@@ -5,6 +5,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -31,7 +32,7 @@
  --%>
 
 <tiles:insert page="/admin/config/AdminHomeNav.jsp"/>
-<script type="text/Javascript">
+<jsu:script>
     function changeHighlight(elem) {
            elem.previousSibling.style.display = "";
            elem.parentNode.style.backgroundColor = "#dbe3f5";
@@ -42,7 +43,7 @@
     function hideCreateButton() {
         hqDojo.byId('createButton').style.display = "none";
     }
-</script>
+</jsu:script>
 <table width="100%" cellpadding="0" cellspacing="10">
 <tr>
 <td width="30%" valign="top" id="escalationsList">
@@ -81,94 +82,92 @@
 <html:img page="/images/tbb_delete.gif" border="0" onmouseout="imageSwap(this, imagePath + 'tbb_delete', '');" onmousedown="imageSwap(this, imagePath + 'tbb_delete', '_gray')"/>
 </c:if>
 </span>
-
-<script langugage="text/Javascript">
-function showEscRows(originalRequest) {
-  var escJson = eval( '( { "escalations": ' + originalRequest.responseText + ' })' );
-
-  var schemes = escJson.escalations;
-
-  var escalations = hqDojo.byId('escalations');
-  if (escalations.childNodes.length > 0) {
-    while(escalations.lastChild) {
-      escalations.removeChild(escalations.lastChild);
-    }
-  }
-
-  if (schemes.length == 0) {
-    var tr = document.createElement("tr");
-    tr.setAttribute((document.all ? 'className' : 'class'), "ListRow");
-
-    var td1 = document.createElement("td");
-    td1.setAttribute((document.all ? 'className' : 'class'), "ListCell");
-    td1.setAttribute('colspan', '2');
-    td1.innerHTML = '<fmt:message key="admin.config.message.noEscalations"/>';
-    tr.appendChild(td1);
-
-    escalations.appendChild(tr);
-  }
-
-  var editEscUrl = "<html:rewrite action="/admin/config/Config"><html:param name="mode" value="escalate"/><html:param name="escId" value="{escId}"/></html:rewrite>";
-  var removeEscUrl = "<html:rewrite action="/admin/config/RemoveEscalation"><html:param name="esc" value="{escId}"/></html:rewrite>";
+<jsu:script>
+	function showEscRows(originalRequest) {
+  		var escJson = eval( '( { "escalations": ' + originalRequest.responseText + ' })' );
+  		var schemes = escJson.escalations;
+  		var escalations = hqDojo.byId('escalations');
   
-  for (var i = 0; i < schemes.length; i++) {
-    var tr = document.createElement("tr");
-    if ((i % 2) == 0) {
-      tr.setAttribute((document.all ? 'className' : 'class'), "tableRowEven");
-    }
-    else {
-      tr.setAttribute((document.all ? 'className' : 'class'), "tableRowOdd");
-    }
+  		if (escalations.childNodes.length > 0) {
+    		while(escalations.lastChild) {
+      			escalations.removeChild(escalations.lastChild);
+    		}
+  		}
 
+  		if (schemes.length == 0) {
+    		var tr = document.createElement("tr");
+    
+    		tr.setAttribute((document.all ? 'className' : 'class'), "ListRow");
 
-    var td2 = document.createElement("td");
-    td2.setAttribute('title', '<fmt:message key="admin.config.message.ClickEscNameEdit"/>')
-    if (schemes[i].id == '<c:out value="${param.escId}"/>') {
-      td2.innerHTML = '<html:img page="/images/icon_right_arrow.gif" border="0" width="10" height="10" style="padding-right:5px;"/>' + '<b>' + schemes[i].name.escapeHTML() + '</b>';
-      td2.setAttribute((document.all ? 'className' : 'class'), "selectedHighlight");
-      td2.setAttribute("align", "left");
-    }
-    else {
-      td2.innerHTML = '<html:img page="/images/icon_right_arrow.gif" border="0" width="10" height="10" style="display:none;padding-right:5px;"/>' + '<a href="' + unescape(editEscUrl).replace("{escId}", schemes[i].id) + '" onclick="changeHighlight(this);">' + schemes[i].name.escapeHTML() + '</a>';
+    		var td1 = document.createElement("td");
+    		
+    		td1.setAttribute((document.all ? 'className' : 'class'), "ListCell");
+    		td1.setAttribute('colspan', '2');
+    		td1.innerHTML = '<fmt:message key="admin.config.message.noEscalations"/>';
+    		tr.appendChild(td1);
 
-      td2.setAttribute((document.all ? 'className' : 'class'), 'ListCell');
-    }
-    tr.appendChild(td2);
+    		escalations.appendChild(tr);
+  		}
 
-    td3 = document.createElement("td");
-    td3.setAttribute('align', 'right');
+  		var editEscUrl = "<html:rewrite action="/admin/config/Config"><html:param name="mode" value="escalate"/><html:param name="escId" value="{escId}"/></html:rewrite>";
+  		var removeEscUrl = "<html:rewrite action="/admin/config/RemoveEscalation"><html:param name="esc" value="{escId}"/></html:rewrite>";
+  
+  		for (var i = 0; i < schemes.length; i++) {
+    		var tr = document.createElement("tr");
+    
+    		if ((i % 2) == 0) {
+      			tr.setAttribute((document.all ? 'className' : 'class'), "tableRowEven");
+    		} else {
+      			tr.setAttribute((document.all ? 'className' : 'class'), "tableRowOdd");
+    		}
 
-    if (schemes.length > 1) {
-      	td3.innerHTML = '<a href="' + unescape(removeEscUrl).replace("{escId}", schemes[i].id) + '">' + hqDojo.byId('deleteBtn').innerHTML + '</a>';
-    } else {
-        td3.innerHTML="&nbsp;";
-    }
+    		var td2 = document.createElement("td");
+    		
+    		td2.setAttribute('title', '<fmt:message key="admin.config.message.ClickEscNameEdit"/>')
+    
+    		if (schemes[i].id == '<c:out value="${param.escId}"/>') {
+      			td2.innerHTML = '<html:img page="/images/icon_right_arrow.gif" border="0" width="10" height="10" style="padding-right:5px;"/>' + '<b>' + schemes[i].name.escapeHTML() + '</b>';
+      			td2.setAttribute((document.all ? 'className' : 'class'), "selectedHighlight");
+      			td2.setAttribute("align", "left");
+    		} else {
+      			td2.innerHTML = '<html:img page="/images/icon_right_arrow.gif" border="0" width="10" height="10" style="display:none;padding-right:5px;"/>' + '<a href="' + unescape(editEscUrl).replace("{escId}", schemes[i].id) + '" onclick="changeHighlight(this);">' + schemes[i].name.escapeHTML() + '</a>';
+	  			td2.setAttribute((document.all ? 'className' : 'class'), 'ListCell');
+    		}
+    
+    		tr.appendChild(td2);
 
-    if (schemes[i].id == '<c:out value="${param.escId}"/>') {
-      td3.setAttribute((document.all ? 'className' : 'class'), "selectedHighlight");
-    }
-    else {
-      td3.setAttribute((document.all ? 'className' : 'class'), "ListCell");
-    }
+    		td3 = document.createElement("td");
+    		
+    		td3.setAttribute('align', 'right');
 
-    tr.appendChild(td3);
+    		if (schemes.length > 1) {
+      			td3.innerHTML = '<a href="' + unescape(removeEscUrl).replace("{escId}", schemes[i].id) + '">' + hqDojo.byId('deleteBtn').innerHTML + '</a>';
+    		} else {
+        		td3.innerHTML="&nbsp;";
+    		}
 
-    escalations.appendChild(tr);
-  }
-}
+    		if (schemes[i].id == '<c:out value="${param.escId}"/>') {
+      			td3.setAttribute((document.all ? 'className' : 'class'), "selectedHighlight");
+    		} else {
+      			td3.setAttribute((document.all ? 'className' : 'class'), "ListCell");
+    		}
 
-  function initEscalationSchemes() {
-    new Ajax.Request('<html:rewrite action="/escalation/ListAllEscalationName"/>', {onSuccess:showEscRows});
-    document.EscalationSchemeForm.action = '<html:rewrite action="/admin/config/Config"/>';
-    document.EscalationSchemeForm.mode.value = 'escalate';
-  }
+    		tr.appendChild(td3);
+    		escalations.appendChild(tr);
+  		}
+	}
 
-  hqDojo.ready(initEscalationSchemes);
+  	function initEscalationSchemes() {
+    	new Ajax.Request('<html:rewrite action="/escalation/ListAllEscalationName"/>', {onSuccess:showEscRows});
+    	document.EscalationSchemeForm.action = '<html:rewrite action="/admin/config/Config"/>';
+    	document.EscalationSchemeForm.mode.value = 'escalate';
+  	}
 
-  var reloadScheme = true;
-</script>
-
-
+  	var reloadScheme = true;
+</jsu:script>
+<jsu:script onLoad="true">
+	initEscalationSchemes();
+</jsu:script>
 <br/>
 
 <td valign="top">

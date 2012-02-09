@@ -34,7 +34,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%
     // XXX: move this all into an action
 /* get the exception from one of the many places it could be hiding */
@@ -76,119 +76,117 @@ if (root != null &&
 %>
 
 <c:set var="exception">
-<%=exception%>
+<%= exception%>
 </c:set>
-
-<%
-    int randomNum=(int)(Math.random()*1000);
-%>
-
+<c:set var="randomNum">
+<%= (int)(Math.random()*1000) %>
+</c:set>
 <c:if test="${param.errorMessage}">
-	<div id="errorMessage<%=randomNum%>" style="display:none;"><fmt:message key="${param.errorMessage}"/></div>
+	<div id="errorMessage${randomNum}" style="display:none;"><fmt:message key="${param.errorMessage}"/></div>
 </c:if>
 
 <c:catch> 
   <c:if test="${not empty exception}">
-  	<div id="exception<%=randomNum%>" style="display:none;"><%=HtmlUtils.htmlEscape(StringUtil.getStackTrace(exception))%></div>
+  	<div id="exception${randomNum}" style="display:none;"><%=HtmlUtils.htmlEscape(StringUtil.getStackTrace(exception))%></div>
 	<c:if test="${not empty root}"> 
-    	<div id="root<%=randomNum%>" style="display:none;"><%=HtmlUtils.htmlEscape(StringUtil.getStackTrace(root))%></div>
+    	<div id="root${randomNum}" style="display:none;"><%=HtmlUtils.htmlEscape(StringUtil.getStackTrace(root))%></div>
    	</c:if> 
   </c:if> 
 </c:catch>
 
 <link rel=stylesheet href="<html:rewrite page="/css/win.css"/>" type="text/css">
-<script type="text/javascript">
-/*--- start declaration/initialization ---*/
-var exDiv = document.getElementById("exception<%= randomNum %>");
-if (exDiv!=null) {
-	exDiv.style.display = "none";
-	var exText<%= randomNum %> = exDiv.innerHTML;
-}
-else{
-	var exText<%= randomNum %> = "";
-}
-var rootDiv = document.getElementById("root<%= randomNum %>");
-if (rootDiv!=null) {
-	rootDiv.style.display = "none";
-	var rootText<%= randomNum %> = rootDiv.innerHTML;
-}
-else{
-	var rootText<%= randomNum %> = "";
-}
-var errorDiv = document.getElementById("errorMessage<%= randomNum %>");
-if (errorDiv!=null) {
-	errorDiv.style.display = "none";
-	var errorText<%= randomNum %> = errorDiv.innerHTML;
-}
-else{
-	var errorText<%= randomNum %> = "";
-}
-/*--- end declaration/initialization ---*/
-
-document.write(
-"<td>\n" + 
-"<table width='100%' cellpadding='0' cellspacing='0' border='0'>\n" + 
-"	<tr>\n" + 
-"		<td class='ErrorBlock'><img src='<html:rewrite page="/images/tt_error.gif"/>' width='10' height='11' hspace='5' border='0'/></td>\n" + 
-"       <td class='ErrorBlock' width='100%'><fmt:message key="errors.jsp.problem"/> <a href='javascript:displayStackTrace<%= randomNum %>()'><fmt:message key="errors.jsp.ClickHere"/></a> <fmt:message key="errors.jsp.ToSee"/></td>\n" +
-"	</tr>\n" +
-"</table>\n" + 
-"</td>\n" + 
-"<tr>\n");
-
-
-function displayStackTrace<%= randomNum %>() {
-	errorPopup = open("","errorPopup<%= randomNum %>","width=750,height=600,resizable=yes,scrollbars=yes,left=200,top=10");
-	errorPopup.document.open();
-	errorPopup.document.write("<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><title><fmt:message key="errors.jsp.problem"/></title>");
-	errorPopup.document.write("<body>\n" + 
-	"<link rel=stylesheet href='<html:rewrite page="/css/win.css"/>' type='text/css'>" +
-	"<a name='top'></a>\n" + 
-	"<a href='javascript:window.close()'>close window</a><br><br><br>\n" + 
-	"<div align='center'>\n" + 
-	"<table width='100%' cellpadding='0' cellspacing='0' border='0'>\n" +
-	"    <tr>\n" + 
-	"      <td>\n" + 
-	"				<table width='100%' cellpadding='0' cellspacing='0' border='0'>\n" +
-	"				  <tr><td class='BlockTitle' width='100%'>Exception:</td></tr>\n" +
-	"				</table>\n" +
-	"			 </td>\n" + 
-	"    </tr>\n" + 
-	"    <tr>\n" + 
-	"      <td class='BlockContent'><blockquote>\n" + exText<%= randomNum %> + "</blockquote></td>\n" + 
-	"    </tr>\n" + 
-	"		 <tr><td class='BlockBottomLine'><img src='<html:rewrite page="/images/spacer.gif"/>' width='1' height='1' border='0'></td></tr>\n" + 
-	"    <tr>\n" + 
-	<c:if test="${not empty root}">
-	"      <td>\n" + 
-	"				<table width='100%' cellpadding='0' cellspacing='0' border='0'>\n" +
-	"				  <tr><td class='BlockTitle' width='100%'>Root cause:</td></tr>\n" +
-	"				</table>\n" +
-	"			 </td>\n" + 
-	"    </tr>\n" + 
-	"    <tr>\n" + 
-	"      <td class='BlockContent'><blockquote>\n" + rootText<%= randomNum %> + "</blockquote></td>\n" + 
-	"    </tr>\n" + 
-	"		 <tr><td class='BlockBottomLine'><img src='<html:rewrite page="/images/spacer.gif"/>' width='1' height='1' border='0'></td></tr>" +
-	</c:if>
-    );
-
-	if (errorDiv!=null) {
-	errorPopup.document.write(
-	"    <tr>\n" + 
-	"        <td class='BlockContent'>\n" + 
-	"            <b>"+ errorText<%= randomNum %> +"</b>\n" + 
-	"        </td>\n" + 
-	"    </tr>\n" + 
-	"	 <tr><td class='BlockBottomLine'><img src='<html:rewrite page="/images/spacer.gif"/>' width='1' height='1' border='0'></td></tr>\n");
+<jsu:script>
+	/*--- start declaration/initialization ---*/
+	var exDiv = document.getElementById("exception${randomNum}");
+	if (exDiv!=null) {
+		exDiv.style.display = "none";
+		var exText${randomNum} = exDiv.innerHTML;
 	}
-
-	errorPopup.document.write(
-	"</table>\n" + 
-	"</div>\n" +
-	"<br><br><br><a href='javascript:window.close()'>close window</a>\n" + 
-	"</body>\n</html>");
+	else{
+		var exText${randomNum} = "";
+	}
+	var rootDiv = document.getElementById("root${randomNum}");
+	if (rootDiv!=null) {
+		rootDiv.style.display = "none";
+		var rootText${randomNum} = rootDiv.innerHTML;
+	}
+	else{
+		var rootText${randomNum} = "";
+	}
+	var errorDiv = document.getElementById("errorMessage${randomNum}");
+	if (errorDiv!=null) {
+		errorDiv.style.display = "none";
+		var errorText${randomNum} = errorDiv.innerHTML;
+	}
+	else{
+		var errorText${randomNum} = "";
+	}
+	/*--- end declaration/initialization ---*/
 	
-	errorPopup.document.close(); 
-}
-</script>
+	document.write(
+	"<td>\n" + 
+	"<table width='100%' cellpadding='0' cellspacing='0' border='0'>\n" + 
+	"	<tr>\n" + 
+	"		<td class='ErrorBlock'><img src='<html:rewrite page="/images/tt_error.gif"/>' width='10' height='11' hspace='5' border='0'/></td>\n" + 
+	"       <td class='ErrorBlock' width='100%'><fmt:message key="errors.jsp.problem"/> <a href='javascript:displayStackTrace${randomNum}()'><fmt:message key="errors.jsp.ClickHere"/></a> <fmt:message key="errors.jsp.ToSee"/></td>\n" +
+	"	</tr>\n" +
+	"</table>\n" + 
+	"</td>\n" + 
+	"<tr>\n");
+	
+	
+	function displayStackTrace${randomNum}() {
+		errorPopup = open("","errorPopup${randomNum}","width=750,height=600,resizable=yes,scrollbars=yes,left=200,top=10");
+		errorPopup.document.open();
+		errorPopup.document.write("<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><title><fmt:message key="errors.jsp.problem"/></title>");
+		errorPopup.document.write("<body>\n" + 
+		"<link rel=stylesheet href='<html:rewrite page="/css/win.css"/>' type='text/css'>" +
+		"<a name='top'></a>\n" + 
+		"<a href='javascript:window.close()'>close window</a><br><br><br>\n" + 
+		"<div align='center'>\n" + 
+		"<table width='100%' cellpadding='0' cellspacing='0' border='0'>\n" +
+		"    <tr>\n" + 
+		"      <td>\n" + 
+		"				<table width='100%' cellpadding='0' cellspacing='0' border='0'>\n" +
+		"				  <tr><td class='BlockTitle' width='100%'>Exception:</td></tr>\n" +
+		"				</table>\n" +
+		"			 </td>\n" + 
+		"    </tr>\n" + 
+		"    <tr>\n" + 
+		"      <td class='BlockContent'><blockquote>\n" + exText${randomNum} + "</blockquote></td>\n" + 
+		"    </tr>\n" + 
+		"		 <tr><td class='BlockBottomLine'><img src='<html:rewrite page="/images/spacer.gif"/>' width='1' height='1' border='0'></td></tr>\n" + 
+		"    <tr>\n" + 
+		<c:if test="${not empty root}">
+		"      <td>\n" + 
+		"				<table width='100%' cellpadding='0' cellspacing='0' border='0'>\n" +
+		"				  <tr><td class='BlockTitle' width='100%'>Root cause:</td></tr>\n" +
+		"				</table>\n" +
+		"			 </td>\n" + 
+		"    </tr>\n" + 
+		"    <tr>\n" + 
+		"      <td class='BlockContent'><blockquote>\n" + rootText${randomNum} + "</blockquote></td>\n" + 
+		"    </tr>\n" + 
+		"		 <tr><td class='BlockBottomLine'><img src='<html:rewrite page="/images/spacer.gif"/>' width='1' height='1' border='0'></td></tr>" +
+		</c:if>
+	    );
+	
+		if (errorDiv!=null) {
+		errorPopup.document.write(
+		"    <tr>\n" + 
+		"        <td class='BlockContent'>\n" + 
+		"            <b>"+ errorText${randomNum} +"</b>\n" + 
+		"        </td>\n" + 
+		"    </tr>\n" + 
+		"	 <tr><td class='BlockBottomLine'><img src='<html:rewrite page="/images/spacer.gif"/>' width='1' height='1' border='0'></td></tr>\n");
+		}
+	
+		errorPopup.document.write(
+		"</table>\n" + 
+		"</div>\n" +
+		"<br><br><br><a href='javascript:window.close()'>close window</a>\n" + 
+		"</body>\n</html>");
+		
+		errorPopup.document.close(); 
+	}
+</jsu:script>

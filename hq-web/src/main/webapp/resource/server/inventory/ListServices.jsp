@@ -6,7 +6,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -94,13 +94,11 @@
 
 <c:url var="pnAction" value="${selfAction}">
 </c:url>
-
-<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
-<script type="text/javascript">
-initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-</script>
-
+<jsu:importScript path="/js/listWidget.js" />
+<jsu:script>
+	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+</jsu:script>
 <!--  SERVICE COUNTS CONTENTS -->
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr>

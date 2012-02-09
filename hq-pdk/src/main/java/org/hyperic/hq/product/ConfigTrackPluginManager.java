@@ -25,19 +25,85 @@
 
 package org.hyperic.hq.product;
 
+import java.io.File;
 import java.util.Properties;
 
+import org.hyperic.cm.filemonitor.FileMonitor;
+import org.hyperic.cm.filemonitor.IFileMonitor;
+import org.hyperic.cm.filemonitor.MonitorStatus;
+import org.hyperic.hq.agent.AgentConfig;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
+
+@Component
 public class ConfigTrackPluginManager extends TrackEventPluginManager {
 
-     public ConfigTrackPluginManager() {
-        super();
+    private static IFileMonitor fileMonitor = null;// = FileMonitor.getInstance();
+
+    public ConfigTrackPluginManager() {
+        super();        
+        initMonitor();
     }
 
-    public ConfigTrackPluginManager(Properties props) {
-        super(props);
+     public ConfigTrackPluginManager(Properties props) {
+         super(props);
+         initMonitor();
+     }
+
+    private void initMonitor() {
+        // determine the data dir for tracking local data
+        final String dataDir = getProperty(AgentConfig.PROP_DATADIR[0],
+            AgentConfig.PROP_DATADIR[1]);
+        final File f = new File(dataDir);
+
+        if (!f.exists()){
+    		log.info("Running on Server, FileMonitor not initiated");
+    		return;
+    	}
+
+    		
+    	if (fileMonitor == null){ 
+        	log.info("Running on Agent, initiating FileMonitor");
+    		fileMonitor = FileMonitor.getInstance();
+    	}
+    	
+
+        // get property for max diff size
+        fileMonitor.setAppDataDir(f.getAbsolutePath());
+        final String maxDiffSize = getProperty("hq.plugins.configmon.maxdiff");
+        long size = -1;
+        if (maxDiffSize != null && maxDiffSize.length() > 0)
+            try{
+                size = Long.valueOf(maxDiffSize).longValue();
+            } catch (NumberFormatException e) {
+                log.error(e.getMessage(), e);
+            }
+        if (size >= 0)
+            fileMonitor.setMaxDiffSize(size);
+
+        // start the monitor, no events will be tracked until tracked folders are defined.
+        if (!(MonitorStatus.STARTED.equals(fileMonitor.getStatus())))
+            fileMonitor.start();
     }
 
     public String getName() {
         return ProductPlugin.TYPE_CONFIG_TRACK;
     }
+    
+    public IFileMonitor getFileMonitor(){
+        return fileMonitor;
+    }
+
+    @Override
+    public void shutdown() throws PluginException {
+    	if (fileMonitor != null){
+	        fileMonitor.stop();
+	        fileMonitor = null;
+    	}
+        super.shutdown();
+    }
+
+    
 }

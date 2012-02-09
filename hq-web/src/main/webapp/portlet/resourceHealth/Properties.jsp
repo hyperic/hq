@@ -6,7 +6,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -36,18 +36,17 @@
 <hq:pageSize var="pageSize"/>
 <c:set var="widgetInstanceName" value="resources"/>
 <c:url var="selfAction" value="/dashboard/Admin.do">
-	<c:param name="mode" value="resourceHealth"/>
+    <c:param name="mode" value="resourceHealth"/>
 </c:url>
-
 <script  src="<html:rewrite page="/js/prototype.js"/>" type="text/javascript"></script>
 <script  src="<html:rewrite page="/js/scriptaculous.js"/>" type="text/javascript"></script>
 <script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
-<script type="text/javascript">
-var pageData = new Array();
-initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');  
-var help = '<hq:help/>';
-</script>
+<jsu:script>
+    var pageData = new Array();
+    initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+    widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');  
+    var help = '<hq:help/>';
+</jsu:script>
 
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr class="PageTitle"> 
@@ -72,14 +71,14 @@ var help = '<hq:help/>';
     <table class="table" class="table" width="100%" border="0" cellspacing="0" cellpadding="0">
     <tr class="tableRowHeader">
     <th width="1%" class="ListHeaderCheckbox">
-	    <c:choose>
-	    <c:when test="${not sessionScope.modifyDashboard}">
-	        <input type="checkbox" onclick="ToggleAll(this, widgetProperties, true)" name="listToggleAll" disabled="true">
-	    </c:when>
-	    <c:otherwise>
-	        <input type="checkbox" onclick="ToggleAll(this, widgetProperties, true)" name="listToggleAll">
-	    </c:otherwise>
-	    </c:choose>
+        <c:choose>
+        <c:when test="${not sessionScope.modifyDashboard}">
+            <input type="checkbox" onclick="ToggleAll(this, widgetProperties, true)" name="listToggleAll" disabled="true">
+        </c:when>
+        <c:otherwise>
+            <input type="checkbox" onclick="ToggleAll(this, widgetProperties, true)" name="listToggleAll">
+        </c:otherwise>
+        </c:choose>
     </th>
     <th class="tableRowInactive"><fmt:message key="dash.settings.ListHeader.Resource"/></th>
     </tr></table>
@@ -93,21 +92,18 @@ var help = '<hq:help/>';
         <c:if test="${not empty resource.description}">
           <fmt:message key="parenthesis">
             <fmt:param>
-            	<c:out value="${resource.description}"/>
+                <c:out value="${resource.description}"/>
             </fmt:param>
           </fmt:message>
         </c:if></span>
         </li>
       </c:forEach>
       </ul>
-
       <script type="text/javascript">
-      <!--
         Sortable.create("resOrd",
-          {dropOnEmpty:true,containment:["resOrd"],constraint:'vertical'});
-      -->
+          {dropOnEmpty:true,containment:["resOrd"],constraint:'vertical'});   
       </script>
-          <c:choose>
+        <c:choose>
               <c:when test="${not sessionScope.modifyDashboard}">
                
               </c:when>
@@ -127,7 +123,7 @@ var help = '<hq:help/>';
           </c:choose>
       <html:hidden property="order"/>
       <tiles:insert definition=".form.buttons">
-      <c:if test='${not sessionScope.modifyDashboard}'>
+       <c:if test='${not sessionScope.modifyDashboard}'>
         <tiles:put name="cancelOnly" value="true"/>
         <tiles:put name="noReset" value="true"/>
       </c:if>

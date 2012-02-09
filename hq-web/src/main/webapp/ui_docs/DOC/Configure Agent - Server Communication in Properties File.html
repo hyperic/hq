@@ -1,35 +1,38 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : Configure Agent - Server Communication in Properties File</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : Configure Agent - Server Communication in Properties File</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : Configure Agent - Server Communication in Properties File
+                            vFabric Hyperic 4.6.5 : Configure Agent - Server Communication in Properties File
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 29, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1311965881256 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1311965881256 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1311965881256 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1325699519447 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699519447 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699519447 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1311965881256'>
+/*]]>*/</style><div class='rbtoc1325699519447'>
 <ul>
     <li><a href='#ConfigureAgent-ServerCommunicationinPropertiesFile-FileBasedConfigurationofAgentServerCommunicationsisEfficient'>File-Based Configuration of Agent-Server Communications is Efficient</a></li>
     <li><a href='#ConfigureAgent-ServerCommunicationinPropertiesFile-Procedure%3AConfigureAgentServerCommunicationProperties'>Procedure: Configure Agent-Server Communication Properties</a></li>
@@ -100,8 +103,8 @@ div.rbtoc1311965881256 li {margin-left: 0px;padding-left: 0px;}
 <ul>
 	<li>Specify the location and credentials the agent should use to contact the Hyperic Server with these properties:
 	<ul>
-		<li><tt>agent.setup.camIP</tt> &#8212; Specify the address or hostname of the Hyperic Server.&nbsp;</li>
-		<li><tt>agent.setup.camPort</tt> &#8212; The default value is the standard plaintext Hyperic listen port. You can specify a different port &#8212; as long as it is not already in use.&nbsp;</li>
+		<li><tt>agent.setup.camIP</tt> &#8212; Specify the address or hostname of the Hyperic Server.</li>
+		<li><tt>agent.setup.camPort</tt> &#8212; The default value is the standard plaintext Hyperic listen port. You can specify a different port &#8212; as long as it is not already in use.</li>
 		<li><tt>agent.setup.camSSLPort</tt> &#8212; The default value is the standard SSL Hyperic listen port. You can specify a different port &#8212; as long as it is not already in use.</li>
 		<li><tt>agent.setup.camSecure</tt> &#8212; The default value is "yes" (use SSL). Change to "no" if you do not require the agent to use secure communications when contacting the Hyperic Server.</li>
 		<li><tt>agent.setup.camLogin</tt> &#8212; Specify the username the agent should use when connecting to the server. If you change the value from the default value ("hqadmin"), make sure that that user account is properly configured on the Hyperic Server.</li>
@@ -115,7 +118,7 @@ div.rbtoc1311965881256 li {margin-left: 0px;padding-left: 0px;}
 	<li>Specify the address or hostname and the listen port the Hyperic Server should use to contact the Hyperic Agent with these properties:
 	<ul>
 		<li><tt>agent.setup.agentIP</tt> &#8212; If you leave the default setting &#8212; "<b>default</b>" &#8212; the Hyperic Agent will detect an IP address on the platform and choose it as its listen address.</li>
-		<li><tt>agent.setup.agentPort</tt> &#8212; If you leave the default setting &#8212; "<b>default</b>" &#8212; the Hyperic Agent will use the default listen port (either 7080 or 7443) as its listen address. If that port is unavailable, the agent will detect a free port and choose it as its listen port.</li>
+		<li><tt>agent.setup.agentPort</tt> &#8212; If you leave the default setting &#8212; "<b>default</b>" &#8212; the Hyperic Agent will use the default listen port (2144 for plaintext or 2443 for SSL) as its listen address. If that port is unavailable, the agent will detect a free port and choose it as its listen port.</li>
 	</ul>
 	</li>
 </ul>
@@ -125,7 +128,32 @@ div.rbtoc1311965881256 li {margin-left: 0px;padding-left: 0px;}
 
 <h2><a name="ConfigureAgent-ServerCommunicationinPropertiesFile-Step4ConfigureUnidirectionalCommunications%28Optional%29"></a>Step 4 - Configure Unidirectional Communications (Optional)</h2>
 
-<p>By default, agent-server communication is bi-directional. If your policies dictate that all communication between agent and server are agent-initiated, you can uncomment the <tt>agent.setup.unidirectional</tt> property and set it to "yes".</p>
+<p>By default, agent-server communication is bi-directional. If your policies dictate that all communication between agent and server are agent-initiated, you can uncomment the <tt>agent.setup.unidirectional</tt> property and set it to "yes":</p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">agent.setup.unidirectional=yes</pre>
+		</div>
+</div></div>
+
+<p>For agents set up for unidirectional communication with the Hyperic Server, the agent.keystore.alias property configures the name of the user-managed keystore for the agent. By default, the agent looks for keystore named "hq". For unidirectional agents with user-managed keystores, you must define the keystore name with <tt>agent.keystore.alias</tt>.</p>
+
+<p>For example, given this user-managed keystore for a unidirectional agent:</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">(hq self-signed cert), Jul 27, 2011, trustedCertEntry,
+Certificate fingerprint (MD5): 98:FF:B8:3D:25:74:23:68:6A:CB:0B:9C:20:88:74:CE
+hq-agent, Jul 27, 2011, PrivateKeyEntry,
+Certificate fingerprint (MD5): 03:09:C4:BC:20:9E:9A:32:DC:B2:E8:29:C0:3C:FE:38</pre>
+		</div>
+</div></div>
+<p>Define the name of the keystore like this:</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">agent.keystore.alias=hq-agent</pre>
+		</div>
+</div></div>
+<p>If the value of agent.keystore.alias does not match the keystore name, agent-server communication will fail.</p>
 
 <h2><a name="ConfigureAgent-ServerCommunicationinPropertiesFile-Step5ConfigureAgentKeystore%28Optional%29"></a>Step 5 - Configure Agent Keystore (Optional)</h2>
 
@@ -161,31 +189,29 @@ div.rbtoc1311965881256 li {margin-left: 0px;padding-left: 0px;}
 
 <h1><a name="ConfigureAgent-ServerCommunicationinPropertiesFile-CommunicationPropertiesReference"></a>Communication Properties Reference</h1>
 
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>agent.setup.camIP</b><br />
-<p><b>Description</b></p>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>agent.setup.camIP</b><br /><b>Description</b>
 
-<p>You can use  this property to define for the agent the IP address of the HQ server. The agent reads this value only in the event that it cannot find connection configuration in its data directory.  Specifying this and other agent.setup.* properties is a way to reduce the user interaction required to configure an agent to communicate with the server. </p>
+<p>You can use  this property to define for the agent the IP address of the Hyperic Server. The Hyperic Agent reads this value only in the event that it cannot find connection configuration in its <tt>data</tt> directory. Specifying this and other <tt>agent.setup.*</tt> properties is a way to reduce the user interaction required to configure an agent to communicate with the server. </p>
 
 <p>The value can be provided as an IP address or a fully qualified domain name. To identify an server on the same host as the server, set the value to 127.0.0.1. </p>
 
-<p>If there is a firewall between the agent and server, specify the address of the firewall, and configure the firewall to forward traffic on port 7080, or 7443 if you use the SSL port, to the HQ Server.</p>
+<p>If there is a firewall between the agent and server, specify the address of the firewall, and configure the firewall to forward traffic on port 7080, or 7443 if you use the SSL port, to the Hyperic Server.</p>
 
 <p><b>Default</b></p>
 
 <p>Commented out, localhost.    </p></td></tr></table></div>
 
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>agent.setup.camPort</b><br />
-<p><b>Description</b></p>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>agent.setup.camPort</b><br /><p><b>Description</b></p>
 
-<p>You can use this property to define for the agent, at first startup after installation, what server port to use for non-secure communications with the server. The agent reads this value only in the event that it cannot find connection configuration in its data directory. Specifying this and other agent.setup.* properties is a way to reduce the user interaction required to configure an agent to communicate with the server. </p>
+<p>You can use this property to define for a Hyperic Agent, at first startup after installation, what server port to use for non-secure communications with the server. The agent reads this value only in the event that it cannot find connection configuration in its <tt>data</tt> directory. Specifying this and other <tt>agent.setup.*</tt> properties is a way to reduce the user interaction required to configure an agent to communicate with the server. </p>
 
 <p><b>Default</b></p>
 
 <p>Commented out, 7080.</p></td></tr></table></div>
 
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>agent.setup.camSSLPort</b><br /><p><b>Description</b></p>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>agent.setup.camSSLPort</b><br /><b>Description</b>
 
-<p>You can use this property to define for the agent, at first startup after installation, what server port to use for SSL communications with the server. The agent reads this value only in the event that it cannot find connection configuration in its data directory. Specifying this and other agent.setup.* properties is a way to reduce the user interaction required to configure an agent to communicate with the server. </p>
+<p>You can use this property to define for the Hyperic Agent, at first startup after installation, what server port to use for SSL communications with the Hyperic Server. The agent reads this value only in the event that it cannot find connection configuration in its <tt>data</tt> directory. Specifying this and other <tt>agent.setup.*</tt> properties is a way to reduce the user interaction required to configure an agent to communicate with the server. </p>
 
 <p><b>Default</b></p>
 
@@ -203,13 +229,13 @@ div.rbtoc1311965881256 li {margin-left: 0px;padding-left: 0px;}
 
 <p>Commented out, value of yes.</p></td></tr></table></div>
 
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>agent.setup.camLogin</b><br /><p><b>Description</b></p>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>agent.setup.camLogin</b><br /><b>Description</b>
 
-<p>You can use this property to define for the agent, at first startup after installation, the HQ username to use when registering itself with the server.  The permission required on the server for this initialization is Create, for Platforms.</p>
+<p>You can use this property to define for the Hyperic Agent, at first startup after installation, the Hyperic username to use when registering itself with the server. The permission required on the server for this initialization is Create, for Platforms.</p>
 
 <p>A login from the agent to the server is only required during the initial configuration of the agent. </p>
 
-<p>The agent reads this value only in the event that it cannot find connection configuration in its data directory. Specifying this and other agent.setup.* properties is a way to reduce the user interaction required to configure an agent to communicate with the server. </p>
+<p>The agent reads this value only in the event that it cannot find connection configuration in its <tt>data</tt> directory. Specifying this and other <tt>agent.setup.*</tt> properties is a way to reduce the user interaction required to configure an agent to communicate with the server. </p>
 
 <p><b>Default</b></p>
 
@@ -226,49 +252,46 @@ div.rbtoc1311965881256 li {margin-left: 0px;padding-left: 0px;}
 
 <p>Commented out, hqadmin<b>.</b></p></td></tr></table></div>
 
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>agent.setup.agentIP</b><br /><p><b>Description</b></p>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>agent.setup.agentIP</b><br /><b>Description</b>
 
-<p>This specifies the IP address that the HQ Server will use to contact the HQ Agent. If the agent is on the same host as the server, value of 127.0.0.1 is valid.</p>
+<p>This specifies the IP address that the Hyperic Server will use to contact the Hyperic Agent. If the agent is on the same host as the server, value of 127.0.0.1 is valid.</p>
 
-<p>If there is a firewall between the server and agent, specify the IP address of the firewall, and configure the firewall to forward traffic intended for the agent to the agent's listen address, which can be configured with agent.listenIP.</p>
+<p>If there is a firewall between the server and agent, specify the IP address of the firewall, and configure the firewall to forward traffic intended for the agent to the agent's listen address, which can be configured with <tt>agent.listenIP</tt>.</p>
 
-<p>The agent reads this value only in the event that it cannot find connection configuration in its data directory. Specifying this and other agent.setup.* properties is a way to reduce the user interaction required to configure an agent to communicate with the server. </p>
-
-<p><b>Default</b></p>
-
-<p>As installed, agent.properties contains a commented out statement that sets the value to &#42;default&#42;.  If you use the agent.setup.* properties to supply an agent's configuration at first startup, and uncomment this property and leave the value &#42;default&#42;, the HQ Server will contact the agent using the IP address that SIGAR detects on the agent host. </p></td></tr></table></div>
-
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>agent.setup.agentPort</b><br /><p><b>Description</b></p>
-
-<p>This specifies the port (on the IP address configured with agent.setup.agentIP) on the agent on which the HQ Server will communication with the agent.  </p>
-
-<p>If there is a firewall between the agent and the server, set agent.setup.agentPort to the appropriate port on the firewall, and configure the firewall to forward traffic intended for the agent to the agent listen port, which can be configured with.  </p>
-
-<p>The agent reads this value only in the event that it cannot find its connection configuration in its data directory. Specifying this and other agent.setup.* properties is a way to reduce the user interaction required to configure an agent to communicate with the server. </p>
+<p>The agent reads this value only in the event that it cannot find connection configuration in its <tt>data</tt> directory. Specifying this and other <tt>agent.setup.*</tt> properties is a way to reduce the user interaction required to configure an agent to communicate with the server. </p>
 
 <p><b>Default</b></p>
 
-<p>As installed, agent.properties contains a commented out statement that sets the value to &#42;default&#42;.  If you use the agent.setup.* properties to supply an agent's configuration at first startup, and uncomment this property and leave the value &#42;default&#42;, the HQ Server will contact the agent on port 2144, unless SIGAR detects it is not available, in which case another default is selected.  </p></td></tr></table></div>
+<p>As installed, <tt>agent.properties</tt> contains a commented out statement that sets the value to <b>default</b>. If you use the <tt>agent.setup.*</tt> properties to supply an agent's configuration at first startup, and uncomment this property and leave the value <tt>default</tt>, the Hyperic Server will contact the agent using the IP address that SIGAR detects on the agent host. </p></td></tr></table></div>
 
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>agent.setup.resetupToken</b><br />
-<p><b>Description</b></p>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>agent.setup.agentPort</b><br /><b>Description</b>
 
-<p>You can use this property to define for the agent, at first startup after installation,  whether the agent will create a new token to use to authenticate with the server each time it starts up.  Regenerating a token is useful if the Agent cannot connect to the server because the token has been deleted or corrupted.</p>
+<p>This specifies the port (on the IP address configured with <tt>agent.setup.agentIP</tt>) on the Hyperic Agent on which the Hyperic Server will communicate with the agent.  </p>
+
+<p>If there is a firewall between the agent and the server, set <tt>agent.setup.agentPort</tt> to the appropriate port on the firewall, and configure the firewall to forward traffic intended for the agent to the agent listen port, which can be configured with.  </p>
+
+<p>The agent reads this value only in the event that it cannot find its connection configuration in its <tt>data</tt> directory. Specifying this and other <tt>agent.setup.*</tt> properties is a way to reduce the user interaction required to configure an agent to communicate with the server. </p>
+
+<p><b>Default</b></p>
+
+<p>As installed, <tt>agent.properties</tt> contains a commented out statement that sets the value to &#42;default&#42;.  If you use the <tt>agent.setup.*</tt> properties to supply an agent's configuration at first startup, and uncomment this property and leave the value &#42;default&#42;, the Hyperic Server will contact the agent on port 2144, unless SIGAR detects it is not available, in which case another default is selected.  </p></td></tr></table></div>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>agent.setup.resetupToken</b><br /><b>Description</b>
+
+<p>You can use this property to configure a Hyperic Agent to create a new token to use to authenticate with the server at startup. The agent reads this value only in the event that it cannot find connection configuration in its data directory. Regenerating a token is useful if the Agent cannot connect to the server because the token has been deleted or corrupted.</p>
 
 <p>Regardless of the value of this property, an agent will generate a token the first time it is started after installation.</p>
 
-<p>The agent reads this value only in the event that it cannot find connection configuration in its data directory. Specifying this and other agent.setup.* properties is a way to reduce the user interaction required to configure an agent to communicate with the server. </p>
-
 <p><b>Default</b></p>
 
-<p>As installed, agent.properties contains a commented out statement that sets the value to no.</p></td></tr></table></div>
+<p>As installed, <tt>agent.properties</tt> contains a commented out statement that sets the value to "no".</p></td></tr></table></div>
 
 <div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>agent.setup.unidirectional</b><br /><b>Available only in <font color="red">vFabric Hyperic</font></b>
 
 
 <p><b>Description</b></p>
 
-<p>Enables the unidirectional communications between HQ Agent and HQ Server in vFabric Hyperic. For more information, see <a href="Configure Unidirectional Agent - Server Communication.html" title="Configure Unidirectional Agent - Server Communication">Configure Unidirectional Agent &#45; Server Communication</a>.</p>
+<p>Enables the unidirectional communications between the Hyperic Agent and Hyperic Server in vFabric Hyperic. For more information, see <a href="Configure Unidirectional Agent - Server Communication.html" title="Configure Unidirectional Agent - Server Communication">Configure Unidirectional Agent &#45; Server Communication</a>.</p>
 
 <p>Note that a for a unidirectional agent with a user-managed keystore, you must configure the keystore name  in <tt>agent.properties</tt>. See <tt><a href="agent.keystore.alias.html" title="agent.keystore.alias">agent.keystore.alias</a></tt>.</p>
 
@@ -310,7 +333,7 @@ For example, to specify this Windows path using Unix syntax:
 <div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Best Practices for Hyperic Agent Keystore</b><br />Please see:
 <ul>
 	<li><a href="Hyperic Security Features and Recommendations.html" title="Hyperic Security Features and Recommendations">Hyperic Security Features and Recommendations</a></li>
-	<li><a href="SSL Setup.html" title="SSL Setup">SSL Setup</a></li>
+	<li><a href="Configure SSL Options.html" title="Configure SSL Options">Configure SSL Options</a></li>
 </ul>
 </td></tr></table></div>
 <p><b>Default</b> <br/>
@@ -328,12 +351,12 @@ For example, to specify this Windows path using Unix syntax:
 <div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Best Practices for Hyperic Keystores</b><br />Please see: 
 <ul>
 	<li><a href="Hyperic Security Features and Recommendations.html" title="Hyperic Security Features and Recommendations">Hyperic Security Features and Recommendations</a></li>
-	<li><a href="SSL Setup.html" title="SSL Setup">SSL Setup</a></li>
+	<li><a href="Configure SSL Options.html" title="Configure SSL Options">Configure SSL Options</a></li>
 </ul>
 </td></tr></table></div> 
 <p><b>Default</b> <br/>
 none</p></td></tr></table></div>
-<p><font color=""></font></p>
+
 
 				    
                     			    </td>
@@ -344,7 +367,7 @@ none</p></td></tr></table></div>
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:43</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:56</font></td>
 		    </tr>
 	    </table>
     </body>

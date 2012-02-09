@@ -28,7 +28,7 @@
 <plugin package="org.hyperic.hq.plugin.ntp">
   <property name="PLUGIN_VERSION" value="@project.version@"/>
 
-  <filter name="template" value="ntpd:ntpdc=%ntpdc%,timeout=%timeout%:${alias}"/>
+  <filter name="template" value="ntpd:ntpdc=%ntpdc%,timeout=%timeout%,hostname=%hostname%,includeLocal=%includeLocal%:${alias}"/>
 
   <!-- Metrics from ntpdc -->
   <metrics name="ntpdc">
@@ -61,6 +61,35 @@
     <metric name="Peer Average Displacement"
             category="PERFORMANCE"
             units="sec"/>
+
+    <metric name="Stratum"
+            category="UTILIZATION"
+            indicator="true"/>
+    <metric name="Peers Reachable (last 8 polls)"
+            alias="PeersReachable"
+            category="UTILIZATION"
+            indicator="true"/>
+    <metric name="Peers Unreachable (last 8 polls)"
+            alias="PeersUnreachable"
+            category="UTILIZATION"
+            indicator="true"/>
+    <metric name="Peers with Reachablity Problems (last 8 polls)"
+            alias="PeersWithReachabilityProblems"
+            category="UTILIZATION"
+            indicator="true"/>
+    <metric name="Peers Polled Client Mode"
+            category="UTILIZATION"
+            indicator="true"/>
+    <metric name="Peers Receiving Broadcasts"
+            category="UTILIZATION"
+            indicator="true"/>
+    <metric name="Peers Sending Broadcasts"
+            category="UTILIZATION"
+            indicator="true"/>
+    <metric name="Peers Synchronized"
+            category="UTILIZATION"
+            indicator="true"/>
+
   </metrics>
 
   <!-- Process metrics -->
@@ -134,9 +163,21 @@
     agent process to allow the agent to collect metrics.
     </p>
     
-    <p><b>NOTE:</b> Due to the expensive nature of collection of metrics 
-    for NTPd, measurement will not be automatically enabled by autodiscovery.  
-    </p>
+    <p>hostname is optional. An empty field will not invoke ntpdc with a host
+    option.
+
+    <p>Exclude Local config option will ignore the LOCAL(0) peer.</p>
+
+    <p>the Reachable metrics use the value of the reach column of the peers
+    ntpdc command.</p>
+    <ul>
+    <li>Peers Reachable (last 8 polls) is the number of peers with 377 in the
+    reach column<li>
+    <li>Peers Unreachable (last 8 polls) is the number of peers with 0 in the
+    reach column<li>
+    <li>Peers With Reachability Problems is the number of peers that do not
+    meet the above criteria</li>
+    </ul>
     ]]>
   </help>  
 
@@ -163,6 +204,14 @@
       <option name="timeout"
               description="Timeout for peer connections in seconds"
               default="1"/>
+      <option name="hostname"
+              description="Optional hostname to pass to ntpdc"
+              optional="true"
+              default=""/>
+       <option name="includeLocal"
+              description="Include LOCAL(0) as a peer in collection statistics"
+              type="boolean"
+              default="false"/>
     </config>
 
     <metrics include="process,ntpdc"/>

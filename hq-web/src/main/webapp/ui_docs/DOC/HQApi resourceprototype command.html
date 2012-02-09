@@ -1,40 +1,43 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : HQApi resourceprototype command</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : HQApi resourceprototype command</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : HQApi resourceprototype command
+                            vFabric Hyperic 4.6.5 : HQApi resourceprototype command
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1307466616744 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1307466616744 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1307466616744 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1325699194087 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699194087 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699194087 li {margin-left: 0px;padding-left: 0px;}
 
-/*]] >*/</style><div class='rbtoc1307466616744'>
+/*]]>*/</style><div class='rbtoc1325699194087'>
 <ul>
     <li><a href='#HQApiresourceprototypecommand-Functionality'>Functionality</a></li>
     <li><a href='#HQApiresourceprototypecommand-resourceprototypeCommandOptions'>resourceprototype Command Options</a></li>
 <ul>
-    <li><a href='#HQApiresourceprototypecommand-eventlist'>event list</a></li>
+    <li><a href='#HQApiresourceprototypecommand-resourceprototypelist'>resourceprototype list</a></li>
 <ul>
     <li><a href='#HQApiresourceprototypecommand-AttributesinanResourcePrototypeElement'>Attributes in an ResourcePrototype Element</a></li>
 </ul>
@@ -53,17 +56,17 @@ div.rbtoc1307466616744 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 </td></tr></table></div> 
 
-<p><font color=""></font></p>
+
 
 <h1><a name="HQApiresourceprototypecommand-Functionality"></a>Functionality</h1>
 
-<p>The <b>resourceprototype</b> command returns the internal HQ ID and the name for resource types. You can list all resource types supported by Hyperic, or only those resource types that exist in inventory.&nbsp;</p>
+<p>The <b>resourceprototype</b> command returns the internal Hyperic ID and the name for resource types. You can list all resource types supported by Hyperic, or only those resource types that exist in inventory.&nbsp;</p>
 
 <h1><a name="HQApiresourceprototypecommand-resourceprototypeCommandOptions"></a>resourceprototype Command Options</h1>
 
 <p>This section defines command options.</p>
 
-<h2><a name="HQApiresourceprototypecommand-eventlist"></a>event list</h2>
+<h2><a name="HQApiresourceprototypecommand-resourceprototypelist"></a>resourceprototype list</h2>
 
 <p>The <b>resourceprototype list</b> command returns a list of resource types &#8212; all supported resource types, or if the <tt>&#45;-existing</tt> qualifier is specified, only those that exist in inventory</p>
 
@@ -97,7 +100,7 @@ div.rbtoc1307466616744 li {margin-left: 0px;padding-left: 0px;}
 </tr>
 <tr>
 <td class='confluenceTd'> <tt>id</tt> </td>
-<td class='confluenceTd'> Internal HQ ID for the resource type. </td>
+<td class='confluenceTd'> Internal Hyperic ID for the resource type. </td>
 </tr>
 <tr>
 <td class='confluenceTd'> <tt>name</tt> </td>
@@ -162,7 +165,7 @@ div.rbtoc1307466616744 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:44</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:57</font></td>
 		    </tr>
 	    </table>
     </body>

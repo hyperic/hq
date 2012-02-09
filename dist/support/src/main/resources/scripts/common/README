@@ -1,0 +1,5 @@
+#
+# The purpose of this folder is to serve as a location for platform-independent custom scripts for support-package.
+#
+# Architecture-specific custom scripts should reside in the relevant sibiling folder with the name of the architecture
+#

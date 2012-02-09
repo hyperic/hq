@@ -1,52 +1,59 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : Plugins Tutorial</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : Plugins Tutorial</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : Plugins Tutorial
+                            vFabric Hyperic 4.6.5 : Plugins Tutorial
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 27, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <h1><a name="PluginsTutorial-PluginsTutorials"></a><a name="PluginsTutorial-top"></a>Plugins Tutorials</h1>
+				    <style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325699815874 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699815874 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699815874 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1325699815874'>
+<ul>
+    <li><a href='#PluginsTutorial-PluginsTutorials'> Plugins Tutorials</a></li>
+<ul>
+    <li><a href='#PluginsTutorial-TutorialsbyPluginTypeandImplementation'>Tutorials by Plugin Type and Implementation</a></li>
+    <li><a href='#PluginsTutorial-HowPluginsandtheHQInventoryModelWorkTogether'>How Plugins and the HQ Inventory Model Work Together</a></li>
+    <li><a href='#PluginsTutorial-EveryPluginNeedsanXMLDescriptor'>Every Plugin Needs an XML Descriptor</a></li>
+<ul>
+    <li><a href='#PluginsTutorial-XMLDescriptorforMeasurementPlugins'>XML Descriptor for Measurement Plugins</a></li>
+<ul>
+    <li><a href='#PluginsTutorial-AutoDiscovery'>Auto-Discovery</a></li>
+    <li><a href='#PluginsTutorial-AvailabilityMetric'>Availability Metric</a></li>
+</ul>
+</ul>
+    <li><a href='#PluginsTutorial-Troubleshooting'>Troubleshooting</a></li>
+</ul>
+</ul></div>
+
+<h1><a name="PluginsTutorial-PluginsTutorials"></a><a name="PluginsTutorial-top"></a>Plugins Tutorials</h1>
 
 
 <p>Plugins are the interface between Hyperic HQ and products on the network you want to manage. HQ can detect hundreds of products thanks to its standard plugins, but if HQ dose not yet detect and manage products (or parts of products) you want it to, we encourage you to develop your own custom plugins.</p>
 
 
 <p>Here we provide tutorials for a couple implementations of a Measurement plugin, with the hope that leading you through the construction of enough different plugins will enable you to understand the plugin gestalt and then to write your own.</p>
-
-<ul>
-	<li><a href="#PluginsTutorial-tutorial">Tutorials by plugin type</a></li>
-</ul>
-
-
-<ul>
-	<li><a href="#PluginsTutorial-inventory">How plugins and the HQ inventory model play nicely together</a></li>
-</ul>
-
-
-<ul>
-	<li><a href="#PluginsTutorial-XML">Every plugin needs an XML descriptor</a></li>
-</ul>
-
-
-<ul>
-	<li><a href="#PluginsTutorial-trouble">Troubleshooting</a></li>
-</ul>
 
 
 
@@ -70,9 +77,9 @@
 </tr>
 <tr>
 <td class='confluenceTd'><a href="Measurement Plugin.html" title="Measurement Plugin">Measurement</a></td>
-<td class='confluenceTd'> <a href="Script Plugin.html" title="Script Plugin">Script</a> </td>
+<td class='confluenceTd'> Script</td>
 <td class='confluenceTd'> You want to discover and collect metrics from a script </td>
-<td class='confluenceTd'><a href="Script Plugin Tutorial.html" title="Script Plugin Tutorial">Script Plugin Tutorial</a></td>
+<td class='confluenceTd'><a href="Script Plugins.html" title="Script Plugins">Script Plugins</a></td>
 </tr>
 <tr>
 <td class='confluenceTd'><a href="Measurement Plugin.html" title="Measurement Plugin">Measurement</a></td>
@@ -86,8 +93,6 @@
 
 
 
-<p><em><a href="#PluginsTutorial-top">back to top</a></em></p>
-
 
 
 <p><a name="PluginsTutorial-inventory"></a></p>
@@ -97,8 +102,6 @@
 <p>See <a href="Resources, Resource Types and Inventory Types.html" title="Resources, Resource Types and Inventory Types">Resources, Resource Types and Inventory Types</a></p>
 
 
-
-<p><em><a href="#PluginsTutorial-top">back to top</a></em></p>
 
 
 
@@ -146,7 +149,6 @@
 
 
 
-<p><em><a href="#PluginsTutorial-top">back to top</a></em></p>
 
 
 
@@ -190,7 +192,7 @@
 
 
 
-<p><font color=""></font></p>
+
 
 				    
                     			    </td>
@@ -201,7 +203,7 @@
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:44</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:58</font></td>
 		    </tr>
 	    </table>
     </body>

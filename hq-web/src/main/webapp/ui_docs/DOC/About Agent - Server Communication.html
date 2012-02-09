@@ -1,0 +1,105 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : About Agent - Server Communication</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 4.6.5 : About Agent - Server Communication
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325712699372 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325712699372 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325712699372 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1325712699372'>
+<ul>
+    <li><a href='#AboutAgent-ServerCommunication-AgenttoServerCommunication'>Agent-to-Server Communication</a></li>
+    <li><a href='#AboutAgent-ServerCommunication-ServertoAgentCommunication'>Server-to-Agent Communication</a></li>
+    <li><a href='#AboutAgent-ServerCommunication-UnidirectionalAgentServerCommunications'>Unidirectional Agent-Server Communications</a></li>
+    <li><a href='#AboutAgent-ServerCommunication-UnidirectionalCommunicationviaaProxy'>Unidirectional Communication via a Proxy</a></li>
+</ul></div>
+
+<p>This section is an overview of the communications between a Hyperic Agent and the Hyperic Server. </p>
+
+
+<h1><a name="AboutAgent-ServerCommunication-AgenttoServerCommunication"></a>Agent-to-Server Communication </h1>
+
+<p>Upon startup, a Hyperic Agent initiates a communications channel with the Hyperic Server. The agent continuously batches and sends monitoring results for the platform to the server. Agent-to-server data flows over HTTPS via a byte-encrypted XML protocol called Lather. </p>
+
+<p>The agent sends this data to the server: </p>
+
+<ul>
+	<li>SSL certificate &#8212; When an agent connects to a server using https, it presents an SSL certificate as part of the handshake. For information about certificate verification, see <a href="About SSL in Hyperic.html#AboutSSLinHyperic-certs">Hyperic 4.6 SSL Certificate Processing</a> on <a href="About SSL in Hyperic.html" title="About SSL in Hyperic">About SSL in Hyperic</a>.</li>
+	<li>plugin status &#8212; When an agent starts up and loads the plugins in its plugin directory, it sends a plugin status report to the server, including the MD5 checksum of each plugin it loaded. This server uses this information for the server-agent plugin synchronization (SAPS) process, described in <a href="Plugin Deployment and Management.html#PluginDeploymentandManagement-AgentStartupSync">About Plugin Sync at Agent Startup</a> on <a href="Plugin Deployment and Management.html" title="Plugin Deployment and Management">Plugin Deployment and Management</a> in <em><a href="vFabric Hyperic Administration.html" title="vFabric Hyperic Administration">vFabric Hyperic Administration</a></em>.</li>
+	<li>metrics &#8212; You can configure the batch size is using the <tt>agent.maxBatchSize</tt> property in <tt>agent.properties</tt></li>
+	<li>event &#8212; You can configure the batch size using <tt>agent.eventReportBatchSize</tt> in  <tt>agent.properties</tt></li>
+	<li>auto-discovery results &#8212; Auto-discovery results are reported after each auto-discovery scan.
+	<ul>
+		<li>By default, the default scan runs every 15 minutes. You can configure the frequency using the <tt>autoinventory.defaultScan.interval.millis</tt> in <tt>agent.properties</tt></li>
+		<li>By default, the run-time scan runs once a day. You can configure the frequency using the <tt>autoinventory.runtimeScan.interval.millis</tt> in <tt>agent.properties</tt>.</li>
+	</ul>
+	</li>
+</ul>
+
+
+<h1><a name="AboutAgent-ServerCommunication-ServertoAgentCommunication"></a>Server-to-Agent Communication </h1>
+
+<p>Unless a Hyperic Agent is configured for unidirectional communication, the Hyperic Server initiates communication with a Hyperic Agent to provide metric collection schedules, and relay the commands and data issued or configured by authorized users. </p>
+
+<p>Server-to-agent traffic is always over SSL, and includes: </p>
+
+<ul>
+	<li>SSL certificate &#8212; When the Hyperic Server connects to an agent using https, it presents an SSL certificate as part of the handshake. For information about certificate verification, see <a href="About SSL in Hyperic.html#AboutSSLinHyperic-certs">Hyperic 4.6 SSL Certificate Processing</a> on <a href="About SSL in Hyperic.html" title="About SSL in Hyperic">About SSL in Hyperic</a>.</li>
+	<li>metric collection schedules</li>
+	<li>resource control actions</li>
+	<li>requests to initiate auto-inventory scans</li>
+	<li>plugin updates &#8212; If, during the SAPS process, the Hyperic Server detects plugin mismatches between the product plugins on the server and those deployed an agent, the server syncs the agent's plugin population to resolve the mismatches, and restarts the agent. This behavior is described in <a href="Plugin Deployment and Management.html#PluginDeploymentandManagement-ServerStartupSync">About Plugin Sync at Server Startup</a> on <a href="Plugin Deployment and Management.html" title="Plugin Deployment and Management">Plugin Deployment and Management</a> in <em><a href="vFabric Hyperic Administration.html" title="vFabric Hyperic Administration">vFabric Hyperic Administration</a></em>.</li>
+</ul>
+
+
+<h1><a name="AboutAgent-ServerCommunication-UnidirectionalAgentServerCommunications"></a>Unidirectional Agent-Server Communications</h1>
+<p><a name="AboutAgent-ServerCommunication-unidirectional"></a></p>
+
+<p>The default communication between an agent and the server is bi-directional &#8212; the Hyperic Agent establishes a connection with the Hyperic Server to send the data described in <a href="#AboutAgent-ServerCommunication-AgenttoServerCommunication">Agent&#45;to&#45;Server Communication</a>, and the Hyperic Server establishes a connection with the Hyperic Agent to send the data described in <a href="#AboutAgent-ServerCommunication-ServertoAgentCommunication">Server&#45;to&#45;Agent Communication</a>.  </p>
+
+<p>If your security policies dictate, you can configure the agent to initiate all communications with the Hyperic Server. You can configure unidirectional communications interactively, at first agent startup, or in an agent's <tt>AgentHome/conf/agent.properties</tt> file. If you want to change from bidirectional to unidirectional communications after initial agent configuration, see <a href="Configure Unidirectional Agent - Server Communication.html" title="Configure Unidirectional Agent - Server Communication">Configure Unidirectional Agent &#45; Server Communication</a>. </p>
+
+<p>If an agent is configured for unidirectional communication, the Hyperic Server does not establish a connection to the agent. Instead, at startup, the agent establishes a persistent connection to the Hyperic Server, and polls the server periodically for server communication.</p>
+
+<h1><a name="AboutAgent-ServerCommunication-UnidirectionalCommunicationviaaProxy"></a>Unidirectional Communication via a Proxy</h1>
+
+<p>If you use unidirectional communications, you can configure the Hyperic Agent to communicate with the Hyperic Server via a proxy server. You must configure this behavior in each agent's <tt>agent.properties</tt> file. For more information, see <a href="Set Up Agent in Properties File.html" title="Set Up Agent in Properties File">Set Up Agent in Properties File</a>.</p>
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:56</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

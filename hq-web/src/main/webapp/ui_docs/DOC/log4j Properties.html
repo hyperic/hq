@@ -1,48 +1,89 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : log4j Properties</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : log4j Properties</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : log4j Properties
+                            vFabric Hyperic 4.6.5 : log4j Properties
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Feb 06, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <p>log4j.rootLogger=${agent.logLevel}, R<br/>
-log4j.appender.R.File=${agent.logFile}<br/>
-log4j.appender.R.MaxBackupIndex=1<br/>
-log4j.appender.R.MaxFileSize=5000KB<br/>
-log4j.appender.R.layout.ConversionPattern=%d %-5p [%t] [%c{1}] %m%n<br/>
-log4j.appender.R.layout=org.apache.log4j.PatternLayout<br/>
-log4j.appender.R=org.apache.log4j.RollingFileAppender<br/>
-&#35;&#35;<br/>
-&#35;&#35; Disable overly verbose logging <br/>
-&#35;&#35;<br/>
-log4j.logger.httpclient.wire=ERROR<br/>
-log4j.logger.org.apache.commons.httpclient=WARN<br/>
-log4j.logger.org.hyperic.hq.measurement.agent.server.SenderThread=INFO<br/>
-log4j.logger.org.hyperic.hq.agent.server.AgentDListProvider=INFO<br/>
-log4j.logger.org.hyperic.hq.agent.server.MeasurementSchedule=INFO<br/>
-log4j.logger.org.hyperic.hq.measurement.agent.server.ScheduleThreadTrace=INFO<br/>
-log4j.logger.org.hyperic.util.schedule.ScheduleTrace=INFO<br/>
-&#35;&#35;<br/>
-&#35;&#35; Only log errors from naming context<br/>
-&#35;&#35;<br/>
-log4j.category.org.jnp.interfaces.NamingContext=ERROR<br/>
-log4j.category.org.apache.axis=ERROR</p>
+				    <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">log4j.rootLogger=${agent.logLevel}, R
+
+log4j.appender.R.File=${agent.logFile}
+log4j.appender.R.MaxBackupIndex=1
+log4j.appender.R.MaxFileSize=5000KB
+log4j.appender.R.layout.ConversionPattern=%d{dd-MM-yyyy HH:mm:ss,SSS z} %-5p [%t] [%c{1}@%L] %m%n
+log4j.appender.R.layout=org.apache.log4j.PatternLayout
+log4j.appender.R=org.apache.log4j.RollingFileAppender
+
+##
+## Disable overly verbose logging 
+##
+log4j.logger.org.apache.http=ERROR
+log4j.logger.org.springframework.web.client.RestTemplate=ERROR
+log4j.logger.org.hyperic.hq.measurement.agent.server.SenderThread=INFO
+log4j.logger.org.hyperic.hq.agent.server.AgentDListProvider=INFO
+log4j.logger.org.hyperic.hq.agent.server.MeasurementSchedule=INFO
+log4j.logger.org.hyperic.util.units=INFO
+log4j.logger.org.hyperic.hq.product.pluginxml=INFO
+
+# Only log errors from naming context
+log4j.category.org.jnp.interfaces.NamingContext=ERROR
+log4j.category.org.apache.axis=ERROR
+
+#Agent Subsystems: Uncomment individual subsystems to see debug messages.
+#-----------------------------------------------------------------------
+#log4j.logger.org.hyperic.hq.autoinventory=DEBUG
+#log4j.logger.org.hyperic.hq.livedata=DEBUG
+#log4j.logger.org.hyperic.hq.measurement=DEBUG
+#log4j.logger.org.hyperic.hq.control=DEBUG
+
+#Agent Plugin Implementations 
+#log4j.logger.org.hyperic.hq.product=DEBUG
+
+#Server Communication 
+#log4j.logger.org.hyperic.hq.bizapp.client.AgentCallbackClient=DEBUG
+
+#Server Realtime commands dispatcher 
+#log4j.logger.org.hyperic.hq.agent.server.CommandDispatcher=DEBUG 
+
+#Agent Configuration parser
+#log4j.logger.org.hyperic.hq.agent.AgentConfig=DEBUG
+
+#Agent plugins loader 
+#log4j.logger.org.hyperic.util.PluginLoader=DEBUG 
+
+#Agent Metrics Scheduler (Scheduling tasks definitions &amp; executions) 
+#log4j.logger.org.hyperic.hq.agent.server.session.AgentSynchronizer.SchedulerThread=DEBUG 
+
+#Agent Plugin Managers 
+#log4j.logger.org.hyperic.hq.product.MeasurementPluginManager=DEBUG
+#log4j.logger.org.hyperic.hq.product.AutoinventoryPluginManager=DEBUG
+#log4j.logger.org.hyperic.hq.product.ConfigTrackPluginManager=DEBUG
+#log4j.logger.org.hyperic.hq.product.LogTrackPluginManager=DEBUG
+#log4j.logger.org.hyperic.hq.product.LiveDataPluginManager=DEBUG
+#log4j.logger.org.hyperic.hq.product.ControlPluginManager=DEBUG</pre>
+		</div>
+</div></div>
 
 				    
                     			    </td>
@@ -53,7 +94,7 @@ log4j.category.org.apache.axis=ERROR</p>
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:43</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:56</font></td>
 		    </tr>
 	    </table>
     </body>

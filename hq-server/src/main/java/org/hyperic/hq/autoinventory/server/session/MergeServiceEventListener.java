@@ -36,6 +36,7 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.autoinventory.server.session.RuntimeReportProcessor.ServiceMergeInfo;
+import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.util.CollectionUtil;
@@ -62,7 +63,7 @@ public class MergeServiceEventListener implements ZeventListener<MergeServiceRep
 
     @PostConstruct
     public void subscribeForEvents() {
-        Set<Class<?>> events = new HashSet<Class<?>>();
+        Set<Class<? extends Zevent>> events = new HashSet<Class<? extends Zevent>>();
         events.add(MergeServiceReportZevent.class);
         zeventManager.addBufferedListener(events, this);
 

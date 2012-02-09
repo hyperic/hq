@@ -80,6 +80,7 @@ public class RegisteredTriggerManagerImplTest
         org.easymock.classextension.EasyMock.replay(alertDAO, dbUtil);
     }
 
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         this.alertConditionEvaluatorFactory = EasyMock.createMock(AlertConditionEvaluatorFactory.class);
@@ -466,6 +467,65 @@ public class RegisteredTriggerManagerImplTest
         assertTrue(MockTrigger.enabled);
     }
 
+    
+    /**
+     * Verifies that other triggers will be processed and no Exceptions thrown
+     * if an Exception occurs retriving unfixed alert fired events
+     */
+   public void testInitializeTriggersExceptionInitializing2() {
+        Integer triggerId = Integer.valueOf(987);
+        Integer trigger2Id = Integer.valueOf(456);
+        Integer alertDefinitionId = Integer.valueOf(5432);
+
+        AlertDefinition alertDef = new AlertDefinition();
+        alertDef.setId(alertDefinitionId);
+        alertDef.setActiveStatus(true);
+        RegisteredTriggerValue mockTrigger = new RegisteredTriggerValue();
+        mockTrigger.setClassname(MockTrigger.class.getName());
+        mockTrigger.setId(triggerId);
+
+        RegisteredTrigger trigger = new RegisteredTrigger(mockTrigger);
+        trigger.setId(mockTrigger.getId());
+        trigger.setAlertDefinition(alertDef);
+
+        RegisteredTriggerValue mockTrigger2 = new RegisteredTriggerValue();
+        mockTrigger2.setClassname(MockTrigger.class.getName());
+        mockTrigger2.setId(trigger2Id);
+
+        RegisteredTrigger trigger2 = new RegisteredTrigger(mockTrigger2);
+        trigger2.setId(mockTrigger2.getId());
+        trigger2.setAlertDefinition(alertDef);
+
+        Set<RegisteredTrigger> triggers = new HashSet<RegisteredTrigger>();
+        triggers.add(trigger);
+        triggers.add(trigger2);
+
+        registeredTriggerRepository.init();
+        EasyMock.expect(triggerDAO.findAllEnabledTriggers()).andReturn(triggers);
+        EasyMock.expect(eventLogManager.findLastUnfixedAlertFiredEvents()).andThrow(new RuntimeException("Oh No!"));
+        EasyMock.expect(alertConditionEvaluatorRepository.getAlertConditionEvaluatorById(alertDefinitionId)).andReturn(null);
+        EasyMock.expect(alertConditionEvaluatorFactory.create(alertDef)).andReturn(alertConditionEvaluator);
+        EasyMock.expect(alertConditionEvaluatorRepository.getStateRepository()).andReturn(alertConditionEvaluatorStateRepository).times(2);
+        Map<Integer,Serializable> alertConditionEvaluatorStates = new HashMap<Integer,Serializable>();
+        alertConditionEvaluatorStates.put(alertDefinitionId, "state");
+        EasyMock.expect(alertConditionEvaluatorStateRepository.getAlertConditionEvaluatorStates()).andReturn(alertConditionEvaluatorStates);
+        alertConditionEvaluator.initialize("state");
+        Map<Integer,Serializable> executionStrategyStates = new HashMap<Integer,Serializable>();
+        executionStrategyStates.put(alertDefinitionId, "moreState");
+        EasyMock.expect(alertConditionEvaluatorStateRepository.getExecutionStrategyStates()).andReturn(executionStrategyStates);
+        EasyMock.expect(alertConditionEvaluator.getExecutionStrategy()).andReturn(executionStrategy);
+        executionStrategy.initialize("moreState");
+        alertConditionEvaluatorRepository.addAlertConditionEvaluator(alertConditionEvaluator);
+        EasyMock.expect(alertConditionEvaluatorRepository.getAlertConditionEvaluatorById(alertDefinitionId)).andReturn(alertConditionEvaluator).times(3);
+        registeredTriggerRepository.addTrigger(EasyMock.isA(MockTrigger.class));
+        EasyMock.expectLastCall().times(2);
+        replay();
+        registeredTriggerManager.initializeTriggers();
+        verify();
+        assertTrue(MockTrigger.initialized);
+        assertTrue(MockTrigger.enabled);
+    }
+    
     /**
      * Verifies that other triggers will be processed and no Exceptions thrown
      * if an Exception occurs registering a single trigger

@@ -3,7 +3,8 @@
 <%@ page errorPage="/common/Error.jsp" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
-
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -33,13 +34,12 @@
 <link rel="shortcut icon" href="<html:rewrite page="/images/4.0/icons/favicon.ico"/>"/>
 <link rel="stylesheet" href="<html:rewrite page="/css/win.css"/>" type="text/css"/>
 <link rel="stylesheet" href="<html:rewrite page="/css/HQ_40.css"/>" type="text/css"/>
-<script type="text/javascript">
+<script>
 	var djConfig = {};
 	djConfig.parseOnLoad = true;
 	djConfig.baseUrl = '/static/js/dojo/1.5/dojo/';
 	djConfig.scopeMap = [ [ "dojo", "hqDojo" ], [ "dijit", "hqDijit" ], [ "dojox", "hqDojox" ] ];
-</script>
-
+</script>	
 <!--[if IE]>
 <script type="text/javascript">
 	// since dojo has trouble when it comes to using relative urls + ssl, we
@@ -49,7 +49,7 @@
 	    a.src = url;
 	    return a.src;
 	}
-	
+		
 	djConfig.modulePaths = {
 	    "dojo": qualifyURL("/static/js/dojo/1.5/dojo"),
 	    "dijit":  qualifyURL("/static/js/dojo/1.5/dijit"),
@@ -57,19 +57,21 @@
   	};
 </script>
 <![endif]-->
+<script type="text/javascript" src="<html:rewrite page="/static/js/dojo/1.5/dojo/dojo.js" />"></script>
 
-<script src="<html:rewrite page='/static/js/dojo/1.5/dojo/dojo.js'/>" type="text/javascript"></script>
-<script type="text/javascript">
-    var imagePath = "/images/";
-    hqDojo.require('dojo.date');
-</script>
-<script src="<html:rewrite page='/js/prototype.js'/>" type="text/javascript"></script>
-<script src="<html:rewrite page='/js/popup.js'/>" type="text/javascript"></script>
-<script src="<html:rewrite page='/js/diagram.js'/>" type="text/javascript"></script>
-<script src="<html:rewrite page='/js/functions.js'/>" type="text/javascript"></script>
-<script src="<html:rewrite page='/js/lib/lib.js'/>" type="text/javascript"></script>
-<script src="<html:rewrite page='/js/lib/charts.js'/>" type="text/javascript"></script>
-<script type="text/javascript">
+<jsu:importScript path="/js/prototype.js" />
+<jsu:importScript path="/js/popup.js" />
+<jsu:importScript path="/js/diagram.js" />
+<jsu:importScript path="/js/functions.js" />
+<jsu:importScript path="/js/lib/lib.js" />
+<jsu:importScript path="/js/lib/charts.js" />
+<c:set var="maxLongValue">
+	<%= Long.MAX_VALUE %>
+</c:set>
+<jsu:script>
+	var imagePath = "/images/";
+	hqDojo.require('dojo.date');
+
 	hyperic.data.escalation = {};
 	hyperic.data.escalation.pauseSelect = document.createElement("select");
 	hyperic.data.escalation.pauseSelect.options[0] = new Option("5 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>", "300000");
@@ -85,5 +87,5 @@
 	hyperic.data.escalation.pauseSelect.options[10] = new Option("24 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/>", "86400000");
 	hyperic.data.escalation.pauseSelect.options[11] = new Option("48 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/>", "172800000");
 	hyperic.data.escalation.pauseSelect.options[12] = new Option("72 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/>", "259200000");
-	hyperic.data.escalation.pauseSelect.options[13] = new Option("<fmt:message key="alert.config.props.CB.Enable.UntilFixed"/>", "<%= Long.MAX_VALUE %>");
-</script>
+	hyperic.data.escalation.pauseSelect.options[13] = new Option("<fmt:message key="alert.config.props.CB.Enable.UntilFixed"/>", "${maxLongValue}");
+</jsu:script>

@@ -31,6 +31,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 
@@ -70,6 +72,7 @@ public class AgentConfig {
     private static final String DEFAULT_PROXY_HOST = "";
     private static final int DEFAULT_PROXY_PORT = -1;
     private static final int DEFAULT_NOTIFY_UP_PORT = -1;
+    private static final String DEFAULT_ENBALED_CIPHERS = "SSL_RSA_WITH_RC4_128_MD5,SSL_RSA_WITH_RC4_128_SHA,SSL_RSA_WITH_3DES_EDE_CBC_SHA,SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA,SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA,TLS_DHE_RSA_WITH_AES_128_CBC_SHA,TLS_DHE_DSS_WITH_AES_128_CBC_SHA,TLS_RSA_WITH_AES_128_CBC_SHA,TLS_DHE_RSA_WITH_AES_256_CBC_SHA,TLS_DHE_DSS_WITH_AES_256_CBC_SHA,TLS_RSA_WITH_AES_256_CBC_SHA";
 
     //PluginDumper needs these to be constant folded
     public static final String PDK_DIR_KEY = "agent.pdkDir";
@@ -140,6 +143,9 @@ public class AgentConfig {
     public static final String[] PROP_ROLLBACK_AGENT_BUNDLE_UPGRADE = 
     { "agent.rollbackAgentBundleUpgrade", ""};    
     
+    public static final String[] PROP_ENABLED_CIPHERS =
+    	{ "agent.enabledCiphers", String.valueOf(DEFAULT_ENBALED_CIPHERS) };
+    
     public static final String PROP_PROPFILE = "agent.propFile";
     
     public static final String DEFAULT_AGENT_PROPFILE_NAME = "agent.properties";
@@ -174,7 +180,8 @@ public class AgentConfig {
         PROP_PDK_LIB_DIR,
         PROP_PDK_PLUGIN_DIR,
         PROP_PDK_WORK_DIR, 
-        PROP_ROLLBACK_AGENT_BUNDLE_UPGRADE
+        PROP_ROLLBACK_AGENT_BUNDLE_UPGRADE,
+        PROP_ENABLED_CIPHERS
     };
 
     private int        listenPort;          // Port the agent should listen on
@@ -189,10 +196,15 @@ public class AgentConfig {
     private Properties bootProps;           // Bootstrap properties
     private String     tokenFile;
 
-    private AgentConfig(){
+	private String[] enabledCiphers;        // Enabled ciphers to be used
+
+    private File logdir;
+
+	private AgentConfig(){
         this.proxyIp = AgentConfig.DEFAULT_PROXY_HOST;
         this.proxyPort = AgentConfig.DEFAULT_PROXY_PORT;
         this.notifyUpPort = AgentConfig.DEFAULT_NOTIFY_UP_PORT;
+        this.enabledCiphers = AgentConfig.DEFAULT_ENBALED_CIPHERS.split(",");
     }
 
     /**
@@ -233,7 +245,7 @@ public class AgentConfig {
     
     private static boolean loadProps(Properties props, File file) {
         FileInputStream fin = null;
-
+        Properties tmpProps = new Properties(); 
         if (!file.exists()) {
             return false;
         }
@@ -243,7 +255,13 @@ public class AgentConfig {
 
         try {
             fin = new FileInputStream(file);
-            props.load(fin);
+            tmpProps.load(fin);
+            for (Enumeration<?> propKeys = tmpProps.propertyNames(); propKeys.hasMoreElements();) {
+                String tmpKey = (String)propKeys.nextElement();
+                String tmpValue = tmpProps.getProperty(tmpKey);
+                tmpValue = tmpValue.trim();
+                props.put(tmpKey, tmpValue);
+            }
             return true;
         } catch (IOException e) {
             return false;
@@ -252,6 +270,7 @@ public class AgentConfig {
                 try { fin.close(); } catch (IOException e) {}
             }
         }
+
     }
     
     /**
@@ -414,6 +433,10 @@ public class AgentConfig {
         
         this.setProxyIp(proxyIp);
         
+        String[] enabledCiphers = appProps.getProperty(AgentConfig.PROP_ENABLED_CIPHERS[0], AgentConfig.PROP_ENABLED_CIPHERS[1]).split(",");
+        
+        this.setEnabledCiphers(enabledCiphers);
+        
         storageProvider = 
             appProps.getProperty(AgentConfig.PROP_STORAGEPROVIDER[0],
                                  AgentConfig.PROP_STORAGEPROVIDER[1]);
@@ -459,7 +482,7 @@ public class AgentConfig {
             appProps.getProperty(PROP_LOGDIR[0],
                                  PROP_LOGDIR[1]);
 
-        dir = new File(logDir);
+        logdir = new File(logDir);
         
         try {
             succeeded = FileUtil.makeDirs(dir, 3);
@@ -468,14 +491,17 @@ public class AgentConfig {
         }
         
         if (!succeeded) {
-            String parent = new File(dir.getAbsolutePath())
-                                    .getParentFile().getAbsolutePath();
+            String parent = new File(logdir.getAbsolutePath()).getParentFile().getAbsolutePath();
             throw new AgentConfigException
                    ("Error creating log directory: " + dir.getAbsolutePath()
                     + "\nMake sure that the " + parent + " directory is "
                     + "owned by user '" + System.getProperty("user.name")
                     + "' and is not a read-only directory.");            
         }
+    }
+    
+    public File getLogDir() {
+        return logdir;
     }
     
     /**
@@ -681,5 +707,17 @@ public class AgentConfig {
             throw new AgentConfigException("Invalid port (not in range " +
                                            "1->65535)");        
     }
+
+    public String[] getEnabledCiphers() {
+		return enabledCiphers;
+	}
+    
+    public List<String> getEnabledCipherList() {
+    	return new ArrayList<String>(Arrays.asList(getEnabledCiphers()));
+    }
+
+	public void setEnabledCiphers(String[] enabledCiphers) {
+		this.enabledCiphers = enabledCiphers;
+	}
 
 }

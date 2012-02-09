@@ -1,35 +1,38 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : Options for Running and Controlling Resource Discovery</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : Options for Running and Controlling Resource Discovery</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : Options for Running and Controlling Resource Discovery
+                            vFabric Hyperic 4.6.5 : Options for Running and Controlling Resource Discovery
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 21, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p>This section describes options for initiating and preventing Hyperic resource discovery processes. </p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1308678412100 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1308678412100 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1308678412100 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1325699684210 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699684210 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699684210 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1308678412100'>
+/*]]>*/</style><div class='rbtoc1325699684210'>
 <ul>
     <li><a href='#OptionsforRunningandControllingResourceDiscovery-ScanaPlatformOnDemand'>Scan a Platform On-Demand</a></li>
     <li><a href='#OptionsforRunningandControllingResourceDiscovery-ConfigureDefaultandRuntimeScanningFrequency'>Configure Default and Runtime Scanning Frequency</a></li>
@@ -46,7 +49,7 @@ div.rbtoc1308678412100 li {margin-left: 0px;padding-left: 0px;}
 
  
 
-<p><font color=""></font></p>
+
 
 <h1><a name="OptionsforRunningandControllingResourceDiscovery-ScanaPlatformOnDemand"></a>Scan a Platform On-Demand </h1>
 
@@ -58,7 +61,7 @@ div.rbtoc1308678412100 li {margin-left: 0px;padding-left: 0px;}
 	<ul>
 		<li>The <b>New Auto-Discovery</b> page appears.
 
-<p><span class="image-wrap" style=""><img src="attachments/77463605/77660222.png" width="750px" style="border: 0px solid black"/></span></p>
+<p><span class="image-wrap" style=""><img src="attachments/79038211/79135439.png" width="750px" style="border: 0px solid black"/></span></p>
 <div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Some Platforms Cannot Be Scanned</b><br />You can only initiate an auto-discovery scan for a platform that runs an Hyperic Agent. Platforms that are remotely monitored, such as Cisco and other network device platforms that do not run an agent, cannot be scanned.</td></tr></table></div> </li>
 	</ul>
 	</li>
@@ -81,7 +84,7 @@ div.rbtoc1308678412100 li {margin-left: 0px;padding-left: 0px;}
 </ol>
  
 
-<p><font color=""></font></p>
+
 
 <h1><a name="OptionsforRunningandControllingResourceDiscovery-ConfigureDefaultandRuntimeScanningFrequency"></a>Configure Default and Runtime Scanning Frequency </h1>
 
@@ -129,7 +132,7 @@ div.rbtoc1308678412100 li {margin-left: 0px;padding-left: 0px;}
 
 <p>If you do not want the Hyperic Agent to discover a resource, you can prevent the agent from loading the plugin. Specify the plugin or plugins that you do not want the agent to load at startup with the <tt>agent.exclude</tt> property in the <tt>agent.properties</tt> file on the platform. </p>
 
-<p><font color=""></font></p>
+
 <h1><a name="OptionsforRunningandControllingResourceDiscovery-DisablePlatformServiceDiscovery"></a>Disable Platform Service Discovery </h1>
 
 <p>To disable auto-discovery of platform services, update <tt>agent.properties</tt> with the following property settings. </p>
@@ -155,12 +158,12 @@ div.rbtoc1308678412100 li {margin-left: 0px;padding-left: 0px;}
 
 <p>As installed, <tt>agent.properties</tt> does not contain this property, and by default, an HQ Agent discovers network services running on a platform.</p></td></tr></table></div> 
 
-<p><font color=""></font></p>
+
 <h1><a name="OptionsforRunningandControllingResourceDiscovery-DisableServiceDiscoveryforaServerInstance"></a>Disable Service Discovery for a Server Instance </h1>
 
 <p>If you do not want to the agent to discover the services running in a server, you can disable the behavior in the <b>Monitoring</b> section of the <b>Configuration Properties</b> page for a server instance. </p>
 
-<p><font color=""></font></p>
+
 
 				    
                     			    </td>
@@ -171,7 +174,7 @@ div.rbtoc1308678412100 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:43</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:56</font></td>
 		    </tr>
 	    </table>
     </body>

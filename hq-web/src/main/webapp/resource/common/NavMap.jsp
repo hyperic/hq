@@ -5,7 +5,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -33,15 +33,13 @@
 
 <hq:navMapSupported var="navMapSupported"/>
 <c:if test="${navMapSupported}">
-
-   <c:choose>
-      <c:when test="${xlib}">
-<script src="<html:rewrite page="/js/effects.js"/>" type="text/javascript"></script>
-<c:set var="imageWidth" value="800"/>
-<div class="navMap" onclick="toggleDiagram('diagramdiv');">
-<hq:navMap areasVar="mapAreas" areasSizeVar="mapAreasSize" imageWidth="${imageWidth}"/>
-
-<map name="diagram">
+	<c:choose>
+    	<c:when test="${xlib}">
+      		<jsu:importScript path="/js/effects.js" />
+			<c:set var="imageWidth" value="800"/>
+			<div class="navMap" onclick="toggleDiagram('diagramdiv');">
+				<hq:navMap areasVar="mapAreas" areasSizeVar="mapAreasSize" imageWidth="${imageWidth}"/>
+				<map name="diagram">
 <c:forEach var="mapArea" varStatus="status" items="${mapAreas}">
 <c:url var="mapAreaUrl" value="/ResourceNav.do">
 

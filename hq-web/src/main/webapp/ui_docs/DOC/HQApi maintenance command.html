@@ -1,35 +1,38 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : HQApi maintenance command</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : HQApi maintenance command</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : HQApi maintenance command
+                            vFabric Hyperic 4.6.5 : HQApi maintenance command
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1307466610442 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1307466610442 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1307466610442 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1325699167261 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699167261 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699167261 li {margin-left: 0px;padding-left: 0px;}
 
-/*]] >*/</style><div class='rbtoc1307466610442'>
+/*]]>*/</style><div class='rbtoc1325699167261'>
 <ul>
     <li><a href='#HQApimaintenancecommand-Functionality'>Functionality</a></li>
     <li><a href='#HQApimaintenancecommand-maintenanceCommandOptions'>maintenance Command Options</a></li>
@@ -69,11 +72,11 @@ div.rbtoc1307466610442 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 </td></tr></table></div> 
 
-<p><font color=""></font></p>
+
 
 <h1><a name="HQApimaintenancecommand-Functionality"></a>Functionality</h1>
 
-<p>You can use the <b>maintenance</b> command to schedule downtime for a group - it is the command line equivalent of vFabric Hyperic's <b>Schedule Downtime</b> feature, available in the <b>Tools</b> menu when a group is selected. At the start of the downtime period, currently active alert definitions for resources in the group are disabled. At the end of the period, those alert definitions are re-enabled.</p>
+<p>You can use the <b>maintenance</b> command to schedule downtime for a resource or a group of resources &#8212; it is the command line equivalent of vFabric Hyperic's <b>Schedule Downtime</b> feature, available in the <b>Tools</b> menu when a resource or a group is selected. At the start of the downtime period, currently active alert definitions for the specified resource(s) in the group are disabled. At the end of the period, those alert definitions are re-enabled.</p>
 
 <p><b>Note:</b> Only a Hyperic user with the Super User role may schedule downtime.<font color=""></font></p>
 
@@ -81,24 +84,33 @@ div.rbtoc1307466610442 li {margin-left: 0px;padding-left: 0px;}
 
 <h2><a name="HQApimaintenancecommand-maintenanceschedule"></a>maintenance schedule</h2>
 
-<p>The <b>maintenance schedule</b> command defines a period of downtime for a specified group. You must supply the following command qualifiers:</p>
+<p>The <b>maintenance schedule</b> command defines a period of downtime for a specified resource or resource group. Command qualifiers include:</p>
 <div class='table-wrap'>
 <table class='confluenceTable'><tbody>
 <tr>
-<td class='confluenceTd'> <b>Qualifier</b> </td>
-<td class='confluenceTd'> <b>Description</b> </td>
+<th class='confluenceTh'> Qualifier </th>
+<th class='confluenceTh'> <b>Description</b> </th>
+<th class='confluenceTh'> <b>Required</b> </th>
 </tr>
 <tr>
 <td class='confluenceTd'> &#45;-groupId </td>
-<td class='confluenceTd'> Specifies the internal ID for the group, for example, <tt>&#45;-groupId="10007"</tt> </td>
+<td class='confluenceTd'> Specifies the internal ID for the group for which maintenance is being scheduled, for example, <tt>&#45;-groupId="10007"</tt> </td>
+<td class='confluenceTd'>Required if <tt>--resourceId</tt> is not specified.</td>
+</tr>
+<tr>
+<td class='confluenceTd'>--resourceId </td>
+<td class='confluenceTd'>Specifies the internal ID of the resource for which maintenance is being scheduled. </td>
+<td class='confluenceTd'> Required if <tt>--groupId</tt>  is not specified.</td>
 </tr>
 <tr>
 <td class='confluenceTd'> &#45;-start </td>
 <td class='confluenceTd'> Specifies the start date and time for the downtime window, for example, <tt>start="8/20/09 3:00 PM"</tt> </td>
+<td class='confluenceTd'>yes </td>
 </tr>
 <tr>
 <td class='confluenceTd'> &#45;-end </td>
 <td class='confluenceTd'> Specifies the end date and time for the downtime window, for example, <tt>end="8/20/09 4:00 PM"</tt> </td>
+<td class='confluenceTd'>yes </td>
 </tr>
 </tbody></table>
 </div>
@@ -106,16 +118,23 @@ div.rbtoc1307466610442 li {margin-left: 0px;padding-left: 0px;}
 
 <h2><a name="HQApimaintenancecommand-maintenanceunschedule"></a>maintenance unschedule</h2>
 
-<p>The <b>maintenance unschedule</b> command removes the currently scheduled downtime for a specified group. You must supply the following command qualifier:</p>
+<p>The <b>maintenance unschedule</b> command removes the currently scheduled downtime for a specified resource or resource group. </p>
 <div class='table-wrap'>
 <table class='confluenceTable'><tbody>
 <tr>
-<td class='confluenceTd'> <b>Qualifier</b> </td>
-<td class='confluenceTd'> <b>Description</b> </td>
+<th class='confluenceTh'> Qualifier </th>
+<th class='confluenceTh'> <b>Description</b> </th>
+<th class='confluenceTh'> <b>Required</b> </th>
 </tr>
 <tr>
 <td class='confluenceTd'> &#45;-groupId </td>
 <td class='confluenceTd'> Specifies the internal ID for the group, for example, <tt>&#45;-groupId="10007"</tt> </td>
+<td class='confluenceTd'> Required if <tt>--resourceId</tt>  is not specified.</td>
+</tr>
+<tr>
+<td class='confluenceTd'>--resourceId </td>
+<td class='confluenceTd'>Specifies the internal ID of the resource for which maintenance is being unscheduled. </td>
+<td class='confluenceTd'> Required if <tt>--groupId</tt>  is not specified.</td>
 </tr>
 </tbody></table>
 </div>
@@ -123,19 +142,28 @@ div.rbtoc1307466610442 li {margin-left: 0px;padding-left: 0px;}
 
 <h2><a name="HQApimaintenancecommand-maintenanceget"></a>maintenance get</h2>
 
-<p>The <b>maintenance get</b> command returns a downtime schedule for a group, if there is one. You must supply the following command qualifier:</p>
+<p>The <b>maintenance get</b> command returns a downtime schedule for a resource, a resource group, or all resources and resource groups. You must supply one of the following command qualifiers:</p>
 <div class='table-wrap'>
 <table class='confluenceTable'><tbody>
 <tr>
-<td class='confluenceTd'> <b>Qualifier</b> </td>
-<td class='confluenceTd'> <b>Description</b> </td>
+<th class='confluenceTh'> Qualifier </th>
+<th class='confluenceTh'> <b>Description</b> </th>
+</tr>
+<tr>
+<td class='confluenceTd'> &#45;-all </td>
+<td class='confluenceTd'> Returns all maintenance schedulesSpecifies the internal ID for the resource</td>
 </tr>
 <tr>
 <td class='confluenceTd'> &#45;-groupId </td>
 <td class='confluenceTd'> Specifies the internal ID for the group, for example, <tt>&#45;-groupId="10007"</tt> </td>
 </tr>
+<tr>
+<td class='confluenceTd'> &#45;-resourceId </td>
+<td class='confluenceTd'> Specifies the internal ID for the resource</td>
+</tr>
 </tbody></table>
 </div>
+
 
 <p>Results are returned in this form:</p>
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
@@ -185,7 +213,7 @@ Maintenance for group 10007 unscheduled.</pre>
 
 <p>If you need to perform an API function multiple times to automate a task, you can call it programmatically rather than using its command line interface.  You can use a program to directly invoke the API's Java methods directly or invoke GET/POST methods against the RESTful web service that exposes the API on the Hyperic Server.</p>
 
-<p>The script attached to this page, <tt><a href="attachments/77464281/77660762.pl">group_maintenance_api.pl</a></tt>, is an example of the latter method. This script accesses the web service that exposes the <tt>maintenance</tt> API to set a maintenance window for a group.</p>
+<p>The script attached to this page, <tt><a href="attachments/79036955/79134752.pl">group_maintenance_api.pl</a></tt>, is an example of the latter method. This script accesses the web service that exposes the <tt>maintenance</tt> API to set a maintenance window for a group.</p>
 
 <p>Perl was chosen for the example for its multi-platform support and flexibility in working with XML. Other scripting languages might also be used to solve the same problem.</p>
 
@@ -308,7 +336,7 @@ REM============================================================================<
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464281/77660762.pl">group_maintenance_api.pl</a> (text/x-perl-script)
+                                <a href="attachments/79036955/79134752.pl">group_maintenance_api.pl</a> (text/x-perl-script)
                                 <br/>
                                                     </div>
 				    
@@ -320,7 +348,7 @@ REM============================================================================<
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:44</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:57</font></td>
 		    </tr>
 	    </table>
     </body>

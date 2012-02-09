@@ -668,36 +668,6 @@
   <metrics name="IIS 5.x VHost" include="vhost-avail,iis-common5and6" />
   <metrics name="IIS 6.x VHost" include="vhost-avail,iis-common5and6" />
 
-  <!-- Plugin help -->
-  <help name="IIS VHost Help">
-  <![CDATA[
-  <p>
-  <h3>Configure IIS ${product.version} for Response Time</h3>
-  </p>
-  <p>
-  To collect response time metrics for IIS servers the default IIS
-  log format must be modified to include the "Time Taken" logging
-  option.  To do this, open the properties of this website in the
-  Internet Information Services (IIS) Manager.  On the "Web Site"
-  tab, under logging options, select "W3C Extended Log Format".
-  Next click on "Properties", then "Advanced".  On the list of
-  logging options, check the "Time Taken" option.  Save the changes
-  and restart your IIS VHost.
-  </p>
-  <p>
-  In addition to the Time-Taken field, some IIS installation default 
-  many of the logging fields needed for response time to off.  When 
-  configuring the log format, make sure that date, time, c-ip, 
-  s-sitename, s-computername, s-ip, cs-method, cs-uri-stem, cs-uri-query,
-  sc-status, sc-bytes, and cs-host are included in the log format.
-  </p>
-  ]]>
-  </help>
-
-  <help name="IIS 4.x VHost" include="IIS VHost Help"/>
-  <help name="IIS 5.x VHost" include="IIS VHost Help"/>
-  <help name="IIS 6.x VHost" include="IIS VHost Help"/>
-
   <server name="IIS"
           description="Web Server"
           version="4.x"
@@ -750,6 +720,7 @@
                    description="Document Root"/>
       </properties>
     </service>
+       
   </server>
 
   <server name="IIS"

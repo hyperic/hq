@@ -5,7 +5,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -37,16 +37,15 @@
 <tiles:importAttribute name="availableServicesCount"/>
 <tiles:importAttribute name="pendingServices"/>
 <tiles:importAttribute name="pendingServicesCount"/>
+<jsu:importScript path="/js/addRemoveWidget.js" />
 
-<script  src="<html:rewrite page="/js/addRemoveWidget.js"/>" type="text/javascript"></script>
 <c:set var="widgetInstanceName" value="addServices"/>
 
-<script type="text/javascript">
-var pageData = new Array();
-initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-</script>
-
+<jsu:script>
+	var pageData = new Array();
+	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+</jsu:script>
 <c:url var="selfJscAction" value="/resource/application/Inventory.do">
   <c:param name="mode" value="addServices"/>
   <c:param name="rid" value="${resource.id}"/>
@@ -247,8 +246,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
     <c:param name="nameFilter" value="${param.nameFilter}"/>
   </c:if>
 </c:url>
-
-<script type="text/javascript"> <!--
+<jsu:script>
     function applyNameFilter() {
         goToLocationSelfAndElement(
                 'nameFilter',
@@ -256,9 +254,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
                 '<c:out value="${selfJscAction}" escapeXml="false"/>');
         return false;
     }
-// -->
-</script>
-
+</jsu:script>
 <!--  SELECT & ADD -->
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr>

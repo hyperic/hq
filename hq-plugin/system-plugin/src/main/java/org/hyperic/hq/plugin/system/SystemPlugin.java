@@ -441,7 +441,7 @@ public class SystemPlugin extends ProductPlugin {
             else if (info.isService(FILE_NAME)) {
                 schema.add(PROP_PATH,
                            "Path to File", 
-                           "log/agent.log");
+                           "../../log/agent.log");
             }
             else if (info.isService(DIR_NAME) ||
                      info.isService(DIR_TREE_NAME))

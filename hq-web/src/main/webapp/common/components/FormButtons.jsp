@@ -4,7 +4,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use Hyperic
   program services by normal system calls through the application
@@ -35,53 +35,48 @@
 <tiles:importAttribute name="cancelOnly" ignore="true"/>
 <tiles:importAttribute name="noReset" ignore="true"/>
 <tiles:importAttribute name="noCancel" ignore="true"/>
-
-<script  type="text/javascript">
-  var isButtonClicked = false;
+<jsu:script>
+  	var isButtonClicked = false;
   
-  function checkSubmit() {
-    if (isButtonClicked) {
-      alert('<fmt:message key="error.PreviousRequestEtc"/>');
-      return false;
-    }
-  }
-</script>
-
-<script>
-	hqDojo.ready(function() {
-		<c:if test="${empty cancelOnly}">
-			// it is possible for this template to be used multiple times
-			// on the same page, so query for all possible occurrences of the id
-			// (although all ids on a page should really be unique to be XHTML-compliant).
+  	function checkSubmit() {
+    	if (isButtonClicked) {
+      		alert('<fmt:message key="error.PreviousRequestEtc"/>');
+      		return false;
+    	}
+  	}
+</jsu:script>
+<jsu:script onLoad="true">
+	<c:if test="${empty cancelOnly}">
+		// it is possible for this template to be used multiple times
+		// on the same page, so query for all possible occurrences of the id
+		// (although all ids on a page should really be unique to be XHTML-compliant).
 			
-			hqDojo.query(".button42").forEach(function(e){				
-				if (e.id == 'okButton' && e.onclick == null) {
+		hqDojo.query(".button42").forEach(function(e){				
+			if (e.id == 'okButton' && e.onclick == null) {
+				e.onclick = function() {
+					hyperic.form.mockLinkSubmit("ok.x", "1", "formButtonHiddenSubmitArea");
+				};
+			}
+
+			<c:if test="${empty noReset}">
+				if (e.id == 'resetButton' && e.onclick == null) {
 					e.onclick = function() {
-						hyperic.form.mockLinkSubmit("ok.x", "1", "formButtonHiddenSubmitArea");
+						hyperic.form.mockLinkSubmit("reset.x", "1", "formButtonHiddenSubmitArea");							
 					};
 				}
-
-				<c:if test="${empty noReset}">
-					if (e.id == 'resetButton' && e.onclick == null) {
-						e.onclick = function() {
-							hyperic.form.mockLinkSubmit("reset.x", "1", "formButtonHiddenSubmitArea");							
-						};
-					}
-				</c:if>
-			});
-		</c:if>
-		<c:if test="${empty noCancel}">
-			hqDojo.query(".button42").forEach(function(e){
-				if (e.id == 'cancelButton' && e.onclick == null) {
-					e.onclick = function() {
-						hyperic.form.mockLinkSubmit("cancel.x", "1", "formButtonHiddenSubmitArea");
-					};
-				}
-			});
-		</c:if>
-	});
-</script>
-
+			</c:if>
+		});
+	</c:if>
+	<c:if test="${empty noCancel}">
+		hqDojo.query(".button42").forEach(function(e){
+			if (e.id == 'cancelButton' && e.onclick == null) {
+				e.onclick = function() {
+					hyperic.form.mockLinkSubmit("cancel.x", "1", "formButtonHiddenSubmitArea");
+				};
+			}
+		});
+	</c:if>
+</jsu:script>
 <!-- FORM BUTTONS -->
 <div class="formButtonContainer">
 	<input type="hidden" name="temp" value="temp" id="formButtonHiddenSubmitArea" />

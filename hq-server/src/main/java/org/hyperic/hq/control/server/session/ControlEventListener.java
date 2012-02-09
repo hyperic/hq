@@ -38,6 +38,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.control.shared.ControlScheduleManager;
+import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +65,7 @@ public class ControlEventListener implements ZeventListener<ResourceZevent> {
     public void subscribe() {
         // Add listener to remove scheduled control actions after resources
         // are deleted.
-        HashSet<Class<ResourceDeletedZevent>> events = new HashSet<Class<ResourceDeletedZevent>>();
+        HashSet<Class<? extends Zevent>> events = new HashSet<Class<? extends Zevent>>();
         events.add(ResourceDeletedZevent.class);
         zEventManager.addBufferedListener(events, this);
     }

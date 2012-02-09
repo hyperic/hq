@@ -682,7 +682,10 @@ public class PluginDumper {
                                mPlugin.getClass().getClassLoader());
             System.err.println("config=" + config);
         }
-        promptContinue();
+
+        if (!"false".equals(getProperty("pause-on-error"))) {
+            promptContinue();
+        }
     }
 
     private boolean printHeader(TypeInfo type, MeasurementInfo info, String tmpl) {

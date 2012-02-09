@@ -4,7 +4,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -34,41 +34,38 @@
 <link rel="shortcut icon" href="<html:rewrite page="/images/4.0/icons/favicon.ico"/>"/>
 <link rel="stylesheet" href="<html:rewrite page="/css/win.css"/>" type="text/css"/>
 <link rel="stylesheet" href="<html:rewrite page="/css/HQ_40.css"/>" type="text/css"/>
-
 <script type="text/javascript">
-djConfig.parseOnLoad = true;
-djConfig.baseUrl = '/static/js/dojo/1.5/dojo/';
+	djConfig.parseOnLoad = true;
+	djConfig.baseUrl = '/static/js/dojo/1.5/dojo/';
 </script>
-<script src="<html:rewrite page='/static/js/dojo/1.5/dojo/dojo.js'/>" type="text/javascript"></script>
-<script type="text/javascript">
+<jsu:importScript path="/static/js/dojo/1.5/dojo/dojo.js" />
+<jsu:importScript path="/js/prototype.js" />
+<jsu:importScript path="/js/popup.js" />
+<jsu:importScript path="/js/requests.js" />
+<jsu:importScript path="/js/diagram.js" />
+<jsu:importScript path="/js/functions.js" />
+<jsu:importScript path="/js/lib/lib.js" />
+<jsu:importScript path="/js/lib/charts.js" />
+<jsu:script>
     var imagePath = "/images/";
     hqDojo.require('dojo.date');
-</script>
-<script src="<html:rewrite page='/js/prototype.js'/>" type="text/javascript"></script>
-<script src="<html:rewrite page='/js/popup.js'/>" type="text/javascript"></script>
-<script src="<html:rewrite page='/js/requests.js'/>" type="text/javascript"></script>
-<script src="<html:rewrite page='/js/diagram.js'/>" type="text/javascript"></script>
-<script src="<html:rewrite page='/js/functions.js'/>" type="text/javascript"></script>
-<script src="<html:rewrite page='/js/lib/lib.js'/>" type="text/javascript"></script>
-<script src="<html:rewrite page='/js/lib/charts.js'/>" type="text/javascript"></script>
-<script type="text/javascript">
-	var onloads = [];
+    var onloads = [];
 	
-	function initOnloads() {
-    	if (arguments.callee.done) return;
+    function initOnloads() {
+       if (arguments.callee.done) return;
         
-        arguments.callee.done = true;
+       arguments.callee.done = true;
         
-        if(typeof(_timer)!="undefined") clearInterval(_timer);
+       if(typeof(_timer)!="undefined") clearInterval(_timer);
         
-        for ( var i = 0 ; i < onloads.length ; i++ )
-        	onloads[i]();
+       for ( var i = 0 ; i < onloads.length ; i++ )
+           onloads[i]();
     };
 	
-	hqDojo.addOnLoad(function() {
-		initOnloads();
-	});
-</script>
+    hqDojo.addOnLoad(function() {
+        initOnloads();
+    });
+</jsu:script>
 <html:link action="/Resource" linkName="viewResUrl" styleId="viewResUrl" style="display:none;">
 	<html:param name="eid" value=""/>
 </html:link>

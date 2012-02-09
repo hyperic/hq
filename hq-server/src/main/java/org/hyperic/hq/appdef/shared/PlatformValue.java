@@ -29,12 +29,15 @@
  */
 package org.hyperic.hq.appdef.shared;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Value object for Platform.
  *
  */
 public class PlatformValue extends AppdefResourceValue
-    implements java.io.Serializable
+    implements java.io.Serializable, Cloneable
 {
     private String sortName;
     private boolean sortNameHasBeenSet = false;
@@ -64,11 +67,14 @@ public class PlatformValue extends AppdefResourceValue
     private boolean mTimeHasBeenSet = false;
     private Long cTime;
     private boolean cTimeHasBeenSet = false;
-    private java.util.Collection IpValues = new java.util.HashSet();
-    private org.hyperic.hq.appdef.shared.PlatformTypeValue PlatformType;
+    private Set<IpValue> IpValues = new HashSet<IpValue>();
+    private PlatformTypeValue PlatformType;
     private boolean PlatformTypeHasBeenSet = false;
     private org.hyperic.hq.appdef.Agent Agent;
     private boolean AgentHasBeenSet = false;
+    protected Set<IpValue> addedIpValues = new HashSet<IpValue>();
+    protected Set<IpValue> removedIpValues = new HashSet<IpValue>();
+    protected Set<IpValue> updatedIpValues = new HashSet<IpValue>();
 
 
     public PlatformValue()
@@ -107,48 +113,64 @@ public class PlatformValue extends AppdefResourceValue
         cTimeHasBeenSet = true;
     }
 
-    //TODO Cloneable is better than this !
-    public PlatformValue( PlatformValue otherValue )
-    {
-        this.sortName = otherValue.sortName;
-        sortNameHasBeenSet = true;
-        this.commentText = otherValue.commentText;
-        commentTextHasBeenSet = true;
-        this.modifiedBy = otherValue.modifiedBy;
-        modifiedByHasBeenSet = true;
-        this.owner = otherValue.owner;
-        ownerHasBeenSet = true;
-        this.configResponseId = otherValue.configResponseId;
-        configResponseIdHasBeenSet = true;
-        this.certdn = otherValue.certdn;
-        certdnHasBeenSet = true;
-        this.fqdn = otherValue.fqdn;
-        fqdnHasBeenSet = true;
-        this.name = otherValue.name;
-        nameHasBeenSet = true;
-        this.location = otherValue.location;
-        locationHasBeenSet = true;
-        this.description = otherValue.description;
-        descriptionHasBeenSet = true;
-        this.cpuCount = otherValue.cpuCount;
-        cpuCountHasBeenSet = true;
-        this.id = otherValue.id;
-        idHasBeenSet = true;
-        this.mTime = otherValue.mTime;
-        mTimeHasBeenSet = true;
-        this.cTime = otherValue.cTime;
-        cTimeHasBeenSet = true;
-        // TODO Clone is better no ?
-        this.IpValues = otherValue.IpValues;
-        // TODO Clone is better no ?
-        this.PlatformType = otherValue.PlatformType;
-        PlatformTypeHasBeenSet = true;
-        // TODO Clone is better no ?
-        this.Agent = otherValue.Agent;
-        AgentHasBeenSet = true;
-
+    
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+    	PlatformValue clonedPlatformValue = new PlatformValue();
+    	
+    	clonedPlatformValue.sortName = this.sortName;
+    	clonedPlatformValue.sortNameHasBeenSet = true;
+    	
+    	clonedPlatformValue.commentText = this.commentText;
+    	clonedPlatformValue.commentTextHasBeenSet = true;
+    	
+    	clonedPlatformValue.modifiedBy = this.modifiedBy;
+    	clonedPlatformValue.modifiedByHasBeenSet = true;
+    	
+    	clonedPlatformValue.owner = this.owner;
+    	clonedPlatformValue.ownerHasBeenSet = true;
+    	
+    	clonedPlatformValue.configResponseId = this.configResponseId;
+    	clonedPlatformValue.configResponseIdHasBeenSet = true;
+    	
+    	clonedPlatformValue.certdn = this.certdn;
+    	clonedPlatformValue.certdnHasBeenSet = true;
+    	
+    	clonedPlatformValue.fqdn = this.fqdn;
+    	clonedPlatformValue.fqdnHasBeenSet = true;
+    	
+    	clonedPlatformValue.name = this.name;
+    	clonedPlatformValue.nameHasBeenSet = true;
+    	
+    	clonedPlatformValue.location = this.location;
+    	clonedPlatformValue.locationHasBeenSet = true;
+    	
+    	clonedPlatformValue.description = this.description;
+    	clonedPlatformValue.descriptionHasBeenSet = true;
+    	
+    	clonedPlatformValue.cpuCount = this.cpuCount;
+    	clonedPlatformValue.cpuCountHasBeenSet = true;
+    	
+    	clonedPlatformValue.id = this.id;
+    	clonedPlatformValue.idHasBeenSet = true;
+    	
+    	clonedPlatformValue.mTime = this.mTime;
+    	clonedPlatformValue.mTimeHasBeenSet = true;
+    	
+    	clonedPlatformValue.IpValues = new HashSet<IpValue>();
+    	for (IpValue ip : this.IpValues)
+    		clonedPlatformValue.addIpValue(new IpValue(ip));
+    	
+    	clonedPlatformValue.PlatformType = new PlatformTypeValue(this.PlatformType);
+    	clonedPlatformValue.PlatformTypeHasBeenSet = true;
+    	
+    	//TODO: clone the agent?
+    	clonedPlatformValue.Agent = this.Agent;
+    	clonedPlatformValue.AgentHasBeenSet = true;
+    	
+    	return clonedPlatformValue;
     }
-
+    
     public String getSortName()
     {
         return this.sortName;
@@ -179,12 +201,14 @@ public class PlatformValue extends AppdefResourceValue
     public boolean commentTextHasBeenSet(){
         return commentTextHasBeenSet;
     }
-    public String getModifiedBy()
+    @Override
+	public String getModifiedBy()
     {
         return this.modifiedBy;
     }
 
-    public void setModifiedBy( String modifiedBy )
+    @Override
+	public void setModifiedBy( String modifiedBy )
     {
         this.modifiedBy = modifiedBy;
         modifiedByHasBeenSet = true;
@@ -194,12 +218,14 @@ public class PlatformValue extends AppdefResourceValue
     public boolean modifiedByHasBeenSet(){
         return modifiedByHasBeenSet;
     }
-    public String getOwner()
+    @Override
+	public String getOwner()
     {
         return this.owner;
     }
 
-    public void setOwner( String owner )
+    @Override
+	public void setOwner( String owner )
     {
         this.owner = owner;
         ownerHasBeenSet = true;
@@ -254,12 +280,14 @@ public class PlatformValue extends AppdefResourceValue
     public boolean fqdnHasBeenSet(){
         return fqdnHasBeenSet;
     }
-    public String getName()
+    @Override
+	public String getName()
     {
         return this.name;
     }
 
-    public void setName( String name )
+    @Override
+	public void setName( String name )
     {
         this.name = name;
         nameHasBeenSet = true;
@@ -269,12 +297,14 @@ public class PlatformValue extends AppdefResourceValue
     public boolean nameHasBeenSet(){
         return nameHasBeenSet;
     }
-    public String getLocation()
+    @Override
+	public String getLocation()
     {
         return this.location;
     }
 
-    public void setLocation( String location )
+    @Override
+	public void setLocation( String location )
     {
         this.location = location;
         locationHasBeenSet = true;
@@ -284,12 +314,14 @@ public class PlatformValue extends AppdefResourceValue
     public boolean locationHasBeenSet(){
         return locationHasBeenSet;
     }
-    public String getDescription()
+    @Override
+	public String getDescription()
     {
         return this.description;
     }
 
-    public void setDescription( String description )
+    @Override
+	public void setDescription( String description )
     {
         this.description = description;
         descriptionHasBeenSet = true;
@@ -314,12 +346,14 @@ public class PlatformValue extends AppdefResourceValue
     public boolean cpuCountHasBeenSet(){
         return cpuCountHasBeenSet;
     }
-    public Integer getId()
+    @Override
+	public Integer getId()
     {
         return this.id;
     }
 
-    public void setId( Integer id )
+    @Override
+	public void setId( Integer id )
     {
         this.id = id;
         idHasBeenSet = true;
@@ -328,7 +362,8 @@ public class PlatformValue extends AppdefResourceValue
     public boolean idHasBeenSet(){
         return idHasBeenSet;
     }
-    public Long getMTime()
+    @Override
+	public Long getMTime()
     {
         return this.mTime;
     }
@@ -343,7 +378,8 @@ public class PlatformValue extends AppdefResourceValue
     public boolean mTimeHasBeenSet(){
         return mTimeHasBeenSet;
     }
-    public Long getCTime()
+    @Override
+	public Long getCTime()
     {
         return this.cTime;
     }
@@ -359,17 +395,13 @@ public class PlatformValue extends AppdefResourceValue
         return cTimeHasBeenSet;
     }
 
-    protected java.util.Collection addedIpValues = new java.util.HashSet();
-    protected java.util.Collection removedIpValues = new java.util.HashSet();
-    protected java.util.Collection updatedIpValues = new java.util.HashSet();
-
     public java.util.Collection<IpValue> getAddedIpValues() { return addedIpValues; }
     public java.util.Collection<IpValue> getRemovedIpValues() { return removedIpValues; }
     public java.util.Collection<IpValue> getUpdatedIpValues() { return updatedIpValues; }
 
     public org.hyperic.hq.appdef.shared.IpValue[] getIpValues()
     {
-        return (org.hyperic.hq.appdef.shared.IpValue[])this.IpValues.toArray(new org.hyperic.hq.appdef.shared.IpValue[IpValues.size()]);
+        return this.IpValues.toArray(new org.hyperic.hq.appdef.shared.IpValue[IpValues.size()]);
     }
 
     public void addIpValue(org.hyperic.hq.appdef.shared.IpValue added)
@@ -402,9 +434,9 @@ public class PlatformValue extends AppdefResourceValue
     }
 
     public void cleanIpValue(){
-        this.addedIpValues = new java.util.HashSet();
-        this.removedIpValues = new java.util.HashSet();
-        this.updatedIpValues = new java.util.HashSet();
+        this.addedIpValues = new HashSet<IpValue>();
+        this.removedIpValues = new HashSet<IpValue>();
+        this.updatedIpValues = new HashSet<IpValue>();
     }
 
     public void copyIpValuesFrom(org.hyperic.hq.appdef.shared.PlatformValue from)
@@ -432,10 +464,9 @@ public class PlatformValue extends AppdefResourceValue
         AgentHasBeenSet = true;
     }
 
-    public String toString()
-    {
+    @Override
+	public String toString() {
         StringBuffer str = new StringBuffer("{");
-
         str.append("sortName=" + getSortName() + " commentText="
                 + getCommentText() + " modifiedBy=" + getModifiedBy()
                 + " owner=" + getOwner() + " configResponseId="
@@ -445,7 +476,6 @@ public class PlatformValue extends AppdefResourceValue
                 + " cpuCount=" + getCpuCount() + " id=" + getId() + " mTime="
                 + getMTime() + " cTime=" + getCTime());
         str.append('}');
-
         return(str.toString());
     }
 
@@ -463,7 +493,8 @@ public class PlatformValue extends AppdefResourceValue
         return ret;
     }
 
-    public boolean equals(Object other)
+    @Override
+	public boolean equals(Object other)
     {
         if ( ! hasIdentity() ) return false;
         if (other instanceof PlatformValue)
@@ -638,43 +669,40 @@ public class PlatformValue extends AppdefResourceValue
         }
     }
 
-    public int hashCode(){
+    private Integer getIpValuesHash(IpValue[] ips) {
+        int hash = 17;
+        for (IpValue ip : ips) {
+            hash = 37*(ip.hashCode() + hash);
+        }
+        return hash;
+    }
+
+    @Override
+	public int hashCode(){
         int result = 17;
         result = 37*result + ((this.sortName != null) ? this.sortName.hashCode() : 0);
-
         result = 37*result + ((this.commentText != null) ? this.commentText.hashCode() : 0);
-
         result = 37*result + ((this.modifiedBy != null) ? this.modifiedBy.hashCode() : 0);
-
         result = 37*result + ((this.owner != null) ? this.owner.hashCode() : 0);
-
         result = 37*result + ((this.configResponseId != null) ? this.configResponseId.hashCode() : 0);
-
         result = 37*result + ((this.certdn != null) ? this.certdn.hashCode() : 0);
-
         result = 37*result + ((this.fqdn != null) ? this.fqdn.hashCode() : 0);
-
         result = 37*result + ((this.name != null) ? this.name.hashCode() : 0);
-
         result = 37*result + ((this.location != null) ? this.location.hashCode() : 0);
-
         result = 37*result + ((this.description != null) ? this.description.hashCode() : 0);
-
         result = 37*result + ((this.cpuCount != null) ? this.cpuCount.hashCode() : 0);
-
         result = 37*result + ((this.id != null) ? this.id.hashCode() : 0);
-
         result = 37*result + ((this.mTime != null) ? this.mTime.hashCode() : 0);
-
         result = 37*result + ((this.cTime != null) ? this.cTime.hashCode() : 0);
-
-        result = 37*result + ((this.getIpValues() != null) ? this.getIpValues().hashCode() : 0);
+        final IpValue[] ips = getIpValues();
+        result = 37*result + ((ips != null) ? this.getIpValuesHash(ips) : 0);
         result = 37*result + ((this.PlatformType != null) ? this.PlatformType.hashCode() : 0);
         result = 37*result + ((this.Agent != null) ? this.Agent.hashCode() : 0);
         return result;
     }
 
-    public AppdefEntityID getEntityId() {
+    @Override
+	public AppdefEntityID getEntityId() {
         return AppdefEntityID.newPlatformID(getId());       
     }
 }

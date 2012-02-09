@@ -27,6 +27,7 @@ package org.hyperic.hq.product.jmx;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -56,6 +57,7 @@ public class MxServerDetector
     extends DaemonDetector
     implements AutoServerDetector
 {
+    private static final String SUN_REMOTE_AUTHENTICATION_FALSE = "com.sun.management.jmxremote.authenticate=false";
     private static final String TEMPLATE_PROPERTY = "template";
     private static final String CONTROL_CLASS_PROPERTY = "control-class";
     private static final String MEASUREMENT_CLASS_PROPERTY = "measurement-class";
@@ -86,52 +88,111 @@ public class MxServerDetector
         }
         return arg.substring(SUN_JMX_PORT.length());
     }
-
-    protected boolean configureMxURL(ConfigResponse config, String arg) {
+    
+    /**
+     * First checks if the ptql query is specified in the process properties, 
+     * if not, then it checks to see if the port value is specified, to generate the service URL.
+     * @return True if configured, otherwise false.
+     */
+    protected boolean configureMxURL(ConfigResponse config, String arg){
         final String prop = SUN_JMX_REMOTE + "=";
-        if (arg.startsWith(prop)) {
-            String url = arg.substring(prop.length());
-            if (url.startsWith(MxUtil.PTQL_PREFIX)) {
-                //local access enabled via:
-                //-Dcom.sun.management.jmxremote=ptql:State.Name.eq=java,...
-                config.setValue(MxUtil.PROP_JMX_URL, url);
+        if (arg.startsWith(prop)){
+            String subString = arg.substring(prop.length());
+            if (subString.startsWith(MxUtil.PTQL_PREFIX)) {
+                log.debug("Found jmx ptql query for local pid connection: " + subString);
+                // local access enabled via:
+                // -Dcom.sun.management.jmxremote=ptql:State.Name.eq=java,...
+                config.setValue(MxUtil.PROP_JMX_URL, subString);
                 return true;
             }
-        }
-
-        String port = parseMxPort(arg);
-        if (port == null) {
-            return false;
-        }
-
-        String url = getMxURL(port);
-        //remote access enabled via:
-        //-Dcom.sun.management.jmxremote.port=xxxx
-        config.setValue(MxUtil.PROP_JMX_URL, url);
-        //for use in name %jmx.port% template
-        config.setValue(MxUtil.PROP_JMX_PORT, port);
-
-        return true;
+        } 
+        String port;
+        if ((port = parseMxPort(arg)) != null) {
+            String serviceUrl = getMxURL(port);
+            log.debug("Found jmx port, creating service url:" + serviceUrl);
+            // remote access enabled via:
+            // -Dcom.sun.management.jmxremote.port=xxxx
+            config.setValue(MxUtil.PROP_JMX_URL, serviceUrl);
+            // for use in name %jmx.port% template
+            config.setValue(MxUtil.PROP_JMX_PORT, port);
+            return true;
+        } 
+        return false;
     }
-
-    protected boolean configureLocalMxURL(ConfigResponse config,
-                                          String arg, String query) {
-        if ((query == null) || !arg.equals(SUN_JMX_REMOTE)) {
-            return false;
+    
+    /**
+     * Goes through several checks in order to find the jmx url in the configuration.
+     * For each process argument it will check the following:
+     * 1) Does it use the ptql query option to detect the process (i.e -Dcom.sun.management.jmxremote=ptql:State.Name...).
+     * 2) Does it match -Dcom.sun.management.jmxremote.port=<port>.
+     * 3) Did the user configure the jmx.url in the ui(optionally the jmx.username and jmx.password).
+     * 4) Does it match the ptql query generated using the install path.
+     * 5) Otherwise it returns false.
+     * 
+     * @param config
+     * @param args
+     * @param processQuery
+     * @return True if the url was set, otherwise false.
+     */
+    protected boolean findAndSetURL(ConfigResponse config, List<String> args, String processQuery) {
+        boolean authenticationNotRequired = args.contains(SUN_REMOTE_AUTHENTICATION_FALSE);
+        for (String arg : args) {
+            if (!configureMxURL(config, arg)) {
+                if (!configureUserSpecifiedMxUrl(config, arg, authenticationNotRequired)) {
+                    if (!configureLocalMxURL(config, arg, processQuery)) {
+                        return false;
+                    }
+                }
+            }
+            return true;
         }
+        return false;
+    }
+        
+    private boolean configureUserSpecifiedMxUrl(ConfigResponse config, String arg,
+                                                boolean authenticationNotRequired) {
+        String mxUrl = config.getValue(MxUtil.PROP_JMX_URL);
+        boolean urlSet = false;
+        if (mxUrl != null) {
+            log.debug("Using jmx.url specified in the configuration: " + mxUrl);
+            urlSet = true;
+            config.setValue(MxUtil.PROP_JMX_URL, mxUrl);
+            if (!authenticationNotRequired) {
+                String username = config.getValue(MxUtil.PROP_JMX_USERNAME);
+                String password = config.getValue(MxUtil.PROP_JMX_PASSWORD);
+                if (username != null && password != null) {
+                    log.debug("Found username and password for JMX auth.");
+                    // only set these values if both exist.
+                    config.setValue(MxUtil.PROP_JMX_USERNAME, username);
+                    config.setValue(MxUtil.PROP_JMX_PASSWORD, password);
+                } else {
+                    log.debug("No username and/or password was specified for JMX connection.");
+                }
+            }
+        }
+        return urlSet;
+    }
+    
+
+    protected boolean configureLocalMxURL(ConfigResponse config, String arg, String query) {
+        String mxUrl = null;
+        boolean urlSet = false;
 
         try {
             //verify local url access is supported by this JVM
             //and we have the appropriate permissions
+            // MxUtil will throw an exception if it doesn't get the pid url
             MxUtil.getUrlFromPid(query);
-            config.setValue(MxUtil.PROP_JMX_URL,
-                            MxUtil.PTQL_PREFIX + query);
-            return true;
+            mxUrl = MxUtil.PTQL_PREFIX + query;
+            config.setValue(MxUtil.PROP_JMX_URL, mxUrl);
+            urlSet = true;
+            log.debug("Using the local pid to create jmx url: " + mxUrl);
         } catch (Exception e) {
-            log.debug("Cannot configure local jmx.url: " +
+            log.debug("Cannot configure jmx.url using local pid: " +
                       e.getMessage(),e);
-            return false;
         }
+        return urlSet;
+        
     }
 
     protected String getProcMainClass() {
@@ -249,18 +310,17 @@ public class MxServerDetector
         return Pattern.compile(regex).matcher(source).find();
     }
 
-    protected List getServerProcessList()
-    {
+    protected List getServerProcessList() {
         List procs = new ArrayList();
-        long[] pids = getPids(getProcQuery());
-        log.debug(getProcQuery() + " matched " + pids.length + " processes");
+        String query = getProcQuery();
+        long[] pids = getPids(query);
+        if (log.isDebugEnabled()) log.debug("ptql=" + query + " matched pids=" + Arrays.asList(pids));
  
         String homeProp = getProcHomeProperty();
         final boolean isMatch = isMatch(homeProp);
         if (isMatch) {
             homeProp = "-D" +  homeProp;
-        }
-        else {
+        } else {
             homeProp = "-D" +  homeProp + "=";
         }
 
@@ -337,8 +397,16 @@ public class MxServerDetector
                 config.setValue(option.getName(), query);
             }
         }
-
-        setJmxUrl(process,config);
+		
+		try {
+			setJmxUrl(process,config);
+		} catch (MxRuntimeException e){
+			if (log.isDebugEnabled()){
+				log.debug(e.getMessage(), e);
+			} else {
+				log.info(e.getMessage());
+			}
+		}
 
         // default anything not auto-configured
         setProductConfig(server, config);
@@ -348,22 +416,29 @@ public class MxServerDetector
         return server;
     }
     
+    /**
+     * Sets the JMX url.
+     * First checks whether the process supplies the jmx.url. Then does some searching for the url.
+     * @param process
+     * @param config
+     * @throws MxRuntimeException If there is no jmx.url found.
+     */
     protected void setJmxUrl(MxProcess process, ConfigResponse config) {
-        String query = getProcQuery(process.getInstallPath());
+        boolean urlSet = false;
+        String processQuery = getProcQuery(process.getInstallPath());
         if (process.getURL() != null) {
-            config.setValue(MxUtil.PROP_JMX_URL,
-                            process.getURL());
+            log.debug("Found jmx.url in the process args: " + process.getURL());
+            // check if jmx.url was found in the process props.
+            config.setValue(MxUtil.PROP_JMX_URL, process.getURL());
+            urlSet = true;
+        } else {
+            // check for url in other places
+            List<String> args = Arrays.asList(process.getArgs());
+            urlSet = findAndSetURL(config, args, processQuery);
         }
-        else {
-            String[] args = process.getArgs();
-            for (int j=0; j<args.length; j++) {
-                if (configureMxURL(config, args[j])) {
-                    break;
-                }
-                else if (configureLocalMxURL(config, args[j], query)) {
-                    //continue as .port might come later
-                }
-            }
+        if (!urlSet) {
+            throw new MxRuntimeException(
+                "Unable to find the jmx.url in configuration properties: " + config);
         }
     }
 
@@ -476,7 +551,7 @@ public class MxServerDetector
         MBeanServerConnection mServer;
     
         try {
-            connector = MxUtil.getMBeanConnector(serverConfig.toProperties());
+            connector = MxUtil.getCachedMBeanConnector(serverConfig.toProperties());
             mServer = connector.getMBeanServerConnection();
         } catch (Exception e) {
             MxUtil.close(connector);
@@ -507,8 +582,8 @@ public class MxServerDetector
          }
          
          try {
-             connector = MxUtil.getMBeanConnector(serverConfig.toProperties());
-             mServer = connector.getMBeanServerConnection();
+            connector = MxUtil.getCachedMBeanConnector(serverConfig.toProperties());
+            mServer = connector.getMBeanServerConnection();
          } catch (Exception e) {
              MxUtil.close(connector);
              throw new PluginException(e.getMessage(), e);

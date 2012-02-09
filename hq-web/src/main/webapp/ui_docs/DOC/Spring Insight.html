@@ -1,35 +1,38 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : Spring Insight</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : Spring Insight</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : Spring Insight
+                            vFabric Hyperic 4.6.5 : Spring Insight
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 27, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1311786243366 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1311786243366 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1311786243366 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1325699997748 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699997748 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699997748 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1311786243366'>
+/*]]>*/</style><div class='rbtoc1325699997748'>
 <ul>
     <li><a href='#SpringInsight-SpringInsightPluginOverview'>Spring Insight Plugin Overview</a></li>
 <ul>
@@ -107,9 +110,7 @@ div.rbtoc1311786243366 li {margin-left: 0px;padding-left: 0px;}
 
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre>Spring Insight
-
      Spring Insight Application
-
 </pre>
 </div></div>
 
@@ -161,7 +162,7 @@ div.rbtoc1311786243366 li {margin-left: 0px;padding-left: 0px;}
 
 <h2><a name="SpringInsight-Step1%3AInstallHypericAgents"></a>Step 1: Install Hyperic Agents</h2>
 
-<p>If you have not already done so, install and start a Hyperic Agent on the host where the Insight Dashboard runs, and on each host of each Insight Agent reporting to the Insight Dashboard.  See <a href="Installing an Agent-Only Package.html" title="Installing an Agent-Only Package">Installing an Agent&#45;Only Package</a> for instructions.</p>
+<p>If you have not already done so, install and start a Hyperic Agent on the host where the Insight Dashboard runs, and on each host of each Insight Agent reporting to the Insight Dashboard.  See Installing an Agent&#45;Only Package for instructions.</p>
 
 <h2><a name="SpringInsight-Step2%3AImportInsightDashboardtoHypericInventory"></a>Step 2: Import Insight Dashboard to Hyperic Inventory</h2>
 
@@ -196,7 +197,7 @@ div.rbtoc1311786243366 li {margin-left: 0px;padding-left: 0px;}
 	<li>Scroll down to the <b>Spring Insight Application</b> resource type and click <b>Edit Alerts</b>.
 	<ul>
 		<li>The <b>Monitoring Defaults</b> page displays key information about the alert.<br/>
-<span class="image-wrap" style=""><img src="attachments/77464547/77660837.png" width="750" style="border: 0px solid black"/></span></li>
+<span class="image-wrap" style=""><img src="attachments/79037547/79135069.png" width="750" style="border: 0px solid black"/></span></li>
 	</ul>
 	</li>
 	<li>On the <b>Monitoring Defaults &gt; Spring Insight Application services</b> page, you can:
@@ -320,7 +321,9 @@ div.rbtoc1311786243366 li {margin-left: 0px;padding-left: 0px;}
 </tr>
 <tr>
 <td class='confluenceTd'><font color="navy">Health</font></td>
-<td class='confluenceTd'><font color="navy">HealthrangeLabel=Last 5 minutes.score</font></td>
+<td class='confluenceTd'><div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>Health[rangeLabel=Last 5 minutes].score</pre>
+</div></div></td>
 <td class='confluenceTd'><font color="navy">percentage</font></td>
 <td class='confluenceTd'><font color="navy">PERFORMANCE</font></td>
 <td class='confluenceTd'><font color="navy">true</font></td>
@@ -328,7 +331,9 @@ div.rbtoc1311786243366 li {margin-left: 0px;padding-left: 0px;}
 </tr>
 <tr>
 <td class='confluenceTd'><font color="navy">Total Invocation Count</font></td>
-<td class='confluenceTd'><font color="navy">MetricDataSummariesmetric=invocationCount,label=Last 5 minutes.value</font></td>
+<td class='confluenceTd'><div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>MetricDataSummaries[metric=invocationCount,label=Last 5 minutes].value</pre>
+</div></div></td>
 <td class='confluenceTd'><font color="navy">none</font></td>
 <td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
 <td class='confluenceTd'><font color="navy">true</font></td>
@@ -336,7 +341,9 @@ div.rbtoc1311786243366 li {margin-left: 0px;padding-left: 0px;}
 </tr>
 <tr>
 <td class='confluenceTd'><font color="navy">Frustrated Invocation Count</font></td>
-<td class='confluenceTd'><font color="navy">MetricDataSummariesmetric=tag.frustrated,label=Last 5 minutes.value</font></td>
+<td class='confluenceTd'><div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>MetricDataSummaries[metric=tag.frustrated,label=Last 5 minutes].value</pre>
+</div></div></td>
 <td class='confluenceTd'><font color="navy">none</font></td>
 <td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
 <td class='confluenceTd'><font color="navy">true</font></td>
@@ -344,7 +351,9 @@ div.rbtoc1311786243366 li {margin-left: 0px;padding-left: 0px;}
 </tr>
 <tr>
 <td class='confluenceTd'><font color="navy">Satisfied Invocation Count</font></td>
-<td class='confluenceTd'><font color="navy">MetricDataSummariesmetric=tag.satisfied,label=Last 5 minutes.value</font></td>
+<td class='confluenceTd'><div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>MetricDataSummaries[metric=tag.satisfied,label=Last 5 minutes].value</pre>
+</div></div></td>
 <td class='confluenceTd'><font color="navy">none</font></td>
 <td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
 <td class='confluenceTd'><font color="navy">true</font></td>
@@ -352,7 +361,9 @@ div.rbtoc1311786243366 li {margin-left: 0px;padding-left: 0px;}
 </tr>
 <tr>
 <td class='confluenceTd'><font color="navy">Tolerated Invocation Count</font></td>
-<td class='confluenceTd'><font color="navy">MetricDataSummariesmetric=tag.tolerated,label=Last 5 minutes.value</font></td>
+<td class='confluenceTd'><div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>MetricDataSummaries[metric=tag.tolerated,label=Last 5 minutes].value</pre>
+</div></div></td>
 <td class='confluenceTd'><font color="navy">none</font></td>
 <td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
 <td class='confluenceTd'><font color="navy">true</font></td>
@@ -360,7 +371,9 @@ div.rbtoc1311786243366 li {margin-left: 0px;padding-left: 0px;}
 </tr>
 <tr>
 <td class='confluenceTd'><font color="navy">Error Rate</font></td>
-<td class='confluenceTd'><font color="navy">MetricDataSummaries<span class="error">&#91;metric=errorCount/invocationCount,label=Last 5 minutes&#93;</span>.value</font></td>
+<td class='confluenceTd'><div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>MetricDataSummaries[metric=errorCount/invocationCount,label=Last 5 minutes].value</pre>
+</div></div></td>
 <td class='confluenceTd'><font color="navy">percentage</font></td>
 <td class='confluenceTd'><font color="navy">PERFORMANCE</font></td>
 <td class='confluenceTd'><font color="navy">true</font></td>
@@ -423,10 +436,10 @@ div.rbtoc1311786243366 li {margin-left: 0px;padding-left: 0px;}
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464547/77660836.png">DataService.png</a> (image/png)
+                                <a href="attachments/79037547/79135069.png">InsightAppAlerts.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464547/77660837.png">InsightAppAlerts.png</a> (image/png)
+                                <a href="attachments/79037547/79135070.png">DataService.png</a> (image/png)
                                 <br/>
                                                     </div>
 				    
@@ -438,7 +451,7 @@ div.rbtoc1311786243366 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:43</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:57</font></td>
 		    </tr>
 	    </table>
     </body>

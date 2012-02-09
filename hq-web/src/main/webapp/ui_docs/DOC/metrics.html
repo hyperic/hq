@@ -1,35 +1,38 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : metrics</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : metrics</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : metrics
+                            vFabric Hyperic 4.6.5 : metrics
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1307466573559 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1307466573559 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1307466573559 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1325699859868 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699859868 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699859868 li {margin-left: 0px;padding-left: 0px;}
 
-/*]] >*/</style><div class='rbtoc1307466573559'>
+/*]]>*/</style><div class='rbtoc1325699859868'>
 <ul>
     <li><a href='#metrics-ElementStructure'>Element Structure</a></li>
     <li><a href='#metrics-Parentage'>Parentage</a></li>
@@ -91,24 +94,24 @@ div.rbtoc1307466573559 li {margin-left: 0px;padding-left: 0px;}
 	<ul>
 		<li>Use the <tt>&lt;include&gt;</tt> element to reference the <tt>&lt;metrics&gt;</tt>&nbsp; element by its <tt>name</tt> .</li>
 		<li>Use the <tt>include</tt> attribute, to reference the&nbsp; <tt>&lt;metrics&gt;</tt> element by its <tt>name</tt> .</li>
-		<li>Set the <tt>&lt;metrics&gt;</tt> element's <tt>name</tt> attribute to a string that matches the string made up by concatenating a resource element's <tt>name</tt> and <tt>version</tt> attributes. See <a href="#metrics-%3Cmetrics%3Enamematchesresource%27sNameAttributestring">&lt;metrics&gt; name matches resource's NameAttribute string</a>.</li>
+		<li>Set the <tt>&lt;metrics&gt;</tt> element's <tt>name</tt> attribute to a string that matches the string made up by concatenating a resource element's <tt>name</tt> and <tt>version</tt> attributes. See <a href="#metrics-metricsnamematchesresource%27sNameAttributestring">metrics name matches resource's NameAttribute string</a>.</li>
 	</ul>
 	</li>
 </ul>
 
 
 <ul>
-	<li><tt>include</tt> &#45; Can be used to include one or more <tt>&lt;metrics&gt;</tt> elements in the descriptor by reference to the target <tt>name</tt> attribute(s). If you use include attribute to include multiple <tt>&lt;metrics&gt;</tt> elements, specify the element names as a comma-separated list. For usage, see <a href="#metrics-%3Cmetrics%3Eelementisreferencedusingtheincludeattribute">&lt;metrics&gt; element is referenced using the include attribute</a>.</li>
+	<li><tt>include</tt> &#45; Can be used to include one or more <tt>&lt;metrics&gt;</tt> elements in the descriptor by reference to the target <tt>name</tt> attribute(s). If you use include attribute to include multiple <tt>&lt;metrics&gt;</tt> elements, specify the element names as a comma-separated list. For usage, see <a href="#metrics-metricselementisreferencedusingincludeattribute">metrics element is referenced using include attribute</a>.</li>
 </ul>
 
 
 <ul>
-	<li><tt>&lt;include&gt;</tt> &#45; Has similar functionality to the include attribute, can be used to include another <tt>&lt;metrics&gt;</tt> element in the descriptor by reference to the target's name attribute. For usage, see <a href="#metrics-%3Cmetrics%3Eelementisreferencedusingtheincludeelement">&lt;metrics&gt; element is referenced using the include element</a>.</li>
+	<li><tt>&lt;include&gt;</tt> &#45; Has similar functionality to the include attribute, can be used to include another <tt>&lt;metrics&gt;</tt> element in the descriptor by reference to the target's name attribute. For usage, see <a href="#metrics-metricselementsincludedusingincludeelement">metrics elements included using include element</a>.</li>
 </ul>
 
 
 <ul>
-	<li><tt>&lt;metric&gt;</tt> &#45; A <tt>&lt;metrics&gt;</tt> element can contain multiple <tt>&lt;metric&gt;</tt> elements that define the name and other attributes of a particular metric. see <a href="#metrics-unnamed%3Cmetrics%3Eelementwithina%3Cservice%3Eelement">unnamed &lt;metrics&gt; element within a &lt;service&gt; element</a>. For information about the contents of the <tt>&lt;metric&gt;</tt> element, see <a href="metric.html" title="metric">metric</a>.</li>
+	<li><tt>&lt;metric&gt;</tt> &#45; A <tt>&lt;metrics&gt;</tt> element can contain multiple <tt>&lt;metric&gt;</tt> elements that define the name and other attributes of a particular metric. see <a href="#metrics-unnamedmetricselementwithinaserviceelement">unnamed metrics element within a service element</a>. For information about the contents of the <tt>&lt;metric&gt;</tt> element, see <a href="metric.html" title="metric">metric</a>.</li>
 </ul>
 
 
@@ -169,6 +172,7 @@ div.rbtoc1307466573559 li {margin-left: 0px;padding-left: 0px;}
 </div></div>
 
 <h2><a name="metrics-metricselementsincludedusingincludeelement"></a>metrics elements included using include element</h2>
+<p><a name="metrics-MetricsElement"></a></p>
 
 <p>In this excerpt from the mssql-plugin, the <tt>&lt;metrics&gt;</tt> element includes 8 sets of metrics, defined in the root of the plugin.  This is an example of using the <tt>&lt;include&gt;</tt> element, instead the <tt>include</tt> attribute to point to a named set of metrics. Both forms of inclusion are supported, and have the same effect.</p>
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
@@ -255,7 +259,7 @@ div.rbtoc1307466573559 li {margin-left: 0px;padding-left: 0px;}
 		</div>
 </div></div>
 
-<p><font color=""></font></p>
+
 
 				    
                     			    </td>
@@ -266,7 +270,7 @@ div.rbtoc1307466573559 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:44</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:58</font></td>
 		    </tr>
 	    </table>
     </body>

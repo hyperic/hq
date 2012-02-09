@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -70,6 +71,7 @@ import org.hyperic.hq.events.server.session.AlertRegulator;
 import org.hyperic.hq.hqu.RenditServer;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
+import org.hyperic.hq.stats.ConcurrentStatsWriter;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
@@ -79,7 +81,7 @@ public class EmailAction extends EmailActionConfig
 {
     protected static String baseUrl = null;
     private static final int _alertThreshold;
-    private static final List _emails = new ArrayList();
+    private static final List<EmailObj> _emails = new ArrayList<EmailObj>();
     private static EmailRecipient[] _emailAddrs;
     // Evaluate number of notifications each period when AlertThreshold is
     // enabled to potentially toggle/block all notifications for 1 - Many
@@ -87,10 +89,8 @@ public class EmailAction extends EmailActionConfig
     // when mechanism is turned on.
     // Matched it up with ConcurrentStatsCollector in order to obtain easy
     // stats on a deployment's activity
-    private static final long EVALUATION_PERIOD =
-        ConcurrentStatsCollector.WRITE_PERIOD*1000;
-    private static final String SEND_ALERT_TIME =
-        ConcurrentStatsCollector.SEND_ALERT_TIME;
+    private static final long EVALUATION_PERIOD = ConcurrentStatsWriter.WRITE_PERIOD*1000;
+    private static final String SEND_ALERT_TIME = ConcurrentStatsCollector.SEND_ALERT_TIME;
     // evaluation window to continue and block notifications or
     // toggle back to regular operation
     private static final int THRESHOLD_WINDOW = 10*60*1000;
@@ -147,11 +147,10 @@ public class EmailAction extends EmailActionConfig
         try {
             File templateDir = Bootstrap.getResource("WEB-INF/alertTemplates").getFile();
             File templateFile = new File(templateDir, filename);
-            Bootstrap.getBean(RenditServer.class).renderTemplate(templateFile, params,
-                                                      output);
-
-            if (_log.isDebugEnabled())
+            Bootstrap.getBean(RenditServer.class).renderTemplate(templateFile, params, output);
+            if (_log.isDebugEnabled()) {
                 _log.debug("Template rendered\n" + output.toString());
+            }
         } catch(Exception e) {
             _log.warn("Unable to render template", e);
         }
@@ -161,14 +160,13 @@ public class EmailAction extends EmailActionConfig
     private String createSubject(AlertDefinitionInterface alertdef,
                                  AlertInterface alert, Resource resource,
                                  ActionExecutionInfo action, String status) {
-        Map params = new HashMap();
+        Map<String, Object> params = new HashMap<String, Object>();
         params.put("resource", resource);
         params.put("alertDef", alertdef);
         params.put("alert", alert);
         params.put("action", action);
         params.put("status", status);
         params.put("isSms", new Boolean(isSms()));
-
         return renderTemplate("subject.gsp", params);
     }
 
@@ -176,16 +174,13 @@ public class EmailAction extends EmailActionConfig
                               ActionExecutionInfo info, Resource resource,
                               AlertInterface alert, String templateName,
                               AuthzSubject user)
-        throws MeasurementNotFoundException
-    {
-        Map params = new HashMap();
-
+    throws MeasurementNotFoundException {
+        Map<String, Object> params = new HashMap<String, Object>();
         params.put("alertDef", alertdef);
         params.put("alert", alert);
         params.put("action", info);
         params.put("resource", resource);
         params.put("user", user);
-
         return renderTemplate(templateName, params);
     }
 
@@ -194,36 +189,27 @@ public class EmailAction extends EmailActionConfig
     }
 
     public String execute(AlertInterface alert, ActionExecutionInfo info)
-        throws ActionExecuteException
-    {
+    throws ActionExecuteException {
         try {
             if (!Bootstrap.getBean(AlertRegulator.class).alertNotificationsAllowed()) {
-                return ResourceBundle.getBundle(BUNDLE)
-                            .getString("action.email.error.notificationDisabled");
+                return ResourceBundle.getBundle(BUNDLE).getString("action.email.error.notificationDisabled");
             }
-
             Map addrs = lookupEmailAddr();
-
             if (addrs.isEmpty()) {
                 return ResourceBundle.getBundle(BUNDLE)
                             .getString("action.email.error.noEmailAddress");
             }
-
             AlertDefinitionInterface alertDef =
                 alert.getAlertDefinitionInterface();
             AppdefEntityID appEnt = getResource(alertDef);
-
             String logStr = "No notifications sent, see server log for details.";
             if (appEnt != null) {
-
             	Resource resource = alertDef.getResource();
             	if (resource != null && !resource.isInAsyncDeleteState()) {
-
             		String[] body = new String[addrs.size()];
             		String[] htmlBody = new String[addrs.size()];
             		EmailRecipient[] to = (EmailRecipient[])
             		addrs.keySet().toArray(new EmailRecipient[addrs.size()]);
-
             		for (int i = 0; i < to.length; i++) {
             			AuthzSubject user = (AuthzSubject) addrs.get(to[i]);
             			if (to[i].useHtml()) {
@@ -234,14 +220,10 @@ public class EmailAction extends EmailActionConfig
             					isSms() ? "sms_email.gsp" :
             						"text_email.gsp", user);
             		}
-
             		final String subject = createSubject(alertDef, alert, resource, info, "");
-            		sendAlert(appEnt, to, subject, body, htmlBody,
-            				alertDef.getPriority(), alertDef.isNotifyFiltered());
-
+            		sendAlert(appEnt, to, subject, body, htmlBody, alertDef.getPriority(), alertDef.isNotifyFiltered());
             		StringBuffer result = getLog(to);
             		logStr = result.toString();
-
             	} else {
             		_log.warn("No resource for alert definition " + alertDef.getId() +
             		", perhaps the resource was deleted?  Email notification will not be sent.");
@@ -250,9 +232,7 @@ public class EmailAction extends EmailActionConfig
             	_log.warn("No appdef entity ID for alert definition " + alertDef.getId() +
             	", perhaps the related platform was deleted?  Email notification will not be sent.");
             }
-
             return logStr;
-
         } catch (Exception e) {
             throw new ActionExecuteException(e);
         }
@@ -281,33 +261,25 @@ public class EmailAction extends EmailActionConfig
         return result;
     }
 
-    protected Map lookupEmailAddr()
-        throws ActionExecuteException
-    {
+    protected Map<EmailRecipient, AuthzSubject> lookupEmailAddr()
+    throws ActionExecuteException {
         // First, look up the addresses
-        HashSet prevRecipients = new HashSet();
-        Map validRecipients = new HashMap();
-        for (Iterator it = getUsers().iterator(); it.hasNext(); ) {
+        HashSet<InternetAddress> prevRecipients = new HashSet<InternetAddress>();
+        Map<EmailRecipient, AuthzSubject> validRecipients = new HashMap<EmailRecipient, AuthzSubject>();
+        for (Iterator<?> it = getUsers().iterator(); it.hasNext(); ) {
             try {
                 InternetAddress addr;
                 boolean useHtml = false;
                 AuthzSubject who = null;
-
                 switch (getType()) {
                 case TYPE_USERS:
                     Integer uid = (Integer) it.next();
                     who = getSubjMan().getSubjectById(uid);
-
                     if (who == null) {
                         _log.warn("User not found: " + uid);
                         continue;
                     }
-
-                    if (isSms()) {
-                        addr = new InternetAddress(who.getSMSAddress());
-                    } else {
-                        addr = new InternetAddress(who.getEmailAddress());
-                    }
+                    addr = (isSms()) ? new InternetAddress(who.getSMSAddress()) : new InternetAddress(who.getEmailAddress());
                     addr.setPersonal(who.getName());
                     useHtml = isSms() ? false : who.isHtmlEmail();
                     break;
@@ -317,7 +289,6 @@ public class EmailAction extends EmailActionConfig
                     addr.setPersonal(addr.getAddress());
                     break;
                 }
-
                 // Don't send duplicate notifications
                 if (prevRecipients.add(addr)) {
                     validRecipients.put(new EmailRecipient(addr, useHtml), who);
@@ -334,34 +305,28 @@ public class EmailAction extends EmailActionConfig
                 continue;
             }
         }
-
         return validRecipients;
     }
 
     public void setParentActionConfig(AppdefEntityID ent, ConfigResponse cfg)
-        throws InvalidActionDataException
-    {
+    throws InvalidActionDataException {
         init(cfg);
     }
 
-    public void send(Escalatable alert, EscalationStateChange change,
-                     String message, Set notified)
-        throws ActionExecuteException
-    {
+    public void send(Escalatable alert, EscalationStateChange change, String message, Set notified)
+    throws ActionExecuteException {
         PerformsEscalations def = alert.getDefinition();
 
-        Map addrs = lookupEmailAddr();
+        Map<EmailRecipient, AuthzSubject> addrs = lookupEmailAddr();
 
-        for (Iterator it = addrs.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry entry = (Map.Entry) it.next();
-            EmailRecipient rec = (EmailRecipient) entry.getKey();
-
+        for (Iterator<Entry<EmailRecipient, AuthzSubject>> it=addrs.entrySet().iterator(); it.hasNext();) {
+            Entry<EmailRecipient, AuthzSubject> entry = it.next();
+            EmailRecipient rec = entry.getKey();
             // Don't notify again if already notified
             if (notified.contains(rec.getAddress())) {
                 it.remove();
                 continue;
             }
-
             rec.setHtml(false);
             notified.add(rec.getAddress());
         }
@@ -441,12 +406,12 @@ public class EmailAction extends EmailActionConfig
 
         public synchronized void run() {
             try {
-                List toEmail = null;
+                List<EmailObj> toEmail = null;
                 synchronized(_emails) {
                     if (_emails.size() == 0) {
                         return;
                     }
-                    toEmail = new ArrayList(_emails);
+                    toEmail = new ArrayList<EmailObj>(_emails);
                     _emails.clear();
                 }
                 if (!_inThresholdWindow) {
@@ -478,8 +443,7 @@ public class EmailAction extends EmailActionConfig
                     return;
                 } else {
                     // send all emails, alert storm is not in affect
-                    for (final Iterator it=toEmail.iterator(); it.hasNext(); ) {
-                        final EmailObj obj = (EmailObj)it.next();
+                    for (final EmailObj obj : toEmail) {
                         sendFilteredEmail(obj);
                     }
                     return;

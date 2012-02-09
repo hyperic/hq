@@ -67,8 +67,7 @@ public class MeasurementCallbackClient
         try {
             return res.getTime();
         } catch (LatherRemoteException exc) {
-            throw new AgentCallbackClientException("Unable to get return " +
-                                                   "value from send report");
+            throw new AgentCallbackClientException("Unable to get return value from send report: " + exc, exc);
         }
     }
 
@@ -111,9 +110,7 @@ public class MeasurementCallbackClient
         try {
             return res.getConfigs();
         } catch(LatherRemoteException exc){
-            throw new 
-                AgentCallbackClientException("Error getting plugin " +
-                                             "configs: " + exc.getMessage());
+            throw new AgentCallbackClientException("Error getting plugin configs: " + exc, exc);
         }
     }
 }

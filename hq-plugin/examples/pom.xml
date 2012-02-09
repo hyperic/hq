@@ -7,10 +7,44 @@
 	<artifactId>examples</artifactId>
 	<packaging>pom</packaging>
 	<name>Hyperic HQ Plugin - Examples</name>
-	<version>4.6.1.BUILD-SNAPSHOT</version>
+	<version>4.6.5.BUILD-SNAPSHOT</version>
 
 	<build>
 		<plugins>
+                <plugin>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>copy-resources</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <delimiters>
+                                    <delimiter>@</delimiter>
+                            </delimiters>
+                            <outputDirectory>${basedir}/target/classes</outputDirectory>
+                            <resources>
+                                    <resource>
+                                        <directory>src/main/resources</directory>
+                                        <filtering>true</filtering>
+                                        <includes>
+                                            <include>**/*.xml</include>
+                                        </includes>
+                                    </resource>
+                                    <resource>
+                                        <directory>src/main/resources</directory>
+                                        <filtering>false</filtering>
+                                        <excludes>
+                                            <exclude>**/*.xml</exclude>
+                                        </excludes>
+                                    </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    </executions>
+                </plugin>
 				<plugin>
 					<artifactId>maven-assembly-plugin</artifactId>
 					<executions>

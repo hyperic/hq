@@ -4,7 +4,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -37,18 +37,16 @@
 <tiles:importAttribute name="cancelOnly" ignore="true"/>
 <tiles:importAttribute name="okAssignBtn" ignore="true"/>
 <tiles:importAttribute name="okAssignOnly" ignore="true"/>
+<jsu:script>
+  	var isButtonClicked = false;
 
-<script  type="text/javascript">
-  var isButtonClicked = false;
-
-  function checkSubmit() {
-    if (isButtonClicked) {
-      alert('<fmt:message key="error.PreviousRequestEtc"/>');
-      return false;
-    }
-  }  
-</script>
-
+  	function checkSubmit() {
+    	if (isButtonClicked) {
+      		alert('<fmt:message key="error.PreviousRequestEtc"/>');
+      		return false;
+    	}
+  	}  
+</jsu:script>
 <!-- FORM BUTTONS -->
 <table width="100%" cellpadding="0" cellspacing="0" border="0" class="buttonTable">
   <tr>

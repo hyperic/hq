@@ -53,7 +53,7 @@
         <td class="ListCell">
             <html:link action="/Resource">
             	<html:param name="eid" value="1:${platform.id}"/>
-            	${platform.name}&nbsp;
+            	<c:out value="${platform.name}"/>&nbsp;
             </html:link>
         </td>
         <td class="ListCell" align="center">

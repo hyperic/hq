@@ -27,11 +27,13 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -94,6 +96,8 @@ public class ReportProcessorImpl implements ReportProcessor {
 
     private ResourceManager resourceManager;
 
+    private AgentScheduleSynchronizer agentScheduleSynchronizer;
+
     @Autowired
     public ReportProcessorImpl(MeasurementManager measurementManager,
                                PlatformManager platformManager, ServerManager serverManager,
@@ -101,7 +105,7 @@ public class ReportProcessorImpl implements ReportProcessor {
                                ReportStatsCollector reportStatsCollector,
                                MeasurementInserterHolder measurementInserterManager,
                                AgentManager agentManager, ZeventEnqueuer zEventManager,
-                               ResourceManager resourceManager) {
+                               ResourceManager resourceManager, AgentScheduleSynchronizer agentScheduleSynchronizer) {
         this.measurementManager = measurementManager;
         this.platformManager = platformManager;
         this.serverManager = serverManager;
@@ -112,36 +116,13 @@ public class ReportProcessorImpl implements ReportProcessor {
         this.agentManager = agentManager;
         this.zEventManager = zEventManager;
         this.resourceManager = resourceManager;
+        this.agentScheduleSynchronizer = agentScheduleSynchronizer;
     }
     
     @PostConstruct
     public void init() {
-        zEventManager.addBufferedListener(PlatformAvailZevent.class,
-            new ZeventListener<PlatformAvailZevent>() {
-                public void processEvents(List<PlatformAvailZevent> events) {
-                    final DataInserter a = measurementInserterManager.getAvailDataInserter();
-                    final boolean debug = log.isDebugEnabled();
-                    for (final PlatformAvailZevent event : events) {
-                        final Integer rid = event.getResourceId();
-                        if (debug) log.debug("adding platform availability pt for resId=" + rid);
-                        if (rid == null) {
-                            continue;
-                        }
-                        final Resource r = resourceManager.getResourceById(rid);
-                        final Measurement m = measurementManager.getAvailabilityMeasurement(r);
-                        final long now = TimingVoodoo.roundDownTime(now(), m.getInterval());
-                        final DataPoint avail =
-                            new DataPoint(m.getId(), MeasurementConstants.AVAIL_UP, now);
-                        try {
-                            sendMetricDataToDB(a, Collections.singletonList(avail), true);
-                        } catch (DataInserterException e) {
-                            log.warn(e);
-                            log.debug(e,e);
-                        }
-                    }
-                }
-            }
-        );
+        zEventManager.addBufferedListener(PlatformAvailZevent.class, new PlatformAvailZeventListener());
+        zEventManager.addBufferedListener(SrnCheckerZevent.class, new SrnCheckerZeventListener());
     }
 
     private long now() {
@@ -252,10 +233,12 @@ public class ReportProcessorImpl implements ReportProcessor {
         /** idea here is that if an agent checks in don't wait for its platform availability
             to come in.  We know that the platform is up if the agent checks in. */
         boolean setPlatformAvail = true;
+        final Map<Integer, Boolean> alreadyChecked = new HashMap<Integer, Boolean>();
+        final Map<Integer, Measurement> measMap = new HashMap<Integer, Measurement>();
         for (final DSNList dsnList : dsnLists) {
-            Integer dmId = new Integer(dsnList.getClientId());
+            final Integer mid = new Integer(dsnList.getClientId());
             if (debug) watch.markTimeBegin("getMeasurement");
-            Measurement m = measurementManager.getMeasurement(dmId);
+            final Measurement m = getMeasurement(mid, measMap);
             if (debug) watch.markTimeEnd("getMeasurement");
 
             // Can't do much if we can't look up the derived measurement
@@ -283,7 +266,12 @@ public class ReportProcessorImpl implements ReportProcessor {
             // TODO reosurceMatchesAgent() and the call to getAgent() can be
             // consolidated, the agent match can be checked by getting the agent
             // for the instanceID from the resource
-            if (!resourceMatchesAgent(res, agent)) {
+            Boolean match = alreadyChecked.get(res.getId());
+            if (match == null) {
+            	match = resourceMatchesAgent(res, agent);
+            	alreadyChecked.put(res.getId(), match);
+            }
+            if (!match) {
                 String ipAddr = agent.getAddress();
                 String portString = agent.getPort().toString();
                              
@@ -313,7 +301,6 @@ public class ReportProcessorImpl implements ReportProcessor {
             }
             if (debug) watch.markTimeEnd("addData");
         }
-        if (debug) log.debug(watch);
 
         DataInserter d = measurementInserterManager.getDataInserter();
         if (debug) watch.markTimeBegin("sendMetricDataToDB");
@@ -324,43 +311,27 @@ public class ReportProcessorImpl implements ReportProcessor {
         sendMetricDataToDB(a, availPoints, false);
         sendMetricDataToDB(a, priorityAvailPts, true);
         if (debug) watch.markTimeEnd("sendAvailDataToDB");
+        if (debug) log.debug(watch);
 
-        // Check the SRNs to make sure the agent is up-to-date
-        if (debug) watch.markTimeBegin("reportAgentSRNs");
-        Collection<AppdefEntityID> toReschedule = srnManager.reportAgentSRNs(report.getSRNList());
-        if (debug) watch.markTimeEnd("reportAgentSRNs");
-        final Set<AppdefEntityID> potentialNonEntitiesToUnschedule = new HashSet<AppdefEntityID>();
-        final SRN[] srnList = report.getSRNList();
-        for (final SRN srn : srnList) {
-            final AppdefEntityID aeid = srn.getEntity();
-            potentialNonEntitiesToUnschedule.add(aeid);
-        }
-        // remove all AppdefEntities that do not belong to the agent.  If they belong and srns are
-        // out of sync, then reschedule
-        for (final Iterator<AppdefEntityID> it=toReschedule.iterator(); it.hasNext(); ) {
-            final AppdefEntityID aeidToResched = it.next();
-            if (toUnschedule.contains(aeidToResched)) {
-                it.remove();
-            }
-        }
-
+        // need to process these in background queue since I don't want cache misses to backup
+        // report processor since it runs in several threads.  Better to backup one thread with
+        // db queries
+        zEventManager.enqueueEventAfterCommit(new SrnCheckerZevent(report.getSRNList(), toUnschedule, agentToken));
         if (platformRes != null && setPlatformAvail) {
             zEventManager.enqueueEventAfterCommit(new PlatformAvailZevent(platformRes.getId()));
         }
-        if (agentToken != null && !toUnschedule.isEmpty()) {
-        	// Better tell the agent to stop reporting non-existent entities
-            zEventManager.enqueueEventAfterCommit(new AgentUnscheduleZevent(toUnschedule, agentToken));
-        }
-        if (!toReschedule.isEmpty()) {
-            zEventManager.enqueueEventAfterCommit(new AgentScheduleSyncZevent(toReschedule));
-        }
-        if (!potentialNonEntitiesToUnschedule.isEmpty()) {
-            zEventManager.enqueueEventAfterCommit(
-                new AgentUnscheduleNonEntityZevent(agentToken, potentialNonEntitiesToUnschedule));
-        }
     }
 
-    /**
+    private Measurement getMeasurement(Integer mid, Map<Integer, Measurement> measMap) {
+    	Measurement measurement = measMap.get(mid);
+    	if (measurement == null) {
+    		measurement = measurementManager.getMeasurement(mid);
+    		measMap.put(mid, measurement);
+        }
+        return measurement;
+    }
+
+	/**
      * checks if the agentToken matches resource's agentToken
      */
     private boolean resourceMatchesAgent(Resource resource, Agent agent) {
@@ -467,4 +438,73 @@ public class ReportProcessorImpl implements ReportProcessor {
             return resourceId;
         }
     }
+
+    private class PlatformAvailZeventListener implements ZeventListener<PlatformAvailZevent> {
+        public void processEvents(List<PlatformAvailZevent> events) {
+            final DataInserter a = measurementInserterManager.getAvailDataInserter();
+            final boolean debug = log.isDebugEnabled();
+            for (final PlatformAvailZevent event : events) {
+                final Integer rid = event.getResourceId();
+                if (debug) log.debug("adding platform availability pt for resId=" + rid);
+                if (rid == null) {
+                    continue;
+                }
+                final Resource r = resourceManager.getResourceById(rid);
+                if (r == null || r.isInAsyncDeleteState()) {
+                    continue;
+                }
+                final Measurement m = measurementManager.getAvailabilityMeasurement(r);
+                if (m == null) {
+                    continue;
+                }
+                final long now = TimingVoodoo.roundDownTime(now(), m.getInterval());
+                final DataPoint avail =
+                    new DataPoint(m.getId(), MeasurementConstants.AVAIL_UP, now);
+                try {
+                    sendMetricDataToDB(a, Collections.singletonList(avail), true);
+                } catch (DataInserterException e) {
+                    log.warn(e);
+                    log.debug(e,e);
+                }
+            }
+        }
+    }
+    
+    private class SrnCheckerZevent extends Zevent {
+        private String agentToken;
+        private Set<AppdefEntityID> toUnschedule;
+        private SRN[] srnList;
+        @SuppressWarnings("serial")
+        public SrnCheckerZevent(SRN[] srnList, Set<AppdefEntityID> toUnschedule, String agentToken) {
+            super(new ZeventSourceId() {}, new ZeventPayload() {});
+            this.srnList = srnList;
+            this.toUnschedule = toUnschedule;
+            this.agentToken = agentToken;
+        }
+        public String getAgentToken() {
+            return agentToken;
+        }
+        public Set<AppdefEntityID> getToUnschedule() {
+            return toUnschedule;
+        }
+        public SRN[] getSrnList() {
+            return srnList;
+        }
+    }
+    
+    private class SrnCheckerZeventListener implements ZeventListener<SrnCheckerZevent> {
+        public void processEvents(List<SrnCheckerZevent> events) {
+            for (final SrnCheckerZevent z : events) {
+                final Collection<AppdefEntityID> list = new ArrayList<AppdefEntityID>();
+                final Collection<SRN> srns = Arrays.asList(z.getSrnList());
+                for (final SRN srn : srns) {
+                    list.add(srn.getEntity());
+                }
+                agentScheduleSynchronizer.unschedule(z.getAgentToken(), z.getToUnschedule());
+                agentScheduleSynchronizer.unscheduleNonEntities(z.getAgentToken(), list);
+                srnManager.rescheduleOutOfSyncSrns(srns, false);
+            }
+        }
+    }
+
 }

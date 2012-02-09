@@ -6,7 +6,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -100,15 +100,11 @@
     <c:param name="scs" value="${param.scs}"/>
   </c:if>
 </c:url>
-
-
-
-<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
-<script type="text/javascript">
-initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-widgetPropertiesListServices = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-</script>
-
+<jsu:importScript path="/js/listWidget.js" />
+<jsu:script>
+	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+	widgetPropertiesListServices = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+</jsu:script>
 <html:form action="/resource/application/inventory/RemoveServices">
 <html:hidden property="rid" value="${Resource.id}"/>
 <html:hidden property="type" value="${Resource.entityId.type}"/>

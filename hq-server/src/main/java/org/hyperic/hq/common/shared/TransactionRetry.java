@@ -27,6 +27,7 @@ package org.hyperic.hq.common.shared;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.StaleStateException;
 import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException;
 import org.springframework.stereotype.Component;
 
@@ -46,13 +47,20 @@ public class TransactionRetry {
      * @param sleepTime - sleepTime in ms between retries
      */
     public void runTransaction(Runnable runner, int maxRetries, long sleepTime) {
-        HibernateOptimisticLockingFailureException ex = null;
+        RuntimeException ex = null;
         int tries = 0;
         while (tries++ < maxRetries) {
             try {
                 runner.run();
                 ex = null;
                 break;
+            } catch (StaleStateException e) {
+                ex = e;
+                if (tries < maxRetries) {
+                    log.warn("retrying operation thread=" + Thread.currentThread().getName()+
+                             ", tries=" + tries + " error: " + e);
+                }
+                log.debug(e, e);
             } catch (HibernateOptimisticLockingFailureException e) {
                 ex = e;
                 if (tries < maxRetries) {

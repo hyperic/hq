@@ -4,7 +4,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -73,15 +73,13 @@
 	  	<tiles:put name="viewEscalationUrl" beanName="viewEscalationUrl"/>
 	  	<tiles:put name="viewOpenNMSUrl" beanName="viewOpenNMSUrl"/>
 	</tiles:insert>
-	
-	<script src="<html:rewrite page='/js/listWidget.js'/>" type="text/javascript"></script>
+	<jsu:importScript path="/js/listWidget.js" />
 	<c:set var="widgetInstanceName" value="list"/>
-	<script type="text/javascript">
+	<jsu:script>
 		var pageData = new Array();
 		initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 		widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-	</script>
-	
+	</jsu:script>
 	<c:choose>
 		<c:when test="${not empty formAction}">
 			<!-- FORM -->

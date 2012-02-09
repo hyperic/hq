@@ -1,0 +1,495 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : Run Windows MSI Installer</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 4.6.5 : Run Windows MSI Installer
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 20, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <style type='text/css'>/*<![CDATA[*/
+div.rbtoc1327094989693 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1327094989693 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1327094989693 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1327094989693'>
+<ul>
+    <li><a href='#RunWindowsMSIInstaller-AbouttheHypericMSIInstaller'>About the Hyperic MSI Installer</a></li>
+    <li><a href='#RunWindowsMSIInstaller-InteractiveMSIInstallation'>Interactive MSI Installation</a></li>
+    <li><a href='#RunWindowsMSIInstaller-SilentMSIInstallation'>Silent MSI Installation</a></li>
+    <li><a href='#RunWindowsMSIInstaller-RemoteInstallswithMicrosoftManagementConsole'>Remote Installs with Microsoft Management Console</a></li>
+    <li><a href='#RunWindowsMSIInstaller-SolvingServiceStartupProblemsAfterMSIInstall'>Solving Service Startup Problems After MSI Install</a></li>
+</ul></div>
+<blockquote>
+<p><b>About this page...</b> </p>
+
+<p>This page has instructions for installing Hyperic components using the Windows MSI installer. As noted below in <a href="#RunWindowsMSIInstaller-AbouttheHypericMSIInstaller">About the Hyperic MSI Installer</a>, the MSI installer is most suitable for non-production environments. For information about other installers, see <a href="Select and Download an Installer.html" title="Select and Download an Installer">Select and Download an Installer</a>.</p>
+
+<p>instructions on installing Hyperic for production use, see <a href="Hyperic Installation and Startup Process.html" title="Hyperic Installation and Startup Process">Hyperic Installation and Startup Process</a>.</p></blockquote> 
+
+
+<h1><a name="RunWindowsMSIInstaller-AbouttheHypericMSIInstaller"></a>About the Hyperic MSI Installer</h1>
+
+<p>You can use the Hyperic MSI Installer to install the Hyperic Server, the Hyperic Agent, or both. Both server and agent are installed as Windows services.</p>
+
+<p>Note that the MSI installer installs Hyperic Server with a built-in PostgreSQL database. You cannot install and configure the Hyperic Server to use an external database with the MSI installer. For this reason, the MSI installer is most useful for quickly setting up a Hyperic evaluation environment.  </p>
+
+<p>The Hyperic MSI installer provides an InstallShield wizard GUI that has two modes:</p>
+
+<ul>
+	<li>Complete &#8212; When you select the "Complete" installation option, the installation location is the <em>only</em> user input the wizard allows &#8212; it will install both the server and the agent and use default values for all other installation options. See <a href="#RunWindowsMSIInstaller-MSISilentModeProperties">MSI Silent Mode Properties</a> to see the default values for server and agent configuration settings.</li>
+</ul>
+
+
+<ul>
+	<li>Custom &#8212; The wizard's "Custom" mode allows you more control over the installation. You can install either the server or the agent, or both. In addition, you can explicitly specify these options:
+	<ul>
+		<li>Address of SMTP server the Hyperic Server will use to send email</li>
+		<li>Username and password for the initial admin user.</li>
+		<li>The encryption key used to encrypt the database user password.</li>
+		<li>The agent address and listen port.</li>
+	</ul>
+	</li>
+</ul>
+
+
+<p>You can also run the the MSI installer in silent mode, in which case you supply installation properties &#8212; defined in <a href="#RunWindowsMSIInstaller-MSISilentModeProperties">MSI Silent Mode Properties</a>  &#8212; on the command line. The default values are used for properties that are not defined at the command line.</p>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Requirements for MSI Installer</b><br />Note that:
+<ul>
+	<li>To run the MSI Installer you must have administrator privilege and permission to install Windows Services.</li>
+	<li>Only the user that installed Hyperic with the MSI installer can uninstall Hyperic with the MSI installer.</li>
+</ul>
+</td></tr></table></div>
+
+<h1><a name="RunWindowsMSIInstaller-InteractiveMSIInstallation"></a>Interactive MSI Installation</h1>
+
+<h2><a name="RunWindowsMSIInstaller-InteractiveCompleteInstall"></a>Interactive Complete Install</h2>
+
+<ol>
+	<li>Double-click the Hyperic MSI installer file.</li>
+	<li>On the <b>InstallShield Wizard</b> window, press <b>Next</b> to start the installation.<br/>
+<span class="image-wrap" style=""><img src="attachments/79038211/79135205.png" style="border: 0px solid black"/></span></li>
+	<li>On the <b>License Agreement</b> window, select the "I accept..." option and click <b>Next</b>.<br/>
+<span class="image-wrap" style=""><img src="attachments/79038211/79135210.png" style="border: 0px solid black"/></span></li>
+	<li>On the <b>Destination Folder</b> window, click <b>Next</b> to install to the default installation directory, or click <b>Change</b> to select a different directory.<br/>
+<span class="image-wrap" style=""><img src="attachments/79038211/79135209.png" style="border: 0px solid black"/></span></li>
+	<li>On the <b>Setup Type</b> window, select the <b>Complete</b> option and click <b>Next</b>.<br/>
+<span class="image-wrap" style=""><img src="attachments/79038211/79135203.png" style="border: 0px solid black"/></span></li>
+	<li>On the <b>Ready to Install</b> window:
+	<ol>
+		<li>Uncheck the box if you do not want the services for the Hyperic Server and Hyperic Agent to be started when the installation is complete.</li>
+		<li>Click <b>Next</b> to start the installation.<br/>
+<span class="image-wrap" style=""><img src="attachments/79038211/79135202.png" style="border: 0px solid black"/></span></li>
+	</ol>
+	</li>
+	<li>On the <b>Installing Hyperic Enterprise</b> window, the "Status" bar shows the progress of the installation.<br/>
+<span class="image-wrap" style=""><img src="attachments/79038211/79135204.png" style="border: 0px solid black"/></span></li>
+	<li>Click <b>Next</b> when the installation is complete.</li>
+</ol>
+
+
+<h2><a name="RunWindowsMSIInstaller-InteractiveCustomInstall"></a>Interactive Custom Install </h2>
+<p>The custom installation procedure allows you to both the Hyperic Server and the Hyperic Agent, or just one or the other. </p>
+
+<p>To run the custom install procedure:</p>
+<ol>
+	<li>Perform steps 1 through 4 of the <a href="#RunWindowsMSIInstaller-InteractiveCompleteInstall">Interactive Complete Install</a> above.</li>
+	<li>On the <b>Setup Type</b> window, Select the <b>Custom</b> option and click <b>Next</b>.<br/>
+<span class="image-wrap" style=""><img src="attachments/79038211/79135206.png" style="border: 0px solid black"/></span></li>
+	<li>On the <b>Custom Setup</b> window you can:
+	<ul>
+		<li>Click <b>Next</b> to install both server and agent to the installation directory shown, or</li>
+		<li>Click <b>Change</b> to select a different installation directory and then click <b>Next</b>, or,</li>
+		<li>Expand the <b>Hyperic Enterprise</b> tree control so you can deselect the <b>Server</b> or <b>Agent</b> component if you do not wish to install it, and then click <b>Next</b>.<br/>
+<span class="image-wrap" style=""><img src="attachments/79038211/79135207.png" style="border: 0px solid black"/></span></li>
+	</ul>
+	</li>
+	<li>On the <b>HQ Web Configuration</b> window, you can accept the default value, or enter a different value for:
+	<ul>
+		<li>Address &#8212; The address upon which the Hyperic Server will listen for agent and web application requests. The default value is the IP address of the first network interface the installer found on the platform.</li>
+		<li>HTTP Port &#8212; The port upon which the Hyperic Server will listen for plain text agent and web application requests. The default is port 7080.</li>
+		<li>HTTPS Port &#8212; The port upon which the Hyperic Server will listen for SSL agent and web application requests. The default is port 7443.<br/>
+<span class="image-wrap" style=""><img src="attachments/79038211/79135208.png" style="border: 0px solid black"/></span></li>
+	</ul>
+	</li>
+	<li>On the <b>Mail Server Configuration</b> window, accept the defaults or change the values for:
+	<ul>
+		<li>SMTP Host &#8212; The hostname of the SMTP server found on the platform.</li>
+		<li>Mail Sender &#8212; The email address from which the server will send email notifications.<br/>
+<span class="image-wrap" style=""><img src="attachments/79038211/79135214.png" style="border: 0px solid black"/></span></li>
+	</ul>
+	</li>
+	<li>On the <b>Database Encryption Key</b> window, enter a string of at least eight characters.<br/>
+<span class="image-wrap" style=""><img src="attachments/79038211/79135215.png" style="border: 0px solid black"/></span></li>
+	<li>On the <b>Admin User Configuration</b> window, accept the defaults or change the values, for:
+	<ul>
+		<li>Admin Email</li>
+		<li>Admin User</li>
+		<li>Admin Password<br/>
+<span class="image-wrap" style=""><img src="attachments/79038211/79135211.png" style="border: 0px solid black"/></span></li>
+	</ul>
+	</li>
+	<li>On the <b>HQ Agent Configuration</b> window, accept the defaults or change the values for:
+	<ul>
+		<li>Agent Address &#8212; This is the address the Hyperic Server will use to contact the agent.</li>
+		<li>Agent Port &#8212; This is the port the Hyperic Server will use to contact the agent.</li>
+		<li>Secure Agent to Server Connections &#8212; If you wish all communication between agent and server to be SSL.</li>
+		<li>Agent Communicates with Server Unidirectionally &#8212; If you wish the agent to initiate all communication with the server.<br/>
+<span class="image-wrap" style=""><img src="attachments/79038211/79135212.png" style="border: 0px solid black"/></span></li>
+	</ul>
+	</li>
+	<li>On the <b>Ready to Install the Program</b> window:
+	<ul>
+		<li>Deselect "Start Hyperic HQ Services when Install Completes" option if you <b>do not</b> want services for the Hyperic Server and Hyperic Agent to be started when the installation is complete.</li>
+		<li>Click <b>Install</b> to install selected components.</li>
+	</ul>
+	</li>
+</ol>
+
+
+<h1><a name="RunWindowsMSIInstaller-SilentMSIInstallation"></a>Silent MSI Installation</h1>
+
+<p>You can run the Hyperic MSI installer in silent mode from the DOS prompt.</p>
+
+<h2><a name="RunWindowsMSIInstaller-CommandLineSyntax"></a>Command Line Syntax</h2>
+
+<div class='panelMacro'><table class='noteMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/warning.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Opening Windows Command Shell</b><br />On Windows, if you open your command shell from the <b>Start</b> menu, you must run as "Administrator", like this: 
+<ol>
+	<li>Start button - All Programs - Accessories.</li>
+	<li>Right click "Command Prompt".</li>
+	<li>Select "Run as".</li>
+	<li>Choose "Administrator" option.</li>
+</ol>
+</td></tr></table></div>
+<p>To install Hyperic:</p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">%Comspec% /c msiexec /i "PathToInstaller" /qn PROPERTY1=VALUE1 PROPERTY2=VALUE2 ...</pre>
+		</div>
+</div></div>
+
+<p>Where:</p>
+<ul>
+	<li><tt>/c</tt> &#8212; tells the shell to wait until the <tt>msiexec.exe</tt> command completes before proceeding. Without this switch, the shell will execute subsequent commands before the current command finishes.</li>
+	<li><tt>/i</tt> &#8212; instructs MSIEXEC to install the .MSI listed after the switch.</li>
+	<li><tt>PathToInstaller</tt> &#8212; is the full path to the MSI installer, for example <tt>C:\Program Files\hyperic-hq-installer-4.6.msi</tt></li>
+	<li><tt>/qn</tt> &#8212; turns off prompts to the console.</li>
+	<li><tt>PROPERTY1=VALUE1</tt> &#8212; is a installation property name=value pair, for example <tt>INSTALLDIR=C:\hyperic</tt>. Installation properties are defined  below in <a href="#RunWindowsMSIInstaller-MSISilentModeProperties">MSI Silent Mode Properties</a></li>
+</ul>
+
+
+<p>To uninstall:</p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">%Comspec% /c msiexec /x "PathToInstaller" /qn</pre>
+		</div>
+</div></div>
+
+<ul>
+	<li><tt>/x</tt> &#8212; instructs MSIEXEC to uninstall the .MSI listed after the switch.</li>
+</ul>
+
+
+
+<h2><a name="RunWindowsMSIInstaller-MSISilentModeProperties"></a>MSI Silent Mode Properties</h2>
+
+<p>Installation properties for installing Hyperic in MSI silent mode are described below.</p>
+
+<p>Note that all properties and their values are case-sensitive.</p>
+
+<p>Properties that begin with the strings SERVER and AGENT are server and agent properties, respectively.</p>
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> <b>Silent Mode Property</b> </th>
+<th class='confluenceTh'> <b>Description</b> </th>
+<th class='confluenceTh'> <b>Default</b> </th>
+</tr>
+<tr>
+<td class='confluenceTd'> INSTALLDIR </td>
+<td class='confluenceTd'> Directory where the Hyperic components will be installed. </td>
+<td class='confluenceTd'> C:\Program Files\Hyperic HQ 4.6 </td>
+</tr>
+<tr>
+<td class='confluenceTd'> ADDLOCAL </td>
+<td class='confluenceTd'> Use this property if you want to install only the Hyperic Server or the Hyperic Agent. Comma-separated list of components to be installed. Allowable case-sensitive values are Agent and Server.</td>
+<td class='confluenceTd'> If you do not specify ADDLOCAL, both agent and server will be installed. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> SERVER_ADMIN_EMAIL </td>
+<td class='confluenceTd'> Hyperic Server Administrator's email address. </td>
+<td class='confluenceTd'> SERVER_ADMIN_USER@SERVER_MAIL_HOST </td>
+</tr>
+<tr>
+<td class='confluenceTd'> SERVER_ADMIN_USER </td>
+<td class='confluenceTd'> User name of the original admin user in Hyperic. </td>
+<td class='confluenceTd'> hqadmin </td>
+</tr>
+<tr>
+<td class='confluenceTd'> SERVER_ADMIN_PASSWORD </td>
+<td class='confluenceTd'> Password of the original admin user in Hyperic Server. </td>
+<td class='confluenceTd'> hqadmin </td>
+</tr>
+<tr>
+<td class='confluenceTd'> SERVER_DATABASE_USER </td>
+<td class='confluenceTd'> Defines the username the Hyperic Server will use when connecting to the Hyperic database.The value assigned will be saved in the <tt>server.database-user</tt> property in <tt>server.conf</tt>. </td>
+<td class='confluenceTd'> hqadmin </td>
+</tr>
+<tr>
+<td class='confluenceTd'> SERVER_DATABASE_PASSWORD </td>
+<td class='confluenceTd'> Password the Hyperic Server will use when connecting to the Hyperic database. The value assigned will be saved in the <tt>server.database-password</tt> property in the <tt>server.conf</tt> file. </td>
+<td class='confluenceTd'> hqadmin </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DB_ENC_KEY_PW </td>
+<td class='confluenceTd'> The Database Encryption Key Password. &nbsp;This value will be used to encrypt the database password. Must be at least 8 characters long, there are no restrictions on the type of characters that may be entered. </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> SERVER_MAIL_HOST </td>
+<td class='confluenceTd'> The IP address or hostname of the SMTP server that the Hyperic Server will use for sending alerts and other Hyperic-related emails. Most UNIX platforms have a local SMTP server. If you wish to use a non-local SMTP server, specify the address with this property. The value assigned will be saved in the <tt>server.mail.host</tt> property in <tt>server.conf</tt> file. </td>
+<td class='confluenceTd'> 127.0.0.1 </td>
+</tr>
+<tr>
+<td class='confluenceTd'> SERVER_MAIL_SENDER </td>
+<td class='confluenceTd'> The 'From' address in email notifications from the Hyperic Server. </td>
+<td class='confluenceTd'> SERVER_ADMIN_EMAIL </td>
+</tr>
+<tr>
+<td class='confluenceTd'> SERVER_POSTGRESQL_PORT </td>
+<td class='confluenceTd'> Hyperic Server's embedded database listen port. </td>
+<td class='confluenceTd'> 9432 </td>
+</tr>
+<tr>
+<td class='confluenceTd'> SERVER_WEBAPP_HOST </td>
+<td class='confluenceTd'> Specifies the Hyperic Server's listen address for Hyperic Portal communications. By default, this property and AGENT_SERVER_ADDRESS have the same value.If you wish, you can use these properties to designate different hosts for agent-server and agent-portal communications. The value assigned will be saved in <tt>server.webapp.host</tt> in <tt>server.conf</tt>. </td>
+<td class='confluenceTd'> host IP address </td>
+</tr>
+<tr>
+<td class='confluenceTd'> SERVER_WEBAPP_PORT </td>
+<td class='confluenceTd'> Specifies the Hyperic Server listen port on which the server listens for Hyperic Portal communications in non-secure mode. By default, this property and AGENT_SERVER_PORT have the same value. If you wish, you can use these properties to designate different ports for agent-server and agent-portal communications. The value assigned will be saved in the <tt>server.webapp.port</tt> property in <tt>server.conf</tt>. </td>
+<td class='confluenceTd'> 7080 </td>
+</tr>
+<tr>
+<td class='confluenceTd'> SERVER_WEBAPP_SECURE_PORT </td>
+<td class='confluenceTd'> Specifies the Hyperic Server port on which the server listens for Hyperic Portal communications in secure mode. The value assigned will be saved in the <tt>server.webapp.secure.port</tt> property in <tt>server.conf</tt>. </td>
+<td class='confluenceTd'> 7443 </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HQ_START_SERVICES </td>
+<td class='confluenceTd'> Property indicating whether the Hyperic Agent and Server processes should be started as a Windows Service at the end of the installation. 1 indicates true, 0 indicates false. </td>
+<td class='confluenceTd'> 1 </td>
+</tr>
+<tr>
+<td class='confluenceTd'> AGENT_ADDRESS </td>
+<td class='confluenceTd'> The IP address to which the agent binds at startup. The default value allows the agent to listen on all IP addresses on the the agent host. The value assigned is saved in both the <tt>agent.listenIp</tt> and the <tt>agent.setup.agentIP</tt> properties in agent.properties. If there is a firewall between the agent and the server, set AGENT_ADDRESS to the firewall address.  After installation is complete, set <tt>agent.listenIP</tt> in <tt>agent.properties</tt> to the agent's local IP address, and configure the <br/>
+wall to forward agent-bound traffic to that address. </td>
+<td class='confluenceTd'> host IP address </td>
+</tr>
+<tr>
+<td class='confluenceTd'> AGENT_IS_SECURE </td>
+<td class='confluenceTd'> Indicates whether communications between the Hyperic Agent and the Hyperic Server should take place over a secure encrypted channel.  The setting will be stored appropriately in the <tt>agent.setup.camSecure</tt> property in <tt>agent.properties</tt>.  <br class="atl-forced-newline" />
+<ul>
+	<li>1 indicates secure communications <br class="atl-forced-newline" /></li>
+	<li>0 indicates that communications will not be secured.</li>
+</ul>
+</td>
+<td class='confluenceTd'> 0 </td>
+</tr>
+<tr>
+<td class='confluenceTd'> AGENT_PORT </td>
+<td class='confluenceTd'> The port on the agent's listen address to which the agent binds at startup. This value is saved to both <tt>agent.setup.agentPort</tt> and <tt>agent.listenPort</tt> in <tt>agent.properties</tt>. </td>
+<td class='confluenceTd'> 2144 </td>
+</tr>
+<tr>
+<td class='confluenceTd'> AGENT_SERVER_ADDRESS </td>
+<td class='confluenceTd'> Specifies the IP address the agent connects to to reach the Hyperic Server.The value is saved to <tt>agent.setup.camIP</tt> in <tt>agent.properties</tt>. </td>
+<td class='confluenceTd'> host IP address </td>
+</tr>
+<tr>
+<td class='confluenceTd'> AGENT_SERVER_USER </td>
+<td class='confluenceTd'> The Hyperic username the agent will use when it registers with the server. The value is saved to   <tt>agent.setup.camLogin</tt> in <tt>agent.properties</tt>. Typically this property and AGENT_SERVER_PASSWORD have the same values as SERVER_ADMIN_USER and SERVER_ADMIN_PASSWORD respectively. However, if you are installing a server and an agent on the same host, and the agent will report to a server on a different host, you might specify  different credentials for  AGENT_SERVER_USER/AGENT_SERVER_PASSWORD and SERVER_ADMIN_USER/SERVER_ADMIN_PASSWORD. </td>
+<td class='confluenceTd'> hqadmin </td>
+</tr>
+<tr>
+<td class='confluenceTd'> AGENT_SERVER_PASSWORD </td>
+<td class='confluenceTd'> The password for the user specified by AGENT_SERVER_USER. The value is saved to <tt>agent.setup.camPword</tt> in <tt>agent.properties</tt>. </td>
+<td class='confluenceTd'> hqadmin </td>
+</tr>
+<tr>
+<td class='confluenceTd'> AGENT_SERVER_PORT </td>
+<td class='confluenceTd'> Port on server port to use for non-secure communications with the server. The value is saved to   <tt>agent.setup.camPort</tt> in agent.properties. </td>
+<td class='confluenceTd'> 7080 </td>
+</tr>
+<tr>
+<td class='confluenceTd'> AGENT_SERVER_SSL_PORT </td>
+<td class='confluenceTd'> Port on server to use for SSL communications with the server.The value is saved to <tt>agent.setup.camSSLPort</tt> in <tt>agent.properties</tt>. </td>
+<td class='confluenceTd'> 7443 </td>
+</tr>
+</tbody></table>
+</div>
+
+
+
+<h2><a name="RunWindowsMSIInstaller-ExampleSilentModeMSIInvocations"></a>Example Silent Mode MSI Invocations</h2>
+
+<ul>
+	<li>To silently install Hyperic Server and the Hyperic Agent on a local machine under "C:\hyperic":
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">%Comspec% /c msiexec /i "installer_path\hyperic-hq-installer-4.6.n.build.msi" /qn INSTALLDIR="C:\hyperic"</pre>
+		</div>
+</div></div></li>
+</ul>
+
+
+<ul>
+	<li>To install (locally) a Hyperic Agent that will communicate securely with the Hyperic Server at 69.59.181.106:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">%Comspec% /c msiexec /i "installer_path\hyperic-hq-installer-4.6.n.build.msi" /qn ADDLOCAL=Agent AGENT_IS_SECURE=1 AGENT_SERVER_ADDRESS=69.59.181.106 AGENT_SERVER_USER=hqadmin AGENT_SERVER_PASSWORD=password</pre>
+		</div>
+</div></div></li>
+</ul>
+
+
+<ul>
+	<li>To install the Hyperic Server and the Hyperic Agent on a local machine using an MSI installer on a remote machine that is accessible on the network:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">%Comspec% /c msiexec /i "\\network_path\hyperic-hq-installer-4.6.n.build.msi" PROPERTY1=VALUE1 PROPERTY2=VALUE2 ...</pre>
+		</div>
+</div></div></li>
+</ul>
+
+
+<ul>
+	<li>To silently install the Hyperic Server and the Hyperic Agent to a local machine using an MSI installer on a remote machine that is accessible on the network, include the /qn switch to turn off the user interface:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">%Comspec% /c msiexec /i "\\network_path\hyperic-hq-installer-4.6.n.build.msi" /qn PROPERTY1=VALUE1PROPERTY2=VALUE2...</pre>
+		</div>
+</div></div></li>
+</ul>
+
+
+
+<h2><a name="RunWindowsMSIInstaller-SilentMSIinstallationtoMultipleHostsUsingPushTechniques"></a>Silent MSI installation to Multiple Hosts Using Push Techniques</h2>
+
+<p>This section describes alternatives for doing silent MSI installs to multiple machines.</p>
+
+<h3><a name="RunWindowsMSIInstaller-UsingATorSOONtostartaprocessonaremoteworkstation"></a>Using AT or SOON to start a process on a remote workstation</h3>
+
+<p>The AT and SOON commands can be used to schedule commands at a future time.   AT, which is built into the command processor, schedules commands and programs to run on a local or remote computer at a specified time. Instead of running processes at a specific time, the SOON command runs them after a specified delay. SOON.EXE is available as a free Microsoft download.</p>
+
+<p>Here are examples of how to run these commands:</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">AT targetPC 10:30 /INTERACTIVE \\myPC\myShare\quietInstall.bat
+SOON targetPC 30 /INTERACTIVE \\myPC\myShare\quietInstall.bat</pre>
+		</div>
+</div></div>
+<p>Executing processes on a remote system has security implications.</p>
+<ul>
+	<li>The local machine must have sufficient privileges to start a batch routine on a remote system.</li>
+	<li>You must establish privileges for the remote system to access network resources when running the install batch routine. When the command processor runs your batch routine on the target system, it executes with Local System privileges. It is therefore necessary for the batch routine to open a privilege pipe to the network resource containing the MSI package. A workaround is to add a NET command to your batch routine, as demonstrated in this sample quietInstall.bat:</li>
+</ul>
+
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">net use * \\myPC\myShare /user:domain\username password /persistent:no
+%Comspec% /c msiexec /i "\\myPC\myShare\hyperic-hq-installer-4.6.n.build.msi" /qn</pre>
+		</div>
+</div></div>
+
+<h3><a name="RunWindowsMSIInstaller-UsingPsExectoStartaProcessonaRemoteSystem"></a>Using PsExec to Start a Process on a Remote System</h3>
+
+<p>The Windows PsExec utility is a free, light-weight telnet replacement you can use to run processes on other systems, complete with full interactivity for console applications, without having to manually install client software. PsExec's most powerful uses include launching interactive command prompts on remote systems and remote-enabling tools to show information about remote systems. It can be downloaded as part of the Sysinternal PsToolspackage.</p>
+
+<p>PsExec can be used to run the batch routine at a remote workstation by invoking the following command:</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">psexec targetPC -u domain\username -p password -i -c -f
+\\myPC\myShare\quietInstall.bat</pre>
+		</div>
+</div></div>
+<p>In the example above, domain\username has local administrative privileges for the targetPC machine. In addition, it should have the necessary privileges to access the myShare folder on the myPC machine.</p>
+
+<p>The batch file quietInstall.bat is used to invoke the MSI installer over the network on the myPC machine. A sample quietInstall.bat might contain the following command:</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">%Comspec% /c msiexec /i "\\myPC\myShare\Hyperic HQ 4.6.msi" /qn</pre>
+		</div>
+</div></div>
+
+<h1><a name="RunWindowsMSIInstaller-RemoteInstallswithMicrosoftManagementConsole"></a>Remote Installs with Microsoft Management Console</h1>
+
+<p>This section has information on how to automatically install components to a group of machines, using Microsoft Management Control and Active Directory.</p>
+
+<p>With Windows Group Policy, Hyperic components can be automatically installed on a group of machines by performing the following steps:</p>
+<ol>
+	<li>Log on to the domain controller.</li>
+	<li>Copy the MSI file into a folder that is shared with access granted to all target machines.</li>
+	<li>Open the Microsoft Management Control (MMC) Active Directory Users and Computers snap-in.</li>
+	<li>Navigate to the group of computers onto which a Hyperic component is to be deployed.</li>
+	<li>Open Properties.</li>
+	<li>Open Group Policies.</li>
+	<li>Add a new polices, and edit it.</li>
+	<li>In Computer Configuration/Software Installation, chose New/Package.</li>
+	<li>Select the MSI file through the network path.</li>
+	<li>Optionally, select that you want Hyperic to be uninstalled if the computer leaves the scope of the policy.</li>
+</ol>
+
+
+<p>Group policy propagation typically takes some time. In order to reliably deploy the Hyperic MSI package, all machines should be rebooted.</p>
+
+<h1><a name="RunWindowsMSIInstaller-SolvingServiceStartupProblemsAfterMSIInstall"></a>Solving Service Startup Problems After MSI Install</h1>
+
+<p>If you install the Hyperic Server and the Hyperic Agent on the same machine, and accept the default "Start Hyperic HQ Services when install completes" option, agent startup problems can result.</p>
+
+<p>In this scenario, as a last step, the installer will issue a server start command, followed by an agent start command.</p>
+
+<p>The agent must contact the server to start up successfully. If the machine the Hyperic components run on is slow or busy, the Hyperic Server can take a long time to start. The Hyperic Agent makes a finite number of attempts to connect to the server, and if it continues to fail, the agent gets stuck. No software will be auto-discovered on the platform and the agent will not appear in the Hyperic user interface.</p>
+
+<p>To solve this problem, force the agent to repeat the setup process by entering this command in a shell:</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">AGENT_HOME/bin/hq-agent.bat setup</pre>
+		</div>
+</div></div>
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:56</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

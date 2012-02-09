@@ -236,8 +236,8 @@
   </cache>
 
   <!-- The SRN cache, used outside of hibernate -->
-  <cache name="SRNCache"
-         maxElementsInMemory="100000"
+  <cache name="org.hyperic.hq.measurement.server.session.ScheduleRevNum"
+         maxElementsInMemory="200000"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
@@ -954,6 +954,14 @@
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.product.Plugin"
          maxElementsInMemory="200"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+
+  <!-- DbKeystore cache -->
+  <cache name="org.hyperic.hq.security.server.session.KeystoreEntryImpl"
+         maxElementsInMemory="10000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"

@@ -1,64 +1,70 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : Set Up PostgreSQL</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : Set Up PostgreSQL</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : Set Up PostgreSQL
+                            vFabric Hyperic 4.6.5 : Set Up PostgreSQL
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 03, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1307466672502 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1307466672502 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1307466672502 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1325627521742 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325627521742 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325627521742 li {margin-left: 0px;padding-left: 0px;}
 
-/*]] >*/</style><div class='rbtoc1307466672502'>
+/*]]>*/</style><div class='rbtoc1325627521742'>
 <ul>
     <li><a href='#SetUpPostgreSQL-SetUpExternalHypericDatabaseonPostgreSQL'>Set Up External Hyperic Database on PostgreSQL</a></li>
+<ul>
     <li><a href='#SetUpPostgreSQL-ExampleConfiguration'>Example Configuration</a></li>
     <li><a href='#SetUpPostgreSQL-InstallandInitializePostgreSQL'>Install and Initialize PostgreSQL</a></li>
     <li><a href='#SetUpPostgreSQL-CreatePostgreSQLUser'>Create PostgreSQL User</a></li>
     <li><a href='#SetUpPostgreSQL-ConfigurePostgreSQLServerOptions'>Configure PostgreSQL Server Options</a></li>
-    <li><a href='#SetUpPostgreSQL-PostgreSQLConfigurationTipsforLargeHQDeployments'>PostgreSQL Configuration Tips for Large HQ Deployments</a></li>
+    <li><a href='#SetUpPostgreSQL-PostgreSQLTuningforLargeDeployments%28Optional%29'>PostgreSQL Tuning for Large Deployments (Optional)</a></li>
     <li><a href='#SetUpPostgreSQL-ConfigureClientAuthentication'>Configure Client Authentication</a></li>
-    <li><a href='#SetUpPostgreSQL-InstallPostgreSQLClientontheHQServer'>Install PostgreSQL Client on the HQ Server</a></li>
-    <li><a href='#SetUpPostgreSQL-InstalltheHQServer'>Install the HQ Server</a></li>
-    <li><a href='#SetUpPostgreSQL-CreatePLPGLanguageforPostgreSQL8Installations'>Create PLPG Language for PostgreSQL 8 Installations</a></li>
-    <li><a href='#SetUpPostgreSQL-StartHQServer'>Start HQ Server</a></li>
-    <li><a href='#SetUpPostgreSQL-TroubleshootingDatabaseConnectionProblems'>Troubleshooting Database Connection Problems</a></li>
+    <li><a href='#SetUpPostgreSQL-InstallPostgreSQLClientontheHypericServerHost'>Install PostgreSQL Client on the Hyperic Server Host</a></li>
+    <li><a href='#SetUpPostgreSQL-InstalltheHypericServer'>Install the Hyperic Server</a></li>
+    <li><a href='#SetUpPostgreSQL-StartHypericServer'>Start Hyperic Server</a></li>
+</ul>
+    <li><a href='#SetUpPostgreSQL-TroubleshootPostgreSQLConnectionProblems'>Troubleshoot PostgreSQL Connection Problems</a></li>
     <li><a href='#SetUpPostgreSQL-UsefulPostgreSQLCommands'>Useful PostgreSQL Commands</a></li>
 </ul></div>
 
-<p><font color=""></font></p>
+
 
 <h1><a name="SetUpPostgreSQL-SetUpExternalHypericDatabaseonPostgreSQL"></a>Set Up External Hyperic Database on PostgreSQL</h1>
 
 <p>This section provides instructions for setting up PostgreSQL as your external Hyperic database. </p>
 
-<p><b>Note:</b> If you are installing Hyperic for evaluation, you can use Hyperic's built-in PostgreSQL database, rather than set up an external database.<br/>
-Hyperic recommends that this setup be performed by or with the support of your database administrator.</p>
+<p>This task corresponds to <a href="Hyperic Installation and Startup Process.html#HypericInstallationandStartupProcess-SetUpDatabase">Step 2 – Set Up Hyperic Database</a> of <a href="Hyperic Installation and Startup Process.html" title="Hyperic Installation and Startup Process">Hyperic Installation and Startup Process</a>. </p>
 
+<p>It is assumed that the reader is or has the support of a database administrator.</p>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Evalating Hyperic?</b><br />If you are installing Hyperic for evaluation, you can use Hyperic's built-in PostgreSQL database, rather than set up an external database.</td></tr></table></div>
 <p>These instructions assume that you are performing a new installation of an RPM package of PostgreSQL, using Yum, an automatic RPM package installer.</p>
 
-<p>If you do not have an RPM package, you can obtain the source from the <a href="http://www.postgresql.org/">PostgreSQL website.</a></p>
+<p>If you do not have an RPM package, you can obtain the source from the <a href="http://www.postgresql.org/">http://www.postgresql.org/</a></p>
 
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Hyperic requires utf-8 character encoding</b><br />Create the Hyperic database with utf-8 character encoding.</td></tr></table></div>
 
-
-<h1><a name="SetUpPostgreSQL-ExampleConfiguration"></a>Example Configuration</h1>
+<h2><a name="SetUpPostgreSQL-ExampleConfiguration"></a>Example Configuration</h2>
 
 <p>The instructions that follow show commands for setting up PostgreSQL in an environment with these characteristics:</p>
 
@@ -77,7 +83,7 @@ Hyperic recommends that this setup be performed by or with the support of your d
 <td class='confluenceTd'> 192.168.1.4 </td>
 </tr>
 <tr>
-<td class='confluenceTd'> <b>HQ Server IP address</b> </td>
+<td class='confluenceTd'> <b>Hyperic Server IP address</b> </td>
 <td class='confluenceTd'> 192.168.1.6 </td>
 </tr>
 <tr>
@@ -90,21 +96,21 @@ Hyperic recommends that this setup be performed by or with the support of your d
 </tr>
 <tr>
 <td class='confluenceTd'> <b>Database location</b> </td>
-<td class='confluenceTd'> /var/lib/pgsql/data/ </td>
+<td class='confluenceTd'> <tt>/var/lib/pgsql/data/</tt> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> <b>PostgreSQL configuration file</b> </td>
-<td class='confluenceTd'> /var/lib/pgsql/data/postgresql.conf </td>
+<td class='confluenceTd'> <tt>/var/lib/pgsql/data/postgresql.conf</tt> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> <b>PostgreSQL authorization file</b> </td>
-<td class='confluenceTd'> /var/lib/pgsql/data/pg_hba.conf </td>
+<td class='confluenceTd'> <tt>/var/lib/pgsql/data/pg_hba.conf</tt> </td>
 </tr>
 </tbody></table>
 </div>
 
 
-<h1><a name="SetUpPostgreSQL-InstallandInitializePostgreSQL"></a>Install and Initialize PostgreSQL</h1>
+<h2><a name="SetUpPostgreSQL-InstallandInitializePostgreSQL"></a>Install and Initialize PostgreSQL</h2>
 
 <p>Log in as root to the target Linux machine, and enter this command:</p>
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
@@ -123,7 +129,7 @@ Hyperic recommends that this setup be performed by or with the support of your d
 		</div>
 </div></div>
 
-<h1><a name="SetUpPostgreSQL-CreatePostgreSQLUser"></a>Create PostgreSQL User</h1>
+<h2><a name="SetUpPostgreSQL-CreatePostgreSQLUser"></a>Create PostgreSQL User</h2>
 
 <ol>
 	<li>Change user to PostgreSQL and connect to the database locally.
@@ -136,13 +142,13 @@ Hyperic recommends that this setup be performed by or with the support of your d
 		<li>The psql prompt is displayed.</li>
 	</ul>
 	</li>
-	<li>Create a user named admin withlogin and createdb privileges.
+	<li>Create a user named <tt>admin</tt> with <tt>login</tt> and <tt>createdb</tt> privileges.
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
 		<pre class="theme: Confluence; brush: java; gutter: false">create role admin with login createdb password 'hqadmin';</pre>
 		</div>
 </div></div></li>
-	<li>Create a default database for Hyperic. Place quotes around the string HQ so that the database name will be uppercase.
+	<li>Create a default database for Hyperic. Place quotes around the string <tt>HQ</tt> so that the database name will be uppercase.
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
 		<pre class="theme: Confluence; brush: java; gutter: false">CREATE DATABASE "HQ" OWNER admin;</pre>
@@ -151,19 +157,19 @@ Hyperic recommends that this setup be performed by or with the support of your d
 </ol>
 
 
-<h1><a name="SetUpPostgreSQL-ConfigurePostgreSQLServerOptions"></a>Configure PostgreSQL Server Options</h1>
+<h2><a name="SetUpPostgreSQL-ConfigurePostgreSQLServerOptions"></a>Configure PostgreSQL Server Options</h2>
 
-<p>In this step, you configure PostgreSQL Server options in the PostgreSQL server configuration file, postgresql.conf.</p>
+<p>In this step, you configure PostgreSQL Server options in the PostgreSQL server configuration file, <tt>postgresql.conf</tt>.</p>
 
 <ol>
-	<li>Open the postgresql.conf file.</li>
-	<li>The default database permissions allow local connections only.  To configure PostgreSQL to listen on all network interfaces, uncomment the listen address entry and change its value as shown below.
+	<li>Open <tt>postgresql.conf</tt>.</li>
+	<li>The default database permissions allow local connections only. To configure PostgreSQL to listen on all network interfaces, uncomment the listen address entry and change its value as shown below.
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
 		<pre class="theme: Confluence; brush: java; gutter: false">listen_addresses = '*'</pre>
 		</div>
 </div></div></li>
-	<li>Add the following settings to optimize HQ performance:
+	<li>Add the following settings to optimize Hyperic performance:
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
 		<pre class="theme: Confluence; brush: java; gutter: false">##performance changes for HQ
@@ -175,11 +181,11 @@ statement_timeout=30000</pre>
 </ol>
 
 
-<p><b>Note:</b> In PostgreSQL 8.3, the PostgreSQL parameter that enables HQ to monitor the database - track_counts - is enabled, because the PostgreSQL autovacuum daemon needs the collected information. Only superusers can change this setting.</p>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>In PostgreSQL 8.3, the PostgreSQL parameter that enables Hyperic to monitor the database &#8212; <tt>track_counts</tt> &#8212; is enabled, because the PostgreSQL autovacuum daemon needs the collected information. Only superusers can change this setting.</td></tr></table></div>
 
-<h1><a name="SetUpPostgreSQL-PostgreSQLConfigurationTipsforLargeHQDeployments"></a>PostgreSQL Configuration Tips for Large HQ Deployments</h1>
+<h2><a name="SetUpPostgreSQL-PostgreSQLTuningforLargeDeployments%28Optional%29"></a>PostgreSQL Tuning for Large Deployments (Optional)</h2>
 
-<p>These changes and additions to postgresql.conf can improve HQ performance in large environments, assuming that you have at least 2GB RAM available for the database.</p>
+<p>These changes and additions to <tt>postgresql.conf</tt> can improve Hyperic performance in large environments, if you have at least 2GB RAM available for the database.</p>
 
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
@@ -192,15 +198,15 @@ max_fsm_pages = 40000
 effective_cache_size = 5000</pre>
 		</div>
 </div></div>
-<p>In particular, increasing effective_cache_size is beneficial, given sufficient RAM.</p>
+<p>In particular, increasing <tt>effective_cache_size</tt> is beneficial, given sufficient RAM.</p>
 
-<p>You may need to refine your database configuration based on the performance you experience. Review of the database log by a database administrator should indicate whether further adjustments to checkpoint_segments or  max_fsm_pages are appropriate.</p>
+<p>You may need to refine your database configuration based on the performance you experience. Review of the database log by a database administrator should indicate whether further adjustments to <tt>checkpoint_segments</tt> or <tt>max_fsm_pages</tt> are appropriate.</p>
 
-<h1><a name="SetUpPostgreSQL-ConfigureClientAuthentication"></a>Configure Client Authentication</h1>
+<h2><a name="SetUpPostgreSQL-ConfigureClientAuthentication"></a>Configure Client Authentication</h2>
 
-<p>In this step, you configure PostgreSQL to allow connections from other users and from the HQ Server.</p>
+<p>In this step, you configure PostgreSQL to allow connections from other users and from the Hyperic Server.</p>
 
-<p>PostgreSQL client authentication is defined in the pg_hba.conf file, which contains lines, referred to as records, that specify allowed connection types, users, client IP addresses, and authentication method. Locate this line in the file:</p>
+<p>PostgreSQL client authentication is defined in the <tt>pg_hba.conf</tt> file, which contains lines, referred to as records, that specify allowed connection types, users, client IP addresses, and authentication method. Locate this line in the file:</p>
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
 		<pre class="theme: Confluence; brush: java; gutter: false"># TYPE  DATABASE USER  CIDR-ADDRESS AUTH-METHOD</pre>
@@ -214,11 +220,11 @@ effective_cache_size = 5000</pre>
 host    all      all *192.168.1.6/32* password</pre>
 		</div>
 </div></div>
-<p>For more information about  pg_hba.conf see [[<a href="http://www.postgresql.org/docs/8.2/interactive/auth-pg-hba-conf.html">http://www.postgresql.org/docs/8.2/interactive/auth-pg-hba-conf.html</a></p>
+<p>For more information about <tt>pg_hba.conf</tt> see <a href="http://www.postgresql.org/docs/8.2/interactive/auth-pg-hba-conf.html">http://www.postgresql.org/docs/8.2/interactive/auth-pg-hba-conf.html</a></p>
 
-<h1><a name="SetUpPostgreSQL-InstallPostgreSQLClientontheHQServer"></a>Install PostgreSQL Client on the HQ Server</h1>
+<h2><a name="SetUpPostgreSQL-InstallPostgreSQLClientontheHypericServerHost"></a>Install PostgreSQL Client on the Hyperic Server Host</h2>
 
-<p>The purpose of installing the PostgreSQL client is so that you can verify connectivity between the server and the database.  To install the client, enter these commands:</p>
+<p>Install the PostgreSQL client so that you can verify connectivity between the server and the database. To install the client, enter these commands:</p>
 
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
@@ -226,68 +232,52 @@ host    all      all *192.168.1.6/32* password</pre>
 psql -d postgres -h 192.168.1.4 -U admin -W</pre>
 		</div>
 </div></div>
-<p>Once the connectivity is tested, you can remove the PostgreSQL client with this command:</p>
+
+<p>After you verify the connection, you can remove the PostgreSQL client with this command:</p>
 
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
 		<pre class="theme: Confluence; brush: java; gutter: false">yum -y remove postgresql</pre>
 		</div>
 </div></div>
-<h1><a name="SetUpPostgreSQL-InstalltheHQServer"></a>Install the HQ Server</h1>
 
-<p>Install the HQ Server. For instructions, see <a href="Installing Hyperic.html" title="Installing Hyperic">Installing Hyperic</a>.</p>
 
-<p>Note: Do not start the HQ Server until after completing the steps in the following section. </p>
-<h1><a name="SetUpPostgreSQL-CreatePLPGLanguageforPostgreSQL8Installations"></a>Create PLPG Language for PostgreSQL 8 Installations</h1>
+<h2><a name="SetUpPostgreSQL-InstalltheHypericServer"></a>Install the Hyperic Server</h2>
 
-<p><b>Note:</b> This step is necessary only for v8.0 of PostgreSQL.</p>
+<p>Install the Hyperic Server. For instructions, see <a href="Hyperic Installation and Startup Process.html#HypericInstallationandStartupProcess-SetUpServer">Step 3 - Set Up Hyperic Server</a> of the <a href="Hyperic Installation and Startup Process.html" title="Hyperic Installation and Startup Process">Hyperic Installation and Startup Process</a>.</p>
 
-<p>HQ usually automatically creates a language in the PostgreSQL database. HQ is not able to create the language automatically in PostgreSQL 8.0, so for that version, you must run the following command on the HQ database before starting the HQ Server:</p>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Don't start up the server yet</b><br />Do not start the Hyperic Server until after completing the steps in the following section.</td></tr></table></div>
 
-<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
-<div id="root">
-		<pre class="theme: Confluence; brush: java; gutter: false">createlang plpgsql [ICG:DATABASE NAME]</pre>
-		</div>
-</div></div>
-<p>For example:</p>
-<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
-<div id="root">
-		<pre class="theme: Confluence; brush: java; gutter: false">createlang plpgsql HQ</pre>
-		</div>
-</div></div>
-<p>The createlang executable is located in the bin directory of your PostgreSQL installation.</p>
+<h2><a name="SetUpPostgreSQL-StartHypericServer"></a>Start Hyperic Server</h2>
 
-<h1><a name="SetUpPostgreSQL-StartHQServer"></a>Start HQ Server</h1>
+<p>Start the Hyperic Server. For instructions, see the <a href="Hyperic Installation and Startup Process.html#HypericInstallationandStartupProcess-StartServer">"Start the Hyperic Server" step</a> of the <a href="Hyperic Installation and Startup Process.html" title="Hyperic Installation and Startup Process">Hyperic Installation and Startup Process</a>.</p>
 
-<p>Start the HQ Server. For instructions, see&nbsp; <a href="Configure and Run the Hyperic Server.html" title="Configure and Run the Hyperic Server">Configure and Run the Hyperic Server</a>. If the server fails to start up, there may be problems with your PostgreSQL configuration.  Check the PostgreSQL logs for  connection failures or errors.</p>
+<p>If the server fails to start up, there may be problems with your PostgreSQL configuration. Check the PostgreSQL logs for  connection failures or errors.</p>
 
-<h1><a name="SetUpPostgreSQL-TroubleshootingDatabaseConnectionProblems"></a>Troubleshooting Database Connection Problems</h1>
+<h1><a name="SetUpPostgreSQL-TroubleshootPostgreSQLConnectionProblems"></a>Troubleshoot PostgreSQL Connection Problems</h1>
 
-<p>If network connections to the database fail, you can troubleshoot the issue in PostgreSQL log files, using the UNIX® tail command with the &#45;f parameter</p>
+<p>If network connections to the database fail, you can troubleshoot the issue in PostgreSQL log files, using the UNIX® <tt>tail</tt> command with the <tt>-f</tt> parameter</p>
 
-<p>tail &#45;f displays the lines at the end of a file, and displays additional log messages that follow to the terminal. This is useful for watching log files, or any other file which may be appended over time. The following log files will have information about failed connections.</p>
+<p><tt>tail -f</tt> displays the lines at the end of a file, and displays additional log messages that follow to the terminal. This is useful for watching log files, or any other file which may be appended over time. Failed connection messages are written to the following files:.</p>
 
 <ul>
-	<li>/var/lib/pgsql/data/pg_log/postgresql-day.log</li>
-	<li>/var/lib/pgsql/pgstartup.log</li>
+	<li><tt>/var/lib/pgsql/data/pg_log/postgresql-day.log</tt></li>
+	<li><tt>/var/lib/pgsql/pgstartup.log</tt></li>
 </ul>
 
 
 <h1><a name="SetUpPostgreSQL-UsefulPostgreSQLCommands"></a>Useful PostgreSQL Commands</h1>
 
-<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
-<div id="root">
-		<pre class="theme: Confluence; brush: java; gutter: false">\h     help  with SQL commands
-?      help with psql commands
-\du    list roles/users
-\l     list databases
-\c     to choose a database
-\d     to list tables once in a database
-\q    quit</pre>
-		</div>
-</div></div>
+<p><tt>\h</tt> &#8212; help  with SQL commands<br/>
+<tt>&#63;</tt> &#8212; help with psql commands<br/>
+<tt>\du</tt> &#8212; list roles/users<br/>
+<tt>\l</tt> &#8212; list databases<br/>
+<tt>\c</tt> &#8212; to choose a database<br/>
+<tt>\d</tt> &#8212; to list tables once in a database<br/>
+<tt>\q</tt> &#8212; quit</p>
 
-<p><font color=""></font></p>
+
+
 
 				    
                     			    </td>
@@ -298,7 +288,7 @@ psql -d postgres -h 192.168.1.4 -U admin -W</pre>
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:43</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:56</font></td>
 		    </tr>
 	    </table>
     </body>

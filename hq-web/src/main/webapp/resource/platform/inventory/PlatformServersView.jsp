@@ -3,7 +3,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -36,11 +36,10 @@
 <tiles:importAttribute name="selfAction"/>
 
 <c:set var="widgetInstanceName" value="listPlatformServers"/>
-<script type="text/javascript">
-initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-serversWidgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-</script>
-
+<jsu:script>
+	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+	serversWidgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+</jsu:script>
 <c:url var="listNewUrl" value="/resource/server/Inventory.do">
 	<c:param name="mode" value="new"/>
 	<c:param name="rid" value="${platform.id}"/>

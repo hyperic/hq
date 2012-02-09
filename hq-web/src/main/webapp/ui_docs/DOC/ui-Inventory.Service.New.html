@@ -1,35 +1,38 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : ui-Inventory.Service.New</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : ui-Inventory.Service.New</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : ui-Inventory.Service.New
+                            vFabric Hyperic 4.6.5 : ui-Inventory.Service.New
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 27, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1311786243045 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1311786243045 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1311786243045 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1325699260617 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699260617 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699260617 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1311786243045'>
+/*]]>*/</style><div class='rbtoc1325699260617'>
 <ul>
     <li><a href='#ui-Inventory.Service.New-LearnAboutPlatformServices'>Learn About Platform Services</a></li>
     <li><a href='#ui-Inventory.Service.New-ConfigureaPlatformService'>Configure a Platform Service</a></li>
@@ -107,7 +110,7 @@ div.rbtoc1311786243045 li {margin-left: 0px;padding-left: 0px;}
 <td class='confluenceTd'> FileServer Mount </td>
 <td class='confluenceTd'> Use to monitor a remote filesystem mount point and associated disks and raid arrays. <br class="atl-forced-newline" />
 <br class="atl-forced-newline" />
-<b>Note:</b> The HQ Agent auto-discovers local mount points. You only need to explicitly configure a FileServer Mount service to monitor a remote network file system (NFS). Alternatively, you can install an HQ Agent on the system that hosts the NFS, in which case the NFS will be auto-discovered. </td>
+<b>Note:</b> The Hyperic Agent auto-discovers local mount points. You only need to explicitly configure a FileServer Mount service to monitor a remote network file system (NFS). Alternatively, you can install an Hyperic Agent on the system that hosts the NFS, in which case the NFS will be auto-discovered. </td>
 <td class='confluenceTd'>&nbsp;</td>
 </tr>
 <tr>
@@ -149,7 +152,7 @@ div.rbtoc1311786243045 li {margin-left: 0px;padding-left: 0px;}
 <td class='confluenceTd'> NetworkServer Interface </td>
 <td class='confluenceTd'> Use to monitor a network interface. <br class="atl-forced-newline" />
 <br class="atl-forced-newline" />
-<b>Note:</b> Because the HQ Agent auto-discovers network interfaces, manual configuration of a NetworkServer Interface is rare. </td>
+<b>Note:</b> Because the Hyperic Agent auto-discovers network interfaces, manual configuration of a NetworkServer Interface is rare. </td>
 <td class='confluenceTd'>&nbsp;</td>
 </tr>
 <tr>
@@ -167,7 +170,7 @@ div.rbtoc1311786243045 li {margin-left: 0px;padding-left: 0px;}
 <td class='confluenceTd'> Use to monitor a process using a Hyperic SIGAR Process Table Query Language (PTQL) query. To configure, you supply the PTQL query in the form: <br class="atl-forced-newline" />  <br class="atl-forced-newline" />
 <tt>Class.Attribute.operator=value</tt> <br class="atl-forced-newline" />  <br class="atl-forced-newline" />
 For example, <br class="atl-forced-newline" />  <br class="atl-forced-newline" />  <tt>Pid.PidFile.eq=/var/run/sshd.pid</tt> </td>
-<td class='confluenceTd'> <a href="http://support.hyperic.com/display/SIGAR/PTQL" title="PTQL">SIGAR Process Table Query Language documentation</a> </td>
+<td class='confluenceTd'> <a href="http://support.hyperic.com/display/SIGAR/PTQL">http://support.hyperic.com/display/SIGAR/PTQL</a> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> RPC </td>
@@ -177,7 +180,7 @@ For example, <br class="atl-forced-newline" />  <br class="atl-forced-newline" /
 </tr>
 <tr>
 <td class='confluenceTd'> Script </td>
-<td class='confluenceTd'> Used to configure HQ to periodically run a script that collects a&nbsp; system or application metric. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Used to configure Hyperic to periodically run a script that collects a&nbsp; system or application metric. <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'>&nbsp;</td>
 </tr>
 <tr>
@@ -225,7 +228,7 @@ For example, <br class="atl-forced-newline" />  <br class="atl-forced-newline" /
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464598/77660533.gif">fb_ok.gif</a> (image/gif)
+                                <a href="attachments/79036996/79134816.gif">fb_ok.gif</a> (image/gif)
                                 <br/>
                                                     </div>
 				    
@@ -237,7 +240,7 @@ For example, <br class="atl-forced-newline" />  <br class="atl-forced-newline" /
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:44</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:57</font></td>
 		    </tr>
 	    </table>
     </body>

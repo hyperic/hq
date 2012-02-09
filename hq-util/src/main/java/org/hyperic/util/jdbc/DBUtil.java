@@ -77,7 +77,7 @@ public class DBUtil {
     public static final int DATABASE_POSTGRESQL_9 = 11;
 
     // Built-in DB constants
-    private static String BUILTIN_DB_JDBC_URL = "jdbc:postgresql://127.0.0.1";
+    private static String BUILTIN_DB_JDBC_URL = "jdbc:postgresql://127.0.0.1:9432";
     private static String BUILTIN_DB_NAME = "hqdb";
 
     public static final int IN_CHUNK_SIZE = 200;

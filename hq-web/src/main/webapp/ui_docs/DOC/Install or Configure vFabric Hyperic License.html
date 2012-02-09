@@ -1,0 +1,90 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : Install or Configure vFabric Hyperic License</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 4.6.5 : Install or Configure vFabric Hyperic License
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325706763728 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325706763728 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325706763728 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1325706763728'>
+<ul>
+    <li><a href='#InstallorConfigurevFabricHypericLicense-LicenseConsumptioninvFabricHyperic'>License Consumption in vFabric Hyperic</a></li>
+    <li><a href='#InstallorConfigurevFabricHypericLicense-InstallorConfigureLicense'>Install or Configure License</a></li>
+</ul></div> 
+
+<h1><a name="InstallorConfigurevFabricHypericLicense-LicenseConsumptioninvFabricHyperic"></a>License Consumption in vFabric Hyperic </h1>
+
+<p>vFabric Hyperic is priced on a per managed platform basis where a platform is: </p>
+
+<ul>
+	<li>A physical machine or a VM with a Hyperic Agent running on it.</li>
+	<li>A network device or network host managed remotely by a Hyperic Agent. (<a href="Network Device.html" title="Network Device">Network Device</a> in <em>vFabric Hyperic Resource Configuration and Metrics</em> describes Hyperic functionality for managing remote devices and hosts.)</li>
+</ul>
+
+
+
+<h1><a name="InstallorConfigurevFabricHypericLicense-InstallorConfigureLicense"></a>Install or Configure License </h1>
+
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>If you obtain vFabric Hyperic as part of a vFabric Cloud Application Platform package, refer first to the licensing information and procedure in <em>Getting Started with vFabric Cloud Application Platform</em>. If necessary, complete additional licensing tasks in this document.</td></tr></table></div> 
+
+<p>vFabric Hyperic evaluation distributions include a time-limited license for 60 platforms. </p>
+
+<p>After you purchase vFabric Hyperic, a production license specifies the the number of platforms you may manage, and unless you have a perpetual license, the license expiration date. </p>
+
+<p>To activate your license: </p>
+<ol>
+	<li>Create a file named <tt>vf.hyp-serial-numbers.txt</tt> that contains the product serial number provided by VMware. Install the serial number file in:
+	<ul>
+		<li><tt>/etc/opt/vmware/vfabric/</tt> on Unix-like platforms</li>
+		<li><tt>%ALLUSERPROFILE%\vmware\vfabric</tt> on Windows platforms.</li>
+	</ul>
+	</li>
+	<li>If you obtained vFabric Hyperic as a part of vFabric Platform, configure the location of the VMware License Server that administers the network license for vFabric Platform, by adding the <tt>vfabric.licenseServer.url</tt> property to <tt>ServerHome/conf/hq-server.conf</tt>.</li>
+	<li>Restart the Hyperic Server.</li>
+</ol>
+
+
+<p>You can view your license terms on the <b>HQ License Details</b> section of the <b>Administration</b> tab, as shown in the screenshot below. </p>
+
+<p>vFabric Hyperic sends an email notification of upcoming expiration starting 45 days prior to the expiration date. </p>
+
+<p><span class="image-wrap" style=""><img src="attachments/79038211/79135216.png" style="border: 0px solid black"/></span> </p>
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:56</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

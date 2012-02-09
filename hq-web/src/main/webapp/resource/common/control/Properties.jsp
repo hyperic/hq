@@ -4,7 +4,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -29,8 +29,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-
-<script src="<html:rewrite page="/js/control_ControlActionProperties.js"/>" type="text/javascript"></script>
+<jsu:importScript path="/js/control_ControlActionProperties.js" />
 
 <!--  GENERAL PROPERTIES TITLE -->
 <tiles:insert definition=".header.tab">
@@ -103,6 +102,6 @@
 </table>
 </div>
 <!--  /  -->
-<script  type="text/javascript">
-  document.getElementById("configFile").style.display = "none";
-</script>
+<jsu:script>
+  	document.getElementById("configFile").style.display = "none";
+</jsu:script>

@@ -1,0 +1,204 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : Upgrade Hyperic Server</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 4.6.5 : Upgrade Hyperic Server
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 24, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1327439172295 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1327439172295 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1327439172295 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1327439172295'>
+<ul>
+    <li><a href='#UpgradeHypericServer-WhatHappensDuringServerUpgrade'>What Happens During Server Upgrade</a></li>
+    <li><a href='#UpgradeHypericServer-UpgradeHypericServeronUnixBasedPlatforms'>Upgrade Hyperic Server on Unix-Based Platforms</a></li>
+    <li><a href='#UpgradeHypericServer-UpgradeHypericServeronWindowsPlatforms'>Upgrade Hyperic Server on Windows Platforms</a></li>
+    <li><a href='#UpgradeHypericServer-ScalingHypericServerinvFabricHyperic4.6.5'>Scaling Hyperic Server in vFabric Hyperic 4.6.5</a></li>
+    <li><a href='#UpgradeHypericServer-SolvingProblemswithUpgradedServerswithanOracleDatabase'>Solving Problems with Upgraded Servers with an Oracle Database</a></li>
+</ul></div>
+
+
+<blockquote>
+<p><b>About this page...</b> </p>
+
+<p>This page has instructions for upgrading the Hyperic Server to 4.6. Before performing the steps on this page, see <a href="Hyperic Upgrade Processes.html" title="Hyperic Upgrade Processes">Hyperic Upgrade Processes</a> for information about upgrade options and other steps in the upgrade process. </p>
+
+<p>If you plan to also upgrade your Hyperic Agents to 4.6, and to configure the server and agents for user-managed keystores, see the information in the <a href="Hyperic Upgrade Processes.html#HypericUpgradeProcesses-UpgradeWithTrust">Upgrade Server and Agent with User-Managed Keystores</a> section of <a href="Hyperic Upgrade Processes.html" title="Hyperic Upgrade Processes">Hyperic Upgrade Processes</a>.</p></blockquote> 
+
+<h1><a name="UpgradeHypericServer-WhatHappensDuringServerUpgrade"></a>What Happens During Server Upgrade</h1>
+
+<p>You upgrade the Hyperic Server using the Hyperic installer, using the upgrade option. (The installer does not upgrade the Hyperic Agent.)</p>
+
+<p>The installer installs a new version of Hyperic Server; it obtains the configuration information from your previous server installation configuration files and configures the new server instance accordingly.</p>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>New Properties in vFabric Hyperic 4.6.5</b><br />In Hyperic 4.6.5, there are two new properties in <tt>server.conf</tt> &#8212; <tt><a href="tomcat.maxthreads.html" title="tomcat.maxthreads">tomcat.maxthreads</a></tt> and <tt><a href="tomcat.minsparethreads.html" title="tomcat.minsparethreads">tomcat.minsparethreads</a></tt>.</td></tr></table></div>
+
+<p>If you use Hyperic's internal database, the installer creates a new database instance that contains the data from the existing instance. The new instance has an updated schema, but the PostgreSQL server itself in not upgraded to a new version.</p>
+
+<p>If you use an external database, the installer updates the existing instance.</p>
+
+<h1><a name="UpgradeHypericServer-UpgradeHypericServeronUnixBasedPlatforms"></a>Upgrade Hyperic Server on Unix-Based Platforms</h1>
+
+<ol>
+	<li>Stop the current server instance. For example:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">/opt/hyperic/server-4.5.0/bin/hq-server.sh stop</pre>
+		</div>
+</div></div></li>
+	<li><b>If you use an external Hyperic database, back it up before proceeding.</b></li>
+	<li>Archive your old Hyperic Server directory, so that if you want, you can revert to the previous version. For example:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">tar -zcvf hq-server-4.5.0-archive.tgz hq-server-4.5.0-EE</pre>
+		</div>
+</div></div></li>
+	<li>Run the Hyperic installer in upgrade mode. For example:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">/opt/hyperic/hyperic-hq-installer/setup.sh -upgrade</pre>
+		</div>
+</div></div></li>
+	<li>You are prompted to acknowledge the VMware license agreement.</li>
+	<li>The installer prompts for the path to the previous Hyperic Server instance. Enter the path, for example:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">/opt/hyperic/server-4.5.0</pre>
+		</div>
+</div></div></li>
+	<li>The installer prompts for the path to the new server instance. Enter the path to the directory under which the new server instance will be installed. For example, to install the new instance under your existing Hyperic home directory:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">/opt/hyperic</pre>
+		</div>
+</div></div>
+	<ul>
+		<li>The installer will finish the upgrade.</li>
+	</ul>
+	</li>
+	<li>Start the new server instance. For example:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">/opt/hyperic/server-4.6.0/bin/hq-server.sh start</pre>
+		</div>
+</div></div></li>
+	<li>In vFabric Hyperic, you can set a variety of sizing properties by running the installer with the <tt>-updateScale</tt> option. For more information, see <a href="#UpgradeHypericServer-ScalingHypericServerinvFabricHyperic4.6.5">Scaling Hyperic Server in vFabric Hyperic 4.6.5</a>.</li>
+</ol>
+
+
+<h1><a name="UpgradeHypericServer-UpgradeHypericServeronWindowsPlatforms"></a>Upgrade Hyperic Server on Windows Platforms</h1>
+
+<ol>
+	<li>Stop the existing server instance using the Windows Services Control Panel.</li>
+	<li>Follow the instructions that apply, depending on whether you use the Hyperic built-in database or an external database:
+	<ul>
+		<li>If you use the built-in Hyperic database, the upgrade process will migrate your database schema to the latest edition. Note that PostgreSQL itself is not upgraded to the latest version that ships with Hyperic. The database server remains the one installed when you first installed Hyperic Server.</li>
+		<li><b>If using an external database, back it up.</b></li>
+	</ul>
+	</li>
+	<li>Archive your previous Hyperic Server directory so that if you wish you can revert to the previous version.</li>
+	<li>Run the Hyperic installer in upgrade mode:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">c:\hyperic\hyperic-hq-installer\setup.bat -upgrade</pre>
+		</div>
+</div></div></li>
+	<li>You are prompted to acknowledge the VMware license agreement.</li>
+	<li>The installer prompts for the path to the previous Hyperic Server instance. Enter the full path to your existing server installation, for instance:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">c:\hyperic\server-4.5.0</pre>
+		</div>
+</div></div></li>
+	<li>The installer prompts for the path where the upgrade version should be installed. Enter the path to the directory that will contain the new server installation. For instance, to install the new instance under your existing Hyperic home directory:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">c:\hyperic\</pre>
+		</div>
+</div></div>
+	<ul>
+		<li>The installer will finish the upgrade.</li>
+	</ul>
+	</li>
+	<li>Update the Windows Service with the new version information:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">c:\hyperic\server-4.5.0\bin\hq-server.bat install</pre>
+		</div>
+</div></div></li>
+	<li>Start the upgraded Hyperic Server using the Windows Services Control Panel.</li>
+	<li>In vFabric Hyperic, you can set a variety of sizing properties by running the installer with the <tt>-updateScale</tt> option. For more information, see <a href="#UpgradeHypericServer-ScalingHypericServerinvFabricHyperic4.6.5">Scaling Hyperic Server in vFabric Hyperic 4.6.5</a>.</li>
+</ol>
+
+
+<h1><a name="UpgradeHypericServer-ScalingHypericServerinvFabricHyperic4.6.5"></a>Scaling Hyperic Server in vFabric Hyperic 4.6.5</h1>
+<p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+
+<p>Starting in vFabric 4.6.5, you can set an installation profile that sets the values of key server properties to tune the Hyperic Server based on the size of your environment. For information about the effect of setting an installation profile, see <a href="About Sizing Profiles in vFabric Hyperic.html" title="About Sizing Profiles in vFabric Hyperic">About Sizing Profiles in vFabric Hyperic</a>. For instructions on how to set the installation profile for Hyperic Server after installation or upgrade, see <a href="Change vFabric Hyperic Server Sizing Profile.html" title="Change vFabric Hyperic Server Sizing Profile">Change vFabric Hyperic Server Sizing Profile</a>. </p>
+
+<p>If you manage more than 50 platforms, and have previously tuned the server properties whose values are set by changing the sizing profile, rather than update the server's sizing profile, you may wish to manually change the values of the server properties that are new in Hyperic 4.6.5 &#8212; in an upgrade installation <tt><a href="tomcat.maxthreads.html" title="tomcat.maxthreads">tomcat.maxthreads</a></tt> and <tt><a href="tomcat.minsparethreads.html" title="tomcat.minsparethreads">tomcat.minsparethreads</a></tt> are added to <tt>server.conf</tt> with values appropriate for managing less than fifty platforms.</p>
+
+<h1><a name="UpgradeHypericServer-SolvingProblemswithUpgradedServerswithanOracleDatabase"></a>Solving Problems with Upgraded Servers with an Oracle Database</h1>
+
+<p>If you are upgrading an Hyperic installation with an Oracle backend and you experience any of the following errors during upgrade, follow the steps below to resolve the problem.</p>
+
+<p><tt>Error updating EAM_SERVICE.SERVICE_TYPE_ID: java.sql.SQLException: ORA-02296: cannot enable (HQDBUSER.) - null values found</tt><br/>
+<tt>Error executing statement desc=null SQL=[docbox:</tt><br/>
+<tt>ALTER TABLE eam_stat_errors DROP CONSTRAINT rt_errs_fk_rstat CASCADE</tt><br/>
+<tt>] java.sql.SQLException: ORA-02443: Cannot drop constraint - nonexistent constraint</tt></p>
+
+<p>Fix this with these steps:</p>
+
+<ol>
+	<li>Restore your database from backup.</li>
+	<li>Execute this SQL:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">DELETE FROM EAM_SERVICE WHERE SERVICE_TYPE_ID IS NULL;</pre>
+		</div>
+</div></div></li>
+	<li>Re-run the upgrade.</li>
+</ol>
+
+
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:56</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

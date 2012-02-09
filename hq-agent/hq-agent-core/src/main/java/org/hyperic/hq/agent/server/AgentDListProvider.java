@@ -41,21 +41,19 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.hyperic.util.file.DiskList;
-import org.hyperic.util.file.FileUtil;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.db.DiskList;
+import org.hyperic.util.file.FileUtil;
 
-public class AgentDListProvider 
-    implements AgentStorageProvider 
-{
-    private static final int RECSIZE  = 1024;
+public class AgentDListProvider implements AgentStorageProvider {
+    private static final int RECSIZE  = 4000;
+    private static final int OLD_RECSIZE = 1024;
     private static final long MAXSIZE = 50 * 1024 * 1024; // 50MB
     private static final long CHKSIZE = 10 * 1024 * 1024;  // 10MB
     private static final int CHKPERC  = 50; // Only allow < 50% free
 
-    private Log      log;        // da logger
+    private final Log      log;        // da logger
     private HashMap  keyVals;    // The key-value pairs
     private HashMap  lists;      // Names onto DiskList objects
     private HashMap  overloads;
@@ -84,7 +82,7 @@ public class AgentDListProvider
      */
     public String getDescription(){
         return "Agent D-list provider.  Data is written to data/idx files " +
-            "for lists, and a single file for key/values";
+                "for lists, and a single file for key/values";
     }
 
     private DiskList intrCreateList(String name, int recSize) throws IOException {
@@ -98,29 +96,31 @@ public class AgentDListProvider
             _chkPerc = info.chkPerc;
         }
         return new DiskList(new File(this.writeDir, name),
-                                      recSize, _chkSize, _chkPerc, _maxSize);
+                recSize, _chkSize, _chkPerc, _maxSize);
     }
+    
+
 
     /**
      * Create a list of non-standard record size.
      */
     public void createList(String name, int recSize)
-        throws AgentStorageException
-    {
+            throws AgentStorageException
+            {
         try {
             DiskList dList = intrCreateList(name, recSize);
             this.lists.put(name, dList);
         } catch (IOException e) {
             throw new AgentStorageException("Unable to create DiskList: " + 
-                                            e.getMessage());
+                    e.getMessage());
         }
-    }
+            }
 
     private ListInfo parseInfo(String info) throws AgentStorageException {
         StringTokenizer st = new StringTokenizer(info, ":");
         if (st.countTokens() != 4) {
             throw new AgentStorageException(info + " is an invalid agent " +
-                                            "disklist configuration");
+                    "disklist configuration");
         }
         String s = st.nextToken().trim();
         long factor;
@@ -130,7 +130,7 @@ public class AgentDListProvider
             factor = 1024;
         } else {
             throw new AgentStorageException(info + " is an invalid agent " +
-                                            "disklist configuration");
+                    "disklist configuration");
         }
         ListInfo listInfo = new ListInfo();
         try {
@@ -139,7 +139,7 @@ public class AgentDListProvider
             listInfo.chkPerc = Integer.parseInt(st.nextToken().trim());
         } catch (NumberFormatException e) {
             throw new AgentStorageException("Invalid agent disklist " +
-                                            "configuration: " + e);
+                    "configuration: " + e);
         }
         return listInfo;
     }
@@ -170,7 +170,7 @@ public class AgentDListProvider
                 this.keyVals.put(key, value);
             }
         }
-        
+
         // After call to setValue() set dirty flag for flush to storage
         this.keyValDirty = true;
     }
@@ -206,8 +206,8 @@ public class AgentDListProvider
     //synchronized because concurrent threads cannot
     //have this.keyValFile open for writing on win32
     public synchronized void flush()
-        throws AgentStorageException
-    {
+            throws AgentStorageException
+            {
         BufferedOutputStream bOs;
         FileOutputStream fOs = null;
         DataOutputStream dOs;
@@ -223,8 +223,8 @@ public class AgentDListProvider
             synchronized(this.keyVals){
                 dOs.writeLong(this.keyVals.size());
                 for(Iterator i=this.keyVals.entrySet().iterator(); 
-                    i.hasNext();
-                    )
+                        i.hasNext();
+                        )
                 {
                     Map.Entry ent = (Map.Entry)i.next();
 
@@ -240,7 +240,7 @@ public class AgentDListProvider
         } catch(IOException exc){
             this.log.error("Error flushing data", exc);
             throw new AgentStorageException("Error flushing data: " +
-                                            exc.getMessage());
+                    exc.getMessage());
         } finally {
             try {if(fOs != null)fOs.close();} catch(IOException exc){}
         }
@@ -255,9 +255,9 @@ public class AgentDListProvider
         } catch (IOException e) {
             this.log.error("Error backing up keyvals", e);
             throw new AgentStorageException("Error backing up keyvals: " +
-                                            e.getMessage());
+                    e.getMessage());
         }
-    }
+            }
 
     /**
      * DList info string is a series of properties seperated by '|'
@@ -270,8 +270,8 @@ public class AgentDListProvider
      * Default is 'data|20|50'
      */
     public void init(String info)
-        throws AgentStorageException 
-    {
+            throws AgentStorageException 
+            {
         BufferedInputStream bIs;
         FileInputStream fIs = null;
         DataInputStream dIs;
@@ -281,7 +281,7 @@ public class AgentDListProvider
         StringTokenizer st = new StringTokenizer(info, "|");
         if (st.countTokens() != 5) {
             throw new AgentStorageException(info + " is an invalid agent" +
-                                            " storage provider configuration");
+                    " storage provider configuration");
         }
 
         this.keyVals    = new HashMap();
@@ -300,7 +300,7 @@ public class AgentDListProvider
             factor = 1024;
         } else {
             throw new AgentStorageException(info + " is an invalid agent" +
-                                            " storage provider configuration");
+                    " storage provider configuration");
         }
         try {
             maxSize = Long.parseLong(st.nextToken().trim()) * factor;
@@ -308,7 +308,7 @@ public class AgentDListProvider
             chkPerc = Integer.parseInt(st.nextToken().trim());
         } catch (NumberFormatException e) {
             throw new AgentStorageException("Invalid agent storage provider " +
-                                            "configuration: " + e);
+                    "configuration: " + e);
         }
 
         if(this.writeDir.exists() == false){
@@ -319,7 +319,7 @@ public class AgentDListProvider
         if(this.writeDir.isDirectory() == false){
             throw new AgentStorageException(dir + " is not a directory");
         }
-        
+
         try {
             fIs = new FileInputStream(this.keyValFile);
             bIs = new BufferedInputStream(fIs);
@@ -333,17 +333,17 @@ public class AgentDListProvider
             // Normal when it doesn't exist
         } catch(IOException exc){
             this.log.error("Error reading " + this.keyValFile + " loading " +
-                           "last known good version");
-            
+                    "last known good version");
+
             // Close old stream
             try {if(fIs != null)fIs.close();} catch(IOException e){}
-  
+
             // Fall back to last known good keyvals file
             try {
                 fIs = new FileInputStream(this.keyValFileBackup);
                 bIs = new BufferedInputStream(fIs);
                 dIs = new DataInputStream(bIs);
-                
+
                 nEnts = dIs.readLong();
                 while(nEnts-- != 0) {
                     this.keyVals.put(dIs.readUTF(), dIs.readUTF());
@@ -353,13 +353,13 @@ public class AgentDListProvider
             } catch (IOException e) {
                 // Throw original error
                 throw new AgentStorageException("Error reading " + 
-                                                this.keyValFile + ": " +
-                                                exc.getMessage());
+                        this.keyValFile + ": " +
+                        exc.getMessage());
             }
         } finally {
             try {if(fIs != null)fIs.close();} catch(IOException exc){}
         }
-    }
+            }
 
     public void dispose(){
         try {
@@ -376,7 +376,7 @@ public class AgentDListProvider
                 dl.close();
             } catch(Exception exc){
                 this.log.error("Unable to dispose of disk list '" +
-                               ent.getKey() + "'", exc);
+                        ent.getKey() + "'", exc);
             }
         }
 
@@ -385,43 +385,44 @@ public class AgentDListProvider
     /*** LIST FUNCTIONALITY ***/
 
     public void addToList(String listName, String value)
-        throws AgentStorageException
-    {
-        DiskList dList;
+            throws AgentStorageException
+            {
+        DiskList dList = getDiskList(listName);
+        if (null == dList) {
+            log.error("Error adding data , cannot read list '" + listName + "' " +
+                    "from storage");
+            return;
+        }
         try {
-            synchronized(this.lists){
-                dList = (DiskList)this.lists.get(listName);
-                
-                if(dList == null){
-                    dList = intrCreateList(listName, RECSIZE);
-                    this.lists.put(listName, dList);
-                }
-            }
-            
             dList.addToList(value);
         } catch(IOException exc){
             this.log.error("Error adding to list '" + listName + "'", exc);
             throw new AgentStorageException("Error adding data to list: " +
-                                            exc.getMessage());
+                    exc.getMessage());
+        }
+            }
+
+    public void removeFromList(String listName, long recNumber) throws AgentStorageException {
+        DiskList dList = getDiskList(listName);
+        if (null == dList) {
+            log.error("Error removing data , cannot read list '" + listName + "' " +
+                    "from storage");
+            return;
+        }
+        try {
+            dList.removeRecord(recNumber);
+        } catch(IOException exc){
+            this.log.error("Error deleting from list '" + listName + "'", exc);
+            throw new AgentStorageException("Error deleting data from list: " +
+                    exc.getMessage());
         }
     }
 
-    public void deleteList(String listName){
-        DiskList dList;
-
-        synchronized(this.lists){
-            dList = (DiskList)this.lists.get(listName);
-
-            if(dList == null){
-                try {
-                    dList = intrCreateList(listName, RECSIZE);
-                } catch(IOException exc){
-                    this.log.error("Error loading disk list", exc);
-                    return;
-                }
-            }
+    public void deleteList(String listName) {
+        DiskList dList = getDiskList(listName);
+        if (null == dList) {
+            return ;
         }
-        
         try {
             dList.deleteAllRecords();
         } catch(IOException exc){
@@ -429,7 +430,24 @@ public class AgentDListProvider
         }
     }
 
-    public Iterator getListIterator(String listName){
+    public Iterator<String> getListIterator(String listName) {
+        DiskList dList = getDiskList(listName);
+        if (null == dList) {
+            return null;
+        }
+        return dList.getListIterator();
+    }
+    
+
+    public void convertListToCurrentRecordSize(String listName) throws IOException{
+        DiskList dList = getDiskList(listName);
+        if (null == dList) {
+            return ;
+        }
+        dList.convertListToCurrentRecordSize(OLD_RECSIZE);
+    }
+
+    private DiskList getDiskList(String listName) {
         DiskList dList;
 
         synchronized(this.lists){
@@ -445,13 +463,14 @@ public class AgentDListProvider
                 this.lists.put(listName, dList);
             }
         }
-
-        return dList.getListIterator();
+        return dList;
     }
-
+    
     private static class ListInfo {
         long      maxSize;
         long      chkSize;
         int       chkPerc;
     }
+
+
 }

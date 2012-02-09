@@ -1,5 +1,5 @@
 <plugin name="cloudfoundry" class="org.hyperic.hq.plugin.cloudfoundry.product.CloudFoundryProductPlugin" >
-	<property name="PLUGIN_VERSION" value="1.0.0.M6"/>
+	<property name="PLUGIN_VERSION" value="1.0.0.M7"/>
 	
 	<config name="login">
 		<option name="email"
@@ -29,12 +29,12 @@
     <metrics name="app-service-metrics">
 		<metric name="Availability"
     		template="cloudfoundry:${api-connection},service=%resource.name%:${alias}"
-			interval="300000"
+			interval="600000"
 			indicator="true" />
 			
 	    <metric name="Uptime"
     		template="cloudfoundry:${api-connection},service=%resource.name%:${alias}"
-			interval="300000"
+			interval="600000"
             category="UTILIZATION"
             units="sec"
             collectionType="static"
@@ -69,11 +69,12 @@
 		            
 	    <metric name="Availability"
 	    		template="cloudfoundry:${api-connection}:${alias}"
+				interval="600000"
 	            indicator="true"/>
 	            
 		<metric name="Memory Used"
 	    		template="cloudfoundry:${api-connection}:${alias}"
-				interval="300000"
+				interval="600000"
 				units="B"
 				category="UTILIZATION"
 				indicator="true" />
@@ -81,14 +82,14 @@
 		<metric name="Memory Used (Percent)"
 				alias="PercentMemoryUsed"
 	    		template="cloudfoundry:${api-connection}:${alias}"
-				interval="300000"
+				interval="600000"
 				units="percentage"
 				category="UTILIZATION"
 				indicator="true" />
 				
 		<metric name="Apps Used"
 	    		template="cloudfoundry:${api-connection}:${alias}"
-				interval="300000"
+				interval="600000"
 				units="none"
 				category="UTILIZATION"
 				indicator="true" />
@@ -96,14 +97,14 @@
 		<metric name="Apps Used (Percent)"
 				alias="PercentAppsUsed"
 	    		template="cloudfoundry:${api-connection}:${alias}"
-				interval="300000"
+				interval="600000"
 				units="percentage"
 				category="UTILIZATION"
 				indicator="true" />
 
 		<metric name="Services Used"
 	    		template="cloudfoundry:${api-connection}:${alias}"
-				interval="300000"
+				interval="600000"
 				units="none"
 				category="UTILIZATION"
 				indicator="true" />
@@ -111,7 +112,7 @@
 		<metric name="Services Used (Percent)"
 				alias="PercentServicesUsed"
 	    		template="cloudfoundry:${api-connection}:${alias}"
-				interval="300000"
+				interval="600000"
 				units="percentage"
 				category="UTILIZATION"
 				indicator="true" />

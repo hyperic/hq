@@ -6,7 +6,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -31,15 +31,14 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-
-<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+<jsu:importScript path="/js/listWidget.js" />
 <c:set var="widgetInstanceName" value="listUser"/>
-<script type="text/javascript">
-var pageData = new Array();
-initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');  
-</script>
-
+<jsu:script>
+	var pageData = new Array();
+	
+	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');  
+</jsu:script>
 <hq:pageSize var="pageSize"/>
 <c:url var="pnAction" value="/admin/user/UserAdmin.do">
   <c:param name="mode" value="list"/>

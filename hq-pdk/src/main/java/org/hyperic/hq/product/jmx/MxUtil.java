@@ -26,8 +26,10 @@
 package org.hyperic.hq.product.jmx;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.net.MalformedURLException;
 import java.rmi.RemoteException;
@@ -418,9 +420,84 @@ public class MxUtil {
         return address;
     }
 
+    private static final Map<JMXConnectorKey, JMXConnector> mbeanConns = new HashMap<JMXConnectorKey, JMXConnector>();
+    public static JMXConnector getCachedMBeanConnector(Properties config)
+    throws MalformedURLException, IOException {
+        String jmxUrl = config.getProperty(MxUtil.PROP_JMX_URL);
+        String user = config.getProperty(PROP_JMX_USERNAME);
+        String pass = config.getProperty(PROP_JMX_PASSWORD);
+        JMXConnectorKey key = new JMXConnectorKey(jmxUrl, user, pass);
+        JMXConnector rtn = null;
+        synchronized(mbeanConns) {
+            rtn = mbeanConns.get(key);
+            if (rtn == null) {
+                rtn = getMBeanConnector(config);
+                mbeanConns.put(key, rtn);
+            }
+            try {
+                // ensure that the connection is not broken
+                rtn.getMBeanServerConnection();
+            } catch (IOException e) {
+                close(rtn);
+                rtn = getMBeanConnector(config);
+                mbeanConns.put(key, rtn);
+            }
+        }
+        final JMXConnector c = rtn;
+        final InvocationHandler handler = new InvocationHandler() {
+            private final JMXConnector conn = c;
+            public Object invoke(Object proxy, Method method, Object[] args)
+            throws Throwable {
+                if (method.getName().equals("close")) {
+                    return null;
+                }
+                synchronized (conn) {
+                    return method.invoke(conn, args);
+                }
+            }
+        };
+        return (JMXConnector) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
+                                                     new Class<?>[] {JMXConnector.class}, handler);
+    }
+
+    private static class JMXConnectorKey {
+        private final String url;
+        private final String user;
+        private final String pass;
+        private JMXConnectorKey(String url, String user, String pass) {
+            this.url = url;
+            this.user = user;
+            this.pass = pass;
+        }
+        public boolean equals(Object rhs) {
+            if (this == rhs) {
+                return true;
+            }
+            if (!(rhs instanceof JMXConnectorKey)) {
+                return false;
+            }
+            JMXConnectorKey r = (JMXConnectorKey) rhs;
+            return r.url.equals(url) && equals(r.user, user) && equals(r.pass, pass);
+        }
+        private boolean equals(String buf1, String buf2) {
+            if (buf1 == buf2) {
+                return true;
+            }
+            if (buf1 == null && buf2 != null || buf2 == null && buf1 != null) {
+                return false;
+            }
+            return buf1.equals(buf2);
+        }
+        public int hashCode() {
+            int rtn = url.hashCode() * 7;
+            rtn += (user != null) ? user.hashCode() * 7 : 0;
+            rtn += (pass != null) ? pass.hashCode() * 7 : 0;
+            return rtn;
+        }
+    }
+    
     public static JMXConnector getMBeanConnector(Properties config)
-        throws MalformedURLException,
-               IOException {
+    throws MalformedURLException, IOException {
 
         String jmxUrl = config.getProperty(MxUtil.PROP_JMX_URL);
         Map map = new HashMap();
@@ -428,8 +505,7 @@ public class MxUtil {
         String user = config.getProperty(PROP_JMX_USERNAME);
         String pass = config.getProperty(PROP_JMX_PASSWORD);
 
-        map.put(JMXConnector.CREDENTIALS,
-                new String[] {user, pass});
+        map.put(JMXConnector.CREDENTIALS, new String[] {user, pass});
 
         // required for Oracle AS
         String providerPackages = config.getProperty(PROP_JMX_PROVIDER_PKGS);
@@ -572,7 +648,7 @@ public class MxUtil {
         ObjectName objName = new ObjectName(objectName);
         JMXConnector connector = null;
         try {
-            connector = getMBeanConnector(config);
+            connector = getCachedMBeanConnector(config);
             if (attribute.startsWith(STATS_PREFIX)) {
                 return getJSR77Statistic(connector.getMBeanServerConnection(), objName, attribute);
             }

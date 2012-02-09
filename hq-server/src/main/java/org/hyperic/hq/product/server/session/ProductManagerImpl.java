@@ -89,20 +89,20 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ProductManagerImpl implements ProductManager {
 
-    private Log log = LogFactory.getLog(ProductManagerImpl.class);
+    private final Log log = LogFactory.getLog(ProductManagerImpl.class);
 
-    private CPropManager cPropManager;
-    private TemplateManager templateManager;
-    private AuditManager auditManager;
-    private PluginUpdater pluginUpdater = new PluginUpdater();
+    private final CPropManager cPropManager;
+    private final TemplateManager templateManager;
+    private final AuditManager auditManager;
+    private final PluginUpdater pluginUpdater = new PluginUpdater();
     private static final String ALERT_DEFINITIONS_XML_FILE = "etc/alert-definitions.xml";
-    private AlertDefinitionManager alertDefinitionManager;
-    private PluginDAO pluginDao;
-    private PlatformManager platformManager;
-    private ServerManager serverManager;
-    private ServiceManager serviceManager;
-    private AlertDefinitionXmlParser alertDefinitionXmlParser;
-    private PluginAuditFactory pluginAuditFactory;
+    private final AlertDefinitionManager alertDefinitionManager;
+    private final PluginDAO pluginDao;
+    private final PlatformManager platformManager;
+    private final ServerManager serverManager;
+    private final ServiceManager serviceManager;
+    private final AlertDefinitionXmlParser alertDefinitionXmlParser;
+    private final PluginAuditFactory pluginAuditFactory;
    
 
     @Autowired

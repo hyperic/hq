@@ -25,10 +25,6 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import java.util.Collection;
-
-import org.hibernate.FlushMode;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.dao.HibernateDAO;
@@ -36,8 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class ScheduleRevNumDAO
-    extends HibernateDAO<ScheduleRevNum> {
+public class ScheduleRevNumDAO extends HibernateDAO<ScheduleRevNum> {
 
     @Autowired
     public ScheduleRevNumDAO(SessionFactory f) {
@@ -51,65 +46,22 @@ public class ScheduleRevNumDAO
         }
     }
 
-    public ScheduleRevNum create(int entType, int entId) {
+    public ScheduleRevNum create(AppdefEntityID aeid) {
+        return create(aeid.getType(), aeid.getId());
+    }
 
-        SrnId srnId = new SrnId(entType, entId);
-        ScheduleRevNum srn = new ScheduleRevNum(srnId, 1);
+    public ScheduleRevNum create(int appdefType, int instanceId) {
+        ScheduleRevNum srn = new ScheduleRevNum();
+        SrnId id = new SrnId(appdefType, instanceId);
+        srn.setSrnId(id);
+        srn.setSrn(1);
+        srn.setLastSchedule(now());
         save(srn);
         return srn;
     }
 
-    /**
-     * Get the minimum collection intervals for all entities with metrics
-     * enabled.
-     * @return A Collection of Object arrays with 3 entries, the Integer type,
-     *         the Integer id, and the Long collection interval.
-     */
-    public Collection<Object[]> getMinIntervals() {
-        String sql = "select mt.appdefType, m.instanceId, min(m.interval) "
-                     + "from Measurement m, " + "MonitorableType mt, " + "MeasurementTemplate t "
-                     + "where m.enabled = true and " + "m.template.id = t.id and "
-                     + "t.monitorableType.id = mt.id " + "group by appdef_type, instance_id";
-        return getSession().createQuery(sql).list();
+    private long now() {
+        return System.currentTimeMillis();
     }
 
-    /**
-     * @param id The appdef entity to look up.
-     * @return The minimum collection interval for the given entity.
-     */
-    public Long getMinInterval(AppdefEntityID id) {
-        String sql = "select min(m.interval) " + "from Measurement m, " + "MonitorableType mt, "
-                     + "MeasurementTemplate t " + "where m.enabled = true and "
-                     + "m.instanceId = ? and " + "m.template.id = t.id and "
-                     + "t.monitorableType.id = mt.id and " + "mt.appdefType = ? "
-                     + "group by appdef_type, instance_id";
-
-        return (Long) getSession().createQuery(sql).setInteger(0, id.getID()).setInteger(1,
-            id.getType()).uniqueResult();
-    }
-
-    /**
-     * Find the minimum collection interval for the given entity, potentially
-     * allowing for the query to return a stale value (for efficiency reasons).
-     * 
-     * @param id The appdef entity to look up.
-     * @param allowStale <code>true</code> to allow the query to return a stale
-     *        value; <code>false</code> to never allow a stale value,
-     *        potentially always forcing a sync with the database.
-     * @return The minimum collection interval for the given entity.
-     */
-    public Long getMinInterval(AppdefEntityID id, boolean allowStale) {
-        Session session = this.getSession();
-        FlushMode oldFlushMode = session.getFlushMode();
-
-        try {
-            if (allowStale) {
-                session.setFlushMode(FlushMode.MANUAL);
-            }
-
-            return getMinInterval(id);
-        } finally {
-            session.setFlushMode(oldFlushMode);
-        }
-    }
 }

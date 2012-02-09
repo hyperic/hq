@@ -1,24 +1,27 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : Troubleshoot Agent and Server Problems</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : Troubleshoot Agent and Server Problems</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : Troubleshoot Agent and Server Problems
+                            vFabric Hyperic 4.6.5 : Troubleshoot Agent and Server Problems
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 01, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Feb 06, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    
@@ -27,23 +30,24 @@
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1309541539305 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1309541539305 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1309541539305 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1328568586413 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1328568586413 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1328568586413 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1309541539305'>
+/*]]>*/</style><div class='rbtoc1328568586413'>
 <ul>
     <li><a href='#TroubleshootAgentandServerProblems-LookingforClues'>Looking for Clues</a></li>
 <ul>
     <li><a href='#TroubleshootAgentandServerProblems-HQHealth'>HQ Health</a></li>
+    <li><a href='#TroubleshootAgentandServerProblems-hqstatsandagentstats'>hqstats and agentstats</a></li>
     <li><a href='#TroubleshootAgentandServerProblems-AgentMetrics'>Agent Metrics</a></li>
     <li><a href='#TroubleshootAgentandServerProblems-LogFiles'>Log Files</a></li>
     <li><a href='#TroubleshootAgentandServerProblems-ThreadDumps'>Thread Dumps</a></li>
-    <li><a href='#TroubleshootAgentandServerProblems-CheckAgentPortAvailability'>Check Agent Port Availability</a></li>
+    <li><a href='#TroubleshootAgentandServerProblems-CheckPortAvailability'>Check Port Availability</a></li>
 </ul>
     <li><a href='#TroubleshootAgentandServerProblems-HypericServerProblems'>Hyperic Server Problems</a></li>
 <ul>
-    <li><a href='#TroubleshootAgentandServerProblems-ServerStartupProblems'>Server Startup Problems</a></li>
+    <li><a href='#TroubleshootAgentandServerProblems-LicenseIssues'>License Issues</a></li>
     <li><a href='#TroubleshootAgentandServerProblems-BackloggedHypericServer'>Backlogged Hyperic Server</a></li>
 </ul>
     <li><a href='#TroubleshootAgentandServerProblems-AgentStartupProblems'>Agent Startup Problems</a></li>
@@ -65,7 +69,7 @@ div.rbtoc1309541539305 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 </ul></div>
 
-<p><font color=""></font></p>
+
 <h1><a name="TroubleshootAgentandServerProblems-LookingforClues"></a>Looking for Clues</h1>
 
 <p>This section describes options for getting information that might help you diagnose problems in an Hyperic deployment.</p>
@@ -74,20 +78,20 @@ div.rbtoc1309541539305 li {margin-left: 0px;padding-left: 0px;}
 
 <p>The <b>HQ Health</b> page, available in the "Plugins" section of the <b>Administration</b> page, displays a variety of metrics and status about your Hyperic deployment, including server host statistics and Hyperic Server process information.</p>
 
-<p><b>HQ Health</b> provides views, queries, and diagnostic tools that provide visibility into metric loads, caches, the Hyperic database, and agents across your deployment.</p>
+<p><b>HQ Health</b> provides views, queries, and diagnostic tools that provide visibility into metric loads, caches, the Hyperic database, and agents across your deployment. For more information, see <a href="ui-HQHealth.html" title="ui-HQHealth">ui&#45;HQHealth</a> in <em>vFabric Hyperic User Interface</em>.</p>
 
-<p>For more information about the <b>Agents</b> tab in <b>HQ Health</b>, see <a href="View Status of all Hyperic Agents.html" title="View Status of all Hyperic Agents">View Status of all Hyperic Agents</a>. For information about all of the data available on the <b>HQ Health</b> page, see its help page. </p>
+<h2><a name="TroubleshootAgentandServerProblems-hqstatsandagentstats"></a>hqstats and agentstats</h2>
 
+<p>Mainly of use to Hyperic Support (or others with an internals-level knowledge of Hyperic), the files in the <tt>hq-server/logs/hqstat</tt> and <tt>AgentHome/logs/agentstats</tt> folders contain a variety of system and subsystem performance, resource usage, and other statistics for the Hyperic Server and Hyperic Agent, respectively.</p>
 
-
-<p><a href="ui-HQHealth.html" title="ui-HQHealth">ui-HQHealth</a></p>
-
+<p>The statistics files in the <tt>hqstat</tt> and <tt>agentstats</tt> directories are in <tt>.csv</tt> format and can be viewed in a spreadsheet program or other <tt>.csv</tt> viewer.</p>
 
 <h2><a name="TroubleshootAgentandServerProblems-AgentMetrics"></a>Agent Metrics</h2>
 
-<p>Hyperic Agent metrics are helpful in diagnosing many problems that can occur. &nbsp;By default, these metrics are reported:</p>
+<p>Hyperic Agent metrics are helpful in diagnosing many problems that can occur. By default, these metrics are reported:</p>
+
 <ul>
-	<li>Availability&nbsp;</li>
+	<li>Availability</li>
 	<li>JVM Free Memory - Indicator</li>
 	<li>JVM Total Memory - Indicator</li>
 	<li>Number of Metrics Collected Per Minute - Indicator</li>
@@ -120,15 +124,14 @@ div.rbtoc1309541539305 li {margin-left: 0px;padding-left: 0px;}
 	<li><tt>ServerHome/logs/wrapper.log</tt></li>
 	<li><tt>ServerHome/logs/bootstrap.log</tt></li>
 	<li><tt>ServerHome/logs/server.log</tt></li>
-	<li><tt>ServerHome/logs/hqdb.log</tt></li>
+	<li><tt>ServerHome/logs/hqdb.log</tt> (only available for deployments using the built-in PostgreSQL database.</li>
 	<li><tt>AgentHome/logs/wrapper.log</tt></li>
 	<li><tt>AgentHome/logs/agent.log</tt></li>
 	<li><tt>AgentHome/logs/agent.log.startup</tt></li>
 </ul>
 
 
-
-<p>You can increase the level of agent logging by setting the <tt>agent.logLevel=DEBUG</tt> properties in <tt>agent.properties</tt>. Note however that debug logging is very verbose and uses more system resources. Hyperic recommends running the agent in DEBUG mode only when troubleshooting a problem. For more information, see <a href="Configure Agent Logging.html" title="Configure Agent Logging">Configure Agent Logging</a>.</p>
+<p>You can increase the level of logging an agent performs in its <tt>agent.properties</tt> file. Note that debug logging is very verbose and uses more system resources. Hyperic recommends configuring debug logging only when troubleshooting problems, and only at the subsystem level. For more information, see <a href="Configure Agent Logging.html" title="Configure Agent Logging">Configure Agent Logging</a>.</p>
 
 <h2><a name="TroubleshootAgentandServerProblems-ThreadDumps"></a>Thread Dumps</h2>
 
@@ -147,30 +150,19 @@ div.rbtoc1309541539305 li {margin-left: 0px;padding-left: 0px;}
 
 <h3><a name="TroubleshootAgentandServerProblems-GenerateaHypericServerThreadDumpfromCommandLine"></a>Generate a Hyperic Server Thread Dump from Command Line</h3>
 
+<p>To generate a thread dump on Windows:</p>
 <ul>
-	<li>Windows
-	<ul>
-		<li>If Hyperic Server is running in a terminal window &#8212; Try <b>&lt;cntrl&gt;&lt;break&gt;</b> in the terminal window.</li>
-		<li>If Hyperic Server is running as a service &#8212; Use a tool like <a href="http://www.adaptj.com/main/stacktrace">StackTrace</a>.</li>
-	</ul>
-	</li>
+	<li>If Hyperic Server is running in a terminal window &#8212; Try <b>&lt;cntrl&gt;&lt;break&gt;</b> in the terminal window.</li>
+	<li>If Hyperic Server is running as a service &#8212; Use a tool like <a href="http://www.adaptj.com/main/stacktrace">StackTrace</a>.</li>
 </ul>
 
 
-<ul>
-	<li>Unix-like systems
-	<ul>
-		<li>Hyperic 4.2, 4.3, and 4.4 &#8212; Run <tt>Kill &#45;3</tt> on the HQ server process.</li>
-		<li>Hyperic 4.5 &#8212; use <a href="http://download.oracle.com/javase/1.5.0/docs/tooldocs/share/jstack.html">jstack</a> on the Hyperic Server process. For example, if the server's PID is 215:
+<p>To generate a thread dump on Unix-like systems, use <tt>jstack</tt> <a href="http://download.oracle.com/javase/1.5.0/docs/tooldocs/share/jstack.html">http://download.oracle.com/javase/1.5.0/docs/tooldocs/share/jstack.html</a> on the Hyperic Server process. For example, if the server's PID is 215:</p>
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
 		<pre class="theme: Confluence; brush: java; gutter: false">jstack 215 &gt;mydumpfile.txt</pre>
 		</div>
-</div></div></li>
-	</ul>
-	</li>
-</ul>
-
+</div></div>
 
 <div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>How to find the Hyperic Server PID</b><br />You can run <tt>jps</tt> in a shell to determine the Hyperic Server's process ID &#8212; look for the process named "Bootstrap". For example:
 
@@ -182,14 +174,20 @@ div.rbtoc1309541539305 li {margin-left: 0px;padding-left: 0px;}
 215 Bootstrap</pre>
 		</div>
 </div></div></td></tr></table></div>
-
+<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>On Unix-like systems, you can also run <tt>Kill &#45;3</tt> on the Hyperic server process. Note however, that if you do, the thread dump will be written to <tt>wrapper.log</tt>, and be difficult to parse.</td></tr></table></div>
 <h3><a name="TroubleshootAgentandServerProblems-GenerateAgentThreadDumpfromUserInterface"></a>Generate Agent Thread Dump from User Interface</h3>
 
 <p>Run the agent launcher with the <tt>dump</tt> option. For more information see <a href="Start, Stop, and Other Agent Operations.html" title="Start, Stop, and Other Agent Operations">Start, Stop, and Other Agent Operations</a></p>
 
-<h2><a name="TroubleshootAgentandServerProblems-CheckAgentPortAvailability"></a>Check Agent Port Availability</h2>
+<h2><a name="TroubleshootAgentandServerProblems-CheckPortAvailability"></a>Check Port Availability</h2>
 
-<p>The Hyperic Server must be able to access the agent's listen port &#8212; you can verify it can by running <tt>telnet &lt;Address&gt; &lt;Port&gt;</tt>. For example:</p>
+<p>The Hyperic Server must be able to establish a connection with the agent, and vice versa.</p>
+
+<p>To verify that the server can access the agent's listen port, run the following from the server platform:  </p>
+
+<p><tt>telnet AgentIp AgentPort</tt></p>
+
+<p>For example:</p>
 
 <p><tt>$ telnet 192.168.1.114 2144</tt></p>
 
@@ -197,44 +195,44 @@ div.rbtoc1309541539305 li {margin-left: 0px;padding-left: 0px;}
 
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre>Trying 127.0.0.1...
-
 Connected to localhost.
-
 Escape character is '^\]'.
-
 GET
 
-
-
 Connection closed by foreign host.
-
 </pre>
 </div></div>
+
+<p>To verify that the agent can access the server's listen port, run the following from the agent platform:  <br/>
+<tt>$ telnet ServerIP ServerPort</tt>  </p>
+
+<p>For example:</p>
+
+<p><tt>$ telnet 192.168.1.114 7080</tt></p>
+
+
 
 <h1><a name="TroubleshootAgentandServerProblems-HypericServerProblems"></a>Hyperic Server Problems</h1>
 
 <p>This section describes problems that could prevent the Hyperic Server from starting up.</p>
 
-<h2><a name="TroubleshootAgentandServerProblems-ServerStartupProblems"></a>Server Startup Problems</h2>
+<h2><a name="TroubleshootAgentandServerProblems-LicenseIssues"></a>License Issues </h2>
 
-<p>In vFabric, the Hyperic Server will not start if it does not find a valid <tt>license.xml</tt> file in its <tt>/conf</tt> directory. Check the <b>HQ License Information</b> section of the <b>Administration</b> page to make sure your license has not expired.</p>
-
+<p>In vFabric Hyperic, the number of platforms you can manage is limited by your license.  For more information, see Installing or Configuring a vFabric Hyperic License.</p>
 <h2><a name="TroubleshootAgentandServerProblems-BackloggedHypericServer"></a>Backlogged Hyperic Server</h2>
 
 <p>When the Hyperic Server starts after a period of downtime, it can be inundated with metric reports from agents that continued to run while the server was down. When the server is processing a large metric backlog from many agents, the maximum size of the agent-server connection pool size can become a bottleneck and affect server performance.</p>
 
 <p>You can check the "Current Thread Busy" metric for the Hyperic Server's internal Tomcat server to determine whether connection pool size is an issue.</p>
 
-<p>To enable a restarted server catch up with a metric backlog you can increase the maximum size of the agent-server connection pool &#8212; typically this is the only time that increasing the size of the connection pool is indicated.</p>
+<p>To enable a restarted server catch up with a metric backlog you can increase the maximum size of the agent-server connection pool &#8212; typically this is the only time that increasing the size of the connection pool is indicated. The maximum number of agent-server connections is configured with the <tt>org.hyperic.lather.maxConns</tt> property in <tt>web.xml</tt>. Note however that, in effect, the number of connections is limited by the maximum number of server execution threads, which is configured using the <tt>tomcat.maxthreads</tt> property in <tt>server.conf</tt>. So, when you increase the value of <tt>org.hyperic.lather.maxConns</tt>, it may be necessary to increase the value of <tt>tomcat.maxthreads</tt>.</p>
 
-<p>The maximum number of agent-server connection is configured with the <tt>org.hyperic.lather.maxConns</tt> property in <tt>web.xml</tt>. Note however that, in effect, the number of connections is limited by the maximum number of server execution threads, which is configured in the <tt>server.xml</tt> file for Hyperic's internal Tomcat server. So, although the default value of <tt>org.hyperic.lather.maxConns</tt> is 3000, by default the number of agent-server connections is effectively limited to 500 &#8212; the default value of <tt>maxThreads</tt> in <tt>server.xml</tt>.</p>
-
-<p>To enable the server to catch up, enable 20% more connections than there are agents reporting to the server. For example, if you have 1000 agents, enable 1200 agent-server connections.</p>
+<p>To enable a backlogged Hyperic Server to catch up, enable 5% to 10% more connections than there are agents reporting to the server. For example, if you have 1000 agents, enable 1050 to 1100 agent-server connections.</p>
 
 <p>To change the size of the agent-server connection pool:</p>
 
 <ol>
-	<li>As necessary, update the maximum number of agent-server connections &#8212; <tt>org.hyperic.lather.maxConns</tt> &#8212; in <tt>&lt;Server installation directory&gt;/hq-engine/hq-server/webapps/ROOT/WEB-INF/web.xml</tt> file, in the stanza shown below. Ensure that the value of <tt>maxConns</tt> is 20% greater than the number of agents that report to the server.
+	<li>As necessary, update the maximum number of agent-server connections &#8212; <tt>org.hyperic.lather.maxConns</tt> &#8212; in <tt>&lt;Server installation directory&gt;/hq-engine/hq-server/webapps/ROOT/WEB-INF/web.xml</tt> file, in the stanza shown below. Ensure that the value of <tt>maxConns</tt> is 5% to 10% greater than the number of agents that report to the server.
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
 		<pre class="theme: Confluence; brush: java; gutter: false">&lt;init-param&gt;
@@ -243,14 +241,7 @@ Connection closed by foreign host.
 &lt;/init-param&gt;</pre>
 		</div>
 </div></div></li>
-	<li>As necessary, configure the maximum number of Tomcat threads &#8212; <tt>maxThreads</tt> &#8212; in the Catalina service element in <tt>&lt;Server installation directory&gt;/hq-engine/hq-server/conf/server.xml</tt> file, excerpted below. Ensure that the value of <tt>maxThreads</tt> greater than the value of <tt>maxConns</tt>.
-<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
-<div id="root">
-		<pre class="theme: Confluence; brush: java; gutter: false">&lt;Service name="Catalina"&gt;
-
-&lt;Executor name="tomcatThreadPool" namePrefix="tomcat-http--" maxThreads="500" minSpareThreads="50"/&gt;</pre>
-		</div>
-</div></div></li>
+	<li>As necessary, configure the maximum number of Tomcat threads &#8212; <tt>tomcat.maxthreads</tt>  &#8212; in <tt>server.conf</tt>. Ensure that the value of <tt>maxThreads</tt> greater than the value of <tt>maxConns</tt>.</li>
 	<li>Restart the Hyperic Server to enable the changes to take effect.</li>
 </ol>
 
@@ -339,7 +330,7 @@ Connection closed by foreign host.
 
 <h1><a name="TroubleshootAgentandServerProblems-InvalidorUnknownAvailability"></a>Invalid or Unknown Availability</h1>
 
-<p>This section describes reasons that Hyperic might incorrectly show an agent (or agent-managed resource) as unavailable, or show its availability status as "Unknown" (availability icon is grey).</p>
+<p>This section describes reasons that Hyperic might incorrectly show an agent (or agent-managed resource) as unavailable, show its availability status as "Unknown" (availability icon is grey), or "flapping" availability values.</p>
 
 <h2><a name="TroubleshootAgentandServerProblems-OutofSyncAgentandServerClocks"></a>Out-of-Sync Agent and Server Clocks</h2>
 
@@ -360,12 +351,7 @@ Connection closed by foreign host.
 
 <p>You can view Hyperic Server process statistics, as well as load and utilization data - load, process, system and JVM memory, and so on - on the <b>HQ Health</b> page.</p>
 
-<p>Based on your load, it may be appropriate to tune Hyperic Server, the Hyperic database, or both. For more information, see the "Configuring HQ for Large Environments and Improved Performance" section in <em>Configure and Run the HQ Server</em>. </p>
-
-
-
-<p><a href="Scaling and Tuning Hyperic Performance.html" title="Scaling and Tuning Hyperic Performance">Scaling and Tuning Hyperic Performance</a></p>
-
+<p>Based on your load, it may be appropriate to tune Hyperic Server, the Hyperic database, or both. For more information, see <a href="Scaling and Tuning Hyperic Performance.html" title="Scaling and Tuning Hyperic Performance">Scaling and Tuning Hyperic Performance</a> in  <em>vFabric Hyperic Installation and Configuration</em>. </p>
 
 <p><b>Important:</b> First and foremost: run the Hyperic database on dedicated hardware. Competition for system resources can slow down metric processing.</p>
 
@@ -387,12 +373,7 @@ Connection closed by foreign host.
 </ul>
 
 
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Want to Change a Whole Bunch of Metric Collection Intervals?</b><br />If you want to change metric templates in bulk, or without using the Hyperic user interface, you can change metric collection settings - including collection intervals - &nbsp;for a resource type with the HQApi <b>metricTemplate</b> command. You can use the <b>metricTemplate sync</b> option from the command line or in a script, as desired. For more information, see the "HQApi metricTemplate command" section in <em>Web Services API</em>.</td></tr></table></div>
-
-
-
-<p><a href="HQApi metricTemplate command.html" title="HQApi metricTemplate command">HQApi metricTemplate command</a></p>
-
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Want to Change a Whole Bunch of Metric Collection Intervals?</b><br />If you want to change metric templates in bulk, or without using the Hyperic user interface, you can change metric collection settings - including collection intervals - &nbsp;for a resource type with the HQApi <b>metricTemplate</b> command. You can use the <b>metricTemplate sync</b> option from the command line or in a script, as desired. For more information, see <a href="HQApi metricTemplate command.html" title="HQApi metricTemplate command">HQApi metricTemplate command</a> section in <em>vFabric Hyperic Web Services API</em>.</td></tr></table></div>
 
 <div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Try to redistribute load</b><br />If an agent that logs metric volume warnings is monitoring a large number of remote services over the network (for example, HTTP, FTP, SNMP, or another service type whose protocol the agent supports), you can spread the load around &#8212; configure a different agent to monitor some of the network services. You can compare the agent loads on the <b>Agents</b> tab of <b>HQ Health</b>.</td></tr></table></div>
 
@@ -435,7 +416,7 @@ Connection closed by foreign host.
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:43</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:56</font></td>
 		    </tr>
 	    </table>
     </body>

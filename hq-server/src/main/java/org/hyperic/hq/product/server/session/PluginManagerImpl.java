@@ -28,6 +28,7 @@ package org.hyperic.hq.product.server.session;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -87,6 +88,7 @@ import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.hq.zevents.ZeventPayload;
 import org.hyperic.hq.zevents.ZeventSourceId;
+import org.hyperic.util.file.FileUtil;
 import org.hyperic.util.timer.StopWatch;
 import org.jdom.Document;
 import org.jdom.JDOMException;
@@ -125,16 +127,16 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     // used AtomicBoolean so that a groovy script may disable the mechanism live, no restarts
     private final AtomicBoolean isEnabled = new AtomicBoolean(true);
     
-    private PermissionManager permissionManager;
-    private AgentSynchronizer agentSynchronizer;
-    private AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle;
-    private PluginDAO pluginDAO;
-    private AgentPluginStatusDAO agentPluginStatusDAO;
-    private MonitorableTypeDAO monitorableTypeDAO;
-    private ResourceManager resourceManager;
-    private AuthzSubjectManager authzSubjectManager;
-    private ZeventManager zeventManager;
-    private TransactionRetry transactionRetry;
+    private final PermissionManager permissionManager;
+    private final AgentSynchronizer agentSynchronizer;
+    private final AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle;
+    private final PluginDAO pluginDAO;
+    private final AgentPluginStatusDAO agentPluginStatusDAO;
+    private final MonitorableTypeDAO monitorableTypeDAO;
+    private final ResourceManager resourceManager;
+    private final AuthzSubjectManager authzSubjectManager;
+    private final ZeventManager zeventManager;
+    private final TransactionRetry transactionRetry;
 
     private ApplicationContext ctx;
 
@@ -258,8 +260,8 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     }
     
     private class PluginRemoveZevent extends Zevent {
-        private AuthzSubject subj;
-        private Collection<String> pluginFileNames;
+        private final AuthzSubject subj;
+        private final Collection<String> pluginFileNames;
         @SuppressWarnings("serial")
         public PluginRemoveZevent(AuthzSubject subj, Collection<String> pluginFileNames) {
             super(new ZeventSourceId() {}, new ZeventPayload() {});
@@ -499,15 +501,26 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         }
     }
 
-    private void deployPlugins(Collection<File> files) {
+    private void deployPlugins(Collection<File> files) throws PluginDeployException {
         final File pluginDir = getCustomPluginDir();
         if (!pluginDir.exists() && !pluginDir.isDirectory() && !pluginDir.mkdir()) {
             throw new SystemException(pluginDir.getAbsolutePath() +
                 " does not exist or is not a directory");
         }
         for (final File file : files) {
-            final File dest = new File(pluginDir.getAbsolutePath() + "/" + file.getName());
-            file.renameTo(dest);
+            final File dest = new File(pluginDir.getAbsolutePath() + File.separator + file.getName());
+            if (!file.renameTo(dest) ) {
+                // Rename sometimes fails on Windows for no apparent reason
+                try {
+                    FileUtil.copyFile(file, dest);
+                } catch (FileNotFoundException e) {
+                    throw new PluginDeployException("plugin.manager.file.notfound.exception", e);
+                } catch (IOException e) {
+                    throw new PluginDeployException("plugin.manager.file.ioexception", e, file.getName());
+                } finally {
+                    file.delete();
+                }
+            }
         }
     }
 
@@ -641,7 +654,7 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
                     file = new File(getServerPluginDir(), filename);
                 }
                 return (file.exists()) ?
-                    new InputSource("file://" + file.getAbsolutePath()) :
+                    new InputSource(file.toURI().toString()) :
                     new InputSource(xmlReaders.get(filename));
             }
         });
@@ -652,6 +665,7 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         private NoCloseStringReader(String s) {
             super(s);
         }
+        @Override
         public void close() {}
     }
 
@@ -935,6 +949,18 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
 
     public void setApplicationContext(ApplicationContext ctx) throws BeansException {
         this.ctx = ctx;
+    }
+
+    @Transactional(readOnly=false)
+    public void markPluginDisabledByName(String pluginName) {
+        final Plugin plugin = pluginDAO.findByName(pluginName);
+        if (plugin == null || plugin.isDeleted()) {
+            return;
+        }
+        if (!plugin.isDisabled()) {
+            plugin.setDisabled(true);
+            plugin.setModifiedTime(System.currentTimeMillis());
+        }
     }
 
     @Transactional(readOnly=false)

@@ -48,8 +48,8 @@
         					<hq:dateFormatter value="${alert.ctime}" showDate="false"/>
         				</html:link>
         				<fmt:message key="common.label.Dash"/>
-        				<abbr title="<fmt:message key="common.label.Resource"/> ${alert.resourceName}; <fmt:message key="common.label.Alert"/> ${alert.name}">
-        					${alert.name}
+        				<abbr title="<fmt:message key="common.label.Resource"/> <c:out value="${alert.resourceName};"/> <fmt:message key="common.label.Alert"/> <c:out value="${alert.name}"/>">
+        					<c:out value="${alert.name}"/>
         				</abbr>
         			</li>
 	      		</c:forEach>

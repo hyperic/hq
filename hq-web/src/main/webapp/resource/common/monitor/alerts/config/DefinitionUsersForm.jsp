@@ -4,7 +4,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -43,15 +43,13 @@
 <tiles:insert page="/common/NoRights.jsp"/>
 </c:when>
 <c:otherwise>
-
-<script  src="<html:rewrite page="/js/addRemoveWidget.js"/>" type="text/javascript"></script>
+<jsu:importScript path="/js/addRemoveWidget.js" />
 <c:set var="widgetInstanceName" value="addUsers"/>
-
-<script type="text/javascript">
-var pageData = new Array();
-initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-</script>
+<jsu:script>
+	var pageData = new Array();
+	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+</jsu:script>
 <c:url var="selfPnaAction" value="/alerts/Config.do">
   <c:param name="mode" value="addUsers"/>
   <c:param name="ad" value="${alertDef.id}"/>

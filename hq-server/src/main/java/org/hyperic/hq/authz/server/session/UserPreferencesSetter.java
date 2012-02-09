@@ -36,6 +36,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.authz.server.session.UserPreferencesUpdatedEvent.UserZeventPayload;
 import org.hyperic.hq.authz.server.session.UserPreferencesUpdatedEvent.UserZeventSource;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
+import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.util.config.ConfigResponse;
@@ -67,7 +68,7 @@ public class UserPreferencesSetter implements ZeventListener<UserPreferencesUpda
 
     @PostConstruct
     public void subscribe() {
-        Set<Class<?>> events = new HashSet<Class<?>>();
+        Set<Class<? extends Zevent>> events = new HashSet<Class<? extends Zevent>>();
         events.add(UserPreferencesUpdatedEvent.class);
         zEventManager.addBufferedListener(events, this);
     }

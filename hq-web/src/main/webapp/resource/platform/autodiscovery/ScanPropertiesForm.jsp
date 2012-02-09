@@ -6,7 +6,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -41,9 +41,7 @@
 	<c:param name="type" value="${param.type}"/>
 </c:url>
 <c:set var="formName" value="PlatformAutoDiscoveryForm"/>
-
-<script src="<html:rewrite page="/js/checkAll.js"/>" type="text/javascript"></script>
-
+<jsu:importScript path="/js/checkAll.js" />
 <!--  GENERAL PROPERTIES TITLE -->
 
 <tiles:insert definition=".header.tab">

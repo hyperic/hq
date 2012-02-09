@@ -6,7 +6,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -39,11 +39,10 @@
 
 <bean:define id="groupCount" name="groups" property="totalSize"/>
 <c:set var="widgetInstanceName" value="listServerGroups"/>
-<script type="text/javascript">
-initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-groupsWidgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-</script>
-
+<jsu:script>
+	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+	groupsWidgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+</jsu:script>
 <c:url var="addToListUrl" value="/resource/${resource.entityId.typeName}/Inventory.do">
 	<c:param name="mode" value="addGroups"/>
 	<c:param name="rid" value="${resource.id}"/>

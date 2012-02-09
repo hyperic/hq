@@ -5,7 +5,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -35,15 +35,15 @@
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<title><fmt:message key="error.Error.Title"/></title>
-<link rel=stylesheet href="<html:rewrite page="/css/win.css"/>" type="text/css">
-<link rel=stylesheet href="<html:rewrite page="HQ_40.css"/>" type="text/css">
-<script  src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
-<script  type="text/javascript">
-  var help = "<hq:help/>";
-</script>
-</head>
+    <head>
+        <title><fmt:message key="error.Error.Title"/></title>
+        <link rel=stylesheet href="<html:rewrite page="/css/win.css"/>" type="text/css">
+        <link rel=stylesheet href="<html:rewrite page="HQ_40.css"/>" type="text/css">
+        <jsu:importScript path="/js/functions.js" />
+        <jsu:script>
+            var help = "<hq:help/>";
+        </jsu:script>
+    </head>
 <body class="exception" style="background-color:#EEEEEE">
 <br>
 <br>
@@ -60,17 +60,13 @@
           <td class="BlockTitle" width="100%"><fmt:message key="error.Error.Tab"/></td>
           <td class="BlockTitle" align="right"><html:link href="" onclick="window.open(help,'help','width=800,height=650,scrollbars=yes,left=80,top=80,resizable=yes'); return false;"><html:img page="/images/4.0/icons/help.gif" width="16" height="16" border="0"/></html:link></td>
         </tr>
-      </table>	
+      </table>  
     </td>
   </tr>
   <tr>
     <td class="BlockContent" colspan="2">
       <p>
       <fmt:message key="error.Error.ThePageRequestedEtc"/>  
-      <fmt:message key="error.Error.YouCan"/>          
-      <span id="stacktrace_link">
-      <html:link href="javascript:displayStackTrace()"><fmt:message key="error.Error.StackTraceHereLink"/></html:link>
-      </span>
       <fmt:message key="error.Error.ReturnTo"/>
       <html:link href="javascript:history.back(1)"><fmt:message key="error.Error.PreviousPageLink"/></html:link> 
       <html:link action="/Dashboard"><fmt:message key="error.Error.DashboardLink"/></html:link> 
@@ -126,74 +122,68 @@ catch (ClassCastException ce) {
 </c:set>
 
 <c:if test="${param.errorMessage}">
-	<div id="errorMessage" style="visibility:hidden"><fmt:message key="${param.errorMessage}"/></div>
+    <div id="errorMessage" style="visibility:hidden"><fmt:message key="${param.errorMessage}"/></div>
 </c:if>
 
 <c:catch> 
-	<%
- 	    if (exception != null) {
- 	%> 
- 		<c:set var="exceptionStackTrace"><%=StringUtil.getStackTrace(exception)%></c:set>
- 		
-      	<div id="exception" style="visibility:hidden"><c:out value="${exceptionStackTrace}" /></div>
-    
-    	<%
-        	    if (root != null) {
-        	%> 
-    		<c:set var="rootStackTrace"><%=StringUtil.getStackTrace(root)%></c:set>
-    		
-      		<div id="root" style="visibility:hidden"><c:out value="${rootStackTrace}" /></div>
-    	<% } %> 
-  	<% } %> 
+    <%
+        if (exception != null) {
+    %> 
+        
+        <%
+                if (root != null) {
+            %> 
+            
+        <% } %> 
+    <% } %> 
 </c:catch>
-
-<script type="text/javascript">
-/*--- start declaration/initialization ---*/
-var exDiv = document.getElementById("exception");
-
-if (exDiv!=null) {
-    exDiv.style.display = "none";
-    var exText = exDiv.innerHTML;
-}
-else
-    var exText = "";
-
-var rootDiv = document.getElementById("root");
-if (rootDiv!=null) {
-    rootDiv.style.display = "none";
-    var rootText = rootDiv.innerHTML;
-}
-else
-    var rootText = "";
-
-var errorDiv = document.getElementById("errorMessage");
-if (errorDiv!=null) {
-    errorDiv.style.display = "none";
-    var errorText = errorDiv.innerHTML;
-}
-else
-    var errorText= "";
-/*--- end declaration/initialization ---*/
-
-var link = document.getElementById("stacktrace_link");
-var display = document.getElementById("display");
-
-function displayStackTrace() {
-  display.innerHTML = '<table width="100%" cellpadding="4" cellspacing="0" border="0"><tr><td class="BlockTitle" width="100%"><fmt:message key="error.Error.Exception"/></td></tr><tr><td>' + exText + '</td></tr></table>';
-
-  if (rootText.length > 0) {
-    display.innerHTML += '<table width="100%" cellpadding="4" cellspacing="0" border="0"><tr><td class="BlockTitle" width="100%"><fmt:message key="error.Error.RootCause"/></td></tr><tr><td>' + rootText + '</td></tr></table>';
-  }
-
-  link.innerHTML = '<html:link href="javascript:hideStackTrace()"><fmt:message key="error.Error.HideStackTraceLink"/></html:link>';
-}
-
-function hideStackTrace() {
-  display.innerHTML = "";
-
-  link.innerHTML = '<html:link href="javascript:displayStackTrace()"><fmt:message key="error.Error.StackTraceHereLink"/></html:link>';
-}
-</script>
+<jsu:script>
+    /*--- start declaration/initialization ---*/
+    var exDiv = document.getElementById("exception");
+    
+    if (exDiv!=null) {
+        exDiv.style.display = "none";
+        var exText = exDiv.innerHTML;
+    }
+    else
+        var exText = "";
+    
+    var rootDiv = document.getElementById("root");
+    if (rootDiv!=null) {
+        rootDiv.style.display = "none";
+        var rootText = rootDiv.innerHTML;
+    }
+    else
+        var rootText = "";
+    
+    var errorDiv = document.getElementById("errorMessage");
+    if (errorDiv!=null) {
+        errorDiv.style.display = "none";
+        var errorText = errorDiv.innerHTML;
+    }
+    else
+        var errorText= "";
+    /*--- end declaration/initialization ---*/
+    
+    var link = document.getElementById("stacktrace_link");
+    var display = document.getElementById("display");
+    
+    function displayStackTrace() {
+      display.innerHTML = '<table width="100%" cellpadding="4" cellspacing="0" border="0"><tr><td class="BlockTitle" width="100%"><fmt:message key="error.Error.Exception"/></td></tr><tr><td>' + exText + '</td></tr></table>';
+    
+      if (rootText.length > 0) {
+        display.innerHTML += '<table width="100%" cellpadding="4" cellspacing="0" border="0"><tr><td class="BlockTitle" width="100%"><fmt:message key="error.Error.RootCause"/></td></tr><tr><td>' + rootText + '</td></tr></table>';
+      }
+    
+      link.innerHTML = '<html:link href="javascript:hideStackTrace()"><fmt:message key="error.Error.HideStackTraceLink"/></html:link>';
+    }
+    
+    function hideStackTrace() {
+      display.innerHTML = "";
+    
+      link.innerHTML = '<html:link href="javascript:displayStackTrace()"><fmt:message key="error.Error.StackTraceHereLink"/></html:link>';
+    }
+</jsu:script>
 </div>
 </body>
 </html>

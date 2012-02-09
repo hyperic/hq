@@ -58,7 +58,7 @@ public class EditPlatformTypeNetworkPropertiesAction
 
     private final Log log = LogFactory.getLog(EditPlatformTypeNetworkPropertiesAction.class.getName());
 
-    private AppdefBoss appdefBoss;
+    private final AppdefBoss appdefBoss;
 
     @Autowired
     public EditPlatformTypeNetworkPropertiesAction(AppdefBoss appdefBoss) {
@@ -70,7 +70,8 @@ public class EditPlatformTypeNetworkPropertiesAction
      * Edit the platform with the attributes specified in the given
      * <code>PlatformForm</code>.
      */
-    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+    @Override
+	public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                  HttpServletResponse response) throws Exception {
 
         PlatformForm editForm = (PlatformForm) form;
@@ -95,6 +96,7 @@ public class EditPlatformTypeNetworkPropertiesAction
                 RequestUtils.setError(request, "resource.platform.error.PlatformNotFound");
                 return returnFailure(request, mapping, forwardParams);
             }
+            platform = (PlatformValue) platform.clone();
 
             editForm.updatePlatformValue(platform);
 

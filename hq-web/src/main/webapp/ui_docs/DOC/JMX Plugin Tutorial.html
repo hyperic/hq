@@ -1,32 +1,35 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : JMX Plugin Tutorial</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : JMX Plugin Tutorial</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : JMX Plugin Tutorial
+                            vFabric Hyperic 4.6.5 : JMX Plugin Tutorial
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 27, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Feb 07, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1311779967806 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1311779967806 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1311779967806 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1328635699950 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1328635699950 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1328635699950 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1311779967806'>
+/*]]>*/</style><div class='rbtoc1328635699950'>
 <ul>
     <li><a href='#JMXPluginTutorial-JMXMeasurementPlugin'>JMX Measurement Plugin</a></li>
     <li><a href='#JMXPluginTutorial-DevelopSampleJMXPlugin'>Develop Sample JMX Plugin</a></li>
@@ -76,15 +79,15 @@ div.rbtoc1311779967806 li {margin-left: 0px;padding-left: 0px;}
 
 <p>In order to manage a JMX-enabled application from HQ, it must be configured to accept remote connections. Many such applications have the remote connector enabled by default; those which do not often require changing a line or two of their configuration.</p>
 
-<p>Learn more about <a href="JMX Plugin.html#JMXPlugin-remote">configuring for remote connection</a>.</p>
+
 
 <h2><a name="JMXPluginTutorial-Step3DetermineWhichMetricstoCollectinthePlugin"></a>Step 3 - Determine Which Metrics to Collect in the Plugin</h2>
 
 <p>You can find appropriate metrics to collect from MBeans in several ways:</p>
 <ul>
-	<li><a href="http://java.sun.com/j2se/1.5.0/docs/guide/management/jconsole.html">JConsole</a></li>
-	<li><a href="http://mc4j.org/">MC4J</a></li>
-	<li><a href="JMX Plugin.html#JMXPlugin-tools">Command line tool</a> provided by HQ JMX support classes. It dumps MBeans in text format.</li>
+	<li>JConsole (<a href="http://download.oracle.com/javase/1.5.0/docs/guide/management/jconsole.html">http://download.oracle.com/javase/1.5.0/docs/guide/management/jconsole.html</a>) ]</li>
+	<li>MC4J (<a href="http://sourceforge.net/projects/mc4j/">http://sourceforge.net/projects/mc4j/</a>)</li>
+	<li>Command line tool provided by Hyperic JMX support classes that dumps MBeans in text format. See <a href="JMX-Based Management with Hyperic.html#JMX-BasedManagementwithHyperic-attributes">Identify Target MBeans and Attributes</a></li>
 </ul>
 
 
@@ -239,7 +242,7 @@ A non-numeric value indicates that the attribute is not appropriate for collecti
 		<li>Daemon Thread Count</li>
 	</ul>
 	</li>
-	<li>For that server, log-tracking data for the Threading MBean (displayed on the "<a href="ui-Monitor.CurrentHealth.html#ui-Monitor.CurrentHealth-EventsLogsTrack">Current Health</a>" screen)</li>
+	<li>For that server, log-tracking data for the Threading MBean (displayed on the <b>Monitor</b> tab for the resource, as described on <a href="ui-Monitor.CurrentHealth.html" title="ui-Monitor.CurrentHealth">ui&#45;Monitor.CurrentHealth</a> in <em>vFabric Hyperic User Interface</em>.</li>
 	<li>For the service, these metrics:
 	<ul>
 		<li>Collection Count</li>
@@ -360,9 +363,9 @@ A non-numeric value indicates that the attribute is not appropriate for collecti
 </tr>
 <tr>
 <td class='confluenceTd'> <tt>template</tt> </td>
-<td class='confluenceTd'>  <a href="Measurement Plugin.html#MeasurementPlugin-template">Learn more</a>. </td>
+<td class='confluenceTd'>&nbsp;</td>
 <td class='confluenceTd'> Y </td>
-<td class='confluenceTd'> <a href="Measurement Plugin.html#MeasurementPlugin-template">See examples</a> </td>
+<td class='confluenceTd'> See <a href="metric.html" title="metric">metric</a>. </td>
 </tr>
 </tbody></table>
 </div>
@@ -431,7 +434,7 @@ For a JMX plugin, this list of configuration options suffices, but you can add o
 &lt;/config&gt;</pre>
 		</div>
 </div></div>
-<p><tt>ct.=proc.java.home</tt> narrows the query to only the salient processes (those with "proc.java.home" in the names). The query is written in <a href="http://support.hyperic.com/display/SIGAR/PTQL" title="PTQL">PTQL</a>, which isn't necessary to understand for this tutorial, but would be useful to understand for future, custom plugins.<br/>
+<p><tt>ct.=proc.java.home</tt> narrows the query to only the salient processes (those with "proc.java.home" in the names). The query is written in PTQl (<a href="http://support.hyperic.com/display/SIGAR/PTQL">http://support.hyperic.com/display/SIGAR/PTQL</a>), which isn't necessary to understand for this tutorial, but would be useful to understand for future, custom plugins.<br/>
 If you are interested in different processes, replace <tt>proc.java.home</tt> with another partial name that will narrow the search. The <tt>process.query</tt> value is used later on when gathering metrics.</p>
 
 <h3><a name="JMXPluginTutorial-GatherMetrics"></a>Gather Metrics</h3>
@@ -475,11 +478,11 @@ This code works when a <em>single</em> process is retrieved by the query; if the
 &lt;metrics include="Threading"/&gt;</pre>
 		</div>
 </div></div>
-<p>It references the <a href="#JMXPluginTutorial-metrics">previously defined metrics</a>, which are grouped earlier for easier reference. If you want to gather other metrics, you should:</p>
+<p>It references the previously defined metrics, which are grouped earlier for easier reference. If you want to gather other metrics, you should:</p>
 <ol>
 	<li>Replace the <tt>java.lang:type</tt> value (for example, ClassLoading) with the associated MBean "objectName" (which you can find, for example, in JConsole).</li>
-	<li><tt>Include</tt> a section that you would define <a href="#JMXPluginTutorial-metrics">earlier</a>. If you <tt>include="Foobar Metrics"</tt> here, then you would define <tt>metrics name="Foobar Metrics"</tt> earlier, with all its component metrics.<br/>
-Learn more about <a href="JMX Plugin.html#JMXPlugin-metrics">defining metrics</a>, including the use of <a href="JMX Plugin.html#JMXPlugin-objectname"><tt>OBJECT_NAME</tt></a>, and about <a href="JMX Plugin.html#JMXPlugin-custom">defining properties</a>.<a name="JMXPluginTutorial-logtrack"></a></li>
+	<li><tt>Include</tt> a section that you would define earlier. If you <tt>include="Foobar Metrics"</tt> here, then you would define <tt>metrics name="Foobar Metrics"</tt> earlier, with all its component metrics.<br/>
+<a name="JMXPluginTutorial-logtrack"></a></li>
 </ol>
 
 
@@ -489,7 +492,7 @@ Learn more about <a href="JMX Plugin.html#JMXPlugin-metrics">defining metrics</a
 		<pre class="theme: Confluence; brush: xml; gutter: false">&lt;plugin type="log_track" class="org.hyperic.hq.product.jmx.MxNotificationPlugin"/&gt;</pre>
 		</div>
 </div></div>
-<p>Keep it as-is. Learn more about <a href="JMX Plugin.html#JMXPlugin-logtrack">log tracking in JMX plugins</a>.</p>
+<p>Keep it as-is. </p>
 
 <p>This code provides two methods &#8212; of which you must use one &#8212; for defining the install (base) path for the process.</p>
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
@@ -508,7 +511,7 @@ You could instead use a third method:</p>
 		</div>
 </div></div>
 <p>As with <tt>PROC_HOME_PROPERTY</tt>, this variable tells the MxServerDetector class to autodiscover the process with this PTQL: <tt>State.Name.eq=java,Args.*.sw=-D&lt;value of proc main class&gt;</tt>.<br/>
-Any of these methods will set the installpath config variable to be the current working directory of the process in question. And while this is particularly useful for log-tracking and control plugins (which are outside the scope of this tutorial), this value is also used <a href="#JMXPluginTutorial-version">later</a> in this XML descriptor.</p>
+Any of these methods will set the installpath config variable to be the current working directory of the process in question. And while this is particularly useful for log-tracking and control plugins (which are outside the scope of this tutorial), this value is also used later in this XML descriptor.</p>
 
 <h3><a name="JMXPluginTutorial-AutoDiscovertheServer"></a>Auto-Discover the Server</h3>
 
@@ -518,7 +521,7 @@ Any of these methods will set the installpath config variable to be the current 
 		<pre class="theme: Confluence; brush: xml; gutter: false">&lt;plugin type="autoinventory" class="org.hyperic.hq.product.jmx.MxServerDetector"/&gt;</pre>
 		</div>
 </div></div>
-<p>Keep it as-is. Autoinventory for a server must also include this class. Learn more about <a href="JMX Plugin.html#JMXPlugin-autodiscovery">auto-discovery in JMX plugins</a>.</p>
+<p>Keep it as-is. Autoinventory for a server must also include this class. </p>
 
 <p>This one line of code tells HQ what type of plugin this is &#8212; Measurement &#8212; and therefore how it should be run.</p>
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
@@ -542,16 +545,15 @@ Any of these methods will set the installpath config variable to be the current 
 		</div>
 </div></div>
 <p>If you want to collect GarbageCollector metrics, then keep as-is. Autoinventory for a service does not need a class (whereas a server does).<br/>
-This code looks slightly different than the earlier <a href="#JMXPluginTutorial-metrics2">metrics-collection code</a> because there are multiple types of Garbage Collection, each of which collects the same metrics. In cases where there are numerous types, calling out each type and its respective metrics (which are identical to the other types'), is onerous and unnecessary. Using</p>
+This code looks slightly different than the earlier metrics collection because there are multiple types of Garbage Collection, each of which collects the same metrics. In cases where there are numerous types, calling out each type and its respective metrics (which are identical to the other types'), is onerous and unnecessary. Using</p>
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre>name=*
-
 </pre>
 </div></div>
-<p>makes sure that every type of GarbageCollector gets measured. The <tt>&lt;plugin type="autoinventory"/&gt;</tt> line tells HQ to resolve the <tt>&#42;</tt>. If you want to collect metrics of another objectName that similarly has multiple types, replace <tt>Java GC</tt> with a meaningful name and <tt>GarbageCollector</tt> with the objectName, and accordingly modify the earlier <a href="#JMXPluginTutorial-metrics">metrics enumeration</a>.
+<p>makes sure that every type of GarbageCollector gets measured. The <tt>&lt;plugin type="autoinventory"/&gt;</tt> line tells HQ to resolve the <tt>&#42;</tt>. If you want to collect metrics of another objectName that similarly has multiple types, replace <tt>Java GC</tt> with a meaningful name and <tt>GarbageCollector</tt> with the objectName, and accordingly modify the earlier metrics enumeration.
 <br class="atl-forced-newline" /></p>
 <div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Declaring Services as Metrics for Convenient Viewing</b><br />This plugin declares the Garbage Collector as a service of the Java server. It is also possible to treat it simply as a metric of the server. Why would you do that? Then all the metrics of the would be displayed in the UI on one level &#8212; the server level &#8212; and you wouldn't have to drill down from the server to the service to access the metrics.</td></tr></table></div>
-<p>This code determines which part of the plugin to use depending on the version of the Java process. Just as we did <a href="#JMXPluginTutorial-server">before</a>, we provide a file &#8212; <tt>jre/lib/management-agent.jar</tt> &#8212; that only exists in Java v1.6 so that HQ can distinguish between v1.5 and v1.6. For version 1.6, the plugin includes everything that's been written for v1.5 plus anything additional we write specifically for v1.6 (in this sample, we haven't written anything additional). The install path that we specified <a href="#JMXPluginTutorial-path">above</a> is used here: the file name is resolved within that path <tt>(JAVA_HOME/jre/lib/management-agent.jar</tt>).</p>
+<p>This code determines which part of the plugin to use depending on the version of the Java process. Just as we did before|, we provide a file &#8212; <tt>jre/lib/management-agent.jar</tt> &#8212; that only exists in Java v1.6 so that HQ can distinguish between v1.5 and v1.6. For version 1.6, the plugin includes everything that's been written for v1.5 plus anything additional we write specifically for v1.6 (in this sample, we haven't written anything additional). The install path that we specified above is used here: the file name is resolved within that path <tt>(JAVA_HOME/jre/lib/management-agent.jar</tt>).</p>
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
 		<pre class="theme: Confluence; brush: xml; gutter: false">&lt;server name="Java" version="1.6.x" include="1.5.x"&gt;
@@ -613,7 +615,7 @@ If necessary, replace this help with whatever configuration instructions are nec
 <p>Your plugin should now kick into action the next time the Agent runs (assuming it's been rebooted since the plugin was added to it), and you should see all the desired metrics in the HQ UI.</p>
 
 
-<p><font color=""></font></p>
+
 
 				    
                     			    </td>
@@ -624,7 +626,7 @@ If necessary, replace this help with whatever configuration instructions are nec
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:44</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:58</font></td>
 		    </tr>
 	    </table>
     </body>

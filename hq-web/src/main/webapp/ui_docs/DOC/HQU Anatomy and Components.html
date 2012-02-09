@@ -1,24 +1,27 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : HQU Anatomy and Components</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : HQU Anatomy and Components</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : HQU Anatomy and Components
+                            vFabric Hyperic 4.6.5 : HQU Anatomy and Components
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p>This section describes how HQU plugins fit into, and operate with, the rest of your HQ environment.</p>
@@ -104,9 +107,14 @@ An HQU plugin may have multiple views.   </p>
 <p>A directory watcher periodically checks this directory for new additions and removals and loads and unloads plugins as necessary. Based on the attachment method you choose, HQ will automatically create a item in the appropriate  menu, or in the View tab of a resource. </p>
 
 <h1><a name="HQUAnatomyandComponents-InvokinganHQUPluginasaWebService"></a><b>Invoking an HQU Plugin as a Web Service</b></h1>
-<p>HQU plugins can be invoked as a web service, via a regular HTTP request:<br/>
-curl <a href="https://hqadmin:hqadmin@localhost:7443/hqu/">https://hqadmin:hqadmin@localhost:7443/hqu/</a><em>plugin_name</em>/<em>Controller_Name</em>/<em>Action</em>.hqu<br/>
-where:</p>
+<p>HQU plugins can be invoked as a web service, via a regular HTTP request:</p>
+
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>curl https://hqadmin:hqadmin@localhost:7443/hqu/plugin_name/Controller_Name/Action.hqu
+</pre>
+</div></div>
+
+<p>where:</p>
 <ul>
 	<li>7443 is the port where Server listens for https traffic.</li>
 	<li>hqadmin is the HQ root user, the original HQ administrator.</li>
@@ -120,20 +128,18 @@ where:</p>
 <h1><a name="HQUAnatomyandComponents-HQURequestProcessing"></a><b>HQU Request Processing</b></h1>
 <p>The diagram below illustrates HQU plugin components in the context of a request-response cycle, given user request of a plugin that is a View attached to the masthead. 
 <br class="atl-forced-newline" />
-<span class="image-wrap" style=""><img src="attachments/77464144/77660728.png" height="307" width="639" style="border: 0px solid black"/></span></p>
+<span class="image-wrap" style=""><img src="attachments/79037104/79134993.png" height="307" width="639" style="border: 0px solid black"/></span></p>
 <ol>
-	<li>When user selects the plugin from a Masthead menu, an internal URL is issued:</li>
-</ol>
-
-
-<p><a href="http://localhost:7080/mastheadattach.do?typeID=">http://localhost:7080/mastheadattach.do?typeID=</a> nnnnn</p>
-<ol>
-	<li>HQU looks up the view, and calls the plugin controller index action:</li>
-</ol>
-
-
-<p><a href="http://localhost:7080/hqu/">http://localhost:7080/hqu/</a><em>plugin_name</em>/<em>Controller_Name</em>/index.hqu</p>
-<ol>
+	<li>When user selects the plugin from a Masthead menu, an internal URL is issued:
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>http://localhost:7080/mastheadattach.do?typeID= nnnnn
+</pre>
+</div></div></li>
+	<li>HQU looks up the view, and calls the plugin controller index action:
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>http://localhost:7080/hqu/plugin_name/Controller_Name/index.hqu
+</pre>
+</div></div></li>
 	<li>The controller object is instantiated. It renders the view, index.gsp, calling the render() method provided by RenderFrame.groovy.</li>
 	<li>The view uses the HQ Groovy APIs to obtain the HQ data to present, and provides the HTTP  response to the Portal user.</li>
 </ol>
@@ -150,7 +156,7 @@ where:</p>
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464144/77660728.png">worddav12ac083c5edf57546a284ed910e213a4.png</a> (image/png)
+                                <a href="attachments/79037104/79134993.png">worddav12ac083c5edf57546a284ed910e213a4.png</a> (image/png)
                                 <br/>
                                                     </div>
 				    
@@ -162,7 +168,7 @@ where:</p>
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:44</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:58</font></td>
 		    </tr>
 	    </table>
     </body>

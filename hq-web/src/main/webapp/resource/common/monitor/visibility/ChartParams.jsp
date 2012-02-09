@@ -5,7 +5,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -129,8 +129,6 @@
       page="/images/spacer.gif" width="1" height="1" border="0"/></td>
   </tr>
 </table>
-<script  type="text/javascript">
-<!--
+<jsu:script>
 	document.forms["ViewChartForm"].elements["showValuesCB"].focus();
-// -->
-</script>
+</jsu:script>

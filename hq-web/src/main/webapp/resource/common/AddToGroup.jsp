@@ -4,7 +4,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -74,24 +74,23 @@
 	</div>
 	</form>
 </div>
-
-<script type="text/javascript">
+<jsu:script>
 	hqDojo.require("dijit.dijit");
     hqDojo.require("dijit.Dialog");
 
     var MyGroupManager = null;
-    hqDojo.ready(function(){
-    	MyGroupManager = new hyperic.group_manager({
-			associationsUrl: "<html:rewrite page="/app/resource/associations"/>",
-			postUrl:"<html:rewrite page="/app/resource/association"/>"
-    	});
-    });
-
     var AddToGroupMenuLink = hqDojo.byId("AddToGroupMenuLink");
+
     if (AddToGroupMenuLink) {
     	AddToGroupMenuLink.onclick = function() { 
         	MyGroupManager.processAction(document.AddToExistingGroupForm); 
         	return false; 
         };
     }
-</script>
+</jsu:script>
+<jsu:script onLoad="true">
+   	MyGroupManager = new hyperic.group_manager({
+		associationsUrl: "<html:rewrite page="/app/resource/associations"/>",
+		postUrl:"<html:rewrite page="/app/resource/association"/>"
+   	});
+</jsu:script>

@@ -1,35 +1,38 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : ServerResource</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : ServerResource</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : ServerResource
+                            vFabric Hyperic 4.6.5 : ServerResource
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 05, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1309894159422 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1309894159422 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1309894159422 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1325699775669 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699775669 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699775669 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1309894159422'>
+/*]]>*/</style><div class='rbtoc1325699775669'>
 <ul>
     <li><a href='#ServerResource-Overview'>Overview</a></li>
     <li><a href='#ServerResource-ClassHierarchy'>Class Hierarchy</a></li>
@@ -60,7 +63,7 @@ div.rbtoc1309894159422 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 </ul></div>
 
-<p><font color=""></font></p>
+
 
 <h1><a name="ServerResource-Overview"></a>Overview</h1>
 
@@ -82,9 +85,7 @@ div.rbtoc1309894159422 li {margin-left: 0px;padding-left: 0px;}
 
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre>java.lang.Object
-
      org.hyperic.hq.product.ServerResource
-
 </pre>
 </div></div>
 
@@ -150,7 +151,7 @@ div.rbtoc1309894159422 li {margin-left: 0px;padding-left: 0px;}
 		<pre class="theme: Confluence; brush: java; gutter: false">public void addService(ServiceResource service)</pre>
 		</div>
 </div></div>
-<p>Adds new service resource to this server. For more about discovering resources see Resources Auto&#45;Discovery Processes.</p>
+<p>Adds new service resource to this server. For more about discovering resources see <a href="Resource Auto-Discovery Processes.html" title="Resource Auto-Discovery Processes">Resource Auto&#45;Discovery Processes</a>.</p>
 
 <p><b>Parameters:</b><br/>
 <b>&nbsp;&nbsp; service</b> New service resource to be added to this server.</p>
@@ -163,7 +164,7 @@ div.rbtoc1309894159422 li {margin-left: 0px;padding-left: 0px;}
 		<pre class="theme: Confluence; brush: java; gutter: false">public void addServiceType(ServiceType serviceType)</pre>
 		</div>
 </div></div>
-<p>Adds new service type to this server. More about discovering resource types see <a href="Auto-Discovery Overview.html#Auto-DiscoveryOverview-discoverresourcetypes">Discovering resource types</a>.</p>
+<p>Adds new service type to this server. More about discovering resource types see <a href="Auto-Discovery Overview.html" title="Auto-Discovery Overview">Auto&#45;Discovery Overview</a>.</p>
 
 <p><b>Parameters:</b><br/>
 <b>&nbsp;&nbsp; serviceType</b> New service type to be added. This type will eventually go back to server together with autoinventory report.</p>
@@ -176,7 +177,7 @@ div.rbtoc1309894159422 li {margin-left: 0px;padding-left: 0px;}
 		<pre class="theme: Confluence; brush: java; gutter: false">public void setIdentifier(String name)</pre>
 		</div>
 </div></div>
-<p>Sets the autoinventory identifier (AIID) for this resource. More about AIID see <a href="Auto-Discovery Overview.html#Auto-DiscoveryOverview-aiid">AIID</a>.</p>
+<p>Sets the autoinventory identifier (AIID) for this resource. </p>
 
 <p><b>Parameters:</b><br/>
 <b>&nbsp;&nbsp; name</b> Autoinventory identifier.</p>
@@ -467,7 +468,7 @@ div.rbtoc1309894159422 li {margin-left: 0px;padding-left: 0px;}
 </div></div>
 <p>Returns custom properties for the resource. These are the resource attributes that are defined using the <tt>&lt;property&gt;</tt> elements in the plugin descriptor; such attributes may be displayed in the Hyperic user interface in at the top of the page for a resource, but they cannot be edited through the user interface.</p>
 
-<p><font color=""></font></p>
+
 
 				    
                     			    </td>
@@ -478,7 +479,7 @@ div.rbtoc1309894159422 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:44</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:58</font></td>
 		    </tr>
 	    </table>
     </body>

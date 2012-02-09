@@ -1,24 +1,27 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : Script Service</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : Script Service</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : Script Service
+                            vFabric Hyperic 4.6.5 : Script Service
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 05, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
@@ -26,14 +29,14 @@
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1309896879474 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1309896879474 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1309896879474 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1325699978326 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699978326 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699978326 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1309896879474'>
+/*]]>*/</style><div class='rbtoc1325699978326'>
 <ul>
     <li><a href='#ScriptService-ScriptServiceOverview'>Script Service Overview</a></li>
-    <li><a href='#ScriptService-CreateScriptServiceinHyperic.'>Create Script Service in Hyperic.</a></li>
+    <li><a href='#ScriptService-CreateScriptServiceinHyperic'>Create Script Service in Hyperic</a></li>
     <li><a href='#ScriptService-ScriptServiceConfigurationOptions'>Script Service Configuration Options</a></li>
     <li><a href='#ScriptService-ScriptServiceMetrics'>Script Service Metrics</a></li>
     <li><a href='#ScriptService-EventTracking'>Event Tracking</a></li>
@@ -48,7 +51,17 @@ div.rbtoc1309896879474 li {margin-left: 0px;padding-left: 0px;}
 
 <div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Hyperic Support for Nagios Script-Based Monitoring</b><br />Hyperic has built-in support for Nagios integration. If you use Nagios, note that you can configure Hyperic to run Nagios checks and store the results in the Hyperic database.&nbsp;For more information, see <a href="Nagios.html" title="Nagios">Nagios</a>.</td></tr></table></div>
 
-<h1><a name="ScriptService-CreateScriptServiceinHyperic."></a>Create Script Service in Hyperic.</h1>
+<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>About Custom Script Plugins</b><br />If you wish to run scripts in Hyperic that provide richer monitoring than available from a configured script service, you can build a custom script plugin that reports as many metrics as you likc. A script plugin includes an XML descriptor and at least one script, which can be defined externally or embedded in the XML file. The plugin can use multiple scripts or a single script; the script must output <em>key=value</em> pairs. For more information, see <a href="Script Plugins.html" title="Script Plugins">Script Plugins</a> in <em>vFabric Hyperic Product Plugin Development</em>.</td></tr></table></div>
+
+
+<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Unicode characters must be escaped</b><br />Unicode characters encountered in a script will be decoded during script processing. For example, the string "%3D" is decoded to an equals sign (=). To preserve the value of s string that might be interpreted as a Unicode character, escape the string with a double backslash, for example:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">\\%3D</pre>
+		</div>
+</div></div></td></tr></table></div>
+
+<h1><a name="ScriptService-CreateScriptServiceinHyperic"></a>Create Script Service in Hyperic</h1>
 
 <p>To create a script service.</p>
 
@@ -110,11 +123,11 @@ div.rbtoc1309896879474 li {margin-left: 0px;padding-left: 0px;}
 <ul>
 	<li><b>Availability</b> &#8212; Uses process exit code:
 	<ul>
-		<li>0 == <span class="image-wrap" style=""><img src="attachments/77463561/77660601.gif" style="border: 0px solid black"/></span> OK</li>
-		<li>1 == <span class="image-wrap" style=""><img src="attachments/77463561/77660604.gif" style="border: 0px solid black"/></span> Warning</li>
-		<li>2 == <span class="image-wrap" style=""><img src="attachments/77463561/77660603.gif" style="border: 0px solid black"/></span> Critical</li>
-		<li>3 == <span class="image-wrap" style=""><img src="attachments/77463561/77660602.gif" style="border: 0px solid black"/></span> Unknown</li>
-		<li>4 == <span class="image-wrap" style=""><img src="attachments/77463561/77660598.gif" style="border: 0px solid black"/></span> Paused</li>
+		<li>0 == <span class="image-wrap" style=""><img src="attachments/79038082/79135188.gif" style="border: 0px solid black"/></span> OK</li>
+		<li>1 == <span class="image-wrap" style=""><img src="attachments/79038082/79135189.gif" style="border: 0px solid black"/></span> Warning</li>
+		<li>2 == <span class="image-wrap" style=""><img src="attachments/79038082/79135190.gif" style="border: 0px solid black"/></span> Critical</li>
+		<li>3 == <span class="image-wrap" style=""><img src="attachments/79038082/79135187.gif" style="border: 0px solid black"/></span> Unknown</li>
+		<li>4 == <span class="image-wrap" style=""><img src="attachments/79038082/79135191.gif" style="border: 0px solid black"/></span> Paused</li>
 	</ul>
 	</li>
 </ul>
@@ -148,7 +161,7 @@ div.rbtoc1309896879474 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:43</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:56</font></td>
 		    </tr>
 	    </table>
     </body>

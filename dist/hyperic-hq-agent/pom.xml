@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.hyperic.hq</groupId>
 		<artifactId>hq-parent</artifactId>
-		<version>4.6.1.BUILD-SNAPSHOT</version>
+		<version>4.6.5.BUILD-SNAPSHOT</version>
 	</parent>
 
 	<groupId>org.hyperic.hq.dist</groupId>
@@ -21,8 +21,39 @@
 			<version>${project.version}</version>
 			<type>tar.gz</type>
 		</dependency>
-	
+		<!--  <dependency>
+			<groupId>org.hyperic.hq.dist</groupId>
+			<artifactId>support</artifactId>
+			<version>${project.version}</version>
+			<type>tar.gz</type>
+		</dependency>	
+		-->
 	</dependencies>
+
+
+	<!--  <build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>unpack-support</id>
+						<goals>
+							<goal>unpack-dependencies</goal>
+						</goals>
+						<phase>generate-resources</phase>
+						<configuration>
+							<outputDirectory>${project.build.directory}/generated-resources</outputDirectory>
+							<includeGroupIds>org.hyperic.hq.dist</includeGroupIds>
+							<includeArtifactIds>support</includeArtifactIds>
+							<excludeTransitive>true</excludeTransitive>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>	
+		</plugins>
+	</build> -->
 	
 	<profiles>
 		<profile>
@@ -53,37 +84,37 @@
 						<dependency>
 							<groupId>org.hyperic.jre</groupId>
 							<artifactId>amd64-linux</artifactId>
-							<version>1.5</version>
+							<version>1.6_30</version>
 							<type>tar.gz</type>
 						</dependency>
 						<dependency>
 							<groupId>org.hyperic.jre</groupId>
 							<artifactId>x86-linux</artifactId>
-							<version>1.5</version>
+							<version>1.6_30</version>
 							<type>tar.gz</type>
 						</dependency>
 						<dependency>
 							<groupId>org.hyperic.jre</groupId>
 							<artifactId>sparc-sun-solaris</artifactId>
-							<version>1.5</version>
+							<version>1.6_30</version>
 							<type>tar.gz</type>
 						</dependency> 
 						<dependency>
 							<groupId>org.hyperic.jre</groupId>
-							<artifactId>hpux-11</artifactId>
-							<version>1.5</version>
+							<artifactId>hpux-11-risc</artifactId>
+							<version>1.6_012</version>
 							<type>tar.gz</type>
 						</dependency>
 						<dependency>
 							<groupId>org.hyperic.jre</groupId>
 							<artifactId>x86-win32</artifactId>
-							<version>1.5</version>
-							<type>tar.gz</type>
+							<version>1.6_30</version>
+							<type>zip</type>
 						</dependency>
 						<dependency>
 							<groupId>org.hyperic.jre</groupId>
-							<artifactId>ppc-aix</artifactId>
-							<version>1.5</version>
+							<artifactId>ppc-aix32</artifactId>
+							<version>1.6_29</version>
 							<type>tar.gz</type>
 						</dependency>
 					</dependencies>
@@ -135,8 +166,8 @@
 				<dependencies>
 						<dependency>
 							<groupId>org.hyperic.jre</groupId>
-							<artifactId>hpux-11</artifactId>
-							<version>1.5</version>
+							<artifactId>hpux-11-risc</artifactId>
+							<version>1.6_012</version>
 							<type>tar.gz</type>
 						</dependency>
 				</dependencies>
@@ -158,8 +189,8 @@
 				<dependencies>
 					<dependency>
 						<groupId>org.hyperic.jre</groupId>
-						<artifactId>ppc-aix</artifactId>
-						<version>1.5</version>
+						<artifactId>ppc-aix32</artifactId>
+						<version>1.6_29</version>
 						<type>tar.gz</type>
 					</dependency>
 				</dependencies>
@@ -182,7 +213,7 @@
 					<dependency>
 						<groupId>org.hyperic.jre</groupId>
 						<artifactId>sparc-sun-solaris</artifactId>
-						<version>1.5</version>
+						<version>1.6_30</version>
 						<type>tar.gz</type>
 					</dependency>
 				</dependencies>
@@ -205,8 +236,8 @@
 						<dependency>
 							<groupId>org.hyperic.jre</groupId>
 							<artifactId>x86-win32</artifactId>
-							<version>1.5</version>
-							<type>tar.gz</type>
+							<version>1.6_30</version>
+							<type>zip</type>
 						</dependency>
 				</dependencies>
   		</profile>
@@ -228,7 +259,7 @@
 						<dependency>
 							<groupId>org.hyperic.jre</groupId>
 							<artifactId>x86-linux</artifactId>
-							<version>1.5</version>
+							<version>1.6_30</version>
 							<type>tar.gz</type>
 						</dependency>
 				</dependencies>
@@ -251,7 +282,7 @@
 						<dependency>
 							<groupId>org.hyperic.jre</groupId>
 							<artifactId>amd64-linux</artifactId>
-							<version>1.5</version>
+							<version>1.6_30</version>
 							<type>tar.gz</type>
 						</dependency>
 				</dependencies>

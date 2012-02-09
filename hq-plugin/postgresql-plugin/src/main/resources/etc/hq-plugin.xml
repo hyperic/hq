@@ -243,7 +243,37 @@
   <help name="PostgreSQL 7.4" include="PostgreSQL"/>
   <help name="PostgreSQL 8.0" include="PostgreSQL"/>
   <help name="PostgreSQL 8.1" include="PostgreSQL"/>
-  <help name="PostgreSQL 8.2" include="PostgreSQL"/>
+  <help name="PostgreSQL 8.2" include="PostgreSQL"/> 
+  
+  <help name="PostgreSQL 8.3">
+      <![CDATA[
+    <p>
+    <h3>Configure PostgreSQL ${product.version} for Monitoring</h3>
+    </p>
+    <p>
+    Monitoring of PostgreSQL is done through the statistics collector.  For
+    PostgreSQL to collect these metrics, make sure the following parameter is
+    set to its default value:
+    </p>
+    <p>
+      <b>track_counts = on</b>
+    <p>
+    Make sure to restart PostgreSQL after making any changes to
+    postgresql.conf.</p>
+
+    <p>
+    Also note that some metrics like 'Index Space Used' and 'Database
+    Space Used' will only be incremented after vacuum or analyze is
+    run.</p>
+
+    <p>
+    For more information see the <a href="http://www.postgresql.org/docs/">
+    PostgreSQL Documentation</a>
+    </p>
+    ]]>
+  </help>  
+  <help name="PostgreSQL 8.4" include="PostgreSQL"/> 
+  <help name="PostgreSQL 9" include="PostgreSQL"/> 
 
   <server name="PostgreSQL" 
           version="7.4">
@@ -256,6 +286,29 @@
 
     <plugin type="control"
             class="PostgreSQLControlPlugin"/>
+         
+    <plugin type="config_track"
+            class="org.hyperic.hq.product.FileChangeTrackPlugin"/>
+ 
+    <plugin type="config_track"
+    		platform="unix"
+            class="org.hyperic.hq.product.FileChangeTrackPlugin">
+            <monitored>
+            	<folder path="data" recursive="false" filter=".*\.conf"/>
+            	<!-- system variable PGDATA -->
+            	<folder path="*PGDATA*" recursive="false" filter=".*\.conf"/>
+            </monitored>
+    </plugin>
+
+    <plugin type="config_track"
+    		platform="win32"
+            class="org.hyperic.hq.product.FileChangeTrackPlugin">
+            <monitored>
+            	<folder path="data" recursive="false" filter=".*\.conf"/>
+            </monitored>
+    </plugin>
+     <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="false" />
+
 
     <actions include="Analyze,ResetStatistics,Vacuum,VacuumAnalyze"/>
 
@@ -301,6 +354,8 @@
       <config>
         <option name="table"
                 description="Table Name"/>
+        <option name="schema"
+                description="Schema Name"/>                
       </config>
 
       <metrics include="pg-table"/>
@@ -315,6 +370,8 @@
       <config>
         <option name="index"
                 description="Index Name"/>
+        <option name="schema"
+                description="Schema Name"/>                    
       </config>
 
       <metrics include="pg-index"/>

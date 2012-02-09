@@ -1,43 +1,46 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : Network Device</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : Network Device</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : Network Device
+                            vFabric Hyperic 4.6.5 : Network Device
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 27, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
  
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1311786242620 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1311786242620 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1311786242620 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1325699953179 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699953179 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699953179 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1311786242620'>
+/*]]>*/</style><div class='rbtoc1325699953179'>
 <ul>
     <li><a href='#NetworkDevice-MonitoringaNetworkDevice'>Monitoring a Network Device</a></li>
 <ul>
-    <li><a href='#NetworkDevice-NetworkDeviceResourcesandtheHQInventoryModel'>Network Device Resources and the HQ Inventory Model</a></li>
+    <li><a href='#NetworkDevice-NetworkDeviceResourcesandtheHypericInventoryModel'>Network Device Resources and the Hyperic Inventory Model</a></li>
 </ul>
     <li><a href='#NetworkDevice-ConfigurationInstructions'>Configuration Instructions</a></li>
 <ul>
-    <li><a href='#NetworkDevice-Step1ConfiguretheNetworkDeviceinHQ'>Step 1 - Configure the Network Device in HQ</a></li>
+    <li><a href='#NetworkDevice-Step1ConfiguretheNetworkDeviceinHyperic'>Step 1 - Configure the Network Device in Hyperic</a></li>
     <li><a href='#NetworkDevice-Step2ConfigureTrackingofTrapEvents%28Optional%29'>Step 2 - Configure Tracking of Trap Events (Optional)</a></li>
     <li><a href='#NetworkDevice-Step3ConfigureAlertDefinitions%28Optional%29'>Step 3 - Configure Alert Definitions (Optional)</a></li>
     <li><a href='#NetworkDevice-Step4DefineDependencyRelationships%28Optional%29'>Step 4 - Define Dependency Relationships (Optional)</a></li>
@@ -57,9 +60,9 @@ div.rbtoc1311786242620 li {margin-left: 0px;padding-left: 0px;}
 
 <p>Hyperic's Network Device plugin monitors SNMP-capable devices on your network. </p>
 
-<p>The Network Device plugin uses SNMP GET requests to obtain resource statistics for the monitored device. If you want to create events for SNMP traps issued by a device, you can configure it to send traps to the HQ Agent that manages the it. Note however that it is not necessary to receive traps to obtain device metrics. </p>
+<p>The Network Device plugin uses SNMP GET requests to obtain resource statistics for the monitored device. If you want to create events for SNMP traps issued by a device, you can configure it to send traps to the Hyperic Agent that manages the it. Note however that it is not necessary to receive traps to obtain device metrics. </p>
 
-<p>The indented list below illustrates the hierarchy of Hyperic resource types that map to network device entities. Each resource type is described below in <a href="#NetworkDevice-NetworkDeviceResourcesandtheHQInventoryModel">Network Device Resources and the HQ Inventory Model</a>. </p>
+<p>The indented list below illustrates the hierarchy of Hyperic resource types that map to network device entities. Each resource type is described below in <a href="#NetworkDevice-NetworkDeviceResourcesandtheHypericInventoryModel">Network Device Resources and the Hyperic Inventory Model</a>. </p>
 
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
@@ -69,7 +72,7 @@ div.rbtoc1311786242620 li {margin-left: 0px;padding-left: 0px;}
 </div></div> 
 
 
-<h2><a name="NetworkDevice-NetworkDeviceResourcesandtheHQInventoryModel"></a>Network Device Resources and the HQ Inventory Model </h2>
+<h2><a name="NetworkDevice-NetworkDeviceResourcesandtheHypericInventoryModel"></a>Network Device Resources and the Hyperic Inventory Model </h2>
 
 <p>The table below lists the resource types in Hyperic that map to managed network device entities. The right column indicates the inventory level for each type in the Hyperic&nbsp;inventory model. </p>
 <div class='table-wrap'>
@@ -96,7 +99,7 @@ div.rbtoc1311786242620 li {margin-left: 0px;padding-left: 0px;}
 <p><b>Note:</b> For more information about the managed resource hierarchy, see <a href="Resources, Resource Types and Inventory Types.html" title="Resources, Resource Types and Inventory Types">Resources, Resource Types and Inventory Types</a>. </p>
 
 <h1><a name="NetworkDevice-ConfigurationInstructions"></a>Configuration Instructions </h1>
-<h2><a name="NetworkDevice-Step1ConfiguretheNetworkDeviceinHQ"></a>Step 1 - Configure the Network Device in HQ </h2>
+<h2><a name="NetworkDevice-Step1ConfiguretheNetworkDeviceinHyperic"></a>Step 1 - Configure the Network Device in Hyperic </h2>
 
 <p>In this step, you configure a platform of type "Network Device" in Hyperic to represent the device you wish to monitor, and select a Hyperic Agent to collect device metrics. </p>
 
@@ -105,7 +108,7 @@ div.rbtoc1311786242620 li {margin-left: 0px;padding-left: 0px;}
 	<li>Select <b>New Platform</b> from the <b>Tools</b> menu.
 	<ul>
 		<li>Click the thumbnail below to see the <b>New Platform</b> page.<br/>
-<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1002x516" href='http://support.hyperic.com/download/attachments/77463605/NewPlatformNetworkDevice.png'><img src="attachments/thumbnails/77463605/77660352" style="border: 0px solid black"/></a></span> </li>
+<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1002x516" href='http://support.hyperic.com/download/attachments/79038211/NewPlatformNetworkDevice.png'><img src="attachments/thumbnails/79038211/79135302" style="border: 0px solid black"/></a></span> </li>
 	</ul>
 	</li>
 	<li>Enter a name for your platform.</li>
@@ -120,7 +123,7 @@ div.rbtoc1311786242620 li {margin-left: 0px;padding-left: 0px;}
 	<li>The netmask or MAC address of the device or server may be required depending on the configuration of the device.</li>
 	<li>Click <b>OK</b>.
 	<ul>
-		<li>The <b>Configuration Properties</b> page for the Network Device platform appears. See <a href="#NetworkDevice-NetworkDeviceConfigurationPropertiesPage">Network Device Configuration Properties Page</a> for a screenshot.</li>
+		<li>The <b>Configuration Properties</b> page for the Network Device platform appears. See <a href="#NetworkDevice-ConfigurationPropertiesPage">Configuration Properties Page</a> for a screenshot.</li>
 	</ul>
 	</li>
 	<li>On the <b>Configuration Properties</b> page, enter values for for the options that apply to the version of SNMP you selected above. Configuration options are defined below in <a href="#NetworkDevice-NetworkDeviceConfigurationOptions">Network Device Configuration Options</a>.</li>
@@ -140,7 +143,7 @@ div.rbtoc1311786242620 li {margin-left: 0px;padding-left: 0px;}
 
 <p>The <b>Configuration Properties</b> page for the Network Device platform type is shown below. </p>
 
-<p><span class="image-wrap" style=""><img src="attachments/77463605/77660311.png" width="800px" style="border: 0px solid black"/></span><br class="atl-forced-newline" /> </p>
+<p><span class="image-wrap" style=""><img src="attachments/79038211/79135279.png" width="800px" style="border: 0px solid black"/></span><br class="atl-forced-newline" /> </p>
 
 <h3><a name="NetworkDevice-NetworkDeviceConfigurationOptions"></a>Network Device Configuration Options </h3>
 
@@ -149,7 +152,7 @@ div.rbtoc1311786242620 li {margin-left: 0px;padding-left: 0px;}
 <p>
 <div class='table-wrap'>
 
-<table id='TBL1307938356760' width='800px' class='confluenceTable'><tbody>
+<table id='TBL1321720890583' width='800px' class='confluenceTable'><tbody>
 <tr>
 <th class='confluenceTh'> name </th>
 <th class='confluenceTh'> description</th>
@@ -164,7 +167,7 @@ div.rbtoc1311786242620 li {margin-left: 0px;padding-left: 0px;}
 
 <div class='table-wrap'>
 
-<table id='TBL1307938356761' width='800px' class='confluenceTable'><tbody>
+<table id='TBL1321720890584' width='800px' class='confluenceTable'><tbody>
 <tr>
 <td class='confluenceTd'> interface. <br class="atl-forced-newline" />
 index </td>
@@ -185,7 +188,7 @@ ifDescr<br class="atl-forced-newline" />
  
 <div class='table-wrap'>
 
-<table id='TBL1307938356762' width='800px' class='confluenceTable'><tbody>
+<table id='TBL1321720890585' width='800px' class='confluenceTable'><tbody>
 <tr>
 <td class='confluenceTd'> snmpIp<br class="atl-forced-newline" />
 <br class="atl-forced-newline" /> </td>
@@ -277,39 +280,40 @@ function customizeMacroTable(tableId,columnTypes,firstDataRowIndex,highlightColo
 
 var columnTypes = ['S'];
 var columnAttributes = 'style=&quot;width:15%;&quot;,style=&quot;width:15%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:30%;&quot;,style=&quot;width:10%;&quot;';
-customizeMacroTable('TBL1307938356760', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
+customizeMacroTable('TBL1321720890583', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
 //-->
  </script> 
 <script type='text/javascript'> <!-- 
 var columnTypes = ['S'];
 var columnAttributes = 'style=&quot;width:15%;&quot;,style=&quot;width:15%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:30%;&quot;,style=&quot;width:10%;&quot;';
-customizeMacroTable('TBL1307938356761', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
+customizeMacroTable('TBL1321720890584', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
 //-->
  </script> 
 <script type='text/javascript'> <!-- 
 var columnTypes = ['S'];
 var columnAttributes = 'style=&quot;width:15%;&quot;,style=&quot;width:15%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:30%;&quot;,style=&quot;width:10%;&quot;';
-customizeMacroTable('TBL1307938356762', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
+customizeMacroTable('TBL1321720890585', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
 //-->
  </script>  </p>
 
 <h2><a name="NetworkDevice-Step2ConfigureTrackingofTrapEvents%28Optional%29"></a>Step 2 - Configure Tracking of Trap Events (Optional) </h2>
-<p>This step has instructions for enabling the Hyperic Agent to receive traps from a Network Device and to log events for traps it receives. If you do not wish to receive traps from the device, skip to the next step. </p>
+<p><a name="NetworkDevice-traps"></a><br/>
+This step has instructions for enabling the Hyperic Agent to receive traps from a Network Device and to log events for traps it receives. If you do not wish to receive traps from the device, skip to the next step. </p>
 
 <ol>
-	<li>To enable the HQ Agent to receive traps, add the following line to its <tt>agent.properties</tt> file:<br/>
+	<li>To enable the Hyperic Agent to receive traps, add the following line to its <tt>agent.properties</tt> file:<br/>
 <tt>snmpTrapReceiver.listenAddress=udp:0.0.0.0/1620</tt>. 
 <div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Privileges Required for Default SNMP Port</b><br />The Hyperic Agent's default UDP port for receiving traps is 162, in the privileged range, which the agent cannot access unless it runs as as root (or as an Administrative user on Windows). If you run the agent under the context of an non-administrative user, configure a non-privileged port to receive SNMP traps, by adding this property to its <tt>agent.properties</tt> file. 
 
 <p><tt>snmpTrapReceiver.listenAddress=udp:0.0.0.0/162</tt> </p>
 
-<p>This enables the agent to receive traps through any interface on the platform at UDP port 1620. If desired, you can specify an specific interface's IP address, or different port in the unprivileged range (1024 or above). Restart the HQ Agent after defining the listen address. </p>
+<p>This enables the agent to receive traps through any interface on the platform at UDP port 1620. If desired, you can specify an specific interface's IP address, or different port in the unprivileged range (1024 or above). Restart the Hyperic Agent after defining the listen address. </p>
 
 <p><b>Note:</b> If you try to check that the SNMP port is open at this point, netstat will not show it open. Once you complete all steps in this procedure netstat output will produce expected results.</p></td></tr></table></div> </li>
 	<li>On the network device:
 	<ol>
 		<li>Verify that traps are enabled on the network device.</li>
-		<li>Set up the HQ Agent as a trap destination on the network device, supplying the HQ Agent's IP address and the SNMP port configured for the agent in the previous step.</li>
+		<li>Set up the Hyperic Agent as a trap destination on the network device, supplying the Hyperic Agent's IP address and the SNMP port configured for the agent in the previous step.</li>
 	</ol>
 	</li>
 	<li>On the <b>Configuration Properties</b> page for the network device in Hyperic:
@@ -336,7 +340,7 @@ customizeMacroTable('TBL1307938356762', columnTypes, 1, 'lightgoldenrodyellow', 
 <h2><a name="NetworkDevice-Step3ConfigureAlertDefinitions%28Optional%29"></a>Step 3 - Configure Alert Definitions (Optional) </h2>
 <p><a name="NetworkDevice-alerts"></a> </p>
 
-<p>Create alert definitions as desired for your managed network device resources. You can base alerts on device metrics, and on device traps, if you have configured the device to send traps to the HQ Agent. </p>
+<p>Create alert definitions as desired for your managed network device resources. You can base alerts on device metrics, and on device traps, if you have configured the device to send traps to the Hyperic Agent. </p>
 
 <p>For information about creating alerts, see <a href="Define an Alert for a Resource.html" title="Define an Alert for a Resource">Define an Alert for a Resource</a>. </p>
 
@@ -345,18 +349,18 @@ customizeMacroTable('TBL1307938356762', columnTypes, 1, 'lightgoldenrodyellow', 
 <p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
  
 
-<p>In vFabric Hyperic, if operating system platforms in your environment depend on the Network Device platform, you can define those dependencies using the <b>Network Host Dependency Manager</b>. This optional configuration is useful when HQ Enterprise's <em>hierarchical alerting</em> feature is enabled. </p>
+<p>In vFabric Hyperic, if operating system platforms in your environment depend on the Network Device platform, you can define those dependencies using the <b>Network Host Dependency Manager</b>. This optional configuration is useful when vFabric Hyperic's <em>hierarchical alerting</em> feature is enabled. </p>
 
-<p>With hierarchical alerting, the alert evaluation process for a resource takes into account the availability and alert status of the resource's parent. If you configure the relationship between a Network Device and the operating system platforms that depend on it, HQ will take the availability of the Network Device into account when evaluating alerts triggered for the operating system platforms - and so avoid firing redundant alerts when a problem with the Network Device makes dependent resources unavailable. </p>
+<p>With hierarchical alerting, the alert evaluation process for a resource takes into account the availability and alert status of the resource's parent. If you configure the relationship between a Network Device and the operating system platforms that depend on it, Hyperic will take the availability of the Network Device into account when evaluating alerts triggered for the operating system platforms - and so avoid firing redundant alerts when a problem with the Network Device makes dependent resources unavailable. </p>
 
-<p>The <b>Network Host Dependency Manager</b> is available in the "Plugins" section on the <b>Administration</b> tab of the HQ Enterprise user interface. </p>
+<p>The <b>Network Host Dependency Manager</b> is available in the "Plugins" section on the <b>Administration</b> tab of the vFabric Hyperic user interface. </p>
 
 <p>For information about hierarchical alerting, see <a href="Manage Alert and Notification Volume.html" title="Manage Alert and Notification Volume">Manage Alert and Notification Volume</a>. For instructions, see the <a href="ui-Admin.Dependency.html" title="ui-Admin.Dependency">help page</a> for the <b>Network Host Dependency Manager</b>. </p>
 
 
 <h1><a name="NetworkDevice-ManagementFunctions"></a>Management Functions </h1>
 
-<p>The Network Device platform type is managed by HQ's netdevice plugin and performs the following functions: </p>
+<p>The Network Device platform type is managed by Hyperic's netdevice plugin and performs the following functions: </p>
 
 <h2><a name="NetworkDevice-AutoDiscovery"></a>Auto-Discovery </h2>
 
@@ -418,12 +422,12 @@ customizeMacroTable('TBL1307938356762', columnTypes, 1, 'lightgoldenrodyellow', 
 <h2><a name="NetworkDevice-NetworkDeviceMetrics"></a>Network Device Metrics </h2>
 <p>Click the thumbnail below to view the <b>Monitoring Defaults</b> page for the Network Device platform service. </p>
 
-<p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 1002x1226" href='http://support.hyperic.com/download/attachments/77463605/NetworkDeviceMetrics.png'><img src="attachments/thumbnails/77463605/77660315" style="border: 0px solid black"/></a></span> </p>
+<p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 1002x1226" href='http://support.hyperic.com/download/attachments/79038211/NetworkDeviceMetrics.png'><img src="attachments/thumbnails/79038211/79135275" style="border: 0px solid black"/></a></span> </p>
 
 <p>
 <div class='table-wrap'>
 
-<table id='TBL1307938356763' width='800px' class='confluenceTable'><tbody>
+<table id='TBL1321720890586' width='800px' class='confluenceTable'><tbody>
 <tr>
 <th class='confluenceTh'> Metric Name <br class="atl-forced-newline" /> </th>
 <th class='confluenceTh'>Definition </th>
@@ -557,7 +561,7 @@ function customizeMacroTable(tableId,columnTypes,firstDataRowIndex,highlightColo
 
 var columnTypes = ['S'];
 var columnAttributes = 'style=&quot;width:20%;&quot;,style=&quot;width:80%;&quot;';
-customizeMacroTable('TBL1307938356763', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
+customizeMacroTable('TBL1321720890586', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
 //-->
  </script> </p> 
 
@@ -565,11 +569,11 @@ customizeMacroTable('TBL1307938356763', columnTypes, 1, 'lightgoldenrodyellow', 
 
 <p>Click the thumbnail below to view the <b>Monitoring Defaults</b> page for the Network Device Interface platform service type. </p>
 
-<p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 1001x899" href='http://support.hyperic.com/download/attachments/77463605/NetworkDeviceInterfaceMetrics.png'><img src="attachments/thumbnails/77463605/77660394" style="border: 0px solid black"/></a></span> </p>
+<p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 1001x899" href='http://support.hyperic.com/download/attachments/79038211/NetworkDeviceInterfaceMetrics.png'><img src="attachments/thumbnails/79038211/79135383" style="border: 0px solid black"/></a></span> </p>
 <p>
 <div class='table-wrap'>
 
-<table id='TBL1307938356764' width='800px' class='confluenceTable'><tbody>
+<table id='TBL1321720890587' width='800px' class='confluenceTable'><tbody>
 <tr>
 <th class='confluenceTh'> Metric </th>
 <th class='confluenceTh'> Definition </th>
@@ -696,7 +700,7 @@ function customizeMacroTable(tableId,columnTypes,firstDataRowIndex,highlightColo
 
 var columnTypes = ['S'];
 var columnAttributes = 'style=&quot;width:20%;&quot;,style=&quot;width:80%;&quot;';
-customizeMacroTable('TBL1307938356764', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
+customizeMacroTable('TBL1321720890587', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
 //-->
  </script> </p> 
 
@@ -720,14 +724,11 @@ customizeMacroTable('TBL1307938356764', columnTypes, 1, 'lightgoldenrodyellow', 
 
 
 <ul>
-	<li>Check the HQ Agent log file to make sure that the agent has opened the proper UDP port. If properly configured, you should see messages similar to:
+	<li>Check the Hyperic Agent log file to make sure that the agent has opened the proper UDP port. If properly configured, you should see messages similar to:
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre> 
-
 2008-06-05 16:45:05,447 DEBUG [SNMPTrapReceiver] snmpTrapReceiver.listenAddress=udp:0.0.0.0/1620 
-
 2008-06-05 16:45:05,572 DEBUG [SNMPTrapReceiver] Add 1:10003 for 10.2.0.2-switch 
-
 </pre>
 </div></div> </li>
 </ul>
@@ -747,7 +748,7 @@ customizeMacroTable('TBL1307938356764', columnTypes, 1, 'lightgoldenrodyellow', 
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:43</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:56</font></td>
 		    </tr>
 	    </table>
     </body>

@@ -33,6 +33,7 @@ import org.hyperic.hq.agent.AgentAPIInfo;
 import org.hyperic.hq.agent.AgentCommand;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentRemoteValue;
+import org.hyperic.hq.agent.stats.AgentStatsCollector;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,14 +45,20 @@ import org.apache.commons.logging.LogFactory;
  * server handler with a CommandDispatcher, and when a request
  * is processed, their registered methods will be invoked.
  */
-
 public class CommandDispatcher {
     private Log log;     
-    private Hashtable commands;
+    private Hashtable<String, AgentServerHandler> commands;
+    private AgentStatsCollector statsCollector;
+    private String COMMAND_DISPATCHER_INCOMING_COMMAND = "COMMAND_DISPATCHER_INCOMING_COMMAND";
+    // this should never happen but the agent is in such an unknown state so I didn't want to leave it out
+    private String COMMAND_DISPATCHER_ILLEGAL_COMMAND = "COMMAND_DISPATCHER_ILLEGAL_COMMAND";
 
     CommandDispatcher(){
-        this.commands = new Hashtable();
+        this.commands = new Hashtable<String, AgentServerHandler>();
         this.log      = LogFactory.getLog(CommandDispatcher.class);
+        this.statsCollector = AgentStatsCollector.getInstance();
+        statsCollector.register(COMMAND_DISPATCHER_ILLEGAL_COMMAND);
+        statsCollector.register(COMMAND_DISPATCHER_INCOMING_COMMAND);
     }
 
     /**
@@ -64,12 +71,11 @@ public class CommandDispatcher {
      *
      * @see AgentServerHandler
      */
-
     void addServerHandler(AgentServerHandler handler){
         String[] cmds = handler.getCommandSet();
-        
         for(int i=0; i<cmds.length; i++){
             this.commands.put(cmds[i], handler);
+            statsCollector.register(COMMAND_DISPATCHER_INCOMING_COMMAND + "_" + cmds[i]);
         }
     }
 
@@ -85,40 +91,47 @@ public class CommandDispatcher {
      * @throws AgentRemoteException indicating some error occurred dispatching
      *                              the method.
      */
-
-    public AgentRemoteValue processRequest(AgentCommand cmd, InputStream inStream,
-                                    OutputStream outStream)
-        throws AgentRemoteException
-    {
+    public AgentRemoteValue processRequest(AgentCommand cmd, InputStream inStream, OutputStream outStream)
+    throws AgentRemoteException {
+        final long start = now();
+        final String command = cmd.getCommand();
+        boolean legalCommand = false;
         try {
             AgentServerHandler handler;
             AgentAPIInfo apiInfo;
             Object val;
-            
             if((val = this.commands.get(cmd.getCommand())) == null){
-                throw new AgentRemoteException("Unknown command, '" + 
-                                               cmd.getCommand() + "'");
+                throw new AgentRemoteException("Unknown command, '" + cmd.getCommand() + "'");
             }
-
             handler = (AgentServerHandler) val;        
             apiInfo = handler.getAPIInfo();
             if(!apiInfo.isCompatible(cmd.getCommandVersion())){
-                throw new AgentRemoteException("Client API mismatch: " +
-                                               cmd.getCommandVersion() + 
-                                               " vs. " +
-                                               apiInfo.getVersion());
+                throw new AgentRemoteException("Client API mismatch: " + cmd.getCommandVersion() + 
+                                               " vs. " + apiInfo.getVersion());
             }
-            
-            return handler.dispatchCommand(cmd.getCommand(), 
-                                           cmd.getCommandArg(), inStream, 
-                                           outStream);
+            legalCommand = true;
+            return handler.dispatchCommand(cmd.getCommand(), cmd.getCommandArg(), inStream, outStream);
         } catch(AgentRemoteException exc){
             throw exc;
         } catch(Exception exc){
             this.log.error("Error while processing request", exc);
-            throw new AgentRemoteException(exc.toString());
+            throw new AgentRemoteException(exc.toString(), exc);
         } catch(LinkageError err){
-            throw new AgentRemoteException(err.toString());
+            AgentRemoteException e = new AgentRemoteException(err.toString());
+            e.initCause(err);
+            throw e;
+        } finally {
+            long end = now();
+            if (legalCommand) {
+                statsCollector.addStat(end-start, COMMAND_DISPATCHER_INCOMING_COMMAND);
+                statsCollector.addStat(end-start, COMMAND_DISPATCHER_INCOMING_COMMAND + "_" + command.toUpperCase());
+            } else {
+                statsCollector.addStat(1, COMMAND_DISPATCHER_ILLEGAL_COMMAND);
+            }
         }
+    }
+
+    private long now() {
+        return System.currentTimeMillis();
     }
 }

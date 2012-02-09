@@ -7,7 +7,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -32,13 +32,10 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-
-
-<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
-<script type="text/javascript">
-var pageData = new Array();
-</script>
-
+<jsu:importScript path="/js/listWidget.js" />
+<jsu:script>
+	var pageData = new Array();
+</jsu:script>
 <c:set var="entityId" value="${Resource.entityId}"/>
 <c:set var="selfAction" value="/resource/server/Inventory.do?mode=view&eid=${entityId}"/>
 

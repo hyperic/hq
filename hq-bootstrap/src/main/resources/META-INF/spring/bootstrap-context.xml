@@ -65,8 +65,8 @@
 		<constructor-arg ref="propertyPasswordEncryptor" />
 		<property name="locations">
 			<list>
-				<value>classpath:/hq-server.conf</value>
 				<value>classpath:/spring-jdbc.properties</value>
+				<value>classpath:/hq-server.conf</value>
 			</list>
 		</property>
 	</bean>

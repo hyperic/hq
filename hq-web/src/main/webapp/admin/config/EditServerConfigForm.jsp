@@ -6,6 +6,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -33,7 +34,7 @@
 
 <tiles:importAttribute name="showIQSettings" ignore="true"/>
 
-<script src="<html:rewrite page="/js/functions.js" />" type="text/javascript"></script>
+<jsu:importScript path="/js/functions.js" />
 <link rel=stylesheet href="<html:rewrite page="/css/win.css" />" type="text/css">
 
 <hq:constant

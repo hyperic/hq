@@ -72,14 +72,13 @@ public class EventLogManagerImpl implements EventLogManager {
     
     private final Log traceLog = LogFactory.getLog(EventLogManagerImpl.class.getName() + "Trace");
 
-    private EventLogDAO eventLogDAO;
-
+    private final EventLogDAO eventLogDAO;
+    @Autowired
     private ResourceManager resourceManager;
 
     @Autowired
-    public EventLogManagerImpl(EventLogDAO eventLogDAO, ResourceManager resourceManager) {
+    public EventLogManagerImpl(EventLogDAO eventLogDAO) {
         this.eventLogDAO = eventLogDAO;
-        this.resourceManager = resourceManager;
     }
 
     /**

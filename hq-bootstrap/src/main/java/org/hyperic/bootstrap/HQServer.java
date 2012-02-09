@@ -29,6 +29,7 @@ package org.hyperic.bootstrap;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -43,6 +44,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.sigar.SigarException;
+import org.hyperic.util.exec.ShutdownType;
 import org.hyperic.util.jdbc.DBUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -56,16 +58,17 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class HQServer {
-
+ 
     private final Log log = LogFactory.getLog(HQServer.class);
-    private String serverHome;
-    private String engineHome;
-    private ProcessManager processManager;
-    private EmbeddedDatabaseController embeddedDatabaseController;
-    private ServerConfigurator serverConfigurator;
-    private EngineController engineController;
-    private OperatingSystem osInfo;
-    private DataSource dataSource;
+    private final String serverHome;
+    private final String engineHome;
+    private final ProcessManager processManager;
+    private final EmbeddedDatabaseController embeddedDatabaseController;
+    private final ServerConfigurator serverConfigurator;
+    private final EngineController engineController;
+    private final OperatingSystem osInfo;
+    private final DataSource dataSource;
+    
     static final int DB_UPGRADE_PROCESS_TIMEOUT = 60 * 1000;
 
     @Autowired
@@ -85,21 +88,23 @@ public class HQServer {
         this.dataSource = dataSource;
     }
 
-    public void start() {
+    /**
+     * @return {@link System#exit(int)} exit code 
+     */
+    public int start() {
         log.info("Starting HQ server...");
         try {
             if (engineController.isEngineRunning()) {
-                return;
+                return ShutdownType.AbnormalStop.exitCode() ;
             }
         } catch (SigarException e) {
-            log.error("Unable to determine if HQ server is already running.  Cause: " +
-                      e.getMessage());
-            return;
+            log.error("Unable to determine if HQ server is already running.  Cause: " + e, e);
+            return ShutdownType.AbnormalStop.exitCode() ; 
         }
         try {
             serverConfigurator.configure();
         } catch (Exception e) {
-            log.error("Error configuring server: " + e.getMessage());
+            log.error("Error configuring server: " + e, e);
         }
         if (embeddedDatabaseController.shouldUse()) {
             log.debug("Calling startBuiltinDB");
@@ -107,11 +112,25 @@ public class HQServer {
                 if (!embeddedDatabaseController.startBuiltInDB()) {
                     // We couldn't start DB and not already running. Time to
                     // bail.
-                    return;
+                    return ShutdownType.AbnormalStop.exitCode() ;  
                 }
+                
+                //Add a JVM shutdown hook to ensure that the db is always stopped 
+                log.debug("Latching the cleaning process on the JVM's shutdown hook") ; 
+                Runtime.getRuntime().addShutdownHook(new Thread() { 
+                    @Override
+                    public final void run() {
+                        try {
+                            embeddedDatabaseController.stopBuiltInDB();
+                        } catch (Exception e) {
+                            log.error("Error stopping built-in database: " + e, e);
+                            return;
+                        }//EO catch block
+                    }//EOM  
+                }) ;
             } catch (Exception e) {
-                log.error("Error starting built-in database: " + e.getMessage());
-                return;
+                log.error("Error starting built-in database: " + e, e);
+                return ShutdownType.AbnormalStop.exitCode() ; 
             }
             log.debug("startBuiltinDB completed");
         }
@@ -120,34 +139,26 @@ public class HQServer {
         try {
             upgradeDB();
         } catch (Exception e) {
-            log.error("Error running database upgrade routine: " + e.getMessage());
-            return;
+            log.error("Error running database upgrade routine: " + e, e);
+            return ShutdownType.AbnormalStop.exitCode() ;
         }
         
         if (!(verifySchema())) {
             // Schema is not valid. Something went wrong with the DB upgrade.
-            return;
-        }
+            return ShutdownType.AbnormalStop.exitCode() ;
+        }                                                                                           
         List<String> javaOpts = getJavaOpts();
         log.info("Booting the HQ server...");
-        engineController.start(javaOpts);
+        return engineController.start(javaOpts);
     }
 
     public void stop() {
         log.info("Stopping HQ server...");
         try {
             engineController.stop();
-        } catch (Exception e) {
-            log.error("Error stopping HQ server: " + e.getMessage());
+        } catch (Throwable e) {
+            log.error("Error stopping HQ server: " + e, e);
             return;
-        }
-        if (embeddedDatabaseController.shouldUse()) {
-            try {
-                embeddedDatabaseController.stopBuiltInDB();
-            } catch (Exception e) {
-                log.error("Error stopping built-in database: " + e.getMessage());
-                return;
-            }
         }
         return;
     }
@@ -163,8 +174,16 @@ public class HQServer {
         }
         return optList;
     }
-
+    
     boolean verifySchema() {
+        final String sInconsistentStateErrorMsgTemplate = "HQ DB schema is in a bad state: '%s'." + 
+                " This is most likely due to a failed upgrade.  " +
+                "Please either restore from backups and start your " +
+                "previous version of HQ or contact HQ support.  " +
+                "HQ cannot start while the current DB Schema version " +
+                "is in this state" ; 
+        
+        boolean isSuccessful = false ;   
         Statement stmt = null;
         ResultSet rs = null;
         Connection conn = null;
@@ -178,21 +197,26 @@ public class HQServer {
                 final String currSchema = rs.getString("propvalue");
                 log.info("HQ DB schema: " + currSchema);
                 if (currSchema.contains(HQConstants.SCHEMA_MOD_IN_PROGRESS)) {
-                    log.fatal("HQ DB schema is in a bad state: '" + currSchema +
-                              "'.  This is most likely due to a failed upgrade.  " +
-                              "Please either restore from backups and start your " +
-                              "previous version of HQ or contact HQ support.  " +
-                              "HQ cannot start while the current DB Schema version " +
-                              "is in this state");
-                    return false;
-                }
-            }
+                    log.fatal(String.format(sInconsistentStateErrorMsgTemplate, currSchema));
+                }else { 
+                    isSuccessful = true ; 
+                }//EO else if DB version is in a consistent state 
+            }else { 
+                log.fatal(String.format(sInconsistentStateErrorMsgTemplate, "No CAM_SCHEMA_VERSION property found"));
+            }//EO else if there was no CAM_SCHEMA_VERSION proprety 
+            
         } catch (SQLException e) {
-            log.error("Error verifying if HQ schema is valid.  Cause: " + e.getMessage());
+            try {
+                DatabaseMetaData metaData = (conn == null) ? null : conn.getMetaData();
+                String url = (metaData == null) ? null : metaData.getURL();
+                log.error("Error verifying if HQ schema is valid.  url= " + url + ", Cause: " + e, e);
+            } catch (SQLException e1) {
+                log.error(e,e);
+            }
         } finally {
             DBUtil.closeJDBCObjects(HQServer.class.getName(), conn, stmt, rs);
         }
-        return true;
+        return isSuccessful ; 
     }
 
     int upgradeDB() {
@@ -201,12 +225,12 @@ public class HQServer {
             logConfigFileUrl = new File(serverHome + "/conf/log4j.xml").toURI().toURL().toString();
         } catch (MalformedURLException e) {
             log.error("Unable to determine URL for logging config file " + serverHome +
-                      "/conf/log4j.xml.  Cause: " + e.getMessage());
+                      "/conf/log4j.xml.  Cause: " + e, e);
             return 1;
         }
 
         String javaHome = System.getProperty("java.home");
-       
+         
         return processManager.executeProcess(
             new String[] { javaHome + "/bin/java",
                           "-cp",
@@ -227,21 +251,33 @@ public class HQServer {
     }
 
     public static void main(String[] args) {
-        ClassPathXmlApplicationContext appContext = null;
+    	
+    	int iReturnCode = -1 ; 
+    	
+    	ClassPathXmlApplicationContext appContext = null;
         try {
             appContext = new ClassPathXmlApplicationContext(
                 new String[] { "classpath*:/META-INF/spring/bootstrap-context.xml" });
         } catch (Exception e) {
-            System.err.println("Error initializing bootstrap class: " + e.getMessage());
+            System.err.println("Error initializing bootstrap class: " + e.getMessage());						
             return;
         }
         HQServer server = appContext.getBean(HQServer.class);
         if ("start".equals(args[0])) {
-            server.start();
+        	iReturnCode = server.start();
         } else if ("stop".equals(args[0])) {
             server.stop();
+            iReturnCode = ShutdownType.NormalStop.exitCode() ; 
+            //return ;  
         } else {
             System.err.println("Usage: HQServer {start|stop}");
-        }
+        }			
+        
+        //delegate the shutdown behavior to the ShutdownType strategies.
+        final ShutdownType enumShutdownType = ShutdownType.reverseValueOf(iReturnCode) ;
+        System.out.println("[HQServer.main("+args[0]+")]: Shutdown of type '" + enumShutdownType + 
+        																		"' was request") ;
+        enumShutdownType.shutdown() ; 
+        
     }
 }

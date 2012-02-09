@@ -60,6 +60,7 @@ import org.hyperic.hq.agent.AgentUpgradeManager;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.client.LegacyAgentCommandsClientImpl;
 import org.hyperic.hq.agent.server.AgentDaemon;
+import org.hyperic.hq.agent.server.AgentDaemon.RunnableAgent;
 import org.hyperic.hq.agent.server.LoggingOutputStream;
 import org.hyperic.hq.bizapp.agent.ProviderInfo;
 import org.hyperic.hq.bizapp.agent.commands.CreateToken_args;
@@ -420,14 +421,12 @@ public class AgentClient {
     /**
      * Test the connection information.
      */
-    private BizappCallbackClient getConnection(String provider,
-                                               boolean secure)
-        throws AutoQuestionException, AgentCallbackClientException
-    {
+    private BizappCallbackClient getConnection(String provider, boolean secure)
+    throws AutoQuestionException, AgentCallbackClientException {
         BizappCallbackClient bizapp;
         Properties bootP = this.config.getBootProperties();
         long start = System.currentTimeMillis();
-        boolean acceptUnverifiedCertificates = "true".equalsIgnoreCase(bootP.getProperty(AgentConfig.SSL_KEYSTORE_ACCEPT_UNVERIFIED_CERT));
+        boolean acceptUnverifiedCertificates = secure;
         
         while (true) {
             String sec = secure ? "secure" : "insecure";
@@ -448,6 +447,7 @@ public class AgentClient {
                 if (exc.getExceptionOfType(SSLPeerUnverifiedException.class) != null) {
                 	SYSTEM_OUT.println();
                 	SYSTEM_OUT.println(exc.getMessage());
+                	log.error(exc,exc);
                 	String question = "Are you sure you want to continue connecting?";
 	                	
 	                try {
@@ -702,18 +702,17 @@ public class AgentClient {
                                      " password", null, true,
                                      QPROP_PWORD);
             try {
-                if(bizapp.userIsValid(user, pword))
+                if(bizapp.userIsValid(user, pword)) {
                     break;
+                }
             } catch(AgentCallbackClientException exc){
-                SYSTEM_ERR.println("Error validating user: " + 
-                                   exc.getMessage());
+                log.error(exc,exc);
+                SYSTEM_ERR.println("Error validating user: " + exc);
                 return;
             }
             
             SYSTEM_ERR.println("- Invalid username/password");
-            if(bootP.getProperty(QPROP_LOGIN) != null ||
-               bootP.getProperty(QPROP_PWORD) != null)
-            {
+            if (bootP.getProperty(QPROP_LOGIN) != null || bootP.getProperty(QPROP_PWORD) != null) {
                 throw new AutoQuestionException("Invalid username/password");
             }
         }
@@ -1117,10 +1116,11 @@ public class AgentClient {
 
             startupSock = new ServerSocket(0);
             startupSock.setSoTimeout(iSleepTime);
-        } catch(IOException exc){
-            throw new AgentInvokeException("Unable to setup a socket to " +
-                                           "listen for Agent startup: " +
-                                           exc.getMessage());
+        } catch(IOException e){
+            AgentInvokeException ex =
+                new AgentInvokeException("Unable to setup a socket to listen for Agent startup: " + e);
+            ex.initCause(e);
+            throw ex;
         }
 
         SYSTEM_OUT.println("- Invoking agent");
@@ -1131,9 +1131,11 @@ public class AgentClient {
             throw new AgentInvokeException("Invalid notify up port: "+startupSock.getLocalPort());
         }
                 
-        agentDaemonThread = new Thread(new AgentDaemon.RunnableAgent(this.config));
+        RunnableAgent runnableAgent = new AgentDaemon.RunnableAgent(this.config);
+        agentDaemonThread = new Thread(runnableAgent);
         agentDaemonThread.setName("AgentDaemonMain");
         AgentUpgradeManager.setAgentDaemonThread(agentDaemonThread);
+        AgentUpgradeManager.setAgent(runnableAgent);
         agentDaemonThread.setDaemon(true);
         agentDaemonThread.start();
         SYSTEM_OUT.println("- Agent thread running");
@@ -1421,7 +1423,13 @@ public class AgentClient {
     private static boolean checkCanWriteToLog (Properties props) {
 
         String logFileName = props.getProperty("agent.logFile");
+        if (logFileName == null) {
+            SYSTEM_ERR.println("agent.logFile not set. "
+                + "\nCannot start HQ agent.");
+            return false;
+        }
         File logFile = new File(logFileName);
+
         File logDir = logFile.getParentFile();
         if (!logDir.exists()) {
             if (!logDir.mkdirs()) {

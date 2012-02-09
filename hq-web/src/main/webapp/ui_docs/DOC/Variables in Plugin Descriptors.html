@@ -1,35 +1,38 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : Variables in Plugin Descriptors</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : Variables in Plugin Descriptors</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : Variables in Plugin Descriptors
+                            vFabric Hyperic 4.6.5 : Variables in Plugin Descriptors
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1307466582615 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1307466582615 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1307466582615 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1325699831615 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699831615 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699831615 li {margin-left: 0px;padding-left: 0px;}
 
-/*]] >*/</style><div class='rbtoc1307466582615'>
+/*]]>*/</style><div class='rbtoc1325699831615'>
 <ul>
     <li><a href='#VariablesinPluginDescriptors-VariablesSimplifyMetricTemplate'>Variables Simplify Metric Template</a></li>
     <li><a href='#VariablesinPluginDescriptors-ConfigurationOptionVariables'>Configuration Option Variables</a></li>
@@ -90,7 +93,7 @@ div.rbtoc1307466582615 li {margin-left: 0px;padding-left: 0px;}
 
 <p>The <tt>&lt;property&gt;</tt> element is analogous to the <tt>&lt;option&gt;</tt> element - each define a resource attribute.&nbsp; The main difference is: data defined as a&nbsp; <tt>&lt;property&gt;</tt> is not configurable by the user, whereas data defined as an&nbsp; <tt>&lt;option&gt;</tt> appears, and can be edited by an authorized user, on the <b>Configuration Properties</b> page for a resource.</p>
 
-<p>Note also that you can override the descriptor-defined value for a <tt>&lt;property&gt;</tt> for resource instances on a particular platform. See <a href="Plugin Descriptor Tips and Techniques.html#PluginDescriptorTipsandTechniques-OverrideProperty">Overriding the Value of a Resource <tt>property</tt> at Platform Level</a>.</p>
+<p>Note also that you can override the descriptor-defined value for a <tt>&lt;property&gt;</tt> for resource instances on a particular platform. See <a href="Overriding the Value of a Resource property at Platform Level.html" title="Overriding the Value of a Resource property at Platform Level">Overriding the Value of a Resource property at Platform Level</a>.</p>
 
 <p><b>Scope</b> &#8212; You can reference a <tt>&lt;property&gt;</tt> as variable in the resource element that defines it, and in descendant resource elements.&nbsp; A lower level element may override an inherited property value by locally&nbsp; defining a&nbsp; <tt>&lt;property&gt;</tt> element of the same name. Data that is defined as a <tt>&lt;property&gt;</tt> is available to plugin classes, whether its value is discovered by the plugin or specified within the plugin descriptor.</p>
 
@@ -102,7 +105,7 @@ div.rbtoc1307466582615 li {margin-left: 0px;padding-left: 0px;}
 </div></div>
 <p>where <tt>PropertyName</tt> is the name of the property.</p>
 
-<p><b>Examples</b> &#8212; For more information, see the <a href="property.html" title="property">property</a> page and the <a href="property.html#property-%3Cproperty%3EdefinesOBJECTNAMEforuseinplugindescriptorandclass">&lt;property&gt; defines OBJECT_NAME for use in plugin descriptor and class</a> example on that page.</p>
+<p><b>Examples</b> &#8212; For more information, see the <a href="property.html" title="property">property</a> page and the "&lt;property&gt; defines OBJECT_NAME for use in plugin descriptor and class" example on that page.</p>
 
 <h1><a name="VariablesinPluginDescriptors-ConvenienceVariables"></a>Convenience Variables</h1>
 
@@ -261,7 +264,7 @@ div.rbtoc1307466582615 li {margin-left: 0px;padding-left: 0px;}
 		</div>
 </div></div>
 
-<p><font color=""></font></p>
+
 
 
 				    
@@ -273,7 +276,7 @@ div.rbtoc1307466582615 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:44</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:58</font></td>
 		    </tr>
 	    </table>
     </body>

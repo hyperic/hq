@@ -7,7 +7,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -53,13 +53,10 @@
     symbol="CONTROL_ENABLED_ATTR" var="CONST_CONTROLLABLE" /> 
 
 <c:set var="canControl" value="${requestScope[CONST_CONTROLLABLE]}"/>
-
-<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
-<script  src="<html:rewrite page="/js/schedule.js"/>" type="text/javascript"></script>
-
+<jsu:importScript path="/js/listWidget.js" />
+<jsu:importScript path="/js/schedule.js" />
 <c:set var="widgetInstanceName" value="listAlerts"/>
-
-<script  type="text/javascript">
+<jsu:script>
   	var jsPath = "<html:rewrite page="/js/"/>";
   	var cssPath = "<html:rewrite page="/css/"/>";
   	var isMonitorSchedule = true;
@@ -68,8 +65,7 @@
     initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 
     widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-</script>
-
+</jsu:script>
 <c:set var="entityId" value="${Resource.entityId}"/>
 <c:set var="hyphenStr" value="--"/>
 
@@ -245,8 +241,7 @@
         </c:otherwise>
     </c:choose>
 </c:if>
-
-<script type="text/javascript">
+<jsu:script>
   	function nextDay() {
     	var tomorrow = new Date(<c:out value="${date}"/> + 86400000);
     	var url = '<c:out value="${calAction}" escapeXml="false"/>' +
@@ -270,8 +265,7 @@
     	writeCal(today.getMonth(), today.getFullYear(),
              '<c:out value="${calAction}" escapeXml="false"/>');
   	}
-</script>
-
+</jsu:script>
 <!-- FORM -->
 <html:form styleId="${widgetInstanceName}_FixForm" method="POST" action="/alerts/RemoveAlerts">
 	<html:hidden property="eid" value="${Resource.entityId}"/>
@@ -287,19 +281,16 @@
 	
 	<tiles:insert definition=".portlet.confirm"/>
 	<tiles:insert definition=".portlet.error"/>
-
-	<script type="text/javascript">
+	<jsu:script>
 		hqDojo.require("dijit.dijit");	
 		hqDojo.require("dijit.Dialog");
   		hqDojo.require("dijit.ProgressBar");
           	
 		var MyAlertCenter = null;
-
-		hqDojo.ready(function(){
-			MyAlertCenter = new hyperic.alert_center("Alerts");          		
-		});
-	</script>
-
+	</jsu:script>
+	<jsu:script onLoad="true">
+		MyAlertCenter = new hyperic.alert_center("Alerts");          		
+	</jsu:script>
 	<table width="100%" style="background-color:#fff;border-left:1px solid gray;border-right:1px solid gray">
 		<tr>
 			<td>

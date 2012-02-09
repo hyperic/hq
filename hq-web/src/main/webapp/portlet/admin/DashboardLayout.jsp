@@ -5,7 +5,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -37,31 +37,26 @@
 <tiles:importAttribute name="narrowPortlets"/>
 <tiles:importAttribute name="widePortlets"/>
 <tiles:importAttribute name="userPortal"/>
+<jsu:importScript path="/js/pageLayout.js" />
+<jsu:script>
+  	var noDelete = false;      
+  	var help = "<hq:help/>";
+  	var imagePath = "/images/";
 
-<script type="text/javascript">
-  var noDelete = false;      
-  var help = "<hq:help/>";
-</script>
-<script src="<html:rewrite page="/js/pageLayout.js" />" type="text/javascript"></script>
-
-<script type="text/javascript">
-  var imagePath = "/images/";
-
-/*-- start initialize --*/
-<c:set var="array" value="leftArr"/>
-<c:forEach var="portlets" items="${userPortal.portlets}" >
-  <c:set var="i" value="0"/>  
-  var <c:out value="${array}"/> = new Array();
-  <c:forEach var="portlet" items="${portlets}">        
-    <c:out value="${i}"/>
-    <c:out value="${array}"/>[<c:out value="${i}"/>] = new Option("<fmt:message key="${portlet.url}"/>", "<c:out value="${portlet.url}"/>");
-    <c:set var="i" value="${i + 1}"/>  
-  </c:forEach>
-  <c:set var="array" value="rightArr"/>  
-</c:forEach>   
-/*-- end initialize --*/
-</script>
-  
+	/*-- start initialize --*/
+	<c:set var="array" value="leftArr"/>
+	<c:forEach var="portlets" items="${userPortal.portlets}" >
+	  <c:set var="i" value="0"/>  
+	  var <c:out value="${array}"/> = new Array();
+	  <c:forEach var="portlet" items="${portlets}">        
+	    <c:out value="${i}"/>
+	    <c:out value="${array}"/>[<c:out value="${i}"/>] = new Option("<fmt:message key="${portlet.url}"/>", "<c:out value="${portlet.url}"/>");
+	    <c:set var="i" value="${i + 1}"/>  
+	  </c:forEach>
+	  <c:set var="array" value="rightArr"/>  
+	</c:forEach>   
+	/*-- end initialize --*/
+</jsu:script>  
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr class="PageTitle"> 
     <td rowspan="99"><html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/></td>
@@ -214,18 +209,17 @@
           <td colspan="7" class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
         </tr>
       </table>
-
-      <script type="text/javascript">
-      var leftSel = document.getElementById("leftSel");
-      var rightSel = document.getElementById("rightSel");
-      for(i=0; i<leftArr.length; i++) {
-              leftSel.options[i] = leftArr[i];
-      }
-      for(i=0; i<rightArr.length; i++) {
+	<jsu:script>
+      	var leftSel = document.getElementById("leftSel");
+      	var rightSel = document.getElementById("rightSel");
+      
+      	for(i=0; i<leftArr.length; i++) {
+        	leftSel.options[i] = leftArr[i];
+      	}
+      	for(i=0; i<rightArr.length; i++) {
               rightSel.options[i] = rightArr[i];
-      }
-      </script>
-
+      	}
+	</jsu:script>
       <tiles:insert definition=".form.buttons"/>
       </html:form>
     </td>

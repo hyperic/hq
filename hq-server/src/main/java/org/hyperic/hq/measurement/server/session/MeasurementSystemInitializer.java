@@ -37,7 +37,6 @@ import org.hyperic.hq.common.ProductProperties;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.galerts.MetricAuxLogProvider;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
-import org.hyperic.hq.measurement.shared.SRNManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -49,17 +48,13 @@ public class MeasurementSystemInitializer {
     private static ScheduledFuture _dataPurgeFuture;
     private MeasurementManager measurementManager;
 
-    private SRNManager srnManager;
     private static Scheduler scheduler;
 
     @Autowired
     public MeasurementSystemInitializer(MeasurementManager measurementManager,
-
-    SRNManager srnManager, ReportStatsCollector reportStatsCollector, Scheduler scheduler) {
+                                        ReportStatsCollector reportStatsCollector,
+                                        Scheduler scheduler) {
         this.measurementManager = measurementManager;
-
-        this.srnManager = srnManager;
-
         MeasurementSystemInitializer.scheduler = scheduler;
 
     }
@@ -68,9 +63,6 @@ public class MeasurementSystemInitializer {
     public void init() {
         // Make sure we have the aux-log provider loaded
         MetricAuxLogProvider.class.toString();
-
-        srnManager.initializeCache();
-
         prefetchEnabledMeasurementsAndTemplates();
         startDataPurgeWorker();
     }

@@ -6,7 +6,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -31,8 +31,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-
-<script type="text/javascript">
+<jsu:script>
     function getUpdateStatus(opt) {
         if (opt == "<fmt:message key="header.Acknowledge"/>") {
         	var postData = { update: true};
@@ -46,25 +45,11 @@
         		}
        		});
         }
-      
     }
     
     var resourceURL = '<html:rewrite action="/Resource" />';
 	var userURL = '<html:rewrite action="/admin/user/UserAdmin" />';
     var searchWidget = new hyperic.widget.search(hqDojo, {search:'/app/search'}, 3, {keyCode: 83, ctrl: true});
-    
-    hqDojo.ready(function(){ 
-        activateHeaderTab(hqDojo);
-        searchWidget.create();
-        //Connect the events for the box, cancel and search buttons
-        hqDojo.connect(searchWidget.searchBox, "onkeypress", searchWidget, "search");
-         // What should the hot-keys do?
-        hqDojo.subscribe('enter', searchWidget, "search");
-        
-        refreshAlerts();
-    });
-    
-    <!--
     var refreshCount = 0;
                                                                                   
 	function refreshAlerts() {
@@ -85,7 +70,7 @@
       	}
 
       	if (refreshCount < 30) {
-      		setTimeout( "refreshAlerts()", portlets_reload_time );
+        	setTimeout( "refreshAlerts()", portlets_reload_time );
       	} else if (autoLogout) {
     	  	top.location.href = "<html:rewrite action="/j_spring_security_logout"/>";
       	}
@@ -103,8 +88,23 @@
 		}
     }
     
-    //-->
-      </script>
+    hqDojo.require("dijit.dijit");
+ 	hqDojo.require("dijit.Dialog");
+ 	 		
+ 	var updateDialog = null;
+</jsu:script>
+<jsu:script onLoad="true">
+    activateHeaderTab(hqDojo);
+    searchWidget.create();
+    
+    //Connect the events for the box, cancel and search buttons
+    hqDojo.connect(searchWidget.searchBox, "onkeypress", searchWidget, "search");
+    
+    // What should the hot-keys do?
+    hqDojo.subscribe('enter', searchWidget, "search");
+        
+    refreshAlerts();
+</jsu:script>
     <div id="header">
     <div id="headerLogo" title="Home" onclick="location.href='<html:rewrite action="/Dashboard" />'">&nbsp;</div>
     <div id="navTabContainer">
@@ -141,23 +141,21 @@
         	<a href="<html:rewrite page="/Admin.do" />"><fmt:message key="header.admin"/></a>
         </div>
     </div>
-    <script type="text/javascript">
-	    hqDojo.ready(function() {
-	    	var menu = hqDojo.byId("navTabContainer");
+    <jsu:script onLoad="true">
+    	var menu = hqDojo.byId("navTabContainer");
 	    	
-	    	hqDojo.query(".tab", menu).onmouseenter(function(e) {
-	    		hqDojo.addClass(e.currentTarget, "over");
-	    	}).onmouseleave(function(e) {
-	    		hqDojo.removeClass(e.currentTarget, "over")
-	    	});
+    	hqDojo.query(".tab", menu).onmouseenter(function(e) {
+    		hqDojo.addClass(e.currentTarget, "over");
+    	}).onmouseleave(function(e) {
+    		hqDojo.removeClass(e.currentTarget, "over")
+    	});
 	    	
-	    	hqDojo.query("li", menu).onmouseover(function(e) {
-	    		hqDojo.addClass(e.currentTarget, "over");
-	    	}).onmouseout(function(e) {
-	    		hqDojo.removeClass(e.currentTarget, "over")
-	    	});
-	    });
-    </script>
+    	hqDojo.query("li", menu).onmouseover(function(e) {
+    		hqDojo.addClass(e.currentTarget, "over");
+    	}).onmouseout(function(e) {
+    		hqDojo.removeClass(e.currentTarget, "over")
+    	});
+	</jsu:script>
     <div class="ajaxLoading" style="display:none;" id="loading">
         <html:img page="/images/4.0/icons/ajax-loader.gif" border="0" width="16" height="16"/>
     </div>
@@ -180,13 +178,7 @@
  	 		</div>
  	 	</form>
  	</div>
-	<script type="text/javascript">
-		hqDojo.require("dijit.dijit");
- 	 	hqDojo.require("dijit.Dialog");
- 	 		
- 	 	var updateDialog = null;
- 	 		
- 	 	hqDojo.ready(function(){
+ 	<jsu:script onLoad="true">
  	 	updateDialog = new hqDijit.Dialog({
  	 	 	id: 'update_popup',
  	 		refocus: true,
@@ -194,8 +186,7 @@
  	 		opacity: 0,
  	 		title: "<fmt:message key="header.dialog.title.update" />"
  			}, hqDojo.byId('update'));
- 	 	});
- 	</script>
+ 	</jsu:script>
  	<a id="updateLink" href="javascript:updateDialog.show()">
  		<img src="<html:rewrite page="/images/transmit2.gif" />" align="absMiddle" border="0" />                        
  	</a>

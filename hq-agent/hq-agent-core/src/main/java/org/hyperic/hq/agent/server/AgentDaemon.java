@@ -40,6 +40,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
@@ -50,12 +51,14 @@ import org.apache.log4j.Logger;
 import org.hyperic.hq.agent.AgentAssertionException;
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.agent.AgentConfigException;
+import org.hyperic.hq.agent.AgentLifecycle;
 import org.hyperic.hq.agent.AgentMonitorValue;
 import org.hyperic.hq.agent.AgentStartupCallback;
 import org.hyperic.hq.agent.AgentUpgradeManager;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorException;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorInterface;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorSimple;
+import org.hyperic.hq.agent.stats.AgentStatsWriter;
 import org.hyperic.hq.bizapp.client.PlugininventoryCallbackClient;
 import org.hyperic.hq.bizapp.client.StorageProviderFetcher;
 import org.hyperic.hq.product.GenericPlugin;
@@ -101,12 +104,12 @@ public class AgentDaemon
     private AgentTransportLifecycle agentTransportLifecycle;
     private Vector<AgentServerHandler>               serverHandlers;
     private Vector<AgentServerHandler>               startedHandlers = new Vector<AgentServerHandler>();
-    private AgentConfig          bootConfig;
     private Hashtable<String, Vector<AgentNotificationHandler>>            notifyHandlers = new Hashtable<String, Vector<AgentNotificationHandler>>();
     private Hashtable<String, AgentMonitorInterface>            monitorClients;
-    private volatile boolean     running;         // Are we running?
+    private AtomicBoolean running = new AtomicBoolean(false);
 
     private ProductPluginManager ppm;
+    private AgentConfig config;
     
     public static AgentDaemon getMainInstance(){
         synchronized(AgentDaemon.mainInstanceLock){
@@ -114,16 +117,14 @@ public class AgentDaemon
         }
     }
 
-    private AgentDaemon(){
+    private AgentDaemon(AgentConfig config){
         // Fields which get re-used are initialized here.
         // See cleanup()/configure() for fields which can
         // be re-configured
-        this.handlerClassLoader =
-            PluginLoader.create("ServerHandlerLoader",
-                                getClass().getClassLoader());
+        this.handlerClassLoader = PluginLoader.create("ServerHandlerLoader", getClass().getClassLoader());
         this.handlerLoader = new ServerHandlerLoader(this.handlerClassLoader);        
-        this.running       = false;
         this.startTime     = System.currentTimeMillis();
+        this.config        = config;
 
         synchronized(AgentDaemon.mainInstanceLock){
             if(AgentDaemon.mainInstance == null){
@@ -177,22 +178,18 @@ public class AgentDaemon
      * @throws AgentConfigException indicating the passed configuration is 
      *                              invalid.
      */
-    public static AgentDaemon newInstance(AgentConfig cfg)
-        throws AgentConfigException 
-    {
-        AgentDaemon res = new AgentDaemon();
-
+    public static AgentDaemon newInstance(AgentConfig cfg) throws AgentConfigException {
+        AgentDaemon res = new AgentDaemon(cfg);
         try {
-            res.configure(cfg);
+            res.configure();
         } catch(AgentRunningException exc){
-            throw new AgentAssertionException("New agent should not be " +
-                                              "running");
+            throw new AgentAssertionException("New agent should not be running", exc);
         } 
         return res;
     }
     
     /**
-     * Retreive a plugin manager.
+     * Retrieve a plugin manager.
      *
      * @param type The type of plugin manager that is wanted
      * @return The plugin manager for the type given
@@ -215,7 +212,7 @@ public class AgentDaemon
     }
 
     /**
-     * Retreive the storage object in use by the Agent.  This routine should
+     * Retrieve the storage object in use by the Agent.  This routine should
      * be used primarily by server handlers wishing to do any kind of 
      * storage.
      *
@@ -239,9 +236,8 @@ public class AgentDaemon
      *
      * @return The configuration object used to initialize the Agent.
      */
-    public AgentConfig getBootConfig()
-    {
-        return this.bootConfig;
+    public AgentConfig getBootConfig() {
+        return this.config;
     }
     
     /**
@@ -274,7 +270,7 @@ public class AgentDaemon
     }
 
     /**
-     * Register an object to be called when a notifiation of the specified
+     * Register an object to be called when a notification of the specified
      * message class occurs;
      *
      * @param handler  Handler to call to process the notification message
@@ -322,23 +318,20 @@ public class AgentDaemon
      * not be running when this function is called.  It may raise an 
      * exception if some of the cleanup fails, however the Agent will be
      * in a pristine state after calling this function.  Cleanup may be
-     * called more than one time without re-configuring inbetween cleanup()
+     * called more than one time without re-configuring in between cleanup()
      * calls.
      *
      * @throws AgentRunningException indicating the Agent was running when
      *                               the routine was called.
      */
-    private void cleanup()
-        throws AgentRunningException 
-    {
+    private synchronized void cleanup() throws AgentRunningException {
         if(this.isRunning()){
-            throw new AgentRunningException("Agent cannot be cleaned up " +
-                                            "while running");
+            throw new AgentRunningException("Agent cannot be cleaned up while running");
         }
 
         // Shutdown the serverhandlers first, in case they need to write
         // something to storage
-        if(this.startedHandlers != null){
+        if (this.startedHandlers != null){
             for(int i=0; i < this.startedHandlers.size(); i++){
                 AgentServerHandler handler = 
                     (AgentServerHandler)this.startedHandlers.get(i);
@@ -411,16 +404,12 @@ public class AgentDaemon
      * load jars, open sockets, and other resources in preparation for
      * running.
      *
-     * @param cfg Configuration to use to configure the Agent
-     *
      * @throws AgentRunningException indicating the Agent was running when a
      *                               reconfiguration was attempted.
      * @throws AgentConfigException  indicating the configuration was invalid.
      */
-
-    public void configure(AgentConfig cfg)
-        throws AgentRunningException, AgentConfigException
-    {
+    public void configure()
+    throws AgentRunningException, AgentConfigException {
         DefaultConnectionListener defListener;
         if(this.isRunning()){
             throw new AgentRunningException("Agent cannot be configured while"+
@@ -429,7 +418,7 @@ public class AgentDaemon
 
         //add lib/handlers/lib/*.jar classpath for handlers only
         String libHandlersLibDir = 
-            cfg.getBootProperties().getProperty(AgentConfig.PROP_LIB_HANDLERS_LIB[0]);
+            config.getBootProperties().getProperty(AgentConfig.PROP_LIB_HANDLERS_LIB[0]);
         File handlersLib = new File(libHandlersLibDir);
         if (handlersLib.exists()) {
             this.handlerClassLoader.addURL(handlersLib);
@@ -438,7 +427,7 @@ public class AgentDaemon
         // Dispatcher
         this.dispatcher = new CommandDispatcher();
 
-        this.storageProvider = AgentDaemon.createStorageProvider(cfg);
+        this.storageProvider = AgentDaemon.createStorageProvider(config);
 
         // Determine the hostname.  This will be stored in the storage provider
         // and checked on each agent invocation.  This determines if this agent
@@ -464,17 +453,17 @@ public class AgentDaemon
         }
 
         this.listener = new CommandListener(this.dispatcher);
-        defListener   = new DefaultConnectionListener(cfg);
+        defListener   = new DefaultConnectionListener(config);
         this.setConnectionListener(defListener);
         
         // set the lather proxy host and port if applicable
-        if (cfg.isProxyServerSet()) {
-            logger.info("Setting proxy server: host="+cfg.getProxyIp()+
-                             "; port="+cfg.getProxyPort()); 
+        if (config.isProxyServerSet()) {
+            logger.info("Setting proxy server: host="+config.getProxyIp()+
+                             "; port="+config.getProxyPort()); 
             System.setProperty(AgentConfig.PROP_LATHER_PROXYHOST, 
-                    cfg.getProxyIp());
+                    config.getProxyIp());
             System.setProperty(AgentConfig.PROP_LATHER_PROXYPORT, 
-                    String.valueOf(cfg.getProxyPort()));                
+                    String.valueOf(config.getProxyPort()));                
         }
 
         // Server Handlers
@@ -484,7 +473,7 @@ public class AgentDaemon
         // jars  must have a Main-Class that implements the AgentServerHandler
         // interface.
         String libHandlersDir = 
-            cfg.getBootProperties().getProperty(AgentConfig.PROP_LIB_HANDLERS[0]);
+            config.getBootProperties().getProperty(AgentConfig.PROP_LIB_HANDLERS[0]);
         
         // The AgentCommandsServer is *NOT* optional. Make sure it is loaded
         File agentCommandsServerJar;
@@ -514,8 +503,6 @@ public class AgentDaemon
                                                + "agent storage: " + ase);
             }
         }
-
-        this.bootConfig = cfg;
     }
 
     private void loadAgentServerHandlerJars(File[] libJars)
@@ -650,7 +637,7 @@ public class AgentDaemon
      */
 
     public boolean isRunning(){
-        return this.running;
+        return running.get();
     }
 
     /**
@@ -660,13 +647,12 @@ public class AgentDaemon
      *                               when die() was called.
      */
 
-    public void die() 
-        throws AgentRunningException 
-    {
-        if(!this.running){
+    public void die() throws AgentRunningException {
+        if(!running.get()){
             throw new AgentRunningException("Agent is not running");
         }
-        this.listener.die();
+        listener.die();
+        running.set(false);
     }
 
     /**
@@ -681,7 +667,7 @@ public class AgentDaemon
 
     private void startPluginManagers() throws AgentStartException {
         try {
-            Properties bootProps = this.bootConfig.getBootProperties();
+            Properties bootProps = this.config.getBootProperties();
             String pluginDir;
 
             this.ppm = new ProductPluginManager(bootProps);
@@ -857,13 +843,13 @@ public class AgentDaemon
     public void start() 
         throws AgentStartException 
     {
-        this.running = true;
+        running.set(true);
         boolean agentStarted = false;
         
         try {
             logger.info("Agent starting up, bundle name="+getCurrentAgentBundle());
 
-            Properties bootProps = this.bootConfig.getBootProperties();
+            Properties bootProps = this.config.getBootProperties();
             String tmpDir = bootProps.getProperty(AgentConfig.PROP_TMPDIR[0]);
             if (tmpDir != null) {
                 try {
@@ -929,8 +915,11 @@ public class AgentDaemon
 
             this.sendNotification(NOTIFY_AGENT_UP, "we're up, baby!");
             agentStarted = true;
+            AgentStatsWriter statsWriter = new AgentStatsWriter(config);
+            statsWriter.startWriter();
             this.listener.listenLoop();
             this.sendNotification(NOTIFY_AGENT_DOWN, "goin' down, baby!");
+            statsWriter.stopWriter();
         } catch(AgentStartException exc){
             logger.error(exc.getMessage(), exc);
             throw exc;
@@ -958,9 +947,13 @@ public class AgentDaemon
                 this.agentTransportLifecycle.stopAgentTransport();
             }
             
-            this.running = false;
+            running.set(false);
             
-            try {this.cleanup();} catch(AgentRunningException exc){}
+            try {
+                cleanup();
+            } catch(AgentRunningException e) {
+                logger.error(e,e);
+            }
         
             if(this.storageProvider != null) {
                 this.storageProvider.dispose();                
@@ -981,25 +974,33 @@ public class AgentDaemon
         }
     }
 
-    public static class RunnableAgent implements Runnable {
+    public static class RunnableAgent implements Runnable, AgentLifecycle {
         
         private final AgentConfig config;
-        
+        private AgentDaemon agent;
         
         public RunnableAgent(AgentConfig config) {
             this.config = config;
         }
+        
+        public void shutdown() {
+            try {
+                if (agent != null) {
+                    agent.die();
+                    agent.cleanup();
+                }
+            } catch (Throwable e) {
+                logger.error(e,e);
+            }
+        }
                 
         public void run() {            
             boolean isConfigured = false;            
-            AgentDaemon agent = null;
             
             try {
                 agent = AgentDaemon.newInstance(config);
                 isConfigured = true;
-            } catch (AgentConfigException e) {
-                logger.error("Agent configuration error: ", e);    
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 logger.error("Agent configuration failed: ", e);                                
             } finally {
                 if (!isConfigured) {

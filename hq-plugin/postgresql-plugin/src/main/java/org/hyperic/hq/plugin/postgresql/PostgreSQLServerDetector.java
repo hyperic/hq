@@ -67,10 +67,10 @@ public class PostgreSQLServerDetector
 
     // Table discovery query
     private static final String TABLE_QUERY = 
-        "SELECT relname FROM pg_stat_user_tables";
+        "SELECT relname, schemaname FROM pg_stat_user_tables";
     // Index discovery query
     private static final String INDEX_QUERY =
-        "SELECT indexrelname FROM pg_stat_user_indexes";
+        "SELECT indexrelname, schemaname FROM pg_stat_user_indexes";
 
     // Resource types and versions
     static final String SERVER_NAME = "PostgreSQL";
@@ -223,22 +223,6 @@ public class PostgreSQLServerDetector
         cprop.setValue("version", version);
         server.setCustomProperties(cprop);
 
-        // Auto-configure if this is HQ's internal database
-        if (installPath.endsWith("hqdb")) {
-            ConfigResponse productConfig = new ConfigResponse();
-                
-            productConfig.setValue(PostgreSQLMeasurementPlugin.PROP_URL,
-                                   "jdbc:postgresql://localhost:9432/hqdb");
-            productConfig.setValue(PostgreSQLMeasurementPlugin.PROP_USER, 
-                                   "hqadmin");
-            productConfig.setValue(PostgreSQLMeasurementPlugin.PROP_PASSWORD,
-                                   "hqadmin");
-
-            server.setProductConfig(productConfig);
-            server.setControlConfig();
-            server.setMeasurementConfig();
-        }
-
         // Ensure 8.0 detector does not return 7.4 servers and vice versa
         if (getTypeInfo().getVersion().equals(VERSION_74)) {
             if (version.indexOf(VERSION_74) != -1) {
@@ -344,7 +328,8 @@ public class PostgreSQLServerDetector
         return servers;
     }
 
-    protected List discoverServices(ConfigResponse config) 
+    @Override
+	protected List discoverServices(ConfigResponse config) 
         throws PluginException
     {
         log.debug("[discoverServices] config="+config);
@@ -373,14 +358,17 @@ public class PostgreSQLServerDetector
 
             while (rs != null && rs.next()) {
                 String tablename = rs.getString(1);
+                String schemaname = rs.getString(2);
 
                 ServiceResource service = new ServiceResource();
                 service.setType(this, TABLE);
-                service.setServiceName(tablename);
+                service.setServiceName(prependSchemaname(tablename, schemaname));
 
                 ConfigResponse productConfig = new ConfigResponse();
                 productConfig.setValue(PostgreSQLMeasurementPlugin.PROP_TABLE,
                                        tablename);
+                productConfig.setValue(PostgreSQLMeasurementPlugin.PROP_SCHEMA, 
+                						schemaname);
 
                 service.setProductConfig(productConfig);
                 service.setMeasurementConfig();
@@ -395,14 +383,17 @@ public class PostgreSQLServerDetector
 
                 while (rs != null && rs.next()) {
                     String indexname = rs.getString(1);
+                    String schemaname = rs.getString(2);
 
                     ServiceResource service = new ServiceResource();
                     service.setType(this, INDEX);
-                    service.setServiceName(indexname);
+                    service.setServiceName(prependSchemaname(indexname, schemaname));
 
                     ConfigResponse productConfig = new ConfigResponse();
                     productConfig.setValue(PostgreSQLMeasurementPlugin.PROP_INDEX,
                             indexname);
+                    productConfig.setValue(PostgreSQLMeasurementPlugin.PROP_SCHEMA, 
+    						schemaname);
 
                     service.setProductConfig(productConfig);
                     service.setMeasurementConfig();
@@ -421,4 +412,8 @@ public class PostgreSQLServerDetector
 
         return services;
     }
+
+	private String prependSchemaname(String itemname, String schemaname) {
+		return schemaname + "." +  itemname;
+	}
 }

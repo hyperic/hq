@@ -76,8 +76,8 @@ public class ConfigStorage {
         return keys;
     }
     
-    public Map load() {
-        Map configs = new HashMap();
+    public Map<Key, ConfigResponse> load() {
+        Map<Key, ConfigResponse> configs = new HashMap<Key, ConfigResponse>();
         StringTokenizer tok =
             new StringTokenizer(getKeys(), Key.DELIM);
 

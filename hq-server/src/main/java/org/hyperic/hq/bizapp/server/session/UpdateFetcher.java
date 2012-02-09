@@ -26,23 +26,28 @@
 
 package org.hyperic.hq.bizapp.server.session;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.bizapp.shared.UpdateBoss;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 
 @Component
-public class UpdateFetcher implements Runnable {
+public class UpdateFetcher
+implements Runnable, ApplicationListener<ContextRefreshedEvent>, ApplicationContextAware {
 
     private final Log _log = LogFactory.getLog(UpdateFetcher.class);
     private UpdateBoss updateBoss;
     private final long checkInterval;
     private TaskScheduler taskScheduler;
+    private ApplicationContext applicationContext;
 
     @Autowired
     public UpdateFetcher(UpdateBoss updateBoss,
@@ -53,17 +58,22 @@ public class UpdateFetcher implements Runnable {
         this.taskScheduler = taskScheduler;
     }
 
-    @PostConstruct
-    public void init() {
-        taskScheduler.scheduleAtFixedRate(this, checkInterval);
-    }
-
     public void run() {
         try {
             updateBoss.fetchReport();
         } catch (Exception e) {
             _log.warn("Error getting update notification", e);
         }
+    }
+
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if (applicationContext == event.getApplicationContext()) {
+            taskScheduler.scheduleAtFixedRate(this, checkInterval);
+        }
+    }
+
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 
 }

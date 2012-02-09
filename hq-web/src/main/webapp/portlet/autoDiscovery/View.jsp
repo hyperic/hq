@@ -7,7 +7,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -42,51 +42,49 @@
   <tiles:put name="adminUrl" beanName="adminUrl" />
   <tiles:put name="portletName" beanName="portletName" />
 </tiles:insert>
-
-<script language="JavaScript1.2">
-// If the user has checked a server but not its platform, check the platform
-function setImportCheckboxes (cbform) {
-  var pcChecked = false;
-  for (var i=0; i<cbform.elements.length; i++) {
-    if (cbform.elements[i].name == 'platformsToProcess') {
-      pcChecked = cbform.elements[i].checked;
-      continue;
-    }
-
-    if (cbform.elements[i].name == 'serversToProcess' && 
-        cbform.elements[i].checked) {
-        cbform.elements[i].checked = pcChecked;
-    }
-  }
-}
-function setRemoveCheckboxes (cbform) {
-  var pc;
-  for (var i=0; i<cbform.elements.length; i++) {
-    if (cbform.elements[i].name == 'platformsToProcess') {
-      pc = cbform.elements[i];
-      continue;
-    }
-    /*
-    if (cbform.elements[i].name == 'serversToProcess' && 
-        pc.checked && !cbform.elements[i].checked) {
-		return confirm("Warning: removing a platform will automatically remove all of its servers.\n\nClick OK to proceed.");
-    }
-    */
-  }
-  return true;
-}
-function addInventory() {
-    var formValue = '<hq:constant classname="org.hyperic.hq.appdef.shared.AIQueueConstants" symbol="Q_DECISION_APPROVE"/>';
-    AIQueueForm.queueAction.value = formValue;
-}
-
-function skipResources() {
-    var formValue = '<hq:constant classname="org.hyperic.hq.appdef.shared.AIQueueConstants" symbol="Q_DECISION_IGNORE"/>';
-    if(!setRemoveCheckboxes(AIQueueForm)) return false;
-    AIQueueForm.queueAction.value = formValue; 
-}
-</script>
-
+<jsu:script>
+	// If the user has checked a server but not its platform, check the platform
+	function setImportCheckboxes (cbform) {
+	  var pcChecked = false;
+	  for (var i=0; i<cbform.elements.length; i++) {
+	    if (cbform.elements[i].name == 'platformsToProcess') {
+	      pcChecked = cbform.elements[i].checked;
+	      continue;
+	    }
+	
+	    if (cbform.elements[i].name == 'serversToProcess' && 
+	        cbform.elements[i].checked) {
+	        cbform.elements[i].checked = pcChecked;
+	    }
+	  }
+	}
+	function setRemoveCheckboxes (cbform) {
+	  var pc;
+	  for (var i=0; i<cbform.elements.length; i++) {
+	    if (cbform.elements[i].name == 'platformsToProcess') {
+	      pc = cbform.elements[i];
+	      continue;
+	    }
+	    /*
+	    if (cbform.elements[i].name == 'serversToProcess' && 
+	        pc.checked && !cbform.elements[i].checked) {
+			return confirm("Warning: removing a platform will automatically remove all of its servers.\n\nClick OK to proceed.");
+	    }
+	    */
+	  }
+	  return true;
+	}
+	function addInventory() {
+	    var formValue = '<hq:constant classname="org.hyperic.hq.appdef.shared.AIQueueConstants" symbol="Q_DECISION_APPROVE"/>';
+	    AIQueueForm.queueAction.value = formValue;
+	}
+	
+	function skipResources() {
+	    var formValue = '<hq:constant classname="org.hyperic.hq.appdef.shared.AIQueueConstants" symbol="Q_DECISION_IGNORE"/>';
+	    if(!setRemoveCheckboxes(AIQueueForm)) return false;
+	    AIQueueForm.queueAction.value = formValue; 
+	}
+</jsu:script>
 <tiles:insert definition=".portlet.error"/>
 
 <table width="100%" cellpadding="0" cellspacing="0" border="0" class="portletLRBorder">

@@ -3,7 +3,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -28,13 +28,10 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-
-
-<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
-<script type="text/javascript">
-var pageData = new Array();
-</script>
-
+<jsu:importScript path="/js/listWidget.js" />
+<jsu:script>
+	var pageData = new Array();
+</jsu:script>
 <c:set var="entityId" value="${Resource.entityId}"/>
 <c:set var="selfAction" value="/resource/platform/Inventory.do?mode=view&eid=${entityId}"/>
 <c:if test="${not empty param.eid && not empty param.resourceType && param.resourceType != -1}">
@@ -107,9 +104,6 @@ var pageData = new Array();
 <html:form action="/resource/platform/inventory/RemoveServers">
 
 <c:set var="svrAction" value="${selfAction}&accord=2"/>
-<c:if test="${not empty param.fs}">
-  <c:set var="svrAction" value="${svrAction}&fs=${param.fs}"/>
-</c:if>
 <c:if test="${not empty param.ps}">
   <c:set var="svrAction" value="${svrAction}&ps=${param.ps}"/>
 </c:if>
@@ -232,9 +226,7 @@ var pageData = new Array();
 </tiles:insert>    
 </div>
 </div>
-
-<script type="text/javascript">
-  clearIfAnyChecked();
-</script>
-
+<jsu:script>
+  	clearIfAnyChecked();
+</jsu:script>
 <tiles:insert definition=".page.footer"/>

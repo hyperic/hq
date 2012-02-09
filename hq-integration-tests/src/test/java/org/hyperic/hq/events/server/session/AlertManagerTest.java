@@ -26,13 +26,7 @@
 
 package org.hyperic.hq.events.server.session;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -53,8 +47,8 @@ import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.OperationDAO;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
+import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.RoleManager;
@@ -77,6 +71,7 @@ import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.test.BaseInfrastructureTest;
+import org.hyperic.hq.util.Reference;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -925,9 +920,9 @@ public class AlertManagerTest
         MeasurementTemplate testTempl = new MeasurementTemplate("AvailabilityTemplate", "avail",
             "percentage", 1, true, 60000l, true, "Availability:avail", monitor_Type, cate, "test");
         sessionFactory.getCurrentSession().save(testTempl);
-        List<Measurement> meas = measurementManager.createMeasurements(this.testPlatform
+        List<Measurement> meas = measurementManager.createOrUpdateMeasurements(this.testPlatform
             .getEntityId(), new Integer[] { testTempl.getId() }, new long[] { 60000l },
-            new ConfigResponse());
+            new ConfigResponse(), new Reference<Boolean>());
         cond.setMeasurementId(meas.get(0).getId());
         testPlatformAlert.createConditionLog("50", cond);
         // Long reason text is: //
@@ -954,9 +949,9 @@ public class AlertManagerTest
         MeasurementTemplate testTempl = new MeasurementTemplate("HeapMemoryTemplate", "avail",
             "percentage", 1, true, 60000l, true, "Availability:avail", monitor_Type, cate, "test");
         sessionFactory.getCurrentSession().save(testTempl);
-        List<Measurement> meas = measurementManager.createMeasurements(this.testPlatform
+        List<Measurement> meas = measurementManager.createOrUpdateMeasurements(this.testPlatform
             .getEntityId(), new Integer[] { testTempl.getId() }, new long[] { 60000l },
-            new ConfigResponse());
+            new ConfigResponse(), new Reference<Boolean>());
         cond.setMeasurementId(meas.get(0).getId());
         testPlatformAlert.createConditionLog("50", cond);
         // Long reason text is: //
@@ -981,9 +976,9 @@ public class AlertManagerTest
         MeasurementTemplate testTempl = new MeasurementTemplate("ControlTemplate", "avail",
             "percentage", 1, true, 60000l, true, "Availability:avail", monitor_Type, cate, "test");
         sessionFactory.getCurrentSession().save(testTempl);
-        List<Measurement> meas = measurementManager.createMeasurements(this.testPlatform
+        List<Measurement> meas = measurementManager.createOrUpdateMeasurements(this.testPlatform
             .getEntityId(), new Integer[] { testTempl.getId() }, new long[] { 60000l },
-            new ConfigResponse());
+            new ConfigResponse(), new Reference<Boolean>());
         cond.setMeasurementId(meas.get(0).getId());
         testPlatformAlert.createConditionLog("50", cond);
         // Long reason text is: //
@@ -1007,9 +1002,9 @@ public class AlertManagerTest
         MeasurementTemplate testTempl = new MeasurementTemplate("ChangeConfigemplate", "avail",
             "percentage", 1, true, 60000l, true, "Availability:avail", monitor_Type, cate, "test");
         sessionFactory.getCurrentSession().save(testTempl);
-        List<Measurement> meas = measurementManager.createMeasurements(this.testPlatform
+        List<Measurement> meas = measurementManager.createOrUpdateMeasurements(this.testPlatform
             .getEntityId(), new Integer[] { testTempl.getId() }, new long[] { 60000l },
-            new ConfigResponse());
+            new ConfigResponse(), new Reference<Boolean>());
         cond.setMeasurementId(meas.get(0).getId());
         testPlatformAlert.createConditionLog("50", cond);
         // Long reason text is: //
@@ -1034,9 +1029,9 @@ public class AlertManagerTest
         MeasurementTemplate testTempl = new MeasurementTemplate("CustomPropertyTemplate", "avail",
             "percentage", 1, true, 60000l, true, "Availability:avail", monitor_Type, cate, "test");
         sessionFactory.getCurrentSession().save(testTempl);
-        List<Measurement> meas = measurementManager.createMeasurements(this.testPlatform
+        List<Measurement> meas = measurementManager.createOrUpdateMeasurements(this.testPlatform
             .getEntityId(), new Integer[] { testTempl.getId() }, new long[] { 60000l },
-            new ConfigResponse());
+            new ConfigResponse(), new Reference<Boolean>());
         cond.setMeasurementId(meas.get(0).getId());
         testPlatformAlert.createConditionLog("50", cond);
         // Long reason text is: //
@@ -1064,9 +1059,9 @@ public class AlertManagerTest
         MeasurementTemplate testTempl = new MeasurementTemplate("LogTemplate", "avail",
             "percentage", 1, true, 60000l, true, "Availability:avail", monitor_Type, cate, "test");
         sessionFactory.getCurrentSession().save(testTempl);
-        List<Measurement> meas = measurementManager.createMeasurements(this.testPlatform
+        List<Measurement> meas = measurementManager.createOrUpdateMeasurements(this.testPlatform
             .getEntityId(), new Integer[] { testTempl.getId() }, new long[] { 60000l },
-            new ConfigResponse());
+            new ConfigResponse(), new Reference<Boolean>());
         cond.setMeasurementId(meas.get(0).getId());
         testPlatformAlert.createConditionLog("log value", cond);
         // Long reason text is: //
@@ -1094,9 +1089,9 @@ public class AlertManagerTest
         MeasurementTemplate testTempl = new MeasurementTemplate("LogTemplate", "avail",
             "percentage", 1, true, 60000l, true, "Availability:avail", monitor_Type, cate, "test");
         sessionFactory.getCurrentSession().save(testTempl);
-        List<Measurement> meas = measurementManager.createMeasurements(this.testPlatform
+        List<Measurement> meas = measurementManager.createOrUpdateMeasurements(this.testPlatform
             .getEntityId(), new Integer[] { testTempl.getId() }, new long[] { 60000l },
-            new ConfigResponse());
+            new ConfigResponse(), new Reference<Boolean>());
         cond.setMeasurementId(meas.get(0).getId());
         testPlatformAlert.createConditionLog("config change value", cond);
         // Long reason text is: //

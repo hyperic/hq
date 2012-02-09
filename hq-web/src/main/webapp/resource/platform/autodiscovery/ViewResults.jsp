@@ -3,7 +3,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -29,11 +29,9 @@
   USA.
  --%>
 
-
-<script type="text/javascript">
-var pageData = new Array();
-</script>
-
+<jsu:script>
+	var pageData = new Array();
+</jsu:script>
 <c:set var="name" value="${AIPlatform.name}"/>
 <c:if test="${not empty Resource}">
     <c:set var="name" value="${Resource.name}"/>

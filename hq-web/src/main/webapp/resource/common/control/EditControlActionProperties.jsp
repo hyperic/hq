@@ -5,7 +5,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -45,8 +45,7 @@
 <c:set var="formBean" value="${requestScope[\"org.apache.struts.taglib.html.BEAN\"]}"/>
 <c:set var="instance" value="${requestScope[\"org.apache.struts.action.mapping.instance\"]}"/>
 <c:set var="formName" value="${instance.name}"/>
-
-<script src="<html:rewrite page="/js/control_ControlActionProperties.js"/>" type="text/javascript"></script>
+<jsu:importScript path="/js/control_ControlActionProperties.js" />
 
 <!--  GENERAL PROPERTIES CONTENTS -->
 <table width="100%" cellpadding="0" cellspacing="0" border="0">

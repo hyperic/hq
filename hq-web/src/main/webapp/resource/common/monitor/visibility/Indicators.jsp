@@ -3,6 +3,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
@@ -45,8 +46,7 @@
 	<tiles:put name="entityType" beanName="entityType" />
 	<tiles:put name="tabListName" beanName="tabListName" />
 </tiles:insert>
-
-<script type="text/javascript">
+<jsu:script>
 	<c:url var="baseUrl" value="/resource/common/monitor/visibility/IndicatorCharts.do">
 		<c:param name="eid" value="${eid}"/>
 	</c:url>
@@ -88,8 +88,7 @@
 	    
 	    hqDojo.byId('viewname').style.display = "none";
 	}
-</script>
-
+</jsu:script>
 <html:form action="/resource/common/monitor/visibility/IndicatorCharts"
 	       method="GET" onsubmit="this.view.disabled=false">
 	<input type="hidden" name="eid" value="<c:out value="${eid}"/>">

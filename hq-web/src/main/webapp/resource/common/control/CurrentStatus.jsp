@@ -7,6 +7,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
@@ -80,18 +81,16 @@
    </c:url>
    <c:set var="statusMsg"><c:out value="${statusMsg}"/>&nbsp;<html:link href="${detailsLink}"><fmt:message key="resource.group.ControlStatus.Link.Details"/></html:link></c:set>
   </c:if>
-  <script type="text/javascript" language="JavaScript1.2">
-<!--
-    hyperic.updateControlStatus = function (){
-      setTimeout( "hyperic.updateControlStatus()", 5000 );
 
+<jsu:script>
+    setInterval(function (){
       <c:url var="updateUrl" value="/resource/common/control/UpdateStatus.do">
-      	<c:param name="eid" value="${Resource.entityId}"/>
+        <c:param name="eid" value="${Resource.entityId}"/>
       </c:url>
       <c:if test="${section eq 'group'}">
-      	<c:url var="updateUrl" value="${updateUrl}">
-    		<c:param name="bid" value="${requestScope.bid}"/>
-    	</c:url>
+        <c:url var="updateUrl" value="${updateUrl}">
+            <c:param name="bid" value="${requestScope.bid}"/>
+        </c:url>
       </c:if>
 
       hqDojo.xhrGet( {
@@ -119,13 +118,13 @@
           },
           timeout: 2000
       });
-    };
+    },5000);
+</jsu:script>
 
-    hqDojo.ready( function() {
+<jsu:script onLoad="true">
         hyperic.updateControlStatus();
-    });
-  -->
-  </script>
+</jsu:script>
+    
  </c:when>
  <c:when test="${controlStatus eq 'Failed'}">
   <c:set var="statusImage" value="/images/status_error.gif"/>
@@ -141,30 +140,30 @@
 <c:choose>
 <c:when test="${controlStatus eq 'Failed' || controlStatus eq 'In Progress' || controlStatus eq 'Completed' }">
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
-	<tr valign="top">
-		<td width="20%" class="BlockLabel"><fmt:message key="resource.server.ControlStatus.Label.Action"/></td>
-		<td width="30%" class="BlockContent"><span id="ctrlAction"><c:out value="${controlCurrentStatus.action}"/></span></td>
-		<td width="20%" class="BlockLabel"><fmt:message key="common.label.Description"/></td>
-		<td width="30%" class="BlockContent"><span id="ctrlDesc"><c:out value="${controlCurrentStatus.description}"/></span></td>
-	</tr>
-	<tr valign="top">
-		<td width="20%" class="BlockLabel"><fmt:message key="resource.server.ControlStatus.Label.Status"/></td>
-		<td width="30%" class="BlockContent"><span id="ctrlImg"><html:img page="${statusImage}" width="50" height="12" border="0"/></span>&nbsp;<span id="ctrlStatus"><c:out value="${statusMsg}" escapeXml="false"/></span></td>
-		<td width="20%" class="BlockLabel"><fmt:message key="resource.server.ControlStatus.Label.Started"/></td>
-		<td width="30%" class="BlockContent"><span id="ctrlStart"><hq:dateFormatter value="${controlCurrentStatus.startTime}"/></span></td>
-	</tr>
-	<tr valign="top">
-		<td width="20%" class="BlockLabel"><fmt:message key="resource.server.ControlStatus.Label.ErrorDescr"/></td>
-		<td width="30%" class="BlockContent"><span id="ctrlMessage"><c:out value="${controlCurrentStatus.message}"/></span></td>
-		<td width="20%" class="BlockLabel"><fmt:message key="resource.server.ControlStatus.Label.Sched"/></td>
-		<td width="30%" class="BlockContent"><span id="ctrlSched"><hq:dateFormatter value="${controlCurrentStatus.dateScheduled}"/></span></td>
-	</tr>
-	<tr valign="top">
-		<td width="20%" class="BlockLabel"><fmt:message key="resource.server.ControlStatus.Label.Elapsed"/></td>
-		<td width="30%" class="BlockContent"><span id="ctrlDuration"><hq:dateFormatter time="true" value="${controlCurrentStatus.duration}"/></span></td>
-		<td width="20%" class="BlockLabel">&nbsp;</td>
-		<td width="30%" class="BlockContent">&nbsp;</td>
-	</tr>
+    <tr valign="top">
+        <td width="20%" class="BlockLabel"><fmt:message key="resource.server.ControlStatus.Label.Action"/></td>
+        <td width="30%" class="BlockContent"><span id="ctrlAction"><c:out value="${controlCurrentStatus.action}"/></span></td>
+        <td width="20%" class="BlockLabel"><fmt:message key="common.label.Description"/></td>
+        <td width="30%" class="BlockContent"><span id="ctrlDesc"><c:out value="${controlCurrentStatus.description}"/></span></td>
+    </tr>
+    <tr valign="top">
+        <td width="20%" class="BlockLabel"><fmt:message key="resource.server.ControlStatus.Label.Status"/></td>
+        <td width="30%" class="BlockContent"><span id="ctrlImg"><html:img page="${statusImage}" width="50" height="12" border="0"/></span>&nbsp;<span id="ctrlStatus"><c:out value="${statusMsg}" escapeXml="false"/></span></td>
+        <td width="20%" class="BlockLabel"><fmt:message key="resource.server.ControlStatus.Label.Started"/></td>
+        <td width="30%" class="BlockContent"><span id="ctrlStart"><hq:dateFormatter value="${controlCurrentStatus.startTime}"/></span></td>
+    </tr>
+    <tr valign="top">
+        <td width="20%" class="BlockLabel"><fmt:message key="resource.server.ControlStatus.Label.ErrorDescr"/></td>
+        <td width="30%" class="BlockContent"><span id="ctrlMessage"><c:out value="${controlCurrentStatus.message}"/></span></td>
+        <td width="20%" class="BlockLabel"><fmt:message key="resource.server.ControlStatus.Label.Sched"/></td>
+        <td width="30%" class="BlockContent"><span id="ctrlSched"><hq:dateFormatter value="${controlCurrentStatus.dateScheduled}"/></span></td>
+    </tr>
+    <tr valign="top">
+        <td width="20%" class="BlockLabel"><fmt:message key="resource.server.ControlStatus.Label.Elapsed"/></td>
+        <td width="30%" class="BlockContent"><span id="ctrlDuration"><hq:dateFormatter time="true" value="${controlCurrentStatus.duration}"/></span></td>
+        <td width="20%" class="BlockLabel">&nbsp;</td>
+        <td width="30%" class="BlockContent">&nbsp;</td>
+    </tr>
         <c:if test="${controlStatus eq 'Completed'}">
          <tr valign="top">
           <td width="20%" class="BlockLabel">&nbsp;</td>
@@ -183,7 +182,7 @@
            </c:choose>
          </tr>
         </c:if>
-	</tr>
+    </tr>
         <tr>
          <td colspan="4" class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
         </tr>

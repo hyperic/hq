@@ -1,35 +1,38 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : Write an SNMP Plugin</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : Write an SNMP Plugin</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : Write an SNMP Plugin
+                            vFabric Hyperic 4.6.5 : Write an SNMP Plugin
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 27, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1311786244671 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1311786244671 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1311786244671 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1325699763502 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699763502 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699763502 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1311786244671'>
+/*]]>*/</style><div class='rbtoc1325699763502'>
 <ul>
     <li><a href='#WriteanSNMPPlugin-WritinganSNMPPlugin'>Writing an SNMP Plugin</a></li>
     <li><a href='#WriteanSNMPPlugin-GettingStarted'>Getting Started</a></li>
@@ -50,10 +53,10 @@ div.rbtoc1311786244671 li {margin-left: 0px;padding-left: 0px;}
 
 <p><a href="http://en.wikipedia.org/wiki/Simple_Network_Management_Protocol">SNMP</a> is the standard protocol for monitoring network-attached devices, which is leveraged by several bundled HQ plugins and made easy by the PDK.</p>
 <ul>
-	<li>The bundled netdevice plugin provides a generic <a href="http://support.hyperic.com/display/hypcomm/Network+Device" title="Network Device">Network Device</a> platform type which can be used to monitor any device that implements <a href="http://www.net-snmp.org/docs/mibs/interfaces.html">IF-MIB</a> (<a href="http://www.ietf.org/rfc/rfc2863.txt">rfc2863</a>) and <a href="http://www.net-snmp.org/docs/mibs/ip.html">IP-MIB</a> (<a href="http://www.ietf.org/rfc/rfc4293.txt">rfc4293</a>).</li>
-	<li>The <a href="http://support.hyperic.com/display/hypcomm/Network+Host" title="Network Host">Network Host</a> platform type extends Network Device with support for <a href="http://www.net-snmp.org/docs/mibs/host.html">HOST-RESOURCES-MIB</a> (<a href="http://www.ietf.org/rfc/rfc2790.txt">rfc2790</a>).</li>
-	<li>The <a href="http://support.hyperic.com/display/hypcomm/Cisco+IOS" title="Cisco IOS">Cisco IOS</a> platform also extends Network Device, adding metrics from <a href="http://tools.cisco.com/Support/SNMP/do/BrowseMIB.do?local=en&amp;mibName=CISCO-PROCESS-MIB">CISCO-PROCESS-MIB</a> and <a href="http://tools.cisco.com/Support/SNMP/do/BrowseMIB.do?local=en&amp;mibName=CISCO-MEMORY-POOL-MIB">CISCO-MEMORY-POOL-MIB</a>.</li>
-	<li>The <a href="http://support.hyperic.com/display/hypcomm/Cisco+PIXOS" title="Cisco PIXOS">Cisco PIXOS</a> platform extends Cisco IOS, adding metrics from <a href="http://tools.cisco.com/Support/SNMP/do/BrowseMIB.do?local=en&amp;mibName=CISCO-FIREWALL-MIB">CISCO-FIREWALL-MIB</a>.</li>
+	<li>The bundled netdevice plugin provides a generic <a href="Network Device.html" title="Network Device">Network Device</a> platform type which can be used to monitor any device that implements <a href="http://www.net-snmp.org/docs/mibs/interfaces.html">IF-MIB</a> (<a href="http://www.ietf.org/rfc/rfc2863.txt">rfc2863</a>) and <a href="http://www.net-snmp.org/docs/mibs/ip.html">IP-MIB</a> (<a href="http://www.ietf.org/rfc/rfc4293.txt">rfc4293</a>).</li>
+	<li>The [Network Host platform type extends Network Device with support for <a href="http://www.net-snmp.org/docs/mibs/host.html">HOST-RESOURCES-MIB</a> (<a href="http://www.ietf.org/rfc/rfc2790.txt">rfc2790</a>).</li>
+	<li>The Cisco platform also extends Network Device, adding metrics from <a href="http://tools.cisco.com/Support/SNMP/do/BrowseMIB.do?local=en&amp;mibName=CISCO-PROCESS-MIB">CISCO-PROCESS-MIB</a> and <a href="http://tools.cisco.com/Support/SNMP/do/BrowseMIB.do?local=en&amp;mibName=CISCO-MEMORY-POOL-MIB">CISCO-MEMORY-POOL-MIB</a>.</li>
+	<li>The Cisco PIXOS platform extends Cisco IOS, adding metrics from <a href="http://tools.cisco.com/Support/SNMP/do/BrowseMIB.do?local=en&amp;mibName=CISCO-FIREWALL-MIB">CISCO-FIREWALL-MIB</a>.</li>
 </ul>
 
 
@@ -72,77 +75,47 @@ div.rbtoc1311786244671 li {margin-left: 0px;padding-left: 0px;}
 <p>We'll be implementing a plugin for NetScreen, an SSL VPN gateway. The first step is to verify basic connectivity to the device using the snmpwalk command:</p>
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre>$ snmpwalk -Os -v2c -c netscreen 10.2.0.140 system
-
 sysDescr.0 = STRING: NetScreen-5GT version 5.0.0r11.1 (SN: 0064062006000809, Firewall+VPN)
-
 sysObjectID.0 = OID: enterprises.3224.1.14
-
 sysUpTimeInstance = Timeticks: (186554200) 21 days, 14:12:22.00
-
 sysContact.0 = STRING: ops@hyperic.com
-
 sysName.0 = STRING: ns5gt
-
 sysLocation.0 = STRING: SF Office
-
 sysServices.0 = INTEGER: 72
-
 </pre>
 </div></div>
 <p>Next, having downloaded and unarchived the MIB packages, we install the NetScreen MIB files in the appropriate location for our machine's SNMP installation:</p>
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre>$ sudo cp NS-SMI.mib NS-RES.mib NS-INTERFACE.mib /usr/share/snmp/mibs
-
 </pre>
 </div></div>
 <p>Now, verify we can view OIDs defined in <a href="http://www.oidview.com/mibs/3224/NETSCREEN-RESOURCE-MIB.html">NS-RES.mib</a>:</p>
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre>$ snmpwalk -Os -M /usr/share/snmp/mibs -m all -v2c -c netscreen 10.2.0.140 netscreenResource
-
 nsResCpuAvg.0 = INTEGER: 2
-
 nsResCpuLast1Min.0 = INTEGER: 2
-
 nsResCpuLast5Min.0 = INTEGER: 2
-
 nsResCpuLast15Min.0 = INTEGER: 2
-
 nsResMemAllocate.0 = INTEGER: 47310400
-
 nsResMemLeft.0 = INTEGER: 60884848
-
 nsResMemFrag.0 = INTEGER: 2537
-
 nsResSessAllocate.0 = INTEGER: 19
-
 nsResSessMaxium.0 = INTEGER: 2000
-
 nsResSessFailed.0 = INTEGER: 0
-
 </pre>
 </div></div>
 <p>And the tabular OIDs defined in <a href="http://www.oidview.com/mibs/3224/NETSCREEN-INTERFACE-MIB.html">NS-INTERACE.mib</a>:</p>
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre>$ snmpwalk -Os -M /usr/share/snmp/mibs -m all -v2c -c netscreen 10.2.0.140 netscreenInterface | more
-
 nsIfIndex.0 = INTEGER: 0
-
 nsIfIndex.1 = INTEGER: 1
-
 nsIfIndex.2 = INTEGER: 2
-
 nsIfIndex.3 = INTEGER: 3
-
 nsIfName.0 = STRING: "trust"
-
 nsIfName.1 = STRING: "untrust"
-
 nsIfName.2 = STRING: "serial"
-
 nsIfName.3 = STRING: "vlan1"
-
 ...
-
 </pre>
 </div></div>
 
@@ -152,61 +125,33 @@ nsIfName.3 = STRING: "vlan1"
 <p>Once the MIBs are sorted out, you can begin with a very simple plug-in that might look something like this (line numbers added for instructional purposes):</p>
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre>1  &lt;plugin&gt;
-
 2    &lt;property name="MIBDIR" value="/usr/share/snmp/mibs"/&gt;
-
 3
-
 4    &lt;property name="MIBS"
-
 5              value="${MIBDIR}/NS-SMI.mib,${MIBDIR}/NS-RES.mib,${MIBDIR}/NS-INTERFACE.mib"/&gt;
-
 6
-
 7    &lt;platform name="NetScreen"&gt;
-
 8
-
 9      &lt;config include="snmp"/&gt;
-
 10
-
 11     &lt;plugin type="measurement"
-
 12             class="org.hyperic.hq.product.SNMPMeasurementPlugin"/&gt;
-
 13
-
 14     &lt;property name="template" value="${snmp.template}:${alias}"/&gt;
-
 15
-
 16     &lt;metric name="Availability"
-
 17             template="${snmp.template},Avail=true:sysUpTime"
-
 18             indicator="true"/&gt;
-
 19
-
 20     &lt;metric name="Uptime"
-
 21             alias="sysUpTime"
-
 22             category="AVAILABILITY"
-
 23             units="jiffys"
-
 24             defaultOn="true"
-
 25             collectionType="static"/&gt;
-
 26
-
 27   &lt;/platform&gt;
-
 28 &lt;/plugin&gt;
-
 </pre>
 </div></div>
 <p>Let's dissect this to better understand what is going on:</p>
@@ -227,7 +172,6 @@ nsIfName.3 = STRING: "vlan1"
 <p>This gets us going, but does not yet provide us with a lot of useful information about the platform. Before diving in to gather more information, let's take another look at line 21. Instead of using the alias parameter, we could also have defined that line like this:</p>
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre>template="${snmp.template}:sysUpTime"
-
 </pre>
 </div></div>
 <p>This explicitly defines a template for this metric rather than relying on the alias value and the default measurement template we set.</p>
@@ -240,90 +184,47 @@ nsIfName.3 = STRING: "vlan1"
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre>...
 
-
-
 26    &lt;metric name="Average CPU Utilization"
-
 27            alias="nsResCpuAvg"
-
 28            units="percent"/&gt;
-
 29
-
 30    &lt;metric name="Average CPU Utilization (Last 1 min)"
-
 31            alias="nsResCpuLast1Min"
-
 32            units="percent"/&gt;
-
 33
-
 34    &lt;metric name="Average CPU Utilization (Last 5 min)"
-
 35            alias="nsResCpuLast5Min"
-
 36            units="percent"/&gt;
-
 37
-
 38    &lt;metric name="Average CPU Utilization (Last 15 min)"
-
 39            alias="nsResCpuLast15Min"
-
 40            indicator="true"
-
 41            units="percent"/&gt;
-
 42
-
 43    &lt;metric name="Memory Allocated"
-
 44            alias="nsResMemAllocate"
-
 45            units="B"/&gt;
-
 46
-
 47    &lt;metric name="Memory Left"
-
 48            alias="nsResMemLeft"
-
 49            indicator="true"
-
 50            units="B"/&gt;
-
 51
-
 52    &lt;metric name="Memory Memory Fragment"
-
 53            alias="nsResMemFrag"
-
 54            units="B"/&gt;
-
 55
-
 56    &lt;metric name="Sessions Allocated"
-
 57            alias="nsResSessAllocate"/&gt;
-
 58
-
 59    &lt;metric name="Sessions Maximum"
-
 60            alias="nsResSessMaxium"/&gt;
-
 61
-
 62    &lt;metric name="Sessions Failed"
-
 63            alias="nsResSessFailed"
-
 64            collectionType="trendsup"/&gt;
 
-
-
 ...
-
 </pre>
 </div></div>
 <p>Again, we provide a name value for how the metric will appear in HQ, use the alias to specify the OID name to be used with the template, and where necessary, specify units, whether or not this will be a default indicator, and the collectionType. This gets us good, basic system information for the platform.</p>
@@ -334,56 +235,30 @@ nsIfName.3 = STRING: "vlan1"
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre>...
 
-
-
 67    &lt;!-- index to get table data --&gt;
-
 68    &lt;filter name="index"
-
 69            value="snmpIndexName=${snmpIndexName},snmpIndexValue=%snmpIndexValue%"/&gt;
-
 70
-
 71    &lt;filter name="template"
-
 72            value="${snmp.template}:${alias}:${index}"/&gt;
-
 73
-
 74    &lt;server&gt;
-
 75      &lt;service name="Interface"&gt;
-
 76        &lt;config&gt;
-
 77          &lt;option name="snmpIndexValue"
-
 78                  description="Interface name"/&gt;
-
 79        &lt;/config&gt;
-
 80
-
 81        &lt;property name="snmpIndexName" value="nsIfName"/&gt;
-
 82
-
 83        &lt;metric name="Availability"
-
 84                template="${snmp.template},Avail=true:nsIfStatus:${index}"
-
 85                indicator="true"/&gt;
-
 86
-
 87      &lt;/service&gt;
-
 88    &lt;/server&gt;
 
-
-
 ...
-
 </pre>
 </div></div>
 <p>Breaking the collection of this table data down:</p>
@@ -403,72 +278,38 @@ nsIfName.3 = STRING: "vlan1"
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre>...
 
-
-
 87        &lt;!-- nsIfFlow* metrics --&gt;
-
 88        &lt;metric name="Bytes Received"
-
 89                alias="nsIfFlowInByte"
-
 90                indicator="true"
-
 91                collectionType="trendsup"
-
 92                category="THROUGHPUT"
-
 93                units="B"/&gt;
-
 94
-
 95        &lt;metric name="Bytes Sent"
-
 96                alias="nsIfFlowOutByte"
-
 97                indicator="true"
-
 98                collectionType="trendsup"
-
 99                category="THROUGHPUT"
-
 100               units="B"/&gt;
-
 101
-
 102       &lt;metric name="Packets Received"
-
 103               alias="nsIfFlowInPacket"
-
 104               collectionType="trendsup"
-
 105               category="THROUGHPUT"/&gt;
-
 106
-
 107       &lt;metric name="Packets Sent"
-
 108               alias="nsIfFlowOutPacket"
-
 109               collectionType="trendsup"
-
 110               category="THROUGHPUT"/&gt;
-
 111
-
 112       &lt;!-- nsIfMon* metrics --&gt;
-
 113       &lt;metric name="Auth Failures"
-
 114               alias="nsIfMonAuthFail"
-
 115               collectionType="trendsup"
-
 116               category="AVAILABILITY"/&gt;
 
-
-
 ...
-
 </pre>
 </div></div>
 
@@ -478,88 +319,46 @@ nsIfName.3 = STRING: "vlan1"
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre>...
 
-
-
 7    &lt;!-- for autoinventory plugin --&gt;
-
 8    &lt;classpath&gt;
-
 9      &lt;include name="pdk/plugins/netdevice-plugin.jar"/&gt;
-
 10   &lt;/classpath&gt;
 
-
-
 ...
-
-
 
 11     &lt;properties&gt;
-
 12       &lt;property name="sysContact"
-
 13                 description="Contact Name"/&gt;
-
 14       &lt;property name="sysName"
-
 15                 description="Name"/&gt;
-
 16       &lt;property name="sysLocation"
-
 17                 description="Location"/&gt;
-
 18       &lt;property name="Version"
-
 19                 description="Version"/&gt;
-
 20     &lt;/properties&gt;
-
 21
-
 22     &lt;plugin type="autoinventory"
-
 23             class="org.hyperic.hq.plugin.netdevice.NetworkDevicePlatformDetector"/&gt;
 
-
-
 ...
-
-
 
 94      &lt;plugin type="autoinventory"
-
 95              class="org.hyperic.hq.plugin.netdevice.NetworkDeviceDetector"/&gt;
 
-
-
 ...
-
-
 
 105       &lt;plugin type="autoinventory"/&gt;
-
 106
-
 107       &lt;properties&gt;
-
 108         &lt;property name="nsIfIp"
-
 109                   description="IP Address"/&gt;
-
 110         &lt;property name="nsIfNetmask"
-
 111                   description="Netmask"/&gt;
-
 112         &lt;property name="nsIfGateway"
-
 113                   description="Gateway"/&gt;
-
 114       &lt;/properties&gt;
 
-
-
 ...
-
 </pre>
 </div></div>
 <ol>
@@ -573,60 +372,30 @@ nsIfName.3 = STRING: "vlan1"
 
 <h1><a name="WriteanSNMPPlugin-TheFinalProduct"></a>The Final Product</h1>
 
-<p>The final plug-in in its entirety is here in <a href="attachments/77464172/77660749.xml">netscreen-plugin.xml</a>.</p>
+<p>The final plug-in in its entirety is here in <a href="attachments/79037344/79135047.xml">netscreen-plugin.xml</a>.</p>
 
 
 <h1><a name="WriteanSNMPPlugin-AdditionalSNMPPluginExamples"></a>Additional SNMP Plugin Examples</h1>
 
-<ul>
-	<li><a href="http://svn.hyperic.org/trunk/plugins/examples/netscaler-plugin.xml?root=Hyperic+HQ&amp;view=markup">netscaler</a></li>
-</ul>
-
+<p>These additional examples are available from <a href="http://git.springsource.org/hq/hq/trees/master/hq-plugin/examples/src/main/resources">http://git.springsource.org/hq/hq/trees/master/hq-plugin/examples/src/main/resources</a>.</p>
 
 <ul>
-	<li><a href="http://svn.hyperic.org/trunk/plugins/examples/zxtm-plugin.xml?root=Hyperic+HQ&amp;view=markup">zxtm</a></li>
-</ul>
-
-
-<ul>
-	<li><a href="http://svn.hyperic.org/trunk/plugins/examples/wxgoos-plugin.xml?root=Hyperic+HQ&amp;view=markup">wxgoos</a></li>
-</ul>
-
-
-<ul>
-	<li><a href="http://svn.hyperic.org/trunk/plugins/examples/squid-plugin.xml?root=Hyperic+HQ&amp;view=markup">squid</a></li>
+	<li>netscaler</li>
+	<li>zxtm</li>
+	<li>wxgoos</li>
+	<li>squid</li>
 </ul>
 
 
 <h1><a name="WriteanSNMPPlugin-Resources"></a>Resources</h1>
 
 <ul>
-	<li><a href="http://www.dpstele.com/layers/l2/snmp_l2_tut_part1.php">SNMP Tutorial</a></li>
-</ul>
-
-
-<ul>
-	<li><a href="http://www.snmp.com/FAQs/glossary.shtml">SNMP Glossary</a></li>
-</ul>
-
-
-<ul>
-	<li><a href="http://tools.cisco.com/Support/SNMP/do/BrowseOID.do?local=en">Cisco MIB browser</a></li>
-</ul>
-
-
-<ul>
-	<li><a href="http://www.oidview.com/mibs/detail.html">OidView MIB browser</a></li>
-</ul>
-
-
-<ul>
-	<li><a href="http://www.net-snmp.org/">Net-SNMP</a></li>
-</ul>
-
-
-<ul>
-	<li><a href="http://www.snmp4j.org/">SNMP4J</a></li>
+	<li>SNMP Tutorial &#8212; <a href="http://www.dpstele.com/layers/l2/snmp_l2_tut_part1.php">http://www.dpstele.com/layers/l2/snmp_l2_tut_part1.php</a></li>
+	<li>SNMP Glossary &#8212; <a href="http://www.snmp.com/FAQs/glossary.shtml">http://www.snmp.com/FAQs/glossary.shtml</a></li>
+	<li>Cisco MIB browser &#8212; <a href="http://tools.cisco.com/Support/SNMP/do/BrowseOID.do?local=en">http://tools.cisco.com/Support/SNMP/do/BrowseOID.do?local=en</a></li>
+	<li>OidView MIB browser &#8212; <a href="http://www.oidview.com/mibs/detail.html">http://www.oidview.com/mibs/detail.html</a></li>
+	<li>Net-SNMP &#8212; <a href="http://www.net-snmp.org/">http://www.net-snmp.org/</a></li>
+	<li>SNMP4J &#8212; <a href="http://www.snmp4j.org/">http://www.snmp4j.org/</a></li>
 </ul>
 
 
@@ -639,7 +408,7 @@ nsIfName.3 = STRING: "vlan1"
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464172/77660749.xml">netscreen-plugin.xml</a> (text/xml)
+                                <a href="attachments/79037344/79135047.xml">netscreen-plugin.xml</a> (text/xml)
                                 <br/>
                                                     </div>
 				    
@@ -651,7 +420,7 @@ nsIfName.3 = STRING: "vlan1"
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:44</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:57</font></td>
 		    </tr>
 	    </table>
     </body>

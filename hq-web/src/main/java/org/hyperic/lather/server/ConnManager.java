@@ -25,49 +25,57 @@
 
 package org.hyperic.lather.server;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.hyperic.hq.common.SystemException;
+
 class ConnManager {
-    static ConnManager mgr = new ConnManager(Integer.MAX_VALUE);
+    private Object LOCK = new Object();
+    private Map<String, AtomicInteger> connState = new HashMap<String, AtomicInteger>();
+    public static final String PROP_PREFIX = "org.hyperic.lather.";
+    public static final String PROP_MAXCONNS = "maxConns";
+    private final Map<String, Semaphore> maxConns;
 
-    private Object connLock = new Object();
-    private int    maxConns;
-    private int    numConns;
-
-    private ConnManager(int maxConns){
-        this.maxConns = maxConns;
-        this.numConns = 0;
-    }
-    
-    static ConnManager getInstance(int maxConns){
-        synchronized(mgr.connLock){
-            mgr.maxConns = maxConns;
+    public ConnManager(Map<String, Semaphore> maxConnMap) {
+        if (!maxConnMap.containsKey(PROP_MAXCONNS)) {
+            throw new SystemException(PROP_MAXCONNS + " property does not exist");
         }
-        return mgr;
+        maxConns = Collections.synchronizedMap(new HashMap<String,Semaphore>(maxConnMap));
     }
 
-    int getNumConns(){
-        synchronized(this.connLock){
-            return this.numConns;
-        }
+    int getAvailablePermits(String method) {
+        final Semaphore semaphore = getSemaphore(method);
+        return semaphore.availablePermits();
     }
 
-    boolean getConn(){
-        synchronized(this.connLock){
-            if(this.numConns >= this.maxConns){
-                return false;
+    boolean grabConn(String method) {
+        final Semaphore semaphore = getSemaphore(method);
+        return semaphore.tryAcquire();
+    }
+
+    private Semaphore getSemaphore(String method) {
+        Semaphore semaphore = maxConns.get(method);
+        return (semaphore == null) ? maxConns.get(PROP_MAXCONNS) : semaphore;
+    }
+
+    void releaseConn(String method) {
+        final Semaphore semaphore = getSemaphore(method);
+        semaphore.release();
+    }
+
+    int getNumConns(String method) {
+        synchronized (LOCK) {
+            AtomicInteger num = connState.get(method);
+            if (num != null) {
+                return num.get();
             }
-
-            this.numConns++;
-        }
-        return true;
-    }
-
-    void releaseConn(){
-        synchronized(this.connLock){
-            this.numConns--;
-            if(this.numConns < 0){
-                throw new IllegalStateException("Released more connections " +
-                                                "than acquired");
-            }
+            num = connState.get(PROP_MAXCONNS);
+            return num.get();
         }
     }
+
 }

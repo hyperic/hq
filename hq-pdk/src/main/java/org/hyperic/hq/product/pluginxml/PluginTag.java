@@ -31,6 +31,7 @@ import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.xmlparser.XmlAttrException;
 import org.hyperic.util.xmlparser.XmlEndAttrHandler;
+import org.hyperic.util.xmlparser.XmlTagInfo;
 
 class PluginTag
     extends BaseTag
@@ -117,5 +118,12 @@ class PluginTag
         }
 
         this.data.addPlugin(type, typeName, impl);
+    }
+    
+    public XmlTagInfo[] getSubTags() {
+        return new XmlTagInfo[] {
+            new XmlTagInfo(new MonitoredTag(this),
+                           XmlTagInfo.ZERO_OR_MORE),
+        };
     }
 }

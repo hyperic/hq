@@ -3,15 +3,12 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
-
-<script type="text/javascript">
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
+<jsu:importScript path="/js/pageLayout.js" />
+<jsu:script>
 	var noDelete = true;
-</script>
-<script src="<html:rewrite page="/js/pageLayout.js"/>" type="text/javascript"></script>
-<script type="text/javascript">
 	var imagePath = "/images/";
-</script>
-
+</jsu:script>
 <!--  GENERAL PROPERTIES TITLE -->
 <tiles:insert definition=".header.tab">
   <tiles:put name="tabKey" value="resource.group.Control.Behavior.Tab"/>

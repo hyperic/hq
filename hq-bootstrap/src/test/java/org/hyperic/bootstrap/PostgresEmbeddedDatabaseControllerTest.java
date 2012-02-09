@@ -26,8 +26,9 @@
 
 package org.hyperic.bootstrap;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 
 import org.easymock.EasyMock;
@@ -44,7 +45,7 @@ import org.junit.Test;
 public class PostgresEmbeddedDatabaseControllerTest {
 
     private PostgresEmbeddedDatabaseController embeddedDBController;
-    private String serverHome = "/fake/server/home";
+    private final String serverHome = "/fake/server/home";
     private ProcessManager processManager;
     private OperatingSystem osInfo;
 
@@ -144,7 +145,7 @@ public class PostgresEmbeddedDatabaseControllerTest {
                                                                         "/bin/db-stop.sh" }),
                 EasyMock.eq(serverHome), EasyMock.eq(false), EasyMock
                     .eq(PostgresEmbeddedDatabaseController.DB_PROCESS_TIMEOUT))).andReturn(0);
-        EasyMock.expect(processManager.isPortInUse(5432l, 1)).andReturn(false);
+        
         replay();
         boolean dbStopped = embeddedDBController.stopBuiltInDB();
         verify();
@@ -171,14 +172,16 @@ public class PostgresEmbeddedDatabaseControllerTest {
                                                                         "/bin/db-stop.bat" }),
                 EasyMock.eq(serverHome), EasyMock.eq(false), EasyMock
                     .eq(PostgresEmbeddedDatabaseController.DB_PROCESS_TIMEOUT))).andReturn(0);
-        EasyMock.expect(processManager.isPortInUse(5432l, 1)).andReturn(false);
         replay();
         boolean dbStopped = embeddedDBController.stopBuiltInDB();
         verify();
         assertTrue(dbStopped);
     }
 
-    @Test
+    /*
+     * As the stopBuiltinDb() no longer checks the stop operation success the method is obsolete
+     */
+    //@Test
     public void testStopPortStillUp() throws Exception {
         EasyMock.expect(processManager.getPidFromPidFile(serverHome + "/hqdb/data/postmaster.pid"))
             .andReturn(123l);
@@ -197,7 +200,10 @@ public class PostgresEmbeddedDatabaseControllerTest {
         assertFalse(dbStopped);
     }
 
-    @Test
+    /*
+     * As the stopBuiltinDb() no longer checks the stop operation success the method is obsolete  
+     */
+    //@Test
     public void testStopErrorDeterminingIfStopped() throws Exception {
         EasyMock.expect(processManager.getPidFromPidFile(serverHome + "/hqdb/data/postmaster.pid"))
             .andReturn(123l);

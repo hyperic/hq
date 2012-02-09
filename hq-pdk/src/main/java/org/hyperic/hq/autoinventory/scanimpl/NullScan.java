@@ -37,10 +37,8 @@ import org.hyperic.util.PluginLoader;
 import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
 
-public class NullScan 
-    extends ScanMethodBase 
-{
-    private static final Log log = LogFactory.getLog("AutoScan");
+public class NullScan extends ScanMethodBase {
+    private static final Log log = LogFactory.getLog(NullScan.class);
     
     public NullScan(){
         this._authorityLevel = 10;

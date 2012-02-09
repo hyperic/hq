@@ -1,49 +1,48 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : Set Up Oracle</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : Set Up Oracle</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : Set Up Oracle
+                            vFabric Hyperic 4.6.5 : Set Up Oracle
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
-<p>This section has instructions for configuring an Oracle database for an Hyperic installation.</p>
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1307466671805 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1307466671805 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1307466671805 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1325710548728 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325710548728 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325710548728 li {margin-left: 0px;padding-left: 0px;}
 
-/*]] >*/</style><div class='rbtoc1307466671805'>
+/*]]>*/</style><div class='rbtoc1325710548728'>
 <ul>
-    <li><a href='#SetUpOracle-BeforeInstallingHypericServer'>Before Installing Hyperic Server</a></li>
+    <li><a href='#SetUpOracle-SetUpHypericDatabaseonOracle'>Set Up Hyperic Database on Oracle</a></li>
 <ul>
-    <li><a href='#SetUpOracle-InstallationRequirements'>Installation Requirements</a></li>
-    <li><a href='#SetUpOracle-CreateanOracleinstance'>Create an Oracle instance</a></li>
+    <li><a href='#SetUpOracle-CreateHypericDatabase'>Create Hyperic Database</a></li>
     <li><a href='#SetUpOracle-CreateTablespaces'>Create Tablespaces</a></li>
     <li><a href='#SetUpOracle-CreatetheDatabaseUser'>Create the Database User</a></li>
     <li><a href='#SetUpOracle-GrantPermissionstotheDatabaseUser'>Grant Permissions to the Database User</a></li>
-    <li><a href='#SetUpOracle-ObtainOracleJDBCDriver%28HypericHQonly%29'>Obtain Oracle JDBC Driver (Hyperic HQ only)</a></li>
 </ul>
-    <li><a href='#SetUpOracle-InstallHypericServer'>Install Hyperic Server</a></li>
-    <li><a href='#SetUpOracle-EnableRowMovementforOracle10gand11g'>Enable Row Movement for Oracle 10g and 11g</a></li>
-    <li><a href='#SetUpOracle-PeriodicOracle10gand11gDatabaseMaintenance'>Periodic Oracle 10g and 11g Database Maintenance</a></li>
+    <li><a href='#SetUpOracle-SetUpHypericServer'>Set Up Hyperic Server</a></li>
+    <li><a href='#SetUpOracle-EnableRowMovement'>Enable Row Movement</a></li>
     <li><a href='#SetUpOracle-TuningHypericDatabaseonOracleforMediumtoLargeEnvironments'>Tuning Hyperic Database on Oracle for Medium to Large Environments</a></li>
 <ul>
     <li><a href='#SetUpOracle-CreatetheTSHQDB16KTablespace'>Create the TS_HQDB_16K Tablespace</a></li>
@@ -55,43 +54,33 @@ div.rbtoc1307466671805 li {margin-left: 0px;padding-left: 0px;}
     <li><a href='#SetUpOracle-ConfigureTablesforHighConcurrency'>Configure Tables for High Concurrency</a></li>
     <li><a href='#SetUpOracle-RestartHypericServer'>Restart Hyperic Server</a></li>
 </ul>
+    <li><a href='#SetUpOracle-PeriodicOracleDatabaseMaintenance'>Periodic Oracle Database Maintenance</a></li>
 </ul></div>
 
 
-<p><font color=""></font></p>
-
-<h1><a name="SetUpOracle-BeforeInstallingHypericServer"></a>Before Installing Hyperic Server</h1>
-
-<p>Before installing Hyperic Server, you create the Hyperic database in Oracle, configure the database, and create the database user that the server will use to access the database. The sections that follow have instructions.</p>
-
-<h2><a name="SetUpOracle-InstallationRequirements"></a>Installation Requirements</h2>
-
-<p>Hyperic supports:</p>
-<ul>
-	<li>Oracle 10g 10.2.0.1 or higher patch level. Preferred version is 10.2.0.4</li>
-	<li>Oracle 11g</li>
-</ul>
 
 
-<p>Hyperic recommends that the Oracle server for the Hyperic database run a &nbsp;dedicated system, with at least 8 GB RAM allocated to SGA.</p>
+<h1><a name="SetUpOracle-SetUpHypericDatabaseonOracle"></a>Set Up Hyperic Database on Oracle </h1>
 
-<h2><a name="SetUpOracle-CreateanOracleinstance"></a>Create an Oracle instance</h2>
+<p>This section has instructions for setting up Oracle as your external Hyperic database. It is assumed that you have already installed Oracle and are either familiar with Oracle or have the support of someone who is.</p>
 
-<p>Install Oracle on the machine to be used, and create a database.</p>
+<h2><a name="SetUpOracle-CreateHypericDatabase"></a>Create Hyperic Database</h2>
 
 <p>The database can be created with Oracle Database Configuration Assistant.</p>
 
 <p>Select <b>New Database</b> (Includes datafiles = No). To save space, decline to install the Example Schemas.</p>
 
-<p>Because you are running Oracle on a dedicated host, you can select the "Typical Memory" configuration.</p>
+<p>Assuming Oracle runs on a dedicated host, you can select the "Typical Memory" configuration.</p>
 
 <p>Select "OLTP" as the type of database sizing to use. Allocate as high a percentage of system resources as you can afford: 70-90%, ideally in the higher range. See <a href="#SetUpOracle-ConfigureInitializationParametersforOracle">Configure Initialization Parameters for Oracle</a> for SGA and PGA size.</p>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Hyperic requires utf-8 character encoding</b><br />Create the database with utf-8 character encoding.</td></tr></table></div>
 
 <h2><a name="SetUpOracle-CreateTablespaces"></a>Create Tablespaces</h2>
 
 <ol>
-	<li>Create the TEMP_HQDB temporary tablespace, 2 GB in size</li>
-	<li>Create the TS_HQDB tablespace, 25 GB in size. This tablespace will be used to store HQ_METRIC_DATA_*D_*S tables.</li>
+	<li>Create the <tt>TEMP_HQDB</tt> temporary tablespace, 2 GB in size</li>
+	<li>Create the <tt>TS_HQDB</tt> tablespace, 25 GB in size. This tablespace will be used to store <tt>HQ_METRIC_DATA_*D_*S</tt> tables.</li>
 </ol>
 
 
@@ -103,11 +92,11 @@ div.rbtoc1307466671805 li {margin-left: 0px;padding-left: 0px;}
 
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
-		<pre class="theme: Confluence; brush: java; gutter: false">SQL&gt; CREATE USER _HQUSER_ IDENTIFIED BY _HQPASSWORD_ DEFAULT TABLESPACE TS_HQDB;</pre>
+		<pre class="theme: Confluence; brush: java; gutter: false">SQL&gt; CREATE USER HQUSER IDENTIFIED BY HQPASSWORD DEFAULT TABLESPACE TS_HQDB;</pre>
 		</div>
 </div></div>
 
-<p>replacing <em>HQUSER</em> and <em>HQPASSWORD</em> with desired values.</p>
+<p>replacing <tt>HQUSER</tt> and <tt>HQPASSWORD</tt> with desired values.</p>
 
 <h2><a name="SetUpOracle-GrantPermissionstotheDatabaseUser"></a>Grant Permissions to the Database User</h2>
 
@@ -127,7 +116,7 @@ div.rbtoc1307466671805 li {margin-left: 0px;padding-left: 0px;}
 		</div>
 </div></div>
 
-<p>Make sure that you see the following rows for CONNECT and RESOURCE roles:</p>
+<p>Make sure that you see the following rows for <tt>CONNECT</tt> and{{ RESOURCE}} roles:</p>
 
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
@@ -144,75 +133,21 @@ RESOURCE YES</pre>
 		</div>
 </div></div>
 
-<h2><a name="SetUpOracle-ObtainOracleJDBCDriver%28HypericHQonly%29"></a>Obtain Oracle JDBC Driver (Hyperic HQ only)</h2>
+<h1><a name="SetUpOracle-SetUpHypericServer"></a>Set Up Hyperic Server</h1>
 
-<p><a name="SetUpOracle-OracleDriver"></a></p>
+<p>For instructions, see <a href="Hyperic Installation and Startup Process.html#HypericInstallationandStartupProcess-SetUpServer">Step 3 - Set Up Hyperic Server</a> of the <a href="Hyperic Installation and Startup Process.html" title="Hyperic Installation and Startup Process">Hyperic Installation and Startup Process</a>.</p>
 
-<p>The Hyperic Server in Hyperic HQ does not include the Oracle JDBC driver. Perform these steps before installing Hyperic Server.</p>
-
-<p>To obtain the driver:</p>
-<ol>
-	<li>Go to <a href="http://www.oracle.com/technology/software/tech/java/sqlj_jdbc/index.html">http://www.oracle.com/technology/software/tech/java/sqlj_jdbc/index.html</a></li>
-	<li>In the <b>JDBC Driver Downloads</b> section, select the link for your version of Oracle.</li>
-	<li>On the drivers download page, select the driver for your JDK version.
-	<ul>
-		<li>JDK 5.0 &#8212; ojdbc5.jar</li>
-		<li>JDK 6.0 &#8212; ojdbc6.jar
-		<ul>
-			<li><b>Note:</b> JDeveloper 11g JDBC drivers support JDBC 4.0 features.  Use ojdbc6.jar with JDK 6.0 for JDBC 4.0 features.</li>
-		</ul>
-		</li>
-	</ul>
-	</li>
-	<li>On the page that appears accept the licensing agreement.</li>
-	<li>Download the jar file.</li>
-	<li>Copy the driver jar file to <tt>hyperic-hq-installer/installer-4.x.y/lib</tt>.</li>
-	<li>Proceed with the HQ installation process.</li>
-</ol>
-
-
-<h1><a name="SetUpOracle-InstallHypericServer"></a>Install Hyperic Server</h1>
-
-<p>See <a href="Installing Hyperic.html" title="Installing Hyperic">Installing Hyperic</a> for instructions.</p>
-
-<p><b>Note:</b> The Hyperic database must be up for the Hyperic Server installation process to succeed.</p>
-
-<h1><a name="SetUpOracle-EnableRowMovementforOracle10gand11g"></a>Enable Row Movement for Oracle 10g and 11g</h1>
-
-<p>After installing Hyperic Server, run the <a href="attachments/77464413/77660775.sql">enable_row_movement.sql</a> procedure attached to this page - this is necessary to enable the routine maintenance described in <a href="#SetUpOracle-PeriodicOracle10gand11gDatabaseMaintenance">Periodic Oracle 10g and 11g Database Maintenance</a>. &nbsp;It is only necessary to enable row movement once; you do not need to do it on a recurring basis.</p>
-
-<h1><a name="SetUpOracle-PeriodicOracle10gand11gDatabaseMaintenance"></a>Periodic Oracle 10g and 11g Database Maintenance</h1>
-
-<p>Perform the following maintenance after running Hyperic for about a week, and monthly thereafter:</p>
-
-<ol>
-	<li>Run the <a href="attachments/77464413/77660772.sql">table_maintenance.sql</a> procedure attached to this page to compact and shrink space on all Hyperic tables (except HQ_METRIC&#42; tables).</li>
-	<li>Run the <a href="attachments/77464413/77660774.sql">rebuild_index.sql</a> procedure  attached to this page to rebuild the index on all Hyperic tables.</li>
-	<li>Run tablespace maintenance as appropriate:
-	<ol>
-		<li>Perform the following query to determine how fragmented a tablespace is. The query returns the tablespace name and total count of holes in it.
-<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
-<div id="root">
-		<pre class="theme: Confluence; brush: java; gutter: false">select count(*), tablespace_name 
-from dba_free_space
-group by tablespace_name
-order by 1,2;</pre>
-		</div>
-</div></div></li>
-		<li>If the hole count is in the order of thousands, run <b>Reorganize</b>.<br/>
-<span class="image-wrap" style=""><img src="attachments/77463605/77660683.png" width="750px" style="border: 0px solid black"/></span></li>
-	</ol>
-	</li>
-</ol>
-
+<h1><a name="SetUpOracle-EnableRowMovement"></a>Enable Row Movement</h1>
+<p><a name="SetUpOracle-RowMovement"></a><br/>
+After installing Hyperic Server, run the <a href="attachments/78578430/78872620.sql">enable_row_movement.sql</a> procedure attached to this page &#8212; this enables the routine maintenance described in <a href="#SetUpOracle-PeriodicOracleDatabaseMaintenance">Periodic Oracle Database Maintenance</a>. It is only necessary to enable row movement once; you do not need to do it on a recurring basis.</p>
 
 <h1><a name="SetUpOracle-TuningHypericDatabaseonOracleforMediumtoLargeEnvironments"></a>Tuning Hyperic Database on Oracle for Medium to Large Environments</h1>
-
-<p>If you manage more than 100 platforms, follow the steps in this section to tune your Oracle-hosted Hyperic database.</p>
+<p><a name="SetUpOracle-TuneOracle"></a><br/>
+If you manage more than 100 platforms, follow the steps in this section to tune your Oracle-hosted Hyperic database.</p>
 
 <h2><a name="SetUpOracle-CreatetheTSHQDB16KTablespace"></a>Create the TS_HQDB_16K Tablespace</h2>
 
-<p>Create the TS_HQDB_16K tablespace, 25 GB in size, with 16 K blocksize. Here is an example of the syntax to create a table space with 16 K blocksize, where 'datafile_name.dbf' is a file where the tablespace data will physically reside:</p>
+<p>Create the <tt>TS_HQDB_16K</tt> tablespace, 25 GB in size, with 16 K blocksize. Here is an example of the syntax to create a table space with 16 K blocksize, where 'datafile_name.dbf' is a file where the tablespace data will physically reside:</p>
 
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
@@ -276,7 +211,7 @@ PROPKEY='BATCH_AGGREGATE_QUEUE';</pre>
 
 <h2><a name="SetUpOracle-MoveDatabaseTables"></a>Move Database Tables</h2>
 
-<p>While still logged into the Oracle instance as the system user, run these commands to move metric and measurement tables to the TS_HQDB_16K tablespace:</p>
+<p>While still logged into the Oracle instance as the system user, run these commands to move metric and measurement tables to the <tt>TS_HQDB_16K</tt> tablespace:</p>
 
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
@@ -336,8 +271,6 @@ alter index HQADMIN.MEASUREMENT_DATA_1D_MID_IDX rebuild;</pre>
 
 <h2><a name="SetUpOracle-ConfigureTablesforHighConcurrency"></a>Configure Tables for High Concurrency</h2>
 
-<p>Run these commands for any HQ 4.x version:</p>
-
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
 		<pre class="theme: Confluence; brush: java; gutter: false">alter table &lt;schema&gt;.HQ_METRIC_DATA_0D_0S initrans 15;
@@ -382,9 +315,34 @@ alter index &lt;schema&gt;.METRIC_DATA_8D_1S_MID_IDX initrans 15;</pre>
 
 <h2><a name="SetUpOracle-RestartHypericServer"></a>Restart Hyperic Server</h2>
 
-<p>Restart the HHyperic Server.</p>
+<p>Restart the Hyperic Server.</p>
 
-<p><font color=""></font></p>
+<h1><a name="SetUpOracle-PeriodicOracleDatabaseMaintenance"></a>Periodic Oracle Database Maintenance</h1>
+
+<p>Perform the following maintenance after running Hyperic for about a week, and monthly thereafter:</p>
+
+<ol>
+	<li>Run the <a href="attachments/78578430/78872619.sql">table_maintenance.sql</a> procedure attached to this page to compact and shrink space on all Hyperic tables (except HQ_METRIC&#42; tables).</li>
+	<li>Run the <a href="attachments/78578430/78872621.sql">rebuild_index.sql</a> procedure  attached to this page to rebuild the index on all Hyperic tables.</li>
+	<li>Run tablespace maintenance as appropriate:
+	<ol>
+		<li>Perform the following query to determine how fragmented a tablespace is. The query returns the tablespace name and total count of holes in it.
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">select count(*), tablespace_name 
+from dba_free_space
+group by tablespace_name
+order by 1,2;</pre>
+		</div>
+</div></div></li>
+		<li>If the hole count is in the order of thousands, run <b>Reorganize</b>.<br/>
+<span class="image-wrap" style=""><img src="attachments/79038211/79135253.png" width="750px" style="border: 0px solid black"/></span></li>
+	</ol>
+	</li>
+</ol>
+
+
+
 
 				    					    <br/>
                         <div class="tabletitle">
@@ -395,13 +353,13 @@ alter index &lt;schema&gt;.METRIC_DATA_8D_1S_MID_IDX initrans 15;</pre>
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464413/77660774.sql">rebuild_index.sql</a> (application/octet-stream)
+                                <a href="attachments/78578430/78872619.sql">table_maintenance.sql</a> (application/octet-stream)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464413/77660775.sql">enable_row_movement.sql</a> (application/octet-stream)
+                                <a href="attachments/78578430/78872620.sql">enable_row_movement.sql</a> (application/octet-stream)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464413/77660772.sql">table_maintenance.sql</a> (application/octet-stream)
+                                <a href="attachments/78578430/78872621.sql">rebuild_index.sql</a> (application/octet-stream)
                                 <br/>
                                                     </div>
 				    
@@ -413,7 +371,7 @@ alter index &lt;schema&gt;.METRIC_DATA_8D_1S_MID_IDX initrans 15;</pre>
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:43</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:56</font></td>
 		    </tr>
 	    </table>
     </body>

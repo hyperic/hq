@@ -60,8 +60,15 @@ public interface MeasurementProcessor {
      */
     public void scheduleHierarchyAfterCommit(Resource resource);
 
-    public void scheduleSynchronous(List<AppdefEntityID> aeids);
+    /**
+     * Schedules all the {@link AppdefEntityID}s synchronously
+     */
+    public void scheduleSynchronous(Collection<AppdefEntityID> aeids);
 
+    /**
+     * Schedules all the enabled {@link Measurement}s associated with the {@link AppdefEntityID}s and 
+     * {@link Agent} synchronously
+     */
     public void scheduleEnabled(Agent agent, Collection<AppdefEntityID> eids) throws MonitorAgentException;
 
     /**
@@ -69,24 +76,21 @@ public interface MeasurementProcessor {
      * @param agentToken the entity whose agent will be contacted for the
      *        unschedule
      * @param entIds the entity IDs whose metrics should be unscheduled
-     * @throws MeasurementUnscheduleException if an error occurs
      */
-    public void unschedule(String agentToken, Collection<AppdefEntityID> entIds) throws MeasurementUnscheduleException;
+    public void unschedule(String agentToken, Collection<AppdefEntityID> entIds);
 
     /**
      * Unschedule metrics of multiple appdef entities
      * @param agentEnt the entity whose agent will be contacted for the
      *        unschedule
      * @param entIds the entity IDs whose metrics should be unscheduled
-     * @throws MeasurementUnscheduleException if an error occurs
      */
-    public void unschedule(AppdefEntityID agentEnt, AppdefEntityID[] entIds) throws MeasurementUnscheduleException;
+    public void unschedule(AppdefEntityID agentEnt, AppdefEntityID[] entIds);
 
     /**
      * Unschedule measurements
      * @param aeids List of {@link AppdefEntityID}
-     * @throws MeasurementUnscheduleException if an error occurs
      */
-    public void unschedule(Collection<AppdefEntityID> aeids) throws MeasurementUnscheduleException;
+    public void unschedule(Collection<AppdefEntityID> aeids);
 
 }

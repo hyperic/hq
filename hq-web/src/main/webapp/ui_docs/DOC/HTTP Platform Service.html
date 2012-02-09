@@ -1,39 +1,42 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : HTTP Platform Service</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : HTTP Platform Service</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : HTTP Platform Service
+                            vFabric Hyperic 4.6.5 : HTTP Platform Service
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 28, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1309291923607 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1309291923607 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1309291923607 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1325700027143 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325700027143 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325700027143 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1309291923607'>
+/*]]>*/</style><div class='rbtoc1325700027143'>
 <ul>
     <li><a href='#HTTPPlatformService-MonitoringaRemoteHTTPService'>Monitoring a Remote HTTP Service</a></li>
     <li><a href='#HTTPPlatformService-ResourcePlugin%2CFunctions%2CandClasses'>Resource Plugin, Functions, and Classes</a></li>
-    <li><a href='#HTTPPlatformService-ConfiguretheHTTPServiceinHQ'>Configure the HTTP Service in HQ</a></li>
+    <li><a href='#HTTPPlatformService-ConfiguretheHTTPServiceinHyperic'>Configure the HTTP Service in Hyperic</a></li>
     <li><a href='#HTTPPlatformService-HTTPConfigurationPropertiesPage'>HTTP Configuration Properties Page</a></li>
     <li><a href='#HTTPPlatformService-HTTPConfigurationOptions'>HTTP Configuration Options</a></li>
     <li><a href='#HTTPPlatformService-HTTPMetrics'>HTTP Metrics</a></li>
@@ -44,11 +47,11 @@ div.rbtoc1309291923607 li {margin-left: 0px;padding-left: 0px;}
 
 <h1><a name="HTTPPlatformService-MonitoringaRemoteHTTPService"></a>Monitoring a Remote HTTP Service</h1>
 
-<p>HQ can monitor an HTTP service over the network. You configure a platform service of type "HTTP" on the operating system platform of your choice. The HQ Agent on that platform collects the metrics for the remote service and presents them under the newly created platform service.</p>
+<p>Hyperic can monitor an HTTP service over the network. You configure a platform service of type "HTTP" on the operating system platform of your choice. The Hyperic Agent on that platform collects the metrics for the remote service and presents them under the newly created platform service.</p>
 
 <h1><a name="HTTPPlatformService-ResourcePlugin%2CFunctions%2CandClasses"></a>Resource Plugin, Functions, and Classes</h1>
 
-<p>The "HTTP" service type is managed by HQ's netservices plugin.</p>
+<p>The "HTTP" service type is managed by Hyperic's netservices plugin.</p>
 <ul>
 	<li>Metric collection is performed by the plugin's <tt>HTTPCollector</tt> class.</li>
 </ul>
@@ -59,7 +62,7 @@ div.rbtoc1309291923607 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 
 
-<h1><a name="HTTPPlatformService-ConfiguretheHTTPServiceinHQ"></a>Configure the HTTP Service in HQ</h1>
+<h1><a name="HTTPPlatformService-ConfiguretheHTTPServiceinHyperic"></a>Configure the HTTP Service in Hyperic</h1>
 
 <p>The "HTTP" service type must be manually configured.</p>
 <ol>
@@ -74,7 +77,7 @@ div.rbtoc1309291923607 li {margin-left: 0px;padding-left: 0px;}
 
 <p>The <b>Configuration Properties</b> page for the "HTTP" service type is shown below.</p>
 
-<p><span class="image-wrap" style=""><img src="attachments/77463605/77660329.png" width="800px" style="border: 0px solid black"/></span><br class="atl-forced-newline" /></p>
+<p><span class="image-wrap" style=""><img src="attachments/79038211/79135324.png" width="800px" style="border: 0px solid black"/></span><br class="atl-forced-newline" /></p>
 
 <h1><a name="HTTPPlatformService-HTTPConfigurationOptions"></a>HTTP Configuration Options</h1>
 
@@ -92,7 +95,7 @@ div.rbtoc1309291923607 li {margin-left: 0px;padding-left: 0px;}
 <p>
 <div class='table-wrap'>
 
-<table id='TBL1307938356773' width='800px' class='confluenceTable'><tbody>
+<table id='TBL1321720890596' width='800px' class='confluenceTable'><tbody>
 <tr>
 <th class='confluenceTh'> name <br class="atl-forced-newline" /> </th>
 <th class='confluenceTh'> description <br class="atl-forced-newline" /> </th>
@@ -107,7 +110,7 @@ div.rbtoc1309291923607 li {margin-left: 0px;padding-left: 0px;}
 
 <div class='table-wrap'>
 
-<table id='TBL1307938356774' width='800px' class='confluenceTable'><tbody>
+<table id='TBL1321720890597' width='800px' class='confluenceTable'><tbody>
 <tr>
 <td class='confluenceTd'> method </td>
 <td class='confluenceTd'> Request Method </td>
@@ -158,12 +161,12 @@ div.rbtoc1309291923607 li {margin-left: 0px;padding-left: 0px;}
 
 <div class='table-wrap'>
 
-<table id='TBL1307938356775' width='800px' class='confluenceTable'><tbody>
+<table id='TBL1321720890598' width='800px' class='confluenceTable'><tbody>
 <tr>
 <td class='confluenceTd'> path </td>
 <td class='confluenceTd'> Path </td>
 <td class='confluenceTd'> /<br class="atl-forced-newline" /> </td>
-<td class='confluenceTd'> <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> false </td>
 <td class='confluenceTd'> <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'>Enter a value to monitor a specific page or file on the site. for example: <br class="atl-forced-newline" /> <br class="atl-forced-newline" /> /Support.html </td>
 <td class='confluenceTd'>url </td>
@@ -173,7 +176,7 @@ div.rbtoc1309291923607 li {margin-left: 0px;padding-left: 0px;}
 
 <div class='table-wrap'>
 
-<table id='TBL1307938356776' width='800px' class='confluenceTable'><tbody>
+<table id='TBL1321720890599' width='800px' class='confluenceTable'><tbody>
 <tr>
 <td class='confluenceTd'> ssl </td>
 <td class='confluenceTd'> Use SSL </td>
@@ -188,12 +191,12 @@ div.rbtoc1309291923607 li {margin-left: 0px;padding-left: 0px;}
 
 <div class='table-wrap'>
 
-<table id='TBL1307938356777' width='800px' class='confluenceTable'><tbody>
+<table id='TBL1321720890600' width='800px' class='confluenceTable'><tbody>
 <tr>
 <td class='confluenceTd'> hostname </td>
 <td class='confluenceTd'> Hostname </td>
 <td class='confluenceTd'> localhost </td>
-<td class='confluenceTd'> <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> false </td>
 <td class='confluenceTd'> <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'>Hostname of system that hosts the service to monitor. For example: mysite.com</td>
 <td class='confluenceTd'>sockaddr</td>
@@ -202,7 +205,7 @@ div.rbtoc1309291923607 li {margin-left: 0px;padding-left: 0px;}
 <td class='confluenceTd'> port </td>
 <td class='confluenceTd'> Port </td>
 <td class='confluenceTd'>A default value for port is usually set for each type of network service by properties in the netservices plugin descriptor.</td>
-<td class='confluenceTd'> <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> false </td>
 <td class='confluenceTd'> <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'>Port where service listens.   </td>
 <td class='confluenceTd'>sockaddr</td>
@@ -211,7 +214,7 @@ div.rbtoc1309291923607 li {margin-left: 0px;padding-left: 0px;}
 <td class='confluenceTd'> sotimeout </td>
 <td class='confluenceTd'> Socket Timeout (in seconds) </td>
 <td class='confluenceTd'> 10 </td>
-<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>true </td>
 <td class='confluenceTd'> int </td>
 <td class='confluenceTd'>The maximum amount of time the agent will wait for a response to a request to the remote service.</td>
 <td class='confluenceTd'> sockaddr</td>
@@ -221,7 +224,7 @@ div.rbtoc1309291923607 li {margin-left: 0px;padding-left: 0px;}
 
 <div class='table-wrap'>
 
-<table id='TBL1307938356778' width='800px' class='confluenceTable'><tbody>
+<table id='TBL1321720890601' width='800px' class='confluenceTable'><tbody>
 <tr>
 <td class='confluenceTd'> realm </td>
 <td class='confluenceTd'> Realm </td>
@@ -236,7 +239,7 @@ div.rbtoc1309291923607 li {margin-left: 0px;padding-left: 0px;}
 
 <div class='table-wrap'>
 
-<table id='TBL1307938356779' width='800px' class='confluenceTable'><tbody>
+<table id='TBL1321720890602' width='800px' class='confluenceTable'><tbody>
 <tr>
 <td class='confluenceTd'> user <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> Username </td>
@@ -273,50 +276,50 @@ function customizeMacroTable(tableId,columnTypes,firstDataRowIndex,highlightColo
 
 var columnTypes = ['S'];
 var columnAttributes = 'style=&quot;width:10%;&quot;,style=&quot;width:15%;&quot;,style=&quot;width:15%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:30%;&quot;,style=&quot;width:10%;&quot;';
-customizeMacroTable('TBL1307938356773', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
+customizeMacroTable('TBL1321720890596', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
 //-->
  </script> 
 <script type='text/javascript'> <!-- 
 var columnTypes = ['S'];
 var columnAttributes = 'style=&quot;width:10%;&quot;,style=&quot;width:15%;&quot;,style=&quot;width:15%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:30%;&quot;,style=&quot;width:10%;&quot;';
-customizeMacroTable('TBL1307938356774', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
+customizeMacroTable('TBL1321720890597', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
 //-->
  </script> 
 <script type='text/javascript'> <!-- 
 var columnTypes = ['S'];
 var columnAttributes = 'style=&quot;width:10%;&quot;,style=&quot;width:15%;&quot;,style=&quot;width:15%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:30%;&quot;,style=&quot;width:10%;&quot;';
-customizeMacroTable('TBL1307938356775', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
+customizeMacroTable('TBL1321720890598', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
 //-->
  </script> 
 <script type='text/javascript'> <!-- 
 var columnTypes = ['S'];
 var columnAttributes = 'style=&quot;width:10%;&quot;,style=&quot;width:15%;&quot;,style=&quot;width:15%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:30%;&quot;,style=&quot;width:10%;&quot;';
-customizeMacroTable('TBL1307938356776', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
+customizeMacroTable('TBL1321720890599', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
 //-->
  </script> 
 <script type='text/javascript'> <!-- 
 var columnTypes = ['S'];
 var columnAttributes = 'style=&quot;width:10%;&quot;,style=&quot;width:15%;&quot;,style=&quot;width:15%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:30%;&quot;,style=&quot;width:10%;&quot;';
-customizeMacroTable('TBL1307938356777', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
+customizeMacroTable('TBL1321720890600', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
 //-->
  </script> 
 <script type='text/javascript'> <!-- 
 var columnTypes = ['S'];
 var columnAttributes = 'style=&quot;width:10%;&quot;,style=&quot;width:15%;&quot;,style=&quot;width:15%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:30%;&quot;,style=&quot;width:10%;&quot;';
-customizeMacroTable('TBL1307938356778', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
+customizeMacroTable('TBL1321720890601', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
 //-->
  </script> 
 <script type='text/javascript'> <!-- 
 var columnTypes = ['S'];
 var columnAttributes = 'style=&quot;width:10%;&quot;,style=&quot;width:15%;&quot;,style=&quot;width:15%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:30%;&quot;,style=&quot;width:10%;&quot;';
-customizeMacroTable('TBL1307938356779', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
+customizeMacroTable('TBL1321720890602', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
 //-->
  </script> </p>
 
 <h1><a name="HTTPPlatformService-HTTPMetrics"></a>HTTP Metrics</h1>
 
 <ul>
-	<li>Availability - An HTTP service is reported to be unavailable if the HQ Agent cannot connect to the host configured for the service, or the HTTP response status is one of the following:
+	<li>Availability - An HTTP service is reported to be unavailable if the Hyperic Agent cannot connect to the host configured for the service, or the HTTP response status is one of the following:
 	<ul>
 		<li>HTTP_BAD_REQUEST</li>
 		<li>HTTP_FORBIDDEN</li>
@@ -393,7 +396,7 @@ customizeMacroTable('TBL1307938356779', columnTypes, 1, 'lightgoldenrodyellow', 
 
 <p>The <b>Monitoring Defaults</b> page for the HTTP service type is shown below:</p>
 
-<p><span class="image-wrap" style=""><img src="attachments/77463605/77660330.png" width="800px" style="border: 0px solid black"/></span></p>
+<p><span class="image-wrap" style=""><img src="attachments/79038211/79135323.png" width="800px" style="border: 0px solid black"/></span></p>
 
 <h1><a name="HTTPPlatformService-EventTracking"></a>Event Tracking</h1>
 
@@ -401,7 +404,7 @@ customizeMacroTable('TBL1307938356779', columnTypes, 1, 'lightgoldenrodyellow', 
 
 <p>To enable log tracking, click the <b>Enable Log Tracking</b> box in the <b>Monitoring</b> section of the <b>Configuration Properties</b> page.</p>
 
-<p>For information about HQ log tracking functionality and configuration options, and how to view log events, see <a href="Set Up Log Tracking for a Resource.html" title="Set Up Log Tracking for a Resource">Set Up Log Tracking for a Resource</a>. </p>
+<p>For information about Hyperic log tracking functionality and configuration options, and how to view log events, see <a href="Set Up Log Tracking for a Resource.html" title="Set Up Log Tracking for a Resource">Set Up Log Tracking for a Resource</a>. </p>
 
 				    
                     			    </td>
@@ -412,7 +415,7 @@ customizeMacroTable('TBL1307938356779', columnTypes, 1, 'lightgoldenrodyellow', 
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:43</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:56</font></td>
 		    </tr>
 	    </table>
     </body>

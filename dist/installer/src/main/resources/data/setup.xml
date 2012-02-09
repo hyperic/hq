@@ -1,15 +1,15 @@
 <?xml version="1.0"?>
 
 <project name="setup" default="all" basedir=".">
-  <property name="oss.license.file" value="${install.dir}/../open_source_licenses.txt"/>	
+  <property name="oss.license.file" value="${install.dir}/../open_source_licenses.txt"/>    
 
   <!-- true for text based installs -->
   <available property="server.pgsql.available"
              file="${install.dir}/data/hqdb/pgsql.tar.gz"/>
-	
+    
    <path id="alljars">
-  	     <fileset dir="${install.dir}/lib" includes="*.jar"/>
-  </path>	
+         <fileset dir="${install.dir}/lib" includes="*.jar"/>
+  </path>   
 
   <target name="init-taskdefs">
     <echo>^^^DEBUG: Loading taskdefs...</echo>
@@ -19,7 +19,7 @@
               classpathref="alljars"/>
      <echo>^^^DEBUG: Taskdefs loaded</echo>
   </target>
-  	
+    
   <target name="load-basics" depends="init-taskdefs">
     <property file="${install.dir}/data/version.properties"/>
     <echo>^^^INFO: Initializing Hyperic HQ ${version} Installation...</echo>
@@ -33,10 +33,20 @@
     <if>
       <equals arg1="${install.mode}" arg2="upgrade"/>
       <then>
+         <echo>^^^INFO:
+*
+******************************************************************************************************************
+Warning: There is no undo for the upgrade process.${line.separator}
+Before upgrading Hyperic Server, archive your existing Hyperic Server directory and back up the Hyperic Database, ${line.separator}
+to ensure that you can roll back to the prior version if desired.
+******************************************************************************************************************
+${line.separator}Press enter to continue...
+          </echo>
+        <input />
         <property name="setup.upgrade" value="true"/>
       </then>
     </if>
-
+  	
     <absolutePath property="base"
                   path="${install.dir}/.."
                   failOnMissing="true"/>
@@ -45,17 +55,17 @@
 
   <!-- The server uses a 1.6 JRE. -->
   <target name="pick-server-jre" if="use.builtin.jre">
-    <condition property="jre.tar.name" value="amd64-linux-1.6.tar.gz">
-        <available file="${install.dir}/jres/amd64-linux-1.6.tar.gz"/>
+    <condition property="jre.tar.name" value="amd64-linux-1.6_30.tar.gz">
+        <available file="${install.dir}/jres/amd64-linux-1.6_30.tar.gz"/>
     </condition>
-    <condition property="jre.tar.name" value="x86-linux-1.6.tar.gz">
-        <available file="${install.dir}/jres/x86-linux-1.6.tar.gz"/>
+    <condition property="jre.tar.name" value="x86-linux-1.6_30.tar.gz">
+        <available file="${install.dir}/jres/x86-linux-1.6_30.tar.gz"/>
     </condition>
-    <condition property="jre.tar.name" value="sparc-sun-solaris-1.6.tar.gz">
-        <available file="${install.dir}/jres/sparc-sun-solaris-1.6.tar.gz"/>
+    <condition property="jre.tar.name" value="sparc-sun-solaris-1.6_30.tar.gz">
+        <available file="${install.dir}/jres/sparc-sun-solaris-1.6_30.tar.gz"/>
     </condition>
-    <condition property="jre.exe.name" value="x86-win32-1.6.exe">
-        <available file="${install.dir}/jres/x86-win32-1.6.exe"/>
+    <condition property="jre.exe.name" value="x86-win32-1.6_30.exe">
+        <available file="${install.dir}/jres/x86-win32-1.6_30.exe"/>
     </condition>
   </target>
 
@@ -73,7 +83,7 @@
       Unpacking JRE ${jre.exe.name} to: ${destination}...
     </echo>
     <exec executable="${install.dir}/jres/${jre.exe.name}">
-      <arg line="-d '${destination}'"/>
+      <arg line="-y -o'${destination}'"/>
     </exec>
   </target>
 
@@ -103,13 +113,13 @@
        Make sure that the setup property is set to the correct file and
        try running the installer again.
     </msgfail>
-       	
+        
     <findWritable property="newSetup"
-       	                  preferredDir="${install.dir}"
-       	                  filename="data/setup.properties"
-       	                  altDirPrefix="HQ_tmp">^^^INFO:
-       	WARNING: New setup properties file can't be written to %ORIGINALFILE%
-       	Setup properties will be written to %WRITABLEFILE% instead.
+                          preferredDir="${install.dir}"
+                          filename="data/setup.properties"
+                          altDirPrefix="HQ_tmp">^^^INFO:
+        WARNING: New setup properties file can't be written to %ORIGINALFILE%
+        Setup properties will be written to %WRITABLEFILE% instead.
     </findWritable>
      <delete file="${newSetup}"/>
     <echo>^^^INFO: Loading install configuration...</echo>
@@ -141,7 +151,7 @@ Setup properties will be written to %WRITABLEFILE% instead.
   </target>
 
   <target name="check-eula">
-  	<available file="eula.txt" property="eula.present"/>
+    <available file="eula.txt" property="eula.present"/>
   </target>
 
   <target name="show-eula" depends="check-eula" if="eula.present">
@@ -235,82 +245,82 @@ __ll__
 
   <target name="validate-os-install">
   </target>
-	
-	<target name="unpack-agent">
-	   <echo>^^^INFO:
-		    Unpacking ${agent.bundle} to: ${hyperic-hq-agent.installdir}/agent-${version}...
-	   </echo>
-	   <untar src="${agent.bundle}"
-	           dest="${hyperic-hq-agent.installdir}"
-	           compression="gzip">
-	   <globmapper from="hyperic-hq-agent-${version}/*" to="agent-${version}/*"/>
+    
+    <target name="unpack-agent">
+       <echo>^^^INFO:
+            Unpacking ${agent.bundle} to: ${hyperic-hq-agent.installdir}/agent-${version}...
+       </echo>
+       <untar src="${agent.bundle}"
+               dest="${hyperic-hq-agent.installdir}"
+               compression="gzip">
+       <globmapper from="hyperic-hq-agent-${version}/*" to="agent-${version}/*"/>
       </untar>
       <property name="agent-command" value="${hyperic-hq-agent.installdir}/agent-${version}/bin/hq-agent.sh"/>
-		<antcall target="post-agent-unpack">
-			<param name="agent-dir" value="${hyperic-hq-agent.installdir}/agent-${version}"/>
-		 </antcall>
-	</target>
-	
-	<target name="unzip-agent">
-		 <echo>^^^INFO:
-				    Unpacking ${agent.bundle} to: ${hyperic-hq-agent.installdir}/agent-${version}...
-		</echo>
-		  <unzip src="${agent.bundle}"
-			           dest="${hyperic-hq-agent.installdir}">
-			<globmapper from="hyperic-hq-agent-${version}/*" to="agent-${version}/*"/>
-		  </unzip>
-		  <antcall target="post-agent-unpack">
-				<param name="agent-dir" value="${hyperic-hq-agent.installdir}/agent-${version}"/>
-		  </antcall>
-	</target>
-	
-	<target name="unpack-ee-agent">
-	   <echo>^^^INFO:
-		    Unpacking ${agent.bundle} to: ${hyperic-hq-agent.installdir}/agent-${version}-EE...
-	   </echo>
-	   <untar src="${agent.bundle}"
-	           dest="${hyperic-hq-agent.installdir}"
-	           compression="gzip">
-	   <globmapper from="hyperic-hqee-agent-${version}/*" to="agent-${version}-EE/*"/>
+        <antcall target="post-agent-unpack">
+            <param name="agent-dir" value="${hyperic-hq-agent.installdir}/agent-${version}"/>
+         </antcall>
+    </target>
+    
+    <target name="unzip-agent">
+         <echo>^^^INFO:
+                    Unpacking ${agent.bundle} to: ${hyperic-hq-agent.installdir}/agent-${version}...
+        </echo>
+          <unzip src="${agent.bundle}"
+                       dest="${hyperic-hq-agent.installdir}">
+            <globmapper from="hyperic-hq-agent-${version}/*" to="agent-${version}/*"/>
+          </unzip>
+          <antcall target="post-agent-unpack">
+                <param name="agent-dir" value="${hyperic-hq-agent.installdir}/agent-${version}"/>
+          </antcall>
+    </target>
+    
+    <target name="unpack-ee-agent">
+       <echo>^^^INFO:
+            Unpacking ${agent.bundle} to: ${hyperic-hq-agent.installdir}/agent-${version}-EE...
+       </echo>
+       <untar src="${agent.bundle}"
+               dest="${hyperic-hq-agent.installdir}"
+               compression="gzip">
+       <globmapper from="hyperic-hqee-agent-${version}/*" to="agent-${version}-EE/*"/>
       </untar>
-		<antcall target="post-agent-unpack">
-			<param name="agent-dir" value="${hyperic-hq-agent.installdir}/agent-${version}-EE"/>
-		 </antcall>
-	</target>
-	
-	<target name="unzip-ee-agent">
-		 <echo>^^^INFO:
-				    Unpacking ${agent.bundle} to: ${hyperic-hq-agent.installdir}/agent-${version}-EE...
-		</echo>
-		  <unzip src="${agent.bundle}"
-			           dest="${hyperic-hq-agent.installdir}">
-			<globmapper from="hyperic-hqee-agent-${version}/*" to="agent-${version}-EE/*"/>
-		  </unzip>
-		  <antcall target="post-agent-unpack">
-				<param name="agent-dir" value="${hyperic-hq-agent.installdir}/agent-${version}-EE"/>
-		  </antcall>
-	</target>
-	
-	<target name="post-agent-unpack">
-		<echo>^^^INFO: Setting permissions on ${agent-dir}...</echo>
-	  	<chmod perm="go-rwx" type="both">
-	  		<fileset dir="${agent-dir}">
-	  			<include name="**/bin" />
-	  			<include name="**/conf" />
-	  			<include name="**/log" />
-	  			<include name="**/wrapper" />
-	  		</fileset>
-	  	</chmod>
-	  	<echo>^^^INFO: Setting permissions on agent binaries...</echo>
-		<antcall target="chmod-exec">
-			<param name="chmod.dir" value="${agent-dir}"/>
-		</antcall>
+        <antcall target="post-agent-unpack">
+            <param name="agent-dir" value="${hyperic-hq-agent.installdir}/agent-${version}-EE"/>
+         </antcall>
+    </target>
+    
+    <target name="unzip-ee-agent">
+         <echo>^^^INFO:
+                    Unpacking ${agent.bundle} to: ${hyperic-hq-agent.installdir}/agent-${version}-EE...
+        </echo>
+          <unzip src="${agent.bundle}"
+                       dest="${hyperic-hq-agent.installdir}">
+            <globmapper from="hyperic-hqee-agent-${version}/*" to="agent-${version}-EE/*"/>
+          </unzip>
+          <antcall target="post-agent-unpack">
+                <param name="agent-dir" value="${hyperic-hq-agent.installdir}/agent-${version}-EE"/>
+          </antcall>
+    </target>
+    
+    <target name="post-agent-unpack">
+        <echo>^^^INFO: Setting permissions on ${agent-dir}...</echo>
+        <chmod perm="go-rwx" type="both">
+            <fileset dir="${agent-dir}">
+                <include name="**/bin" />
+                <include name="**/conf" />
+                <include name="**/log" />
+                <include name="**/wrapper" />
+            </fileset>
+        </chmod>
+        <echo>^^^INFO: Setting permissions on agent binaries...</echo>
+        <antcall target="chmod-exec">
+            <param name="chmod.dir" value="${agent-dir}"/>
+        </antcall>
   
-		<echo>^^^INFO: Fixing line endings on text files...</echo>
-  		<antcall target="fix-text-files">
-			<param name="crlf.dir" value="${agent-dir}"/>
-	    </antcall>
-  	</target>
+        <echo>^^^INFO: Fixing line endings on text files...</echo>
+        <antcall target="fix-text-files">
+            <param name="crlf.dir" value="${agent-dir}"/>
+        </antcall>
+    </target>
 
   <target name="agent"
           depends="agent.valid-props,setup-agent-init"
@@ -319,43 +329,43 @@ __ll__
     <echo>^^^INFO: Installing the agent...</echo>
     <echo>^^^DEBUG: Looking for previous installation</echo>
    
-  	<foreach param="agent.bundle" target="unpack-agent">
-  		<param name="hyperic-hq-agent.installdir" value="${hyperic-hq-agent.installdir}"/>
-  		<param name="version" value="${version}"/>
-  		<path>
-  			<fileset dir="${base}" includes="hyperic-hq-agent-*.tar.gz"/>
-  		</path>
-  	</foreach>
-  	
-  	<foreach param="agent.bundle" target="unzip-agent">
-  	  		<param name="hyperic-hq-agent.installdir" value="${hyperic-hq-agent.installdir}"/>
-  	  		<param name="version" value="${version}"/>
-  	  		<path>
-  	  			<fileset dir="${base}" includes="hyperic-hq-agent-*.zip"/>
-  	  		</path>
-  	 </foreach>
+    <foreach param="agent.bundle" target="unpack-agent">
+        <param name="hyperic-hq-agent.installdir" value="${hyperic-hq-agent.installdir}"/>
+        <param name="version" value="${version}"/>
+        <path>
+            <fileset dir="${base}" includes="hyperic-hq-agent-*.tar.gz"/>
+        </path>
+    </foreach>
+    
+    <foreach param="agent.bundle" target="unzip-agent">
+            <param name="hyperic-hq-agent.installdir" value="${hyperic-hq-agent.installdir}"/>
+            <param name="version" value="${version}"/>
+            <path>
+                <fileset dir="${base}" includes="hyperic-hq-agent-*.zip"/>
+            </path>
+     </foreach>
 
-	<foreach param="agent.bundle" target="unpack-ee-agent">
-  		<param name="hyperic-hq-agent.installdir" value="${hyperic-hq-agent.installdir}"/>
-  		<param name="version" value="${version}"/>
-  		<path>
-  			<fileset dir="${base}" includes="hyperic-hqee-agent-*.tar.gz"/>
-  		</path>
-  	</foreach>
-  	
-  	<foreach param="agent.bundle" target="unzip-ee-agent">
-  	  		<param name="hyperic-hq-agent.installdir" value="${hyperic-hq-agent.installdir}"/>
-  	  		<param name="version" value="${version}"/>
-  	  		<path>
-  	  			<fileset dir="${base}" includes="hyperic-hqee-agent-*.zip"/>
-  	  		</path>
-  	 </foreach>
+    <foreach param="agent.bundle" target="unpack-ee-agent">
+        <param name="hyperic-hq-agent.installdir" value="${hyperic-hq-agent.installdir}"/>
+        <param name="version" value="${version}"/>
+        <path>
+            <fileset dir="${base}" includes="hyperic-hqee-agent-*.tar.gz"/>
+        </path>
+    </foreach>
+    
+    <foreach param="agent.bundle" target="unzip-ee-agent">
+            <param name="hyperic-hq-agent.installdir" value="${hyperic-hq-agent.installdir}"/>
+            <param name="version" value="${version}"/>
+            <path>
+                <fileset dir="${base}" includes="hyperic-hqee-agent-*.zip"/>
+            </path>
+     </foreach>
     
     <echo>^^^COMPLETION:
       Agent successfully installed to: ${hyperic-hq-agent.installdir}
     </echo>
    <echo>^^^INFO: 
-	You can now start your HQ agent by running this command:
+    You can now start your HQ agent by running this command:
 
        ${agent.command} start
    </echo>
@@ -365,23 +375,23 @@ __ll__
 <target name="setup-agent-init" depends="setup-agent-ee,setup-agent-org,setup-agent-ee-command,setup-agent-command"/>
 
    <target name="setup-agent-ee" depends="check-eula" if="eula.present">
-	    <property name="agent.vname" value="agent-${version}-EE"/>
-    	<property name="agent.product.dir"
+        <property name="agent.vname" value="agent-${version}-EE"/>
+        <property name="agent.product.dir"
               value="${hyperic-hq-agent.installdir}/${agent.vname}"/>
    </target>
 
    <target name="setup-agent-org" depends="check-eula" unless="eula.present">
-	    <property name="agent.vname" value="agent-${version}"/>
-    	<property name="agent.product.dir"
+        <property name="agent.vname" value="agent-${version}"/>
+        <property name="agent.product.dir"
               value="${hyperic-hq-agent.installdir}/${agent.vname}"/>
    </target>
 
    <target name="setup-agent-ee-command" if="isWin32">
-	    <property name="agent.command" value="${agent.product.dir}/bin/hq-agent.bat"/>
+        <property name="agent.command" value="${agent.product.dir}/bin/hq-agent.bat"/>
    </target>
 
    <target name="setup-agent-command" unless="isWin32">
-	   <property name="agent.command" value="${agent.product.dir}/bin/hq-agent.sh"/>
+       <property name="agent.command" value="${agent.product.dir}/bin/hq-agent.sh"/>
    </target>
 
   <target name="validate-user-privs"
@@ -481,7 +491,7 @@ __ll__
     <msgfail>^^^ERROR:\
       There is another program using port ${server.webapp.port}.
       Please choose a different value for the server.webapp.port property.
-    	
+        
       Run the setup program with the "-full" option so that you
       can pick either an alternate port or a different database to use
       for the HQ server.
@@ -491,7 +501,7 @@ __ll__
     <msgfail>^^^ERROR:\
       There is another program using port ${server.webapp.secure.port}.
       Please choose a different value for the server.webapp.secure.port property.
-    	
+        
       Run the setup program with the "-full" option so that you
       can pick either an alternate port or a different database to use
       for the HQ server.
@@ -509,9 +519,9 @@ ${errMsg}
           description="Install or upgrade the HQ server.">
     <antcall target="server-install"/>
     <antcall target="server-upgrade"/>
-  	 <antcall target="copy-oss-license-file">
-  	 	 	<param name="oss.license.to.dir" value="${server.product.dir}"/>
-  	 </antcall>
+     <antcall target="copy-oss-license-file">
+            <param name="oss.license.to.dir" value="${server.product.dir}"/>
+     </antcall>
   </target>
 
   <target name="server-install" unless="setup.upgrade">
@@ -527,77 +537,78 @@ ${errMsg}
     <echo>^^^INFO: Upgrading the server...</echo>
     <antcall target="setup-server"/>
     <echo>^^^INFO: Copying existing hq-server.conf</echo>
-  	<!-- Backup conf file to maintain comments -->
-  	<tstamp>
-  	    <format property="current.time" pattern="yyyy-MM-dd.hhmm"/>
- 	</tstamp>
+    <!-- Backup conf file to maintain comments -->
+    <tstamp>
+        <format property="current.time" pattern="yyyy-MM-dd.hhmm"/>
+    </tstamp>
 
-  	<copy file="${server.upgradedir}/conf/hq-server.conf"
-  	            tofile="${server.product.dir}/conf/hq-server-${current.time}.conf"
-  	            failonerror="false"/>
-  	
+    <copy file="${server.upgradedir}/conf/hq-server.conf"
+                tofile="${server.product.dir}/conf/hq-server-${current.time}.conf"
+                failonerror="false"/>
+    
     <!-- Copy the existing config -->
     <serverConfigUpgrade existing="${server.upgradedir}/conf/hq-server.conf" 
-    	new="${server.product.dir}/conf/hq-server.conf" upgradeDir="${server.upgradedir}"/>
-  		
+        new="${server.product.dir}/conf/hq-server.conf" upgradeDir="${server.upgradedir}"/>
+        
+    
     <!-- Copy the existing license file, if there is one -->
-  	<!-- Disable copying of license.xml file for 4.6 upgrade bc it's now different, post 4.6 upgrades should
-  	     copying the serial file, if one exists...
+    <!-- Disable copying of license.xml file for 4.6 upgrade bc it's now different, post 4.6 upgrades should
+         copying the serial file, if one exists...
     <echo>^^^INFO: Copying existing license file</echo>
     <copy file="${server.upgradedir}/conf/license.xml"
           todir="${server.product.dir}/conf"
           failonerror="false"/>
-  	-->
-  	
-  	<echo>^^^INFO: Copying keystore</echo>
-  	<available file="${server.upgradedir}/conf/hyperic.keystore" property="keystore.exists"/>
-  	<antcall target="copy-keystore-upgrade" />
-  	
-  	<!-- Copy log4j.xml from evolution or later -->
+    -->
+    
+    <echo>^^^INFO: Copying keystore</echo>
+    <available file="${server.upgradedir}/conf/hyperic.keystore" property="keystore.exists"/>
+    <antcall target="copy-keystore-upgrade" />
+    
+    <!-- Copy log4j.xml from evolution or later -->
     <copy file="${server.upgradedir}/conf/log4j.xml"
             todir="${server.product.dir}/conf"
             failonerror="false"/>
-  	
+    
     <echo>^^^INFO: Copying existing HQ server cache information</echo>
-  	<!-- Copy from 4.4 or earlier -->
+    <!-- Copy from 4.4 or earlier -->
     <ehcacheUpgrade existing="${server.upgradedir}/hq-engine/server/default/deploy/hq.ear/ehcache.xml"
                     new="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/classes/ehcache.xml"/>
 
-  	<!-- Copy from evolution or later -->
-  	<ehcacheUpgrade existing="${server.upgradedir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/classes/ehcache.xml"
-  	                    new="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/classes/ehcache.xml"/>
-  	
+    <!-- Copy from evolution or later -->
+    <ehcacheUpgrade existing="${server.upgradedir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/classes/ehcache.xml"
+                        new="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/classes/ehcache.xml"/>
+    
     <echo>^^^INFO: Copying existing HQU plugins</echo>
-  	<!-- Copy from 4.4 or earlier-->
+    <!-- Copy from 4.4 or earlier-->
     <uiPluginUpgrade newHquDir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/hqu" 
-    	existingHquDir="${server.upgradedir}/hq-engine/server/default/deploy/hq.ear/hq.war/hqu"/>
-  	
-  	<!--Copy from evolution or later -->
-  	<uiPluginUpgrade newHquDir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/hqu" 
-  	      existingHquDir="${server.upgradedir}/hq-engine/hq-server/webapps/ROOT/hqu"/>
-  	
-  	<echo>^^^INFO: Copying existing state files</echo>
-  	<!-- Copy from 4.4 or earlier-->
-  	<copy todir="${server.product.dir}/hq-engine/hq-server" failonerror="false">
+        existingHquDir="${server.upgradedir}/hq-engine/server/default/deploy/hq.ear/hq.war/hqu"/>
+    
+    <!--Copy from evolution or later -->
+    <uiPluginUpgrade newHquDir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/hqu" 
+          existingHquDir="${server.upgradedir}/hq-engine/hq-server/webapps/ROOT/hqu"/>
+    
+    <echo>^^^INFO: Copying existing state files</echo>
+    <!-- Copy from 4.4 or earlier-->
+    <copy todir="${server.product.dir}/hq-engine/hq-server" failonerror="false">
       <fileset dir="${server.upgradedir}/hq-engine" includes="*.dat"/>
     </copy>
-  	
-  	<!--Copy from evolution or later -->
-	<copy todir="${server.product.dir}/hq-engine/hq-server" failonerror="false">
+    
+    <!--Copy from evolution or later -->
+    <copy todir="${server.product.dir}/hq-engine/hq-server" failonerror="false">
       <fileset dir="${server.upgradedir}/hq-engine/hq-server" includes="*.dat"/>
-    </copy>	
+    </copy> 
 
     <echo>^^^INFO: Copying unprocessed metric data files</echo>
     <!-- Copy from 4.4 or earlier-->
     <copy todir="${server.product.dir}/hq-engine/hq-server" failonerror="false">
       <fileset dir="${server.upgradedir}/hq-engine" includes="*Inserter.tmp"/>
     </copy>
-  	
+    
     <!--Copy from evolution or later -->
     <copy todir="${server.product.dir}/hq-engine/hq-server" failonerror="false">
       <fileset dir="${server.upgradedir}/hq-engine/hq-server" includes="*Inserter.tmp"/>
     </copy>
-
+  
     <echo>^^^COMPLETION:
       Server successfully upgraded to: ${server.product.dir}
     </echo>
@@ -608,52 +619,107 @@ ${errMsg}
 
 
    <target name="setup-server-ee" depends="check-eula" if="eula.present">
-	    <property name="server.vname" value="server-${version}-EE"/>
-    	<property name="server.product.dir"
+        <property name="server.vname" value="server-${version}-EE"/>
+        <property name="server.product.dir"
               value="${server.installdir}/${server.vname}"/>
    </target>
 
  <target name="setup-server-org" depends="check-eula" unless="eula.present">
-	    <property name="server.vname" value="server-${version}"/>
-    	<property name="server.product.dir"
+        <property name="server.vname" value="server-${version}"/>
+        <property name="server.product.dir"
               value="${server.installdir}/${server.vname}"/>
    </target>
-
-  <target name="generate-hq-server-conf" unless="setup.upgrade">
-    <substProps src="${install.dir}/data/hq-server.conf"
-                dest="${conf-dir}/hq-server.conf"/>
-  	<replace file="${conf-dir}/hq-server.conf" token="@SERVER_CONF@" value="${conf-dir}" />
-  </target>
 	
-	<target name="unpack-server">
-		<echo> 
-		   	  ^^^INFO: Unpacking server to: ${server.installdir}...
-		</echo>
-		<untar src="${server.bundle}"
-		           dest="${server.installdir}"
-		           compression="gzip"/>
+
+
+    <target name="update-hq-server-profile" depends="load-basics, check-eula">
+       <fail unless="eula.present" message="Updating scale is only available in the EE version"/>        
+        <condition property="profile.notValid">
+            <and>               
+                <not>
+                     <equals arg1="${install.profile}" arg2="small"/>
+                    </not>
+                <not>
+                     <equals arg1="${install.profile}" arg2="medium"/>
+                    </not>
+                <not>
+                     <equals arg1="${install.profile}" arg2="large"/>
+                    </not>
+            </and>
+        </condition>
+        <fail if="profile.notValid" message="Not a valid profile must be small/medium/large"/>
+        <antcall target="load-properties"/>
+        <updateServerProfile src="${server.product.dir}/conf/hq-profiles.properties"
+                                    dest="${server.product.dir}/conf/hq-server.conf"/>
+         <delete file="${server.product.dir}/conf/hq-profiles.properties"/> 
+         <echo>^^^DEBUG: The server is now updated to "${install.profile}" profile...</echo>
+    </target>
+	
+    <target name="install-hq-server-profile">
+        <property name="install.profile" value="small"/>
+        <echo>^^^DEBUG: Using "${install.profile}" installing profile...</echo>
+        
+        <antcall target="load-properties"/>
+        <antcall target="load-properties-to-conf-file"/>
+        <antcall target="load-properties-to-web-xml-file"/>
+    <!--After the properties has been loaded, we can delete the file-->
+    <delete file="${server.product.dir}/conf/hq-profiles.properties"/> 
+    </target>
+
+    
+    <target name="load-properties-to-web-xml-file">
+         <echo>^^^DETAILED: Loading properties into web.xml</echo>
+    	  <loadproperties srcFile="${server.product.dir}/conf/hq-profiles.properties"/>
+    	  <webContextConfigure webContextFile="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/web.xml"
+    	  	maxConns="${max.conns}"/>           
+    </target>
+    
+    <target name="load-properties-to-conf-file"  unless="setup.upgrade">
+        <echo>^^^DETAILED: Loading properties into hq-server.conf</echo>
+        <loadproperties srcFile="${server.product.dir}/conf/hq-profiles.properties"/>             
+        <substProps src="${install.dir}/data/hq-server.conf"
+                            dest="${conf-dir}/hq-server.conf"/>
+                <replace file="${conf-dir}/hq-server.conf" token="@SERVER_CONF@" value="${conf-dir}" />
+    </target>
+        
+    <target name="load-properties">
+        <echo>^^^DETAILED: Loading properties according to the selected installation profile</echo>
+                <copy tofile="${server.product.dir}/conf/hq-profiles.properties"
+                                      file="${install.dir}/data/hq-profiles.properties"
+                                      overwrite="true"/>
+                <replaceregexp file="${server.product.dir}/conf/hq-profiles.properties"
+                       match="(.${install.profile})"
+                       replace=""
+                       byline="true"/>
+      </target>
+    
+    <target name="unpack-server">
+        <echo> 
+              ^^^INFO: Unpacking server to: ${server.installdir}...
+        </echo>
+        <untar src="${server.bundle}"
+                   dest="${server.installdir}"
+                   compression="gzip"/>
   </target>
 
   <target name="setup-server">
-  	<!-- The server distro will unzip to a server-${version} dir, but the tar.gz may have build stamp in name -->
-  	<foreach param="server.bundle" target="unpack-server">
-  	  	<param name="server.installdir" value="${server.installdir}"/>
-  		<param name="version" value="${version}"/>
-  	  	<path>
-  	  		<fileset dir="${base}" includes="server-*.tar.gz"/>
-  	  	</path>
-  	 </foreach>
+    <!-- The server distro will unzip to a server-${version} dir, but the tar.gz may have build stamp in name -->
+    <foreach param="server.bundle" target="unpack-server">
+        <param name="server.installdir" value="${server.installdir}"/>
+        <param name="version" value="${version}"/>
+        <path>
+            <fileset dir="${base}" includes="server-*.tar.gz"/>
+        </path>
+     </foreach>
 
     <!-- Setup conf directory -->
     <echo>^^^INFO: Creating server configuration files...</echo>
     <property name="conf-dir" value="${server.product.dir}/conf"/>
     <antcall target="copy-license"/>
-	<antcall target="copy-keystore" />
-    <antcall target="generate-hq-server-conf"/>
+    <antcall target="copy-keystore" />
+    <antcall target="install-hq-server-profile"/>
     <property name="tomcat.home"
               value="${server.product.dir}/hq-engine"/>
-   
-
     <echo>^^^INFO: Copying binaries and libraries to server installation...</echo>
 
     <!-- We only keep this file around for debugging, in case we need
@@ -685,8 +751,8 @@ ${errMsg}
         <include name="ant-launcher.jar"/>
         <include name="commons-logging-1.0.4.jar"/>
         <include name="hq-installer.jar"/>
-    	<include name="hq-util.jar"/>
-      	<include name="hq-common.jar"/>
+        <include name="hq-util.jar"/>
+        <include name="hq-common.jar"/>
         <include name="oro-2.0.8.jar"/>
         <include name="sigar-*.dll"/>
         <include name="libsigar-*"/>
@@ -706,21 +772,21 @@ ${errMsg}
     <!-- Do DB-specific stuff -->
     <echo>^^^INFO: Setting up server database...</echo>
     <ant antfile="setup-db-${server.database}.xml" target="setup"/>
-
+    
     <antcall target="install-server-jre">
       <param name="destination" value="${server.product.dir}" />
     </antcall>
 
     <!-- Mark executables as executable -->
-	<echo>^^^INFO: Setting permissions on ${server.product.dir}...</echo>
+    <echo>^^^INFO: Setting permissions on ${server.product.dir}...</echo>
 
     <!-- Must break things up into chunks to avoid overly-long argument lists.  The webapps, in the hq-server
          hierarchy, are the directories with the most files, so narrow down to them -->
     <chmod perm="go-rwx" type="both">
         <fileset dir="${server.product.dir}">
             <exclude name="hq-engine/**" />
-        	<exclude name="jre/**" />
-        	<exclude name="hqdb/**" />
+            <exclude name="jre/**" />
+            <exclude name="hqdb/**" />
         </fileset>
     </chmod>    
 
@@ -733,7 +799,7 @@ ${errMsg}
     <chmod perm="go-rwx" type="both">
         <fileset dir="${server.product.dir}/hq-engine/hq-server">
             <exclude name="webapps/**" />
-        	<exclude name="work/**" />
+            <exclude name="work/**" />
         </fileset>
     </chmod>    
 
@@ -756,7 +822,7 @@ ${errMsg}
         </fileset>
     </chmod>
 
-	<echo>^^^INFO: Setting permissions on server binaries...</echo>
+    <echo>^^^INFO: Setting permissions on server binaries...</echo>
     <antcall target="chmod-exec">
       <param name="chmod.dir" value="${server.product.dir}"/>
     </antcall>
@@ -769,50 +835,50 @@ ${errMsg}
 
     <antcall target="debug-setup"/>
   </target>
+     
+	<target name="copy-license" unless="setup.upgrade">
+        <copy file="${install.dir}/data/license.xml" todir="${conf-dir}"
+              failonerror="false"/>
+      </target>
 
-	  <target name="copy-license" unless="setup.upgrade">
-	    <copy file="${install.dir}/data/license.xml" todir="${conf-dir}"
-	          failonerror="false"/>
-	  </target>
-
-	  <target name="copy-keystore" unless="setup.upgrade">
-	    <copy file="${install.dir}/data/hyperic.keystore" 
-	    	tofile="${server.product.dir}/conf/hyperic.keystore"
-	          failonerror="false"/>
-	  	<copy file="${install.dir}/data/hyperic.keystore" 
-	  		tofile="${server.product.dir}/conf/hyperic.keystore.backup.DO.NOT.DELETE"
-	  	              failonerror="false"/>
-	  	<delete file="${install.dir}/data/hyperic.keystore" />
-	  </target>
-
-	  <target name="copy-keystore-upgrade">
-	    <antcall target="copy-generated-keystore" />
-	  	<antcall target="copy-existing-keystore" />
-	  </target>
-	
-	  <target name="copy-generated-keystore" unless="keystore.exists">
-	  	<copy file="${install.dir}/data/hyperic.keystore" 
-	  		tofile="${server.product.dir}/conf/hyperic.keystore"
-	  		failonerror="false"/>
+      <target name="copy-keystore" unless="setup.upgrade">
+        <copy file="${install.dir}/data/hyperic.keystore" 
+            tofile="${server.product.dir}/conf/hyperic.keystore"
+              failonerror="false"/>
         <copy file="${install.dir}/data/hyperic.keystore" 
             tofile="${server.product.dir}/conf/hyperic.keystore.backup.DO.NOT.DELETE"
                       failonerror="false"/>
-	  	<delete file="${install.dir}/data/hyperic.keystore" />
-	  </target>
-	
-	  <target name="copy-existing-keystore" if="keystore.exists">
+        <delete file="${install.dir}/data/hyperic.keystore" />
+      </target>
+
+      <target name="copy-keystore-upgrade">
+        <antcall target="copy-generated-keystore" />
+        <antcall target="copy-existing-keystore" />
+      </target>
+    
+      <target name="copy-generated-keystore" unless="keystore.exists">
+        <copy file="${install.dir}/data/hyperic.keystore" 
+            tofile="${server.product.dir}/conf/hyperic.keystore"
+            failonerror="false"/>
+        <copy file="${install.dir}/data/hyperic.keystore" 
+            tofile="${server.product.dir}/conf/hyperic.keystore.backup.DO.NOT.DELETE"
+                      failonerror="false"/>
+        <delete file="${install.dir}/data/hyperic.keystore" />
+      </target>
+    
+      <target name="copy-existing-keystore" if="keystore.exists">
         <copy file="${server.upgradedir}/conf/hyperic.keystore"
                     tofile="${server.product.dir}/conf/hyperic.keystore"
                     failonerror="false"/>
-	    <copy file="${server.upgradedir}/conf/hyperic.keystore.backup.DO.NOT.DELETE"
+        <copy file="${server.upgradedir}/conf/hyperic.keystore.backup.DO.NOT.DELETE"
                     tofile="${server.product.dir}/conf/hyperic.keystore.backup.DO.NOT.DELETE"
                     failonerror="false"/>
-	  </target>
-	
+      </target>
+    
   <!-- If server.overwrite is not set or is false, check for an
        existing HQ server installation -->
   <target name="fail-if--server.alreadyInstalled"
-		  if="server.installdir"
+          if="server.installdir"
           unless="server.dont-check-for-overwrite">
     <condition property="server.isInstalled">
       <or>
@@ -833,10 +899,10 @@ ${errMsg}
     <fixcrlf srcdir="${crlf.dir}"
         includes="**/*.bat **/*.properties **/*.txt **/ReadMe* **/*.conf **/*.xml"/>
   </target>
-	
+    
   <!--- Copy the license file for the open source software to a designated directory -->
   <target name="copy-oss-license-file">
-	 <copy file="${oss.license.file}" todir="${oss.license.to.dir}"/>
+     <copy file="${oss.license.file}" todir="${oss.license.to.dir}"/>
   </target>
 
   <target name="chmod-exec">
@@ -844,8 +910,8 @@ ${errMsg}
       <fileset dir="${chmod.dir}">
         <include name="**/bin/*"/>
         <include name="**/sbin/*"/>
-		<!-- Set java permissions for Sun Sparc 64 bit JVM -->
-		<include name="**/bin/sparcv9/*"/>
+        <!-- Set java permissions for Sun Sparc 64 bit JVM -->
+        <include name="**/bin/sparcv9/*"/>
         <include name="**/*.sh"/>
         <include name="**/*.bat"/>
         <include name="**/*.cmd"/>
@@ -867,7 +933,4 @@ ${errMsg}
       <property name="tomcat.home" value="${tomcat.home}"/>
     </ant>
   </target>
-	
-	
-
 </project>

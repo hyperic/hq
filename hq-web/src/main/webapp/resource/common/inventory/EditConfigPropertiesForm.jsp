@@ -8,7 +8,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -33,13 +33,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-
-<script src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
-
-<script src="<html:rewrite page="/js/serviceInventory_ConfigProperties.js"/>" type="text/javascript"></script>
-<script type="text/javascript">
-
-</script>
+<jsu:importScript path="/js/functions.js" />
+<jsu:importScript path="/js/serviceInventory_ConfigProperties.js" />
 
 <hq:constant
     classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
@@ -150,7 +145,7 @@
 		<td width="25%" class="BlockLabel"><c:if test="${monitorConfigOption.optional == false}"><html:img page="/images/icon_required.gif" width="9" height="9" border="0"/></c:if><bean:write name="monitorConfigOption" property="shortOption"/><br><span class="CaptionText"><c:out value="${monitorConfigOption.description}"/></span></td>
 <c:choose>
     <c:when test="${monitorConfigOption.isEnumeration == false && monitorConfigOption.isBoolean == false}">
- <td width="25%" class="BlockContent"><c:choose><c:when test="${monitorConfigOption.isSecret == true }"><input type="password" </c:when><c:otherwise><input type="text" </c:otherwise></c:choose>size="35" name="<c:out value='${monitorConfigOption.option}'/>" value="<c:out value='${monitorConfigOption.value}'/>"></td>
+ <td width="25%" class="BlockContent"><c:choose><c:when test="${monitorConfigOption.isSecret == true }"><input type="password" </c:when><c:otherwise><input type="text" </c:otherwise></c:choose><c:choose><c:when test="${monitorConfigOption.option =='measurement.server.config_track.files' }">readonly="readonly"</c:when></c:choose> size="35" name="<c:out value='${monitorConfigOption.option}'/>" value="<c:out value='${monitorConfigOption.value}'/>"></td>
     </c:when>
     <c:when test="${monitorConfigOption.isBoolean == true}">
     <td width="25%" class="BlockContent">

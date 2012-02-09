@@ -6,7 +6,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -58,16 +58,12 @@
 
 <c:set var="addToListUrl" 
         value="/resource/group/Inventory.do?mode=addResources&rid=${Resource.id}&type=${Resource.entityId.type}"/>
-
-<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
-<script type="text/javascript">
-var pageData = new Array();
-initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-</script>
-  <!-- est="${not empty param.sos}"
-    param name="sos" value="${param.sos}"
-  :if -->
+<jsu:importScript path="/js/listWidget.js" />
+<jsu:script>
+	var pageData = new Array();
+	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+</jsu:script>
 
 <c:url var="psAction" value="${selfAction}">
   <c:if test="${not empty param.pn}">

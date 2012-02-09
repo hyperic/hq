@@ -53,8 +53,8 @@ public class VSphereHostCollector extends VSphereCollector {
 
     static final String TYPE = VSphereUtil.HOST_SYSTEM;
 
-    private static final Log _log =
-        LogFactory.getLog(VSphereHostCollector.class.getName());
+    private final Log _log =
+        LogFactory.getLog(this.getClass());
 
     private static final Set<String> VALID_UNITS =
         new HashSet<String>(Arrays.asList(MeasurementConstants.VALID_UNITS));
@@ -223,6 +223,7 @@ public class VSphereHostCollector extends VSphereCollector {
             if (info.getUnitInfo().getLabel().equals("Percent")) {
                 val /= 100;
             }
+            
             String type = info.getStatsType().toString();
             if (type.equals("absolute") ||
                 (type.equals("rate") &&
@@ -235,5 +236,20 @@ public class VSphereHostCollector extends VSphereCollector {
                 setValue(key, val);
             }
         }
+    }
+
+    @Override
+    protected void setValue(String key, double val) {
+        if (_log.isDebugEnabled()) {
+            _log.debug("key='" + key + "' val='" + val + "'");
+        }
+        if (key.startsWith("mem.swap") && key.endsWith("Rate.average")) {
+            String newKey = key.replace("Rate.", ".");
+            if (_log.isDebugEnabled()) {
+                _log.debug("newKey='" + newKey + "' val='" + val + "'");
+            }
+            super.setValue(newKey, val);
+        }
+        super.setValue(key, val);
     }
 }

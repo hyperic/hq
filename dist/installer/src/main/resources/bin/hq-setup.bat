@@ -22,7 +22,7 @@ if exist "%JAVA_HOME%\bin\java.exe" goto basicAntSetup
 goto noJavaExe
 
 :haveBuiltinJRE:
-"%INSTALL_DIR%\jres\x86-win32-1.6.exe" -d "%TEMP%" > nul
+"%INSTALL_DIR%\jres\x86-win32-1.6_30.exe" -y -o"%TEMP%" > nul
 SET JAVA_HOME=%TEMP%\jre
 SET USE_BUILTIN_JRE=1
 goto basicAntSetup
@@ -45,6 +45,7 @@ SET INSTALL_MODE=quick
 :handleSetupParam
 if "%1"=="" goto startSetup
 if "%1"=="-upgrade" SET INSTALL_MODE=upgrade
+if "%1"=="-updateScale" goto startUpdateScale
 if "%1"=="-oracle" SET INSTALL_MODE=oracle
 if "%1"=="-postgresql" SET INSTALL_MODE=postgresql
 if "%1"=="-mysql" SET INSTALL_MODE=mysql
@@ -62,6 +63,31 @@ echo "using setup with file=%SETUP_FILE%"
 echo Please ignore references to missing tools.jar
 call "%ANT_HOME%\bin\ant" -Dinstall.dir="%INSTALL_DIR%" -Dinstall.mode="%INSTALL_MODE%" -Dsetup="%SETUP_FILE%" -f "%INSTALL_DIR%\data\setup.xml" -logger org.hyperic.tools.ant.installer.InstallerLogger
 goto setupDone
+
+:startUpdateScale 
+
+echo Please Enter the server profile:
+echo 1: small (less than 50 platforms)
+echo 2: medium (50-250 platforms)
+echo 3: large (larger than 250 platforms)
+@ECHO OFF
+SET /P profile=
+GOTO CASE_%profile%
+:CASE_1
+    SET profile=small
+    GOTO END_SWITCH
+:CASE_2
+    SET profile=medium
+    GOTO END_SWITCH
+:CASE_3
+    SET profile=large
+    GOTO END_SWITCH
+:END_SWITCH
+
+SET /P dir=Please Enter the server directory:
+call "%ANT_HOME%\bin\ant"  -Dinstall.profile=%profile% -Dserver.product.dir=%dir% -Dinstall.dir="%INSTALL_DIR%" -Dinstall.nowrap=false -Dinstall.mode="%INSTALL_MODE%" -logger org.hyperic.tools.ant.installer.InstallerLogger -f "%INSTALL_DIR%\data\setup.xml"  update-hq-server-profile
+goto setupDone
+
 
 :defaultSetup
 echo Please ignore references to missing tools.jar

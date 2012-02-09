@@ -6,7 +6,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -168,22 +168,21 @@
 		</c:forEach>
 
 		<c:if test="${count > 7}">
-			<div id="metricsDiv" class="scrollable"><script
-				type="text/javascript">
-      function setMetricsHeight() {
-        var metricsDiv = hqDojo.byId('metricsDiv');
-        var bottom = overlay.findPosY(hqDojo.byId('timetop'));
-        var top = overlay.findPosY(metricsDiv);
-
-        metricsDiv.style.height = (bottom - top) + 'px';
-      }
-
-      hqDojo.ready(function() {
-    	  setMetricsHeight();
-      });
-    </script>
+			<div id="metricsDiv" class="scrollable">
+				<jsu:script>
+				    function setMetricsHeight() {
+				        var metricsDiv = hqDojo.byId('metricsDiv');
+				        var bottom = overlay.findPosY(hqDojo.byId('timetop'));
+				        var top = overlay.findPosY(metricsDiv);
+				
+				        metricsDiv.style.height = (bottom - top) + 'px';
+					}
+				</jsu:script>
+				<jsu:script onLoad="true">
+					setMetricsHeight();
+				</jsu:script>
 		</c:if>
-
+		
 		<table width="100%" border="0" cellpadding="1" cellspacing="0">
 			<tr class="tableRowHeader">
 				<th class="ListHeaderInactive"><fmt:message

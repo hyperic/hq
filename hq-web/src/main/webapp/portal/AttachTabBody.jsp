@@ -3,7 +3,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <!-- get the eid and mode here for the parent portal action and use that action instead of mastheadattach -->
 <div style="display:none;">
 <c:out value="${resourceViewTabAttachments}"></c:out> ---
@@ -50,9 +50,6 @@
 	</div>
 </c:otherwise>
 </c:choose>
-
-<script type="text/javascript">
-hqDojo.ready(function(){
-    hqDojo.byId("SubTabTarget").innerHTML = hqDojo.byId("SubTabSource").innerHTML;
-});
-</script>
+<jsu:script onLoad="true">
+   	hqDojo.byId("SubTabTarget").innerHTML = hqDojo.byId("SubTabSource").innerHTML;
+</jsu:script>

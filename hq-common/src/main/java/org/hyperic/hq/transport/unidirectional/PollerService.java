@@ -26,6 +26,7 @@
 
 package org.hyperic.hq.transport.unidirectional;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -60,7 +61,7 @@ public interface PollerService {
      * @return {@link Map} of {@link String} of agentToken to {@link InvocationRequest}
      * representing the requests which were removed from the queue.
      */
-    Map removeAgedOutRequests(long now);
+    Map<String, Collection<InvocationRequest>> removeAgedOutRequests(long now);
 
     /**
      * Removes the old agent messages

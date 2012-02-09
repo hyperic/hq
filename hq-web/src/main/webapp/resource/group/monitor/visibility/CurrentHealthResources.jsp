@@ -2,7 +2,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -34,7 +34,7 @@
 <tiles:importAttribute name="showOptions" ignore="true"/>
 
 <c:if test="${showProblems}">
-  <script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+	<jsu:importScript path="/js/listWidget.js" />
 </c:if>
 
 <tiles:insert page="/resource/common/monitor/visibility/ResourcesTab.jsp"/>

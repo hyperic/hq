@@ -30,10 +30,11 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 
 <tiles:importAttribute name="portlet"/>
 
-<script type="text/javascript">
+<jsu:script>
 	function requestMetricsResponse${portlet.token}() {
         hqDojo.xhrGet({ 
             url: "<html:rewrite page="/dashboard/ViewMetricViewer.do?"/>", 
@@ -56,7 +57,7 @@
 	hqDojo.ready(function() {
 		requestMetricsResponse${portlet.token}();
 	});
-</script>
+</jsu:script>
 
 <div class="effectsPortlet">
 <tiles:insert definition=".header.tab">

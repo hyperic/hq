@@ -1,35 +1,38 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : HQApi agent command</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : HQApi agent command</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : HQApi agent command
+                            vFabric Hyperic 4.6.5 : HQApi agent command
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 27, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
  
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1309216840822 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1309216840822 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1309216840822 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1325699157378 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699157378 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699157378 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1309216840822'>
+/*]]>*/</style><div class='rbtoc1325699157378'>
 <ul>
     <li><a href='#HQApiagentcommand-agentFunctionality'>agent Functionality</a></li>
     <li><a href='#HQApiagentcommand-agentCommandOptions'>agent Command Options</a></li>
@@ -53,7 +56,7 @@ div.rbtoc1309216840822 li {margin-left: 0px;padding-left: 0px;}
 </ul>
     <li><a href='#HQApiagentcommand-agentbundlelist'>agent bundle-list</a></li>
 <ul>
-    <li><a href='#HQApiagentcommand-StructureofanAgentsResponseElement'>Structure of an AgentsResponse Element</a></li>
+    <li><a href='#HQApiagentcommand-StructureofanAgentBundleFilesResponseElement'>Structure of an AgentBundleFilesResponse Element</a></li>
     <li><a href='#HQApiagentcommand-ContentofanAgentBundleFileElement'>Content of an AgentBundleFile Element</a></li>
     <li><a href='#HQApiagentcommand-agentbundlelistCommandQualifiers'>agent bundle-list Command Qualifiers</a></li>
     <li><a href='#HQApiagentcommand-agentbundlelistExample'>agent bundle-list Example</a></li>
@@ -79,7 +82,7 @@ div.rbtoc1309216840822 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 </td></tr></table></div>  
 
-<p><font color=""></font></p> 
+ 
 
 <h1><a name="HQApiagentcommand-agentFunctionality"></a>agent Functionality </h1>
 
@@ -89,14 +92,14 @@ div.rbtoc1309216840822 li {margin-left: 0px;padding-left: 0px;}
 
 <h2><a name="HQApiagentcommand-agentlist"></a>agent list </h2>
 
-<p>The <b>agent list</b> command returns an <tt>AgentsResponse</tt> element, which contains an <tt>Agent</tt> element for each agent registered with the HQ Server. </p>
+<p>The <b>agent list</b> command returns an <tt>AgentsResponse</tt> element, which contains an <tt>Agent</tt> element for each agent registered with the Hyperic Server. </p>
 
 <h3><a name="HQApiagentcommand-StructureofanAgentsResponseElement"></a>Structure of an AgentsResponse Element </h3>
 
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
 		<pre class="theme: Confluence; brush: java; gutter: false">&lt;AgentsResponse&gt; 
-&lt;Agent&gt; 
+     &lt;Agent&gt; 
 &lt;/AgentsResponse&gt;</pre>
 		</div>
 </div></div> 
@@ -109,9 +112,9 @@ div.rbtoc1309216840822 li {margin-left: 0px;padding-left: 0px;}
 <ul>
 	<li><tt>unidirectional</tt> &#8212; whether agent uses unidirectional communications (for vFabric Hyperic only)</li>
 	<li><tt>version</tt> &#8212; agent software version</li>
-	<li><tt>port</tt> &#8212; port on which the agent listens for HQ Server communications</li>
+	<li><tt>port</tt> &#8212; port on which the agent listens for Hyperic Server communications</li>
 	<li><tt>address</tt> &#8212; agent's IP address</li>
-	<li><tt>id</tt> &#8212; HQ internal ID for the agent</li>
+	<li><tt>id</tt> &#8212; Hyperic internal ID for the agent</li>
 </ul>
 
 
@@ -127,7 +130,7 @@ div.rbtoc1309216840822 li {margin-left: 0px;padding-left: 0px;}
 &lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt; 
 &lt;AgentsResponse&gt; 
 &lt;Status&gt;Success&lt;/Status&gt; 
-     &lt;Agent unidirectional="false" version="4.1.0-EE" port="2144" address="localhost" id="10001"/&gt; 
+    &lt;Agent id="10901" address="10.17.184.239" port="4749" version="4.5.1.2.BUILD-SNAPSHOT" unidirectional="false"/&gt;
 &lt;/AgentsResponse&gt;</pre>
 		</div>
 </div></div> 
@@ -252,13 +255,13 @@ Successfully transferred plugin jboss-plugin.jar to 127.0.0.1:2144</pre>
 
 <p>The <b>agent bundle-list</b> command returns an <tt>AgentBundleFilesResponse</tt> element, which contains an <tt>AgentBundleFile</tt> element for each agent bundle in the Hyperic Server's  <tt>ServerHome/hq-engine/hq-server/webapps/ROOT/WEB-INF/hq-agent-bundles</tt> directory.</p>
 
-<h3><a name="HQApiagentcommand-StructureofanAgentsResponseElement"></a>Structure of an AgentsResponse Element </h3>
+<h3><a name="HQApiagentcommand-StructureofanAgentBundleFilesResponseElement"></a>Structure of an AgentBundleFilesResponse Element </h3>
 
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
 		<pre class="theme: Confluence; brush: java; gutter: false">&lt;AgentBundleFilesResponse&gt; 
       &lt;AgentBundleFile&gt; 
-&lt;/AgentsResponse&gt;</pre>
+&lt;/AgentBundleFilesResponse&gt;</pre>
 		</div>
 </div></div> 
 
@@ -398,7 +401,7 @@ Current Bundle: agent-4.5.1.2-custom-20110317154325</pre>
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:44</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:57</font></td>
 		    </tr>
 	    </table>
     </body>

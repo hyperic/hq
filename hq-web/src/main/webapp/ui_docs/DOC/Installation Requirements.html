@@ -1,37 +1,39 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : Installation Requirements</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : Installation Requirements</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : Installation Requirements
+                            vFabric Hyperic 4.6.5 : Installation Requirements
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 15, 2011 by <font color="#0050B2">btalbott@vmware.com</font>.
+					    This page last changed on Jan 23, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p>Before downloading and installing vFabric Hyperic, make sure your system meets the operating system, JRE, database, and system resource requirements for Hyperic Server and Hyperic Agent.</p>
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>Note: In Getting Started with vFabric Cloud Application Platform, the section "vSphere, JVM, and Operating System Support" documents configurations that the entire vFabric Platform supports. Those configurations are a subset of the configurations that vFabric Hyperic supports.</td></tr></table></div>
-<p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>Note: In <em>Getting Started with vFabric Cloud Application Platform</em>, the section "vSphere, JVM, and Operating System Support" documents configurations that the entire vFabric Platform supports. Those configurations are a subset of the configurations that vFabric Hyperic supports.</td></tr></table></div>
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1310750676287 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1310750676287 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1310750676287 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1327340360876 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1327340360876 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1327340360876 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1310750676287'>
+/*]]>*/</style><div class='rbtoc1327340360876'>
 <ul>
     <li><a href='#InstallationRequirements-HypericServerRequirements'>Hyperic Server Requirements</a></li>
 <ul>
@@ -51,30 +53,18 @@ div.rbtoc1310750676287 li {margin-left: 0px;padding-left: 0px;}
     <li><a href='#InstallationRequirements-DriversforMonitoringDatabases'>Drivers for Monitoring Databases</a></li>
 </ul>
 </ul></div>
-<p><font color=""></font></p>
-
 
 <h1><a name="InstallationRequirements-HypericServerRequirements"></a>Hyperic Server Requirements</h1>
+<p><a name="InstallationRequirements-Server"></a></p>
 
 <p>Hyperic supports only one Hyperic Server on a single host. The host must have a static IP address for server communications.</p>
 
 <h2><a name="InstallationRequirements-HypericServerJRERequirements"></a>Hyperic Server JRE Requirements</h2>
 
-<p>Hyperic Server 4.5 requires a 1.6 JRE.</p>
+<p>Hyperic Server 4.6 requires a 1.6 JRE.</p>
 
-<p>Use the no-JRE server installer if you prefer to use an existing JRE in your environment, or if no architecture-specific HQ Server package is available.</p>
+<p>Use the no-JRE server installer if you prefer to use an existing JRE in your environment, or if no architecture-specific Hyperic Server package is available.</p>
 
-<p>HQ Server can run with either a 32-bit or 64-bit JRE, except on Windows, as noted below.</p>
-
-
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Note for Windows Environments</b><br />HQ Server does <b>not</b> support 64-bit JREs under Windows. Use the 32-bit installer package for Windows, or the platform-independant installer if you prefer to use a pre-existing JRE in your environment. 
-
-<p>If you do use a JRE of your own, see <a href="Before You Start.html" title="Before You Start">HQ Components and JRE Location</a> for information about how to ensure that HQ Server uses the right JRE.</p></td></tr></table></div> 
-<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Note for Solaris Sparc Environment</b><br />There is <em>no</em> platform-specific HQ Server package for Solaris SPARC. Install a no-JRE HQ Server package in Solaris SPARC environments. For information about how to ensure that HQ Server can determine what JRE to use, see <a href="Before You Start.html" title="Before You Start">HQ Components and JRE Location</a>.
-
-<p>A platform-specific HQ Agent package with a bundled JRE is available for SPARC Solaris in a tarball.  </p>
-
-<p><b>Note</b>: You <b>must</b> use GNU Tar to unpack HQ tarballs.</p></td></tr></table></div>
 <div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>JRE 1.6 and Monitoring Hyperic Tomcat</b><br />Due to an known problem in Sun JRE version 1.6.0 update 23 and update 24, Hyperic cannot monitor its internal Tomcat 6.0 server — the resource type "HQ Tomcat 6.0" metrics. This problem also prevents local JMX monitoring (process-based monitoring where jmx.url starts with "ptql") of Java processes running in a JRE version 1.6.0 update 23 or update 24 JVM. For a description of the bug, see <a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7009828">http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7009828</a>.</td></tr></table></div>
 <h2><a name="InstallationRequirements-HypericServerResourceRequirements"></a>Hyperic Server Resource Requirements</h2>
 
@@ -105,32 +95,35 @@ div.rbtoc1310750676287 li {margin-left: 0px;padding-left: 0px;}
 
 <p>Although Hyperic does not support Hyperic Server running under Windows XP in production environments, the configuration works; you can run small evaluation deployments under Windows XP.</p>
 
-<p>For Unix-based platforms, the libXp.so.6 X library is required. See below.</p>
+<p>For Unix-based platforms, the <tt>libXp.so.6</tt> X library is required. See below.</p>
 
 <h2><a name="InstallationRequirements-XLibrariesonUnixBasedPlatforms"></a>X Libraries on Unix-Based Platforms</h2>
+<p><a name="InstallationRequirements-xlib"></a></p>
 
-<p>On Unix-based platforms, Hyperic Server requires the libXp.so.6 X library to create charts and other graphics in the Hyperic user interface. The location of this library varies by version and provider:</p>
+<p>On Unix-like platforms, Hyperic Server requires the <tt>libXp.so.6</tt> X library to create charts and other graphics in the Hyperic user interface. The location of this library varies by version and provider:</p>
 <ul>
-	<li>Enterprise Linux---As of Red Hat Enterprise Linux 4 and CentOS 4, libXp.so.6 is in the xorg-x11-deprecated-libs RPM.</li>
+	<li>Enterprise Linux &#8212; As of Red Hat Enterprise Linux 4 and CentOS 4, libXp.so.6 is in the xorg-x11-deprecated-libs RPM.</li>
 </ul>
 
 
 <ul>
-	<li>Debian---install the libxp6, libxt6, libxtst6, and libx11-6 packages.</li>
+	<li>Debian &#8212; install the libxp6, libxt6, libxtst6, and libx11-6 packages.</li>
 </ul>
 
 
 <ul>
-	<li>Fedora Core 5---as of Fedora Core 5, the libXp.so library has been split out to its own package; install the libXp RPM.</li>
+	<li>Fedora Core 5 &#8212; as of Fedora Core 5, the libXp.so library has been split out to its own package; install the libXp RPM.</li>
 </ul>
 
 
 <ul>
-	<li>Other distributions---The required libraries can be found in either the XFree86-libs or the xorg-x11-libs package.</li>
+	<li>Other distributions &#8212; The required libraries can be found in either the XFree86-libs or the xorg-x11-libs package.</li>
 </ul>
 
 
 <h2><a name="InstallationRequirements-HypericServerSupportedDatabases"></a>Hyperic Server Supported Databases</h2>
+
+<p><a name="InstallationRequirements-DatabaseTypes"></a></p>
 
 <p><a name="InstallationRequirements-DBs"></a>Hyperic is packaged with a built-in PostgreSQL V8.2.5 database, which is suitable for evaluation or very small Hyperic deployments.</p>
 
@@ -153,7 +146,8 @@ div.rbtoc1310750676287 li {margin-left: 0px;padding-left: 0px;}
 <ul>
 	<li>Oracle:
 	<ul>
-		<li>10g or 11g&nbsp;</li>
+		<li>Oracle 10g, patch level 10.2.0.1 or higher, 10.2.0.4 preferred</li>
+		<li>Oracle 11g</li>
 	</ul>
 	</li>
 </ul>
@@ -183,6 +177,8 @@ div.rbtoc1310750676287 li {margin-left: 0px;padding-left: 0px;}
 	<li>Firefox 3.x</li>
 	<li>Internet Explorer 7</li>
 	<li>Internet Explorer 8, except if running on Windows 2008</li>
+	<li>Safari 5.0.x</li>
+	<li>Safari 5.1</li>
 </ul>
 
 
@@ -191,6 +187,7 @@ div.rbtoc1310750676287 li {margin-left: 0px;padding-left: 0px;}
 <p>Firefox is recommended.</p>
 
 <h1><a name="InstallationRequirements-HypericDatabaseRequirements"></a>Hyperic Database Requirements</h1>
+<p><a name="InstallationRequirements-DatabaseRequirements"></a></p>
 
 <ul>
 	<li>1 GHz or higher Pentium 4, or equivalent (2 x 2.4GHz Pentium Xeon or equivalent recommended)</li>
@@ -201,7 +198,8 @@ div.rbtoc1310750676287 li {margin-left: 0px;padding-left: 0px;}
 
 <h1><a name="InstallationRequirements-HypericAgentRequirements"></a>Hyperic Agent Requirements</h1>
 
-<p>Hyperic supports only one Hyperic Agent on a host.</p>
+<p><a name="InstallationRequirements-agent"></a><br/>
+Hyperic supports only one Hyperic Agent on a host.</p>
 
 
 <h2><a name="InstallationRequirements-AgentSystemResourceRequirements"></a>Agent System Resource Requirements</h2>
@@ -236,16 +234,16 @@ div.rbtoc1310750676287 li {margin-left: 0px;padding-left: 0px;}
 
 <h2><a name="InstallationRequirements-AgentJRERequirements"></a>Agent JRE Requirements</h2>
 
-<p>The Hyperic Agent can run with either a 1.5 or 1.6 JRE. Hyperic recommends a 1.5 JRE, which is included in platform-specific agent installers.</p>
+<p>The Hyperic Agent can run with either a 1.6 or 1.5 JRE. Hyperic recommends a 1.6 JRE, which is included in platform-specific agent installers.</p>
 
-<p>Use the platform-independent agent installer if you prefer to use an existing JRE in your environment.</p>
+<p>Use a platform-independent agent installer if you prefer to use an existing JRE in your environment.</p>
 
 <h2><a name="InstallationRequirements-DriversforMonitoringDatabases"></a>Drivers for Monitoring Databases</h2>
 
 <p>In the open source version of Hyperic, the plugins packaged with the Hyperic Agent for MSSQL, Oracle, Informix, DB2, and Sybase do not include the database vendor's JDBC plugin. After installing Hyperic HQ you must download and install the vendor-provided JDBC drivers for these plugins to work.</p>
 
 <p><b>Note:</b> The database plugins in vFabric Hyperic include the JDBC drivers.</p>
-<p><font color=""></font></p>
+
 
 				    
                     			    </td>
@@ -256,7 +254,7 @@ div.rbtoc1310750676287 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:43</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:56</font></td>
 		    </tr>
 	    </table>
     </body>

@@ -6,7 +6,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -40,16 +40,15 @@
  		<c:param name="token" value="${param.token}"/>
  	</c:if>
 </c:url>
-<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
-<script type="text/javascript">
+<jsu:importScript path="/js/listWidget.js" />
+<jsu:script>
 	var pageData = new Array();
 
 	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 
 	var help = '<hq:help/>';
-</script>
-<script type="text/javascript">
+
 	/***********************************************/
 	/* Disable "Enter" key in Form script- By Nurul Fadilah(nurul@REMOVETHISvolmedia.com)
 	/* This notice must stay intact for use
@@ -86,11 +85,10 @@
     	selectValidOption();
     	MetricViewerForm.submit();
 	}
-
-	hqDojo.ready(function() {
-		selectValidOption();
-	});
-</script>
+</jsu:script>
+<jsu:script onLoad="true">
+	selectValidOption();
+</jsu:script>
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr class="PageTitle">
     <td rowspan="99"><html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/></td>

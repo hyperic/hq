@@ -37,13 +37,13 @@ machine=`uname -m`
 case "$platform" in
     Linux )
         if [ "${machine}" = "x86_64" ]; then
-            JRE_NAME=amd64-linux-1.6.tar.gz
+            JRE_NAME=amd64-linux-1.6_30.tar.gz
         else
-            JRE_NAME=x86-linux-1.6.tar.gz
+            JRE_NAME=x86-linux-1.6_30.tar.gz
         fi
         ;;
     SunOS )
-        JRE_NAME=sparc-sun-solaris-1.6.tar.gz
+        JRE_NAME=sparc-sun-solaris-1.6_30.tar.gz
         ;;
 esac
 
@@ -90,6 +90,26 @@ while [ ! "x${1}" = "x" ] ; do
     INSTALL_MODE="full"
   elif [ "x${1}" = "x-upgrade" ] ; then
     INSTALL_MODE=upgrade
+  elif [ "x${1}" = "x-updateScale" ] ; then
+    INSTALL_MODE=updateScale
+    echo "Please enter the installation profile:
+           1: small (less than 50 platforms)
+           2: medium (50-250 platforms)
+           3: large (larger than 250 platforms)"
+    read PROFILE
+    case $PROFILE in
+	1)
+   		PROFILE="small"
+   		;;
+	2)
+   		PROFILE="medium"
+   		;;
+	3)	
+		PROFILE="large"
+   		;;
+     esac
+    echo "Please enter the current server installation directory"
+    read SERVER_DIR
   elif [ "x${1}" = "x-oracle" ] ; then
     INSTALL_MODE=oracle
   elif [ "x${1}" = "x-postgresql" ] ; then
@@ -103,7 +123,15 @@ while [ ! "x${1}" = "x" ] ; do
 done
 
 echo "Please ignore references to missing tools.jar"
-if [ "x${SETUP_FILE}" = "x" ] ; then
+if [ "x${INSTALL_MODE}" = "xupdateScale" ] ; then
+  ANT_OPTS="$ANT_OPTS -Djava.net.preferIPv4Stack=true" ANT_ARGS="" JAVA_HOME=${HQ_JAVA_HOME} ${ANT_HOME}/bin/ant --noconfig -q \
+    -Dinstall.dir=${INSTALL_DIR} \
+    -Dinstall.mode=${INSTALL_MODE} \
+    -Dinstall.profile=${PROFILE} \
+    -Dserver.product.dir=${SERVER_DIR} \
+    -logger org.hyperic.tools.ant.installer.InstallerLogger \
+    -f ${INSTALL_DIR}/data/setup.xml update-hq-server-profile
+elif [ "x${SETUP_FILE}" = "x" ] ; then
   ANT_OPTS="$ANT_OPTS -Djava.net.preferIPv4Stack=true" ANT_ARGS="" JAVA_HOME=${HQ_JAVA_HOME} ${ANT_HOME}/bin/ant --noconfig -q \
     -Dinstall.dir=${INSTALL_DIR} \
     -Dinstall.mode=${INSTALL_MODE} \

@@ -7,7 +7,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -57,114 +57,113 @@
 <hq:constant
     classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
     symbol="APPDEF_TYPE_GROUP_COMPAT_SVC" var="CONST_COMPAT_SVC" />
-
-<script  type="text/javascript">
-var compatibleArr = new Array();
-var compatibleCount = 0;
-// need to set the total size of the compatbility types
-<c:choose>
-<c:when test="GroupForm.platformTypeCount > 0 || GroupForm.serverTypeCount > 0 || GroupForm.serviceTypeCount > 0">
-    compatibleArr.length = <c:out value="${GroupForm.clusterCount}"/> + 2;
-</c:when>
-<c:otherwise>
-    compatibleArr.length = <c:out value="${GroupForm.clusterCount}"/> + 1;
-</c:otherwise>
-</c:choose>
-
-// build the compatible types
-compatibleArr[0] = new Option ("<fmt:message key="resource.group.inventory.New.props.SelectResourceType"/>", "-1");
-
-<c:if test="${GroupForm.platformTypeCount > 0}">
-compatibleArr[1] = new Option ("<fmt:message key="resource.group.inventory.New.props.PlatformType"/>", "-1");
-
-compatibleCount = 1;
-
-<c:forEach var="resType" varStatus="resourceCount" items="${GroupForm.platformTypes}">
-  compatibleArr[<c:out value="${resourceCount.count}"/> + 1] = new Option ('<c:out value="${resType.label}"/>',
-                '<c:out value="${resType.value}"/>');
-  <c:if test="${resourceCount.last}">
-      compatibleCount= compatibleCount + <c:out value="${resourceCount.count}"/>;
-  </c:if>
-</c:forEach>
-
-</c:if>
-
-<c:if test="${GroupForm.serverTypeCount > 0}">
-
-<c:if test="${GroupForm.platformTypeCount > 0 }">
-    compatibleArr[compatibleCount + 1] = new Option ("", "-1");
-</c:if>
-
-compatibleArr[compatibleCount + 2] = new Option ("<fmt:message key="resource.group.inventory.New.props.ServerType"/>", "-1");
-
-<c:forEach var="resType" varStatus="resourceCount" items="${GroupForm.serverTypes}">
-  compatibleArr[<c:out value="${resourceCount.count}"/> + compatibleCount + 2] = 
-                                            new Option ('<c:out value="${resType.label}"/>',
-                                                        '<c:out value="${resType.value}"/>');
-  <c:if test="${resourceCount.last}">
-      compatibleCount=compatibleCount+<c:out value="${resourceCount.count}"/>;
-  </c:if>
-</c:forEach>
-compatibleCount = compatibleCount + 2;
-
-</c:if>
-
-<c:if test="${GroupForm.serviceTypeCount > 0}">
-
-<c:if test="${GroupForm.platformTypeCount > 0 || GroupForm.serverTypeCount > 0}">
-    compatibleArr[compatibleCount + 1] = new Option ("", "-1");
-</c:if>
-
-compatibleArr[compatibleCount + 2] = new Option ("<fmt:message key="resource.group.inventory.New.props.ServiceType"/>", "-1");
-
-<c:forEach var="resType" varStatus="resourceCount" items="${GroupForm.serviceTypes}">
-  compatibleArr[<c:out value="${resourceCount.count}"/> + compatibleCount + 2] = 
-                                            new Option ('<c:out value="${resType.label}"/>',
-                                                        '<c:out value="${resType.value}"/>');
-</c:forEach>
-</c:if>
-
-var clusterArr = new Array();
-
-// build the mixed types
-clusterArr.length=4;
-
-clusterArr[0] = new Option ("<fmt:message key="resource.group.inventory.New.props.SelectResourceType"/>", "-1");
-clusterArr[1] = new Option ('<fmt:message key="resource.group.inventory.New.props.GroupOfGroups"/>',
-                            '<c:out value="${CONST_TYPE_GROUP}"/>:-1');
-clusterArr[2] = new Option ('<fmt:message key="resource.group.inventory.New.props.GroupOfMixed"/>',
-                            '<c:out value="${CONST_ADHOC_PSS}"/>:-1');
-clusterArr[3] = new Option ('<fmt:message key="resource.group.inventory.New.props.GroupOfApplications"/>',
-                            '<c:out value="${CONST_TYPE_APPLICATION}"/>:-1');
-
-var masterArr = new Array ("", compatibleArr, clusterArr);
-
-function changeDropDown (masterSelName, selName, selectVal){
-  var masterSel = document.getElementsByName(masterSelName)[0];
-  var typeIndex = masterSel.selectedIndex;
-  
-  var sel = document.getElementsByName(selName)[0];
-  sel.options.length = 0;
-  
-  if (typeIndex == 0 ) {
-    sel.style.display = "none";
-  }
-  
-  else
-    sel.style.display = "block";
-  
-  if (typeIndex == 1 || typeIndex == 2) {
-    sel.options.length = masterArr[typeIndex].length;
     
-    for(i=0; i<masterArr[typeIndex].length; i++) {
-  		sel.options[i] = masterArr[typeIndex][i];
-        if (selectVal != null && sel.options[i].value == selectVal)
-            sel.options[i].selected=true;
-  	}
-  }
-}
-</script>
-
+<jsu:script>
+	var compatibleArr = new Array();
+	var compatibleCount = 0;
+	// need to set the total size of the compatbility types
+	<c:choose>
+	<c:when test="GroupForm.platformTypeCount > 0 || GroupForm.serverTypeCount > 0 || GroupForm.serviceTypeCount > 0">
+	    compatibleArr.length = <c:out value="${GroupForm.clusterCount}"/> + 2;
+	</c:when>
+	<c:otherwise>
+	    compatibleArr.length = <c:out value="${GroupForm.clusterCount}"/> + 1;
+	</c:otherwise>
+	</c:choose>
+	
+	// build the compatible types
+	compatibleArr[0] = new Option ("<fmt:message key="resource.group.inventory.New.props.SelectResourceType"/>", "-1");
+	
+	<c:if test="${GroupForm.platformTypeCount > 0}">
+	compatibleArr[1] = new Option ("<fmt:message key="resource.group.inventory.New.props.PlatformType"/>", "-1");
+	
+	compatibleCount = 1;
+	
+	<c:forEach var="resType" varStatus="resourceCount" items="${GroupForm.platformTypes}">
+	  compatibleArr[<c:out value="${resourceCount.count}"/> + 1] = new Option ('<c:out value="${resType.label}"/>',
+	                '<c:out value="${resType.value}"/>');
+	  <c:if test="${resourceCount.last}">
+	      compatibleCount= compatibleCount + <c:out value="${resourceCount.count}"/>;
+	  </c:if>
+	</c:forEach>
+	
+	</c:if>
+	
+	<c:if test="${GroupForm.serverTypeCount > 0}">
+	
+	<c:if test="${GroupForm.platformTypeCount > 0 }">
+	    compatibleArr[compatibleCount + 1] = new Option ("", "-1");
+	</c:if>
+	
+	compatibleArr[compatibleCount + 2] = new Option ("<fmt:message key="resource.group.inventory.New.props.ServerType"/>", "-1");
+	
+	<c:forEach var="resType" varStatus="resourceCount" items="${GroupForm.serverTypes}">
+	  compatibleArr[<c:out value="${resourceCount.count}"/> + compatibleCount + 2] = 
+	                                            new Option ('<c:out value="${resType.label}"/>',
+	                                                        '<c:out value="${resType.value}"/>');
+	  <c:if test="${resourceCount.last}">
+	      compatibleCount=compatibleCount+<c:out value="${resourceCount.count}"/>;
+	  </c:if>
+	</c:forEach>
+	compatibleCount = compatibleCount + 2;
+	
+	</c:if>
+	
+	<c:if test="${GroupForm.serviceTypeCount > 0}">
+	
+	<c:if test="${GroupForm.platformTypeCount > 0 || GroupForm.serverTypeCount > 0}">
+	    compatibleArr[compatibleCount + 1] = new Option ("", "-1");
+	</c:if>
+	
+	compatibleArr[compatibleCount + 2] = new Option ("<fmt:message key="resource.group.inventory.New.props.ServiceType"/>", "-1");
+	
+	<c:forEach var="resType" varStatus="resourceCount" items="${GroupForm.serviceTypes}">
+	  compatibleArr[<c:out value="${resourceCount.count}"/> + compatibleCount + 2] = 
+	                                            new Option ('<c:out value="${resType.label}"/>',
+	                                                        '<c:out value="${resType.value}"/>');
+	</c:forEach>
+	</c:if>
+	
+	var clusterArr = new Array();
+	
+	// build the mixed types
+	clusterArr.length=4;
+	
+	clusterArr[0] = new Option ("<fmt:message key="resource.group.inventory.New.props.SelectResourceType"/>", "-1");
+	clusterArr[1] = new Option ('<fmt:message key="resource.group.inventory.New.props.GroupOfGroups"/>',
+	                            '<c:out value="${CONST_TYPE_GROUP}"/>:-1');
+	clusterArr[2] = new Option ('<fmt:message key="resource.group.inventory.New.props.GroupOfMixed"/>',
+	                            '<c:out value="${CONST_ADHOC_PSS}"/>:-1');
+	clusterArr[3] = new Option ('<fmt:message key="resource.group.inventory.New.props.GroupOfApplications"/>',
+	                            '<c:out value="${CONST_TYPE_APPLICATION}"/>:-1');
+	
+	var masterArr = new Array ("", compatibleArr, clusterArr);
+	
+	function changeDropDown (masterSelName, selName, selectVal){
+	  var masterSel = document.getElementsByName(masterSelName)[0];
+	  var typeIndex = masterSel.selectedIndex;
+	  
+	  var sel = document.getElementsByName(selName)[0];
+	  sel.options.length = 0;
+	  
+	  if (typeIndex == 0 ) {
+	    sel.style.display = "none";
+	  }
+	  
+	  else
+	    sel.style.display = "block";
+	  
+	  if (typeIndex == 1 || typeIndex == 2) {
+	    sel.options.length = masterArr[typeIndex].length;
+	    
+	    for(i=0; i<masterArr[typeIndex].length; i++) {
+	  		sel.options[i] = masterArr[typeIndex][i];
+	        if (selectVal != null && sel.options[i].value == selectVal)
+	            sel.options[i].selected=true;
+	  	}
+	  }
+	}
+</jsu:script>
 <!--  GENERAL PROPERTIES TITLE -->
 <tiles:insert definition=".header.tab">
   <tiles:put name="tabKey" value="resource.group.inventory.New.GroupType.Title"/>
@@ -212,17 +211,17 @@ function changeDropDown (masterSelName, selName, selectVal){
 <logic:messagesNotPresent property="typeAndResourceTypeId">
       <td width="80%" class="BlockContent">      
           <html:select property="typeAndResourceTypeId"/>
-          <script  type="text/javascript">
-            document.getElementsByName("typeAndResourceTypeId")[0].style.display = "none";
-          </script>
+          <jsu:script>
+          	document.getElementsByName("typeAndResourceTypeId")[0].style.display = "none";
+          </jsu:script>
       </td>
 </logic:messagesNotPresent>
 <logic:messagesPresent property="typeAndResourceTypeId">
       <td width="80%" class="ErrorField">      
           <html:select property="typeAndResourceTypeId"/>
-          <script  type="text/javascript">
+          <jsu:script>
             document.getElementsByName("typeAndResourceTypeId")[0].style.display = "none";
-          </script>
+          </jsu:script>
       </td>          
 </logic:messagesPresent>
       <script  type="text/javascript">

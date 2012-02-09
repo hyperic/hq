@@ -1,40 +1,55 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : server.java.opts</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : server.java.opts</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : server.java.opts
+                            vFabric Hyperic 4.6.5 : server.java.opts
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Feb 07, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><b>Description</b></p>
 
-<p>Additional options to pass to Java.</p>
+<p>Options to pass to Java at Hyperic Server startup.</p>
 
-<p><b>Default</b></p>
+<p>For information about the effect of this and other server properties on Hyperic performance, see <a href="Scaling and Tuning Hyperic Performance.html" title="Scaling and Tuning Hyperic Performance">Scaling and Tuning Hyperic Performance</a>. </p>
 
+<p><b>Default</b><br/>
+In Hyperic HQ and in vFabric Hyperic 4.6 and 4.6.0.1 the default value is: </p>
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
-		<pre class="theme: Confluence; brush: java; gutter: false">server.java.opts= -Djava.awt.headless=true -XX:MaxPermSize=192m -Xmx512m -Xms512m -XX:+HeapDumpOnOutOfMemoryError</pre>
+		<pre class="theme: Confluence; brush: java; gutter: false">server.java.opts= -Djava.awt.headless=true -XX:MaxPermSize=192m -Xmx1g -Xms1g -XX:+HeapDumpOnOutOfMemoryError</pre>
 		</div>
 </div></div>
 
-<p>For For information about changing heap size, see <a href="Scaling and Tuning Hyperic Performance.html" title="Scaling and Tuning Hyperic Performance">Scaling and Tuning Hyperic Performance</a>.</p>
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Setting Hyperic Server Timzone</b><br />You can set the time zone for the JVM in which Hyperic Server runs by adding <tt>-Duser.timezone=Area/Location</tt> to <tt>server.java.opts</tt>, where:
+<p>In vFabric Hyperic 4.6.5 and later, the value of the property can vary by the installation profile for the Hyperic Server. </p>
+
+<ul>
+	<li>small &#8212; <tt>server.java.opts= -Djava.awt.headless=true -XX:MaxPermSize=192m -Xmx1g -Xms1g -XX:+HeapDumpOnOutOfMemoryError</tt></li>
+	<li>medium &#8212; <tt>-Djava.awt.headless=true -XX:MaxPermSize=192m -Xmx4g -Xms4g -XX:+HeapDumpOnOutOfMemoryError</tt></li>
+	<li>large &#8212; <tt>-Djava.awt.headless=true -XX:MaxPermSize=192m -Xmn4g -Xmx8g -Xms8g -XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:SurvivorRatio=12 -XX:+UseCompressedOops</tt></li>
+</ul>
+
+
+<p>For information about installation profiles and how to select one, see <a href="About Sizing Profiles in vFabric Hyperic.html" title="About Sizing Profiles in vFabric Hyperic">About Sizing Profiles in vFabric Hyperic</a>.</p>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Setting Hyperic Server Timezone</b><br />You can set the time zone for the JVM in which Hyperic Server runs by adding <tt>-Duser.timezone=Area/Location</tt> to <tt>server.java.opts</tt>, where:
 
 <ul>
 	<li><tt>Area</tt> &#8212; Is a continent or ocean, for example <tt>America</tt>}</li>
@@ -51,7 +66,7 @@
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:43</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:56</font></td>
 		    </tr>
 	    </table>
     </body>

@@ -1,35 +1,38 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : HQApi alert command</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : HQApi alert command</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : HQApi alert command
+                            vFabric Hyperic 4.6.5 : HQApi alert command
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 27, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1309209376880 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1309209376880 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1309209376880 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1325699179445 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699179445 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699179445 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1309209376880'>
+/*]]>*/</style><div class='rbtoc1325699179445'>
 <ul>
     <li><a href='#HQApialertcommand-Functionality'>Functionality</a></li>
     <li><a href='#HQApialertcommand-alertCommandOptions'>alert Command Options</a></li>
@@ -61,7 +64,7 @@ div.rbtoc1309209376880 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 </td></tr></table></div> 
 
-<p><font color=""></font></p>
+
 
 
 <h1><a name="HQApialertcommand-Functionality"></a>Functionality</h1>
@@ -97,6 +100,11 @@ Command qualifiers:</p>
 <td class='confluenceTd'> no </td>
 </tr>
 <tr>
+<td class='confluenceTd'> <tt>&#45;-groupId</tt> </td>
+<td class='confluenceTd'> Use to limit the alerts returned to alerts in the specified groiup. </td>
+<td class='confluenceTd'> no </td>
+</tr>
+<tr>
 <td class='confluenceTd'> <tt>&#45;-inEsc</tt> </td>
 <td class='confluenceTd'> Use to limit the alerts returned to alerts in escalation. </td>
 <td class='confluenceTd'> no </td>
@@ -104,6 +112,11 @@ Command qualifiers:</p>
 <tr>
 <td class='confluenceTd'> <tt>&#45;-notFixed</tt> </td>
 <td class='confluenceTd'> Use to limit the alerts returned to alerts that have not been marked "fixed". </td>
+<td class='confluenceTd'> no </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-resourceId</tt> </td>
+<td class='confluenceTd'> Use to limit the alerts returned to alerts for the specified resource </td>
 <td class='confluenceTd'> no </td>
 </tr>
 <tr>
@@ -126,12 +139,8 @@ Command qualifiers:</p>
 <p>The <tt>AlertsResponse</tt> object returned by the <b>alert list</b> command has this element structure:</p>
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre>&lt;AlertsResponse&gt;
-
 &lt;Alert&gt;
-
 &lt;AlertActionLog&gt;
-
-
 
 </pre>
 </div></div>
@@ -306,6 +315,16 @@ Command qualifiers:</p>
 <td class='confluenceTd'> The internal HQ ID for the alert. </td>
 <td class='confluenceTd'> yes </td>
 </tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-pause</tt> </td>
+<td class='confluenceTd'> If specified, pause the Escalation for the specified number of milliseconds.  </td>
+<td class='confluenceTd'> no </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-reason</tt> </td>
+<td class='confluenceTd'>  The reason for acknowledging the alert.  </td>
+<td class='confluenceTd'> no </td>
+</tr>
 </tbody></table>
 </div>
 
@@ -341,6 +360,11 @@ Command qualifiers:</p>
 <td class='confluenceTd'> <tt>&#45;-id</tt> </td>
 <td class='confluenceTd'> The internal HQ ID for the alert. </td>
 <td class='confluenceTd'> yes </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-reason</tt> </td>
+<td class='confluenceTd'>  The reason for fixing the alert.  </td>
+<td class='confluenceTd'> no </td>
 </tr>
 </tbody></table>
 </div>
@@ -406,7 +430,7 @@ Command qualifiers:</p>
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:44</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:57</font></td>
 		    </tr>
 	    </table>
     </body>

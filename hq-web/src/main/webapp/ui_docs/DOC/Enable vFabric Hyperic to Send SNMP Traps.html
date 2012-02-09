@@ -1,48 +1,51 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : Enable vFabric Hyperic to Send SNMP Traps</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : Enable vFabric Hyperic to Send SNMP Traps</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : Enable vFabric Hyperic to Send SNMP Traps
+                            vFabric Hyperic 4.6.5 : Enable vFabric Hyperic to Send SNMP Traps
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 21, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1308677259582 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1308677259582 ul {list-style: disc;margin-left: 0px;padding-left: 20x;}
-div.rbtoc1308677259582 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1325699615415 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699615415 ul {list-style: disc;margin-left: 0px;padding-left: 20x;}
+div.rbtoc1325699615415 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1308677259582'>
+/*]]>*/</style><div class='rbtoc1325699615415'>
 <ul>
     <li><a href='#EnablevFabricHyperictoSendSNMPTraps-ConfigureHQServertoSendSNMPTraps'>Configure HQ Server to Send SNMP Traps</a></li>
 <ul>
-    <li><a href='#EnablevFabricHyperictoSendSNMPTraps-ConfigureHQServerEnterpriseforSNMPv1'>Configure HQ Server Enterprise for SNMP v1</a></li>
-    <li><a href='#EnablevFabricHyperictoSendSNMPTraps-ConfigureHQServerEnterpriseforSNMPv2c'>Configure HQ Server Enterprise for SNMP v2c</a></li>
-    <li><a href='#EnablevFabricHyperictoSendSNMPTraps-ConfigureHQServerEnterpriseforSNMPv3'>Configure HQ Server Enterprise for SNMP v3</a></li>
+    <li><a href='#EnablevFabricHyperictoSendSNMPTraps-ConfigurevFabricHypericServerforSNMPv1'>Configure vFabric Hyperic Server for SNMP v1</a></li>
+    <li><a href='#EnablevFabricHyperictoSendSNMPTraps-ConfigurevFabricHypericServerforSNMPv2c'>Configure vFabric Hyperic Server for SNMP v2c</a></li>
+    <li><a href='#EnablevFabricHyperictoSendSNMPTraps-ConfigurevFabricHypericServerforSNMPv3'>Configure vFabric Hyperic Server for SNMP v3</a></li>
 </ul>
     <li><a href='#EnablevFabricHyperictoSendSNMPTraps-UsingSNMPTrapsinAlertDefinitions'>Using SNMP Traps in Alert Definitions</a></li>
 </ul></div>
 
 <p>This page has information about enabling vFabric Hyperic to send SNMP traps to an SNMP management system. </p>
 
-<p><b>Note:</b> For information about enabling Hyperic to <em>receive traps</em>, see <a href="Configuring HQ as an SNMP Trap Receiver.html" title="Configuring HQ as an SNMP Trap Receiver">Configuring HQ as an SNMP Trap Receiver</a>.</p>
+<p><b>Note:</b> For information about enabling Hyperic to <em>receive traps</em>, see <a href="Configuring Hyperic as an SNMP Trap Receiver.html" title="Configuring Hyperic as an SNMP Trap Receiver">Configuring Hyperic as an SNMP Trap Receiver</a>.</p>
 
 
 <h1><a name="EnablevFabricHyperictoSendSNMPTraps-ConfigureHQServertoSendSNMPTraps"></a>Configure HQ Server to Send SNMP Traps</h1>
@@ -54,11 +57,11 @@ div.rbtoc1308677259582 li {margin-left: 0px;padding-left: 0px;}
 
 
 
-<h3><a name="EnablevFabricHyperictoSendSNMPTraps-ConfigureHQServerEnterpriseforSNMPv1"></a>Configure HQ Server Enterprise for SNMP v1</h3>
+<h3><a name="EnablevFabricHyperictoSendSNMPTraps-ConfigurevFabricHypericServerforSNMPv1"></a>Configure vFabric Hyperic Server for SNMP v1</h3>
 
 <p>Select "v1" from the&nbsp; <b>SNMP Protocol Version</b> pulldown and supply values for the properties defined in the table below.</p>
 
-<p>The table below defines the properties for configuring HQ Server for SNMP V1 communications with an NMS.</p>
+<p>The table below defines the properties for configuring Hyperic Server for SNMP V1 communications with an NMS.</p>
 
 <div class='table-wrap'>
 <table class='confluenceTable'><tbody>
@@ -69,7 +72,7 @@ div.rbtoc1308677259582 li {margin-left: 0px;padding-left: 0px;}
 </tr>
 <tr>
 <td class='confluenceTd'> SNMP Trap OID </td>
-<td class='confluenceTd'> The OID of the notification to be sent. Supplies the value of <tt>snmpTrapOID.0</tt> &#45; the second varbind in a trap or inform that HQ Server generates. (The first varbind is <tt>SysUpTime.0</tt>.) <br class="atl-forced-newline" />
+<td class='confluenceTd'> The OID of the notification to be sent. Supplies the value of <tt>snmpTrapOID.0</tt> &#45; the second varbind in a trap or inform that Hyperic Server generates. (The first varbind is <tt>SysUpTime.0</tt>.) <br class="atl-forced-newline" />
 <br class="atl-forced-newline" />
 <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'>&nbsp;</td>
@@ -114,7 +117,7 @@ div.rbtoc1308677259582 li {margin-left: 0px;padding-left: 0px;}
 </div>
 
 
-<h3><a name="EnablevFabricHyperictoSendSNMPTraps-ConfigureHQServerEnterpriseforSNMPv2c"></a>Configure HQ Server Enterprise for SNMP v2c</h3>
+<h3><a name="EnablevFabricHyperictoSendSNMPTraps-ConfigurevFabricHypericServerforSNMPv2c"></a>Configure vFabric Hyperic Server for SNMP v2c</h3>
 
 <div class='table-wrap'>
 <table class='confluenceTable'><tbody>
@@ -125,7 +128,7 @@ div.rbtoc1308677259582 li {margin-left: 0px;padding-left: 0px;}
 </tr>
 <tr>
 <td class='confluenceTd'> SNMP Trap OID </td>
-<td class='confluenceTd'> The OID of the notification to be sent. Supplies the value of <tt>snmpTrapOID.0</tt> &#45; the second varbind in a trap or inform that HQ Server generates. (The first varbind is <tt>SysUpTime.0</tt>.) </td>
+<td class='confluenceTd'> The OID of the notification to be sent. Supplies the value of <tt>snmpTrapOID.0</tt> &#45; the second varbind in a trap or inform that Hyperic Server generates. (The first varbind is <tt>SysUpTime.0</tt>.) </td>
 <td class='confluenceTd'>&nbsp;</td>
 </tr>
 <tr>
@@ -148,10 +151,10 @@ div.rbtoc1308677259582 li {margin-left: 0px;padding-left: 0px;}
 
 
 
-<h3><a name="EnablevFabricHyperictoSendSNMPTraps-ConfigureHQServerEnterpriseforSNMPv3"></a>Configure HQ Server Enterprise for SNMP v3</h3>
+<h3><a name="EnablevFabricHyperictoSendSNMPTraps-ConfigurevFabricHypericServerforSNMPv3"></a>Configure vFabric Hyperic Server for SNMP v3</h3>
 
 
-<p>This section lists the properties for enabling HQ Enterprise to sent SNMP notifications to an NMS. When HQ is so enabled, you can use SNMP notifications in alert definitions - as alert actions and escalation steps.</p>
+<p>This section lists the properties for enabling vFabric Hyperic to send SNMP notifications to an NMS. When Hyperic is so enabled, you can use SNMP notifications in alert definitions - as alert actions and escalation steps.</p>
 
 
 <div class='table-wrap'>
@@ -163,7 +166,7 @@ div.rbtoc1308677259582 li {margin-left: 0px;padding-left: 0px;}
 </tr>
 <tr>
 <td class='confluenceTd'> SNMP Trap OID </td>
-<td class='confluenceTd'> The OID of the notification to be sent. Supplies the value of <tt>snmpTrapOID.0</tt> &#45; the second varbind in a trap or inform that HQ Server generates. (The first varbind is <tt>SysUpTime.0</tt>.) </td>
+<td class='confluenceTd'> The OID of the notification to be sent. Supplies the value of <tt>snmpTrapOID.0</tt> &#45; the second varbind in a trap or inform that Hyperic Server generates. (The first varbind is <tt>SysUpTime.0</tt>.) </td>
 <td class='confluenceTd'>&nbsp;</td>
 </tr>
 <tr>
@@ -178,17 +181,17 @@ div.rbtoc1308677259582 li {margin-left: 0px;padding-left: 0px;}
 </tr>
 <tr>
 <td class='confluenceTd'> Security Name </td>
-<td class='confluenceTd'> The username HQ's SNMP agent should use when sending notifications to the NMS.&nbsp; <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> The username Hyperic's SNMP agent should use when sending notifications to the NMS.&nbsp; <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> Required. <br class="atl-forced-newline" /> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Local Engine ID </td>
-<td class='confluenceTd'> ID of HQ's SNMP agent; this value appears automatically, and is not user-configurable. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> ID of Hyperic's SNMP agent; this value appears automatically, and is not user-configurable. <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> <br class="atl-forced-newline" /> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Auth Protocol </td>
-<td class='confluenceTd'> The SNMP authentication protocol HQ Server should use for communications with the NMS. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> The SNMP authentication protocol Hyperic Server should use for communications with the NMS. <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'><ul>
 	<li>none</li>
 	<li>MD5</li>
@@ -203,7 +206,7 @@ div.rbtoc1308677259582 li {margin-left: 0px;padding-left: 0px;}
 </tr>
 <tr>
 <td class='confluenceTd'> Privacy Protocol </td>
-<td class='confluenceTd'> The SNMP Privacy Protocol HQ Server should use for&nbsp; communication with the NMS. </td>
+<td class='confluenceTd'> The SNMP Privacy Protocol Hyperic Server should use for&nbsp; communication with the NMS. </td>
 <td class='confluenceTd'><ul>
 	<li>none</li>
 	<li>DES</li>
@@ -237,7 +240,7 @@ div.rbtoc1308677259582 li {margin-left: 0px;padding-left: 0px;}
 
 <p>After the configuration above is complete, the "SNMP Trap" notification tab is available when you define or edit an alert definition. </p>
 
-<p><font color=""></font></p>
+
 
 				    
                     			    </td>
@@ -248,7 +251,7 @@ div.rbtoc1308677259582 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:43</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:56</font></td>
 		    </tr>
 	    </table>
     </body>

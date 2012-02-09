@@ -1,0 +1,296 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : Run Hyperic Installer</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 4.6.5 : Run Hyperic Installer
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Feb 07, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <style type='text/css'>/*<![CDATA[*/
+div.rbtoc1328635140838 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1328635140838 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1328635140838 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1328635140838'>
+<ul>
+    <li><a href='#RunHypericInstaller-ObtainHypericInstaller'>Obtain Hyperic Installer</a></li>
+    <li><a href='#RunHypericInstaller-AbouttheSetupScript'>About the Setup Script</a></li>
+    <li><a href='#RunHypericInstaller-RuntheSetupScript'>Run the Setup Script</a></li>
+</ul></div>
+
+<blockquote><p><b>About this page...</b></p>
+
+<p>This page has instructions for performing a <b>new</b> installation of Hyperic components using the Hyperic installer. Before running the installer, see <a href="Hyperic Installation and Startup Process.html" title="Hyperic Installation and Startup Process">Hyperic Installation and Startup Process</a> for information about where installation fits in the implementation process. For production environments, there are several steps to perform before installing the Hyperic Server and Hyperic Agent, including database setup and SSL configuration.</p>
+
+<p>If you wish to upgrade an existing Hyperic deployment, please see <a href="Hyperic Upgrade Processes.html" title="Hyperic Upgrade Processes">Hyperic Upgrade Processes</a>.</p></blockquote>
+
+<h1><a name="RunHypericInstaller-ObtainHypericInstaller"></a>Obtain Hyperic Installer</h1>
+
+<p>If you have not done so already, download the Hyperic installer. See <a href="Select and Download an Installer.html" title="Select and Download an Installer">Select and Download an Installer</a>.</p>
+
+<h1><a name="RunHypericInstaller-AbouttheSetupScript"></a>About the Setup Script</h1>
+
+<p>The setup script, <tt>setup.bat</tt> for Windows or, <tt>setup.sh</tt> for Unix-like environments, is in the Hyperic installation package. You can use to install the Hyperic Server, the Hyperic Agent, or both.</p>
+
+<p>When you run the setup script, you can supply a qualifier that sets the installation mode.</p>
+
+<ul>
+	<li>none &#8212; Run the setup script with no qualifier to perform a quick install. Selected components will be installed with default values for most configuration options. If you install the Hyperic Server, it will be configured to use its built-in PostgreSQL database. A quick install is useful when you evaluate Hyperic.</li>
+</ul>
+
+
+<ul>
+	<li><tt>&#45;full</tt> &#8212; In "full" mode, the installer dialog will prompt for all setup configuration options. Use this option if you plan to configure the Hyperic Server to use an SSL keystore that you manage yourself, rather than a Hyperic-generated keystore.</li>
+</ul>
+
+
+<ul>
+	<li><tt>&#45;upgrade</tt> &#8212; Use "upgrade" mode if you have an existing Hyperic Server installation. The server configuration and the contents of the existing Hyperic database are preserved. See <a href="Hyperic Upgrade Processes.html" title="Hyperic Upgrade Processes">Hyperic Upgrade Processes</a> before doing an upgrade installation.</li>
+</ul>
+
+
+<ul>
+	<li><tt>&#45;postgresql</tt> &#8212; Quick install when using a standalone (not the Hyperic built-in) PostgreSQL database; installer will prompt you for database connection information and use defaults for other configuration settings.</li>
+</ul>
+
+
+<ul>
+	<li><tt>&#45;oracle</tt> &#8212; Quick install mode for Oracle; installer will prompt you for database connection information and use defaults for other configuration settings.</li>
+</ul>
+
+
+<ul>
+	<li><tt>&#45;mysql</tt> &#8212; Quick install mode for MySQL; installer will prompt you for database connection information and use defaults for everything else.</li>
+</ul>
+
+
+<ul>
+	<li><tt>&#45;updateScale</tt> &#8212; In vFabric Hyperic 4.6.5 and later, run the installer with this option to change the sizing profile for the Hyperic Server. For information about sizing profiles, see <a href="About Sizing Profiles in vFabric Hyperic.html" title="About Sizing Profiles in vFabric Hyperic">About Sizing Profiles in vFabric Hyperic</a>. For information about changing the sizing profile for vFabric Hyperic Server, see <a href="Change vFabric Hyperic Server Sizing Profile.html" title="Change vFabric Hyperic Server Sizing Profile">Change vFabric Hyperic Server Sizing Profile</a>.</li>
+</ul>
+
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Configuration Options for Database-Specific Quick Installs</b><br />When you do a database-specific quick install (<tt>&#45;postgresql</tt>, <tt>&#45;oracle</tt>, or <tt>&#45;mysql</tt>) the installer <b>does not</b>:
+<ul>
+	<li>Prompt for the ports on which the Hyperic Server listens for agent and user interface requests &#8212; the default ports are automatically configured.</li>
+	<li>Allow you to specify the location and password for a user-managed server keystore &#8212; instead, the Hyperic Server will use a Hyperic-managed keystore.</li>
+	<li>Allow you to select a different database type.</li>
+</ul>
+</td></tr></table></div>
+
+<h1><a name="RunHypericInstaller-RuntheSetupScript"></a>Run the Setup Script</h1>
+
+<p>This section describes the dialog that the installation script presents if you run it in <tt>&#45;full</tt> mode. If you us a different mode,  some of the prompts described below will not appear &#8212; default values will be applied to those options.</p>
+
+<ol>
+	<li>Create a directory for the Hyperic installation.
+	<ul>
+		<li>The installation dialog assumes your Hyperic installation directory is <tt>/home/hyperic</tt> on Unix-like systems and <tt>c:\Program Files</tt> on Windows.</li>
+	</ul>
+	</li>
+	<li>Unpack the tarball or zip archive.
+	<ul>
+		<li><b>Use GNU Tar to unpacking Hyperic tarballs.</b> Use of proprietary Unix Tar utilities will result in warnings. GNU Tar is available at <a href="http://www.gnu.org">http://www.gnu.org</a>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">tar zxvf hyperic-hq-installer-4.x.y-xxx.tgz</pre>
+		</div>
+</div></div></li>
+		<li><b>If you are installing Hyperic components on a Windows platform, you must run the installer on a local drive.</b></li>
+	</ul>
+	</li>
+	<li>Open a command shell.
+	<ul>
+		<li>On Unix-based platforms, enter:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">PathToInstaller/setup.sh -mode</pre>
+		</div>
+</div></div></li>
+		<li>On Windows platforms, enter:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">PathToInstaller\setup.bat -mode</pre>
+		</div>
+</div></div></li>
+		<li>where <em>mode</em> is one of the values in the table above, with the exception of <tt>upgrade</tt> &#8212; if you are upgrading an existing Hyperic deployment, see <a href="Hyperic Upgrade Processes.html" title="Hyperic Upgrade Processes">Hyperic Upgrade Processes</a>.</li>
+	</ul>
+	</li>
+	<li>The VMware License agreement is displayed.
+	<ul>
+		<li>Accept the license agreement to proceed.</li>
+	</ul>
+	</li>
+	<li><b><em>Choose which software to install</em></b><b>{</b><b><em>} 1: Hyperic HQ Server</em></b><b><em>2: Hyperic HQ Agent</em></b>
+	<ul>
+		<li>To install both the server and the agent, enter:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">1,2</pre>
+		</div>
+</div></div></li>
+	</ul>
+	</li>
+	<li><b><em>HQ server installation path [default '.....']:</em></b>
+	<ul>
+		<li>Accept the default, or enter a directory location. You must have write access the location.</li>
+	</ul>
+	</li>
+	<li><b><em>What port should the HQ server's web-based GUI listen on for http communication? [default '7080']</em></b><em>:</em>
+	<ul>
+		<li>Accept the default, or enter a different (unused) port.</li>
+	</ul>
+	</li>
+	<li><b><em>What port should the HQ server's web-based GUI listen on for secure https communication? [default '7443']</em></b>
+	<ul>
+		<li>Accept the default, or enter a different (unused) port.</li>
+	</ul>
+	</li>
+	<li><b><em>Would you like us to use your own java keystore? [default '2']</em></b><b><em>1: Yes</em></b><b>{</b><b><em>} 2: No</em></b>
+	<ul>
+		<li>Enter "1" if you wish to configure the Hyperic Server to use a certificate you manage, rather than generate its own, and proceed to the next step.</li>
+		<li>If you accept the default "2", a default keystore will be generated at: <tt>ServerHome/conf/hyperic.keystore</tt> with the password <tt>hyperic</tt>, and the next three prompts will not appear.</li>
+	</ul>
+	</li>
+	<li><b><em>What is the file path to your java keystore?</em></b>
+	<ul>
+		<li>This prompt appears if you are configuring Hyperic Server for a user-managed keystore.</li>
+		<li>Enter the path to your keystore.</li>
+	</ul>
+	</li>
+	<li><b><em>What is the file password to your java keystore?</em></b>
+	<ul>
+		<li>This prompt appears if you are configuring Hyperic Server for a user-managed keystore.</li>
+		<li>Enter the path to your keystore.</li>
+	</ul>
+	</li>
+	<li><b><em>Enter the base URL for the Hyperic server's web-based GUI [default...]</em></b>
+	<ul>
+		<li>The URL used to access the Hyperic Server. This value is used in alert notification emails. This value can be changed on the <b>Administration</b> page in the Hyperic Portal.</li>
+	</ul>
+	</li>
+	<li><b><em>Enter the fully qualified domain name of the SMTP server that Hyperic will use to send email messages  [default FQDN.local]</em></b>
+	<ul>
+		<li>If the installer does not find a local SMTP server, and you do not specify one, Hyperic cannot send alert notifications. Other alert functionality is unaffected.</li>
+		<li>You can configure Hyperic for an external SMTP server after installing Hyperic Server. See <a href="Configuring Hyperic Server for SMTP Server.html" title="Configuring Hyperic Server for SMTP Server">Configuring Hyperic Server for SMTP Server</a>.</li>
+	</ul>
+	</li>
+	<li><b><em>Enter the email address that HQ will use as the sender for email messages [default...]</em></b>
+	<ul>
+		<li>The email address of the Hyperic Administrator. Note that most mail servers will not deliver mail without a valid domain name in the From field.</li>
+	</ul>
+	</li>
+	<li><b><em>What is the installation profile?</em></b> <b><em>default '1'</em></b><b><em>:]</em></b><br/>
+<b><em>1: small (less than 50 platforms)</em></b><br/>
+<b><em>2: medium (50-250 platforms)</em></b><br/>
+<b><em>3: large (larger than 250 platforms)</em></b>
+	<ul>
+		<li>Select the profile that fits your deployment. For more information, see <a href="About Sizing Profiles in vFabric Hyperic.html" title="About Sizing Profiles in vFabric Hyperic">About Sizing Profiles in vFabric Hyperic</a>.
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>The sizing prompt is only presented in vFabric Hyperic, and only when you are running a <tt>-full</tt> installation.</td></tr></table></div>
+<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>If you plan to use the embedded PostgreSQL database, rather than an external database (required for production environments), select the "small" sizing profile. The "medium" and "large" profiles are <em>not</em> supported unless you use an external Hyperic database.</td></tr></table></div></li>
+	</ul>
+	</li>
+	<li><b><em>What backend database should the HQ server use? [default '1']:</em></b><b><em>Choices:</em></b><br/>
+<b><em>1: HQ Built-in Database</em></b><br/>
+<b><em>2: Oracle 10g/11g</em></b><br/>
+<b><em>3: PostgreSQL</em></b><br/>
+<b><em>4: MySQL Enterprise / Community Server 5.x</em></b>
+	<ul>
+		<li>Select the database you wish to use and:
+		<ul>
+			<li>If you entered "1", proceed to step 16.</li>
+			<li>If you entered "2", "3", or "4", proceed to step 17.</li>
+		</ul>
+		</li>
+	</ul>
+	</li>
+	<li><b>What port should HQ's built-in database use? [default '9432']:</b></li>
+	<li>Dialog for external database:
+	<ol>
+		<li><b><em>Enter the JDBC connection URL.</em></b>
+		<ul>
+			<li>The prompt supplies a default URL, which assumes the external database is on localhost.</li>
+			<li>Supply a URL in the form shown, editing as appropriate to identify the connection details, such as host and name.</li>
+		</ul>
+		</li>
+		<li><b><em>Enter the username to use to connect to the database:</em></b>
+		<ul>
+			<li>Enter the database username that was set up when the Hyperic database was created.</li>
+		</ul>
+		</li>
+		<li><b><em>Enter the password to use to connect to the database:</em></b>
+		<ul>
+			<li>Enter the database password that was set up when the Hyperic database was created.</li>
+		</ul>
+		</li>
+	</ol>
+	</li>
+	<li><b><em>Would you like to use an auto generated encryption key to encrypt the database password? [default '1']</em></b>
+	<ul>
+		<li>If you accept the default, the installer will generate a key for encrypting the database password. Enter 2 if you prefer to supply the string yourself, and when prompted, enter a string of at least 8 characters.</li>
+	</ul>
+	</li>
+	<li><b><em>What should the username be for the initial admin user? [default 'hqadmin']:</em></b>
+	<ul>
+		<li>Accept the default, or enter a different username.</li>
+	</ul>
+	</li>
+	<li><b><em>What should the password be for the initial admin user?:</em></b>
+	<ul>
+		<li>The installer will not echo the password but will prompt for it twice.</li>
+	</ul>
+	</li>
+	<li><b><em>What should the email address be for the initial admin user? [default...]</em></b>
+	<ul>
+		<li>Accept the default, or enter a different email address.</li>
+	</ul>
+	</li>
+	<li>If the installer detects a database from a previous Hyperic installation, it will prompt you to:
+	<ul>
+		<li><b>1: Upgrade the HQ server database</b> &#8212; Choose this option to preserve your existing Hyperic data, then follow the instructions in <a href="Upgrade Hyperic Server.html" title="Upgrade Hyperic Server">Upgrade Hyperic Server</a>.</li>
+		<li><b>2: Overwrite the HQ server database</b> &#8212; This option erases all of the data in your Hyperic database. If you do not want to preserve the contents of the database, it would be quicker to drop and recreate the database prior to installing Hyperic Server.</li>
+		<li><b>3: Exit the installer</b></li>
+	</ul>
+	</li>
+	<li><b><em>HQ agent installation path [default '......']:</em></b>
+	<ul>
+		<li>Accept the default, or enter a different path.</li>
+		<li>The installer indicates the installation was successful, provides the URL for the Hyperic Portal along with the default username and password, and returns you to the command prompt.</li>
+	</ul>
+	</li>
+</ol>
+
+
+<p>After installing the Hyperic Server, proceed with license installation (for vFabric Server only) and start the server, as described in the <a href="Hyperic Installation and Startup Process.html#HypericInstallationandStartupProcess-license">Install License</a> and <a href="Hyperic Installation and Startup Process.html#HypericInstallationandStartupProcess-StartServer">Start the Hyperic Server</a> steps of <a href="Hyperic Installation and Startup Process.html" title="Hyperic Installation and Startup Process">Hyperic Installation and Startup Process</a>.</p>
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:56</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

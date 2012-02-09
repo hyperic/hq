@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2011], VMWare, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -35,10 +35,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -60,26 +64,22 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class TemplateManagerImpl implements TemplateManager {
+    private final Log log = LogFactory.getLog(TemplateManagerImpl.class);
    
     private MeasurementDAO measurementDAO;
     private MeasurementTemplateDAO measurementTemplateDAO;
     private MonitorableTypeDAO monitorableTypeDAO;
-    private ScheduleRevNumDAO scheduleRevNumDAO;
     private SRNManager srnManager;
-    private SRNCache srnCache;
 
     @Autowired
     public TemplateManagerImpl(MeasurementDAO measurementDAO,
                                MeasurementTemplateDAO measurementTemplateDAO,
                                MonitorableTypeDAO monitorableTypeDAO,
-                               ScheduleRevNumDAO scheduleRevNumDAO, SRNManager srnManager,
-                               SRNCache srnCache) {
+                               SRNManager srnManager) {
         this.measurementDAO = measurementDAO;
         this.measurementTemplateDAO = measurementTemplateDAO;
         this.monitorableTypeDAO = monitorableTypeDAO;
-        this.scheduleRevNumDAO = scheduleRevNumDAO;
         this.srnManager = srnManager;
-        this.srnCache = srnCache;
     }
 
     /**
@@ -317,42 +317,37 @@ public class TemplateManagerImpl implements TemplateManager {
      * @param interval - the interval of collection to set to
      */
     public void updateTemplateDefaultInterval(AuthzSubject subject, Integer[] templIds,
-                                              long interval) {
-        HashSet<AppdefEntityID> toReschedule = new HashSet<AppdefEntityID>();
+                                              final long interval) {
+        final HashSet<AppdefEntityID> toReschedule = new HashSet<AppdefEntityID>();
+        final Map<Integer, Collection<Measurement>> measTemplMap =
+            measurementDAO.getMeasurementsByTemplateIds(templIds);
         for (int i = 0; i < templIds.length; i++) {
-            MeasurementTemplate template = measurementTemplateDAO.findById(templIds[i]);
-
+            final MeasurementTemplate template = measurementTemplateDAO.get(templIds[i]);
+            if (template == null) {
+                continue;
+            }
             if (interval != template.getDefaultInterval()) {
                 template.setDefaultInterval(interval);
             }
-
             if (!template.isDefaultOn()) {
                 template.setDefaultOn(interval != 0);
             }
-            final List<Measurement> measurements = measurementDAO.findByTemplate(template.getId());
-            for (Measurement m : measurements) {
+            final Collection<Measurement> measurements = measTemplMap.get(template.getId());
+            if (measurements == null) {
+                continue;
+            }
+            for (final Measurement m : measurements) {
+                final Resource r = m.getResource();
+                if (r == null || r.isInAsyncDeleteState()) {
+                    continue;
+                }
                 m.setEnabled(template.isDefaultOn());
                 m.setInterval(template.getDefaultInterval());
-            }
-
-            List<AppdefEntityID> appdefEntityIds = measurementDAO
-                .findAppdefEntityIdsByTemplate(template.getId());
-
-            toReschedule.addAll(appdefEntityIds);
-        }
-
-        int count = 0;
-        for (AppdefEntityID id : toReschedule) {
-            ScheduleRevNum srn = srnCache.get(id);
-            if (srn != null) {
-                srnManager.incrementSrn(id, Math.min(interval, srn.getMinInterval()));
-                if (++count % 100 == 0) {
-                    scheduleRevNumDAO.flushSession();
-                }
+                final AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(r);
+                toReschedule.add(aeid);
             }
         }
-
-        scheduleRevNumDAO.flushSession();
+        srnManager.scheduleInBackground(toReschedule, true, true);
     }
 
     /**
@@ -396,9 +391,7 @@ public class TemplateManagerImpl implements TemplateManager {
 
         for (Map.Entry<AppdefEntityID, Long> entry : aeids.entrySet()) {
             AppdefEntityID aeid = entry.getKey();
-            ScheduleRevNum srn = srnManager.get(aeid);
-            srnManager.incrementSrn(aeid, (srn == null) ? entry.getValue().longValue() : srn
-                .getMinInterval());
+            srnManager.incrementSrn(aeid);
         }
     }
 
@@ -481,23 +474,56 @@ public class TemplateManagerImpl implements TemplateManager {
     /**
      * Set the measurement templates to be "designated" for a monitorable type.
      */
-    public void setDesignatedTemplates(String mType, Integer[] desigIds) {
-        List<MeasurementTemplate> derivedTemplates = measurementTemplateDAO
-            .findDerivedByMonitorableType(mType);
+    public void setDesignatedTemplates(Integer[] desigIds,boolean designated) {
 
-        HashSet<Integer> designates = new HashSet<Integer>();
-        designates.addAll(Arrays.asList(desigIds));
+        // If there are no ids, then just return
+        if (desigIds == null) {
+            return;
+        }
 
-        for (MeasurementTemplate template : derivedTemplates) {
-            // Never turn off Availability as an indicator
-            if (template.isAvailability()) {
+        // For each of the ids,
+        for (Integer id : desigIds) {
+            // If id is null, skip it
+            if (id == null) {
+                continue;
+            }
+            
+            // Find the matching template
+            MeasurementTemplate mt = measurementTemplateDAO.get(id);
+    
+            // If it can't be found,
+            if (mt == null) {
+                log.warn(String.format("Could not find measurement template with id %d. Skipping.",id));
+                // Then just skip to the next one
                 continue;
             }
 
-            boolean designated = designates.contains(template.getId());
+            // If it's an availability template
+            if (mt.isAvailability()) {
+                // Cannot change designated status for availability, just skip
+                // it
+                if (log.isTraceEnabled()) {
+                    log.trace(String.format(
+                        "Measurement template with id %d is an availability template. Skipping.",
+                        id));
+                }
+                continue;
+            }
 
-            if (designated != template.isDesignate()) {
-                template.setDesignate(designated);
+            // If the required status is different than the current one,
+            if (mt.isDesignate() != designated) {
+                // Change it
+                if (log.isTraceEnabled()) {
+                    log.trace(String.format(
+                        "Setting designated state of template with id %d to %b", id, designated));
+                }
+                mt.setDesignate(designated);
+            } else {
+                if (log.isTraceEnabled()) {
+                    log.trace(String.format(
+                        "Designated state of template with id %d is already %b. Not changing", id,
+                        designated));
+                }
             }
         }
     }

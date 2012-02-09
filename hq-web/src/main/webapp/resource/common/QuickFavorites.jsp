@@ -4,7 +4,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -104,26 +104,24 @@
 						</div>
 					</div>
 				</div>
-				<script src="<html:rewrite page="/js/addtodashboard.js" />"></script>
-				<script type="text/javascript">
-				    hqDojo.ready(function() {
-					    var config = {
-					    	title : "<fmt:message key='resource.common.quickFavorites.addToMultipleDashboards' />",
-					    	dialogId : "AddToFavorites_Dialog",
-					    	callerId : "AddToFavorites_Link",
-					    	url : "<html:rewrite action='/resource/common/QuickFavorites' />",
-					    	addButtonId : "AddToFavorites_AddButton",
-					    	cancelButtonId : "AddToFavorites_CancelButton",
-					    	progressId : "AddToFavorites_Progress",
-			    			successMsgId : "AddToFavorites_SuccessMsg",
-			    			failureMsgId : "AddToFavorites_ErrorMsg",
-			    			checkboxAllId : "AddToFavorites_CheckAllBox",
-					    	checkboxIdPrefix : "AddToFavorites_CheckBox"
-					    };
+				<jsu:importScript path="/js/addtodashboard.js" />
+				<jsu:script onLoad="true">
+				    var config = {
+				    	title : "<fmt:message key='resource.common.quickFavorites.addToMultipleDashboards' />",
+				    	dialogId : "AddToFavorites_Dialog",
+				    	callerId : "AddToFavorites_Link",
+				    	url : "<html:rewrite action='/resource/common/QuickFavorites' />",
+				    	addButtonId : "AddToFavorites_AddButton",
+				    	cancelButtonId : "AddToFavorites_CancelButton",
+				    	progressId : "AddToFavorites_Progress",
+		    			successMsgId : "AddToFavorites_SuccessMsg",
+		    			failureMsgId : "AddToFavorites_ErrorMsg",
+		    			checkboxAllId : "AddToFavorites_CheckAllBox",
+				    	checkboxIdPrefix : "AddToFavorites_CheckBox"
+				    };
 					    
-					    AddToDashboard.initDialog(config);
-					});
-				</script>
+				    AddToDashboard.initDialog(config);
+				</jsu:script>
     		</c:otherwise>
     	</c:choose>
   	</c:otherwise> 

@@ -92,10 +92,9 @@ import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.ResourceAuditFactory;
 import org.hyperic.hq.common.shared.AuditManager;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.measurement.server.session.AgentScheduleSyncZevent;
+import org.hyperic.hq.measurement.shared.SRNManager;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.PlatformTypeInfo;
-import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.sigar.NetFlags;
 import org.hyperic.util.pager.PageControl;
@@ -156,6 +155,8 @@ public class PlatformManagerImpl implements PlatformManager {
 
     private ResourceAuditFactory resourceAuditFactory;
 
+    private SRNManager srnManager;
+
     @Autowired
     public PlatformManagerImpl(PlatformTypeDAO platformTypeDAO,
                                PermissionManager permissionManager, AgentDAO agentDAO,
@@ -167,7 +168,7 @@ public class PlatformManagerImpl implements PlatformManager {
                                ConfigResponseDAO configResponseDAO, PlatformDAO platformDAO,
                                ServerDAO serverDAO, ServiceDAO serviceDAO,
                                AuditManager auditManager, AgentManager agentManager,
-                               ZeventEnqueuer zeventManager,
+                               ZeventEnqueuer zeventManager, SRNManager srnManager,
                                ResourceAuditFactory resourceAuditFactory) {
         this.platformTypeDAO = platformTypeDAO;
         this.permissionManager = permissionManager;
@@ -187,6 +188,7 @@ public class PlatformManagerImpl implements PlatformManager {
         this.agentManager = agentManager;
         this.zeventManager = zeventManager;
         this.resourceAuditFactory = resourceAuditFactory;
+        this.srnManager = srnManager;
     }
 
     // TODO resolve circular dependency
@@ -380,12 +382,15 @@ public class PlatformManagerImpl implements PlatformManager {
         final Audit audit = resourceAuditFactory.deleteResource(resourceManager
             .findResourceById(AuthzConstants.authzHQSystem), subject, 0, 0);
         boolean pushed = false;
+        final Agent agent = platform.getAgent();
         try {
         	auditManager.pushContainer(audit);
             pushed = true;
             permissionManager.checkRemovePermission(subject, platform.getEntityId());
             // keep the configresponseId so we can remove it later
             ConfigResponseDB config = platform.getConfigResponse();
+            // don't want a proxy obj, since it will never be null
+            config = (config.getId() == null) ? null : configResponseDAO.get(config.getId());
             removeServerReferences(platform);
 
             // this flush ensures that the server's platform_id is set to null
@@ -401,6 +406,11 @@ public class PlatformManagerImpl implements PlatformManager {
             cpropManager.deleteValues(aeid.getType(), aeid.getID());
             resourceManager.removeAuthzResource(subject, aeid, r);
             platformDAO.getSession().flush();
+            if ( agent.getPlatforms().size() == 0) {
+                log.debug("Removing agent " + agent.getAddress() + ":" + agent.getPort() +
+                          " as there are no more platforms left for agent to service.");
+                agentManager.removeAgent(agent);
+            }
 
         } catch (PermissionException e) {
             log.debug("Error while removing Platform");
@@ -639,8 +649,17 @@ public class PlatformManagerImpl implements PlatformManager {
 
     /**
      * Get platform light value by id. Does not check permission.
-     * 
-     * 
+     */
+    @Transactional(readOnly = true)
+    public Platform getPlatformById(Integer id) {
+        if (id == null) {
+            return null;
+        }
+        return platformDAO.get(id);
+    }
+
+    /**
+     * Get platform light value by id.
      */
     @Transactional(readOnly = true)
     public Platform getPlatformById(AuthzSubject subject, Integer id)
@@ -1881,8 +1900,7 @@ public class PlatformManagerImpl implements PlatformManager {
                 eids.add(service.getEntityId());
             }
         }
-        AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(eids);
-        zeventManager.enqueueEventAfterCommit(event);
+        srnManager.scheduleInBackground(eids, true, true);
     }
 
     /**
@@ -1983,22 +2001,6 @@ public class PlatformManagerImpl implements PlatformManager {
         return platformDAO.getPlatformCount();
     }
 
-    @Transactional(readOnly = true)
-    public Platform getPlatformByAgentId(Integer agentId) {
-        final Agent agent = agentDAO.get(agentId);
-        if (agent == null) {
-            return null;
-        }
-        final Collection<Platform> platforms = agent.getPlatforms();
-        for (final Platform platform : platforms) {
-            final Resource resource = platform.getResource();
-            if (PlatformDetector.isSupportedPlatform(resource.getPrototype().getName())) {
-                return platform;
-            }
-        }
-        return null;
-    }
-
     /**
      * 
      */
@@ -2010,6 +2012,22 @@ public class PlatformManagerImpl implements PlatformManager {
     @PostConstruct
     public void afterPropertiesSet() throws Exception {
         valuePager = Pager.getPager(VALUE_PROCESSOR);
+    }
+
+    @Transactional(readOnly = true)
+    public Platform getPlatformByAgentId(Integer agentId) {
+    	final Agent agent = agentDAO.get(agentId);
+    	if (agent == null) {
+    		return null;
+    	}
+    	final Collection<Platform> platforms = agent.getPlatforms();
+    	for (final Platform platform : platforms) {
+    		final Resource resource = platform.getResource();
+    		if (PlatformDetector.isSupportedPlatform(resource.getPrototype().getName())) {
+    			return platform;
+    		}
+    	}
+    	return null;
     }
     
 }

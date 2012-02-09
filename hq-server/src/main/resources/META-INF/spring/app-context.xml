@@ -104,23 +104,17 @@
 		<constructor-arg ref="lazyDataSource"/>
 	</bean>
 
-    <bean id="tomcatDataSource" class="org.apache.tomcat.jdbc.pool.DataSource"
-        p:driverClassName="${server.database-driver}"
-        p:url="${server.database-url}"
-        p:username="${server.database-user}"
-        p:password="${server.database-password}"
-        p:defaultAutoCommit="false"
-        p:minIdle="${server.database-minpoolsize}"
-        p:maxActive="${server.database-maxpoolsize}"
-        p:maxIdle="${server.database-maxpoolsize}" 
-        p:initialSize="${server.database-minpoolsize}"
-        p:maxWait="${server.database-blockingtimeout}"
-        p:jdbcInterceptors="ConnectionState;StatementFinalizer"
-        p:validationQuery="${server.connection-validation-sql}"
-        p:validationInterval="0"
-        p:logAbandoned="true"
-        p:testOnBorrow="true"
-        p:defaultTransactionIsolation="2"/>
+	<bean id="tomcatDataSource" class="org.apache.tomcat.jdbc.pool.DataSource"
+				p:driverClassName="${server.database-driver}" p:url="${server.database-url}"
+				p:username="${server.database-user}" p:password="${server.database-password}"
+				p:defaultAutoCommit="false" p:minIdle="${server.database-minpoolsize}"
+				p:maxActive="${server.database-maxpoolsize}" p:maxIdle="${server.database-maxpoolsize}" 
+				p:initialSize="${server.database-minpoolsize}"
+				p:maxWait="${server.database-blockingtimeout}" 
+                p:jdbcInterceptors="ConnectionState;StatementFinalizer"
+                destroy-method="close"
+				p:validationQuery="${server.connection-validation-sql}"
+				p:validationInterval="30000" p:logAbandoned="true" p:testOnBorrow="true" p:defaultTransactionIsolation="2" />
 				
 	 <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
         <property name="dataSource" ref="dataSource"/>
@@ -136,10 +130,12 @@
 		</property>
 	</bean>
 
-	<context:component-scan base-package="org.hyperic,com.hyperic" />
+	<context:component-scan base-package="org.hyperic,com.hyperic"> 
+	   <context:exclude-filter type="regex" expression="org.hyperic.cm.*"/>
+	</context:component-scan>
 
-	<bean id="sessionFactory"
-		class="org.hyperic.hibernate.CacheInitializingLocalSessionFactoryBean">
+	<bean id="sessionFactory"  
+		class="org.hyperic.hibernate.CacheInitializingLocalSessionFactoryBean" destroy-method="destroy">
 		<constructor-arg ref="preloadCaches"/>
 		<property name="dataSource" ref="dataSource" />
 		<property name="mappingLocations" value="classpath:/hibernate/**/*.hbm.xml" />
@@ -179,6 +175,7 @@
 		<value>org.hyperic.hq.appdef.server.session.Service</value>
 	    <value>org.hyperic.hq.measurement.server.session.Category</value>
 	    <value>org.hyperic.hq.measurement.server.session.MonitorableType</value>
+	    <value>org.hyperic.hq.measurement.server.session.ScheduleRevNum</value>
 	</util:list>
 
 	<util:list id="preregisterZevents">
@@ -269,7 +266,7 @@
 	
 	<task:scheduler id="scheduler" pool-size="8"/>
 	
-	<bean class="org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler" id="concurrentStatsScheduler" p:poolSize="8">
+	<bean class="org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler" id="concurrentStatsScheduler" p:poolSize="2">
 		<property name="threadFactory">
 			<bean class="org.hyperic.hq.stats.ConcurrentStatsCollectorThreadFactory"/>
 		</property>

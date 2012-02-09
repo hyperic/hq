@@ -4,7 +4,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -50,11 +50,9 @@
 <tiles:importAttribute name="pageNumAction" ignore="true"/>
 <tiles:importAttribute name="defaultSortColumn"/>
 <tiles:importAttribute name="goButtonLink" ignore="true"/>
-
-<script type="text/javascript">
-  var goButtonLink;
-</script>
-
+<jsu:script>
+  	var goButtonLink;
+</jsu:script>
 <c:choose>
   <c:when test="${not empty listNewParamName && not empty listNewParamValue}">
     <c:url var="listNewUrl" value="${listNewUrl}">
@@ -102,18 +100,18 @@
         </td>
         <td><html:img page="/images/spacer.gif" width="10" height="1" alt="" border="0"/></td>
         <td width="100%"><html:link href="#" styleId="goButtonLink"><html:img page="/images/dash-button_go-arrow_gray.gif" width="23" height="17" alt="" border="0" styleId="goButtonImg"/></html:link></td>
-        <script type="text/javascript">
-          goButtonLink = "<c:out value="${goButtonLink}"/>";
+        <jsu:script>
+          	goButtonLink = "<c:out value="${goButtonLink}"/>";
           
-          hideDiv("goButtonDiv");
+          	hideDiv("goButtonDiv");
   
-          var checkboxesArr = document.getElementsByName("definitions");
-          var numCheckboxes = checkboxesArr.length;
+          	var checkboxesArr = document.getElementsByName("definitions");
+          	var numCheckboxes = checkboxesArr.length;
           
-          if (numCheckboxes > 0) {
-            showDiv("goButtonDiv");
-          }
-        </script>
+          	if (numCheckboxes > 0) {
+            	showDiv("goButtonDiv");
+          	}
+          </jsu:script>
       </tr>
     </table>
   </div>

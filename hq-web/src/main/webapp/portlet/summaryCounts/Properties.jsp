@@ -5,7 +5,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -37,12 +37,10 @@
 <c:url var="selfAction" value="/dashboard/Admin.do">
 	<c:param name="mode" value="savedQueries"/>
 </c:url>
-
-<script  src="<html:rewrite page="/js/dashboard_SummaryCounts.js" />" type="text/javascript"></script>
-<script type="text/javascript">
-  var help = '<hq:help/>';
-</script>
-
+<jsu:importScript path="/js/dashboard_SummaryCounts.js" />
+<jsu:script>
+  	var help = '<hq:help/>';
+</jsu:script>
 
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr class="PageTitle"> 

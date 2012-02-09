@@ -1,24 +1,27 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : User Accounts and Roles in Hyperic</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : User Accounts and Roles in Hyperic</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : User Accounts and Roles in Hyperic
+                            vFabric Hyperic 4.6.5 : User Accounts and Roles in Hyperic
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 01, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
@@ -35,7 +38,7 @@
 
  
 
-<p><font color=""></font></p>
+
 
 <h1><a name="UserAccountsandRolesinHyperic-Authentication"></a>Authentication </h1>
 
@@ -94,7 +97,7 @@
 <p><b>Note:</b> If you do not have an authentication system, you can manually create user accounts as described in <a href="Create and Manage User Accounts.html" title="Create and Manage User Accounts">Create and Manage User Accounts</a>.</p>
 
 
-<p><font color=""></font></p>
+
 
 <h1><a name="UserAccountsandRolesinHyperic-RolesinvFabricHyperic"></a>Roles in vFabric Hyperic </h1>
 
@@ -143,7 +146,7 @@ The permission matrix for a role defines the level of access that role users hav
 
 <p>The screenshot below shows the permission matrix you define for a role. </p>
 
-<p><span class="image-wrap" style=""><img src="attachments/77463605/77660699.png" width="650" style="border: 0px solid black"/></span> </p>
+<p><span class="image-wrap" style=""><img src="attachments/79038211/79135267.png" width="650" style="border: 0px solid black"/></span> </p>
 
 <h3><a name="UserAccountsandRolesinHyperic-AboutPermissionLevels"></a>About Permission Levels </h3>
 
@@ -208,7 +211,7 @@ The permission matrix for a role defines the level of access that role users hav
 
 <h3><a name="UserAccountsandRolesinHyperic-HowHQValidatesPlatformServerServicePermissionLevelAssignments"></a>How HQ Validates Platform-Server-Service Permission Level Assignments </h3>
 
-<p>HQ Enterprise does a bottom-up validation of the permission levels a role grants to Platforms, Servers, and Services. </p>
+<p>vFabric Hyperic does a bottom-up validation of the permission levels a role grants to Platforms, Servers, and Services. </p>
 
 <p>A role with <b>Full</b> access (which enables resource deletion) to an inventory type must have at least <b>Read-Only</b> access to the parent type (if there is one) and Full to the child type (if there is one). </p>
 
@@ -217,7 +220,7 @@ The permission matrix for a role defines the level of access that role users hav
 
 <h2><a name="UserAccountsandRolesinHyperic-Groups%3AGrantAccesstoSpecificResources"></a>Groups: Grant Access to Specific Resources </h2>
 <p><a name="UserAccountsandRolesinHyperic-UnderstandGroups"></a> <br/>
-In addition to defining a permission matrix for a role, you assign one or more resource groups to the role. Together, the permission levels and groups defined in the role determine the <em>specific</em> inventory resources that role users can work with. </p>
+In addition to defining a permission matrix for a role, you assign one or more groups that contain individual resource to the role. (Assigning a group that contains other groups or a group of applications will <b>not</b> grant the role permissions to the resources in the groups or applications.) Together, the permission levels and groups defined in the role determine the <em>specific</em> inventory resources that role users can work with. </p>
 
 <blockquote>
 <p>If you create a role simply for use in role-based alert notifications, you do not have to assign any resource groups to the role. </p></blockquote> 
@@ -227,15 +230,16 @@ In addition to defining a permission matrix for a role, you assign one or more r
 
 <p>You can assign the same resource group to multiple roles, and you can assign the same user to multiple roles. This allows for the fact that different users may need different levels of access to the same resources. For instance, you can create one role for users that need <b>Read-Only</b> access to the members of a resource group, and another for users that need <b>Full</b> permission, and assign the same resource groups to both roles. </p>
 
+
 <h2><a name="UserAccountsandRolesinHyperic-AlertCalendar%3AEnableShiftBasedNotifications"></a>Alert Calendar: Enable Shift-Based Notifications </h2>
 
 <p>An Alert Calendar is an optional component of a role that builds on the notion of role-based notification. In role-based alert notifications, the notification recipient is a role - notifications are sent to all users with the role. An Alert Calendar for role defines the time periods during a work week that role users are on duty. You can define multiple roles to span the week - each with a different availability calendar, and assign all of the complementary roles as the notification recipients. In this case, Hyperic Server will send alert notifications only to the role that is currently on-duty, based on the alert calendars defined in the roles. </p>
 
 <p>The screenshot below shows the alert calendar you can define for a role. </p>
 
-<p><span class="image-wrap" style=""><img src="attachments/77463605/77660698.png" width="750" style="border: 0px solid black"/></span> </p>
+<p><span class="image-wrap" style=""><img src="attachments/79038211/79135266.png" width="750" style="border: 0px solid black"/></span> </p>
 
-<p><font color=""></font></p>
+
 
 <h2><a name="UserAccountsandRolesinHyperic-BuiltinRoles"></a>Built-in Roles </h2>
 
@@ -245,19 +249,19 @@ In addition to defining a permission matrix for a role, you assign one or more r
 
 <p>The screenshot below is the permission matrix for the Hyperic SuperUser. The built-in hqadmin account has the SuperUser role. </p>
 
-<p><span class="image-wrap" style=""><img src="attachments/77463605/77660252.png" width="750" style="border: 0px solid black"/></span> </p>
-<p><font color=""></font></p>
+<p><span class="image-wrap" style=""><img src="attachments/79038211/79135471.png" width="750" style="border: 0px solid black"/></span> </p>
+
 
 <h3><a name="UserAccountsandRolesinHyperic-GuestRole"></a>Guest Role </h3>
 
 <p>The screenshot below is the permission matrix for the Hyperic SuperUser. The built-in guest account has the Guest role. </p>
 
-<p><span class="image-wrap" style=""><img src="attachments/77463605/77660249.png" width="750" style="border: 0px solid black"/></span> </p>
+<p><span class="image-wrap" style=""><img src="attachments/79038211/79135470.png" width="750" style="border: 0px solid black"/></span> </p>
 
 <h2><a name="UserAccountsandRolesinHyperic-HypericRolesandLDAPGroups"></a>Hyperic Roles and LDAP Groups</h2>
 
 <p>If integrate vFabric Hyperic with your LDAP system, you can automatically assign roles to a new user based upon the groups the user is assigned in the LDAP system.  For more information, <a href="Configure LDAP Properties.html" title="Configure LDAP Properties">Configure LDAP Properties</a>. </p>
-<p><font color=""></font></p> 
+ 
 
 				    
                     			    </td>
@@ -268,7 +272,7 @@ In addition to defining a permission matrix for a role, you assign one or more r
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:43</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:56</font></td>
 		    </tr>
 	    </table>
     </body>

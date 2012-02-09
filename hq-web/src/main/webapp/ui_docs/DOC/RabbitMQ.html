@@ -1,24 +1,27 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : RabbitMQ</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : RabbitMQ</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : RabbitMQ
+                            vFabric Hyperic 4.6.5 : RabbitMQ
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 27, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
@@ -27,16 +30,17 @@
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1311786240758 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1311786240758 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1311786240758 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1325700044408 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325700044408 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325700044408 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1311786240758'>
+/*]]>*/</style><div class='rbtoc1325700044408'>
 <ul>
     <li><a href='#RabbitMQ-RabbitMQPluginOverview'>RabbitMQ Plugin Overview</a></li>
 <ul>
     <li><a href='#RabbitMQ-SupportedVersionsandRequirements'>Supported Versions and Requirements</a></li>
-    <li><a href='#RabbitMQ-RabbitMQResourcesandtheHQInventoryModel'>RabbitMQ Resources and the HQ Inventory Model</a></li>
+    <li><a href='#RabbitMQ-RabbitMQResourcesandtheHypericInventoryModel'>RabbitMQ Resources and the Hyperic Inventory Model</a></li>
+    <li><a href='#RabbitMQ-SSLRequirementsfor4.6Agents'>SSL Requirements for 4.6 Agents</a></li>
 </ul>
     <li><a href='#RabbitMQ-ConfigurationInstructions'>Configuration Instructions</a></li>
 <ul>
@@ -76,25 +80,18 @@ div.rbtoc1311786240758 li {margin-left: 0px;padding-left: 0px;}
 
 <h1><a name="RabbitMQ-RabbitMQPluginOverview"></a>RabbitMQ Plugin Overview </h1>
 
-<p>Hyperic's RabbitMQ plugin manages RabbitMQ brokers, the virtual hosts within a broker, and RabbitMQ exchanges, queues, connections, and channels. The plugin can discover and manage multiple RabbitMQ nodes on the same platform as the HQ Agent. </p>
+<p>Hyperic's RabbitMQ plugin manages RabbitMQ brokers, the virtual hosts within a broker, and RabbitMQ exchanges, queues, connections, and channels. The plugin can discover and manage multiple RabbitMQ nodes on the same platform as the Hyperic Agent. </p>
 
-<p>The indented list below illustrates the hierarchy of Hyperic resource types that map to RabbitMQ entities. Each resource type is described below in <a href="#RabbitMQ-RabbitMQResourcesandtheHQInventoryModel">RabbitMQ Resources and the HQ Inventory Model</a>. </p>
+<p>The indented list below illustrates the hierarchy of Hyperic resource types that map to RabbitMQ entities. Each resource type is described below in <a href="#RabbitMQ-RabbitMQResourcesandtheHypericInventoryModel">RabbitMQ Resources and the Hyperic Inventory Model</a>. </p>
 
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre> 
-
 RabbitMQ 
-
 RabbitMQ Exchange 
-
 RabbitMQ Queue 
-
 RabbitMQ VirtualHost 
-
 RabbitMQ Connection 
-
 RabbitMQ Channel 
-
 </pre>
 </div></div> 
 
@@ -106,7 +103,7 @@ RabbitMQ Channel
 
 <div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Both Agent and Server Must be version 4.6</b><br />Note that to monitor RabbitMQ with the 4.6 version of the plugin, you must run v4.6 of <b>both</b> the Hyperic Server and the Hyperic Agent.</td></tr></table></div> 
 
-<h2><a name="RabbitMQ-RabbitMQResourcesandtheHQInventoryModel"></a>RabbitMQ Resources and the HQ Inventory Model </h2>
+<h2><a name="RabbitMQ-RabbitMQResourcesandtheHypericInventoryModel"></a>RabbitMQ Resources and the Hyperic Inventory Model </h2>
 
 <p>The table below lists the resource types in Hyperic&nbsp;that map to managed RabbitMQ entities. The right column indicates the inventory level for each type in the Hyperic&nbsp;inventory model. </p>
 <div class='table-wrap'>
@@ -143,7 +140,7 @@ A queue is represented in Hyperic&nbsp;as a "RabbitMQ Queue" service. <br class=
 <br class="atl-forced-newline" /> 
 RabbitMQ's first level of access control is enforced at the virtual host level; if a user attempts to connect to a virtual host to which he does not have credentials, the a broker rejects the connection attempt. <br class="atl-forced-newline" /> 
 <br class="atl-forced-newline" /> 
-A RabbitMQ virtual host is represented in HQ as a "RabbitMQ VirtualHost" service. <br class="atl-forced-newline" /> </td>
+A RabbitMQ virtual host is represented in Hyperic as a "RabbitMQ VirtualHost" service. <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> service </td>
 </tr>
 <tr>
@@ -162,12 +159,14 @@ A RabbitMQ virtual host is represented in HQ as a "RabbitMQ VirtualHost" service
 
 <p><b>Note:</b> For more information about the managed resource hierarchy, see <a href="Resources, Resource Types and Inventory Types.html" title="Resources, Resource Types and Inventory Types">Resources, Resource Types and Inventory Types</a>. </p>
 
+<h2><a name="RabbitMQ-SSLRequirementsfor4.6Agents"></a>SSL Requirements for 4.6 Agents </h2>
+<p>In Hyperic 4.6, to communicate with RabbitMQ over SSL, you must configure a keystore for the agent and manually import the RabbitMQ server's SSL certificate into the agent keystore if the server’s certificate is unverified. </p>
 
 <h1><a name="RabbitMQ-ConfigurationInstructions"></a>Configuration Instructions </h1>
 
 <p>The RabbitMQ plugin can automatically discover and monitor one or more RabbitMQ nodes and associated Rabbit services running on a platform. </p>
 
-<p>You must run the HQ Agent on same platform as the RabbitMQ nodes it will manage. </p>
+<p>You must run the Hyperic Agent on same platform as the RabbitMQ nodes it will manage. </p>
 
 <h2><a name="RabbitMQ-Step1%3ARemovePreviousRabbitMQInventoryResourcesandAgentInstallation"></a>Step 1: Remove Previous RabbitMQ Inventory Resources and Agent Installation</h2>
 
@@ -187,17 +186,17 @@ A RabbitMQ virtual host is represented in HQ as a "RabbitMQ VirtualHost" service
 	</li>
 	<li>Stop the Hyperic Agent that runs on the RabbitMQ host.</li>
 	<li>Uninstall the Hyperic Agent from the RabbitMQ host by deleting the <em>AgentHome</em> directory.</li>
-	<li>Do a fresh install of the HQ Agent, as described in the following step.</li>
+	<li>Do a fresh install of the Hyperic Agent, as described in the following step.</li>
 </ol>
 </td></tr></table></div> 
 
 <h2><a name="RabbitMQ-Step2%3AInstallHypericAgent"></a>Step 2: Install Hyperic Agent </h2>
 
-<p>If you have not already done so, install a Hyperic Agent on the RabbitMQ host. See <a href="Installing an Agent-Only Package.html" title="Installing an Agent-Only Package">Installing an Agent-Only Package</a> for instructions. </p>
+<p>If you have not already done so, install a Hyperic Agent on the RabbitMQ host. See Installing an Agent-Only Package for instructions. </p>
 
 <h2><a name="RabbitMQ-Step3%3AImportRabbitMQServer%28s%29toInventory"></a>Step 3: Import RabbitMQ Server(s) to Inventory </h2>
 
-<p>The HQ Agent on a platform automatically discovers each RabbitMQ node running on the platform. After the RabbitMQ node(s) are discovered, the platform appears in the <b>Auto-Discovery</b> portlet of the HQ Dashboard, and presents the RabbitMQ nodes as new servers. </p>
+<p>The Hyperic Agent on a platform automatically discovers each RabbitMQ node running on the platform. After the RabbitMQ node(s) are discovered, the platform appears in the <b>Auto-Discovery</b> portlet of the Hyperic Dashboard, and presents the RabbitMQ nodes as new servers. </p>
 
 <p>Import the platform and the new RabbitMQ server resources. </p>
 
@@ -239,7 +238,7 @@ A RabbitMQ virtual host is represented in HQ as a "RabbitMQ VirtualHost" service
 
 <p>The plugin auto-discovers the RabbitMQ Server instances on a platform by querying the process table, and then discovers the queues, exchanges, and the virtual hosts for each server instance. </p>
 
-<p>When the plugin detects that a transient service no longer exists in RabbitMQ, the plugin removes the associated HQ resource from inventory. Note that the RabbitMQ server must be running for the plugin to detect that previously existing services no longer exist - the plugin will not remove services while the Rabbit node is down. </p>
+<p>When the plugin detects that a transient service no longer exists in RabbitMQ, the plugin removes the associated Hyperic resource from inventory. Note that the RabbitMQ server must be running for the plugin to detect that previously existing services no longer exist - the plugin will not remove services while the Rabbit node is down. </p>
 
 
 <h3><a name="RabbitMQ-RabbitMQServerProperties"></a>RabbitMQ Server Properties </h3>
@@ -257,7 +256,7 @@ A RabbitMQ virtual host is represented in HQ as a "RabbitMQ VirtualHost" service
 </tr>
 <tr>
 <td class='confluenceTd'> Owner </td>
-<td class='confluenceTd'> The HQ account under which the resource was created. </td>
+<td class='confluenceTd'> The Hyperic account under which the resource was created. </td>
 <td class='confluenceTd'>&nbsp;</td>
 </tr>
 <tr>
@@ -314,7 +313,7 @@ A RabbitMQ virtual host is represented in HQ as a "RabbitMQ VirtualHost" service
 </tr>
 <tr>
 <td class='confluenceTd'> Owner </td>
-<td class='confluenceTd'> The HQ user account under which the resource was created. </td>
+<td class='confluenceTd'> The Hyperic user account under which the resource was created. </td>
 </tr>
 <tr>
 <td class='confluenceTd'>vhost </td>
@@ -361,7 +360,7 @@ A RabbitMQ virtual host is represented in HQ as a "RabbitMQ VirtualHost" service
 </tr>
 <tr>
 <td class='confluenceTd'> Owner </td>
-<td class='confluenceTd'> The HQ account under which the resource was created. </td>
+<td class='confluenceTd'> The Hyperic account under which the resource was created. </td>
 </tr>
 <tr>
 <td class='confluenceTd'> durable </td>
@@ -393,7 +392,7 @@ A RabbitMQ virtual host is represented in HQ as a "RabbitMQ VirtualHost" service
 </tr>
 <tr>
 <td class='confluenceTd'> Owner </td>
-<td class='confluenceTd'> The HQ user account under which the resource was created. </td>
+<td class='confluenceTd'> The Hyperic user account under which the resource was created. </td>
 </tr>
 <tr>
 <td class='confluenceTd'> vhost </td>
@@ -473,7 +472,7 @@ A RabbitMQ virtual host is represented in HQ as a "RabbitMQ VirtualHost" service
 </tr>
 <tr>
 <td class='confluenceTd'> Owner </td>
-<td class='confluenceTd'> The HQ user account under which the resource was created. </td>
+<td class='confluenceTd'> The Hyperic user account under which the resource was created. </td>
 </tr>
 <tr>
 <td class='confluenceTd'> vhost </td>
@@ -1249,7 +1248,7 @@ A RabbitMQ virtual host is represented in HQ as a "RabbitMQ VirtualHost" service
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:43</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:57</font></td>
 		    </tr>
 	    </table>
     </body>

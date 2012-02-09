@@ -1,0 +1,30 @@
+# Command definitions for the win32 architecture, overriding the definitions in support-commands.common when needed.
+#
+# See support-commands.common for details.
+#
+
+# Override commands which are different than common
+env : all : . : set
+date : all : . : date /t
+
+# Remove irrelevant commands
+bash-history : none : . : .
+list-open-files : none : . : .
+top-processes : none : . : .
+current-working-dir : none : . : .
+vmstat : none : . : .
+# TODO Use sigar for netstat - For some reason it gets stuck on windows when running through sigar
+netstat : all : . : netstat -na
+
+# Note the use of the %(simple_tar)s variable so we don't rely on any packing utility installation in the win32 machine
+# (These have the same name as the one in the .common files, thereby overriding the definitions there)
+server-logs : server : %(server_home)s : %(simple_tar)s %(detail_working_folder)s\server-logs.tar.gz logs\
+hq-engine-logs : server : %(server_home)s : %(simple_tar)s %(detail_working_folder)s\hq-engine-logs.tar.gz hq-engine\hq-server\logs\
+server-file-tree : server : %(server_home)s : dir /s
+server-conf : server : %(server_home)s : %(simple_tar)s %(detail_working_folder)s\server-conf.tar.gz conf\
+
+agent-logs : agent : %(agent_home)s : %(simple_tar)s %(detail_working_folder)s\agent-logs.tar.gz log\
+agent-file-tree : agent : %(agent_home)s : dir /s
+agent-conf : agent : %(agent_home)s : %(simple_tar)s %(detail_working_folder)s\agent-conf.tar.gz conf\
+
+

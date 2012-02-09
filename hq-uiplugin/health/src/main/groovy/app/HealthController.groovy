@@ -31,11 +31,13 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID
 import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue
 import org.hyperic.hq.appdef.server.session.AgentSortField
+import org.hyperic.hq.authz.server.session.ResourceSortField
 import org.hyperic.hq.appdef.Agent
 import org.hyperic.util.PrintfFormat
 import org.hyperic.util.units.UnitsFormat
 import org.hyperic.util.units.UnitsConstants
 import org.hyperic.util.units.UnitNumber
+import org.hyperic.hq.hqu.rendit.helpers.ResourceHelper 
 import org.hyperic.hq.hqu.rendit.html.HtmlUtil
 import org.hyperic.hq.hqu.rendit.html.DojoUtil
 import org.hyperic.hq.hqu.rendit.BaseController
@@ -72,7 +74,7 @@ class HealthController
     HealthController() {
         onlyAllowSuperUsers()
         setJSONMethods(['getSystemStats', 'getDiag', 'cacheData', 
-                        'agentData', 'runQuery', 'executeQuery', 'totalCacheSizeInBytes'])
+                        'agentData', 'inventoryData', 'runQuery', 'executeQuery', 'executeMaintenanceOp', 'totalCacheSizeInBytes'])
     }
 
     boolean logRequests() {
@@ -210,7 +212,7 @@ class HealthController
         def hitsCol   = new CacheColumn('hits',   'Hits',   true)
         def missCol   = new CacheColumn('misses', 'Misses', true)
         def limitCol  = new CacheColumn('limit', 'Limit', true)
-        def memUsgCol = new CacheColumn('memoryUsage', 'Memory Usage', true)
+        def memUsgCol = new CacheColumn('memoryUsage', 'Memory Usage (KB)', true)
         
         def globalId = 0
         [
@@ -275,7 +277,7 @@ class HealthController
             Map<String,Object> health = new HashMap<String,Object>();
             health.put("region", cache.getName());
             health.put("limit", limit)
-            health.put("memoryUsage", formatBytes(memoryUsage))
+            health.put("memoryUsage", formatMemoryUsage(memoryUsage))
             health.put("size", new Integer(cache.getSize()));
             health.put("hits", new Integer(cache.getHitCount()));
             health.put("misses", new Integer(cache.getMissCountNotFound()));
@@ -288,7 +290,7 @@ class HealthController
         health.put("hits", 0);
         health.put("misses", 0);
         health.put("limit", 0);
-        health.put("memoryUsage", formatBytes(totalCacheInBytes))
+        health.put("memoryUsage", formatMemoryUsage(totalCacheInBytes))
         healths.add(health)
         return healths;
     }
@@ -303,6 +305,7 @@ class HealthController
             diags:             diagnostics,
             cacheSchema:       cacheSchema,
             agentSchema:       agentSchema,
+            inventorySchema:   inventorySchema,
             metricsPerMinute:  metricsPerMinute,
             numPlatforms:      resourceHelper.find(count:'platforms'),
             numCpus:   resourceHelper.find(count:'cpus'),
@@ -325,6 +328,7 @@ class HealthController
            
             databaseQueries:   databaseQueries,
             databaseActions:   databaseActions,
+            maintenanceOps:    maintenanceOps,
             jvmSupportsTraces: getJVMSupportsTraces() ])
     }
     
@@ -336,6 +340,47 @@ class HealthController
             total = total + (float)v.total / (float)v.interval
         }
         (int)total
+    }
+
+    private getInventorySchema() {
+        def resourceTypeCol = new CacheColumn('resourceType', 'Resource Type', true)
+        def totalCol   = new CacheColumn('total',   'Total',   true)
+        
+        def globalId = 0
+        [
+            getData: {pageInfo, params ->
+                getInventoryData(pageInfo)
+            },
+            defaultSort: resourceTypeCol,
+            defaultSortOrder: 1,  // descending
+            rowId: {globalId++},
+            columns: [
+                [field:  resourceTypeCol,
+                 width:  '40%',
+                 label:  {it.name}],
+                [field:  totalCol,
+                 width:  '10%',
+                 label:  {it.total}],
+            ],
+        ]
+
+    }
+
+    def inventoryData(params) {
+        DojoUtil.processTableRequest(inventorySchema, params)
+    }
+    
+    private getInventoryData(params) {
+        def types = []
+        resourceHelper.findAppdefPrototypes().each { p ->
+            types.add(['name': p.name, 
+                       'total': getResourceTypeCount(p)] )
+        }
+        return types
+    }
+            
+    private getResourceTypeCount(p) {
+        return resourceHelper.findByPrototype(['byPrototype': p.name]).size()
     }
     
     def getDiag(params) {
@@ -364,6 +409,21 @@ class HealthController
                            locale, null).toString()
     }
 
+    private formatMemoryUsage(b) {
+        def kb
+        if (b == -1) {
+            return 'unknown'.padLeft(18)
+        } else if (b == null) {
+            return 'null'.padLeft(18)
+        } else if (b > 0) {
+            kb = (b / 1024)
+        } else {
+            kb = 0
+        }
+        def fkb = sprintf("%.2f", kb.toFloat())
+        return fkb.padLeft(18)
+    }
+    
     private formatPercent(n, total) {
         if (total == 0)
            return 0
@@ -452,6 +512,7 @@ class HealthController
         def cmdLine     = s.getProcArgs('$$')
         def procEnv     = s.getProcEnv('$$')
         def agentPager  = PageInfo.getAll(AgentSortField.ADDR, true) 
+        def inventoryPager  = PageInfo.getAll(ResourceSortField.NAME, true)
         
         def locals = [
             numCpu:           Runtime.runtime.availableProcessors(),
@@ -486,11 +547,13 @@ class HealthController
             cpuInfos:         s.cpuInfoList,
             jvmSupportsTraces: getJVMSupportsTraces(),
             agentData:        getAgentData(agentPager),
+            inventoryData:    getInventoryData(),
             agentFmt:         agentFmt,
             AgentSortField:   AgentSortField,
             licenseInfo:      [:],
             cacheHealths:     getCacheHealths(),
-			dbQueries:        runAllOrphanQueries(),
+            dbQueries:        runAllOrphanQueries(),
+            orphanedNodes:    _findOrphanedData(params),
         ] + getSystemStats([:]) 
         
         if (HQUtil.isEnterpriseEdition()) {
@@ -499,7 +562,34 @@ class HealthController
         
         render(locals: locals)
     }
-
+	
+	private def _findOrphanedData(params) {
+		def overlord = HQUtil.getOverlord()
+		def rHelp = new ResourceHelper(overlord)
+		 
+		def orphans = []
+		 
+		def servers = rHelp.findAllServers()
+		 
+		servers.each { s ->
+			def server = s.toServer()
+			if (server.getPlatform() == null) {
+				orphans << ['id': server.id, 'type':'Server', 'name': server.name, 'obj': s, 'overlord': overlord]
+			}
+		}
+		 
+		def services = rHelp.findAllServices()
+		 
+		services.each { s ->
+			def service = s.toService()
+			if (service.getServer() == null) {
+				orphans << ['id': service.id, 'type':'Service', 'name': service.name, 'obj': s, 'overlord': overlord]
+			}
+		}
+		
+		return orphans
+	}
+	
     def serverProp(params) {
         def s = Humidor.instance.sigar
         def dateFormat  = DateFormat.dateTimeInstance
@@ -839,4 +929,42 @@ class HealthController
             return res
         }
     }
+	
+	def getMaintenanceOps() {
+		def ops = [
+			findOrphanedNodes: [
+			   name: localeBundle['maintenceOpFindOrphanNodes'],
+			   op: { params ->
+				   def output = "<table><tr><th>ID</th><th>Type</th><th>Name</th></tr>"
+				   for (node in _findOrphanedData(params)) {
+					   output += "<tr><td>${node.id}</td><td>${node.type}</td><td>${node.name}</td></tr>"
+				   }
+				   output += "</table>"
+				   return output
+			   }
+			],
+			cleanupOrphanedNodes: [
+				name: localeBundle['maintenanceOpCleanupOrphanNodes'],
+				op: { params ->
+				   def output = "<table><tr><th>ID</th><th>Type</th><th>Name</th></tr>"
+				   for (node in _findOrphanedData(params)) {
+					   output += "<tr><td>${node.id}</td><td>${node.type}</td><td>${node.name}</td></tr>"
+					   node.obj.remove(node.overlord)
+				   }
+				   output += "</table>"
+				   return output
+				}
+			]
+		  ]
+  
+	}
+	
+	def executeMaintenanceOp(params) {
+        def id    = params.getOne('op')
+		def name = maintenanceOps[id].name
+		def start = now()
+		def res = maintenanceOps[id].op(params)
+		def maintenanceOpData = "${name} executed in ${now() - start} ms<br/><br/>"
+		return [maintenanceOpData: maintenanceOpData + res]
+	}
 }

@@ -32,6 +32,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -40,6 +42,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 public class Measurement extends PersistedObject
     implements ContainerManagedTimestampTrackable, Serializable
 {
+    private static Log log = LogFactory.getLog(Measurement.class);
     private Integer             _instanceId;
     private MeasurementTemplate _template;
     private long                _mtime;
@@ -122,10 +125,20 @@ public class Measurement extends PersistedObject
     }
 
     public long getInterval() {
+        if (isEnabled() && _interval == 0) {
+            log.warn("Enabled measurement id " + _instanceId + " for resource " + getEntityId() + 
+                     " has interval of 0. Returning template default interval");
+            return _template.getDefaultInterval();
+        }
         return _interval;
     }
 
     protected void setInterval(long interval) {
+        if (isEnabled() && interval == 0) {
+            log.warn("Attempt to set interval to 0 for enabled measurement id " + _instanceId + 
+                     ". Using template default interval");
+            _interval = _template.getDefaultInterval();
+        }
         _interval = interval;
     }
 

@@ -5,7 +5,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -113,10 +113,9 @@
 <%-- whether or not to show interval form controls. See 2.1.5 mockup for an example.
   --%>
 <tiles:importAttribute name="showIntervalControls" ignore="true"/>
-
-<script type="text/javascript">
+<jsu:script>
   var goButtonLink;
-</script>
+</jsu:script>
 
 <c:if test="${not empty addToListParamName && not empty addToListParamValue}">
 	<c:url var="addToListUrl" value="${addToListUrl}">

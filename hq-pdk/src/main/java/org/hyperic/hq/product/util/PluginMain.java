@@ -321,5 +321,6 @@ public class PluginMain {
             pd.invoke();
             pd.shutdown();
         }
+        System.exit(0);
     }
 }

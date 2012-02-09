@@ -72,7 +72,6 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
     private final LinkedList<StatefulAgentDataTransferJob> agentJobs =
         new LinkedList<StatefulAgentDataTransferJob>();
     /** used mainly for diagnostics.  map of job description and number of times it has run */
-    private final Map<String, Integer> shortDiagInfo = new HashMap<String, Integer>();
     private final Map<String, Integer> fullDiagInfo = new HashMap<String, Integer>();
     private final AtomicBoolean shutdown = new AtomicBoolean(false);
     private final AtomicLong executorNum = new AtomicLong(0);
@@ -324,15 +323,6 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
                 fullDiagInfo.put(desc, (runs+1));
             }
         }
-        synchronized(shortDiagInfo) {
-            final String desc = job.getJobDescription();
-            final Integer runs = shortDiagInfo.get(desc);
-            if (runs == null) {
-                shortDiagInfo.put(desc, 1);
-            } else {
-                shortDiagInfo.put(desc, (runs+1));
-            }
-        }
     }
 
     public String getStatus() {
@@ -340,7 +330,7 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
     }
 
     public String getShortStatus() {
-        return getStatus(shortDiagInfo);
+        return getStatus(fullDiagInfo);
     }
     
     private String getStatus(Map<String, Integer> diag) {

@@ -25,20 +25,13 @@
 
 package org.hyperic.util.security;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateExpiredException;
 import java.security.cert.X509Certificate;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -52,7 +45,6 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.conn.ssl.AbstractVerifier;
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
@@ -62,38 +54,34 @@ public class DefaultSSLProviderImpl implements SSLProvider {
     private SSLContext sslContext;
     private SSLSocketFactory sslSocketFactory;
     private static final Log log = LogFactory.getLog(DefaultSSLProviderImpl.class);
-    private static final ReadWriteLock KEYSTORE_LOCK = new ReentrantReadWriteLock();
-    private static final Lock KEYSTORE_READER_LOCK = KEYSTORE_LOCK.readLock();
-    private static final Lock KEYSTORE_WRITER_LOCK = KEYSTORE_LOCK.writeLock();
 
-    private KeyManagerFactory getKeyManagerFactory(final KeyStore keystore, final String password) throws KeyStoreException {
+    private KeyManagerFactory getKeyManagerFactory(final KeyStore keystore, final String password)
+    throws KeyStoreException {
         try {
             KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-            
             keyManagerFactory.init(keystore, password.toCharArray());
-            
             return keyManagerFactory;
         } catch (NoSuchAlgorithmException e) {
             // no support for algorithm, if this happens we're kind of screwed
             // we're using the default so it should never happen
-            throw new KeyStoreException("The algorithm is not supported. Error message:"+e.getMessage());
+            throw new KeyStoreException("The algorithm is not supported: "+e, e);
         } catch (UnrecoverableKeyException e) {
             // invalid password, should never happen
-            throw new KeyStoreException("Password for the keystore is invalid. Error message:"+e.getMessage());
+            throw new KeyStoreException("Password for the keystore is invalid: " + e,e);
         }
     }
     
-    private TrustManagerFactory getTrustManagerFactory(final KeyStore keystore) throws KeyStoreException, IOException {
+    private TrustManagerFactory getTrustManagerFactory(final KeyStore keystore)
+    throws KeyStoreException, IOException {
         try {
-            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            
+            TrustManagerFactory trustManagerFactory =
+                TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             trustManagerFactory.init(keystore);
-            
             return trustManagerFactory;
         } catch (NoSuchAlgorithmException e) {
             // no support for algorithm, if this happens we're kind of screwed
             // we're using the default so it should never happen
-            log.error("The algorithm is not supported. Error message:"+e.getMessage());
+            log.error("The algorithm is not supported: "+e,e);
             throw new KeyStoreException(e);
         }
     }
@@ -101,25 +89,20 @@ public class DefaultSSLProviderImpl implements SSLProvider {
     public DefaultSSLProviderImpl(KeystoreConfig keystoreConfig,
                                   boolean acceptUnverifiedCertificates ) {
         if (log.isDebugEnabled()) {
-            log.debug("Keystore info: alias="+keystoreConfig.getAlias()+
-                      ", path:"+keystoreConfig.getFilePath()+
-                      ", acceptUnverifiedCertificates="+acceptUnverifiedCertificates);
+            log.debug("Keystore info: alias=" + keystoreConfig.getAlias() +
+                      ", acceptUnverifiedCertificates=" + acceptUnverifiedCertificates);
         }
-        boolean hasLock = false;
         final boolean debug = log.isDebugEnabled();
         final StopWatch watch = new StopWatch();
         try {
             KeystoreManager keystoreMgr = KeystoreManager.getKeystoreManager();
-            KEYSTORE_READER_LOCK.lockInterruptibly();
-            hasLock = true;
             KeyStore trustStore = keystoreMgr.getKeyStore(keystoreConfig);
             KeyManagerFactory keyManagerFactory = getKeyManagerFactory(trustStore, keystoreConfig.getFilePassword());
             TrustManagerFactory trustManagerFactory = getTrustManagerFactory(trustStore);
             X509TrustManager defaultTrustManager = (X509TrustManager) trustManagerFactory.getTrustManagers()[0];
-            X509TrustManager customTrustManager = getCustomTrustManager(defaultTrustManager,
-                                                                        keystoreConfig,
-                                                                        acceptUnverifiedCertificates,
-                                                                        trustStore);
+            X509TrustManager customTrustManager =
+                keystoreMgr.getCustomTrustManager(defaultTrustManager, keystoreConfig,
+                                                  acceptUnverifiedCertificates, trustStore);
             sslContext = SSLContext.getInstance("TLS");
             sslContext.init(keyManagerFactory.getKeyManagers(),
                             new TrustManager[] { customTrustManager },
@@ -131,7 +114,6 @@ public class DefaultSSLProviderImpl implements SSLProvider {
         } catch (Exception e) {
             throw new IllegalStateException(e);
         } finally {
-            if (hasLock) KEYSTORE_READER_LOCK.unlock();
             if (debug) log.debug("readCert: " + watch);
         }
     }
@@ -154,123 +136,11 @@ public class DefaultSSLProviderImpl implements SSLProvider {
                 try {
                     internalVerifier.verify(host, ssl);
                 } catch (SSLPeerUnverifiedException e) {
-                    throw new SSLPeerUnverifiedException("The authenticity of host '" + host +
-                                                         "' can't be established.");
-                }
-            }
-        };
-    }
-
-    private X509TrustManager getCustomTrustManager(final X509TrustManager defaultTrustManager,
-                                                   final KeystoreConfig keystoreConfig,
-                                                   final boolean acceptUnverifiedCertificates,
-                                                   final KeyStore trustStore) {
-        return new X509TrustManager() {
-            private final Log log = LogFactory.getLog(X509TrustManager.class);
-
-            public X509Certificate[] getAcceptedIssuers() {
-                return defaultTrustManager.getAcceptedIssuers();
-            }
-
-            public void checkServerTrusted(X509Certificate[] chain,
-                String authType) throws CertificateException {
-                try {
-                    defaultTrustManager.checkServerTrusted(chain, authType);
-                } catch (CertificateException e){
-                    CertificateExpiredException expiredCertException = getCertExpiredException(e);
-                    if(expiredCertException!=null){
-                        log.error("Fail the connection because received certificate is expired. " +
-                        		"Please update the certificate.",expiredCertException);
-                        throw new CertificateException(e);
-                    }
-                    if (acceptUnverifiedCertificates) {
-                        log.info("Import the certification. (Received certificate is not trusted by keystore)");
-                        importCertificate(chain);
-                    }else{
-                        log.warn("Fail the connection because received certificate is not trusted by keystore: alias="
-                            + keystoreConfig.getAlias()
-                            + ", path=" + keystoreConfig.getFilePath());
-                        log.debug("Fail the connection because received certificate is not trusted by keystore: alias="
-                            + keystoreConfig.getAlias()
-                            + ", path=" + keystoreConfig.getFilePath()
-                            +", acceptUnverifiedCertificates="+acceptUnverifiedCertificates,e);
-                        throw new CertificateException(e);
-                    }
-                }
-            }
-            
-            private CertificateExpiredException getCertExpiredException(Exception e){  
-                while(e !=null){
-                    if(e instanceof CertificateExpiredException){
-                        return (CertificateExpiredException)e;
-                    }
-                    e = (Exception) e.getCause();
-                }
-                return null;
-            }
-
-            public void checkClientTrusted(X509Certificate[] chain,
-                String authType) throws CertificateException {
-                defaultTrustManager.checkClientTrusted(chain, authType);
-            }
-
-            private void importCertificate(X509Certificate[] chain)
-                throws CertificateException {
-                FileOutputStream keyStoreFileOutputStream = null;
-                boolean hasLock = false;
-                final boolean debug = log.isDebugEnabled();
-                final StopWatch watch = new StopWatch();
-                try {
-                    for (X509Certificate cert : chain) {
-                        String[] cnValues = AbstractVerifier.getCNs(cert);
-                        String alias;
-                        
-                        if (cnValues != null && cnValues.length > 0) {
-                        	alias = cnValues[0];
-                        } else {
-                        	alias = "UnknownCN";
-                        }
-                        
-                        alias += "-ts=" + System.currentTimeMillis();
-                        
-                        trustStore.setCertificateEntry(alias, cert);
-                    }
-                    KEYSTORE_WRITER_LOCK.lockInterruptibly();
-                    hasLock = true;
-                    keyStoreFileOutputStream = new FileOutputStream(
-                            keystoreConfig.getFilePath());
-                    trustStore.store(keyStoreFileOutputStream, keystoreConfig
-                        .getFilePassword().toCharArray());
-                } catch (FileNotFoundException e) {
-                    // Can't find the keystore in the path
-                    log.error(
-                        "Can't find the keystore in "
-                            + keystoreConfig.getFilePath() + ". Error message:"
-                            + e.getMessage(), e);
-                } catch (NoSuchAlgorithmException e) {
-                    log.error("The algorithm is not supported. Error message:"
-                        + e.getMessage(), e);
-                } catch (Exception e) {
-                    // expect KeyStoreException, IOException
-                    log.error("Exception when trying to import certificate: "
-                        + e.getMessage(), e);
-                } finally {
-                    close(keyStoreFileOutputStream);
-                    keyStoreFileOutputStream = null;
-                    if (hasLock) {
-                        KEYSTORE_WRITER_LOCK.unlock();
-                    }
-                    if (debug) log.debug("importCert: " + watch);
-                }
-            }
-
-            private void close(FileOutputStream keyStoreFileOutputStream) {
-                if (keyStoreFileOutputStream != null) {
-                    try {
-                        keyStoreFileOutputStream.close();
-                    } catch (IOException e) {
-                        log.error(e, e);
-                    }
+                    SSLPeerUnverifiedException sslPeerUnverifiedException =
+                        new SSLPeerUnverifiedException("The authenticity of host '" + host +
+                                                       "' can't be established: " + e);
+                    sslPeerUnverifiedException.initCause(e);
+                    throw sslPeerUnverifiedException;
                 }
             }
         };

@@ -106,6 +106,10 @@ public class ServerConfigUpgraderTest {
         expectedConfig.put("server.hibernate.dialect",
             "org.hyperic.hibernate.dialect.MySQL5InnoDBDialect");
         expectedConfig.put("server.encryption-key", "defaultkey");
+        expectedConfig.put("tomcat.maxthreads", "500");
+        expectedConfig.put("tomcat.minsparethreads", "50");
+        expectedConfig.put("server.jms.usejmx", "false");
+        expectedConfig.put("server.jms.jmxport", "1099");
         expectedConfig.remove("server.database-password");
 
         Properties serverConfig = upgrader.upgradeServerConfig(input);
@@ -135,6 +139,10 @@ public class ServerConfigUpgraderTest {
         expectedConfig.put("server.hibernate.dialect",
             "org.hyperic.hibernate.dialect.Oracle9Dialect");
         expectedConfig.put("server.encryption-key", "defaultkey");
+        expectedConfig.put("tomcat.maxthreads", "500");
+        expectedConfig.put("tomcat.minsparethreads", "50");
+        expectedConfig.put("server.jms.usejmx", "false");
+        expectedConfig.put("server.jms.jmxport", "1099");
         expectedConfig.remove("server.database-password");
         Properties serverConfig = upgrader.upgradeServerConfig(input);
         String encryptedPw = (String) serverConfig.remove("server.database-password");
@@ -166,6 +174,10 @@ public class ServerConfigUpgraderTest {
         expectedConfig.put("server.hibernate.dialect",
             "org.hyperic.hibernate.dialect.PostgreSQLDialect");
         expectedConfig.put("server.encryption-key", "defaultkey");
+        expectedConfig.put("tomcat.maxthreads", "500");
+        expectedConfig.put("tomcat.minsparethreads", "50");
+        expectedConfig.put("server.jms.usejmx", "false");
+        expectedConfig.put("server.jms.jmxport", "1099");
         expectedConfig.remove("server.database-password");
         Properties serverConfig = upgrader.upgradeServerConfig(input);
         String encryptedPw = (String) serverConfig.remove("server.database-password");

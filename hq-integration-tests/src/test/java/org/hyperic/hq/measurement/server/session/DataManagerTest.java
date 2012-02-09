@@ -29,8 +29,7 @@
  */
 package org.hyperic.hq.measurement.server.session;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -43,21 +42,14 @@ import java.util.Map;
 
 import org.hibernate.SessionFactory;
 import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.shared.AIPlatformValue;
-import org.hyperic.hq.appdef.shared.AgentManager;
-import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.AuthzSubjectManager;
-import org.hyperic.hq.authz.shared.ResourceGroupManager;
-import org.hyperic.hq.authz.shared.ResourceManager;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
-import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.measurement.shared.DataManager;
 import org.hyperic.hq.measurement.shared.MeasRangeObj;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.test.BaseInfrastructureTest;
+import org.hyperic.hq.util.Reference;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.jdbc.DBUtil;
 import org.junit.Before;
@@ -147,8 +139,8 @@ public class DataManagerTest
                                                metric4Templ.getId(),
                                                metric5Templ.getId() };
         long[] intervals = new long[] { 60000l, 60000l, 60000l, 60000l, 60000l, 60000l };
-        List<Measurement> meas = measurementManager.createMeasurements(platform.getEntityId(),
-            templateIds, intervals, new ConfigResponse());
+        List<Measurement> meas = measurementManager.createOrUpdateMeasurements(platform.getEntityId(),
+            templateIds, intervals, new ConfigResponse(), new Reference<Boolean>());
         // Add availability data
         // availabilityManager.addData(meas.get(0).getId(), new MetricValue(new
         // Double(1), System

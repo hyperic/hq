@@ -30,7 +30,10 @@
 <hibernate-mapping package="org.hyperic.hq.measurement.server.session">
 
   <class name="ScheduleRevNum" table="EAM_SRN">
-    <composite-id name="id" class="SrnId">
+
+    <cache usage="read-write"/>
+
+    <composite-id name="srnId" class="SrnId">
       <key-property name="instanceId" type="integer">
         <column name="INSTANCE_ID" not-null="true"/>
       </key-property>
@@ -46,6 +49,10 @@
 
     <property name="srn" type="integer">
       <column name="SRN" not-null="true"/>
+    </property>
+
+    <property name="lastSchedule" type="long">
+      <column name="LAST_SCHEDULE_TIME" not-null="true"/>
     </property>
 
   </class>

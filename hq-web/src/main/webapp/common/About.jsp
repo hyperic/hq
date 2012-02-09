@@ -3,7 +3,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -33,14 +33,14 @@
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-  <title><fmt:message key="about.Title"/></title>
-<link rel=stylesheet href="<html:rewrite page="/css/win.css"/>" type="text/css">
-<script src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
-<script  type="text/javascript">
-  var help = "<hq:help/>";
-</script>
-</head>
+	<head>
+  		<title><fmt:message key="about.Title"/></title>
+		<link rel=stylesheet href="<html:rewrite page="/css/win.css"/>" type="text/css">
+		<jsu:importScript path="/js/functions.js" />
+		<jsu:script>
+			var help = "<hq:help/>";
+		</jsu:script>
+	</head>
 
 <body>
 <div align="center">

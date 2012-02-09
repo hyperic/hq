@@ -44,6 +44,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.type.IntegerType;
 import org.hibernate.type.StringType;
 import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.product.server.session.PluginDAO;
@@ -55,14 +56,20 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
 
-    private AgentDAO agentDAO;
-    private PluginDAO pluginDAO;
+    private static final Object LIMIT_S_TO_CURRENT_AGENTS = "join EAM_AGENT agent on s.agent_id = agent.id " +         
+            "where agent.version >= :serverVersion ";
+    
+    private final AgentDAO agentDAO;
+    private final PluginDAO pluginDAO;
+    private final ServerConfigManager serverConfigManager;
 
     @Autowired
-    public AgentPluginStatusDAO(SessionFactory factory, AgentDAO agentDAO, PluginDAO pluginDAO) {
+    public AgentPluginStatusDAO(SessionFactory factory, AgentDAO agentDAO, PluginDAO pluginDAO,
+            ServerConfigManager serverConfigManager) {
         super(AgentPluginStatus.class, factory);
         this.agentDAO = agentDAO;
         this.pluginDAO = pluginDAO;
+        this.serverConfigManager = serverConfigManager;
     }
     
     @PostConstruct
@@ -112,7 +119,7 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
         }
         return rtn;
     }
-
+       
     Map<Agent, Collection<AgentPluginStatus>> getOutOfSyncPluginsByAgent() {
         final Map<Agent, Collection<AgentPluginStatus>> rtn =
             new HashMap<Agent, Collection<AgentPluginStatus>>();
@@ -142,17 +149,22 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
         return rtn;
     }
 
+    
     /**
+     * Get our of sync plugins for agents, whose version is not older than that of
+     * the server.
      * @param agentId may be null
      * @return {@link List} of {@link Integer} which represents the AgentPluginStatusId
      */
     @SuppressWarnings("unchecked")
     private List<Integer> getOutOfSyncPlugins(Integer agentId) {
+        String serverMajorVersion = serverConfigManager.getServerMajorVersion();
         final String agentSql = agentId == null ? "" : " s.agent_id = :agentId AND ";
-        final String sql = new StringBuilder(256)
+        final String sql = new StringBuilder(256)            
             .append("select distinct s.id ")
             .append("from EAM_AGENT_PLUGIN_STATUS s ")
-            .append("where ")
+            .append(LIMIT_S_TO_CURRENT_AGENTS)
+            .append(" AND (")
             .append(agentSql)
             .append("not exists ( ")
             .append("    select 1 ")
@@ -161,16 +173,17 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
             .append("    where st.agent_id = s.agent_id and s.md5 = st.md5 ")
             .append("    and p.deleted = '0'")
             .append(") ")
-            .append("OR s.last_sync_status != :syncSuccess")
+            .append("OR s.last_sync_status != :syncSuccess)")
             .toString();
         final SQLQuery query = getSession().createSQLQuery(sql);
         if (agentId != null) {
             query.setParameter("agentId", agentId);
         }
+        query.setParameter("serverVersion", serverMajorVersion);
         return query.addScalar("id", Hibernate.INTEGER)
                     .setParameter("syncSuccess", AgentPluginStatusEnum.SYNC_SUCCESS.toString())
                     .list();
-    }
+    }    
     
     /**
      * @return {@link Collection} of {@link Object[]} where [0] = agentId and [1] = pluginName
@@ -265,22 +278,28 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
     }
 
     Long getNumAutoUpdatingAgents() {
+        String serverMajorVersion = serverConfigManager.getServerMajorVersion();
         final String sql = new StringBuilder(150)
             .append("select count(distinct agent_id) from EAM_AGENT_PLUGIN_STATUS s ")
-            .append("where exists (select 1 from EAM_PLATFORM p where p.agent_id = s.agent_id)")
+            .append(LIMIT_S_TO_CURRENT_AGENTS)
+            .append("and exists (select 1 from EAM_PLATFORM p where p.agent_id = s.agent_id)")
             .toString();
-        return ((Number) getSession().createSQLQuery(sql).uniqueResult()).longValue();
+        final SQLQuery query = getSession().createSQLQuery(sql);
+        query.setParameter("serverVersion", serverMajorVersion);
+        return ((Number) query.uniqueResult()).longValue();
     }
 
     @SuppressWarnings("unchecked")
     public Collection<Agent> getAutoUpdatingAgents() {
+        String serverMajorVersion = serverConfigManager.getServerMajorVersion();
         final String hql = new StringBuilder(150)
             .append("select distinct agent_id from EAM_AGENT_PLUGIN_STATUS s ")
-            .append("where exists (select 1 from EAM_PLATFORM p where p.agent_id = s.agent_id)")
+            .append(LIMIT_S_TO_CURRENT_AGENTS)
+            .append("and exists (select 1 from EAM_PLATFORM p where p.agent_id = s.agent_id)")
             .toString();
-        final List<Integer> ids = getSession().createSQLQuery(hql)
-                                              .addScalar("agent_id", Hibernate.INTEGER)
-                                              .list();
+        final SQLQuery query = getSession().createSQLQuery(hql);
+        query.setParameter("serverVersion", serverMajorVersion);
+        final List<Integer> ids = query.addScalar("agent_id", Hibernate.INTEGER).list();
         final List<Agent> rtn = new ArrayList<Agent>(ids.size());
         for (final Integer agentId : ids) {
             rtn.add(agentDAO.findById(agentId));

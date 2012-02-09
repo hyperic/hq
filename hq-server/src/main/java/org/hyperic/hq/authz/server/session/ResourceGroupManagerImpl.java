@@ -100,29 +100,28 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     private static final String OWNEDGROUP_PAGER = PagerProcessor_ownedResourceGroup.class
         .getName();
 
-    private ResourceEdgeDAO resourceEdgeDAO;
+    private final ResourceEdgeDAO resourceEdgeDAO;
 
-    private AuthzSubjectManager authzSubjectManager;
+    private final AuthzSubjectManager authzSubjectManager;
+    @Autowired
     private EventLogManager eventLogManager;
     private final Log log = LogFactory.getLog(ResourceGroupManagerImpl.class);
-    private ResourceManager resourceManager;
-    private ResourceGroupDAO resourceGroupDAO;
-    private ResourceDAO resourceDAO;
-    private ResourceRelationDAO resourceRelationDAO;
+    private final ResourceManager resourceManager;
+    private final ResourceGroupDAO resourceGroupDAO;
+    private final ResourceDAO resourceDAO;
+    private final ResourceRelationDAO resourceRelationDAO;
     private ApplicationContext applicationContext;
-    private CritterTranslator critterTranslator;
+    private final CritterTranslator critterTranslator;
 
     @Autowired
     public ResourceGroupManagerImpl(ResourceEdgeDAO resourceEdgeDAO,
                                     AuthzSubjectManager authzSubjectManager,
-                                    EventLogManager eventLogManager,
                                     ResourceManager resourceManager,
                                     ResourceGroupDAO resourceGroupDAO, ResourceDAO resourceDAO,
                                     ResourceRelationDAO resourceRelationDAO,
                                     CritterTranslator critterTranslator) {
         this.resourceEdgeDAO = resourceEdgeDAO;
         this.authzSubjectManager = authzSubjectManager;
-        this.eventLogManager = eventLogManager;
         this.resourceManager = resourceManager;
         this.resourceGroupDAO = resourceGroupDAO;
         this.resourceDAO = resourceDAO;
@@ -727,7 +726,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
                                            AuthzConstants.groupResourceTypeName);
         Collection<ResourceGroup> groups = resourceGroupDAO.findCompatible(resProto);
         for (Iterator<ResourceGroup> i = groups.iterator(); i.hasNext();) {
-            ResourceGroup g = (ResourceGroup) i.next();
+            ResourceGroup g = i.next();
             if (!groupIds.contains(g.getId())) {
                 i.remove();
             }
@@ -776,7 +775,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         List<ResourceGroup> groups = new ArrayList<ResourceGroup>(numToFind);
         Iterator<ResourceGroup> i = all.iterator();
         while (i.hasNext() && groups.size() < numToFind) {
-            ResourceGroup g = (ResourceGroup) i.next();
+            ResourceGroup g = i.next();
             if (index.contains(g.getId()))
                 groups.add(g);
         }
@@ -947,5 +946,12 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
 
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
+    }
+
+    public ResourceGroup getGroupById(Integer id) {
+        if (id == null) {
+            return null;
+        }
+        return resourceGroupDAO.get(id);
     }
 }

@@ -38,6 +38,8 @@ import java.util.LinkedList;
 import java.util.Properties;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.server.AgentStartException;
 import org.hyperic.hq.agent.server.AgentStorageException;
 import org.hyperic.hq.agent.server.AgentStorageProvider;
@@ -47,16 +49,13 @@ import org.hyperic.hq.bizapp.agent.CommandsAPIInfo;
 import org.hyperic.hq.bizapp.client.AgentCallbackClientException;
 import org.hyperic.hq.bizapp.client.MeasurementCallbackClient;
 import org.hyperic.hq.bizapp.client.StorageProviderFetcher;
-import org.hyperic.hq.measurement.server.session.SRN;
 import org.hyperic.hq.measurement.data.DSNList;
 import org.hyperic.hq.measurement.data.MeasurementReport;
 import org.hyperic.hq.measurement.data.MeasurementReportConstructor;
+import org.hyperic.hq.measurement.server.session.SRN;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.encoding.Base64;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Deals with sending measurements back to the server (including 
@@ -91,7 +90,7 @@ public class SenderThread
     private          MeasurementCallbackClient client;
     private          AgentStorageProvider      storage;
     private          String                    agentToken;
-    private          LinkedList                transitionQueue;
+    private          LinkedList<String>        transitionQueue;
     // This toggle will avoid displaying non-stop messages about server down 
     private          int                       metricDup = 0;
     private          int                       maxBatchSize = MAX_BATCHSIZE;
@@ -107,16 +106,14 @@ public class SenderThread
     private long stat_totBatchSendTime   = 0;
     private long stat_totMetricsSent     = 0;
 
-    SenderThread(Properties bootProps, AgentStorageProvider storage,
-                 MeasurementSchedule schedule)
-        throws AgentStartException 
-    {
+    SenderThread(Properties bootProps, AgentStorageProvider storage, MeasurementSchedule schedule)
+    throws AgentStartException {
         String sMetricDup, sMaxBatchSize, sMetricDebug;
         this.log             = LogFactory.getLog(SenderThread.class);
         this.shouldDie       = false;
         this.storage         = storage;
         this.client          = setupClient();
-        this.transitionQueue = new LinkedList();
+        this.transitionQueue = new LinkedList<String>();
         this.metricDebug     = new HashSet();
         this.schedule        = schedule;
 
@@ -178,8 +175,7 @@ public class SenderThread
             }
         }
 
-        this.log.info("Maximum metric batch size set to " + 
-                      this.maxBatchSize);
+        this.log.info("Maximum metric batch size set to " +  this.maxBatchSize);
     }
 
     private MeasurementCallbackClient setupClient()
@@ -324,13 +320,12 @@ public class SenderThread
      */
     private void processTransitionQueue(){
         synchronized(this.transitionQueue){
-            for(Iterator i=this.transitionQueue.iterator(); i.hasNext(); ){
-                String val = (String)i.next();
-                
+            for (Iterator<String> i=this.transitionQueue.iterator(); i.hasNext(); ){
+                String val = i.next();
                 try {
                     this.storage.addToList(DATA_LISTNAME, val);
                 } catch(Exception exc){
-                    this.log.error("Unable to store data", exc);
+                    this.log.error("Unable to store data: " + exc, exc);
                 }
             }
 
@@ -352,7 +347,7 @@ public class SenderThread
      *          sent, otherwise it returns the timestamp of the last
      *          measurement sent to the server.
      */
-    private Long sendBatch(){
+    private Long sendBatch() {
         MeasurementReportConstructor constructor;
         DSNList[] clientIds;
         long batchStart = 0, batchEnd = 0, lastMetricTime = 0, serverTime = 0;
@@ -370,14 +365,12 @@ public class SenderThread
         
         final boolean debug = log.isDebugEnabled();
         log.debug("Sending batch to server:");
-        Iterator it=this.storage.getListIterator(DATA_LISTNAME);
-        Set records = new HashSet();
+        Set<Record> records = new HashSet<Record>();
         // first we are going to ensure that all the data points that
         // we send over to the server are unique
-        for(; it != null && it.hasNext() && numUsed < this.maxBatchSize; numUsed++)
-        {
+        for (Iterator<String> it=storage.getListIterator(DATA_LISTNAME); it!=null && it.hasNext() && numUsed < maxBatchSize; numUsed++) {
             try {
-                Record r = SenderThread.decodeRecord((String)it.next());
+                Record r = SenderThread.decodeRecord(it.next());
                 boolean didNotAlreadyExist = records.add(r); 
                 if (!didNotAlreadyExist) {
                     // nuke the dup
@@ -385,14 +378,13 @@ public class SenderThread
                     numUsed--;
                 }
             } catch(IOException exc){
-                this.log.error("Error accessing record -- deleting: " +
-                               exc);
+                this.log.error("Error accessing record -- deleting: " + exc, exc);
                 continue;
             }
         }
 
-        for (it=records.iterator(); it.hasNext(); ) {                
-            Record rec = (Record)it.next();
+        for (Iterator<Record> it=records.iterator(); it.hasNext(); ) {                
+            Record rec = it.next();
 
             lastMetricTime = rec.data.getTimestamp();
             
@@ -409,7 +401,6 @@ public class SenderThread
                               " derivedID=" + rec.derivedID + " value=" + 
                               rec.data.getValue() + " from tQueue -- sending");
             }
-
             constructor.addDataPoint(rec.derivedID, rec.dsnId, rec.data);
         }
 
@@ -426,30 +417,27 @@ public class SenderThread
 
             srnList = this.schedule.getSRNsAsArray();
             if (srnList.length == 0) {
-                log.error("Agent does not have valid SRNs, but has metric " +
-                          "data to send, removing measurements");
+                log.error("Agent does not have valid SRNs, but has metric data to send, removing measurements");
                 removeMeasurements(numUsed);
                 return null;
             }
             
             if(log.isDebugEnabled()){
                 for(int i=0; i<srnList.length; i++){
-                    this.log.debug("    SRN: " + srnList[i].getEntity() + 
-                                   "=" + srnList[i].getRevisionNumber());
+                    this.log.debug("    SRN: " + srnList[i].getEntity() +  "=" + srnList[i].getRevisionNumber());
                 }
             }
 
             report = new MeasurementReport();
             if (this.agentToken == null) {
-                this.agentToken =
-                    storage.getValue(CommandsAPIInfo.PROP_AGENT_TOKEN);
+                this.agentToken = storage.getValue(CommandsAPIInfo.PROP_AGENT_TOKEN);
             }
             report.setAgentToken(this.agentToken);
             report.setClientIdList(clientIds);
             report.setSRNList(srnList);
-            batchStart = System.currentTimeMillis();
+            batchStart = now();
             serverTime= this.client.measurementSendReport(report);
-            batchEnd = System.currentTimeMillis();
+            batchEnd = now();
 
             // Compute offset from server (will include network latency)
             this.serverDiff = Math.abs(serverTime - batchEnd);
@@ -503,6 +491,10 @@ public class SenderThread
         return null;
     }
 
+    private long now() {
+        return System.currentTimeMillis();
+    }
+
     /**
      * @return The number of measurements removed from the metric storage.
      *
@@ -525,8 +517,7 @@ public class SenderThread
         }
 
         if(j != num){
-            this.log.error("Failed to remove " + (num - j) +
-                           "records");
+            this.log.error("Failed to remove " + (num - j) + "records");
         }
 
         return j;
@@ -556,18 +547,14 @@ public class SenderThread
      * MONITOR METHOD:  Get the total number of metrics which have been
      *                  transmitted to the server
      */
-    public double getTotMetricsSent() 
-        throws AgentMonitorException 
-    {
+    public double getTotMetricsSent() throws AgentMonitorException {
         return this.stat_totMetricsSent;
     }
 
     /**
      * MONITOR METHOD:  Get the offset in ms between the agent and server
      */
-    public double getServerOffset()
-        throws AgentMonitorException
-    {
+    public double getServerOffset() throws AgentMonitorException {
         return this.serverDiff;
     }
 
@@ -578,7 +565,7 @@ public class SenderThread
         Calendar cal = Calendar.getInstance();
         controlCal.set(Calendar.SECOND, 5);
         
-        while(this.shouldDie == false){
+        while (this.shouldDie == false) {
             try {
                 try {
                     controlCal.add(Calendar.MINUTE, 1);
@@ -607,38 +594,16 @@ public class SenderThread
                 lastMetricTime = this.sendBatch();
                 if(lastMetricTime != null){
                     String backlogNum = "";
-                    int numConsec = 0;
-    
                     final long start = System.currentTimeMillis();
-    
-                    // Give it a single shot to catch up before starting to
-                    // squawk
+                    // Give it a single shot to catch up before starting to squawk
                     while((lastMetricTime = this.sendBatch()) != null) {
-                        long now = System.currentTimeMillis(),
-                            tDiff = now - lastMetricTime.longValue();
-                        String backlog;
-    
-                        numConsec++;
-    
-                        // Log a warning if we send 4 or more complete
-                        // batches consecutively.
-                        if(numConsec == 3){
-                            this.log.warn("The Agent is having a hard time " +
-                                          "keeping up with the frequency of " +
-                                          "metrics taken.  " +
-                                          "Consider increasing your collection " +
-                                          "interval.");
-                        }
-    
-                        backlog = Long.toString(tDiff / (60 * 1000));
-                        if(tDiff / (60 * 1000) > 1 &&
-                           backlog.equals(backlogNum) == false)
-                        {
+                        long now = System.currentTimeMillis();
+                        long tDiff = now - lastMetricTime.longValue();
+                        String backlog = Long.toString(tDiff / (60 * 1000));
+                        if(tDiff / (60 * 1000) > 1 && backlog.equals(backlogNum) == false) {
                             backlogNum = backlog;
-                            this.log.warn(backlog + 
-                                          " minute(s) of metrics backlogged");
+                            this.log.info(backlog +  " minute(s) of metrics backlogged");
                         }
-    
                         if(this.shouldDie == true){
                             this.log.info("Dying with measurements backlogged");
                             return;
@@ -646,15 +611,9 @@ public class SenderThread
                     }
                     final long total = System.currentTimeMillis() - start;
                     if (total > SEND_INTERVAL) {
-                        log.warn("Agent took " + total + " ms to send its spool.  " +
-                            "This could mean the network is having issues or the " +
-                            "HQ Server's I/O is overloaded.");
+                        log.info("Agent took " + (total/1000) + " seconds to send its spooled metrics to the HQ Server.");
                     } else if (log.isDebugEnabled()) {
                         log.debug("Agent took " + total + " ms to send its spool");
-                    }
-
-                    if(numConsec >= 3){
-                        this.log.info("Agent measurements no longer backlogged");
                     }
                 }
             } catch (Throwable e) {

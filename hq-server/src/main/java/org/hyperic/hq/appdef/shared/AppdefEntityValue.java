@@ -385,6 +385,9 @@ public class AppdefEntityValue {
         return getGroup(false);
     }
 
+    /**
+     * @deprecated
+     */
     public PageList<AppdefResourceValue> getAssociatedPlatforms(PageControl pc)
         throws PermissionException, AppdefEntityNotFoundException {
         Integer iId = _id.getId();
@@ -434,6 +437,7 @@ public class AppdefEntityValue {
     /** Get the servers associated with this resource
      * @param pc the page control object
      * @return a PageList of ServiceValue's
+     * @deprecated
      */
     public PageList getAssociatedServers(PageControl pc)
         throws PermissionException, AppdefEntityNotFoundException {
@@ -472,6 +476,7 @@ public class AppdefEntityValue {
     /** Get the servers of a specific type associated with this resource
      * @param pc the page control object
      * @return a PageList of ServiceValue's
+     * @deprecated
      */
     public PageList getAssociatedServers(Integer typeId, PageControl pc)
         throws AppdefEntityNotFoundException, PermissionException {
@@ -508,6 +513,7 @@ public class AppdefEntityValue {
      * this resource
      * @param pc the page control object
      * @return a PageList of ServiceValue's
+     * @deprecated
      */
     public List getAssociatedServerIds(Integer typeId)
         throws AppdefEntityNotFoundException, PermissionException {
@@ -547,6 +553,7 @@ public class AppdefEntityValue {
 
     /** Get the services associated with this resource
      * @return a PageList of ServiceValue's
+     * @deprecated
      */
     public PageList getAssociatedServices(PageControl pc)
         throws PermissionException, AppdefEntityNotFoundException,
@@ -586,6 +593,7 @@ public class AppdefEntityValue {
      * @param pc the page control object
      * @return a PageList of ServiceValues and ServiceClusterValues (in case of
      *         applications)
+     * @deprecated
      */
     public PageList getAssociatedServices(Integer typeId, PageControl pc)
         throws ApplicationNotFoundException, AppdefEntityNotFoundException,

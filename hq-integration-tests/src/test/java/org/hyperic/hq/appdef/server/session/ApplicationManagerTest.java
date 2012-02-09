@@ -47,6 +47,7 @@ import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
+import org.hyperic.hq.context.IntegrationTestSpringJUnit4ClassRunner;
 import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -54,10 +55,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(IntegrationTestSpringJUnit4ClassRunner.class)
 @Transactional
 @DirtiesContext
 

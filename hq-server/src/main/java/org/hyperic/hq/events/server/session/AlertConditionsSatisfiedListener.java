@@ -37,6 +37,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.events.shared.AlertManager;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
+import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +68,7 @@ public class AlertConditionsSatisfiedListener implements ZeventListener<AlertCon
     @PostConstruct
     public void subscribe() {
         zEventManager.registerEventClass(AlertConditionsSatisfiedZEvent.class);
-        Set<Class<?>> alertEvents = new HashSet<Class<?>>();
+        Set<Class<? extends Zevent>> alertEvents = new HashSet<Class<? extends Zevent>>();
         alertEvents.add(AlertConditionsSatisfiedZEvent.class);
         zEventManager.addBufferedListener(alertEvents, this);
         concurrentStatsCollector.register(ConcurrentStatsCollector.FIRED_ALERT_TIME);

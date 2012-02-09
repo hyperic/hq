@@ -1,41 +1,44 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : Network Platform Services</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : Network Platform Services</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : Network Platform Services
+                            vFabric Hyperic 4.6.5 : Network Platform Services
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 27, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1311786240318 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1311786240318 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1311786240318 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1325700001571 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325700001571 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325700001571 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1311786240318'>
+/*]]>*/</style><div class='rbtoc1325700001571'>
 <ul>
     <li><a href='#NetworkPlatformServices-HypericNetworkServiceMonitoringCapabilities'>Hyperic Network Service Monitoring Capabilities</a></li>
     <li><a href='#NetworkPlatformServices-ConfigurationRequirementsandOptionsforMonitoringNetworkServices'>Configuration Requirements and Options for Monitoring Network Services</a></li>
     <li><a href='#NetworkPlatformServices-MetricsforNetworkServices'>Metrics for Network Services</a></li>
     <li><a href='#NetworkPlatformServices-ClassesforMonitoringaNetworkService'>Classes for Monitoring a Network Service</a></li>
-    <li><a href='#NetworkPlatformServices-ServicesHQCanMonitorOvertheNetwork'>Services HQ Can Monitor Over the Network</a></li>
+    <li><a href='#NetworkPlatformServices-ServicesHypericCanMonitorOvertheNetwork'>Services Hyperic Can Monitor Over the Network</a></li>
 </ul></div>
 
 
@@ -66,24 +69,24 @@ div.rbtoc1311786240318 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 
 
-<p><span class="image-wrap" style=""><img src="attachments/77463605/77660304.png" style="border: 0px solid black"/></span></p>
+<p><span class="image-wrap" style=""><img src="attachments/79038211/79135287.png" style="border: 0px solid black"/></span></p>
 
 <h1><a name="NetworkPlatformServices-ConfigurationRequirementsandOptionsforMonitoringNetworkServices"></a>Configuration Requirements and Options for Monitoring Network Services</h1>
 
 <p>Configuration requirements vary by the type of network service you wish to monitor. At a minimum you must configure the location of the network resource, and depending on the resource, you may also need to supply the credentials required to access it.</p>
 
-<p>You can optionally configure event tracking for any type of network service that HQ monitors. If you do, the agent will log an event for responses that match the criteria you specify. You can define alert conditions based on events logged for remote service, just as you can for managed resources on the same platform as the agent.</p>
+<p>You can optionally configure event tracking for any type of network service that Hyperic monitors. If you do, the agent will log an event for responses that match the criteria you specify. You can define alert conditions based on events logged for remote service, just as you can for managed resources on the same platform as the agent.</p>
 
 <h1><a name="NetworkPlatformServices-MetricsforNetworkServices"></a>Metrics for Network Services</h1>
 
 <p>The metrics reported for a remote service varies by type.</p>
 <ul>
-	<li>Availability - The HQ Agent reports availability for any network service that it can can monitor. Availability is determined by various means, depending on the protocol used to communicate with the managed resource. This process typically consists of opening a socket, reading and writing from it, and closing it. For some services, this alone constitutes availability, for other services, availability is conditioned on response content, such as a response level or code. The type of request the agent issues to determine availability is protocol-dependent.</li>
+	<li>Availability - The Hyperic Agent reports availability for any network service that it can can monitor. Availability is determined by various means, depending on the protocol used to communicate with the managed resource. This process typically consists of opening a socket, reading and writing from it, and closing it. For some services, this alone constitutes availability, for other services, availability is conditioned on response content, such as a response level or code. The type of request the agent issues to determine availability is protocol-dependent.</li>
 </ul>
 
 
 <ul>
-	<li>Response Time - Like availability, response time is reported for any network service that the HQ Agent can monitor. Response time for a network service reflects the length of time (in ms) that the agent takes to determine service availability.</li>
+	<li>Response Time - Like availability, response time is reported for any network service that the Hyperic Agent can monitor. Response time for a network service reflects the length of time (in ms) that the agent takes to determine service availability.</li>
 </ul>
 
 
@@ -94,11 +97,11 @@ div.rbtoc1311786240318 li {margin-left: 0px;padding-left: 0px;}
 
 <h1><a name="NetworkPlatformServices-ClassesforMonitoringaNetworkService"></a>Classes for Monitoring a Network Service</h1>
 
-<p>Most network services are monitored by classes in HQ's netservices plugin. (Notable exception: if you monitor a remote SNMP agent, HQ's <tt>SNMPMeasurementPlugin</tt> performs most of the metric collection.)</p>
+<p>Most network services are monitored by classes in Hyperic's netservices plugin. (Notable exception: if you monitor a remote SNMP agent, Hyperic's <tt>SNMPMeasurementPlugin</tt> performs most of the metric collection.)</p>
 
-<h1><a name="NetworkPlatformServices-ServicesHQCanMonitorOvertheNetwork"></a>Services HQ Can Monitor Over the Network</h1>
+<h1><a name="NetworkPlatformServices-ServicesHypericCanMonitorOvertheNetwork"></a>Services Hyperic Can Monitor Over the Network</h1>
 <p><a name="NetworkPlatformServices-services"></a><br/>
-The links below correspond to the resource types that HQ can monitor over the network. Click a link for information on how to configure a platform service resource of that type, and for information on supported metrics and default monitoring settings.</p>
+The links below correspond to the resource types that Hyperic can monitor over the network. Click a link for information on how to configure a platform service resource of that type, and for information on supported metrics and default monitoring settings.</p>
 <ul>
 	<li><a href="RPC Platform Service.html" title="RPC Platform Service">RPC Platform Service</a></li>
 	<li><a href="HTTP Platform Service.html" title="HTTP Platform Service">HTTP Platform Service</a></li>
@@ -126,7 +129,7 @@ The links below correspond to the resource types that HQ can monitor over the ne
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:43</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:56</font></td>
 		    </tr>
 	    </table>
     </body>

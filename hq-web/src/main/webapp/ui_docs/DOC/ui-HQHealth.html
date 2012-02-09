@@ -1,64 +1,123 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : ui-HQHealth</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : ui-HQHealth</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : ui-HQHealth
+                            vFabric Hyperic 4.6.5 : ui-HQHealth
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 20, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <h1><a name="ui-HQHealth-HQHealth"></a>HQ Health</h1>
+				    <style type='text/css'>/*<![CDATA[*/
+div.rbtoc1327081056529 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1327081056529 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1327081056529 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1327081056529'>
+<ul>
+    <li><a href='#ui-HQHealth-HQHealth'>HQ Health</a></li>
+    <li><a href='#ui-HQHealth-KeyStatistics'>Key Statistics</a></li>
+    <li><a href='#ui-HQHealth-DiagnosticsTab'>Diagnostics Tab</a></li>
+    <li><a href='#ui-HQHealth-CacheTab'>Cache Tab</a></li>
+    <li><a href='#ui-HQHealth-LoadTab'>Load Tab</a></li>
+    <li><a href='#ui-HQHealth-DatabaseTab'>Database Tab</a></li>
+    <li><a href='#ui-HQHealth-AgentsTab'>Agents Tab</a></li>
+    <li><a href='#ui-HQHealth-MaintenanceTab'>Maintenance Tab</a></li>
+    <li><a href='#ui-HQHealth-InventorySummaryTab'>Inventory Summary Tab</a></li>
+</ul></div>
+
+<h1><a name="ui-HQHealth-HQHealth"></a>HQ Health</h1>
 
 <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
-<p><b>HQ Health</b> displays real-time diagnostic data for the machine on which the HQ Server is installed. This data helps Hyperic  Support to troubleshoot problems; it is not intended for customer use. The page is available to Administrators only.</p>
+<p>The <b>HQ Health</b> page, accessible to Hyperic adimistrators on the "Plugins" section of the <b>Administration</b> tab of the Hyperic userface, displays real-time Hyperic Server diagnostics. <b>HQ Health</b> is helps Hyperic Support troubleshoot problems; it is not intended for customer use.</p>
 
-<p><b>HQ Health</b> displays statistics from HQ's internal caches. For information about modifying cache settings, see <a href="Scaling and Tuning Hyperic Performance.html#ScalingandTuningHypericPerformance-ConfigureHQCacheSettingsforImprovedPerformance">Configure HQ Cache Settings for Improved Performance.</a></p>
-<h3><a name="ui-HQHealth-SectionsonthisScreen"></a>Sections on this Screen</h3>
 
-<p>The top of the screen displays standard health statistics for a server. Below are three tabs that display more data about the state of the server and database:</p>
-<div class='table-wrap'>
-<table class='confluenceTable'><tbody>
-<tr>
-<th class='confluenceTh'> Tab </th>
-<th class='confluenceTh'> What Data It Displays </th>
-</tr>
-<tr>
-<td class='confluenceTd'> Diagnostics </td>
-<td class='confluenceTd'> This tab contains the information that HQ prints to log files every 15 minutes. You can choose these diagnostics from the drop-down list.&nbsp; <br class="atl-forced-newline" />
+
+<p><span class="image-wrap" style=""><img src="attachments/79038211/79135578.png" width="750" style="border: 0px solid black"/></span></p>
+
+<h1><a name="ui-HQHealth-KeyStatistics"></a>Key Statistics</h1>
+
+<p>The top of the screen displays standard health statistics for a server.</p>
+
+<h1><a name="ui-HQHealth-DiagnosticsTab"></a>Diagnostics Tab</h1>
+
+<p>This tab contains the information that Hyperic prints to log files every 15 minutes. You can choose these diagnostics from the drop-down list:</p>
 <ul>
-	<li>Batch Aggregate AvailabilityInserter<font color="red">&#42;</font>: Status of queue for availability updates to database. Available only if using the Batch Aggregate inserter.</li>
-	<li>Batch Aggregate DataInserter<font color="red">&#42;</font>: Status of queue for metric updates to the database. Available only if using the Batch Aggregate inserter.</li>
-	<li>Event Tracker Stats: Shows minimum, maximum, and average invocation times, and the number of invocations since since the HQ server last started.</li>
-	<li>EhCache: Size and hit ratio of HQ caches.</li>
-	<li>Metric Reports Stats: A running average of how fast metrics are being pushed into the database.</li>
-	<li>ZEvents: Status of the internal BUS.</li>
+	<li><b>Agent Synchronizer</b> &#8212; Lists the Hyperic Agents (up to 10 of them) that have done the most metric scheduling, unscheduling, and plugin synchronization jobs since last Hyperic Server restart. The number of jobs of each type that the agent has run is shown. (For information about plugin synchronization, see <a href="Plugin Deployment and Management.html" title="Plugin Deployment and Management">Plugin Deployment and Management</a> in <em>vFabric Hyperic Administration</em>.)</li>
+	<li><b>Batch Aggregate AvailabilityInserter</b> &#8212; Status of the queue that contains resource availability data to be stored in the database.</li>
+	<li><b>Batch Aggregate DataInserter</b> &#8212; Status of the queue of that contains resource metrics to be stored in the Hyperic database.</li>
+	<li><b>EhCache</b> &#8212; Size, hits, and misses for Hyperic cache regions.</li>
+	<li><b>Enabled Metrics Not Coming In</b> &#8212; Lists up to 10 platforms for which enabled metrics (for the platform, or resources running on the platform) were not reported during the last 60 minutes. For each such platform, the number of unreported metrics is listed, along with the internal ID for the metric, metric name (if known), the internal ID for the resource with the unreported metric, and the resource name. Note that only metrics for resources that (1) have been configured for monitoring, if necessary, and (2) are currently available, will be included in this diagnostic.
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">Report generated at 1/13/12 10:32:20 AM
+Top 10 available platforms with enabled metrics not reported in for 60 minutes (by platform hierarchy)
+------------------------------------------------------------------------
+
+fqdn=goku.localdomain (5 not collecting):
+mid=80097, name=UNKNOWN, resid=26068, resname=goku Coldfusion 7.x
+mid=80098, name=UNKNOWN, resid=26068, resname=goku Coldfusion 7.x
+mid=80100, name=UNKNOWN, resid=26068, resname=goku Coldfusion 7.x
+mid=80104, name=UNKNOWN, resid=26068, resname=goku Coldfusion 7.x
+mid=80105, name=UNKNOWN, resid=26068, resname=goku Coldfusion 7.x
+fqdn=w1-lotor.local (4 not collecting):
+mid=40694, name=UNKNOWN, resid=15573, resname=w1-lotor Solaris Network Interface lo0 (loopback)
+mid=40696, name=UNKNOWN, resid=15573, resname=w1-lotor Solaris Network Interface lo0 (loopback)
+mid=40514, name=UNKNOWN, resid=15558, resname=w1-lotor Sendmail 8.x
+mid=40515, name=UNKNOWN, resid=15558, resname=w1-lotor Sendmail 8.x
+fqdn=w1-zarkon.local (2 not collecting):
+mid=61944, name=UNKNOWN, resid=22441, resname=w1-zarkon Solaris Network Interface lo0 (loopback)
+mid=61946, name=UNKNOWN, resid=22441, resname=w1-zarkon Solaris Network Interface lo0 (loopback)</pre>
+		</div>
+</div></div></li>
+	<li><b>Metric Reports Stats</b> &#8212; A running average of how fast metrics are being pushed into the database.</li>
+	<li><b>ZEvents</b> &#8212; Status of the internal BUS.</li>
 </ul>
-</td>
-</tr>
-<tr>
-<td class='confluenceTd'> <a name="ui-HQHealth-cache"></a> Cache </td>
-<td class='confluenceTd'> The same data (less the "Bytes" column) displayed in the EhCache display in the Diagnostics tab, but in a more easily viewable format. This tab's data can be sorted. </td>
-</tr>
-<tr>
-<td class='confluenceTd'> Load </td>
-<td class='confluenceTd'> Current load on HQ Server, including: <br class="atl-forced-newline" />
-<br class="atl-forced-newline" />
+
+
+<p><a name="ui-HQHealth-cache"></a></p>
+
+<h1><a name="ui-HQHealth-CacheTab"></a>Cache Tab</h1>
+
+<p>This tab presents the detailed status of Hyperic cache regions:</p>
+<ul>
+	<li>Total Memory Usage (of all cached objects)</li>
+	<li>For each region:
+	<ul>
+		<li>Size</li>
+		<li>Hits</li>
+		<li>Misses,</li>
+		<li>Limit</li>
+		<li>Limit&nbsp;</li>
+		<li>Memory Usage</li>
+	</ul>
+	</li>
+</ul>
+
+
+<p>For information about cache settings, see <a href="Scaling and Tuning Hyperic Performance.html#ScalingandTuningHypericPerformance-caches">Configure HQ Cache Settings for Improved Performance</a>.</p>
+
+<h1><a name="ui-HQHealth-LoadTab"></a>Load Tab</h1>
+
+<p>Current load on Hyperic Server, including:</p>
 <ul>
 	<li>Metrics collected per minute</li>
 	<li>Platforms</li>
@@ -70,82 +129,87 @@
 	<li>Applications</li>
 	<li>Roles</li>
 	<li>Users</li>
-	<li>Alerts</li>
+	<li>Active Alert Defs</li>
 	<li>Resources</li>
 	<li>Resource Types</li>
 	<li>Groups</li>
 	<li>Escalations</li>
 	<li>Active Escalations</li>
 </ul>
-</td>
-</tr>
-<tr>
-<td class='confluenceTd'> Database </td>
-<td class='confluenceTd'><ul>
-	<li><b>Actions</b>:
-	<ul>
-		<li>Purge AIQ Data &#45;Deletes the contents of the auto-discovery queue. This is useful if the queue contains resources that for some reason cannot be imported.&nbsp; Deleting resources from the queue will cause the agent to re-discover them.</li>
-		<li>Purge Stalled Executions - Deletes escalations that are stall for some reason.</li>
-	</ul>
-	</li>
-	<li><b>Queries:</b>
-	<ul>
-		<li>AutoInventory IPs</li>
-		<li>AutoInventory Platforms&nbsp;</li>
-		<li>AutoInventory Servers</li>
-		<li>Orphaned AlertDef Count (See <a href="#ui-HQHealth-OrphanedDatabaseRows">Orphaned Database Rows</a>)</li>
-		<li>Orphaned Audit Count (See <a href="#ui-HQHealth-OrphanedDatabaseRows">Orphaned Database Rows</a>)</li>
-		<li>Stalled Escalations</li>
-		<li>Orphaned Group Count (See <a href="#ui-HQHealth-OrphanedDatabaseRows">Orphaned Database Rows</a>)</li>
-		<li>Orphaned Resource Count (See <a href="#ui-HQHealth-OrphanedDatabaseRows">Orphaned Database Rows</a>)</li>
-		<li>Postgres Locks</li>
-		<li>Postgres Activity</li>
-		<li>Active But Disabled Resource Alert Defs</li>
-		<li>Database Version Information&nbsp; <br class="atl-forced-newline" /></li>
-	</ul>
-	</li>
-</ul>
-</td>
-</tr>
-<tr>
-<td class='confluenceTd'> Agents </td>
-<td class='confluenceTd'> For each HQ Agent connected to the HQ Server, the following information is listed:
+
+
+<h1><a name="ui-HQHealth-DatabaseTab"></a>Database Tab</h1>
+
+<p>The Database tab contains an <b>Actions</b> pulldown menu with database cleanup commands, and a <b>Query</b> pulldown with queries that return information about resources in the auto-inventory queue and resources that are orphaned.</p>
+
+<p>You can perform the following database cleanup commands from the <b>Actions</b> pulldown:</p>
 <ul>
-	<li>FQDN - of the machine it runs on; this is the identifier of the monitored platform in HQ.</li>
-	<li>Address &#45;&nbsp; The IP address upon which the agent listens for server communications.</li>
-	<li>Port - The port on the agent's listen address upon which it listens for server communications. Be default, the listen port is 2144.&nbsp;</li>
-	<li>Version - HQ version</li>
+	<li>Purge AIQ Data &#8212; Deletes the contents of the auto-discovery queue. This is useful if the queue contains resources that for some reason cannot be imported. Deleting resources from the queue will cause the agent to rediscover them.</li>
+	<li>Purge Stalled Executions &#8212; Deletes escalations that are stalled.</li>
+</ul>
+
+
+<p>You can run the following queries from the <b>Queries</b> pulldown:</p>
+<ul>
+	<li>AutoInventory IPs</li>
+	<li>AutoInventory Platforms</li>
+	<li>AutoInventory Servers</li>
+	<li>Database Character Set</li>
+	<li>Orphaned Alert Definition Count</li>
+	<li>Orphaned Audit Count</li>
+	<li>Orphaned (Stalled) Escalations</li>
+	<li>Orphaned Group Count (deprecated)</li>
+	<li>Orphaned Platform Count</li>
+	<li>Orphaned Resource Group Count</li>
+	<li>Orphaned Resource Count (deprecated)</li>
+	<li>Orphaned Server Count</li>
+	<li>Orphaned Service Count</li>
+	<li>Postgres Locks</li>
+	<li>Postgres Activity</li>
+	<li>Active But Disabled Resource Alert Defs</li>
+	<li>Database Version Information</li>
+</ul>
+
+
+<h1><a name="ui-HQHealth-AgentsTab"></a>Agents Tab</h1>
+
+<p>For each Hyperic Agent connected to the Hyperic Server, the following information is listed:</p>
+<ul>
+	<li>FQDN &#8212; of the machine it runs on; this is the identifier of the monitored platform in Hyperic.</li>
+	<li>Address &#8212; The IP address upon which the agent listens for server communications.</li>
+	<li>Port &#8212; The port on the agent's listen address upon which it listens for server communications. By default, the listen port is 2144. The value "-1" indicates that the agent is configured for unidirectional communications. &nbsp;</li>
+	<li>Version &#8212; Hyperic version</li>
 	<li>Bundle Version</li>
-	<li>Creation Time - When the platform where the agent runs was first added to HQ inventory.&nbsp;</li>
-	<li>&#35; Platforms - The number of platforms the agent is monitoring. Typically this value is "1", indicated that the agent is monitoring only the platform where it runs. The value is greater, if the agent is also monitoring an an agentless device, for instance an SNMP device.&nbsp;</li>
-	<li>&#35; Metrics - This is the number of metrics the agent collects. Hyperic recommends balancing the metric collection load across agents. For example, don't use a single agent to monitor every SNMP devices in your network - this would constitute a single point of failure, and the metric load might downgrade the performance of other services running on the host. .</li>
-	<li>Time Offset (ms) - The system time offset between HQ Server and HQ Agent. Time synchronisation on HQ Server and HQ Agents is very important to determine the availability of platforms and services correctly. Single or double digit values are okay. Higher values indicate a problem. In this case, set up NTP-daemons on your server and agent hosts. You can monitor the NTP-daemons and set an alert on the offset value</li>
+	<li>Creation Time &#8212; When the platform where the agent runs was first added to Hyperic inventory.&nbsp;</li>
+	<li>&#35; Platforms &#8212; The number of platforms the agent is monitoring. Typically this value is "1", indicated that the agent is monitoring only the platform where it runs. The value is greater, if the agent is also monitoring an an agentless device, for instance an SNMP device.&nbsp;</li>
+	<li>&#35; Metrics &#8212; This is the number of metrics the agent collects. Hyperic recommends balancing the metric collection load across agents. For example, don't use a single agent to monitor every SNMP devices in your network - this would constitute a single point of failure, and the metric load might downgrade the performance of other services running on the host.</li>
+	<li>Time Offset (ms) &#8212; The system time offset between Hyperic Server and Hyperic Agent. Time synchronisation on Hyperic Server and Hyperic Agents is very important to determine the availability of platforms and services correctly. Single or double digit values are okay. Higher values indicate a problem. In this case, set up NTP-daemons on your server and agent hosts. You can monitor the NTP-daemons and set an alert on the offset value</li>
 	<li>License count</li>
 </ul>
-</td>
-</tr>
-</tbody></table>
-</div>
 
 
-<h3><a name="ui-HQHealth-OrphanedDatabaseRows"></a>Orphaned Database Rows</h3>
+<h1><a name="ui-HQHealth-MaintenanceTab"></a>Maintenance Tab</h1>
 
-<p>Interrupted database updates can result in orphaned rows in the HQ database. Orphaned rows can cause HQ exceptions.&nbsp; For example:</p>
-<ul>
-	<li>If the HQ database contains alert definitions that are no longer associated with a resource, trying to edit edit a resource type alert can result in a stack trace similar to:</li>
-</ul>
-
+<p>The <b>Maintenance</b> tab has commands for listing and removing orphaned resources.</p>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>About Orphaned Objects in Cache</b><br />Interrupted database updates can result in orphaned rows in the Hyperic database. Orphaned rows can cause Hyperic exceptions. For example, if the Hyperic database contains alert definitions that are no longer associated with a resource, trying to edit edit a resource type alert can result in a stack trace similar to:
 
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
 		<pre class="theme: Confluence; brush: java; gutter: false">org.hyperic.hq.events.AlertConditionCreateException:
 org.hyperic.hq.measurement.MeasurementNotFoundException: No measurement found for 10288 with template 33434 at org.hyperic.hq.bizapp.server.session.EventsBossImpl.updateAlertDefinition(EventsBossImpl.java:887)</pre>
 		</div>
-</div></div>
+</div></div></td></tr></table></div>
 
-<p>The HQ Health page provides orphaned item queries for alert definitions, resources, groups, and audits.</p>
+<ul>
+	<li>Cleanup Orphaned Nodes &#8212; Removes orphaned resources from the Hyperic database. For example, a service whose relationships to its metadata or related resources are broken.</li>
+	<li>List Orphaned Nodes &#8212; List orphaned resources in the Hyperic database.</li>
+</ul>
 
-<p>If these queries indicate that there are any orphaned rows in the HQ database, contact Hyperic support for assistance in removing the orphaned rows.&nbsp;</p>
+
+<div class='panelMacro'><table class='noteMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/warning.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>You can see the number of orphaned resources of a particular type by running the queries available on the "Database" tab of HQ Health.</td></tr></table></div>
+<h1><a name="ui-HQHealth-InventorySummaryTab"></a>Inventory Summary Tab</h1>
+
+<p>The <b>Inventory Summary</b> tab lists the resource types in inventory and the number of each type.</p>
 
 				    
                     			    </td>
@@ -156,7 +220,7 @@ org.hyperic.hq.measurement.MeasurementNotFoundException: No measurement found fo
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:44</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:57</font></td>
 		    </tr>
 	    </table>
     </body>

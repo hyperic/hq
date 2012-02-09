@@ -5,7 +5,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -30,12 +30,16 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-<script  src='<html:rewrite page="/js/scriptaculous.js"/>' type="text/javascript"></script>
-<script src='<html:rewrite page="/js/dashboard.js"/>' type="text/javascript"></script>
-<script src='<html:rewrite page="/js/effects.js"/>' type="text/javascript"></script>
-<script src='<html:rewrite page="/js/popup.js"/>' type="text/javascript"></script>
-<script src='<html:rewrite page="/js/window.js"/>' type="text/javascript"></script>
-<script type="text/javascript">
+
+<c:set var="longMaxValue">
+    <%= Long.MAX_VALUE %>
+</c:set>
+<jsu:importScript path="/js/scriptaculous.js" />
+<jsu:importScript path="/js/dashboard.js" />
+<jsu:importScript path="/js/effects.js" />
+<jsu:importScript path="/js/popup.js" />
+<jsu:importScript path="/js/window.js" />
+<jsu:script>
 	document.toggleSubmit = function(e){
 		if(e && e.keyCode == 13){
 	        saveEscalation();
@@ -44,14 +48,6 @@
 	    }
 	};
 	
-	hqDojo.ready(function(){
-		requestViewEscalation();
-		
-	    hqDojo.connect(document, 'onkeypress', document.toggleSubmit);
-	    hqDojo.connect(document.forms[0], 'onkeypress', document.toggleSubmit);
-	    hqDojo.connect(document.forms[1], 'onkeypress', document.toggleSubmit);
-	});
-	
 	var selUserEsc;
 	var selActionTypeEsc;
 
@@ -59,7 +55,7 @@
 	    hqDojo.xhrGet({
 	    	url: "<html:rewrite action="/escalation/jsonByEscalationId" />",
 	    	content: {
-	    		id: escape("${param.escId}"),
+	    		id: escape('<c:out value="${param.escId}"/>'),
 	    		preventCache: (new Date()).getTime()
 	    	},
 	    	handleAs: "json",
@@ -109,7 +105,7 @@
         	}
     
         	if (allowPause) {
-            	if (tmp.escalation.maxWaitTime == <%= Long.MAX_VALUE %>) {
+            	if (tmp.escalation.maxWaitTime == ${longMaxValue}) {
                 	hqDojo.byId('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.pause.indefinitely" />';
             	} else {
             		hqDojo.byId('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.pause" /> ' + maxWaitTime;
@@ -1139,7 +1135,7 @@
 	    	}
 	
 	    	var finalEmailAddresses = new Array();
-	    	var reg = new RegExp("^[0-9a-zA-Z_.-]+@[0-9a-zA-Z-]+[\.]{1}[0-9a-zA-Z]+[\.]?[0-9a-zA-Z]+$");
+	    	var reg = new RegExp("^[a-z0-9._%+-]+@(?:[a-z0-9-]+\.)+[a-z]{2,6}$");
 	    	
 	    	// now find the real emails in the list
 	    	for (var x = 0; x < emailAddressCandidates.length; x++) {
@@ -1291,7 +1287,14 @@
 	    new Ajax.Request(url, {method: 'post', parameters: pars, onComplete: updateEscView, onFailure: reportError});
 	    document.EscalationForm.reset();
 	}
-</script>
+</jsu:script>
+<jsu:script onLoad="true">
+	requestViewEscalation();
+		
+    hqDojo.connect(document, 'onkeypress', document.toggleSubmit);
+    hqDojo.connect(document.forms[0], 'onkeypress', document.toggleSubmit);
+    hqDojo.connect(document.forms[1], 'onkeypress', document.toggleSubmit);
+</jsu:script>
 <html:form action="/alerts/ConfigEscalation" method="GET">
     <html:hidden property="mode"/>
     <c:choose>
@@ -1574,14 +1577,12 @@
 </tr>
 </tbody>
 </table>
-
-<script type="text/javascript">
+<jsu:script>
   var escalationSpan = hqDojo.byId("AlertEscalationOption");
   if (escalationSpan != null) {
 	  escalationSpan.appendChild(hyperic.form.createEscalationPauseOptions({id: "maxWaitTime", name: "maxWaitTime", className:"maxWaitTime"}));
   }
-</script>
-
+</jsu:script>
 <div id="usersList" style="display:none;">
     <div class="ListHeader">Select Users</div>
     <ul class="boxy">

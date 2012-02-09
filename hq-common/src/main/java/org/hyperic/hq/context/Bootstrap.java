@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.Resource;
 
 /**
@@ -74,6 +75,24 @@ public class Bootstrap {
     public static boolean hasAppContext() {
         return Bootstrap.appContext != null;
     }
+    
+    /**
+     * Sets the {@link ApplicationContext} subsequent to disposing of an existing 
+     * context.
+     * @param newAppContext New {@link ApplicationContext} instance 
+     */
+    public static final void setAppContext(final ApplicationContext newAppContext) { 
+        //first dispose of any existing application context 
+        dispose() ; 
+        appContext = newAppContext ; 
+    }//EOM 
+    
+    public static final void dispose() { 
+        if(appContext != null && appContext instanceof GenericApplicationContext) { 
+            ((GenericApplicationContext)appContext).close() ;
+        }//EO there was an existing application context
+        appContext = null ; 
+    }//EOM 
 
     public static Resource getResource(String location) {
         return Bootstrap.appContext.getResource(location);
@@ -98,4 +117,5 @@ public class Bootstrap {
     public static void setBean(Class<?> beanClass, Object bean) {
         Bootstrap.testBeansByType.put(beanClass, bean);
     }
+    
 }

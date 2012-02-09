@@ -5,7 +5,7 @@
 	<groupId>org.hyperic.hq</groupId>
 	<artifactId>hq-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>4.6.1.BUILD-SNAPSHOT</version>
+	<version>4.6.5.BUILD-SNAPSHOT</version>
 	<name>Hyperic HQ - Parent</name>
 
 	<properties>
@@ -25,7 +25,7 @@
 		<dns.version>2.0.6</dns.version>
 		<db2monitor.version>1.0.1</db2monitor.version>
 		<dbunit.version>2.2</dbunit.version>
-		<easymock.version>2.4</easymock.version>
+		<easymock.version>3.0</easymock.version>
 		<ehcache.version>1.5.0</ehcache.version>
 		<freemarker.version>2.3.4</freemarker.version>
 		<getopt.version>1.0.13</getopt.version>
@@ -64,10 +64,11 @@
 		<snmp.version>1.11</snmp.version>
 		<spring-framework.version>3.0.5.RELEASE</spring-framework.version>
 		<spring-security.version>3.0.5.RELEASE</spring-security.version>
+<!--		<spring-dao.version>2.0.8</spring-dao.version> -->
 		<struts.version>1.3.10</struts.version>
-		<surefire.version>2.6</surefire.version>
+		<surefire.version>2.8 </surefire.version>
         <tiles2.version>2.2.2</tiles2.version>
-		<tomcat-jdbc.version>1.0.8.5</tomcat-jdbc.version>
+		<tomcat-jdbc.version>7.0.19</tomcat-jdbc.version>
 		<tomcat-juli.version>6.0.32</tomcat-juli.version>
 		<urlrewrite.version>3.1.0</urlrewrite.version>
 		<velocity.version>1.6.3</velocity.version>
@@ -75,6 +76,7 @@
 		<xalan.version>2.7.1</xalan.version>
 		<xbean.version>3.6</xbean.version>
 		<xstream.version>1.3.1</xstream.version>
+		<filemonitor.version>1.0.1</filemonitor.version>
 
 		<maven.build.timestamp.format>MMM dd, yyyy</maven.build.timestamp.format>
 		<build.timestamp>${maven.build.timestamp}</build.timestamp>
@@ -272,6 +274,11 @@
 				<artifactId>spring-beans</artifactId>
 				<version>${spring-framework.version}</version>
 			</dependency>
+			<!--<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-dao</artifactId>
+				<version>${spring-dao.version}</version>
+			</dependency> -->
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-context</artifactId>
@@ -510,11 +517,11 @@
 			  <artifactId>xbean-spring</artifactId>
 			  <version>${xbean.version}</version>
 			</dependency>
-			<dependency>
-			  <groupId>org.apache</groupId>
-			  <artifactId>tomcat-jdbc</artifactId>
-			  <version>${tomcat-jdbc.version}</version>
-			</dependency>
+                        <dependency>
+                          <groupId>org.apache.tomcat</groupId>
+                          <artifactId>tomcat-jdbc</artifactId>
+                          <version>${tomcat-jdbc.version}</version>
+                        </dependency>
 			<dependency>
 			  <groupId>org.apache.tomcat</groupId>
 			  <artifactId>juli</artifactId>
@@ -577,6 +584,11 @@
     				<artifactId>mockito-all</artifactId>
     				<version>${mockito.version}</version>
 				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.hyperic.cm</groupId>
+				<artifactId>cm-file-monitor</artifactId>
+				<version>${filemonitor.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -723,6 +735,7 @@
 					<module>hq-bootstrap</module>
 					<module>hq-web</module>
 					<module>hq-integration-tests</module>
+                			<module>hq-maven</module>
 			</modules>
 		</profile>
 		<profile>
@@ -743,10 +756,17 @@
 					<module>hq-installer</module>
 					<module>hq-bootstrap</module>
 					<module>hq-web</module>
-	    			<module>dist</module>
+		    			<module>dist</module>
+                			<module>hq-maven</module>
 			</modules>
 		</profile>
-        <profile>
+		<profile>
+                        <id>dist-only</id>
+                        <modules>
+                                        <module>dist</module>
+                        </modules>
+                </profile>
+	        <profile>
 			<id>no-dist</id>
 			<modules>
 					<module>hq-util</module>
@@ -761,9 +781,10 @@
 					<module>hq-installer</module>
 					<module>hq-bootstrap</module>
 					<module>hq-web</module>
+                			<module>hq-maven</module>
 			</modules>
 		</profile>
-        <profile>
+	        <profile>
 			<id>web-app</id>
 			<modules>
 					<module>hq-util</module>
@@ -850,6 +871,15 @@
 				<enabled>false</enabled>
 			</snapshots>
 		</repository>
+		<repository>
+			<id>cm-release</id>
+			<name>Configuration Monitor Repository</name>
+			<url>http://maven.cm.hyperic.org/release</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+		
 	</repositories>
 
 	<distributionManagement>

@@ -3,7 +3,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -36,13 +36,13 @@
 <c:url var="selfUrl" value="${selfAction}"/>
 
 <c:if test="${scanstate.startTime > 0 && !scanstate.isDone }"> <!-- there's a scan -->
- <script type="text/javascript">
-   function changeUrl(newUrl) {
-    window.location.href = newUrl;
-   }
-
-   setTimeout("changeUrl('<c:out value="${selfUrl}" escapeXml="false"/>')", 30000);   
- </script>
+	<jsu:script>
+	   	function changeUrl(newUrl) {
+	    	window.location.href = newUrl;
+	   	}
+	
+	   	setTimeout("changeUrl('<c:out value="${selfUrl}" escapeXml="false"/>')", 30000);   
+	</jsu:script>
 </c:if>
 <!--  CURRENT STATUS TITLE -->
 <tiles:insert definition=".header.tab">

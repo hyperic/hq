@@ -1,24 +1,27 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : Resource Auto-Discovery Processes</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : Resource Auto-Discovery Processes</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : Resource Auto-Discovery Processes
+                            vFabric Hyperic 4.6.5 : Resource Auto-Discovery Processes
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 01, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
@@ -26,13 +29,18 @@
 
 <p>This page describes VMware vFabric™ Hyperic® processes for discovering resources running on a platform.</p>
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1309540373641 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1309540373641 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1309540373641 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1325700478222 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325700478222 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325700478222 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1309540373641'>
+/*]]>*/</style><div class='rbtoc1325700478222'>
 <ul>
     <li><a href='#ResourceAuto-DiscoveryProcesses-HypericAutoDiscoveryProcesses'>Hyperic Auto-Discovery Processes</a></li>
+<ul>
+    <li><a href='#ResourceAuto-DiscoveryProcesses-DefaultScan'>Default Scan</a></li>
+    <li><a href='#ResourceAuto-DiscoveryProcesses-FileScan'>File Scan</a></li>
+    <li><a href='#ResourceAuto-DiscoveryProcesses-RuntimeScan'>Runtime Scan</a></li>
+</ul>
     <li><a href='#ResourceAuto-DiscoveryProcesses-AboutAutoInventoryIDsandInstallPath'>About Auto-Inventory IDs and InstallPath</a></li>
     <li><a href='#ResourceAuto-DiscoveryProcesses-WhattheAgentCanandCannotDiscover'>What the Agent Can and Cannot Discover</a></li>
     <li><a href='#ResourceAuto-DiscoveryProcesses-HowDiscoveredResourcesGetintoHypericInventory'>How Discovered Resources Get into Hyperic Inventory</a></li>
@@ -41,14 +49,14 @@ div.rbtoc1309540373641 li {margin-left: 0px;padding-left: 0px;}
 
 
 
-<h2><a name="ResourceAuto-DiscoveryProcesses-HypericAutoDiscoveryProcesses"></a>Hyperic Auto-Discovery Processes</h2>
+<h1><a name="ResourceAuto-DiscoveryProcesses-HypericAutoDiscoveryProcesses"></a>Hyperic Auto-Discovery Processes</h1>
 
 <p>Most resources are automatically discovered by the Hyperic Agent running on a platform. The agent scans a platform to discover new resources, and resources whose properties have changed since the last scan. For instance, if a platform's IP address changes, the next scan detects the change.</p>
 
 <p>Under the hood, an agent's auto-discovery capabilities break down to three different types of scan, described in the sections that follow.</p>
 
 
-<h3><a name="ResourceAuto-DiscoveryProcesses-DefaultScan"></a>Default Scan</h3>
+<h2><a name="ResourceAuto-DiscoveryProcesses-DefaultScan"></a>Default Scan</h2>
 
 <p>A <em>default scan</em> discovers platforms and servers from the process table or Windows registry.</p>
 
@@ -62,39 +70,39 @@ div.rbtoc1309540373641 li {margin-left: 0px;padding-left: 0px;}
 
 
 
-<p><span class="image-wrap" style=""><img src="attachments/77463605/77660172.png" width="750px" style="border: 0px solid black"/></span></p>
+<p><span class="image-wrap" style=""><img src="attachments/79038211/79135428.png" width="750px" style="border: 0px solid black"/></span></p>
 
 
 
-<p><font color=""></font></p>
 
-<h3><a name="ResourceAuto-DiscoveryProcesses-FileScan"></a>File Scan</h3>
+
+<h2><a name="ResourceAuto-DiscoveryProcesses-FileScan"></a>File Scan</h2>
 
 <p>A <em>file scan</em> discovers servers by scanning the platform's file system for manageable products' installation directories. You can configure what server types to look for and directories to include or exclude for the search. You can initiate a file scan explicitly; when you run a default scan, you can start a file scan at the same time &#8212; the agent never runs a file scan automatically.</p>
 
 
 
-<p><span class="image-wrap" style=""><img src="attachments/77463605/77660171.png" style="border: 0px solid black"/></span></p>
+<p><span class="image-wrap" style=""><img src="attachments/79038211/79135427.png" style="border: 0px solid black"/></span></p>
 
-<p><font color=""></font></p>
 
-<h3><a name="ResourceAuto-DiscoveryProcesses-RuntimeScan"></a>Runtime Scan</h3>
+
+<h2><a name="ResourceAuto-DiscoveryProcesses-RuntimeScan"></a>Runtime Scan</h2>
 
 <p>A <em>runtime scan</em> discovers servers and services &#8212; platform services as well as services that run in a server. The agent performs a runtime scan when a new platform or new servers on a platform are added to inventory. In addition, the agent automatically does a runtime scan once a day.</p>
 
-<p>For information about how to scan a platform on demand and options for configuring and disabling auto-discovery behavior, see <a href="Options for Running and Controlling Resource Discovery.html" title="Options for Running and Controlling Resource Discovery">Options for Running and Controlling Resource Discovery</a>.</p>
+<p>For information about how to scan a platform on demand and options for configuring and disabling auto-discovery behavior, see <a href="Options for Running and Controlling Resource Discovery.html" title="Options for Running and Controlling Resource Discovery">Options for Running and Controlling Resource Discovery</a> in <em>vFabric Hyperic Administration</em>.</p>
 
-<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Dynamic Service Type Detection</b><br />The auto-discovery functionality described on this page is governed by the resource plugin that manages a resource type. In addition, the Hyperic Agent can auto-discover and manage Java application services via Model MBeans that adhere to a specified ObjectName naming convention and expose a specified set of service data. This enables you to monitor application services along with the hosting application server and its internal services. For more information, see <a href="Java Applications.html" title="Java Applications">Java Applications</a>.</td></tr></table></div>
-
-
+<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Dynamic Service Type Detection</b><br />The auto-discovery functionality described on this page is governed by the resource plugin that manages a resource type. In addition, the Hyperic Agent can auto-discover and manage Java application services via Model MBeans that adhere to a specified ObjectName naming convention and expose a specified set of service data. This enables you to monitor application services along with the hosting application server and its internal services. For more information, see <a href="Java Applications.html" title="Java Applications">Java Applications</a> in <em>vFabric Hyperic Resource Configuration and Metrics</em>.</td></tr></table></div>
 
 
-<p><span class="image-wrap" style=""><img src="attachments/77463605/77660170.png" style="border: 0px solid black"/></span></p>
-
-<p><font color=""></font></p>
 
 
-<h2><a name="ResourceAuto-DiscoveryProcesses-AboutAutoInventoryIDsandInstallPath"></a>About Auto-Inventory IDs and InstallPath</h2>
+<p><span class="image-wrap" style=""><img src="attachments/79038211/79135426.png" style="border: 0px solid black"/></span></p>
+
+
+
+
+<h1><a name="ResourceAuto-DiscoveryProcesses-AboutAutoInventoryIDsandInstallPath"></a>About Auto-Inventory IDs and InstallPath</h1>
 <p><a name="ResourceAuto-DiscoveryProcesses-installpath"></a><br/>
 In Hyperic, any resource that is a server type must have an installation path defined as a configuration option. Note that for most server types, the installation path is not required for auto-discovery---servers are typically discovered from a scan of the system process table or Windows registry, and the value of the installation path is set by Hyperic. In fact, the installation path shown in Hyperic for a server often does not map to the actual installation path of the resource.</p>
 
@@ -110,7 +118,7 @@ In Hyperic, any resource that is a server type must have an installation path de
 </ul>
 
 
-<h2><a name="ResourceAuto-DiscoveryProcesses-WhattheAgentCanandCannotDiscover"></a>What the Agent Can and Cannot Discover</h2>
+<h1><a name="ResourceAuto-DiscoveryProcesses-WhattheAgentCanandCannotDiscover"></a>What the Agent Can and Cannot Discover</h1>
 
 <p>The data the Hyperic Agent discovers for a resource type is specified in the XML descriptor for the resource plugin that manages it. All operating system platform types are managed by HQ's <tt>system</tt> plugin. Most other Hyperic plugins discover multiple versions of a server type and the service types it contains. For example, Hyperic's <tt>tomcat</tt> plugin manages several versions of the Tomcat server and multiple services within Tomcat.</p>
 
@@ -124,7 +132,7 @@ In Hyperic, any resource that is a server type must have an installation path de
 
 
 <ul>
-	<li>Remote network services - The Hyperic Agent can manage remote services and devices over supported network protocols, for example HTTP, FTP, or SMTP. For obvious reasons, you explicitly configure a remotely managed resource: you manually add it to inventory, and configure the properties that enable the agent to communicate with it. See <a href="#ResourceAuto-DiscoveryProcesses-CreateNewPlatformService">Create New Platform Service</a> for more information.</li>
+	<li>Remote network services - The Hyperic Agent can manage remote services and devices over supported network protocols, for example HTTP, FTP, or SMTP. For obvious reasons, you explicitly configure a remotely managed resource: you manually add it to inventory, and configure the properties that enable the agent to communicate with it. For more information, see <a href="Create a Platform Service.html" title="Create a Platform Service">Create a Platform Service</a> in <em>vFabric Hyperic Administration</em>.</li>
 </ul>
 
 
@@ -133,11 +141,11 @@ In Hyperic, any resource that is a server type must have an installation path de
 </ul>
 
 
-<h2><a name="ResourceAuto-DiscoveryProcesses-HowDiscoveredResourcesGetintoHypericInventory"></a>How Discovered Resources Get into Hyperic Inventory</h2>
+<h1><a name="ResourceAuto-DiscoveryProcesses-HowDiscoveredResourcesGetintoHypericInventory"></a>How Discovered Resources Get into Hyperic Inventory</h1>
 
 <p>After a scan is completed, new and changed platforms and servers appear in the <b>Auto-Discovery</b> portlet on the Hyperic Dashboard. You explicitly add new and changed platforms to inventory - using controls in the <b>Auto-Discovery</b> portlet, or the <b>Auto-Discovery Results</b> page, which provides mored detailed results of what a scan detected on a platform. New and changed services do not appear in the <b>Auto-Discovery</b> portlet or the the <b>Auto-Discovery Results</b> page &#8212; you do not need to explicitly add them to inventory. When you add a platform or server to inventory, the associated services are automatically added as well.</p>
 
-<h2><a name="ResourceAuto-DiscoveryProcesses-WhattoDoAfterAddingNewResourcestoInventory"></a>What to Do After Adding New Resources to Inventory</h2>
+<h1><a name="ResourceAuto-DiscoveryProcesses-WhattoDoAfterAddingNewResourcestoInventory"></a>What to Do After Adding New Resources to Inventory</h1>
 
 <p>After adding a new platform or server to inventory, you might need to:</p>
 
@@ -161,7 +169,7 @@ In Hyperic, any resource that is a server type must have an installation path de
 </ul>
 
 
-<p><font color=""></font></p>
+
 
 				    					    <br/>
                         <div class="tabletitle">
@@ -172,19 +180,19 @@ In Hyperic, any resource that is a server type must have an installation path de
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464506/77660783.png">Default Scan.png</a> (image/png)
+                                <a href="attachments/79037968/79135110.png">manual scan.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464506/77660782">manual scan</a> (application/octet-stream)
+                                <a href="attachments/79037968/79135111">Runtime Scan</a> (application/octet-stream)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464506/77660777.png">Runtime Scan.png</a> (image/png)
+                                <a href="attachments/79037968/79135112.png">Runtime Scan.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464506/77660776">Runtime Scan</a> (application/octet-stream)
+                                <a href="attachments/79037968/79135113">manual scan</a> (application/octet-stream)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464506/77660779.png">manual scan.png</a> (image/png)
+                                <a href="attachments/79037968/79135114.png">Default Scan.png</a> (image/png)
                                 <br/>
                                                     </div>
 				    
@@ -196,7 +204,7 @@ In Hyperic, any resource that is a server type must have an installation path de
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:43</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:56</font></td>
 		    </tr>
 	    </table>
     </body>

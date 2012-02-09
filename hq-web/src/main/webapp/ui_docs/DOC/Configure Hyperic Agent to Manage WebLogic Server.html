@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : Configure Hyperic Agent to Manage WebLogic Server</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 4.6.5 : Configure Hyperic Agent to Manage WebLogic Server
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p>This page lists agent properties related to managing WebLogic Server.</p>
+
+<h1><a name="ConfigureHypericAgenttoManageWebLogicServer-SpecifyWebLogicServerInstallationPath"></a>Specify WebLogic Server Installation Path </h1>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>weblogic.installpath</b><br />
+<p><b>Description</b></p>
+
+<p>To enable the agent to monitor WebLogic 8.1, specify the location server/lib/weblogic.jar</p>
+
+<p><b>Default</b></p>
+
+<p>/usr/local/bea/weblogic-8.1</p></td></tr></table></div> 
+
+
+<h1><a name="ConfigureHypericAgenttoManageWebLogicServer-ConfigureHypericAgentforTwoWaySSLwithWebLogicServer"></a>Configure Hyperic Agent for Two-Way SSL with WebLogic Server </h1>
+
+
+<p>In Two-Way SSL, each side presents an SSL certificate to the other - the client must trust the server cert and the server must trust the client cert. The process is:</p>
+
+<ol>
+	<li>HQ Agent initiates a connection with the Administration Server.</li>
+	<li>The Administration server presents its certificate and asks the HQ Agent for its certificate.</li>
+	<li>The HQ Agent presents its certificate (<em>client2certs.pem</em>), using the private key (<em>clientkey.pem</em> and <em>clientkey</em>) to encrypt the communication.</li>
+</ol>
+
+
+<p>To enable the HQ Agent to use Two-Way-SSL with a Weblogic Administration Server, you specify the client cert the HQ Agent presents to the Administration Server by adding these properties to <tt>agent.properties</tt>.</p>
+
+<ul>
+	<li>weblogic.auth.method=ssl2ways</li>
+	<li>weblogic.ssl2ways.key=<em>ClientKey.pem</em> (client private key)</li>
+	<li>weblogic.ssl2ways.key.pass=<em>ClientKey</em> ﻿(passphrase for client private key)</li>
+	<li>weblogic.ssl2ways.cert=<em>Client2Certs.pem</em> (client certificate)</li>
+</ul>
+
+
+<p>Weblogic docs: <a href="http://download.oracle.com/docs/cd/E11035_01/wls100/security/SSL_client.html#wp1033891">Using Two-Way SSL Authentication</a></p>
+
+
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>weblogic.auth.method</b><br /><p><b>Description</b></p>
+
+<p><tt>weblogic.auth.method</tt> is one of four properties you define to enable an Hyperic Agent to communicate with a WebLogic Administration Server using Two-Way-SSL.</p>
+
+<p>Add the following line to the <tt>agent.properties</tt> file to specify that the agent will use Two-Way-SSL for communications with the Administration Server.</p>
+
+<p><tt>weblogic.auth.method=ssl2ways</tt></p>
+
+<p><b>Default</b></p>
+
+<p>None.</p>
+</td></tr></table></div> 
+
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>weblogic.ssl2ways.cert</b><br /><b>Description</b>
+
+<p><tt>weblogic.ssl2ways.cert</tt> is one of four properties you define to enable an Hyperic Agent to communicate with a WebLogic Administration Server using Two-Way-SSL.</p>
+
+<p>Add <tt>weblogic.ssl2ways.cert</tt> to the <tt>agent.properties</tt> file and set its value to the location of the client certificate that the Hyperic  Agent will present to the Administration Server:</p>
+
+<p><tt>weblogic.ssl2ways.cert=Client2Cert.pem</tt></p>
+
+<p>where <em>Client2Cert.pem</em> is the <b>path to the client certificate</b> the HQ Agent presents to the Administration Server it manages.</p>
+
+<p><b>Default</b></p>
+
+<p>None.</p>
+</td></tr></table></div> 
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>weblogic.ssl2ways.key</b><br /><b>Description</b>
+
+<p><tt>weblogic.ssl2ways.cert</tt> is one of four properties you define to enable an Hyperic Agent to communicate with a WebLogic Administration Server using Two-Way-SSL.</p>
+
+<p>Add <tt>weblogic.ssl2ways.cert</tt> to the <tt>agent.properties</tt> file and set its value to the location of the client certificate that the Hyperic  Agent will present to the Administration Server:</p>
+
+<p><tt>weblogic.ssl2ways.cert=Client2Cert.pem</tt></p>
+
+<p>where <em>Client2Cert.pem</em> is the <b>path to the client certificate</b> the HQ Agent presents to the Administration Server it manages.</p>
+
+<p><b>Default</b></p>
+
+<p>None.</p>
+</td></tr></table></div> 
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>weblogic.ssl2ways.key.pass</b><br /><p><b>Description</b></p>
+
+<p><tt>weblogic.ssl2ways.key.pass</tt> is one of four properties you define to enable an Hyperic Agent to communicate with a WebLogic Administration Server using Two-Way-SSL.</p>
+
+
+<p>Add <tt>weblogic.ssl2ways.key.pass</tt> to the <tt>agent.properties</tt> file and set its value to the passphrase for the client private key:</p>
+
+<p>weblogic.ssl2ways.key.pass=<em>ClientKey</em></p>
+
+<p>where <em>ClientKey</em> is the passphrase for the client private key.</p>
+
+<p><b>Default</b></p>
+
+<p>None.</p>
+</td></tr></table></div> 
+
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:56</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

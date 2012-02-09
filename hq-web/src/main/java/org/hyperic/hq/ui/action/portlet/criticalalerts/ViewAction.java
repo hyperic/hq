@@ -61,6 +61,7 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.util.HtmlUtils;
 
 /**
  * This action class is used by the Critical Alerts portlet. It's main use is to
@@ -71,10 +72,10 @@ public class ViewAction
 
     static final String RESOURCES_KEY = Constants.USERPREF_KEY_CRITICAL_ALERTS_RESOURCES;
 
-    private AuthzBoss authzBoss;
-    private EventsBoss eventsBoss;
-    private DashboardManager dashboardManager;
-    private AlertPermissionManager alertPermissionManager;
+    private final AuthzBoss authzBoss;
+    private final EventsBoss eventsBoss;
+    private final DashboardManager dashboardManager;
+    private final AlertPermissionManager alertPermissionManager;
 
     @Autowired
     public ViewAction(AuthzBoss authzBoss, EventsBoss eventsBoss, DashboardManager dashboardManager, AlertPermissionManager alertPermissionManager) {
@@ -85,7 +86,8 @@ public class ViewAction
         this.alertPermissionManager = alertPermissionManager;
     }
 
-    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+    @Override
+	public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                  HttpServletResponse response) throws Exception {
 
         HttpSession session = request.getSession();
@@ -176,7 +178,7 @@ public class ViewAction
             JSONObject jAlert = new JSONObject();
             jAlert.put("alertId", alert.getId());
             jAlert.put("appdefKey", eid.getAppdefKey());
-            jAlert.put("resourceName", aVal.getName());
+            jAlert.put("resourceName", HtmlUtils.htmlEscape(aVal.getName()));
             jAlert.put("alertDefName", def.getName());
             jAlert.put("cTime", date);
             jAlert.put("fixed", alert.getAlertInfo().isFixed());

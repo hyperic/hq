@@ -3,7 +3,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -61,9 +61,7 @@
 		<hq:constant classname="org.hyperic.hq.ui.Constants" symbol="MODE_MON_CHART_SMSR" var="MODE_MON_CHART_SMSR" />
 		<hq:constant classname="org.hyperic.hq.ui.Constants" symbol="MODE_MON_CHART_MMSR" var="MODE_MON_CHART_MMSR" />
 		<hq:constant classname="org.hyperic.hq.ui.Constants" symbol="MODE_MON_CHART_SMMR" var="MODE_MON_CHART_SMMR" />
-		<script src="<html:rewrite page="/js/chart.js"/>"
-			type="text/javascript"></script>
-
+		<jsu:importScript path="/js/chart.js" />
 		<table width="100%" border="0" cellspacing="0" cellpadding="0">
 			<tr>
 				<td colspan="4"><c:choose>
@@ -143,29 +141,27 @@
 					alt="" border="0" /></td>
 			</tr>
 		</table>
-
-		<script type="text/javascript">
-	hyperic.data.metric_chart = {
-		message: {
-			chartSaved: '<fmt:message key="resource.common.monitor.visibility.chart.confirm.ChartSaved"/>'
-		}
-	};
-
-	var MyMetricChart = new hyperic.MetricChart(document.forms["ViewChartForm"]);
-
-	<c:if test="${not empty metric}">
-		var exportParam = {};
-
-		exportParam.eid = "<c:out value="${Resource.entityId.type}:${Resource.id}" />";
-		exportParam.metricId = "<c:out value="${metric.id}" />";
-
-      	<c:if test="${not empty param.ctype}">
-      		exportParam.ctype = "<c:out value="${param.ctype}" />";
-      	</c:if>
-	</c:if>
-
-	setInterval("MyMetricChart.refresh()",300000); // 5 minute page refresh  300000
-</script>
-
+		<jsu:script>
+			hyperic.data.metric_chart = {
+				message: {
+					chartSaved: '<fmt:message key="resource.common.monitor.visibility.chart.confirm.ChartSaved"/>'
+				}
+			};
+		
+			var MyMetricChart = new hyperic.MetricChart(document.forms["ViewChartForm"]);
+		
+			<c:if test="${not empty metric}">
+				var exportParam = {};
+		
+				exportParam.eid = "<c:out value="${Resource.entityId.type}:${Resource.id}" />";
+				exportParam.metricId = "<c:out value="${metric.id}" />";
+		
+		      	<c:if test="${not empty param.ctype}">
+		      		exportParam.ctype = "<c:out value="${param.ctype}" />";
+		      	</c:if>
+			</c:if>
+		
+			setInterval("MyMetricChart.refresh()",300000); // 5 minute page refresh  300000
+		</jsu:script>
 	</c:otherwise>
 </c:choose>

@@ -28,10 +28,7 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitNode;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitOverview;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitStatsObject;
+import org.hyperic.hq.plugin.rabbitmq.core.*;
 import org.hyperic.hq.product.PluginException;
 
 /**
@@ -64,7 +61,14 @@ public class RabbitServerCollector extends RabbitStatsCollector {
             setValue("fd_percentage", (double) n.getFdUsed() / (double) n.getFdTotal());
             setValue("connectionCount", rabbitAdmin.getConnections().size());
             setValue("channelCount", rabbitAdmin.getChannels().size());
-            getResult().addValues(o.getQueueTotals());
+
+            QueueTotals queueTotals = o.getQueueTotals();
+            if (queueTotals != null) {
+                setValue("messages", queueTotals.getMessages());
+                setValue("messages_ready", queueTotals.getMessagesReady());
+                setValue("messages_unacknowledged", queueTotals.getMessagesUnacknowledged());
+            }
+
             res = o;
 
         } catch (PluginException ex) {

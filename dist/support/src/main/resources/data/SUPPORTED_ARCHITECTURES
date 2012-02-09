@@ -1,0 +1,15 @@
+#
+# This folder contains multiple support-commands.* and helper-commands.* files, as explained in support-commands.common.
+#
+# Here is a list of the possible architectures for the system, which define the possible extensions for the support-commands and helper-commands files.
+# The list of architectures is identical to the one used inside the pom.xml files.
+#
+# * apple-osx
+# * hpux-11
+# * ppc-aix
+# * sparc-solaris
+# * x86-linux
+# * x86-64-linux
+# * win32
+#
+# Please note that the actual detection of the architecture is part of the scripts/hq_utils.py script.

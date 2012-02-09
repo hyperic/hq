@@ -1,62 +1,65 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : Define an Alert for a Resource Type</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : Define an Alert for a Resource Type</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : Define an Alert for a Resource Type
+                            vFabric Hyperic 4.6.5 : Define an Alert for a Resource Type
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 21, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1308678469435 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1308678469435 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1308678469435 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1325699425106 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699425106 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699425106 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1308678469435'>
+/*]]>*/</style><div class='rbtoc1325699425106'>
 <ul>
-    <li><a href='#DefineanAlertforaResourceType-DefineaResourceTypeAlert'>Define a Resource Type Alert</a></li>
+    <li><a href='#ui-Admin.Monitor.NewResourceTypeAlert-DefineaResourceTypeAlert'>Define a Resource Type Alert</a></li>
 <ul>
-    <li><a href='#DefineanAlertforaResourceType-Step1SelectTargetResourceType'>Step 1 - Select Target Resource Type</a></li>
-    <li><a href='#DefineanAlertforaResourceType-Step2DefineAlertProperties'>Step 2 - Define Alert Properties</a></li>
-    <li><a href='#DefineanAlertforaResourceType-Step3DefineAlertConditionSet'>Step 3 - Define Alert Condition Set</a></li>
+    <li><a href='#ui-Admin.Monitor.NewResourceTypeAlert-Step1SelectTargetResourceType'>Step 1 - Select Target Resource Type</a></li>
+    <li><a href='#ui-Admin.Monitor.NewResourceTypeAlert-Step2DefineAlertProperties'>Step 2 - Define Alert Properties</a></li>
+    <li><a href='#ui-Admin.Monitor.NewResourceTypeAlert-Step3DefineAlertConditionSet'>Step 3 - Define Alert Condition Set</a></li>
 <ul>
-    <li><a href='#DefineanAlertforaResourceType-ConditionSet'>Condition Set</a></li>
-    <li><a href='#DefineanAlertforaResourceType-DefineAdditionalConditions'>Define Additional Conditions</a></li>
-    <li><a href='#DefineanAlertforaResourceType-DefineRecoveryAlertBehavior'>Define Recovery Alert Behavior</a></li>
-    <li><a href='#DefineanAlertforaResourceType-EnableActions'>Enable Actions</a></li>
-    <li><a href='#DefineanAlertforaResourceType-EnableActionFilters'>Enable Action Filters</a></li>
+    <li><a href='#ui-Admin.Monitor.NewResourceTypeAlert-ConditionSet'>Condition Set</a></li>
+    <li><a href='#ui-Admin.Monitor.NewResourceTypeAlert-DefineAdditionalConditions'>Define Additional Conditions</a></li>
+    <li><a href='#ui-Admin.Monitor.NewResourceTypeAlert-DefineRecoveryAlertBehavior'>Define Recovery Alert Behavior</a></li>
+    <li><a href='#ui-Admin.Monitor.NewResourceTypeAlert-EnableActions'>Enable Actions</a></li>
+    <li><a href='#ui-Admin.Monitor.NewResourceTypeAlert-EnableActionFilters'>Enable Action Filters</a></li>
 <ul>
-    <li><a href='#DefineanAlertforaResourceType-DisableanAlertDefinitionuponFiring'>Disable an Alert Definition upon Firing</a></li>
-    <li><a href='#DefineanAlertforaResourceType-DisregardControlActionsforRelatedAlerts.'>Disregard Control Actions for Related Alerts.</a></li>
+    <li><a href='#ui-Admin.Monitor.NewResourceTypeAlert-DisableanAlertDefinitionuponFiring'>Disable an Alert Definition upon Firing</a></li>
+    <li><a href='#ui-Admin.Monitor.NewResourceTypeAlert-DisregardControlActionsforRelatedAlerts.'>Disregard Control Actions for Related Alerts.</a></li>
 </ul>
 </ul>
-    <li><a href='#DefineanAlertforaResourceType-Step4DefineAlertActions'>Step 4 - Define Alert Actions</a></li>
+    <li><a href='#ui-Admin.Monitor.NewResourceTypeAlert-Step4DefineAlertActions'>Step 4 - Define Alert Actions</a></li>
 <ul>
-    <li><a href='#DefineanAlertforaResourceType-Escalation'>Escalation</a></li>
-    <li><a href='#DefineanAlertforaResourceType-ControlAction'>Control Action</a></li>
-    <li><a href='#DefineanAlertforaResourceType-NotifyRoles'>Notify Roles</a></li>
-    <li><a href='#DefineanAlertforaResourceType-NotifyHQUsers'>Notify HQ Users</a></li>
-    <li><a href='#DefineanAlertforaResourceType-NotifyOtherRecipients'>Notify Other Recipients</a></li>
-    <li><a href='#DefineanAlertforaResourceType-Script'>Script</a></li>
-    <li><a href='#DefineanAlertforaResourceType-OpenNMS'>OpenNMS</a></li>
-    <li><a href='#DefineanAlertforaResourceType-SNMPNotification'>SNMP Notification</a></li>
+    <li><a href='#ui-Admin.Monitor.NewResourceTypeAlert-Escalation'>Escalation</a></li>
+    <li><a href='#ui-Admin.Monitor.NewResourceTypeAlert-ControlAction'>Control Action</a></li>
+    <li><a href='#ui-Admin.Monitor.NewResourceTypeAlert-NotifyRoles'>Notify Roles</a></li>
+    <li><a href='#ui-Admin.Monitor.NewResourceTypeAlert-NotifyHQUsers'>Notify HQ Users</a></li>
+    <li><a href='#ui-Admin.Monitor.NewResourceTypeAlert-NotifyOtherRecipients'>Notify Other Recipients</a></li>
+    <li><a href='#ui-Admin.Monitor.NewResourceTypeAlert-Script'>Script</a></li>
+    <li><a href='#ui-Admin.Monitor.NewResourceTypeAlert-OpenNMS'>OpenNMS</a></li>
+    <li><a href='#ui-Admin.Monitor.NewResourceTypeAlert-SNMPNotification'>SNMP Notification</a></li>
 </ul>
 </ul>
 </ul></div>
@@ -83,22 +86,22 @@ div.rbtoc1308678469435 li {margin-left: 0px;padding-left: 0px;}
 
 <p>On the <b>New Alert</b> page, define each property in the "Alert Properties" section.&nbsp;</p>
 <ul>
-	<li><b>Name</b> &#45; Name assigned by the user creating an alert definition. A fired alert is identified, in the HQ user interface and alert notifications, by the alert definition name and a timestamp. An alert definition name should clearly communicate the nature of the problem. For example, "Down" for an alert on availability, or "Low Memory" for an alert on free memory.</li>
+	<li><b>Name</b> &#8212; Name assigned by the user creating an alert definition. A fired alert is identified, in the Hyperic user interface and alert notifications, by the alert definition name and a timestamp. An alert definition name should clearly communicate the nature of the problem. For example, "Down" for an alert on availability, or "Low Memory" for an alert on free memory.</li>
 </ul>
 
 
 <ul>
-	<li><b>Description</b> &#45; Description entered by the user creating the alert definition.</li>
+	<li><b>Description</b> &#8212; Description entered by the user creating the alert definition.</li>
 </ul>
 
 
 <ul>
-	<li><b>Priority</b> &#45; The severity of the problem, as defined by the person creating the alert definition:&nbsp; "Low", "Medium", or "High".&nbsp; A consistent policy for defining an alert definition priority makes it easier to triage problems appropriately.&nbsp; An alert's priority is shown in HQ pages that present alert status and in alert notifications. You can sort alerts by priority in HQ Enterprise's&nbsp; <b>Alert Center</b> or <b>Operations Center</b>.</li>
+	<li><b>Priority</b> &#8212; The severity of the problem, as defined by the person creating the alert definition: "Low", "Medium", or "High". A consistent policy for defining an alert definition priority makes it easier to triage problems appropriately.  An alert's priority is shown in Hyperic pages that present alert status and in alert notifications. You can sort alerts by priority in vFabric Hyperic's <b>Alert Center</b> or <b>Operations Center</b>.</li>
 </ul>
 
 
 <ul>
-	<li><b>Active</b> &#45; The current enabled/disabled status of the alert definition. Alerts only fire for enabled alert definitions.  When an alert definition is disabled, HQ does not evaluate its condition or fire alerts for it.</li>
+	<li><b>Active</b> &#8212; The current enabled/disabled status of the alert definition. Alerts only fire for enabled alert definitions. When an alert definition is disabled, Hyperic does not evaluate its condition or fire alerts for it.</li>
 </ul>
 
 
@@ -109,17 +112,17 @@ div.rbtoc1308678469435 li {margin-left: 0px;padding-left: 0px;}
 
 <p>An alert condition specifies a resource metric value or event that will initiate the alert firing process.</p>
 
-<p>The condition types you can choose when you define a alert vary by resource type and HQ version. If a condition type is not supported by your version of HQ or is not valid for the target resource, it will not appear as an option.</p>
+<p>The condition types you can choose when you define a alert vary by resource type and Hyperic version. If a condition type is not supported by your version of Hyperic or is not valid for the target resource, it will not appear as an option.</p>
 
 <p>To define a condition, choose one of the following condition types, and supply required parameter values.</p>
 <ul>
-	<li><b>Metric condition</b> &#45;&nbsp; To base the alert on the value of a metric that HQ collects for the resource:
+	<li><b>Metric condition</b> &#45;&nbsp; To base the alert on the value of a metric that Hyperic collects for the resource:
 	<ol>
 		<li><b>Metric</b> &#45; Select a metric from the selector list.&nbsp; Only currently enabled metrics are listed.&nbsp; (If the metric you're looking for is not listed, see the note below.)</li>
 		<li>Define the rule for evaluating the metric value.&nbsp; You can:
 		<ul>
 			<li><ins>Compare metric value to an absolute value</ins>. Select an operator: <b>&gt;(greater than)</b>, <b>&lt;(less than)</b>, <b>=(equal to)</b>, or <b>&#33;= (not equal to)</b>, and enter a metric value. If the metric value is a percentage, specify it as a float value. For example, enter <tt>.99</tt> for <tt>99%</tt>, <tt>1.0</tt> for 100%. Use a period (.) as a decimal separator, rather than a comma (,).</li>
-			<li><ins>Compare metric value to its minimum, baseline, or maximum value</ins> <font color="red">&#42;</font>, in HQ Enterprise only. Select an operator: <b>&gt;(greater than)</b>, <b>&lt;(less than)</b>, <b>=(equal to)</b>, or <b>&#33;= (not equal to)</b>, and choose "Min Value", "Baseline Value" or "Max Value". Baselining must be enabled. For more information, see <a href="Metrics and Metric Collection.html#MetricsandMetricCollection-baselines">Baselines</a>.</li>
+			<li><ins>Compare metric value to its minimum, baseline, or maximum value</ins> <font color="red">&#42;</font>, in vFabric Hyperic only. Select an operator: <b>&gt;(greater than)</b>, <b>&lt;(less than)</b>, <b>=(equal to)</b>, or <b>&#33;= (not equal to)</b>, and choose "Min Value", "Baseline Value" or "Max Value". Baselining must be enabled. For more information, see <a href="Metrics and Metric Collection.html#MetricsandMetricCollection-baselines">Baselines</a>.</li>
 			<li><ins>Fire upon change in metric value</ins>.&nbsp; Click <b>value changes</b>.</li>
 		</ul>
 		</li>
@@ -142,12 +145,12 @@ div.rbtoc1308678469435 li {margin-left: 0px;padding-left: 0px;}
 
 
 <ul>
-	<li><b>Events/Log Level Condition</b> &#45; To define a condition that is triggered by a log event, select a message severity level ("error", "warn", "info", "debug", "all") and optionally a match string. The condition is satisfied each time a message of the selected severity that contains the match string (if one was specified) is written to a log file that HQ is tracking. Log tracking must be enabled for the resource. To determine the log files that HQ monitors for the resource, see the <b>Configuration Properties</b> section of the resource's <b>Inventory</b> tab. The log files that HQ monitors for a resource are defined using the <b>server.log_track.files</b> property. For configuration instructions, see&nbsp; see <a href="Set Up Log Tracking for a Resource.html" title="Set Up Log Tracking for a Resource">Set Up Log Tracking for a Resource</a>.</li>
+	<li><b>Events/Log Level Condition</b> &#45; To define a condition that is triggered by a log event, select a message severity level ("error", "warn", "info", "debug", "all") and optionally a match string. The condition is satisfied each time a message of the selected severity that contains the match string (if one was specified) is written to a log file that Hyperic is tracking. Log tracking must be enabled for the resource. To determine the log files that Hyperic monitors for the resource, see the <b>Configuration Properties</b> section of the resource's <b>Inventory</b> tab. The log files that Hyperic monitors for a resource are defined using the <b>server.log_track.files</b> property. For configuration instructions, see&nbsp; see <a href="Set Up Log Tracking for a Resource.html" title="Set Up Log Tracking for a Resource">Set Up Log Tracking for a Resource</a>.</li>
 </ul>
 
 
 <ul>
-	<li><b>Config Changed... Condition</b> &#45; This type of condition is triggered by a change to a configuration file that HQ is configured to monitor for the resource. To limit the condition to a single file, enter its filename in the "match filename" field.&nbsp; If you don't specify a filename, a change to any file monitored will trigger the alert.&nbsp; To determine the log files that HQ monitors for the resource, see the <b>Configuration Properties</b> section of the resource's <b>Inventory</b> tab. The files that HQ monitors for a resource are defined using the <b>server.config_track.files</b> property. The maximum length for filename entered is&nbsp; 25 characters.&nbsp; For configuration instructions, see <a href="Set Up Configuration Tracking for a Resource.html" title="Set Up Configuration Tracking for a Resource">Set Up Configuration Tracking for a Resource</a>.</li>
+	<li><b>Config Changed... Condition</b> &#45; This type of condition is triggered by a change to a configuration file that Hyperic is configured to monitor for the resource. To limit the condition to a single file, enter its filename in the "match filename" field.&nbsp; If you don't specify a filename, a change to any file monitored will trigger the alert.&nbsp; To determine the log files that Hyperic monitors for the resource, see the <b>Configuration Properties</b> section of the resource's <b>Inventory</b> tab. The files that Hyperic monitors for a resource are defined using the <b>server.config_track.files</b> property. The maximum length for filename entered is&nbsp; 25 characters.&nbsp; For configuration instructions, see <a href="Set Up Configuration Tracking for a Resource.html" title="Set Up Configuration Tracking for a Resource">Set Up Configuration Tracking for a Resource</a>.</li>
 </ul>
 
 
@@ -155,7 +158,7 @@ div.rbtoc1308678469435 li {margin-left: 0px;padding-left: 0px;}
 <p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
 
 
-<p>In HQ Enterprise, you can define up to three conditions for an alert. To add another condition, click <b>Add Another Condition</b> and specify whether both the new condition and the preceding one must be satisfied for the alert to be triggered ("AND") or only one must be satisfied ("OR").</p>
+<p>In vFabric Hyperic, you can define up to three conditions for an alert. To add another condition, click <b>Add Another Condition</b> and specify whether both the new condition and the preceding one must be satisfied for the alert to be triggered ("AND") or only one must be satisfied ("OR").</p>
 
 <h3><a name="DefineanAlertforaResourceType-DefineRecoveryAlertBehavior"></a>Define Recovery Alert Behavior</h3>
 <p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
@@ -190,7 +193,7 @@ div.rbtoc1308678469435 li {margin-left: 0px;padding-left: 0px;}
 
 <p>This option eliminates redundant firing for the same problem. If you do not choose this option, the alert will fire repeatedly as long as the triggering condition is still true.&nbsp;&nbsp;</p>
 
-<p>In HQ Enterprise this configuration option &#45;&nbsp; used in conjunction with recovery alerts &#45;&nbsp; automates the process of disabling and re-enabling an alert definition.&nbsp; Result:&nbsp; (1) no redundant alerts for the same problem, and (2) you don't have manually "fix" an alert triggered by a transient problem.</p>
+<p>In vFabric Enterprise this configuration option, used in conjunction with recovery alerts, automates the process of disabling and re-enabling an alert definition. Result: (1) no redundant alerts for the same problem, and (2) you don't have manually "fix" an alert triggered by a transient problem.</p>
 
 <h4><a name="DefineanAlertforaResourceType-DisregardControlActionsforRelatedAlerts."></a>Disregard Control Actions for Related Alerts.</h4>
 <p><a name="DefineanAlertforaResourceType-DisregardControlActions"></a></p>
@@ -227,7 +230,7 @@ div.rbtoc1308678469435 li {margin-left: 0px;padding-left: 0px;}
 
 <p><a name="DefineanAlertforaResourceType-AlertControlAction"></a></p>
 
-<p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 608x185" href='http://support.hyperic.com/download/attachments/77463605/AddControlAction.png'><img src="attachments/thumbnails/77463605/77660383" style="border: 0px solid black"/></a></span></p>
+<p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 608x185" href='http://support.hyperic.com/download/attachments/79038211/AddControlAction.png'><img src="attachments/thumbnails/79038211/79135339" style="border: 0px solid black"/></a></span></p>
 
 <h3><a name="DefineanAlertforaResourceType-NotifyRoles"></a>Notify Roles</h3>
 
@@ -267,7 +270,7 @@ div.rbtoc1308678469435 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 
 
-<p>For more information, see <a href="http://support.hyperic.com/display/hypcomm/HQU+OpenNMS" title="HQU OpenNMS">Enabling OpenNMS Integration</a>.</p>
+<p>For more information, see <a href="http://support.hyperic.com/display/hyperforge/HQU+OpenNMS">http://support.hyperic.com/display/hyperforge/HQU+OpenNMS</a>.</p>
 
 
 <h3><a name="DefineanAlertforaResourceType-SNMPNotification"></a>SNMP Notification</h3>
@@ -312,7 +315,7 @@ div.rbtoc1308678469435 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 
 
-<p><font color=""></font></p>
+
 
 				    					    <br/>
                         <div class="tabletitle">
@@ -323,13 +326,13 @@ div.rbtoc1308678469435 li {margin-left: 0px;padding-left: 0px;}
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464487/77660784.gif">tbb_new.gif</a> (image/gif)
+                                <a href="attachments/79037335/79135043.gif">tbb_editAlerts.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464487/77660787.gif">toolbox_Administration_on.gif</a> (image/gif)
+                                <a href="attachments/79037335/79135044.gif">toolbox_Administration_on.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464487/77660786.gif">tbb_editAlerts.gif</a> (image/gif)
+                                <a href="attachments/79037335/79135045.gif">tbb_new.gif</a> (image/gif)
                                 <br/>
                                                     </div>
 				    
@@ -341,7 +344,7 @@ div.rbtoc1308678469435 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:43</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:56</font></td>
 		    </tr>
 	    </table>
     </body>

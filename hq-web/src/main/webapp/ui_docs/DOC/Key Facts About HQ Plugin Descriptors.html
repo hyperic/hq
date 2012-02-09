@@ -1,24 +1,27 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : Key Facts About HQ Plugin Descriptors</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : Key Facts About HQ Plugin Descriptors</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : Key Facts About HQ Plugin Descriptors
+                            vFabric Hyperic 4.6.5 : Key Facts About HQ Plugin Descriptors
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 24, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
@@ -26,11 +29,11 @@
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1308934604905 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1308934604905 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1308934604905 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1325699834067 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699834067 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699834067 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1308934604905'>
+/*]]>*/</style><div class='rbtoc1325699834067'>
 <ul>
     <li><a href='#KeyFactsAboutHQPluginDescriptors-DescriptorDefinesResourceTypes%2CManagementFunctions%2CandMetrics'>Descriptor Defines Resource Types, Management Functions, and Metrics</a></li>
     <li><a href='#KeyFactsAboutHQPluginDescriptors-ResourceHierarchyistheSkeletonofaDescriptor'>Resource Hierarchy is the Skeleton of a Descriptor</a></li>
@@ -39,21 +42,21 @@ div.rbtoc1308934604905 li {margin-left: 0px;padding-left: 0px;}
     <li><a href='#KeyFactsAboutHQPluginDescriptors-InheritanceandReuseinPluginDescriptors'>Inheritance and Reuse in Plugin Descriptors</a></li>
     <li><a href='#KeyFactsAboutHQPluginDescriptors-EveryPluginRequiresaVersionProperty'>Every Plugin Requires a Version Property</a></li>
 </ul></div>
-<p>This page is a broad overview of the descriptor component of an HQ resource plugin. High level view of the XML schema, descriptions of the key XML elements, and highlights key concepts and behaviors a plugin developer should understand.</p>
+<p>This page is an overview of the descriptor component of an Hyperic resource plugin. High level view of the XML schema, descriptions of the key XML elements, and highlights key concepts and behaviors a plugin developer should understand.</p>
 
 <h1><a name="KeyFactsAboutHQPluginDescriptors-DescriptorDefinesResourceTypes%2CManagementFunctions%2CandMetrics"></a>Descriptor Defines Resource Types, Management Functions, and Metrics</h1>
 
 <p>A plugin descriptor is an XML file that defines what a plugin does and how - the resource types it manages and for each type, the management funtions it performs, the resource data it requires and discovers, and the metrics it returns.</p>
 
-<p>Every plugin has a descriptor file. If a plugin that uses HQ plugin support classes or a script to perform management functions, the descriptor is the component to develope and deploy. The descriptor for a plugin that uses custom management classes is packaged with the classes in a JAR for deployment</p>
+<p>Every plugin has a descriptor file. If a plugin that uses Hyperic plugin support classes or a script to perform management functions, the descriptor is the component to develope and deploy. The descriptor for a plugin that uses custom management classes is packaged with the classes in a JAR for deployment</p>
 
 <h2><a name="KeyFactsAboutHQPluginDescriptors-ManagedResourceTypeHierarchy"></a>Managed Resource Type Hierarchy</h2>
 
-<p>A plugin descriptor defines each resource type the plugin will manage, in some cases a single type, more typically a hierarchy of types, for instance a server (e.g., Tomcat 6.0) and its services (e.g. Vhosts). A plugin can manage multiple resource type hierarchies, for instance, HQ's Tomcat plugin manages Tomcat 5.5 as well as Tomcat 6. The descriptor for such plugins defines a resource hierarchy for <em>each</em> version.</p>
+<p>A plugin descriptor defines each resource type the plugin will manage, in some cases a single type, more typically a hierarchy of types, for instance a server (e.g., Tomcat 6.0) and its services (e.g. Vhosts). A plugin can manage multiple resource type hierarchies, for instance, Hyperic's Tomcat plugin manages Tomcat 5.5 as well as Tomcat 6. The descriptor for such plugins defines a resource hierarchy for <em>each</em> version.</p>
 
-<p>Although a plugin can manage a platform and one or more levels of dependent resources, in practice virtually all platform-level resources are managed by a single HQ plugin - the system plugin (system-plugin.jar).&nbsp; The system plugin discovers and manages <em>all</em> supported operating system platforms (Unix, Linux, Win32, Solaris, MacOSX, AIX, HPUX , and FreeBSD) and platform services (such as network interface, CPU, file server mount services) for each.</p>
+<p>Although a plugin can manage a platform and one or more levels of dependent resources, in practice virtually all platform-level resources are managed by a single Hyperic plugin - the system plugin (system-plugin.jar).&nbsp; The system plugin discovers and manages <em>all</em> supported operating system platforms (Unix, Linux, Win32, Solaris, MacOSX, AIX, HPUX , and FreeBSD) and platform services (such as network interface, CPU, file server mount services) for each.</p>
 
-<p>The only other HQ plugins that manage resources that HQ considers platforms are those that manage virtual or network hosts.</p>
+<p>The only other Hyperic plugins that manage resources that Hyperic considers platforms are those that manage virtual or network hosts.</p>
 
 <h2><a name="KeyFactsAboutHQPluginDescriptors-ManagementFunctionsandClassesforeachResourceType"></a>Management Functions and Classes for each Resource Type</h2>
 
@@ -103,7 +106,7 @@ div.rbtoc1308934604905 li {margin-left: 0px;padding-left: 0px;}
 
 <h1><a name="KeyFactsAboutHQPluginDescriptors-ResourceHierarchyistheSkeletonofaDescriptor"></a>Resource Hierarchy is the Skeleton of a Descriptor</h1>
 
-<p>The structure of a plugin descriptor is the same as the hierarchy of resource types the plugin manages, expressed in terms of the HQ inventory model.&nbsp; A plugin descriptor contains a resource type element&nbsp; - <tt>&lt;platform&gt;</tt>, <tt>&lt;server&gt;</tt>, or <tt>&lt;service&gt;</tt> &#45; for each resource type to be managed. Note that the resource element hierarchy in the descriptor must reflect relationships between the managed resource types.&nbsp; For example, a <tt>&lt;server&gt;</tt> element for a Tomcat type contains (is the parent of) the <tt>&lt;service&gt;</tt> element for the Vhost type.&nbsp;</p>
+<p>The structure of a plugin descriptor is the same as the hierarchy of resource types the plugin manages, expressed in terms of the Hyperic inventory model.&nbsp; A plugin descriptor contains a resource type element&nbsp; - <tt>&lt;platform&gt;</tt>, <tt>&lt;server&gt;</tt>, or <tt>&lt;service&gt;</tt> &#45; for each resource type to be managed. Note that the resource element hierarchy in the descriptor must reflect relationships between the managed resource types.&nbsp; For example, a <tt>&lt;server&gt;</tt> element for a Tomcat type contains (is the parent of) the <tt>&lt;service&gt;</tt> element for the Vhost type.&nbsp;</p>
 
 <p>The left column below illustrates <em>all</em> of the resource element relationships that are valid in a plugin descriptor. Elements that map to resource types shown in bold. (No element attributes are shown, and some lower level elements are excluded. The child elements below each resource type element are used to define the resource data, plugin functions, and metrics for that resource type.
 <br class="atl-forced-newline" /></p>
@@ -173,7 +176,7 @@ div.rbtoc1308934604905 li {margin-left: 0px;padding-left: 0px;}
 </div></div><br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> <b><em>Platform-Platform Service</em></b> <br class="atl-forced-newline" />
 (NOT TYPICAL) <br class="atl-forced-newline" />
-HQ's system-plugin manages all of HQ-supported operating system platforms, and services that run on each, usually referred to as <em>platform services</em>. The plugin descriptor defines a <tt>&lt;platform&gt;</tt> &#45; <tt>&lt;service&gt;</tt> hierarchy for each operating system platform. <br class="atl-forced-newline" />
+Hyperic's system-plugin manages all of Hyperic-supported operating system platforms, and services that run on each, usually referred to as <em>platform services</em>. The plugin descriptor defines a <tt>&lt;platform&gt;</tt> &#45; <tt>&lt;service&gt;</tt> hierarchy for each operating system platform. <br class="atl-forced-newline" />
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
 		<pre class="theme: Confluence; brush: java; gutter: false">&lt;plugin&gt;
@@ -186,7 +189,7 @@ HQ's system-plugin manages all of HQ-supported operating system platforms, and s
 		</div>
 </div></div><b><em>Platform-Server-Service</em></b> <br class="atl-forced-newline" />
 (NOT TYPICAL) <br class="atl-forced-newline" />  <br class="atl-forced-newline" />
-This structure is valid but uncommon. The only HQ plugins that manage a platform-server-service are plugins that manage virtual platforms. <br class="atl-forced-newline" /> <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+This structure is valid but uncommon. The only Hyperic plugins that manage a platform-server-service are plugins that manage virtual platforms. <br class="atl-forced-newline" /> <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
 		<pre class="theme: Confluence; brush: java; gutter: false">&lt;plugin&gt;
    &lt;platform&gt;
@@ -196,7 +199,7 @@ This structure is valid but uncommon. The only HQ plugins that manage a platform
 </div></div><b><em>Server-Service</em></b> <br class="atl-forced-newline" />
 (TYPICAL) <br class="atl-forced-newline" />
 <br class="atl-forced-newline" />
-Most HQ plugins manage a server type and the service types that it contains; the <tt>&lt;server&gt;</tt> element is the root of the plugin, and contains a <tt>&lt;service&gt;</tt> element for each of the services the plugin manages. The descriptor for a plugin that manages multiple versions of a server type (e.g the plugin for Tomcat 5.5 and 6.0) defines a <tt>&lt;server&gt;</tt> &#45; <tt>&lt;service&gt;</tt> hierarchy for each.<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+Most Hyperic plugins manage a server type and the service types that it contains; the <tt>&lt;server&gt;</tt> element is the root of the plugin, and contains a <tt>&lt;service&gt;</tt> element for each of the services the plugin manages. The descriptor for a plugin that manages multiple versions of a server type (e.g the plugin for Tomcat 5.5 and 6.0) defines a <tt>&lt;server&gt;</tt> &#45; <tt>&lt;service&gt;</tt> hierarchy for each.<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
 		<pre class="theme: Confluence; brush: java; gutter: false">&lt;plugin&gt; (root)
    &lt;server&gt;
@@ -230,13 +233,13 @@ If a plugin manages only a platform service the <tt>&lt;service&gt;</tt> element
 
 
 <ul>
-	<li>Resource data the plugin uses, and related user interface behaviors, whether and where resource properties are presented in the HQ user interface, defaults and allowable values for configurable data, and so on.</li>
+	<li>Resource data the plugin uses, and related user interface behaviors, whether and where resource properties are presented in the Hyperic user interface, defaults and allowable values for configurable data, and so on.</li>
 </ul>
 
 
 <p>The following table below introduces elements you can define for each resource type a plugin will manage.&nbsp; Click the thumbnail to display a diagram that visualizes the purpose and effect of key descriptor elements.</p>
 
-<p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 1632x1056" href='http://support.hyperic.com/download/attachments/77464225/DescriptorElement.jpg'><img src="attachments/thumbnails/77464225/77660757" style="border: 0px solid black"/></a></span></p>
+<p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 1632x1056" href='http://support.hyperic.com/download/attachments/79037430/DescriptorElement.jpg'><img src="attachments/thumbnails/79037430/79135062" style="border: 0px solid black"/></a></span></p>
 <div class='table-wrap'>
 <table class='confluenceTable'><tbody>
 <tr>
@@ -261,7 +264,7 @@ If a plugin manages only a platform service the <tt>&lt;service&gt;</tt> element
 </ul>
 </td>
 <td class='confluenceTd'> <tt>&lt;property&gt;</tt> specifies a non-configurable resource attribute, whose value might be discovered (e.g., RAM, or CPU speed for a platform), returned by a plugin class, or defined in the descriptor. <br class="atl-forced-newline" />  <br class="atl-forced-newline" />
-Resource data defined as a <tt>&lt;property&gt;</tt> cannot be entered or edited in the HQ user interface. <br class="atl-forced-newline" />  <br class="atl-forced-newline" />  <tt>&lt;properties&gt;</tt> is a container element for one or more <tt>&lt;property&gt;</tt> elements. <tt>&lt;property&gt;</tt> elements contained by a <tt>&lt;properties&gt;</tt> element are presented at the top of the <b>Browse</b> page for a resource instance. <br class="atl-forced-newline" /> </td>
+Resource data defined as a <tt>&lt;property&gt;</tt> cannot be entered or edited in the Hyperic user interface. <br class="atl-forced-newline" />  <br class="atl-forced-newline" />  <tt>&lt;properties&gt;</tt> is a container element for one or more <tt>&lt;property&gt;</tt> elements. <tt>&lt;property&gt;</tt> elements contained by a <tt>&lt;properties&gt;</tt> element are presented at the top of the <b>Browse</b> page for a resource instance. <br class="atl-forced-newline" /> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Management functions for a resource type:
@@ -270,7 +273,7 @@ Resource data defined as a <tt>&lt;property&gt;</tt> cannot be entered or edited
 	<li><tt>&lt;actions&gt;</tt></li>
 </ul>
 </td>
-<td class='confluenceTd'> <tt>&lt;plugin&gt;</tt> specifies a management function (auto-discovery, measurement, control, log tracking, and so on) for a resource type, and the Java class - either a custom class or an HQ support class - that performs that function. <br class="atl-forced-newline" />  <br class="atl-forced-newline" />
+<td class='confluenceTd'> <tt>&lt;plugin&gt;</tt> specifies a management function (auto-discovery, measurement, control, log tracking, and so on) for a resource type, and the Java class - either a custom class or an Hyperic support class - that performs that function. <br class="atl-forced-newline" />  <br class="atl-forced-newline" />
 Each management function for a resource type is specified in a separate <tt>&lt;plugin&gt;</tt> element. <br class="atl-forced-newline" />  <br class="atl-forced-newline" />  <tt>&lt;actions&gt;</tt> specifies a list of control operations, supported by the resource type, that the plugin can perform. The <tt>&lt;actions&gt;</tt> element is required (as a sibling) for a <tt>&lt;plugin&gt;</tt> element of type "control". <br class="atl-forced-newline" /> </td>
 </tr>
 <tr>
@@ -298,31 +301,31 @@ The purpose of the <tt>&lt;filter&gt;</tt> element is to make a descriptor easie
 
 <h1><a name="KeyFactsAboutHQPluginDescriptors-FirstFactsAboutMetricTemplates"></a>First Facts About Metric Templates</h1>
 
-<p>Every metric a plugin collects has a <em>metric template</em> that expresses a request for a specific metric, for a specific resource, in a format that the HQ Agent understands. A metric template takes this form:</p>
+<p>Every metric a plugin collects has a <em>metric template</em> that expresses a request for a specific metric, for a specific resource, in a format that the Hyperic Agent understands. A metric template takes this form:</p>
 
 <p><tt>Domain:Properties:Metric:Connection</tt></p>
 
-<p>A metric template provides the information a measurement class needs to obtain a metric. That information includes resource attributes (connection data, resource type and name, and so on) and metric attributes (category, units of measure, whether it is an indicator, and so on). Those resource and metric attributes are defined in &lt;option&gt;, &lt;property&gt;, and &lt;metric&gt; elements for a resource type. A metric template codifies this data for a particular metric as structured "metric request" that the HQ Agent can fulfill. </p>
+<p>A metric template provides the information a measurement class needs to obtain a metric. That information includes resource attributes (connection data, resource type and name, and so on) and metric attributes (category, units of measure, whether it is an indicator, and so on). Those resource and metric attributes are defined in &lt;option&gt;, &lt;property&gt;, and &lt;metric&gt; elements for a resource type. A metric template codifies this data for a particular metric as structured "metric request" that the Hyperic Agent can fulfill. </p>
 
-<p>An HQ plugin that manages a server-service hierarchy often collects over a hundred unique metrics. To ease the process of defining metric templates, plugin developers typically define the template in terms of variables that return the values of relevant &lt;option&gt;, &lt;property&gt; and &lt;metric&gt; attributes.</p>
+<p>An Hyperic plugin that manages a server-service hierarchy often collects over a hundred unique metrics. To ease the process of defining metric templates, plugin developers typically define the template in terms of variables that return the values of relevant &lt;option&gt;, &lt;property&gt; and &lt;metric&gt; attributes.</p>
 
 <p>For more information see <a href="Understanding Metric Templates.html" title="Understanding Metric Templates">Understanding Metric Templates</a>.</p>
 
 <h1><a name="KeyFactsAboutHQPluginDescriptors-InheritanceandReuseinPluginDescriptors"></a>Inheritance and Reuse in Plugin Descriptors</h1>
 
-<p>In an HQ plugin descriptor, variable values can be inherited, and certain element types can be defined at one level and inherited or included by reference in lower level resource elements.</p>
+<p>In an Hyperic plugin descriptor, variable values can be inherited, and certain element types can be defined at one level and inherited or included by reference in lower level resource elements.</p>
 
-<p>For example, the root of an HQ plugin descriptor may contain a <tt>&lt;metrics&gt;</tt> element that defines metrics common to multiple resource types managed by plugin. Then, the <tt>&lt;metrics&gt;</tt> element in each resource to which those common metrics apply, can include them by reference to <tt>&lt;metrics&gt;</tt> element in the desscriptor root.</p>
+<p>For example, the root of an Hyperic plugin descriptor may contain a <tt>&lt;metrics&gt;</tt> element that defines metrics common to multiple resource types managed by plugin. Then, the <tt>&lt;metrics&gt;</tt> element in each resource to which those common metrics apply, can include them by reference to <tt>&lt;metrics&gt;</tt> element in the desscriptor root.</p>
 
-<p>Inheritance and reuse behaviors are useful to the plugin developer but may confuse the new plugin developer taking a first look at the descriptors for HQ's built-in plugins.</p>
+<p>Inheritance and reuse behaviors are useful to the plugin developer but may confuse the new plugin developer taking a first look at the descriptors for Hyperic's built-in plugins.</p>
 
-<p>For readers new to HQ plugins, the thing to understand is that a lot of information that applies to a particular resource type in a descriptor file can be defined in the root of the file, and included by reference in multiple resource elements.</p>
+<p>For readers new to Hyperic plugins, the thing to understand is that a lot of information that applies to a particular resource type in a descriptor file can be defined in the root of the file, and included by reference in multiple resource elements.</p>
 
 <h1><a name="KeyFactsAboutHQPluginDescriptors-EveryPluginRequiresaVersionProperty"></a>Every Plugin Requires a Version Property</h1>
 
 <p>As of Hyperic 4.6, you must specify the version of a plugin in a <tt>&lt;property&gt;</tt> element in the plugin descriptor's root <tt>&lt;plugin&gt;</tt> element. For more information, see <a href="plugin - root.html" title="plugin - root">plugin &#45; root</a>.</p>
 
-<p><font color=""></font></p>
+
 
 				    
                     			    </td>
@@ -333,7 +336,7 @@ The purpose of the <tt>&lt;filter&gt;</tt> element is to make a descriptor easie
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:44</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:57</font></td>
 		    </tr>
 	    </table>
     </body>

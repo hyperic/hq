@@ -6,7 +6,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -31,21 +31,18 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-
-
-<script  src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
-<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+<jsu:importScript path="/js/functions.js" />
+<jsu:importScript path="/js/listWidget.js" />
 <c:set var="widgetInstanceName" value="listResources"/>
-<script type="text/javascript">
-var pageData = new Array();
-var FOO = "chart";
-var LIST  = "list"; 
-var imagePath = "/images/";
-
-initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-</script>
-
+<jsu:script>
+	var pageData = new Array();
+	var FOO = "chart";
+	var LIST  = "list"; 
+	var imagePath = "/images/";
+	
+	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+</jsu:script>
 <hq:constant var="PLATFORM"
     classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
     symbol="APPDEF_TYPE_PLATFORM"/>
@@ -307,25 +304,24 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 
 <c:choose>
   <c:when test="${ResourceHubForm.view == LIST}">
-    <script type="text/javascript">
-      function refreshAvail() {
-        var now = new Date()
-    <c:forEach var="resource" items="${AllResources}">
-        <c:out value="document.avail${resource.entityId.id}.src"/> =
-          '<html:rewrite page="/resource/Availability"/>?timeout=30000&eid=' +
-          '<c:out value="${resource.entityId.appdefKey}"/>#' + now.valueOf();
-    </c:forEach>
-        setAvailRefresh()
-      }
-      
-      function setAvailRefresh() {
-        setTimeout( "refreshAvail()", 60*1000 );
-      }
-      
-      hqDojo.ready(function() {
-    	  setAvailRefresh();
-      });
-    </script>
+  	<jsu:script>
+      	function refreshAvail() {
+	        var now = new Date()
+	    <c:forEach var="resource" items="${AllResources}">
+	        <c:out value="document.avail${resource.entityId.id}.src"/> =
+	          '<html:rewrite page="/resource/Availability"/>?timeout=30000&eid=' +
+	          '<c:out value="${resource.entityId.appdefKey}"/>#' + now.valueOf();
+	    </c:forEach>
+	        setAvailRefresh()
+	      }
+	      
+	      function setAvailRefresh() {
+	        setTimeout( "refreshAvail()", 60*1000 );
+	      }
+	</jsu:script>
+	<jsu:script onLoad="true">	      
+   	  	setAvailRefresh();
+	</jsu:script>
     <c:choose>
     <c:when test="${empty Indicators || empty AllResources}">
     <display:table items="${AllResources}" var="resource" action="${sAction}" width="100%" cellspacing="0" cellpadding="0">
@@ -473,10 +469,10 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
     <c:param name="ft" value="${param.ft}"/>
   </c:if>
   <c:if test="${not empty param.g}">
-    <c:param name="fg" value="${param.g}"/>
+    <c:param name="g" value="${param.g}"/>
   </c:if>
   <c:if test="${not empty param.fg}">
-    <c:param name="g" value="${param.fg}"/>
+    <c:param name="fg" value="${param.fg}"/>
   </c:if>
   <c:if test="${not empty param.unavail}">
     <c:param name="unavail" value="${param.unavail}"/>
@@ -517,7 +513,6 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 </html:form>
 <tiles:insert definition=".resource.common.addToGroup"/>
 <tiles:insert definition=".page.footer"/>
-
-<script type="text/javascript">
-  clearIfAnyChecked();
-</script>
+<jsu:script>
+  	clearIfAnyChecked();
+</jsu:script>

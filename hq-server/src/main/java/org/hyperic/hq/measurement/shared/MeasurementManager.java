@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.server.session.Server;
@@ -42,18 +41,21 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
-import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.ext.MeasurementEvent;
 import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.server.session.CollectionSummary;
 import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.server.session.Measurement;
+import org.hyperic.hq.measurement.server.session.MeasurementDAO;
 import org.hyperic.hq.measurement.server.session.MeasurementEnabler;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplateDAO;
+import org.hyperic.hq.util.Reference;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 
@@ -61,18 +63,6 @@ import org.hyperic.util.pager.PageControl;
  * Local interface for MeasurementManager.
  */
 public interface MeasurementManager {
-    /**
-     * Create Measurement objects based their templates
-     * @param templates List of Integer template IDs to add
-     * @param id instance ID (appdef resource) the templates are for
-     * @param intervals Millisecond interval that the measurement is polled
-     * @param props Configuration data for the instance
-     * @return a List of the associated Measurement objects
-     */
-    public List<Measurement> createMeasurements(AppdefEntityID id, Integer[] templates,
-                                                long[] intervals, ConfigResponse props)
-        throws MeasurementCreateException, TemplateNotFoundException;
-
     /**
      * Create Measurements and enqueue for scheduling after commit
      */
@@ -384,10 +374,6 @@ public interface MeasurementManager {
      */
     public void buildMeasurementEvent(MeasurementEvent event);
 
-    void scheduleSynchronous(List<AppdefEntityID> aeids);
-
-    void unschedule(List<AppdefEntityID> aeids) throws MeasurementUnscheduleException;
-    
     /**
      * Get the maximum collection interval for a scheduled metric within a
      * compatible group of resources.
@@ -416,5 +402,25 @@ public interface MeasurementManager {
      * @return {@link MeasurementTemplate}s
      */
     MeasurementTemplate getTemplatesByMeasId(Integer measId);
+    
+    /**
+     * Create Measurement objects based their templates
+     * @param templates List of Integer template IDs to add
+     * @param id instance ID (appdef resource) the templates are for
+     * @param intervals Millisecond interval that the measurement is polled
+     * @param props Configuration data for the instance
+     * @param updated set true if any measurements were created or updated
+     * @return a List of the associated Measurement objects
+     */
+    public List<Measurement> createOrUpdateMeasurements(AppdefEntityID id, Integer[] templates, long[] intervals,
+        ConfigResponse props, Reference<Boolean> updated) throws MeasurementCreateException, TemplateNotFoundException;
+
+	void setSrnManager(SRNManager srnManager);
+	
+	void setMeasurementDao(MeasurementDAO dao);
+	
+	void setResourceManager(ResourceManager resourceManager);
+	
+	void setMeasurementTemplateDao(MeasurementTemplateDAO mTemplateDao);
 
 }

@@ -11,7 +11,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
@@ -28,6 +27,8 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.product.shared.PluginDeployException;
@@ -55,20 +56,24 @@ public class PluginManagerController extends BaseController implements Applicati
     
     private static final String HELP_PAGE_MAIN = "Administration.Plugin.Manager";
 
-    private PluginManager pluginManager;
-    private AgentManager agentManager;
-    private ResourceManager resourceManager;
+    private final PluginManager pluginManager;
+    private final AgentManager agentManager;
+    private final ResourceManager resourceManager;
     private ApplicationContext applicationContext;
+    private final ServerConfigManager serverConfigManager;
+    
     SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy hh:mm aa zzz");
 
     
     @Autowired
     public PluginManagerController(AppdefBoss appdefBoss, AuthzBoss authzBoss, 
-            PluginManager pluginManager, AgentManager agentManager, ResourceManager resourceManager) {
+            PluginManager pluginManager, AgentManager agentManager, ResourceManager resourceManager,
+            ServerConfigManager serverConfigManager) {
         super(appdefBoss, authzBoss);
         this.pluginManager = pluginManager;
         this.agentManager = agentManager;
         this.resourceManager = resourceManager;
+        this.serverConfigManager = serverConfigManager;
     }
     
     @RequestMapping(method = RequestMethod.GET)
@@ -216,9 +221,14 @@ public class PluginManagerController extends BaseController implements Applicati
         if(failureAgents!=null && failureAgents.size()>0){
             agentErrorCount = failureAgents.size();
         }
-       
+        
         info.put("agentErrorCount", agentErrorCount);
-        info.put("allAgentCount", agentManager.getNumAutoUpdatingAgents());
+        long numAutoUpdatingAgents = agentManager.getNumAutoUpdatingAgents();
+        info.put("syncableAgentCount", numAutoUpdatingAgents);
+        long totalAgentCount = numAutoUpdatingAgents + agentManager.getNumOldAgents(); 
+        info.put("totalAgentCount", totalAgentCount);
+        String serverVersion = getServerVersion();
+        info.put("serverVersion", serverVersion);
         return info;
     }
 
@@ -227,17 +237,32 @@ public class PluginManagerController extends BaseController implements Applicati
         List<String> agentNames = new ArrayList<String>();
         
         Map<Integer, AgentPluginStatus> failureAgents = pluginManager.getStatusesByAgentId(AgentPluginStatusEnum.SYNC_FAILURE);
-        Iterator it = failureAgents.entrySet().iterator();
-        while(it.hasNext()){
-            Map.Entry<Integer, AgentPluginStatus> pairs = (Map.Entry<Integer, AgentPluginStatus>) it.next();
-            AgentPluginStatus status = pairs.getValue();
-            agentNames.add(getAgentName(status.getAgent()));
+        for (Map.Entry<Integer, AgentPluginStatus> failedAgent : failureAgents.entrySet()){
+            AgentPluginStatus status = failedAgent.getValue();
+            agentNames.add(getAgentName(status.getAgent()));            
         }
        
         Collections.sort(agentNames);
         
         return agentNames;
-    }    
+    }                   
+    
+    @RequestMapping(method = RequestMethod.GET, value="/agent/old/summary", headers="Accept=application/json")
+    public @ResponseBody  List<Map<String,String>> getOldAgentStatusSummary() {
+        List<Agent> oldAgents = agentManager.getOldAgents();        
+        List<Map<String,String>> oldAgentVersions = new ArrayList<Map<String,String>>(oldAgents.size());
+        for (Agent agent : oldAgents) {
+            Map<String,String> agentInfoMap = new HashMap<String, String>(2);
+            String version = agent.getVersion();        
+            agentInfoMap.put("version", version);
+            String agentName = getAgentName(agent);
+            agentInfoMap.put("agentName", agentName);
+            oldAgentVersions.add(agentInfoMap);
+        }
+        
+        return oldAgentVersions;
+    }         
+    
     
     @RequestMapping(method = RequestMethod.GET, value="/status/{pluginId}", headers="Accept=application/json")
     public @ResponseBody List<Map<String, Object>> getAgentStatus(@PathVariable int pluginId, 
@@ -378,4 +403,9 @@ public class PluginManagerController extends BaseController implements Applicati
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }
+    
+    private String getServerVersion() {
+        String serverVersion = serverConfigManager.getPropertyValue(HQConstants.ServerVersion);               
+        return serverVersion;
+    }       
 }

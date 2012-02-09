@@ -33,6 +33,7 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 
 import org.hyperic.hq.events.shared.RegisteredTriggerManager;
+import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +61,7 @@ public class TriggersCreatedListener implements ZeventListener<TriggersCreatedZe
 
     @PostConstruct
     public void subscribe() {
-        Set<Class<?>> triggerEvents = new HashSet<Class<?>>();
+        Set<Class<? extends Zevent>> triggerEvents = new HashSet<Class<? extends Zevent>>();
         triggerEvents.add(TriggersCreatedZevent.class);
 
         zEventManager.addBufferedListener(triggerEvents, this);

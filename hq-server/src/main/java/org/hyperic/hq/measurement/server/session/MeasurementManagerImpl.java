@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2009], Hyperic, Inc.
+ * Copyright (C) [2004-2012], VMWare, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -73,12 +73,10 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
-import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.agent.client.AgentMonitor;
 import org.hyperic.hq.measurement.ext.MeasurementEvent;
@@ -87,12 +85,14 @@ import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.MeasurementProcessor;
+import org.hyperic.hq.measurement.shared.SRNManager;
 import org.hyperic.hq.measurement.shared.TrackerManager;
 import org.hyperic.hq.product.MeasurementPluginManager;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.shared.ProductManager;
+import org.hyperic.hq.util.Reference;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
@@ -115,61 +115,43 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     // XXX scottmf, need to re-evalutate why SAMPLE_SIZE is used
     private static final int SAMPLE_SIZE = 10;
 
-    private ResourceManager resourceManager;
-    private ResourceGroupManager resourceGroupManager;
-    private ApplicationDAO applicationDAO;
-    private PermissionManager permissionManager;
-    private AuthzSubjectManager authzSubjectManager;
-    private ConfigManager configManager;
-    private MetricDataCache metricDataCache;
-    private MeasurementDAO measurementDAO;
-    private MeasurementTemplateDAO measurementTemplateDAO;
-    private AgentManager agentManager;
-    private AgentMonitor agentMonitor;
-    private ApplicationContext applicationContext;
-
     @Autowired
-    public MeasurementManagerImpl(ResourceManager resourceManager,
-                                  ResourceGroupManager resourceGroupManager,
-                                  ApplicationDAO applicationDAO,
-                                  PermissionManager permissionManager,
-                                  AuthzSubjectManager authzSubjectManager,
-                                  ConfigManager configManager, MetricDataCache metricDataCache,
-                                  MeasurementDAO measurementDAO,
-                                  MeasurementTemplateDAO measurementTemplateDAO,
-                                  AgentManager agentManager, AgentMonitor agentMonitor) {
-        this.resourceManager = resourceManager;
-        this.resourceGroupManager = resourceGroupManager;
-        this.applicationDAO = applicationDAO;
-        this.permissionManager = permissionManager;
-        this.authzSubjectManager = authzSubjectManager;
-        this.configManager = configManager;
-        this.metricDataCache = metricDataCache;
-        this.measurementDAO = measurementDAO;
-        this.measurementTemplateDAO = measurementTemplateDAO;
-        this.agentManager = agentManager;
-        this.agentMonitor = agentMonitor;
-    }
-
-    // TODO: Resolve circular dependency
-    private MeasurementProcessor getMeasurementProcessor() {
-        return Bootstrap.getBean(MeasurementProcessor.class);
-    }
-
-    // TODO: Resolve circular dependency
-    private AvailabilityManager getAvailabilityManager() {
-        return Bootstrap.getBean(AvailabilityManager.class);
-    }
+    private ResourceManager resourceManager;
+    @Autowired
+    private ResourceGroupManager resourceGroupManager;
+    @Autowired
+    private ApplicationDAO applicationDAO;
+    @Autowired
+    private PermissionManager permissionManager;
+    @Autowired
+    private AuthzSubjectManager authzSubjectManager;
+    @Autowired
+    private ConfigManager configManager;
+    @Autowired
+    private MetricDataCache metricDataCache;
+    @Autowired
+    private MeasurementDAO measurementDAO;
+    @Autowired
+    private MeasurementTemplateDAO measurementTemplateDAO;
+    @Autowired
+    private AgentManager agentManager;
+    @Autowired
+    private AgentMonitor agentMonitor;
+    @Autowired
+    private ApplicationContext applicationContext;
+    @Autowired
+	private ZeventManager zeventManager;
+    @Autowired
+	private SRNManager srnManager;
+    @Autowired
+	private MeasurementProcessor measurementProcessor;
+    @Autowired
+	private AvailabilityManager availabilityManager;
 
     // TODO: Resolve circular dependency with ProductManager
     private MeasurementPluginManager getMeasurementPluginManager() throws Exception {
-        return (MeasurementPluginManager) Bootstrap.getBean(ProductManager.class).getPluginManager(
+        return (MeasurementPluginManager) applicationContext.getBean(ProductManager.class).getPluginManager(
             ProductPlugin.TYPE_MEASUREMENT);
-    }
-
-    // TODO resolve circular dependency
-    private AgentScheduleSynchronizer getAgentScheduleSynchronizer() {
-        return Bootstrap.getBean(AgentScheduleSynchronizer.class);
     }
 
     /**
@@ -194,7 +176,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
         MeasurementScheduleZevent event = new MeasurementScheduleZevent(dm.getId().intValue(),
             interval);
-        ZeventManager.getInstance().enqueueEventAfterCommit(event);
+        zeventManager.enqueueEventAfterCommit(event);
     }
 
     /**
@@ -212,7 +194,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                 events.add(new MeasurementScheduleZevent(mid.intValue(), 0));
             }
         }
-        ZeventManager.getInstance().enqueueEventsAfterCommit(events);
+        zeventManager.enqueueEventsAfterCommit(events);
     }
 
     private Measurement createMeasurement(Resource instanceId, MeasurementTemplate mt,
@@ -233,27 +215,16 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         }
     }
 
-    /**
-     * Create Measurement objects based their templates
-     * 
-     * @param templates List of Integer template IDs to add
-     * @param id instance ID (appdef resource) the templates are for
-     * @param intervals Millisecond interval that the measurement is polled
-     * @param props Configuration data for the instance
-     * 
-     * @return a List of the associated Measurement objects
-     */
-    public List<Measurement> createMeasurements(AppdefEntityID id, Integer[] templates,
-                                                long[] intervals, ConfigResponse props)
-        throws MeasurementCreateException, TemplateNotFoundException {
+    public List<Measurement> createOrUpdateMeasurements(AppdefEntityID id, Integer[] templates, long[] intervals,
+                                                        ConfigResponse props, Reference<Boolean> updated)
+    throws MeasurementCreateException, TemplateNotFoundException {
         Resource resource = resourceManager.findResource(id);
         if (resource == null || resource.isInAsyncDeleteState()) {
             return Collections.emptyList();
         }
 
         if (intervals.length != templates.length) {
-            throw new IllegalArgumentException(
-                "The templates and intervals lists must be the same size");
+            throw new IllegalArgumentException("The templates and intervals lists must be the same size");
         }
 
         MeasurementTemplateDAO tDao = measurementTemplateDAO;
@@ -276,11 +247,22 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
             if (m == null) {
                 // No measurement, create it
+                if (updated != null) {
+                    updated.set(true);
+                }
                 m = createMeasurement(resource, t, props, intervals[i]);
             } else {
+                String dsn = translate(m.getTemplate().getTemplate(), props);
+                if (updated != null && !updated.get()) {
+                    boolean update = m.isEnabled() != (intervals[i] != 0);
+                    if (update) updated.set(update);
+                    update = m.getInterval() != intervals[i];
+                    if (update) updated.set(update);
+                    update = !m.getDsn().equals(dsn);
+                    if (update) updated.set(update);
+                }
                 m.setEnabled(intervals[i] != 0);
                 m.setInterval(intervals[i]);
-                String dsn = translate(m.getTemplate().getTemplate(), props);
                 m.setDsn(dsn);
                 enqueueZeventForMeasScheduleChange(m, intervals[i]);
             }
@@ -295,14 +277,13 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
      */
     public List<Measurement> createMeasurements(AuthzSubject subject, AppdefEntityID id,
                                                 Integer[] templates, long[] intervals,
-                                                ConfigResponse props) throws PermissionException,
-        MeasurementCreateException, TemplateNotFoundException {
+                                                ConfigResponse props)
+    throws PermissionException, MeasurementCreateException, TemplateNotFoundException {
         // Authz check
         permissionManager.checkModifyPermission(subject.getId(), id);
-
-        List<Measurement> dmList = createMeasurements(id, templates, intervals, props);
-        ZeventManager.getInstance().enqueueEventAfterCommit(
-            new AgentScheduleSyncZevent(Collections.singletonList(id)));
+        Reference<Boolean> updated = new Reference<Boolean>(false);
+        List<Measurement> dmList = createOrUpdateMeasurements(id, templates, intervals, props, updated);
+        srnManager.scheduleInBackground(Collections.singletonList(id), true, updated.get());
         return dmList;
     }
 
@@ -503,7 +484,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
             if (availMeasurement != null) {
                 MetricValue val = new MetricValue(MeasurementConstants.AVAIL_DOWN);
-                getAvailabilityManager().addData(availMeasurement, val);
+                availabilityManager.addData(availMeasurement, val);
             }
         }
     }
@@ -1031,46 +1012,31 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
         // Update the agent schedule
         List<AppdefEntityID> toSchedule = Arrays.asList(aeids);
-        if (!toSchedule.isEmpty()) {
-            AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(toSchedule);
-            ZeventManager.getInstance().enqueueEventAfterCommit(event);
-        }
+        srnManager.scheduleInBackground(toSchedule, true, true);
     }
 
     /**
      * Enable a collection of metrics, enqueue for scheduling after commit
      */
     public void enableMeasurements(AuthzSubject subject, Integer[] mids) throws PermissionException {
-        StopWatch watch = new StopWatch();
-        Resource resource = null;
-        AppdefEntityID appId = null;
-        List<AppdefEntityID> appIdList = new ArrayList<AppdefEntityID>();
-        List<Integer> midsList = Arrays.asList(mids);
-
-        watch.markTimeBegin("setEnabled");
+        final StopWatch watch = new StopWatch();
+        final List<AppdefEntityID> appIdList = new ArrayList<AppdefEntityID>();
+        final List<Integer> midsList = Arrays.asList(mids);
+        final boolean debug = log.isDebugEnabled();
+        if (debug) watch.markTimeBegin("setEnabled");
         for (Integer mid : midsList) {
-            Measurement meas = measurementDAO.get(mid);
-
+            final Measurement meas = measurementDAO.get(mid);
             if (!meas.isEnabled()) {
-                resource = meas.getResource();
-                appId = AppdefUtil.newAppdefEntityId(resource);
-
+                final Resource resource = meas.getResource();
+                final AppdefEntityID appId = AppdefUtil.newAppdefEntityId(resource);
                 permissionManager.checkModifyPermission(subject.getId(), appId);
                 appIdList.add(appId);
-
                 meas.setEnabled(true);
             }
         }
-        watch.markTimeEnd("setEnabled");
-
-        if (!appIdList.isEmpty()) {
-            watch.markTimeBegin("enqueueZevents");
-            AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(appIdList);
-            ZeventManager.getInstance().enqueueEventAfterCommit(event);
-            watch.markTimeEnd("enqueueZevents");
-
-            log.debug("enableMeasurements: total=" + appIdList.size() + ", time=" + watch);
-        }
+        if (debug) watch.markTimeEnd("setEnabled");
+        srnManager.scheduleInBackground(appIdList, true, true);
+        if (debug) log.debug("enableMeasurements: total=" + appIdList.size() + ", time=" + watch);
     }
 
     /**
@@ -1092,9 +1058,8 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             m.setEnabled(true);
             m.setInterval(interval);
         }
-        List<AppdefEntityID> eids = Collections.singletonList(appId);
-        AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(eids);
-        ZeventManager.getInstance().enqueueEventAfterCommit(event);
+        final List<AppdefEntityID> aeids = Collections.singletonList(appId);
+        srnManager.scheduleInBackground(aeids, true, true);
     }
 
     /**
@@ -1114,9 +1079,8 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             }
         }
         if (sendToAgent) {
-            List<AppdefEntityID> eids = Collections.singletonList(appId);
-            AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(eids);
-            ZeventManager.getInstance().enqueueEventAfterCommit(event);
+            List<AppdefEntityID> aeids = Collections.singletonList(appId);
+            srnManager.scheduleInBackground(aeids, true, true);
         }
     }
 
@@ -1151,6 +1115,9 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     
     public void disableMeasurementsForDeletion(AuthzSubject subject, Agent agent,
                     AppdefEntityID[] ids) throws PermissionException {
+        if (agent == null || ids == null) {
+            return;
+        }
         List<Resource> resources = new ArrayList<Resource>();
         for (int i = 0; i < ids.length; i++) {
             permissionManager.checkModifyPermission(subject.getId(), ids[i]);
@@ -1170,7 +1137,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         
         enqueueZeventsForMeasScheduleCollectionDisabled(mids);
     
-        ZeventManager.getInstance().enqueueEventAfterCommit(new AgentUnscheduleZevent(Arrays.asList(ids), agent.getAgentToken()));
+        zeventManager.enqueueEventAfterCommit(new AgentUnscheduleZevent(Arrays.asList(ids), agent.getAgentToken()));
     }
     
     /**
@@ -1223,7 +1190,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             
             enqueueZeventsForMeasScheduleCollectionDisabled(mids);
         }
-        ZeventManager.getInstance().enqueueEventAfterCommit(new AgentUnscheduleZevent(Arrays.asList(ids), agent.getAgentToken()));
+        zeventManager.enqueueEventAfterCommit(new AgentUnscheduleZevent(Arrays.asList(ids), agent.getAgentToken()));
     }
 
 
@@ -1268,11 +1235,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         // Unscheduling of all metrics for a resource could indicate that
         // the resource is getting removed. Send the unschedule synchronously
         // so that all the necessary plumbing is in place.
-        try {
-            getMeasurementProcessor().unschedule(Collections.singletonList(aeid));
-        } catch (MeasurementUnscheduleException e) {
-            log.error("Unable to disable measurements", e);
-        }
+        measurementProcessor.unschedule(Collections.singletonList(aeid));
     }
 
     /**
@@ -1318,9 +1281,8 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
         enqueueZeventsForMeasScheduleCollectionDisabled(mids);
 
-        List<AppdefEntityID> eids = Collections.singletonList(id);
-        AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(eids);
-        ZeventManager.getInstance().enqueueEventAfterCommit(event);
+        final List<AppdefEntityID> aeids = Collections.singletonList(id);
+        srnManager.scheduleInBackground(aeids, true, true);
     }
 
     /**
@@ -1332,13 +1294,12 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                                               Collection<Resource> resources) {
         final List<DataPoint> rtn = new ArrayList<DataPoint>(resources.size());
 
-        AvailabilityManager am = getAvailabilityManager();
         for (Resource resource : resources) {
             // HQ-1653: Only disable/enable availability measurements
             // TODO: G (when AvailabilityManager is convered)
-            List<Measurement> measurements = am.getAvailMeasurementChildren(resource,
-                                                                            AuthzConstants.ResourceEdgeContainmentRelation);
-            measurements.add(am.getAvailMeasurement(resource));
+            List<Measurement> measurements =
+                availabilityManager.getAvailMeasurementChildren(resource, AuthzConstants.ResourceEdgeContainmentRelation);
+            measurements.add(availabilityManager.getAvailMeasurement(resource));
             rtn.addAll(manageAvailabilityMeasurements(event, measurements));
         }
         return rtn;
@@ -1474,14 +1435,20 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             if (r == null || r.isInAsyncDeleteState()) {
                 continue;
             }
-            boolean isCreate = z instanceof ResourceCreatedZevent;
+            /**
+             * Create - create new measurements and schedule them to the agent
+             * Refresh - Simple resend = schedule current measurement to the agent with no update.
+             * 	  Most commonly will happen if agent is reinitialized (data dir erased).
+             * Update - Config changed - update measurements with new config and schedule to agent.
+             */
+            boolean isCreate = z instanceof ResourceCreatedZevent;    
             boolean isRefresh = z instanceof ResourceRefreshZevent;
             boolean isUpdate = z instanceof ResourceUpdatedZevent;
 
             try {
                 // Handle reschedules for when agents are updated.
                 if (isUpdate) {
-                    if (debug) log.debug("Refreshing metric schedule for [" + id + "]");
+                    if (debug) log.debug("Updated metric schedule for [" + id + "]");
                     eids.add(id);
                 }
                 if (isRefresh) {
@@ -1496,7 +1463,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                     ProductPlugin.TYPE_MEASUREMENT, id, true);
                 if (getEnabledMetricsCount(subject, id) == 0) {
                     if (debug) log.debug("Enabling default metrics for [" + id + "]");
-                    List metrics = enableDefaultMetrics(subject, id, c, true);
+                    List<Measurement> metrics = enableDefaultMetrics(subject, id, c, true);
                     if (!metrics.isEmpty()) {
                         eids.add(id);
                     }
@@ -1511,20 +1478,34 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                     // enable log or config tracking for update events since
                     // in the callback we don't know if that flag has changed.
                     // TODO break circular dep preventing DI of TrackerManager
-                    Bootstrap.getBean(TrackerManager.class).enableTrackers(subject, id, c);
+                    applicationContext.getBean(TrackerManager.class).enableTrackers(subject, id, c);
                 }
 
             } catch (ConfigFetchException e) {
                 log.warn("Config not set for [" + id + "] (this is usually ok): " + e);
             } catch (Exception e) {
                 log.warn("Unable to enable default metrics for [" + id + "]", e);
-            }
+            } 
         }
-        if (!eids.isEmpty()) {
-            AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(eids);
-            ZeventManager.getInstance().enqueueEventAfterCommit(event);
-        }
+        srnManager.scheduleInBackground(eids, true, false);
     }
+    
+    public void setSrnManager(SRNManager srnManager) {
+    	this.srnManager = srnManager;
+    }
+    
+    public void setMeasurementDao(MeasurementDAO dao) {
+    	this.measurementDAO = dao;
+    }
+    
+	public void setResourceManager(ResourceManager resourceManager){
+		this.resourceManager = resourceManager;
+	}
+	
+	public void setMeasurementTemplateDao(MeasurementTemplateDAO mTemplateDao){
+		this.measurementTemplateDAO = mTemplateDao; 
+	}
+
 
     private String[] getTemplatesToCheck(AuthzSubject s, AppdefEntityID id)
         throws AppdefEntityNotFoundException, PermissionException {
@@ -1718,15 +1699,6 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                           event.getInstanceId(), e);
             }
         }
-    }
-
-    public void scheduleSynchronous(List<AppdefEntityID> aeids) {
-        getMeasurementProcessor().scheduleSynchronous(aeids);
-    }
-
-    @Transactional(readOnly=true)
-    public void unschedule(List<AppdefEntityID> aeids) throws MeasurementUnscheduleException {
-        getMeasurementProcessor().unschedule(aeids);
     }
 
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {

@@ -1,56 +1,63 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : Set Up MySQL</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : Set Up MySQL</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : Set Up MySQL
+                            vFabric Hyperic 4.6.5 : Set Up MySQL
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1307466673249 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1307466673249 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1307466673249 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1325706831362 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325706831362 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325706831362 li {margin-left: 0px;padding-left: 0px;}
 
-/*]] >*/</style><div class='rbtoc1307466673249'>
+/*]]>*/</style><div class='rbtoc1325706831362'>
 <ul>
     <li><a href='#SetUpMySQL-SetUpHypericDatabaseonMySQL'>Set Up Hyperic Database on MySQL</a></li>
 <ul>
     <li><a href='#SetUpMySQL-Step1CreateaMySQLDatabaseInstance'>Step 1 - Create a MySQL Database Instance</a></li>
     <li><a href='#SetUpMySQL-Step2ConfigureMySQLStartupOptionsandSystemVariables'>Step 2 - Configure MySQL Startup Options and System Variables</a></li>
-    <li><a href='#SetUpMySQL-Step3InstalltheHypericServer'>Step 3 - Install the Hyperic Server</a></li>
-    <li><a href='#SetUpMySQL-Step4TunetheBatchAggregateInserterforMySQL'>Step 4 - Tune the Batch Aggregate Inserter for MySQL</a></li>
+    <li><a href='#SetUpMySQL-Step3VerifyDatabaseSetup'>Step 3 - Verify Database Setup</a></li>
 </ul>
-    <li><a href='#SetUpMySQL-SolveProblemswithMySQLConfiguration'>Solve Problems with MySQL Configuration</a></li>
-    <li><a href='#SetUpMySQL-MySQLMaintenanceExamples'>MySQL Maintenance Examples</a></li>
+    <li><a href='#SetUpMySQL-SolveProblemswithMySQLStartup'>Solve Problems with MySQL Startup</a></li>
+    <li><a href='#SetUpMySQL-TunetheBatchAggregateInserterforMySQL'>Tune the Batch Aggregate Inserter for MySQL</a></li>
 </ul></div>
 
 
 
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>For information about maintaining a MySQL Hyperic database, see <a href="MySQL Maintenance Examples.html" title="MySQL Maintenance Examples">MySQL Maintenance Examples</a>.</td></tr></table></div>
+
 <h1><a name="SetUpMySQL-SetUpHypericDatabaseonMySQL"></a>Set Up Hyperic Database on MySQL</h1>
 
-<p>This section provides instructions for setting up MySQL as your external Hyperic database.  It is assumed that you have already installed MySQL and are either familiar with MySQL or have the support of someone who is.</p>
+<p>This section has instructions for setting up MySQL as your external Hyperic database. </p>
+
+<p>This task corresponds to <a href="Hyperic Installation and Startup Process.html#HypericInstallationandStartupProcess-SetUpDatabase">Step 2 – Set Up Hyperic Database</a> of <a href="Hyperic Installation and Startup Process.html" title="Hyperic Installation and Startup Process">Hyperic Installation and Startup Process</a>. </p>
+
+<p>It is assumed that you have already installed MySQL and are either familiar with MySQL or have the support of someone who is.</p>
 
 <p><b>Note:</b> If you are installing Hyperic for evaluation, you can use Hyperic's built-in PostgreSQL database, rather than set up an external database.</p>
 
-<p>If you are new to MySQL, the introduction to MySQL at <a href="http://dev.mysql.com/tech-resources/articles/mysql_intro.html">http://dev.mysql.com/tech-resources/articles/mysql_intro.html</a> may be of interest.</p>
 
 <h2><a name="SetUpMySQL-Step1CreateaMySQLDatabaseInstance"></a>Step 1 - Create a MySQL Database Instance</h2>
 
@@ -67,24 +74,23 @@ mysql&gt; grant all on HQ.* to 'hqadmin'@'&lt;hq_server_host&gt;';</pre>
 
 <h2><a name="SetUpMySQL-Step2ConfigureMySQLStartupOptionsandSystemVariables"></a>Step 2 - Configure MySQL Startup Options and System Variables</h2>
 
-<p>In this step, you configure the MySQL database, by editing the settings in its configuration file.  In Unix and Linux, the file is  /etc/my.cnf. In Windows the file is  my.ini, located in the MySQL installation base directory.</p>
+<p>In this step, you configure the MySQL database by editing the settings in its configuration file. For Unix-like environments, the file is <tt>/etc/my.cnf</tt>. On Windows the file is <tt>my.ini</tt>, located in the MySQL installation base directory.</p>
 
-<p>For more information about InnoDB startup options and system variables, see <a href="http://dev.mysql.com/doc/refman/5.0/en/innodb-parameters.html">http://dev.mysql.com/doc/refman/5.0/en/innodb-parameters.html</a></p>
+<p>For more information about InnoDB startup options and system variables, see <a href="http://dev.mysql.com/doc/refman/5.0/en/innodb-parameters.html">http://dev.mysql.com/doc/refman/5.0/en/innodb-parameters.html</a>.</p>
 
 <ol>
 	<li>Enable the full query log. Every query (even ones with incorrect syntax) that the database server receives will be logged. This is useful for debugging, but it is usually disabled in production use. Be sure to change the paths given here to match your environment.
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
 		<pre class="theme: Confluence; brush: java; gutter: false">[mysqld]
-log-error = /home/mysql/log/mysqld.err
-log = /home/mysql/log/mysql_general.log</pre>
+log-error = mysqld.err
+log = mysql_general.log</pre>
 		</div>
 </div></div></li>
 	<li>Print warnings to the error log file. If you have any problem with MySQL, you should enable logging of warnings and examine the error log for possible explanations.
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
-		<pre class="theme: Confluence; brush: java; gutter: false">log_warnings
-server-id       = 1</pre>
+		<pre class="theme: Confluence; brush: java; gutter: false">log_warnings</pre>
 		</div>
 </div></div></li>
 	<li>Configure buffer pool size. The size of the MySQL buffer pool is has a significant impact on MySQL performance. If your database is on a dedicated machine, make the buffer pool about 80% of total memory.
@@ -104,7 +110,7 @@ innodb_log_file_size = 256M</pre>
 	<li>Configure innodb as the default storage engine. (Required.)
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
-		<pre class="theme: Confluence; brush: java; gutter: false">default-storage_engine=innodb
+		<pre class="theme: Confluence; brush: java; gutter: false">default-storage-engine=innodb
 bulk_insert_buffer_size = 32M
 join_buffer_size = 8M
 max_heap_table_size = 256M
@@ -113,14 +119,14 @@ max_tmp_tables = 48
 myisam_sort_buffer_size = 256M</pre>
 		</div>
 </div></div></li>
-	<li>Configure the sort buffer size. MySQL recommends a sort_buffer_size larger than the one suggested her.
+	<li>Configure the sort buffer size. MySQL recommends a <tt>sort_buffer_size</tt> larger than the one suggested her.
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
 		<pre class="theme: Confluence; brush: java; gutter: false">sort_buffer_size = 64K</pre>
 		</div>
 </div></div>
 <div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>An article on experimenting with sort buffer size is available at <a href="http://www.mysqlperformanceblog.com/2007/08/18/how-fast-can-you-sort-data-with-mysql">http://www.mysqlperformanceblog.com/2007/08/18/how-fast-can-you-sort-data-with-mysql</a>.</td></tr></table></div></li>
-	<li>Configure the read buffer size.  Because Hyperic does a significant volume of sequential reads, a large read buffer improve performance.
+	<li>Configure the read buffer size.Because Hyperic does a significant volume of sequential reads, a large read buffer improves performance.
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
 		<pre class="theme: Confluence; brush: java; gutter: false">read_buffer_size = 1M
@@ -131,19 +137,20 @@ key_buffer_size = 256M
 thread_cache_size = 32</pre>
 		</div>
 </div></div></li>
-	<li>Configure the number of threads that can run in the InnoDB kernel. A starting point for setting this value is to to set a value equal to 2 times the number of CPUs times the number of disks.
+	<li>Configure the number of threads that can run in the InnoDB kernel. A starting point for setting this value is to set a value equal to 2 times the number of CPUs times the number of disks.
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
 		<pre class="theme: Confluence; brush: java; gutter: false">innodb_thread_concurrency = 8</pre>
 		</div>
 </div></div></li>
-	<li>Set the method that is used to flush data and log files.*= For battery-backed-up storage with write-back cache mode on Linux OSs, the O_DIRECT flush method is good. Learn about <a href="http://dev.mysql.com/doc/refman/5.0/en/innodb-parameters.html#option_mysqld_innodb_flush_method">other innodb flush methods</a>.
+	<li>Set the method that is used to flush data and log files. For battery-backed-up storage with write-back cache mode on Linux systems, the <tt>O_DIRECT</tt> flush method is good. For information other other innodb flush methods see <a href="http://dev.mysql.com/doc/refman/5.0/en/innodb-parameters.html#option_mysqld_innodb_flush_method">http://dev.mysql.com/doc/refman/5.0/en/innodb-parameters.html#option_mysqld_innodb_flush_method</a>.
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
 		<pre class="theme: Confluence; brush: java; gutter: false">innodb_flush_method=O_DIRECT
 innodb_rollback_on_timeout=1</pre>
 		</div>
 </div></div>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>On Windows the flush method is always <tt>async_unbuffered</tt>. You do not need to set <tt>innodb_flush_method=O_DIRECT</tt> on Windows platforms.</td></tr></table></div> 
 	<ul>
 		<li>In this situation, tune your Linux OS (version 2.6 or higher) to favor the use of main memory rather than file caches with either:
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
@@ -171,23 +178,42 @@ innodb_rollback_on_timeout=1</pre>
 		<pre class="theme: Confluence; brush: java; gutter: false">query_cache_limit = 8M</pre>
 		</div>
 </div></div></li>
-	<li>Set character encoding. Hyperic requires a char encoding of utf-8*.
+	<li>Set character encoding. Hyperic requires a char encoding of utf-8.
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
 		<pre class="theme: Confluence; brush: java; gutter: false">default-character-set=utf8
-collation_server=utf8_bin</pre>
+collation_server=utf8_bin
+character_set_system=utf8</pre>
 		</div>
 </div></div></li>
 </ol>
 
 
-<h2><a name="SetUpMySQL-Step3InstalltheHypericServer"></a>Step 3 - Install the Hyperic Server</h2>
+<h2><a name="SetUpMySQL-Step3VerifyDatabaseSetup"></a>Step 3 - Verify Database Setup</h2>
 
-<p>For instructions, see <a href="Installing Hyperic.html" title="Installing Hyperic">Installing Hyperic</a>.</p>
+<p>instructions tbd</p>
 
-<h2><a name="SetUpMySQL-Step4TunetheBatchAggregateInserterforMySQL"></a>Step 4 - Tune the Batch Aggregate Inserter for MySQL</h2>
 
-<p><b>NOTE:</b>&nbsp; Perform these steps only after installing the Hyperic Server.</p>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>After the database is created, you can set up Hyperic Server following the instructions in <a href="Hyperic Installation and Startup Process.html#HypericInstallationandStartupProcess-SetUpServer">Step 3 - Set Up Hyperic Server</a> of the <a href="Hyperic Installation and Startup Process.html" title="Hyperic Installation and Startup Process">Hyperic Installation and Startup Process</a>.</td></tr></table></div>
+
+<h1><a name="SetUpMySQL-SolveProblemswithMySQLStartup"></a>Solve Problems with MySQL Startup</h1>
+
+<p>If MySQL fails to start and issues a message similar to this:</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">InnoDB: Error: log file ./ib_logfile0 is of different size 0 5242880 bytes
+InnoDB: than specified in the .cnf file 0 268435456 bytes!
+080403  8:06:13 ERROR Default storage engine (InnoDB) is not available
+080403  8:06:13 ERROR Aborting</pre>
+		</div>
+</div></div>
+<p>the actual log size does not match the configured log size. &nbsp;&nbsp;</p>
+
+<p>Delete the log files in <tt>/var/lib/mysql/</tt> and restart MySQL.</p>
+
+<h1><a name="SetUpMySQL-TunetheBatchAggregateInserterforMySQL"></a>Tune the Batch Aggregate Inserter for MySQL</h1>
+<p><a name="SetUpMySQL-BatchAgg"></a></p>
+<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>Do this tuning <em>after</em> installing the Hyperic Server.</td></tr></table></div>
 
 <p>These tuning recommendations are based on a performance tuning exercise in an environment with 700 Hyperic Agents reporting to an Hyperic Server on an 8 way / 16 GB host with an MySQL database running on an 8 way / 8 GB host, each running CentOS 5, with</p>
 <ul>
@@ -217,75 +243,7 @@ mysql&gt; update HQ.EAM_CONFIG_PROPS set propvalue = 4000000 where propkey = 'BA
 		</div>
 </div></div>
 
-<h1><a name="SetUpMySQL-SolveProblemswithMySQLConfiguration"></a>Solve Problems with MySQL Configuration</h1>
 
-<p>If MySQL fails to start and issues a message similar to this:</p>
-<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
-<div id="root">
-		<pre class="theme: Confluence; brush: java; gutter: false">InnoDB: Error: log file ./ib_logfile0 is of different size 0 5242880 bytes
-InnoDB: than specified in the .cnf file 0 268435456 bytes!
-080403  8:06:13 ERROR Default storage engine (InnoDB) is not available
-080403  8:06:13 ERROR Aborting</pre>
-		</div>
-</div></div>
-<p>the actual log size does not match the configured log size. &nbsp;&nbsp;</p>
-
-<p>Delete the log files in /var/lib/mysql/ and restart MySQL.</p>
-
-<h1><a name="SetUpMySQL-MySQLMaintenanceExamples"></a>MySQL Maintenance Examples</h1>
-
-<p>Here are examples of regular maintenance for mysql</p>
-<ol>
-	<li>Simple MySQL Backup Script
-<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
-<div id="root">
-		<pre class="theme: Confluence; brush: java; gutter: false">#!/bin/sh
-
-START=`date '+%A %Y/%m/%d %H:%M:%S'`
-DAY=`date +%A`
-MYSQLADMIN="/usr/bin/mysqladmin"
-MYSQLDUMP="/usr/bin/mysqldump"
-USER="root"
-PASSWORD="mysql"
-DBNAME="hqdb"
-DEST="/home/mysql/dumps/$DBNAME-$DAY.sql.gz"
-flushCmd="$MYSQLADMIN -u $USER -p$PASSWORD flush-logs"
-dumpCmd="$MYSQLDUMP -u $USER -p$PASSWORD --quick --single-transaction $DBNAME"
-gzip="gzip"
-echo "Starting backup: $START"
-echo "$flushCmd &amp;&amp; $dumpCmd | $gzip &gt; $DEST"
-$flushCmd &amp;&amp; $dumpCmd | $gzip &gt; $DEST
-END=`date '+%A %Y/%m/%d %H:%M:%S'`
-echo "Backup completed: $END"</pre>
-		</div>
-</div></div></li>
-	<li>Simple Log Rollover Scheme.  This may be done with error files, log files, etc.
-<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
-<div id="root">
-		<pre class="theme: Confluence; brush: java; gutter: false">cp /path/to/mysql/log/mysqld.err /path/to/mysql/log/mysqld-`date '+%w'`.err ;
-cp /dev/null /path/to/mysql/log/mysqld.err</pre>
-		</div>
-</div></div></li>
-	<li>Sample Unix Cron Entries (empty lines will fail in cron, beware)
-<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
-<div id="root">
-		<pre class="theme: Confluence; brush: java; gutter: false">#
-#       Field 1: (0-59) minute
-#       Field 2: (0-23) hour
-#       Field 3: (1-31) day  of  the month
-#       Field 4: (1-12) month of the year
-#       Field 5: (0-6)  day of the week - 1=Monday
-# ----------------------------------------------------------------------------
-#
-0 2 * * * backup.sh
-0 1 * * * cp /path/to/mysql/log/mysqld.err /path/to/mysql/log/mysqld-`date '+%w'`.err ;
-cp /dev/null /path/to/mysql/log/mysqld.err</pre>
-		</div>
-</div></div></li>
-</ol>
-
-
-<p><font color=""></font></p>
 
 				    
                     			    </td>
@@ -296,7 +254,7 @@ cp /dev/null /path/to/mysql/log/mysqld.err</pre>
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:43</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:56</font></td>
 		    </tr>
 	    </table>
     </body>

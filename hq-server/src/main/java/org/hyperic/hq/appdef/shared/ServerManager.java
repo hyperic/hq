@@ -185,7 +185,7 @@ public interface ServerManager {
      * Get server by service. The virtual servers are not filtere out of
      * returned list.
      */
-    public PageList<ServerValue> getServersByServices(AuthzSubject subject, List<AppdefEntityID> sIDs)
+    public PageList<Server> getServersByServices(AuthzSubject subject, List<AppdefEntityID> sIDs)
         throws PermissionException, ServerNotFoundException;
 
     /**

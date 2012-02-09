@@ -29,7 +29,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html"%>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <html>
 	<head>
 	    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
@@ -44,7 +44,7 @@
 				</c:if>
 			</fmt:message>
 		</title>
-		<script type="text/javascript">
+		<jsu:script>
         	var onloads = [];
 
             function initOnloads() {
@@ -57,11 +57,10 @@
                 for ( var i = 0 ; i < onloads.length ; i++ )
              		onloads[i]();
 	        };
-	        
-	        hqDojo.ready(function() {
-            	initOnloads();
-            });
-	    </script>
+    	</jsu:script>
+		<jsu:script onLoad="true">	
+			initOnloads();
+		</jsu:script>    	
 	</head>
 	<body style="background-color: #FFFFFF;" class="tundra" debug="true">
 		<tiles:insert attribute="header" />

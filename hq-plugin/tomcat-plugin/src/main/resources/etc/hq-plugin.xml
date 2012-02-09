@@ -173,8 +173,10 @@
     <property name="VERSION_FILE"
               value="server/lib/catalina-storeconfig.jar"/>
 
+    <property name="tomcatVersion" value="1.0"/>
+
     <plugin type="autoinventory"
-            class="org.hyperic.hq.product.jmx.MxServerDetector"/>
+            class="org.hyperic.hq.plugin.tomcat.TomcatServerDetector"/>
 
     <property name="domain"
               value="Catalina"/>
@@ -207,6 +209,17 @@
 
     <plugin type="log_track"
             class="org.hyperic.hq.product.Log4JLogTrackPlugin"/>
+
+    <plugin type="config_track"
+            class="org.hyperic.hq.product.FileChangeTrackPlugin">
+            <monitored>
+            	<folder path="conf" recursive="true" filter=".*\.properties|.*\.xml|.*.policy|.*\.cfg|.*\.cnf|.*\.conf"/>
+            	<folder path="bin" recursive="false" filter=".*\.bat|.*\.xml|.*\.sh"/>
+            	<folder path="lib" recursive="false" filter=".*\.jar"/>
+            	<folder path="webapps" recursive="true" filter=".*\.properties|.*\.xml|.*\.jar|.*\.dll|.*\.class|.*\.pl|.*\.py|.*\.pyc|.*\.cgi"/>
+            </monitored>
+    </plugin>
+     <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="false" />
 
     <property name="DEFAULT_PROGRAM"
               value="bin/catalina.sh"/>
@@ -574,8 +587,23 @@
     <!-- derive installpath from -Dcatalina.base=... -->
     <property name="PROC_HOME_PROPERTY"
               value="catalina.base"/>
-    <plugin type="autoinventory"
-            class="org.hyperic.hq.plugin.tomcat.TomcatServerDetector"/>
+    <property name="tomcatVersion" value="6.0"/>
+
+
+     &internal-services;
+     &hibernate-services;
+ 
+    
+  </server>
+
+  <server name="Apache Tomcat"
+          version="7.0"
+          include="6.0">
+    <property name="VERSION_FILE"
+              value="lib/tomcat-api.jar"/>
+    <property name="PROC_HOME_PROPERTY"
+              value="catalina.base"/>
+    <property name="tomcatVersion" value="7.0"/>
      &internal-services;
      &hibernate-services;
   </server>

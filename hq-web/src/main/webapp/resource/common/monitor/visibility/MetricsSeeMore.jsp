@@ -4,7 +4,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -64,15 +64,14 @@
     </td>
     <td>
     <html:hidden property="showAll"/>
-    <script type="text/javascript">
-    function reverseListing() {
-      document.forms.MetricsDisplayForm.showAll.value =
-        '<c:out value="${!MetricsDisplayForm.showAll}"/>';
-      document.forms.MetricsDisplayForm.submit();
-    }
-    </script>
-    <html:link href="javascript:reverseListing();"><html:img page="/images/4.0/icons/accept.png" border="0"/>
-    </html:link>
+    <jsu:script>
+	    function reverseListing() {
+	      document.forms.MetricsDisplayForm.showAll.value =
+	        '<c:out value="${!MetricsDisplayForm.showAll}"/>';
+	      document.forms.MetricsDisplayForm.submit();
+	    }
+	</jsu:script>
+    <html:link href="javascript:reverseListing();"><html:img page="/images/4.0/icons/accept.png" border="0"/></html:link>
     </td>
   </tr>
 </table>

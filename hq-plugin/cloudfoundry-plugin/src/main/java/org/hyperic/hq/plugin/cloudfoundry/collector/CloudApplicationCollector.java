@@ -82,20 +82,24 @@ public class CloudApplicationCollector extends Collector {
             	ApplicationStats stats = cf.getApplicationStats(appName);
             	List<InstanceStats> records = stats.getRecords();
             	for (InstanceStats stat : records) {
-            		double memory = stat.getUsage().getMem();
-            		long memoryQuota = stat.getMemQuota();            		
-            		double disk = stat.getUsage().getDisk();
-            		double diskQuota = (double) stat.getDiskQuota();
-            		double cpu = stat.getUsage().getCpu() / 100d;
-
-            		// FIXME: the cloud foundry api is returning the value
-                	// in KB, so need to convert to the proper units
-                	memory = memory * 1024;
-            		totalMemory += memory;
-            		percentMemory += memory/memoryQuota;
-            		totalDisk += disk;
-            		percentDisk += disk/diskQuota;
-            		totalCpu += cpu;
+            		InstanceStats.Usage usage = stat.getUsage();
+            		
+            		if (usage != null) {
+	            		double memory = usage.getMem();
+	            		long memoryQuota = stat.getMemQuota();            		
+	            		double disk = usage.getDisk();
+	            		double diskQuota = (double) stat.getDiskQuota();
+	            		double cpu = usage.getCpu() / 100d;
+	
+	            		// FIXME: the cloud foundry api is returning the value
+	                	// in KB, so need to convert to the proper units
+	                	memory = memory * 1024;
+	            		totalMemory += memory;
+	            		percentMemory += memory/memoryQuota;
+	            		totalDisk += disk;
+	            		percentDisk += disk/diskQuota;
+	            		totalCpu += cpu;
+            		}
             		
             		if (stat.getUptime() > maxUptime) {
             			maxUptime = stat.getUptime();
@@ -107,7 +111,7 @@ public class CloudApplicationCollector extends Collector {
             		percentMemory = percentMemory/recordSize;
             		totalDisk = totalDisk/recordSize;
             		percentDisk = percentDisk/recordSize;
-            		totalCpu = totalCpu/records.size();
+            		totalCpu = totalCpu/recordSize;
             	}
                 setValue("AverageMemoryUsed", totalMemory);
                 setValue("PercentAverageMemoryUsed", percentMemory);             

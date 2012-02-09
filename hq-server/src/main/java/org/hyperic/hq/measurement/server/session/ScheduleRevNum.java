@@ -25,63 +25,14 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import java.io.Serializable;
+import org.hyperic.hibernate.PersistedObject;
 
-public class ScheduleRevNum implements Serializable {
-
-    private SrnId _id;
-    private long  _version;
-    private int   _srn;
-    private long  _minInterval = 0;
-    private long  _lastReported = 0;
+@SuppressWarnings("serial")
+public class ScheduleRevNum extends PersistedObject {
     
-    public ScheduleRevNum() {
-    }
-
-    public ScheduleRevNum(SrnId id, int srn) {
-        _id  = id;
-        _srn = srn;
-    }
-
-    public SrnId getId() {
-        return _id;
-    }
-    
-    protected void setId(SrnId id) {
-        _id = id;
-    }
-
-    public long get_version_() {
-        return _version;
-    }
-    
-    protected void set_version_(long version) {
-        _version = version;
-    }
-
-    public int getSrn() {
-        return _srn;
-    }
-    
-    protected void setSrn(int srn) {
-        _srn = srn;
-    }
-
-    public long getMinInterval() {
-        return _minInterval;
-    }
-    
-    public void setMinInterval(long minInterval) {
-        _minInterval = minInterval;
-    }
-
-    public long getLastReported() {
-        return _lastReported;
-    }
-    
-    public void setLastReported(long lastReported) {
-        _lastReported = lastReported;
-    }
+    private SrnId srnId;
+    private int srn;
+    private long lastSchedule;
 
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -90,16 +41,35 @@ public class ScheduleRevNum implements Serializable {
         if (obj == null || !(obj instanceof ScheduleRevNum)) {
             return false;
         }
-        ScheduleRevNum o = (ScheduleRevNum)obj;
-        return _id == o.getId() ||
-               (_id != null && o.getId() != null && _id.equals(o.getId()));
+        final ScheduleRevNum s = (ScheduleRevNum) obj;
+        return srnId.equals(s.srnId);
     }
 
     public int hashCode() {
-        int result = 17;
+        return srnId.hashCode();
+    }
 
-        result = 37*result + (_id != null ? _id.hashCode() : 0);
+    public int getSrn() {
+        return srn;
+    }
 
-        return result;
+    public void setSrn(int srn) {
+        this.srn = srn;
+    }
+
+    public SrnId getSrnId() {
+        return srnId;
+    }
+
+    public void setSrnId(SrnId srnId) {
+        this.srnId = srnId;
+    }
+
+    public long getLastSchedule() {
+        return lastSchedule;
+    }
+
+    public void setLastSchedule(long lastSchedule) {
+        this.lastSchedule = lastSchedule;
     }
 }

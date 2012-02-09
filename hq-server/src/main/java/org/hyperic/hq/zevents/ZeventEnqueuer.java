@@ -44,7 +44,8 @@ public interface ZeventEnqueuer {
      */
     void enqueueEvent(Zevent event) throws InterruptedException;
 
-    ZeventListener addBufferedListener(Class eventClass, ZeventListener listener);
+    ZeventListener<? extends Zevent> addBufferedListener(Class<? extends Zevent> eventClass,
+                                                         ZeventListener<? extends Zevent> listener);
 
     void enqueueEventAfterCommit(Zevent event);
 
@@ -55,7 +56,7 @@ public interface ZeventEnqueuer {
      * @param eventClass a subclass of {@link Zevent}
      * @return false if the eventClass was already registered
      */
-    boolean registerEventClass(Class eventClass);
+    boolean registerEventClass(Class<? extends Zevent> eventClass);
 
     /**
      * Register a list of event classes. These classes must be registered prior to
@@ -70,11 +71,12 @@ public interface ZeventEnqueuer {
      * Enqueue events if the current running transaction successfully commits.
      * @see #enqueueEvents(List)
      */
-    void enqueueEventsAfterCommit(List inEvents);
+    void enqueueEventsAfterCommit(List<? extends Zevent> inEvents);
 
-    ZeventListener addBufferedListener(Set eventClasses, ZeventListener listener);
+    ZeventListener<? extends Zevent> addBufferedListener(Set<Class<? extends Zevent>> eventClasses,
+                                                         ZeventListener<? extends Zevent> listener);
 
-    void enqueueEvents(List events) throws InterruptedException;
+    void enqueueEvents(List<? extends Zevent> events) throws InterruptedException;
 
     long getMaxTimeInQueue();
 
@@ -86,7 +88,7 @@ public interface ZeventEnqueuer {
      * Registers a buffer with the internal list, so data about its contents can
      * be printed by the diagnostic thread.
      */
-    void registerBuffer(Queue q, ZeventListener e);
+    void registerBuffer(Queue<?> q, ZeventListener<? extends Zevent> e);
 
-    boolean addBufferedGlobalListener(ZeventListener listener);
+    boolean addBufferedGlobalListener(ZeventListener<? extends Zevent> listener);
 }

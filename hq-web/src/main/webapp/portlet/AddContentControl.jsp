@@ -4,7 +4,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -34,36 +34,33 @@
 <tiles:importAttribute name="availablePortlets"/>
 <tiles:importAttribute name="wide"/>
 <tiles:importAttribute name="portlets"/>
-
-<script type="text/javascript">
-<c:choose>
-<c:when test="${wide}">
-  function isWide(portlet) {
-</c:when>
-<c:otherwise>
-  function isNarrow(portlet) {
-</c:otherwise>
-</c:choose>
+<jsu:script>
+	<c:choose>
+		<c:when test="${wide}">
+  			function isWide(portlet) {
+		</c:when>
+		<c:otherwise>
+  			function isNarrow(portlet) {
+		</c:otherwise>
+	</c:choose>
     <c:forEach var="portlet" items="${portlets}">
-      if (portlet == '<c:out value="${portlet}"/>')
-        return true;
+      	if (portlet == '<c:out value="${portlet}"/>')
+        	return true;
     </c:forEach>
-    return false;
-  }
-</script>
+    	return false;
+  	}
 
-<script type="text/javascript">
-  // Check if a valid portlet has been selected. NOTE: The function name must be unique, since it's included
-  // more than once on the same rendered page.
-  function isDivAddContents<c:out value="${wide}" />PortletValid() {
-    portlet = document.getElementById('addContentsPortlet<c:out value="${wide}" />').getElementsByTagName("select")[0].value
-    if (portlet == "bad") { // this is default setting, which must not be allowed through
-      return false
-    } else {
-      return true
-    }
-  }
-</script>
+  	// Check if a valid portlet has been selected. NOTE: The function name must be unique, since it's included
+  	// more than once on the same rendered page.
+	  function isDivAddContents<c:out value="${wide}" />PortletValid() {
+	    portlet = document.getElementById('addContentsPortlet<c:out value="${wide}" />').getElementsByTagName("select")[0].value
+	    if (portlet == "bad") { // this is default setting, which must not be allowed through
+	      return false
+	    } else {
+	      return true
+	    }
+	  }
+</jsu:script>
 
 <c:choose>
 <c:when test="${not empty availablePortlets }">

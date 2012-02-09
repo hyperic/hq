@@ -3,7 +3,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -86,19 +86,17 @@
     </td>
   </tr>
 </table>
-
-<script type="text/javascript">
+<jsu:script>
 	var advancedDialog = null;
-	
-	hqDojo.ready(function(){
-		advancedDialog = new hqDijit.Dialog({
-                id: 'advancedDisplay',
-                refocus: true,
-                autofocus: false,
-                opacity: 0,
-                title: "<fmt:message key="resource.common.monitor.visibility.metricsToolbar.EditRangeBtn" />"
-        }, hqDojo.byId('advancedDisplay'));
+</jsu:script>
+<jsu:script onLoad="true">	
+	advancedDialog = new hqDijit.Dialog({
+	    id: 'advancedDisplay',
+        refocus: true,
+        autofocus: false,
+        opacity: 0,
+        title: "<fmt:message key="resource.common.monitor.visibility.metricsToolbar.EditRangeBtn" />"
+    }, hqDojo.byId('advancedDisplay'));
         
-        hqDojo.place(hqDojo.byId('advancedDisplay'), hqDojo.byId('advancedContainer'), "last");
-  	});
-</script>
+    hqDojo.place(hqDojo.byId('advancedDisplay'), hqDojo.byId('advancedContainer'), "last");
+</jsu:script>

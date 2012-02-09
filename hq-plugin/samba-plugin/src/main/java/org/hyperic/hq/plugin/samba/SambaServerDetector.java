@@ -27,35 +27,21 @@ package org.hyperic.hq.plugin.samba;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Iterator;
 import java.util.regex.Pattern;
-
-import org.hyperic.hq.product.AutoServerDetector;
-import org.hyperic.hq.product.FileServerDetector;
-import org.hyperic.hq.product.MeasurementPlugin;
-import org.hyperic.hq.product.Metric;
-import org.hyperic.hq.product.MetricUnreachableException;
-import org.hyperic.hq.product.MetricInvalidException;
-import org.hyperic.hq.product.MetricNotFoundException;
-import org.hyperic.hq.product.MetricValue;
-import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.ServerDetector;
-import org.hyperic.hq.product.ServerResource;
-import org.hyperic.hq.product.ServiceResource;
-import org.hyperic.hq.product.ProductPlugin;
-
-import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.config.ConfigSchema;
-import org.hyperic.util.config.SchemaBuilder;
-
-import org.hyperic.sigar.win32.RegistryKey;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.product.AutoServerDetector;
+import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.hq.product.ServerDetector;
+import org.hyperic.hq.product.ServerResource;
+import org.hyperic.hq.product.ServiceResource;
+import org.hyperic.util.config.ConfigResponse;
 
 public class SambaServerDetector
     extends ServerDetector
@@ -68,27 +54,27 @@ public class SambaServerDetector
     // this PTQL query matches the PROCESS_NAME and returns the parent process id
     private static final String PTQL_QUERY = 
         "State.Name.eq="+PROCESS_NAME+",State.Name.Pne=$1";
-
+    
     private static Log log = LogFactory.getLog(SambaServerDetector.class);
 
-    public List getServerResources(ConfigResponse platformConfig)
+    public List<ServerResource> getServerResources(ConfigResponse platformConfig)
         throws PluginException
     {
-        List servers = new ArrayList();
-        List paths = getServerProcessList();
+        List<ServerResource>  servers = new ArrayList<ServerResource> ();
+        List<String>  paths = getServerProcessList();
         for (int i=0; i<paths.size(); i++)
         {
-            String dir = (String)paths.get(i);
-            List found = getServerList(dir);
+            String dir = paths.get(i);
+            List<ServerResource>  found = getServerList(dir);
             if (!found.isEmpty())
                 servers.addAll(found);
         }
         return servers;
     }
 
-    private static List getServerProcessList()
+    private static List<String> getServerProcessList()
     {
-        List servers = new ArrayList();
+        List<String> servers = new ArrayList<String>();
         long[] pids = getPids(PTQL_QUERY);
         for (int i=0; i<pids.length; i++)
         {
@@ -96,11 +82,45 @@ public class SambaServerDetector
             if (exe == null)
                 continue;
             File binary = new File(exe);
-            if (!binary.isAbsolute())
-                continue;
+            if (!binary.isAbsolute()) {
+            	//The smbd process exists but the ps does not return the
+            	//full installation path
+            	String proccessFullPath = getProcessFullPath(exe);
+				if (null != proccessFullPath && !proccessFullPath.equalsIgnoreCase(""))
+            		servers.add(proccessFullPath);
+            	continue;
+            }
             servers.add(binary.getAbsolutePath());
         }
         return servers;
+    }
+    
+    /**
+     * In case the process does not contain the full installation path
+     * of smbd we will try to get it using the Linux 'which' command, assuming
+     * that it is most likely to run on a Linux system, in case of a failure 
+     * we will return null. TODO: check if Sigar can provide us a way to
+     * execute to which method
+     * @param exe
+     */
+    private static String getProcessFullPath(String exe)
+    {
+    	  String[] cmd = {"which", exe, "-a"};
+          try
+          {
+              Process process = Runtime.getRuntime().exec(cmd);
+              BufferedReader fp = new BufferedReader( new InputStreamReader(process.getInputStream()) );
+              String output = "";
+              String line;
+              while( null != (line = fp.readLine()) )
+                  output = output + line;
+              File binary = new File(output);
+              if (binary.isAbsolute()) 
+            	  return binary.getAbsolutePath();
+          }
+          catch (Exception e) {
+		}
+          return null;
     }
 
     private String getVersion(String path)
@@ -125,10 +145,10 @@ public class SambaServerDetector
         return null;
     }
 
-    public List getServerList(String path) throws PluginException
+    public List<ServerResource> getServerList(String path) throws PluginException
     {
-        List servers = new ArrayList();
-        String installpath = getParentDir(path, 2);
+        List<ServerResource> servers = new ArrayList<ServerResource>();
+        String installpath = getParentDir(path, 1);
 
         ConfigResponse productConfig = new ConfigResponse();
         productConfig.setValue("installpath", installpath);
@@ -155,15 +175,17 @@ public class SambaServerDetector
         return servers;
     }
 
-    protected List discoverServices(ConfigResponse config)
+    @Override
+	protected List<String> discoverServices(ConfigResponse config)
         throws PluginException
     {
         String installpath = config.getValue(ProductPlugin.PROP_INSTALLPATH);
-        List services = new ArrayList();
+        List<String>  services = new ArrayList<String> ();
         return services;
     }
 
-    private ServiceResource getService(String name, String installpath)
+    @SuppressWarnings("unused")
+	private ServiceResource getService(String name, String installpath)
     {
         ServiceResource service = new ServiceResource();
         service.setType(this, name);

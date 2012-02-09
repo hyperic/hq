@@ -1,21 +1,21 @@
 body, p, td, table, tr, .bodytext, .stepfield {
-	font-family: Verdana, arial, sans-serif;
-	font-size: 11px;
-	line-height: 16px;
-	color: #000000;
-	font-weight: normal;
+    font-family: Verdana, arial, sans-serif;
+    font-size: 11px;
+    line-height: 16px;
+    color: #000000;
+    font-weight: normal;
 }
 #PageContent {
-	text-align: left;
-	background-color: #fff;
-	padding: 0px;
-	margin: 0px;
+    text-align: left;
+    background-color: #fff;
+    padding: 0px;
+    margin: 0px;
     padding-bottom:20px;
 }
 body {
-	margin: 0px;
-	padding: 0px;
-	text-align: center;
+    margin: 0px;
+    padding: 0px;
+    text-align: center;
     background-color: #f0f0f0;
 }
 
@@ -73,11 +73,11 @@ pre {
 }
 
 .code {
- 	border: 1px dashed #3c78b5;
+    border: 1px dashed #3c78b5;
     font-size: 11px;
-	font-family: Courier;
+    font-family: Courier;
     margin: 10px;
-	line-height: 13px;
+    line-height: 13px;
     overflow: auto;
 }
 
@@ -94,9 +94,9 @@ pre {
 
 .codeHeader {
     background-color: #f0f0f0;
- 	border-bottom: 1px dashed #3c78b5;
+    border-bottom: 1px dashed #3c78b5;
     padding: 3px;
-	text-align: center;
+    text-align: center;
 }
 
 .codeContent {
@@ -106,18 +106,18 @@ pre {
 }
 
 .preformatted {
- 	border: 1px dashed #3c78b5;
+    border: 1px dashed #3c78b5;
     font-size: 11px;
-	font-family: Courier;
+    font-family: Courier;
     margin: 10px;
-	line-height: 13px;
+    line-height: 13px;
 }
 
 .preformattedHeader {
     background-color: #f0f0f0;
- 	border-bottom: 1px dashed #3c78b5;
+    border-bottom: 1px dashed #3c78b5;
     padding: 3px;
-	text-align: center;
+    text-align: center;
 }
 
 .preformattedContent {
@@ -126,16 +126,16 @@ pre {
 }
 
 .panel {
- 	border: 1px dashed #3c78b5;
+    border: 1px dashed #3c78b5;
     margin: 10px;
     margin-top: 0px;
 }
 
 .panelHeader {
     background-color: #f0f0f0;
- 	border-bottom: 1px dashed #3c78b5;
+    border-bottom: 1px dashed #3c78b5;
     padding: 3px;
-	text-align: center;
+    text-align: center;
 }
 
 .panelContent {
@@ -145,21 +145,21 @@ pre {
 
 .anonymousAlert {
     background-color: #f0f0f0;
- 	border: 1px dashed red;
+    border: 1px dashed red;
     font-size: 11px;
     padding: 10px 5px 10px 5px;
     margin: 4px;
-	line-height: 13px;
+    line-height: 13px;
 }
 
 .lockAlert {
     background-color: #f0f0f0;
     width: 50%;
- 	border: 1px dashed red;
+    border: 1px dashed red;
     font-size: 11px;
     padding: 10px 5px 10px 5px;
     margin: 4px;
-	line-height: 13px;
+    line-height: 13px;
 }
 
 
@@ -196,9 +196,9 @@ pre {
 
 .breadcrumbs {
     background-color: #f0f0f0;
- 	border-color: #3c78b5;
-	border-width: 1px 0px 1px 0px;
-	border-style: solid;
+    border-color: #3c78b5;
+    border-width: 1px 0px 1px 0px;
+    border-style: solid;
     font-size: 11px;
     padding: 3px 0px 3px 0px;
 }
@@ -210,12 +210,12 @@ pre {
 .menuheading {
     font-weight: bold;
     background-color: #f0f0f0;
- 	border-bottom: 1px solid #3c78b5;
-	padding: 4px 4px 2px 4px;
+    border-bottom: 1px solid #3c78b5;
+    padding: 4px 4px 2px 4px;
 }
 
 .menuitems {
-	padding: 4px 4px 20px 4px;
+    padding: 4px 4px 20px 4px;
 }
 
 .rightpanel {
@@ -227,32 +227,32 @@ pre {
     text-align: left;
     font-weight: bold;
     background-color: #D0D9BD;
- 	border-bottom: 1px solid #3c78b5;
-	padding: 4px 4px 4px 4px;
-	margin: 0px;
+    border-bottom: 1px solid #3c78b5;
+    padding: 4px 4px 4px 4px;
+    margin: 0px;
 }
 #helpcontent {
-	padding: 4px 4px 4px 4px;
+    padding: 4px 4px 4px 4px;
     background-color: #f5f7f1;
 }
 .helptab-unselected {
     font-weight: bold;
-	padding: 5px;
+    padding: 5px;
     background-color: #f5f7f1;
 }
 .helptab-selected {
     font-weight: bold;
     background-color: #D0D9BD;
-	padding: 5px;
+    padding: 5px;
 }
 .helptabs {
     margin: 0px;
     background-color: #f5f7f1;
-	padding: 5px;
+    padding: 5px;
 }
 .infopanel-heading {
     font-weight: bold;
-	padding: 4px 0px 2px 0px;
+    padding: 4px 0px 2px 0px;
 }
 
 #profileSummary h3 {
@@ -271,15 +271,15 @@ pre {
 }
 
 .pageheader {
-	padding: 5px 5px 5px 0px;
- 	border-bottom: 1px solid #3c78b5;
+    padding: 5px 5px 5px 0px;
+    border-bottom: 1px solid #3c78b5;
 }
 
 .pagetitle {
-	font-size: 22px;
-	font-weight: bold;
-	font-family: Arial, sans-serif;
-	color: #003366;
+    font-size: 22px;
+    font-weight: bold;
+    font-family: Arial, sans-serif;
+    color: #003366;
 }
 
 .newpagetitle {
@@ -287,11 +287,11 @@ pre {
 }
 
 .steptitle {
-	font-size: 18px;
-	font-weight: bold;
-	font-family: Arial, sans-serif;
-	color: #003366;
-	margin-bottom: 7px;
+    font-size: 18px;
+    font-weight: bold;
+    font-family: Arial, sans-serif;
+    color: #003366;
+    margin-bottom: 7px;
 }
 
 .substeptitle {
@@ -305,9 +305,9 @@ pre {
 
 .stepdesc {
     font-family: Verdana, arial, sans-serif;
-	font-size: 11px;
-	line-height: 16px;
-	font-weight: normal;
+    font-size: 11px;
+    line-height: 16px;
+    font-weight: normal;
     color: #666666;
     margin-top: 7px;
     margin-bottom: 7px;
@@ -333,10 +333,10 @@ pre {
 }
 
 .formtitle {
-	font-size: 12px;
-	font-weight: bold;
-	font-family: Arial, sans-serif;
-	color: #003366;
+    font-size: 12px;
+    font-weight: bold;
+    font-family: Arial, sans-serif;
+    color: #003366;
 }
 
 .sectionbottom {
@@ -348,13 +348,13 @@ pre {
 }
 
 .tabletitle {
-	font-size: 14px;
-	font-weight: bold;
-	font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: bold;
+    font-family: Arial, sans-serif;
     padding: 3px 0px 2px 0px;
     margin: 8px 4px 2px 0px;
-	color: #003366;
-	border-bottom: 2px solid #3c78b5;
+    color: #003366;
+    border-bottom: 2px solid #3c78b5;
 }
 .pagesubheading {
     color: #666666;
@@ -363,16 +363,16 @@ pre {
 }
 
 HR {
-	color: 3c78b5;
-	height: 1;
+    color: 3c78b5;
+    height: 1;
 }
 
 A:link, A:visited, A:active, A:hover {
-	color: #003366;
+    color: #003366;
 }
 
 h1 A:link, h1 A:visited, h1 A:active {
-	text-decoration: none;
+    text-decoration: none;
 }
 
 h1 A:hover {
@@ -388,23 +388,23 @@ h1 A:hover {
 }
 
 input {
-	font-family: verdana, geneva, arial, sans-serif;
-	font-size: 11px;
-	color: #000000;
+    font-family: verdana, geneva, arial, sans-serif;
+    font-size: 11px;
+    color: #000000;
 }
 
 textarea, textarea.editor {
-	font-family: verdana, geneva, arial, sans-serif;
-	font-size: 11px;
-	color: #333333;
+    font-family: verdana, geneva, arial, sans-serif;
+    font-size: 11px;
+    color: #333333;
 }
 
 /* use logoSpaceLink instead.
 .spacenametitle {
-	font: 21px/31px Impact, Arial, Helvetica;
+    font: 21px/31px Impact, Arial, Helvetica;
     font-weight: 100;
     color: #999999;
-	margin: 0px;
+    margin: 0px;
 }
 .spacenametitle img {
   margin: 0 0 -4px 0;
@@ -419,10 +419,10 @@ textarea, textarea.editor {
 }*/
 
 .spacenametitle-printable {
-	font: 20px/25px Impact, Arial, Helvetica;
+    font: 20px/25px Impact, Arial, Helvetica;
     font-weight: 100;
     color: #999999;
-	margin: 0px;
+    margin: 0px;
 }
 .spacenametitle-printable a {
     text-decoration: none;
@@ -434,16 +434,16 @@ textarea, textarea.editor {
 }
 
 .blogDate {
-	font-weight: bold;
-	text-decoration: none;
-	color: black;
+    font-weight: bold;
+    text-decoration: none;
+    color: black;
 }
 
 .blogSurtitle {
     background: #f0f0f0;
- 	border: 1px solid #ddd;
-	padding: 3px;
-	margin: 1px 1px 10px 1px;
+    border: 1px solid #ddd;
+    padding: 3px;
+    margin: 1px 1px 10px 1px;
 }
 
 .blogHeading {
@@ -464,80 +464,80 @@ textarea, textarea.editor {
 }
 
 .endsection {
-	align: right;
-	color: #666666;
-	margin-top: 10px;
+    align: right;
+    color: #666666;
+    margin-top: 10px;
 }
 .endsectionleftnav {
-	align: right;
-	color: #666666;
-	margin-top: 10px;
+    align: right;
+    color: #666666;
+    margin-top: 10px;
 }
 
 h1 {
-	font-size: 24px;
-	line-height: normal;
-	font-weight: bold;
-	background-color: #f0f0f0;
-	color: #003366;
- 	border-bottom: 1px solid #3c78b5;
-	padding: 2px;
-	margin: 36px 0px 4px 0px;
+    font-size: 24px;
+    line-height: normal;
+    font-weight: bold;
+    background-color: #f0f0f0;
+    color: #003366;
+    border-bottom: 1px solid #3c78b5;
+    padding: 2px;
+    margin: 36px 0px 4px 0px;
 }
 
 h2 {
-	font-size: 18px;
-	line-height: normal;
-	font-weight: bold;
-	background-color: #f0f0f0;
- 	border-bottom: 1px solid #3c78b5;
-	padding: 2px;
-	margin: 27px 0px 4px 0px;
+    font-size: 18px;
+    line-height: normal;
+    font-weight: bold;
+    background-color: #f0f0f0;
+    border-bottom: 1px solid #3c78b5;
+    padding: 2px;
+    margin: 27px 0px 4px 0px;
 }
 
 h3 {
-	font-size: 14px;
-	line-height: normal;
-	font-weight: bold;
-	background-color: #f0f0f0;
-	padding: 2px;
-	margin: 21px 0px 4px 0px;
+    font-size: 14px;
+    line-height: normal;
+    font-weight: bold;
+    background-color: #f0f0f0;
+    padding: 2px;
+    margin: 21px 0px 4px 0px;
 }
 
 h4 {
-	font-size: 12px;
-	line-height: normal;
-	font-weight: bold;
-	background-color: #f0f0f0;
-	padding: 2px;
-	margin: 18px 0px 4px 0px;
+    font-size: 12px;
+    line-height: normal;
+    font-weight: bold;
+    background-color: #f0f0f0;
+    padding: 2px;
+    margin: 18px 0px 4px 0px;
 }
 
 h4.search {
-	font-size: 12px;
-	line-height: normal;
-	font-weight: normal;
-	background-color: #f0f0f0;
-	padding: 4px;
-	margin: 18px 0px 4px 0px;
+    font-size: 12px;
+    line-height: normal;
+    font-weight: normal;
+    background-color: #f0f0f0;
+    padding: 4px;
+    margin: 18px 0px 4px 0px;
 }
 
 h5 {
-	font-size: 10px;
-	line-height: normal;
-	font-weight: bold;
-	background-color: #f0f0f0;
-	padding: 2px;
-	margin: 14px 0px 4px 0px;
+    font-size: 10px;
+    line-height: normal;
+    font-weight: bold;
+    background-color: #f0f0f0;
+    padding: 2px;
+    margin: 14px 0px 4px 0px;
 }
 
 h6 {
-	font-size: 8px;
-	line-height: normal;
-	font-weight: bold;
-	background-color: #f0f0f0;
-	padding: 2px;
-	margin: 14px 0px 4px 0px;
+    font-size: 8px;
+    line-height: normal;
+    font-weight: bold;
+    background-color: #f0f0f0;
+    padding: 2px;
+    margin: 14px 0px 4px 0px;
 }
 
 .smallfont {
@@ -626,28 +626,28 @@ div.centered table {margin: 0px auto; text-align: left; }
     padding: 3px 4px 3px 4px;
 }
 .gridHover {
-	background-color: #f9f9f9;
+    background-color: #f9f9f9;
 }
 
 td.infocell {
     background-color: #f0f0f0;
 }
 .label {
-	font-weight: bold;
-	color: #003366;
+    font-weight: bold;
+    color: #003366;
 }
 
 label {
-	font-weight: bold;
-	color: #003366;
+    font-weight: bold;
+    color: #003366;
 }
 
 .error {
-	background-color: #fcc;
+    background-color: #fcc;
 }
 
 .errorBox {
-	background-color: #fcc;
+    background-color: #fcc;
     border: 1px solid #c00;
     padding: 5px;
     margin-top:5px;
@@ -655,15 +655,15 @@ label {
 }
 
 .errorMessage {
-	color: #c00;
+    color: #c00;
 }
 
 .success {
-	background-color: #dfd;
+    background-color: #dfd;
 }
 
 .successBox {
-	background-color: #dfd;
+    background-color: #dfd;
     border: 1px solid #090;
     padding: 5px;
     margin-top:5px;
@@ -671,11 +671,11 @@ label {
 }
 
 blockquote {
-	padding-left: 10px;
-	padding-right: 10px;
-	margin-left: 5px;
-	margin-right: 0px;
-	border-left: 1px solid #3c78b5;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-left: 5px;
+    margin-right: 0px;
+    border-left: 1px solid #3c78b5;
 }
 
 table.confluenceTable, table.admin
@@ -723,11 +723,11 @@ table.admin td.controls
 }
 
 DIV.small {
-	font-size: 9px;
+    font-size: 9px;
 }
 
 H1.pagename {
-	margin-top: 0px;
+    margin-top: 0px;
 }
 
 IMG.inline  {}
@@ -765,25 +765,25 @@ a.createlink {
 .diffadded {
     background: #ddffdd;
     padding: 1px 1px 1px 4px;
-	border-left: 4px solid darkgreen;
+    border-left: 4px solid darkgreen;
 }
 .diffdeleted {
     color: #999;
     background: #ffdddd;
     padding: 1px 1px 1px 4px;
-	border-left: 4px solid darkred;
+    border-left: 4px solid darkred;
 }
 .diffnochange {
     padding: 1px 1px 1px 4px;
-	border-left: 4px solid lightgrey;
+    border-left: 4px solid lightgrey;
 }
 .differror {
     background: brown;
 }
 .diff {
     font-family: lucida console, courier new, fixed-width;
-	font-size: 12px;
-	line-height: 14px;
+    font-size: 12px;
+    line-height: 14px;
 }
 .diffaddedchars {
     background-color:#99ff99;
@@ -800,9 +800,9 @@ a.createlink {
 }
 
 .greybox {
- 	border: 1px solid #ddd;
-	padding: 3px;
-	margin: 1px 1px 10px 1px;
+    border: 1px solid #ddd;
+    padding: 3px;
+    margin: 1px 1px 10px 1px;
 }
 
 .borderedGreyBox {
@@ -812,10 +812,10 @@ a.createlink {
 }
 
 .greyboxfilled {
- 	border: 1px solid #ddd;
+    border: 1px solid #ddd;
     background: #f0f0f0;
     padding: 3px;
-	margin: 1px 1px 10px 1px;
+    margin: 1px 1px 10px 1px;
 }
 
 .lightGreyBox
@@ -826,15 +826,15 @@ a.createlink {
 .navBackgroundBox {
     padding: 5px 5px 5px 5px;
     font-size: 22px;
-	font-weight: bold;
-	font-family: Arial, sans-serif;
-	color: white;
+    font-weight: bold;
+    font-family: Arial, sans-serif;
+    color: white;
     background: #3c78b5;
     text-decoration: none;
 }
 
 .previewBoxTop {
-	background-color: #f0f0f0;
+    background-color: #f0f0f0;
     border-width: 1px 1px 0px 1px;
     border-style: solid;
     border-color: #3c78b5;
@@ -844,14 +844,14 @@ a.createlink {
 }
 .previewContent {
     background-color: #fff;
- 	border-color: #3c78b5;
-	border-width: 0px 1px 0px 1px;
-	border-style: solid;
-	padding: 10px;
-	margin: 0px;
+    border-color: #3c78b5;
+    border-width: 0px 1px 0px 1px;
+    border-style: solid;
+    padding: 10px;
+    margin: 0px;
 }
 .previewBoxBottom {
-	background-color: #f0f0f0;
+    background-color: #f0f0f0;
     border-width: 0px 1px 1px 1px;
     border-style: solid;
     border-color: #3c78b5;
@@ -862,16 +862,16 @@ a.createlink {
 
 .functionbox {
     background-color: #f0f0f0;
- 	border: 1px solid #3c78b5;
-	padding: 3px;
-	margin: 1px 1px 10px 1px;
+    border: 1px solid #3c78b5;
+    padding: 3px;
+    margin: 1px 1px 10px 1px;
 }
 
 .functionbox-greyborder {
     background-color: #f0f0f0;
- 	border: 1px solid #ddd;
-	padding: 3px;
-	margin: 1px 1px 10px 1px;
+    border: 1px solid #ddd;
+    padding: 3px;
+    margin: 1px 1px 10px 1px;
 }
 
 .search-highlight {
@@ -933,7 +933,7 @@ td.noformatting {
     border-width: 0px;
     border-style: none;
     text-align: center;
-	padding: 0px;
+    padding: 0px;
 }
 
 .commentblock {
@@ -1574,8 +1574,8 @@ div.auto_complete ul strong.highlight {
     float: right;
     display: block;
     width: 16px;
-	height: 16px;
-	background-repeat: no-repeat;
+    height: 16px;
+    background-repeat: no-repeat;
     background-image: url(/images/icons/forwd_16.gif);
 }
 #blogcalendar span.fwdArrow span
@@ -1587,8 +1587,8 @@ div.auto_complete ul strong.highlight {
     float: left;
     display: block;
     width: 16px;
-	height: 16px;
-	background-repeat: no-repeat;
+    height: 16px;
+    background-repeat: no-repeat;
     background-image: url(/images/icons/back_16.gif);
 }
 #blogcalendar span.backArrow span
@@ -1657,8 +1657,8 @@ span.right {float: right; text-align: right}
 
 
 #permissionsDiv label {
-	font-weight: bold;
-	color: black;
+    font-weight: bold;
+    color: black;
 }
 
 .pagePermissionsTable

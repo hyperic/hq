@@ -1,0 +1,111 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : Install Hyperic Agent RPM</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 4.6.5 : Install Hyperic Agent RPM
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 23, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <style type='text/css'>/*<![CDATA[*/
+div.rbtoc1327340535961 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1327340535961 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1327340535961 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1327340535961'>
+<ul>
+    <li><a href='#InstallHypericAgentRPM-AbouttheAgentRPM'>About the Agent RPM</a></li>
+    <li><a href='#InstallHypericAgentRPM-InstallAgentRPM'>Install Agent RPM</a></li>
+</ul></div>
+
+<blockquote>
+<p><b>About this page...</b> </p>
+
+<p>This page has instructions for installing the Hyperic Agent 4.6 from an RPM downloaded from the VMware YUM repository. </p>
+
+<p>For information about installing the Hyperic Agent to a Red Hat Enterprise Linux (RHEL) VM directly from the VMware YUM repository, see <a href="http://10.150.104.52:8080/infocenter/index.jsp?topic=/com.vmware.vfabric.platform.5.0.0/vfabric/install-repo-install.html">http://10.150.104.52:8080/infocenter/index.jsp?topic=/com.vmware.vfabric.platform.5.0.0/vfabric/install-repo-install.html</a>. </p>
+
+<p>Before following the instructions below, see <a href="Hyperic Installation and Startup Process.html" title="Hyperic Installation and Startup Process">Hyperic Installation and Startup Process</a>. The instructions on this page are one way to perform the <a href="Hyperic Installation and Startup Process.html#HypericInstallationandStartupProcess-InstallAgent">Install the Agent</a> step on that page. </p>
+</blockquote> 
+
+
+<h1><a name="InstallHypericAgentRPM-AbouttheAgentRPM"></a>About the Agent RPM</h1>
+
+<p>The Hyperic Agent RPM is <tt>vfabric-hyperic-agent-4.6.EE-1.noarch.rpm</tt>. Note that the agent in the RPM does not include a JRE. Agent hosts must have the J2RE virtual package installed. A Sun 1.6 JRE is recommended. The RPM:</p>
+
+<ul>
+	<li>Creates the user and group named "hyperic" if they do not exist.</li>
+	<li>Sets the home directory of the hyperic user to <tt>/opt/hyperic</tt>.</li>
+	<li>Installs the agent files into <tt>/opt/hyperic/hyperic-hqee-agent</tt>.</li>
+	<li>Installs an <tt>init</tt> script to <tt>/etc/init.d/hyperic-hqee-agent</tt>.</li>
+	<li>Adds <tt>init</tt> script to <tt>chkconfig</tt> and sets it to "on" for runlevels 2, 3, 4, and 5.</li>
+</ul>
+
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Open firewall port on Hyperic Agent, if necessary</b><br />If <tt>iptables</tt> (a host-based firewall tool typically enabled by default on Redhat and Fedora installations) is configured, you may need to open up the Hyperic Agent's listen port for communication from the Hyperic Server, using a command similar to:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">`/sbin/iptables -ARH-Firewall-1-INPUT -p tcp --dport 2144 -j ACCEPT`</pre>
+		</div>
+</div></div>
+<p>If SELinux is enabled, dditional configuration may be required.</p></td></tr></table></div>
+
+<h1><a name="InstallHypericAgentRPM-InstallAgentRPM"></a>Install Agent RPM</h1>
+<p>To install and configure the Hyperic Agent from a downloaded RPM:</p>
+
+<ol>
+	<li>On the platform the agent will manage, use yum to install the agent
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">yum install vfabric-hyperic-agent</pre>
+		</div>
+</div></div></li>
+	<li>If you have not already done so, install a JDK or JRE on the platform.</li>
+	<li>As the root user, edit the <tt>/etc/init.d/hyperic-hqee-agent</tt> file, setting the <tt>HQ_JAVA_HOME</tt> to home directory of the JDK or JRE you want the agent to use.</li>
+	<li>Follow the instructions for configuring and starting the agent, starting with the <a href="Hyperic Installation and Startup Process.html#HypericInstallationandStartupProcess-PropFile">Configure Hyperic Agent in properties file</a> step of <a href="Hyperic Installation and Startup Process.html" title="Hyperic Installation and Startup Process">Hyperic Installation and Startup Process</a>.</li>
+</ol>
+
+
+				    					    <br/>
+                        <div class="tabletitle">
+                            <a name="attachments">
+                                <h2>Attachments:</h2>
+                            </a>
+                        </div>
+
+                        <div class="greybox" align="left">
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/78578323/78872618.properties">vfabric_hyperic_server.properties</a> (application/octet-stream)
+                                <br/>
+                                                    </div>
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:56</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

@@ -4,7 +4,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -92,8 +92,7 @@
     <fmt:message var="resourceTypeTitle" key="resource.hub.filter.service" />
   </c:when>
 </c:choose>
-
-<script src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
+<jsu:importScript path="/js/functions.js" />
 <link rel=stylesheet href="<html:rewrite page="/css/win.css"/>" type="text/css">
 <c:choose>
   <c:when test="${Resource.entityId.type == platformType}">

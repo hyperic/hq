@@ -5,7 +5,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -37,7 +37,7 @@
 	<html:param name="ff" value="{ff}"/> 
 </html:link>
 
-<script type="text/javascript">
+<jsu:script>
 	function requestAvailSummary${portlet.token}() {
 		hqDojo.xhrGet({
 			url: "<html:rewrite action="/dashboard/ViewAvailSummary" />",
@@ -60,7 +60,7 @@
 	hqDojo.ready(function() {
 		requestAvailSummary${portlet.token}();
 	});
-</script>
+</jsu:script>
 
 <div class="effectsPortlet">
 	<tiles:insert definition=".header.tab">

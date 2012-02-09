@@ -6,7 +6,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -44,38 +44,35 @@
 <c:if test="${empty mode}">
   <c:set var="mode" value="currentHealth"/>
 </c:if>
-
-<script type="text/javascript">
-  <c:set var="widgetInstanceName" value="childResources"/>
-  <c:set var="listMembersName" value="groupMembers"/>
-
-  initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-  widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-
+<c:set var="widgetInstanceName" value="childResources"/>
+<c:set var="listMembersName" value="groupMembers"/>
+<jsu:script>
+  	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+  	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+</jsu:script>
 <c:if test="${empty params.eids && not virtual}">
-  function checkAllBoxes() {
-    var check = true;
-    for (var i = 0; i < document.forms[0].elements.length; i++) {
-      if (document.forms[0].elements[i].name == 'eids' &&
-        document.forms[0].elements[i].checked)
-        check = false;
-    }
-
-    if (check) {
-      for (var i = 0; i < document.forms[0].elements.length; i++) {
-        if (document.forms[0].elements[i].name == 'eids' ||
-            document.forms[0].elements[i].name == 'groupMembersAll')
-            document.forms[0].elements[i].checked = true;
-      }
-    }
-  }
-
-  	hqDojo.ready(function() {
+	<jsu:script>
+	  function checkAllBoxes() {
+	    var check = true;
+	    for (var i = 0; i < document.forms[0].elements.length; i++) {
+	      if (document.forms[0].elements[i].name == 'eids' &&
+	        document.forms[0].elements[i].checked)
+	        check = false;
+	    }
+	
+	    if (check) {
+	      for (var i = 0; i < document.forms[0].elements.length; i++) {
+	        if (document.forms[0].elements[i].name == 'eids' ||
+	            document.forms[0].elements[i].name == 'groupMembersAll')
+	            document.forms[0].elements[i].checked = true;
+	      }
+	    }
+	  }
+	</jsu:script>
+	<jsu:script onLoad="true">
   		checkAllBoxes();
-  	});
+	</jsu:script>
 </c:if>
-</script>
-
 <c:if test="${empty childResourcesHealthKey}">
   <c:set var="childResourcesHealthKey" value="resource.service.monitor.visibility.MembersTab"/>
 </c:if>

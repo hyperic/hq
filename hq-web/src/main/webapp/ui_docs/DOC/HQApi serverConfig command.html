@@ -1,35 +1,38 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : HQApi serverConfig command</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : HQApi serverConfig command</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : HQApi serverConfig command
+                            vFabric Hyperic 4.6.5 : HQApi serverConfig command
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1307466613050 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1307466613050 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1307466613050 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1325699185337 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699185337 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699185337 li {margin-left: 0px;padding-left: 0px;}
 
-/*]] >*/</style><div class='rbtoc1307466613050'>
+/*]]>*/</style><div class='rbtoc1325699185337'>
 <ul>
     <li><a href='#HQApiserverConfigcommand-Functionality'>Functionality</a></li>
     <li><a href='#HQApiserverConfigcommand-serverConfigCommandOptions'>serverConfig Command Options</a></li>
@@ -42,7 +45,6 @@ div.rbtoc1307466613050 li {margin-left: 0px;padding-left: 0px;}
     <li><a href='#HQApiserverConfigcommand-ServerConfigurationReference'>Server Configuration Reference</a></li>
 <ul>
     <li><a href='#HQApiserverConfigcommand-HypericEmailConfigurationProperties'>Hyperic Email Configuration Properties</a></li>
-    <li><a href='#HQApiserverConfigcommand-HypericIQConnectionProperty'>Hyperic IQ Connection Property</a></li>
     <li><a href='#HQApiserverConfigcommand-DataManagerConfigurationProperties'>Data Manager Configuration Properties</a></li>
     <li><a href='#HQApiserverConfigcommand-GlobalAlertProperties'>Global Alert Properties</a></li>
     <li><a href='#HQApiserverConfigcommand-NotificationThrottlingConfigurationProperties'>Notification Throttling Configuration Properties</a></li>
@@ -61,17 +63,17 @@ div.rbtoc1307466613050 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 </td></tr></table></div> 
 
-<p><font color=""></font></p>
+
 
 <h1><a name="HQApiserverConfigcommand-Functionality"></a>Functionality</h1>
 
-<p>An authorized user can use the <b>serverConfig</b> command to update selected HQ Server configuration properties, which are listed and defined in <a href="#HQApiserverConfigcommand-ServerConfigurationReference">Server Configuration Reference</a> below. For the most part, these are the properties configurable on the <b>HQ Server Settings</b> page in the HQ user interface.</p>
+<p>An authorized user can use the <b>serverConfig</b> command to update selected Hyperic Server configuration properties, which are listed and defined in <a href="#HQApiserverConfigcommand-ServerConfigurationReference">Server Configuration Reference</a> below. For the most part, these are the properties configurable on the <b>HQ Server Settings</b> page in the Hyperic user interface.</p>
 
 <h1><a name="HQApiserverConfigcommand-serverConfigCommandOptions"></a>serverConfig Command Options</h1>
 
 <h2><a name="HQApiserverConfigcommand-serverConfigget"></a>serverConfig get</h2>
 
-<p>The <b>serverConfig get</b> command returns a <tt>&lt;ServerConfigResponse&gt;</tt> element that lists selected HQ Server configuration properties and their values.</p>
+<p>The <b>serverConfig get</b> command returns a <tt>&lt;ServerConfigResponse&gt;</tt> element that lists selected Hyperic Server configuration properties and their values.</p>
 
 <h3><a name="HQApiserverConfigcommand-StructureofaServerConfigResponseElement"></a>Structure of a ServerConfigResponse Element</h3>
 
@@ -85,7 +87,7 @@ div.rbtoc1307466613050 li {margin-left: 0px;padding-left: 0px;}
 <p>where there there is:</p>
 
 <ul>
-	<li>one <tt>&lt;serverConfig&gt;</tt> element for each HQ Server configuration property returned.</li>
+	<li>one <tt>&lt;serverConfig&gt;</tt> element for each Hyperic Server configuration property returned.</li>
 </ul>
 
 
@@ -108,7 +110,7 @@ div.rbtoc1307466613050 li {margin-left: 0px;padding-left: 0px;}
 <tr>
 <td class='confluenceTd'>&nbsp;</td>
 <td class='confluenceTd'> key </td>
-<td class='confluenceTd'> One of the HQ server properties listed in <a href="#HQApiserverConfigcommand-ServerConfigurationReference">Server Configuration Reference</a> below. </td>
+<td class='confluenceTd'> One of the Hyperic server properties listed in <a href="#HQApiserverConfigcommand-ServerConfigurationReference">Server Configuration Reference</a> below. </td>
 </tr>
 <tr>
 <td class='confluenceTd'>&nbsp;</td>
@@ -199,7 +201,7 @@ div.rbtoc1307466613050 li {margin-left: 0px;padding-left: 0px;}
 
 <p>The <b>serverConfig set</b> command takes updates server properties with the values specified in a &nbsp;<tt>&lt;ServerConfigResponse&gt;</tt>&nbsp;.&nbsp;</p>
 
-<p>This command writes updates the HQ Server configuration with the property values specified in the <tt>&lt;ServerConfigResponse&gt;</tt> element in the <tt>ServerConfiguration.xml</tt> file.</p>
+<p>This command writes updates the Hyperic Server configuration with the property values specified in the <tt>&lt;ServerConfigResponse&gt;</tt> element in the <tt>ServerConfiguration.xml</tt> file.</p>
 
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
@@ -209,9 +211,9 @@ div.rbtoc1307466613050 li {margin-left: 0px;padding-left: 0px;}
 
 <h2><a name="HQApiserverConfigcommand-serverConfiggetParameter"></a>serverConfig getParameter</h2>
 
-<p>The <b>serverConfig getParameter</b> command returns the value of a specified HQ Server configuration property. Specify the name of the property with the <tt>&#45;-key</tt> qualifier.</p>
+<p>The <b>serverConfig getParameter</b> command returns the value of a specified Hyperic Server configuration property. Specify the name of the property with the <tt>&#45;-key</tt> qualifier.</p>
 
-<p>For example, this command returns the value of the HQ Server's ALERT_PURGE property:</p>
+<p>For example, this command returns the value of the Hyperic Server's ALERT_PURGE property:</p>
 
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
@@ -228,9 +230,9 @@ div.rbtoc1307466613050 li {margin-left: 0px;padding-left: 0px;}
 
 <h2><a name="HQApiserverConfigcommand-serverConfigsetParameter"></a>serverConfig setParameter</h2>
 
-<p>The <b>serverConfig setParameter</b> command updates the value of a specified HQ Server configuration property. Specify the property with the <tt>&#45;-key</tt> qualifier and the new value with the <tt>&#45;value</tt> qualifier.</p>
+<p>The <b>serverConfig setParameter</b> command updates the value of a specified Hyperic Server configuration property. Specify the property with the <tt>&#45;-key</tt> qualifier and the new value with the <tt>&#45;value</tt> qualifier.</p>
 
-<p>For example, this command sets HQ Server's HQ_ALERTS_ENABLED property to "false":</p>
+<p>For example, this command sets Hyperic Server's HQ_ALERTS_ENABLED property to "false":</p>
 
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
@@ -246,7 +248,7 @@ div.rbtoc1307466613050 li {margin-left: 0px;padding-left: 0px;}
 </div></div>
 
 <h1><a name="HQApiserverConfigcommand-ServerConfigurationReference"></a>Server Configuration Reference</h1>
-<p>This section lists and defines the HQ Server properties that you can configure with the <b>serverConfig</b> command.</p>
+<p>This section lists and defines the Hyperic Server properties that you can configure with the <b>serverConfig</b> command.</p>
 <h2><a name="HQApiserverConfigcommand-HypericEmailConfigurationProperties"></a>Hyperic Email Configuration Properties</h2>
 
 <p>These properties configure how Hyperic composes and sends notification emails.</p>
@@ -802,7 +804,7 @@ Base URL forms the prefix of an URL to any HQ appends the remainder of the URL t
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:44</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:57</font></td>
 		    </tr>
 	    </table>
     </body>

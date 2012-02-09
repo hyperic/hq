@@ -1,24 +1,27 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : hq-pdk.jar Command Syntax</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : hq-pdk.jar Command Syntax</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
+<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ <p>
+ <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : hq-pdk.jar Command Syntax
+                            vFabric Hyperic 4.6.5 : hq-pdk.jar Command Syntax
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <h1><a name="hq-pdk.jarCommandSyntax-hqpdk.jarCommandSyntax"></a>hq-pdk.jar Command Syntax</h1>
@@ -47,7 +50,7 @@
 </ul>
 
 
-<p>For details and functionality and usage of each method, see <a href="Running and Testing Plugins from Command Line.html#RunningandTestingPluginsfromCommandLine-hqpdk.jarMethodsandFunctionality">hq-pdk.jar Methods and Functionality</a>.</p>
+<p>For details and functionality and usage of each method, see <a href="hq-pdk.jar Methods and Functionality.html" title="hq-pdk.jar Methods and Functionality">hq&#45;pdk.jar Methods and Functionality</a>.</p>
 
 <h2><a name="hq-pdk.jarCommandSyntax-pPluginNamespecifiestheplugintorun"></a>-p PluginName specifies the plugin to run</h2>
 
@@ -75,7 +78,7 @@
 </ul>
 
 
-<p><b>Note:</b> If you use a generated properties file to supply resource properties, you do not have to specify the plugin to run on the command line, because a resource properties identifies the plugin. See <a href="Running and Testing Plugins from Command Line.html#RunningandTestingPluginsfromCommandLine-GeneratingandUsingResourcePropertiesFiles">Generating and Using Resource Properties Files</a>.</p>
+<p><b>Note:</b> If you use a generated properties file to supply resource properties, you do not have to specify the plugin to run on the command line, because a resource properties identifies the plugin. See <a href="Generating and Using Resource Properties Files.html" title="Generating and Using Resource Properties Files">Generating and Using Resource Properties Files</a>.</p>
 
 <h2><a name="hq-pdk.jarCommandSyntax-tResourceTypespecifiesthetargetresourcetype"></a>-t ResourceType specifies the target resource type</h2>
 
@@ -103,11 +106,11 @@
 </ul>
 
 
-<p><b>Note:</b> If you use a generated properties file to supply resource properties, you do not have to specify resource type on the command line, because a resource properties specifies the resource type name for the resource. See <a href="Running and Testing Plugins from Command Line.html#RunningandTestingPluginsfromCommandLine-GeneratingandUsingResourcePropertiesFiles">Generating and Using Resource Properties Files </a>.</p>
+<p><b>Note:</b> If you use a generated properties file to supply resource properties, you do not have to specify resource type on the command line, because a resource properties specifies the resource type name for the resource. See <a href="Generating and Using Resource Properties Files.html" title="Generating and Using Resource Properties Files">Generating and Using Resource Properties Files</a>.</p>
 
 <h2><a name="hq-pdk.jarCommandSyntax-aMethodActionspecifiesamethodargument"></a>-a MethodAction specifies a method argument</h2>
 
-<p>Where <tt>MethodAction</tt> is an argument supported or required by the the method called. For example, when you run the <tt>track</tt> method, you specify whether you want to track log or configuration events by including either <tt>&#45;a log</tt> or <tt>&#45;a config</tt> in the command line.&nbsp; The arguments for each method are documented in <a href="Running and Testing Plugins from Command Line.html#RunningandTestingPluginsfromCommandLine-hqpdk.jarMethodsandFunctionality">hq-odj.jar Methods and Functionality</a>.</p>
+<p>Where <tt>MethodAction</tt> is an argument supported or required by the the method called. For example, when you run the <tt>track</tt> method, you specify whether you want to track log or configuration events by including either <tt>&#45;a log</tt> or <tt>&#45;a config</tt> in the command line.&nbsp; The arguments for each method are documented in <a href="hq-pdk.jar Methods and Functionality.html" title="hq-pdk.jar Methods and Functionality">hq&#45;pdk.jar Methods and Functionality</a>.</p>
 
 <h2><a name="hq-pdk.jarCommandSyntax-DOptionsetsapropertyvalue"></a>-DOption sets a property value</h2>
 
@@ -119,14 +122,14 @@
 <ul>
 	<li>The value of a resource property required by the method called.
 	<ul>
-		<li><b>Note:</b>&nbsp; Rather than supply each resource property on the command line, you can reference a generated properties file. For more information see <a href="Running and Testing Plugins from Command Line.html#RunningandTestingPluginsfromCommandLine-GeneratingandUsingResourcePropertiesFiles">Generating and Using Resource Properties Files</a>.</li>
+		<li><b>Note:</b>&nbsp; Rather than supply each resource property on the command line, you can reference a generated properties file. For more information see <a href="Generating and Using Resource Properties Files.html" title="Generating and Using Resource Properties Files">Generating and Using Resource Properties Files</a>.</li>
 	</ul>
 	</li>
 </ul>
 
 
 <ul>
-	<li>The value of an agent or system property that governs agent behavior or plugin execution. For more information, see <a href="Running and Testing Plugins from Command Line.html#RunningandTestingPluginsfromCommandLine-PropertiesforControllingAgentBehaviorandPluginExecution">Properties for Controlling Agent Behavior and Plugin Execution</a>.</li>
+	<li>The value of an agent or system property that governs agent behavior or plugin execution. For more information, see <a href="Properties for Controlling Agent Behavior and Plugin Execution.html" title="Properties for Controlling Agent Behavior and Plugin Execution">Properties for Controlling Agent Behavior and Plugin Execution</a>.</li>
 </ul>
 
 
@@ -139,7 +142,7 @@
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:44</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:57</font></td>
 		    </tr>
 	    </table>
     </body>

@@ -485,6 +485,27 @@ fi
                  description="Oracle Version"/>
     </properties>
 
+    <plugin type="config_track" class="org.hyperic.hq.product.FileChangeTrackPlugin" />
+
+   <plugin type="config_track" platform="unix"
+            class="org.hyperic.hq.product.FileChangeTrackPlugin">
+            <monitored>
+            	<folder path="dbs" recursive="false" filter=".*\.ora"/>
+            	<folder path="network/admin" recursive="false" filter=".*\.ora"/>
+            	<folder path="etc" recursive="false" filter="oratab"/>
+            </monitored>
+    </plugin>
+
+   <plugin type="config_track" platform="win32"
+            class="org.hyperic.hq.product.FileChangeTrackPlugin">
+            <monitored>
+            	<folder path="database" recursive="false" filter=".*\.ora"/>
+            	<folder path="network/admin" recursive="false" filter=".*\.ora"/>
+            </monitored>
+    </plugin>
+    <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="false" />
+    
+
     <service name="User Instance">
       <plugin type="measurement"
               class="OracleMeasurementPlugin"/>

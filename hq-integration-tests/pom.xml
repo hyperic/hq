@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.hyperic.hq</groupId>
 		<artifactId>hq-parent</artifactId>
-		<version>4.6.1.BUILD-SNAPSHOT</version>
+		<version>4.6.5.BUILD-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>hq-integration-tests</artifactId>
@@ -15,6 +15,10 @@
 	
 	<dependencies>
 		<dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+        </dependency>
+		<dependency>      
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
 		</dependency>
@@ -127,7 +131,7 @@
 					</execution>
 				</executions>
 				<configuration>
-					<argLine>-Xmx1024m -XX:MaxPermSize=192m -XX:-UseGCOverheadLimit</argLine>
+					<argLine>-Xmx1700m -XX:MaxPermSize=192m -XX:-UseGCOverheadLimit -XX:+HeapDumpOnOutOfMemoryError</argLine>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -140,7 +144,7 @@
 			</plugin>
 		</plugins>
 			<testResources>
-    		<testResource>
+    		<testResource>    
     			<directory>src/test/resources</directory>
     		</testResource>
     		<testResource>
