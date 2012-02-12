@@ -7,7 +7,7 @@
 	<artifactId>jvm-plugin</artifactId>
 	<packaging>pom</packaging>
 	<name>Hyperic HQ Plugin - JVM Plugin</name>
-	<version>4.6.5.RC1</version>
+	<version>4.6.5.BUILD-SNAPSHOT</version>
 
 	<build>
 		<plugins>
