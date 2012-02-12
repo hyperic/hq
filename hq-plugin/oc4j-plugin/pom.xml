@@ -7,7 +7,7 @@
 	<artifactId>oc4j-plugin</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - OC4J Plugin</name>
-	<version>4.6.5.RC1</version>
+	<version>4.6.5.BUILD-SNAPSHOT</version>
 
 	<dependencies>
 		<dependency>
