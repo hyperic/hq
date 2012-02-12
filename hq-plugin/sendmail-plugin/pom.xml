@@ -7,7 +7,7 @@
 	<artifactId>sendmail-plugin</artifactId>
 	<packaging>pom</packaging>
 	<name>Hyperic HQ Plugin - Sendmail Plugin</name>
-	<version>4.6.5.BUILD-SNAPSHOT</version>
+	<version>4.6.5.RC1</version>
 
 	<dependencies>
 		<dependency>
