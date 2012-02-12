@@ -44,6 +44,8 @@ public interface AttrConstants {
      * for the currently logged in user is stored.
      */
     public static final String WEBUSER_SES_ATTR = "webUser";
+    
+    public static final String STATEFUL_HTTP_SESSION_HDR_ATTR = "stateful_session" ; 
 
     /**
      * The session scope attribute under which an LDAP user's password
