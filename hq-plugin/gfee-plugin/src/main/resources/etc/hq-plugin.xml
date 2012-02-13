@@ -21,6 +21,7 @@
 ]>
 
 <plugin name="gfee" class="org.hyperic.hq.plugin.gfee.GFProductPlugin">
+    <property name="PLUGIN_VERSION" value="1.1"/>
 
     <classpath>
         <include name="pdk/lib/mx4j" />
@@ -330,6 +331,7 @@
         </server>
 
         <server name="GemFire Cache Server" version="6.5" include="6.0"/>
+        <server name="GemFire Cache Server" version="6.6" include="6.0"/>
 
 
 <!--*********************************
@@ -502,6 +504,7 @@
         </server>
 
         <server name="GemFire Gateway Hub" version="6.5" include="6.0"/>
+        <server name="GemFire Gateway Hub" version="6.6" include="6.0"/>
 
 
 <!--*********************************
@@ -564,6 +567,7 @@
         </server>
 
         <server name="GemFire Application Peer" version="6.5" include="6.0"/>
+        <server name="GemFire Application Peer" version="6.6" include="6.0"/>
 
     </platform>  
 

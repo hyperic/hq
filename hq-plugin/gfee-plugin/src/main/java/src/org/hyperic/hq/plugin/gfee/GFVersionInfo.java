@@ -107,6 +107,7 @@ public class GFVersionInfo {
     public static void main(String[] args) {
 
         String[] vStrings = new String[]{
+                "Java version:   6.6.1 build 33336 10/21/2011 10:29:38 PDT javac 1.5.0_17",
                 "Java version:   6.5.1.4 build 30577 02/26/2011 11:57:13 PST javac 1.5.0_17",
                 "Java version:   6.5.0 build 30577 02/26/2011 11:57:13 PST javac 1.5.0_17",
                 "Java version:   6.0 build 30577 02/26/2011 11:57:13 PST javac 1.5.0_17"			
@@ -122,6 +123,8 @@ public class GFVersionInfo {
             System.out.print("\n");
             System.out.print("Is this 6.5: " + info.isGFVersion("6.5"));
             System.out.print("\n");			
+            System.out.print("Is this 6.6: " + info.isGFVersion("6.6"));
+            System.out.print("\n");         
         }
 
     }
