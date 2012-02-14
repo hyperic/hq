@@ -28,9 +28,7 @@ package org.hyperic.hq.ui.action.resource.hub;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -67,11 +65,11 @@ public class RemoveResourceAction
 
     private final Log log = LogFactory.getLog(RemoveResourceAction.class.getName());
 
-    private EventsBoss eventsBoss;
+    private final EventsBoss eventsBoss;
 
-    private AppdefBoss appdefBoss;
+    private final AppdefBoss appdefBoss;
 
-    private TransactionRetry transactionRetry;
+    private final TransactionRetry transactionRetry;
 
     @Autowired
     public RemoveResourceAction(EventsBoss eventsBoss, AppdefBoss appdefBoss, TransactionRetry transactionRetry) {
@@ -81,7 +79,8 @@ public class RemoveResourceAction
         this.transactionRetry = transactionRetry;
     }
 
-    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+    @Override
+	public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                  HttpServletResponse response) throws Exception {
 
         ResourceHubForm hubForm = (ResourceHubForm) form;
@@ -130,6 +129,8 @@ public class RemoveResourceAction
         if (resourceItems != null && resourceItems.length > 0) {
             final Reference<Integer> numDeleted = new Reference<Integer>();
             final Reference<String> vetoMessage = new Reference<String>();
+            //Fix for [HHQ-5417] - numDeleted.get() returned null
+            numDeleted.set(0);
             // about the exception handling:
             // if someone either deleted the entity out from under our user
             // or the user hit the back button, a derivative of
