@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.io.PrintStream;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -86,7 +87,7 @@ public class PluginParser {
         try {
             XmlParser.parse(in, tag, resolver);
         } catch(XmlParseException e) {
-            throw new PluginException(e.getMessage());
+            throw new PluginException(e);
         }
         
         //remove help text w/ lowercase keys

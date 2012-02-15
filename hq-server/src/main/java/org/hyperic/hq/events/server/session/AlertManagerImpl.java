@@ -399,30 +399,26 @@ public class AlertManagerImpl implements AlertManager,
         long startTime = System.currentTimeMillis();
         try {
 
-            Integer adId = Integer.valueOf(((AlertConditionsSatisfiedZEventSource) event
-                .getSourceId()).getId());
-
-            AlertDefinition alertDef = null;
+            Integer adId = Integer.valueOf(((AlertConditionsSatisfiedZEventSource) event.getSourceId()).getId());
 
             // Check persisted alert def status
             if (!alertDefinitionManager.isEnabled(adId)) {
                 return;
             }
 
-            alertDef = alertDefinitionManager.getByIdNoCheck(adId);
+            AlertDefinition alertDef = alertDefinitionManager.getByIdNoCheck(adId);
+            Resource r = alertDef.getResource();
+            if (r == null || r.isInAsyncDeleteState()) {
+                return;
+            }
 
             if (alertDef.getFrequencyType() == EventConstants.FREQ_ONCE || alertDef.isWillRecover()) {
                 // Disable the alert definition now that we've fired
-                alertDefinitionManager.updateAlertDefinitionInternalEnable(authzSubjectManager
-                    .getOverlordPojo(), alertDef, false);
+                alertDefinitionManager.updateAlertDefinitionInternalEnable(
+                    authzSubjectManager.getOverlordPojo(), alertDef, false);
             }
 
-            EscalatableCreator creator = new ClassicEscalatableCreator(alertDef, event,
-                messagePublisher, this);
-            Resource res = creator.getAlertDefinition().getResource();
-            if (res == null || res.isInAsyncDeleteState()) {
-                return;
-            }
+            EscalatableCreator creator = new ClassicEscalatableCreator(alertDef, event, messagePublisher, this);
 
             // Now start escalation
             if (alertDef.getEscalation() != null) {

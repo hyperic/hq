@@ -41,15 +41,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
-import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.util.pager.PageControl;
-import org.hyperic.util.pager.SortAttribute;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.Globals;
@@ -57,6 +48,15 @@ import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionMessage;
 import org.apache.struts.action.ActionMessages;
 import org.apache.struts.util.MessageResources;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.ui.AttrConstants;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.exception.ParameterNotFoundException;
+import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.pager.SortAttribute;
 
 /**
  * Utilities class that provides many convenience methods for logging,
@@ -190,6 +190,29 @@ public class RequestUtils {
         throws ServletException {
         return getWebUser(request).getSessionId().intValue();
     }       
+    
+    /**
+     * 
+     * @param headerAttributeName Request header attribute name. 
+     * @param defaultValue fallback value in case the attribute was not provided. 
+     * @param request {@link HttpServletRequest} instance from which to extract the header attribute 
+     * @return header attribute value (single value presumed) or the provided defaultValue formal arg. 
+     */
+    public static final String getStringHeader(final String headerAttributeName, final String defaultValue, 
+            final HttpServletRequest request) { 
+        final String headerValue = request.getHeader(headerAttributeName) ;
+        return (headerValue == null ? defaultValue : headerValue) ; 
+    }//EOM 
+    
+    /**
+     * @param request {@link HttpServletRequest} instance from which to extract the header attribute 
+     * @return true IFF the request formal arg contains the {@link AttrConstants#STATEFUL_HTTP_SESSION_HDR_ATTR} and
+     * the value == '1'  
+     */
+    public static final boolean isStatefulHttpSession(final HttpServletRequest request) { 
+        final String statefulSessionFlag = getStringHeader(Constants.STATEFUL_HTTP_SESSION_HDR_ATTR, "0", request) ;
+        return "1".equals(statefulSessionFlag) ; 
+    }//EOM 
 
     /** Extract the subcontroller mode from the
      * <code>Constants.MODE_PARAM</code> parameter of the HTTP

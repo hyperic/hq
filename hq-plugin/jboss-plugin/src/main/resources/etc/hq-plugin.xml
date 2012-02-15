@@ -892,13 +892,8 @@
     <plugin type="config_track"
     		class="org.hyperic.hq.product.FileChangeTrackPlugin">
       <monitored>
-        <folder path="server/all/conf" recursive="true" filter="${conf}"/>
-        <folder path="server/default/conf" recursive="true" filter="${conf}"/>
-        <folder path="server/default/deploy" recursive="true" filter="${code}|${conf}"/>
-        <folder path="server/minimal/conf" recursive="true" filter="${conf}"/>
-        <folder path="server/standard/conf" recursive="true" filter="${conf}"/>
-        <folder path="server/web/conf" recursive="true" filter="${conf}"/>
-        <folder path="" recursive="false" filter="jar-versions.xml"/>
+        <folder path="conf" recursive="true" filter="${conf}"/>
+        <folder path="deploy" recursive="true" filter="${code}|${conf}"/>
       </monitored>
     </plugin>
     <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="false" />
@@ -1170,13 +1165,8 @@
 	     <plugin type="config_track"
 	            class="org.hyperic.hq.product.FileChangeTrackPlugin">
 	      <monitored>
-	        <folder path="server/all/conf" recursive="true" filter="${conf}"/>
-	        <folder path="server/default/conf" recursive="true" filter="${conf}"/>
-	        <folder path="server/default/deploy" recursive="true" filter="${code}|${conf}"/>
-	        <folder path="server/minimal/conf" recursive="true" filter="${conf}"/>
-	        <folder path="server/standard/conf" recursive="true" filter="${conf}"/>
-	        <folder path="server/web/conf" recursive="true" filter="${conf}"/>
-	        <folder path="" recursive="false" filter="jar-versions.xml"/>
+	        <folder path="conf" recursive="true" filter="${conf}"/>
+	        <folder path="deploy" recursive="true" filter="${code}|${conf}"/>
 	      </monitored>
 	    </plugin>
 	    <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="false" />

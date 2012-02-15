@@ -52,7 +52,7 @@
 		<param name="DatePattern" value="'.'yyyy-MM-dd" />
 
 		<layout class="org.apache.log4j.PatternLayout">
-			<param name="ConversionPattern" value="%d %-5p [%t] [%c@%L] %m%n" />
+			<param name="ConversionPattern" value="%d{dd-MM-yyyy HH:mm:ss,SSS z} %-5p [%t] [%c@%L] %m%n" />
 		</layout>
 	</appender>
 
@@ -120,6 +120,11 @@
 	<logger name="org.apache.commons.validator.ValidatorResources">
 		<level value="OFF" />
 	</logger>
+
+        <!-- turn off "handling transient entity in delete processing" log message when pojos are deleted -->
+        <logger name="org.hibernate.event.def.DefaultLoadEventListener">
+            <level value="OFF" />
+        </logger>
 
         <!-- turn off "handling transient entity in delete processing" log message when pojos are deleted -->
         <logger name="org.hibernate.event.def.DefaultDeleteEventListener">

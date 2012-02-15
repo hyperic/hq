@@ -28,6 +28,7 @@ package org.hyperic.hq.ui.security;
 import java.io.IOException;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -54,8 +55,15 @@ public class ApiFilterSecurityInterceptor extends FilterSecurityInterceptor
 		super.invoke(fi);
 		//For API calls, invalidate the session after the request ends
 		try {
-			int sessId = RequestUtils.getSessionIdInt(fi.getHttpRequest());
-			_sessionManager.invalidate(sessId);
+		    //TODO: [HHQ-5412] Guys 9/2/2012: temporary support for http client reuse in app-insight  
+		    final HttpServletRequest request = fi.getHttpRequest() ; 
+		    if(!RequestUtils.isStatefulHttpSession(request)) { 
+		        int sessId = RequestUtils.getSessionIdInt(request);
+		        _sessionManager.invalidate(sessId);
+		    }//EO if stateless session 
+		    else if(log.isDebugEnabled()){ 
+		        log.debug("Session " +  RequestUtils.getSessionIdInt(request) + " is stateful, leaving active.") ; 
+		    }//EO else if 
 		} catch (Exception e) {
 			log.warn("Error invalidating the user associated with this session: " + e.getMessage());
 		}
