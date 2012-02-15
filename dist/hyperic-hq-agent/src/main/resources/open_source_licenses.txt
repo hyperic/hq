@@ -1,6 +1,6 @@
 open_source_license.txt
 
-Hyperic HQ 4.6.0 GA
+Hyperic HQ 4.6.5 GA
 Enterprise and Open Source Editions
 
 
@@ -37,7 +37,6 @@ SECTION 1: BSD-STYLE, MIT-STYLE, OR SIMILAR STYLE LICENSES
    >>> antlr-2.7.6
    >>> antlr.jar-2.7.2
    >>> aopalliance-1.0
-   >>> apache-tomcat-4.0.6
    >>> asm-1.5.3
    >>> backport-util-concurrent-3.1
    >>> commons-codec-1.1
@@ -68,7 +67,6 @@ SECTION 1: BSD-STYLE, MIT-STYLE, OR SIMILAR STYLE LICENSES
    >>> mockrunner-0.3.7
    >>> mx4j-3.0.1
    >>> ognl-2.7.2
-   >>> org.tanukisoftware.wrapper-3.5.6
    >>> pg-7.4.3
    >>> postgresql-8.2
    >>> postgresql-jdbc-7.4.3
@@ -94,7 +92,7 @@ SECTION 2: Apache License, V2.0
    >>> apache-ant-1.7.1
    >>> apache-commons-codec-1.2
    >>> apache-commons-net-2.0
-   >>> apache-tomcat-6.0.32
+   >>> apache-tomcat-6.0.35
    >>> apache-velocity-1.6.3
    >>> castor-1.3.1
    >>> cglib-2.1_3
@@ -110,6 +108,7 @@ SECTION 2: Apache License, V2.0
    >>> commons-digester-1.8
    >>> commons-fileupload-1.2.1
    >>> commons-httpclient-3.1
+   >>> commons-io-1.4
    >>> commons-lang-2.1
    >>> commons-lang-2.4
    >>> commons-logging-1.0.4
@@ -127,6 +126,7 @@ SECTION 2: Apache License, V2.0
    >>> geronimo-jta_1.0.1b_spec-1.0.1
    >>> groovy-1.6
    >>> groovy-all-1.6.7
+   >>> gson-1.4
    >>> hivemind-1.1.1
    >>> jackson-core-1.6.0
    >>> jackson-mapper-asl-1.6.0
@@ -158,6 +158,7 @@ SECTION 2: Apache License, V2.0
    >>> tapdoc-0.7.0
    >>> tapestry-project-4.1.5
    >>> tiles-2.2.2
+   >>> tomcat-jdbc-7.0.19
    >>> xalan-2.7.1
    >>> xalan-j-2.7.1
    >>> xercesimpl-2.9.0
@@ -166,42 +167,39 @@ SECTION 2: Apache License, V2.0
 
 
 
-SECTION 3: Artistic License, V2.0
-
-   >>> commons-io-1.4
-
-
-
-SECTION 4: Common Development and Distribution License, V1.0
+SECTION 3: Common Development and Distribution License, V1.0
 
    >>> activation-1.1
+   >>> javamail-1.4
+   >>> javax.activation-1.0.2
+   >>> jaxb-impl-2.1.12.jar-2.1.12
+   >>> jms-api-1.1.0
    >>> jta-1.1
 
 
 
-SECTION 5: Creative Commons Attribution License, V3.0
+SECTION 4: Creative Commons Attribution License, V3.0
 
    >>> adxmenu-4.21
 
 
 
-SECTION 6: Eclipse Public License, V1.0
+SECTION 5: Eclipse Public License, V1.0
 
    >>> aspectj-1.6.8
 
 
 
-SECTION 7: GNU General Public License, V2.0
+SECTION 6: GNU General Public License, V2.0
 
    >>> amqp-client-1.8.1
-   >>> javax.activation-1.0.2
-   >>> jaxb-impl-2.1.12.jar-2.1.12
-   >>> jms-api-1.1.0
+   >>> org.tanukisoftware.wrapper-3.5.6
 
 
 
-SECTION 8: GNU Lesser General Public License, V2.1
+SECTION 7: GNU Lesser General Public License, V2.1
 
+   >>> bsh-2.0.0.b4
    >>> dbunit-2.2
    >>> hibernate-3.2.6.ga
    >>> hibernate-tools-3.2.3.ga
@@ -214,15 +212,14 @@ SECTION 8: GNU Lesser General Public License, V2.1
 
 
 
-SECTION 9: GNU Lesser General Public License, V3.0
+SECTION 8: GNU Lesser General Public License, V3.0
 
-   >>> bsh-2.0.0.b4
    >>> bsh-2.0b4
    >>> wutka-dtdparser-1.2.1
 
 
 
-SECTION 10: GNU Library General Public License, V2.0
+SECTION 9: GNU Library General Public License, V2.0
 
    >>> itext-2.0.6
    >>> java-getopt-1.0.13
@@ -235,12 +232,10 @@ PART 2. HYPERIC HQ: OPEN SOURCE VERSION
 
 SECTION 1: BSD-STYLE, MIT-STYLE, OR SIMILAR STYLE LICENSES
 
-
    >>> ant-contrib-1.0b2
    >>> antlr-2.7.6
    >>> antlr.jar-2.7.2
    >>> aopalliance-1.0
-   >>> apache-tomcat-4.0.6
    >>> asm-1.5.3
    >>> backport-util-concurrent-3.1
    >>> commons-codec-1.1
@@ -270,7 +265,6 @@ SECTION 1: BSD-STYLE, MIT-STYLE, OR SIMILAR STYLE LICENSES
    >>> mockrunner-0.3.7
    >>> mx4j-3.0.1
    >>> ognl-2.7.2
-   >>> org.tanukisoftware.wrapper-3.5.6
    >>> pg-7.4.3
    >>> postgresql-8.2
    >>> postgresql-jdbc-7.4.3
@@ -296,7 +290,7 @@ SECTION 2: Apache License, V2.0
    >>> apache-ant-1.7.1
    >>> apache-commons-codec-1.2
    >>> apache-commons-net-2.0
-   >>> apache-tomcat-6.0.32
+   >>> apache-tomcat-6.0.35
    >>> apache-velocity-1.6.3
    >>> cglib-2.1_3
    >>> commons- beanutils-1.7.0
@@ -311,6 +305,7 @@ SECTION 2: Apache License, V2.0
    >>> commons-digester-1.8
    >>> commons-fileupload-1.2.1
    >>> commons-httpclient-3.1
+   >>> commons-io-1.4
    >>> commons-lang-2.1
    >>> commons-lang-2.4
    >>> commons-logging-1.0.4
@@ -327,6 +322,7 @@ SECTION 2: Apache License, V2.0
    >>> geronimo-jta_1.0.1b_spec-1.0.1
    >>> groovy-1.6
    >>> groovy-all-1.6.7
+   >>> gson-1.4
    >>> hivemind-1.1.1
    >>> jakarta-oro-2.0.8
    >>> jakarta-taglibs-standard-1.1.2
@@ -356,6 +352,7 @@ SECTION 2: Apache License, V2.0
    >>> tapdoc-0.7.0
    >>> tapestry-project-4.1.5
    >>> tiles-2.2.2
+   >>> tomcat-jdbc-7.0.19
    >>> xalan-2.7.1
    >>> xalan-j-2.7.1
    >>> xercesimpl-2.9.0
@@ -364,42 +361,38 @@ SECTION 2: Apache License, V2.0
 
 
 
-SECTION 3: Artistic License, V2.0
-
-   >>> commons-io-1.4
-
-
-
-SECTION 4: Common Development and Distribution License, V1.0
+SECTION 3: Common Development and Distribution License, V1.0
 
    >>> activation-1.1
    >>> jta-1.1
 
 
-
-SECTION 5: Creative Commons Attribution License, V3.0
+SECTION 4: Creative Commons Attribution License, V3.0
 
    >>> adxmenu-4.21
 
 
 
-SECTION 6: Eclipse Public License, V1.0
+SECTION 5: Eclipse Public License, V1.0
 
    >>> aspectj-1.6.8
 
 
 
-SECTION 7: GNU General Public License, V2.0
+SECTION 6: GNU General Public License, V2.0
 
    >>> amqp-client-1.8.1
+   >>> javamail-1.4
    >>> jaxb-impl-2.1.12.jar-2.1.12
    >>> jms-api-1.1.0
    >>> mysql-connector-java-5.1.10
+   >>> org.tanukisoftware.wrapper-3.5.6
 
 
 
-SECTION 8: GNU Lesser General Public License, V2.1
+SECTION 7: GNU Lesser General Public License, V2.1
 
+   >>> bsh-2.0.0.b4
    >>> dbunit-2.2
    >>> hibernate-3.2.6.ga
    >>> hibernate-tools-3.2.3.ga
@@ -411,14 +404,13 @@ SECTION 8: GNU Lesser General Public License, V2.1
 
 
 
-SECTION 9: GNU Lesser General Public License, V3.0
+SECTION 8: GNU Lesser General Public License, V3.0
 
-   >>> bsh-2.0.0.b4
    >>> bsh-2.0b4
 
 
 
-SECTION 10: GNU Library General Public License, V2.0
+SECTION 9: GNU Library General Public License, V2.0
 
    >>> itext-2.0.6
    >>> java-getopt-1.0.13
@@ -435,23 +427,23 @@ APPENDIX. Standard License Files
 
    >>> Creative Commons Attribution License, V3.0
 
-   >>> Artistic License, V2.0
-
-   >>> GNU Lesser General Public License, V3.0
-
    >>> GNU General Public License, V2.0
 
    >>> GNU Library General Public License, V2.0
 
    >>> Eclipse Public License, V1.0
 
+   >>> GNU Lesser General Public License, V3.0
 
-=============== PART 1. HYPERIC HQ: ENTERPRISE VERSION ===================================
 
 
---------------- SECTION 1:  BSD-STYLE, MIT-STYLE, OR SIMILAR STYLE LICENSES ----------
+=============== PART 1. HYPERIC HQ: ENTERPRISE VERSION ====================================
 
-BSD-STYLE, MIT-STYLE, OR SIMILAR STYLE LICENSES are applicable to the following component(s).
+
+
+--------------- SECTION 1:  BSD-STYLE, MIT-STYLE, OR SIMILAR ----------
+
+BSD-STYLE, MIT-STYLE, OR SIMILAR are applicable to the following component(s).
 
 
 >>> ant-contrib-1.0b2
@@ -602,58 +594,6 @@ DAMAGE.
 LICENCE: all the source code provided by AOP Alliance is Public Domain.
 
 
->>> apache-tomcat-4.0.6
-
-The Apache Software License,  Version 1.1                                                                                           
-         Copyright (c) 1999, 2000  The Apache Software Foundation.         
-                           All rights reserved.                            
-                                                                           
-                                                                           
- Redistribution and use in source and binary forms,  with or without modi- 
- fication, are permitted provided that the following conditions are met:   
-                                                                           
- 1. Redistributions of source code  must retain the above copyright notice 
-    notice, this list of conditions and the following disclaimer.          
-                                                                           
- 2. Redistributions  in binary  form  must  reproduce the  above copyright 
-    notice,  this list of conditions  and the following  disclaimer in the 
-    documentation and/or other materials provided with the distribution.   
-                                                                           
- 3. The end-user documentation  included with the redistribution,  if any, 
-    must include the following acknowlegement:                             
-                                                                           
-       "This product includes  software developed  by the Apache  Software 
-        Foundation <http://www.apache.org/>."                              
-                                                                           
-    Alternately, this acknowlegement may appear in the software itself, if 
-    and wherever such third-party acknowlegements normally appear.         
-                                                                           
- 4. The names  "The  Jakarta  Project",  "Tomcat",  and  "Apache  Software 
-    Foundation"  must not be used  to endorse or promote  products derived 
-    from this  software without  prior  written  permission.  For  written 
-    permission, please contact <apache@apache.org>.                        
-                                                                           
- 5. Products derived from this software may not be called "Apache" nor may 
-    "Apache" appear in their names without prior written permission of the 
-    Apache Software Foundation.                                            
-                                                                           
- THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESSED OR IMPLIED WARRANTIES 
- INCLUDING, BUT NOT LIMITED TO,  THE IMPLIED WARRANTIES OF MERCHANTABILITY 
- AND FITNESS FOR  A PARTICULAR PURPOSE  ARE DISCLAIMED.  IN NO EVENT SHALL 
- THE APACHE  SOFTWARE  FOUNDATION OR  ITS CONTRIBUTORS  BE LIABLE  FOR ANY 
- DIRECT,  INDIRECT,   INCIDENTAL,  SPECIAL,  EXEMPLARY,  OR  CONSEQUENTIAL 
- DAMAGES (INCLUDING,  BUT NOT LIMITED TO,  PROCUREMENT OF SUBSTITUTE GOODS 
- OR SERVICES;  LOSS OF USE,  DATA,  OR PROFITS;  OR BUSINESS INTERRUPTION) 
- HOWEVER CAUSED AND  ON ANY  THEORY  OF  LIABILITY,  WHETHER IN  CONTRACT, 
- STRICT LIABILITY, OR TORT  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
- ANY  WAY  OUT OF  THE  USE OF  THIS  SOFTWARE,  EVEN  IF  ADVISED  OF THE 
- POSSIBILITY OF SUCH DAMAGE.                                               
-                                                                             
-This software  consists of voluntary  contributions made  by many indivi- 
-duals on behalf of the  Apache Software Foundation.  For more information 
-on the Apache Software Foundation, please see <http://www.apache.org/>.
-
-
 >>> asm-1.5.3
 
 ASM: a very small and fast Java bytecode manipulation framework
@@ -760,22 +700,17 @@ Thanks for the assistance and support of Sun Microsystems Labs,and everyone cont
 
 >>> date.format.js-1.2.3
 
-/*
- * Date Format 1.2.3
- * (c) 2007-2009 Steven Levithan <stevenlevithan.com>
- * MIT license
- *
- * Includes enhancements by Scott Trenda <scott.trenda.net>
- * and Kris Kowal <cixar.com/~kris.kowal/>
- *
- * Accepts a date, a mask, or a date and a mask.
- * Returns a formatted version of the given date.
- * The date defaults to the current date/time.
- * The mask defaults to dateFormat.masks.default.
- */
+Date Format 1.2.3
+(c) 2007-2009 Steven Levithan <stevenlevithan.com>
+ MIT license
 
-(NOTE: no actual license text specified, only the single line "MIT License" as indicated in the license file uploaded, which is just a snippet from the above copyright.
- * MIT license
+Includes enhancements by Scott Trenda <scott.trenda.net>
+and Kris Kowal <cixar.com/~kris.kowal/>
+
+Accepts a date, a mask, or a date and a mask.
+Returns a formatted version of the given date.
+The date defaults to the current date/time.
+The mask defaults to dateFormat.masks.default.
 
 
 >>> dnsjava-2.0.3
@@ -1748,11 +1683,6 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
 
->>> org.tanukisoftware.wrapper-3.5.6
-
-License: GPL 2.0
-
-
 >>> pg-7.4.3
 
 The PostgreSQL JDBC driver is distributed under the BSD license, same
@@ -2452,7 +2382,7 @@ DAMAGE.
 
 --------------- SECTION 2: Apache License, V2.0 ----------
 
-Apache License, V2.0 are applicable to the following component(s).
+Apache License, V2.0 is applicable to the following component(s).
 
 
 >>> activemq-5.3.0
@@ -3468,7 +3398,7 @@ This product includes software developed by
 The Apache Software Foundation (http://www.apache.org/).
 
 
->>> apache-tomcat-6.0.32
+>>> apache-tomcat-6.0.35
 
 Apache Tomcat
 Copyright 1999-2011 The Apache Software Foundation
@@ -3486,6 +3416,83 @@ Java compilation software for JSP pages is provided by Eclipse,
 which is open source software.  The original software and 
 related information is available at
 http://www.eclipse.org.
+
+ADDITIONAL LICENSE INFORMATION:
+
+
+
+
+APACHE TOMCAT SUBCOMPONENTS: 
+
+Apache Tomcat includes a number of subcomponents with separate copyright notices
+and license terms. Your use of these subcomponents is subject to the terms and
+conditions of the following licenses. 
+
+
+For the Eclipse JDT Java compiler:
+
+Eclipse Public License - v 1.0
+
+[PLEASE SEE THE APPENDIX FOR THE FULL TEXT OF THE ECLIPSE PUBLIC LICENSE 1.0.]
+
+
+For the Windows Installer component:
+
+    * All NSIS source code, plug-ins, documentation, examples, header files and
+       graphics, with the exception of the compression modules and where
+       otherwise noted, are licensed under the zlib/libpng license.
+    * The zlib compression module for NSIS is licensed under the zlib/libpng
+       license.
+    * The bzip2 compression module for NSIS is licensed under the bzip2 license.
+    * The lzma compression module for NSIS is licensed under the Common Public
+       License version 1.0. 
+
+[VMWARE DOES NOT DISTRIBUTE THE LZMA COMPRESSION MODULE; THUS, THE FULL TEXT OF THE COMMON PUBLIC LICENSE 1.0 HAS BEEN OMITTED.]
+
+zlib/libpng license
+
+This software is provided 'as-is', without any express or implied warranty. In
+no event will the authors be held liable for any damages arising from the use of
+this software.
+
+Permission is granted to anyone to use this software for any purpose, including
+commercial applications, and to alter it and redistribute it freely, subject to
+the following restrictions:
+
+   1. The origin of this software must not be misrepresented; you must not claim
+       that you wrote the original software. If you use this software in a
+       product, an acknowledgment in the product documentation would be
+       appreciated but is not required.
+   2. Altered source versions must be plainly marked as such, and must not be
+       misrepresented as being the original software.
+   3. This notice may not be removed or altered from any source distribution. 
+
+bzip2 license
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+   1. Redistributions of source code must retain the above copyright notice,
+       this list of conditions and the following disclaimer.
+   2. The origin of this software must not be misrepresented; you must not claim
+       that you wrote the original software. If you use this software in a
+       product, an acknowledgment in the product documentation would be
+       appreciated but is not required.
+   3. Altered source versions must be plainly marked as such, and must not be
+       misrepresented as being the original software.
+   4. The name of the author may not be used to endorse or promote products
+       derived from this software without specific prior written permission. 
+
+THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS AND ANY EXPRESS OR IMPLIED
+WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+OF SUCH DAMAGE.
 
 
 >>> apache-velocity-1.6.3
@@ -3639,6 +3646,15 @@ The Apache Software Foundation (http://www.apache.org/).
 
 Apache Jakarta HttpClient
 Copyright 1999-2007 The Apache Software Foundation
+
+This product includes software developed by
+The Apache Software Foundation (http://www.apache.org/).
+
+
+>>> commons-io-1.4
+
+Apache Commons IO
+Copyright 2001-2008 The Apache Software Foundation
 
 This product includes software developed by
 The Apache Software Foundation (http://www.apache.org/).
@@ -4118,6 +4134,23 @@ The primary ANTLR guy:
 Terence Parr
 parrt@cs.usfca.edu
 parrt@antlr.org
+
+
+>>> gson-1.4
+
+Copyright (C) 2008 Google Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 
 
 >>> hivemind-1.1.1
@@ -5327,6 +5360,15 @@ for the specific language governing rights and limitations under the
 License.
 
 
+>>> tomcat-jdbc-7.0.19
+
+Apache Tomcat JDBC Pool
+Copyright 2008-2011 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
 >>> xalan-2.7.1
 
 This product includes software developed by
@@ -5524,23 +5566,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 
---------------- SECTION 3: Artistic License, V2.0 ----------
+--------------- SECTION 3: Common Development and Distribution License, V1.0 ----------
 
-Artistic License, V2.0 are applicable to the following component(s).
-
-
->>> commons-io-1.4
-
-Apache Commons IO
-Copyright 2001-2008 The Apache Software Foundation
-
-This product includes software developed by
-The Apache Software Foundation (http://www.apache.org/).
-
-
---------------- SECTION 4: Common Development and Distribution License, V1.0 ----------
-
-Common Development and Distribution License, V1.0 are applicable to the following component(s).
+Common Development and Distribution License, V1.0 is applicable to the following component(s).
 
 
 >>> activation-1.1
@@ -5548,250 +5576,11 @@ Common Development and Distribution License, V1.0 are applicable to the followin
 License  :  CDDL 1.0
 
 
->>> jta-1.1
+>>> javamail-1.4
 
-The contents of this file are subject to the terms 
-of the Common Development and Distribution License 
-(the License).  You may not use this file except in
-compliance with the License.
-
-You can obtain a copy of the license at 
-https://glassfish.dev.java.net/public/CDDLv1.0.html or
-glassfish/bootstrap/legal/CDDLv1.0.txt.
-See the License for the specific language governing 
-permissions and limitations under the License.
-
-When distributing Covered Code, include this CDDL 
-Header Notice in each file and include the License file 
-at glassfish/bootstrap/legal/CDDLv1.0.txt.  
-If applicable, add the following below the CDDL Header, 
-with the fields enclosed by brackets [] replaced by
-you own identifying information: 
-"Portions Copyrighted [year] [name of copyright owner]"
-
-Copyright 2006 Sun Microsystems, Inc. All rights reserved.
-
-
---------------- SECTION 5: Creative Commons Attribution License, V3.0 ----------
-
-Creative Commons Attribution License, V3.0 are applicable to the following component(s).
-
-
->>> adxmenu-4.21
-
-(c) Copyright 2003, 2008, Aleksandar Vacic, aplus.co.yu
-This work is licensed under the CC Attribution 3.0 Unported license
-To view a copy of this license, visit http://creativecommons.org/licenses/by/3.0/ or
-send a letter to Creative Commons, 559 Nathan Abbott Way, Stanford, California 94305, USA
-
-License
-
-THE WORK (AS DEFINED BELOW) IS PROVIDED UNDER THE TERMS OF THIS CREATIVE COMMONS PUBLIC LICENSE ("CCPL" OR "LICENSE"). THE WORK IS PROTECTED BY COPYRIGHT AND/OR OTHER APPLICABLE LAW. ANY USE OF THE WORK OTHER THAN AS AUTHORIZED UNDER THIS LICENSE OR COPYRIGHT LAW IS PROHIBITED.
-
-BY EXERCISING ANY RIGHTS TO THE WORK PROVIDED HERE, YOU ACCEPT AND AGREE TO BE BOUND BY THE TERMS OF THIS LICENSE. TO THE EXTENT THIS LICENSE MAY BE CONSIDERED TO BE A CONTRACT, THE LICENSOR GRANTS YOU THE RIGHTS CONTAINED HERE IN CONSIDERATION OF YOUR ACCEPTANCE OF SUCH TERMS AND CONDITIONS.
-
-1. Definitions
-
-"Adaptation" means a work based upon the Work, or upon the Work and other pre-existing works, such as a translation, adaptation, derivative work, arrangement of music or other alterations of a literary or artistic work, or phonogram or performance and includes cinematographic adaptations or any other form in which the Work may be recast, transformed, or adapted including in any form recognizably derived from the original, except that a work that constitutes a Collection will not be considered an Adaptation for the purpose of this License. For the avoidance of doubt, where the Work is a musical work, performance or phonogram, the synchronization of the Work in timed-relation with a moving image ("synching") will be considered an Adaptation for the purpose of this License.
-
-"Collection" means a collection of literary or artistic works, such as encyclopedias and anthologies, or performances, phonograms or broadcasts, or other works or subject matter other than works listed in Section 1(f) below, which, by reason of the selection and arrangement of their contents, constitute intellectual creations, in which the Work is included in its entirety in unmodified form along with one or more other contributions, each constituting separate and independent works in themselves, which together are assembled into a collective whole. A work that constitutes a Collection will not be considered an Adaptation (as defined above) for the purposes of this License.
-
-"Distribute" means to make available to the public the original and copies of the Work or Adaptation, as appropriate, through sale or other transfer of ownership.
-"Licensor" means the individual, individuals, entity or entities that offer(s) the Work under the terms of this License.
-
-"Original Author" means, in the case of a literary or artistic work, the individual, individuals, entity or entities who created the Work or if no individual or entity can be identified, the publisher; and in addition (i) in the case of a performance the actors, singers, musicians, dancers, and other persons who act, sing, deliver, declaim, play in, interpret or otherwise perform literary or artistic works or expressions of folklore; (ii) in the case of a phonogram the producer being the person or legal entity who first fixes the sounds of a performance or other sounds; and, (iii) in the case of broadcasts, the organization that transmits the broadcast.
-
-"Work" means the literary and/or artistic work offered under the terms of this License including without limitation any production in the literary, scientific and artistic domain, whatever may be the mode or form of its expression including digital form, such as a book, pamphlet and other writing; a lecture, address, sermon or other work of the same nature; a dramatic or dramatico-musical work; a choreographic work or entertainment in dumb show; a musical composition with or without words; a cinematographic work to which are assimilated works expressed by a process analogous to cinematography; a work of drawing, painting, architecture, sculpture, engraving or lithography; a photographic work to which are assimilated works expressed by a process analogous to photography; a work of applied art; an illustration, map, plan, sketch or three-dimensional work relative to geography, topography, architecture or science; a performance; a broadcast; a phonogram; a compilation of data to the extent it is protected as a copyrightable work; or a work performed by a variety or circus performer to the extent it is not otherwise considered a literary or artistic work.
-
-"You" means an individual or entity exercising rights under this License who has not previously violated the terms of this License with respect to the Work, or who has received express permission from the Licensor to exercise rights under this License despite a previous violation.
-
-"Publicly Perform" means to perform public recitations of the Work and to communicate to the public those public recitations, by any means or process, including by wire or wireless means or public digital performances; to make available to the public Works in such a way that members of the public may access these Works from a place and at a place individually chosen by them; to perform the Work to the public by any means or process and the communication to the public of the performances of the Work, including by public digital performance; to broadcast and rebroadcast the Work by any means including signs, sounds or images.
-
-"Reproduce" means to make copies of the Work by any means including without limitation by sound or visual recordings and the right of fixation and reproducing fixations of the Work, including storage of a protected performance or phonogram in digital form or other electronic medium.
-
-2. Fair Dealing Rights. Nothing in this License is intended to reduce, limit, or restrict any uses free from copyright or rights arising from limitations or exceptions that are provided for in connection with the copyright protection under copyright law or other applicable laws.
-
-3. License Grant. Subject to the terms and conditions of this License, Licensor hereby grants You a worldwide, royalty-free, non-exclusive, perpetual (for the duration of the applicable copyright) license to exercise the rights in the Work as stated below:
-
-to Reproduce the Work, to incorporate the Work into one or more Collections, and to Reproduce the Work as incorporated in the Collections;
-
-to create and Reproduce Adaptations provided that any such Adaptation, including any translation in any medium, takes reasonable steps to clearly label, demarcate or otherwise identify that changes were made to the original Work. For example, a translation could be marked "The original work was translated from English to Spanish," or a modification could indicate "The original work has been modified.";
-
-to Distribute and Publicly Perform the Work including as incorporated in Collections; and,
-
-to Distribute and Publicly Perform Adaptations.
-
-For the avoidance of doubt:
-
-Non-waivable Compulsory License Schemes. In those jurisdictions in which the right to collect royalties through any statutory or compulsory licensing scheme cannot be waived, the Licensor reserves the exclusive right to collect such royalties for any exercise by You of the rights granted under this License;
-
-Waivable Compulsory License Schemes. In those jurisdictions in which the right to collect royalties through any statutory or compulsory licensing scheme can be waived, the Licensor waives the exclusive right to collect such royalties for any exercise by You of the rights granted under this License; and,
-Voluntary License Schemes. The Licensor waives the right to collect royalties, whether individually or, in the event that the Licensor is a member of a collecting society that administers voluntary licensing schemes, via that society, from any exercise by You of the rights granted under this License.
-
-The above rights may be exercised in all media and formats whether now known or hereafter devised. The above rights include the right to make such modifications as are technically necessary to exercise the rights in other media and formats. Subject to Section 8(f), all rights not expressly granted by Licensor are hereby reserved.
-
-4. Restrictions. The license granted in Section 3 above is expressly made subject to and limited by the following restrictions:
-
-You may Distribute or Publicly Perform the Work only under the terms of this License. You must include a copy of, or the Uniform Resource Identifier (URI) for, this License with every copy of the Work You Distribute or Publicly Perform. You may not offer or impose any terms on the Work that restrict the terms of this License or the ability of the recipient of the Work to exercise the rights granted to that recipient under the terms of the License. You may not sublicense the Work. You must keep intact all notices that refer to this License and to the disclaimer of warranties with every copy of the Work 
-
-You Distribute or Publicly Perform. When You Distribute or Publicly Perform the Work, You may not impose any effective technological measures on the Work that restrict the ability of a recipient of the Work from You to exercise the rights granted to that recipient under the terms of the License. This Section 4(a) applies to the Work as incorporated in a Collection, but this does not require the Collection apart from the Work itself to be made subject to the terms of this License. If You create a Collection, upon notice from any Licensor You must, to the extent practicable, remove from the Collection any credit as required by Section 4(b), as requested. If You create an Adaptation, upon notice from any Licensor You must, to the extent practicable, remove from the Adaptation any credit as required by Section 4(b), as requested.
-
-If You Distribute, or Publicly Perform the Work or any Adaptations or Collections, You must, unless a request has been made pursuant to Section 4(a), keep intact all copyright notices for the Work and provide, reasonable to the medium or means You are utilizing: (i) the name of the Original Author (or pseudonym, if applicable) if supplied, and/or if the Original Author and/or Licensor designate another party or parties (e.g., a sponsor institute, publishing entity, journal) for attribution ("Attribution Parties") in Licensor's copyright notice, terms of service or by other reasonable means, the name of such party or parties; (ii) the title of the Work if supplied; (iii) to the extent reasonably practicable, the URI, if any, that Licensor specifies to be associated with the Work, unless such URI does not refer to the copyright notice or licensing information for the Work; and (iv) , consistent with Section 3(b), in the case of an Adaptation, a credit identifying the use of the Work in the Adaptation (e.g., "French translation of the Work by Original Author," or "Screenplay based on original Work by Original Author"). The credit required by this Section 4 (b) may be implemented in any reasonable manner; provided, however, that in the case of a Adaptation or Collection, at a minimum such credit will appear, if a credit for all contributing authors of the Adaptation or Collection appears, then as part of these credits and in a manner at least as prominent as the credits for the other contributing authors. For the avoidance of doubt, You may only use the credit required by this Section for the purpose of attribution in the manner set out above and, by exercising Your rights under this License, You may not implicitly or explicitly assert or imply any connection with, sponsorship or endorsement by the Original Author, Licensor and/or Attribution Parties, as appropriate, of You or Your use of the Work, without the separate, express prior written permission of the Original Author, Licensor and/or Attribution Parties.
-
-Except as otherwise agreed in writing by the Licensor or as may be otherwise permitted by applicable law, if You Reproduce, Distribute or Publicly Perform the Work either by itself or as part of any Adaptations or Collections, You must not distort, mutilate, modify or take other derogatory action in relation to the Work which would be prejudicial to the Original Author's honor or reputation. Licensor agrees that in those jurisdictions (e.g. Japan), in which any exercise of the right granted in Section 3(b) of this License (the right to make Adaptations) would be deemed to be a distortion, mutilation, modification or other derogatory action prejudicial to the Original Author's honor and reputation, the Licensor will waive or not assert, as appropriate, this Section, to the fullest extent permitted by the applicable national law, to enable You to reasonably exercise Your right under Section 3(b) of this License (right to make Adaptations) but not otherwise.
-
-5. Representations, Warranties and Disclaimer
-
-UNLESS OTHERWISE MUTUALLY AGREED TO BY THE PARTIES IN WRITING, LICENSOR OFFERS THE WORK AS-IS AND MAKES NO REPRESENTATIONS OR WARRANTIES OF ANY KIND CONCERNING THE WORK, EXPRESS, IMPLIED, STATUTORY OR OTHERWISE, INCLUDING, WITHOUT LIMITATION, WARRANTIES OF TITLE, MERCHANTIBILITY, FITNESS FOR A PARTICULAR PURPOSE, NONINFRINGEMENT, OR THE ABSENCE OF LATENT OR OTHER DEFECTS, ACCURACY, OR THE PRESENCE OF ABSENCE OF ERRORS, WHETHER OR NOT DISCOVERABLE. SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OF IMPLIED WARRANTIES, SO SUCH EXCLUSION MAY NOT APPLY TO YOU.
-
-6. Limitation on Liability. EXCEPT TO THE EXTENT REQUIRED BY APPLICABLE LAW, IN NO EVENT WILL LICENSOR BE LIABLE TO YOU ON ANY LEGAL THEORY FOR ANY SPECIAL, INCIDENTAL, CONSEQUENTIAL, PUNITIVE OR EXEMPLARY DAMAGES ARISING OUT OF THIS LICENSE OR THE USE OF THE WORK, EVEN IF LICENSOR HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-
-7. Termination
-
-This License and the rights granted hereunder will terminate automatically upon any breach by You of the terms of this License. Individuals or entities who have received Adaptations or Collections from You under this License, however, will not have their licenses terminated provided such individuals or entities remain in full compliance with those licenses. Sections 1, 2, 5, 6, 7, and 8 will survive any termination of this License.
-
-Subject to the above terms and conditions, the license granted here is perpetual (for the duration of the applicable copyright in the Work). Notwithstanding the above, Licensor reserves the right to release the Work under different license terms or to stop distributing the Work at any time; provided, however that any such election will not serve to withdraw this License (or any other license that has been, or is required to be, granted under the terms of this License), and this License will continue in full force and effect unless terminated as stated above.
-
-8. Miscellaneous
-
-Each time You Distribute or Publicly Perform the Work or a Collection, the Licensor offers to the recipient a license to the Work on the same terms and conditions as the license granted to You under this License.
-
-Each time You Distribute or Publicly Perform an Adaptation, Licensor offers to the recipient a license to the original Work on the same terms and conditions as the license granted to You under this License.
-
-If any provision of this License is invalid or unenforceable under applicable law, it shall not affect the validity or enforceability of the remainder of the terms of this License, and without further action by the parties to this agreement, such provision shall be reformed to the minimum extent necessary to make such provision valid and enforceable.
-No term or provision of this License shall be deemed waived and no breach consented to unless such waiver or consent shall be in writing and signed by the party to be charged with such waiver or consent.
-
-This License constitutes the entire agreement between the parties with respect to the Work licensed here. There are no understandings, agreements or representations with respect to the Work not specified here. Licensor shall not be bound by any additional provisions that may appear in any communication from You. This License may not be modified without the mutual written agreement of the Licensor and You.
-
-The rights granted under, and the subject matter referenced, in this License were drafted utilizing the terminology of the Berne Convention for the Protection of Literary and Artistic Works (as amended on September 28, 1979), the Rome Convention of 1961, the WIPO Copyright Treaty of 1996, the WIPO Performances and Phonograms Treaty of 1996 and the Universal Copyright Convention (as revised on July 24, 1971). These rights and subject matter take effect in the relevant jurisdiction in which the License terms are sought to be enforced according to the corresponding provisions of the implementation of those treaty provisions in the applicable national law. If the standard suite of rights granted under applicable copyright law includes additional rights not granted under this License, such additional rights are deemed to be included in the License; this License is not intended to restrict the license of any rights under applicable law.
-
-
---------------- SECTION 6: Eclipse Public License, V1.0 ----------
-
-Eclipse Public License, V1.0 are applicable to the following component(s).
-
-
->>> aspectj-1.6.8
-
-Copyright (c) 2006 Contributors.
-All rights reserved.
-
-This program and the accompanying materials are made available
-under the terms of the Eclipse Public License v1.0
-which accompanies this distribution and is available at
-http://eclipse.org/legal/epl-v10.html
-
-Portions Licensed:
-
-
-  The Apache Software License, Version 1.1
- 
-  Copyright (c) 2001 The Apache Software Foundation.  All rights
-  reserved.
- 
-  Redistribution and use in source and binary forms, with or without
-  modification, are permitted provided that the following conditions
-  are met:
- 
-  1. Redistributions of source code must retain the above copyright
-     notice, this list of conditions and the following disclaimer.
- 
-  2. Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in
-     the documentation and/or other materials provided with the
-     distribution.
- 
-  3. The end-user documentation included with the redistribution,
-     if any, must include the following acknowledgment:
-        "This product includes software developed by the
-         Apache Software Foundation (http://www.apache.org/)."
-     Alternately, this acknowledgment may appear in the software itself,
-     if and wherever such third-party acknowledgments normally appear.
- 
-  4. The names "Apache" and "Apache Software Foundation" and
-     "Apache BCEL" must not be used to endorse or promote products
-     derived from this software without prior written permission. For
-     written permission, please contact apache@apache.org.
- 
-  5. Products derived from this software may not be called "Apache",
-     "Apache BCEL", nor may "Apache" appear in their name, without
-     prior written permission of the Apache Software Foundation.
- 
-  THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
-  WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
-  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-  DISCLAIMED.  IN NO EVENT SHALL THE APACHE SOFTWARE FOUNDATION OR
-  ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
-  USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
-  OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
-  SUCH DAMAGE.
-  
-  This software consists of voluntary contributions made by many
-  individuals on behalf of the Apache Software Foundation.  For more
-  information on the Apache Software Foundation, please see
-  <http://www.apache.org/>.
-
-
---------------- SECTION 7: GNU General Public License, V2.0 ----------
-
-GNU General Public License, V2.0 are applicable to the following component(s).
-
-
->>> amqp-client-1.8.1
-
-[PLEASE NOTE:  VMWARE, INC. ELECTS TO USE AND DISTRIBUTE THIS COMPONENT UNDER THE TERMS OF THE GPL 2.0.  PLEASE SEE THE APPENDIX TO REVIEW THE FULL TEXT OF GPL 2.0 THE ORIGINAL LICENSE TERMS ARE REPRODUCED BELOW ONLY AS A REFERENCE.]
-
-Top-level license file contents:
-
-
-This package, the RabbitMQ Java client library is dual-licensed under
-the MPL and the GPL v2. For the MPL, please see
-LICENSE-MPL-RabbitMQ. For the GPL v2, please see LICENSE-GPL2.
-
-The RabbitMQ Java client library includes software under the Apache
-Licence v2. For this license, please see LICENSE-APACHE2. For
-attribution of copyright and other details of provenance, please refer
-to the source code.
-
-If you have any questions regarding licensing, please contact us at
-info@rabbitmq.com.
-
-
-ADDITIONAL LICENSE INFORMATION:
-
-> JSONReader.java
-Copyright 2006, 2007 Frank Carver
-Copyright 2007 Tony Garnock-Jones
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-
-GPLv2 license attached above.
-
-No copyright file found in the distribution.
 
 
 >>> javax.activation-1.0.2
-
-PLEASE NOTE:  VMWARE, INC. ELECTS TO INCLUDE THIS SOFTWARE IN 
-THIS DISTRIBUTION UNDER THE GPL 2.0 LICENSE. PLEASE SEE THE 
-APPENDIX TO REVIEW THE FULL TEXT OF THE GPL 2.0.  THE 
-ORIGINAL LICENSE TERMS ARE REPRODUCED BELOW ONLY AS A 
-REFERENCE.
 
 Copyright 1997-2007 Sun Microsystems, Inc. All rights 
 reserved.
@@ -5840,8 +5629,6 @@ delete this exception statement from your version.
 
 
 >>> jaxb-impl-2.1.12.jar-2.1.12
-
-[PLEASE NOTE:  VMWARE, INC. ELECTS TO USE AND DISTRIBUTE THIS COMPONENT UNDER THE TERMS OF THE GPL 2.0.  PLEASE SEE THE APPENDIX TO REVIEW THE FULL TEXT OF THE GPL 2.0.  THE ORIGINAL LICENSE TERMS ARE REPRODUCED BELOW ONLY AS A REFERENCE; HOWEVER, THE FULL TEXT OF THE CDDL 1.0 HAS BEEN OMITTED.]
 
 Licenses: Dual license consisting of the CDDL v1.0 and GPL v2.
 
@@ -6598,8 +6385,6 @@ are license related. "copyright" and "license" yield no hits either.
 
 >>> jms-api-1.1.0
 
-~[PLEASE NOTE:  VMWARE, INC. ELECTS TO USE AND DISTRIBUTE THIS COMPONENT UNDER THE TERMS OF THE GPL 2.0.  PLEASE SEE THE APPENDIX TO REVIEW THE FULL TEXT OF THE GPL 2.0.  THE ORIGINAL LICENSE TERMS ARE REPRODUCED BELOW ONLY AS A REFERENCE.]
- 
 DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER. 
   
 Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved. 
@@ -6635,9 +6420,290 @@ only if the new code is made subject to such option by the copyright
 holder.
 
 
---------------- SECTION 8: GNU Lesser General Public License, V2.1 ----------
+>>> jta-1.1
 
-GNU Lesser General Public License, V2.1 are applicable to the following component(s).
+The contents of this file are subject to the terms 
+of the Common Development and Distribution License 
+(the License).  You may not use this file except in
+compliance with the License.
+
+You can obtain a copy of the license at 
+https://glassfish.dev.java.net/public/CDDLv1.0.html or
+glassfish/bootstrap/legal/CDDLv1.0.txt.
+See the License for the specific language governing 
+permissions and limitations under the License.
+
+When distributing Covered Code, include this CDDL 
+Header Notice in each file and include the License file 
+at glassfish/bootstrap/legal/CDDLv1.0.txt.  
+If applicable, add the following below the CDDL Header, 
+with the fields enclosed by brackets [] replaced by
+you own identifying information: 
+"Portions Copyrighted [year] [name of copyright owner]"
+
+Copyright 2006 Sun Microsystems, Inc. All rights reserved.
+
+
+--------------- SECTION 4: Creative Commons Attribution License, V3.0 ----------
+
+Creative Commons Attribution License, V3.0 is applicable to the following component(s).
+
+
+>>> adxmenu-4.21
+
+(c) Copyright 2003, 2008, Aleksandar Vacic, aplus.co.yu
+This work is licensed under the CC Attribution 3.0 Unported license
+To view a copy of this license, visit http://creativecommons.org/licenses/by/3.0/ or
+send a letter to Creative Commons, 559 Nathan Abbott Way, Stanford, California 94305, USA
+
+License
+
+THE WORK (AS DEFINED BELOW) IS PROVIDED UNDER THE TERMS OF THIS CREATIVE COMMONS PUBLIC LICENSE ("CCPL" OR "LICENSE"). THE WORK IS PROTECTED BY COPYRIGHT AND/OR OTHER APPLICABLE LAW. ANY USE OF THE WORK OTHER THAN AS AUTHORIZED UNDER THIS LICENSE OR COPYRIGHT LAW IS PROHIBITED.
+
+BY EXERCISING ANY RIGHTS TO THE WORK PROVIDED HERE, YOU ACCEPT AND AGREE TO BE BOUND BY THE TERMS OF THIS LICENSE. TO THE EXTENT THIS LICENSE MAY BE CONSIDERED TO BE A CONTRACT, THE LICENSOR GRANTS YOU THE RIGHTS CONTAINED HERE IN CONSIDERATION OF YOUR ACCEPTANCE OF SUCH TERMS AND CONDITIONS.
+
+1. Definitions
+
+"Adaptation" means a work based upon the Work, or upon the Work and other pre-existing works, such as a translation, adaptation, derivative work, arrangement of music or other alterations of a literary or artistic work, or phonogram or performance and includes cinematographic adaptations or any other form in which the Work may be recast, transformed, or adapted including in any form recognizably derived from the original, except that a work that constitutes a Collection will not be considered an Adaptation for the purpose of this License. For the avoidance of doubt, where the Work is a musical work, performance or phonogram, the synchronization of the Work in timed-relation with a moving image ("synching") will be considered an Adaptation for the purpose of this License.
+
+"Collection" means a collection of literary or artistic works, such as encyclopedias and anthologies, or performances, phonograms or broadcasts, or other works or subject matter other than works listed in Section 1(f) below, which, by reason of the selection and arrangement of their contents, constitute intellectual creations, in which the Work is included in its entirety in unmodified form along with one or more other contributions, each constituting separate and independent works in themselves, which together are assembled into a collective whole. A work that constitutes a Collection will not be considered an Adaptation (as defined above) for the purposes of this License.
+
+"Distribute" means to make available to the public the original and copies of the Work or Adaptation, as appropriate, through sale or other transfer of ownership.
+"Licensor" means the individual, individuals, entity or entities that offer(s) the Work under the terms of this License.
+
+"Original Author" means, in the case of a literary or artistic work, the individual, individuals, entity or entities who created the Work or if no individual or entity can be identified, the publisher; and in addition (i) in the case of a performance the actors, singers, musicians, dancers, and other persons who act, sing, deliver, declaim, play in, interpret or otherwise perform literary or artistic works or expressions of folklore; (ii) in the case of a phonogram the producer being the person or legal entity who first fixes the sounds of a performance or other sounds; and, (iii) in the case of broadcasts, the organization that transmits the broadcast.
+
+"Work" means the literary and/or artistic work offered under the terms of this License including without limitation any production in the literary, scientific and artistic domain, whatever may be the mode or form of its expression including digital form, such as a book, pamphlet and other writing; a lecture, address, sermon or other work of the same nature; a dramatic or dramatico-musical work; a choreographic work or entertainment in dumb show; a musical composition with or without words; a cinematographic work to which are assimilated works expressed by a process analogous to cinematography; a work of drawing, painting, architecture, sculpture, engraving or lithography; a photographic work to which are assimilated works expressed by a process analogous to photography; a work of applied art; an illustration, map, plan, sketch or three-dimensional work relative to geography, topography, architecture or science; a performance; a broadcast; a phonogram; a compilation of data to the extent it is protected as a copyrightable work; or a work performed by a variety or circus performer to the extent it is not otherwise considered a literary or artistic work.
+
+"You" means an individual or entity exercising rights under this License who has not previously violated the terms of this License with respect to the Work, or who has received express permission from the Licensor to exercise rights under this License despite a previous violation.
+
+"Publicly Perform" means to perform public recitations of the Work and to communicate to the public those public recitations, by any means or process, including by wire or wireless means or public digital performances; to make available to the public Works in such a way that members of the public may access these Works from a place and at a place individually chosen by them; to perform the Work to the public by any means or process and the communication to the public of the performances of the Work, including by public digital performance; to broadcast and rebroadcast the Work by any means including signs, sounds or images.
+
+"Reproduce" means to make copies of the Work by any means including without limitation by sound or visual recordings and the right of fixation and reproducing fixations of the Work, including storage of a protected performance or phonogram in digital form or other electronic medium.
+
+2. Fair Dealing Rights. Nothing in this License is intended to reduce, limit, or restrict any uses free from copyright or rights arising from limitations or exceptions that are provided for in connection with the copyright protection under copyright law or other applicable laws.
+
+3. License Grant. Subject to the terms and conditions of this License, Licensor hereby grants You a worldwide, royalty-free, non-exclusive, perpetual (for the duration of the applicable copyright) license to exercise the rights in the Work as stated below:
+
+to Reproduce the Work, to incorporate the Work into one or more Collections, and to Reproduce the Work as incorporated in the Collections;
+
+to create and Reproduce Adaptations provided that any such Adaptation, including any translation in any medium, takes reasonable steps to clearly label, demarcate or otherwise identify that changes were made to the original Work. For example, a translation could be marked "The original work was translated from English to Spanish," or a modification could indicate "The original work has been modified.";
+
+to Distribute and Publicly Perform the Work including as incorporated in Collections; and,
+
+to Distribute and Publicly Perform Adaptations.
+
+For the avoidance of doubt:
+
+Non-waivable Compulsory License Schemes. In those jurisdictions in which the right to collect royalties through any statutory or compulsory licensing scheme cannot be waived, the Licensor reserves the exclusive right to collect such royalties for any exercise by You of the rights granted under this License;
+
+Waivable Compulsory License Schemes. In those jurisdictions in which the right to collect royalties through any statutory or compulsory licensing scheme can be waived, the Licensor waives the exclusive right to collect such royalties for any exercise by You of the rights granted under this License; and,
+Voluntary License Schemes. The Licensor waives the right to collect royalties, whether individually or, in the event that the Licensor is a member of a collecting society that administers voluntary licensing schemes, via that society, from any exercise by You of the rights granted under this License.
+
+The above rights may be exercised in all media and formats whether now known or hereafter devised. The above rights include the right to make such modifications as are technically necessary to exercise the rights in other media and formats. Subject to Section 8(f), all rights not expressly granted by Licensor are hereby reserved.
+
+4. Restrictions. The license granted in Section 3 above is expressly made subject to and limited by the following restrictions:
+
+You may Distribute or Publicly Perform the Work only under the terms of this License. You must include a copy of, or the Uniform Resource Identifier (URI) for, this License with every copy of the Work You Distribute or Publicly Perform. You may not offer or impose any terms on the Work that restrict the terms of this License or the ability of the recipient of the Work to exercise the rights granted to that recipient under the terms of the License. You may not sublicense the Work. You must keep intact all notices that refer to this License and to the disclaimer of warranties with every copy of the Work 
+
+You Distribute or Publicly Perform. When You Distribute or Publicly Perform the Work, You may not impose any effective technological measures on the Work that restrict the ability of a recipient of the Work from You to exercise the rights granted to that recipient under the terms of the License. This Section 4(a) applies to the Work as incorporated in a Collection, but this does not require the Collection apart from the Work itself to be made subject to the terms of this License. If You create a Collection, upon notice from any Licensor You must, to the extent practicable, remove from the Collection any credit as required by Section 4(b), as requested. If You create an Adaptation, upon notice from any Licensor You must, to the extent practicable, remove from the Adaptation any credit as required by Section 4(b), as requested.
+
+If You Distribute, or Publicly Perform the Work or any Adaptations or Collections, You must, unless a request has been made pursuant to Section 4(a), keep intact all copyright notices for the Work and provide, reasonable to the medium or means You are utilizing: (i) the name of the Original Author (or pseudonym, if applicable) if supplied, and/or if the Original Author and/or Licensor designate another party or parties (e.g., a sponsor institute, publishing entity, journal) for attribution ("Attribution Parties") in Licensor's copyright notice, terms of service or by other reasonable means, the name of such party or parties; (ii) the title of the Work if supplied; (iii) to the extent reasonably practicable, the URI, if any, that Licensor specifies to be associated with the Work, unless such URI does not refer to the copyright notice or licensing information for the Work; and (iv) , consistent with Section 3(b), in the case of an Adaptation, a credit identifying the use of the Work in the Adaptation (e.g., "French translation of the Work by Original Author," or "Screenplay based on original Work by Original Author"). The credit required by this Section 4 (b) may be implemented in any reasonable manner; provided, however, that in the case of a Adaptation or Collection, at a minimum such credit will appear, if a credit for all contributing authors of the Adaptation or Collection appears, then as part of these credits and in a manner at least as prominent as the credits for the other contributing authors. For the avoidance of doubt, You may only use the credit required by this Section for the purpose of attribution in the manner set out above and, by exercising Your rights under this License, You may not implicitly or explicitly assert or imply any connection with, sponsorship or endorsement by the Original Author, Licensor and/or Attribution Parties, as appropriate, of You or Your use of the Work, without the separate, express prior written permission of the Original Author, Licensor and/or Attribution Parties.
+
+Except as otherwise agreed in writing by the Licensor or as may be otherwise permitted by applicable law, if You Reproduce, Distribute or Publicly Perform the Work either by itself or as part of any Adaptations or Collections, You must not distort, mutilate, modify or take other derogatory action in relation to the Work which would be prejudicial to the Original Author's honor or reputation. Licensor agrees that in those jurisdictions (e.g. Japan), in which any exercise of the right granted in Section 3(b) of this License (the right to make Adaptations) would be deemed to be a distortion, mutilation, modification or other derogatory action prejudicial to the Original Author's honor and reputation, the Licensor will waive or not assert, as appropriate, this Section, to the fullest extent permitted by the applicable national law, to enable You to reasonably exercise Your right under Section 3(b) of this License (right to make Adaptations) but not otherwise.
+
+5. Representations, Warranties and Disclaimer
+
+UNLESS OTHERWISE MUTUALLY AGREED TO BY THE PARTIES IN WRITING, LICENSOR OFFERS THE WORK AS-IS AND MAKES NO REPRESENTATIONS OR WARRANTIES OF ANY KIND CONCERNING THE WORK, EXPRESS, IMPLIED, STATUTORY OR OTHERWISE, INCLUDING, WITHOUT LIMITATION, WARRANTIES OF TITLE, MERCHANTIBILITY, FITNESS FOR A PARTICULAR PURPOSE, NONINFRINGEMENT, OR THE ABSENCE OF LATENT OR OTHER DEFECTS, ACCURACY, OR THE PRESENCE OF ABSENCE OF ERRORS, WHETHER OR NOT DISCOVERABLE. SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OF IMPLIED WARRANTIES, SO SUCH EXCLUSION MAY NOT APPLY TO YOU.
+
+6. Limitation on Liability. EXCEPT TO THE EXTENT REQUIRED BY APPLICABLE LAW, IN NO EVENT WILL LICENSOR BE LIABLE TO YOU ON ANY LEGAL THEORY FOR ANY SPECIAL, INCIDENTAL, CONSEQUENTIAL, PUNITIVE OR EXEMPLARY DAMAGES ARISING OUT OF THIS LICENSE OR THE USE OF THE WORK, EVEN IF LICENSOR HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+7. Termination
+
+This License and the rights granted hereunder will terminate automatically upon any breach by You of the terms of this License. Individuals or entities who have received Adaptations or Collections from You under this License, however, will not have their licenses terminated provided such individuals or entities remain in full compliance with those licenses. Sections 1, 2, 5, 6, 7, and 8 will survive any termination of this License.
+
+Subject to the above terms and conditions, the license granted here is perpetual (for the duration of the applicable copyright in the Work). Notwithstanding the above, Licensor reserves the right to release the Work under different license terms or to stop distributing the Work at any time; provided, however that any such election will not serve to withdraw this License (or any other license that has been, or is required to be, granted under the terms of this License), and this License will continue in full force and effect unless terminated as stated above.
+
+8. Miscellaneous
+
+Each time You Distribute or Publicly Perform the Work or a Collection, the Licensor offers to the recipient a license to the Work on the same terms and conditions as the license granted to You under this License.
+
+Each time You Distribute or Publicly Perform an Adaptation, Licensor offers to the recipient a license to the original Work on the same terms and conditions as the license granted to You under this License.
+
+If any provision of this License is invalid or unenforceable under applicable law, it shall not affect the validity or enforceability of the remainder of the terms of this License, and without further action by the parties to this agreement, such provision shall be reformed to the minimum extent necessary to make such provision valid and enforceable.
+No term or provision of this License shall be deemed waived and no breach consented to unless such waiver or consent shall be in writing and signed by the party to be charged with such waiver or consent.
+
+This License constitutes the entire agreement between the parties with respect to the Work licensed here. There are no understandings, agreements or representations with respect to the Work not specified here. Licensor shall not be bound by any additional provisions that may appear in any communication from You. This License may not be modified without the mutual written agreement of the Licensor and You.
+
+The rights granted under, and the subject matter referenced, in this License were drafted utilizing the terminology of the Berne Convention for the Protection of Literary and Artistic Works (as amended on September 28, 1979), the Rome Convention of 1961, the WIPO Copyright Treaty of 1996, the WIPO Performances and Phonograms Treaty of 1996 and the Universal Copyright Convention (as revised on July 24, 1971). These rights and subject matter take effect in the relevant jurisdiction in which the License terms are sought to be enforced according to the corresponding provisions of the implementation of those treaty provisions in the applicable national law. If the standard suite of rights granted under applicable copyright law includes additional rights not granted under this License, such additional rights are deemed to be included in the License; this License is not intended to restrict the license of any rights under applicable law.
+
+
+--------------- SECTION 5: Eclipse Public License, V1.0 ----------
+
+Eclipse Public License, V1.0 is applicable to the following component(s).
+
+
+>>> aspectj-1.6.8
+
+Copyright (c) 2006 Contributors.
+All rights reserved.
+
+This program and the accompanying materials are made available
+under the terms of the Eclipse Public License v1.0
+which accompanies this distribution and is available at
+http://eclipse.org/legal/epl-v10.html
+
+Portions Licensed:
+
+
+  The Apache Software License, Version 1.1
+ 
+  Copyright (c) 2001 The Apache Software Foundation.  All rights
+  reserved.
+ 
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions
+  are met:
+ 
+  1. Redistributions of source code must retain the above copyright
+     notice, this list of conditions and the following disclaimer.
+ 
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
+     the documentation and/or other materials provided with the
+     distribution.
+ 
+  3. The end-user documentation included with the redistribution,
+     if any, must include the following acknowledgment:
+        "This product includes software developed by the
+         Apache Software Foundation (http://www.apache.org/)."
+     Alternately, this acknowledgment may appear in the software itself,
+     if and wherever such third-party acknowledgments normally appear.
+ 
+  4. The names "Apache" and "Apache Software Foundation" and
+     "Apache BCEL" must not be used to endorse or promote products
+     derived from this software without prior written permission. For
+     written permission, please contact apache@apache.org.
+ 
+  5. Products derived from this software may not be called "Apache",
+     "Apache BCEL", nor may "Apache" appear in their name, without
+     prior written permission of the Apache Software Foundation.
+ 
+  THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
+  WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED.  IN NO EVENT SHALL THE APACHE SOFTWARE FOUNDATION OR
+  ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
+  USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+  OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+  SUCH DAMAGE.
+  
+  This software consists of voluntary contributions made by many
+  individuals on behalf of the Apache Software Foundation.  For more
+  information on the Apache Software Foundation, please see
+  <http://www.apache.org/>.
+
+
+--------------- SECTION 6: GNU General Public License, V2.0 ----------
+
+GNU General Public License, V2.0 is applicable to the following component(s).
+
+
+>>> amqp-client-1.8.1
+
+This package, the RabbitMQ Java client library is dual-licensed under
+the MPL and the GPL v2. For the MPL, please see
+LICENSE-MPL-RabbitMQ. For the GPL v2, please see LICENSE-GPL2.
+
+The RabbitMQ Java client library includes software under the Apache
+Licence v2. For this license, please see LICENSE-APACHE2. For
+attribution of copyright and other details of provenance, please refer
+to the source code.
+
+If you have any questions regarding licensing, please contact us at
+info@rabbitmq.com.
+
+
+ADDITIONAL LICENSE INFORMATION:
+
+> JSONReader.java
+Copyright 2006, 2007 Frank Carver
+Copyright 2007 Tony Garnock-Jones
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+
+GPLv2 license attached above.
+
+No copyright file found in the distribution.
+
+
+>>> org.tanukisoftware.wrapper-3.5.6
+
+License: GPL 2.0
+
+
+--------------- SECTION 7: GNU Lesser General Public License, V2.1 ----------
+
+GNU Lesser General Public License, V2.1 is applicable to the following component(s).
+
+
+>>> bsh-2.0.0.b4
+
+[PLEASE NOTE:  VMWARE, INC. ELECTS TO USE AND DISTRIBUTE THIS COMPONENT UNDER THE TERMS OF THE LGPL.  PLEASE SEE THE APPENDIX TO REVIEW THE FULL TEXT OF THE LGPL.  THE ORIGINAL LICENSE TERMS ARE REPRODUCED BELOW ONLY AS A REFERENCE; HOWEVER, THE FULL TEXT OF THE SUN PUBLIC LICENSE HAS BEEN OMITTED.]
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License, Version 3, as published by the Free Software Foundation.
+ 
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ 
+You should have received a copy of the GNU Lesser General Public License along with this program.  If not, see http://www.gnu.org/licenses/.
+ 
+You shall not disclaim warranty or limit liability differently from the terms of Sections 15 and 16 of the GNU General Public License, Version 3, which is incorporated into the GNU Lesser General Public License.
+
+Original License:
+
+This file is part of the BeanShell Java Scripting distribution.
+Documentation and updates may be found at http://www.beanshell.org/
+
+Sun Public License Notice:
+
+The contents of this file are subject to the Sun Public License Version
+1.0 (the "License"); you may not use this file except in compliance with
+the License. A copy of the License is available at http://www.sun.com
+
+The Original Code is BeanShell. The Initial Developer of the Original
+Code is Pat Niemeyer. Portions created by Pat Niemeyer are Copyright
+(C) 2000.  All Rights Reserved.
+
+GNU Public License Notice:
+
+Alternatively, the contents of this file may be used under the terms of
+the GNU Lesser General Public License (the "LGPL"), in which case the
+provisions of LGPL are applicable instead of those above. If you wish to
+allow use of your version of this file only under the  terms of the LGPL
+and not to allow others to use your version of this file under the SPL,
+indicate your decision by deleting the provisions above and replace
+them with the notice and other provisions required by the LGPL.  If you
+do not delete the provisions above, a recipient may use your version of
+this file under either the SPL or the LGPL.
+
+Patrick Niemeyer (pat@pat.net)
+Author of Learning Java, O'Reilly & Associates
+http://www.pat.net/~pat/
 
 
 >>> dbunit-2.2
@@ -6957,53 +7023,9 @@ USA.
 in the United States and other countries.]
 
 
---------------- SECTION 9: GNU Lesser General Public License, V3.0 ----------
+--------------- SECTION 8: GNU Lesser General Public License, V3.0 ----------
 
-GNU Lesser General Public License, V3.0 are applicable to the following component(s).
-
-
->>> bsh-2.0.0.b4
-
-[PLEASE NOTE:  VMWARE, INC. ELECTS TO USE AND DISTRIBUTE THIS COMPONENT UNDER THE TERMS OF THE LGPL 3.0.  PLEASE SEE THE APPENDIX TO REVIEW THE FULL TEXT OF THE LGPL 3.0.  THE ORIGINAL LICENSE TERMS ARE REPRODUCED BELOW ONLY AS A REFERENCE; HOWEVER, THE FULL TEXT OF THE SUN PUBLIC LICENSE HAS BEEN OMITTED.]
-
-This program is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License, Version 3, as published by the Free Software Foundation.
- 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
- 
-You should have received a copy of the GNU Lesser General Public License along with this program.  If not, see http://www.gnu.org/licenses/.
- 
-You shall not disclaim warranty or limit liability differently from the terms of Sections 15 and 16 of the GNU General Public License, Version 3, which is incorporated into the GNU Lesser General Public License.
-
-Original License:
-
-This file is part of the BeanShell Java Scripting distribution.
-Documentation and updates may be found at http://www.beanshell.org/
-
-Sun Public License Notice:
-
-The contents of this file are subject to the Sun Public License Version
-1.0 (the "License"); you may not use this file except in compliance with
-the License. A copy of the License is available at http://www.sun.com
-
-The Original Code is BeanShell. The Initial Developer of the Original
-Code is Pat Niemeyer. Portions created by Pat Niemeyer are Copyright
-(C) 2000.  All Rights Reserved.
-
-GNU Public License Notice:
-
-Alternatively, the contents of this file may be used under the terms of
-the GNU Lesser General Public License (the "LGPL"), in which case the
-provisions of LGPL are applicable instead of those above. If you wish to
-allow use of your version of this file only under the  terms of the LGPL
-and not to allow others to use your version of this file under the SPL,
-indicate your decision by deleting the provisions above and replace
-them with the notice and other provisions required by the LGPL.  If you
-do not delete the provisions above, a recipient may use your version of
-this file under either the SPL or the LGPL.
-
-Patrick Niemeyer (pat@pat.net)
-Author of Learning Java, O'Reilly & Associates
-http://www.pat.net/~pat/
+GNU Lesser General Public License, V3.0 is applicable to the following component(s).
 
 
 >>> bsh-2.0b4
@@ -7043,9 +7065,9 @@ http://www.pat.net/~pat/
 License: LGPL 3.0
 
 
---------------- SECTION 10: GNU Library General Public License, V2.0 ----------
+--------------- SECTION 9: GNU Library General Public License, V2.0 ----------
 
-GNU Library General Public License, V2.0 are applicable to the following component(s).
+GNU Library General Public License, V2.0 is applicable to the following component(s).
 
 
 >>> itext-2.0.6
@@ -7387,58 +7409,6 @@ DAMAGE.
 LICENCE: all the source code provided by AOP Alliance is Public Domain.
 
 
->>> apache-tomcat-4.0.6
-
-The Apache Software License,  Version 1.1                                                                                           
-         Copyright (c) 1999, 2000  The Apache Software Foundation.         
-                           All rights reserved.                            
-                                                                           
-                                                                           
- Redistribution and use in source and binary forms,  with or without modi- 
- fication, are permitted provided that the following conditions are met:   
-                                                                           
- 1. Redistributions of source code  must retain the above copyright notice 
-    notice, this list of conditions and the following disclaimer.          
-                                                                           
- 2. Redistributions  in binary  form  must  reproduce the  above copyright 
-    notice,  this list of conditions  and the following  disclaimer in the 
-    documentation and/or other materials provided with the distribution.   
-                                                                           
- 3. The end-user documentation  included with the redistribution,  if any, 
-    must include the following acknowlegement:                             
-                                                                           
-       "This product includes  software developed  by the Apache  Software 
-        Foundation <http://www.apache.org/>."                              
-                                                                           
-    Alternately, this acknowlegement may appear in the software itself, if 
-    and wherever such third-party acknowlegements normally appear.         
-                                                                           
- 4. The names  "The  Jakarta  Project",  "Tomcat",  and  "Apache  Software 
-    Foundation"  must not be used  to endorse or promote  products derived 
-    from this  software without  prior  written  permission.  For  written 
-    permission, please contact <apache@apache.org>.                        
-                                                                           
- 5. Products derived from this software may not be called "Apache" nor may 
-    "Apache" appear in their names without prior written permission of the 
-    Apache Software Foundation.                                            
-                                                                           
- THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESSED OR IMPLIED WARRANTIES 
- INCLUDING, BUT NOT LIMITED TO,  THE IMPLIED WARRANTIES OF MERCHANTABILITY 
- AND FITNESS FOR  A PARTICULAR PURPOSE  ARE DISCLAIMED.  IN NO EVENT SHALL 
- THE APACHE  SOFTWARE  FOUNDATION OR  ITS CONTRIBUTORS  BE LIABLE  FOR ANY 
- DIRECT,  INDIRECT,   INCIDENTAL,  SPECIAL,  EXEMPLARY,  OR  CONSEQUENTIAL 
- DAMAGES (INCLUDING,  BUT NOT LIMITED TO,  PROCUREMENT OF SUBSTITUTE GOODS 
- OR SERVICES;  LOSS OF USE,  DATA,  OR PROFITS;  OR BUSINESS INTERRUPTION) 
- HOWEVER CAUSED AND  ON ANY  THEORY  OF  LIABILITY,  WHETHER IN  CONTRACT, 
- STRICT LIABILITY, OR TORT  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
- ANY  WAY  OUT OF  THE  USE OF  THIS  SOFTWARE,  EVEN  IF  ADVISED  OF THE 
- POSSIBILITY OF SUCH DAMAGE.                                               
-                                                                             
-This software  consists of voluntary  contributions made  by many indivi- 
-duals on behalf of the  Apache Software Foundation.  For more information 
-on the Apache Software Foundation, please see <http://www.apache.org/>.
-
-
 >>> asm-1.5.3
 
 ASM: a very small and fast Java bytecode manipulation framework
@@ -7545,22 +7515,17 @@ Thanks for the assistance and support of Sun Microsystems Labs,and everyone cont
 
 >>> date.format.js-1.2.3
 
-/*
- * Date Format 1.2.3
- * (c) 2007-2009 Steven Levithan <stevenlevithan.com>
- * MIT license
- *
- * Includes enhancements by Scott Trenda <scott.trenda.net>
- * and Kris Kowal <cixar.com/~kris.kowal/>
- *
- * Accepts a date, a mask, or a date and a mask.
- * Returns a formatted version of the given date.
- * The date defaults to the current date/time.
- * The mask defaults to dateFormat.masks.default.
- */
+Date Format 1.2.3
+(c) 2007-2009 Steven Levithan <stevenlevithan.com>
+ MIT license
 
-(NOTE: no actual license text specified, only the single line "MIT License" as indicated in the license file uploaded, which is just a snippet from the above copyright.
- * MIT license
+Includes enhancements by Scott Trenda <scott.trenda.net>
+and Kris Kowal <cixar.com/~kris.kowal/>
+
+Accepts a date, a mask, or a date and a mask.
+Returns a formatted version of the given date.
+The date defaults to the current date/time.
+The mask defaults to dateFormat.masks.default.
 
 
 >>> dnsjava-2.0.3
@@ -8522,11 +8487,6 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
 
->>> org.tanukisoftware.wrapper-3.5.6
-
-License: GPL 2.0
-
-
 >>> pg-7.4.3
 
 The PostgreSQL JDBC driver is distributed under the BSD license, same
@@ -9226,7 +9186,7 @@ DAMAGE.
 
 --------------- SECTION 2: Apache License, V2.0 ----------
 
-Apache License, V2.0 are applicable to the following component(s).
+Apache License, V2.0 is applicable to the following component(s).
 
 
 >>> activemq-5.3.0
@@ -10242,7 +10202,7 @@ This product includes software developed by
 The Apache Software Foundation (http://www.apache.org/).
 
 
->>> apache-tomcat-6.0.32
+>>> apache-tomcat-6.0.35
 
 Apache Tomcat
 Copyright 1999-2011 The Apache Software Foundation
@@ -10260,6 +10220,83 @@ Java compilation software for JSP pages is provided by Eclipse,
 which is open source software.  The original software and 
 related information is available at
 http://www.eclipse.org.
+
+ADDITIONAL LICENSE INFORMATION:
+
+
+
+
+APACHE TOMCAT SUBCOMPONENTS: 
+
+Apache Tomcat includes a number of subcomponents with separate copyright notices
+and license terms. Your use of these subcomponents is subject to the terms and
+conditions of the following licenses. 
+
+
+For the Eclipse JDT Java compiler:
+
+Eclipse Public License - v 1.0
+
+[PLEASE SEE THE APPENDIX FOR THE FULL TEXT OF THE ECLIPSE PUBLIC LICENSE 1.0.]
+
+
+For the Windows Installer component:
+
+    * All NSIS source code, plug-ins, documentation, examples, header files and
+       graphics, with the exception of the compression modules and where
+       otherwise noted, are licensed under the zlib/libpng license.
+    * The zlib compression module for NSIS is licensed under the zlib/libpng
+       license.
+    * The bzip2 compression module for NSIS is licensed under the bzip2 license.
+    * The lzma compression module for NSIS is licensed under the Common Public
+       License version 1.0. 
+
+[VMWARE DOES NOT DISTRIBUTE THE LZMA COMPRESSION MODULE; THUS, THE FULL TEXT OF THE COMMON PUBLIC LICENSE 1.0 HAS BEEN OMITTED.]
+
+zlib/libpng license
+
+This software is provided 'as-is', without any express or implied warranty. In
+no event will the authors be held liable for any damages arising from the use of
+this software.
+
+Permission is granted to anyone to use this software for any purpose, including
+commercial applications, and to alter it and redistribute it freely, subject to
+the following restrictions:
+
+   1. The origin of this software must not be misrepresented; you must not claim
+       that you wrote the original software. If you use this software in a
+       product, an acknowledgment in the product documentation would be
+       appreciated but is not required.
+   2. Altered source versions must be plainly marked as such, and must not be
+       misrepresented as being the original software.
+   3. This notice may not be removed or altered from any source distribution. 
+
+bzip2 license
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+   1. Redistributions of source code must retain the above copyright notice,
+       this list of conditions and the following disclaimer.
+   2. The origin of this software must not be misrepresented; you must not claim
+       that you wrote the original software. If you use this software in a
+       product, an acknowledgment in the product documentation would be
+       appreciated but is not required.
+   3. Altered source versions must be plainly marked as such, and must not be
+       misrepresented as being the original software.
+   4. The name of the author may not be used to endorse or promote products
+       derived from this software without specific prior written permission. 
+
+THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS AND ANY EXPRESS OR IMPLIED
+WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+OF SUCH DAMAGE.
 
 
 >>> apache-velocity-1.6.3
@@ -10396,6 +10433,15 @@ The Apache Software Foundation (http://www.apache.org/).
 
 Apache Jakarta HttpClient
 Copyright 1999-2007 The Apache Software Foundation
+
+This product includes software developed by
+The Apache Software Foundation (http://www.apache.org/).
+
+
+>>> commons-io-1.4
+
+Apache Commons IO
+Copyright 2001-2008 The Apache Software Foundation
 
 This product includes software developed by
 The Apache Software Foundation (http://www.apache.org/).
@@ -10774,6 +10820,23 @@ The primary ANTLR guy:
 Terence Parr
 parrt@cs.usfca.edu
 parrt@antlr.org
+
+
+>>> gson-1.4
+
+Copyright (C) 2008 Google Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 
 
 >>> hivemind-1.1.1
@@ -11940,6 +12003,15 @@ for the specific language governing rights and limitations under the
 License.
 
 
+>>> tomcat-jdbc-7.0.19
+
+Apache Tomcat JDBC Pool
+Copyright 2008-2011 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
 >>> xalan-2.7.1
 
 This product includes software developed by
@@ -12137,23 +12209,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 
---------------- SECTION 3: Artistic License, V2.0 ----------
+--------------- SECTION 3: Common Development and Distribution License, V1.0 ----------
 
-Artistic License, V2.0 are applicable to the following component(s).
-
-
->>> commons-io-1.4
-
-Apache Commons IO
-Copyright 2001-2008 The Apache Software Foundation
-
-This product includes software developed by
-The Apache Software Foundation (http://www.apache.org/).
-
-
---------------- SECTION 4: Common Development and Distribution License, V1.0 ----------
-
-Common Development and Distribution License, V1.0 are applicable to the following component(s).
+Common Development and Distribution License, V1.0 is applicable to the following component(s).
 
 
 >>> activation-1.1
@@ -12185,9 +12243,9 @@ you own identifying information:
 Copyright 2006 Sun Microsystems, Inc. All rights reserved.
 
 
---------------- SECTION 5: Creative Commons Attribution License, V3.0 ----------
+--------------- SECTION 4: Creative Commons Attribution License, V3.0 ----------
 
-Creative Commons Attribution License, V3.0 are applicable to the following component(s).
+Creative Commons Attribution License, V3.0 is applicable to the following component(s).
 
 
 >>> adxmenu-4.21
@@ -12279,9 +12337,9 @@ This License constitutes the entire agreement between the parties with respect t
 The rights granted under, and the subject matter referenced, in this License were drafted utilizing the terminology of the Berne Convention for the Protection of Literary and Artistic Works (as amended on September 28, 1979), the Rome Convention of 1961, the WIPO Copyright Treaty of 1996, the WIPO Performances and Phonograms Treaty of 1996 and the Universal Copyright Convention (as revised on July 24, 1971). These rights and subject matter take effect in the relevant jurisdiction in which the License terms are sought to be enforced according to the corresponding provisions of the implementation of those treaty provisions in the applicable national law. If the standard suite of rights granted under applicable copyright law includes additional rights not granted under this License, such additional rights are deemed to be included in the License; this License is not intended to restrict the license of any rights under applicable law.
 
 
---------------- SECTION 6: Eclipse Public License, V1.0 ----------
+--------------- SECTION 5: Eclipse Public License, V1.0 ----------
 
-Eclipse Public License, V1.0 are applicable to the following component(s).
+Eclipse Public License, V1.0 is applicable to the following component(s).
 
 
 >>> aspectj-1.6.8
@@ -12349,17 +12407,12 @@ Portions Licensed:
   <http://www.apache.org/>.
 
 
---------------- SECTION 7: GNU General Public License, V2.0 ----------
+--------------- SECTION 6: GNU General Public License, V2.0 ----------
 
-GNU General Public License, V2.0 are applicable to the following component(s).
+GNU General Public License, V2.0 is applicable to the following component(s).
 
 
 >>> amqp-client-1.8.1
-
-[PLEASE NOTE:  VMWARE, INC. ELECTS TO USE AND DISTRIBUTE THIS COMPONENT UNDER THE TERMS OF THE GPL 2.0.  PLEASE SEE THE APPENDIX TO REVIEW THE FULL TEXT OF GPL 2.0 THE ORIGINAL LICENSE TERMS ARE REPRODUCED BELOW ONLY AS A REFERENCE.]
-
-Top-level license file contents:
-
 
 This package, the RabbitMQ Java client library is dual-licensed under
 the MPL and the GPL v2. For the MPL, please see
@@ -12398,9 +12451,11 @@ GPLv2 license attached above.
 No copyright file found in the distribution.
 
 
->>> jaxb-impl-2.1.12.jar-2.1.12
+>>> javamail-1.4
 
-[PLEASE NOTE:  VMWARE, INC. ELECTS TO USE AND DISTRIBUTE THIS COMPONENT UNDER THE TERMS OF THE GPL 2.0.  PLEASE SEE THE APPENDIX TO REVIEW THE FULL TEXT OF THE GPL 2.0.  THE ORIGINAL LICENSE TERMS ARE REPRODUCED BELOW ONLY AS A REFERENCE; HOWEVER, THE FULL TEXT OF THE CDDL 1.0 HAS BEEN OMITTED.]
+
+
+>>> jaxb-impl-2.1.12.jar-2.1.12
 
 Licenses: Dual license consisting of the CDDL v1.0 and GPL v2.
 
@@ -13157,8 +13212,6 @@ are license related. "copyright" and "license" yield no hits either.
 
 >>> jms-api-1.1.0
 
-~[PLEASE NOTE:  VMWARE, INC. ELECTS TO USE AND DISTRIBUTE THIS COMPONENT UNDER THE TERMS OF THE GPL 2.0.  PLEASE SEE THE APPENDIX TO REVIEW THE FULL TEXT OF THE GPL 2.0.  THE ORIGINAL LICENSE TERMS ARE REPRODUCED BELOW ONLY AS A REFERENCE.]
- 
 DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER. 
   
 Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved. 
@@ -13192,7 +13245,6 @@ its licensees as provided above. However, if you add GPL Version 2 code
 and therefore, elected the GPL Version 2 license, then the option applies 
 only if the new code is made subject to such option by the copyright 
 holder.
-
 
 >>> mysql-connector-java-5.1.10
 
@@ -13339,9 +13391,58 @@ Package Name                  Qualifying License and Version
 Apache Portable Runtime (APR) Apache Software License 2.0
 
 
---------------- SECTION 8: GNU Lesser General Public License, V2.1 ----------
+>>> org.tanukisoftware.wrapper-3.5.6
 
-GNU Lesser General Public License, V2.1 are applicable to the following component(s).
+License: GPL 2.0
+
+
+--------------- SECTION 7: GNU Lesser General Public License, V2.1 ----------
+
+GNU Lesser General Public License, V2.1 is applicable to the following component(s).
+
+
+>>> bsh-2.0.0.b4
+
+[PLEASE NOTE:  VMWARE, INC. ELECTS TO USE AND DISTRIBUTE THIS COMPONENT UNDER THE TERMS OF THE LGPL.  PLEASE SEE THE APPENDIX TO REVIEW THE FULL TEXT OF THE LGPL.  THE ORIGINAL LICENSE TERMS ARE REPRODUCED BELOW ONLY AS A REFERENCE; HOWEVER, THE FULL TEXT OF THE SUN PUBLIC LICENSE HAS BEEN OMITTED.]
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License, Version 3, as published by the Free Software Foundation.
+ 
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ 
+You should have received a copy of the GNU Lesser General Public License along with this program.  If not, see http://www.gnu.org/licenses/.
+ 
+You shall not disclaim warranty or limit liability differently from the terms of Sections 15 and 16 of the GNU General Public License, Version 3, which is incorporated into the GNU Lesser General Public License.
+
+Original License:
+
+This file is part of the BeanShell Java Scripting distribution.
+Documentation and updates may be found at http://www.beanshell.org/
+
+Sun Public License Notice:
+
+The contents of this file are subject to the Sun Public License Version
+1.0 (the "License"); you may not use this file except in compliance with
+the License. A copy of the License is available at http://www.sun.com
+
+The Original Code is BeanShell. The Initial Developer of the Original
+Code is Pat Niemeyer. Portions created by Pat Niemeyer are Copyright
+(C) 2000.  All Rights Reserved.
+
+GNU Public License Notice:
+
+Alternatively, the contents of this file may be used under the terms of
+the GNU Lesser General Public License (the "LGPL"), in which case the
+provisions of LGPL are applicable instead of those above. If you wish to
+allow use of your version of this file only under the  terms of the LGPL
+and not to allow others to use your version of this file under the SPL,
+indicate your decision by deleting the provisions above and replace
+them with the notice and other provisions required by the LGPL.  If you
+do not delete the provisions above, a recipient may use your version of
+this file under either the SPL or the LGPL.
+
+Patrick Niemeyer (pat@pat.net)
+Author of Learning Java, O'Reilly & Associates
+http://www.pat.net/~pat/
 
 
 >>> dbunit-2.2
@@ -13637,53 +13738,9 @@ USA.
 in the United States and other countries.]
 
 
---------------- SECTION 9: GNU Lesser General Public License, V3.0 ----------
+--------------- SECTION 8: GNU Lesser General Public License, V3.0 ----------
 
-GNU Lesser General Public License, V3.0 are applicable to the following component(s).
-
-
->>> bsh-2.0.0.b4
-
-[PLEASE NOTE:  VMWARE, INC. ELECTS TO USE AND DISTRIBUTE THIS COMPONENT UNDER THE TERMS OF THE LGPL 3.0.  PLEASE SEE THE APPENDIX TO REVIEW THE FULL TEXT OF THE LGPL 3.0.  THE ORIGINAL LICENSE TERMS ARE REPRODUCED BELOW ONLY AS A REFERENCE; HOWEVER, THE FULL TEXT OF THE SUN PUBLIC LICENSE HAS BEEN OMITTED.]
-
-This program is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License, Version 3, as published by the Free Software Foundation.
- 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
- 
-You should have received a copy of the GNU Lesser General Public License along with this program.  If not, see http://www.gnu.org/licenses/.
- 
-You shall not disclaim warranty or limit liability differently from the terms of Sections 15 and 16 of the GNU General Public License, Version 3, which is incorporated into the GNU Lesser General Public License.
-
-Original License:
-
-This file is part of the BeanShell Java Scripting distribution.
-Documentation and updates may be found at http://www.beanshell.org/
-
-Sun Public License Notice:
-
-The contents of this file are subject to the Sun Public License Version
-1.0 (the "License"); you may not use this file except in compliance with
-the License. A copy of the License is available at http://www.sun.com
-
-The Original Code is BeanShell. The Initial Developer of the Original
-Code is Pat Niemeyer. Portions created by Pat Niemeyer are Copyright
-(C) 2000.  All Rights Reserved.
-
-GNU Public License Notice:
-
-Alternatively, the contents of this file may be used under the terms of
-the GNU Lesser General Public License (the "LGPL"), in which case the
-provisions of LGPL are applicable instead of those above. If you wish to
-allow use of your version of this file only under the  terms of the LGPL
-and not to allow others to use your version of this file under the SPL,
-indicate your decision by deleting the provisions above and replace
-them with the notice and other provisions required by the LGPL.  If you
-do not delete the provisions above, a recipient may use your version of
-this file under either the SPL or the LGPL.
-
-Patrick Niemeyer (pat@pat.net)
-Author of Learning Java, O'Reilly & Associates
-http://www.pat.net/~pat/
+GNU Lesser General Public License, V3.0 is applicable to the following component(s).
 
 
 >>> bsh-2.0b4
@@ -13718,9 +13775,9 @@ Author of Learning Java, O'Reilly & Associates
 http://www.pat.net/~pat/
 
 
---------------- SECTION 10: GNU Library General Public License, V2.0 ----------
+--------------- SECTION 9: GNU Library General Public License, V2.0 ----------
 
-GNU Library General Public License, V2.0 are applicable to the following component(s).
+GNU Library General Public License, V2.0 is applicable to the following component(s).
 
 
 >>> itext-2.0.6
@@ -15134,277 +15191,7 @@ THE POSSIBILITY OF SUCH DAMAGES.
 
 
 
---------------- SECTION 5: Artistic License, V2.0 -----------
-
-Artistic License 2.0
-
-Copyright (c) 2000-2006, The Perl Foundation.
-
-Everyone is permitted to copy and distribute verbatim copies of this license document, but changing it is not allowed.
-
-Preamble
-This license establishes the terms under which a given free software Package may be copied, modified, distributed, and/or redistributed. The intent is that the Copyright Holder maintains some artistic control over the development of that Package while still keeping the Package available as open source and free software.
-
-You are always permitted to make arrangements wholly outside of this license directly with the Copyright Holder of a given Package. If the terms of this license do not permit the full use that you propose to make of the Package, you should contact the Copyright Holder and seek a different licensing arrangement.
-
-Definitions
-
-"Copyright Holder" means the individual(s) or organization(s) named in the copyright notice for the entire Package.
-
-"Contributor" means any party that has contributed code or other material to the Package, in accordance with the Copyright Holder's procedures.
-
-"You" and "your" means any person who would like to copy, distribute, or modify the Package.
-
-"Package" means the collection of files distributed by the Copyright Holder, and derivatives of that collection and/or of those files. A given Package may consist of either the Standard Version, or a Modified Version.
-
-"Distribute" means providing a copy of the Package or making it accessible to anyone else, or in the case of a company or organization, to others outside of your company or organization.
-
-"Distributor Fee" means any fee that you charge for Distributing this Package or providing support for this Package to another party. It does not mean licensing fees.
-
-"Standard Version" refers to the Package if it has not been modified, or has been modified only in ways explicitly requested by the Copyright Holder.
-
-"Modified Version" means the Package, if it has been changed, and such changes were not explicitly requested by the Copyright Holder.
-
-"Original License" means this Artistic License as Distributed with the Standard Version of the Package, in its current version or as it may be modified by The Perl Foundation in the future.
-
-"Source" form means the source code, documentation source, and configuration files for the Package.
-
-"Compiled" form means the compiled bytecode, object code, binary, or any other form resulting from mechanical transformation or translation of the Source form.
-Permission for Use and Modification Without Distribution
-
-(1) You are permitted to use the Standard Version and create and use Modified Versions for any purpose without restriction, provided that you do not Distribute the Modified Version.
-
-Permissions for Redistribution of the Standard Version
-
-(2) You may Distribute verbatim copies of the Source form of the Standard Version of this Package in any medium without restriction, either gratis or for a Distributor Fee, provided that you duplicate all of the original copyright notices and associated disclaimers. At your discretion, such verbatim copies may or may not include a Compiled form of the Package.
-
-(3) You may apply any bug fixes, portability changes, and other modifications made available from the Copyright Holder. The resulting Package will still be considered the Standard Version, and as such will be subject to the Original License.
-
-Distribution of Modified Versions of the Package as Source
-
-(4) You may Distribute your Modified Version as Source (either gratis or for a Distributor Fee, and with or without a Compiled form of the Modified Version) provided that you clearly document how it differs from the Standard Version, including, but not limited to, documenting any non-standard features, executables, or modules, and provided that you do at least ONE of 
-the following:
-
-(a) make the Modified Version available to the Copyright Holder of the Standard Version, under the Original License, so that the Copyright Holder may include your modifications in the Standard Version. 
-
-(b) ensure that installation of your Modified Version does not prevent the user installing or running the Standard Version. In addition, the Modified Version must bear a name that is different from the name of the Standard Version. 
-
-(c) allow anyone who receives a copy of the Modified Version to make the Source form of the Modified Version available to others under 
-
-(i) the Original License or 
-(ii) a license that permits the licensee to freely copy, modify and redistribute the Modified Version using the same licensing terms that apply to the copy that the licensee received, and requires that the Source form of the Modified Version, and of any works derived from it, be made freely available in that license fees are prohibited but Distributor Fees are allowed.
-
-Distribution of Compiled Forms of the Standard Version or Modified Versions 
-without the Source
-
-(5) You may Distribute Compiled forms of the Standard Version without the Source, provided that you include complete instructions on how to get the Source of the Standard Version. Such instructions must be valid at the time of your distribution. If these instructions, at any time while you are carrying out such distribution, become invalid, you must provide new instructions on demand or cease further distribution. If you provide valid instructions or cease distribution within thirty days after you become aware that the instructions are invalid, then you do not forfeit any of your rights under this license.
-
-(6) You may Distribute a Modified Version in Compiled form without the Source, provided that you comply with Section 4 with respect to the Source of the Modified Version.
-
-Aggregating or Linking the Package
-
-(7) You may aggregate the Package (either the Standard Version or Modified Version) with other packages and Distribute the resulting aggregation provided that you do not charge a licensing fee for the Package. Distributor Fees are permitted, and licensing fees for other components in the aggregation are permitted. The terms of this license apply to the use and Distribution of the Standard or Modified Versions as included in the aggregation.
-
-(8) You are permitted to link Modified and Standard Versions with other works, to embed the Package in a larger work of your own, or to build stand-alone binary or bytecode versions of applications that include the Package, and Distribute the result without restriction, provided the result does not expose a direct interface to the Package.
-
-Items That are Not Considered Part of a Modified Version
-
-(9) Works (including, but not limited to, modules and scripts) that merely extend or make use of the Package, do not, by themselves, cause the Package to be a Modified Version. In addition, such works are not considered parts of the Package itself, and are not subject to the terms of this license.
-
-General Provisions
-
-(10) Any use, modification, and distribution of the Standard or Modified Versions is governed by this Artistic License. By using, modifying or distributing the Package, you accept this license. Do not use, modify, or distribute the Package, if you do not accept this license.
-
-(11) If your Modified Version has been derived from a Modified Version made by someone other than you, you are nevertheless required to ensure that your Modified Version complies with the requirements of this license.
-
-(12) This license does not grant you the right to use any trademark, service mark, tradename, or logo of the Copyright Holder.
-
-(13) This license includes the non-exclusive, worldwide, free-of-charge patent license to make, have made, use, offer to sell, sell, import and otherwise transfer the Package with respect to any patent claims licensable by the Copyright Holder that are necessarily infringed by the Package. 
-
-If you institute patent litigation (including a cross-claim or counterclaim) against any party alleging that the Package constitutes direct or contributory patent infringement, then this Artistic License to you shall terminate on the date that such litigation is filed.
-
-(14) Disclaimer of Warranty: THE PACKAGE IS PROVIDED BY THE COPYRIGHT HOLDER 
-AND CONTRIBUTORS "AS IS' AND WITHOUT ANY EXPRESS OR IMPLIED 
-WARRANTIES. THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A 
-PARTICULAR PURPOSE, OR NON-INFRINGEMENT ARE DISCLAIMED TO THE EXTENT 
-PERMITTED BY YOUR LOCAL LAW. UNLESS REQUIRED BY LAW, NO COPYRIGHT 
-HOLDER OR CONTRIBUTOR WILL BE LIABLE FOR ANY DIRECT, INDIRECT, 
-INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING IN ANY WAY OUT OF THE 
-USE OF THE PACKAGE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-
-
-
---------------- SECTION 6: GNU Lesser General Public License, V3.0 -----------
-
-		   GNU LESSER GENERAL PUBLIC LICENSE
-                       Version 3, 29 June 2007
-
- Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
- Everyone is permitted to copy and distribute verbatim copies
- of this license document, but changing it is not allowed.
-
-
-  This version of the GNU Lesser General Public License incorporates
-the terms and conditions of version 3 of the GNU General Public
-License, supplemented by the additional permissions listed below.
-
-  0. Additional Definitions.
-
-  As used herein, "this License" refers to version 3 of the GNU Lesser
-General Public License, and the "GNU GPL" refers to version 3 of the GNU
-General Public License.
-
-  "The Library" refers to a covered work governed by this License,
-other than an Application or a Combined Work as defined below.
-
-  An "Application" is any work that makes use of an interface provided
-by the Library, but which is not otherwise based on the Library.
-Defining a subclass of a class defined by the Library is deemed a mode
-of using an interface provided by the Library.
-
-  A "Combined Work" is a work produced by combining or linking an
-Application with the Library.  The particular version of the Library
-with which the Combined Work was made is also called the "Linked
-Version".
-
-  The "Minimal Corresponding Source" for a Combined Work means the
-Corresponding Source for the Combined Work, excluding any source code
-for portions of the Combined Work that, considered in isolation, are
-based on the Application, and not on the Linked Version.
-
-  The "Corresponding Application Code" for a Combined Work means the
-object code and/or source code for the Application, including any data
-and utility programs needed for reproducing the Combined Work from the
-Application, but excluding the System Libraries of the Combined Work.
-
-  1. Exception to Section 3 of the GNU GPL.
-
-  You may convey a covered work under sections 3 and 4 of this License
-without being bound by section 3 of the GNU GPL.
-
-  2. Conveying Modified Versions.
-
-  If you modify a copy of the Library, and, in your modifications, a
-facility refers to a function or data to be supplied by an Application
-that uses the facility (other than as an argument passed when the
-facility is invoked), then you may convey a copy of the modified
-version:
-
-   a) under this License, provided that you make a good faith effort to
-   ensure that, in the event an Application does not supply the
-   function or data, the facility still operates, and performs
-   whatever part of its purpose remains meaningful, or
-
-   b) under the GNU GPL, with none of the additional permissions of
-   this License applicable to that copy.
-
-  3. Object Code Incorporating Material from Library Header Files.
-
-  The object code form of an Application may incorporate material from
-a header file that is part of the Library.  You may convey such object
-code under terms of your choice, provided that, if the incorporated
-material is not limited to numerical parameters, data structure
-layouts and accessors, or small macros, inline functions and templates
-(ten or fewer lines in length), you do both of the following:
-
-   a) Give prominent notice with each copy of the object code that the
-   Library is used in it and that the Library and its use are
-   covered by this License.
-
-   b) Accompany the object code with a copy of the GNU GPL and this license
-   document.
-
-  4. Combined Works.
-
-  You may convey a Combined Work under terms of your choice that,
-taken together, effectively do not restrict modification of the
-portions of the Library contained in the Combined Work and reverse
-engineering for debugging such modifications, if you also do each of
-the following:
-
-   a) Give prominent notice with each copy of the Combined Work that
-   the Library is used in it and that the Library and its use are
-   covered by this License.
-
-   b) Accompany the Combined Work with a copy of the GNU GPL and this license
-   document.
-
-   c) For a Combined Work that displays copyright notices during
-   execution, include the copyright notice for the Library among
-   these notices, as well as a reference directing the user to the
-   copies of the GNU GPL and this license document.
-
-   d) Do one of the following:
-
-       0) Convey the Minimal Corresponding Source under the terms of this
-       License, and the Corresponding Application Code in a form
-       suitable for, and under terms that permit, the user to
-       recombine or relink the Application with a modified version of
-       the Linked Version to produce a modified Combined Work, in the
-       manner specified by section 6 of the GNU GPL for conveying
-       Corresponding Source.
-
-       1) Use a suitable shared library mechanism for linking with the
-       Library.  A suitable mechanism is one that (a) uses at run time
-       a copy of the Library already present on the user's computer
-       system, and (b) will operate properly with a modified version
-       of the Library that is interface-compatible with the Linked
-       Version.
-
-   e) Provide Installation Information, but only if you would otherwise
-   be required to provide such information under section 6 of the
-   GNU GPL, and only to the extent that such information is
-   necessary to install and execute a modified version of the
-   Combined Work produced by recombining or relinking the
-   Application with a modified version of the Linked Version. (If
-   you use option 4d0, the Installation Information must accompany
-   the Minimal Corresponding Source and Corresponding Application
-   Code. If you use option 4d1, you must provide the Installation
-   Information in the manner specified by section 6 of the GNU GPL
-   for conveying Corresponding Source.)
-
-  5. Combined Libraries.
-
-  You may place library facilities that are a work based on the
-Library side by side in a single library together with other library
-facilities that are not Applications and are not covered by this
-License, and convey such a combined library under terms of your
-choice, if you do both of the following:
-
-   a) Accompany the combined library with a copy of the same work based
-   on the Library, uncombined with any other library facilities,
-   conveyed under the terms of this License.
-
-   b) Give prominent notice with the combined library that part of it
-   is a work based on the Library, and explaining where to find the
-   accompanying uncombined form of the same work.
-
-  6. Revised Versions of the GNU Lesser General Public License.
-
-  The Free Software Foundation may publish revised and/or new versions
-of the GNU Lesser General Public License from time to time. Such new
-versions will be similar in spirit to the present version, but may
-differ in detail to address new problems or concerns.
-
-  Each version is given a distinguishing version number. If the
-Library as you received it specifies that a certain numbered version
-of the GNU Lesser General Public License "or any later version"
-applies to it, you have the option of following the terms and
-conditions either of that published version or of any later version
-published by the Free Software Foundation. If the Library as you
-received it does not specify a version number of the GNU Lesser
-General Public License, you may choose any version of the GNU Lesser
-General Public License ever published by the Free Software Foundation.
-
-  If the Library as you received it specifies that a proxy can decide
-whether future versions of the GNU Lesser General Public License shall
-apply, that proxy's public statement of acceptance of any version is
-permanent authorization for you to choose that version for the
-Library.
-
-
---------------- SECTION 7: GNU General Public License, V2.0 -----------
+--------------- SECTION 5: GNU General Public License, V2.0 -----------
 
 		    GNU GENERAL PUBLIC LICENSE
 		       Version 2, June 1991
@@ -15747,7 +15534,7 @@ library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.
 
 
---------------- SECTION 8: GNU Library General Public License, V2.0 -----------
+--------------- SECTION 6: GNU Library General Public License, V2.0 -----------
 
 		  GNU LIBRARY GENERAL PUBLIC LICENSE
 		       Version 2, June 1991
@@ -16233,7 +16020,7 @@ That's all there is to it!
 
 
 
---------------- SECTION 9: Eclipse Public License, V1.0 -----------
+--------------- SECTION 7: Eclipse Public License, V1.0 -----------
 
 Eclipse Public License - v 1.0
 
@@ -16460,6 +16247,175 @@ to a jury trial in any resulting litigation.
 
 
 
+--------------- SECTION 8: GNU Lesser General Public License, V3.0 -----------
+
+		   GNU LESSER GENERAL PUBLIC LICENSE
+                       Version 3, 29 June 2007
+
+ Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
+ Everyone is permitted to copy and distribute verbatim copies
+ of this license document, but changing it is not allowed.
+
+
+  This version of the GNU Lesser General Public License incorporates
+the terms and conditions of version 3 of the GNU General Public
+License, supplemented by the additional permissions listed below.
+
+  0. Additional Definitions.
+
+  As used herein, "this License" refers to version 3 of the GNU Lesser
+General Public License, and the "GNU GPL" refers to version 3 of the GNU
+General Public License.
+
+  "The Library" refers to a covered work governed by this License,
+other than an Application or a Combined Work as defined below.
+
+  An "Application" is any work that makes use of an interface provided
+by the Library, but which is not otherwise based on the Library.
+Defining a subclass of a class defined by the Library is deemed a mode
+of using an interface provided by the Library.
+
+  A "Combined Work" is a work produced by combining or linking an
+Application with the Library.  The particular version of the Library
+with which the Combined Work was made is also called the "Linked
+Version".
+
+  The "Minimal Corresponding Source" for a Combined Work means the
+Corresponding Source for the Combined Work, excluding any source code
+for portions of the Combined Work that, considered in isolation, are
+based on the Application, and not on the Linked Version.
+
+  The "Corresponding Application Code" for a Combined Work means the
+object code and/or source code for the Application, including any data
+and utility programs needed for reproducing the Combined Work from the
+Application, but excluding the System Libraries of the Combined Work.
+
+  1. Exception to Section 3 of the GNU GPL.
+
+  You may convey a covered work under sections 3 and 4 of this License
+without being bound by section 3 of the GNU GPL.
+
+  2. Conveying Modified Versions.
+
+  If you modify a copy of the Library, and, in your modifications, a
+facility refers to a function or data to be supplied by an Application
+that uses the facility (other than as an argument passed when the
+facility is invoked), then you may convey a copy of the modified
+version:
+
+   a) under this License, provided that you make a good faith effort to
+   ensure that, in the event an Application does not supply the
+   function or data, the facility still operates, and performs
+   whatever part of its purpose remains meaningful, or
+
+   b) under the GNU GPL, with none of the additional permissions of
+   this License applicable to that copy.
+
+  3. Object Code Incorporating Material from Library Header Files.
+
+  The object code form of an Application may incorporate material from
+a header file that is part of the Library.  You may convey such object
+code under terms of your choice, provided that, if the incorporated
+material is not limited to numerical parameters, data structure
+layouts and accessors, or small macros, inline functions and templates
+(ten or fewer lines in length), you do both of the following:
+
+   a) Give prominent notice with each copy of the object code that the
+   Library is used in it and that the Library and its use are
+   covered by this License.
+
+   b) Accompany the object code with a copy of the GNU GPL and this license
+   document.
+
+  4. Combined Works.
+
+  You may convey a Combined Work under terms of your choice that,
+taken together, effectively do not restrict modification of the
+portions of the Library contained in the Combined Work and reverse
+engineering for debugging such modifications, if you also do each of
+the following:
+
+   a) Give prominent notice with each copy of the Combined Work that
+   the Library is used in it and that the Library and its use are
+   covered by this License.
+
+   b) Accompany the Combined Work with a copy of the GNU GPL and this license
+   document.
+
+   c) For a Combined Work that displays copyright notices during
+   execution, include the copyright notice for the Library among
+   these notices, as well as a reference directing the user to the
+   copies of the GNU GPL and this license document.
+
+   d) Do one of the following:
+
+       0) Convey the Minimal Corresponding Source under the terms of this
+       License, and the Corresponding Application Code in a form
+       suitable for, and under terms that permit, the user to
+       recombine or relink the Application with a modified version of
+       the Linked Version to produce a modified Combined Work, in the
+       manner specified by section 6 of the GNU GPL for conveying
+       Corresponding Source.
+
+       1) Use a suitable shared library mechanism for linking with the
+       Library.  A suitable mechanism is one that (a) uses at run time
+       a copy of the Library already present on the user's computer
+       system, and (b) will operate properly with a modified version
+       of the Library that is interface-compatible with the Linked
+       Version.
+
+   e) Provide Installation Information, but only if you would otherwise
+   be required to provide such information under section 6 of the
+   GNU GPL, and only to the extent that such information is
+   necessary to install and execute a modified version of the
+   Combined Work produced by recombining or relinking the
+   Application with a modified version of the Linked Version. (If
+   you use option 4d0, the Installation Information must accompany
+   the Minimal Corresponding Source and Corresponding Application
+   Code. If you use option 4d1, you must provide the Installation
+   Information in the manner specified by section 6 of the GNU GPL
+   for conveying Corresponding Source.)
+
+  5. Combined Libraries.
+
+  You may place library facilities that are a work based on the
+Library side by side in a single library together with other library
+facilities that are not Applications and are not covered by this
+License, and convey such a combined library under terms of your
+choice, if you do both of the following:
+
+   a) Accompany the combined library with a copy of the same work based
+   on the Library, uncombined with any other library facilities,
+   conveyed under the terms of this License.
+
+   b) Give prominent notice with the combined library that part of it
+   is a work based on the Library, and explaining where to find the
+   accompanying uncombined form of the same work.
+
+  6. Revised Versions of the GNU Lesser General Public License.
+
+  The Free Software Foundation may publish revised and/or new versions
+of the GNU Lesser General Public License from time to time. Such new
+versions will be similar in spirit to the present version, but may
+differ in detail to address new problems or concerns.
+
+  Each version is given a distinguishing version number. If the
+Library as you received it specifies that a certain numbered version
+of the GNU Lesser General Public License "or any later version"
+applies to it, you have the option of following the terms and
+conditions either of that published version or of any later version
+published by the Free Software Foundation. If the Library as you
+received it does not specify a version number of the GNU Lesser
+General Public License, you may choose any version of the GNU Lesser
+General Public License ever published by the Free Software Foundation.
+
+  If the Library as you received it specifies that a proxy can decide
+whether future versions of the GNU Lesser General Public License shall
+apply, that proxy's public statement of acceptance of any version is
+permanent authorization for you to choose that version for the
+Library.
+
+
 ===========================================================================
 
 To the extent any open source components are licensed under the
@@ -16471,7 +16427,7 @@ source components and modifications thereto, if any, (the
 "Source Files"), by downloading the Source Files from VMware's website at
 http://www.vmware.com/download/open_source.html, or by sending a request, with
 your name and address to: VMware, Inc., 3401 Hillview Avenue,
-Palo Alto, CA 94304,United States of America or email info@vmware.com.  All such
+Palo Alto, CA 94304,United States of America.  All such
 requests should clearly specify:  OPEN SOURCE FILES REQUEST,
 Attention General Counsel. VMware shall mail a copy of the
 Source Files to you on a CD or equivalent physical medium.  This
@@ -16479,4 +16435,4 @@ offer to obtain a copy of the Source Files is valid for three
 years from the date you acquired this Software product. Alternatively, 
 the Source Files may accompany the VMware product.
 
-[HYPERIC460GAKP072211]
+[HYPERIC465GAKP021412]

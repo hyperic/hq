@@ -9,7 +9,7 @@
     <body>
 <b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
  - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
- -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.5.html">Hyperic 4.6.5 Release Notes</a> </b>
  <p>
  <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
@@ -21,31 +21,21 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Feb 07, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Feb 14, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1328654543457 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1328654543457 ul {list-style: disc;margin-left: 0px;padding-left: 20x;}
-div.rbtoc1328654543457 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1329252507396 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1329252507396 ul {list-style: disc;margin-left: 0px;padding-left: 20x;}
+div.rbtoc1329252507396 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1328654543457'>
+/*]]>*/</style><div class='rbtoc1329252507396'>
 <ul>
     <li><a href='#SetUpConfigurationTrackingforaResource-HypericConfigurationTrackingFunctionality'>Hyperic Configuration Tracking Functionality</a></li>
     <li><a href='#SetUpConfigurationTrackingforaResource-SetUp4.6.5ConfigurationTrackingforaServer'>Set Up 4.6.5 Configuration Tracking for a Server</a></li>
-<ul>
-    <li><a href='#SetUpConfigurationTrackingforaResource-TomcatConfigurationTracking'>Tomcat Configuration Tracking</a></li>
-    <li><a href='#SetUpConfigurationTrackingforaResource-ApacheConfigurationTracking'>Apache Configuration Tracking</a></li>
-    <li><a href='#SetUpConfigurationTrackingforaResource-WebSphereConfigurationTracking'>WebSphere Configuration Tracking</a></li>
-    <li><a href='#SetUpConfigurationTrackingforaResource-WebLogicServerConfigurationTracking'>WebLogic Server Configuration Tracking</a></li>
-    <li><a href='#SetUpConfigurationTrackingforaResource-JBossConfigurationTracking'>JBoss Configuration Tracking</a></li>
-    <li><a href='#SetUpConfigurationTrackingforaResource-IISConfigurationTracking'>IIS Configuration Tracking</a></li>
-    <li><a href='#SetUpConfigurationTrackingforaResource-PostgreSQLConfigurationTracking'>PostgreSQL Configuration Tracking</a></li>
-    <li><a href='#SetUpConfigurationTrackingforaResource-mySQLConfigurationTracking'>mySQL Configuration Tracking</a></li>
-</ul>
     <li><a href='#SetUpConfigurationTrackingforaResource-SetUpPollingBasedConfigurationTracking'>Set Up Polling-Based Configuration Tracking</a></li>
     <li><a href='#SetUpConfigurationTrackingforaResource-ViewConfigurationEventsforaResource'>View Configuration Events for a Resource</a></li>
     <li><a href='#SetUpConfigurationTrackingforaResource-ConfigureAlertsBasedonConfigurationEvents'>Configure Alerts Based on Configuration Events</a></li>
@@ -56,35 +46,43 @@ div.rbtoc1328654543457 li {margin-left: 0px;padding-left: 0px;}
 
 <h1><a name="SetUpConfigurationTrackingforaResource-HypericConfigurationTrackingFunctionality"></a>Hyperic Configuration Tracking Functionality</h1>
 
-<p>For supported resource types, you can configure Hyperic to track changes made to configuration files (or other local files of interest) and log events for the associated resource. For a full description of configuration tracking functionality, see <a href="Log and Configuration Event Tracking.html" title="Log and Configuration Event Tracking">Log and Configuration Event Tracking</a>.</p>
+<p>For supported resource types, you can configure Hyperic to track changes made to configuration files (or other local files of interest) and log events for the associated resource. Configuration tracking is supported for most platform and server types; typically not for services.</p>
 
-<p>Note that:</p>
+<p>Configuration tracking functionality for server types varies by resource type, plugins that have been updated to use the new event-based tracking added in Hyperic 4.6.5 track more information about file changes than those that still use the still-supported polling-based tracking. </p>
+
+<p>The plugins that are updated to use event-based tracking are listed in <a href="#SetUpConfigurationTrackingforaResource-SetUp4.6.5ConfigurationTrackingforaServer">Set Up 4.6.5 Configuration Tracking for a Server</a>. Follow the instructions in that section for those server types. For other server types, and for platform and service types that support configuration tracking see <a href="#SetUpConfigurationTrackingforaResource-SetUpPollingBasedConfigurationTracking">Set Up Polling&#45;Based Configuration Tracking</a>.</p>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Learn about Configuration Tracking</b><br />See <a href="Log and Configuration Event Tracking.html" title="Log and Configuration Event Tracking">Log and Configuration Event Tracking</a> for information about:
 <ul>
-	<li>The Hyperic Agent must be able to read a file to track it &#8212; ensure that file permissions are such that the Hyperic Agent can read files you wish to track.</li>
-	<li>Configuration tracking is supported for most platform and server types; typically not for services.</li>
-	<li>Configuration tracking functionality for server types varies by resource type, plugins that have been updated to use the <tt>org.hyperic.hq.product.FileChangeTrackPlugin</tt> added in Hyperic 4.6.5 provide more detailed tracking than those that still use <tt>org.hyperic.hq.product.ConfigFileTrackPlugin</tt>.</li>
+	<li>What resource types support configuration tracking,</li>
+	<li>Prerequisites for configuration tracking,</li>
+	<li>The differences between Hyperic's event-based and polling-based configuration tracking,</li>
+	<li>Where to view configuration events in the Hyperic user interface, and</li>
+	<li>Support for using configuration change events in alerts.</li>
 </ul>
-
+</td></tr></table></div>
 
 
 <p><a name="SetUpConfigurationTrackingforaResource-config"></a></p>
 <h1><a name="SetUpConfigurationTrackingforaResource-SetUp4.6.5ConfigurationTrackingforaServer"></a>Set Up 4.6.5 Configuration Tracking for a Server</h1>
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>Hyperic 4.6.5 has a new configuration tracking support class that enables enhanced configuration tracking for servers. The new class &#8212; <tt>FileChangeTrackPlugin</tt> ---- supports detailed change tracking of files in multiple directories (or directory trees).  The plugin tracks the nature of a change (whether it was an file add, delete, modify, or rename), and retains the "diff" data for the change. In Hyperic 4.6.5, a number of plugins have been updated to use <tt>FileChangeTrackPlugin</tt> &#8212; follow the instructions in this section to set up configuration tracking for servers of these types. 
+
+<p>Hyperic 4.6.5 has enhanced configuration tracking support for server types. The instructions in the section apply to server types whose plugin is updated to use event-based configuration tracking listed below. </p>
 <ul>
 	<li>Tomcat</li>
 	<li>Apache</li>
 	<li>WebSphere</li>
 	<li>WebLogic Server</li>
 	<li>JBoss</li>
-	<li>IIS</li>
 	<li>PostgreSQL</li>
 	<li>mySQL</li>
+	<li>Oracle</li>
 </ul>
-</td></tr></table></div>
-<p>To enable and configure configuration tracking for a server:</p>
+
+
+<p>To enable and configure configuration tracking for a resource of one of the previous server types:</p>
 
 <ol>
-	<li>Navigate to the server.</li>
+	<li>Navigate to the server instance.</li>
 	<li>Select <b>Configure Server</b> from the <b>Tools</b> menu.
 	<ul>
 		<li>The <b>Configuration Properties</b> page appears.<br/>
@@ -93,7 +91,8 @@ div.rbtoc1328654543457 li {margin-left: 0px;padding-left: 0px;}
 	</li>
 	<li>In the <b>Monitoring section of the</b> page:
 	<ol>
-		<li>Make sure that the <b>Enable Config Tracking</b> box, which enables and disables configuration tracking for the server, is checked.</li>
+		<li>Make sure that the <b>Enable Config Tracking</b> box, which enables and disables configuration tracking for the server, is checked.
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>If you are satisfied with the default filter definition in the "Configuration Files" in, skip the following step, and click <b>OK</b>.</td></tr></table></div></li>
 		<li>In the "Configuration Files" box, specify the files you wish to monitor in this fashion:
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
@@ -105,8 +104,7 @@ div.rbtoc1328654543457 li {margin-left: 0px;padding-left: 0px;}
 			<ul>
 				<li><tt>path</tt> &#8212; An absolute path, or a path relative to the managed resource's discovered install directory.</li>
 				<li><tt>recurse</tt> &#8212; Indicates, with a value of "true" or "false", whether or not track the files inside directories below the target directory specified by <tt>path</tt>.</li>
-				<li><tt>regex</tt> &#8212; A regular expression for filtering the directories or files to track for changes, in the directory (or directory tree for recursive tracking) specified by <tt>path</tt>.
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>You do not need to configure the files to track, if you are satisfied by the default filter definitions, which are described below.</td></tr></table></div></li>
+				<li><tt>regex</tt> &#8212; A regular expression for filtering the directories or files to track for changes, in the directory (or directory tree for recursive tracking) specified by <tt>path</tt>.</li>
 			</ul>
 			</li>
 		</ul>
@@ -117,172 +115,7 @@ div.rbtoc1328654543457 li {margin-left: 0px;padding-left: 0px;}
 </ol>
 
 
-
-
-<h2><a name="SetUpConfigurationTrackingforaResource-TomcatConfigurationTracking"></a>Tomcat Configuration Tracking</h2>
-
-<p>For Tomcat the default value of the <b>Configuration Files</b> field, which specifies which files to track is:</p>
-
-<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
-<div id="root">
-		<pre class="theme: Confluence; brush: java; gutter: false">conf;true;.*.properties|.*.xml|.*.policy;,bin;false;.*.bat|.*.xml|.*.sh;,
-lib;false;.*.jar;,webapps;true;.*.properties|.*.xml|.*\.jar|.*\.dll|.*\.class
-|.*\.jsp|.*\.php|.*\.pl|.*\.js|.*\.py|.*\.pyc|.*\.cgi;</pre>
-		</div>
-</div></div>
-
-
-<p>When configuration tracking is enabled, this filter causes Hyperic to track:</p>
-<ul>
-	<li>In the <tt>TomcatHome/conf</tt> directory and any directories below it, any files that end with the string <tt>xml</tt>, <tt>properties</tt>, or <tt>policy</tt>.</li>
-	<li>In the <tt>TomcatHome/bin</tt> directory, any files that end with the string <tt>bat</tt>, <tt>xml</tt>, or <tt>sh</tt>.</li>
-	<li>In the <tt>TomcatHome/lib</tt> directory, any files that end with the string <tt>jar</tt>.</li>
-	<li>In the <tt>TomcatHome/webapps</tt> directory and any directories below it, any files that end with the string <tt>properties</tt> or <tt>xml</tt>, or have the <tt>.jar</tt>, <tt>.dll</tt>, <tt>.class</tt>, <tt>.jsp</tt>, <tt>.phpl</tt>, <tt>.pl</tt>, <tt>.js</tt>, <tt>.py</tt>, <tt>.pyc</tt>, or <tt>.cgi</tt> extension.</li>
-</ul>
-
-
-<h2><a name="SetUpConfigurationTrackingforaResource-ApacheConfigurationTracking"></a>Apache Configuration Tracking</h2>
-
-<p>For Apache, the default value of the <b>Configuration Files</b> field, which specifies which files to track is:</p>
-
-<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
-<div id="root">
-		<pre class="theme: Confluence; brush: java; gutter: false">httpd/conf;false;.*\.conf;,httpd/conf.d;false;.*\.conf;,httpd/conf;false;
-.*.conf;,httpd/conf.d;false;.*.conf;</pre>
-		</div>
-</div></div>
-
-<p>When configuration tracking is enabled, this filter causes Hyperic to track files whose name ends in <tt>conf</tt> or that have the <tt>.conf</tt> extension in the following directories:</p>
-
-<ul>
-	<li><tt>ApacheHomehttpd/conf</tt></li>
-	<li><tt>ApacheHomehttpd/conf.d</tt></li>
-</ul>
-
-
-<h2><a name="SetUpConfigurationTrackingforaResource-WebSphereConfigurationTracking"></a>WebSphere Configuration Tracking</h2>
-
-<p>For WebSphere, the default value of the <b>Configuration Files</b> field, which specifies which files to track is:</p>
-
-<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
-<div id="root">
-		<pre class="theme: Confluence; brush: java; gutter: false">installedApps;true;.*\.jar|.*\.dll|.*\.class|.*\.jsp|.*\.php|.*\.pl|.*\.vb|
-.*\.vbs|.*\.js|.*\.py|.*\.pyc|.*\.cgi;,config;true;.*\.xml|.*\.cfg|.*\.properties|
-.*\.ini|.*\.conf|.*\.config;,properties;true;.*\.xml|.*\.cfg|.*\.properties|
-.*\.ini|.*\.conf|.*\.config|.*\.policy|.*\.props|.*\.key;</pre>
-		</div>
-</div></div>
-
-<p>When configuration tracking is enabled, this filter causes Hyperic to track:</p>
-
-<ul>
-	<li>In the <tt>WebSphereHome\installedApps</tt> directory and any directories below it, any files with one of the following extensions: <tt>.jar</tt>, <tt>.dll</tt>, <tt>.class</tt>, <tt>.jsp</tt>, <tt>.php</tt>, <tt>.pl</tt>, <tt>.vb</tt>, <tt>.vbs</tt>, <tt>.js</tt>, <tt>.py</tt>, <tt>.pyc</tt>, <tt>.cgi</tt></li>
-</ul>
-
-
-<ul>
-	<li>In the <tt>WebSphereHome\config</tt> directory and any directories below it, any files with one of the following extensions: <tt>.xml</tt>, <tt>.cfg</tt>, <tt>.properties</tt>, <tt>.ini</tt>, <tt>.conf</tt>, <tt>.config</tt></li>
-</ul>
-
-
-<ul>
-	<li>In the <tt>WebSphereHome\properties</tt> directory and any directories below it, any files with one of the following extensions: <tt>.xml</tt>, <tt>.cfg</tt>, <tt>.properties</tt>, <tt>.ini</tt>, <tt>.conf</tt>, <tt>.config</tt>, <tt>.policy</tt>, <tt>.props</tt>, <tt>.key</tt></li>
-</ul>
-
-
-<h2><a name="SetUpConfigurationTrackingforaResource-WebLogicServerConfigurationTracking"></a>WebLogic Server Configuration Tracking</h2>
-
-<p>For WebLogic Server, the default value of the <b>Configuration Files</b> field, which specifies which files to track is:</p>
-
-<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
-<div id="root">
-		<pre class="theme: Confluence; brush: java; gutter: false">;true;.*\.jar|.*\.dll|.*\.class|.*\.jsp|.*\.php|.*\.pl|.*\.js|.*\.py|.*\.pyc|
-.*\.cgi|.*\.so.*\.xml|.*\.cfg|.*\.properties|.*\.ini|.*\.conf|.*\.config|.*\.ldift|
-.*\.sql|.*\.ddl|.*\.sh;,;true;.*\.jar|.*\.dll|.*\.class|.*\.jsp|.*\.php|.*\.pl|
-.*\.js|.*\.py|.*\.pyc|.*\.cgi|.*\.so|.*\.sql|.*\.sh.*\.xml|.*\.cfg|.*\.properties|
-.*\.ini|.*\.conf|.*\.config|.*\.lok|.*\.ldift;</pre>
-		</div>
-</div></div>
-
-<p>When configuration tracking is enabled, this filter causes Hyperic to track files in any directory in the <tt>WlsHome</tt> directory and any directories below it, files with one of the following extensions:</p>
-
-<p><tt>.jar</tt>, <tt>.dll</tt>, <tt>.class</tt>, <tt>.jsp</tt>, <tt>.php</tt>, <tt>.pl</tt>, <tt>.js</tt>, <tt>.py</tt>, <tt>.pyc</tt>, <tt>.cgi</tt>, <tt>.so</tt>, <tt>.sql</tt>, <tt>.sh</tt>, <tt>.xml</tt>, <tt>.cfg</tt>, <tt>.properties</tt>, <tt>.ini</tt>, <tt>.conf</tt>, <tt>.config</tt>, <tt>.ldift</tt>, <tt>.ddl</tt>, <tt>.lok</tt>, <tt>.ldift</tt></p>
-
-<h2><a name="SetUpConfigurationTrackingforaResource-JBossConfigurationTracking"></a>JBoss Configuration Tracking</h2>
-
-<p>For JBoss, the default value of the <b>Configuration Files</b> field, which specifies which files to track is:</p>
-
-<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
-<div id="root">
-		<pre class="theme: Confluence; brush: java; gutter: false">server/all/conf;true;.*\.xml|.*\.cfg|.*\.properties|.*\.ini|.*\.conf|.*\.config;,
-server/default/conf;true;.*\.xml|.*\.cfg|.*\.properties|.*\.ini|.*\.conf|
-.*\.config;,server/default/deploy;true;.*\.jar|.*\.dll|.*\.class|.*\.jsp|.*\.asp|
-.*\.aspx|.*\.php|.*\.pl|.*\.vb|.*\.vbs|.*\.js|.*\.py|.*\.pyc|.*\.cgi|.*\.xml|.*\.cfg|
-.*\.properties|.*\.ini|.*\.conf|.*\.config;,server/minimal/conf;true;.*\.xml|.*\.cfg|
-.*\.properties|.*\.ini|.*\.conf|.*\.config;,server/standard/conf;true;.*\.xml|
-.*\.cfg|.*\.properties|.*\.ini|.*\.conf|.*\.config;,server/web/conf;true;.*\.xml|
-.*\.cfg|.*\.properties|.*\.ini|.*\.conf|.*\.config;,;false;jar-versions.xml;,
-configuration/;false;.*\.xml|.*\.properties</pre>
-		</div>
-</div></div>
-
-<p>When configuration tracking is enabled, this filter causes Hyperic to track files:</p>
-
-<ul>
-	<li>In any directory in the <tt>JBossHome/server/all/conf</tt> directory and any directories below it, files with the following extensions: <tt>.xml</tt>, <tt>.cfg</tt>, <tt>.properties</tt>, <tt>.ini</tt>, <tt>.conf</tt>, <tt>.config</tt></li>
-	<li>In any directory in the <tt>JBossHome/server/default/conf</tt> directory and any directories below it, files with the following extensions: <tt>.xml</tt>, <tt>.cfg</tt>, <tt>.properties</tt>, <tt>.ini</tt>, <tt>.conf</tt>, <tt>.config</tt></li>
-	<li>In any directory in the <tt>JBossHome/server/default/deploy</tt> directory and any directories below it, files with the following extensions: <tt>.jar</tt>, <tt>.dll</tt>, <tt>.class</tt>, <tt>.jsp</tt>, <tt>.asp</tt>. <tt>.aspx</tt>, <tt>.php</tt>, <tt>.pl</tt>, <tt>.vb</tt>, <tt>.vbs</tt>, <tt>.js</tt>, <tt>.py</tt>, <tt>.pyc</tt>, <tt>.cgi</tt>, <tt>.xml</tt>, <tt>.cfg</tt>, <tt>.properties</tt>, <tt>.ini</tt>, <tt>.conf</tt>, <tt>.config</tt></li>
-	<li>In any directory in the <tt>JBossHome/server/minimal/conf</tt> directory and any directories below it, files with the following extensions: <tt>.xml</tt>, <tt>.cfg</tt>, <tt>.properties</tt>, <tt>.ini</tt>, <tt>.conf</tt>, <tt>.config</tt></li>
-	<li>In any directory in the <tt>JBossHome/server/standard/conf</tt> directory and any directories below it, files with the following extensions: <tt>.xml</tt>, <tt>.cfg</tt>, <tt>.properties</tt>, <tt>.ini</tt>, <tt>.conf</tt>, <tt>.config</tt></li>
-	<li>In any directory in the <tt>JBossHome/server/web/conf</tt> directory and any directories below it, files with the following extensions: <tt>.xml</tt>, <tt>.cfg</tt>, <tt>.properties</tt>, <tt>.ini</tt>, <tt>.conf</tt>, <tt>.config</tt></li>
-	<li>In the <tt>JBossHome</tt> directory, the file <tt>jar-versions.xml</tt></li>
-	<li>In the <tt>JBossHome/configuration/</tt> directory, files with the following extensions: <tt>.xml</tt>, <tt>.properties</tt>;</li>
-</ul>
-
-
-
-<h2><a name="SetUpConfigurationTrackingforaResource-IISConfigurationTracking"></a>IIS Configuration Tracking</h2>
-
-<p>For JBoss, the default value of the <b>Configuration Files</b> field, which specifies which files to track is:</p>
-
-<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
-<div id="root">
-		<pre class="theme: Confluence; brush: java; gutter: false">C:\Windows\system32\inetsrv;false;metabase.xml,wwwroot;true;.*.xml|.*.jar|.*.dll|
-.*.aspx|.*.asp|.*.js|.*.vbs|.*.ini|.*.conf|.*.properties</pre>
-		</div>
-</div></div>
-
-<p>When configuration tracking is enabled, this filter causes Hyperic to track:</p>
-
-<ul>
-	<li>In the <tt>C:\Windows\system32\inetsrv</tt> directory, the <tt>metabase.xml</tt> file</li>
-	<li>In <tt>wwwroot</tt> and any directories below it, any files that end in one of the following strings: &nbsp;<tt>xml</tt>, <tt>jar</tt>, <tt>dll,aspx</tt>, <tt>asp</tt>, <tt>js</tt>, <tt>vbs</tt>, <tt>ini</tt>, <tt>conf</tt>, <tt>properties.</tt></li>
-</ul>
-
-
-
-<h2><a name="SetUpConfigurationTrackingforaResource-PostgreSQLConfigurationTracking"></a>PostgreSQL Configuration Tracking</h2>
-
-<p>For PostgreSQL, the default value of the <b>Configuration Files</b> field, which specifies which files to track is:</p>
-<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
-<div id="root">
-		<pre class="theme: Confluence; brush: java; gutter: false">data;false;.*\.conf;,*PGDATA*;false;.*\.conf;,data;false;.*\.conf;</pre>
-		</div>
-</div></div>
-
-<p>When configuration tracking is enabled, this filter causes Hyperic to track:</p>
-<ul>
-	<li>In the <tt>PostgresqlHome/data</tt> directory, any files with a <tt>.conf</tt> extension.</li>
-	<li>In the configuration directory specified by the <tt>PGDATA</tt> environment variable, and any files with a <tt>.conf</tt> extension.</li>
-	<li>In the <tt>PostgresqlHome/data</tt> directory, any files with a <tt>.conf</tt> extension.</li>
-</ul>
-
-
-
-<h2><a name="SetUpConfigurationTrackingforaResource-mySQLConfigurationTracking"></a>mySQL Configuration Tracking</h2>
-
-<p>For MySQL, the default value of the <b>Configuration Files</b> field, which specifies which files to track is:</p>
-
+<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Example <b>Configuration Files</b> setting</b><br />For MySQL, the default value of the <b>Configuration Files</b> field, which specifies which files to track is:
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
 		<pre class="theme: Confluence; brush: java; gutter: false">/etc;false;my\.cnf;,/etc/mysql;false;my\.cnf;,;false;my\.cnf;,~/;false;
@@ -311,10 +144,8 @@ configuration/;false;.*\.xml|.*\.properties</pre>
 	<li><tt>c:/</tt></li>
 	<li><tt>MySqlHome</tt></li>
 </ul>
-
-
-
-
+</td></tr></table></div>
+<p><a name="SetUpConfigurationTrackingforaResource-polling"></a></p>
 <h1><a name="SetUpConfigurationTrackingforaResource-SetUpPollingBasedConfigurationTracking"></a>Set Up Polling-Based Configuration Tracking </h1>
 
 <p>For platforms and services that support configuration tracking, and server types that have the agent uses a cryptographic hash function to continuously compare a original version of the file with the current version to see if it has changed.</p>
@@ -404,7 +235,7 @@ configuration/;false;.*\.xml|.*\.properties</pre>
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:56</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 14, 2012 13:49</font></td>
 		    </tr>
 	    </table>
     </body>
