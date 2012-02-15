@@ -17,7 +17,7 @@
 			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
 			<includes>
-				<include>org.hyperic.jre:ppc-aix</include>
+				<include>org.hyperic.jre:ppc-aix32</include>
 			</includes>
 		</dependencySet>
 	</dependencySets>
