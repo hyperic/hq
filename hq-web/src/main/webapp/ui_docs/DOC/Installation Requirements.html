@@ -9,7 +9,7 @@
     <body>
 <b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
  - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
- -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6.5 Release Notes</a> </b>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.5.html">Hyperic 4.6.5 Release Notes</a> </b>
  <p>
  <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
@@ -21,19 +21,19 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jan 23, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Feb 13, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <p>Before downloading and installing vFabric Hyperic, make sure your system meets the operating system, JRE, database, and system resource requirements for Hyperic Server and Hyperic Agent.</p>
+				    <p>*is supported on the platforms described in the "vSphere, JVM, and Operating System Support" section of Getting Started with vFabric Cloud Application Platform.Before downloading and installing vFabric Hyperic, make sure your system meets the operating system, JRE, database, and system resource requirements for the Hyperic Server and Hyperic Agent.</p>
 
 <div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>Note: In <em>Getting Started with vFabric Cloud Application Platform</em>, the section "vSphere, JVM, and Operating System Support" documents configurations that the entire vFabric Platform supports. Those configurations are a subset of the configurations that vFabric Hyperic supports.</td></tr></table></div>
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1327340360876 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1327340360876 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1327340360876 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1329167196997 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1329167196997 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1329167196997 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1327340360876'>
+/*]]>*/</style><div class='rbtoc1329167196997'>
 <ul>
     <li><a href='#InstallationRequirements-HypericServerRequirements'>Hyperic Server Requirements</a></li>
 <ul>
@@ -65,14 +65,21 @@ div.rbtoc1327340360876 li {margin-left: 0px;padding-left: 0px;}
 
 <p>Use the no-JRE server installer if you prefer to use an existing JRE in your environment, or if no architecture-specific Hyperic Server package is available.</p>
 
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>JRE 1.6 and Monitoring Hyperic Tomcat</b><br />Due to an known problem in Sun JRE version 1.6.0 update 23 and update 24, Hyperic cannot monitor its internal Tomcat 6.0 server — the resource type "HQ Tomcat 6.0" metrics. This problem also prevents local JMX monitoring (process-based monitoring where jmx.url starts with "ptql") of Java processes running in a JRE version 1.6.0 update 23 or update 24 JVM. For a description of the bug, see <a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7009828">http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7009828</a>.</td></tr></table></div>
 <h2><a name="InstallationRequirements-HypericServerResourceRequirements"></a>Hyperic Server Resource Requirements</h2>
 
-<p>For small to medium deployments, up to 50 managed platforms:</p>
+<p>For medium deployments, 50 to 500 managed platforms, or 5000-30,000 managed resources:</p>
 <ul>
-	<li>1 GHz or higher Pentium 4, or equivalent (2 x 2.4GHz Pentium Xeon or equivalent recommended)</li>
-	<li>1 GB RAM (4 or more GB recommended)</li>
-	<li>1-5 GB Free Disk Space</li>
+	<li>at least 4 server class CPUs, 2 GHz or better</li>
+	<li>8 GB RAM, or more</li>
+	<li>20 GB Free Disk Space</li>
+</ul>
+
+
+<p>For large deployments, 500 to 2,000 managed platforms, or 30,000 managed resources:</p>
+<ul>
+	<li>at least 6 server class CPUs, 2 GHz or better</li>
+	<li>12 GB RAM, or more</li>
+	<li>20 GB Free Disk Space</li>
 </ul>
 
 
@@ -81,33 +88,35 @@ div.rbtoc1327340360876 li {margin-left: 0px;padding-left: 0px;}
 <h2><a name="InstallationRequirements-HypericServerOperatingSystemRequirements"></a>Hyperic Server Operating System Requirements</h2>
 
 <ul>
-	<li>Linux</li>
+	<li>Linux, CentOS 5.x or RHEL 5.x preferred</li>
 	<li>Solaris 10 or higher</li>
-	<li>Mac OS X (Intel x86)</li>
-	<li>Windows 2003 Server</li>
-	<li>Windows 2008</li>
-	<li>Windows Vista</li>
-	<li>Windows 7</li>
+	<li>Mac OS X (Intel x86), for small environments</li>
+	<li>Windows 2008 &#8212; for small to medium environments</li>
+	<li>Windows Vista &#8212; for small to medium environments</li>
+	<li>Windows 7 &#8212; for small to medium environments</li>
 </ul>
 
 
 <p><b>Notes:</b></p>
 
-<p>Although Hyperic does not support Hyperic Server running under Windows XP in production environments, the configuration works; you can run small evaluation deployments under Windows XP.</p>
+<ul>
+	<li>Although Hyperic does not support Hyperic Server running under Windows XP in production environments, the configuration works; you can run small evaluation deployments under Windows XP.</li>
+</ul>
 
-<p>For Unix-based platforms, the <tt>libXp.so.6</tt> X library is required. See below.</p>
+
+<ul>
+	<li>For Unix-based platforms, the <tt>libXp.so.6</tt> X library is required. See below.</li>
+</ul>
+
 
 <h2><a name="InstallationRequirements-XLibrariesonUnixBasedPlatforms"></a>X Libraries on Unix-Based Platforms</h2>
 <p><a name="InstallationRequirements-xlib"></a></p>
 
 <p>On Unix-like platforms, Hyperic Server requires the <tt>libXp.so.6</tt> X library to create charts and other graphics in the Hyperic user interface. The location of this library varies by version and provider:</p>
-<ul>
-	<li>Enterprise Linux &#8212; As of Red Hat Enterprise Linux 4 and CentOS 4, libXp.so.6 is in the xorg-x11-deprecated-libs RPM.</li>
-</ul>
-
 
 <ul>
-	<li>Debian &#8212; install the libxp6, libxt6, libxtst6, and libx11-6 packages.</li>
+	<li>Enterprise Linux &#8212; As of Red Hat Enterprise Linux 4 and CentOS 4, <tt>libXp.so.6</tt> is in the <tt>xorg-x11-deprecated-libs</tt> RPM.</li>
+	<li>Debian &#8212; install the <tt>libxp6</tt>, <tt>libxt6</tt>, <tt>libxtst6</tt>, and <tt>libx11-6</tt> packages.</li>
 </ul>
 
 
@@ -133,11 +142,12 @@ div.rbtoc1327340360876 li {margin-left: 0px;padding-left: 0px;}
 
 <p>Hyperic supports the use of these databases for an external Hyperic database:</p>
 <ul>
-	<li>MySQL
+	<li>MySQL &#8212; MySQL is recommended for <em>all</em> Hyperic deployments, small, medium, and large.
 	<ul>
 		<li>MySQL Enterprise Server and MySQL Community Server, v5.1.x (recommended)</li>
-		<li>MySQL Enterprise Server and MySQL Community Server, v5.0.45 or higher</li>
-		<li>Hyperic does not work with MySQL Versions other than 5.0.x or 5.1.x.</li>
+		<li>MySQL Enterprise Server and MySQL Community Server, v5.0.45 or higher (for small to medium environments only).</li>
+		<li>Hyperic does not work with MySQL Versions other than 5.0.x or 5.1.x.<br/>
+<b>Note:</b>  MySQL 5.5.x is <b>not</b> supported</li>
 	</ul>
 	</li>
 </ul>
@@ -146,8 +156,8 @@ div.rbtoc1327340360876 li {margin-left: 0px;padding-left: 0px;}
 <ul>
 	<li>Oracle:
 	<ul>
-		<li>Oracle 10g, patch level 10.2.0.1 or higher, 10.2.0.4 preferred</li>
-		<li>Oracle 11g</li>
+		<li>Oracle 11g (preferred)</li>
+		<li>Oracle 10g, patch level 10.2.0.1 or higher (for small to medium environments only)</li>
 	</ul>
 	</li>
 </ul>
@@ -173,12 +183,11 @@ div.rbtoc1327340360876 li {margin-left: 0px;padding-left: 0px;}
 <p>Hyperic supports these browser versions:</p>
 
 <ul>
-	<li>Firefox 2.x</li>
-	<li>Firefox 3.x</li>
+	<li>Firefox 9.x</li>
 	<li>Internet Explorer 7</li>
 	<li>Internet Explorer 8, except if running on Windows 2008</li>
-	<li>Safari 5.0.x</li>
-	<li>Safari 5.1</li>
+	<li>Safari 5.1.x</li>
+	<li>Safari for Windows 5.1.2</li>
 </ul>
 
 
@@ -189,11 +198,23 @@ div.rbtoc1327340360876 li {margin-left: 0px;padding-left: 0px;}
 <h1><a name="InstallationRequirements-HypericDatabaseRequirements"></a>Hyperic Database Requirements</h1>
 <p><a name="InstallationRequirements-DatabaseRequirements"></a></p>
 
+
+<p>For medium deployments, 50 to 500 managed platforms, or 5000-30000 managed resources;</p>
 <ul>
-	<li>1 GHz or higher Pentium 4, or equivalent (2 x 2.4GHz Pentium Xeon or equivalent recommended)</li>
-	<li>2 GB RAM (4 or more GB recommended)</li>
-	<li>25 GB Free Disk Space</li>
+	<li>at least 4 server class CPUs, 2 GHz or better</li>
+	<li>8 GB RAM, or more</li>
+	<li>50 GB Free Disk Space</li>
 </ul>
+
+
+<p>For large deployments, 500 to 2,000 managed platforms, or 30,000 managed resources:</p>
+<ul>
+	<li>at least 8 server class CPUs, 2 GHz or better</li>
+	<li>16 GB RAM, or more</li>
+	<li>500 GB Free Disk Space<br/>
+<b>Note:</b> Adequate disk I/O bandwidth is important; a RAID configuration (for example, RAID 10 or RAID 0), solid state disk, or disk caching controller is recommended. </li>
+</ul>
+
 
 
 <h1><a name="InstallationRequirements-HypericAgentRequirements"></a>Hyperic Agent Requirements</h1>
@@ -205,7 +226,6 @@ Hyperic supports only one Hyperic Agent on a host.</p>
 <h2><a name="InstallationRequirements-AgentSystemResourceRequirements"></a>Agent System Resource Requirements</h2>
 
 <ul>
-	<li>500 MHz Celeron or higher, or equivalent</li>
 	<li>256 MB RAM</li>
 	<li>500 MB Free Disk Space</li>
 </ul>
@@ -215,7 +235,7 @@ Hyperic supports only one Hyperic Agent on a host.</p>
 
 <ul>
 	<li>Linux</li>
-	<li>Windows XP&nbsp;</li>
+	<li>Windows XP</li>
 	<li>Windows XP Pro</li>
 	<li>Windows 2000</li>
 	<li>Windows 2003 Standard Edition</li>
@@ -234,7 +254,7 @@ Hyperic supports only one Hyperic Agent on a host.</p>
 
 <h2><a name="InstallationRequirements-AgentJRERequirements"></a>Agent JRE Requirements</h2>
 
-<p>The Hyperic Agent can run with either a 1.6 or 1.5 JRE. Hyperic recommends a 1.6 JRE, which is included in platform-specific agent installers.</p>
+<p>Hyperic recommends running the Hyperic Agent on recent 1.6 JRE build, as platform-specific agent installers include. Although in some environments, the Hyperic Agent may run on a 1.5 JRE, for security reasons, an up-to-date 1.6 JRE is preferred. </p>
 
 <p>Use a platform-independent agent installer if you prefer to use an existing JRE in your environment.</p>
 
@@ -254,7 +274,7 @@ Hyperic supports only one Hyperic Agent on a host.</p>
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:56</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 14, 2012 13:49</font></td>
 		    </tr>
 	    </table>
     </body>
