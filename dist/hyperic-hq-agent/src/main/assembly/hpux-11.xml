@@ -17,7 +17,7 @@
 		     <fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
 			<includes>
-				<include>org.hyperic.jre:hpux-11</include>
+				<include>org.hyperic.jre:hpux-11-risc</include>
 			</includes>
 		</dependencySet>
 	</dependencySets>
