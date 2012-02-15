@@ -593,6 +593,8 @@
 
   <help name="Apache-ERS 2.3 VHost" include="Apache 2.0 VHost"/>
   <help name="Apache-ERS 2.4 VHost" include="Apache-ERS 2.3 VHost"/>
+  <help name="Apache-ERS 3.x VHost" include="Apache-ERS 2.4 VHost"/>
+  <help name="Apache-ERS 4.x VHost" include="Apache-ERS 3.x VHost"/>
 
   <help name="test-snmp">
   <![CDATA[
