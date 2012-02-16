@@ -1218,8 +1218,7 @@
     <plugin type="log_track"
             class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>    
 
-    <property name="regKey" value="\SOFTWARE\Microsoft\Exchange\v8.0\Setup"/>
-    <property name="version" value="8.\d*"/>
+    <property name="VERSION_FILE" value="e12pidgen.dll"/>
 
     <properties>
        <property name="version"
@@ -1246,13 +1245,11 @@
   </server>
 
   <server name="Exchange" version="2010" include="Exchange 2007" platforms="Win32">
-    <property name="regKey" value="\SOFTWARE\Microsoft\ExchangeServer\v14\Setup"/>
-    <property name="version" value="14.\d*"/>
+    <property name="VERSION_FILE" value="custsat.dll"/>
   </server>
 
   <server name="Exchange Transport" version="2007" platforms="Win32">
-    <property name="regKey" value="\SOFTWARE\Microsoft\Exchange\Setup"/>
-    <property name="version" value="8.\d*"/>
+    <property name="VERSION_FILE" value="e12pidgen.dll"/>
 
     <plugin type="measurement"
             class="org.hyperic.hq.product.Win32MeasurementPlugin"/>
@@ -1282,7 +1279,6 @@
   </server>
   
   <server name="Exchange Transport" version="2010" include="Exchange Transport 2007" platforms="Win32">
-    <property name="regKey" value="\SOFTWARE\Microsoft\ExchangeServer\v14\Setup"/>
-    <property name="version" value="14.\d*"/>
+    <property name="VERSION_FILE" value="custsat.dll"/>
   </server>
 </plugin>
