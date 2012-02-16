@@ -21,18 +21,18 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Feb 15, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
  
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1325699941373 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1325699941373 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1325699941373 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1329332303186 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1329332303186 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1329332303186 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1325699941373'>
+/*]]>*/</style><div class='rbtoc1329332303186'>
 <ul>
     <li><a href='#vSphere-vSpherePluginOverview'>vSphere Plugin Overview</a></li>
 <ul>
@@ -143,7 +143,7 @@ div.rbtoc1325699941373 li {margin-left: 0px;padding-left: 0px;}
 
 <p>You install a Hyperic Agent on a platform that can access vCenter Server over the network. To minimize the load on the vCenter platform, do not install the agent on the same platform as vCenter.</p>
 
-<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>SSL Requirements for 4.6 Agents</b><br />In Hyperic 4.6, to communicate with the vCenter server over SSL, you must configure a keystore for the agent and manually import the vCenter SSL certificate into the agent keystore if the server’s certificate is unverified.</td></tr></table></div>
+<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>SSL Requirements for 4.6.x Agents</b><br />In Hyperic 4.6.x, to communicate with the vCenter server over SSL, you must configure a keystore for the agent and manually import the vCenter SSL certificate into the agent keystore if the server’s certificate is unverified.</td></tr></table></div>
 
 <p>To discover and manage vSphere Hosts and VMs, the plugin must be able to connect to the vCenter SDK port, so after vCenter is discovered, you must enable the plugin to connect to the SDK port by defining the SDK connection settings on the vCenter server's <b>Configuration Properties</b> page. </p>
 
@@ -363,11 +363,15 @@ div.rbtoc1325699941373 li {margin-left: 0px;padding-left: 0px;}
 
 <p>Create a keystore for the Hyperic Agent on the on the platform where you will install the agent that will monitor vCenter. Import the vCenter server certificate into the truststore.</p>
 
-<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>SSL Configuration Requirements (Hyperic 4.6 and later</b><br />There are new SSL configuration requirements for secure communication between a Hyperic 4.6 agent and a VMware vCenter server.
+<p>{info:title=SSL Configuration Requirements (Hyperic 4.6 and later)</p>
 
-<p>If the <tt>accept.unverified.certificates</tt> property in <tt>agent.properties</tt> is "false", as it is by default, the VMware vCenter server's unverified SSL certificate must be manually imported to a keystore that the Hyperic 4.6 Agent can access. Otherwise, secure communication between the Hyperic 4.6 Agent and VMware vCenter server will fail.</p>
+<p>In Hyperic 4.6 and later there are new SSL configuration requirements for secure communication between a Hyperic 4.6.x agent and a VMware vCenter server.</p>
 
-<p>If the <tt>accept.unverified.certificates</tt> property in <tt>agent.properties</tt> is "true", the vSphere plugin will automatically import the VMware vCenter server's unverified SSL certificate to the keystore accessible to the Hyperic 4.6 agent. This is not recommended because it is less secure and expose the Hyperic Agent to man-in-the-middle attacks.</p></td></tr></table></div>
+<p>If the <tt>accept.unverified.certificates</tt> property in <tt>agent.properties</tt> is "false", as it is by default, the VMware vCenter server's unverified SSL certificate must be manually imported to a keystore that the Hyperic 4.6.x Agent can access. Otherwise, secure communication between the Hyperic 4.6.x Agent and VMware vCenter server will fail.</p>
+
+<p>If the <tt>accept.unverified.certificates</tt> property in <tt>agent.properties</tt> is "true", the vSphere plugin will automatically import the VMware vCenter server's unverified SSL certificate to the keystore accessible to the Hyperic 4.6.x agent. This is not recommended because it is less secure and expose the Hyperic Agent to man-in-the-middle attacks.</p>
+
+<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td></td></tr></table></div>
 <h2><a name="vSphere-Step2InstallHypericAgent"></a>Step 2 - Install Hyperic Agent</h2>
 
 <p>Install a Hyperic Agent on the platform from which you will remotely monitor vCenter Server. For instructions, see Installing an Agent&#45;Only Package. </p>
@@ -1188,7 +1192,7 @@ While a VM may&nbsp;have been configured to use 4 GB of RAM, as an example, it m
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Feb 14, 2012 13:49</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 15, 2012 15:43</font></td>
 		    </tr>
 	    </table>
     </body>

@@ -21,10 +21,22 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Feb 06, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Feb 15, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <h1><a name="JBoss-MonitoringJBoss"></a>Monitoring JBoss </h1>
+				    <style type='text/css'>/*<![CDATA[*/
+div.rbtoc1329347651467 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1329347651467 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1329347651467 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1329347651467'>
+<ul>
+    <li><a href='#JBoss-MonitoringJBoss'>Monitoring JBoss</a></li>
+    <li><a href='#JBoss-JBossConfigurationTracking'>JBoss Configuration Tracking</a></li>
+    <li><a href='#JBoss-JBossMetrics'>JBoss Metrics</a></li>
+</ul></div>
+
+<h1><a name="JBoss-MonitoringJBoss"></a>Monitoring JBoss </h1>
 
 <p>You cannot manage a JBoss server on the same machine as the Hyperic Server. </p>
 
@@ -48,7 +60,39 @@
 
 <h1><a name="JBoss-JBossConfigurationTracking"></a>JBoss Configuration Tracking</h1>
 
-<p>For a description of configuration tracking functionality for JBoss in Hyperic 4.6.5, including the pre-configured <b>Configuration Files</b> filter, see <a href="Set Up Configuration Tracking for a Resource.html" title="Set Up Configuration Tracking for a Resource">Set Up Configuration Tracking for a Resource</a> in <em>vFabric Hyperic Administration</em>.</p>
+<p>In Hyperic 4.6.5, the JBoss plugin uses a new plugin support class —-- <tt>org.hyperic.hq.product.FileChangeTrackPlugin</tt> --— that enables more detailed change tracking than available in previous versions of Hyperic. This plugin tracks the change type ("add", "delete", "modify", or "rename") and the actual changes in text files. For information about the new support class, see <tt><a href="FileChangeTrackPlugin.html" title="FileChangeTrackPlugin">FileChangeTrackPlugin</a></tt>. </p>
+
+<p>For JBoss, the default value of the <b>Configuration Files</b> field, which specifies which files to track is:</p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">server/all/conf;true;.*\.xml|.*\.cfg|.*\.properties|.*\.ini|.*\.conf|.*\.config;,
+server/default/conf;true;.*\.xml|.*\.cfg|.*\.properties|.*\.ini|.*\.conf|
+.*\.config;,server/default/deploy;true;.*\.jar|.*\.dll|.*\.class|.*\.jsp|.*\.asp|
+.*\.aspx|.*\.php|.*\.pl|.*\.vb|.*\.vbs|.*\.js|.*\.py|.*\.pyc|.*\.cgi|.*\.xml|.*\.cfg|
+.*\.properties|.*\.ini|.*\.conf|.*\.config;,server/minimal/conf;true;.*\.xml|.*\.cfg|
+.*\.properties|.*\.ini|.*\.conf|.*\.config;,server/standard/conf;true;.*\.xml|
+.*\.cfg|.*\.properties|.*\.ini|.*\.conf|.*\.config;,server/web/conf;true;.*\.xml|
+.*\.cfg|.*\.properties|.*\.ini|.*\.conf|.*\.config;,;false;jar-versions.xml;,
+configuration/;false;.*\.xml|.*\.properties</pre>
+		</div>
+</div></div>
+
+<p>When configuration tracking is enabled, this filter causes Hyperic to track files:</p>
+
+<ul>
+	<li>In any directory in the <tt>JBossHome/server/all/conf</tt> directory and any directories below it, files with the following extensions: <tt>.xml</tt>, <tt>.cfg</tt>, <tt>.properties</tt>, <tt>.ini</tt>, <tt>.conf</tt>, <tt>.config</tt></li>
+	<li>In any directory in the <tt>JBossHome/server/default/conf</tt> directory and any directories below it, files with the following extensions: <tt>.xml</tt>, <tt>.cfg</tt>, <tt>.properties</tt>, <tt>.ini</tt>, <tt>.conf</tt>, <tt>.config</tt></li>
+	<li>In any directory in the <tt>JBossHome/server/default/deploy</tt> directory and any directories below it, files with the following extensions: <tt>.jar</tt>, <tt>.dll</tt>, <tt>.class</tt>, <tt>.jsp</tt>, <tt>.asp</tt>. <tt>.aspx</tt>, <tt>.php</tt>, <tt>.pl</tt>, <tt>.vb</tt>, <tt>.vbs</tt>, <tt>.js</tt>, <tt>.py</tt>, <tt>.pyc</tt>, <tt>.cgi</tt>, <tt>.xml</tt>, <tt>.cfg</tt>, <tt>.properties</tt>, <tt>.ini</tt>, <tt>.conf</tt>, <tt>.config</tt></li>
+	<li>In any directory in the <tt>JBossHome/server/minimal/conf</tt> directory and any directories below it, files with the following extensions: <tt>.xml</tt>, <tt>.cfg</tt>, <tt>.properties</tt>, <tt>.ini</tt>, <tt>.conf</tt>, <tt>.config</tt></li>
+	<li>In any directory in the <tt>JBossHome/server/standard/conf</tt> directory and any directories below it, files with the following extensions: <tt>.xml</tt>, <tt>.cfg</tt>, <tt>.properties</tt>, <tt>.ini</tt>, <tt>.conf</tt>, <tt>.config</tt></li>
+	<li>In any directory in the <tt>JBossHome/server/web/conf</tt> directory and any directories below it, files with the following extensions: <tt>.xml</tt>, <tt>.cfg</tt>, <tt>.properties</tt>, <tt>.ini</tt>, <tt>.conf</tt>, <tt>.config</tt></li>
+	<li>In the <tt>JBossHome</tt> directory, the file <tt>jar-versions.xml</tt></li>
+	<li>In the <tt>JBossHome/configuration/</tt> directory, files with the following extensions: <tt>.xml</tt>, <tt>.properties</tt>;</li>
+</ul>
+
+
+<p>Configuration tracking for Jboss is disabled by default. For information about how to enable configuration tracking and how to specify which files to track, see <a href="Set Up Configuration Tracking for a Resource.html" title="Set Up Configuration Tracking for a Resource">Set Up Configuration Tracking for a Resource</a> in <em>vFabric Hyperic Administration</em>.</p>
 
 <h1><a name="JBoss-JBossMetrics"></a>JBoss Metrics</h1>
 
@@ -193,7 +237,7 @@
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Feb 14, 2012 13:49</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 15, 2012 15:42</font></td>
 		    </tr>
 	    </table>
     </body>
