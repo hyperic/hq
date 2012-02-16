@@ -21,20 +21,20 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Feb 15, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1325712260599 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1325712260599 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1325712260599 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1329331447789 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1329331447789 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1329331447789 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1325712260599'>
+/*]]>*/</style><div class='rbtoc1329331447789'>
 <ul>
     <li><a href='#AboutSSLinHyperic-HypericSSLSupport'>Hyperic SSL Support</a></li>
-    <li><a href='#AboutSSLinHyperic-OverviewofHyperic4.6SSLConfigurationandDefaults'>Overview of Hyperic 4.6 SSL Configuration and Defaults</a></li>
-    <li><a href='#AboutSSLinHyperic-Hyperic4.6SSLCertificateProcessing'>Hyperic 4.6 SSL Certificate Processing</a></li>
-    <li><a href='#AboutSSLinHyperic-SSLBetweena4.6Serverand4.5Agents'>SSL Between a 4.6 Server and 4.5 Agents</a></li>
+    <li><a href='#AboutSSLinHyperic-OverviewofHyperic4.6.xSSLConfigurationandDefaults'>Overview of Hyperic 4.6.x SSL Configuration and Defaults</a></li>
+    <li><a href='#AboutSSLinHyperic-Hyperic4.6.xSSLCertificateProcessing'>Hyperic 4.6.x SSL Certificate Processing</a></li>
+    <li><a href='#AboutSSLinHyperic-SSLBetweena4.6.xServerand4.5.xAgents'>SSL Between a 4.6.x Server and 4.5.x Agents</a></li>
 </ul></div>
 
 <blockquote>
@@ -54,11 +54,11 @@ div.rbtoc1325712260599 li {margin-left: 0px;padding-left: 0px;}
 
 <p>The Hyperic Agent can manage products over SSL, if the product plugin supports it.</p>
 
-<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>SSL Best Practices for New Hyperic Installations</b><br />VMware recommends that you install trusted keystores from you CA for Hyperic 4.6 components. If you do not configure your own SSL keystores for Hyperic Agents and the Hyperic Server, the components will generate keystores with self-signed certificates &#8212; this is not recommended. If you do choose to run with Hyperic-generated keystores, update the password for each Hyperic-generated keystore; edit <tt><a href="agent.keystore.password.html" title="agent.keystore.password">agent.keystore.password</a></tt> in the <tt>agent.properties</tt> file, and restart the agent.</td></tr></table></div>
+<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>SSL Best Practices for New Hyperic Installations</b><br />VMware recommends that you install trusted keystores from you CA for Hyperic 4.6.x components. If you do not configure your own SSL keystores for Hyperic Agents and the Hyperic Server, the components will generate keystores with self-signed certificates &#8212; this is not recommended. If you do choose to run with Hyperic-generated keystores, update the password for each Hyperic-generated keystore; edit <tt><a href="agent.keystore.password.html" title="agent.keystore.password">agent.keystore.password</a></tt> in the <tt>agent.properties</tt> file, and restart the agent.</td></tr></table></div>
 
-<h1><a name="AboutSSLinHyperic-OverviewofHyperic4.6SSLConfigurationandDefaults"></a>Overview of Hyperic 4.6 SSL Configuration and Defaults</h1>
+<h1><a name="AboutSSLinHyperic-OverviewofHyperic4.6.xSSLConfigurationandDefaults"></a>Overview of Hyperic 4.6.x SSL Configuration and Defaults</h1>
 
-<p>When the Hyperic 4.6 server and a Hyperic 4.6 Agent communicate over SSL, each component validates the other's SSL certificate. </p>
+<p>When the Hyperic 4.6.x server and a Hyperic 4.6.x Agent communicate over SSL, each component validates the other's SSL certificate. </p>
 
 <p>Ideally, you should configure Hyperic components to communicate with each other via SSL at installation time. Detailed instructions are provided in <a href="Hyperic Installation and Startup Process.html" title="Hyperic Installation and Startup Process">Hyperic Installation and Startup Process</a>. The key tasks are:</p>
 
@@ -85,15 +85,15 @@ div.rbtoc1325712260599 li {margin-left: 0px;padding-left: 0px;}
 
 
 <ul>
-	<li>Import Managed Product Certs &#8212; In Hyperic 4.6, Hyperic plugins that connect to managed products over SSL are updated to support certificate verification. To enable management of such products by a 4.6 agent, it may be necessary to manually import the target server's certificate into the agent keystore if the server's certificate is not trusted.  For more information see <a href="Configure SSL Options.html#ConfigureSSLOptions-SslPlugins">Managed Products and SSL</a>.</li>
+	<li>Import Managed Product Certs &#8212; In Hyperic 4.6, Hyperic plugins that connect to managed products over SSL are updated to support certificate verification. To enable management of such products by a 4.6.x agent, it may be necessary to manually import the target server's certificate into the agent keystore if the server's certificate is not trusted.  For more information see <a href="Configure SSL Options.html#ConfigureSSLOptions-SslPlugins">Managed Products and SSL</a>.</li>
 </ul>
 
 
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Reconfiguring Certs After Installation and Startup</b><br />If you did not configure user-managed keystores for Hyperic 4.6 at initial installation, and wish to reconfigure the server and agent for user-managed keystores, see <a href="Configure SSL Options.html#ConfigureSSLOptions-certs">Reconfigure Hyperic for Trusted SSL Certificates</a> on <a href="Configure SSL Options.html" title="Configure SSL Options">Configure SSL Options</a>.</td></tr></table></div>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Reconfiguring Certs After Installation and Startup</b><br />If you did not configure user-managed keystores for Hyperic 4.6.x at initial installation, and wish to reconfigure the server and agent for user-managed keystores, see <a href="Configure SSL Options.html#ConfigureSSLOptions-certs">Reconfigure Hyperic for Trusted SSL Certificates</a> on <a href="Configure SSL Options.html" title="Configure SSL Options">Configure SSL Options</a>.</td></tr></table></div>
 <p><a name="AboutSSLinHyperic-certs"></a></p>
-<h1><a name="AboutSSLinHyperic-Hyperic4.6SSLCertificateProcessing"></a>Hyperic 4.6 SSL Certificate Processing</h1>
+<h1><a name="AboutSSLinHyperic-Hyperic4.6.xSSLCertificateProcessing"></a>Hyperic 4.6.x SSL Certificate Processing</h1>
 
-<p>The first time a 4.6 agent initiates a connection to the Hyperic Server (the first time you start the agent after installation), the server presents its SSL certificate to the agent. If the agent trusts the certificate that the server presented, the agent imports the server's certificate into its own keystore. </p>
+<p>The first time a 4.6.x agent initiates a connection to the Hyperic Server (the first time you start the agent after installation), the server presents its SSL certificate to the agent. If the agent trusts the certificate that the server presented, the agent imports the server's certificate into its own keystore. </p>
 
 <div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>How the Agent Decides to Trust the Server's Certificate</b><br />The agent trusts a server certificate: 
 <ul>
@@ -106,14 +106,14 @@ div.rbtoc1325712260599 li {margin-left: 0px;padding-left: 0px;}
 
 <p>By default, the Hyperic Server and the Hyperic Agent do not import untrusted certificates unless you explicitly respond "yes" to the warning prompt described above. Note, however that both components can be configured to accept untrusted certificates automatically, with no warning. For security reasons, this practice is strongly discouraged. Check the values of <tt>agent.setup.acceptUnverifiedCertificate</tt> (in <tt>AgentHome/conf/agent.properties</tt>) and <tt>accept.unverified.certificates</tt> in <tt>ServerHome/conf/hq-server.conf</tt>. </p>
 
-<h1><a name="AboutSSLinHyperic-SSLBetweena4.6Serverand4.5Agents"></a>SSL Between a 4.6 Server and 4.5 Agents</h1>
+<h1><a name="AboutSSLinHyperic-SSLBetweena4.6.xServerand4.5.xAgents"></a>SSL Between a 4.6.x Server and 4.5.x Agents</h1>
 <p><a name="AboutSSLinHyperic-compatibility"></a></p>
 
 <p>To ensure backwards compatibility with pre-4.6 Hyperic Agents, the Hyperic Server upgrade procedure does <em>not</em> provide a mechanism for configuring the server to access a user-managed keystore. </p>
 
-<p>When a newly-upgraded Hyperic 4.6 Server starts up, it generates a self-signed SSL certificate.</p>
+<p>When a newly-upgraded Hyperic 4.6.x Server starts up, it generates a self-signed SSL certificate.</p>
 
-<p>When a pre-4.6 Hyperic Agent first connects to a newly-upgraded Hyperic 4.6 server, its self-signed certificate is imported into the server's keystore. </p>
+<p>When a pre-4.6 Hyperic Agent first connects to a newly-upgraded Hyperic 4.6.x server, its self-signed certificate is imported into the server's keystore. </p>
 
 
 
@@ -131,7 +131,7 @@ div.rbtoc1325712260599 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Feb 14, 2012 13:49</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 15, 2012 15:42</font></td>
 		    </tr>
 	    </table>
     </body>
