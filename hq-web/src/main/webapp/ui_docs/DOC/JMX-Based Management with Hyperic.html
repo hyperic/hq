@@ -21,15 +21,15 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Feb 07, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Feb 16, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1328634238003 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1328634238003 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1328634238003 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1329434122854 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1329434122854 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1329434122854 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1328634238003'>
+/*]]>*/</style><div class='rbtoc1329434122854'>
 <ul>
     <li><a href='#JMX-BasedManagementwithHyperic-Introduction'>Introduction</a></li>
     <li><a href='#JMX-BasedManagementwithHyperic-JMXResourcesantheHypericInventoryModel'>JMX Resources an the Hyperic Inventory Model</a></li>
@@ -41,10 +41,9 @@ div.rbtoc1328634238003 li {margin-left: 0px;padding-left: 0px;}
     <li><a href='#JMX-BasedManagementwithHyperic-DefiningServiceTypestoProvideManagementviaCustomMBeans'>Defining Service Types to Provide Management via Custom MBeans</a></li>
     <li><a href='#JMX-BasedManagementwithHyperic-DefininganObjectNametoAccessCustomMBeans'>Defining an ObjectName to Access Custom MBeans</a></li>
     <li><a href='#JMX-BasedManagementwithHyperic-DefiningConfigurationPropertiestoBeDisplayedintheUI'>Defining Configuration Properties to Be Displayed in the UI</a></li>
-<ul>
     <li><a href='#JMX-BasedManagementwithHyperic-DefiningandGatheringMetrics'>Defining and Gathering Metrics</a></li>
+    <li><a href='#JMX-BasedManagementwithHyperic-SpecifyingAvailabilityMetricforMBeans'>Specifying Availability Metric for MBeans</a></li>
     <li><a href='#JMX-BasedManagementwithHyperic-ImplementingControlActions'>Implementing Control Actions</a></li>
-</ul>
     <li><a href='#JMX-BasedManagementwithHyperic-DefineServerAutoInventoryElement'>Define Server Auto-Inventory Element</a></li>
 <ul>
     <li><a href='#JMX-BasedManagementwithHyperic-DiscoveringCustomProperties'>Discovering Custom Properties</a></li>
@@ -67,7 +66,7 @@ div.rbtoc1328634238003 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 
 
-<p>Hyperic uses the remote API (<a href="http://www.jcp.org/en/jsr/detail?id=160">http://www.jcp.org/en/jsr/detail?id=160</a>] specified by JSR-160 to manage products that support JMX 1.2/JSR-160, including the ones listed above. For JMX-enabled servers that do not support JSR-160, Hyperic uses vendor-specific connectors.  </p>
+<p>Hyperic uses the remote API (<a href="http://www.jcp.org/en/jsr/detail?id=160">http://www.jcp.org/en/jsr/detail?id=160</a>) specified by JSR-160 to manage products that support JMX 1.2/JSR-160, including the ones listed above. For JMX-enabled servers that do not support JSR-160, Hyperic uses vendor-specific connectors.  </p>
 
 <p>Hyperic's JMX support classes enable auto-discovery of MBean servers and MBeans, collection of MBean attributes, and execution of MBean operations. </p>
 
@@ -262,7 +261,7 @@ Name:  Catalina:type=Cache,host=localhost,path=/jsp-examples
 		</div>
 </div></div>
 
-<h4><a name="JMX-BasedManagementwithHyperic-DefiningandGatheringMetrics"></a>Defining and Gathering Metrics</h4>
+<h2><a name="JMX-BasedManagementwithHyperic-DefiningandGatheringMetrics"></a>Defining and Gathering Metrics</h2>
 
 <p>Metrics are defined just as they are with other plugins, but in the case of custom MBean services the <b>OBJECT_NAME</b> property is used to compose the metric <b>template</b> attribute:</p>
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
@@ -307,9 +306,16 @@ return MBeanServer.getAttribute(name, "accessCount");</pre>
 
 <p>Learn more about <a href="Measurement Plugin.html" title="Measurement Plugin">measurement plugins</a>.</p>
 
+<p><a name="JMX-BasedManagementwithHyperic-availability"></a></p>
+<h2><a name="JMX-BasedManagementwithHyperic-SpecifyingAvailabilityMetricforMBeans"></a>Specifying Availability Metric for MBeans</h2>
+
+<p>Hyperic's JMX plugins typically query for an MBean's "Availability" attribute to determine whether the MBean is available. If the MBean server returns "1", the MBean is considered available; if the return value is "0", the MBean is considered unavailable. (Other values will cause availability to display incorrectly.) </p>
+
+<p>Note that, because many MBeans do not have an "Availability" attribute, Hyperic's JMX plugins also consider an Mbean to be available if the query returns an <tt>AttributeNotFoundException</tt>, assuming that the MBean is in fact available to report that the attribute does not exist. If the MBean server returns any exception other than <tt>AttributeNotFoundException</tt>, the MBean is considered to be unavailable. </p>
+
 <p><a name="JMX-BasedManagementwithHyperic-control"></a></p>
 
-<h4><a name="JMX-BasedManagementwithHyperic-ImplementingControlActions"></a>Implementing Control Actions</h4>
+<h2><a name="JMX-BasedManagementwithHyperic-ImplementingControlActions"></a>Implementing Control Actions</h2>
 
 <p>With the <b>OBJECT_NAME</b> property defined, MBean operations can be exposed as HQ control actions simply by adding the list of method names:</p>
 
@@ -504,7 +510,7 @@ return MbeanServer.invoke(name, "reset", new Object[0], new String[0]);</pre>
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Feb 15, 2012 15:43</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 16, 2012 15:30</font></td>
 		    </tr>
 	    </table>
     </body>
