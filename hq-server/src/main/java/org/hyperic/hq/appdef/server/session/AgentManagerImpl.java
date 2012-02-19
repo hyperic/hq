@@ -1325,7 +1325,9 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
             if (debug) log.debug(stringVals);
             agent = getAgent(agentToken);
                     
-            if ((agent == null) || isAgentOld(agent)) {
+            if ((agent == null) || this.agentDao.isAgentOld(agent)) {
+                if (debug) log.debug("agent with token=" + agentToken +
+                        " either doesn't exist or is old. Ignoring its agent plugin status report.");
                 return null;
             }
             if (canRestartAgent(agent, arg.getStringLists().toString())) {
@@ -1359,8 +1361,6 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
             agentPluginUpdater.queuePluginTransfer(updateMap, removeMap, canRestartAgent);
         } catch (AgentNotFoundException e) {
             log.error(e,e);
-        } catch (ConfigPropertyException e) {
-            throw new SystemException(e);
         } finally {
             if (agent != null) {
                 agent.setLastPluginInventoryCheckin(System.currentTimeMillis());
@@ -1368,12 +1368,6 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         }
         // only return agentId if canRestartAgent == true
         return (agent != null && canRestartAgent) ? agent.getId() : null;
-    }
-
-    private boolean isAgentOld(Agent agent) throws ConfigPropertyException {
-        Properties serverConfigProps = serverConfigManager.getConfig();
-        String serverVersion = serverConfigProps.getProperty(HQConstants.ServerVersion);     
-        return agent.getVersion().compareTo(serverVersion) < 0;
     }
 
     private boolean canRestartAgent(Agent agent, String stringLists) {

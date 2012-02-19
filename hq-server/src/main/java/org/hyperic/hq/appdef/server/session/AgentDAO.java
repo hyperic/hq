@@ -51,6 +51,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class AgentDAO extends HibernateDAO<Agent> {
     private static final Log log = LogFactory.getLog(AgentDAO.class);
+    private static final String LIMIT_A_TO_OLD_AGENTS = "a.version < :serverVersion ";
     
     private final ServerConfigManager serverConfigManager;
     
@@ -150,7 +151,7 @@ public class AgentDAO extends HibernateDAO<Agent> {
 
     @SuppressWarnings("unchecked")
     public List<Agent> findOldAgents() {
-        String sql = "from Agent where version < :serverVersion";
+        String sql = "from Agent a where " + LIMIT_A_TO_OLD_AGENTS;
         final Query query = getSession().createQuery(sql);
         query.setParameter("serverVersion", serverConfigManager.getServerMajorVersion());
         return query.list();
@@ -161,10 +162,20 @@ public class AgentDAO extends HibernateDAO<Agent> {
      * @return number of agents, whose version is older than that of the server
      */
     public long getNumOldAgents() {
-        final String sql = "select count(a) from Agent a where version < :serverVersion";        
+        final String sql = "select count(a) from Agent a where " + LIMIT_A_TO_OLD_AGENTS;        
         final Query query = getSession().createQuery(sql);
         query.setParameter("serverVersion", serverConfigManager.getServerMajorVersion());        
         return ((Number) query.uniqueResult()).longValue();
+    }
+
+    /**
+     * 
+     * @param agent
+     * @return true if agent's version is older than that of the server
+     */
+    public boolean isAgentOld(Agent agent) {
+        String serverVersion = serverConfigManager.getServerMajorVersion();     
+        return agent.getVersion().compareTo(serverVersion) < 0;
     }
 
 
