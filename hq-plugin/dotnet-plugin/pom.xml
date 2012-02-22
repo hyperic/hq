@@ -7,7 +7,7 @@
 	<artifactId>dotnet-plugin</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - .NET Plugin</name>
-	<version>4.6.5.BUILD-SNAPSHOT</version>
+	<version>5.0.BUILD-SNAPSHOT</version>
 
 	<dependencies>
 		<dependency>
