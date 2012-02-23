@@ -21,18 +21,18 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Feb 22, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1325699958694 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1325699958694 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1325699958694 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1329945585120 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1329945585120 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1329945585120 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1325699958694'>
+/*]]>*/</style><div class='rbtoc1329945585120'>
 <ul>
     <li><a href='#NetAppFiler-NetAppFilerPluginOverview'>NetApp Filer Plugin Overview</a></li>
 <ul>
@@ -58,7 +58,7 @@ div.rbtoc1325699958694 li {margin-left: 0px;padding-left: 0px;}
 
 <p>Hyperic's NetApp Filer plugin manages and monitors NetApp filers that use NFS v2, NFS v3, and CIFS protocols.</p>
 
-<p>The NetApp Filer plugin is based on Hyperic's Network Device plugin, and uses SNMP GET requests to obtain resource statistics for the filer and its services. If you want to create events for SNMP traps issued by a filer, you can configure the NetApp Filter to send traps to the HQ Agent that manages the filer. &nbsp;Note however that it is not necessary to receive traps to obtain filer metrics.</p>
+<p>The NetApp Filer plugin is based on Hyperic's Network Device plugin, and uses SNMP GET requests to obtain resource statistics for the filer and its services. If you want to create events for SNMP traps issued by a filer, you can configure the NetApp Filter to send traps to the Hyperic Agent that manages the filer. Note however that it is not necessary to receive traps to obtain filer metrics.</p>
 
 <p>The indented list below illustrates the hierarchy of Hyperic resource types that map to NetApp Filer entities. Each resource type is described below in <a href="#NetAppFiler-NetAppFilerResourcesandtheHQInventoryModel">NetApp Filer Resources and the HQ Inventory Model</a>.</p>
 
@@ -174,7 +174,7 @@ div.rbtoc1325699958694 li {margin-left: 0px;padding-left: 0px;}
 <p>
 <div class='table-wrap'>
 
-<table id='TBL1321720898428' width='800px' class='confluenceTable'><tbody>
+<table id='TBL1321720902894' width='800px' class='confluenceTable'><tbody>
 <tr>
 <th class='confluenceTh'> name </th>
 <th class='confluenceTh'> description</th>
@@ -189,7 +189,7 @@ div.rbtoc1325699958694 li {margin-left: 0px;padding-left: 0px;}
 
 <div class='table-wrap'>
 
-<table id='TBL1321720898429' width='800px' class='confluenceTable'><tbody>
+<table id='TBL1321720902895' width='800px' class='confluenceTable'><tbody>
 <tr>
 <td class='confluenceTd'> snmpIp </td>
 <td class='confluenceTd'> SNMP agent IP address </td>
@@ -347,13 +347,13 @@ function customizeMacroTable(tableId,columnTypes,firstDataRowIndex,highlightColo
 
 var columnTypes = ['S'];
 var columnAttributes = 'style=&quot;width:15%;&quot;,style=&quot;width:15%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:30%;&quot;,style=&quot;width:10%;&quot;';
-customizeMacroTable('TBL1321720898428', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
+customizeMacroTable('TBL1321720902894', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
 //-->
  </script> 
 <script type='text/javascript'> <!-- 
 var columnTypes = ['S'];
 var columnAttributes = 'style=&quot;width:15%;&quot;,style=&quot;width:15%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:30%;&quot;,style=&quot;width:10%;&quot;';
-customizeMacroTable('TBL1321720898429', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
+customizeMacroTable('TBL1321720902895', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
 //-->
  </script> </p>
 
@@ -363,19 +363,19 @@ customizeMacroTable('TBL1321720898429', columnTypes, 1, 'lightgoldenrodyellow', 
 <p>This step has instructions for enabling the Hyperic Agent to receive traps from a NetApp Filer and to log events for traps it receives. &nbsp;If you do not wish to receive traps from the filer, skip to&nbsp;</p>
 
 <ol>
-	<li>To enable the HQ Agent to receive traps, add the following line to its <tt>agent.properties</tt> file:<br/>
+	<li>To enable the Hyperic Agent to receive traps, add the following line to its <tt>agent.properties</tt> file:<br/>
 <tt>snmpTrapReceiver.listenAddress=udp:0.0.0.0/1620</tt>.
 <div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Privileges Required for Default SNMP Port</b><br />The Hyperic Agent's default UDP port for receiving traps is 162, in the privileged range, which the agent cannot access unless it runs as as root (or as an Administrative user on Windows). If you run the agent under the context of an non-administrative user, configure a non-privileged port to receive SNMP traps, by adding this property to its <tt>agent.properties</tt> file.
 
 <p><tt>snmpTrapReceiver.listenAddress=udp:0.0.0.0/162</tt></p>
 
-<p>This enables the agent to receive traps through any interface on the platform at UDP port 1620. If desired, you can specify an specific interface's IP address, or different port in the unprivileged range (1024 or above). Restart the HQ Agent after defining the listen address.</p>
+<p>This enables the agent to receive traps through any interface on the platform at UDP port 1620. If desired, you can specify an specific interface's IP address, or different port in the unprivileged range (1024 or above). Restart the Hyperic Agent after defining the listen address.</p>
 
 <p><b>Note:</b> If you try to check that the SNMP port is open at this point, netstat will not show it open. Once you complete all steps in this procedure netstat output will produce expected results.</p></td></tr></table></div></li>
 	<li>On the NetApp Filer:
 	<ol>
 		<li>Verify that traps are enabled on the Netapp Filer.</li>
-		<li>Set up the HQ Agent as a trap destination on the NetApp Filer, supplying the HQ Agent's IP address and the SNMP port configured for the agent in the previous step.</li>
+		<li>Set up the HypericHyperic Agent as a trap destination on the NetApp Filer, supplying the Hyperic Agent's IP address and the SNMP port configured for the agent in the previous step.</li>
 	</ol>
 	</li>
 	<li>On the <b>Configuration Properties</b> page for the NetApp Filer in Hyperic:
@@ -402,7 +402,7 @@ customizeMacroTable('TBL1321720898429', columnTypes, 1, 'lightgoldenrodyellow', 
 <h2><a name="NetAppFiler-Step3ConfigureAlertDefinitions%28Optional%29"></a>Step 3 - Configure Alert Definitions (Optional)</h2>
 <p><a name="NetAppFiler-alerts"></a></p>
 
-<p>Create alert definitions as desired for your managed NetApp Filer resources. You can base alerts on filer metrics, and on  filer traps, if you have configured the filer to send traps to the HQ Agent.</p>
+<p>Create alert definitions as desired for your managed NetApp Filer resources. You can base alerts on filer metrics, and on  filer traps, if you have configured the filer to send traps to the Hyperic Agent.</p>
 
 <p>For information about creating alerts, see <a href="Define an Alert for a Resource.html" title="Define an Alert for a Resource">Define an Alert for a Resource</a>.</p>
 
@@ -1915,7 +1915,7 @@ customizeMacroTable('TBL1321720898429', columnTypes, 1, 'lightgoldenrodyellow', 
 </ul>
 
 
-<p>Check the HQ Agent log file to make sure that the agent has opened the proper UDP port. If properly configured, you should see messages similar to:</p>
+<p>Check the Hyperic Agent log file to make sure that the agent has opened the proper UDP port. If properly configured, you should see messages similar to:</p>
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre>2008-06-05 16:45:05,447 DEBUG [SNMPTrapReceiver] snmpTrapReceiver.listenAddress=udp:0.0.0.0/1620
 2008-06-05 16:45:05,572 DEBUG [SNMPTrapReceiver] Add 1:10003 for 10.2.0.2-switch
@@ -1936,7 +1936,7 @@ customizeMacroTable('TBL1321720898429', columnTypes, 1, 'lightgoldenrodyellow', 
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Feb 16, 2012 15:29</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 22, 2012 14:06</font></td>
 		    </tr>
 	    </table>
     </body>

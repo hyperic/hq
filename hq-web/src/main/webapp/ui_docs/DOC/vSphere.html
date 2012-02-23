@@ -21,18 +21,18 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Feb 15, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Feb 21, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
  
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1329332303186 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1329332303186 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1329332303186 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1329860893369 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1329860893369 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1329860893369 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1329332303186'>
+/*]]>*/</style><div class='rbtoc1329860893369'>
 <ul>
     <li><a href='#vSphere-vSpherePluginOverview'>vSphere Plugin Overview</a></li>
 <ul>
@@ -363,18 +363,14 @@ div.rbtoc1329332303186 li {margin-left: 0px;padding-left: 0px;}
 
 <p>Create a keystore for the Hyperic Agent on the on the platform where you will install the agent that will monitor vCenter. Import the vCenter server certificate into the truststore.</p>
 
-<p>{info:title=SSL Configuration Requirements (Hyperic 4.6 and later)</p>
-
-<p>In Hyperic 4.6 and later there are new SSL configuration requirements for secure communication between a Hyperic 4.6.x agent and a VMware vCenter server.</p>
+<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>SSL Configuration Requirements (Hyperic 4.6 and later)</b><br />In Hyperic 4.6 and later there are new SSL configuration requirements for secure communication between a Hyperic 4.6.x agent and a VMware vCenter server.
 
 <p>If the <tt>accept.unverified.certificates</tt> property in <tt>agent.properties</tt> is "false", as it is by default, the VMware vCenter server's unverified SSL certificate must be manually imported to a keystore that the Hyperic 4.6.x Agent can access. Otherwise, secure communication between the Hyperic 4.6.x Agent and VMware vCenter server will fail.</p>
 
-<p>If the <tt>accept.unverified.certificates</tt> property in <tt>agent.properties</tt> is "true", the vSphere plugin will automatically import the VMware vCenter server's unverified SSL certificate to the keystore accessible to the Hyperic 4.6.x agent. This is not recommended because it is less secure and expose the Hyperic Agent to man-in-the-middle attacks.</p>
-
-<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td></td></tr></table></div>
+<p>If the <tt>accept.unverified.certificates</tt> property in <tt>agent.properties</tt> is "true", the vSphere plugin will automatically import the VMware vCenter server's unverified SSL certificate to the keystore accessible to the Hyperic 4.6.x agent. This is not recommended because it is less secure and expose the Hyperic Agent to man-in-the-middle attacks.</p></td></tr></table></div>
 <h2><a name="vSphere-Step2InstallHypericAgent"></a>Step 2 - Install Hyperic Agent</h2>
 
-<p>Install a Hyperic Agent on the platform from which you will remotely monitor vCenter Server. For instructions, see Installing an Agent&#45;Only Package. </p>
+<p>Install a Hyperic Agent on the platform from which you will remotely monitor vCenter Server. For instructions, see <a href="Install an Agent-Only Package.html" title="Install an Agent-Only Package">Install an Agent&#45;Only Package</a> in <em>vFabric Hyperic Installation and Configuration</em>. </p>
 
 <div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Interactive Agent Configuration is Not Supported</b><br />You must configure the Hyperic Agent in its properties file. <b>Do not start the Hyperic Agent until you have configured its startup setting in its <tt>agent.properties</tt> file, as described in the following section</b>.</td></tr></table></div> 
 
@@ -510,7 +506,7 @@ Perform the configuration steps in this section if your vCenter instance manages
 
 <p>Installing a Hyperic Agent in each VM enables you to manage Hyperic-supported server types running in it.  In vFabric Hyperic, this enables you to correlate the behavior of resources throughout the managed resource hierarchy &#8212; from vCenter to managed servers in the VM. </p>
 
-<p>For installation instructions, see Installing an Agent&#45;Only Package. </p>
+<p>For installation instructions, see <a href="Install an Agent-Only Package.html" title="Install an Agent-Only Package">Install an Agent&#45;Only Package</a> in <em>vFabric Hyperic Installation and Configuration</em>. </p>
 
 <p><b>Note:</b> If you run a Hyperic Agent in a VM, Hyperic creates an operating system type platform type for it in inventory. For instance, if you run and agent in a VM running Linux, Hyperic creates a platform of type "Linux" for the system, in addition to the platform of type "vSphere VM" create for the VM itself. </p>
 
@@ -1192,7 +1188,7 @@ While a VM may&nbsp;have been configured to use 4 GB of RAM, as an example, it m
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Feb 16, 2012 15:29</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 22, 2012 14:06</font></td>
 		    </tr>
 	    </table>
     </body>

@@ -21,20 +21,21 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Feb 15, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Feb 22, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1329331447789 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1329331447789 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1329331447789 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1329933479855 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1329933479855 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1329933479855 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1329331447789'>
+/*]]>*/</style><div class='rbtoc1329933479855'>
 <ul>
     <li><a href='#AboutSSLinHyperic-HypericSSLSupport'>Hyperic SSL Support</a></li>
     <li><a href='#AboutSSLinHyperic-OverviewofHyperic4.6.xSSLConfigurationandDefaults'>Overview of Hyperic 4.6.x SSL Configuration and Defaults</a></li>
     <li><a href='#AboutSSLinHyperic-Hyperic4.6.xSSLCertificateProcessing'>Hyperic 4.6.x SSL Certificate Processing</a></li>
     <li><a href='#AboutSSLinHyperic-SSLBetweena4.6.xServerand4.5.xAgents'>SSL Between a 4.6.x Server and 4.5.x Agents</a></li>
+    <li><a href='#AboutSSLinHyperic-SSLandHypericProductPlugins'>SSL and Hyperic Product Plugins</a></li>
 </ul></div>
 
 <blockquote>
@@ -50,11 +51,9 @@ div.rbtoc1329331447789 li {margin-left: 0px;padding-left: 0px;}
 </blockquote>
 <h1><a name="AboutSSLinHyperic-HypericSSLSupport"></a>Hyperic SSL Support</h1>
 
-<p>Server-to-agent communication is <em>always</em> SSL; optionally, you can configure agent-to-server communications to be over SSL as well. </p>
+<p>Hyperic 4.6 and later supports the use of SSL communication for both server-to-agent and agent-to-server communications. Server-to-agent communication is <em>always</em> SSL; you cannot configure Hyperic to use plain HTTP for server-to-agent communication. You configure SSL for agent-to-server communication when you configure agent-server communications, either interactively at first agent startup, or in <tt>AgentHome/conf/agent.properties</tt> using the <tt>agent.setup.camSecure</tt> property.</p>
 
 <p>The Hyperic Agent can manage products over SSL, if the product plugin supports it.</p>
-
-<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>SSL Best Practices for New Hyperic Installations</b><br />VMware recommends that you install trusted keystores from you CA for Hyperic 4.6.x components. If you do not configure your own SSL keystores for Hyperic Agents and the Hyperic Server, the components will generate keystores with self-signed certificates &#8212; this is not recommended. If you do choose to run with Hyperic-generated keystores, update the password for each Hyperic-generated keystore; edit <tt><a href="agent.keystore.password.html" title="agent.keystore.password">agent.keystore.password</a></tt> in the <tt>agent.properties</tt> file, and restart the agent.</td></tr></table></div>
 
 <h1><a name="AboutSSLinHyperic-OverviewofHyperic4.6.xSSLConfigurationandDefaults"></a>Overview of Hyperic 4.6.x SSL Configuration and Defaults</h1>
 
@@ -68,7 +67,7 @@ div.rbtoc1329331447789 li {margin-left: 0px;padding-left: 0px;}
 
 
 <ul>
-	<li>Choose the "user-managed keystore" option when you install the Hyperic Server and supply the keystore path and password during the server installation dialog.
+	<li>When you run the Hyperic 4.6.x installer in <tt>-full</tt> mode, it offers you the option of configuring the location and password of an existing keystore on the Hyperic Server host.  Choose the "user-managed keystore" option and supply the keystore path and password during the server installation dialog.
 <div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Default Server Keystore</b><br />If you do <em>not</em> configure the server to use an existing keystore, and supply its location and password during server installation, the installer will create a keystore for the server with a self-signed certificate. The keystore, named <tt>hyperic.keystore</tt>, will be in <tt>ServerHome/conf</tt>, and have the password "hyperic". The server will present the self-signed certificate when communicating with agents.</td></tr></table></div></li>
 </ul>
 
@@ -106,8 +105,9 @@ div.rbtoc1329331447789 li {margin-left: 0px;padding-left: 0px;}
 
 <p>By default, the Hyperic Server and the Hyperic Agent do not import untrusted certificates unless you explicitly respond "yes" to the warning prompt described above. Note, however that both components can be configured to accept untrusted certificates automatically, with no warning. For security reasons, this practice is strongly discouraged. Check the values of <tt>agent.setup.acceptUnverifiedCertificate</tt> (in <tt>AgentHome/conf/agent.properties</tt>) and <tt>accept.unverified.certificates</tt> in <tt>ServerHome/conf/hq-server.conf</tt>. </p>
 
-<h1><a name="AboutSSLinHyperic-SSLBetweena4.6.xServerand4.5.xAgents"></a>SSL Between a 4.6.x Server and 4.5.x Agents</h1>
 <p><a name="AboutSSLinHyperic-compatibility"></a></p>
+
+<h1><a name="AboutSSLinHyperic-SSLBetweena4.6.xServerand4.5.xAgents"></a>SSL Between a 4.6.x Server and 4.5.x Agents</h1>
 
 <p>To ensure backwards compatibility with pre-4.6 Hyperic Agents, the Hyperic Server upgrade procedure does <em>not</em> provide a mechanism for configuring the server to access a user-managed keystore. </p>
 
@@ -115,7 +115,18 @@ div.rbtoc1329331447789 li {margin-left: 0px;padding-left: 0px;}
 
 <p>When a pre-4.6 Hyperic Agent first connects to a newly-upgraded Hyperic 4.6.x server, its self-signed certificate is imported into the server's keystore. </p>
 
+<p><a name="AboutSSLinHyperic-SslPlugins"></a></p>
+<h1><a name="AboutSSLinHyperic-SSLandHypericProductPlugins"></a>SSL and Hyperic Product Plugins </h1>
 
+<p>In Hyperic 4.6.x, Hyperic plugins that connect to managed products over SSL are updated to support certificate verification. To enable management of such products by a 4.6.x agent, it may be necessary to  manually import the target server's certificate into the agent keystore if the server's certificate is not trusted. Affected plugins include:</p>
+
+<ul>
+	<li><a href="vSphere.html" title="vSphere">vSphere</a></li>
+	<li><a href="RabbitMQ.html" title="RabbitMQ">RabbitMQ</a></li>
+</ul>
+
+
+<p>Import of the managed server's certificate is necessary only if the Hyperic Agent cannot verify the certificate. If the agent's keystore contains a CA cert and the managed server's certificate has been signed by that CA, the agent will be able verify the certificate. Otherwise, you should import the certificate of the signing CA, which is preferable to simply importing the managed server's certificate. If you are not sure of all of the CAs for signed certificates, you might consider importing the certificates in your JRE cacert file, which contains certificates for a variety of common CAs.</p>
 
 
 
@@ -131,7 +142,7 @@ div.rbtoc1329331447789 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Feb 16, 2012 15:28</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 22, 2012 14:06</font></td>
 		    </tr>
 	    </table>
     </body>
