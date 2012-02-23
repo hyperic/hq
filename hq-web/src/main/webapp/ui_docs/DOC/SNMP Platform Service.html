@@ -21,22 +21,22 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Feb 22, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1325700004356 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1325700004356 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1325700004356 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1329945622682 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1329945622682 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1329945622682 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1325700004356'>
+/*]]>*/</style><div class='rbtoc1329945622682'>
 <ul>
     <li><a href='#SNMPPlatformService-MonitoraRemoteSNMPAgent'>Monitor a Remote SNMP Agent</a></li>
     <li><a href='#SNMPPlatformService-ResourcePlugin%2CFunctions%2CandClasses'>Resource Plugin, Functions, and Classes</a></li>
-    <li><a href='#SNMPPlatformService-ConfiguretheSNMPServiceinHQ'>Configure the SNMP Service in HQ</a></li>
+    <li><a href='#SNMPPlatformService-ConfiguretheSNMPServiceinHyperic'>Configure the SNMP Service in Hyperic</a></li>
     <li><a href='#SNMPPlatformService-ConfigurationPropertiesPage'>Configuration Properties Page</a></li>
     <li><a href='#SNMPPlatformService-SNMPConfigurationOptions'>SNMP Configuration Options</a></li>
     <li><a href='#SNMPPlatformService-SNMPMetrics'>SNMP Metrics</a></li>
@@ -51,18 +51,18 @@ div.rbtoc1325700004356 li {margin-left: 0px;padding-left: 0px;}
 
 <h1><a name="SNMPPlatformService-ResourcePlugin%2CFunctions%2CandClasses"></a>Resource Plugin, Functions, and Classes</h1>
 
-<p>The SNMP service type is managed by HQ's netservices plugin and performs the following functions:</p>
+<p>The SNMP service type is managed by Hyperic's netservices plugin and performs the following functions:</p>
 
 <ul>
 	<li>Metric collection using the <tt>org.hyperic.hq.product.SNMPMeasurementPlugin</tt> class.</li>
 </ul>
 
 
-<h1><a name="SNMPPlatformService-ConfiguretheSNMPServiceinHQ"></a>Configure the SNMP Service in HQ</h1>
+<h1><a name="SNMPPlatformService-ConfiguretheSNMPServiceinHyperic"></a>Configure the SNMP Service in Hyperic</h1>
 
 <p>You manually configure an SNMP service on an operating system platform platform.</p>
 <ol>
-	<li>Navigate to the platform whose HQ Agent will monitor the service.</li>
+	<li>Navigate to the platform whose Hyperic Agent will monitor the service.</li>
 	<li>Select <b>New Platform Service</b> from the <b>Tools</b> menu.</li>
 	<li>On <b>New Service</b> page, enter a name for the service and select "SNMP" from the <b>Service Type</b> pull-down.</li>
 	<li>Supply all required values on the <b>Configuration Properties</b> page. Configuration options are defined below in <a href="#SNMPPlatformService-SNMPConfigurationOptions">SNMP Configuration Options</a>.</li>
@@ -82,7 +82,7 @@ div.rbtoc1325700004356 li {margin-left: 0px;padding-left: 0px;}
 <p>
 <div class='table-wrap'>
 
-<table id='TBL1321720898468' width='800px' class='confluenceTable'><tbody>
+<table id='TBL1321720902934' width='800px' class='confluenceTable'><tbody>
 <tr>
 <th class='confluenceTh'> name <br class="atl-forced-newline" /> </th>
 <th class='confluenceTh'> description <br class="atl-forced-newline" /> </th>
@@ -106,7 +106,7 @@ div.rbtoc1325700004356 li {margin-left: 0px;padding-left: 0px;}
 
 <div class='table-wrap'>
 
-<table id='TBL1321720898469' width='800px' class='confluenceTable'><tbody>
+<table id='TBL1321720902935' width='800px' class='confluenceTable'><tbody>
 <tr>
 <td class='confluenceTd'> snmpIp </td>
 <td class='confluenceTd'> SNMP agent IP address </td>
@@ -264,20 +264,20 @@ function customizeMacroTable(tableId,columnTypes,firstDataRowIndex,highlightColo
 
 var columnTypes = ['S'];
 var columnAttributes = 'style=&quot;width:15%;&quot;,style=&quot;width:15%;&quot;,style=&quot;width:15%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:20%;&quot;,style=&quot;width:15%;&quot;';
-customizeMacroTable('TBL1321720898468', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
+customizeMacroTable('TBL1321720902934', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
 //-->
  </script> 
 <script type='text/javascript'> <!-- 
 var columnTypes = ['S'];
 var columnAttributes = 'style=&quot;width:15%;&quot;,style=&quot;width:15%;&quot;,style=&quot;width:15%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:20%;&quot;,style=&quot;width:15%;&quot;';
-customizeMacroTable('TBL1321720898469', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
+customizeMacroTable('TBL1321720902935', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
 //-->
  </script> </p>
 
 <h1><a name="SNMPPlatformService-SNMPMetrics"></a>SNMP Metrics</h1>
 
 <ul>
-	<li>Availability - An SNMP service is considered available if the HQ Agent is able to get <tt>sysUpTime</tt> from the remote SNMP agent. Otherwise the service is reported to be unavailable.</li>
+	<li>Availability - An SNMP service is considered available if the Hyperic Agent is able to get <tt>sysUpTime</tt> from the remote SNMP agent. Otherwise the service is reported to be unavailable.</li>
 </ul>
 
 
@@ -314,7 +314,7 @@ customizeMacroTable('TBL1321720898469', columnTypes, 1, 'lightgoldenrodyellow', 
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Feb 16, 2012 15:29</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 22, 2012 14:06</font></td>
 		    </tr>
 	    </table>
     </body>

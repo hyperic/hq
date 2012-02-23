@@ -21,18 +21,18 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Feb 22, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1325699177009 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1325699177009 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1325699177009 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1329946587970 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1329946587970 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1329946587970 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1325699177009'>
+/*]]>*/</style><div class='rbtoc1329946587970'>
 <ul>
     <li><a href='#HQApidependencycommand-dependencyFunctionality'>dependency Functionality</a></li>
     <li><a href='#HQApidependencycommand-dependencyCommandOptions'>dependency Command Options</a></li>
@@ -74,7 +74,7 @@ div.rbtoc1325699177009 li {margin-left: 0px;padding-left: 0px;}
 
 <h1><a name="HQApidependencycommand-dependencyFunctionality"></a>dependency Functionality</h1>
 
-<p>The <b>dependency</b> command allows you to query HQ inventory in terms of dependency relationships. You can:</p>
+<p>The <b>dependency</b> command allows you to query Hyperic inventory in terms of dependency relationships. You can:</p>
 <ul>
 	<li>view and update the relationships between top level platforms and operating system platforms, and</li>
 	<li>view parent-child relationships between platforms, servers, and services</li>
@@ -83,7 +83,7 @@ div.rbtoc1325699177009 li {margin-left: 0px;padding-left: 0px;}
 
 <p>In the Hyperic inventory model, there are two sorts of platform resources:</p>
 <ul>
-	<li>Platforms that correspond to a host machine and its operating system have a&nbsp; "platform type" that identifies the host's operating system:&nbsp; "AIX", "HPUX", "Linux", and so on.&nbsp; For clarity, this kind of platform is referred to below as an <em>operating system platform</em> or a <em>dependent platform</em>. An operating system platform is the top resource in the  "platform-server-service" hierarchy of resources that an HQ Agent discovers on a host.</li>
+	<li>Platforms that correspond to a host machine and its operating system have a&nbsp; "platform type" that identifies the host's operating system:&nbsp; "AIX", "HPUX", "Linux", and so on.&nbsp; For clarity, this kind of platform is referred to below as an <em>operating system platform</em> or a <em>dependent platform</em>. An operating system platform is the top resource in the  "platform-server-service" hierarchy of resources that a Hyperic Agent discovers on a host.</li>
 </ul>
 
 
@@ -92,8 +92,8 @@ div.rbtoc1325699177009 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 
 
-<p>Once you have created and correctly configured a top level platform (for instance, a Cisco switch) in HQ inventory, you can associate it with the operating system host platforms that depend on it. Do so extends the reach of hierarchical alerting beyond the platform-server-service hierarchy to network devices and virtual hosts - so that the health of a parent resource can be considered during alert processing for dependent resources.</p>
-<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>The <b>dependency</b> API should be used only by advanced HQ administrators in consultation with Hyperic support or professional services. Under most circumstances, Hyperic recommends that administrators define network dependencies using the <b>Network and Host Dependency Manager</b>, available in the "Plugins" section of the <b>Administration</b> page in the vFabric Hyperic user interface.</td></tr></table></div>
+<p>Once you have created and correctly configured a top level platform (for instance, a Cisco switch) in Hyperic inventory, you can associate it with the operating system host platforms that depend on it. Do so extends the reach of hierarchical alerting beyond the platform-server-service hierarchy to network devices and virtual hosts - so that the health of a parent resource can be considered during alert processing for dependent resources.</p>
+<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>The <b>dependency</b> API should be used only by advanced Hyperic administrators in consultation with Hyperic support or professional services. Under most circumstances, Hyperic recommends that administrators define network dependencies using the <b>Network and Host Dependency Manager</b>, available in the "Plugins" section of the <b>Administration</b> page in the vFabric Hyperic user interface.</td></tr></table></div>
 
 
 <p>For more information about platform dependencies in Hyperic see <a href="Define Host Dependencies for Hierarchical Alerting.html" title="Define Host Dependencies for Hierarchical Alerting">Define Host Dependencies for Hierarchical Alerting</a>.</p>
@@ -130,7 +130,7 @@ div.rbtoc1325699177009 li {margin-left: 0px;padding-left: 0px;}
 </tr>
 <tr>
 <td class='confluenceTd'> <tt>&#45;-id=Integer</tt> </td>
-<td class='confluenceTd'> Where <tt>Integer</tt> is an integer value. Results are returned for the top level platform with the specified internal HQ ID. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Where <tt>Integer</tt> is an integer value. Results are returned for the top level platform with the specified internal Hyperic ID. <br class="atl-forced-newline" /> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> <tt>&#45;-name=regex</tt> </td>
@@ -525,7 +525,7 @@ hqapi.sh dependency list --children --prototype=Win32 --name=pat
 
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
-		<pre class="theme: Confluence; brush: java; gutter: false">List the immediate child resources under a resource based on the HQ inventory model (platform/server/services):
+		<pre class="theme: Confluence; brush: java; gutter: false">List the immediate child resources under a resource based on the Hyperic inventory model (platform/server/services):
 
 hqapi.sh dependency list --children --id=10611 --relation=containment
 &lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
@@ -592,7 +592,7 @@ hqapi.sh dependency list --children --id=10611 --relation=containment
 </tr>
 <tr>
 <td class='confluenceTd'> &#45;-id=IntegerValue </td>
-<td class='confluenceTd'> This required qualifier identifies, by its internal HQ ID, the top level platform whose dependency relationships to children will be deleted. </td>
+<td class='confluenceTd'> This required qualifier identifies, by its internal Hyperic ID, the top level platform whose dependency relationships to children will be deleted. </td>
 </tr>
 <tr>
 <td class='confluenceTd'> &#45;-relation </td>
@@ -655,7 +655,7 @@ hqapi.sh dependency list --children --id=10611 --relation=containment
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Feb 16, 2012 15:29</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 22, 2012 14:07</font></td>
 		    </tr>
 	    </table>
     </body>

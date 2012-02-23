@@ -21,7 +21,7 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Feb 10, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Feb 22, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
@@ -31,15 +31,15 @@
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1328895780477 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1328895780477 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1328895780477 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1329944441891 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1329944441891 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1329944441891 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1328895780477'>
+/*]]>*/</style><div class='rbtoc1329944441891'>
 <ul>
     <li><a href='#GemFire-GemFirePluginOverview'>GemFire Plugin Overview</a></li>
 <ul>
-    <li><a href='#GemFire-SupportedVersionsandRequirements'>Supported Versions and Requirements</a></li>
+    <li><a href='#GemFire-SupportedVersions'>Supported Versions</a></li>
     <li><a href='#GemFire-GemFireResourcesandtheHypericInventoryModel'>GemFire Resources and the Hyperic Inventory Model</a></li>
     <li><a href='#GemFire-ConfigurationOverview'>Configuration Overview</a></li>
 </ul>
@@ -58,7 +58,7 @@ div.rbtoc1328895780477 li {margin-left: 0px;padding-left: 0px;}
     <li><a href='#GemFire-ConfigurationInstructions'>Configuration Instructions</a></li>
 <ul>
     <li><a href='#GemFire-Step1%3AEnableGemFireMemberDiscoveryandMonitoring'>Step 1: Enable GemFire Member Discovery and Monitoring</a></li>
-    <li><a href='#GemFire-Step2%3AConfigureHQAgentfortheDS'>Step 2: Configure HQ Agent for the DS</a></li>
+    <li><a href='#GemFire-Step2%3AConfigureHypericAgentfortheDS'>Step 2: Configure Hyperic Agent for the DS</a></li>
     <li><a href='#GemFire-Step3%3AConfigureaPlatformfortheDS'>Step 3: Configure a Platform for the DS</a></li>
     <li><a href='#GemFire-Step4%3ASetEventTrackingOptions'>Step 4: Set Event Tracking Options</a></li>
     <li><a href='#GemFire-Step5%3ATailorPluginMonitoringDefaults'>Step 5: Tailor Plugin Monitoring Defaults</a></li>
@@ -72,7 +72,7 @@ div.rbtoc1328895780477 li {margin-left: 0px;padding-left: 0px;}
     <li><a href='#GemFire-GatewayHub6.5GatewayMetrics'>Gateway Hub 6.5 Gateway Metrics</a></li>
 </ul>
     <li><a href='#GemFire-GemFireEvents'>GemFire Events</a></li>
-    <li><a href='#GemFire-HQGemFireView'>HQ GemFire View</a></li>
+    <li><a href='#GemFire-HypericGemFireView'>Hyperic GemFire View</a></li>
 <ul>
     <li><a href='#GemFire-GemFireViewforaDS'>GemFire View for a DS</a></li>
     <li><a href='#GemFire-GemFireViewforaCacheServerorApplicationPeer'>GemFire View for a Cache Server or Application Peer</a></li>
@@ -102,13 +102,13 @@ GemFire Distributed System
 </pre>
 </div></div> 
 
-<h2><a name="GemFire-SupportedVersionsandRequirements"></a>Supported Versions and Requirements </h2>
+<h2><a name="GemFire-SupportedVersions"></a>Supported Versions</h2>
 
-<p>The GemFire plugin supports GemFire v6.5, and requires HQ Agent v4.6. </p>
+<p>The GemFire plugin supports GemFire v6.5</p>
 
 <h2><a name="GemFire-GemFireResourcesandtheHypericInventoryModel"></a>GemFire Resources and the Hyperic Inventory Model </h2>
 
-<p>The table below has a brief description of each GemFire resource type; the right column indicates the inventory level for a type in the HQ inventory model. </p>
+<p>The table below has a brief description of each GemFire resource type; the right column indicates the inventory level for a type in the Hyperic inventory model. </p>
 <div class='table-wrap'>
 <table class='confluenceTable'><tbody>
 <tr>
@@ -130,7 +130,7 @@ GemFire Distributed System
 </tr>
 <tr>
 <td class='confluenceTd'> JMX Agent </td>
-<td class='confluenceTd'> A GemFire <em>JMX Agent</em>&nbsp;&nbsp;is an administrative member of a DS through which the HQ Agent obtains GemFire resource and metric data. The JMX Agent returns ModelMBeans attributes that correspond to inventory properties and metric values for members of the DS. </td>
+<td class='confluenceTd'> A GemFire <em>JMX Agent</em>&nbsp;&nbsp;is an administrative member of a DS through which the Hyperic Agent obtains GemFire resource and metric data. The JMX Agent returns ModelMBeans attributes that correspond to inventory properties and metric values for members of the DS. </td>
 <td class='confluenceTd'> server </td>
 </tr>
 <tr>
@@ -163,9 +163,9 @@ GemFire Distributed System
 <td class='confluenceTd'> regions </td>
 <td class='confluenceTd'> In GemFire, a region is a set of cached objects&nbsp;that are managed in accordance with the same policies. &nbsp;For example, rules for expiration, data policy, scope, the directories to which region data is written, the Gateway Hub to which region events are distributed, and so on. <br class="atl-forced-newline" /> 
 <br class="atl-forced-newline" /> 
-A region can have subregions, which in turn can have their own subregions. Regions provide a hierarchical namespace for sets of objects in a cache. &nbsp;A region can exist in any non-admin member of the DS. The name of a region in HQ indicates the resource type of its parent in the managed resource hierarchy: <br class="atl-forced-newline" /> 
+A region can have subregions, which in turn can have their own subregions. Regions provide a hierarchical namespace for sets of objects in a cache. A region can exist in any non-admin member of the DS. The name of a region in Hyperic indicates the resource type of its parent in the managed resource hierarchy: <br class="atl-forced-newline" /> 
 <ul>
-	<li>Application Peer 6.5&nbsp;Region</li>
+	<li>Application Peer 6.5 Region</li>
 	<li>Cache Server 6.5 Region</li>
 	<li>Gateway Hub 6.5 Region</li>
 </ul>
@@ -176,16 +176,16 @@ A region can have subregions, which in turn can have their own subregions. Regio
 </div>
 
 
-<p><b>Note:</b> For more information about the managed resource hierarchy, see <a href="Resources, Resource Types and Inventory Types.html" title="Resources, Resource Types and Inventory Types">Resources, Resource Types and Inventory Types</a>. </p>
+<p><b>Note:</b> For more information about the managed resource hierarchy, see <a href="Resources, Resource Types and Inventory Types.html" title="Resources, Resource Types and Inventory Types">Resources, Resource Types and Inventory Types</a> in <em>vFabric Hyperic Overview</em>.</p>
 
 <h2><a name="GemFire-ConfigurationOverview"></a>Configuration Overview </h2>
 
-<p>The GemFire plugin uses the GemFire JMX Agent to obtain inventory properties and metrics for the GemFire components in a GemFire Distributed System (DS). You configure an HQ Agent to communicate with the DS's JMX Agent. The HQ Agent can run on the same platform as the JMX Agent, or on another platform. </p>
+<p>The GemFire plugin uses the GemFire JMX Agent to obtain inventory properties and metrics for the GemFire components in a GemFire Distributed System (DS). You configure a Hyperic Agent to communicate with the DS's JMX Agent. The Hyperic Agent can run on the same platform as the JMX Agent, or on another platform. </p>
 
-<p>The key requirements for successfully managing GemFire components with HQ are: </p>
+<p>The key requirements for successfully managing GemFire components with Hyperic are: </p>
 
 <ul>
-	<li>The HQ Agent must be able to connect to the JMX Agent. If the HQ Agent is on a different platform than the JMX Agent for the DS, you must ensure that the HQ Agent can connect to the JMX Agent's RMI service.</li>
+	<li>The Hyperic Agent must be able to connect to the JMX Agent. If the Hyperic Agent is on a different platform than the JMX Agent for the DS, you must ensure that the Hyperic Agent can connect to the JMX Agent's RMI service.</li>
 </ul>
 
 
@@ -227,7 +227,7 @@ plugin.gemfire.AlertsPlugin <br class="atl-forced-newline" /> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Live Data </td>
-<td class='confluenceTd'> The <tt>GemFireLiveData</tt> class provides a live data user interface for viewing member metrics in real-time. (As opposed to the <b>Monitor</b> tab for a GemFire component, which presents metrics that have been saved to the HQ database.) See <a href="#GemFire-HQGemFireView">HQ GemFire View</a>. </td>
+<td class='confluenceTd'> The <tt>GemFireLiveData</tt> class provides a live data user interface for viewing member metrics in real-time. (As opposed to the <b>Monitor</b> tab for a GemFire component, which presents metrics that have been saved to the Hyperic database.) See <a href="#GemFire-HypericGemFireView">Hyperic GemFire View</a>. </td>
 <td class='confluenceTd'> com.vmware.springsource.hyperic. <br class="atl-forced-newline" /> 
 plugin.gemfire.GemFireLiveData <br class="atl-forced-newline" /> </td>
 </tr>
@@ -516,25 +516,25 @@ RegionCollector <br class="atl-forced-newline" /> </td>
 
 <p>Follow these steps to ensure that the GemFire plugin can discover and monitor GemFire components: </p>
 <ol>
-	<li>If you plan to run the HQ Agent on the same platform as the JMX Agent for the DS, skip to Step 2.&nbsp;If you plan to run the HQ Agent on a <em>different</em> platform than the JMX Agent for the DS, you must ensure that the HQ Agent can connect to the JMX Agent's RMI service &#8212; you can do this by specifying the JMX Agent's <tt>rmi-bind-address</tt> when you start it:<br/>
+	<li>If you plan to run the Hyperic Agent on the same platform as the JMX Agent for the DS, skip to Step 2. If you plan to run the Hyperic Agent on a <em>different</em> platform than the JMX Agent for the DS, you must ensure that the Hyperic Agent can connect to the JMX Agent's RMI service &#8212; you can do this by specifying the JMX Agent's <tt>rmi-bind-address</tt> when you start it:<br/>
 <tt>./agent start rmi-bind-address=IP_Address &#45;dir/AgentHome</tt> </li>
 	<li>Enable statistics sampling for each GemFire member in the DS &#8212; by default, statistics sampling is not enabled. To enable it, edit each member's <tt>gemfire.properties</tt> file to set the&nbsp;<tt>statistic-sampling-enabled</tt> property to <tt>true</tt>.</li>
 </ol>
 
 
-<h2><a name="GemFire-Step2%3AConfigureHQAgentfortheDS"></a>Step 2: Configure HQ Agent for the DS </h2>
+<h2><a name="GemFire-Step2%3AConfigureHypericAgentfortheDS"></a>Step 2: Configure Hyperic Agent for the DS </h2>
 
 <p>If you have not already done so, either: </p>
 
 <ul>
-	<li>install an HQ Agent to monitor the DS, either on the same platform as the JMX Agent, or on another platform (see Installing an Agent-Only Package for instructions), or</li>
-	<li>Select an existing HQ Agent on a remote platform to monitor the DS.</li>
+	<li>install a Hyperic Agent to monitor the DS, either on the same platform as the JMX Agent, or on another platform (see <a href="Install an Agent-Only Package.html" title="Install an Agent-Only Package">Install an Agent&#45;Only Package</a> in <em>vFabric Hyperic Installation and Configuration</em> for instructions), or</li>
+	<li>Select an existing Hyperic Agent on a remote platform to monitor the DS.</li>
 </ul>
 
 
 <h2><a name="GemFire-Step3%3AConfigureaPlatformfortheDS"></a>Step 3: Configure a Platform for the DS </h2>
 
-<p>These instructions assume the HQ Agent that will monitor the DS is up and running. </p>
+<p>These instructions assume the Hyperic Agent that will monitor the DS is up and running. </p>
 
 <ol>
 	<li><b>Resources &gt; Browse</b>.</li>
@@ -545,7 +545,7 @@ RegionCollector <br class="atl-forced-newline" /> </td>
 		<li>In the "General Properties" section,
 		<ol>
 			<li>Select <b>Gemfire Distributed System</b> from the <b>Platform Type</b> pulldown.</li>
-			<li>If the HQ Agent is on a different platform from the JMX Agent, select its address:port combination from the <b>Agent Connection</b> pulldown.</li>
+			<li>If the Hyperic Agent is on a different platform from the JMX Agent, select its address:port combination from the <b>Agent Connection</b> pulldown.</li>
 			<li>Enter the FQDN of the platform where the JMX Agent runs.</li>
 			<li>Enter the IP Address of the platform where the JMX Agent runs.</li>
 			<li>Click <b>OK</b>.</li>
@@ -553,7 +553,7 @@ RegionCollector <br class="atl-forced-newline" /> </td>
 		</li>
 		<li>In the "Configuration Properties" section of the <b>Inventory</b> page for the new platform:
 		<ul>
-			<li><b>jmx.url</b> &#8212; If the HQ Agent and the JMX Agent are on different platforms, edit the default JMX URL shown to include the IP address of the JMX Agent.
+			<li><b>jmx.url</b> &#8212; If the Hyperic Agent and the JMX Agent are on different platforms, edit the default JMX URL shown to include the IP address of the JMX Agent.
 			<ul>
 				<li>The default <b>jmx.url</b> is:<br/>
 <tt>service:jmx:rmi:///jndi/rmi://localhost:1099/jmxconnector</tt> </li>
@@ -573,9 +573,9 @@ RegionCollector <br class="atl-forced-newline" /> </td>
 
 <h2><a name="GemFire-Step4%3ASetEventTrackingOptions"></a>Step 4: Set Event Tracking Options </h2>
 
-<p>To enable log tracking, click the <b>Enable Log Tracking</b> box in the <b>Monitoring</b> section of the <b>Configuration Properties</b> page for the DS. HQ will log events of level "ERR" for the alert types listed in <a href="#GemFire-GemFireEvents">GemFire Events</a>. </p>
+<p>To enable log tracking, click the <b>Enable Log Tracking</b> box in the <b>Monitoring</b> section of the <b>Configuration Properties</b> page for the DS. Hyperic will log events of level "ERR" for the alert types listed in <a href="#GemFire-GemFireEvents">GemFire Events</a>. </p>
 
-<p>For information about HQ log tracking functionality and configuration options, and how to view log events, see <a href="Set Up Log Tracking for a Resource.html" title="Set Up Log Tracking for a Resource">Set Up Log Tracking for a Resource</a>. </p>
+<p>For information about Hyperic log tracking functionality and configuration options, and how to view log events, see <a href="Set Up Log Tracking for a Resource.html" title="Set Up Log Tracking for a Resource">Set Up Log Tracking for a Resource</a>. </p>
 
 
 <h2><a name="GemFire-Step5%3ATailorPluginMonitoringDefaults"></a>Step 5: Tailor Plugin Monitoring Defaults </h2>
@@ -614,7 +614,7 @@ RegionCollector <br class="atl-forced-newline" /> </td>
 <tr>
 <td class='confluenceTd'> <font color="navy">Availability</font> </td>
 <td class='confluenceTd'> <font color="navy">Availability</font> </td>
-<td class='confluenceTd'>  The DS is considered available if the HQ Agent connect to the JMX Agent for the DS.</td>
+<td class='confluenceTd'>  The DS is considered available if the Hyperic Agent can connect to the JMX Agent for the DS.</td>
 <td class='confluenceTd'> <font color="navy">percentage</font> </td>
 <td class='confluenceTd'> <font color="navy">AVAILABILITY</font> </td>
 <td class='confluenceTd'> <font color="navy">true</font> </td>
@@ -967,7 +967,7 @@ cache.region.lost </td>
 </div>
 
 
-<h1><a name="GemFire-HQGemFireView"></a>HQ GemFire View </h1>
+<h1><a name="GemFire-HypericGemFireView"></a>Hyperic GemFire View </h1>
 
 <p>VMware vFabric™ Hyperic®'s GemFire plugin provides a live data user interface for viewing metrics in real-time. &nbsp;(As opposed to the <b>Monitor</b> tab for a GemFire component, which presents metrics that have been saved to the Hyperic database.) &nbsp;</p>
 
@@ -1032,7 +1032,7 @@ cache.region.lost </td>
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Feb 16, 2012 15:29</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 22, 2012 14:06</font></td>
 		    </tr>
 	    </table>
     </body>

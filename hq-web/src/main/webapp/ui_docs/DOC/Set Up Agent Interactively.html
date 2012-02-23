@@ -21,15 +21,15 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Feb 22, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1325710826511 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1325710826511 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1325710826511 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1329943908182 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1329943908182 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1329943908182 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1325710826511'>
+/*]]>*/</style><div class='rbtoc1329943908182'>
 <ul>
     <li><a href='#SetUpAgentInteractively-AbouttheAgentConfigurationDialog'>About the Agent Configuration Dialog</a></li>
     <li><a href='#SetUpAgentInteractively-LaunchtheConfigurationDialog'>Launch the Configuration Dialog</a></li>
@@ -94,7 +94,7 @@ sh hq-agent.bat start</pre>
 <h1><a name="SetUpAgentInteractively-AgentConfigurationDialog"></a>Agent Configuration Dialog</h1>
 
 <ol>
-	<li><em>Should Agent communications to HQ be unidirectional [docbox:default=no]</em>
+	<li><em>Should Agent communications to HQ be unidirectional [default=no]</em>
 	<ul>
 		<li>This prompt only appears if you are installing vFabric Hyperic. To understand this option, see <a href="About Agent - Server Communication.html" title="About Agent - Server Communication">About Agent &#45; Server Communication</a>.</li>
 	</ul>
@@ -105,7 +105,7 @@ sh hq-agent.bat start</pre>
 		<li>If there is a firewall blocking traffic from the agent to the server, specify the address of the firewall.</li>
 	</ul>
 	</li>
-	<li><em>Should Agent communications to HQ always be secure [docbox:default=yes]</em>.
+	<li><em>Should Agent communications to HQ always be secure [default=yes]</em>.
 	<ul>
 		<li>Accept the default to configure Hyperic to use SSL for agent-to-server communication. (Server-agent communication is <em>always</em> SSL.)</li>
 		<li>SSL configuration is strongly recommended, and <b>required</b> if you configured unidirectional communications in Step 1.</li>
@@ -114,11 +114,11 @@ sh hq-agent.bat start</pre>
 	</li>
 	<li>You are prompted to identify the server port where the Hyperic server listens for agent communication. Depending on whether you selected SSL in the previous step, one of the following prompts appears:
 	<ul>
-		<li><em>What is the secure HQ server port [docbox:default=7443]</em> &#8212; If the Hyperic Server is configured to listen for SSL communications on the default SSL port of 7443, press <b>Return</b>.</li>
-		<li><em>What is the HQ server port [docbox:default=7080]</em> &#8212; If the Hyperic Server is configured to listen on the default port of 7080, press <b>Return</b>. If there is a firewall blocking traffic from the agent to the server, configure it to forward traffic on TCP port 7080 (or 7443) to the host running the Hyperic Server.</li>
+		<li><em>What is the secure HQ server port [default=7443]</em> &#8212; If the Hyperic Server is configured to listen for SSL communications on the default SSL port of 7443, press <b>Return</b>.</li>
+		<li><em>What is the HQ server port [default=7080]</em> &#8212; If the Hyperic Server is configured to listen on the default port of 7080, press <b>Return</b>. If there is a firewall blocking traffic from the agent to the server, configure it to forward traffic on TCP port 7080 (or 7443) to the host running the Hyperic Server.</li>
 	</ul>
 	</li>
-	<li><em>What is your HQ login [docbox:default=hqadmin]:</em>
+	<li><em>What is your HQ login [default=hqadmin]:</em>
 	<ul>
 		<li>By default, the Hyperic Server is initially configured with an administrative account with username <tt>hqadmin</tt>. Unless you have configured a different Hyperic user account for agent-server communications, accept the default.</li>
 	</ul>
@@ -128,14 +128,14 @@ sh hq-agent.bat start</pre>
 		<li>Enter the password for the username you supplied at the previous prompt.</li>
 	</ul>
 	</li>
-	<li><em>What IP should HQ use to contact the agent [docbox:default=n.n.n.n]</em>
+	<li><em>What IP should HQ use to contact the agent [default=n.n.n.n]</em>
 	<ul>
 		<li>The prompt will show the first IP address the agent detects on the host.</li>
 		<li>If there is another IP address on the host you prefer to use, enter it.</li>
 		<li>If there is a firewall blocking traffic from the server to the agent, enter the IP address of the firewall, and configure the firewall to forward traffic intended for the Hyperic Agent to the listen address of the agent host.</li>
 	</ul>
 	</li>
-	<li><em>What port should HQ use to contact the agent [docbox:default=2144]</em>
+	<li><em>What port should HQ use to contact the agent [default=2144]</em>
 	<ul>
 		<li>Enter the agent port the Hyperic Server should use when it initiates contact with the agent. Specify the port that the agent binds to at startup, which by default is 2144.</li>
 		<li>If you have previously edited <tt>agent.properties</tt> to explicitly define a different listen port, using the optional <tt>agent.listenPort</tt> property, that is the value you should supply to this prompt.</li>
@@ -172,7 +172,7 @@ Successfully setup agent</pre>
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Feb 16, 2012 15:28</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 22, 2012 14:06</font></td>
 		    </tr>
 	    </table>
     </body>

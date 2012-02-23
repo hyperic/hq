@@ -21,22 +21,22 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Feb 22, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1325700012145 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1325700012145 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1325700012145 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1329945262754 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1329945262754 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1329945262754 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1325700012145'>
+/*]]>*/</style><div class='rbtoc1329945262754'>
 <ul>
     <li><a href='#InetAddressPingPlatformService-MonitoringanInternetAddress'>Monitoring an Internet Address</a></li>
     <li><a href='#InetAddressPingPlatformService-ResourcePlugin%2CFunctions%2CandClasses'>Resource Plugin, Functions, and Classes</a></li>
-    <li><a href='#InetAddressPingPlatformService-ConfiguretheInetAddressPingServiceinHQ'>Configure the InetAddress Ping Service in HQ</a></li>
+    <li><a href='#InetAddressPingPlatformService-ConfiguretheInetAddressPingServiceinHyperic'>Configure the InetAddress Ping Service in Hyperic</a></li>
     <li><a href='#InetAddressPingPlatformService-ConfigurationPropertiesPage'>Configuration Properties Page</a></li>
     <li><a href='#InetAddressPingPlatformService-InetAddressPingConfigurationOptions'>InetAddress Ping Configuration Options</a></li>
     <li><a href='#InetAddressPingPlatformService-InetAddressPingMetrics'>InetAddress Ping Metrics</a></li>
@@ -47,18 +47,18 @@ div.rbtoc1325700012145 li {margin-left: 0px;padding-left: 0px;}
 
 <h1><a name="InetAddressPingPlatformService-MonitoringanInternetAddress"></a>Monitoring an Internet Address</h1>
 
-<p>You can set up a platform service to report the availability of a remote host by pinging its internet address. You configure a platform service of type "InetAddress Ping" on the operating system platform of your choice. The HQ Agent on that platform pings the address and reports availability under the newly created platform service.</p>
+<p>You can set up a platform service to report the availability of a remote host by pinging its internet address. You configure a platform service of type "InetAddress Ping" on the operating system platform of your choice. The Hyperic Agent on that platform pings the address and reports availability under the newly created platform service.</p>
 
 <p>Note these requirements:</p>
 <ul>
-	<li>The HQ Agent must run with Java 1.5 or higher.</li>
-	<li>On Unix-like systems, the HQ Agent must run as root to ICMP ping some hosts.</li>
+	<li>The Hyperic Agent must run with Java 1.5 or higher.</li>
+	<li>On Unix-like systems, the Hyperic Agent must run as root to ICMP ping some hosts.</li>
 </ul>
 
 
 <h1><a name="InetAddressPingPlatformService-ResourcePlugin%2CFunctions%2CandClasses"></a>Resource Plugin, Functions, and Classes</h1>
 
-<p>The InetAddress Ping service type is managed by HQ's netservices plugin and performs the following functions:</p>
+<p>The InetAddress Ping service type is managed by Hyperic's netservices plugin and performs the following functions:</p>
 <ul>
 	<li>Metric collection using the <tt>org.hyperic.hq.plugin.netservices.InetAddressChecker</tt> class.</li>
 </ul>
@@ -69,7 +69,7 @@ div.rbtoc1325700012145 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 
 
-<h1><a name="InetAddressPingPlatformService-ConfiguretheInetAddressPingServiceinHQ"></a>Configure the InetAddress Ping Service in HQ</h1>
+<h1><a name="InetAddressPingPlatformService-ConfiguretheInetAddressPingServiceinHyperic"></a>Configure the InetAddress Ping Service in Hyperic</h1>
 
 <p>The <b>InetAddress Ping</b> service type must be manually configured.</p>
 <ol>
@@ -92,7 +92,7 @@ div.rbtoc1325700012145 li {margin-left: 0px;padding-left: 0px;}
 <p>
 <div class='table-wrap'>
 
-<table id='TBL1321720898453' width='800px' class='confluenceTable'><tbody>
+<table id='TBL1321720902919' width='800px' class='confluenceTable'><tbody>
 <tr>
 <th class='confluenceTh'> name <br class="atl-forced-newline" /> </th>
 <th class='confluenceTh'> description <br class="atl-forced-newline" /> </th>
@@ -138,14 +138,14 @@ function customizeMacroTable(tableId,columnTypes,firstDataRowIndex,highlightColo
 
 var columnTypes = ['S'];
 var columnAttributes = 'style=&quot;width:10%;&quot;,style=&quot;width:15%;&quot;,style=&quot;width:15%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:30%;&quot;,style=&quot;width:10%;&quot;';
-customizeMacroTable('TBL1321720898453', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
+customizeMacroTable('TBL1321720902919', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
 //-->
  </script>  </p>
 
 <h1><a name="InetAddressPingPlatformService-InetAddressPingMetrics"></a>InetAddress Ping Metrics</h1>
 
 <ul>
-	<li>Availability - The HQ Agent checks the availability of internet address using the <tt>java.net.InetAddress.isReachable</tt> method. For more information, see <a href="http://download.oracle.com/javase/1,5.0/docs/api/java/net/InetAddress.html">http://download.oracle.com/javase/1,5.0/docs/api/java/net/InetAddress.html</a></li>
+	<li>Availability - The Hyperic Agent checks the availability of internet address using the <tt>java.net.InetAddress.isReachable</tt> method. For more information, see <a href="http://download.oracle.com/javase/1,5.0/docs/api/java/net/InetAddress.html">http://download.oracle.com/javase/1,5.0/docs/api/java/net/InetAddress.html</a></li>
 </ul>
 
 
@@ -174,7 +174,7 @@ customizeMacroTable('TBL1321720898453', columnTypes, 1, 'lightgoldenrodyellow', 
 
 <p>To enable log tracking, click the <b>Enable Log Tracking</b> box in the <b>Monitoring</b> section of the <b>Configuration Properties</b> page.</p>
 
-<p>For information about HQ log tracking functionality and configuration options, and how to view log events, see <a href="Set Up Log Tracking for a Resource.html" title="Set Up Log Tracking for a Resource">Set Up Log Tracking for a Resource</a>.</p>
+<p>For information about Hyperic log tracking functionality and configuration options, and how to view log events, see <a href="Set Up Log Tracking for a Resource.html" title="Set Up Log Tracking for a Resource">Set Up Log Tracking for a Resource</a>.</p>
 
 				    
                     			    </td>
@@ -185,7 +185,7 @@ customizeMacroTable('TBL1321720898453', columnTypes, 1, 'lightgoldenrodyellow', 
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Feb 16, 2012 15:29</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 22, 2012 14:06</font></td>
 		    </tr>
 	    </table>
     </body>
