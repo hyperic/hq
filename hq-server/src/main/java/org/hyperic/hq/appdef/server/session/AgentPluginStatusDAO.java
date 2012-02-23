@@ -277,18 +277,6 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
                            .list();
     }
 
-    Long getNumAutoUpdatingAgents() {
-        String serverMajorVersion = serverConfigManager.getServerMajorVersion();
-        final String sql = new StringBuilder(150)
-            .append("select count(distinct agent_id) from EAM_AGENT_PLUGIN_STATUS s ")
-            .append(LIMIT_S_TO_CURRENT_AGENTS)
-            .append("and exists (select 1 from EAM_PLATFORM p where p.agent_id = s.agent_id)")
-            .toString();
-        final SQLQuery query = getSession().createSQLQuery(sql);
-        query.setParameter("serverVersion", serverMajorVersion);
-        return ((Number) query.uniqueResult()).longValue();
-    }
-
     @SuppressWarnings("unchecked")
     public Collection<Agent> getAutoUpdatingAgents() {
         String serverMajorVersion = serverConfigManager.getServerMajorVersion();
