@@ -51,6 +51,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class AgentDAO extends HibernateDAO<Agent> {
     private static final Log log = LogFactory.getLog(AgentDAO.class);
+    private static final String LIMIT_A_TO_CURRENT_AGENTS = "a.version >= :serverVersion ";
     private static final String LIMIT_A_TO_OLD_AGENTS = "a.version < :serverVersion ";
     
     private final ServerConfigManager serverConfigManager;
@@ -167,6 +168,19 @@ public class AgentDAO extends HibernateDAO<Agent> {
         query.setParameter("serverVersion", serverConfigManager.getServerMajorVersion());        
         return ((Number) query.uniqueResult()).longValue();
     }
+    
+
+    public long getNumAutoUpdatingAgents() {
+        final String sql = new StringBuilder(150)
+            .append("select count(a) from Agent a where ")
+            .append(LIMIT_A_TO_CURRENT_AGENTS)
+            .append("and exists (select 1 from Platform p where p.agent.id = a.id)")
+            .toString();
+        final Query query = getSession().createQuery(sql);
+        query.setParameter("serverVersion", serverConfigManager.getServerMajorVersion());
+        return ((Number) query.uniqueResult()).longValue();
+    }
+    
 
     /**
      * 
