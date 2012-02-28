@@ -80,7 +80,12 @@ public class RemoveAction
         Integer sessionId = RequestUtils.getSessionId(request);
 
         log.trace("removing users");
-        authzBoss.removeSubject(sessionId, users);
+        try {
+            authzBoss.removeSubject(sessionId, users);
+        } catch (Exception e) {
+            log.error("Error deleting user", e);
+            throw e;
+	}
 
         RequestUtils.setConfirmation(request, "admin.role.confirm.RemoveUsers");
         return returnSuccess(request, mapping, params, false);
