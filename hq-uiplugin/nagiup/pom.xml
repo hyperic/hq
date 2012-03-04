@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.hyperic.hq.uiplugin</groupId>
 		<artifactId>hq-uiplugin-parent</artifactId>
-		<version>4.6.5.BUILD-SNAPSHOT</version>
+		<version>4.6.6.BUILD-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>nagiup</artifactId>
