@@ -4,11 +4,11 @@
 	<modelVersion>4.0.0</modelVersion>
 	
 	<parent>
-		<groupId>org.hyperic.hq</groupId>
-		<artifactId>hq-parent</artifactId>
-		<version>5.0.BUILD-SNAPSHOT</version>
+		<groupId>org.hyperic.hq.agent.handler</groupId>
+		<artifactId>modules</artifactId>
+		<version>5.0.MVN3.BUILD-SNAPSHOT</version>
 	</parent>
-	
+		
 	<groupId>org.hyperic.hq.agent.handler</groupId>
 	<artifactId>hq-agent-handler-commands</artifactId>
 	<packaging>jar</packaging>

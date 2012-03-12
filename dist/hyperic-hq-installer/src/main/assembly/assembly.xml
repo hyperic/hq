@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <assembly>
-	<id>sparc-solaris</id>
+	<id>postgres-all-in-one</id>
 	<formats>
-		<format>tar.gz</format>
+		<format>zip</format>
 	</formats>
 
 	<componentDescriptors>
@@ -10,31 +10,21 @@
 	</componentDescriptors>
 
 	<dependencySets>
-		<dependencySet>
-			<useProjectArtifact>false</useProjectArtifact>
-			<useTransitiveDependencies>false</useTransitiveDependencies>
-			<outputDirectory>installer/jres</outputDirectory>
-			<fileMode>0644</fileMode>
-			<directoryMode>0755</directoryMode>
-			<includes>
-				<include>org.hyperic.jre:sparc-sun-solaris</include>
-			</includes>
-		</dependencySet>
+		
 		<dependencySet>
 			<useProjectArtifact>false</useProjectArtifact>
 			<useTransitiveDependencies>false</useTransitiveDependencies>
 			<outputDirectory>/</outputDirectory>
 			<includes>
-				<include>org.hyperic.hq.dist:hyperic-hq-agent:tar.gz:sparc-solaris</include>
+				<include>org.hyperic.hq.dist:hyperic-hq-agent:zip:noJRE</include>
 			</includes>
 		</dependencySet>
 		<dependencySet>
 			<useProjectArtifact>false</useProjectArtifact>
 			<useTransitiveDependencies>false</useTransitiveDependencies>
 			<outputDirectory>/installer/data/hqdb</outputDirectory>
-			<unpack>true</unpack>
 			<includes>
-				<include>postgresql:postgresql:*:sparc-sun-solaris</include>
+				<include>postgresql:postgresql:*:*</include>
 			</includes>
 		</dependencySet>
 	</dependencySets>

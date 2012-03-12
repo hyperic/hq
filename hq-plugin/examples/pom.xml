@@ -7,7 +7,7 @@
 	<artifactId>examples</artifactId>
 	<packaging>pom</packaging>
 	<name>Hyperic HQ Plugin - Examples</name>
-	<version>5.0.BUILD-SNAPSHOT</version>
+	<version>5.0.MVN3.BUILD-SNAPSHOT</version>
 
 	<build>
 		<plugins>
@@ -61,6 +61,7 @@
 						<descriptors>
 							<descriptor>src/main/assembly/assembly.xml</descriptor>
 						</descriptors>
+						<appendAssemblyId>false</appendAssemblyId>
 					</configuration>
 				</plugin>
 				<plugin>

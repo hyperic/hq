@@ -3,20 +3,19 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.hyperic.hq.plugin</groupId>
+	<parent>
+        <groupId>org.hyperic.hq.plugin</groupId>
+        <artifactId>modules</artifactId>
+       <version>5.0.MVN3.BUILD-SNAPSHOT</version>
+    </parent>
+
 	<artifactId>alfresco-plugin</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - Alfresco Plugin</name>
-	<version>5.0.BUILD-SNAPSHOT</version>
 
+	    <!-- inhetited from modules parent 	
 	<dependencies>
-		<dependency>
-			<groupId>org.hyperic.hq</groupId>
-			<artifactId>hq-pdk</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<!-- During a clover build, we end up using an instrumented hq-pdk jar.  
-		Since we are skipping instrumentation, we end up with a ClassNotFoundException for clover on exec-->
+	
 		<dependency>
            	<groupId>com.cenqua.clover</groupId>
             <artifactId>clover</artifactId>
@@ -24,6 +23,7 @@
 			<scope>test</scope>
        </dependency>
 	</dependencies>
+	-->
 
 	<build>
 		<plugins>
@@ -68,7 +68,7 @@
 					</archive>
 				</configuration>
 			</plugin>
-			<plugin>
+			<!-- <plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
 				<executions>
@@ -87,6 +87,12 @@
 					</arguments>
 					<classpathScope>test</classpathScope>
 				</configuration>
+			</plugin>
+			 -->
+			<plugin> 
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				
 			</plugin>
 			<plugin>
 				<artifactId>maven-resources-plugin</artifactId>

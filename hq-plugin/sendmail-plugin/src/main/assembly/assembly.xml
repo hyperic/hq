@@ -28,6 +28,7 @@
 -->
 
 <assembly>
+	<id>sendmail-plugin-assembly</id>
 	<formats>
 		<format>zip</format>
 	</formats>

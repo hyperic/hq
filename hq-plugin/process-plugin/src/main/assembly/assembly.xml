@@ -28,6 +28,7 @@
 -->
 
 <assembly>
+	<id>process-plugin-assembly</id>
 	<formats>
 		<format>zip</format>
 	</formats>

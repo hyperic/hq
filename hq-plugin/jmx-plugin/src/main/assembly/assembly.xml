@@ -28,6 +28,7 @@
 -->
 
 <assembly>
+	<id>jmx-plugin-assembly</id>
 	<formats>
 		<format>zip</format>
 	</formats>

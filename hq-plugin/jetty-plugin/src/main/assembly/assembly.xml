@@ -28,6 +28,7 @@
 -->
 
 <assembly>
+	<id>jetty-plugin-assembly</id>
 	<formats>
 		<format>zip</format>
 	</formats>

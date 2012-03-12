@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <assembly>
+	<id>agent-dist-assembly</id>
 	<formats>
 		<format>tar.gz</format>
 	</formats>
@@ -44,20 +45,27 @@
 		<dependencySet>
 			<useProjectArtifact>false</useProjectArtifact>
 			<useTransitiveDependencies>false</useTransitiveDependencies>
+			<useTransitiveFiltering>true</useTransitiveFiltering>
+			<outputDirectory>/pdk/lib</outputDirectory>
 			<excludes>
 				<exclude>org.hyperic.hq.plugin:*</exclude>
 				<exclude>mysql:mysql-connector-java</exclude>
 				<exclude>postgresql:postgresql</exclude>
 				<exclude>mx4j:*</exclude>
 				<exclude>org.hyperic.hq:hq-pdk:*:javadoc</exclude>
-				<exclude>org.hyperic:sigar</exclude>
 				<exclude>org.hyperic.hq.agent:hq-product</exclude>
 				<exclude>org.hyperic.hq.hqapi:hqapi1</exclude>
+				<exclude>org.hyperic.hq.agent.handler:hq-agent-handler*</exclude>
+				<exclude>org.hyperic.hq.agent:hq-agent-core</exclude>
+				<exclude>org.hyperic.hq:hq-lather</exclude>
 			</excludes>
-			<unpack>true</unpack>
+			<includes>
+				<include>*:jar</include>
+			</includes>
 			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
 		</dependencySet>
+		
 	    <dependencySet>
 			<useProjectArtifact>false</useProjectArtifact>
 			<useTransitiveDependencies>false</useTransitiveDependencies>
@@ -127,6 +135,7 @@
 					<include>postgresql:postgresql</include>
 				</includes>
 		</dependencySet>
+	
 		<dependencySet>
 				<useProjectArtifact>false</useProjectArtifact>
 				<useTransitiveDependencies>true</useTransitiveDependencies>
@@ -137,6 +146,7 @@
 					<include>mx4j:*</include>
 				</includes>
 		</dependencySet>
+		
 		<dependencySet>
 				<useProjectArtifact>false</useProjectArtifact>
 				<useTransitiveDependencies>false</useTransitiveDependencies>
@@ -145,9 +155,34 @@
 				<fileMode>0644</fileMode>
 				<directoryMode>0755</directoryMode>
 				<includes>
-					<include>org.hyperic:sigar</include>
+					<include>org.hyperic:sigar:zip</include>
 				</includes>
 		</dependencySet>
+		
+		<dependencySet>
+				<useProjectArtifact>false</useProjectArtifact>
+				<useTransitiveDependencies>false</useTransitiveDependencies>
+				<unpack>true</unpack> 
+				<fileMode>0644</fileMode>
+				<directoryMode>0755</directoryMode>
+				<includes>
+					<include>org.hyperic.hq.agent.handler:hq-agent-handler*:*</include>
+				</includes>
+		</dependencySet>
+		
+		<dependencySet>
+				<useProjectArtifact>false</useProjectArtifact>
+				<useTransitiveDependencies>false</useTransitiveDependencies>
+				<outputDirectory>/lib</outputDirectory>
+				<fileMode>0644</fileMode>
+				<directoryMode>0755</directoryMode>
+				<includes>
+					<include>org.hyperic.hq.agent:hq-agent-core:jar</include>
+					<include>org.hyperic.hq:hq-lather:jar</include>
+				</includes>
+		</dependencySet>
+		
+		
 		<dependencySet>
 				<useProjectArtifact>false</useProjectArtifact>
 				<useTransitiveDependencies>true</useTransitiveDependencies>
@@ -155,8 +190,13 @@
 				<outputDirectory>pdk/lib</outputDirectory>
 				<fileMode>0644</fileMode>
 				<directoryMode>0755</directoryMode>
+				<excludes>
+					<exclude>org.hyperic.hq:hq-pdk:*:javadoc</exclude>
+				</excludes>
 				<!-- Argh - for some reason mvn is still applying filtering to hqapi's transitive deps.  Adding them in explicitly -->
 				<includes>
+					<include>org.hyperic.hq:hq-common:jar</include>
+					<include>org.hyperic.hq:hq-pdk:jar</include>
 					<include>org.hyperic.hq.hqapi:hqapi1</include>
 					<include>org.apache.httpcomponents:*</include>
 					<include>org.jvnet.ws.wadl:*</include>
@@ -171,6 +211,7 @@
 					<include>org.apache.ws.commons.util:*</include>
 					<include>org.dnsjava:*</include>
 					<include>org.jasypt:*</include>
+					
 				</includes>
 		</dependencySet>
 	</dependencySets>
