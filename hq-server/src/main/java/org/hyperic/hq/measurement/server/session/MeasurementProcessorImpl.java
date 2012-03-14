@@ -30,8 +30,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -117,14 +119,13 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
             return;
         }
        
-        final ArrayList<AppdefEntityID> aeids = new ArrayList<AppdefEntityID>(resources.size()+1);
+        final Set<AppdefEntityID> aeids = new LinkedHashSet<AppdefEntityID>(resources.size()+1);
         for (final Resource resource : resources ) {
             if (resource == null || resource.isInAsyncDeleteState()) {
                 continue;
             }
             final Collection<ResourceEdge> edges =
                 resourceManager.findResourceEdges(resourceManager.getContainmentRelation(), resource);
-            aeids.ensureCapacity(aeids.size()+edges.size()+1);
             aeids.add(AppdefUtil.newAppdefEntityId(resource));
             for (final ResourceEdge e : edges ) {
                 final Resource r = e.getTo();
@@ -254,7 +255,7 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
                                 .append(eid)
                                 .append("\n");
                     }
-                    Measurement[] array = (Measurement[])measurements.toArray(new Measurement[0]);
+                    Measurement[] array = measurements.toArray(new Measurement[0]);
                     agentMonitor.schedule(client, srn, array);
                     concurrentStatsCollector.addStat((now()-begin), ConcurrentStatsCollector.MEASUREMENT_SCHEDULE_TIME);
                 } catch (AgentConnectionException e) {
@@ -356,7 +357,7 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
     public void unschedule(Collection<AppdefEntityID> aeids) {
         Map<Integer, Collection<AppdefEntityID>> agents = getAgentMap(aeids);
         for (Map.Entry<Integer, Collection<AppdefEntityID>> entry : agents.entrySet()) {
-            Agent agent = agentManager.findAgent((Integer) entry.getKey());
+            Agent agent = agentManager.findAgent(entry.getKey());
             Collection<AppdefEntityID> eids = entry.getValue();
             unschedule(agent.getAgentToken(), eids);
         }
