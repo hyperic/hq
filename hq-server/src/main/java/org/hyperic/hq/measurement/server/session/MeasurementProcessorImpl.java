@@ -119,7 +119,7 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
             return;
         }
        
-        final Set<AppdefEntityID> aeids = new LinkedHashSet<AppdefEntityID>(resources.size()+1);
+        final Set<AppdefEntityID> aeids = new LinkedHashSet<AppdefEntityID>(resources.size()*2);
         for (final Resource resource : resources ) {
             if (resource == null || resource.isInAsyncDeleteState()) {
                 continue;
