@@ -34,6 +34,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -100,9 +101,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
     ApplicationListener<ApplicationEvent> {
     
-    private Log log = LogFactory.getLog(AlertDefinitionManagerImpl.class);
+    private final Log log = LogFactory.getLog(AlertDefinitionManagerImpl.class);
 
-    private AlertPermissionManager alertPermissionManager;
+    private final AlertPermissionManager alertPermissionManager;
 
     private final String VALUE_PROCESSOR = PagerProcessor_events.class.getName();
 
@@ -116,19 +117,19 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
     
     private AlertDAO alertDAO;
     
-    private MeasurementManager measurementManager;
+    private final MeasurementManager measurementManager;
 
-    private RegisteredTriggerManager registeredTriggerManager;
+    private final RegisteredTriggerManager registeredTriggerManager;
 
-    private ResourceManager resourceManager;
+    private final ResourceManager resourceManager;
 
-    private EscalationManager escalationManager;
+    private final EscalationManager escalationManager;
     
-    private AuthzSubjectManager authzSubjectManager;
+    private final AuthzSubjectManager authzSubjectManager;
 
-    private AlertAuditFactory alertAuditFactory;
+    private final AlertAuditFactory alertAuditFactory;
     
-    private AvailabilityDownAlertDefinitionCache availabilityDownAlertDefinitionCache;
+    private final AvailabilityDownAlertDefinitionCache availabilityDownAlertDefinitionCache;
 
     @Autowired
     public AlertDefinitionManagerImpl(AlertPermissionManager alertPermissionManager, AlertDefinitionDAO alertDefDao,
@@ -156,6 +157,14 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
     public void afterPropertiesSet() throws Exception {
         _valuePager = Pager.getPager(VALUE_PROCESSOR);
     }
+    
+    @PreDestroy
+    public final void destroy() { 
+        this.alertDefDao = null ; 
+        this.actionDao = null ; 
+        this.alertConditionDAO = null ; 
+        this.alertDAO = null ; 
+    }//EOM 
     
     public void onApplicationEvent(ApplicationEvent event) {        
         if (event instanceof ResourceDeleteRequestedEvent) {

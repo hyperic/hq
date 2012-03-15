@@ -32,6 +32,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PreDestroy;
+	
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
@@ -72,7 +74,7 @@ public class EventLogManagerImpl implements EventLogManager {
     
     private final Log traceLog = LogFactory.getLog(EventLogManagerImpl.class.getName() + "Trace");
 
-    private final EventLogDAO eventLogDAO;
+    private EventLogDAO eventLogDAO;
     @Autowired
     private ResourceManager resourceManager;
 
@@ -335,4 +337,9 @@ public class EventLogManagerImpl implements EventLogManager {
 
         return eventLogDAO.deleteLogs(from, to, interval);
     }
+
+	@PreDestroy 
+    public final void destroy() { 
+        this.eventLogDAO = null ; 
+    }//EOM 
 }

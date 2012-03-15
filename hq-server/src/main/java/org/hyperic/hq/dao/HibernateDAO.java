@@ -29,6 +29,8 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
+import javax.annotation.PreDestroy;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
@@ -180,5 +182,10 @@ public abstract class HibernateDAO<T> {
 
         return new PageList<T>(crit.list(), total.intValue());
     }
+
+ 	@PreDestroy 
+    public void destory() { 
+        this.sessionFactory = null ;
+    }//EOM 
 
 }

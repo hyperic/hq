@@ -43,6 +43,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -75,10 +76,11 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
     private final Map<String, Integer> fullDiagInfo = new HashMap<String, Integer>();
     private final AtomicBoolean shutdown = new AtomicBoolean(false);
     private final AtomicLong executorNum = new AtomicLong(0);
-    private ConcurrentStatsCollector concurrentStatsCollector;
-    private AuthzSubject overlord;
-    private AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle;
+    private final ConcurrentStatsCollector concurrentStatsCollector;
+    private final AuthzSubject overlord;
+    private final AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle;
     private ApplicationContext ctx;
+    private ScheduledThreadPoolExecutor executor ; 
 
     @Autowired
     public AgentSynchronizer(ConcurrentStatsCollector concurrentStatsCollector,
@@ -120,9 +122,9 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
     
     @PostConstruct
     void initialize() {
-        ScheduledThreadPoolExecutor executor =
+        this.executor =
             new ScheduledThreadPoolExecutor(NUM_WORKERS, new ThreadFactory() {
-            private AtomicLong i = new AtomicLong(0);
+            private final AtomicLong i = new AtomicLong(0);
             public Thread newThread(Runnable r) {
                 return new Thread(r, "AgentSynchronizer" + i.getAndIncrement());
             }
@@ -149,6 +151,7 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
             this.name = name;
             this.initialSleep = initialSleep;
         }
+        @Override
         public String toString() {
             return name;
         }
@@ -216,6 +219,7 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
     private void executeJob(final StatefulAgentDataTransferJob job) throws InterruptedException {
         final String name = Thread.currentThread().getName() + "-" + executorNum.getAndIncrement();
         final Thread thread = new Thread(name) {
+            @Override
             public void run() {
                 job.setLastRuntime();
                 if (agentIsPingable(job)) {
@@ -420,5 +424,11 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
     private long now() {
         return System.currentTimeMillis();
     }
+    
+    @PreDestroy
+    public void shutdown() {
+        shutdown.set(true);
+        this.executor.shutdown() ;
+    }//EOM 
 
 }

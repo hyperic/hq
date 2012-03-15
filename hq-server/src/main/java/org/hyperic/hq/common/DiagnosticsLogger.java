@@ -49,22 +49,22 @@ import org.springframework.stereotype.Component;
 @Component
 public class DiagnosticsLogger implements Runnable {
 
-    private Log log = LogFactory.getLog(DiagnosticsLogger.class);
+    private final Log log = LogFactory.getLog(DiagnosticsLogger.class);
 
    
-    private TaskScheduler taskScheduler;
+    private final TaskScheduler taskScheduler;
 
     // List of DiagnosticObjects, may want to convert to a Map if we ever
     // want to allow objects to be removed from the DiagnosticThread at
     // runtime.
-    private List<DiagnosticObject> diagnosticObjects = new ArrayList<DiagnosticObject>();
+    private final List<DiagnosticObject> diagnosticObjects = new ArrayList<DiagnosticObject>();
 
     // How often the thread prints info
-    private long interval = Long.getLong("org.hq.diagnostic.interval", 1000 * 60 * 10).longValue(); // 10 minutes
+    private final long interval = Long.getLong("org.hq.diagnostic.interval", 1000 * 60 * 10).longValue(); // 10 minutes
     
     @Autowired
     public DiagnosticsLogger(@Value("#{scheduler}")TaskScheduler taskScheduler) {
-        this.taskScheduler = taskScheduler;
+        this.taskScheduler = taskScheduler; 
     }
     
     public long getInterval() {
@@ -76,12 +76,18 @@ public class DiagnosticsLogger implements Runnable {
         //Run the Diagnostics Logger every interval, starting one interval from now
         taskScheduler.scheduleAtFixedRate(this, new Date(System.currentTimeMillis() + interval),interval);
     }
-
+    
     public void addDiagnosticObject(DiagnosticObject o) {
         synchronized (diagnosticObjects) {
             diagnosticObjects.add(o);
         }
     }
+    
+    public void removeDiagnosticObject(final DiagnosticObject o) {
+        synchronized (diagnosticObjects) {
+            diagnosticObjects.remove(o);
+        }//EO synchronized block
+    }//EOM 
 
     public Collection<DiagnosticObject> getDiagnosticObjects() {
         synchronized (diagnosticObjects) {

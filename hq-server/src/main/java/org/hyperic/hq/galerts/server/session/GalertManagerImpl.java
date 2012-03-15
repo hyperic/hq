@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -80,14 +81,14 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
     private final Log _log = LogFactory.getLog(GalertManagerImpl.class);
 
     private ExecutionStrategyTypeInfoDAO _stratTypeDAO;
-    private GalertDefDAO _defDAO;
-    private GalertAuxLogDAO _auxLogDAO;
-    private GalertLogDAO _logDAO;
-    private GalertActionLogDAO _actionLogDAO;
-    private CrispoManager crispoManager;
-    private EscalationManager escalationManager;
-    private GalertProcessor galertProcessor;
-    private ResourceGroupManager resourceGroupManager;
+    private final GalertDefDAO _defDAO;
+    private final GalertAuxLogDAO _auxLogDAO;
+    private final GalertLogDAO _logDAO;
+    private final GalertActionLogDAO _actionLogDAO;
+    private final CrispoManager crispoManager;
+    private final EscalationManager escalationManager;
+    private final GalertProcessor galertProcessor;
+    private final ResourceGroupManager resourceGroupManager;
 
     @Autowired
     public GalertManagerImpl(ExecutionStrategyTypeInfoDAO stratTypeDAO, GalertDefDAO defDAO,
@@ -308,8 +309,8 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
         _logDAO.save(newLog);
 
         for (Map.Entry<GalertAuxLog, AlertAuxLog> ent : gAuxLogToAuxLog.entrySet()) {
-            GalertAuxLog gAuxLog = (GalertAuxLog) ent.getKey();
-            AlertAuxLog auxLog = (AlertAuxLog) ent.getValue();
+            GalertAuxLog gAuxLog = ent.getKey();
+            AlertAuxLog auxLog = ent.getValue();
             AlertAuxLogProvider provider = auxLog.getProvider();
 
             if (provider != null)
@@ -758,5 +759,10 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
         // Make sure we have the aux-log provider loaded
         GalertAuxLogProvider.class.toString();
     }
+    
+    @PreDestroy
+    public void destroy() { 
+        this._stratTypeDAO = null; 
+    }//EOM 
 
 }

@@ -26,6 +26,8 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import javax.annotation.PreDestroy;
+
 import org.hyperic.hq.appdef.shared.ApplicationManager;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.ServerManager;
@@ -65,5 +67,13 @@ public class AppdefResourceDeleter implements ApplicationListener<ResourceDelete
         serviceManager.handleResourceDelete(event.getResource());
         applicationManager.handleResourceDelete(event.getResource());
     }
+    
+    @PreDestroy
+    public final void destroy() { 
+        this.platformManager = null ; 
+        this.serverManager = null ; 
+        this.serviceManager = null ; 
+        this.applicationManager = null ;
+    }//EOM 
 
 }

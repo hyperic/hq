@@ -42,6 +42,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -99,11 +100,11 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
 			.synchronizedSet(new HashSet());
 	private final ThreadPoolExecutor _executor;
 	private final EscalationStateDAO escalationStateDao;
-	private AuthzSubjectManager authzSubjectManager;
-	private AlertDAO alertDAO;
+	private final AuthzSubjectManager authzSubjectManager;
+	private final AlertDAO alertDAO;
 	private final Log log = LogFactory.getLog(EscalationRuntime.class);
-	private GalertLogDAO galertLogDAO;
-	private ConcurrentStatsCollector concurrentStatsCollector;
+	private final GalertLogDAO galertLogDAO;
+	private final ConcurrentStatsCollector concurrentStatsCollector;
 	
 	@Autowired
 	public EscalationRuntimeImpl(EscalationStateDAO escalationStateDao,
@@ -125,21 +126,28 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
 	public void initStatsCollection() {
 		concurrentStatsCollector.register(ConcurrentStatsCollector.ESCALATION_EXECUTE_STATE_TIME);
 	}
+	
+	@PreDestroy 
+	public final void destroy() { 
+	    this._executor.shutdown() ;
+	    this._schedule.cancel() ;
+	}//EOM 
 
 	/**
 	 * This class is invoked when the clock daemon wakes up and decides that it
 	 * is time to look at an escalation.
 	 */
 	private class ScheduleWatcher extends TimerTask {
-		private Integer _stateId;
-		private Executor _executor;
+		private final Integer _stateId;
+		private final Executor _executor;
 
 		private ScheduleWatcher(Integer stateId, Executor executor) {
 			_stateId = stateId;
 			_executor = executor;
 		}
 
-		public void run() {
+		@Override
+        public void run() {
 			try {
 				_executor.execute(new EscalationRunner(_stateId));
 			}  catch(Throwable t) {
@@ -448,7 +456,7 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
 			} else {
 				log.debug("Scheduling state[" + stateId + "]");
 			}
-
+			
 			 task = new ScheduleWatcher(stateId, _executor);
 			 _schedule.schedule(task, new Date(schedTime));
 
