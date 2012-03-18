@@ -774,6 +774,45 @@
 	</build>
 
 	<profiles>
+		<profile>
+      		<id>production</id>
+      		<activation>
+        		<property><name>production</name></property>
+      		</activation>
+      		<build> 
+      			<pluginManagement>
+		          <plugins>
+		            <plugin>
+		              <groupId>org.apache.maven.plugins</groupId>
+		              <artifactId>maven-install-plugin</artifactId>
+		              <executions>
+		                <execution>
+		                  <id>default-install</id>
+		                  <phase>none</phase>
+		                </execution>
+		              </executions>
+		            </plugin>
+		          </plugins>
+		        </pluginManagement>
+      		</build>
+      		<modules>
+					<module>hq-util</module>
+					<module>hq-common</module>
+					<module>hq-lather</module>
+					<module>hq-pdk</module>
+					<module>hq-agent</module>
+					<module>hq-server</module>
+					<module>hq-rendit</module>
+					<module>hq-plugin</module>
+					<module>hq-uiplugin</module>
+					<module>hq-installer</module>
+					<module>hq-bootstrap</module>
+					<module>hq-web</module>
+		    			 <module>dist</module> 
+                	<module>hq-maven</module> 
+			</modules>
+      	</profile>
+	
 		<!-- M2Eclipse dedicated profile used to define plugins which M2Eclipse does not support out of the box -->
 		<!-- The profile is activated by adding '-DMVN_ECLIPSE_PROFILE=true' vm argument to the IDE -->
 		<profile>
@@ -909,8 +948,8 @@
 					<module>hq-installer</module>
 					<module>hq-bootstrap</module>
 					<module>hq-web</module>
-		    			<module>dist</module>
-                			<module>hq-maven</module>
+		    		<module>dist</module>
+                	<module>hq-maven</module>
 			</modules>
 		</profile>
 		<profile>
@@ -934,7 +973,7 @@
 					<module>hq-installer</module>
 					<module>hq-bootstrap</module>
 					<module>hq-web</module>
-                			<module>hq-maven</module>
+                	<module>hq-maven</module>
 			</modules>
 		</profile>
 	        <profile>
