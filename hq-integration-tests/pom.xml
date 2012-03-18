@@ -131,7 +131,6 @@
 				</executions>
 				<configuration>
 					<argLine>-Xmx1700m -XX:MaxPermSize=192m -XX:-UseGCOverheadLimit -XX:+HeapDumpOnOutOfMemoryError</argLine>
-					<parallel>classes</parallel>
 				</configuration>
 			</plugin>
 			<plugin>
