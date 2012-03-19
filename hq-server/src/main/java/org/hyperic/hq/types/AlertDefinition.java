@@ -82,7 +82,6 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "AlertDefinition", propOrder = {
-    "resource",
     "resourcePrototype",
     "escalation",
     "alertCondition",
