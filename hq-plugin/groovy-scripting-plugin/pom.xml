@@ -21,7 +21,7 @@
 		<dependency>
 			<groupId>org.codehaus.groovy</groupId>
 			<artifactId>groovy-all</artifactId>
-			<version>${groovy.version}</version>
+			<!-- <version>${groovy.version}</version> -->
 		</dependency>
 			<!-- inhetited from modules parent 
 		<dependency>
