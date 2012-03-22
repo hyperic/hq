@@ -36,6 +36,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.TreeSet;
@@ -416,7 +418,7 @@ public class DiskList {
         }
     }
 
-    private void removeRecord(long recNo)
+    public void removeRecord(long recNo)
         throws IOException
     {
         if(recNo < 0){
@@ -528,6 +530,35 @@ public class DiskList {
             throw sExc;
         }
     }
+    
+    /**
+     * This method converts lists from the old record size to the current one -
+     * it reads all the records from the list using the old size, deletes the list
+     * and than saves all the records using the current record size. 
+     * should be used when starting the first time after an upgrade. The default record size was changed from 1024 to 4000 and when we
+     * will try to read the records with size 4000 we will get an exception because the
+     * records size is 1024. This is a fix for Jira bug [HHQ-5387].
+     * @param oldSize - the old size of the record
+     * @throws IOException 
+     */
+    public void convertListToCurrentRecordSize(int oldSize) throws IOException {
+        log.info("Converting list on file '" + this.fileName + "' from size " + oldSize + " to size " + this.recordSize);
+        int realRecSize = this.recordSize;
+        this.recordSize = oldSize;
+        Collection<String> records = new ArrayList<String>();
+        Iterator<String> iter = getListIterator();
+        for(; iter != null && iter.hasNext(); ){
+            String data = iter.next();
+            records.add(data);
+        }
+        log.info("Read " + records.size() + " records from file '" + this.fileName + "'");      
+        deleteAllRecords();
+
+        this.recordSize = realRecSize;
+        for (String rec : records) {
+            addToList(rec);
+        }
+    }
 
     public static class DiskListIterator 
         implements Iterator
@@ -619,6 +650,9 @@ public class DiskList {
             // XXX -- This is broken, and is used to satisfy a lame 
             // requirement I made on the AgentStorageProvider interface.. :-(
             if(this.firstRec == -1){
+                if (log.isDebugEnabled()) {
+                    log.debug("getListIterator() - list '" + this.fileName + "' has no elements");
+                }
                 return null;
             }
 
