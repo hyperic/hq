@@ -25,10 +25,8 @@
 
 package org.hyperic.hq.agent.server;
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
-
 import org.hyperic.util.GenericValueMap;
 
 /**
@@ -116,7 +114,7 @@ public interface AgentStorageProvider extends GenericValueMap {
      *
      * @param listName name of the list to get an iterator for.
      */
-    public Iterator<String> getListIterator(String listName);
+    public Iterator getListIterator(String listName);
 
     /**
      * Delete an entire list from storage.  This is basically a shortcut
@@ -134,24 +132,4 @@ public interface AgentStorageProvider extends GenericValueMap {
         throws AgentStorageException;
 
     public void addOverloadedInfo(String listName, String info);
-
-	/**
-	 * This method converts lists from the old record size to the current one -
-	 * should be used when starting the first time after an upgrade. In version
-	 * 4.6.5 the default record size was changed from 1024 to 4000 and when we
-	 * will try to read the records with size 4000 we will get an exception because the
-	 * records size is 1024, when that happens we should call this method in order
-	 * to covert the records to the new size and then read again. This is a fix for Jira bug [HHQ-5387].
-	 * @param listName - name of the list
-	 * @throws IOException 
-	 */
-	public void convertListToCurrentRecordSize(String listName) throws IOException;
-	
-	/**
-	 * Removes a record from the list
-	 * @param listName - name of the list
-	 * @param recNumber - index of the record to remove
-	 * @throws AgentStorageException
-	 */
-	public void removeFromList(String listName, long recNumber) throws AgentStorageException;
 }

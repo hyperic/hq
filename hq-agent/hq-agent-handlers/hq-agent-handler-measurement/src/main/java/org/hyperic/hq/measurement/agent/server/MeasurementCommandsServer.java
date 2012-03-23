@@ -75,17 +75,17 @@ public class MeasurementCommandsServer
     implements AgentServerHandler, AgentNotificationHandler {
     private static final long THREAD_JOIN_WAIT = 10 * 1000;
 
-    private final MeasurementCommandsAPI   verAPI;         // Common API specifics
+    private MeasurementCommandsAPI   verAPI;         // Common API specifics
     private Thread                   scheduleThread; // Thread of scheduler
     private ScheduleThread           scheduleObject; // Our scheduler
     private Thread                   senderThread;   // Thread of sender
     private SenderThread             senderObject;   // Our sender
     private AgentStorageProvider     storage;        // Agent storage
-    private final Map                      validProps;     // Map of valid props
+    private Map                      validProps;     // Map of valid props
     private AgentConfig        bootConfig;     // Agent boot config
     private MeasurementSchedule      schedStorage;   // Schedule storage
     private MeasurementPluginManager pluginManager;  // Plugin manager
-    private final Log                      log;            // Our log
+    private Log                      log;            // Our log
 
     // Config and Log track
     private ConfigTrackPluginManager ctPluginManager;
@@ -201,7 +201,7 @@ public class MeasurementCommandsServer
     public void startup(AgentDaemon agent)
         throws AgentStartException 
     {
-        Iterator<ScheduledMeasurement> i = null;
+        Iterator i;
 
         try {
             this.storage      = agent.getStorageProvider();
@@ -271,14 +271,9 @@ public class MeasurementCommandsServer
 
         spawnThreads(this.senderObject, this.scheduleObject, this.trackerObject);
 
-        try {
-        	i = this.schedStorage.getMeasurementList();
-        }
-        catch (Exception e) {
-        	throw new AgentStartException("Failed reading the measurement list from the storage.", e);
-		}
+        i = this.schedStorage.getMeasurementList();
         while(i.hasNext()){
-            ScheduledMeasurement meas = i.next();
+            ScheduledMeasurement meas = (ScheduledMeasurement)i.next();
             this.measurementCommandsService.scheduleMeasurement(meas);
         }
 
