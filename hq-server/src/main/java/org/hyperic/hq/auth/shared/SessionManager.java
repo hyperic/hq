@@ -105,7 +105,9 @@ public class SessionManager {
                 ",sessionId=" + key + ",timeout=" + timeout);
         }
         _cache.put(key, new AuthSession(subject, timeout));
-        _userToSessionId.put(subject.getName(), key);
+        if (null != subject) {
+        	_userToSessionId.put(subject.getName(), key);
+        }
         return key;
     }
 
