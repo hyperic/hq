@@ -29,7 +29,7 @@
 		<ehcache.version>1.5.0</ehcache.version>
 		<freemarker.version>2.3.4</freemarker.version>
 		<getopt.version>1.0.13</getopt.version>
-		<groovy.version>1.7.0</groovy.version> 
+		<groovy.version>1.6.7</groovy.version> 
 		<hibernate.version>3.2.6.ga</hibernate.version>
 		<hibernate-tools.version>3.2.3.GA</hibernate-tools.version>
         <hqapi.version>5.0.0</hqapi.version>
@@ -694,7 +694,7 @@
 					</executions>
 				</plugin>
 			 
-			   <!-- <plugin>
+			 <!--  <plugin>
 				<groupId>org.codehaus.groovy.maven</groupId>
 				<artifactId>gmaven-plugin</artifactId>
 				 <version>1.0</version> 
@@ -719,8 +719,46 @@
 				    </execution>
 				</executions>
 				</plugin>  -->
+
+			 		 <plugin>
+					  <groupId>org.codehaus.gmaven</groupId>
+					  <artifactId>gmaven-plugin</artifactId>
+					  <version>1.2</version>
+					  <configuration> 
+						<providerSelection>1.7</providerSelection> 
+					  </configuration> 
+					  <dependencies>
+						  <dependency>
+							<groupId>org.codehaus.gmaven.runtime</groupId>
+							<artifactId>gmaven-runtime-1.7</artifactId>
+							<version>1.2</version>
+							<exclusions>
+							  <exclusion>
+								<groupId>org.codehaus.groovy</groupId>
+								<artifactId>groovy-all</artifactId>
+							  </exclusion>
+							</exclusions>
+						  </dependency>
+						  <dependency>
+							<groupId>org.codehaus.groovy</groupId>
+							<artifactId>groovy-all</artifactId>
+							<version>1.7.0</version>
+						  </dependency>
+					  </dependencies>
+					  <executions>
+						  <execution>
+							  <goals>
+								<!--  <goal>generateStubs</goal> -->
+								  <goal>compile</goal>
+<!--								  <goal>generateTestStubs</goal> -->
+								  <goal>testCompile</goal>
+							  </goals>
+						  </execution>
+					  </executions>
+				  </plugin>
+
 				
-			   <plugin>
+			 <!--  <plugin>
 			      <groupId>org.codehaus.gmaven</groupId>
 			      <artifactId>gmaven-plugin</artifactId>
 			      <version>1.4</version>
@@ -731,7 +769,7 @@
 			          <dependency>
 			            <groupId>org.codehaus.gmaven.runtime</groupId>
 			            <artifactId>gmaven-runtime-1.7</artifactId>
-			            <version>1.2</version>
+			            <version>1.4</version>
 			            <exclusions>
 			              <exclusion>
 			                <groupId>org.codehaus.groovy</groupId>
@@ -748,14 +786,14 @@
 			      <executions>
 			          <execution>
 			              <goals>
-			                  <!-- <goal>generateStubs</goal> -->
+			                  <goal>generateStubs</goal>
 			                  <goal>compile</goal>
-			                  <!-- <goal>generateTestStubs</goal> -->
+			                  <goal>generateTestStubs</goal>
 			                  <goal>testCompile</goal>
 			              </goals>
 			          </execution>
 			      </executions>
-			  </plugin>
+			  </plugin> -->
 			    
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
