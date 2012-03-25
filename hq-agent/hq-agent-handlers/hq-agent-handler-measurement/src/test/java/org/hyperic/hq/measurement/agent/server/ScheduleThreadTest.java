@@ -26,6 +26,8 @@
 
 package org.hyperic.hq.measurement.agent.server;
 
+import java.util.Properties;
+
 import junit.framework.TestCase;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -40,8 +42,7 @@ import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
-
-import java.util.Properties;
+import org.junit.Before;
 
 public class ScheduleThreadTest extends TestCase {
 
@@ -59,6 +60,13 @@ public class ScheduleThreadTest extends TestCase {
                                         MeasurementConstants.CAT_PERFORMANCE);
 
     }
+    
+    @Before
+    public final void setup(){
+    	this.derivedId = 0 ;  
+    	this.dsnId = 0 ; 
+    	this.entityId = 0 ; 
+    }//EOM 
 
     public void testSimpleStartKill() throws Exception {
 

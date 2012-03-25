@@ -70,6 +70,7 @@
 		<maven-assembly-plugin.version>2.2.1</maven-assembly-plugin.version>
 		<maven-deploy-plugin.version>2.7</maven-deploy-plugin.version>
 		<maven-jar-plugin.version>2.4</maven-jar-plugin.version>
+		<maven-compiler-plugin.version>2.3.2</maven-compiler-plugin.version>
         <tiles2.version>2.2.2</tiles2.version>
 		<tomcat-jdbc.version>7.0.19</tomcat-jdbc.version>
 		<tomcat-juli.version>6.0.32</tomcat-juli.version>
@@ -205,6 +206,18 @@
 				<groupId>org.codehaus.groovy</groupId>
 				<artifactId>groovy-all</artifactId>
 				<version>${groovy.version}</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>org.codehaus.gmaven.runtime</groupId>
+				<artifactId>gmaven-runtime-1.7</artifactId>
+				<version>1.2</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.codehaus.groovy</groupId>
+						<artifactId>groovy-all</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			
 			<!-- <dependency>
@@ -628,6 +641,11 @@
 			<plugins>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
+          			<artifactId>maven-compiler-plugin</artifactId>
+          			<version>${maven-compiler-plugin.version}</version>
+          		</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-deploy-plugin</artifactId>
 					<version>${maven-deploy-plugin.version}</version>
 					<configuration>
@@ -834,7 +852,8 @@
 					<module>hq-installer</module>
 					<module>hq-bootstrap</module>
 					<module>hq-web</module>
-		    			 <module>dist</module> 
+		    		<module>dist</module>
+		    		<module>hq-integration-tests</module>
                 	<module>hq-maven</module> 
 			</modules>
       	</profile>
