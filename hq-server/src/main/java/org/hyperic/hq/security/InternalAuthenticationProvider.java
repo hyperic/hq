@@ -51,9 +51,9 @@ import org.springframework.security.core.authority.GrantedAuthorityImpl;
  */
 public class InternalAuthenticationProvider implements AuthenticationProvider {
 
-    private AuthzSubjectManager authzSubjectManager;
-    private Set<HQAuthenticationProvider> hqAuthenticationProviders;
-    private ServerConfigManager serverConfigManager;
+    private final AuthzSubjectManager authzSubjectManager;
+    private final Set<HQAuthenticationProvider> hqAuthenticationProviders;
+    private final ServerConfigManager serverConfigManager;
 
     public InternalAuthenticationProvider(AuthzSubjectManager authzSubjectManager,
                                           Set<HQAuthenticationProvider> hqAuthenticationProviders, ServerConfigManager serverConfigManager) {
@@ -88,7 +88,10 @@ public class InternalAuthenticationProvider implements AuthenticationProvider {
                         result = authProvider.authenticate(username, password);
                     } catch (AuthenticationException e) {
                         lastException = e;
-                    }
+                    } catch (Exception e) {
+						lastException = new AuthenticationException(e.getMessage(), e) {
+						};
+					}
                     if (result != null) {
                         return result;
                     }

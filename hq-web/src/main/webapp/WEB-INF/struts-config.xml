@@ -525,15 +525,11 @@
       </action>
 
 	  <action path="/admin/user/RegisterFormPrepare"
-              name="RegisterUserForm"
+              name="RegisterUserFormPrepare"
               scope="request"
               type="org.springframework.web.struts.DelegatingActionProxy"
               input="/admin/user/UserAdmin.do?mode=register">
       		<set-property property="workflow" value="user/Register"/>
-        	<forward name="success" path="/Dashboard.do"/>
-        	<forward name="failure" path="/admin/user/UserAdmin.do?mode=register"/>
-        	<forward name="reset" path="/admin/user/UserAdmin.do?mode=register" redirect="true"/>
-        	<forward name="logout" path="/Logout.do"/>
       </action>
           
       <!-- end user admin actions / -->
