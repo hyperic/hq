@@ -103,14 +103,14 @@ public class ScheduleThreadTest extends TestCase {
         ScheduleThread st = new ScheduleThread(new SimpleSender(), new NullValueGetter(),
                                                new Properties());
 
-        ScheduledMeasurement m = createMeasurement(DSN_PLATFORM_LOAD, 100);
+        ScheduledMeasurement m = createMeasurement(DSN_PLATFORM_LOAD, 20);
         st.scheduleMeasurement(m);
 
         Thread t = new Thread(st);
         t.start();
 
         try {
-            Thread.sleep(400);
+            Thread.sleep(600);
         } catch (InterruptedException e) {
             // Ignore
         }
@@ -139,14 +139,14 @@ public class ScheduleThreadTest extends TestCase {
         ScheduleThread st = new ScheduleThread(new SimpleSender(), new SimpleValueGetter(),
                                                new Properties());
 
-        ScheduledMeasurement m = createMeasurement(DSN_PLATFORM_LOAD, 100);
+        ScheduledMeasurement m = createMeasurement(DSN_PLATFORM_LOAD, 20);
         st.scheduleMeasurement(m);
 
         Thread t = new Thread(st);
         t.start();
 
         try {
-            Thread.sleep(400);
+            Thread.sleep(600);
         } catch (InterruptedException e) {
             // Ignore
         }
@@ -174,14 +174,14 @@ public class ScheduleThreadTest extends TestCase {
         ScheduleThread st = new ScheduleThread(new SimpleSender(), new SimpleValueGetter(),
                                                new Properties());
 
-        st.scheduleMeasurement(createMeasurement(DSN_PLATFORM_LOAD, 100));
-        st.scheduleMeasurement(createMeasurement(DSN_PLATFORM_AVAIL, 100));
+        st.scheduleMeasurement(createMeasurement(DSN_PLATFORM_LOAD, 20));
+        st.scheduleMeasurement(createMeasurement(DSN_PLATFORM_AVAIL, 20));
 
         Thread t = new Thread(st);
         t.start();
 
         try {
-            Thread.sleep(400);
+            Thread.sleep(600);
         } catch (InterruptedException e) {
             // Ignore
         }
@@ -210,14 +210,14 @@ public class ScheduleThreadTest extends TestCase {
 
         ScheduleThread st = new ScheduleThread(new SimpleSender(), new SimpleValueGetter(), p);
 
-        st.scheduleMeasurement(createMeasurement(DSN_PLATFORM_LOAD, 100));
-        st.scheduleMeasurement(createMeasurement(DSN_HANG_COLLECTION, 1000));
+        st.scheduleMeasurement(createMeasurement(DSN_PLATFORM_LOAD, 20));
+        st.scheduleMeasurement(createMeasurement(DSN_HANG_COLLECTION, 20));
 
         Thread t = new Thread(st);
         t.start();
 
         try {
-            Thread.sleep(1000);
+            Thread.sleep(1200);
         } catch (InterruptedException e) {
             // Ignore
         }
@@ -246,13 +246,13 @@ public class ScheduleThreadTest extends TestCase {
 
         ScheduleThread st = new ScheduleThread(new SimpleSender(), new SimpleValueGetter(), p);
 
-        st.scheduleMeasurement(createMeasurement(DSN_HANG_COLLECTION, 100));
+        st.scheduleMeasurement(createMeasurement(DSN_HANG_COLLECTION, 20));
 
         Thread t = new Thread(st);
         t.start();
 
         try {
-            Thread.sleep(1000);
+            Thread.sleep(1300);
         } catch (InterruptedException e) {
             // Ignore
         }
