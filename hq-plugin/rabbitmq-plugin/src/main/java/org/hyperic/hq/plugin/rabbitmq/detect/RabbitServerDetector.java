@@ -237,7 +237,6 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
                     setProductConfig(service, obj.getProductConfig());
                     service.setCustomProperties(obj.getCustomProperties());
                     service.setMeasurementConfig();
-                    service.setControlConfig();
                     serviceResources.add(service);
                 }
             }
