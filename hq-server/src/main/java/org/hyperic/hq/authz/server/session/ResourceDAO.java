@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.authz.server.session;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -44,6 +45,7 @@ import org.hibernate.FlushMode;
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
@@ -444,21 +446,27 @@ public class ResourceDAO
     }
 
     @SuppressWarnings("unchecked")
-    Collection<Integer> getParentResourceIds(Collection<Resource> resources,
-                                             ResourceRelation relation, int startdistance,
+    Collection<Integer> getParentResourceIds(Collection<Resource> resources, ResourceRelation relation, int startdistance,
                                              int maxdistance) {
+        final List<Resource> resourceList = new ArrayList<Resource>(resources);
         final String hql = new StringBuilder(64)
             .append("select distinct re.to.id FROM ResourceEdge re ")
             .append("WHERE re.distance between :start and :end and re.relation=:relation ")
             .append("AND re.from in (:from)")
             .toString();
-        return getSession()
-            .createQuery(hql)
-            .setParameterList("from", resources)
-            .setParameter("relation", relation)
-            .setParameter("start", Math.min(startdistance, maxdistance))
-            .setParameter("end", Math.max(startdistance, maxdistance))
-            .list();
+        final Query query = getSession().createQuery(hql);
+        final HQDialect dialect = getHQDialect();
+        final int batchSize = (dialect.getMaxExpressions() < 0) ? Integer.MAX_VALUE : dialect.getMaxExpressions();
+        final Collection<Integer> rtn = new ArrayList<Integer>(resources.size());
+        for (int ii=0; ii<resources.size(); ii+=batchSize) {
+            final int last = Math.min(resources.size(), batchSize+ii);
+            rtn.addAll(query.setParameterList("from", resourceList.subList(ii, last))
+                            .setParameter("relation", relation)
+                            .setParameter("start", Math.min(startdistance, maxdistance))
+                            .setParameter("end", Math.max(startdistance, maxdistance))
+                            .list());
+        }
+        return rtn;
     }
 
     @SuppressWarnings("unchecked")
