@@ -7,7 +7,7 @@
 	<artifactId>geronimo-plugin</artifactId>
 	<packaging>pom</packaging>
 	<name>Hyperic HQ Plugin - Geronimo Plugin</name>
-	<version>4.6.5.1</version>
+	<version>4.6.5.1.2.BUILD-SNAPSHOT</version>
 
 	<dependencies>
 		<dependency>
