@@ -1153,6 +1153,16 @@
 		
 	</repositories>
 
+	 <pluginRepositories>
+	       <pluginRepository>
+	       <id>hyperic-external</id>
+			<url>http://maven.hyperic.org/external</url>
+	        <snapshots>
+	           <enabled>false</enabled>
+	        </snapshots>
+	      </pluginRepository>
+     </pluginRepositories>
+
 	<distributionManagement>
 		<repository>
 			<id>hyperic-milestone</id>
