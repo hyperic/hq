@@ -50,6 +50,14 @@
                         <version>${junit.version}</version>
                 </dependency>
 	-->
+		<dependency>
+			<groupId>org.hyperic</groupId>
+			<artifactId>sigar</artifactId>
+			<version>${sigar.version}</version>
+			<type>zip</type>
+			<classifier>libs</classifier>
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -136,6 +144,27 @@
 				</executions>
 			</plugin>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>unpack-sigar</id>
+						<goals>
+							<goal>unpack-dependencies</goal>
+						</goals>
+						<phase>generate-test-resources</phase>
+						<configuration>
+							<outputDirectory>${project.build.directory}/generated-test-resources</outputDirectory>
+							<includeGroupIds>org.hyperic</includeGroupIds>
+							<includeArtifactIds>sigar</includeArtifactIds>
+							<excludeTransitive>true</excludeTransitive>
+							<includeTypes>zip</includeTypes>
+							<stripVersion>true</stripVersion>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>com.atlassian.maven.plugins</groupId>
 				<artifactId>maven-clover2-plugin</artifactId>
 				<version>2.6.3</version>
@@ -143,9 +172,16 @@
 					<skip>true</skip>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<argLine>-Djava.library.path=${project.build.directory}/generated-test-resources</argLine>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
-	<repositories>
+<!-- 	<repositories>
 		<repository>
 			<id>hyperic-snapshot</id>
 			<name>Hyperic Snapshot Repository</name>
@@ -189,5 +225,5 @@
 		<developerConnection>scm:git:git://git.springsource.org/hq/hq.git</developerConnection>
 		<url>https://fisheye.springsource.org/browse/hq</url>
 	</scm>
-
+ -->
 </project>
