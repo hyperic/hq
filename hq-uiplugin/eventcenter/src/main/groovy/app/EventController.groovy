@@ -164,8 +164,8 @@ class EventController
     	    [logSchema: LOG_SCHEMA,
     	     allTypes: getAllTypes(),
     	     allStatusVals:  (EventLogStatus.getAll() + []).sort { a, b -> b.code <=> a.code },
-    	     allGroups: resourceHelper.findViewableGroups().sort { a, b -> 
-    	         a.name <=> b.name }.grep { !it.isSystem() },
+    	     allGroups: resourceHelper.findViewableGroups().sort { p1, p2 -> p1.name.compareToIgnoreCase(p2.name) }.
+    	         grep { !it.isSystem() },
     	     timePeriods: getTimePeriods(),
     	    ])
     }
