@@ -915,4 +915,7 @@
 		<url>https://fisheye.springsource.org/browse/hq</url>
 	</scm>
 
+  <modules>
+    <module>hq-api</module>
+  </modules>
 </project>
