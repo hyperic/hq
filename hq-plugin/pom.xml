@@ -6,14 +6,14 @@
 	 <parent>
         <groupId>org.hyperic.hq</groupId>
         <artifactId>hq-parent</artifactId>
-       <version>4.6.5.1.2.BUILD-SNAPSHOT.2.BUILD-SNAPSHOT</version>
+       <version>4.6.5.2.BUILD-SNAPSHOT.BUILD-SNAPSHOT</version>
     </parent>
 
 	<groupId>org.hyperic.hq.plugin</groupId>
 	<artifactId>modules</artifactId>
 	<packaging>pom</packaging>
 	<name>Hyperic HQ Plugin - Modules</name>
-	<version>4.6.5.1.2.BUILD-SNAPSHOT.2.BUILD-SNAPSHOT</version>
+	<version>4.6.5.2.BUILD-SNAPSHOT.BUILD-SNAPSHOT</version>
 
 	<modules>
 		<module>examples</module>
