@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.hyperic.hq</groupId>
 		<artifactId>hq-parent</artifactId>
-		<version>4.6.5.2.BUILD-SNAPSHOT.BUILD-SNAPSHOT</version>
+		<version>4.6.5.2.BUILD-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>hq-lather</artifactId>
