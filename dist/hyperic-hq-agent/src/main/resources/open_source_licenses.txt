@@ -1,6 +1,6 @@
 open_source_license.txt
 
-Hyperic HQ 4.6.5 GA
+Hyperic HQ 4.6.5.1 GA
 Enterprise and Open Source Editions
 
 
@@ -4621,14 +4621,14 @@ The Apache Software Foundation (http://www.apache.org/).
 
 JUnit testing support is provided by JUnit, under the 
 Common Public License Version 1.0: 
-	http://www.opensource.org/licenses/cpl.php
+    http://www.opensource.org/licenses/cpl.php
 See http://www.junit.org/
 
 [VMware Inc. does not distribute JUnit; thus, the full text of the Common Public License 1.0 has been omitted.]
 
 Small parts of the POI component HDGF are based on VSDump,
 and are under the GNU General Public Licence version 3 (GPL v3):
-	http://gplv3.fsf.org/
+    http://gplv3.fsf.org/
 See http://www.gnome.ru/projects/vsdump_en.html
 
 
@@ -5645,7 +5645,7 @@ Use of any of this software is governed by the terms of the license below:
 
 The "Artistic License"
 
-				Preamble
+                Preamble
 
 The intent of this document is to state the conditions under which a
 Package may be copied, such that the Copyright Holder maintains some
@@ -5656,30 +5656,30 @@ reasonable modifications.
 
 Definitions:
 
-	"Package" refers to the collection of files distributed by the
-	Copyright Holder, and derivatives of that collection of files
-	created through textual modification.
+    "Package" refers to the collection of files distributed by the
+    Copyright Holder, and derivatives of that collection of files
+    created through textual modification.
 
-	"Standard Version" refers to such a Package if it has not been
-	modified, or has been modified in accordance with the wishes
-	of the Copyright Holder as specified below.
+    "Standard Version" refers to such a Package if it has not been
+    modified, or has been modified in accordance with the wishes
+    of the Copyright Holder as specified below.
 
-	"Copyright Holder" is whoever is named in the copyright or
-	copyrights for the package.
+    "Copyright Holder" is whoever is named in the copyright or
+    copyrights for the package.
 
-	"You" is you, if you're thinking about copying or distributing
-	this Package.
+    "You" is you, if you're thinking about copying or distributing
+    this Package.
 
-	"Reasonable copying fee" is whatever you can justify on the
-	basis of media cost, duplication charges, time of people involved,
-	and so on.  (You will not be required to justify it to the
-	Copyright Holder, but only to the computing community at large
-	as a market that must bear the fee.)
+    "Reasonable copying fee" is whatever you can justify on the
+    basis of media cost, duplication charges, time of people involved,
+    and so on.  (You will not be required to justify it to the
+    Copyright Holder, but only to the computing community at large
+    as a market that must bear the fee.)
 
-	"Freely Available" means that no fee is charged for the item
-	itself, though there may be fees involved in handling the item.
-	It also means that recipients of the item may redistribute it
-	under the same conditions they received it.
+    "Freely Available" means that no fee is charged for the item
+    itself, though there may be fees involved in handling the item.
+    It also means that recipients of the item may redistribute it
+    under the same conditions they received it.
 
 1. You may make and give away verbatim copies of the source form of the
 Standard Version of this Package without restriction, provided that you
@@ -5769,7 +5769,7 @@ products derived from this software without specific prior written permission.
 IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
-				The End
+                The End
 
 Additional License(s)
 
@@ -7250,7 +7250,7 @@ Copyright 2006 Red Hat, Inc.  All rights reserved.
 "JBoss" and the JBoss logo are registered trademarks of Red Hat, Inc.  
 All other trademarks are the property of their respective owners. 
 
-	Page 1 of 1	18 October 2006
+    Page 1 of 1 18 October 2006
 
 
 =============== PART 2. HYPERIC HQ: OPEN SOURCE VERSION ==================================
@@ -11264,14 +11264,14 @@ The Apache Software Foundation (http://www.apache.org/).
 
 JUnit testing support is provided by JUnit, under the 
 Common Public License Version 1.0: 
-	http://www.opensource.org/licenses/cpl.php
+    http://www.opensource.org/licenses/cpl.php
 See http://www.junit.org/
 
 [VMware Inc. does not distribute JUnit; thus, the full text of the Common Public License 1.0 has been omitted.]
 
 Small parts of the POI component HDGF are based on VSDump,
 and are under the GNU General Public Licence version 3 (GPL v3):
-	http://gplv3.fsf.org/
+    http://gplv3.fsf.org/
 See http://www.gnome.ru/projects/vsdump_en.html
 
 
@@ -12472,7 +12472,7 @@ Use of any of this software is governed by the terms of the license below:
 
 The "Artistic License"
 
-				Preamble
+                Preamble
 
 The intent of this document is to state the conditions under which a
 Package may be copied, such that the Copyright Holder maintains some
@@ -12483,30 +12483,30 @@ reasonable modifications.
 
 Definitions:
 
-	"Package" refers to the collection of files distributed by the
-	Copyright Holder, and derivatives of that collection of files
-	created through textual modification.
+    "Package" refers to the collection of files distributed by the
+    Copyright Holder, and derivatives of that collection of files
+    created through textual modification.
 
-	"Standard Version" refers to such a Package if it has not been
-	modified, or has been modified in accordance with the wishes
-	of the Copyright Holder as specified below.
+    "Standard Version" refers to such a Package if it has not been
+    modified, or has been modified in accordance with the wishes
+    of the Copyright Holder as specified below.
 
-	"Copyright Holder" is whoever is named in the copyright or
-	copyrights for the package.
+    "Copyright Holder" is whoever is named in the copyright or
+    copyrights for the package.
 
-	"You" is you, if you're thinking about copying or distributing
-	this Package.
+    "You" is you, if you're thinking about copying or distributing
+    this Package.
 
-	"Reasonable copying fee" is whatever you can justify on the
-	basis of media cost, duplication charges, time of people involved,
-	and so on.  (You will not be required to justify it to the
-	Copyright Holder, but only to the computing community at large
-	as a market that must bear the fee.)
+    "Reasonable copying fee" is whatever you can justify on the
+    basis of media cost, duplication charges, time of people involved,
+    and so on.  (You will not be required to justify it to the
+    Copyright Holder, but only to the computing community at large
+    as a market that must bear the fee.)
 
-	"Freely Available" means that no fee is charged for the item
-	itself, though there may be fees involved in handling the item.
-	It also means that recipients of the item may redistribute it
-	under the same conditions they received it.
+    "Freely Available" means that no fee is charged for the item
+    itself, though there may be fees involved in handling the item.
+    It also means that recipients of the item may redistribute it
+    under the same conditions they received it.
 
 1. You may make and give away verbatim copies of the source form of the
 Standard Version of this Package without restriction, provided that you
@@ -12596,7 +12596,7 @@ products derived from this software without specific prior written permission.
 IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
-				The End
+                The End
 
 Additional License(s)
 
@@ -14369,8 +14369,8 @@ constitute any admission of liability.
 
 --------------- SECTION 3: GNU Lesser General Public License, V2.1 -----------
 
-		  GNU LESSER GENERAL PUBLIC LICENSE
-		       Version 2.1, February 1999
+          GNU LESSER GENERAL PUBLIC LICENSE
+               Version 2.1, February 1999
 
  Copyright (C) 1991, 1999 Free Software Foundation, Inc.
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -14381,7 +14381,7 @@ constitute any admission of liability.
  as the successor of the GNU Library Public License, version 2, hence
  the version number 2.1.]
 
-			    Preamble
+                Preamble
 
   The licenses for most software are designed to take away your
 freedom to share and change it.  By contrast, the GNU General Public
@@ -14483,7 +14483,7 @@ modification follow.  Pay close attention to the difference between a
 former contains code derived from the library, whereas the latter must
 be combined with the library in order to run.
 
-		  GNU LESSER GENERAL PUBLIC LICENSE
+          GNU LESSER GENERAL PUBLIC LICENSE
    TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
 
   0. This License Agreement applies to any software library or other
@@ -14803,7 +14803,7 @@ decision will be guided by the two goals of preserving the free status
 of all derivatives of our free software and of promoting the sharing
 and reuse of software generally.
 
-			    NO WARRANTY
+                NO WARRANTY
 
   15. BECAUSE THE LIBRARY IS LICENSED FREE OF CHARGE, THERE IS NO
 WARRANTY FOR THE LIBRARY, TO THE EXTENT PERMITTED BY APPLICABLE LAW.
@@ -14826,7 +14826,7 @@ FAILURE OF THE LIBRARY TO OPERATE WITH ANY OTHER SOFTWARE), EVEN IF
 SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
 DAMAGES.
 
-		     END OF TERMS AND CONDITIONS
+             END OF TERMS AND CONDITIONS
 
            How to Apply These Terms to Your New Libraries
 
@@ -15193,15 +15193,15 @@ THE POSSIBILITY OF SUCH DAMAGES.
 
 --------------- SECTION 5: GNU General Public License, V2.0 -----------
 
-		    GNU GENERAL PUBLIC LICENSE
-		       Version 2, June 1991
+            GNU GENERAL PUBLIC LICENSE
+               Version 2, June 1991
 
  Copyright (C) 1989, 1991 Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  Everyone is permitted to copy and distribute verbatim copies
  of this license document, but changing it is not allowed.
 
-			    Preamble
+                Preamble
 
   The licenses for most software are designed to take away your
 freedom to share and change it.  By contrast, the GNU General Public
@@ -15251,7 +15251,7 @@ patent must be licensed for everyone's free use or not licensed at all.
   The precise terms and conditions for copying, distribution and
 modification follow.
 
-		    GNU GENERAL PUBLIC LICENSE
+            GNU GENERAL PUBLIC LICENSE
    TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
 
   0. This License applies to any program or other work which contains
@@ -15450,7 +15450,7 @@ make exceptions for this.  Our decision will be guided by the two goals
 of preserving the free status of all derivatives of our free software and
 of promoting the sharing and reuse of software generally.
 
-			    NO WARRANTY
+                NO WARRANTY
 
   11. BECAUSE THE PROGRAM IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY
 FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW.  EXCEPT WHEN
@@ -15472,9 +15472,9 @@ YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER
 PROGRAMS), EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGES.
 
-		     END OF TERMS AND CONDITIONS
+             END OF TERMS AND CONDITIONS
 
-	    How to Apply These Terms to Your New Programs
+        How to Apply These Terms to Your New Programs
 
   If you develop a new program, and you want it to be of the greatest
 possible use to the public, the best way to achieve this is to make it
@@ -15536,8 +15536,8 @@ Public License instead of this License.
 
 --------------- SECTION 6: GNU Library General Public License, V2.0 -----------
 
-		  GNU LIBRARY GENERAL PUBLIC LICENSE
-		       Version 2, June 1991
+          GNU LIBRARY GENERAL PUBLIC LICENSE
+               Version 2, June 1991
 
  Copyright (C) 1991 Free Software Foundation, Inc.
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -15547,7 +15547,7 @@ Public License instead of this License.
 [This is the first released version of the library GPL.  It is
  numbered 2 because it goes with version 2 of the ordinary GPL.]
 
-			    Preamble
+                Preamble
 
   The licenses for most software are designed to take away your
 freedom to share and change it.  By contrast, the GNU General Public
@@ -15637,7 +15637,7 @@ works together with the library.
   Note that it is possible for a library to be covered by the ordinary
 General Public License rather than by this special one.
 
-		  GNU LIBRARY GENERAL PUBLIC LICENSE
+          GNU LIBRARY GENERAL PUBLIC LICENSE
    TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
 
   0. This License Agreement applies to any software library which
@@ -15949,7 +15949,7 @@ decision will be guided by the two goals of preserving the free status
 of all derivatives of our free software and of promoting the sharing
 and reuse of software generally.
 
-			    NO WARRANTY
+                NO WARRANTY
 
   15. BECAUSE THE LIBRARY IS LICENSED FREE OF CHARGE, THERE IS NO
 WARRANTY FOR THE LIBRARY, TO THE EXTENT PERMITTED BY APPLICABLE LAW.
@@ -15972,7 +15972,7 @@ FAILURE OF THE LIBRARY TO OPERATE WITH ANY OTHER SOFTWARE), EVEN IF
 SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
 DAMAGES.
 
-		     END OF TERMS AND CONDITIONS
+             END OF TERMS AND CONDITIONS
 
            How to Apply These Terms to Your New Libraries
 
@@ -16249,7 +16249,7 @@ to a jury trial in any resulting litigation.
 
 --------------- SECTION 8: GNU Lesser General Public License, V3.0 -----------
 
-		   GNU LESSER GENERAL PUBLIC LICENSE
+           GNU LESSER GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
 
  Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
@@ -16435,4 +16435,4 @@ offer to obtain a copy of the Source Files is valid for three
 years from the date you acquired this Software product. Alternatively, 
 the Source Files may accompany the VMware product.
 
-[HYPERIC465GAKP021412]
+[HYPERIC4651GAKV040212]
