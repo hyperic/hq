@@ -43,7 +43,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class EditPasswordPrepareAction
     extends TilesAction {
 
-    private final AuthzBoss authzBoss;
+    private AuthzBoss authzBoss;
 
     @Autowired
     public EditPasswordPrepareAction(AuthzBoss authzBoss) {
@@ -51,8 +51,7 @@ public class EditPasswordPrepareAction
         this.authzBoss = authzBoss;
     }
 
-    @Override
-	public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
                                  HttpServletRequest request, HttpServletResponse response) throws Exception {
 
         WebUser user = RequestUtils.getWebUser(request);
@@ -66,16 +65,8 @@ public class EditPasswordPrepareAction
                 break;
             }
         }
-        
-        String [] vals = request.getParameterValues("u");
-        String val = null;
-        if (vals != null && vals.length > 0)
-        	val = vals[0];
-   	    // if the admin user is changing her own pw, require authentication of current pw 
-		if (val != null)
-			admin = admin & String.valueOf(user.getId()).equals(val) == false;
 
-		if (admin) {
+        if (admin) {
             context.putAttribute("administrator", "true");
         }
 
