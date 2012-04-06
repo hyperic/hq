@@ -25,9 +25,14 @@
 
 package org.hyperic.hq.auth.server.session;
 
+import java.util.Collection;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.auth.Principal;
 import org.hyperic.hq.auth.shared.AuthManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Role;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.dao.PrincipalDAO;
@@ -46,6 +51,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(noRollbackFor=AuthenticationException.class)
 public class AuthManagerImpl implements AuthManager {
 
+    private final Log log = LogFactory.getLog(AuthManagerImpl.class);
     private PrincipalDAO principalDao;
     private PasswordEncoder passwordEncoder;
     private AuthenticationManager authenticationManager;
@@ -88,9 +94,11 @@ public class AuthManagerImpl implements AuthManager {
      * @param username The username whose password will be changed.
      * @param password The new password for this user
      */
+    @Transactional(readOnly = false)
     public void changePassword(AuthzSubject subject, String username, String password)
         throws PermissionException {
         // AUTHZ check
+        checkChangePassword(subject, username);
         if (!subject.getName().equals(username)) {
             // users can change their own passwords... only
             // peeps with modifyUsers can modify other
@@ -108,9 +116,11 @@ public class AuthManagerImpl implements AuthManager {
      * @param username The username whose password will be changed.
      * @param password The new password for this user
      */
+    @Transactional(readOnly = false)
     public void changePasswordHash(AuthzSubject subject, String username, String hash)
         throws PermissionException {
         // AUTHZ check
+        checkChangePassword(subject, username);
         if (!subject.getName().equals(username)) {
             // users can change their own passwords... only
             // peeps with modifyUsers can modify other
@@ -124,6 +134,21 @@ public class AuthManagerImpl implements AuthManager {
         }
     }
 
+    private void checkChangePassword(AuthzSubject subject, String username) throws PermissionException {
+        AuthzSubject target = authzSubjectManager.findSubjectByName(username);
+        AuthzSubject user = authzSubjectManager.findSubjectById(subject.getId());
+        final boolean isTargetAdmin = isSuperUser(target);
+        final boolean isUserAdmin = isSuperUser(user);
+        if (log.isDebugEnabled()) {
+            log.debug("[changePassword] target user isSuperUser()=" + isTargetAdmin);
+            log.debug("[changePassword] loged  user   isSuperUser()=" + isSuperUser(user));
+        }
+        
+        if(isTargetAdmin && !isUserAdmin){
+            throw new PermissionException("Only admin user can change admin user passwords");
+        }
+    }
+    
     /**
      * Delete a user from the internal database
      * 
@@ -159,5 +184,18 @@ public class AuthManagerImpl implements AuthManager {
     @Transactional(readOnly = true)
     public Principal getPrincipal(AuthzSubject subject) {
         return principalDao.findByUsername(subject.getName());
+    }
+
+    private boolean isSuperUser(AuthzSubject subject) {
+        if (subject.getId().equals(AuthzConstants.overlordId)) {
+            return true;
+        }
+        final Collection<Role> roles = subject.getRoles();
+        for (final Role role : roles) {
+            if (role.getId().equals(AuthzConstants.rootRoleId)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
