@@ -46,10 +46,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(noRollbackFor=AuthenticationException.class)
 public class AuthManagerImpl implements AuthManager {
 
-    private PrincipalDAO principalDao;
-    private PasswordEncoder passwordEncoder;
-    private AuthenticationManager authenticationManager;
-    private AuthzSubjectManager authzSubjectManager;
+    private final PrincipalDAO principalDao;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final AuthzSubjectManager authzSubjectManager;
 
     @Autowired
     public AuthManagerImpl(PrincipalDAO principalDao, AuthzSubjectManager authzSubjectManager,

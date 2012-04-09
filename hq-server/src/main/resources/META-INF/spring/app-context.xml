@@ -72,6 +72,7 @@
 				<value>classpath:/jms.properties</value>
 				<value>classpath:/hibernate.properties</value>
 				<value>classpath:/tweak.properties</value>
+				<value>classpath:/hq-caf.properties</value>
 				<value>file:#{ systemProperties['user.home'] }/.hq/build.properties</value>
 				<value>classpath:/hq-server.conf</value>
 			</list>

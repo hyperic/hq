@@ -1,0 +1,9 @@
+#!/bin/sh
+ 
+thisdir=$(dirname $(readlink -f $0))
+. $thisdir/../config/cafenv.config
+export PYTHONPATH=$CAF_ROOT_DIR/providers/Python
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CAF_ROOT_DIR/lib:$CAF_ROOT_DIR/python/lib
+export CAF_APPCONFIG=$CAF_ROOT_DIR/config/pyfx-appconfig
+$CAF_ROOT_DIR/python/bin/python $CAF_ROOT_DIR/providers/Python/Providers/Hyperic/HypericAgentDeployerProvider_1_0.py $* --logging-level=INFO --format=CAF
+

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<caf:providerReg
+    xmlns:ns2="http://schemas.vmware.com/commonagent/1.0"
+    providerNamespace="Hyperic"
+    providerName="HypericAgentDeployerProvider"
+    providerVersion="1.0"
+    providerRelDir="invokers/HypericAgentDeployerProvider_1_0"
+    staleSec="1000"/>
