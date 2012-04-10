@@ -48,4 +48,12 @@ public class SecurityUtil {
         return System.currentTimeMillis() + "-" +
             Math.abs(rand1) + "-" + Math.abs(rand2);
     }
+    
+    public static String encrypt(String algorithm, String encryptionKey, String data) {
+        StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
+        encryptor.setPassword(encryptionKey);
+        encryptor.setAlgorithm(algorithm);
+
+        return PropertyValueEncryptionUtils.encrypt(data, encryptor);
+    }
 }

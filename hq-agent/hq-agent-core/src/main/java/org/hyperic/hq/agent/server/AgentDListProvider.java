@@ -44,6 +44,8 @@ import java.util.StringTokenizer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.db.DiskList;
+import org.hyperic.hq.agent.server.AgentStorageException;
+import org.hyperic.hq.agent.server.AgentStorageProvider;
 import org.hyperic.util.file.FileUtil;
 
 public class AgentDListProvider implements AgentStorageProvider {
@@ -327,7 +329,7 @@ public class AgentDListProvider implements AgentStorageProvider {
 
             nEnts = dIs.readLong();
             while(nEnts-- != 0){
-                this.keyVals.put(dIs.readUTF(), dIs.readUTF());
+                this.keyVals.put(/*Certificate);*/ dIs.readUTF(), dIs.readUTF());
             }
         } catch(FileNotFoundException exc){
             // Normal when it doesn't exist
