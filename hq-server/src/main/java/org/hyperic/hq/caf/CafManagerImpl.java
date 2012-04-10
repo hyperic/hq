@@ -1,21 +1,28 @@
 package org.hyperic.hq.caf;
 
 import static org.hyperic.hq.caf.CafOperations.DEPLOY_AGENT;
+import static org.hyperic.hq.caf.CafOperations.RESTART_AGENT;
+import static org.hyperic.hq.caf.CafOperations.START_AGENT;
+import static org.hyperic.hq.caf.CafOperations.STOP_AGENT;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIQueueManager;
 import org.hyperic.hq.appdef.shared.AIServerValue;
+import org.hyperic.hq.appdef.shared.AgentManager;
+import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.auth.shared.AuthManager;
 import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -43,6 +50,7 @@ public class CafManagerImpl implements CafManager{
 	private final AuthzSubjectManager authzSubjectManager;
 	private final PermissionManager permissionManager;
 	private final AIQueueManager aiQueueManager;
+	private final AgentManager agentManager;
 	private String serverPort;
 	private String serverSecurePort;
 
@@ -55,12 +63,67 @@ public class CafManagerImpl implements CafManager{
 	@Autowired
 	public CafManagerImpl(CafRequestsExeutor cafRequestExecutor, AuthManager authManager, 
 			AuthzSubjectManager authzSubjectManager, PermissionManager permissionManager,
-			AIQueueManager aiQueueManager) {
+			AIQueueManager aiQueueManager, AgentManager agentManager) {
 		this.cafRequestExecutor = cafRequestExecutor;
 		this.authManager = authManager;
 		this.authzSubjectManager = authzSubjectManager;
 		this.permissionManager = permissionManager;
 		this.aiQueueManager = aiQueueManager;
+		this.agentManager = agentManager;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.hyperic.hq.caf.CafManager#startAgent(java.lang.String)
+	 */
+	public CafResponse startAgent(String cafId) {
+		return executeAgentStopStartRestartOperation(cafId, START_AGENT);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.hyperic.hq.caf.CafManager#stopAgent(java.lang.String)
+	 */
+	public CafResponse stopAgent(String cafId) {
+		return executeAgentStopStartRestartOperation(cafId, STOP_AGENT);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.hyperic.hq.caf.CafManager#restartAgent(java.lang.String)
+	 */
+	public CafResponse restartAgent(String cafId) {
+		return executeAgentStopStartRestartOperation(cafId, RESTART_AGENT);
+	}
+	
+	/**
+	 * Executes stop/start/restart agent operation via CAF
+	 * @param cafId - the CAF id
+	 * @param operation - the operation to execute
+	 * @return CafResponse
+	 */
+	private CafResponse executeAgentStopStartRestartOperation(String cafId, CafOperations operation) {
+		Map<UUID,CafResponse> responses;
+		Set<UUID> requests;
+		Map<String, Object> params;
+		UUID requestId;
+		Agent agent = agentManager.findAgentsByCafId(cafId);
+		if (null == agent) {
+			CafResponse response = new CafResponse();
+			response.setErrorMessage("There is no agent installed on CAF '" + cafId + "'");
+			return response;
+		}
+		requestId = UUID.randomUUID();
+		params = new HashMap<String, Object>();
+		params.put("agent_directory", agentManager.getAgentInstallationPath(agent.getAgentToken()));
+		cafRequestExecutor.executeInvokeOperation(requestId, cafId, operation.getFqc(), 
+				operation.getOperation(), params);
+		requests = new HashSet<UUID>();
+		requests.add(requestId);
+		responses = waitAndGetResults(requests);
+		if (null == responses.get(requestId)) {
+			CafResponse response = new CafResponse();
+			response.setErrorMessage("Did not recieve any response in time");
+			return response;
+		}
+		return responses.get(requestId);
 	}
 
 	/* (non-Javadoc)
@@ -77,12 +140,15 @@ public class CafManagerImpl implements CafManager{
 	public String deployNewAgent(final String user, String password, String serverIp, List<String> cafIds) 
 			throws CafException {
 		UUID requestId;
-		Map<UUID, String> requestToPmeId = new HashMap<UUID, String>();
+		Map<UUID, String> requestToPmeId;
 		Map<UUID,CafResponse> responses;
+		Map<String, Object> params;
+		String message = "";
 		try {
 			log.info("Deploying new agents to CAFs '" + cafIds + "'");
+			requestToPmeId = new HashMap<UUID, String>();
 			checkDeployAgentPermissions(user, password);
-			Map<String, Object> params = new HashMap<String, Object>();
+			params = new HashMap<String, Object>();
 			//The next 2 line are temporary until we will
 			//be able to send the agent file as an attachment to the request
 			params.put("path_to_agent_file", "/tmp");
@@ -95,6 +161,12 @@ public class CafManagerImpl implements CafManager{
 			params.put("password", password);
 
 			for (String pmeId : cafIds) {
+				Agent agent = agentManager.findAgentsByCafId(pmeId);
+				//There is an agent installed on this CAF, don't reinstall
+				if (null != agent) {
+					message += "An agent is already installed on CAF '" + pmeId + "'\n\n";
+					continue;
+				}
 				requestId = UUID.randomUUID();
 				requestToPmeId.put(requestId, pmeId);
 				cafRequestExecutor.executeInvokeOperation(requestId, pmeId, DEPLOY_AGENT.getFqc(), 
@@ -107,7 +179,7 @@ public class CafManagerImpl implements CafManager{
 		}
 		responses = waitAndGetResults(requestToPmeId.keySet());
 		addNewDeployedAgentsToInventory(user, responses);
-		return buildDeployAgentResultsMessage(requestToPmeId, responses);
+		return buildDeployAgentResultsMessage(requestToPmeId, responses) + message;
 	}
 
 	/**
@@ -192,8 +264,13 @@ public class CafManagerImpl implements CafManager{
 		String pattern = "(\\d)*-(\\d)*-(\\d)*";
 		for (CafResponse response : responses.values()) {
 				for(String line : response.getProviderStdout()) {
-					if (line.trim().matches(pattern)) {
-						tokens.add(line.trim());
+					String agentToken = line.trim();
+					if (agentToken.matches(pattern)) {
+						tokens.add(agentToken);
+						try {
+							agentManager.updateAgentCafId(agentToken, response.getPmeIdStr());
+						} catch (AgentNotFoundException e) {				
+						}
 						break;
 					}
 				}

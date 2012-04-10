@@ -422,6 +422,18 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         agent.setModifiedTime(new Long(System.currentTimeMillis()));
         return agent;
     }
+    
+    /**
+     * Update an existing agent by setting his caf id
+     * @param agentToken
+     * @param cafId
+     * @throws AgentNotFoundException
+     */
+    public void updateAgentCafId(String agentToken, String cafId) throws AgentNotFoundException{
+    	 Agent agent = this.getAgentInternal(agentToken);
+    	 agent.setCafId(cafId);
+    	 agent.setModifiedTime(new Long(System.currentTimeMillis()));
+    }
 
     /**
      * Update an existing Agent given the old agent token. The auth token will
@@ -504,6 +516,13 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     @Transactional(readOnly = true)
     public List<Agent> findAgentsByIP(String ip) {
         return agentDao.findByIP(ip);
+    }
+    
+    /**
+     */
+    @Transactional(readOnly = true)
+    public Agent findAgentsByCafId(String cafId) {
+        return agentDao.findByCafId(cafId);
     }
 
     /**
@@ -612,6 +631,11 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     @Transactional(readOnly = true)
     public Agent getAgent(String agentToken) throws AgentNotFoundException {
         return this.getAgentInternal(agentToken);
+    }
+    
+    @Transactional(readOnly = true)
+    public String getAgentInstallationPath(String agentToken) {
+    	return agentDao.getAgentInstallationPath(agentToken);
     }
 
     /**

@@ -25,7 +25,7 @@ import com.vmware.commonagent.contracts.exceptions.CafException;
 /**
  * Central component for executing CAF operations
  */
-public class CafRequestsExeutor {
+class CafRequestsExeutor {
 	
 	private  final UUID clientId;
 	private  final String routingKeyPrefix;

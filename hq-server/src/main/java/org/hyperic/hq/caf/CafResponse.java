@@ -8,8 +8,10 @@ public class CafResponse {
 	private String clientIdStr;
 	private String requestIdStr;
 	private String pmeIdStr;
+	private String errorMessage;
 	private final Collection<String>providerStdout = new ArrayList<String>();
 	private final Collection<String>providerStderr = new ArrayList<String>();
+	
 	
 	public String getClientIdStr() {
 		return clientIdStr;
@@ -51,8 +53,19 @@ public class CafResponse {
 		providerStderr.add(line);
 	}
 	
+	public String getErrorMessage() {
+		return errorMessage;
+	}
+
+	public void setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
+	}
+	
 	@Override
 	public String toString() {
+		if (null != errorMessage) {
+			return "Error executing CAF request - " +  errorMessage;
+		}
 		String toString = "Results for request '" + requestIdStr + "' - \n";
 		toString += "Provider stdOut : \n";
 		for (String line : providerStdout) {
@@ -64,4 +77,6 @@ public class CafResponse {
 		}
 		return toString;
 	}
+
+	
 }

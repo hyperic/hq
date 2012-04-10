@@ -12,7 +12,7 @@ import com.vmware.commonagent.contracts.doc.PmeCollectInstances;
 import com.vmware.commonagent.contracts.doc.PmeInvokeOperation;
 import com.vmware.commonagent.contracts.doc.RequestHeader;
 
-public class RequestBuilder {
+class RequestBuilder {
 	public static RequestHeader createRequestHeader() {
 		return BldV1.requestHeader()
 			.noSamlToken()

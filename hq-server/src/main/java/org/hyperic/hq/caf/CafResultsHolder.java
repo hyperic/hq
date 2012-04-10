@@ -7,7 +7,7 @@ import java.util.Map;
  * This component holds CAF responses so that those who execute invoke operation
  * could find the response to those operation here mapped by the request's id
  */
-public class CafResultsHolder {
+class CafResultsHolder {
 	
 	private static Map<String, CafResponse> cafResults = new HashMap<String, CafResponse>();
 	

@@ -517,4 +517,16 @@ public interface AgentManager {
      * @return long representing the number of agents whose version is lower than that of the server
      */
     public long getNumOldAgents();
+    
+    /**
+     * Update an existing agent by setting his caf id
+     * @param agentToken
+     * @param cafId
+     * @throws AgentNotFoundException
+     */
+    public void updateAgentCafId(String agentToken, String cafId) throws AgentNotFoundException;
+    
+    public String getAgentInstallationPath(String agentToken); 
+    
+    public Agent findAgentsByCafId(String cafId);
 }

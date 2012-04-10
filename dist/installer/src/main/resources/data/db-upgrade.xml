@@ -11755,6 +11755,10 @@ has already been defined.
        </schema-directSQL>  
     </schemaSpec>	
 	
+	<schemaSpec version="3.211">
+	    <schema-addColumn table="EAM_AGENT" column="CAF_PME_ID" columnType="VARCHAR2"/>
+	</schemaSpec>
+	
 </dbupgrade>
 </target>
 </project>

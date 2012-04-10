@@ -19,7 +19,7 @@ import com.vmware.commonagent.common.core.XmlElement;
 import com.vmware.commonagent.common.core.XmlUtils;
 
 
-public class CafMessageListener {
+class CafMessageListener {
 	
 	private static final Logger _log = LoggerFactory.getLogger(CafMessageListener.class);
 	

@@ -58,5 +58,24 @@ public interface CafManager {
 	 */
 	public String deployNewAgent(String user, String password, String serverIp, List<String> cafIds) 
 			 throws CafException;
+	
+
+	/**
+	 * Starts the agent on a CAF machine
+	 * @param cafId - the id of the CAF 
+	 */
+	public CafResponse startAgent(String cafId);
+	
+	/**
+	 * Stops the agent on a CAF machine
+	 * @param cafId - the id of the CAF 
+	 */
+	public CafResponse stopAgent(String cafId);
+	
+	/**
+	 * Restarts the agent on a CAF machine
+	 * @param cafId - the id of the CAF 
+	 */
+	public CafResponse restartAgent(String cafId);
 	 
 }
