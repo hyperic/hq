@@ -165,6 +165,10 @@ public class AgentDAO extends HibernateDAO<Agent> {
         return query.list();
     }
     
+    /**
+     * Returns the agent's installation path 
+     * @param agentToken
+     */
     public String getAgentInstallationPath(String agentToken) {
     	final StringBuilder sql = new StringBuilder()
     	.append("select distinct s from Server s ")

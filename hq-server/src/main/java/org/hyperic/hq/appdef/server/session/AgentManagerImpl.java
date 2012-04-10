@@ -518,7 +518,9 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         return agentDao.findByIP(ip);
     }
     
-    /**
+   
+    /* (non-Javadoc)
+     * @see org.hyperic.hq.appdef.shared.AgentManager#findAgentsByCafId(java.lang.String)
      */
     @Transactional(readOnly = true)
     public Agent findAgentsByCafId(String cafId) {
@@ -633,6 +635,9 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         return this.getAgentInternal(agentToken);
     }
     
+    /* (non-Javadoc)
+     * @see org.hyperic.hq.appdef.shared.AgentManager#getAgentInstallationPath(java.lang.String)
+     */
     @Transactional(readOnly = true)
     public String getAgentInstallationPath(String agentToken) {
     	return agentDao.getAgentInstallationPath(agentToken);

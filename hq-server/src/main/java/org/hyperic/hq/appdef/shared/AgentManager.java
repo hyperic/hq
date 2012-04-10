@@ -519,14 +519,22 @@ public interface AgentManager {
     public long getNumOldAgents();
     
     /**
-     * Update an existing agent by setting his caf id
+     * Updates an existing agent by setting his caf id
      * @param agentToken
      * @param cafId
      * @throws AgentNotFoundException
      */
     public void updateAgentCafId(String agentToken, String cafId) throws AgentNotFoundException;
     
+    /**
+     * Returns the agent's installation path
+     * @param agentToken
+     */
     public String getAgentInstallationPath(String agentToken); 
     
+    /**
+     * Finds an agent by it's CafId
+     * @param cafId
+     */
     public Agent findAgentsByCafId(String cafId);
 }
