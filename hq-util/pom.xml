@@ -17,6 +17,7 @@
         <dependency>
             <groupId>org.jasypt</groupId>
             <artifactId>jasypt</artifactId>
+            <scope>compile</scope>
         </dependency>
 		<dependency>
 			<groupId>org.apache.ant</groupId>

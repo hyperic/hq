@@ -26,6 +26,8 @@
 package org.hyperic.util.security;
 
 import java.util.Random;
+import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
+import org.jasypt.properties.PropertyValueEncryptionUtils;
 
 public class SecurityUtil {
 

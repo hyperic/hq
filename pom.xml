@@ -16,6 +16,7 @@
 		<ant-contrib.version>1.0b2</ant-contrib.version>
 		<apache-taglibs.version>1.1.2</apache-taglibs.version>
 		<backport-util-concurrent.version>3.1</backport-util-concurrent.version>
+		<commons-lang.version>2.5</commons-lang.version>
 		<clover2.version>2.6.3</clover2.version>
 		<commons-fileupload.version>1.2.1</commons-fileupload.version>
 		<commons-io.version>1.4</commons-io.version>
@@ -85,6 +86,11 @@
 
 	<dependencyManagement>
 		<dependencies>
+                        <dependency>
+		                <groupId>commons-lang</groupId>
+			        <artifactId>commons-lang</artifactId>
+			        <version>${commons-lang.version}</version>
+                        </dependency>
 			<dependency>
 				<groupId>backport-util-concurrent</groupId>
 				<artifactId>backport-util-concurrent</artifactId>
