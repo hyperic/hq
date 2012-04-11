@@ -141,11 +141,13 @@ public class AuthManagerImpl implements AuthManager {
         final boolean isUserAdmin = isSuperUser(user);
         if (log.isDebugEnabled()) {
             log.debug("[changePassword] target user isSuperUser()=" + isTargetAdmin);
-            log.debug("[changePassword] loged  user   isSuperUser()=" + isSuperUser(user));
+            log.debug("[changePassword] loged  user isSuperUser()=" + isSuperUser(user));
         }
-        
-        if(isTargetAdmin && !isUserAdmin){
-            throw new PermissionException("Only admin user can change admin user passwords");
+
+        if (isTargetAdmin && !isUserAdmin) {
+            PermissionException ex = new PermissionException("Only admin user can change admin user passwords");
+            log.error(ex);
+            throw ex;
         }
     }
     
