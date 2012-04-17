@@ -25,12 +25,24 @@
 
 package org.hyperic.util.security;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.security.KeyStore;
+import java.security.KeyStore.PrivateKeyEntry;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableEntryException;
 import java.util.Random;
+
+import org.apache.commons.codec.binary.Base64;
+import org.jasypt.encryption.StringEncryptor;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.jasypt.properties.PropertyValueEncryptionUtils;
 
 public class SecurityUtil {
-
+    private final static String DEFAULT_ENCRYPTION_ALGORITHM = "PBEWithMD5AndDES";
+    private final static String DEFAULT_PRIVATE_KEY_KEY = "hq";
+    
     /**
      * Generates a token of up to 100 chars of a (generally) random
      * token.
@@ -51,11 +63,51 @@ public class SecurityUtil {
             Math.abs(rand1) + "-" + Math.abs(rand2);
     }
     
-    public static String encrypt(String algorithm, String encryptionKey, String data) {
+    public static StandardPBEStringEncryptor getStandardPBEStringEncryptor(KeystoreConfig keystoreConfig) throws KeyStoreException, IOException, NoSuchAlgorithmException, UnrecoverableEntryException {
+        StandardPBEStringEncryptor encryptor =  new StandardPBEStringEncryptor();
+        encryptor.setAlgorithm(SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM);
+
+        KeyStore keystore = KeystoreManager.getKeystoreManager().getKeyStore(keystoreConfig);
+        KeyStore.Entry e = keystore.getEntry(SecurityUtil.DEFAULT_PRIVATE_KEY_KEY,
+                new KeyStore.PasswordProtection(keystoreConfig.getFilePassword().toCharArray()));
+        String encryptionKey =  new String(Base64.decodeBase64(new String(((PrivateKeyEntry)e).getCertificate().getPublicKey().getEncoded(),Charset.forName("US-ASCII")).getBytes()),Charset.forName("US-ASCII"));
+        encryptor.setPassword(encryptionKey);
+        
+        return encryptor;
+    }
+    
+    /**
+     * 
+     * @param encryptor initialized encryptor
+     * @param data
+     * @return
+     */
+    public static String encrypt(StringEncryptor encryptor, String data) {
+        return PropertyValueEncryptionUtils.encrypt(data,encryptor);
+    }
+
+    public static String encrypt(String encryptionAlgorithm, String encryptionKey, String data) {
         StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
         encryptor.setPassword(encryptionKey);
-        encryptor.setAlgorithm(algorithm);
+        encryptor.setAlgorithm(encryptionAlgorithm);
+        return encrypt(encryptor,data);
+    }
 
-        return PropertyValueEncryptionUtils.encrypt(data, encryptor);
+    public static String decrypt(StringEncryptor encryptor, String data) {
+        return PropertyValueEncryptionUtils.decrypt(data,encryptor);
+    }
+    
+    /**
+     * 
+     * @param encryptor initialized encryptor
+     * @param data
+     * @return
+     */
+    public static String decrypt(String encryptionAlgorithm, String encryptionKey, String data) {
+        StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
+        
+        encryptor.setPassword(encryptionKey);
+        encryptor.setAlgorithm(encryptionAlgorithm);
+        return decrypt(encryptor,data);
     }
 }

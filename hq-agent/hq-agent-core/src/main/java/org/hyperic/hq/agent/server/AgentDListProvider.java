@@ -34,6 +34,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -43,10 +44,11 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.AgentKeystoreConfig;
 import org.hyperic.hq.agent.db.DiskList;
-import org.hyperic.hq.agent.server.AgentStorageException;
-import org.hyperic.hq.agent.server.AgentStorageProvider;
 import org.hyperic.util.file.FileUtil;
+import org.hyperic.util.security.SecurityUtil;
+import org.jasypt.encryption.StringEncryptor;
 
 public class AgentDListProvider implements AgentStorageProvider {
     private static final int RECSIZE  = 4000;
@@ -71,6 +73,8 @@ public class AgentDListProvider implements AgentStorageProvider {
     private long      chkSize = CHKSIZE;
     private int       chkPerc = CHKPERC;
 
+    private StringEncryptor encryptor = null;
+    
     public AgentDListProvider(){
         this.log     = LogFactory.getLog(AgentDListProvider.class);
         this.keyVals = null;
@@ -221,17 +225,23 @@ public class AgentDListProvider implements AgentStorageProvider {
             fOs = new FileOutputStream(this.keyValFile);
             bOs = new BufferedOutputStream(fOs);
             dOs = new DataOutputStream(bOs);
-
+            if (this.encryptor==null) {
+                this.encryptor = SecurityUtil.getStandardPBEStringEncryptor(new AgentKeystoreConfig());
+            }
             synchronized(this.keyVals){
                 dOs.writeLong(this.keyVals.size());
+                
                 for(Iterator i=this.keyVals.entrySet().iterator(); 
                         i.hasNext();
                         )
                 {
                     Map.Entry ent = (Map.Entry)i.next();
 
-                    dOs.writeUTF((String)ent.getKey());
-                    dOs.writeUTF((String)ent.getValue());
+                    String encryptedKey = SecurityUtil.encrypt(this.encryptor, (String)ent.getKey());
+                    String encryptedVal =  SecurityUtil.encrypt(this.encryptor, (String)ent.getValue());
+
+                    dOs.writeUTF(encryptedKey);
+                    dOs.writeUTF(encryptedVal);
                 }
 
                 dOs.flush();
@@ -243,6 +253,8 @@ public class AgentDListProvider implements AgentStorageProvider {
             this.log.error("Error flushing data", exc);
             throw new AgentStorageException("Error flushing data: " +
                     exc.getMessage());
+        } catch (GeneralSecurityException e) {
+            throw new AgentStorageException(e.getMessage());
         } finally {
             try {if(fOs != null)fOs.close();} catch(IOException exc){}
         }
@@ -328,12 +340,21 @@ public class AgentDListProvider implements AgentStorageProvider {
             dIs = new DataInputStream(bIs);
 
             nEnts = dIs.readLong();
+
+            if (this.encryptor==null) {
+                this.encryptor = SecurityUtil.getStandardPBEStringEncryptor(new AgentKeystoreConfig());
+            }
             while(nEnts-- != 0){
-                this.keyVals.put(/*Certificate);*/ dIs.readUTF(), dIs.readUTF());
+                String decryptedKey = SecurityUtil.decrypt(encryptor, dIs.readUTF());
+                String decryptedVal = SecurityUtil.decrypt(encryptor, dIs.readUTF());
+                this.keyVals.put(decryptedKey, decryptedVal);
             }
         } catch(FileNotFoundException exc){
             // Normal when it doesn't exist
-        } catch(IOException exc){
+        } catch (GeneralSecurityException e) {
+            this.log.error(e.getMessage());
+            throw new AgentStorageException(e.getMessage());
+ 	} catch(IOException exc){
             this.log.error("Error reading " + this.keyValFile + " loading " +
                     "last known good version");
 
@@ -347,8 +368,13 @@ public class AgentDListProvider implements AgentStorageProvider {
                 dIs = new DataInputStream(bIs);
 
                 nEnts = dIs.readLong();
+                if (this.encryptor==null) {
+                    this.encryptor = SecurityUtil.getStandardPBEStringEncryptor(new AgentKeystoreConfig());
+                }
                 while(nEnts-- != 0) {
-                    this.keyVals.put(dIs.readUTF(), dIs.readUTF());
+                    String denryptedKey = SecurityUtil.encrypt(this.encryptor, dIs.readUTF());
+                    String decryptedVal = SecurityUtil.encrypt(this.encryptor, dIs.readUTF());
+                    this.keyVals.put(denryptedKey, decryptedVal);
                 }
             } catch (FileNotFoundException e) {
                 // Already checked this before, shouldn't happen
@@ -356,9 +382,13 @@ public class AgentDListProvider implements AgentStorageProvider {
                 // Throw original error
                 throw new AgentStorageException("Error reading " + 
                         this.keyValFile + ": " +
-                        exc.getMessage());
+                        e.getMessage());
+            
+            } catch(GeneralSecurityException e){
+                // Throw original error
+                throw new AgentStorageException(e.getMessage());
             }
-        } finally {
+    } finally {
             try {if(fIs != null)fIs.close();} catch(IOException exc){}
         }
             }

@@ -32,6 +32,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.KeyStore;
+import java.security.KeyStore.PrivateKeyEntry;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
@@ -44,6 +45,7 @@ import javax.net.ssl.X509TrustManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.conn.ssl.AbstractVerifier;
+import org.apache.http.util.EncodingUtils;
 import org.hyperic.util.exec.Execute;
 import org.hyperic.util.exec.ExecuteWatchdog;
 import org.hyperic.util.exec.PumpStreamHandler;
@@ -290,5 +292,37 @@ public class KeystoreManager {
             } catch (IOException e) {}
         }
     }
+    public static void main(String[] args) throws Exception {
 
+      FileInputStream keyStoreFileInputStream = new FileInputStream(new File("/work/agent-4.7-ee/wrapper/sbin/../../data/keystore"));
+
+      char[] pass = "storePW".toCharArray();
+      KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+      keystore.load(keyStoreFileInputStream, pass);
+
+      final PrivateKeyEntry e =  (PrivateKeyEntry) keystore.getEntry("hq", new KeyStore.PasswordProtection(pass)) ; 
+
+//      System.out.println(new String(e.getCertificate().getPublicKey().getEncoded() , Charset.forName("US-ASCII")));
+//      byte[] b = e.getCertificate().getPublicKey().getEncoded();
+//      CharsetDecoder cd = Charset.forName("US-ASCII").newDecoder();
+//      CharBuffer c = new CharBuffer();
+//      cd.decode(new MappedByteBuffer(),c,false);
+//      String encryptionKey =  new  String(, Charset.forName("US-ASCII"));
+      byte[] b = e.getCertificate().getPublicKey().getEncoded();
+      System.out.println(EncodingUtils.getAsciiString(b));
+//      StandardPBEStringEncryptor encryptor =  new StandardPBEStringEncryptor();
+//      encryptor.setAlgorithm("PBEWithMD5AndDES");
+
+//      KeyStore keystore = KeystoreManager.getKeystoreManager().getKeyStore(keystoreConfig);
+//      KeyStore.Entry e = keystore.getEntry(SecurityUtil.DEFAULT_PRIVATE_KEY_KEY,
+//              new KeyStore.PasswordProtection(keystoreConfig.getFilePassword().toCharArray()));
+//      String encryptionKey =  new  String(((PrivateKeyEntry)e).getCertificate().getPublicKey().getEncoded(), Charset.forName("US-ASCII"));
+//      encryptor.setPassword(encryptionKey);
+//      System.out.println(PropertyValueEncryptionUtils.decrypt(data,encryptor));
+
+      
+      
+//      System.out.println(encryptionKey);
+//      ;
+    }
 }
