@@ -35,6 +35,10 @@ import java.util.Properties;
 
 public class PropertyUtil {
 
+    public static void decodeEncodedEntries(Map props) {
+        
+    }
+    
     /**
      * Expand variable references in property values.
      *

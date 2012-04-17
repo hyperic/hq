@@ -26,6 +26,7 @@
 package org.hyperic.util.security;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.security.KeyStore;
 import java.security.KeyStore.PrivateKeyEntry;
@@ -34,7 +35,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableEntryException;
 import java.util.Random;
 
-import org.apache.commons.codec.binary.Base64;
 import org.jasypt.encryption.StringEncryptor;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.jasypt.properties.PropertyValueEncryptionUtils;
@@ -66,12 +66,13 @@ public class SecurityUtil {
     public static StandardPBEStringEncryptor getStandardPBEStringEncryptor(KeystoreConfig keystoreConfig) throws KeyStoreException, IOException, NoSuchAlgorithmException, UnrecoverableEntryException {
         StandardPBEStringEncryptor encryptor =  new StandardPBEStringEncryptor();
         encryptor.setAlgorithm(SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM);
-
+ 
         KeyStore keystore = KeystoreManager.getKeystoreManager().getKeyStore(keystoreConfig);
         KeyStore.Entry e = keystore.getEntry(SecurityUtil.DEFAULT_PRIVATE_KEY_KEY,
                 new KeyStore.PasswordProtection(keystoreConfig.getFilePassword().toCharArray()));
-        String encryptionKey =  new String(Base64.decodeBase64(new String(((PrivateKeyEntry)e).getCertificate().getPublicKey().getEncoded(),Charset.forName("US-ASCII")).getBytes()),Charset.forName("US-ASCII"));
-        encryptor.setPassword(encryptionKey);
+        byte[] pk = ((PrivateKeyEntry)e).getPrivateKey().getEncoded();
+        ByteBuffer encryptionKey = Charset.forName("US-ASCII").encode(ByteBuffer.wrap(pk).toString());
+        encryptor.setPassword(encryptionKey.toString());
         
         return encryptor;
     }
