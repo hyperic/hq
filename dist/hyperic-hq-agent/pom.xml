@@ -85,6 +85,8 @@
         		<property><name>CI-build</name></property>
    			</activation>
 			<modules> 
+			    <module>modules/hyperic-hq-agent-parent</module>
+			    <module>modules/noJRE</module>
 			</modules> 
 		</profile>  
 		<profile> 
@@ -93,6 +95,8 @@
         		<property><name>daily-build</name></property>
    			</activation>
 			<modules> 
+			    <module>modules/hyperic-hq-agent-parent</module>
+			    <module>modules/noJRE</module>
 			</modules> 
 		</profile>  
 		<profile> 
