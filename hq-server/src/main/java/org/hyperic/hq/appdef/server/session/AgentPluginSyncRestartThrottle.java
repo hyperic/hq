@@ -37,6 +37,7 @@ import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -70,12 +71,12 @@ public class AgentPluginSyncRestartThrottle {
     private final TreeSet<Integer> pendingRestarts = new TreeSet<Integer>();
     /** [HHQ-4882] - agents need to be up for at least 60 secs before being restarted */
     private final HashMap<Integer, Long> lastCheckin = new HashMap<Integer, Long>();
-    private TaskScheduler taskScheduler;
+    private final TaskScheduler taskScheduler;
     private final AtomicBoolean shutdown = new AtomicBoolean(false);
     private final Object LOCK = new Object();
-    private AuthzSubject overlord;
-    private ConcurrentStatsCollector concurrentStatsCollector;
-    private TransactionRetry transactionRetry;
+    private final AuthzSubject overlord;
+    private final ConcurrentStatsCollector concurrentStatsCollector;
+    private final TransactionRetry transactionRetry;
     
     @Autowired
     public AgentPluginSyncRestartThrottle(AuthzSubjectManager authzSubjectManager,
@@ -284,9 +285,12 @@ public class AgentPluginSyncRestartThrottle {
         }
     }
     
+    @PreDestroy
     public void shutdown() {
         shutdown.set(true);
-        LOCK.notifyAll();
+        synchronized(LOCK) { 
+            LOCK.notifyAll();
+        }//EO synchronized block 
     }
 
 }

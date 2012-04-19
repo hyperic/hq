@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.hyperic.hq</groupId>
 		<artifactId>hq-parent</artifactId>
-		<version>5.0.BUILD-SNAPSHOT</version>
+		<version>5.0.MVN3.BUILD-SNAPSHOT</version>
 	</parent>
 	
 	<groupId>org.hyperic.hq.uiplugin</groupId>
@@ -16,7 +16,6 @@
 
 	<modules>
 		<module>hq-uiplugin-parent</module>
-
 		<module>alertcenter</module>
 		<module>auditcenter</module>
 		<module>eventcenter</module>

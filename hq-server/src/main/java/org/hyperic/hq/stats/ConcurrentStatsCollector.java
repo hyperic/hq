@@ -27,6 +27,7 @@ package org.hyperic.hq.stats;
 
 import java.util.concurrent.ScheduledFuture;
 
+import javax.annotation.PreDestroy;
 import javax.management.MBeanServer;
 
 import net.sf.ehcache.CacheManager;
@@ -145,5 +146,11 @@ public class ConcurrentStatsCollector extends AbstractStatsCollector {
             "hyperic.jmx:type=DataSource,name=tomcat.jdbc", "Active", false)));
         register(CONCURRENT_STATS_COLLECTOR);
     }
+    
+    @PreDestroy
+    @Override 
+    public final void destory() { 
+        super.destory() ; 
+    }//EOM 
 
 }

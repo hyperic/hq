@@ -28,6 +28,7 @@
 -->
 
 <assembly>
+	<id>Examples-assembly</id>
 	<formats>
 		<format>zip</format>
 	</formats>

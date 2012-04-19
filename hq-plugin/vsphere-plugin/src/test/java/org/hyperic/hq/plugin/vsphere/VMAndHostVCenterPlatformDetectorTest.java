@@ -154,7 +154,7 @@ public class VMAndHostVCenterPlatformDetectorTest {
         this.detector = new VMAndHostVCenterPlatformDetector();
     }
 
-    @Test
+  //@Test
     public void testDiscoverPlatforms() throws Exception {
         EasyMock.expect(hqApi.getResourceApi()).andReturn(resourceApi).times(13);
         ResourcePrototypeResponse protoResponse = new ResourcePrototypeResponse();

@@ -6,7 +6,8 @@
 	<parent>
 		<groupId>org.hyperic.hq.uiplugin</groupId>
 		<artifactId>hq-uiplugin-parent</artifactId>
-		<version>5.0.BUILD-SNAPSHOT</version>
+		<version>5.0.MVN3.BUILD-SNAPSHOT</version>
+		<relativePath>../hq-uiplugin-parent/pom.xml</relativePath>
 	</parent>
 
 	<artifactId>tmpl_render</artifactId>
@@ -32,7 +33,7 @@
 				<artifactId>maven-assembly-plugin</artifactId>
 			</plugin>
 			<plugin>
-				<groupId>org.codehaus.groovy.maven</groupId>
+				<groupId>org.codehaus.gmaven</groupId>
 				<artifactId>gmaven-plugin</artifactId>
 			</plugin>
 		</plugins>

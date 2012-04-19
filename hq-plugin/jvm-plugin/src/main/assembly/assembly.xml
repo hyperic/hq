@@ -28,6 +28,7 @@
 -->
 
 <assembly>
+	<id>jvm-plugin-assembly</id>
 	<formats>
 		<format>zip</format>
 	</formats>

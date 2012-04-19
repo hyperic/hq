@@ -28,6 +28,8 @@ package org.hyperic.hq.appdef.galerts;
 
 import java.util.ResourceBundle;
 
+import javax.annotation.PreDestroy;
+
 import org.hyperic.hq.appdef.server.session.ResourceAuxLogPojo;
 import org.hyperic.hq.appdef.shared.ResourceAuxLogManager;
 import org.hyperic.hq.events.AlertAuxLog;
@@ -41,8 +43,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class ResourceAuxLogProvider extends AlertAuxLogProvider {
     private static final String BUNDLE = "org.hyperic.hq.appdef.Resources";
-    private GalertManager galertManager;
-    private ResourceAuxLogManager resourceAuxLogManager;
+    private final GalertManager galertManager;
+    private final ResourceAuxLogManager resourceAuxLogManager;
 
     public static /*final*/ResourceAuxLogProvider INSTANCE;
     
@@ -58,6 +60,7 @@ public class ResourceAuxLogProvider extends AlertAuxLogProvider {
         return galertManager.findAuxLogById(new Integer(id));
     }
 
+    @Override
     public AlertAuxLog load(int auxLogId, long timestamp, String desc) {
         GalertAuxLog gAuxLog = findGAuxLog(auxLogId);
         ResourceAuxLogPojo auxLog = resourceAuxLogManager.find(gAuxLog);
@@ -65,6 +68,7 @@ public class ResourceAuxLogProvider extends AlertAuxLogProvider {
         return new ResourceAuxLog(gAuxLog, auxLog);
     }
 
+    @Override
     public void save(int auxLogId, AlertAuxLog log) {
         ResourceAuxLog logInfo = (ResourceAuxLog)log;
         GalertAuxLog gAuxLog = findGAuxLog(auxLogId);
@@ -72,7 +76,14 @@ public class ResourceAuxLogProvider extends AlertAuxLogProvider {
         resourceAuxLogManager.create(gAuxLog, logInfo);
     }
 
+    @Override
     public void deleteAll(GalertDef def) {
         resourceAuxLogManager.removeAll(def);
     }
+    
+    @PreDestroy
+    public final void destroy() {
+        INSTANCE = null ; 
+        this.unregister() ; 
+    }//EOM 
 }

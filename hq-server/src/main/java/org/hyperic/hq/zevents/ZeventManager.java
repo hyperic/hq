@@ -26,16 +26,13 @@
 package org.hyperic.hq.zevents;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Properties;
 import java.util.Queue;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -44,6 +41,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 
 import org.apache.commons.logging.Log;
@@ -86,34 +84,34 @@ public class ZeventManager implements ZeventEnqueuer {
     private final Object _listenerLock = new Object();
 
     /* Set of {@link ZeventListener}s listening to events of all types */
-    private final Set<TimingListenerWrapper<Zevent>> _globalListeners =
+    private Set<TimingListenerWrapper<Zevent>> _globalListeners =
         new HashSet<TimingListenerWrapper<Zevent>>();
 
     /*
      * Map of {@link Class}es subclassing {@link ZEvent} onto lists of {@link
      * ZeventListener}s
      */
-    private final Map<Class<? extends Zevent>, List<TimingListenerWrapper<Zevent>>> _listeners =
+    private Map<Class<? extends Zevent>, List<TimingListenerWrapper<Zevent>>> _listeners =
         new HashMap<Class<? extends Zevent>, List<TimingListenerWrapper<Zevent>>>();
 
     /* Map of {@link Queue} onto the target listeners using them. */
-    private final WeakHashMap<Queue<?>, TimingListenerWrapper<Zevent>> _registeredBuffers =
+    private WeakHashMap<Queue<?>, TimingListenerWrapper<Zevent>> _registeredBuffers =
         new WeakHashMap<Queue<?>, TimingListenerWrapper<Zevent>>();
 
     // For diagnostics and warnings
     private long _lastWarnTime;
-    private long _listenerTimeout;
-    private long _warnSize;
-    private long _warnInterval;
+    private final long _listenerTimeout;
+    private final long _warnSize;
+    private final long _warnInterval;
     private long _maxTimeInQueue;
     private long _numEvents;
 
     private BlockingQueue<Zevent> _eventQueue;
     private DiagnosticsLogger diagnosticsLogger;
-    private ThreadWatchdog threadWatchdog;
-    private long maxQueue;
-    private long batchSize;
-    private ConcurrentStatsCollector concurrentStatsCollector;
+    private final ThreadWatchdog threadWatchdog;
+    private final long maxQueue;
+    private final long batchSize;
+    private final ConcurrentStatsCollector concurrentStatsCollector;
     
     @Autowired
     public ZeventManager(DiagnosticsLogger diagnosticsLogger, ThreadWatchdog threadWatchdog,
@@ -156,6 +154,7 @@ public class ZeventManager implements ZeventEnqueuer {
                 return getStatus();
             }
 
+            @Override
             public String toString() {
                 return "ZEvent Subsystem";
             }
@@ -177,6 +176,7 @@ public class ZeventManager implements ZeventEnqueuer {
         return _eventQueue.size();
     }
 
+    @PreDestroy
     public void shutdown() throws InterruptedException {
         while (!_eventQueue.isEmpty()) {
             System.out.println("Waiting for empty queue: " + _eventQueue.size());
@@ -184,6 +184,20 @@ public class ZeventManager implements ZeventEnqueuer {
         }
         _processorThread.interrupt();
         _processorThread.join(5000);
+        
+        _threadGroup.interrupt() ;
+        diagnosticsLogger = null ;
+        this._globalListeners = null ; 
+        this._listeners = null ; 
+        this._eventQueue = null ;
+        synchronized(this._registeredBuffers) { 
+            
+            for (Entry<Queue<?>, TimingListenerWrapper<Zevent>> entry : _registeredBuffers.entrySet()) {
+                entry.getKey().clear() ; 
+            }//EO while there are more buffers 
+            this._registeredBuffers = null ;
+            
+        }//EO sync block 
     }
 
     public long getMaxTimeInQueue() {

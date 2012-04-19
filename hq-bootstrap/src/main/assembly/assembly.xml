@@ -28,6 +28,7 @@
 -->
 
 <assembly>
+	<id>hq-bootstrap-assembly</id>
 	<formats>
 		<format>zip</format>
 	</formats>

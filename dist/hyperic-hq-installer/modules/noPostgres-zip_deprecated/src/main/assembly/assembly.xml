@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assembly>
+	<id>noPostgres</id>
+	<formats>
+		<format>zip</format>
+	</formats>
+
+	<componentDescriptors>
+    	<componentDescriptor>../../src/main/assembly/component.xml</componentDescriptor>
+    </componentDescriptors>
+
+    <dependencySets>
+		<dependencySet>
+			<useProjectArtifact>false</useProjectArtifact>
+			<useTransitiveDependencies>false</useTransitiveDependencies>
+			<outputDirectory>/</outputDirectory>
+			<includes>
+				<include>org.hyperic.hq.dist:hyperic-hq-agent:zip:noJRE</include>
+			</includes>
+		</dependencySet>
+	</dependencySets>
+</assembly>

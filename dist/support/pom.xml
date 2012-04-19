@@ -7,13 +7,13 @@
   <!--   <parent>
         <groupId>org.hyperic.hq</groupId>
         <artifactId>hq-parent</artifactId>
-        <version>5.0.BUILD-SNAPSHOT</version>
+        <version>5.0.MVN3.BUILD-SNAPSHOT</version>
     </parent>
   --> 
     
     <groupId>org.hyperic.hq.dist</groupId>
     <artifactId>support</artifactId>
-    <version>5.0.BUILD-SNAPSHOT</version>
+    <version>5.0.MVN3.BUILD-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Hyperic HQ Distribution - Hyperic HQ Server Support Bundle</name>
     

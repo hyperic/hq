@@ -29,6 +29,7 @@ import java.util.Calendar;
 import java.util.concurrent.ScheduledFuture;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,12 +42,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class MeasurementSystemInitializer {
+public class MeasurementSystemInitializer  {
 
     private static final Log _log = LogFactory.getLog(MeasurementSystemInitializer.class);
 
     private static ScheduledFuture _dataPurgeFuture;
-    private MeasurementManager measurementManager;
+    private final MeasurementManager measurementManager;
 
     private static Scheduler scheduler;
 
@@ -113,5 +114,13 @@ public class MeasurementSystemInitializer {
     private void prefetchEnabledMeasurementsAndTemplates() {
         measurementManager.findAllEnabledMeasurementsAndTemplates();
     }
+    
+    @PreDestroy
+    private void destroy() { 
+        scheduler.shutdown() ;
+        scheduler = null ;
+       _dataPurgeFuture = null ;
+    }//EOM
+    
 
 }

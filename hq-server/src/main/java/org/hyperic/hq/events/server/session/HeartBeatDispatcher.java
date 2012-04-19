@@ -26,8 +26,10 @@
 package org.hyperic.hq.events.server.session;
 
 import java.util.Date;
+import java.util.concurrent.ScheduledFuture;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -50,8 +52,9 @@ public class HeartBeatDispatcher {
 
     private final Log log = LogFactory.getLog(HeartBeatDispatcher.class);
 
-    private HeartBeatService heartBeatService;
-    private Scheduler scheduler;
+    private final HeartBeatService heartBeatService;
+    private final Scheduler scheduler;
+    private ScheduledFuture<?> heartBeatTask ; 
 
     @Autowired
     public HeartBeatDispatcher(HeartBeatService heartBeatService, Scheduler scheduler) {
@@ -68,9 +71,14 @@ public class HeartBeatDispatcher {
         log.info("Scheduling Heart Beat Service to dispatch heart beats every " +
                  (HEART_BEAT_PERIOD_MILLIS / 1000) + " sec");
 
-        scheduler.scheduleAtFixedRate(new HeartBeatServiceTask(), Scheduler.NO_INITIAL_DELAY,
-            HEART_BEAT_PERIOD_MILLIS);
+        this.heartBeatTask = scheduler.scheduleAtFixedRate(new HeartBeatServiceTask(), Scheduler.NO_INITIAL_DELAY,
+            HEART_BEAT_PERIOD_MILLIS) ; 
     }
+    
+    @PreDestroy 
+    public final void destroy() { 
+        this.heartBeatTask.cancel(true/*mayInterruptIfRunning*/) ; 
+    }//EOM 
 
     private class HeartBeatServiceTask implements Runnable {
 

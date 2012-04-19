@@ -1,4 +1,4 @@
-/*
+	/*
  * NOTE: This copyright does *not* cover user programs that use HQ
  * program services by normal system calls through the application
  * program interfaces provided as part of the Hyperic Plug-in Development
@@ -430,5 +430,10 @@ public abstract class AbstractStatsCollector {
             return rtn;
         }
     }
+    
+    public void destory() { 
+        this.queue.clear() ;
+        this.statKeys.clear() ; 
+    }//EOM 
 
 }

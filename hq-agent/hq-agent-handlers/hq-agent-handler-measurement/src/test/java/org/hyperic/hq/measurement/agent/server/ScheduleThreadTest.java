@@ -26,6 +26,8 @@
 
 package org.hyperic.hq.measurement.agent.server;
 
+import java.util.Properties;
+
 import junit.framework.TestCase;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -40,8 +42,7 @@ import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
-
-import java.util.Properties;
+import org.junit.Before;
 
 public class ScheduleThreadTest extends TestCase {
 
@@ -59,6 +60,13 @@ public class ScheduleThreadTest extends TestCase {
                                         MeasurementConstants.CAT_PERFORMANCE);
 
     }
+    
+    @Before
+    public final void setup(){
+    	this.derivedId = 0 ;  
+    	this.dsnId = 0 ; 
+    	this.entityId = 0 ; 
+    }//EOM 
 
     public void testSimpleStartKill() throws Exception {
 
@@ -95,14 +103,14 @@ public class ScheduleThreadTest extends TestCase {
         ScheduleThread st = new ScheduleThread(new SimpleSender(), new NullValueGetter(),
                                                new Properties());
 
-        ScheduledMeasurement m = createMeasurement(DSN_PLATFORM_LOAD, 100);
+        ScheduledMeasurement m = createMeasurement(DSN_PLATFORM_LOAD, 20);
         st.scheduleMeasurement(m);
 
         Thread t = new Thread(st);
         t.start();
 
         try {
-            Thread.sleep(400);
+            Thread.sleep(600);
         } catch (InterruptedException e) {
             // Ignore
         }
@@ -131,14 +139,14 @@ public class ScheduleThreadTest extends TestCase {
         ScheduleThread st = new ScheduleThread(new SimpleSender(), new SimpleValueGetter(),
                                                new Properties());
 
-        ScheduledMeasurement m = createMeasurement(DSN_PLATFORM_LOAD, 100);
+        ScheduledMeasurement m = createMeasurement(DSN_PLATFORM_LOAD, 20);
         st.scheduleMeasurement(m);
 
         Thread t = new Thread(st);
         t.start();
 
         try {
-            Thread.sleep(400);
+            Thread.sleep(600);
         } catch (InterruptedException e) {
             // Ignore
         }
@@ -166,14 +174,14 @@ public class ScheduleThreadTest extends TestCase {
         ScheduleThread st = new ScheduleThread(new SimpleSender(), new SimpleValueGetter(),
                                                new Properties());
 
-        st.scheduleMeasurement(createMeasurement(DSN_PLATFORM_LOAD, 100));
-        st.scheduleMeasurement(createMeasurement(DSN_PLATFORM_AVAIL, 100));
+        st.scheduleMeasurement(createMeasurement(DSN_PLATFORM_LOAD, 20));
+        st.scheduleMeasurement(createMeasurement(DSN_PLATFORM_AVAIL, 20));
 
         Thread t = new Thread(st);
         t.start();
 
         try {
-            Thread.sleep(400);
+            Thread.sleep(600);
         } catch (InterruptedException e) {
             // Ignore
         }
@@ -202,14 +210,14 @@ public class ScheduleThreadTest extends TestCase {
 
         ScheduleThread st = new ScheduleThread(new SimpleSender(), new SimpleValueGetter(), p);
 
-        st.scheduleMeasurement(createMeasurement(DSN_PLATFORM_LOAD, 100));
-        st.scheduleMeasurement(createMeasurement(DSN_HANG_COLLECTION, 1000));
+        st.scheduleMeasurement(createMeasurement(DSN_PLATFORM_LOAD, 20));
+        st.scheduleMeasurement(createMeasurement(DSN_HANG_COLLECTION, 20));
 
         Thread t = new Thread(st);
         t.start();
 
         try {
-            Thread.sleep(1000);
+            Thread.sleep(1200);
         } catch (InterruptedException e) {
             // Ignore
         }
@@ -238,13 +246,13 @@ public class ScheduleThreadTest extends TestCase {
 
         ScheduleThread st = new ScheduleThread(new SimpleSender(), new SimpleValueGetter(), p);
 
-        st.scheduleMeasurement(createMeasurement(DSN_HANG_COLLECTION, 100));
+        st.scheduleMeasurement(createMeasurement(DSN_HANG_COLLECTION, 20));
 
         Thread t = new Thread(st);
         t.start();
 
         try {
-            Thread.sleep(1000);
+            Thread.sleep(1300);
         } catch (InterruptedException e) {
             // Ignore
         }

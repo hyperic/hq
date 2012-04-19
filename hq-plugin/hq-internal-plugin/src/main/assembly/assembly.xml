@@ -28,6 +28,7 @@
 -->
 
 <assembly>
+	<id>hq-internal-plugin-assembly</id>
 	<formats>
 		<format>zip</format>
 	</formats>

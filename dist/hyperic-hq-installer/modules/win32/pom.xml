@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.hyperic.hq.dist.hyperic-hq-installer</groupId>
+		<artifactId>hyperic-hq-installer-parent</artifactId>
+		<version>5.0.MVN3.BUILD-SNAPSHOT</version>
+		<relativePath>../hyperic-hq-installer-parent/pom.xml</relativePath>
+	</parent>
+
+	<artifactId>hyperic-hq-installer-win32</artifactId>
+	<packaging>pom</packaging>
+	<name>Hyperic HQ Distribution - Hyperic HQ Installer win32</name>
+	
+	<dependencies>	
+		<dependency>
+			<groupId>postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>8.2.5</version>
+			<classifier>x86-win32</classifier>
+			<type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.jre</groupId>
+			<artifactId>x86-win32</artifactId>
+			<version>1.6_30</version>
+			<type>exe</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.dist.hyperic-hq-agent</groupId>
+			<artifactId>hyperic-hq-agent-win32</artifactId>
+			<version>${project.version}</version>
+			<type>zip</type>
+		</dependency>
+	</dependencies>
+	
+	<properties> 
+		<jre.classifier>x86-win32</jre.classifier>
+		<agent.classifier>win32</agent.classifier> 
+		<postgres.classifier>x86-win32</postgres.classifier> 
+		<packaging.type>zip</packaging.type>
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

@@ -36,6 +36,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.PreDestroy;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
@@ -243,7 +245,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             if (t == null) {
                 continue;
             }
-            Measurement m = (Measurement) lookup.get(templates[i]);
+            Measurement m = lookup.get(templates[i]);
 
             if (m == null) {
                 // No measurement, create it
@@ -460,7 +462,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
         Iterator<Measurement> it = mcol.iterator();
         for (int i = 0; it.hasNext(); i++) {
-            Measurement dm = (Measurement) it.next();
+            Measurement dm = it.next();
             dsns[i] = dm.getDsn();
 
             MeasurementTemplate template = dm.getTemplate();
@@ -742,6 +744,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
      * @deprecated Use getAvailabilityMeasurement(Resource) instead.
      * 
      */
+    @Deprecated
     @Transactional(readOnly = true)
     public Measurement getAvailabilityMeasurement(AuthzSubject subject, AppdefEntityID id) {
         return getAvailabilityMeasurement(resourceManager.findResource(id));
@@ -942,7 +945,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                 }
 
                 Integer templateId = dm.getTemplate().getId();
-                Long previous = (Long) intervals.get(templateId);
+                Long previous = intervals.get(templateId);
 
                 if (previous == null) {
                     intervals.put(templateId, interval);
@@ -1710,6 +1713,24 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             return null;
         }
         return measurementTemplateDAO.get(measId);
+    }
+    
+    @PreDestroy
+    public final void destroy() { 
+        this.agentManager = null ; 
+        this.agentMonitor = null ; 
+        this.applicationContext = null ; 
+        this.applicationDAO = null ; 
+        this.authzSubjectManager = null ; 
+        this.availabilityManager = null ; 
+        this.configManager = null ; 
+        this.measurementDAO = null ; 
+        this.measurementProcessor = null ; 
+        this.measurementTemplateDAO = null ; 
+        this.metricDataCache = null ; 
+        this.permissionManager = null ; 
+        this.srnManager = null ; 
+        this.zeventManager = null ; 
     }
 
 }

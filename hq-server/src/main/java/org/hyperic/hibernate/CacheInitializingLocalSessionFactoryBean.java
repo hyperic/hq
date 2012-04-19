@@ -66,7 +66,7 @@ import org.springframework.orm.hibernate3.SessionFactoryUtils;
 public class CacheInitializingLocalSessionFactoryBean
     extends LocalSessionFactoryBean {
 
-    private List<String> classesForCache;
+    private final List<String> classesForCache;
 
     private final Log log = LogFactory.getLog(CacheInitializingLocalSessionFactoryBean.class);
 
@@ -75,6 +75,9 @@ public class CacheInitializingLocalSessionFactoryBean
 
     @Autowired
     private DiagnosticsLogger diagnosticsLogger;
+    
+    //required for proper shutdown 
+    private DiagnosticObject cacheDiagnostics ; 
 
     private static final String HIBERNATE_STATS_OBJECT_NAME = "Hibernate:type=statistics,application=hq";
 
@@ -91,6 +94,9 @@ public class CacheInitializingLocalSessionFactoryBean
         } catch (Exception e) {
             logger.warn("Error unregistering Hibernate Stats MBean", e);
         }
+        
+        //remove the cache diagnostic object from the logger 
+        this.diagnosticsLogger.removeDiagnosticObject(this.cacheDiagnostics) ;  
     }
 
     @Override
@@ -140,9 +146,9 @@ public class CacheInitializingLocalSessionFactoryBean
 
     private void initEhCacheDiagnostics() {
         // Add ehcache statistics to the diagnostics
-        DiagnosticObject cacheDiagnostics = new DiagnosticObject() {
-            private PrintfFormat _fmt = new PrintfFormat("%-55s %-6d %-6d %6d");
-            private PrintfFormat _hdr = new PrintfFormat("%-55s %-6s %-6s %6s");
+        this.cacheDiagnostics = new DiagnosticObject() {
+            private final PrintfFormat _fmt = new PrintfFormat("%-55s %-6d %-6d %6d");
+            private final PrintfFormat _hdr = new PrintfFormat("%-55s %-6s %-6s %6s");
 
             public String getName() {
                 return "EhCache Diagnostics";
@@ -195,6 +201,7 @@ public class CacheInitializingLocalSessionFactoryBean
                 return getStatus();
             }
 
+            @Override
             public String toString() {
                 return "ehcache";
             }
