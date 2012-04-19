@@ -3,7 +3,7 @@
 
 	<fileSets>
 		<fileSet>
-			<directory>src/main/resources</directory>
+			<directory>../../src/main/resources</directory>
 			<outputDirectory>/</outputDirectory>
 			<excludes>
 				<exclude>**/*.sh</exclude>
@@ -14,7 +14,7 @@
 			<directoryMode>0755</directoryMode>
 		</fileSet>
 		<fileSet>
-			<directory>src/main/resources</directory>
+			<directory>../../src/main/resources</directory>
 			<outputDirectory>/</outputDirectory>
 			<includes>
 				<include>**/*.sh</include>
@@ -44,6 +44,8 @@
 					<include>org.hyperic.hq.dist:server</include>
 				</includes>
 		</dependencySet>
+
+
 	</dependencySets>
 	
 </component>

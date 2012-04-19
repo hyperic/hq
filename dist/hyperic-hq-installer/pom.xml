@@ -13,66 +13,8 @@
 	<groupId>org.hyperic.hq.dist</groupId>
 	<artifactId>hyperic-hq-installer</artifactId>
 	<packaging>pom</packaging>
-	<name>Hyperic HQ Distribution - Hyperic HQ All-in-One Installer</name>
+	<name>Hyperic HQ Distribution - Hyperic HQ Installer Modules</name>
 	
-		<dependencies>
-		<dependency>
-			<groupId>org.hyperic.hq.dist</groupId>
-			<artifactId>server</artifactId>
-			<version>${project.version}</version>
-			<type>tar.gz</type>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq.dist</groupId>
-			<artifactId>installer</artifactId>
-			<version>${project.version}</version>
-			<type>tar.gz</type>
-		</dependency>
-		 
-		<dependency>
-			<groupId>postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-			<version>8.2.5</version>
-			<classifier>apple-osx</classifier>
-			<type>zip</type>
-		</dependency>
-		<dependency>
-			<groupId>postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-			<version>8.2.5</version>
-			<classifier>sparc-sun-solaris</classifier>
-			<type>zip</type>
-		</dependency>
-		<dependency>
-			<groupId>postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-			<version>8.2.5</version>
-			<classifier>x86-win32</classifier>
-			<type>zip</type>
-		</dependency>
-		<dependency>
-			<groupId>postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-			<version>8.2.5</version>
-			<classifier>x86-linux</classifier>
-			<type>zip</type>
-		</dependency>
-		<dependency>
-			<groupId>postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-			<version>8.2.5</version>
-			<classifier>x86-64-linux</classifier>
-			<type>zip</type>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq.dist</groupId>
-			<artifactId>hyperic-hq-agent</artifactId>
-			<version>${project.version}</version>
-			<type>zip</type>
-			<classifier>noJRE</classifier>
-		</dependency>
-	</dependencies>
-
 	<build>	
 		<pluginManagement>
 			<plugins>
@@ -85,30 +27,59 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
-		<plugins>
-			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<configuration>
-					<descriptors>
-						<descriptor>src/main/assembly/assembly.xml</descriptor>
-					</descriptors>
-					<appendAssemblyId>false</appendAssemblyId>
-				</configuration>
-			</plugin>
-		</plugins>
 	</build>
+  
+	<profiles> 
+		<profile> 
+			<id>All-Installers</id> 
+			<activation>
+        		<property><name>all-installers</name></property>
+   			</activation>
+			<modules> 
+				<!-- will use the no-JRE instead <module>modules/apple-osx</module>-->
+				<module>modules/hyperic-hq-installer-parent</module>
+				<module>modules/noJRE-tar</module>
+				<module>modules/noJRE-zip</module>
+				<module>modules/win32</module>
+				<module>modules/x86-linux</module> 
+				<module>modules/x86-64-linux</module>
+			</modules> 
+		</profile>
+		<profile> 
+			<id>CI-Build</id> 
+			<activation>
+        		<property><name>CI-build</name></property>
+   			</activation>
+			<modules> 
+				<!--<module>modules/hyperic-hq-installer-parent</module>
+				<module>modules/win32</module>
+				<module>modules/x86-64-linux</module> -->
+			</modules> 
+		</profile>  
+		<profile> 
+			<id>Daily-Build</id> 
+			<activation>
+        		<property><name>daily-build</name></property>
+   			</activation>
+			<modules> 
+				<!-- no jre-tar -->
+				<!--<module>modules/hyperic-hq-installer-parent</module>
+				<module>modules/noJRE-zip</module>
+				<module>modules/win32</module>
+				<module>modules/x86-linux</module> 
+				<module>modules/x86-64-linux</module> -->
+			</modules> 
+		</profile>  
+		<profile> 
+			<id>no-JRE</id> 
+			<activation>
+       			<activeByDefault>true</activeByDefault>
+      		</activation>
+			<modules> 
+				<module>modules/hyperic-hq-installer-parent</module>
+				<module>modules/noJRE-zip</module>
+			</modules> 
+		</profile> 
+	</profiles> 	
 	
-	<repositories>
-		<repository>
-			<id>hyperic-ant</id>
-			<name>Hyperic ANT Dependencies Repository</name>
-			<url>http://maven.hyperic.org/ant</url>
-		</repository>
-		<repository>
-			<id>hyperic-postgresql</id>
-			<name>Hyperic Postgresql Dependencies Repository</name>
-			<url>http://maven.hyperic.org/postgresql</url>
-		</repository>
-	</repositories>
-
 </project>

@@ -15,7 +15,7 @@
 	<groupId>org.hyperic.hq.dist</groupId>
 	<artifactId>hyperic-hq-agent</artifactId>
 	<packaging>pom</packaging>
-	<name>Hyperic HQ Distribution - Hyperic HQ Agent</name>
+	<name>Hyperic HQ Distribution - Hyperic HQ Agent Modules</name>
 
 	<dependencies>
 		<dependency>
@@ -30,30 +30,84 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-deploy-plugin</artifactId>
 					<configuration>
-						<skip combine.self="override">false</skip>
+						<skip combine.self="override">true</skip>
 					</configuration>
 				</plugin>
 			</plugins>
-		</pluginManagement>
+   		</pluginManagement>
 		<plugins>
 			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<configuration>
-					<descriptors>
-						<descriptor>src/main/assembly/assembly.xml</descriptor>
-					</descriptors>
-					<appendAssemblyId>true</appendAssemblyId>
-				</configuration>
-			</plugin>
-			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-dependency-plugin</artifactId> 
-				<executions> <execution> <id>unpack-support</id> <goals> <goal>unpack-dependencies</goal> 
-				</goals> <phase>generate-resources</phase> <configuration> <outputDirectory>${project.build.directory}/generated-resources</outputDirectory> 
-				<includeGroupIds>org.hyperic.hq.dist</includeGroupIds> <includeArtifactIds>support</includeArtifactIds> 
-				<excludeTransitive>true</excludeTransitive> </configuration> </execution> 
-				</executions> </plugin> -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>unpack-agent</id>
+						<goals>
+							<goal>unpack-dependencies</goal>
+						</goals>
+						<phase>generate-resources</phase>
+						<configuration>
+							<outputDirectory>${project.build.directory}/generated-resources</outputDirectory>
+							<includeGroupIds>org.hyperic.hq.dist</includeGroupIds>
+							<includeArtifactIds>agent</includeArtifactIds>
+							<excludeTransitive>true</excludeTransitive>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>	
 		</plugins>
 	</build>
+
+	<profiles> 
+	  
+	   <profile> 
+		<id>All-Installers</id> 
+		<activation>
+		<property><name>all-agent-installers</name></property>
+		</activation>
+		<modules> 
+		      <!-- will use the no-JRE instead <module>modules/apple-osx</module>-->
+		      <module>modules/hyperic-hq-agent-parent</module>
+		      <module>modules/noJRE</module>
+		      <module>modules/hpux-11</module>
+		      <module>modules/ppc-aix</module>
+		      <module>modules/sparc-solaris</module>
+		      <module>modules/win32</module> 
+		      <module>modules/x86-linux</module> 
+		      <module>modules/x86-64-linux</module>   
+		</modules> 
+	    </profile> 
+		<profile> 
+			<id>CI-Build</id> 
+			<activation>
+        		<property><name>CI-build</name></property>
+   			</activation>
+			<modules> 
+			</modules> 
+		</profile>  
+		<profile> 
+			<id>Daily-Build</id> 
+			<activation>
+        		<property><name>daily-build</name></property>
+   			</activation>
+			<modules> 
+			</modules> 
+		</profile>  
+		<profile> 
+		    <id>no-JRE</id> 
+		    <activation>
+       			<activeByDefault>true</activeByDefault>
+		    </activation>
+		    <modules> 
+			<module>modules/hyperic-hq-agent-parent</module>
+			<module>modules/noJRE</module>
+		    </modules> 
+		</profile> 
+
+	</profiles> 	
+	
 </project>
+
+

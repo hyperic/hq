@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component>
+
+ 	<dependencySets>
+
+		<dependencySet>
+			<useProjectArtifact>false</useProjectArtifact>
+			<useTransitiveDependencies>false</useTransitiveDependencies>
+			<outputDirectory>installer/jres</outputDirectory>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
+			<includes>
+				<!-- <include>org.hyperic.jre:amd64-linux</include> -->
+				<include>org.hyperic.jre:${jre.classifier}</include>
+			</includes>
+		</dependencySet>
+		<dependencySet>
+			<useProjectArtifact>false</useProjectArtifact>
+			<useTransitiveDependencies>false</useTransitiveDependencies>
+			<outputDirectory>/</outputDirectory>
+			<includes>
+				<include>org.hyperic.hq.dist.hyperic-hq-agent:hyperic-hq-agent-${agent.classifier}:${packaging.type}</include>
+			</includes>
+		</dependencySet>
+		<dependencySet>
+			<useProjectArtifact>false</useProjectArtifact>
+			<useTransitiveDependencies>false</useTransitiveDependencies>
+			<outputDirectory>/installer/data/hqdb</outputDirectory>
+			<unpack>true</unpack>
+			<includes>
+				<!-- <include>postgresql:postgresql:*:x86-64-linux</include> --> 
+				<include>postgresql:postgresql:*:${postgres.classifier}</include>
+			</includes>
+		</dependencySet>
+
+	</dependencySets>
+	
+</component>

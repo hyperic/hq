@@ -3,7 +3,7 @@
 
 	<fileSets>
 		<fileSet>
-			<directory>src/main/resources</directory>
+			<directory>../../src/main/resources</directory>
 			<outputDirectory>/</outputDirectory>
 			<excludes>
 				<exclude>**/*.sh</exclude>
@@ -15,7 +15,7 @@
 			<directoryMode>0755</directoryMode>
 		</fileSet>
 		<fileSet>
-			<directory>src/main/resources</directory>
+			<directory>../../src/main/resources</directory>
 			<outputDirectory>/</outputDirectory>
 			<includes>
 				<include>**/*.sh</include>
@@ -25,7 +25,7 @@
 			<directoryMode>0755</directoryMode>
 		</fileSet>
 		<fileSet>
-			<directory>src/main/resources</directory>
+			<directory>../../src/main/resources</directory>
 			<outputDirectory>/</outputDirectory>
 			<includes>
 				<include>wrapper/**/*</include>
@@ -33,7 +33,14 @@
 			<fileMode>0755</fileMode>
 			<directoryMode>0755</directoryMode>
 		</fileSet>
+
 		<fileSet>
+			<directory>../../${project.build.directory}/generated-resources/agent-${project.version}</directory>
+			<outputDirectory>/bundles/agent-${project.version}</outputDirectory>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
+		</fileSet>
+		<!--<fileSet>
 			<directory>${project.build.directory}/generated-resources/support-${project.version}</directory>
 			<outputDirectory>/support</outputDirectory>
 			<excludes>
@@ -55,10 +62,10 @@
 				</includes>
 				<fileMode>0755</fileMode>
 				<directoryMode>0755</directoryMode>
-			</fileSet>
+			</fileSet>-->
 	</fileSets>
 
-	<dependencySets>
+	<!--<dependencySets>
 		<dependencySet>
 			<useProjectArtifact>false</useProjectArtifact>
 			<useTransitiveDependencies>false</useTransitiveDependencies>
@@ -70,6 +77,6 @@
 				<include>org.hyperic.hq.dist:agent</include>
 			</includes>
 		</dependencySet>
-	</dependencySets>
+	</dependencySets> -->
 
 </component>

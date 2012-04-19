@@ -848,10 +848,49 @@
 				<artifactId>archetype-packaging</artifactId>
 				<version>2.0-alpha-5</version>
 			</extension>
+			<extension>
+			    <groupId>org.apache.maven.wagon</groupId>
+			     <artifactId>wagon-ssh</artifactId>
+			     <version>1.0-beta-6</version>
+   		    </extension>
 		</extensions>
 	</build>
 
 	<profiles>
+		<profile> 
+			<id>CI-build</id>
+			<activation>
+        		<property><name>CI-build</name></property>
+      		</activation>
+			<distributionManagement>
+				<repository>
+				  <id>ssh-repository</id>
+				  <url>${CI-build.repository.url}</url>
+				</repository>
+				<snapshotRepository>
+				  <id>snapshot-ssh-repository</id>
+				  <url>${CI-build.snapshotrepository.url}</url>
+				</snapshotRepository>
+			</distributionManagement>
+		</profile> 
+
+		<profile> 
+			<id>Daily-build</id>
+			<activation>
+        		<property><name>daily-build</name></property>
+      		</activation>
+			<distributionManagement>
+				<repository>
+				  <id>ssh-repository</id>
+				  <url>${daily-build.repository.url}</url>
+				</repository>
+				<snapshotRepository>
+				  <id>snapshot-ssh-repository</id>
+				  <url>${daily-build.snapshotrepository.url}</url>
+				</snapshotRepository>
+			</distributionManagement>
+		</profile> 
+
 		<profile>
       		<id>production</id>
       		<activation>
@@ -1098,6 +1137,18 @@
 				</plugins>
 			</pluginManagement>
 			</build>
+			<distributionManagement>
+				<repository>
+					<id>hyperic-milestone</id>
+					<name>Hyperic Milestone Repository</name>
+					<url>s3://maven.hyperic.org/milestone</url>
+				</repository>
+				<snapshotRepository>
+					<id>hyperic-snapshot</id>
+					<name>Hyperic Snapshot Repository</name>
+					<url>s3://maven.hyperic.org/snapshot</url>
+				</snapshotRepository>
+			</distributionManagement>
 		</profile>
 	</profiles>
 
@@ -1162,19 +1213,6 @@
 	        </snapshots>
 	      </pluginRepository>
      </pluginRepositories>
-
-	<distributionManagement>
-		<repository>
-			<id>hyperic-milestone</id>
-			<name>Hyperic Milestone Repository</name>
-			<url>s3://maven.hyperic.org/milestone</url>
-		</repository>
-		<snapshotRepository>
-			<id>hyperic-snapshot</id>
-			<name>Hyperic Snapshot Repository</name>
-			<url>s3://maven.hyperic.org/snapshot</url>
-		</snapshotRepository>
-	</distributionManagement>
 
 	<organization>
 		<name>VMware, Inc.</name>

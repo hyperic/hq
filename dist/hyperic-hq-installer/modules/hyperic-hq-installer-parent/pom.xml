@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.hyperic.hq</groupId>
+		<artifactId>hq-parent</artifactId>
+		<version>5.0.MVN3.BUILD-SNAPSHOT</version>
+		<relativePath>../../../../pom.xml</relativePath>
+	</parent>
+
+	<groupId>org.hyperic.hq.dist.hyperic-hq-installer</groupId>
+	<artifactId>hyperic-hq-installer-parent</artifactId>
+	<packaging>pom</packaging>
+	<name>Hyperic HQ Distribution - Hyperic HQ Installer parent</name>
+	
+		<dependencies>
+			<dependency>
+				<groupId>org.hyperic.hq.dist</groupId>
+				<artifactId>server</artifactId>
+				<version>${project.version}</version>
+				<type>tar.gz</type>
+			</dependency>
+			<dependency>
+				<groupId>org.hyperic.hq.dist</groupId>
+				<artifactId>installer</artifactId>
+				<version>${project.version}</version>
+				<type>tar.gz</type>
+			</dependency>
+
+		</dependencies>
+
+	<build>	
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-deploy-plugin</artifactId>
+					<configuration>
+						<skip combine.self="override">false</skip>
+					</configuration>
+				</plugin>
+				<plugin>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<configuration>
+						<descriptors>
+							<descriptor>../../src/main/assembly/common-assembly.xml</descriptor>
+						</descriptors>
+						<appendAssemblyId>false</appendAssemblyId>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+	
+	<repositories>
+		<repository>
+			<id>hyperic-ant</id>
+			<name>Hyperic ANT Dependencies Repository</name>
+			<url>http://maven.hyperic.org/ant</url>
+		</repository>
+		<repository>
+			<id>hyperic-postgresql</id>
+			<name>Hyperic Postgresql Dependencies Repository</name>
+			<url>http://maven.hyperic.org/postgresql</url>
+		</repository>
+		<repository>
+			<id>hyperic-jres</id>
+			<name>Hyperic JREs Repository</name>
+			<url>http://maven.hyperic.org/jres</url>
+		</repository>
+	</repositories>
+
+</project>
