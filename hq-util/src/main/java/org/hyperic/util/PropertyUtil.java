@@ -33,6 +33,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
+import org.hyperic.util.security.SecurityUtil;
+import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
+
 public class PropertyUtil {
 
     public static void decodeEncodedEntries(Map props) {
@@ -135,6 +138,35 @@ public class PropertyUtil {
         return props;
     }
 
+    public static Properties loadProperties(String file, String pbePass, String[] encryptedKeys) throws IOException {
+        Properties props = loadProperties(file);
+//        String[] encryptedKeys =new String[] {"agent.setup.camPword", "agent.keystore.password"};
+        if (pbePass==null || encryptedKeys==null || encryptedKeys.length==0){
+            return props;
+        }
+        StandardPBEStringEncryptor encryptor = SecurityUtil.getStandardPBEStringEncryptor(pbePass);
+        for (String encryptedKey : encryptedKeys) {
+            String encryptedVal = props.getProperty(encryptedKey);
+            if(encryptedVal!=null) {
+                props.setProperty(encryptedKey, encryptor.decrypt(encryptedVal));
+            }
+        }
+        return props;
+    }
+
+    public static void storeProperties(String file, Properties props, String header,
+            String pbePass, String[] encryptedKeys) throws IOException {
+        Properties encryptedProps = new Properties(props);
+        StandardPBEStringEncryptor encryptor = SecurityUtil.getStandardPBEStringEncryptor(pbePass);
+        for (String encryptedKey : encryptedKeys) {
+            String encryptedVal = props.getProperty(encryptedKey);
+            if(encryptedVal!=null) {
+                encryptedProps.setProperty(encryptedKey, encryptor.encrypt(encryptedVal));
+            }
+        }
+        storeProperties(file,encryptedProps,header);
+    }
+    
     /**
      * Store properties to a file
      */

@@ -25,14 +25,6 @@
 
 package org.hyperic.util.security;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-import java.security.KeyStore;
-import java.security.KeyStore.PrivateKeyEntry;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableEntryException;
 import java.util.Random;
 
 import org.jasypt.encryption.StringEncryptor;
@@ -41,7 +33,6 @@ import org.jasypt.properties.PropertyValueEncryptionUtils;
 
 public class SecurityUtil {
     private final static String DEFAULT_ENCRYPTION_ALGORITHM = "PBEWithMD5AndDES";
-    private final static String DEFAULT_PRIVATE_KEY_KEY = "hq";
     
     /**
      * Generates a token of up to 100 chars of a (generally) random
@@ -63,17 +54,10 @@ public class SecurityUtil {
             Math.abs(rand1) + "-" + Math.abs(rand2);
     }
     
-    public static StandardPBEStringEncryptor getStandardPBEStringEncryptor(KeystoreConfig keystoreConfig) throws KeyStoreException, IOException, NoSuchAlgorithmException, UnrecoverableEntryException {
+    public static StandardPBEStringEncryptor getStandardPBEStringEncryptor(String pbePass) {
         StandardPBEStringEncryptor encryptor =  new StandardPBEStringEncryptor();
         encryptor.setAlgorithm(SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM);
- 
-        KeyStore keystore = KeystoreManager.getKeystoreManager().getKeyStore(keystoreConfig);
-        KeyStore.Entry e = keystore.getEntry(SecurityUtil.DEFAULT_PRIVATE_KEY_KEY,
-                new KeyStore.PasswordProtection(keystoreConfig.getFilePassword().toCharArray()));
-        byte[] pk = ((PrivateKeyEntry)e).getPrivateKey().getEncoded();
-        ByteBuffer encryptionKey = Charset.forName("US-ASCII").encode(ByteBuffer.wrap(pk).toString());
-        encryptor.setPassword(encryptionKey.toString());
-        
+        encryptor.setPassword(pbePass);
         return encryptor;
     }
     
