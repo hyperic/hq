@@ -38,10 +38,7 @@ import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 
 public class PropertyUtil {
 
-    public static void decodeEncodedEntries(Map props) {
-        
-    }
-    
+   
     /**
      * Expand variable references in property values.
      *

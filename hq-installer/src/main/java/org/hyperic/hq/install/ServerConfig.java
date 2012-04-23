@@ -52,6 +52,7 @@ import org.hyperic.util.config.ReturnStepsException;
 import org.hyperic.util.config.StringConfigOption;
 import org.hyperic.util.config.YesNoConfigOption;
 import org.hyperic.util.jdbc.DriverLoadException;
+import org.hyperic.util.security.SecurityUtil;
 
 public class ServerConfig
 extends BaseConfig {
@@ -815,7 +816,7 @@ extends BaseConfig {
 	}
 
 	private String encryptPassword(String algorithm, String encryptionKey, String clearTextPassword) {
-		return null;//SecurityUtil.encrypt(algorithm, encryptionKey, clearTextPassword);
+		return SecurityUtil.encrypt(algorithm, encryptionKey, clearTextPassword);
 	}
 
 	protected boolean databaseExists(ConfigResponse config) throws EarlyExitException {
