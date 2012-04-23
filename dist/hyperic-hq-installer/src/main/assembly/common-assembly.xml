@@ -5,6 +5,8 @@
 		<format>${packaging.type}</format>
 	</formats>
 
+	<baseDirectory>hyperic-hq-installer-${project.version}</baseDirectory>
+	
 	<componentDescriptors>
 		<componentDescriptor>../../src/main/assembly/base-component.xml</componentDescriptor>
 		<componentDescriptor>../../src/main/assembly/osbundle-component.xml</componentDescriptor> 
