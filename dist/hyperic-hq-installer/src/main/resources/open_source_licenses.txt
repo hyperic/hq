@@ -145,7 +145,7 @@ SECTION 2: Apache License, V2.0
    >>> pluto-1.0.1
    >>> poi-3.0.1
    >>> quartz-1.7.2
-   >>> sigar-1.6.4
+   >>> sigar-1.6.6
    >>> slf4j.org.apache.log4j-1.6.1
    >>> snmp4j-1.11
    >>> spring-amqp-1.0.1.m1
@@ -339,7 +339,7 @@ SECTION 2: Apache License, V2.0
    >>> pluto-1.0.1
    >>> poi-3.0.1
    >>> quartz-1.7.2
-   >>> sigar-1.6.4
+   >>> sigar-1.6.6
    >>> slf4j.org.apache.log4j-1.6.1
    >>> snmp4j-1.11
    >>> spring-amqp-1.0.1.m1
@@ -4643,7 +4643,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 
 
->>> sigar-1.6.4
+>>> sigar-1.6.6
 
 Copyright (c) 2004-2009 Hyperic, Inc.
 Copyright (c) 2009 SpringSource, Inc.
@@ -11286,7 +11286,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 
 
->>> sigar-1.6.4
+>>> sigar-1.6.6
 
 Copyright (c) 2004-2009 Hyperic, Inc.
 Copyright (c) 2009 SpringSource, Inc.

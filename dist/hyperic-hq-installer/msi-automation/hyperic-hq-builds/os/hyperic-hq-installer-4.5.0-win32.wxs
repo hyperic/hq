@@ -473,7 +473,7 @@
                                         <File Id="commons_validator_1.3.1.jar" Name="commons-validator-1.3.1.jar" Vital="no" Compressed="yes" DiskId="1" Source=".\File\commons_validator_1.3.1.jar" />
                                         <File Id="aspectjweaver_1.6.5.jar" Name="aspectjweaver-1.6.5.jar" Vital="no" Compressed="yes" DiskId="1" Source=".\File\aspectjweaver_1.6.5.jar" />
                                         <File Id="hq_util_4.5.0.build_snapshot" Name="hq-util-4.5.0.BUILD-SNAPSHOT.jar" Vital="no" Compressed="yes" DiskId="1" Source=".\File\hq_util_4.5.0.build_snapshot" />
-                                        <File Id="sigar_1.6.4.jar" Name="sigar-1.6.4.jar" Vital="no" Compressed="yes" DiskId="1" Source=".\File\sigar_1.6.4.jar" />
+                                        <File Id="sigar_1.6.6.jar" Name="sigar-1.6.6.jar" Vital="no" Compressed="yes" DiskId="1" Source=".\File\sigar_1.6.6.jar" />
                                         <File Id="json_20090211.jar" Name="json-20090211.jar" Vital="no" Compressed="yes" DiskId="1" Source=".\File\json_20090211.jar" />
                                         <File Id="jug_2.0.0_asl.jar" Name="jug-2.0.0-asl.jar" Vital="no" Compressed="yes" DiskId="1" Source=".\File\jug_2.0.0_asl.jar" />
                                         <File Id="jtidy_r8_20060801.jar" Name="jtidy-r8-20060801.jar" Vital="no" Compressed="yes" DiskId="1" Source=".\File\jtidy_r8_20060801.jar" />

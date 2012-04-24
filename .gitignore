@@ -32,3 +32,6 @@ logs
 nbactions.xml
 
 .DS_Store
+
+*.iml
+.idea
