@@ -137,7 +137,6 @@ public class PropertyUtil {
 
     public static Properties loadProperties(String file, String pbePass, String[] encryptedKeys) throws IOException {
         Properties props = loadProperties(file);
-//        String[] encryptedKeys =new String[] {"agent.setup.camPword", "agent.keystore.password"};
         if (pbePass==null || encryptedKeys==null || encryptedKeys.length==0){
             return props;
         }
@@ -150,7 +149,82 @@ public class PropertyUtil {
         }
         return props;
     }
-
+    
+//    public static void storeProperties(String file,Set<Map.Entry<String,String>> entriesToStore) {
+//        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(file, "8859_1"))
+//        FileOutputStream os = null;
+//
+//        os = new FileOutputStream(file);
+////            synchronized (this) {
+//            for (Iterator<Map.Entry<String,String>> entriesItr = entriesToStore.iterator(); entriesItr.hasNext();) {
+//                Map.Entry<String,String> entry = entriesItr.next();
+//                String key = saveConvert((String) entry.getKey(), true, escUnicode);
+//                String val = saveConvert((String) entry.getValue(), false, escUnicode);
+//                bw.write(key + "=" + val);
+//                        bw.newLine();
+//            }
+////        }
+//        bw.flush();
+//    }
+    
+    private static String saveConvert(String theString,
+            boolean escapeSpace,
+            boolean escapeUnicode) {
+         int len = theString.length();
+         int bufLen = len * 2;
+         if (bufLen < 0) {
+             bufLen = Integer.MAX_VALUE;
+         }
+         StringBuffer outBuffer = new StringBuffer(bufLen);
+        
+         for(int x=0; x<len; x++) {
+             char aChar = theString.charAt(x);
+             // Handle common case first, selecting largest block that
+             // avoids the specials below
+             if ((aChar > 61) && (aChar < 127)) {
+                 if (aChar == '\\') {
+                     outBuffer.append('\\'); outBuffer.append('\\');
+                     continue;
+                 }
+                 outBuffer.append(aChar);
+                 continue;
+             }
+             switch(aChar) {
+         case ' ':
+             if (x == 0 || escapeSpace) 
+             outBuffer.append('\\');
+             outBuffer.append(' ');
+             break;
+                 case '\t':outBuffer.append('\\'); outBuffer.append('t');
+                           break;
+                 case '\n':outBuffer.append('\\'); outBuffer.append('n');
+                           break;
+                 case '\r':outBuffer.append('\\'); outBuffer.append('r');
+                           break;
+                 case '\f':outBuffer.append('\\'); outBuffer.append('f');
+                           break;
+                 case '=': // Fall through
+                 case ':': // Fall through
+                 case '#': // Fall through
+                 case '!':
+                     outBuffer.append('\\'); outBuffer.append(aChar);
+                     break;
+                 default:
+//                     if (((aChar < 0x0020) || (aChar > 0x007e)) & escapeUnicode ) {
+//                         outBuffer.append('\\');
+//                         outBuffer.append('u');
+//                         outBuffer.append(toHex((aChar >> 12) & 0xF));
+//                         outBuffer.append(toHex((aChar >>  8) & 0xF));
+//                         outBuffer.append(toHex((aChar >>  4) & 0xF));
+//                         outBuffer.append(toHex( aChar        & 0xF));
+//                     } else {
+                         outBuffer.append(aChar);
+//                     }
+             }
+         }
+         return outBuffer.toString();
+        }
+    
     public static void storeProperties(String file, Properties props, String header,
             String pbePass, String[] encryptedKeys) throws IOException {
         Properties encryptedProps = new Properties(props);

@@ -28,6 +28,7 @@ package org.hyperic.hq.agent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -87,7 +88,7 @@ public class AgentConfig {
     public static final String SSL_KEYSTORE_PATH = "agent.keystore.path";
     public static final String SSL_KEYSTORE_PASSWORD = "agent.keystore.password";
     public static final String SSL_KEYSTORE_ACCEPT_UNVERIFIED_CERT = "accept.unverified.certificates";
-    
+    public static final String DEFAULT_AGENT_KEY_FILE_NAME = "propEncKey";
     // The following final objects are the properties which are usable
     // within the configuation object.  The first element in the array
     // is the property name, the second is the default value
@@ -136,6 +137,7 @@ public class AgentConfig {
     { "agent.proxyHost", DEFAULT_PROXY_HOST };
     public static final String[] PROP_PROXYPORT = 
     { "agent.proxyPort", String.valueOf(DEFAULT_PROXY_PORT)};
+    private static final String HQ_PASS = "agent.setup.camPword";
     
     // A property provided for testing rollback during agent auto-upgrade.
     // Set the property value to the bundle name that will fail when starting 
@@ -159,6 +161,7 @@ public class AgentConfig {
 
     public static final String BUNDLE_PROPFILE = PROP_BUNDLEHOME[1]
             + "/conf/"+DEFAULT_AGENT_PROPFILE_NAME;
+    public static final String[] ENCRYPTED_PROP_KEYS = new String[] {HQ_PASS,SSL_KEYSTORE_PASSWORD};
     
     private static final String[][] propertyList = {
         PROP_LISTENPORT,
@@ -242,35 +245,42 @@ public class AgentConfig {
                     + PROP_BUNDLEHOME[0] + " provided!");
         }
     }
-    
-    private static boolean loadProps(Properties props, File file) {
-        FileInputStream fin = null;
-        Properties tmpProps = new Properties(); 
+
+    private static boolean loadProps(Properties props, File file) throws AgentConfigException {
+        Properties tmpProps = new Properties();
         if (!file.exists()) {
             return false;
         }
         if (!file.canRead()) {
             return false;
         }
-
         try {
-            fin = new FileInputStream(file);
-            tmpProps.load(fin);
+            File propKeyFile = new File(file.getAbsolutePath() + File.pathSeparator + AgentConfig.DEFAULT_AGENT_KEY_FILE_NAME);
+            if (propKeyFile.exists()) {
+                ObjectInputStream propKeyOIS = null;
+                try {
+                    propKeyOIS = new ObjectInputStream(new FileInputStream(propKeyFile));
+                } finally {
+                    if (propKeyOIS!=null) {propKeyOIS.close();}
+                }
+                String propKey = (String) propKeyOIS.readObject();
+                tmpProps = PropertyUtil.loadProperties(file.getPath(),propKey,ENCRYPTED_PROP_KEYS);
+            } else {
+                // if no key file is present, the properties file will be opened the usual way,
+                // and all properties are assumed to be un-encrypted
+                tmpProps = PropertyUtil.loadProperties(file.getPath());
+            }
+            
             for (Enumeration<?> propKeys = tmpProps.propertyNames(); propKeys.hasMoreElements();) {
                 String tmpKey = (String)propKeys.nextElement();
-                String tmpValue = tmpProps.getProperty(tmpKey);
+                String tmpValue = tmpProps.getProperty(tmpKey); 
                 tmpValue = tmpValue.trim();
                 props.put(tmpKey, tmpValue);
             }
             return true;
-        } catch (IOException e) {
+        } catch (Exception e) {
             return false;
-        } finally {
-            if (fin != null) {
-                try { fin.close(); } catch (IOException e) {}
-            }
         }
-
     }
     
     /**
@@ -303,7 +313,7 @@ public class AgentConfig {
             files.add(deployerProps);
         }
         
-        return (File[])files.toArray(new File[files.size()]);
+        return files.toArray(new File[files.size()]);
     }
     
     /**

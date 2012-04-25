@@ -28,15 +28,18 @@ package org.hyperic.hq.bizapp.agent.client;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Properties;
@@ -76,6 +79,7 @@ import org.hyperic.sigar.FileWatcher;
 import org.hyperic.sigar.FileWatcherThread;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
+import org.hyperic.util.PropertyUtil;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.security.SecurityUtil;
 import org.tanukisoftware.wrapper.WrapperManager;
@@ -130,15 +134,24 @@ public class AgentClient {
 
     private static final String JAAS_CONFIG = "jaas.config";
 
-    private AgentCommandsClient agtCommands; 
-    private CommandsClient   camCommands; 
-    private AgentConfig   config;
+    private final AgentCommandsClient agtCommands; 
+    private final CommandsClient   camCommands; 
+    private final AgentConfig   config;
     private String              sslHandlerPkg;
-    private Log                 log;                 
+    private final Log                 log;                 
     private boolean             nuking;
     private boolean             redirectedOutputs = false;
     private static Thread agentDaemonThread;
 
+    private final static String PING = "ping";
+    private final static String DIE = "die";
+    private final static String START = "start";
+    private final static String STATUS = "status";
+    private final static String RESTART = "restart";
+    private final static String SETUP = "setup";
+    private final static String SETUP_IF_NO_PROVIDER = "setup-if-no-provider";
+    private final static String SET_PROPERTY = "set-property";
+    
     private AgentClient(AgentConfig config, SecureAgentConnection conn){
         this.agtCommands = new LegacyAgentCommandsClientImpl(conn);
         this.camCommands = new CommandsClient(conn);
@@ -589,7 +602,7 @@ public class AgentClient {
         } catch(AgentConnectionException exc){
             SYSTEM_ERR.println("Unable to setup agent: " + exc.getMessage());
             SYSTEM_ERR.println("The Agent must be running prior to running " +
-                               "setup");
+                               SETUP);
             return;
         }
 
@@ -1168,6 +1181,39 @@ public class AgentClient {
 
     }
     
+    private void cmdSetProp(String propKey, String propVal) throws FileNotFoundException, IOException, ClassNotFoundException {
+        String propEncKey = null;
+        final String propFile = System.getProperty(AgentConfig.PROP_PROPFILE,AgentConfig.DEFAULT_PROPFILE);
+        File propEncKeyFile = new File("/work" + File.pathSeparator + AgentConfig.DEFAULT_AGENT_KEY_FILE_NAME);
+
+        // get prop encryption from file
+        if (propEncKeyFile.exists()) {
+            ObjectInputStream propKeyOIS = null;
+            try {
+                propKeyOIS = new ObjectInputStream(new FileInputStream(propEncKeyFile));
+            } finally {
+                if (propKeyOIS!=null) {propKeyOIS.close();}
+            }
+            propEncKey = (String) propKeyOIS.readObject();
+        // generate key file
+        } else {
+            ObjectOutputStream propEncKeyOOS = null;
+            try {
+                propEncKeyOOS = new ObjectOutputStream(new FileOutputStream(propEncKeyFile));
+                propEncKey = SecurityUtil.generateRandomToken();
+                propEncKeyOOS.writeObject(propEncKey);
+            } finally {
+                if (propEncKeyOOS!=null) {propEncKeyOOS.close();}
+            }
+        }
+        
+        // encrypt property value
+        Properties bootProps = this.config.getBootProperties();
+        bootProps.setProperty(propKey, propVal);
+        // save encrypted data to properties file
+        PropertyUtil.storeProperties(propFile, bootProps, null, propEncKey, new String[] {propKey});
+    }
+    
     private String getStartupLogFile(Properties bootProps)  throws AgentConfigException {
             String logFile;
             
@@ -1198,7 +1244,7 @@ public class AgentClient {
             return 1;
         }
     }
-
+    
     /**
      * Initialize the AgentClient
      *
@@ -1249,6 +1295,7 @@ public class AgentClient {
                 }
                 setInterval(60000);
             }
+            @Override
             public void onChange(FileInfo fileInfo) {
                 try {
                     SYSTEM_OUT.println("Change detected in " + fileInfo.getName() + ", reloading logging configuration");
@@ -1337,14 +1384,23 @@ public class AgentClient {
 
     public static void main(String args[]) {
 
+//        if(args[0].equals(SET_PROPERTY)){
+//            if (args.length!=3) {
+//                SYSTEM_OUT.println("syntax: " + SET_PROPERTY + " <property name> <property value>");
+//            }
+//            cmdSetProp(args[1],args[2]);
+//            return;
+//        }
+        
         if(args.length < 1 || 
-           !(args[0].equals("ping") || 
-             args[0].equals("die")  ||
-             args[0].equals("start") || 
-             args[0].equals("status") ||
-             args[0].equals("restart") ||
-             args[0].equals("setup") ||
-             args[0].equals("setup-if-no-provider")))
+           !(args[0].equals(PING) || 
+             args[0].equals(DIE)  ||
+             args[0].equals(SET_PROPERTY)  ||
+             args[0].equals(START) || 
+             args[0].equals(STATUS) ||
+             args[0].equals(RESTART) ||
+             args[0].equals(SETUP) ||
+             args[0].equals(SETUP_IF_NO_PROVIDER)))
         {
             SYSTEM_ERR.println("Syntax: program " +
                                "<ping [numAttempts] | die [dieTime] | start " +
@@ -1353,7 +1409,7 @@ public class AgentClient {
         }
 
         AgentClient client;
-        if (args[0].equals("start")) {
+        if (args[0].equals(START)) {
             // Only generate tokens on agent startup.
             client = initializeAgent(true);
         } else {
@@ -1367,14 +1423,14 @@ public class AgentClient {
         try {
             int nWait;
 
-            if(args[0].equals("ping")){
+            if(args[0].equals(PING)){
                 if(args.length == 3){
                     nWait = getUseTime(args[2]);
                 } else {
                     nWait = 1;
                 }
                 client.cmdPing(nWait);
-            } else if(args[0].equals("die")){
+            } else if(args[0].equals(DIE)){
                 if(args.length == 2){
                     nWait = getUseTime(args[1]);
                 } else {
@@ -1388,21 +1444,27 @@ public class AgentClient {
                     SYSTEM_OUT.println("Failed to stop agent: " +
                                        exc.getMessage());
                 }
-            } else if(args[0].equals("start")){
+            } else if(args[0].equals(START)){
                 int errVal = client.cmdStart(false);
                 if(errVal == FORCE_SETUP){
                     errVal = 0;
                     client.cmdSetupIfNoProvider();
                 }
-            } else if(args[0].equals("status")){
+            } else if(args[0].equals(STATUS)){
                 client.cmdStatus();
-            } else if(args[0].equals("setup")){
+            } else if(args[0].equals(SETUP)){
                 client.cmdSetup();
-            } else if(args[0].equals("setup-if-no-provider")) {
+            } else if(args[0].equals(SETUP_IF_NO_PROVIDER)) {
                 client.cmdSetupIfNoProvider();
-            } else if(args[0].equals("restart")){
+            } else if(args[0].equals(RESTART)){
                 client.cmdRestart();           
-            } else
+            } else if(args[0].equals(SET_PROPERTY)){
+                if (args.length!=3) {
+                    SYSTEM_OUT.println("syntax: " + SET_PROPERTY + " <property name> <property value>");
+                }
+                client.cmdSetProp(args[1],args[2]);
+                return;
+            } else 
                 throw new IllegalStateException("Unhandled condition");
         } catch(AutoQuestionException exc){
             SYSTEM_ERR.println("Unable to automatically setup: " +

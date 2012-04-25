@@ -32,7 +32,7 @@ import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.jasypt.properties.PropertyValueEncryptionUtils;
 
 public class SecurityUtil {
-    private final static String DEFAULT_ENCRYPTION_ALGORITHM = "PBEWithMD5AndDES";
+    public final static String DEFAULT_ENCRYPTION_ALGORITHM = "PBEWithMD5AndDES";
     
     /**
      * Generates a token of up to 100 chars of a (generally) random
