@@ -28,20 +28,18 @@ package org.hyperic.hq.bizapp.agent.client;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.net.ssl.SSLPeerUnverifiedException;
@@ -1182,36 +1180,16 @@ public class AgentClient {
     }
     
     private void cmdSetProp(String propKey, String propVal) throws FileNotFoundException, IOException, ClassNotFoundException {
-        String propEncKey = null;
+        String propEncKey = PropertyUtil.getPropEncKey(AgentConfig.DEFAULT_PROP_ENC_KEY_FILE);
         final String propFile = System.getProperty(AgentConfig.PROP_PROPFILE,AgentConfig.DEFAULT_PROPFILE);
-        File propEncKeyFile = new File("/work" + File.pathSeparator + AgentConfig.DEFAULT_AGENT_KEY_FILE_NAME);
-
-        // get prop encryption from file
-        if (propEncKeyFile.exists()) {
-            ObjectInputStream propKeyOIS = null;
-            try {
-                propKeyOIS = new ObjectInputStream(new FileInputStream(propEncKeyFile));
-            } finally {
-                if (propKeyOIS!=null) {propKeyOIS.close();}
-            }
-            propEncKey = (String) propKeyOIS.readObject();
-        // generate key file
-        } else {
-            ObjectOutputStream propEncKeyOOS = null;
-            try {
-                propEncKeyOOS = new ObjectOutputStream(new FileOutputStream(propEncKeyFile));
-                propEncKey = SecurityUtil.generateRandomToken();
-                propEncKeyOOS.writeObject(propEncKey);
-            } finally {
-                if (propEncKeyOOS!=null) {propEncKeyOOS.close();}
-            }
-        }
-        
+//        Properties props = PropertyUtil.loadProperties(propFile);
         // encrypt property value
-        Properties bootProps = this.config.getBootProperties();
-        bootProps.setProperty(propKey, propVal);
-        // save encrypted data to properties file
-        PropertyUtil.storeProperties(propFile, bootProps, null, propEncKey, new String[] {propKey});
+//        Properties bootProps = this.config.getBootProperties();
+//        props.setProperty(propKey, propVal);
+        // save encrypted data to agent.properties file
+        Map<String,String> entriesToStore = new HashMap<String,String>();
+        entriesToStore.put(propKey, propVal);
+        PropertyUtil.storeProperties(propFile, propEncKey, entriesToStore);
     }
     
     private String getStartupLogFile(Properties bootProps)  throws AgentConfigException {
@@ -1253,7 +1231,7 @@ public class AgentClient {
      *
      * @return An initialized AgentClient
      */
-    private static AgentClient initializeAgent(boolean generateToken){
+    private static AgentClient initializeAgent(/*String propEncKey,*/boolean generateToken){
         SecureAgentConnection conn;
         AgentConfig cfg;
         String connIp, listenIp, authToken;
@@ -1265,7 +1243,7 @@ public class AgentClient {
         BasicConfigurator.configure();
 
         try {
-            cfg = AgentConfig.newInstance(propFile);
+            cfg = AgentConfig.newInstance(propFile/*,propEncKey*/);
         } catch(IOException exc){
             SYSTEM_ERR.println("Error: " + exc);
             return null;
@@ -1384,6 +1362,11 @@ public class AgentClient {
 
     public static void main(String args[]) {
 
+//        if(true) { 
+//            System.out.println(Arrays.toString(args));
+//            System.exit(-1) ; 
+//        }
+        
 //        if(args[0].equals(SET_PROPERTY)){
 //            if (args.length!=3) {
 //                SYSTEM_OUT.println("syntax: " + SET_PROPERTY + " <property name> <property value>");
@@ -1403,24 +1386,27 @@ public class AgentClient {
              args[0].equals(SETUP_IF_NO_PROVIDER)))
         {
             SYSTEM_ERR.println("Syntax: program " +
-                               "<ping [numAttempts] | die [dieTime] | start " +
-                               "| status | restart | setup | setup-if-no-provider >");
+                               "<" + PING + " [numAttempts] | " + DIE + " [dieTime] | " + START + 
+                               " | " + STATUS + " | " + RESTART + " | " + SETUP +
+                               " | " + SETUP_IF_NO_PROVIDER + " | " + SET_PROPERTY + " >");
             return;
         }
 
         AgentClient client;
+        try {
+//        String propEncKey = PropertyUtil.getPropEncKey(AgentConfig.DEFAULT_PROP_ENC_KEY_FILE);
         if (args[0].equals(START)) {
             // Only generate tokens on agent startup.
-            client = initializeAgent(true);
+            client = initializeAgent(/*propEncKey,*/true);
         } else {
-            client = initializeAgent(false);
+            client = initializeAgent(/*propEncKey,*/false);
         }
         
         if (client == null) {
             return;
         }
 
-        try {
+//        try {
             int nWait;
 
             if(args[0].equals(PING)){

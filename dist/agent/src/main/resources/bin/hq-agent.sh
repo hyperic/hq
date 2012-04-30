@@ -606,6 +606,11 @@ testpid() {
         pid=""
     fi
 } 
+setProp() {
+    echo "saving encryption of $2 in the agent properties file"
+    COMMAND_LINE="$CMDNICE \"$WRAPPER_CMD\" \"$WRAPPER_CONF\" wrapper.syslog.ident=\"$APP_NAME\" wrapper.pidfile=\"$PIDFILE\" wrapper.name=\"$APP_NAME\" wrapper.displayname=\"$APP_LONG_NAME\" wrapper.daemonize=TRUE $ANCHORPROP $IGNOREPROP $STATUSPROP $LOCKPROP wrapper.app.parameter.2=4 wrapper.app.parameter.4=$1 wrapper.app.parameter.5=$2 wrapper.app.parameter.6=$3"
+    eval $COMMAND_LINE
+}
  
 start() {
     echo -n "Starting $APP_LONG_NAME..."
@@ -848,8 +853,13 @@ case "$1" in
         setup
         ;;        
 
+    'set-property')
+        checkUser "" $1
+        setProp $@
+        ;;        
+
     *)
-        echo "Usage: $0 { start | stop | restart | status | dump | ping | setup }"
+        echo "Usage: $0 { start | stop | restart | status | dump | ping | setup | set-property }"
         exit 1
         ;;
 esac

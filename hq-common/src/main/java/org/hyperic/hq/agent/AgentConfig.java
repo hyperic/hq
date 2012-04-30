@@ -34,11 +34,14 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.hyperic.util.PropertyUtil;
 import org.hyperic.util.file.FileUtil;
+import org.hyperic.util.security.SecurityUtil;
 
 /**
  * The configuration object for the AgentDaemon.  This class performs
@@ -161,6 +164,12 @@ public class AgentConfig {
 
     public static final String BUNDLE_PROPFILE = PROP_BUNDLEHOME[1]
             + "/conf/"+DEFAULT_AGENT_PROPFILE_NAME;
+
+    public static final String DEFAULT_AGENT_PROP_ENC_KEY_FILE_NAME = "agent.propEncKey";
+
+    public static final String DEFAULT_PROP_ENC_KEY_FILE = PROP_INSTALLHOME[1]
+            + "/conf/"+DEFAULT_AGENT_PROP_ENC_KEY_FILE_NAME;
+
     public static final String[] ENCRYPTED_PROP_KEYS = new String[] {HQ_PASS,SSL_KEYSTORE_PASSWORD};
     
     private static final String[][] propertyList = {
@@ -246,29 +255,53 @@ public class AgentConfig {
         }
     }
 
-    private static boolean loadProps(Properties props, File file) throws AgentConfigException {
-        Properties tmpProps = new Properties();
-        if (!file.exists()) {
+    private static boolean loadProps(Properties props, File propFile) throws AgentConfigException {
+        Properties tmpProps;
+        try {
+            tmpProps = PropertyUtil.loadProperties(propFile.getPath());
+        } catch (IOException e1) {
+            throw new AgentConfigException(e1.getMessage());
+        }
+        if (!propFile.exists()) {
             return false;
         }
-        if (!file.canRead()) {
+        if (!propFile.canRead()) {
             return false;
         }
         try {
-            File propKeyFile = new File(file.getAbsolutePath() + File.pathSeparator + AgentConfig.DEFAULT_AGENT_KEY_FILE_NAME);
+            File propKeyFile = new File(propFile.getParent() + File.separator + AgentConfig.DEFAULT_AGENT_KEY_FILE_NAME);
+            // if there is a property key file, use it to decrypt encrypted fileds and encrypt ones
+            // which should have been encrypted, but are not
             if (propKeyFile.exists()) {
+                // get encryption key file contecnt
                 ObjectInputStream propKeyOIS = null;
+                String propEncKey = null;
                 try {
                     propKeyOIS = new ObjectInputStream(new FileInputStream(propKeyFile));
+                    propEncKey = (String) propKeyOIS.readObject();
                 } finally {
                     if (propKeyOIS!=null) {propKeyOIS.close();}
                 }
-                String propKey = (String) propKeyOIS.readObject();
-                tmpProps = PropertyUtil.loadProperties(file.getPath(),propKey,ENCRYPTED_PROP_KEYS);
-            } else {
-                // if no key file is present, the properties file will be opened the usual way,
-                // and all properties are assumed to be un-encrypted
-                tmpProps = PropertyUtil.loadProperties(file.getPath());
+                // go over props which should have been encrypted in the prop file
+                Map<String,String> unEncProps = new HashMap<String,String>();
+                for (String encryptedKey : ENCRYPTED_PROP_KEYS) {
+                    String propVal = tmpProps.getProperty(encryptedKey);
+                    // if property is defined in the prop file
+                    if(propVal!=null) {
+                        // if encrypted, replace with decrypted value
+                        if (SecurityUtil.isEncrypted(propVal)) {
+                            String decPropVal  = SecurityUtil.decrypt(SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM,propEncKey,propVal);
+                            tmpProps.setProperty(encryptedKey, decPropVal);
+                        // if not encrypted, although it should have, mark as candidate for encryption in the file
+                        } else {
+                            unEncProps.put(encryptedKey, propVal);
+                        }
+                    }
+                }
+                // encrypt props which should have been encrypted, but are not
+                if (unEncProps.size()>0) {
+                    PropertyUtil.storeProperties(propFile.getAbsolutePath(), propEncKey,unEncProps);
+                }
             }
             
             for (Enumeration<?> propKeys = tmpProps.propertyNames(); propKeys.hasMoreElements();) {
@@ -279,6 +312,7 @@ public class AgentConfig {
             }
             return true;
         } catch (Exception e) {
+            
             return false;
         }
     }
@@ -324,8 +358,10 @@ public class AgentConfig {
      * @return The merge Properties object.
      * @see org.hyperic.hq.agent.AgentConfig#getPropertyFiles(String)
      */
-    public static Properties getProperties(String propsFile) throws AgentConfigException {
-        Properties useProps = new Properties();
+    public static Properties/*EncryptableProperties*/ getProperties(String propsFile/*, String propEncKey*/) throws AgentConfigException {
+        Properties/*EncryptableProperties*/ useProps = /*propEncKey!=null?*/
+//                new EncryptableProperties(SecurityUtil.getStandardPBEStringEncryptor(propEncKey))/*:
+                    new Properties();
         useProps.putAll(AgentConfig.getDefaultProperties());
        
         File[] propFiles = getPropertyFiles(propsFile);
@@ -339,13 +375,13 @@ public class AgentConfig {
         return useProps;
     }
    
-    public static AgentConfig newInstance(String propsFile)
+    public static AgentConfig newInstance(String propsFile/*, String propEncKey*/)
         throws IOException, AgentConfigException {
         // verify that the agent bundle home has been properly defined
         // before populating the default properties
         checkAgentBundleHome();
         
-        Properties useProps = getProperties(propsFile);
+        Properties/*EncryptableProperties*/ useProps = getProperties(propsFile/*,propEncKey*/);
         
         return AgentConfig.newInstance(useProps);
     }

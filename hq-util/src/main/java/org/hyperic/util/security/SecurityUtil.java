@@ -54,6 +54,11 @@ public class SecurityUtil {
             Math.abs(rand1) + "-" + Math.abs(rand2);
     }
     
+
+    public static boolean isEncrypted(String str) {
+        return str!=null && str.length()>=5 && str.startsWith("ENC(") && str.endsWith(")");
+    }
+
     public static StandardPBEStringEncryptor getStandardPBEStringEncryptor(String pbePass) {
         StandardPBEStringEncryptor encryptor =  new StandardPBEStringEncryptor();
         encryptor.setAlgorithm(SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM);
