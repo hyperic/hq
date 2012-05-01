@@ -1179,7 +1179,7 @@ public class AgentClient {
 
     }
     
-    private void cmdSetProp(String propKey, String propVal) throws FileNotFoundException, IOException, ClassNotFoundException {
+    private static void cmdSetProp(String propKey, String propVal) throws FileNotFoundException, IOException, ClassNotFoundException {
         String propEncKey = PropertyUtil.getPropEncKey(AgentConfig.DEFAULT_PROP_ENC_KEY_FILE);
         final String propFile = System.getProperty(AgentConfig.PROP_PROPFILE,AgentConfig.DEFAULT_PROPFILE);
 //        Properties props = PropertyUtil.loadProperties(propFile);
@@ -1367,18 +1367,26 @@ public class AgentClient {
 //            System.exit(-1) ; 
 //        }
         
-//        if(args[0].equals(SET_PROPERTY)){
-//            if (args.length!=3) {
-//                SYSTEM_OUT.println("syntax: " + SET_PROPERTY + " <property name> <property value>");
-//            }
-//            cmdSetProp(args[1],args[2]);
-//            return;
-//        }
+        if(args.length==4 && args[0].equals(SET_PROPERTY)){
+            try {
+                cmdSetProp(args[1],args[2]);
+            } catch (FileNotFoundException e) {
+                SYSTEM_ERR.println("Error: " + e.getMessage());
+                e.printStackTrace(SYSTEM_ERR);
+            } catch (IOException e) {
+                SYSTEM_ERR.println("Error: " + e.getMessage());
+                e.printStackTrace(SYSTEM_ERR);
+            } catch (ClassNotFoundException e) {
+                SYSTEM_ERR.println("Error: " + e.getMessage());
+                e.printStackTrace(SYSTEM_ERR);
+            }
+            return;
+        }
         
         if(args.length < 1 || 
            !(args[0].equals(PING) || 
              args[0].equals(DIE)  ||
-             args[0].equals(SET_PROPERTY)  ||
+//             args[0].equals(SET_PROPERTY)  ||
              args[0].equals(START) || 
              args[0].equals(STATUS) ||
              args[0].equals(RESTART) ||

@@ -26,9 +26,7 @@
 package org.hyperic.hq.agent;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -269,41 +267,39 @@ public class AgentConfig {
             return false;
         }
         try {
-            File propKeyFile = new File(propFile.getParent() + File.separator + AgentConfig.DEFAULT_AGENT_KEY_FILE_NAME);
-            // if there is a property key file, use it to decrypt encrypted fileds and encrypt ones
+            // use the property encryption key to decrypt encrypted fileds and encrypt ones
             // which should have been encrypted, but are not
-            if (propKeyFile.exists()) {
-                // get encryption key file contecnt
-                ObjectInputStream propKeyOIS = null;
-                String propEncKey = null;
-                try {
-                    propKeyOIS = new ObjectInputStream(new FileInputStream(propKeyFile));
-                    propEncKey = (String) propKeyOIS.readObject();
-                } finally {
-                    if (propKeyOIS!=null) {propKeyOIS.close();}
-                }
-                // go over props which should have been encrypted in the prop file
-                Map<String,String> unEncProps = new HashMap<String,String>();
-                for (String encryptedKey : ENCRYPTED_PROP_KEYS) {
-                    String propVal = tmpProps.getProperty(encryptedKey);
-                    // if property is defined in the prop file
-                    if(propVal!=null) {
-                        // if encrypted, replace with decrypted value
-                        if (SecurityUtil.isEncrypted(propVal)) {
-                            String decPropVal  = SecurityUtil.decrypt(SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM,propEncKey,propVal);
-                            tmpProps.setProperty(encryptedKey, decPropVal);
-                        // if not encrypted, although it should have, mark as candidate for encryption in the file
-                        } else {
-                            unEncProps.put(encryptedKey, propVal);
+            // go over props which should have been encrypted in the prop file
+            Map<String,String> unEncProps = null;
+            String propEncKey = null;
+            for (String encryptedKey : ENCRYPTED_PROP_KEYS) {
+                String propVal = tmpProps.getProperty(encryptedKey);
+                // if property is defined in the prop file
+                if(propVal!=null) {
+                    // if encrypted, replace with decrypted value
+                    if (SecurityUtil.isEncrypted(propVal)) {
+                        if (propEncKey==null) {
+                            propEncKey = PropertyUtil.getPropEncKey(AgentConfig.DEFAULT_PROP_ENC_KEY_FILE);
                         }
+                        String decPropVal  = SecurityUtil.decrypt(SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM,propEncKey,propVal);
+                        tmpProps.setProperty(encryptedKey, decPropVal);
+                        // if not encrypted, although it should have, mark as candidate for encryption in the file
+                    } else {
+                        if (unEncProps==null) {
+                            unEncProps = new HashMap<String,String>();
+                        }
+                        unEncProps.put(encryptedKey, propVal);
                     }
                 }
-                // encrypt props which should have been encrypted, but are not
-                if (unEncProps.size()>0) {
-                    PropertyUtil.storeProperties(propFile.getAbsolutePath(), propEncKey,unEncProps);
-                }
             }
-            
+            // encrypt props which should have been encrypted, but are not
+            if (unEncProps!=null) {
+                if (propEncKey==null) {
+                    propEncKey = PropertyUtil.getPropEncKey(AgentConfig.DEFAULT_PROP_ENC_KEY_FILE);
+                }
+                PropertyUtil.storeProperties(propFile.getAbsolutePath(), propEncKey,unEncProps);
+            }
+                
             for (Enumeration<?> propKeys = tmpProps.propertyNames(); propKeys.hasMoreElements();) {
                 String tmpKey = (String)propKeys.nextElement();
                 String tmpValue = tmpProps.getProperty(tmpKey); 
@@ -312,7 +308,6 @@ public class AgentConfig {
             }
             return true;
         } catch (Exception e) {
-            
             return false;
         }
     }
