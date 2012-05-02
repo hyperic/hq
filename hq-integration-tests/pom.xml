@@ -42,6 +42,11 @@
 			<classifier>tests</classifier>
 		</dependency>
 		<dependency>
+			<groupId>org.hyperic.hq</groupId>
+			<artifactId>hq-api</artifactId> 
+			<version>${project.version}</version>					
+		</dependency>		
+		<dependency>
 			<groupId>org.hyperic.hq.agent.handler</groupId>
 			<artifactId>hq-agent-handler-measurement</artifactId>
 			<version>${project.version}</version>

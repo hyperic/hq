@@ -348,7 +348,10 @@ public class AIQueueManagerImpl implements AIQueueManager {
     public AIPlatformValue findAIPlatformByFqdn(AuthzSubject subject, String fqdn) {
         // XXX Do authz check
         AIPlatform aiPlatform = aiPlatformDAO.findByFQDN(fqdn);
-        AIPlatformValue aiplatformValue = syncQueue(aiPlatform, false);
+        AIPlatformValue aiplatformValue = null;
+        if (null != aiPlatform) {
+            aiplatformValue = syncQueue(aiPlatform, false);
+        }
         return aiplatformValue;
     }
 

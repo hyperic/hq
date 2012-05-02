@@ -54,7 +54,9 @@
 																basicAuthenticationFilter,
 																basicAuthenticationExceptionTranslationFilter,
 																basicSessionManagementFilter,
-			    	                                     		filterSecurityInterceptor" />    	                                     		
+			    	                                     		filterSecurityInterceptor" /> 
+             <!-- TODO: change to correct filters -->
+             <sec:filter-chain pattern="/rest-api/**" filters="none"/>
 			<sec:filter-chain pattern="/**" filters="securityContextPersistenceFilter,
 													 logoutFilter,
 			                                         basicAuthenticationFilter,
@@ -65,6 +67,8 @@
 			                                         formSessionManagementFilter,
 			                                         formAuthenticationExceptionTranslationFilter,
 			                                         filterSecurityInterceptor" />
+                                       
+			                                   
 		</sec:filter-chain-map>
 	</bean>
 
