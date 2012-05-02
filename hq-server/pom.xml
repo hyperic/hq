@@ -15,30 +15,38 @@
 
 
 	<dependencies>
-		<dependency>
+		<!--  transitive from hq-pdk -->
+		<!-- <dependency>
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-common</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
+		-->
+		<!--  transitive from hq-pdk -->
+		<!-- <dependency>
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-lather</artifactId>
 			<version>${project.version}</version>
-		</dependency>
-		<dependency>
+		</dependency> -->
+		<!--  transitive from hq-pdk -->
+		<!-- <dependency> 
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-util</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		-->
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-pdk</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		
+		
 		 <dependency>
     		<groupId>org.aspectj</groupId>
     		<artifactId>aspectjrt</artifactId>
  		</dependency>
+ 		
 		<dependency>
 			<groupId>org.jasypt</groupId>
 			<artifactId>jasypt</artifactId>
@@ -75,14 +83,17 @@
 			<groupId>org.hyperic</groupId>
 			<artifactId>ehcache</artifactId>
 		</dependency>
-		<dependency>
+		<!--  transitive from HQ-common -->
+		<!-- <dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-beans</artifactId>
 		</dependency>
+		 
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
 		</dependency>
+		-->
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context-support</artifactId>

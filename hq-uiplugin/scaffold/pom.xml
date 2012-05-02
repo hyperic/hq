@@ -6,6 +6,7 @@
 		<groupId>org.hyperic.hq.uiplugin</groupId>
 		<artifactId>hq-uiplugin-parent</artifactId>
 		<version>5.0.BUILD-SNAPSHOT</version>
+		<relativePath>../hq-uiplugin-parent/pom.xml</relativePath>
   </parent>
 
   <groupId>org.hyperic.hq.uiplugin</groupId>

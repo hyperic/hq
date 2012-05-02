@@ -122,6 +122,14 @@ public abstract class HypericEnum implements Serializable
         }
     }
     
+    protected final void unregister() { 
+        synchronized (_enumsByClass) {
+            final Set vals = (Set)_enumsByClass.get(this._implClass);
+            //vals must exist at this point 
+            vals.remove(this) ; 
+        }//EO synchronized block 
+    }//EOM
+    
     public int getCode() {
         return _code;
     }
@@ -147,6 +155,7 @@ public abstract class HypericEnum implements Serializable
         return _desc;
     }
     
+    @Override
     public String toString() {
         return _desc;
     }

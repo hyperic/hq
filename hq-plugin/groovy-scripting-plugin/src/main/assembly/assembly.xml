@@ -28,6 +28,8 @@
 -->
 
 <assembly>
+	<id>groovy-scripting-assembly</id>
+
 	<formats>
 		<format>zip</format>
 	</formats>

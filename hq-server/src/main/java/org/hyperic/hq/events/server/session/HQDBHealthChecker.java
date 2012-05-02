@@ -35,8 +35,10 @@ import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.ResourceBundle;
+import java.util.concurrent.ScheduledFuture;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
@@ -66,9 +68,10 @@ public class HQDBHealthChecker {
     private static final int MAX_NUM_OF_FAILURE_CHECKS = 10;
 
     private final Log log = LogFactory.getLog(HQDBHealthChecker.class);
-    private DBUtil dbUtil;
-    private EmailManager emailManager;
-    private Scheduler scheduler;
+    private final DBUtil dbUtil;
+    private final EmailManager emailManager;
+    private final Scheduler scheduler;
+    private ScheduledFuture<?> healthCheckerTask ; 
 
     @Autowired
     public HQDBHealthChecker(DBUtil dbUtil, EmailManager emailManager, Scheduler scheduler) {
@@ -85,9 +88,14 @@ public class HQDBHealthChecker {
         log.info("Scheduling HQ DB Health to perform a health check every " +
                  (HEALTH_CHECK_PERIOD_MILLIS / 1000) + " sec");
 
-        scheduler.scheduleAtFixedRate(new HQDBHealthTask(), Scheduler.NO_INITIAL_DELAY,
+        this.healthCheckerTask = scheduler.scheduleAtFixedRate(new HQDBHealthTask(), Scheduler.NO_INITIAL_DELAY,
             HEALTH_CHECK_PERIOD_MILLIS);
     }
+    
+    @PreDestroy 
+    public final void destroy() { 
+        this.healthCheckerTask.cancel(true/*mayInterruptIfRunning*/) ; 
+    }//EOM 
 
     private class HQDBHealthTask implements Runnable {
 

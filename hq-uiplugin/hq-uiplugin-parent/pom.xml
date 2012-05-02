@@ -4,12 +4,11 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>org.hyperic.hq</groupId>
-		<artifactId>hq-parent</artifactId>
+		<groupId>org.hyperic.hq.uiplugin</groupId>
+		<artifactId>modules</artifactId>
 		<version>5.0.BUILD-SNAPSHOT</version>
-	</parent>
+	</parent> 
 
-	<groupId>org.hyperic.hq.uiplugin</groupId>
 	<artifactId>hq-uiplugin-parent</artifactId>
 	<packaging>pom</packaging>
 	<name>Hyperic HQ UI Plugin - Parent</name>
@@ -23,6 +22,7 @@
 						<descriptors>
 							<descriptor>src/main/assembly/server.xml</descriptor>
 						</descriptors>
+						<appendAssemblyId>true</appendAssemblyId>
 					</configuration>
 				</plugin>
 			</plugins>
@@ -30,3 +30,4 @@
 	</build>
 
 </project>
+

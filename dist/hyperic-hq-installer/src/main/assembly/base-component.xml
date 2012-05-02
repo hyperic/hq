@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component>
+
+	<fileSets>
+		<fileSet>
+			<directory>../../src/main/resources</directory>
+			<outputDirectory>/</outputDirectory>
+			<excludes>
+				<exclude>**/*.sh</exclude>
+				<exclude>**/.gitignore</exclude>
+			</excludes>
+			<filtered>true</filtered>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
+		</fileSet>
+		<fileSet>
+			<directory>../../src/main/resources</directory>
+			<outputDirectory>/</outputDirectory>
+			<includes>
+				<include>**/*.sh</include>
+			</includes>
+			<filtered>true</filtered>
+			<fileMode>0755</fileMode>
+			<directoryMode>0755</directoryMode>
+		</fileSet>
+	</fileSets>
+
+	<dependencySets>
+		<dependencySet>
+				<useProjectArtifact>false</useProjectArtifact>
+				<useTransitiveDependencies>false</useTransitiveDependencies>
+				<unpack>true</unpack>
+				<directoryMode>0755</directoryMode>
+				<includes>
+					<include>org.hyperic.hq.dist:installer</include>
+				</includes>
+		</dependencySet>
+		<dependencySet>
+				<useProjectArtifact>false</useProjectArtifact>
+				<useTransitiveDependencies>false</useTransitiveDependencies>
+				<outputDirectory>/</outputDirectory>
+				<includes>
+					<include>org.hyperic.hq.dist:server</include>
+				</includes>
+		</dependencySet>
+
+
+	</dependencySets>
+	
+</component>

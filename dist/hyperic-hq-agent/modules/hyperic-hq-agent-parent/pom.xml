@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.hyperic.hq</groupId>
+		<artifactId>hq-parent</artifactId>
+		<version>5.0.BUILD-SNAPSHOT</version>
+		<relativePath>../../../../pom.xml</relativePath>
+	</parent>
+
+	<groupId>org.hyperic.hq.dist.hyperic-hq-agent</groupId> 
+	<artifactId>hyperic-hq-agent-parent</artifactId>
+	<packaging>pom</packaging>
+	<name>Hyperic HQ Distribution - Hyperic HQ Agent parent</name>
+
+	<dependencies> 
+		<dependency>
+			<groupId>org.hyperic.hq.dist</groupId>
+			<artifactId>hyperic-hq-agent</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+			<type>pom</type>
+		</dependency> 
+		<!--<dependency>
+			<groupId>org.hyperic.hq.dist</groupId>
+			<artifactId>agent</artifactId>
+			<version>${project.version}</version>
+			<type>tar.gz</type>
+		</dependency> -->
+	</dependencies> 
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<configuration>
+						<descriptors>
+							<descriptor>src/main/assembly/assembly.xml</descriptor>
+						</descriptors>
+						<appendAssemblyId>false</appendAssemblyId>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-deploy-plugin</artifactId>
+					<configuration>
+						<skip combine.self="override">true</skip>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
+	<repositories>
+		<repository>
+			<id>hyperic-jres</id>
+			<name>Hyperic JREs Repository</name>
+			<url>http://maven.hyperic.org/jres</url>
+		</repository>
+	</repositories>
+
+</project>

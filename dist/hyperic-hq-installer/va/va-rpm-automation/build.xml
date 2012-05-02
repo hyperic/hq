@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="build-rpms" default="cleanup-after" xmlns:ac="antlib:net.sf.antcontrib">
+  <description>Creates VA RPM from the HQ bundles.</description>
+
+  <property file="${basedir}/build.properties"/>
+  <import file="rpm-macros.xml" />
+
+  <target name="determine-build-type">
+    <ac:if>
+      <equals arg1="${hq.build.type}" arg2="" />
+      <ac:then>
+        <echo message="Doing a release build...." />
+	   
+        <property name="build.type.release" value="true" />
+        <property name="hq.build.subfolder.suffix" value="${hq.version}" />
+        <property name="hq.ee.base.installer.url" value="http://10.0.0.104/raid/release/shipped/hq/stagingRepo/release/com/hyperic/hq/dist/${hq.ee.base.name}-installer/${hq.version}/" />
+
+      </ac:then>
+      <ac:else>
+        <ac:if>
+          <contains string="${hq.build.type}" substring="SNAPSHOT" />
+          <ac:then>
+            <echo message="Doing a snapshot build...." />
+
+            <property name="hq.ee.base.name.suffix" value="${hq.version}.${hq.ee.build}" />
+            <property name="hq.build.subfolder.suffix" value="${hq.version}.${hq.build.type}" />         	
+            <property name="hq.ee.base.installer.url" value="http://private.maven.hyperic.com/snapshot/com/hyperic/hq/dist/hyperic-hqee-installer/${hq.version}.${hq.build.type}/" />
+
+          </ac:then>
+          <ac:else>
+            <echo message="Doing a milestone build...." />
+
+            <property name="hq.ee.base.name.suffix" value="${hq.version}.${hq.ee.build}" />
+            <property name="hq.build.subfolder.suffix" value="${hq.version}.${hq.build.type}" />
+            <property name="hq.ee.base.installer.url" value="http://10.0.0.104/raid/release/shipped/hq/stagingRepo/com/hyperic/hq/dist/${hq.ee.base.name}-installer/${hq.version}.${hq.build.type}/" />
+
+          </ac:else>
+        </ac:if>
+      </ac:else>
+    </ac:if>
+  </target>
+
+  <!-- Ensure all folders we need are there. -->
+
+  <target name="create-folders" depends="determine-build-type"
+    description="Ensure directory structure is created before RPM build." >
+    <echo message="Creating folders prior to building RPM's..." />
+
+    <mkdir dir="${bundle.src.dir}" />
+    <mkdir dir="${rpm.build.home}/BUILD" />
+    <mkdir dir="${rpm.build.home}/RPMS/x86_64" />
+    <mkdir dir="${rpm.build.home}/SOURCES" />
+    <mkdir dir="${rpm.build.home}/SPECS" />
+    <mkdir dir="${rpm.build.home}/SRPMS" />
+
+  </target>
+
+  <!-- Clean out any leftover or old stuff. -->
+
+  <target name="clean" depends="create-folders"
+    description="Clean up directory structure before starting RPM build." >
+    <echo message="Cleaning prior to building RPM's..." />
+
+    <delete quiet="true">
+      <fileset dir="${build.base}" includes="*.spec *.gz *.log" />
+      <dirset dir="${rpm.build.home}/BUILD" includes="*" />
+      <fileset dir="${rpm.build.home}/RPMS" includes="**/.rpm" />
+      <fileset dir="${rpm.build.home}/SOURCES" includes="**/.${hq.file.type}" />
+      <fileset dir="${build.base}" includes="**/.${hq.file.type}" />
+      <fileset dir="${rpm.build.home}/SPECS" includes="**/.spec" />
+      <fileset dir="${support.files}" />
+      <fileset dir="${support.files.EE}" />
+    </delete>
+  </target>
+
+  <!-- Download builds from Maven repos. -->
+
+  <target name="download-builds" depends="clean"
+    description="Download agent and installer builds from Maven repos." >
+    <echo message="Downloading HQ builds from Maven repos..." />
+<!--
+    <get src="${hq.os.agent.url}" dest="${bundle.src.dir}" usetimestamp="true" />
+    <get src="${hq.ee.agent.url}" dest="${bundle.src.dir}" usetimestamp="true" />
+
+    <get src="${hq.os.installer.linux.url}" dest="${bundle.src.dir}" usetimestamp="true" />
+    <get src="${hq.ee.installer.linux.url}" dest="${bundle.src.dir}" usetimestamp="true" />
+    <get src="${hq.os.installer.linux64.url}" dest="${bundle.src.dir}" usetimestamp="true" />
+    <get src="${hq.ee.installer.linux64.url}" dest="${bundle.src.dir}" usetimestamp="true" /> -->
+  </target> 
+
+  <!-- Make new directory structure we'll use in the RPM creation process.  -->
+
+  <target name="make-folders" depends="download-builds"
+    description="Create directory structure in preparation for RPM build." >
+    <echo message="Making version directories..." />
+    <mkdir dir="${build.base}/${hq.version}-EE-server" />
+  </target>
+
+  <!-- Copy HQ kits into place. -->
+
+  <target name="cp-src-bundles" depends="make-folders"
+    description="Copy HQ source bundles in preparation for RPM build." >
+    <echo message="Copying sources bundles..." />
+    <copy file="${bundle.src.dir}/${hq.ee.installer.linux64}" todir="${build.base}/${hq.version}-EE-server" />
+  </target>
+
+  <!-- Update spec files with latest version/build information. -->
+
+  <target name="update-spec-files" depends="cp-src-bundles"
+    description="Update SPEC files with version/build information." >
+    <echo message="Updating spec files..." />
+
+
+    <patternset id="spec.files.patterns" >
+    	 <include name="*.spec" unless="build.type.release" />
+    	 <include name="*.spec.release" if="build.type.release" />
+    </patternset>
+    
+    <copy todir="${build.base}" >
+
+    <fileset dir="${build.base}/specs" >
+        <patternset refid="spec.files.patterns" />
+    </fileset>
+    	
+     <filterset>
+        <filter token="hq.version" value="${hq.version}"/>
+        <filter token="hq.ee.build" value="${hq.ee.build}"/>
+        <filter token="hq.build.type" value="${hq.build.type}"/>
+      </filterset>
+    </copy>
+  	
+  	 <copy todir="${build.base}" >
+  	        <fileset dir="${build.base}" >
+  	            <patternset refid="spec.files.patterns" />
+  	        </fileset>
+  	        <globmapper from="*.spec.release" to="*.spec" />
+  	    </copy>
+
+  	    <delete>
+  	        <fileset dir="${build.base}" includes="*.spec.release" />
+  	    </delete>
+
+  	
+    <chmod perm="+x" dir="${build.base}" includes="*.spec" />
+  </target>
+
+
+  <target name="build-x86_64-EE" depends="update-spec-files"
+    description="Build x86 64 bit EE RPM" >
+    <echo message="Building x86 64 bit EE RPM..." />
+
+    <build-one-server-rpm
+      rpm.dir="${build.base}"
+      rpm.subfolder="${hq.version}-EE-server"
+      build.subfolder="${hq.ee.installer.subfolder}"
+      tarball.name="${hq.ee.installer.linux64}"
+      spec.file.name="x86_64-EE-server.spec"
+      init.file.name="${init.files}/hyperic-hqee-server.init" />
+
+  </target>
+
+
+  <!-- Move RPM's to their final destination. -->
+
+  <target name="move-RPMs" depends="build-x86_64-EE"
+    description="Move the RPM's once they're built to their destination." >
+    <echo message="Moving RPM's to destination folder..." />
+    <move todir="${rpm.dest.dir}" >
+
+      <fileset dir="${rpm.build.home}" includes="**/*.rpm" />
+      <flattenmapper />
+
+    </move>
+  </target>
+
+
+
+  <!-- Remove the directory structure we created earlier. -->
+
+  <target name="rm-folders" depends="move-RPMs"
+    description="Remove version folders used in RPM build." >
+    <echo message="Removing version directories..." />
+    <delete dir="${build.base}/${hq.version}-EE-server" />
+  	 <delete dir="${rpm.build.home}" />
+  </target>
+	
+
+	  <!-- Cleanup after ourselves. -->
+
+	  <target name="cleanup-after" depends="rm-folders"
+	    description="Cleanup after RPM build." >
+	    <echo message="RPM build complete, cleaning up afterwards..." />
+
+	    <delete>
+	      <fileset dir="${build.base}" includes="*.spec *.gz rpm_error.log" />
+	      
+	    </delete>
+
+	  </target>
+	
+</project>

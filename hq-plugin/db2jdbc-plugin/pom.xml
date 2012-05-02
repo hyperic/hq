@@ -3,20 +3,23 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.hyperic.hq.plugin</groupId>
+	<parent>
+        <groupId>org.hyperic.hq.plugin</groupId>
+        <artifactId>modules</artifactId>
+       <version>5.0.BUILD-SNAPSHOT</version>
+    </parent>
+
 	<artifactId>db2jdbc-plugin</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - db2 JDBC Plugin</name>
-	<version>5.0.BUILD-SNAPSHOT</version>
 
+	    <!-- inhetited from modules parent 
 	<dependencies>
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-pdk</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<!-- During a clover build, we end up using an instrumented hq-pdk jar.  
-		Since we are skipping instrumentation, we end up with a ClassNotFoundException for clover on exec-->
 		<dependency>
            	<groupId>com.cenqua.clover</groupId>
             <artifactId>clover</artifactId>
@@ -24,6 +27,7 @@
 			<scope>test</scope>
        </dependency>
 	</dependencies>
+	-->
 
 	<build>
 		<plugins>
@@ -68,25 +72,9 @@
 					</archive>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>validate-plugin-xml</id>
-						<goals>
-							<goal>java</goal>
-						</goals>
-						<phase>process-resources</phase>
-					</execution>
-				</executions>
-				<configuration>
-					<mainClass>org.hyperic.hq.product.validation.PluginXmlValidator</mainClass>
-					<arguments>
-						<argument>${basedir}</argument>
-					</arguments>
-					<classpathScope>test</classpathScope>
-				</configuration>
+			<plugin> 
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
 			</plugin>
 			<plugin>
 				<artifactId>maven-resources-plugin</artifactId>

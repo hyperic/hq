@@ -28,6 +28,7 @@
 -->
 
 <assembly>
+	<id>resin-plugin-assembly</id>
 	<formats>
 		<format>zip</format>
 	</formats>

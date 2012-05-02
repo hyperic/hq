@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.hyperic.hq.dist.hyperic-hq-installer</groupId>
+		<artifactId>hyperic-hq-installer-parent</artifactId>
+		<version>5.0.BUILD-SNAPSHOT</version>
+		<relativePath>../hyperic-hq-installer-parent/pom.xml</relativePath>
+	</parent>
+
+	<artifactId>hyperic-hq-installer-x86-linux</artifactId>
+	<packaging>pom</packaging>
+	<name>Hyperic HQ Distribution - Hyperic HQ Installer x86-linux</name>
+	
+	<dependencies>	
+		<dependency>
+			<groupId>postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>8.2.5</version>
+			<classifier>x86-linux</classifier>
+			<type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.jre</groupId>
+			<artifactId>x86-linux</artifactId>
+			<version>1.6_30</version>
+			<type>tar.gz</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.dist.hyperic-hq-agent</groupId>
+			<artifactId>hyperic-hq-agent-x86-linux</artifactId>
+			<version>${project.version}</version>
+			<type>tar.gz</type>
+		</dependency>
+	</dependencies>
+	
+	<properties> 
+		<jre.classifier>x86-linux</jre.classifier>
+		<agent.classifier>x86-linux</agent.classifier> 
+		<postgres.classifier>x86-linux</postgres.classifier> 
+		<packaging.type>tar.gz</packaging.type>
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

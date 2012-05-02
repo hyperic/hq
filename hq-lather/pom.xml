@@ -38,6 +38,7 @@
 					<descriptors>
 						<descriptor>src/main/assembly/agent.xml</descriptor>
 					</descriptors>
+					<appendAssemblyId>true</appendAssemblyId>
 				</configuration>
 			</plugin>
 			<plugin>

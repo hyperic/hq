@@ -3,18 +3,24 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.hyperic.hq.plugin</groupId>
+	<parent>
+        <groupId>org.hyperic.hq.plugin</groupId>
+        <artifactId>modules</artifactId>
+       <version>5.0.BUILD-SNAPSHOT</version>
+    </parent>
+
 	<artifactId>vim-plugin</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - vim Plugin</name>
-	<version>5.0.BUILD-SNAPSHOT</version>
 
 	<dependencies>
+		<!-- inherited from modules parent 
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-pdk</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		-->
 		<dependency>
 			<groupId>dom4j</groupId>
 			<artifactId>dom4j</artifactId>

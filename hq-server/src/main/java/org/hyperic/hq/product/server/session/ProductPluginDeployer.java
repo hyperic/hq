@@ -40,10 +40,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ScheduledFuture;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -86,23 +88,28 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
 
     private static final String HQU = "hqu";
 
-    private RenditServer renditServer;
-    private ProductManager productManager;
+    private final RenditServer renditServer;
+    private final ProductManager productManager;
 
     private ProductPluginManager productPluginManager;
 
-    private List<File> pluginDirs = new ArrayList<File>(2);
+    private final List<File> pluginDirs = new ArrayList<File>(2);
     private File hquDir;
 
-    private AgentManager agentManager;
+    private final AgentManager agentManager;
 
-    private PluginManager pluginManager;
+    private final PluginManager pluginManager;
 
-    private TransactionRetry transactionRetry;
+    private final TransactionRetry transactionRetry;
 
-    private TaskScheduler taskScheduler;
+    private final TaskScheduler taskScheduler;
+    private ScheduledFuture<?> pluginExecutorTask ;  
 
-    private Collection<FileEvent> fileEvents = new ArrayList<FileEvent>();
+    private FileWatcher fileWatcher ; 
+    
+
+
+    private final Collection<FileEvent> fileEvents = new ArrayList<FileEvent>();
 
     @Autowired
     public ProductPluginDeployer(RenditServer renditServer, ProductManager productManager,
@@ -306,7 +313,7 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
             ProductPluginManager.setPdkPluginsDir(pluginDirs.get(0).getAbsolutePath());
         }
         productPluginManager.init();
-        FileWatcher fileWatcher = new FileWatcher();
+        this.fileWatcher = new FileWatcher();
         fileWatcher.addFileEventListener(new ProductPluginFileEventListener());
         for(File pluginDir: this.pluginDirs) {
             fileWatcher.addDir(pluginDir.toString(), false);
@@ -315,8 +322,16 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
         if(!(pluginDirs.isEmpty())) {
             fileWatcher.start();
         }
-        taskScheduler.scheduleWithFixedDelay(new PluginFileExecutor(), new Date(now()+60000l), 5000l);
+        this.pluginExecutorTask = taskScheduler.scheduleWithFixedDelay(new PluginFileExecutor(), new Date(now()+60000l), 5000l);
     }
+    
+    @PreDestroy 
+    public final void destroy() { 
+        this.pluginExecutorTask.cancel(true/*mayInterruptIfRunning*/) ; 
+        this.fileWatcher.stop() ; 
+    }//EOM 
+    
+    
 
     private long now() {
         return System.currentTimeMillis();

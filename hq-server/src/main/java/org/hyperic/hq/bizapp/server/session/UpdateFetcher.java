@@ -26,6 +26,10 @@
 
 package org.hyperic.hq.bizapp.server.session;
 
+import java.util.concurrent.ScheduledFuture;
+
+import javax.annotation.PreDestroy;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.bizapp.shared.UpdateBoss;
@@ -44,9 +48,10 @@ public class UpdateFetcher
 implements Runnable, ApplicationListener<ContextRefreshedEvent>, ApplicationContextAware {
 
     private final Log _log = LogFactory.getLog(UpdateFetcher.class);
-    private UpdateBoss updateBoss;
+    private final UpdateBoss updateBoss;
     private final long checkInterval;
-    private TaskScheduler taskScheduler;
+    private final TaskScheduler taskScheduler;
+    private ScheduledFuture<?> updateTask ; 
     private ApplicationContext applicationContext;
 
     @Autowired
@@ -68,9 +73,14 @@ implements Runnable, ApplicationListener<ContextRefreshedEvent>, ApplicationCont
 
     public void onApplicationEvent(ContextRefreshedEvent event) {
         if (applicationContext == event.getApplicationContext()) {
-            taskScheduler.scheduleAtFixedRate(this, checkInterval);
+            this.updateTask = taskScheduler.scheduleAtFixedRate(this, checkInterval);
         }
     }
+    
+    @PreDestroy
+    public final void destroy() { 
+        this.updateTask.cancel(true /*mayInterruptIfRunning*/) ; 
+    }//EOM 
 
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;

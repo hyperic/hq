@@ -37,6 +37,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.PreDestroy;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
@@ -96,6 +98,13 @@ public class AppdefStatDAO {
         this.jdbcTemplate = jdbcTemplate;
         this.sessionFactory = sessionFactory;
     }
+    
+    
+    @PreDestroy 
+    public final void destroy() { 
+        this.jdbcTemplate = null ; 
+        this.sessionFactory = null ;
+    }//EOM 
 
     public Map<String, Integer> getPlatformCountsByTypeMap(AuthzSubject subject)
         throws SQLException {
@@ -376,7 +385,7 @@ public class AppdefStatDAO {
                     // (ResourceTreeNode[]) serviceMap.values()
                     // .toArray(new ResourceTreeNode[0]);
                     aPlatformNode.setSelected(true);
-                    ResourceTreeNode[] svrNodes = (ResourceTreeNode[]) servers
+                    ResourceTreeNode[] svrNodes = servers
                         .toArray(new ResourceTreeNode[0]);
                     ResourceTreeNode.alphaSortNodes(svrNodes, true);
                     aPlatformNode.addUpChildren(svrNodes);
@@ -483,7 +492,7 @@ public class AppdefStatDAO {
                         }
                     }
                     aServerNode.setSelected(true);
-                    ResourceTreeNode[] services = (ResourceTreeNode[]) serviceMap.values().toArray(
+                    ResourceTreeNode[] services = serviceMap.values().toArray(
                         new ResourceTreeNode[0]);
                     ResourceTreeNode.alphaSortNodes(services, true);
                     aServerNode.addUpChildren(services);
@@ -642,7 +651,7 @@ public class AppdefStatDAO {
                         aServiceNode.addDownChild(aPlatformNode);
                     }
 
-                    ResourceTreeNode[] appNodes = (ResourceTreeNode[]) appMap.values().toArray(
+                    ResourceTreeNode[] appNodes = appMap.values().toArray(
                         new ResourceTreeNode[0]);
                     ResourceTreeNode.alphaSortNodes(appNodes, true);
                     aServiceNode.addUpChildren(appNodes);
@@ -728,7 +737,7 @@ public class AppdefStatDAO {
                     }
 
                     appNode.setSelected(true);
-                    ResourceTreeNode[] svcNodes = (ResourceTreeNode[]) svcMap.values().toArray(
+                    ResourceTreeNode[] svcNodes = svcMap.values().toArray(
                         new ResourceTreeNode[0]);
                     ResourceTreeNode.alphaSortNodes(svcNodes);
                     appNode.addDownChildren(svcNodes);
@@ -900,13 +909,13 @@ public class AppdefStatDAO {
 
                 agNode.setSelected(true);
                 if (parentNodeList != null) {
-                    ResourceTreeNode[] parNodeArr = (ResourceTreeNode[]) parentNodeList
+                    ResourceTreeNode[] parNodeArr = parentNodeList
                         .toArray(new ResourceTreeNode[0]);
                     ResourceTreeNode.alphaSortNodes(parNodeArr, true);
                     agNode.addUpChildren(parNodeArr);
                 }
 
-                ResourceTreeNode[] members = (ResourceTreeNode[]) entitySet
+                ResourceTreeNode[] members = entitySet
                     .toArray(new ResourceTreeNode[0]);
 
                 ResourceTreeNode.alphaSortNodes(members);
@@ -991,7 +1000,7 @@ public class AppdefStatDAO {
             // Let group member order drive node creation (not db order).
             for (AppdefEntityID id : groupVo.getAppdefGroupEntries()) {
                 entitySet
-                    .add(new ResourceTreeNode((String) entNameMap.get(id.getId()),
+                    .add(new ResourceTreeNode(entNameMap.get(id.getId()),
                         getAppdefTypeLabel(id.getType(), groupVo.getAppdefResourceTypeValue()
                             .getName()), new AppdefEntityID(entityType, id.getId()),
                         ResourceTreeNode.RESOURCE));

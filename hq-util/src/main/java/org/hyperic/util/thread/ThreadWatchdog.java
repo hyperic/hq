@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2009], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc. 
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -31,6 +31,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -61,6 +62,11 @@ public class ThreadWatchdog {
     public void initialize() {
         _executor = new ScheduledThreadPoolExecutor(1, _tFact);
     }
+    
+    @PreDestroy
+    public final void destroy() { 
+        this._executor.shutdownNow() ; 
+    }//EOM
     
     /**
      * Schedule an interrupt for the current thread.
@@ -94,7 +100,7 @@ public class ThreadWatchdog {
     }
     
     public static class InterruptToken {
-        private Future _f;
+        private final Future _f;
         
         private InterruptToken(Future f) {
             _f = f;

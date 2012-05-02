@@ -24,6 +24,7 @@
  */
 
 package org.hyperic.hq.galerts.server.session;
+import javax.annotation.PreDestroy;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Expression;
@@ -45,7 +46,7 @@ public class ExecutionStrategyTypeInfoDAO
     }
 
     void remove(ExecutionStrategyInfo info) {
-        getSession().delete(info);
+        getSession().delete(info); 
     }
 
     public ExecutionStrategyTypeInfo find(ExecutionStrategyType sType) {
@@ -54,4 +55,10 @@ public class ExecutionStrategyTypeInfoDAO
         return (ExecutionStrategyTypeInfo) createCriteria().add(
             Expression.eq("typeClass", strategyClass)).uniqueResult();
     }
+    
+    @PreDestroy
+    public final void destroy() { 
+        this.sessionFactory = null ; 
+    }//EOM 
+    
 }

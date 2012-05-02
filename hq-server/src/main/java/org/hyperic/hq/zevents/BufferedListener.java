@@ -26,7 +26,6 @@
 package org.hyperic.hq.zevents;
 
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -45,7 +44,7 @@ class BufferedListener<T extends Zevent>
     
     BufferedListener(ZeventListener<T> target, ThreadGroupFactory fact) {
         super(1, 1, 0, TimeUnit.SECONDS, new LinkedBlockingQueue(), fact);
-        ZeventManager.getInstance().registerBuffer(getQueue(), target);
+        ZeventManager.getInstance().registerBuffer(getQueue(), target); 
         _target = target;
     }
 
@@ -77,14 +76,17 @@ class BufferedListener<T extends Zevent>
         }
     }
 
+    @Override
     public boolean equals(Object obj) {
         return _target.equals(obj);
     }
 
+    @Override
     public int hashCode() {
         return _target.hashCode();
     }
     
+    @Override
     public String toString() {
         return _target.toString();
     }

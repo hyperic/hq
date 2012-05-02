@@ -5,6 +5,11 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
+	<parent>
+        <groupId>org.hyperic.hq.plugin</groupId>
+        <artifactId>modules</artifactId>
+       <version>5.0.BUILD-SNAPSHOT</version>
+    </parent>
 
 	<groupId>org.hyperic.hq.plugin</groupId>
 	<artifactId>cloudfoundry-plugin</artifactId>
@@ -18,17 +23,19 @@
 		<json.version>20080701</json.version>
 		<spring.framework.version>3.0.5.RELEASE</spring.framework.version>
 		<sigar.version>1.6.4</sigar.version>
-		<junit.version>4.6</junit.version>
-		<surefire.version>2.6</surefire.version>
+		<!-- <junit.version>4.6</junit.version> -->
+		<surefire.version>2.8</surefire.version>
 	</properties>
 
 	<dependencies>
 		<!-- Hyperic -->
+		    <!-- inhetited from modules parent 
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-pdk</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		-->
 		<dependency>
 			<groupId>org.hyperic.hq.agent</groupId>
 			<artifactId>hq-agent-core</artifactId>
@@ -40,11 +47,13 @@
             <version>${hqapi.version}</version>
             <scope>compile</scope>
         </dependency>
+	    <!-- inhetited from hq-parent 
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
 			<version>${json.version}</version>
 		</dependency>
+		-->
 		
 		<!-- Cloud Foundry -->
 		<dependency>
@@ -166,6 +175,7 @@
 						<include>**/unit/*.java</include>
 					</includes>
 					<junitArtifactName>junit:junit</junitArtifactName>
+					<parallel>classes</parallel>
 				</configuration>
 			</plugin>
 			<plugin>

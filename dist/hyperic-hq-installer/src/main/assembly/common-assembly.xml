@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assembly>
+	<id>common-installer-assembly</id>
+	<formats>
+		<format>${packaging.type}</format>
+	</formats>
+
+	<baseDirectory>hyperic-hq-installer-${project.version}</baseDirectory>
+	
+	<componentDescriptors>
+		<componentDescriptor>../../src/main/assembly/base-component.xml</componentDescriptor>
+		<componentDescriptor>../../src/main/assembly/osbundle-component.xml</componentDescriptor> 
+	</componentDescriptors>
+
+</assembly>

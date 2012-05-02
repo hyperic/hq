@@ -28,6 +28,7 @@
 -->
 
 <assembly>
+	<id>hibernate-plugin-assembly</id>
 	<formats>
 		<format>zip</format>
 	</formats>

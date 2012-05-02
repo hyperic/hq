@@ -21,7 +21,7 @@
 		</dependency>
 		<dependency>
     			<groupId>org.apache.tomcat</groupId>
-    			<artifactId>juli</artifactId>
+    			<artifactId>juli</artifactId> 
     			<version>6.0.32</version>
     			<scope>provided</scope>
 		</dependency>
@@ -656,7 +656,7 @@
 							<excludeTransitive>true</excludeTransitive>
 						</configuration>
 					</execution>
-					<execution>
+				 	<execution>  
 						<id>copy-plugins</id>
 						<goals>
 							<goal>copy-dependencies</goal>
@@ -666,6 +666,7 @@
 							<outputDirectory>${project.build.directory}/generated-resources/WEB-INF/hq-plugins</outputDirectory>
 							<includeGroupIds>org.hyperic.hq.plugin</includeGroupIds>
 							<excludeTransitive>true</excludeTransitive>
+							
 							<includeTypes>jar</includeTypes>
 							<stripVersion>true</stripVersion>
 						</configuration>	
@@ -683,7 +684,7 @@
 							<includeTypes>zip</includeTypes>
 							<stripVersion>true</stripVersion>
 						</configuration>
-					</execution>
+					</execution>  
 					<execution>
 						<id>unpack-sigar</id>
 						<goals>
@@ -710,6 +711,7 @@
 							<directory>${project.build.directory}/generated-resources</directory>
 						</resource>
 					</webResources>
+					<attachClasses>true</attachClasses>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -813,10 +815,17 @@
 								<artifactId>jcl-over-slf4j</artifactId>
 								<version>1.6.1</version>
 							</dependency>
+							<dependency>
+								<groupId>org.codehaus.groovy</groupId>
+								<artifactId>groovy-all</artifactId>
+								<version>1.7.6</version>
+							</dependency>
+
     					</dependencies>
 					</plugin>
         			<plugin>
 						<artifactId>maven-war-plugin</artifactId>
+						<version>2.2</version>
 						<configuration>
 							<warName>ROOT</warName>
 							<webResources>
@@ -833,14 +842,14 @@
 	</profiles>
 	
 	<repositories>
-                <repository>
-                        <id>hqapi-release</id>
-                        <name>HQApi Release Repository</name>
-                        <url>http://maven.hyperic.org/hqapi/release</url>
-                        <snapshots>
-                                <enabled>false</enabled>
-                        </snapshots>
-                </repository>
+        <repository>
+                <id>hqapi-release</id>
+                <name>HQApi Release Repository</name>
+                <url>http://maven.hyperic.org/hqapi/release</url>
+                <snapshots>
+                        <enabled>false</enabled>
+                </snapshots>
+        </repository>
 		<repository>
 			<id>hqapi-snapshot</id>
 			<name>HQApi Snapshot Repository</name>

@@ -28,6 +28,7 @@
 -->
 
 <assembly>
+	<id>glassfish-plugin-assembly</id>
 	<formats>
 		<format>zip</format>
 	</formats>

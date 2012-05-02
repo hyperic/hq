@@ -28,6 +28,7 @@
 -->
 
 <assembly>
+	<id>hq-installer-assmebly</id>
 	<formats>
 		<format>zip</format>
 	</formats>

@@ -28,6 +28,7 @@
 -->
 
 <assembly>
+	<id>geronimo-plugin-assembly</id>
 	<formats>
 		<format>zip</format>
 	</formats>
