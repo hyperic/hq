@@ -1,0 +1,120 @@
+<beans
+    xmlns="http://www.springframework.org/schema/beans" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:int="http://www.springframework.org/schema/integration"
+    xmlns:int-amqp="http://www.springframework.org/schema/integration/amqp"
+    xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+    xmlns:int-stream="http://www.springframework.org/schema/integration/stream"
+    xmlns:int-file="http://www.springframework.org/schema/integration/file"
+    xsi:schemaLocation="http://www.springframework.org/schema/integration/amqp http://www.springframework.org/schema/integration/amqp/spring-integration-amqp.xsd
+        http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration-2.0.xsd
+        http://www.springframework.org/schema/integration/stream http://www.springframework.org/schema/integration/stream/spring-integration-stream.xsd
+        http://www.springframework.org/schema/integration/file http://www.springframework.org/schema/integration/file/spring-integration-file.xsd
+        http://www.springframework.org/schema/rabbit http://www.springframework.org/schema/rabbit/spring-rabbit-1.0.xsd
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+ 
+    <bean
+        id="cafManager"
+        class="org.hyperic.hq.caf.CafManagerImpl">
+        <property name="serverPort" value="${server.webapp.port}"/>
+        <property name="serverSecurePort" value="${server.webapp.secure.port}"/>
+    </bean>
+    
+    <bean
+        id="cafMessageListener"
+        class="org.hyperic.hq.caf.CafMessageListener">
+    </bean>
+    
+      <bean
+        id="CafRequestsExeutor"
+        class="org.hyperic.hq.caf.CafRequestsExeutor">
+        <constructor-arg value="${server.caf.clientId}"/>
+        <constructor-arg value="${vmRoutingKeyPrefix}"/>
+        <constructor-arg ref="toRabbit"/>
+    </bean>
+    
+    <!-- To RabbitMQ -->
+    <int:channel id="toRabbit" />
+
+    <int-amqp:outbound-channel-adapter
+        amqp-template="amqpTemplate"
+        channel="toRabbit"
+        exchange-name="${cafMgmtExchange}"
+        routing-key-expression="headers.send_to" />
+        
+    <!-- From RabbitMQ -->      
+    <int:channel id="fromRabbitErrChannel" />
+    
+    <int:channel id="fromRabbitResponse" />
+
+    <int:channel id="fromRabbitEvent" />
+
+    <int-amqp:inbound-channel-adapter channel="fromRabbitResponse"
+                                      queue-names="#{responseQ.getName()}"
+                                      connection-factory="cafConnectionFactory"
+                                      error-channel="fromRabbitErrChannel" />
+
+    <int-amqp:inbound-channel-adapter channel="fromRabbitEvent"
+                                      queue-names="#{eventQ.getName()}"
+                                      connection-factory="cafConnectionFactory"
+                                      error-channel="fromRabbitErrChannel" />
+
+    <int:header-enricher
+        input-channel="fromRabbitResponse"
+        output-channel="fromRabbit">
+        <int:header name="type" value="response" />
+    </int:header-enricher>
+                                     
+    <int:header-enricher
+        input-channel="fromRabbitEvent"
+        output-channel="fromRabbit">
+        <int:header name="type" value="event" />
+    </int:header-enricher>
+
+    <int:channel id="fromRabbit">
+       <int:interceptors>
+            <bean class="org.springframework.integration.transformer.MessageTransformingChannelInterceptor">
+                <constructor-arg>
+                    <bean class="com.vmware.commonagent.subsys.communication.MessageInlineAttachmentTransformer">
+                        <property name="outputDir" value="${outputDir}/hypericCaf" />
+                    </bean>
+                </constructor-arg>
+            </bean>
+        </int:interceptors>
+    </int:channel>
+    
+    <int:service-activator input-channel="fromRabbitErrChannel" ref="cafMessageListener" />
+  
+    <int:service-activator input-channel="fromRabbit" ref="cafMessageListener" />
+    
+    <!-- Infrastructure -->
+
+    <int:poller max-messages-per-poll="10" fixed-rate="100" default="true" />
+
+    <bean id="cafConnectionFactory"
+       class="org.springframework.amqp.rabbit.connection.CachingConnectionFactory">
+       <constructor-arg value="${server.caf.brokerAddress}"/>
+        <property name="virtualHost" value="${brokerVhost}"/>
+    </bean>
+
+    <rabbit:admin connection-factory="cafConnectionFactory" />
+
+    <rabbit:template id="amqpTemplate" connection-factory="cafConnectionFactory" />
+
+    <rabbit:queue id="responseQ" />
+
+    <rabbit:direct-exchange name="${cafMgmtExchange}">
+        <rabbit:bindings>
+            <rabbit:binding queue="responseQ" key="${vmRoutingKeyPrefix}.${server.caf.clientId}" />
+        </rabbit:bindings>
+    </rabbit:direct-exchange>
+    
+    <rabbit:queue id="eventQ"/>
+    
+    <rabbit:topic-exchange name="${cafEvtExchange}">
+        <rabbit:bindings>
+            <rabbit:binding queue="eventQ" pattern="caf.event.#" />
+        </rabbit:bindings>
+    </rabbit:topic-exchange>
+
+</beans>

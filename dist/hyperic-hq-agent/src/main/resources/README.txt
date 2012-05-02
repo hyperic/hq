@@ -1,6 +1,6 @@
 ================================================================================                   
 
-                 Hyperic HQ Agent, version ${project.version}
+     Hyperic HQ Agent, version ${project.version}, build ${build.number}
 
 ================================================================================
 

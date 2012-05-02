@@ -119,6 +119,13 @@ public class AgentDAO extends HibernateDAO<Agent> {
         return (Agent) getSession().createQuery(sql).setString(0, address).setInteger(1, port)
             .uniqueResult();
     }
+    
+
+    public Agent findByCafId(String cafId) {
+        String sql = "from Agent where cafId=?";
+        return (Agent) getSession().createQuery(sql).setString(0, cafId)
+            .uniqueResult();
+    }
 
     private Agent findByAgentToken(String token, Session session) {
         return (Agent) session.createCriteria(Agent.class)
@@ -158,6 +165,24 @@ public class AgentDAO extends HibernateDAO<Agent> {
         return query.list();
     }
     
+    /**
+     * Returns the agent's installation path 
+     * @param agentToken
+     */
+    public String getAgentInstallationPath(String agentToken) {
+    	final StringBuilder sql = new StringBuilder()
+    	.append("select distinct s from Server s ")
+    	.append(" JOIN s.platform p")
+    	.append(" JOIN p.agent a")
+    	.append(" WHERE a.agentToken='" + agentToken + "' and s.description like '%Hyperic%Agent%'");
+    	final Query q = getSession().createQuery(sql.toString());
+    	try{
+    		return ((Server)q.uniqueResult()).getInstallPath();
+    	}catch (Exception e) {
+    	}
+    	return null;
+    }
+
     /**
      * 
      * @return number of agents, whose version is older than that of the server

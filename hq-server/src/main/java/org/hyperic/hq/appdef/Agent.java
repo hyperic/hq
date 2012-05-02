@@ -43,6 +43,7 @@ public class Agent extends AppdefBean {
     private Collection _pluginStatuses;
     private long lastPluginInventoryCheckin;
     private String pluginInventoryChecksum;
+    private String cafId;
 
     public Agent() {
     }
@@ -147,7 +148,8 @@ public class Agent extends AppdefBean {
         _platforms = platforms;
     }
 
-    public boolean equals(Object obj)
+    @Override
+	public boolean equals(Object obj)
     {
         if (!(obj instanceof Agent) || !super.equals(obj)) {
             return false;
@@ -161,7 +163,8 @@ public class Agent extends AppdefBean {
                                         _port.equals(o.getPort())));
     }
 
-    public int hashCode()
+    @Override
+	public int hashCode()
     {
         int result = super.hashCode();
 
@@ -175,7 +178,8 @@ public class Agent extends AppdefBean {
         return getAddress()+":"+getPort();
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
         StringBuffer str = new StringBuffer(64);
 
         str.append("{id=").append(getId()).append(" ")
@@ -184,7 +188,8 @@ public class Agent extends AppdefBean {
         return(str.toString());
     }
     
-    public boolean allowContainerManagedLastModifiedTime() {
+    @Override
+	public boolean allowContainerManagedLastModifiedTime() {
         return false;
     }
 
@@ -203,5 +208,13 @@ public class Agent extends AppdefBean {
     public void setPluginInventoryChecksum(String pluginInventoryChecksum) {
         this.pluginInventoryChecksum = pluginInventoryChecksum;
     }
+
+	public String getCafId() {
+		return cafId;
+	}
+
+	public void setCafId(String cafId) {
+		this.cafId = cafId;
+	}
 
 }
