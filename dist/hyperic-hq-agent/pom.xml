@@ -65,7 +65,7 @@
 	   <profile> 
 		<id>All-Installers</id> 
 		<activation>
-		<property><name>all-agent-installers</name></property>
+		<property><name>all-installers</name></property>
 		</activation>
 		<modules> 
 		      <!-- will use the no-JRE instead <module>modules/apple-osx</module>-->
