@@ -1,5 +1,5 @@
 ================================================================================                   
-                 Hyperic HQ Server, version ${project.version}
+    Hyperic HQ Server, version ${project.version}, build ${build.number}
 ================================================================================ 
 Starting and Stopping the Hyperic HQ Server on Windows:
 

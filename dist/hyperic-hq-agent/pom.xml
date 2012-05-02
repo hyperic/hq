@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>org.hyperic.hq</groupId>
 		<artifactId>hq-parent</artifactId>
-		<version>5.0.MVN3.BUILD-SNAPSHOT</version>
+		<version>5.0.BUILD-SNAPSHOT</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
@@ -65,7 +65,7 @@
 	   <profile> 
 		<id>All-Installers</id> 
 		<activation>
-		<property><name>all-agent-installers</name></property>
+		<property><name>all-installers</name></property>
 		</activation>
 		<modules> 
 		      <!-- will use the no-JRE instead <module>modules/apple-osx</module>-->
