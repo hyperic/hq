@@ -85,7 +85,7 @@
 		<commons-collections.version>2.1.1</commons-collections.version>
 		<dom4j.version>1.6.1</dom4j.version>
 		<jaxb-impl.version>2.1.3</jaxb-impl.version>
-		
+		<org.springframework.integration-version>2.1.0.RELEASE</org.springframework.integration-version>
 		<maven.build.timestamp.format>MMM dd, yyyy</maven.build.timestamp.format>
 		<build.timestamp>${maven.build.timestamp}</build.timestamp>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -1160,6 +1160,11 @@
 				<enabled>false</enabled>
 			</snapshots>
 		</repository>
+		<repository>
+ 	 	    <id>nexusRelease</id>
+ 			<name>Nexus Release Repository</name>
+ 	 		<url>http://cos-nexus.wp.fsi:8081/nexus/content/repositories/releases</url>
+ 	 	 </repository>
 		<repository>
 			<id>cm-release</id>
 			<name>Configuration Monitor Repository</name>
