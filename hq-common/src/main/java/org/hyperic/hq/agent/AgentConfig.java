@@ -356,10 +356,8 @@ public class AgentConfig {
      * @return The merge Properties object.
      * @see org.hyperic.hq.agent.AgentConfig#getPropertyFiles(String)
      */
-    public static Properties/*EncryptableProperties*/ getProperties(String propsFile/*, String propEncKey*/) throws AgentConfigException {
-        Properties/*EncryptableProperties*/ useProps = /*propEncKey!=null?*/
-//                new EncryptableProperties(SecurityUtil.getStandardPBEStringEncryptor(propEncKey))/*:
-                    new Properties();
+    public static Properties getProperties(String propsFile) throws AgentConfigException {
+        Properties useProps = new Properties();
         useProps.putAll(AgentConfig.getDefaultProperties());
        
         File[] propFiles = getPropertyFiles(propsFile);
@@ -373,13 +371,13 @@ public class AgentConfig {
         return useProps;
     }
    
-    public static AgentConfig newInstance(String propsFile/*, String propEncKey*/)
+    public static AgentConfig newInstance(String propsFile)
         throws IOException, AgentConfigException {
         // verify that the agent bundle home has been properly defined
         // before populating the default properties
         checkAgentBundleHome();
         
-        Properties/*EncryptableProperties*/ useProps = getProperties(propsFile/*,propEncKey*/);
+        Properties useProps = getProperties(propsFile);
         
         return AgentConfig.newInstance(useProps);
     }

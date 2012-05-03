@@ -327,12 +327,4 @@ public class PropertyUtil {
             if (writer!=null) {writer.close();}
         }
     }
-
-    public static void main(String[] args) throws NumberFormatException, IOException {
-        Map<String,String> m = new HashMap<String,String>();
-        m.put("agent.setup.camPword", "AAAA");
-        m.put("accept.unverified.certificates", "BBB");
-        m.put("new", "CCC");
-        storeProperties("/work/agent-4.7-ee/conf/agent.properties", m);
-    }
 }
