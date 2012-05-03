@@ -63,6 +63,7 @@ set START_CMD=%CLIENT_CMD% start
 set PING_CMD=%CLIENT_CMD% ping
 set SETUP_CMD=%CLIENT_CMD% setup
 set DIE_CMD=%CLIENT_CMD% die
+set SET_PROP_CMD=%CLIENT_CMD% %*
 
 if /i "%1"=="start" (
     echo Starting agent
@@ -91,6 +92,10 @@ if /i "%1"=="ping" (
 )
 if /i "%1"=="setup" (
     %SETUP_CMD%
+    goto done
+)
+if /i "%1"=="set-property" (
+    %SET_PROP_CMD%
     goto done
 )
 echo Syntax %0 ^<start ^| stop ^| ping ^| setup^>

@@ -1182,10 +1182,7 @@ public class AgentClient {
     private static void cmdSetProp(String propKey, String propVal) throws FileNotFoundException, IOException, ClassNotFoundException {
         String propEncKey = PropertyUtil.getPropEncKey(AgentConfig.DEFAULT_PROP_ENC_KEY_FILE);
         final String propFile = System.getProperty(AgentConfig.PROP_PROPFILE,AgentConfig.DEFAULT_PROPFILE);
-//        Properties props = PropertyUtil.loadProperties(propFile);
         // encrypt property value
-//        Properties bootProps = this.config.getBootProperties();
-//        props.setProperty(propKey, propVal);
         // save encrypted data to agent.properties file
         Map<String,String> entriesToStore = new HashMap<String,String>();
         entriesToStore.put(propKey, propVal);
@@ -1367,7 +1364,7 @@ public class AgentClient {
 //            System.exit(-1) ; 
 //        }
         
-        if(args.length==4 && args[0].equals(SET_PROPERTY)){
+        if(args.length==3 && args[0].equals(SET_PROPERTY)){
             try {
                 cmdSetProp(args[1],args[2]);
             } catch (FileNotFoundException e) {

@@ -92,7 +92,7 @@ STATUS_CMD="${CLIENT_CMD} status"
 PING_CMD="${CLIENT_CMD} ping"
 SETUP_CMD="${CLIENT_CMD} setup"
 DIE_CMD="${CLIENT_CMD} die"
-SET_PROP_CMD="${CLIENT_CMD} set-property $@"
+SET_PROP_CMD="${CLIENT_CMD} $@"
 
 if [ "$1" = "start" ] ; then
     echo "Starting agent"
@@ -122,7 +122,6 @@ elif [ "$1" = "ping" ] ; then
 elif [ "$1" = "setup" ] ; then
     ${SETUP_CMD}
 elif [ "$1" = "set-property" ] ; then
-    echo "set prop nowrapper"
     ${SET_PROP_CMD}
 else
     echo "Syntax: $0 "'<start | stop | ping | setup | set-property>'

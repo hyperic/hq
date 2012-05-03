@@ -33,9 +33,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.hyperic.util.PropertyUtil;
 import org.hyperic.util.file.FileUtil;
@@ -168,7 +170,11 @@ public class AgentConfig {
     public static final String DEFAULT_PROP_ENC_KEY_FILE = PROP_INSTALLHOME[1]
             + "/conf/"+DEFAULT_AGENT_PROP_ENC_KEY_FILE_NAME;
 
-    public static final String[] ENCRYPTED_PROP_KEYS = new String[] {HQ_PASS,SSL_KEYSTORE_PASSWORD};
+    public static final Set<String> ENCRYPTED_PROP_KEYS = new HashSet<String>();
+    {
+        ENCRYPTED_PROP_KEYS.add(HQ_PASS);
+        ENCRYPTED_PROP_KEYS.add(SSL_KEYSTORE_PASSWORD);
+    }
     
     private static final String[][] propertyList = {
         PROP_LISTENPORT,
@@ -272,25 +278,28 @@ public class AgentConfig {
             // go over props which should have been encrypted in the prop file
             Map<String,String> unEncProps = null;
             String propEncKey = null;
-            for (String encryptedKey : ENCRYPTED_PROP_KEYS) {
-                String propVal = tmpProps.getProperty(encryptedKey);
+            for (Enumeration<?> propKeys = tmpProps.propertyNames(); propKeys.hasMoreElements();) {
+                String tmpKey = (String)propKeys.nextElement();
+                String tmpValue = tmpProps.getProperty(tmpKey); 
                 // if property is defined in the prop file
-                if(propVal!=null) {
+                if(tmpValue!=null) {
                     // if encrypted, replace with decrypted value
-                    if (SecurityUtil.isEncrypted(propVal)) {
+                    if (SecurityUtil.isEncrypted(tmpValue)) {
                         if (propEncKey==null) {
                             propEncKey = PropertyUtil.getPropEncKey(AgentConfig.DEFAULT_PROP_ENC_KEY_FILE);
                         }
-                        String decPropVal  = SecurityUtil.decrypt(SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM,propEncKey,propVal);
-                        tmpProps.setProperty(encryptedKey, decPropVal);
+                        tmpValue  = SecurityUtil.decrypt(SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM,propEncKey,tmpValue);
                         // if not encrypted, although it should have, mark as candidate for encryption in the file
-                    } else {
+                    } else if (ENCRYPTED_PROP_KEYS.contains(tmpKey)) {
                         if (unEncProps==null) {
                             unEncProps = new HashMap<String,String>();
                         }
-                        unEncProps.put(encryptedKey, propVal);
+                        unEncProps.put(tmpKey, tmpValue);
                     }
                 }
+                
+                tmpValue = tmpValue.trim();
+                props.put(tmpKey, tmpValue);
             }
             // encrypt props which should have been encrypted, but are not
             if (unEncProps!=null) {
@@ -299,13 +308,7 @@ public class AgentConfig {
                 }
                 PropertyUtil.storeProperties(propFile.getAbsolutePath(), propEncKey,unEncProps);
             }
-                
-            for (Enumeration<?> propKeys = tmpProps.propertyNames(); propKeys.hasMoreElements();) {
-                String tmpKey = (String)propKeys.nextElement();
-                String tmpValue = tmpProps.getProperty(tmpKey); 
-                tmpValue = tmpValue.trim();
-                props.put(tmpKey, tmpValue);
-            }
+
             return true;
         } catch (Exception e) {
             return false;
