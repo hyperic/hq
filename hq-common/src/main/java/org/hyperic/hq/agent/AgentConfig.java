@@ -26,18 +26,22 @@
 package org.hyperic.hq.agent;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.hyperic.util.PropertyUtil;
 import org.hyperic.util.file.FileUtil;
+import org.hyperic.util.security.SecurityUtil;
 
 /**
  * The configuration object for the AgentDaemon.  This class performs
@@ -87,7 +91,7 @@ public class AgentConfig {
     public static final String SSL_KEYSTORE_PATH = "agent.keystore.path";
     public static final String SSL_KEYSTORE_PASSWORD = "agent.keystore.password";
     public static final String SSL_KEYSTORE_ACCEPT_UNVERIFIED_CERT = "accept.unverified.certificates";
-    
+    public static final String DEFAULT_AGENT_KEY_FILE_NAME = "propEncKey";
     // The following final objects are the properties which are usable
     // within the configuation object.  The first element in the array
     // is the property name, the second is the default value
@@ -136,6 +140,7 @@ public class AgentConfig {
     { "agent.proxyHost", DEFAULT_PROXY_HOST };
     public static final String[] PROP_PROXYPORT = 
     { "agent.proxyPort", String.valueOf(DEFAULT_PROXY_PORT)};
+    private static final String HQ_PASS = "agent.setup.camPword";
     
     // A property provided for testing rollback during agent auto-upgrade.
     // Set the property value to the bundle name that will fail when starting 
@@ -159,6 +164,17 @@ public class AgentConfig {
 
     public static final String BUNDLE_PROPFILE = PROP_BUNDLEHOME[1]
             + "/conf/"+DEFAULT_AGENT_PROPFILE_NAME;
+
+    public static final String DEFAULT_AGENT_PROP_ENC_KEY_FILE_NAME = "agent.propEncKey";
+
+    public static final String DEFAULT_PROP_ENC_KEY_FILE = PROP_INSTALLHOME[1]
+            + "/conf/"+DEFAULT_AGENT_PROP_ENC_KEY_FILE_NAME;
+
+    public static final Set<String> ENCRYPTED_PROP_KEYS = new HashSet<String>();
+    {
+        ENCRYPTED_PROP_KEYS.add(HQ_PASS);
+        ENCRYPTED_PROP_KEYS.add(SSL_KEYSTORE_PASSWORD);
+    }
     
     private static final String[][] propertyList = {
         PROP_LISTENPORT,
@@ -242,35 +258,61 @@ public class AgentConfig {
                     + PROP_BUNDLEHOME[0] + " provided!");
         }
     }
-    
-    private static boolean loadProps(Properties props, File file) {
-        FileInputStream fin = null;
-        Properties tmpProps = new Properties(); 
-        if (!file.exists()) {
-            return false;
-        }
-        if (!file.canRead()) {
-            return false;
-        }
 
+    private static boolean loadProps(Properties props, File propFile) throws AgentConfigException {
+        Properties tmpProps;
         try {
-            fin = new FileInputStream(file);
-            tmpProps.load(fin);
+            tmpProps = PropertyUtil.loadProperties(propFile.getPath());
+        } catch (IOException e1) {
+            throw new AgentConfigException(e1.getMessage());
+        }
+        if (!propFile.exists()) {
+            return false;
+        }
+        if (!propFile.canRead()) {
+            return false;
+        }
+        try {
+            // use the property encryption key to decrypt encrypted fileds and encrypt ones
+            // which should have been encrypted, but are not
+            // go over props which should have been encrypted in the prop file
+            Map<String,String> unEncProps = null;
+            String propEncKey = null;
             for (Enumeration<?> propKeys = tmpProps.propertyNames(); propKeys.hasMoreElements();) {
                 String tmpKey = (String)propKeys.nextElement();
-                String tmpValue = tmpProps.getProperty(tmpKey);
+                String tmpValue = tmpProps.getProperty(tmpKey); 
+                // if property is defined in the prop file
+                if(tmpValue!=null) {
+                    // if encrypted, replace with decrypted value
+                    if (SecurityUtil.isEncrypted(tmpValue)) {
+                        if (propEncKey==null) {
+                            propEncKey = PropertyUtil.getPropEncKey(AgentConfig.DEFAULT_PROP_ENC_KEY_FILE);
+                        }
+                        tmpValue  = SecurityUtil.decrypt(SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM,propEncKey,tmpValue);
+                        // if not encrypted, although it should have, mark as candidate for encryption in the file
+                    } else if (ENCRYPTED_PROP_KEYS.contains(tmpKey)) {
+                        if (unEncProps==null) {
+                            unEncProps = new HashMap<String,String>();
+                        }
+                        unEncProps.put(tmpKey, tmpValue);
+                    }
+                }
+                
                 tmpValue = tmpValue.trim();
                 props.put(tmpKey, tmpValue);
             }
-            return true;
-        } catch (IOException e) {
-            return false;
-        } finally {
-            if (fin != null) {
-                try { fin.close(); } catch (IOException e) {}
+            // encrypt props which should have been encrypted, but are not
+            if (unEncProps!=null) {
+                if (propEncKey==null) {
+                    propEncKey = PropertyUtil.getPropEncKey(AgentConfig.DEFAULT_PROP_ENC_KEY_FILE);
+                }
+                PropertyUtil.storeProperties(propFile.getAbsolutePath(), propEncKey,unEncProps);
             }
-        }
 
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
     
     /**
@@ -303,7 +345,7 @@ public class AgentConfig {
             files.add(deployerProps);
         }
         
-        return (File[])files.toArray(new File[files.size()]);
+        return files.toArray(new File[files.size()]);
     }
     
     /**

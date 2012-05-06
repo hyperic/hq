@@ -92,6 +92,7 @@ STATUS_CMD="${CLIENT_CMD} status"
 PING_CMD="${CLIENT_CMD} ping"
 SETUP_CMD="${CLIENT_CMD} setup"
 DIE_CMD="${CLIENT_CMD} die"
+SET_PROP_CMD="${CLIENT_CMD} $@"
 
 if [ "$1" = "start" ] ; then
     echo "Starting agent"
@@ -120,7 +121,9 @@ elif [ "$1" = "ping" ] ; then
     fi
 elif [ "$1" = "setup" ] ; then
     ${SETUP_CMD}
+elif [ "$1" = "set-property" ] ; then
+    ${SET_PROP_CMD}
 else
-    echo "Syntax: $0 "'<start | stop | ping | setup>'
+    echo "Syntax: $0 "'<start | stop | ping | setup | set-property>'
     exit 1
 fi

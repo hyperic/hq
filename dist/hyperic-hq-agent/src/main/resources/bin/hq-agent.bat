@@ -24,7 +24,11 @@ for /F "delims== tokens=1*" %%i in (%ROLLBACK_PROPS%) do (
     if not EXIST bundles\%%j\bin\hq-agent.bat (
       echo Failed to find bundle script "%_AGENTHOME%bundles\%%j\bin\hq-agent.bat".
     ) else (
-      call bundles\%%j\bin\hq-agent.bat %*
+      if /i "%1"=="set-property" (
+        call bundles\%%j\bin\hq-agent-nowrapper.bat %*
+      ) else (
+        call bundles\%%j\bin\hq-agent.bat %*
+      )
     )
   )
 )

@@ -27,9 +27,8 @@ package org.hyperic.util.config;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Properties;
 import java.util.List;
-import java.util.Set;
+import java.util.Properties;
 
 import org.hyperic.util.PropertyUtil;
 import org.springframework.util.StringUtils;
@@ -52,13 +51,16 @@ public class AutomatedResponseBuilder extends InteractiveResponseBuilder {
 
     public AutomatedResponseBuilder (InteractiveResponseBuilder_IOHandler io,
                                      File propFile,
-                                     String requiredProp) throws IOException {
+                                     String requiredProp,
+                                     String pbePass,
+                                     String[] encriptedKeys) throws IOException {
         super(io);
-        this.props = PropertyUtil.loadProperties(propFile.getPath());
+        this.props = PropertyUtil.loadProperties(propFile.getPath(),pbePass,encriptedKeys);
         this.requiredProp = requiredProp;
         hasRequiredProp = (props.getProperty(requiredProp) != null);
     }
 
+    @Override
     public ConfigResponse processConfigSchema(ConfigSchema schema) 
         throws EncodingException, IOException, InvalidOptionException, 
                EarlyExitException {

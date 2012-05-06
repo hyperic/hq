@@ -36,9 +36,10 @@ import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.net.ssl.SSLPeerUnverifiedException;
@@ -76,6 +77,7 @@ import org.hyperic.sigar.FileWatcher;
 import org.hyperic.sigar.FileWatcherThread;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
+import org.hyperic.util.PropertyUtil;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.security.SecurityUtil;
 import org.tanukisoftware.wrapper.WrapperManager;
@@ -93,7 +95,7 @@ public class AgentClient {
     private static final PrintStream SYSTEM_OUT = System.out;
 
     private static final String PRODUCT = "HQ";
-    
+
 
     // The following QPROP_* defines are properties which can be
     // placed in the agent properties file to perform automatic setup
@@ -111,7 +113,7 @@ public class AgentClient {
     private static final String QPROP_AGENTPORT  = QPROP_PRE + "agentPort";
     private static final String QPROP_RESETUPTOK = QPROP_PRE + "resetupTokens";
     private static final String QPROP_TIMEOUT    = QPROP_PRE + "serverTimeout";
-    
+
     private static final String DEFAULT_LOG_LEVEL = "INFO";
     private static final String LOG_PATTERN_LAYOUT = "%d %-5p [%t] [%c{1}] %m%n";
     private static final int BUFFER_SIZE = 1024;
@@ -121,23 +123,32 @@ public class AgentClient {
     private static final String PROP_LOGFILE    = "agent.logFile";
     private static final String PROP_STARTUP_TIMEOUT = "agent.startupTimeOut";
     private static final String PROP_FQDN = "platform.fqdn";
-    
+
     private static final String AGENT_CLASS   = 
-        "org.hyperic.hq.agent.server.AgentDaemon";
+            "org.hyperic.hq.agent.server.AgentDaemon";
 
     private static final int AGENT_STARTUP_TIMEOUT = (60 * 5) * 1000; // 5 min
     private static final int FORCE_SETUP           = -42;
 
     private static final String JAAS_CONFIG = "jaas.config";
 
-    private AgentCommandsClient agtCommands; 
-    private CommandsClient   camCommands; 
-    private AgentConfig   config;
+    private final AgentCommandsClient agtCommands; 
+    private final CommandsClient   camCommands; 
+    private final AgentConfig   config;
     private String              sslHandlerPkg;
-    private Log                 log;                 
+    private final Log                 log;                 
     private boolean             nuking;
     private boolean             redirectedOutputs = false;
     private static Thread agentDaemonThread;
+
+    private final static String PING = "ping";
+    private final static String DIE = "die";
+    private final static String START = "start";
+    private final static String STATUS = "status";
+    private final static String RESTART = "restart";
+    private final static String SETUP = "setup";
+    private final static String SETUP_IF_NO_PROVIDER = "setup-if-no-provider";
+    private final static String SET_PROPERTY = "set-property";
 
     private AgentClient(AgentConfig config, SecureAgentConnection conn){
         this.agtCommands = new LegacyAgentCommandsClientImpl(conn);
@@ -148,8 +159,8 @@ public class AgentClient {
     }
 
     private long cmdPing(int numAttempts)
-        throws AgentConnectionException, AgentRemoteException
-    {
+            throws AgentConnectionException, AgentRemoteException
+            {
         AgentConnectionException lastExc;
 
         lastExc = new AgentConnectionException("Failed to connect to agent");
@@ -169,35 +180,35 @@ public class AgentClient {
             }
         }
         throw lastExc;
-    }
+            }
 
     private void cmdStatus()
-        throws AgentConnectionException, AgentRemoteException
-    {
+            throws AgentConnectionException, AgentRemoteException
+            {
         ProviderInfo pInfo;
         String address;
         String currentAgentBundle;
 
         try {
             currentAgentBundle = this.agtCommands.getCurrentAgentBundle();
-            
+
             pInfo = this.camCommands.getProviderInfo();
         } catch(AgentConnectionException exc){
             SYSTEM_ERR.println("Unable to contact agent: " + exc.getMessage());
             return;
         } catch(AgentRemoteException exc){
             SYSTEM_ERR.println("Error executing remote method: " +
-                               exc.getMessage());
+                    exc.getMessage());
             return;
         }
-        
+
         SYSTEM_OUT.println("Current agent bundle: "+currentAgentBundle);
 
         if(pInfo == null || (address = pInfo.getProviderAddress()) == null){
             SYSTEM_OUT.println("Agent not yet setup");
             return;
         }
-        
+
         try {
             String proto;
 
@@ -210,37 +221,37 @@ public class AgentClient {
             else
                 SYSTEM_OUT.print("Server port:       ");
             SYSTEM_OUT.println(url.getPort());
-            
+
             if (pInfo.isNewTransport()) {
                 SYSTEM_OUT.println("Using new transport; unidirectional="+
-                                  pInfo.isUnidirectional());
+                        pInfo.isUnidirectional());
             }
         } catch(Exception exc){
             SYSTEM_OUT.println("Unable to parse provider info (" + 
-                               address + "): " + exc.getMessage());
+                    address + "): " + exc.getMessage());
         }
-        
+
         SYSTEM_OUT.println("Agent listen port: " + 
-                           this.config.getListenPort());
-        
-        
+                this.config.getListenPort());
+
+
         if (this.config.isProxyServerSet()) {
             SYSTEM_OUT.println("Proxy server IP address: "+this.config.getProxyIp());
             SYSTEM_OUT.println("Proxy server port: "+this.config.getProxyPort());
         }
-        
-    }
+
+            }
 
     private void cmdDie(int waitTime)
-        throws AgentConnectionException, AgentRemoteException
-    {
+            throws AgentConnectionException, AgentRemoteException
+            {
         try {
             this.agtCommands.die();
         } catch(AgentConnectionException exc){
             return; // If we can't connect then we know the agent is dead
         } catch(AgentRemoteException exc){
             throw new AgentRemoteException("Error making remote agent call: "+
-                                           exc.getMessage());
+                    exc.getMessage());
         }
 
         // Loop waiting to see if it died before returning
@@ -261,23 +272,23 @@ public class AgentClient {
         }
 
         throw new AgentRemoteException("Unable to kill agent within timeout");
-    }
-    
+            }
+
 
     private void cmdRestart()
-    throws AgentConnectionException, AgentRemoteException
-{
-    try {
-        this.agtCommands.restart();
-    } catch(AgentConnectionException exc){
-        throw new AgentConnectionException("Unable to connect to agent: " +
-                                           "already dead?");
-    } catch(AgentRemoteException exc){
-        throw new AgentRemoteException("Error making remote agent call: "+
-                                       exc.getMessage());
-    }
-}    
-    
+            throws AgentConnectionException, AgentRemoteException
+            {
+        try {
+            this.agtCommands.restart();
+        } catch(AgentConnectionException exc){
+            throw new AgentConnectionException("Unable to connect to agent: " +
+                    "already dead?");
+        } catch(AgentRemoteException exc){
+            throw new AgentRemoteException("Error making remote agent call: "+
+                    exc.getMessage());
+        }
+            }    
+
     private class AutoQuestionException extends Exception {
         AutoQuestionException(String s){
             super(s);
@@ -285,9 +296,9 @@ public class AgentClient {
     }
 
     private String askQuestion(String question, String def, boolean invis,
-                               String questionProp)
-        throws IOException
-    {
+            String questionProp)
+                    throws IOException
+                    {
         BufferedReader in;
         String res, bootProp;
 
@@ -298,7 +309,7 @@ public class AgentClient {
             if(def != null){
                 SYSTEM_OUT.print(" [default=" + def + "]");
             }
-            
+
             SYSTEM_OUT.print(": ");
 
             if(invis){
@@ -312,7 +323,7 @@ public class AgentClient {
                     if(bootProp.equals("*default*") && def != null){
                         bootProp = def;
                     }
-                    
+
                     SYSTEM_OUT.println(bootProp);
                     return bootProp;
                 }
@@ -324,7 +335,7 @@ public class AgentClient {
                         res = null;
                     }
                 }
-                
+
                 if(res == null){
                     if(def != null){
                         return def;
@@ -334,100 +345,100 @@ public class AgentClient {
                 }
             }
         }
-    }
+                    }
 
     private String askQuestion(String question, String def, 
-                               String questionProp)
-        throws IOException
-    {
+            String questionProp)
+                    throws IOException
+                    {
         return this.askQuestion(question, def, false, questionProp);
-    }
+                    }
 
     private boolean askYesNoQuestion(String question, boolean def,
-                                     String questionProp)
-        throws IOException, AutoQuestionException
-    {
+            String questionProp)
+                    throws IOException, AutoQuestionException
+                    {
         boolean isAuto;
 
         isAuto = this.config.getBootProperties().getProperty(questionProp) !=
-            null;
+                null;
 
         while(true){
             String res;
 
             res = this.askQuestion(question, def ? "yes" : "no",
-                                   questionProp);
+                    questionProp);
             if(res.equalsIgnoreCase("yes") ||
-               res.equalsIgnoreCase("y"))
+                    res.equalsIgnoreCase("y"))
             {
                 return true;
             } else if(res.equalsIgnoreCase("no") ||
-                      res.equalsIgnoreCase("n"))
+                    res.equalsIgnoreCase("n"))
             {
                 return false;
             }
 
             if(isAuto){
                 throw new AutoQuestionException("Property '" + questionProp +
-                                                "' must be 'yes' or " +
-                                                "'no'");
+                        "' must be 'yes' or " +
+                        "'no'");
             }
 
             SYSTEM_OUT.println("- Value must be 'yes' or 'no'");
         }
-    }
+                    }
 
 
     private int askIntQuestion(String question, int def, String questionProp)
-        throws IOException, AutoQuestionException
-    {
+            throws IOException, AutoQuestionException
+            {
         boolean isAuto;
 
         isAuto = this.config.getBootProperties().getProperty(questionProp) !=
-            null;
+                null;
 
         while(true){
             String res;
             int iVal;
 
             res = this.askQuestion(question, Integer.toString(def),
-                                   questionProp);
+                    questionProp);
             try {
                 iVal = Integer.parseInt(res);
                 return iVal;
             } catch(NumberFormatException exc){
                 if(isAuto){
                     throw new AutoQuestionException("Property '" + 
-                                    questionProp +"' must be a valid integer");
+                            questionProp +"' must be a valid integer");
                 }
                 SYSTEM_OUT.println("- Value must be an integer");
             }
         }
-    }
+            }
 
     private BizappCallbackClient testProvider(String provider, final boolean acceptUnverifiedCertificates)
-        throws AgentCallbackClientException
-    {
+            throws AgentCallbackClientException
+            {
         StaticProviderFetcher fetcher;
         BizappCallbackClient res;
 
         fetcher = new StaticProviderFetcher(new ProviderInfo(provider, 
-                                                             "no-auth"));
+                "no-auth"));
         res = new BizappCallbackClient(fetcher, config);
         res.bizappPing(acceptUnverifiedCertificates);
         return res;
-    }
+            }
 
     /**
      * Test the connection information.
      */
     private BizappCallbackClient getConnection(String provider, boolean secure)
-    throws AutoQuestionException, AgentCallbackClientException {
+            throws AutoQuestionException, AgentCallbackClientException {
         BizappCallbackClient bizapp;
         Properties bootP = this.config.getBootProperties();
         long start = System.currentTimeMillis();
         boolean acceptUnverifiedCertificates = secure;
-        
+
         while (true) {
             String sec = secure ? "secure" : "insecure";
             SYSTEM_OUT.print("- Testing " + sec  + " connection ... ");
@@ -438,30 +449,30 @@ public class AgentClient {
                 SYSTEM_OUT.println("Success");
                 return bizapp;
             } catch (AgentCallbackClientException exc) {
-            	// ...reset to false just to be safe...
-            	acceptUnverifiedCertificates = false;
-            	
+                // ...reset to false just to be safe...
+                acceptUnverifiedCertificates = false;
+
                 String msg = exc.getMessage();
-                
+
                 // ...check if there's a SSL exception...
                 if (exc.getExceptionOfType(SSLPeerUnverifiedException.class) != null) {
-                	SYSTEM_OUT.println();
-                	SYSTEM_OUT.println(exc.getMessage());
-                	log.error(exc,exc);
-                	String question = "Are you sure you want to continue connecting?";
-	                	
-	                try {
-	                	if (askYesNoQuestion(question, false, "agent.setup.acceptUnverifiedCertificate")) {
-		               		acceptUnverifiedCertificates = true;
-		               		
-		               		// try again
-	                		continue;
-	                	}
-                	} catch(IOException ioe) {
-                		log.debug(ioe.getMessage());
-                	}
+                    SYSTEM_OUT.println();
+                    SYSTEM_OUT.println(exc.getMessage());
+                    log.error(exc,exc);
+                    String question = "Are you sure you want to continue connecting?";
+
+                    try {
+                        if (askYesNoQuestion(question, false, "agent.setup.acceptUnverifiedCertificate")) {
+                            acceptUnverifiedCertificates = true;
+
+                            // try again
+                            continue;
+                        }
+                    } catch(IOException ioe) {
+                        log.debug(ioe.getMessage());
+                    }
                 }
-                
+
                 if (msg.indexOf("is still starting") != -1) {
                     SYSTEM_ERR.println("HQ is still starting (retrying in 10 seconds)");
 
@@ -482,9 +493,9 @@ public class AgentClient {
                         // If the timeout is improperly configured,
                         // bail out
                         throw new AutoQuestionException("Mis-configured" +
-                                                        QPROP_TIMEOUT +
-                                                        "property: " +
-                                                        propTimeout);
+                                QPROP_TIMEOUT +
+                                "property: " +
+                                propTimeout);
                     }
 
                     SYSTEM_ERR.println("Failure (retrying in 10 seconds)");
@@ -500,10 +511,10 @@ public class AgentClient {
                 SYSTEM_ERR.println("Failure");
 
                 if (bootP.getProperty(QPROP_IPADDR) != null ||
-                    bootP.getProperty(QPROP_PORT) != null ||
-                    bootP.getProperty(QPROP_SSLPORT) != null) {
+                        bootP.getProperty(QPROP_PORT) != null ||
+                        bootP.getProperty(QPROP_SSLPORT) != null) {
                     throw new AutoQuestionException("Unable to connect to " +
-                                                    PRODUCT);
+                            PRODUCT);
                 }
                 throw exc;
             }
@@ -525,7 +536,7 @@ public class AgentClient {
 
         try {
             address =
-                InetAddress.getLocalHost().getHostAddress();
+                    InetAddress.getLocalHost().getHostAddress();
             if (!loopback.equals(address)) {
                 return address;
             }
@@ -536,7 +547,7 @@ public class AgentClient {
         Sigar sigar = new Sigar();
         try {
             address =
-                sigar.getNetInterfaceConfig().getAddress();
+                    sigar.getNetInterfaceConfig().getAddress();
         } catch (SigarException e) {
             address = loopback;
         } finally {
@@ -545,36 +556,36 @@ public class AgentClient {
 
         return address;
     }
-    
+
     private void cmdSetupIfNoProvider() 
-        throws AgentConnectionException, AgentRemoteException, 
-               IOException, AutoQuestionException {
-               
+            throws AgentConnectionException, AgentRemoteException, 
+            IOException, AutoQuestionException {
+
         Properties bootProps = this.config.getBootProperties();        
         int timeout = getStartupTimeout(bootProps);
-        
+
         // Sleep until the agent is started
         this.cmdPing(timeout / 1000);
-        
+
         // Prompt the agent to setup if the provider info is not specified.
         ProviderInfo providerInfo = this.camCommands.getProviderInfo();
 
         if (providerInfo == null) {
             this.cmdSetup();
         }
-                
+
     }
 
     private void cmdSetup()
-        throws AgentConnectionException, AgentRemoteException, IOException,
-               AutoQuestionException
-    {
+            throws AgentConnectionException, AgentRemoteException, IOException,
+            AutoQuestionException
+            {
         BizappCallbackClient bizapp;
         InetAddress localHost;
         CreateToken_result tokenRes;
         ProviderInfo providerInfo;
         String provider, host, user, pword,  
-            agentToken, response;
+        agentToken, response;
         String agentIP;
         Properties bootP;
         int agentPort = -1;
@@ -583,67 +594,67 @@ public class AgentClient {
         int unidirectionalPort = -1;
 
         bootP = this.config.getBootProperties();
-        
+
         try {
             this.cmdPing(1);
         } catch(AgentConnectionException exc){
             SYSTEM_ERR.println("Unable to setup agent: " + exc.getMessage());
             SYSTEM_ERR.println("The Agent must be running prior to running " +
-                               "setup");
+                    SETUP);
             return;
         }
 
         SYSTEM_OUT.println("[ Running agent setup ]");
-        
+
         // FIXME - For now we will only setup the new transport if the 
         // unidirectional agent is available (since currently we don't 
         // have a bidirectional agent). Once we have a bidirectional 
         // agent, we should always ask if agent communications should 
         // use the new transport.
 
-//        isNewTransportAgent = askYesNoQuestion("Should Agent communications to " + 
-//                PRODUCT + " use the new transport ", 
-//                false, QPROP_NEWTRANSPORT);   
+        //        isNewTransportAgent = askYesNoQuestion("Should Agent communications to " + 
+        //                PRODUCT + " use the new transport ", 
+        //                false, QPROP_NEWTRANSPORT);   
 
         if (isUnidirectionalAgentSupported()) {
             unidirectional = askYesNoQuestion("Should Agent communications to " + 
-                                              PRODUCT + " be unidirectional", 
-                                              false, QPROP_UNI);
-            
+                    PRODUCT + " be unidirectional", 
+                    false, QPROP_UNI);
+
             // FIXME For now enable the new transport only if we have 
             // a unidirectional agent.
             isNewTransportAgent = unidirectional;
         }
-        
+
         boolean secure;
         int port;
 
         while(true){
             host = this.askQuestion("What is the " + PRODUCT +
-                                    " server IP address",
-                                    null, QPROP_IPADDR);
-                        
+                    " server IP address",
+                    null, QPROP_IPADDR);
+
             secure = askYesNoQuestion("Should Agent communications " +
-                                      "to " + PRODUCT + " always " +
-                                      "be secure", 
-                                      true, QPROP_SECURE);
+                    "to " + PRODUCT + " always " +
+                    "be secure", 
+                    true, QPROP_SECURE);
             if (secure) {
                 // Always secure.  Ask for SSL port and verify
                 port = this.askIntQuestion("What is the " + PRODUCT +
-                                           " server SSL port",
-                                           7443, QPROP_SSLPORT);
+                        " server SSL port",
+                        7443, QPROP_SSLPORT);
                 provider = AgentCallbackClient.getDefaultProviderURL(host,
-                                                                     port,
-                                                                     true);
+                        port,
+                        true);
             } else {
                 // Never secure.  Only ask for non-ssl port and verify
                 port    = this.askIntQuestion("What is the " + PRODUCT +
-                                              " server port    ", 
-                                              7080, QPROP_PORT);
+                        " server port    ", 
+                        7080, QPROP_PORT);
 
                 provider = AgentCallbackClient.getDefaultProviderURL(host,
-                                                                     port,
-                                                                     false);
+                        port,
+                        false);
             }
 
             try {
@@ -654,7 +665,7 @@ public class AgentClient {
 
             break;
         }
-                
+
         if (unidirectional) {
             // workaround to uniquely identify an agent based on host and port combination
             // we set the agent port to the hashcode of the FQDN if specified 
@@ -664,25 +675,25 @@ public class AgentClient {
             if (fqdn != null) {
                 agentPort = fqdn.hashCode();
             }
-            
+
             if (secure) {
                 unidirectionalPort = port;                
             } else {
                 // unidirectional only uses secure communication. Ask for SSL port and verify
                 while(true){
                     unidirectionalPort = this.askIntQuestion("What is the " + PRODUCT +
-                                       " server SSL port for unidirectional communications",
-                                                   7443, QPROP_SSLPORT);
-                    
+                            " server SSL port for unidirectional communications",
+                            7443, QPROP_SSLPORT);
+
                     // The unidirectional transport is not hosted via the 
                     // Lather servlet, but this is ok, since the 
                     // undirectional servlet is in the same container as 
                     // the Lather servlet. We are just testing connectivity 
                     // to the servlet container here.
                     String unidirectionalProvider = 
-                        AgentCallbackClient.getDefaultProviderURL(host,
-                                                        unidirectionalPort,
-                                                        true);
+                            AgentCallbackClient.getDefaultProviderURL(host,
+                                    unidirectionalPort,
+                                    true);
                     try {
                         getConnection(unidirectionalProvider, true);
                     } catch (AgentCallbackClientException e) {
@@ -693,14 +704,14 @@ public class AgentClient {
                 }                            
             }
         }
-        
+
         while(true){
             user  = this.askQuestion("What is your " + PRODUCT +
-                                     " login", "hqadmin",
-                                     QPROP_LOGIN);
+                    " login", "hqadmin",
+                    QPROP_LOGIN);
             pword = this.askQuestion("What is your " + PRODUCT +
-                                     " password", null, true,
-                                     QPROP_PWORD);
+                    " password", null, true,
+                    QPROP_PWORD);
             try {
                 if(bizapp.userIsValid(user, pword)) {
                     break;
@@ -710,7 +721,7 @@ public class AgentClient {
                 SYSTEM_ERR.println("Error validating user: " + exc);
                 return;
             }
-            
+
             SYSTEM_ERR.println("- Invalid username/password");
             if (bootP.getProperty(QPROP_LOGIN) != null || bootP.getProperty(QPROP_PWORD) != null) {
                 throw new AutoQuestionException("Invalid username/password");
@@ -720,17 +731,17 @@ public class AgentClient {
         // Get info about agent
         while(true){
             String question;
-            
+
             if (unidirectional) {
                 question = "What is the agent IP address";
             } else {
                 question = "What IP should "+PRODUCT+" use to contact the agent";
             }
-            
+
             agentIP = this.askQuestion(question, 
-                                       getDefaultIpAddress(),
-                                       QPROP_AGENTIP);
-            
+                    getDefaultIpAddress(),
+                    QPROP_AGENTIP);
+
             // Attempt to resolve, as a safeguard
             try {
                 localHost = InetAddress.getByName(agentIP);
@@ -743,30 +754,30 @@ public class AgentClient {
 
         if (!unidirectional) {
             while(true){
-        	int listenPort = this.config.getListenPort();
+                int listenPort = this.config.getListenPort();
                 agentPort = this.askIntQuestion("What port should " + PRODUCT +
-                                                " use to contact the agent",
-                                                listenPort,
-                                                QPROP_AGENTPORT);
+                        " use to contact the agent",
+                        listenPort,
+                        QPROP_AGENTPORT);
                 if(agentPort < 1 || agentPort > 65535){
                     SYSTEM_ERR.println("- Invalid port");
                 } else {
                     if (agentPort!= listenPort){
                         SYSTEM_ERR.println("- To setup agent port to "+ 
-                				agentPort + "," +
-                                           " Stop the agent," +
-                                           " Update agent properties" +
-                                           " for agent.listenPort and start" +
-                                           " the agent again");
+                                agentPort + "," +
+                                " Stop the agent," +
+                                " Update agent properties" +
+                                " for agent.listenPort and start" +
+                                " the agent again");
                         SYSTEM_OUT.println("- Now Agent uses the default port:"
-                                            +listenPort);
+                                +listenPort);
                         agentPort = listenPort;
                     }
                     break;
                 }
             }            
         }
-        
+
         // The old agent token may be needed if re-registering an existing agent 
         // but changing from non-unidirectional to unidirectional transport. 
         // In this case, the agent port will change, so we will need to lookup 
@@ -776,78 +787,78 @@ public class AgentClient {
         /* Check to see if this agent already has a setup for a server.
            If it does, allow the user to re-register with the new IP address */
         if((providerInfo = this.camCommands.getProviderInfo()) != null &&
-           providerInfo.getProviderAddress() != null &&
-           providerInfo.getAgentToken() != null)
+                providerInfo.getProviderAddress() != null &&
+                providerInfo.getAgentToken() != null)
         {
             oldAgentToken = providerInfo.getAgentToken();
-            
+
             boolean setupTokens;
 
             SYSTEM_OUT.println("- Agent is already setup for " +
-                               PRODUCT + " @ " +
-                               providerInfo.getProviderAddress());
+                    PRODUCT + " @ " +
+                    providerInfo.getProviderAddress());
             setupTokens =
-                this.askYesNoQuestion("Would you like to re-setup the auth " +
-                                      "tokens", false, QPROP_RESETUPTOK);
+                    this.askYesNoQuestion("Would you like to re-setup the auth " +
+                            "tokens", false, QPROP_RESETUPTOK);
             if(setupTokens == false){
                 // Here we basically just need to inform the server that the 
                 // agent with a given AgentToken will re-use that, but
                 // with a different IP address
                 SYSTEM_OUT.println("- Informing " + PRODUCT +
-                                   " about agent setup changes");
-                
-                boolean acceptUnverifiedCertificates = false;
-                
-                while(true) {
-	                try {
-	                    response = bizapp.updateAgent(providerInfo.getAgentToken(),
-	                                                  user, pword, agentIP, 
-	                                                  agentPort, 
-	                                                  isNewTransportAgent, 
-	                                                  unidirectional,
-	                                                  acceptUnverifiedCertificates);
-	                    if (response != null) {
-	                        if (response.contains("java.security.cert.CertificateException")) {
-	    	            		String question = "The server to agent communication channel is using a self-signed certificate and can not be verified" +
-	    	            						  "\nAre you sure you want to continue connecting?";
-	    	                	
-	    		                try {
-	    		                	if (askYesNoQuestion(question, false, "agent.setup.acceptUnverifiedCertificate")) {
-	    			               		acceptUnverifiedCertificates = true;
-	    			               		
-	    			               		// try again
-	    		                		continue;
-	    		                	}
-	    	                	} catch(IOException ioe) {
-	    	                		log.debug(ioe.getMessage());
-	    	                	}
-	    	                } 
-	                        
-	                        SYSTEM_ERR.println("- Error updating agent: " + response);
-	                    }
+                        " about agent setup changes");
 
-	                    break;
-	                } catch(Exception exc){
-	                	SYSTEM_ERR.println("- Error updating agent: " + 
-	                                       exc.getMessage());
-	                    return;
-	                }
+                boolean acceptUnverifiedCertificates = false;
+
+                while(true) {
+                    try {
+                        response = bizapp.updateAgent(providerInfo.getAgentToken(),
+                                user, pword, agentIP, 
+                                agentPort, 
+                                isNewTransportAgent, 
+                                unidirectional,
+                                acceptUnverifiedCertificates);
+                        if (response != null) {
+                            if (response.contains("java.security.cert.CertificateException")) {
+                                String question = "The server to agent communication channel is using a self-signed certificate and can not be verified" +
+                                        "\nAre you sure you want to continue connecting?";
+
+                                try {
+                                    if (askYesNoQuestion(question, false, "agent.setup.acceptUnverifiedCertificate")) {
+                                        acceptUnverifiedCertificates = true;
+
+                                        // try again
+                                        continue;
+                                    }
+                                } catch(IOException ioe) {
+                                    log.debug(ioe.getMessage());
+                                }
+                            } 
+
+                            SYSTEM_ERR.println("- Error updating agent: " + response);
+                        }
+
+                        break;
+                    } catch(Exception exc){
+                        SYSTEM_ERR.println("- Error updating agent: " + 
+                                exc.getMessage());
+                        return;
+                    }
                 }
-                
+
                 if (providerInfo.isNewTransport()!=isNewTransportAgent || 
-                    providerInfo.isUnidirectional()!=unidirectional) {
-                    
+                        providerInfo.isUnidirectional()!=unidirectional) {
+
                     ProviderInfo registeredProviderInfo = 
-                        new ProviderInfo(provider, providerInfo.getAgentToken());
-                    
+                            new ProviderInfo(provider, providerInfo.getAgentToken());
+
                     if (isNewTransportAgent) {
                         registeredProviderInfo.setNewTransport(unidirectional, 
-                                                               unidirectionalPort);
+                                unidirectionalPort);
                     }
-                    
+
                     this.camCommands.setProviderInfo(registeredProviderInfo);
                 }
-                
+
                 return;
             }
         }
@@ -857,122 +868,122 @@ public class AgentClient {
             InetAddress.getByName(host);
         } catch(UnknownHostException exc){
             SYSTEM_ERR.println("Unable to resolve provider (strange): " +
-                               exc.getMessage());
+                    exc.getMessage());
             return;
         }
         tokenRes = this.camCommands.createToken(new CreateToken_args());
-        
+
         SYSTEM_OUT.println("- Received temporary auth token from agent");
 
         // Ask server to verify agent
         SYSTEM_OUT.println("- Registering agent with " + PRODUCT);
         RegisterAgentResult result;
         boolean acceptUnverifiedCertificates = false;
-        
+
         while(true) {
-	        try {
-	            result = bizapp.registerAgent(oldAgentToken, 
-	                                          user, pword, 
-	                                          tokenRes.getToken(), 
-	                                          agentIP, agentPort,
-	                                          ProductProperties.getVersion(),
-	                                          getCpuCount(), isNewTransportAgent, 
-	                                          unidirectional, acceptUnverifiedCertificates);
+            try {
+                result = bizapp.registerAgent(oldAgentToken, 
+                        user, pword, 
+                        tokenRes.getToken(), 
+                        agentIP, agentPort,
+                        ProductProperties.getVersion(),
+                        getCpuCount(), isNewTransportAgent, 
+                        unidirectional, acceptUnverifiedCertificates);
 
-	            response = result.response;
-	            
-	            if(!response.startsWith("token:")) {
-	            	if (response.contains("java.security.cert.CertificateException")) {
-	            		String question = "The server to agent communication channel is using a self-signed certificate and could not be verified" +
-	            						  "\nAre you sure you want to continue connecting?";
-	                	
-		                try {
-		                	if (askYesNoQuestion(question, false, "agent.setup.acceptUnverifiedCertificate")) {
-			               		acceptUnverifiedCertificates = true;
-			               		
-			               		// try again
-		                		continue;
-		                	}
-	                	} catch(IOException ioe) {
-	                		log.debug(ioe.getMessage());
-	                	}
-	                } 
+                response = result.response;
 
-	            	SYSTEM_ERR.println("- Unable to register agent: " + response);
-	            	return;
-	            }
-	
-	            // Else the bizapp responds with the token that the agent needs
-	            // to use to contact it
-	            agentToken = response.substring("token:".length());
-	            break;
-	        } catch(Exception exc){
-	            exc.printStackTrace(SYSTEM_ERR);
-	            SYSTEM_ERR.println("- Error registering agent: "+exc.getMessage());
-	        }
+                if(!response.startsWith("token:")) {
+                    if (response.contains("java.security.cert.CertificateException")) {
+                        String question = "The server to agent communication channel is using a self-signed certificate and could not be verified" +
+                                "\nAre you sure you want to continue connecting?";
+
+                        try {
+                            if (askYesNoQuestion(question, false, "agent.setup.acceptUnverifiedCertificate")) {
+                                acceptUnverifiedCertificates = true;
+
+                                // try again
+                                continue;
+                            }
+                        } catch(IOException ioe) {
+                            log.debug(ioe.getMessage());
+                        }
+                    } 
+
+                    SYSTEM_ERR.println("- Unable to register agent: " + response);
+                    return;
+                }
+
+                // Else the bizapp responds with the token that the agent needs
+                // to use to contact it
+                agentToken = response.substring("token:".length());
+                break;
+            } catch(Exception exc){
+                exc.printStackTrace(SYSTEM_ERR);
+                SYSTEM_ERR.println("- Error registering agent: "+exc.getMessage());
+            }
         }
-        
+
         SYSTEM_OUT.println("- " + PRODUCT +
-                           " gave us the following agent token");
+                " gave us the following agent token");
         SYSTEM_OUT.println("    " + agentToken);
         SYSTEM_OUT.println("- Informing agent of new " + PRODUCT + " server");
-        
+
         ProviderInfo registeredProviderInfo = new ProviderInfo(provider, agentToken);
-        
+
         if (isNewTransportAgent) {
             registeredProviderInfo.setNewTransport(unidirectional, unidirectionalPort);
         }
-        
+
         this.camCommands.setProviderInfo(registeredProviderInfo);
         SYSTEM_OUT.println("- Validating");
         providerInfo = this.camCommands.getProviderInfo();
-        
+
         if(providerInfo == null || 
-           providerInfo.getProviderAddress().equals(provider) == false ||
-           providerInfo.getAgentToken().equals(agentToken) == false)
+                providerInfo.getProviderAddress().equals(provider) == false ||
+                providerInfo.getAgentToken().equals(agentToken) == false)
         {
             if(providerInfo == null){
                 SYSTEM_ERR.println(" - Failure - Agent is reporting no " +
-                                   "" + PRODUCT + " provider information");
+                        "" + PRODUCT + " provider information");
             } else {
                 SYSTEM_ERR.println("- Failure - Agent is using " +
-                                   PRODUCT + " server '" + 
-                                   providerInfo.getProviderAddress() + 
-                                   "' with token '" +
-                                   providerInfo.getAgentToken() + "'");
+                        PRODUCT + " server '" + 
+                        providerInfo.getProviderAddress() + 
+                        "' with token '" +
+                        providerInfo.getAgentToken() + "'");
             }
 
         } else {
             SYSTEM_OUT.println("- Successfully setup agent");
-            
+
             if (providerInfo.isNewTransport()) {
                 String unidirectionalPortString = "";
                 if (providerInfo.isUnidirectional()) {
                     unidirectionalPortString = ", port="+
-                    providerInfo.getUnidirectionalPort();
+                            providerInfo.getUnidirectionalPort();
                 }
-                
+
                 SYSTEM_OUT.println("- Agent using new transport, unidirectional="+
-                                    providerInfo.isUnidirectional()+
-                                    unidirectionalPortString);
+                        providerInfo.isUnidirectional()+
+                        unidirectionalPortString);
             }
         }
 
         redirectOutputs(bootP); //win32
-    }
-    
+            }
+
     private boolean isUnidirectionalAgentSupported() {
         // TODO: Ideally, we should be able to check for the existence of a
         // .com class by calling TransportUtils.tryLoadUnidirectionalTransportPollerClient()
         // but there is some class loader issue with an EE agent. As a workaround,
         // in HQ 4.5, we will just check for the existence of an EE agent jar.
-        
+
         boolean isUnidirectionalSupported = false;
         String libPath = AgentConfig.PROP_BUNDLEHOME[1] + "/lib";
 
         try {            
             File libDir = new File(libPath);
-            
+
             if (libDir.isDirectory()) {
                 File[] libFiles = libDir.listFiles();
                 for (int i=0; i<libFiles.length; i++) {
@@ -986,56 +997,56 @@ public class AgentClient {
             }           
         } catch (Exception e) {
             log.info("Could not determine whether the agent supports "
-                        + "unidirectional transport: "
-                        + e.getMessage(), e);
+                    + "unidirectional transport: "
+                    + e.getMessage(), e);
         }
-        
+
         return isUnidirectionalSupported;
     }
 
     private void verifyAgentRunning(ServerSocket startupSock)
-        throws AgentInvokeException
-    {
+            throws AgentInvokeException
+            {
         try {
-            
+
             Socket conn = startupSock.accept();
 
             DataInputStream dIs  = new DataInputStream(conn.getInputStream());
-            
+
             if(dIs.readInt() != 1){
                 throw new AgentInvokeException("Agent reported an error " +
-                                               "while starting up");
+                        "while starting up");
             }                
-                        
+
         } catch(InterruptedIOException exc){
             throw new AgentInvokeException("Timed out waiting for Agent " +
-                                           "to report startup success");
+                    "to report startup success");
         } catch(IOException exc){
             throw new AgentInvokeException("Agent failure while starting");
         } finally {
             try { startupSock.close(); } catch(IOException exc){}
         }
-                
+
         try {
             this.agtCommands.ping();
         } catch(Exception exc){
             throw new AgentInvokeException("Unable to ping agent: " +
-                                           exc.getMessage());
+                    exc.getMessage());
         }     
-    }
+            }
 
     private void nukeAgentAndDie(){
         synchronized(this){
             if(this.nuking){
                 return;
             }
-            
+
             this.nuking = true;
         }
 
         try {
             SYSTEM_ERR.println("Received interrupt while starting.  " +
-                               "Shutting agent down ...");
+                    "Shutting agent down ...");
             this.cmdDie(10);
         } catch (Exception e){
         }
@@ -1058,10 +1069,10 @@ public class AgentClient {
     private PrintStream newLogStream(String stream, Properties bootProps) throws AgentConfigException, IOException {
         Logger logger = Logger.getLogger(stream);
         Level level = Level.toLevel(bootProps.getProperty("agent.startup.logLevel." + stream,
-                                                          bootProps.getProperty("agent.logLevel." + stream,
-                                                                                DEFAULT_LOG_LEVEL)));
+                bootProps.getProperty("agent.logLevel." + stream,
+                        DEFAULT_LOG_LEVEL)));
         PatternLayout layout = new PatternLayout(bootProps.getProperty("agent.startup.ConversionPattern",
-                                                                       LOG_PATTERN_LAYOUT));
+                LOG_PATTERN_LAYOUT));
         RollingFileAppender fileAppender = new RollingFileAppender(layout, getStartupLogFile(bootProps), true);
         fileAppender.setImmediateFlush(true);
         fileAppender.setBufferedIO(false);
@@ -1078,7 +1089,7 @@ public class AgentClient {
             return;
         }
         this.redirectedOutputs = true;
-                
+
         try {
             System.setErr(newLogStream("SystemErr", bootProp));
             System.setOut(newLogStream("SystemOut", bootProp));
@@ -1086,14 +1097,14 @@ public class AgentClient {
             e.printStackTrace(SYSTEM_ERR);
         }
     }
-    
+
     public static Thread getAgentDaemonThread() {
         return agentDaemonThread;
     }
 
     private int cmdStart(boolean force) 
-        throws AgentInvokeException
-    {
+            throws AgentInvokeException
+            {
         ServerSocket startupSock;
         ProviderInfo providerInfo;
         Properties bootProps;
@@ -1118,7 +1129,7 @@ public class AgentClient {
             startupSock.setSoTimeout(iSleepTime);
         } catch(IOException e){
             AgentInvokeException ex =
-                new AgentInvokeException("Unable to setup a socket to listen for Agent startup: " + e);
+                    new AgentInvokeException("Unable to setup a socket to listen for Agent startup: " + e);
             ex.initCause(e);
             throw ex;
         }
@@ -1130,7 +1141,7 @@ public class AgentClient {
         } catch (AgentConfigException e) {
             throw new AgentInvokeException("Invalid notify up port: "+startupSock.getLocalPort());
         }
-                
+
         RunnableAgent runnableAgent = new AgentDaemon.RunnableAgent(this.config);
         agentDaemonThread = new Thread(runnableAgent);
         agentDaemonThread.setName("AgentDaemonMain");
@@ -1152,11 +1163,11 @@ public class AgentClient {
             // This should rarely (never) occur, since we just ensured things
             // were operational.
             throw new AgentInvokeException("Unexpected connection exception: "+
-                                           "agent is still running");
+                    "agent is still running");
         }
 
         SYSTEM_OUT.println("Agent successfully started");
-        
+
         // Only force a setup if we are not running the agent in Java Service Wrapper mode
         if(providerInfo == null && !WrapperManager.isControlledByNativeWrapper()){
             SYSTEM_OUT.println();
@@ -1166,18 +1177,28 @@ public class AgentClient {
             return 0;            
         }
 
-    }
-    
-    private String getStartupLogFile(Properties bootProps)  throws AgentConfigException {
-            String logFile;
-            
-            if((logFile = bootProps.getProperty(PROP_LOGFILE)) == null){
-                throw new AgentConfigException(PROP_LOGFILE + " is undefined");
             }
-            
-            return logFile + ".startup";
+
+    private static void cmdSetProp(String propKey, String propVal) throws FileNotFoundException, IOException, ClassNotFoundException {
+        String propEncKey = PropertyUtil.getPropEncKey(AgentConfig.DEFAULT_PROP_ENC_KEY_FILE);
+        final String propFile = System.getProperty(AgentConfig.PROP_PROPFILE,AgentConfig.DEFAULT_PROPFILE);
+        // encrypt property value
+        // save encrypted data to agent.properties file
+        Map<String,String> entriesToStore = new HashMap<String,String>();
+        entriesToStore.put(propKey, propVal);
+        PropertyUtil.storeProperties(propFile, propEncKey, entriesToStore);
     }
-    
+
+    private String getStartupLogFile(Properties bootProps)  throws AgentConfigException {
+        String logFile;
+
+        if((logFile = bootProps.getProperty(PROP_LOGFILE)) == null){
+            throw new AgentConfigException(PROP_LOGFILE + " is undefined");
+        }
+
+        return logFile + ".startup";
+    }
+
     // returns the startup timeout in milliseconds
     private static int getStartupTimeout(Properties bootProps) {
         int iSleepTime = AGENT_STARTUP_TIMEOUT;
@@ -1212,8 +1233,8 @@ public class AgentClient {
         AgentConfig cfg;
         String connIp, listenIp, authToken;
         final String propFile =
-            System.getProperty(AgentConfig.PROP_PROPFILE,
-                               AgentConfig.DEFAULT_PROPFILE);
+                System.getProperty(AgentConfig.PROP_PROPFILE,
+                        AgentConfig.DEFAULT_PROPFILE);
 
         //console appender until we have configured logging.
         BasicConfigurator.configure();
@@ -1235,7 +1256,7 @@ public class AgentClient {
             return null;
         }
         PropertyConfigurator.configure(bootProps);
-        
+
         FileWatcherThread watcherThread = FileWatcherThread.getInstance();
         FileWatcher loggingWatcher = new FileWatcher(new Sigar()) {
             {
@@ -1249,6 +1270,7 @@ public class AgentClient {
                 }
                 setInterval(60000);
             }
+            @Override
             public void onChange(FileInfo fileInfo) {
                 try {
                     SYSTEM_OUT.println("Change detected in " + fileInfo.getName() + ", reloading logging configuration");
@@ -1261,7 +1283,7 @@ public class AgentClient {
         };
         watcherThread.add(loggingWatcher);
         watcherThread.doStart();
-      
+
         listenIp = cfg.getListenIp();
         try {
             if(listenIp.equals(AgentConfig.IP_GLOBAL)){
@@ -1271,7 +1293,7 @@ public class AgentClient {
             }
         } catch(UnknownHostException exc){
             SYSTEM_ERR.println("Failed to lookup agent address '" + 
-                               listenIp + "'");
+                    listenIp + "'");
             return null;
         }
         AgentKeystoreConfig keystoreConfig =new AgentKeystoreConfig();
@@ -1281,7 +1303,7 @@ public class AgentClient {
                 authToken = AgentClientUtil.getLocalAuthToken(tokenFile);
             } catch(FileNotFoundException exc){
                 SYSTEM_ERR.print("- Unable to load agent token file.  Generating" +
-                                 " a new one ... ");
+                        " a new one ... ");
                 try {
                     String nToken = SecurityUtil.generateRandomToken();
 
@@ -1289,20 +1311,20 @@ public class AgentClient {
                     authToken = AgentClientUtil.getLocalAuthToken(tokenFile);
                 } catch(IOException oexc){
                     SYSTEM_ERR.println("Unable to setup preliminary agent auth " +
-                                       "tokens: " + exc.getMessage());
+                            "tokens: " + exc.getMessage());
                     return null;
                 }
                 SYSTEM_ERR.println("Done");
             } catch(IOException exc){
                 SYSTEM_ERR.println("Unable to get necessary authentication tokens"+
-                               " to talk to agent: " + exc.getMessage());
+                        " to talk to agent: " + exc.getMessage());
                 return null;
             }
             conn = new SecureAgentConnection(connIp, cfg.getListenPort(), authToken, keystoreConfig, keystoreConfig.isAcceptUnverifiedCert());
             // TODO need to figure out where the connection should be closed AND close it! }:^(
-            
+
             return new AgentClient(cfg, conn);
-                
+
         } else {
             // Not the main agent daemon process, wait for the token to become
             // available.  We will only wait up to the configured agent.startupTimeOut
@@ -1313,11 +1335,11 @@ public class AgentClient {
                     authToken = AgentClientUtil.getLocalAuthToken(tokenFile);
                     conn = new SecureAgentConnection(connIp, cfg.getListenPort(), authToken, keystoreConfig, keystoreConfig.isAcceptUnverifiedCert());
                     // TODO need to figure out where the connection should be closed AND close it! }:^(
-                    
+
                     return new AgentClient(cfg, conn);
                 } catch(FileNotFoundException exc){
                     SYSTEM_ERR.println("- No token file found, waiting for " +
-                                       "Agent to initialize");
+                            "Agent to initialize");
                     try {
                         Thread.sleep(2000);
                     } catch (InterruptedException e) {
@@ -1326,8 +1348,8 @@ public class AgentClient {
                     }
                 } catch(IOException e) {
                     SYSTEM_ERR.println("Unable to read preliminary agent auth " +
-                                       "tokens, waiting for Agent to initialize " +
-                                       "(error was: " + e.getMessage() + ")");
+                            "tokens, waiting for Agent to initialize " +
+                            "(error was: " + e.getMessage() + ")");
                 }
             }
             SYSTEM_ERR.println("Timeout waiting for token file");
@@ -1336,45 +1358,61 @@ public class AgentClient {
     }
 
     public static void main(String args[]) {
+        if(args.length==3 && args[0].equals(SET_PROPERTY)){
+            try {
+                cmdSetProp(args[1],args[2]);
+            } catch (FileNotFoundException e) {
+                SYSTEM_ERR.println("Error: " + e.getMessage());
+                e.printStackTrace(SYSTEM_ERR);
+            } catch (IOException e) {
+                SYSTEM_ERR.println("Error: " + e.getMessage());
+                e.printStackTrace(SYSTEM_ERR);
+            } catch (ClassNotFoundException e) {
+                SYSTEM_ERR.println("Error: " + e.getMessage());
+                e.printStackTrace(SYSTEM_ERR);
+            }
+            return;
+        }
 
         if(args.length < 1 || 
-           !(args[0].equals("ping") || 
-             args[0].equals("die")  ||
-             args[0].equals("start") || 
-             args[0].equals("status") ||
-             args[0].equals("restart") ||
-             args[0].equals("setup") ||
-             args[0].equals("setup-if-no-provider")))
+                !(args[0].equals(PING) || 
+                        args[0].equals(DIE)  ||
+                        args[0].equals(START) || 
+                        args[0].equals(STATUS) ||
+                        args[0].equals(RESTART) ||
+                        args[0].equals(SETUP) ||
+                        args[0].equals(SETUP_IF_NO_PROVIDER)))
         {
             SYSTEM_ERR.println("Syntax: program " +
-                               "<ping [numAttempts] | die [dieTime] | start " +
-                               "| status | restart | setup | setup-if-no-provider >");
+                    "<" + PING + " [numAttempts] | " + DIE + " [dieTime] | " + START + 
+                    " | " + STATUS + " | " + RESTART + " | " + SETUP +
+                    " | " + SETUP_IF_NO_PROVIDER + " | " + SET_PROPERTY + " >");
             return;
         }
 
         AgentClient client;
-        if (args[0].equals("start")) {
-            // Only generate tokens on agent startup.
-            client = initializeAgent(true);
-        } else {
-            client = initializeAgent(false);
-        }
-        
-        if (client == null) {
-            return;
-        }
-
         try {
+            if (args[0].equals(START)) {
+                // Only generate tokens on agent startup.
+                client = initializeAgent(true);
+            } else {
+                client = initializeAgent(false);
+            }
+
+            if (client == null) {
+                return;
+            }
+
             int nWait;
 
-            if(args[0].equals("ping")){
+            if(args[0].equals(PING)){
                 if(args.length == 3){
                     nWait = getUseTime(args[2]);
                 } else {
                     nWait = 1;
                 }
                 client.cmdPing(nWait);
-            } else if(args[0].equals("die")){
+            } else if(args[0].equals(DIE)){
                 if(args.length == 2){
                     nWait = getUseTime(args[1]);
                 } else {
@@ -1386,34 +1424,34 @@ public class AgentClient {
                     SYSTEM_OUT.println("Success -- agent is stopped!");
                 } catch(Exception exc){
                     SYSTEM_OUT.println("Failed to stop agent: " +
-                                       exc.getMessage());
+                            exc.getMessage());
                 }
-            } else if(args[0].equals("start")){
+            } else if(args[0].equals(START)){
                 int errVal = client.cmdStart(false);
                 if(errVal == FORCE_SETUP){
                     errVal = 0;
                     client.cmdSetupIfNoProvider();
                 }
-            } else if(args[0].equals("status")){
+            } else if(args[0].equals(STATUS)){
                 client.cmdStatus();
-            } else if(args[0].equals("setup")){
+            } else if(args[0].equals(SETUP)){
                 client.cmdSetup();
-            } else if(args[0].equals("setup-if-no-provider")) {
+            } else if(args[0].equals(SETUP_IF_NO_PROVIDER)) {
                 client.cmdSetupIfNoProvider();
-            } else if(args[0].equals("restart")){
+            } else if(args[0].equals(RESTART)){
                 client.cmdRestart();           
-            } else
+            } else 
                 throw new IllegalStateException("Unhandled condition");
         } catch(AutoQuestionException exc){
             SYSTEM_ERR.println("Unable to automatically setup: " +
-                               exc.getMessage());
+                    exc.getMessage());
         } catch(AgentInvokeException exc){
             SYSTEM_ERR.println("Error invoking agent: " + exc.getMessage());
         } catch(AgentConnectionException exc){
             SYSTEM_ERR.println("Error contacting agent: " + exc.getMessage());
         } catch(AgentRemoteException exc){
             SYSTEM_ERR.println("Error executing remote method: " +
-                               exc.getMessage());
+                    exc.getMessage());
         } catch(Exception exc){
             SYSTEM_ERR.println("Error: " + exc.getMessage());
             exc.printStackTrace(SYSTEM_ERR);
@@ -1425,7 +1463,7 @@ public class AgentClient {
         String logFileName = props.getProperty("agent.logFile");
         if (logFileName == null) {
             SYSTEM_ERR.println("agent.logFile not set. "
-                + "\nCannot start HQ agent.");
+                    + "\nCannot start HQ agent.");
             return false;
         }
         File logFile = new File(logFileName);
@@ -1434,31 +1472,31 @@ public class AgentClient {
         if (!logDir.exists()) {
             if (!logDir.mkdirs()) {
                 SYSTEM_ERR.println("Log directory does not exist and " 
-                                   + "could not be created: "
-                                   + logDir.getAbsolutePath() 
-                                   + "\nCannot start HQ agent.");
+                        + "could not be created: "
+                        + logDir.getAbsolutePath() 
+                        + "\nCannot start HQ agent.");
                 return false;
             }
         }
         if (!logDir.canWrite()) {
             SYSTEM_ERR.println("Cannot write to log directory: " 
-                               + logDir.getAbsolutePath() 
-                               + "\nMake sure this directory is owned by user '"
-                               + System.getProperty("user.name") + "' and is "
-                               + "not a read-only directory."
-                               + "\nCannot start HQ agent.");
+                    + logDir.getAbsolutePath() 
+                    + "\nMake sure this directory is owned by user '"
+                    + System.getProperty("user.name") + "' and is "
+                    + "not a read-only directory."
+                    + "\nCannot start HQ agent.");
             return false;
         }
         if (logFile.exists() && !logFile.canWrite()) {
             SYSTEM_ERR.println("Cannot write to log file: " 
-                               + logFile.getAbsolutePath() 
-                               + "\nMake sure this file is owned by user '"
-                               + System.getProperty("user.name") + "' and is "
-                               + "not a read-only file."
-                               + "\nCannot start HQ agent.");
+                    + logFile.getAbsolutePath() 
+                    + "\nMake sure this file is owned by user '"
+                    + System.getProperty("user.name") + "' and is "
+                    + "not a read-only file."
+                    + "\nCannot start HQ agent.");
             return false;
         }
-        
+
         return true;
     }
 

@@ -26,7 +26,12 @@ if test -d "./bundles/$AGENT_BUNDLE"; then
   chmod -R +x ./bundles/$AGENT_BUNDLE/pdk/lib/*.sl > /dev/null 2>&1
   # pass on the command to the bundle
   #echo "Invoking agent bundle $AGENT_BUNDLE"
-  ./bundles/$AGENT_BUNDLE/bin/hq-agent.sh "$@"
+  if [ $1 = "set-property" ]
+  then
+    ./bundles/$AGENT_BUNDLE/bin/hq-agent-nowrapper.sh "$@"
+  else
+    ./bundles/$AGENT_BUNDLE/bin/hq-agent.sh "$@"
+  fi
 else
   echo "Bundle $AGENT_BUNDLE does not exist!"
 fi
