@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.security.KeyStoreException;
 import java.util.Iterator;
 import java.util.Properties;
-import java.util.StringTokenizer;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
@@ -57,14 +56,6 @@ public class ConfigSchemaTask
     extends Task
     implements InteractiveResponseBuilder_IOHandler {
     
-    public void setEncryptedKeys(String encryptedKeys) {
-        StringTokenizer st = new StringTokenizer(encryptedKeys,",");
-        this.itsEncryptedKeys = new String[st.countTokens()];
-        for (int i=0;i<this.itsEncryptedKeys.length;i++) {
-            this.itsEncryptedKeys[i] = st.nextToken();
-        }
-    }
-
     private String itsClass;
     private String itsInputPrefix;
     private String itsOutputPrefix;
@@ -74,8 +65,7 @@ public class ConfigSchemaTask
     private File itsCompletionFile;
     private String itsIfDefined;
     private boolean itsReplaceInstallDir = false;
-    private String[] itsEncryptedKeys;
-    private String itsPBEKey;
+    
     private Project itsProject;
     private InstallerConfigSchemaProvider itsSchemaProvider;
     private ConfigResponse itsResponse;
@@ -145,9 +135,7 @@ public class ConfigSchemaTask
                 ? new InteractiveResponseBuilder(this)
                 : new AutomatedResponseBuilder(this, 
                                                this.itsLoadFile,
-                                               this.itsIfDefined,
-                                               this.itsPBEKey,
-                                               this.itsEncryptedKeys);
+                                               this.itsIfDefined);
         } catch (IOException e) {
             throw new BuildException("Error loading properties from file: " 
                                      + this.itsLoadFile.getPath());
