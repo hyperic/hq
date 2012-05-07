@@ -21,8 +21,6 @@
            file="${setup}.new"
            completionFile="${setup}.agent-summary.txt"
            installDirPropName="installdir"
-           encryptedKeys="agent.setup.camPword,agent.keystore.password"
-           itsPBEKeyFile=""
            replaceInstallDir="true" />
       </option>
     </configMultichoice>
