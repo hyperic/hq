@@ -49,6 +49,7 @@ import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.util.security.SecurityUtil;
+import org.jasypt.encryption.StringEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -60,17 +61,22 @@ public class MeasurementDAO
     private static final String ALIAS_CLAUSE =
         " upper(t.alias) = '" + MeasurementConstants.CAT_AVAILABILITY.toUpperCase() + "' ";
     private final AgentDAO agentDao;
-
+    private StringEncryptor encryptor = null;
+    
     private Measurement encrypt(Measurement m) {
-        
+        String dsn = m.getDsn();
+        if (!SecurityUtil.isEncrypted(dsn)) {
+            m.setDsn(SecurityUtil.encrypt(this.encryptor, dsn));
+        }
+        return m;
     }
 
     private Measurement decrypt(Measurement m) {
         String dsn = m.getDsn();
         if (SecurityUtil.isEncrypted(dsn)) {
-            
+            m.setDsn(SecurityUtil.decrypt(this.encryptor, dsn));
         }
-        
+        return m;
     }
 
     private List<Measurement> decrypt(List<Measurement> m) {
@@ -85,6 +91,7 @@ public class MeasurementDAO
     public MeasurementDAO(SessionFactory f, AgentDAO agentDao) {
         super(Measurement.class, f);
         this.agentDao = agentDao;
+        this.encryptor = SecurityUtil.getStandardPBEStringEncryptor(pbePass);
     }
 
     public void removeBaseline(Measurement m) {
@@ -124,8 +131,9 @@ public class MeasurementDAO
         Measurement m = new Measurement(resource.getInstanceId(), mt, interval);
 
         m.setEnabled(interval != 0);
-        m.setDsn(encrypt(dsn));
+        m.setDsn(dsn);
         m.setResource(resource);
+        encrypt(m);
         save(m);
         return m;
     }
@@ -295,6 +303,9 @@ public class MeasurementDAO
                 }
                 tmp.add(m);
             }
+        }
+        for (Iterator<List<Measurement>> mList : rtn.entrySet().iterator()) {
+            
         }
         return decrypt(rtn);
     }
