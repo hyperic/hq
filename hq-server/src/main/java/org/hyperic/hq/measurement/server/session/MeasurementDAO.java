@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -47,6 +48,7 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.util.security.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -57,8 +59,28 @@ public class MeasurementDAO
         " upper(t.alias) != '" + MeasurementConstants.CAT_AVAILABILITY.toUpperCase() + "' ";
     private static final String ALIAS_CLAUSE =
         " upper(t.alias) = '" + MeasurementConstants.CAT_AVAILABILITY.toUpperCase() + "' ";
-    private AgentDAO agentDao;
+    private final AgentDAO agentDao;
 
+    private Measurement encrypt(Measurement m) {
+        
+    }
+
+    private Measurement decrypt(Measurement m) {
+        String dsn = m.getDsn();
+        if (SecurityUtil.isEncrypted(dsn)) {
+            
+        }
+        
+    }
+
+    private List<Measurement> decrypt(List<Measurement> m) {
+        for (Iterator<Measurement> mItr = m.iterator() ; mItr.hasNext();) {
+            Measurement measurement = mItr.next();
+            decrypt(measurement);
+        }
+        return m;
+    }
+    
     @Autowired
     public MeasurementDAO(SessionFactory f, AgentDAO agentDao) {
         super(Measurement.class, f);
@@ -102,7 +124,7 @@ public class MeasurementDAO
         Measurement m = new Measurement(resource.getInstanceId(), mt, interval);
 
         m.setEnabled(interval != 0);
-        m.setDsn(dsn);
+        m.setDsn(encrypt(dsn));
         m.setResource(resource);
         save(m);
         return m;
@@ -131,9 +153,9 @@ public class MeasurementDAO
             String sql = "select distinct m from Measurement m " + "join m.template t "
                          + "where t.id=? and m.instanceId=?";
 
-            return (Measurement) getSession().createQuery(sql).setInteger(0, tid.intValue())
+            return decrypt((Measurement) getSession().createQuery(sql).setInteger(0, tid.intValue())
                 .setInteger(1, iid.intValue()).setCacheable(true).setCacheRegion(
-                    "Measurement.findByTemplateForInstance").uniqueResult();
+                    "Measurement.findByTemplateForInstance").uniqueResult());
         } finally {
             session.setFlushMode(oldFlushMode);
         }
@@ -147,10 +169,10 @@ public class MeasurementDAO
         String sql = "select m from Measurement m " + "join m.template t "
                      + "where t.id in (:tids) and m.resource = :res";
 
-        return getSession().createQuery(sql).setParameterList("tids", tids)
+        return decrypt(getSession().createQuery(sql).setParameterList("tids", tids)
             .setParameter("res", res).setCacheable(true) // Share the cache for
                                                          // now
-            .setCacheRegion("Measurement.findByTemplateForInstance").list();
+            .setCacheRegion("Measurement.findByTemplateForInstance").list());
     }
 
     @SuppressWarnings("unchecked")
@@ -172,7 +194,7 @@ public class MeasurementDAO
         String sql = "select distinct m from Measurement m " + "join m.template t "
                      + "where t.id=?";
 
-        return getSession().createQuery(sql).setInteger(0, id.intValue()).list();
+        return decrypt(getSession().createQuery(sql).setInteger(0, id.intValue()).list());
     }
 
     /**
@@ -212,12 +234,12 @@ public class MeasurementDAO
             final List<Resource> sublist = resources.subList(i, end);
             measurements.addAll(query.setParameterList("resources", sublist).list());
         }
-        return measurements;
+        return decrypt(measurements);
     }
 
     @SuppressWarnings("unchecked")
     List<Measurement> findByResource(Resource resource) {
-        return createCriteria().add(Restrictions.eq("resource", resource)).list();
+        return decrypt(createCriteria().add(Restrictions.eq("resource", resource)).list());
     }
 
     int deleteByIds(List<Integer> ids) {
@@ -274,7 +296,7 @@ public class MeasurementDAO
                 tmp.add(m);
             }
         }
-        return rtn;
+        return decrypt(rtn);
     }
  
     @SuppressWarnings("unchecked")
@@ -285,16 +307,16 @@ public class MeasurementDAO
         String sql = "select m from Measurement m " + "join m.template t "
                      + "where m.enabled = true and " + "m.resource = ? " + "order by t.name";
 
-        return getSession().createQuery(sql).setParameter(0, resource).setCacheable(true)
-            .setCacheRegion("Measurement.findEnabledByResource").list();
+        return decrypt(getSession().createQuery(sql).setParameter(0, resource).setCacheable(true)
+            .setCacheRegion("Measurement.findEnabledByResource").list());
     }
 
     @SuppressWarnings("unchecked")
     List<Measurement> findDefaultsByResource(Resource resource) {
-        return getSession().createQuery(
+        return decrypt(getSession().createQuery(
             "select m from Measurement m join m.template t "
                 + "where t.defaultOn = true and m.resource = ? " + "order by m.id ").setParameter(
-            0, resource).list();
+            0, resource).list());
     }
 
     @SuppressWarnings("unchecked")
@@ -303,8 +325,8 @@ public class MeasurementDAO
                      + "join t.monitorableType mt " + "join t.category c "
                      + "where mt.appdefType = ? and " + "m.instanceId = ? and " + "c.name = ?";
 
-        return getSession().createQuery(sql).setInteger(0, type).setInteger(1, id)
-            .setString(2, cat).list();
+        return decrypt(getSession().createQuery(sql).setInteger(0, type).setInteger(1, id)
+            .setString(2, cat).list());
     }
 
     @SuppressWarnings("unchecked")
@@ -313,7 +335,7 @@ public class MeasurementDAO
                      + "where m.resource = ? and m.enabled = true and c.name = ? "
                      + "order by t.name";
 
-        return getSession().createQuery(sql).setParameter(0, resource).setString(1, cat).list();
+        return decrypt(getSession().createQuery(sql).setParameter(0, resource).setString(1, cat).list());
     }
 
     Measurement findByAliasAndID(String alias, Resource resource) {
@@ -321,8 +343,8 @@ public class MeasurementDAO
         String sql = "select distinct m from Measurement m " + "join m.template t "
                      + "where t.alias = ? and m.resource = ?";
 
-        return (Measurement) getSession().createQuery(sql).setString(0, alias).setParameter(1,
-            resource).uniqueResult();
+        return decrypt((Measurement) getSession().createQuery(sql).setString(0, alias).setParameter(1,
+            resource).uniqueResult());
     }
 
     /**
@@ -348,7 +370,7 @@ public class MeasurementDAO
                     .setParameter("cat", cat)
                     .list());
             }
-            return rtn;
+            return decrypt(rtn);
     }
     
     /**
@@ -364,8 +386,8 @@ public class MeasurementDAO
         String sql = "select m from Measurement m " + "join m.template t "
                      + "where m.resource = ? and " + "t.designate = true " + "order by t.name";
 
-        return getSession().createQuery(sql).setParameter(0, resource).setCacheable(true)
-            .setCacheRegion("Measurement.findDesignatedByResource").list();
+        return decrypt(getSession().createQuery(sql).setParameter(0, resource).setCacheable(true)
+            .setCacheRegion("Measurement.findDesignatedByResource").list());
     }
 
     @SuppressWarnings("unchecked")
@@ -375,9 +397,9 @@ public class MeasurementDAO
                      + "where gm.group = :group and gm.resource = m.resource "
                      + "and t.designate = true and c.name = :cat order by t.name";
 
-        return getSession().createQuery(sql).setParameter("group", g).setParameter("cat", cat)
+        return decrypt(getSession().createQuery(sql).setParameter("group", g).setParameter("cat", cat)
             .setCacheable(true).setCacheRegion("Measurement.findDesignatedByCategoryForGroup")
-            .list();
+            .list());
     }
     
     /**
@@ -413,9 +435,9 @@ public class MeasurementDAO
                      + "join g.resource r " + "where m.instanceId = r.instanceId and "
                      + "rg = ? and m.template.id = ? and m.enabled = true";
 
-        return (List<Measurement>) getSession().createQuery(sql).setParameter(0, g).setInteger(1,
+        return decrypt(getSession().createQuery(sql).setParameter(0, g).setInteger(1,
             templateId.intValue()).setCacheable(true).setCacheRegion(
-            "ResourceGroup.getMetricsCollecting").list();
+            "ResourceGroup.getMetricsCollecting").list());
     }
 
     @SuppressWarnings("unchecked")
@@ -424,8 +446,8 @@ public class MeasurementDAO
                      + "join t.monitorableType mt " + "join t.category c "
                      + "where m.enabled = true " + "and c.name = ?";
 
-        return getSession().createQuery(sql).setString(0, cat).setCacheable(true).setCacheRegion(
-            "Measurement.findByCategory").list();
+        return decrypt(getSession().createQuery(sql).setString(0, cat).setCacheable(true).setCacheRegion(
+            "Measurement.findByCategory").list());
     }
 
     /**
@@ -448,7 +470,7 @@ public class MeasurementDAO
         if (list.size() == 0) {
             return null;
         }
-        return (Measurement) list.get(0);
+        return list.get(0);
     }
 
     @SuppressWarnings("unchecked")
@@ -479,15 +501,15 @@ public class MeasurementDAO
             }
         }
 
-        return rtn;
+        return decrypt(rtn);
     }
 
     @SuppressWarnings("unchecked")
     List<Measurement> findAvailMeasurements(ResourceGroup g) {
         String hql = "select m from GroupMember gm, " + "Measurement m join m.template t " +
                      "where m.resource = gm.resource and gm.group = :group and " + ALIAS_CLAUSE;
-        return createQuery(hql).setParameter("group", g).setCacheable(true).setCacheRegion(
-            "Measurement.findAvailMeasurementsForGroup").list();
+        return decrypt(createQuery(hql).setParameter("group", g).setCacheable(true).setCacheRegion(
+            "Measurement.findAvailMeasurementsForGroup").list());
     }
 
     /**
@@ -536,7 +558,7 @@ public class MeasurementDAO
                     .list());
             }
         }
-        return rtn;
+        return decrypt(rtn);
     }
 
     @SuppressWarnings("unchecked")
@@ -559,7 +581,7 @@ public class MeasurementDAO
                     .setParameterList("tids", tidList.subList(yy, tidEnd), iType).list());
             }
         }
-        return rtn;
+        return decrypt(rtn);
     }
 
     /**
@@ -597,7 +619,7 @@ public class MeasurementDAO
                                    .setParameter("relationType", resourceRelationType)
                                    .list());
         }
-        return rtn;
+        return decrypt(rtn);
     }
 
     /**
@@ -640,7 +662,7 @@ public class MeasurementDAO
                                    .setCacheable(true).setCacheRegion("Measurement.findParentAvailMeasurements")
                                    .list());
         }
-        return rtn;
+        return decrypt(rtn);
     }
 
     @SuppressWarnings("unchecked")
@@ -659,7 +681,7 @@ public class MeasurementDAO
 
         q.setCacheable(true);
         q.setCacheRegion("Measurement.findAvailMeasurementsByInstances");
-        return q.list();
+        return decrypt(q.list());
     }
 
     @SuppressWarnings("unchecked")
@@ -765,7 +787,7 @@ public class MeasurementDAO
                 java.lang.Number count = (java.lang.Number) tuple[1];
                 Long curCount;
 
-                curCount = (Long) idToCount.get(id);
+                curCount = idToCount.get(id);
                 if (curCount == null) {
                     curCount = new Long(0);
                 }
@@ -830,6 +852,6 @@ public class MeasurementDAO
             }
             measurements.add(m);
         }
-        return rtn;
+        return decrypt(rtn);
     }
 }
