@@ -36,6 +36,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -44,10 +45,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.product.AutoinventoryPluginManager;
+import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.CollectorExecutor;
 import org.hyperic.hq.product.ConfigTrackPluginManager;
 import org.hyperic.hq.product.ControlPlugin;
@@ -87,6 +92,7 @@ import org.hyperic.util.units.FormattedNumber;
  */
 public class PluginDumper {
     static final String PRODUCT_JAR = "hq-pdk";
+    static Log log = LogFactory.getLog(PluginDumper.class.getName());
 
     PluginDumperConfig config;
 
@@ -632,20 +638,19 @@ public class PluginDumper {
         return config;
     }
 
-    private MetricValue getValue(String template)
-        throws Exception {
+    private static final Collection<Collector> executedCollectors = new ArrayList<Collector>();
 
-        int sleep = 1000;
-        String execSleep = getProperty("exec.sleep");
-        if (execSleep != null) {
-            sleep *= Integer.parseInt(execSleep);
-        }
-
-        MetricValue value =
-            this.mpm.getValue(template);
-        while (value.isFuture()) {
-            //exec: type metric, keep trying until execution has completed.
-            Thread.sleep(sleep);
+    private MetricValue getValue(String template) throws Exception {
+        MetricValue value = this.mpm.getValue(template);
+        if (value.isFuture()) { // collector??
+            Collection<Collector> collectorsToExecute = Collector.getCollectorsToExecute();
+            for (Collector collector : collectorsToExecute) {
+                if (!executedCollectors.contains(collector)) {
+                    log.debug("[getValue] running collector:'"+collector.getClass().getName()+"' "+collector);
+                    collector.run();
+                    executedCollectors.add(collector);
+                }
+            }
             value = this.mpm.getValue(template);
         }
         return value;
