@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+  - NOTE: This copyright does *not* cover user programs that use HQ
+  - program services by normal system calls through the application
+  - program interfaces provided as part of the Hyperic Plug-in Development
+  - Kit or the Hyperic Client Development Kit - this is merely considered
+  - normal use of the program, and does *not* fall under the heading of
+  - "derived work".
+  - 
+  - Copyright (C) [2004-2011], VMWare, Inc.
+  - This file is part of HQ.
+  - 
+  - HQ is free software; you can redistribute it and/or modify
+  - it under the terms version 2 of the GNU General Public License as
+  - published by the Free Software Foundation. This program is distributed
+  - in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  - even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  - PARTICULAR PURPOSE. See the GNU General Public License for more
+  - details.
+  - 
+  - You should have received a copy of the GNU General Public License
+  - along with this program; if not, write to the Free Software
+  - Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  - USA.
+ -->
+
+
+<web-app 
+    xmlns="http://java.sun.com/xml/ns/j2ee" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
+    version="2.4">
+    <display-name>HQ</display-name>
+
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>
+            /WEB-INF/spring/security-web-context.xml,
+            classpath*:/META-INF/spring/*-context.xml,
+			classpath:META-INF/hqapi-context.xml
+        </param-value>
+    </context-param>
+
+    <listener>
+        <listener-class>org.hyperic.hq.context.BootstrapContextLoaderListener</listener-class>
+    </listener>
+
+    <context-param>
+        <param-name>javax.servlet.jsp.jstl.fmt.localizationContext</param-name>
+        <param-value>ApplicationResources</param-value>
+    </context-param>
+    <context-param>
+        <param-name>context-constants</param-name>
+        <param-value>org.hyperic.hq.ui.Constants</param-value>
+    </context-param>
+    <context-param>
+        <param-name>service-locator</param-name>
+        <param-value>org.hyperic.hq.ui.ServiceLocator</param-value>
+    </context-param>
+    <context-param>
+        <param-name>RtEnabled</param-name>
+        <param-value>false</param-value>
+    </context-param>
+
+
+    <!-- URLRewite Filter -->
+    <filter>
+        <filter-name>UrlRewriteFilter</filter-name>
+        <filter-class>org.tuckey.web.filters.urlrewrite.UrlRewriteFilter</filter-class>
+        <init-param>
+            <param-name>logLevel</param-name>
+            <param-value>WARN</param-value>
+        </init-param>
+    </filter>
+
+    <!-- Hibernate session filter -->
+    <filter>
+        <filter-name>Hibernate-Session-Filter</filter-name>
+        <filter-class>org.springframework.orm.hibernate3.support.OpenSessionInViewFilter</filter-class>
+    </filter>
+
+    <filter>
+        <filter-name>filterChainProxy</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+    </filter>
+
+    <filter>
+        <filter-name>Resource-Filter</filter-name>
+        <filter-class>org.hyperic.hq.ui.ResourceFilter</filter-class>
+    </filter>
+
+    <filter>
+        <filter-name>HQU-Filter</filter-name>
+        <filter-class>org.hyperic.hq.ui.RenditFilter</filter-class>
+    </filter>
+
+    <filter>
+        <filter-name>httpMethodFilter</filter-name>
+        <filter-class>org.springframework.web.filter.HiddenHttpMethodFilter</filter-class>
+    </filter>
+
+    <filter>
+        <filter-name>CharacterEncodingFilter</filter-name>
+        <filter-class>org.hyperic.hq.web.filter.CharacterEncodingFilter</filter-class>
+        <init-param>
+            <param-name>encoding</param-name>
+            <param-value>UTF-8</param-value>
+        </init-param>
+        <init-param>
+            <param-name>forceEncoding</param-name>
+            <param-value>true</param-value>
+        </init-param>
+        <init-param>
+            <param-name>excludePaths</param-name>
+            <param-value>/ServerInvokerServlet,/transport/*</param-value>
+        </init-param>
+    </filter>
+
+    <filter>
+        <filter-name>csrf</filter-name>
+        <filter-class>org.hyperic.hq.web.filters.CsrfIgnoreAllGetsFilter</filter-class>
+        <init-param>
+            <param-name>nonceCacheSize</param-name>
+            <param-value>10</param-value>
+        </init-param>
+    </filter>
+    
+    <filter-mapping>
+        <filter-name>csrf</filter-name>
+        <servlet-name>hqu</servlet-name>
+        <servlet-name>metricdata</servlet-name>
+        <servlet-name>availability</servlet-name>
+        <servlet-name>availcolor</servlet-name>
+        <servlet-name>navMapImage</servlet-name>
+        <servlet-name>availHealthChart</servlet-name>
+        <servlet-name>usageHealthChart</servlet-name>
+        <servlet-name>utilizationHealthChart</servlet-name>
+        <servlet-name>highLowChart</servlet-name>
+        <servlet-name>metricChart</servlet-name>
+        <servlet-name>availStoplight</servlet-name>
+        <servlet-name>action</servlet-name>
+        <servlet-name>ServletRedirector</servlet-name>
+        <servlet-name>JspRedirector</servlet-name>
+        <servlet-name>webapp</servlet-name>
+        <url-pattern>*.jsp</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>UrlRewriteFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>Hibernate-Session-Filter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>CharacterEncodingFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>filterChainProxy</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>httpMethodFilter</filter-name>
+        <servlet-name>webapp</servlet-name>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>Resource-Filter</filter-name>
+        <url-pattern>/images/*</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>Resource-Filter</filter-name>
+        <url-pattern>/css/*</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>Resource-Filter</filter-name>
+        <url-pattern>/js/*</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>HQU-Filter</filter-name>
+        <url-pattern>/hqu/*</url-pattern>
+    </filter-mapping>
+
+    <listener>
+        <listener-class>org.hyperic.hq.ui.Configurator</listener-class>
+    </listener>
+    
+        
+    <servlet>
+        <servlet-name>CXFServlet</servlet-name>
+       <!--  <display-name>CXF Servlet</display-name>  -->
+        <servlet-class>
+            org.apache.cxf.transport.servlet.CXFServlet
+        </servlet-class>
+        <!-- 
+        <init-param>
+            <param-name>config-location</param-name>
+            <param-value>classpath:META-INF/hqapi-context.xml</param-value>
+        </init-param>
+         -->
+        <init-param>
+            <param-name>debug</param-name>
+            <param-value>99</param-value>
+        </init-param>       
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>CXFServlet</servlet-name>
+        <url-pattern>/rest-api/*</url-pattern>
+    </servlet-mapping>
+
+
+
+    
+
+</web-app>

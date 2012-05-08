@@ -35,7 +35,8 @@
         <hqapi.version>5.0.0</hqapi.version>
 		<httpclient.version>4.1.1</httpclient.version>
 		<j2ee-management.version>1.1</j2ee-management.version>
-        <jackson-mapper-asl.version>1.6.0</jackson-mapper-asl.version>
+     	 	<jackson-mapper-asl.version>1.8.6</jackson-mapper-asl.version>
+	        <cxf.version>2.6.0</cxf.version>
 		<jasypt.version>1.6</jasypt.version>
 		<jdom.version>1.1</jdom.version>
 		<jmock.version>1.2.0</jmock.version>
@@ -886,6 +887,7 @@
 					<module>hq-agent</module>
 					<module>hq-server</module>
 					<module>hq-rendit</module>
+					<module>hq-api</module>
 					<module>hq-plugin</module>
 					<module>hq-uiplugin</module>
 					<module>hq-installer</module>
@@ -1005,6 +1007,7 @@
 					<module>hq-agent</module>
 					<module>hq-server</module>
 					<module>hq-rendit</module>
+					<module>hq-api</module>
 					<module>hq-plugin</module>
 					<module>hq-uiplugin</module>
 					<module>hq-installer</module>
@@ -1027,6 +1030,7 @@
 					<module>hq-agent</module>
 					<module>hq-server</module>
 					<module>hq-rendit</module>
+					<module>hq-api</module>
 					<module>hq-plugin</module>
 					<module>hq-uiplugin</module>
 					<module>hq-installer</module>
@@ -1052,6 +1056,7 @@
 					<module>hq-agent</module>
 					<module>hq-server</module>
 					<module>hq-rendit</module>
+					<module>hq-api</module>
 					<module>hq-plugin</module>
 					<module>hq-uiplugin</module>
 					<module>hq-installer</module>
@@ -1069,6 +1074,7 @@
 					<module>hq-pdk</module>
 					<module>hq-server</module>
 					<module>hq-rendit</module>
+					<module>hq-api</module>
 					<module>hq-web</module>
 			</modules>
 		</profile>
@@ -1082,6 +1088,7 @@
 					<module>hq-agent</module>
 					<module>hq-server</module>
 					<module>hq-rendit</module>
+					<module>hq-api</module>
 					<module>hq-plugin</module>
 					<module>hq-uiplugin</module>
 					<module>hq-installer</module>
