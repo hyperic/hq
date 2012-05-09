@@ -312,8 +312,10 @@ class ResourceConfig {
             } else {
                 def curResponse = responseMap.response
                 allConfigsRoll.setSupports(i, true)
+                allConfigsRoll.setShouldConfig(i, true)
                 allConfigsRoll.setConfig(i, curResponse)
                 allConfigs.setSupports(i, true)
+                allConfigs.setShouldConfig(i, true)
                 
                 def newResponse = new ConfigResponse()
                 responseMap.schema.options.each { opt ->
