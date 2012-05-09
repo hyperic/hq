@@ -1,0 +1,84 @@
+#!/bin/sh
+#
+# chkconfig: 2345 60 40
+# description: Starts and stops the hyperic server.  
+#
+
+# Source function library
+. /etc/rc.d/init.d/functions
+
+# Source networking configuration.
+. /etc/sysconfig/network
+
+# Check that networking is up.
+[ ${NETWORKING} = "no" ] && exit 0
+
+USER=hyperic
+SERVER_DIR=/opt/hyperic/server-current
+
+# Set HQ_JAVA_HOME if you want to use a different JDK
+# export HQ_JAVA_HOME=/opt/bea/jrockit81sp1_141_03
+
+checksetup() {
+
+	if ! [ -d $SERVER_DIR ]; then
+		echo "ERROR: SERVER_DIR not found, exiting."
+		exit 1;
+	fi
+
+	if [ $USER = "" ]; then
+		echo "ERROR: USER not set, exiting"
+		exit 1;
+	fi
+
+}
+
+start() {
+
+	echo -n $"Starting hyperic server: "
+	daemon su $USER -c "\"$SERVER_DIR/bin/hq-server.sh start > /dev/null 2>&1\""
+	RETVAL=$?
+	echo
+
+}	
+
+stop() {
+
+	echo -n $"Shutting down hyperic server: "
+	daemon su $USER -c "\"$SERVER_DIR/bin/hq-server.sh stop > /dev/null 2>&1\""
+
+	RETVAL=$?
+	echo
+
+}
+
+restart() {
+
+	stop
+	start
+
+}	
+
+checksetup
+RET=$?
+
+if [ $RET -ne 0 ]; then
+	exit $RET
+fi
+
+case "$1" in
+start)
+	start
+	;;
+stop)
+	stop
+	;;
+restart)
+	restart
+	;;
+*)
+	echo $"Usage: $0 {start|stop|restart}"
+	exit 1
+esac
+    
+exit $?

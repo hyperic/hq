@@ -1,7 +1,7 @@
 %define HQ_Component_Name       hyperic-hqee-installer
 %define HQ_Component_Version    @hq.version@
 %define HQ_Component_Edition	EE
-%define HQ_Component_Build	@hq.ee.build@-x86-64-linux
+%define HQ_Component_Build	x86-64-linux-@hq.version@.@hq.ee.build@
 %define HQ_Component_Release   	EE.1 
 %define HQ_Component_Build_Type @hq.build.type@
 
@@ -15,7 +15,7 @@ Name:           %{HQ_Component_Name}
 Version:        %{HQ_Component_Version}
 Release:        %{HQ_Component_Release}
 Summary:        %{HQ_Component_Name}
-Source0:        %{HQ_Component_Name}-%{HQ_Component_Version}.%{HQ_Component_Build}.tar.gz
+Source0:        %{HQ_Component_Name}-%{HQ_Component_Build}.tar.gz
 Vendor:		Hyperic, Inc.
 License:        Commercial
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root

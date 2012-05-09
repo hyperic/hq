@@ -1,0 +1,88 @@
+#!/bin/sh
+#
+# chkconfig: 2345 80 30
+# description: Starts and stops the hyperic agent.  
+#
+
+# Source function library
+. /etc/rc.d/init.d/functions
+
+# Source networking configuration.
+. /etc/sysconfig/network
+
+# Check that networking is up.
+[ ${NETWORKING} = "no" ] && exit 0
+
+USER=hyperic
+AGENT_DIR=/opt/hyperic/hyperic-hq-agent
+
+# Set HQ_JAVA_HOME if you want to use a different JDK
+export HQ_JAVA_HOME=/usr/java/jdk1.5.0_12
+
+checksetup() {
+
+	if ! [ -d $AGENT_DIR ]; then
+		echo "ERROR: AGENT_DIR not found, exiting."
+		exit 1;
+	fi
+
+	if [ $USER = "" ]; then
+		echo "ERROR: USER not set, exiting"
+		exit 1;
+	fi
+
+}
+
+start() {
+
+	echo -n $"Starting hyperic agent: "
+	daemon su $USER -c "\"$AGENT_DIR/bin/hq-agent.sh start > /dev/null 2>&1\""
+	RETVAL=$?
+	echo
+
+}	
+
+stop() {
+
+	echo -n $"Shutting down hyperic agent: "
+
+	daemon su $USER -c "\"$AGENT_DIR/bin/hq-agent.sh stop > /dev/null 2>&1\""
+
+	RETVAL=$?
+	echo
+
+}
+
+restart() {
+
+	stop
+	start
+
+}	
+
+checksetup
+RET=$?
+
+if [ $RET -ne 0 ]; then
+	exit $RET
+fi
+
+case "$1" in
+start)
+	start
+	;;
+stop)
+	stop
+	;;
+restart)
+	restart
+	;;
+status)
+	su $USER -c "$AGENT_DIR/bin/hq-agent.sh status"
+	;;
+*)
+	echo $"Usage: $0 {start|stop|restart|status}"
+	exit 1
+esac
+    
+exit $?

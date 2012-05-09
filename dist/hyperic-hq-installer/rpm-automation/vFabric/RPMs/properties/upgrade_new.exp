@@ -1,0 +1,19 @@
+#!/usr/bin/expect --
+
+set timeout 1000
+
+spawn ./setup.sh -upgrade
+
+expect "Press"
+send -- "\r"
+
+expect "Do you accept the terms of the agreement?"
+send -- "y\r"
+
+expect "server to upgrade"
+send -- "[lindex $argv 0]\r"
+
+expect "new HQ server directory"
+send -- "[lindex $argv 1]\r"
+
+expect eof
