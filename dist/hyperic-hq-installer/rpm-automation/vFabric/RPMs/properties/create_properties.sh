@@ -18,6 +18,11 @@ cat ${VF_HQ_SERVER_PROPS} | grep -v ^# | tr -d '\r' > $TMP_HQ_SERVER_PROPS
 touch ${INSTALLER_DIR}/$HQ_SERVER_PROPERTIES
 chmod 777 ${INSTALLER_DIR}/$HQ_SERVER_PROPERTIES
 
+if [[ ! -e $HQ_SERVER_INSTALL_PATH ]]; then
+   mkdir  $HQ_SERVER_INSTALL_PATH
+fi
+chown hyperic:hyperic $HQ_SERVER_INSTALL_PATH
+
 printf "accept.eula=$HQ_ACCEPT_EULA\n"  >>  ${INSTALLER_DIR}/$HQ_SERVER_PROPERTIES
 printf "server.installdir=$HQ_SERVER_INSTALL_PATH\n"  >>  ${INSTALLER_DIR}/$HQ_SERVER_PROPERTIES
 printf "server.mail.sender=$HQ_SENDER_EMAIL_ADDRESS\n"  >>  ${INSTALLER_DIR}/$HQ_SERVER_PROPERTIES
