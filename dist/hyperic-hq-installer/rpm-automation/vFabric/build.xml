@@ -333,19 +333,6 @@
 
   </target>
 
-  <!-- Email results to interested parties. -->
-
-  <target name="email-results" depends="build-support-archives"
-    description="Email results of RPM build to interested parties." >
-    <echo message="Mailing the results..." />
-
-    <gzip src="${rpm.error.log}"
-      destfile="${rpm.error.log.gz}" />
-
-    <mail tolist="${email.notify.list}" from="${email.from}"
-      subject="RPMs for HQ ${hq.version} and build type ${hq.build.type} are ready!"
-      files="${rpm.error.log.gz}" />
-  </target>
 
   <!-- Cleanup after ourselves. -->
 
@@ -373,7 +360,7 @@
 
   <!-- One target to rule them all... -->
 
-  <target name="all" depends="email-results, cleanup-after"
+  <target name="all" depends="build-support-archives, cleanup-after"
     description="Perform complete RPM build including cleanup afterwards." >
   </target>
 

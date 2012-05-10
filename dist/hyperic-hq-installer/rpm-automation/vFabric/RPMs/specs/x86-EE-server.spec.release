@@ -123,8 +123,6 @@ chkconfig --del hyperic-hq-server
 %{__rm} -f setup.bat
 %{__mv} -f * $RPM_BUILD_ROOT/%{prefix}/%{HQ_Component_Name}
 
-#echo "Place custom plug-ins in this directory." > $RPM_BUILD_ROOT/%{prefix}/hq-plugins/README
-
 %clean
 
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
@@ -134,93 +132,47 @@ chkconfig --del hyperic-hq-server
 #
 # Setup the HQ Server using the Hyperic installer process
 #
+echo "Installing the Hyperic server, this could take a few minutes"
 if [ -d /opt/hyperic/server-current ] && cd /opt/hyperic/server-current; then
    cd %{prefix}/%{HQ_Component_Name}
-   /bin/su hyperic -c "properties/upgrade_new.exp %{prefix}/server-current %{prefix}"
+   /bin/su hyperic -c "properties/upgrade_new.exp %{prefix}/server-current %{prefix} "
    cd $RPM_BUILD_ROOT/%{prefix}
    /bin/su hyperic -c "/bin/ln -snf server-%{HQ_Component_Version}-%{HQ_Component_Edition} server-current"
 else
    cd %{prefix}/%{HQ_Component_Name}
-   #installer/data/hqdb/tune-os.sh > /dev/null 2> /dev/null
-   # if an answer file exists, use it to populate the properties script to
-   # configure HQ
-   if [ -f %{HQ_SERVER_PROPERTIES_DIR}/%{HQ_SERVER_PROPERTIES_FILE} ]; then
-       %{prefix}/%{HQ_Component_Name}/properties/create_properties.sh %{prefix}/%{HQ_Component_Name} > /dev/null 2>&1
-      /bin/su hyperic -c "%{prefix}/%{HQ_Component_Name}/setup.sh install_ee.properties"
-      cd $RPM_BUILD_ROOT/%{prefix}
-      if [ -d %{prefix}/server-%{HQ_Component_Version}-%{HQ_Component_Edition} ]
-      then
-         /bin/su hyperic -c "/bin/ln -snf server-%{HQ_Component_Version}-%{HQ_Component_Edition} server-current"
-         %{__cp} %{prefix}/%{HQ_Component_Name}/installer/logs/hq-install.log %{prefix}/server-%{HQ_Component_Version}-%{HQ_Component_Edition}/hq-install.log
-         # copy the properties file into the setup dir for future ease of use
-         %{__cp} %{prefix}/%{HQ_Component_Name}/properties/%{HQ_SERVER_PROPERTIES_FILE} %{prefix}/%{HQ_Component_Name}/
-         %{__chown} hyperic:hyperic %{prefix}/%{HQ_Component_Name}/%{HQ_SERVER_PROPERTIES_FILE}
-      fi
-   else
-      echo
-      echo "Response file, %{HQ_SERVER_PROPERTIES_DIR}/%{HQ_SERVER_PROPERTIES_FILE}"
-      echo "not found. HQ will be installed, but not configured."
-      echo
-      echo "Please login as user %{HQ_User} and run:"
-      echo "%{prefix}/%{HQ_Component_Name}/setup.sh"
-      echo "to interactively configure HQ."
-      echo
-      echo "Arguments to setup.sh determine the installation mode. The arguements are:"
-      echo
-      echo 'none        Quick install; the Hyperic components you choose to install will'
-      echo '    be installed with default settings for most configuration options---you'
-      echo '    supply installation directories only. If you install the server, it will'
-      echo '    be configured to use its built-in PostgreSQL database.'
-      echo '    This is the quickest way to install Hyperic for evaluation purposes.'
-      echo
-      echo '-full       Full install; installer will prompt you to supply values for all'
-      echo '    installation options.'
-      echo
-      echo '-upgrade    Server upgrade only; installer will prompt you for the path of'
-      echo '    the Hyperic server to upgrade.'
-      echo
-      echo '-postgresql         Quick install when using a standalone (not the Hyperic'
-      echo '    built-in) PostgreSQL database; installer will prompt you for database'
-      echo '    connection information and use defaults for other configuration settings.'
-      echo
-      echo '-oracle     Quick install mode for Oracle; installer will prompt you for'
-      echo '    database connection information and use defaults for other configuration'
-      echo '    settings.'
-      echo
-      echo '-mysql      Quick install mode for MySQL; installer will prompt you for'
-      echo '    database connection information and take defaults for everything else.'
-      echo
-      echo
-      echo "vFabric HQ may also be configured by a properties file either at RPM"
-      echo "install or post RPM install."
-      echo
-      echo "To configure HQ from a properties file at RPM install, edit:"
-      echo "%{prefix}/%{HQ_Component_Name}/%{HQ_SERVER_PROPERTIES_FILE}." 
-      echo "Place that file in:"
-      echo "%{HQ_SERVER_PROPERTIES_DIR}/ and install the vfabric-hyperic-server RPM."
-      echo
-      echo "The properties file supports the equivalent configuration modes of the"
-      echo 'above setup.sh arguments of: none, -postgresql, -oracle, and -mysql.'
-      echo
-      echo "For interactive setup, setup.sh must be run as user %{HQ_User}."
-      echo
-      %{__cp} %{prefix}/%{HQ_Component_Name}/properties/%{HQ_SERVER_PROPERTIES_FILE} %{prefix}/%{HQ_Component_Name}/
-      %{__chown} hyperic:hyperic %{prefix}/%{HQ_Component_Name}/%{HQ_SERVER_PROPERTIES_FILE}
+   if [[ ! -f %{HQ_SERVER_PROPERTIES_DIR}/%{HQ_SERVER_PROPERTIES_FILE} ]]; then
+       mkdir %{HQ_SERVER_PROPERTIES_DIR} > /dev/null 2>&1
+       cp %{prefix}/%{HQ_Component_Name}/properties/%{HQ_SERVER_PROPERTIES_FILE} %{HQ_SERVER_PROPERTIES_DIR}/%{HQ_SERVER_PROPERTIES_FILE}
    fi
+   %{prefix}/%{HQ_Component_Name}/properties/create_properties.sh %{prefix}/%{HQ_Component_Name} > /dev/null 2>&1
+   source /etc/bashrc
+   /bin/su hyperic -c "%{prefix}/%{HQ_Component_Name}/setup.sh install_ee.properties > /dev/null 2>&1"
+   cd $HQ_SERVER_INSTALL_PATH
+   if [ -d $HQ_SERVER_INSTALL_PATH/server-%{HQ_Component_Version}-%{HQ_Component_Edition} ]
+   then
+      /bin/su hyperic -c "/bin/ln -snf $HQ_SERVER_INSTALL_PATH/server-%{HQ_Component_Version}-%{HQ_Component_Edition} %{prefix}/server-current"
+      %{__cp} %{prefix}/%{HQ_Component_Name}/installer/logs/hq-install.log %{prefix}/server-current/hq-install.log
+   fi
+   
 fi
-#installer/data/hqdb/tune-os.sh > /dev/null 2> /dev/null
 
 %postun
 
 if [ ! -f /etc/init.d/hyperic-hq-server ]; then
-	%{__rm} -Rf %{prefix}/server-current %{prefix}/server-%{HQ_Component_Version}-%{HQ_Component_Edition}
+    source /etc/bashrc
+	%{__rm} -Rf $HQ_SERVER_INSTALL_PATH/server-%{HQ_Component_Version}-%{HQ_Component_Edition}
+	%{__rm} -Rf $HQ_SERVER_INSTALL_PATH/hq-plugins
+	%{__rm} -Rf %{prefix}/server-current
+	%{__rm} -Rf %{prefix}/%{HQ_Component_Name}
+	 echo "The HQ Server has been removed successfully"
 fi
 
 %posttrans
 
 # use the location of the log file to determine if HQ was configured vs just
 # having the files dropped
-if [ -f %{prefix}/server-%{HQ_Component_Version}-%{HQ_Component_Edition}/hq-install.log ]; then
+source /etc/bashrc
+if [ -f %{prefix}/server-current/hq-install.log ]; then
    if [ -f /etc/init.d/hyperic-hq-server ]; then
       chkconfig --add hyperic-hq-server
       chkconfig hyperic-hq-server on
@@ -230,24 +182,30 @@ if [ -f %{prefix}/server-%{HQ_Component_Version}-%{HQ_Component_Edition}/hq-inst
       %{__rm} -f /tmp/hyperic-hq-server-was-running-%{HQ_Component_Version}.%{HQ_Component_Edition}-%{release}
       echo
       echo "The new version of HQ Server has been started using your existing configuration."
-      echo "The installation log can be found in %{prefix}/server-%{HQ_Component_Version}-%{HQ_Component_Edition}/hq-install.log."
+      echo "The installation log can be found in %{prefix}/server-current/hq-install.log."
       echo
-      echo "Manually starting the HQ Server should be done using the hyperic user."
+      echo "In order to manually start the HQ Server switch to the hyperic user and execute - "
+      echo "%{prefix}/server-current/bin/hq-server.sh start"
       echo
       echo "The HQ server may also be started with this init script: /etc/init.d/hyperic-hq-server"
       echo
    elif [ -f /etc/init.d/hyperic-hq-server ]; then
       echo
-      echo "The HQ Server has successfully been installed, and the service has been"
+      echo "The HQ Server has successfully been installed into $HQ_SERVER_INSTALL_PATH, and the service has been"
       echo "configured to start at boot."
-      echo "The installation log can be found in %{prefix}/server-%{HQ_Component_Version}-%{HQ_Component_Edition}/hq-install.log."
+      echo "The installation log can be found in %{prefix}/server-current/hq-install.log."
       echo
-      echo "Manually starting the HQ Server should be done using the hyperic user."
+      echo "In order to manually start the HQ Server switch to the hyperic user and execute - "
+      echo "%{prefix}/server-current/bin/hq-server.sh start"
       echo
       echo "The HQ server may also be started with this init script: /etc/init.d/hyperic-hq-server"
       echo
    fi
 else
+    echo
+    echo "The HQ Server installation has failed."
+    echo "For more details go to the installation log in %{prefix}/%{HQ_Component_Name}/installer/logs/hq-install.log"
+    echo
    if [ -f /etc/init.d/hyperic-hq-server ]; then
       chkconfig --add hyperic-hq-server
    fi
