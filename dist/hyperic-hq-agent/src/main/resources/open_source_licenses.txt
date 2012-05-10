@@ -1,37 +1,28 @@
 open_source_license.txt
 
-Hyperic HQ 4.6.5 GA
-Enterprise and Open Source Editions
+Hyperic-HQ 4.6.6 GA
 
 
 ===========================================================================
+The following copyright statements and licenses apply to various open source software packages (or portions thereof) that are distributed with this VMware Product. 
 
-The following copyright statements and licenses apply to various open
-source software packages (or portions thereof) that are distributed with
-this VMware Product.
+The VMware Product may also include other VMware components, which may contain additional open source software packages. One or more such open_source_licenses.txt files may therefore accompany this VMware Product. 
 
-The VMware Product may also include other VMware components, which may
-contain additional open source software packages. One or more such
-open_source_licenses.txt files may therefore accompany this VMware Product.
+The VMware Product that includes this file does not necessarily use all the open source software packages referred to below and may also only use portions of a given package.
 
-The VMware Product that includes this file does not necessarily use all the
-open source software packages referred to below and may also only use
-portions of a given package.
-
-===========================================================================
+=================================================================
 TABLE OF CONTENTS
-===========================================================================
+=================================================================
+The following is a listing of the open source components detailed in this document. This list is provided for your convenience; please read further if you wish to review the copyright notice(s) and the full text of the license associated with each component.
 
-The following is a listing of the open source components detailed in this
-document. This list is provided for your convenience; please read further if
-you wish to review the copyright notice(s) and the full text of the license
-associated with each component.
-
+ 
 
 PART 1. HYPERIC HQ: ENTERPRISE VERSION
 
 
 SECTION 1: BSD-STYLE, MIT-STYLE, OR SIMILAR STYLE LICENSES
+
+The BSD-STYLE, MIT-STYLE, OR SIMILAR STYLE LICENSES are applicable to the following component(s).
 
    >>> ant-contrib-1.0b2
    >>> antlr-2.7.6
@@ -197,6 +188,7 @@ SECTION 6: GNU General Public License, V2.0
 
 
 
+
 SECTION 7: GNU Lesser General Public License, V2.1
 
    >>> bsh-2.0.0.b4
@@ -231,6 +223,8 @@ PART 2. HYPERIC HQ: OPEN SOURCE VERSION
 
 
 SECTION 1: BSD-STYLE, MIT-STYLE, OR SIMILAR STYLE LICENSES
+
+The BSD-STYLE, MIT-STYLE, OR SIMILAR STYLE LICENSES are applicable to the following component(s).
 
    >>> ant-contrib-1.0b2
    >>> antlr-2.7.6
@@ -364,7 +358,9 @@ SECTION 2: Apache License, V2.0
 SECTION 3: Common Development and Distribution License, V1.0
 
    >>> activation-1.1
+   >>> javamail-1.4
    >>> jta-1.1
+
 
 
 SECTION 4: Creative Commons Attribution License, V3.0
@@ -382,11 +378,10 @@ SECTION 5: Eclipse Public License, V1.0
 SECTION 6: GNU General Public License, V2.0
 
    >>> amqp-client-1.8.1
-   >>> javamail-1.4
-   >>> jaxb-impl-2.1.12.jar-2.1.12
-   >>> jms-api-1.1.0
    >>> mysql-connector-java-5.1.10
    >>> org.tanukisoftware.wrapper-3.5.6
+   >>> jaxb-impl-2.1.12.jar-2.1.12
+   >>> jms-api-1.1.0
 
 
 
@@ -2382,7 +2377,7 @@ DAMAGE.
 
 --------------- SECTION 2: Apache License, V2.0 ----------
 
-Apache License, V2.0 is applicable to the following component(s).
+Apache License, V2.0 are applicable to the following component(s).
 
 
 >>> activemq-5.3.0
@@ -4645,131 +4640,146 @@ Unless required by applicable law or agreed to in writing, software distributed 
 
 >>> sigar-1.6.6
 
-Copyright (c) 2004-2009 Hyperic, Inc.
-Copyright (c) 2009 SpringSource, Inc.
-Copyright (c) 2010 VMware, Inc.
+Copyright (c) 2004-2011 VMware, Inc.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
+You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
 
-http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-
+See the License for the specific language governing permissions and limitations under the License.
 
 ADDITIONAL LICENSE INFORMATION:
 
+https://github.com/hyperic/sigar/blob/master/NOTICE
 
-Hyperic SIGAR includes some third-party open source components in its distribution. The list below identifies the community or organization and links to their appropriate license terms.The Hyperic team would like to thank all the communities of the projects listed below for their contributions. 
+Hyperic SIGAR includes some third-party open source components in its distribution. The list below identifies the community or organization and links to their appropriate license terms.
+
+The Hyperic team would like to thank all the communities of the projects listed below for their contributions.
+
 ----------------------------------------------------------
+Components under the Apache License 2.0:
+----------------------------------------------------------
+The following components are included without modification:
 
-The following components are included without modification:- log4j -
-Information: http://logging.apache.org/License: http://www.apache.org/licenses/LICENSE-2.0
+- log4j -
 
+Information: http://logging.apache.org/
+
+License: http://www.apache.org/licenses/LICENSE-2.0
 
 The following components are included with modification:
 
-- cpptasks - Information: http://ant-contrib.sourceforge.net/License: http://ant-contrib.sourceforge.net/LICENSE.txt
+- cpptasks -
 
-  Copyright 2001-2004 The Ant-Contrib project
+Information: http://ant-contrib.sourceforge.net/
 
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
+License: http://www.apache.org/licenses/LICENSE-2.0
 
-      http://www.apache.org/licenses/LICENSE-2.0
+- (portions of) APR -
+Information: http://apr.apache.org/License: http://www.apache.org/licenses/LICENSE-2.0
 
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
+----------------------------------------------------------
+Components under BSD/MIT Style Licenses: 
+----------------------------------------------------------
 
+The following components are included with modification:
 
-> Apache 2.0
+- solaris get_mib2 -
+Information: ftp://vic.cc.purdue.edu/pub/tools/unix/solaris/get_mib2/
 
-- (portions of) APR -Information: http://apr.apache.org/License: http://www.apache.org/licenses/LICENSE-2.0
-
-License : Apache 2.0
-
-
-> MIT
-
-- solaris get_mib2 -Information: ftp://vic.cc.purdue.edu/pub/tools/unix/solaris/get_mib2/License: within src/os/solaris/get_mib2.[ch]
-
+License: within src/os/solaris/get_mib2.[ch]
 
 Copyright 1995 Purdue Research Foundation, West Lafayette, Indiana
 47907.  All rights reserved.
 
 Written by Victor A. Abell <abe@cc.purdue.edu>
 
-This software is not subject to any license of the American Telephone
-and Telegraph Company or the Regents of the University of California.
+This software is not subject to any license of the American Telephone and Telegraph Company or the Regents of the University of California.
 
-Permission is granted to anyone to use this software for any purpose on
-any computer system, and to alter it and redistribute it freely, subject
-to the following restrictions:
+Permission is granted to anyone to use this software for any purpose on any computer system, and to alter it and redistribute it freely, subject to the following restrictions:
 
-1. Neither Victor A  Abell nor Purdue University are responsible for
-any consequences of the use of this software.
+1. Neither Victor A Abell nor Purdue University are responsible for any consequences of the use of this software.
 
-2. The origin of this software must not be misrepresented, either by
-explicit claim or by omission.  Credit to Victor A. Abell and Purdue
-University must appear in documentation and sources.
+2. The origin of this software must not be misrepresented, either by explicit claim or by omission.  Credit to Victor A. Abell and Purdue University must appear in documentation and sources.
 
-3. Altered versions must be plainly marked as such, and must not be
-misrepresented as being the original software.
+3. Altered versions must be plainly marked as such, and must not be misrepresented as being the original software.
 
 4. This notice may not be removed or altered.
 
+- getline by Chris Thewalt -
 
-Altered for sigar:
-- remove static stuff to make thread-safe by Doug MacEachern (3/11/05)
+Information: http://tinyurl.com/r438r
 
+License: within src/sigar_getline.c
 
+Copyright (C) 1991, 1992 by Chris Thewalt (thewalt@ce.berkeley.edu)
 
-> MIT
-
-- getline by Chris Thewalt -Information: http://tinyurl.com/r438rLicense: within src/sigar_getline.c
-
-Copyright (C) 1991, 1992 by Chris Thewalt (thewalt@ce.berkeley.edu) 3 * 4 * Permission to use, copy, modify, and distribute this software 5 * for any purpose and without fee is hereby granted, provided 6 * that the above copyright notices appear in all copies and that both the 7 * copyright notice and this permission notice appear in supporting 8 * documentation. This software is provided "as is" without express or 9 * implied warranty.
+Permission to use, copy, modify, and distribute this software for any purpose and without fee is hereby granted, provided that the above copyright notices appear in all copies and that both the copyright notice and this permission notice appear in supporting documentation.  This software is provided "as is" without express or implied warranty.
 
 
-> MIT
+- PrintfFormat.java -
 
-- PrintfFormat.java -Information: http://java.sun.com/developer/technicalArticles/Programming/sprintf/PrintfFormat.javaLicense: within bindings/java/src/org/hyperic/sigar/util/PrintfFormat.java
+Information: http://java.sun.com/developer/technicalArticles/Programming/sprintf/PrintfFormat.java
 
+License: within bindings/java/src/org/hyperic/sigar/util/PrintfFormat.java
 
 (c) 2000 Sun Microsystems, Inc.
+
 ALL RIGHTS RESERVED
 
 License Grant-
 
+Permission to use, copy, modify, and distribute this Software and its documentation for NON-COMMERCIAL or COMMERCIAL purposes and without fee is hereby granted.
 
-Permission to use, copy, modify, and distribute this Software and its
-documentation for NON-COMMERCIAL or COMMERCIAL purposes and without fee is
-hereby granted.
+This Software is provided "AS IS".  All express warranties, including any implied warranty of merchantability, satisfactory quality, fitness for a particular purpose, or non-infringement, are disclaimed, except to the extent that such disclaimers are held to be legally invalid.
 
-This Software is provided "AS IS".  All express warranties, including any
-implied warranty of merchantability, satisfactory quality, fitness for a
-particular purpose, or non-infringement, are disclaimed, except to the extent
-that such disclaimers are held to be legally invalid.
+You acknowledge that Software is not designed, licensed or intended for use in the design, construction, operation or maintenance of any nuclear facility ("High Risk Activities").  Sun disclaims any express or implied warranty of fitness for such uses.
 
-You acknowledge that Software is not designed, licensed or intended for use in
-the design, construction, operation or maintenance of any nuclear facility
-("High Risk Activities").  Sun disclaims any express or implied warranty of
-fitness for such uses.
+Please refer to the file http://www.sun.com/policies/trademarks/ for further important trademark information and to http://java.sun.com/nav/business/index.html for further important licensing information for the Java Technology.
 
-Please refer to the file http:www.sun.com/policies/trademarks/ for further
-important trademark information and to
-http:java.sun.com/nav/business/index.html for further important licensing
-information for the Java Technology.
+> Apache 1.1
+
+https://github.com/hyperic/sigar/blob/master/include/sigar_fileinfo.h
+
+The Apache Software License, Version 1.1
+
+Copyright (c) 2000-2003 The Apache Software Foundation.  All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+3. The end-user documentation included with the redistribution, if any, must include the following acknowledgment: "This product includes software developed by the Apache Software Foundation (http://www.apache.org/)." Alternately, this 
+acknowledgment may appear in the software itself, if and wherever such third-party acknowledgments normally appear.
+
+4. The names "Apache" and "Apache Software Foundation" must not be used to endorse or promote products derived from this software without prior written permission. For written permission, please contact apache@apache.org.
+
+5. Products derived from this software may not be called "Apache", nor may "Apache" appear in their name, without prior written permission of the Apache Software Foundation.
+
+THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE APACHE SOFTWARE FOUNDATION OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+This software consists of voluntary contributions made by many individuals on behalf of the Apache Software Foundation.  For more information on the Apache Software Foundation, please see <http://www.apache.org/>.
+
+> BSD
+
+https://github.com/hyperic/sigar/blob/master/tests/t_sigar_cpu.c
+
+Copyright (c) 2009, Sun Microsystems Inc.
+
+ All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+- Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+
+- Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+- Neither the name of Sun Microsystems Inc. nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 >>> slf4j.org.apache.log4j-1.6.1
@@ -5568,7 +5578,7 @@ limitations under the License.
 
 --------------- SECTION 3: Common Development and Distribution License, V1.0 ----------
 
-Common Development and Distribution License, V1.0 is applicable to the following component(s).
+Common Development and Distribution License, V1.0 are applicable to the following component(s).
 
 
 >>> activation-1.1
@@ -5578,11 +5588,35 @@ License  :  CDDL 1.0
 
 >>> javamail-1.4
 
+LICENSE: CDDL 1.0
 
+>>> jta-1.1
+
+The contents of this file are subject to the terms 
+of the Common Development and Distribution License 
+(the License).  You may not use this file except in
+compliance with the License.
+
+You can obtain a copy of the license at 
+https://glassfish.dev.java.net/public/CDDLv1.0.html or
+glassfish/bootstrap/legal/CDDLv1.0.txt.
+See the License for the specific language governing 
+permissions and limitations under the License.
+
+When distributing Covered Code, include this CDDL 
+Header Notice in each file and include the License file 
+at glassfish/bootstrap/legal/CDDLv1.0.txt.  
+If applicable, add the following below the CDDL Header, 
+with the fields enclosed by brackets [] replaced by
+you own identifying information: 
+"Portions Copyrighted [year] [name of copyright owner]"
+
+Copyright 2006 Sun Microsystems, Inc. All rights reserved.
 
 >>> javax.activation-1.0.2
 
-Copyright 1997-2007 Sun Microsystems, Inc. All rights 
+
+ Copyright 1997-2007 Sun Microsystems, Inc. All rights 
 reserved.
 
 ORIGINAL LICENSE:
@@ -5629,6 +5663,7 @@ delete this exception statement from your version.
 
 
 >>> jaxb-impl-2.1.12.jar-2.1.12
+
 
 Licenses: Dual license consisting of the CDDL v1.0 and GPL v2.
 
@@ -6385,6 +6420,7 @@ are license related. "copyright" and "license" yield no hits either.
 
 >>> jms-api-1.1.0
 
+
 DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER. 
   
 Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved. 
@@ -6420,33 +6456,9 @@ only if the new code is made subject to such option by the copyright
 holder.
 
 
->>> jta-1.1
-
-The contents of this file are subject to the terms 
-of the Common Development and Distribution License 
-(the License).  You may not use this file except in
-compliance with the License.
-
-You can obtain a copy of the license at 
-https://glassfish.dev.java.net/public/CDDLv1.0.html or
-glassfish/bootstrap/legal/CDDLv1.0.txt.
-See the License for the specific language governing 
-permissions and limitations under the License.
-
-When distributing Covered Code, include this CDDL 
-Header Notice in each file and include the License file 
-at glassfish/bootstrap/legal/CDDLv1.0.txt.  
-If applicable, add the following below the CDDL Header, 
-with the fields enclosed by brackets [] replaced by
-you own identifying information: 
-"Portions Copyrighted [year] [name of copyright owner]"
-
-Copyright 2006 Sun Microsystems, Inc. All rights reserved.
-
-
 --------------- SECTION 4: Creative Commons Attribution License, V3.0 ----------
 
-Creative Commons Attribution License, V3.0 is applicable to the following component(s).
+Creative Commons Attribution License, V3.0 are applicable to the following component(s).
 
 
 >>> adxmenu-4.21
@@ -6540,7 +6552,7 @@ The rights granted under, and the subject matter referenced, in this License wer
 
 --------------- SECTION 5: Eclipse Public License, V1.0 ----------
 
-Eclipse Public License, V1.0 is applicable to the following component(s).
+Eclipse Public License, V1.0 are applicable to the following component(s).
 
 
 >>> aspectj-1.6.8
@@ -6610,7 +6622,7 @@ Portions Licensed:
 
 --------------- SECTION 6: GNU General Public License, V2.0 ----------
 
-GNU General Public License, V2.0 is applicable to the following component(s).
+GNU General Public License, V2.0 are applicable to the following component(s).
 
 
 >>> amqp-client-1.8.1
@@ -6657,9 +6669,11 @@ No copyright file found in the distribution.
 License: GPL 2.0
 
 
+
+
 --------------- SECTION 7: GNU Lesser General Public License, V2.1 ----------
 
-GNU Lesser General Public License, V2.1 is applicable to the following component(s).
+GNU Lesser General Public License, V2.1 are applicable to the following component(s).
 
 
 >>> bsh-2.0.0.b4
@@ -7025,7 +7039,7 @@ in the United States and other countries.]
 
 --------------- SECTION 8: GNU Lesser General Public License, V3.0 ----------
 
-GNU Lesser General Public License, V3.0 is applicable to the following component(s).
+GNU Lesser General Public License, V3.0 are applicable to the following component(s).
 
 
 >>> bsh-2.0b4
@@ -7067,7 +7081,7 @@ License: LGPL 3.0
 
 --------------- SECTION 9: GNU Library General Public License, V2.0 ----------
 
-GNU Library General Public License, V2.0 is applicable to the following component(s).
+GNU Library General Public License, V2.0 are applicable to the following component(s).
 
 
 >>> itext-2.0.6
@@ -7253,12 +7267,13 @@ All other trademarks are the property of their respective owners.
 	Page 1 of 1	18 October 2006
 
 
-=============== PART 2. HYPERIC HQ: OPEN SOURCE VERSION ==================================
+=============== PART 2. HYPERIC HQ: OPEN SOURCE VERSION ====================================
 
 
---------------- SECTION 1:  BSD-STYLE, MIT-STYLE, OR SIMILAR STYLE LICENSES ----------
 
-BSD-STYLE, MIT-STYLE, OR SIMILAR STYLE LICENSES are applicable to the following component(s).
+--------------- SECTION 1:  BSD-STYLE, MIT-STYLE, OR SIMILAR ----------
+
+BSD-STYLE, MIT-STYLE, OR SIMILAR are applicable to the following component(s).
 
 
 >>> ant-contrib-1.0b2
@@ -9186,7 +9201,7 @@ DAMAGE.
 
 --------------- SECTION 2: Apache License, V2.0 ----------
 
-Apache License, V2.0 is applicable to the following component(s).
+Apache License, V2.0 are applicable to the following component(s).
 
 
 >>> activemq-5.3.0
@@ -11288,131 +11303,146 @@ Unless required by applicable law or agreed to in writing, software distributed 
 
 >>> sigar-1.6.6
 
-Copyright (c) 2004-2009 Hyperic, Inc.
-Copyright (c) 2009 SpringSource, Inc.
-Copyright (c) 2010 VMware, Inc.
+Copyright (c) 2004-2011 VMware, Inc.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
+You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
 
-http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-
+See the License for the specific language governing permissions and limitations under the License.
 
 ADDITIONAL LICENSE INFORMATION:
 
+https://github.com/hyperic/sigar/blob/master/NOTICE
 
-Hyperic SIGAR includes some third-party open source components in its distribution. The list below identifies the community or organization and links to their appropriate license terms.The Hyperic team would like to thank all the communities of the projects listed below for their contributions. 
+Hyperic SIGAR includes some third-party open source components in its distribution. The list below identifies the community or organization and links to their appropriate license terms.
+
+The Hyperic team would like to thank all the communities of the projects listed below for their contributions.
+
 ----------------------------------------------------------
+Components under the Apache License 2.0:
+----------------------------------------------------------
+The following components are included without modification:
 
-The following components are included without modification:- log4j -
-Information: http://logging.apache.org/License: http://www.apache.org/licenses/LICENSE-2.0
+- log4j -
 
+Information: http://logging.apache.org/
+
+License: http://www.apache.org/licenses/LICENSE-2.0
 
 The following components are included with modification:
 
-- cpptasks - Information: http://ant-contrib.sourceforge.net/License: http://ant-contrib.sourceforge.net/LICENSE.txt
+- cpptasks -
 
-  Copyright 2001-2004 The Ant-Contrib project
+Information: http://ant-contrib.sourceforge.net/
 
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
+License: http://www.apache.org/licenses/LICENSE-2.0
 
-      http://www.apache.org/licenses/LICENSE-2.0
+- (portions of) APR -
+Information: http://apr.apache.org/License: http://www.apache.org/licenses/LICENSE-2.0
 
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
+----------------------------------------------------------
+Components under BSD/MIT Style Licenses: 
+----------------------------------------------------------
 
+The following components are included with modification:
 
-> Apache 2.0
+- solaris get_mib2 -
+Information: ftp://vic.cc.purdue.edu/pub/tools/unix/solaris/get_mib2/
 
-- (portions of) APR -Information: http://apr.apache.org/License: http://www.apache.org/licenses/LICENSE-2.0
-
-License : Apache 2.0
-
-
-> MIT
-
-- solaris get_mib2 -Information: ftp://vic.cc.purdue.edu/pub/tools/unix/solaris/get_mib2/License: within src/os/solaris/get_mib2.[ch]
-
+License: within src/os/solaris/get_mib2.[ch]
 
 Copyright 1995 Purdue Research Foundation, West Lafayette, Indiana
 47907.  All rights reserved.
 
 Written by Victor A. Abell <abe@cc.purdue.edu>
 
-This software is not subject to any license of the American Telephone
-and Telegraph Company or the Regents of the University of California.
+This software is not subject to any license of the American Telephone and Telegraph Company or the Regents of the University of California.
 
-Permission is granted to anyone to use this software for any purpose on
-any computer system, and to alter it and redistribute it freely, subject
-to the following restrictions:
+Permission is granted to anyone to use this software for any purpose on any computer system, and to alter it and redistribute it freely, subject to the following restrictions:
 
-1. Neither Victor A  Abell nor Purdue University are responsible for
-any consequences of the use of this software.
+1. Neither Victor A Abell nor Purdue University are responsible for any consequences of the use of this software.
 
-2. The origin of this software must not be misrepresented, either by
-explicit claim or by omission.  Credit to Victor A. Abell and Purdue
-University must appear in documentation and sources.
+2. The origin of this software must not be misrepresented, either by explicit claim or by omission.  Credit to Victor A. Abell and Purdue University must appear in documentation and sources.
 
-3. Altered versions must be plainly marked as such, and must not be
-misrepresented as being the original software.
+3. Altered versions must be plainly marked as such, and must not be misrepresented as being the original software.
 
 4. This notice may not be removed or altered.
 
+- getline by Chris Thewalt -
 
-Altered for sigar:
-- remove static stuff to make thread-safe by Doug MacEachern (3/11/05)
+Information: http://tinyurl.com/r438r
 
+License: within src/sigar_getline.c
 
+Copyright (C) 1991, 1992 by Chris Thewalt (thewalt@ce.berkeley.edu)
 
-> MIT
-
-- getline by Chris Thewalt -Information: http://tinyurl.com/r438rLicense: within src/sigar_getline.c
-
-Copyright (C) 1991, 1992 by Chris Thewalt (thewalt@ce.berkeley.edu) 3 * 4 * Permission to use, copy, modify, and distribute this software 5 * for any purpose and without fee is hereby granted, provided 6 * that the above copyright notices appear in all copies and that both the 7 * copyright notice and this permission notice appear in supporting 8 * documentation. This software is provided "as is" without express or 9 * implied warranty.
+Permission to use, copy, modify, and distribute this software for any purpose and without fee is hereby granted, provided that the above copyright notices appear in all copies and that both the copyright notice and this permission notice appear in supporting documentation.  This software is provided "as is" without express or implied warranty.
 
 
-> MIT
+- PrintfFormat.java -
 
-- PrintfFormat.java -Information: http://java.sun.com/developer/technicalArticles/Programming/sprintf/PrintfFormat.javaLicense: within bindings/java/src/org/hyperic/sigar/util/PrintfFormat.java
+Information: http://java.sun.com/developer/technicalArticles/Programming/sprintf/PrintfFormat.java
 
+License: within bindings/java/src/org/hyperic/sigar/util/PrintfFormat.java
 
 (c) 2000 Sun Microsystems, Inc.
+
 ALL RIGHTS RESERVED
 
 License Grant-
 
+Permission to use, copy, modify, and distribute this Software and its documentation for NON-COMMERCIAL or COMMERCIAL purposes and without fee is hereby granted.
 
-Permission to use, copy, modify, and distribute this Software and its
-documentation for NON-COMMERCIAL or COMMERCIAL purposes and without fee is
-hereby granted.
+This Software is provided "AS IS".  All express warranties, including any implied warranty of merchantability, satisfactory quality, fitness for a particular purpose, or non-infringement, are disclaimed, except to the extent that such disclaimers are held to be legally invalid.
 
-This Software is provided "AS IS".  All express warranties, including any
-implied warranty of merchantability, satisfactory quality, fitness for a
-particular purpose, or non-infringement, are disclaimed, except to the extent
-that such disclaimers are held to be legally invalid.
+You acknowledge that Software is not designed, licensed or intended for use in the design, construction, operation or maintenance of any nuclear facility ("High Risk Activities").  Sun disclaims any express or implied warranty of fitness for such uses.
 
-You acknowledge that Software is not designed, licensed or intended for use in
-the design, construction, operation or maintenance of any nuclear facility
-("High Risk Activities").  Sun disclaims any express or implied warranty of
-fitness for such uses.
+Please refer to the file http://www.sun.com/policies/trademarks/ for further important trademark information and to http://java.sun.com/nav/business/index.html for further important licensing information for the Java Technology.
 
-Please refer to the file http:www.sun.com/policies/trademarks/ for further
-important trademark information and to
-http:java.sun.com/nav/business/index.html for further important licensing
-information for the Java Technology.
+> Apache 1.1
+
+https://github.com/hyperic/sigar/blob/master/include/sigar_fileinfo.h
+
+The Apache Software License, Version 1.1
+
+Copyright (c) 2000-2003 The Apache Software Foundation.  All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+3. The end-user documentation included with the redistribution, if any, must include the following acknowledgment: "This product includes software developed by the Apache Software Foundation (http://www.apache.org/)." Alternately, this 
+acknowledgment may appear in the software itself, if and wherever such third-party acknowledgments normally appear.
+
+4. The names "Apache" and "Apache Software Foundation" must not be used to endorse or promote products derived from this software without prior written permission. For written permission, please contact apache@apache.org.
+
+5. Products derived from this software may not be called "Apache", nor may "Apache" appear in their name, without prior written permission of the Apache Software Foundation.
+
+THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE APACHE SOFTWARE FOUNDATION OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+This software consists of voluntary contributions made by many individuals on behalf of the Apache Software Foundation.  For more information on the Apache Software Foundation, please see <http://www.apache.org/>.
+
+> BSD
+
+https://github.com/hyperic/sigar/blob/master/tests/t_sigar_cpu.c
+
+Copyright (c) 2009, Sun Microsystems Inc.
+
+ All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+- Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+
+- Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+- Neither the name of Sun Microsystems Inc. nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 >>> slf4j.org.apache.log4j-1.6.1
@@ -12211,13 +12241,18 @@ limitations under the License.
 
 --------------- SECTION 3: Common Development and Distribution License, V1.0 ----------
 
-Common Development and Distribution License, V1.0 is applicable to the following component(s).
+Common Development and Distribution License, V1.0 are applicable to the following component(s).
 
 
 >>> activation-1.1
 
 License  :  CDDL 1.0
 
+
+>>> javamail-1.4
+
+
+License  :  CDDL 1.0
 
 >>> jta-1.1
 
@@ -12245,7 +12280,7 @@ Copyright 2006 Sun Microsystems, Inc. All rights reserved.
 
 --------------- SECTION 4: Creative Commons Attribution License, V3.0 ----------
 
-Creative Commons Attribution License, V3.0 is applicable to the following component(s).
+Creative Commons Attribution License, V3.0 are applicable to the following component(s).
 
 
 >>> adxmenu-4.21
@@ -12339,7 +12374,7 @@ The rights granted under, and the subject matter referenced, in this License wer
 
 --------------- SECTION 5: Eclipse Public License, V1.0 ----------
 
-Eclipse Public License, V1.0 is applicable to the following component(s).
+Eclipse Public License, V1.0 are applicable to the following component(s).
 
 
 >>> aspectj-1.6.8
@@ -12409,51 +12444,7 @@ Portions Licensed:
 
 --------------- SECTION 6: GNU General Public License, V2.0 ----------
 
-GNU General Public License, V2.0 is applicable to the following component(s).
-
-
->>> amqp-client-1.8.1
-
-This package, the RabbitMQ Java client library is dual-licensed under
-the MPL and the GPL v2. For the MPL, please see
-LICENSE-MPL-RabbitMQ. For the GPL v2, please see LICENSE-GPL2.
-
-The RabbitMQ Java client library includes software under the Apache
-Licence v2. For this license, please see LICENSE-APACHE2. For
-attribution of copyright and other details of provenance, please refer
-to the source code.
-
-If you have any questions regarding licensing, please contact us at
-info@rabbitmq.com.
-
-
-ADDITIONAL LICENSE INFORMATION:
-
-> JSONReader.java
-Copyright 2006, 2007 Frank Carver
-Copyright 2007 Tony Garnock-Jones
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-
-GPLv2 license attached above.
-
-No copyright file found in the distribution.
-
-
->>> javamail-1.4
-
-
+GNU General Public License, V2.0 are applicable to the following component(s).
 
 >>> jaxb-impl-2.1.12.jar-2.1.12
 
@@ -13246,6 +13237,46 @@ and therefore, elected the GPL Version 2 license, then the option applies
 only if the new code is made subject to such option by the copyright 
 holder.
 
+
+>>> amqp-client-1.8.1
+
+This package, the RabbitMQ Java client library is dual-licensed under
+the MPL and the GPL v2. For the MPL, please see
+LICENSE-MPL-RabbitMQ. For the GPL v2, please see LICENSE-GPL2.
+
+The RabbitMQ Java client library includes software under the Apache
+Licence v2. For this license, please see LICENSE-APACHE2. For
+attribution of copyright and other details of provenance, please refer
+to the source code.
+
+If you have any questions regarding licensing, please contact us at
+info@rabbitmq.com.
+
+
+ADDITIONAL LICENSE INFORMATION:
+
+> JSONReader.java
+Copyright 2006, 2007 Frank Carver
+Copyright 2007 Tony Garnock-Jones
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+
+GPLv2 license attached above.
+
+No copyright file found in the distribution.
+
+
 >>> mysql-connector-java-5.1.10
 
 Copyright  2002-2004 MySQL AB, 2008 Sun Microsystems
@@ -13398,7 +13429,7 @@ License: GPL 2.0
 
 --------------- SECTION 7: GNU Lesser General Public License, V2.1 ----------
 
-GNU Lesser General Public License, V2.1 is applicable to the following component(s).
+GNU Lesser General Public License, V2.1 are applicable to the following component(s).
 
 
 >>> bsh-2.0.0.b4
@@ -13740,7 +13771,7 @@ in the United States and other countries.]
 
 --------------- SECTION 8: GNU Lesser General Public License, V3.0 ----------
 
-GNU Lesser General Public License, V3.0 is applicable to the following component(s).
+GNU Lesser General Public License, V3.0 are applicable to the following component(s).
 
 
 >>> bsh-2.0b4
@@ -13777,7 +13808,7 @@ http://www.pat.net/~pat/
 
 --------------- SECTION 9: GNU Library General Public License, V2.0 ----------
 
-GNU Library General Public License, V2.0 is applicable to the following component(s).
+GNU Library General Public License, V2.0 are applicable to the following component(s).
 
 
 >>> itext-2.0.6
@@ -16427,7 +16458,7 @@ source components and modifications thereto, if any, (the
 "Source Files"), by downloading the Source Files from VMware's website at
 http://www.vmware.com/download/open_source.html, or by sending a request, with
 your name and address to: VMware, Inc., 3401 Hillview Avenue,
-Palo Alto, CA 94304,United States of America.  All such
+Palo Alto, CA 94304,United States of America or email info@vmware.com.  All such
 requests should clearly specify:  OPEN SOURCE FILES REQUEST,
 Attention General Counsel. VMware shall mail a copy of the
 Source Files to you on a CD or equivalent physical medium.  This
@@ -16435,4 +16466,4 @@ offer to obtain a copy of the Source Files is valid for three
 years from the date you acquired this Software product. Alternatively, 
 the Source Files may accompany the VMware product.
 
-[HYPERIC465GAKP021412]
+[HYPERIC-HQ466GAKL050212]
