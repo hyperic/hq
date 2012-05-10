@@ -23,6 +23,8 @@ if [[ ! -e $HQ_SERVER_INSTALL_PATH ]]; then
 fi
 chown hyperic:hyperic $HQ_SERVER_INSTALL_PATH
 
+printf "export HQ_SERVER_INSTALL_PATH=$HQ_SERVER_INSTALL_PATH\n" >> /etc/bashrc
+
 printf "accept.eula=$HQ_ACCEPT_EULA\n"  >>  ${INSTALLER_DIR}/$HQ_SERVER_PROPERTIES
 printf "server.installdir=$HQ_SERVER_INSTALL_PATH\n"  >>  ${INSTALLER_DIR}/$HQ_SERVER_PROPERTIES
 printf "server.mail.sender=$HQ_SENDER_EMAIL_ADDRESS\n"  >>  ${INSTALLER_DIR}/$HQ_SERVER_PROPERTIES

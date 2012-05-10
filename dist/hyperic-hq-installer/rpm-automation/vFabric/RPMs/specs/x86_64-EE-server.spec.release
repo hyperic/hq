@@ -134,7 +134,8 @@ chkconfig --del hyperic-hq-server
 echo "Installing the Hyperic server, this could take a few minutes"
 if [ -d /opt/hyperic/server-current ] && cd /opt/hyperic/server-current; then
    cd %{prefix}/%{HQ_Component_Name}
-   /bin/su hyperic -c "properties/upgrade_new.exp %{prefix}/server-current %{prefix} "
+   printf "export HQ_SERVER_INSTALL_PATH=%{prefix}\n" >> /etc/bashrc
+   /bin/su hyperic -c "properties/upgrade_new.exp %{prefix}/server-current %{prefix} > /dev/null 2>&1"
    cd $RPM_BUILD_ROOT/%{prefix}
    /bin/su hyperic -c "/bin/ln -snf server-%{HQ_Component_Version}-%{HQ_Component_Edition} server-current"
 else
@@ -150,10 +151,9 @@ else
    if [ -d $HQ_SERVER_INSTALL_PATH/server-%{HQ_Component_Version}-%{HQ_Component_Edition} ]
    then
       /bin/su hyperic -c "/bin/ln -snf $HQ_SERVER_INSTALL_PATH/server-%{HQ_Component_Version}-%{HQ_Component_Edition} %{prefix}/server-current"
-      %{__cp} %{prefix}/%{HQ_Component_Name}/installer/logs/hq-install.log %{prefix}/server-current/hq-install.log
    fi
-   
 fi
+ %{__cp} %{prefix}/%{HQ_Component_Name}/installer/logs/hq-install.log %{prefix}/server-current/hq-install.log
 
 %postun
 
@@ -176,8 +176,8 @@ if [ -f %{prefix}/server-current/hq-install.log ]; then
       chkconfig --add hyperic-hq-server
       chkconfig hyperic-hq-server on
    fi
+   /sbin/service hyperic-hq-server start > /dev/null 2> /dev/null
    if [ -f /etc/init.d/hyperic-hq-server ] && [ -f /tmp/hyperic-hq-server-was-running-%{HQ_Component_Version}.%{HQ_Component_Edition}-%{release} ]; then
-      /sbin/service hyperic-hq-server start > /dev/null 2> /dev/null
       %{__rm} -f /tmp/hyperic-hq-server-was-running-%{HQ_Component_Version}.%{HQ_Component_Edition}-%{release}
       echo
       echo "The new version of HQ Server has been started using your existing configuration."
@@ -201,10 +201,10 @@ if [ -f %{prefix}/server-current/hq-install.log ]; then
       echo
    fi
 else
-    echo
-    echo "The HQ Server installation has failed."
-    echo "For more details go to the installation log in %{prefix}/%{HQ_Component_Name}/installer/logs/hq-install.log"
-    echo
+   echo
+   echo "The HQ Server installation has failed."
+   echo "For more details go to the installation log in %{prefix}/%{HQ_Component_Name}/installer/logs/hq-install.log"
+   echo
    if [ -f /etc/init.d/hyperic-hq-server ]; then
       chkconfig --add hyperic-hq-server
    fi
