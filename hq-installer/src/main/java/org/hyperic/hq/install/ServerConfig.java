@@ -500,8 +500,7 @@ extends BaseConfig {
 
 			// Encrypt database password
 			String encryptedPw = encryptPassword("PBEWithMD5AndDES", encryptionKey, previous
-					.getValue("server.database-password"));
-
+					.getValue("server.database-password")).replaceAll("\\r|\\n", "");
 			schema.addOption(new HiddenConfigOption("server.encryption-key", encryptionKey));
 			//Make this optional for non-interactive installers so the default value created here will be used instead
 			HiddenConfigOption encryptedPwOption = new HiddenConfigOption("server.database-password-encrypted",
