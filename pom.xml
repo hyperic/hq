@@ -55,7 +55,7 @@
 		<oro.version>2.0.8</oro.version>
 		<poi.version>3.0.1-FINAL</poi.version>
 		<postgresql.agent.driver.version>7.4.3</postgresql.agent.driver.version>
-		<postgresql.server.driver.version>9.1-901.jdbc4</postgresql.server.driver.version>
+		<postgresql.server.driver.version>9.1-901-A.jdbc4</postgresql.server.driver.version>
 		<quartz.version>1.7.2</quartz.version>
 		<roo.version>1.0.2.RELEASE</roo.version>
 		<servlet-api.version>2.4</servlet-api.version>
