@@ -1,30 +1,26 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>vFabric Hyperic 4.6.5 : ui-tcserver.ServerConfigurationRef</title>
+        <title>Hyperic 4.5 Documentation : ui-tcserver.ServerConfigurationRef</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
-<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
- - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
- -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.5.html">Hyperic 4.6.5 Release Notes</a> </b>
- <p>
- <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6.5 : ui-tcserver.ServerConfigurationRef
+                            Hyperic 4.5 Documentation : ui-tcserver.ServerConfigurationRef
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 02, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <ul>
+				    
+<ul>
 	<li><a href="#ui-tcserver.ServerConfigurationRef-tcRuntimeConfigurationReference">tc Runtime Configuration Reference</a>
 	<ul>
 		<li><a href="#ui-tcserver.ServerConfigurationRef-GeneralConfiguration">General Configuration</a>
@@ -53,6 +49,9 @@
 </ul>
 
 
+
+
+<p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
 
 
 <h2><a name="ui-tcserver.ServerConfigurationRef-tcRuntimeConfigurationReference"></a>tc Runtime Configuration Reference</h2>
@@ -87,7 +86,7 @@ With the default setting, "-1", no shutdown port is enabled, so that the only wa
 
 <h3><a name="ui-tcserver.ServerConfigurationRef-JMXListener"></a>JMX Listener</h3>
 
-<p>The <b>JMX Listener</b> section configures the component of the tc Runtime instance that listens for Java Management Extensions (JMX) connections from management tools, such as the Hyperic Agent. By default, tc Runtime enables JMX connectivity.</p>
+<p>The <b>JMX Listener</b> section configures the component of the tc Runtime instance that listens for Java Management Extensions (JMX) connections from management tools, such as the HQ Agent. By default, tc Runtime enables JMX connectivity.</p>
 <div class='table-wrap'>
 <table class='confluenceTable'><tbody>
 <tr>
@@ -98,7 +97,7 @@ With the default setting, "-1", no shutdown port is enabled, so that the only wa
 <td class='confluenceTd'> Enabled <a name="ui-tcserver.ServerConfigurationRef-configurationjmxenabled"></a></td>
 <td class='confluenceTd'> Specifies whether the tc Runtime instance's pre-configured JMX listener is enabled. <br class="atl-forced-newline" />
 <br class="atl-forced-newline" />
-<b>Important:</b> The Hyperic Agent uses JMX to connect to tc Runtime, so if you disable the JMX listener then you will not be able to use configure tc Runtime instances or groups from the Hyperic user interface, unless you configure JMX for tc Runtime through some other mechanism. </td>
+<b>Important:</b> The HQ Agent uses JMX to connect to tc Runtime, so if you disable the JMX listener then you will not be able to use configure tc Runtime instances or groups from the HQ user interface, unless you configure JMX for tc Runtime through some other mechanism. </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Port <a name="ui-tcserver.ServerConfigurationRef-configurationjmxport"></a><br class="atl-forced-newline" /> </td>
@@ -117,11 +116,11 @@ With the default setting, "-1", no shutdown port is enabled, so that the only wa
 <td class='confluenceTd'> Specifies whether tc Runtime authenticates users that connect to the server using the JMX port. <br class="atl-forced-newline" />  <br class="atl-forced-newline" />
 If you enable this field, tc Runtime looks up the user and password in the files specifies by the Access File and Password File fields, respectively; if tc Runtime finds the username and password in the files, then the user is authenticated and allowed JMX access. If you disable this property, <em>all</em> users may access tc Runtime via JMX. <br class="atl-forced-newline" />
 <br class="atl-forced-newline" />
-You configure the JMX user and password in Hyperic on server instances the <b>Inventory &gt; Configuration Properties</b> page. The default JMX user and password is configured by default when you install tc Server; if, however, you change the name or password of the user in the access and password files, you must also change the configured user/password in the Hyperic user interface. </td>
+You configure the JMX user and password in HQ on server instances the <b>Inventory &gt; Configuration Properties</b> page. The default JMX user and password is configured by default when you install tc Server; if, however, you change the name or password of the user in the access and password files, you must also change the configured user/password in the HQ user interface. </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Access File <a name="ui-tcserver.ServerConfigurationRef-configurationjmxaccessFile"></a><br class="atl-forced-newline" /> </td>
-<td class='confluenceTd'> Specifies the full pathname of the tc Runtime file that contains the list of users allowed to access tc Runtime using JMX. Note that this file is on the computer that hosts the tc Runtime instance, not the computer that hosts the Hyperic Server. <br class="atl-forced-newline" />
+<td class='confluenceTd'> Specifies the full pathname of the tc Runtime file that contains the list of users allowed to access tc Runtime using JMX. Note that this file is on the computer that hosts the tc Runtime instance, not the computer that hosts the HQ Server. <br class="atl-forced-newline" />
 <br class="atl-forced-newline" />
 The access file contains one line per user; each line contains a username and permission level:
 <ul>
@@ -133,7 +132,7 @@ The default name for the access file is <tt>jmxremote.access</tt>; the default l
 </tr>
 <tr>
 <td class='confluenceTd'> Password File <a name="ui-tcserver.ServerConfigurationRef-configurationjmxpasswordFile"></a><br class="atl-forced-newline" /> </td>
-<td class='confluenceTd'> Specifies the full pathname of the tc Runtime file that contains passwords for the users listed in the Access File. Note that this file is on the computer that hosts the tc Runtime instance, not the computer that hosts the Hyperic Server. <br class="atl-forced-newline" />
+<td class='confluenceTd'> Specifies the full pathname of the tc Runtime file that contains passwords for the users listed in the Access File. Note that this file is on the computer that hosts the tc Runtime instance, not the computer that hosts the HQ Server. <br class="atl-forced-newline" />
 <br class="atl-forced-newline" />
 The password file contains one line for each user listed in the access file; each line contains a username and password. <br class="atl-forced-newline" />
 <br class="atl-forced-newline" />
@@ -143,7 +142,7 @@ The default name for the password file is <tt>jmxremote.password</tt>; the defau
 <td class='confluenceTd'> Use SSL <a name="ui-tcserver.ServerConfigurationRef-configurationjmxuseSSL"></a></td>
 <td class='confluenceTd'> Specifies whether to use secure sockets layer (SSL) for users' JMX connections to tc Runtime. <br class="atl-forced-newline" />
 <br class="atl-forced-newline" />
-To use SSL, you must first set up a digital certificate on the computer that hosts the tc Runtime instance and then configure the SSL setings on this page. You can use the command-line utility keytool (<a href="http://download.oracle.com/javase/1.4.2/docs/tooldocs/solaris/keytool.html">http://download.oracle.com/javase/1.4.2/docs/tooldocs/solaris/keytool.html</a>) to manage digital certificates. </td>
+To use SSL, you must first set up a digital certificate on the computer that hosts the tc Runtime instance and then configure the SSL setings on this page. You can use the command-line utility <a href="http://java.sun.com/j2se/1.5.0/docs/tooldocs/solaris/keytool.html">keytool</a> to manage digital certificates. </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Client Authentication <br class="atl-forced-newline" /> <a name="ui-tcserver.ServerConfigurationRef-configurationjmxclientAuth"></a></td>
@@ -153,7 +152,7 @@ If you enable this property, tc Runtime authenticates JMX/SSL clients using cert
 </tr>
 <tr>
 <td class='confluenceTd'> Use JDK Client Factory <a name="ui-tcserver.ServerConfigurationRef-configurationjmxuseJdkClientFactory"></a></td>
-<td class='confluenceTd'> Specifies whether or not the Hyperic Agent uses the required client libraries from the JDK. The required libraries are used to pass SSL-specific properties (such as the trust store and password) to the tc Runtime instance. If you disable this property, you must manually set up the Hyperic Agent's CLASSPATH to find these client libraries. </td>
+<td class='confluenceTd'> Specifies whether or not the HQ Agent uses the required client libraries from the JDK. The required libraries are used to pass SSL-specific properties (such as the trust store and password) to the tc Runtime instance. If you disable this property, you must manually set up the HQ Agent's CLASSPATH to find these client libraries. </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Cipher Suites <a name="ui-tcserver.ServerConfigurationRef-configurationjmxcipherSuites"></a></td>
@@ -187,11 +186,11 @@ A <em>keystore</em> is a database of key material. Key material is used for a va
 
 <h2><a name="ui-tcserver.ServerConfigurationRef-ServerStartConfiguration"></a>Server Start Configuration</h2>
 
-<p><b>NOTE:</b> Hyperic populates these fields with information contained in the <tt>CATALINA_HOME/bin/setenv.sh</tt> file of the tc Runtime instance you are configuring, specifically argument values defined in the JVM_OPTS environment variable.</p>
+<p><b>NOTE:</b> HQ populates these fields with information contained in the <tt>CATALINA_HOME/bin/setenv.sh</tt> file of the tc Runtime instance you are configuring, specifically argument values defined in the JVM_OPTS environment variable.</p>
 
 <p>If for some reason <tt>setenv.sh</tt> does not exist, or does not define JVM_OPTS, the Server Start fields will be blank.</p>
 
-<p>Edits you make to Server Start fields in the Hyperic user interface are written back to <tt>setenv.sh</tt>.</p>
+<p>Edits you make to Server Start fields in the HQ user interface are written back to <tt>setenv.sh</tt>.</p>
 
 <h3><a name="ui-tcserver.ServerConfigurationRef-General"></a>General</h3>
 
@@ -342,7 +341,7 @@ For example: <br class="atl-forced-newline" />
 <h2><a name="ui-tcserver.ServerConfigurationRef-ContextContainer"></a>Context Container</h2>
 
 <p><a name="ui-tcserver.ServerConfigurationRef-configurationcontainer"></a><br/>
-The fields described in the following table configure the context for <em>every</em> Web application deployed to this tc Runtime instance. Hyperic loads and updates the values from the <tt>CATALINA_BASE/conf/context.xml</tt> file for this tc Runtime instance.</p>
+The fields described in the following table configure the context for <em>every</em> Web application deployed to this tc Runtime instance. HQ loads and updates the values from the <tt>CATALINA_BASE/conf/context.xml</tt> file for this tc Runtime instance.</p>
 
 <h3><a name="ui-tcserver.ServerConfigurationRef-StaticResourceCache"></a>Static Resource Cache</h3>
 
@@ -387,7 +386,7 @@ The fields described in the following table configure the context for <em>every<
 <h2><a name="ui-tcserver.ServerConfigurationRef-ServerDefaultsJSP"></a>Server Defaults - JSP</h2>
 
 <p><a name="ui-tcserver.ServerConfigurationRef-configurationdefaultsJsp"></a><br/>
-The fields described in the following table configure JSP-related init params for <em>every</em> Web application deployed to this tc Runtime instance. Hyperic loads and updates the values from the <tt>CATALINA_BASE/conf/web.xml</tt> file for this tc Runtime instance.</p>
+The fields described in the following table configure JSP-related init params for <em>every</em> Web application deployed to this tc Runtime instance. HQ loads and updates the values from the <tt>CATALINA_BASE/conf/web.xml</tt> file for this tc Runtime instance.</p>
 <div class='table-wrap'>
 <table class='confluenceTable'><tbody>
 <tr>
@@ -490,7 +489,7 @@ Default value is clsid:8AD9C840-044E-11D1-B3E9-00805F499D93. <br class="atl-forc
 <h2><a name="ui-tcserver.ServerConfigurationRef-ServerDefaultsStaticContent"></a>Server Defaults - Static Content</h2>
 
 <p><a name="ui-tcserver.ServerConfigurationRef-configurationdefaultsStatic"></a><br/>
-The fields described in the following table configure static content-related init params for <em>every</em> Web application deployed to this tc Runtime instance. Hyperic loads and updates the values from the <tt>CATALINA_BASE/conf/web.xml</tt> file for this tc Runtime instance.</p>
+The fields described in the following table configure static content-related init params for <em>every</em> Web application deployed to this tc Runtime instance. HQ loads and updates the values from the <tt>CATALINA_BASE/conf/web.xml</tt> file for this tc Runtime instance.</p>
 <div class='table-wrap'>
 <table class='confluenceTable'><tbody>
 <tr>

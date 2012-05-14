@@ -41,6 +41,11 @@
 <div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>vSphere Resource Relationships</b><br />If you manage vSphere resources using the vSphere plugin, do not use the <b>Network Host Dependency Manager</b> to configure dependencies for vSphere resources. vSphere resource types will be removed from the <b>Network Host Dependency Manager</b> pulldown menus in a future release. For information about the vSphere virtual resource hierarchy, see <a href="vSphere.html" title="vSphere">vSphere</a>.</td></tr></table></div>
 <h2><a name="ui-Admin.Dependency-Step1SelectaTopLevelPlatformtoUpdate"></a>Step 1 - Select a Top Level Platform to Update</h2>
 
+<p>For more information see <a href="http://support.hyperic.com/display/EVO/Manage+Alert+and+Notification+Volume#ManageAlertandNotificationVolume-hierarchical">Hierarchical Alerting Prevents a Cascade of Alerts in Resource Hierarchies</a>.</p>
+
+<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>vSphere Resource Relationships</b><br />If you manage vSphere resources using the vSphere plugin, do not use the <b>Network Host Dependency Manager</b> to configure dependencies for vSphere resources. vSphere resource types will be removed from the <b>Network Host Dependency Manager</b> pulldown menus in a future release. For information about the vSphere virtual resource hierarchy, see <a href="http://support.hyperic.com/display/EVO/Monitoring+vSphere+Components+%28Hyperic+4.5.1+and+Later%29" title="Monitoring vSphere Components (Hyperic 4.5.1 and Later)">Monitoring vSphere Components</a>.</td></tr></table></div>
+<h2><a name="ui-Admin.Dependency-Step1SelectaTopLevelPlatformtoUpdate"></a>Step 1 - Select a Top Level Platform to Update</h2>
+
 <p>To define or change the dependent platforms for a top level platform, you first select the top level platform. For ease of navigation, the <b>Network and Host Dependency Manager</b> provides two ways to find a top level platform. Depending on how many top level platforms you have in inventory, and what you know about your target, one of the following options may be preferable.</p>
 
 <h3><a name="ui-Admin.Dependency-OptionABrowseaFilteredListofTopLevelPlatforms"></a>Option A - Browse a Filtered List of Top Level Platforms</h3>
@@ -98,10 +103,13 @@
 		<li>Use the <b>Select</b> and <b>Remove</b> controls on the page.</li>
 	</ul>
 	</li>
+</ol>
+
+
+<ol>
 	<li>To add dependencies:
 	<ul>
-		<li>Click <b>Add</b>.</li>
-		<li>The <b>Available Platforms</b> popup lists operating system platforms in inventory that are not currently assigned to a top level platform.</li>
+		<li>Click <b>Add</b>.#* The <b>Available Platforms</b> popup lists operating system platforms in inventory that are not currently assigned to a top level platform.</li>
 		<li>Filter the list, as desired:
 		<ul>
 			<li>Enter the leading characters of the operating system platform name in the "Name" field.</li>

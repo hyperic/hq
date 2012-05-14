@@ -301,10 +301,10 @@ public class AuthzBossImpl implements AuthzBoss {
                 if (whoami.getName().equals(aSubject.getName())) {
                     throw new PermissionException("Users are not permitted to remove themselves.");
                 }
-                // reassign ownership of all things appdef
-                appdefBoss.resetResourceOwnership(sessionId.intValue(), aSubject);
                 // reassign ownership of all things authz
                 resetResourceOwnership(sessionId, aSubject);
+                // reassign ownership of all things appdef
+                appdefBoss.resetResourceOwnership(sessionId.intValue(), aSubject);
 
                 // delete in auth
                 authManager.deleteUser(whoami, aSubject.getName());
@@ -333,7 +333,7 @@ public class AuthzBossImpl implements AuthzBoss {
         Collection<Resource> resources = resourceManager.findResourceByOwner(currentOwner);
         for (Resource aRes : resources) {
             String resType = aRes.getResourceType().getName();
-            if (resType.equals(AuthzConstants.roleResourceTypeName)) {
+            if (resType.equals(AuthzConstants.roleResourceTypeName)|| resType.equals(AuthzConstants.subjectResourceTypeName)) {
                 resourceManager.setResourceOwner(authzSubjectManager.getOverlordPojo(), aRes, authzSubjectManager
                     .getOverlordPojo());
             }

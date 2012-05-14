@@ -186,6 +186,9 @@ public class UIPluginManagerImpl implements UIPluginManager {
         // Recreation of views will be done when deploy is called on the plugin.
         Collection views = p.getViewsBag();
         if (!views.isEmpty()){
+            for (Object viewObject : views){
+                ((View)viewObject).getAttachmentsBag().clear();
+            }
             views.clear();
             // need to flush the session to allow for adding the views back during deploy
             // within the same transaction.
