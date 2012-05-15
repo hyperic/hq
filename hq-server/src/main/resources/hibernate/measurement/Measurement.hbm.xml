@@ -29,9 +29,7 @@
 
 <hibernate-mapping package="org.hyperic.hq.measurement.server.session">
     <typedef name="encryptedString" class="org.jasypt.hibernate.type.EncryptedStringType">
-      <param name="algorithm">PBEWithMD5AndDES</param>
-      <param name="password">jasypt</param>
-      <param name="keyObtentionIterations">1000</param>
+      <param name="encryptorRegisteredName">strongHibernateStringEncryptor</param>
     </typedef>
     
   <class name="Measurement" table="EAM_MEASUREMENT">

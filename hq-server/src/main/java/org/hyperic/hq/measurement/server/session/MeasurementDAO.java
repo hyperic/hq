@@ -25,6 +25,10 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -45,10 +49,14 @@ import org.hyperic.hq.appdef.server.session.AgentDAO;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.util.jdbc.DBUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
+
 
 @Repository
 public class MeasurementDAO
@@ -57,12 +65,34 @@ public class MeasurementDAO
         " upper(t.alias) != '" + MeasurementConstants.CAT_AVAILABILITY.toUpperCase() + "' ";
     private static final String ALIAS_CLAUSE =
         " upper(t.alias) = '" + MeasurementConstants.CAT_AVAILABILITY.toUpperCase() + "' ";
-    private AgentDAO agentDao;
-
+    private final AgentDAO agentDao;
+    private final DBUtil dbUtil;
+    
     @Autowired
-    public MeasurementDAO(SessionFactory f, AgentDAO agentDao) {
+    public MeasurementDAO(SessionFactory f, AgentDAO agentDao, DBUtil dbUtil) {
         super(Measurement.class, f);
         this.agentDao = agentDao;
+        this.dbUtil = dbUtil;
+    }
+    
+    protected void encryptUnEncryptedDSNs() {
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        final String sql = "SELECT dsn FROM Measurement";
+        try {
+            conn = dbUtil.getConnection();
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery("SELECT dsn FROM Measurement");
+            while (rs.next()) {
+                final String dsn = rs.getString(0);
+                
+            }
+        } catch (SQLException e) {
+            throw new SystemException(e);
+        } finally {
+            DBUtil.closeJDBCObjects(MeasurementDAO.class.getName(), conn, stmt, rs);
+        }        
     }
 
     public void removeBaseline(Measurement m) {
@@ -413,7 +443,7 @@ public class MeasurementDAO
                      + "join g.resource r " + "where m.instanceId = r.instanceId and "
                      + "rg = ? and m.template.id = ? and m.enabled = true";
 
-        return (List<Measurement>) getSession().createQuery(sql).setParameter(0, g).setInteger(1,
+        return getSession().createQuery(sql).setParameter(0, g).setInteger(1,
             templateId.intValue()).setCacheable(true).setCacheRegion(
             "ResourceGroup.getMetricsCollecting").list();
     }
@@ -448,7 +478,7 @@ public class MeasurementDAO
         if (list.size() == 0) {
             return null;
         }
-        return (Measurement) list.get(0);
+        return list.get(0);
     }
 
     @SuppressWarnings("unchecked")
@@ -765,7 +795,7 @@ public class MeasurementDAO
                 java.lang.Number count = (java.lang.Number) tuple[1];
                 Long curCount;
 
-                curCount = (Long) idToCount.get(id);
+                curCount = idToCount.get(id);
                 if (curCount == null) {
                     curCount = new Long(0);
                 }

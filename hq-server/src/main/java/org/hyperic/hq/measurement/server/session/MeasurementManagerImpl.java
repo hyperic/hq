@@ -215,6 +215,10 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         }
     }
 
+    public void encryptUnEncryptedDSNs() {
+        this.measurementDAO.encryptUnEncryptedDSNs();
+    }
+    
     public List<Measurement> createOrUpdateMeasurements(AppdefEntityID id, Integer[] templates, long[] intervals,
                                                         ConfigResponse props, Reference<Boolean> updated)
     throws MeasurementCreateException, TemplateNotFoundException {
@@ -243,7 +247,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             if (t == null) {
                 continue;
             }
-            Measurement m = (Measurement) lookup.get(templates[i]);
+            Measurement m = lookup.get(templates[i]);
 
             if (m == null) {
                 // No measurement, create it
@@ -460,7 +464,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
         Iterator<Measurement> it = mcol.iterator();
         for (int i = 0; it.hasNext(); i++) {
-            Measurement dm = (Measurement) it.next();
+            Measurement dm = it.next();
             dsns[i] = dm.getDsn();
 
             MeasurementTemplate template = dm.getTemplate();
@@ -742,6 +746,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
      * @deprecated Use getAvailabilityMeasurement(Resource) instead.
      * 
      */
+    @Deprecated
     @Transactional(readOnly = true)
     public Measurement getAvailabilityMeasurement(AuthzSubject subject, AppdefEntityID id) {
         return getAvailabilityMeasurement(resourceManager.findResource(id));
@@ -942,7 +947,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                 }
 
                 Integer templateId = dm.getTemplate().getId();
-                Long previous = (Long) intervals.get(templateId);
+                Long previous = intervals.get(templateId);
 
                 if (previous == null) {
                     intervals.put(templateId, interval);
