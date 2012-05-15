@@ -8,7 +8,7 @@
 	<artifactId>test-plugin</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - Test Plugin</name>
-	<version>4.6.5.1.STATEFARM-ONLY</version>
+	<version>4.6.5.1.STATEFARM-BUILD-SNAPSHOT</version>
 
 	<dependencies>
 		<dependency>
