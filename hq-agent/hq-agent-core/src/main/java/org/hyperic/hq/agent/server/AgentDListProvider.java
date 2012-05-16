@@ -56,6 +56,7 @@ import org.hyperic.hq.agent.db.DiskList;
 import org.hyperic.util.file.FileUtil;
 import org.hyperic.util.security.KeystoreConfig;
 import org.hyperic.util.security.KeystoreManager;
+import org.hyperic.util.security.MarkedStringEncryptor;
 import org.hyperic.util.security.SecurityUtil;
 import org.jasypt.encryption.StringEncryptor;
 
@@ -246,7 +247,7 @@ public class AgentDListProvider implements AgentStorageProvider {
             bOs = new BufferedOutputStream(fOs);
             dOs = new DataOutputStream(bOs);
             if (this.encryptor==null) {
-                this.encryptor = SecurityUtil.getStandardPBEStringEncryptor(this.getKeyvalsPass());
+                this.encryptor = new MarkedStringEncryptor(SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM,getKeyvalsPass());
             }
             synchronized(this.keyVals){
                 dOs.writeLong(this.keyVals.size());
@@ -362,11 +363,13 @@ public class AgentDListProvider implements AgentStorageProvider {
             nEnts = dIs.readLong();
 
             if (this.encryptor==null) {
-                this.encryptor = SecurityUtil.getStandardPBEStringEncryptor(this.getKeyvalsPass());
+                this.encryptor = new MarkedStringEncryptor(SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM,getKeyvalsPass());
             }
             while(nEnts-- != 0){
-                String decryptedKey = SecurityUtil.decrypt(encryptor, dIs.readUTF());
-                String decryptedVal = SecurityUtil.decrypt(encryptor, dIs.readUTF());
+                String key = dIs.readUTF();
+                String val = dIs.readUTF();
+                String decryptedKey = SecurityUtil.isMarkedEncrypted(key)?SecurityUtil.decrypt(encryptor, key):key;
+                String decryptedVal = SecurityUtil.isMarkedEncrypted(val)?SecurityUtil.decrypt(encryptor, val):val;
                 this.keyVals.put(decryptedKey, decryptedVal);
             }
         } catch(FileNotFoundException exc){
@@ -389,7 +392,7 @@ public class AgentDListProvider implements AgentStorageProvider {
 
                 nEnts = dIs.readLong();
                 if (this.encryptor==null) {
-                    this.encryptor = SecurityUtil.getStandardPBEStringEncryptor(this.getKeyvalsPass());
+                    this.encryptor = new MarkedStringEncryptor(SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM,getKeyvalsPass());
                 }
                 while(nEnts-- != 0) {
                     String denryptedKey = SecurityUtil.encrypt(this.encryptor, dIs.readUTF());
