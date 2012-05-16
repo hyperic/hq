@@ -99,7 +99,7 @@
     </c:url>
     <td class="ListCell" width="20%" align="left" valign="top"><a 
     href="${inventoryUrl}">${service.resource.name}</a></td>
-    <td class="ListCell"><c:out value="${service.parentResource.name}" /></td>
+    <td class="ListCell"><c:out value="${service.parentResource.name}" escapeXml="true" /></td>
     <td class="ListCell"><c:out value="${service.resource.appdefResourceTypeValue.name}" /></td>
     <td width="4%" class="ListCellCheckboxLeftLine"><html:img 
     page="/images/icon_alert.gif" width="11" height="11" alt="Alerts" 

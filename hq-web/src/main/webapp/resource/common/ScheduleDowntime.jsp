@@ -124,7 +124,7 @@
     maintenance_<c:out value="${resource.id}"/> = new hyperic.maintenance_schedule({
         "title": "<fmt:message key="resource.group.MaintenanceWindow.Title"/>", 
         "appdefentityId": "<c:out value="${resource.entityId}"/>", 
-        "resourceName": "<c:out value="${resource.name}"/>",
+        "resourceName": "<c:out value="${resource.name}" escapeXml="true"/>",
         "url": "/app/resource/<c:out value='${resource.entityId}' />/downtime"
     });
 </jsu:script>

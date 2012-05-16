@@ -139,7 +139,7 @@
         					<html:link action="/resource/${summary.resourceEntityTypeName}/monitor/Visibility">
         						<html:param name="mode" value="${mode}"/>
         						<html:param name="eid" value="${summary.resourceTypeId}:${summary.resourceId}"/>
-        						${summary.resourceName}
+                                <c:out value="${summary.resourceName}" escapeXml="true"/>
         					</html:link>
       					</td>
       					<td class="ListCellCheckbox">
