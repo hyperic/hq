@@ -89,7 +89,7 @@ public class MeasurementDAO
         try {
             conn = dbUtil.getConnection();
             getDSNsStmt = conn.createStatement();
-            rs = getDSNsStmt.executeQuery("SELECT dsn FROM EAM_Measurement");
+            rs = getDSNsStmt.executeQuery("SELECT DSN FROM EAM_MEASUREMENT");
             if (!rs.next()) {
                 logger.debug("no metrics");
                 return;
@@ -100,7 +100,7 @@ public class MeasurementDAO
                 return;
             }
             List<String> dsns = new ArrayList<String>();
-            setDSNsStmt = conn.prepareStatement("UPDATE EAM_Measurement SET dsn=? WHERE dsn=?");
+            setDSNsStmt = conn.prepareStatement("UPDATE EAM_MEASUREMENT SET DSN=? WHERE DSN=?");
             MarkedStringEncryptor encryptor = new MarkedStringEncryptor(SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM,"jasypt");
             setDSNsStmt.setString(1,encryptor.encrypt(dsn));
             setDSNsStmt.setString(2,dsn);
