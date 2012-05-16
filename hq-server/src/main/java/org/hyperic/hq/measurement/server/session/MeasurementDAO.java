@@ -26,6 +26,7 @@
 package org.hyperic.hq.measurement.server.session;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -37,6 +38,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.FlushMode;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -53,6 +56,8 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.util.jdbc.DBUtil;
+import org.hyperic.util.security.MarkedStringEncryptor;
+import org.hyperic.util.security.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -67,6 +72,7 @@ public class MeasurementDAO
         " upper(t.alias) = '" + MeasurementConstants.CAT_AVAILABILITY.toUpperCase() + "' ";
     private final AgentDAO agentDao;
     private final DBUtil dbUtil;
+    protected final Log logger = LogFactory.getLog(this.getClass().getName());
     
     @Autowired
     public MeasurementDAO(SessionFactory f, AgentDAO agentDao, DBUtil dbUtil) {
@@ -75,23 +81,47 @@ public class MeasurementDAO
         this.dbUtil = dbUtil;
     }
     
-    protected void encryptUnEncryptedDSNs() {
+    public void encryptUnEncryptedDSNs() {
         Connection conn = null;
-        Statement stmt = null;
+        Statement getDSNsStmt = null;
+        PreparedStatement setDSNsStmt = null;
         ResultSet rs = null;
-        final String sql = "SELECT dsn FROM Measurement";
         try {
             conn = dbUtil.getConnection();
-            stmt = conn.createStatement();
-            rs = stmt.executeQuery("SELECT dsn FROM Measurement");
+            getDSNsStmt = conn.createStatement();
+            rs = getDSNsStmt.executeQuery("SELECT dsn FROM EAM_Measurement");
+            if (!rs.next()) {
+                logger.debug("no metrics");
+                return;
+            }
+            String dsn = rs.getString(1);
+            if (SecurityUtil.isMarkedEncrypted(dsn)) {
+                logger.debug("DSN column already encrypted");
+                return;
+            }
+            List<String> dsns = new ArrayList<String>();
+            setDSNsStmt = conn.prepareStatement("UPDATE EAM_Measurement SET dsn=? WHERE dsn=?");
+            MarkedStringEncryptor encryptor = new MarkedStringEncryptor(SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM,"jasypt");
+            setDSNsStmt.setString(1,encryptor.encrypt(dsn));
+            setDSNsStmt.setString(2,dsn);
+            dsns.add(dsn);
             while (rs.next()) {
-                final String dsn = rs.getString(0);
-                
+                setDSNsStmt.addBatch();
+                dsn = rs.getString(1);
+                setDSNsStmt.setString(1,encryptor.encrypt(dsn));
+                setDSNsStmt.setString(2,dsn);
+                dsns.add(dsn);
+            }
+            int[] execInfo = setDSNsStmt.executeBatch();
+            for (int i=0 ; i<execInfo.length ; i++) {
+                if (execInfo[i]==Statement.EXECUTE_FAILED) {
+                    logger.error("failed encrypting the following measurement's dsn DB column: " + dsns.get(i)); 
+                }
             }
         } catch (SQLException e) {
             throw new SystemException(e);
         } finally {
-            DBUtil.closeJDBCObjects(MeasurementDAO.class.getName(), conn, stmt, rs);
+            DBUtil.closeConnection(MeasurementDAO.class.getName(), conn);
         }        
     }
 
