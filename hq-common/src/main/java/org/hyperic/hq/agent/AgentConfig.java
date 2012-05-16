@@ -284,7 +284,7 @@ public class AgentConfig {
                 // if property is defined in the prop file
                 if(tmpValue!=null) {
                     // if encrypted, replace with decrypted value
-                    if (SecurityUtil.isEncrypted(tmpValue)) {
+                    if (SecurityUtil.isMarkedEncrypted(tmpValue)) {
                         if (propEncKey==null) {
                             propEncKey = PropertyUtil.getPropEncKey(AgentConfig.DEFAULT_PROP_ENC_KEY_FILE);
                         }

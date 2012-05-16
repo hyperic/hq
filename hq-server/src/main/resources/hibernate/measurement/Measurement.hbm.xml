@@ -28,7 +28,10 @@
 -->
 
 <hibernate-mapping package="org.hyperic.hq.measurement.server.session">
-
+    <typedef name="encryptedString" class="org.jasypt.hibernate.type.EncryptedStringType">
+      <param name="encryptorRegisteredName">strongHibernateStringEncryptor</param>
+    </typedef>
+    
   <class name="Measurement" table="EAM_MEASUREMENT">
 
     <cache usage="read-write"/>
@@ -63,7 +66,7 @@
     <property name="interval" type="long">
       <column name="COLL_INTERVAL" not-null="true"/>
     </property>
-    <property name="dsn" type="string">
+    <property name="dsn" type="encryptedString">
       <column name="DSN" not-null="true" length="2048"/>
     </property>
 

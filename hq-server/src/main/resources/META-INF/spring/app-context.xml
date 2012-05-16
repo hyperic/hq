@@ -50,6 +50,26 @@
         <property name="passwordSysPropertyName" value="server.encryption-key" />
     </bean>
     
+    <bean id="strongEncryptor"
+        class="org.hyperic.util.security.MarkedStringEncryptor">
+        <property name="algorithm">
+            <value>PBEWithMD5AndDES</value>
+        </property>
+        <property name="password">
+            <value>jasypt</value>
+        </property>
+    </bean>
+  
+    <bean id="hibernateStringEncryptor"
+        class="org.jasypt.hibernate.encryptor.HibernatePBEStringEncryptor">
+        <property name="registeredName">
+            <value>strongHibernateStringEncryptor</value>
+        </property>
+        <property name="encryptor">
+            <ref bean="strongEncryptor" />
+            </property>
+    </bean>
+  
     <bean id="propertyPasswordEncryptor"
         class="org.jasypt.encryption.pbe.StandardPBEStringEncryptor">
         <property name="config" ref="jasyptConfiguration" />
