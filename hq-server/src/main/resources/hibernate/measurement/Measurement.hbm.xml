@@ -29,7 +29,7 @@
 
 <hibernate-mapping package="org.hyperic.hq.measurement.server.session">
     <typedef name="encryptedString" class="org.jasypt.hibernate.type.EncryptedStringType">
-      <param name="encryptorRegisteredName">strongHibernateStringEncryptor</param>
+      <param name="encryptorRegisteredName">markedStringEncryptorHibernateWrapper</param>
     </typedef>
     
   <class name="Measurement" table="EAM_MEASUREMENT">

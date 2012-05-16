@@ -72,13 +72,15 @@ public class MeasurementDAO
         " upper(t.alias) = '" + MeasurementConstants.CAT_AVAILABILITY.toUpperCase() + "' ";
     private final AgentDAO agentDao;
     private final DBUtil dbUtil;
+    private final MarkedStringEncryptor encryptor;
     protected final Log logger = LogFactory.getLog(this.getClass().getName());
     
     @Autowired
-    public MeasurementDAO(SessionFactory f, AgentDAO agentDao, DBUtil dbUtil) {
+    public MeasurementDAO(SessionFactory f, AgentDAO agentDao, DBUtil dbUtil, MarkedStringEncryptor encryptor) {
         super(Measurement.class, f);
         this.agentDao = agentDao;
         this.dbUtil = dbUtil;
+        this.encryptor = encryptor;
     }
     
     public void encryptUnEncryptedDSNs() {
@@ -101,8 +103,7 @@ public class MeasurementDAO
             }
             List<String> dsns = new ArrayList<String>();
             setDSNsStmt = conn.prepareStatement("UPDATE EAM_MEASUREMENT SET DSN=? WHERE DSN=?");
-            MarkedStringEncryptor encryptor = new MarkedStringEncryptor(SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM,"jasypt");
-            setDSNsStmt.setString(1,encryptor.encrypt(dsn));
+            setDSNsStmt.setString(1,this.encryptor.encrypt(dsn));
             setDSNsStmt.setString(2,dsn);
             dsns.add(dsn);
             boolean mixedDSNs = false;
@@ -113,7 +114,7 @@ public class MeasurementDAO
                     continue;
                 }
                 setDSNsStmt.addBatch();
-                setDSNsStmt.setString(1,encryptor.encrypt(dsn));
+                setDSNsStmt.setString(1,this.encryptor.encrypt(dsn));
                 setDSNsStmt.setString(2,dsn);
                 dsns.add(dsn);
             }
