@@ -46,7 +46,7 @@ public class MeasurementSystemInitializer {
     private static final Log _log = LogFactory.getLog(MeasurementSystemInitializer.class);
 
     private static ScheduledFuture _dataPurgeFuture;
-    private MeasurementManager measurementManager;
+    private final MeasurementManager measurementManager;
 
     private static Scheduler scheduler;
 
@@ -63,6 +63,7 @@ public class MeasurementSystemInitializer {
     public void init() {
         // Make sure we have the aux-log provider loaded
         MetricAuxLogProvider.class.toString();
+        this.measurementManager.encryptUnEncryptedDSNs();
         prefetchEnabledMeasurementsAndTemplates();
         startDataPurgeWorker();
     }

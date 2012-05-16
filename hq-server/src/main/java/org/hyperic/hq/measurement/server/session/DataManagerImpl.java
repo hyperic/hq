@@ -41,10 +41,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.PostConstruct;
@@ -130,7 +130,7 @@ public class DataManagerImpl implements DataManager {
     private static final int IND_MAX = MeasurementConstants.IND_MAX;
     private static final int IND_CFG_COUNT = MeasurementConstants.IND_CFG_COUNT;
 
-    private DBUtil dbUtil;
+    private final DBUtil dbUtil;
 
     // Pager class name
     private boolean confDefaultsLoaded = false;
@@ -140,16 +140,17 @@ public class DataManagerImpl implements DataManager {
 
     private static final long HOURS_PER_MEAS_TAB = MeasTabManagerUtil.NUMBER_OF_TABLES_PER_DAY;
 
-    private MeasurementDAO measurementDAO;
-    private MeasurementManager measurementManager;
-    private ServerConfigManager serverConfigManager;
-    private AvailabilityManager availabilityManager;
-    private MetricDataCache metricDataCache;
-    private ZeventEnqueuer zeventManager;
-    private MessagePublisher messagePublisher;
-    private RegisteredTriggers registeredTriggers;
-    private ConcurrentStatsCollector concurrentStatsCollector;
-    private int transactionTimeout;
+    private final MeasurementDAO measurementDAO;
+    private final MeasurementManager measurementManager;
+    private final ServerConfigManager serverConfigManager;
+    private final AvailabilityManager availabilityManager;
+    private final MetricDataCache metricDataCache;
+    private final ZeventEnqueuer zeventManager;
+    private final MessagePublisher messagePublisher;
+    private final RegisteredTriggers registeredTriggers;
+    private final ConcurrentStatsCollector concurrentStatsCollector;
+    private final int transactionTimeout;
+    
     
     @Autowired
     public DataManagerImpl(DBUtil dbUtil, MeasurementDAO measurementDAO,
@@ -441,7 +442,7 @@ public class DataManagerImpl implements DataManager {
             }
 
             if (numLeft == left.size()) {
-                DataPoint remPt = (DataPoint) left.remove(0);
+                DataPoint remPt = left.remove(0);
                 failedToSaveMetrics.add(remPt);
                 // There are some entries that we weren't able to do
                 // anything about ... that sucks.
@@ -1224,7 +1225,7 @@ public class DataManagerImpl implements DataManager {
         final List<Integer> availIds = new ArrayList<Integer>();
         final Map<Integer, List<Measurement>> measIdsByTempl = new HashMap<Integer, List<Measurement>>();
         setMeasurementObjects(measurements, availIds, measIdsByTempl);
-        final Integer[] avIds = (Integer[]) availIds.toArray(new Integer[0]);
+        final Integer[] avIds = availIds.toArray(new Integer[0]);
         final Map<Integer, double[]> rtn = availabilityManager.getAggregateDataByTemplate(avIds,
             begin, end);
         rtn.putAll(getAggDataByTempl(measIdsByTempl, begin, end, interval));
@@ -1288,11 +1289,11 @@ public class DataManagerImpl implements DataManager {
             }
             final int c = mv.getCount();
             count = count + c;
-            total = (double) ((mv.getValue() * c) + total);
+            total = ((mv.getValue() * c) + total);
         }
         final double[] data = new double[MeasurementConstants.IND_LAST_TIME + 1];
         data[MeasurementConstants.IND_MIN] = low;
-        data[MeasurementConstants.IND_AVG] = (double) total / count;
+        data[MeasurementConstants.IND_AVG] = total / count;
         data[MeasurementConstants.IND_MAX] = high;
         data[MeasurementConstants.IND_CFG_COUNT] = count;
         if (lastVal != null) {
@@ -1336,7 +1337,7 @@ public class DataManagerImpl implements DataManager {
                 measIds.add(m.getId());
             }
         }
-        final Integer[] avIds = (Integer[]) availIds.toArray(new Integer[0]);
+        final Integer[] avIds = availIds.toArray(new Integer[0]);
         final PageList<HighLowMetricValue> rtn =
             availabilityManager.getHistoricalAvailData(avIds, begin, end, interval, pc, true);
         final HQDialect dialect = measurementDAO.getHQDialect();
@@ -1346,7 +1347,7 @@ public class DataManagerImpl implements DataManager {
         for (int i = 0; i < measIds.size(); i += maxExprs) {
             final int last = Math.min(i + maxExprs, measIds.size());
             final List<Integer> sublist = measIds.subList(i, last);
-            final Integer[] mids = (Integer[]) sublist.toArray(new Integer[0]);
+            final Integer[] mids = sublist.toArray(new Integer[0]);
             final Collection<HighLowMetricValue> coll =
                 getHistData(mids, begin, end, interval, returnMetricNulls, null);
             final PageList<HighLowMetricValue> pList =
@@ -1525,6 +1526,7 @@ public class DataManagerImpl implements DataManager {
                                           final Collection<AggMetricValue[]> data) {
         final boolean debug = log.isDebugEnabled();
         final Thread thread = new Thread() {
+            @Override
             public void run() {
                 final StopWatch watch = new StopWatch();
                 if (debug) {
@@ -1634,7 +1636,7 @@ public class DataManagerImpl implements DataManager {
         int i=0;
         while (threads.size() >= maxThreads) {
             i = (i >= threads.size() || i < 0) ? 0 : i;
-            final Thread thread = (Thread) threads.get(i);
+            final Thread thread = threads.get(i);
             try {
                 if (thread.isAlive()) {
                     thread.join(100);
@@ -1938,7 +1940,7 @@ public class DataManagerImpl implements DataManager {
             Integer[] mids = new Integer[1];
             Integer id = meas.getId();
             mids[0] = id;
-            return (double[]) availabilityManager.getAggregateData(mids, begin, end).get(id);
+            return availabilityManager.getAggregateData(mids, begin, end).get(id);
         } else {
             return getBaselineMeasData(meas, begin, end);
         }
@@ -2043,7 +2045,7 @@ public class DataManagerImpl implements DataManager {
             conn = dbUtil.getConnection();
             // The table to query from
             List<Integer> measids = MeasTabManagerUtil.getMeasIds(conn, tids, iids);
-            String table = getDataTable(begin, end, (Integer[]) measids.toArray(new Integer[0]),
+            String table = getDataTable(begin, end, measids.toArray(new Integer[0]),
                 useAggressiveRollup);
             // Use the already calculated min, max and average on
             // compressed tables.
@@ -2130,9 +2132,9 @@ public class DataManagerImpl implements DataManager {
                 mids.add(meas.getId());
             }
         }
-        Map<Integer, double[]> rtn = getAggDataByMetric((Integer[]) mids.toArray(new Integer[0]),
+        Map<Integer, double[]> rtn = getAggDataByMetric(mids.toArray(new Integer[0]),
             begin, end, useAggressiveRollup);
-        rtn.putAll(availabilityManager.getAggregateData((Integer[]) avids.toArray(new Integer[0]),
+        rtn.putAll(availabilityManager.getAggregateData(avids.toArray(new Integer[0]),
             begin, end));
         return rtn;
     }

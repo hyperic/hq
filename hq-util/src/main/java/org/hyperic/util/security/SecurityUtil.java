@@ -33,6 +33,8 @@ import org.jasypt.properties.PropertyValueEncryptionUtils;
 
 public class SecurityUtil {
     public final static String DEFAULT_ENCRYPTION_ALGORITHM = "PBEWithMD5AndDES";
+    public final static String ENC_MARK_PREFIX = "Enc(";
+    public final static String ENC_MARK_POSTFIX = ")";
     
     /**
      * Generates a token of up to 100 chars of a (generally) random
@@ -55,8 +57,16 @@ public class SecurityUtil {
     }
     
 
-    public static boolean isEncrypted(String str) {
-        return str!=null && str.length()>=5 && str.startsWith("ENC(") && str.endsWith(")");
+    public static boolean isMarkedEncrypted(String str) {
+        return str!=null && str.startsWith(ENC_MARK_PREFIX) && str.endsWith(ENC_MARK_POSTFIX);
+    }
+    
+    public static String unmark(String str) {
+        return str.substring(ENC_MARK_PREFIX.length(), str.length()-ENC_MARK_POSTFIX.length()); 
+    }
+    
+    public static String mark(String str) {
+        return new StringBuilder().append(ENC_MARK_PREFIX).append(str).append(ENC_MARK_POSTFIX).toString(); 
     }
 
     public static StandardPBEStringEncryptor getStandardPBEStringEncryptor(String pbePass) {
