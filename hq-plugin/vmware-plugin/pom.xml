@@ -7,7 +7,7 @@
 	<artifactId>vmware-plugin</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - VMware Plugin</name>
-	<version>4.6.5.1.STATEFARM-BUILD-SNAPSHOT</version>
+	<version>4.6.5.1.SF.BUILD-SNAPSHOT</version>
 
 	<dependencies>
 		<dependency>
