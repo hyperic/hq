@@ -105,12 +105,20 @@ public class MeasurementDAO
             setDSNsStmt.setString(1,encryptor.encrypt(dsn));
             setDSNsStmt.setString(2,dsn);
             dsns.add(dsn);
+            boolean mixedDSNs = false;
             while (rs.next()) {
-                setDSNsStmt.addBatch();
                 dsn = rs.getString(1);
+                if (SecurityUtil.isMarkedEncrypted(dsn)) {
+                    mixedDSNs = true;
+                    continue;
+                }
+                setDSNsStmt.addBatch();
                 setDSNsStmt.setString(1,encryptor.encrypt(dsn));
                 setDSNsStmt.setString(2,dsn);
                 dsns.add(dsn);
+            }
+            if (mixedDSNs) {
+                logger.error("the DSN column of the Measurement table contains encrypted and un-encrypted values");
             }
             int[] execInfo = setDSNsStmt.executeBatch();
             for (int i=0 ; i<execInfo.length ; i++) {
