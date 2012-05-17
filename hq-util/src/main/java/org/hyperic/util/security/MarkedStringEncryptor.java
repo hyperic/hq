@@ -34,11 +34,19 @@ public class MarkedStringEncryptor implements PBEStringEncryptor {
 
     public String encrypt(String message) {
         logger.debug("encrypting: " + message);
-        return  SecurityUtil.mark(this.encryptor.encrypt(message));
+        if (SecurityUtil.isMarkedEncrypted(message)) {
+            logger.error("the following dsn is already encrypted: '" + message + "'");
+            return message;
+        }
+        return SecurityUtil.mark(this.encryptor.encrypt(message));
     }
 
     public String decrypt(String encryptedMessage) {
         logger.debug("decrypting: " + encryptedMessage);
+        if (!SecurityUtil.isMarkedEncrypted(encryptedMessage)) {
+            logger.error("the following un-encrypted dsn exists in the DB: '" + encryptedMessage + "'");
+            return encryptedMessage;
+        }
         return this.encryptor.decrypt(SecurityUtil.unmark(encryptedMessage));
     }
 
