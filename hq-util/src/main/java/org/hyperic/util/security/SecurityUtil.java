@@ -33,7 +33,7 @@ import org.jasypt.properties.PropertyValueEncryptionUtils;
 
 public class SecurityUtil {
     public final static String DEFAULT_ENCRYPTION_ALGORITHM = "PBEWithMD5AndDES";
-    public final static String ENC_MARK_PREFIX = "Enc(";
+    public final static String ENC_MARK_PREFIX = "ENC(";
     public final static String ENC_MARK_POSTFIX = ")";
     
     /**
@@ -58,7 +58,11 @@ public class SecurityUtil {
     
 
     public static boolean isMarkedEncrypted(String str) {
-        return str!=null && str.startsWith(ENC_MARK_PREFIX) && str.endsWith(ENC_MARK_POSTFIX);
+        if (str==null) {
+            return false;
+        }
+        String uStr = str.toUpperCase();
+        return uStr.startsWith(ENC_MARK_PREFIX) && uStr.endsWith(ENC_MARK_POSTFIX);
     }
     
     public static String unmark(String str) {
