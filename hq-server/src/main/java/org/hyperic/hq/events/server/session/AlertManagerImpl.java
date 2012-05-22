@@ -380,6 +380,22 @@ public class AlertManagerImpl implements AlertManager,
         }
         return counts;
     }
+    
+    /**
+     * Get the number of alerts for the given array of AppdefEntityID's as 
+     * a map that maps the AppdefEntityID to it's resource alerts number
+     */
+    @Transactional(readOnly = true)
+    public Map<AppdefEntityID, Integer> getAlertCountMapped(AppdefEntityID[] ids) {
+        AlertDAO dao = alertDAO;
+        Map<AppdefEntityID, Integer> counts = new HashMap<AppdefEntityID, Integer>();
+        for (int i = 0; i < ids.length; i++) {
+            if (ids[i].isPlatform() || ids[i].isServer() || ids[i].isService()) {
+            	counts.put(ids[i],dao.countAlerts(resourceManager.findResource(ids[i])).intValue());
+            }
+        }
+        return counts;
+    }
 
     /**
      * Processes {@link AlertConditionSatisfiedZEvent} that indicate that an

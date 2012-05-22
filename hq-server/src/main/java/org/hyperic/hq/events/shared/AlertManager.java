@@ -40,6 +40,7 @@ import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Local interface for AlertManager.
@@ -121,6 +122,15 @@ public interface AlertManager {
      */
     public int[] getAlertCount(org.hyperic.hq.appdef.shared.AppdefEntityID[] ids);
 
+    
+    /**
+     * Get the number of alerts for the given array of AppdefEntityID's as 
+     * a map that maps the AppdefEntityID to it's resource alerts number
+     * 
+     */
+    @Transactional(readOnly = true)
+    public Map<AppdefEntityID, Integer> getAlertCountMapped(AppdefEntityID[] ids);
+    
     /**
      * Processes {@link AlertConditionSatisfiedZEvent} that indicate that an
      * alert should be created To minimize StaleStateExceptions, this method

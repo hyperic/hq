@@ -27,6 +27,7 @@ package org.hyperic.hq.galerts.shared;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -181,6 +182,12 @@ public interface GalertManager {
     public int[] fillAlertCount(AuthzSubject subj, AppdefEntityID[] ids, int[] counts)
         throws PermissionException;
 
+    /**
+     * fill the number of alerts for the given array of AppdefEntityID's , mapping AppdefEntityID to it's alerts count
+     */
+	public void fillAlertCount(AuthzSubject subject,
+			AppdefEntityID[] ids, Map<AppdefEntityID, Integer> counts)  throws PermissionException;;
+	
     public void deleteAlertLog(GalertLog log);
 
     public void deleteAlertLogs(ResourceGroup group);
@@ -242,5 +249,7 @@ public interface GalertManager {
      * Remove all the galert defs associated with this resource
      */
     public void processGroupDeletion(ResourceGroup g);
+
+    
 
 }
