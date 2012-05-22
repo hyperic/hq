@@ -67,6 +67,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.quartz.SchedulerException;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Local interface for EventsBoss.
@@ -78,6 +79,14 @@ public interface EventsBoss {
     public int[] getAlertCount(int sessionID, org.hyperic.hq.appdef.shared.AppdefEntityID[] ids)
         throws SessionNotFoundException, SessionTimeoutException, PermissionException;
 
+    /**
+     * Get the number of alerts for the given array of AppdefEntityID's, mapping AppdefEntityID to it's alerts count
+     * 
+     */
+    @Transactional(readOnly = true)
+    public Map<AppdefEntityID, Integer> getAlertCountMapped(int sessionID, AppdefEntityID[] ids)
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException;
+    
     /**
      * Create an alert definition
      */

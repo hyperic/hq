@@ -27,6 +27,7 @@ package org.hyperic.hq.ui.action.portlet.resourcehealth;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -119,14 +120,13 @@ public class ViewAction
         }
 
         // Get alert counts for each resource
-        int alerts[] = eventsBoss.getAlertCount(sessionID, arrayIds);
+        Map<AppdefEntityID, Integer> alertsCount = eventsBoss.getAlertCountMapped(sessionID, arrayIds);
 
         // Due to the complexity of the UIBeans, we need to construct the
         // JSON objects by hand.
         JSONObject favorites = new JSONObject();
 
         List<JSONObject> resources = new ArrayList<JSONObject>();
-        int count = 0;
 
         for (ResourceDisplaySummary bean : list) {
             JSONObject res = new JSONObject();
@@ -139,10 +139,12 @@ public class ViewAction
             res.put("throughput", getFormattedValue(bean.getThroughput(), bean.getThroughputUnits()));
             res.put("availability", getAvailString(bean.getAvailability()));
             res.put("monitorable", bean.getMonitorable());
-            res.put("alerts", alerts[count]);
-
+            Integer alertsNum = alertsCount.get(bean.getEntityId());
+            if (null == alertsNum) {
+            	alertsNum = 0;
+            }
+            res.put("alerts", alertsNum);
             resources.add(res);
-            count++;
         }
 
         favorites.put("favorites", resources);

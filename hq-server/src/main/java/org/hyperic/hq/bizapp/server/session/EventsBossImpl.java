@@ -226,6 +226,23 @@ public class EventsBossImpl implements EventsBoss {
         counts = galertManager.fillAlertCount(subject, ids, counts);
         return counts;
     }
+    
+
+    /**
+     * Get the number of alerts for the given array of AppdefEntityID's, mapping AppdefEntityID to it's alerts count
+     * 
+     */
+    @Transactional(readOnly = true)
+    public Map<AppdefEntityID, Integer> getAlertCountMapped(int sessionID, AppdefEntityID[] ids)
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException {
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
+
+        Map<AppdefEntityID, Integer> counts = alertManager.getAlertCountMapped(ids);
+        galertManager.fillAlertCount(subject, ids, counts);
+        return counts;
+    }
+    
+    
 
     /**
      * Create an alert definition
