@@ -65,7 +65,7 @@ rem Find the requested command.
 for /F %%v in ('echo %1^|findstr "^start$ ^stop$ ^restart$ ^install$ ^remove$ ^query$ ^ping$ ^setup"') do call :exec set COMMAND=%%v
 
 if "%COMMAND%" == "" (
-    echo Usage: %0 { start : stop : restart : install : remove : query : ping : setup }
+    echo Usage: %0 { start : stop : restart : install : remove : query : ping : setup : set-property }
     pause
     goto :eof
 ) else (
