@@ -39,6 +39,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.util.PropertyUtil;
 import org.hyperic.util.file.FileUtil;
 import org.hyperic.util.security.SecurityUtil;
@@ -49,6 +51,7 @@ import org.hyperic.util.security.SecurityUtil;
  * API for consumption by the Agent.
  */
 public class AgentConfig {
+    protected final static Log logger = LogFactory.getLog(AgentConfig.class.getName());
 
     private static final String DEV_URANDOM = "/dev/urandom";
     
@@ -267,9 +270,11 @@ public class AgentConfig {
             throw new AgentConfigException(e1.getMessage());
         }
         if (!propFile.exists()) {
+            logger.error(propFile + " does not exist");
             return false;
         }
         if (!propFile.canRead()) {
+            logger.error("can't read " + propFile);
             return false;
         }
         try {
@@ -308,9 +313,9 @@ public class AgentConfig {
                 }
                 PropertyUtil.storeProperties(propFile.getAbsolutePath(), propEncKey,unEncProps);
             }
-
             return true;
         } catch (Exception e) {
+            logger.error(e);
             return false;
         }
     }
