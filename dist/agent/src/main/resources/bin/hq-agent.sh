@@ -850,7 +850,7 @@ case "$1" in
         ;;        
 
     *)
-        echo "Usage: $0 { start | stop | restart | status | dump | ping | setup }"
+        echo "Usage: $0 { start | stop | restart | status | dump | ping | setup | set-property }"
         exit 1
         ;;
 esac
