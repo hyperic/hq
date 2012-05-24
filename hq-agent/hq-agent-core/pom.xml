@@ -23,6 +23,7 @@
         <dependency>
             <groupId>com.ibm.icu</groupId>
             <artifactId>icu4j</artifactId>
+            <scope>compile</scope>
         </dependency>
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
