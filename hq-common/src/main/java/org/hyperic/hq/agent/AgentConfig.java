@@ -270,12 +270,10 @@ public class AgentConfig {
             throw new AgentConfigException(e1.getMessage());
         }
         if (!propFile.exists()) {
-            logger.error(propFile + " does not exist");
-            return false;
+            throw new AgentConfigException(propFile + " does not exist");
         }
         if (!propFile.canRead()) {
-            logger.error("can't read " + propFile);
-            return false;
+            throw new AgentConfigException("can't read " + propFile);
         }
         try {
             // use the property encryption key to decrypt encrypted fileds and encrypt ones
@@ -315,8 +313,7 @@ public class AgentConfig {
             }
             return true;
         } catch (Exception e) {
-            logger.error(e);
-            return false;
+            throw new AgentConfigException("Failed to load: " + e.getMessage());
         }
     }
     
@@ -367,9 +364,7 @@ public class AgentConfig {
        
         File[] propFiles = getPropertyFiles(propsFile);
         for (int i=0; i<propFiles.length; i++) {
-            if (!loadProps(useProps, propFiles[i])) {
-                throw new AgentConfigException("Failed to load: " + propFiles[i]);
-            }
+            loadProps(useProps, propFiles[i]);
         }
         
         PropertyUtil.expandVariables(useProps);
