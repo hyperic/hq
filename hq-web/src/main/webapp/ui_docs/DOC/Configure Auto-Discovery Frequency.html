@@ -1,15 +1,15 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>vFabric Hyperic 4.6.5 : Configure Auto-Discovery Frequency</title>
+        <title>vFabric Hyperic 4.6.6 : Configure Auto-Discovery Frequency</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
-<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
- - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
- -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.5.html">Hyperic 4.6.5 Release Notes</a> </b>
+<b><a href="vFabric Hyperic 4.6.6.html" title="vFabric Hyperic 4.6.6 Documentation Home">vFabric Hyperic 4.6.6 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.6.html">Hyperic 4.6.6 Release Notes</a> </b>
  <p>
  <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
@@ -17,19 +17,38 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6.5 : Configure Auto-Discovery Frequency
+                            vFabric Hyperic 4.6.6 : Configure Auto-Discovery Frequency
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on May 09, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <h2><a name="ConfigureAuto-DiscoveryFrequency-ConfigureFrequencyofDefaultScan"></a>Configure Frequency of Default Scan </h2>
+				    <style type='text/css'>/*<![CDATA[*/
+div.rbtoc1336582595843 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1336582595843 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1336582595843 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1336582595843'>
+<ul>
+    <li><a href='#ConfigureAuto-DiscoveryFrequency-ConfigureFrequencyofDefaultScan'>Configure Frequency of Default Scan</a></li>
+<ul>
+    <li><a href='#ConfigureAuto-DiscoveryFrequency-autoinventory.defaultScan.interval.millis'>autoinventory.defaultScan.interval.millis</a></li>
+</ul>
+    <li><a href='#ConfigureAuto-DiscoveryFrequency-DisableDefaultScan'>Disable Default Scan</a></li>
+    <li><a href='#ConfigureAuto-DiscoveryFrequency-ConfigureFrequencyofRuntimeScan'>Configure Frequency of Runtime Scan</a></li>
+<ul>
+    <li><a href='#ConfigureAuto-DiscoveryFrequency-autoinventory.runtimeScan.interval.millis'>autoinventory.runtimeScan.interval.millis</a></li>
+</ul>
+</ul></div>
+
+<h2><a name="ConfigureAuto-DiscoveryFrequency-ConfigureFrequencyofDefaultScan"></a>Configure Frequency of Default Scan </h2>
 
 <p>By default, an HQ Agent runs a default scan upon startup and every 15 minutes thereafter. To change the frequency, uncomment the <tt>autoinventory.defaultScan.interval.millis</tt> line in the <tt>agent.properties file</tt>, and set the desired value in milliseconds.</p>
 
 
-<h6><a name="ConfigureAuto-DiscoveryFrequency-autoinventory.defaultScan.interval.millis"></a>autoinventory.defaultScan.interval.millis </h6>
+<ul>
+	<li>autoinventory.defaultScan.interval.millis*
 <div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Description</b>
 
 <p>Specifies how frequently the agent performs a default autoinventory scan.  </p>
@@ -40,7 +59,9 @@
 
 <p>Commented out, set to 86,400,000 milliseconds, or 1 day. </p>
 
-<p><b>Note however, that by default, the agent performs the default scan at startup and every 15 minutes thereafter.</b></p></td></tr></table></div> 
+<p><b>Note however, that by default, the agent performs the default scan at startup and every 15 minutes thereafter.</b></p></td></tr></table></div> </li>
+</ul>
+
 
 <h2><a name="ConfigureAuto-DiscoveryFrequency-DisableDefaultScan"></a>Disable Default Scan </h2>
 
@@ -52,7 +73,7 @@
 
 <p>By default, an HQ Agent runs a runtime scan once a day. To change the frequency, edit the{{autoinventory.runtime.Scan.interval.millis}} line in the <tt>agent.properties file</tt>, and set the desired value in milliseconds.</p>
 
-<h6><a name="ConfigureAuto-DiscoveryFrequency-autoinventory.runtimeScan.interval.millis"></a>autoinventory.runtimeScan.interval.millis </h6>
+<p><b>autoinventory.runtimeScan.interval.millis</b></p>
 <div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Description</b>
 
 <p>Specifies how frequently the agent performs a runtime scan. </p>
@@ -75,7 +96,7 @@
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Feb 28, 2012 11:11</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on May 21, 2012 08:34</font></td>
 		    </tr>
 	    </table>
     </body>

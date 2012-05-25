@@ -1,0 +1,400 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 4.6.6 : Supported Configurations and System Requirements</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 4.6.6.html" title="vFabric Hyperic 4.6.6 Documentation Home">vFabric Hyperic 4.6.6 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.6.html">Hyperic 4.6.6 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 4.6.6 : Supported Configurations and System Requirements
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on May 16, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <style type='text/css'>/*<![CDATA[*/
+div.rbtoc1337208032713 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1337208032713 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1337208032713 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1337208032713'>
+<ul>
+    <li><a href='#SupportedConfigurationsandSystemRequirements-OperatingSystemSupportandRequirements'>Operating System Support and Requirements</a></li>
+<ul>
+    <li><a href='#SupportedConfigurationsandSystemRequirements-vFabricHypericServer'>vFabric Hyperic Server</a></li>
+    <li><a href='#SupportedConfigurationsandSystemRequirements-vFabricHypericAgent'>vFabric Hyperic Agent</a></li>
+</ul>
+    <li><a href='#SupportedConfigurationsandSystemRequirements-HostMachineRequirements'>Host Machine Requirements</a></li>
+    <li><a href='#SupportedConfigurationsandSystemRequirements-HypericServerSupportedDatabases'>Hyperic Server-Supported Databases</a></li>
+    <li><a href='#SupportedConfigurationsandSystemRequirements-SupportedBrowsers'>Supported Browsers</a></li>
+    <li><a href='#SupportedConfigurationsandSystemRequirements-AgentServerCompatibilityRequirements'>Agent Server Compatibility Requirements</a></li>
+    <li><a href='#SupportedConfigurationsandSystemRequirements-DriversforMonitoringDatabases'>Drivers for Monitoring Databases</a></li>
+</ul></div>
+
+
+<p>The sections that follow document supported operating system platforms and describe system requirements for vFabric Hyperic Server and Agent.</p>
+
+<p><a name="SupportedConfigurationsandSystemRequirements-OS"></a></p>
+<h1><a name="SupportedConfigurationsandSystemRequirements-OperatingSystemSupportandRequirements"></a>Operating System Support and Requirements</h1>
+
+<p>The following sections show supported configurations and related requirements for vFabric Hyperic Server and Agent.</p>
+
+<h2><a name="SupportedConfigurationsandSystemRequirements-vFabricHypericServer"></a>vFabric Hyperic Server</h2>
+
+<p>The table shows operating system support and requirements for vFabric Hyperic Server. The table includes <a href="http://pubs.vmware.com/vfabric5/topic/com.vmware.vfabric.platform.5.1/suppconfigs/about.html">vFabric Suite supported configurations</a>, as well as additional configurations supported by standalone vFabric Hyperic.&nbsp;</p>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Operating System*&nbsp; <br class="atl-forced-newline" /> </th>
+<th class='confluenceTh'> Processor Architecture </th>
+<th class='confluenceTh'> JVM&#42; <br class="atl-forced-newline" /> </th>
+<th class='confluenceTh'> Production or Developer Support*&#42; </th>
+<th class='confluenceTh'> Scaling Considerations </th>
+</tr>
+<tr>
+<td class='confluenceTd'> RedHat Enterprise Linux (RHEL) 5 or CentOS 5.x </td>
+<td class='confluenceTd'> x86_64 </td>
+<td class='confluenceTd'> Oracle Java SE 6<br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Production </td>
+<td class='confluenceTd'> Best configuration for environments with more than 1000 managed platforms. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> RedHat Enterprise Linux (RHEL) 6 or CentOS 6.x </td>
+<td class='confluenceTd'> x86_32 </td>
+<td class='confluenceTd'> Oracle Java SE 6 <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Production </td>
+<td class='confluenceTd'> For medium scale environments. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> RedHat Enterprise Linux (RHEL) 6 </td>
+<td class='confluenceTd'> x86_64 </td>
+<td class='confluenceTd'> Oracle Java SE 6</td>
+<td class='confluenceTd'> Production </td>
+<td class='confluenceTd'> For medium scale environments. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Ubuntu 10.11 </td>
+<td class='confluenceTd'> x86_64 </td>
+<td class='confluenceTd'> Oracle Java SE 6</td>
+<td class='confluenceTd'> Production </td>
+<td class='confluenceTd'> For medium scale environments. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Ubuntu 10.11 </td>
+<td class='confluenceTd'> x86_32 </td>
+<td class='confluenceTd'> Oracle Java SE 6 </td>
+<td class='confluenceTd'> Development </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Solaris 10 or higher </td>
+<td class='confluenceTd'> x86_64 </td>
+<td class='confluenceTd'> Oracle Java SE 6 </td>
+<td class='confluenceTd'> Production </td>
+<td class='confluenceTd'> For medium scale environments. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Solaris 10 or higher </td>
+<td class='confluenceTd'> x86_32 </td>
+<td class='confluenceTd'> Oracle Java SE 6 </td>
+<td class='confluenceTd'> Production </td>
+<td class='confluenceTd'> For medium scale environments. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Microsoft Windows Server 2008 </td>
+<td class='confluenceTd'> x86_64, x86_32 </td>
+<td class='confluenceTd'> Oracle Java SE 6 </td>
+<td class='confluenceTd'> Production </td>
+<td class='confluenceTd'> For medium scale environments. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Microsoft Windows Server 2003 Server </td>
+<td class='confluenceTd'> x86_64 </td>
+<td class='confluenceTd'> Oracle Java SE 6 </td>
+<td class='confluenceTd'> Development </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Microsoft Windows XP </td>
+<td class='confluenceTd'> x86_64 </td>
+<td class='confluenceTd'> Oracle Java SE 6 </td>
+<td class='confluenceTd'> Development </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Microsoft Windows 7 </td>
+<td class='confluenceTd'> x86_64 </td>
+<td class='confluenceTd'> Oracle Java SE 6 </td>
+<td class='confluenceTd'> Development </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> MacOS X 10.6&#43; </td>
+<td class='confluenceTd'> x86_64 </td>
+<td class='confluenceTd'> Oracle Java SE 6</td>
+<td class='confluenceTd'> Development </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+</tbody></table>
+</div>
+
+
+<p>&#42;Host operating systems should employ a method of time sync (NTP). This is required in order to ensure accuracy of metric data reporting and alerts.</p>
+
+<p>&#42;*The table indicates whether the supported configuration is for production or development. Generally,&nbsp;<em>production</em>&nbsp;support means you can run your production application on the platform;&nbsp;<em>developer</em>&nbsp;support means you can develop on the platform but you should not run your production application on it. Many developers use consumer-focused operating systems that are not certified for production use, and most vFabric products function well on popular consumer operating systems. The developer support designation is intended to convey which products are "known to work" and that VMware will provide best-effort support for resolving reportedissues that are discovered. Developer Support certifications are not supported for use in production.</p>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>X Libraries on Unix-Based Platforms</b><br /><a name="SupportedConfigurationsandSystemRequirements-xlib"></a><br/>
+On Unix-like platforms, Hyperic Server requires the <tt>libXp.so.6</tt> X library to create charts and other graphics in the Hyperic user interface. The location of this library varies by version and provider:
+
+<ul>
+	<li>Enterprise Linux &#8212; As of Red Hat Enterprise Linux 4 and CentOS 4, <tt>libXp.so.6</tt> is in the <tt>xorg-x11-deprecated-libs</tt> RPM.</li>
+	<li>Debian &#8212; install the <tt>libxp6</tt>, <tt>libxt6</tt>, <tt>libxtst6</tt>, and <tt>libx11-6</tt> packages.</li>
+</ul>
+
+
+<ul>
+	<li>Fedora Core 5 &#8212; as of Fedora Core 5, the libXp.so library has been split out to its own package; install the libXp RPM.</li>
+</ul>
+
+
+<ul>
+	<li>Other distributions &#8212; The required libraries can be found in either the XFree86-libs or the xorg-x11-libs package.</li>
+</ul>
+</td></tr></table></div>
+
+<h2><a name="SupportedConfigurationsandSystemRequirements-vFabricHypericAgent"></a>vFabric Hyperic Agent</h2>
+
+<p>The &nbsp;table shows supported configurations for Hyperic Agent. &nbsp;These configurations are supported for the agent in both development and production environments.</p>
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Operating System&#42; <br class="atl-forced-newline" /> </th>
+<th class='confluenceTh'> Processor Architecture </th>
+<th class='confluenceTh'> JVM <br class="atl-forced-newline" /> </th>
+</tr>
+<tr>
+<td class='confluenceTd'> RedHat Enterprise Linux (RHEL) 5 or CentOS 5.x</td>
+<td class='confluenceTd'>x86_64  </td>
+<td class='confluenceTd'>Oracle Java SE6 </td>
+</tr>
+<tr>
+<td class='confluenceTd'> RedHat Enterprise Linux (RHEL) 6 or CentOS 6.x</td>
+<td class='confluenceTd'>x86_64, x86_32 </td>
+<td class='confluenceTd'>Oracle Java SE6  </td>
+</tr>
+<tr>
+<td class='confluenceTd'>Windows XP </td>
+<td class='confluenceTd'>x86_64  </td>
+<td class='confluenceTd'>Oracle Java SE6  </td>
+</tr>
+<tr>
+<td class='confluenceTd'>Windows XP Pro </td>
+<td class='confluenceTd'>x86_64 </td>
+<td class='confluenceTd'>Oracle Java SE6  </td>
+</tr>
+<tr>
+<td class='confluenceTd'>Windows 2000 </td>
+<td class='confluenceTd'>x86_64, x86_32  </td>
+<td class='confluenceTd'>Oracle Java SE6  </td>
+</tr>
+<tr>
+<td class='confluenceTd'>Windows 2003 Standard Edition </td>
+<td class='confluenceTd'>x86_64  </td>
+<td class='confluenceTd'>Oracle Java SE6  </td>
+</tr>
+<tr>
+<td class='confluenceTd'>Windows 2003 Enterprise Edition </td>
+<td class='confluenceTd'>x86_64  </td>
+<td class='confluenceTd'>Oracle Java SE6  </td>
+</tr>
+<tr>
+<td class='confluenceTd'>Windows 2008 Standard Edition </td>
+<td class='confluenceTd'>x86_64, x86_32  </td>
+<td class='confluenceTd'>Oracle Java SE6  </td>
+</tr>
+<tr>
+<td class='confluenceTd'>Windows 7 </td>
+<td class='confluenceTd'>x86_64  </td>
+<td class='confluenceTd'>Oracle Java SE6  </td>
+</tr>
+<tr>
+<td class='confluenceTd'>Solaris 10 or higher </td>
+<td class='confluenceTd'>x86_64, x86_32 </td>
+<td class='confluenceTd'>Oracle Java SE6  </td>
+</tr>
+<tr>
+<td class='confluenceTd'>Mac OS X 10.5 or higher </td>
+<td class='confluenceTd'>x86_64 </td>
+<td class='confluenceTd'>Oracle Java SE6  </td>
+</tr>
+<tr>
+<td class='confluenceTd'>HP-UX 11.11 or higher </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>Oracle Java SE6  </td>
+</tr>
+<tr>
+<td class='confluenceTd'>AIX 5.3 and AIX 6.1 </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>Oracle Java SE6  </td>
+</tr>
+<tr>
+<td class='confluenceTd'>FreeBSD 8.1 </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> Oracle Java SE6 </td>
+</tr>
+</tbody></table>
+</div>
+
+
+<p>&#42;Host operating systems should employ a method of time sync (NTP). This is required in order to ensure accuracy of metric data reporting and alerts.</p>
+
+<p><a name="SupportedConfigurationsandSystemRequirements-hosts"></a></p>
+<h1><a name="SupportedConfigurationsandSystemRequirements-HostMachineRequirements"></a>Host Machine Requirements</h1>
+
+<p>This section describes the host system requirements for the Hyperic Server, and the Hyperic database, assuming that the database runs on a different host than the Hyperic Server.</p>
+
+<p>Note: &nbsp;</p>
+
+<ul>
+	<li>Hyperic supports only one Hyperic Server on a host. The host must have a static IP address for server communications.&nbsp;</li>
+	<li>Hyperic supports only one Hyperic Agent on a host.&nbsp;</li>
+	<li>If you will manage more more than 100 platforms, run the&nbsp;Hyperic database on a dedicated host, rather than on the same machine as the Hyperic Server.</li>
+</ul>
+
+
+<p>In the table below:</p>
+<ul>
+	<li>"Medium" is 50 to 500 managed platforms, or 5000-30000 managed resources.</li>
+	<li>"Large" is 500 to 2,000 managed platforms, or more than 30,000 managed resources.</li>
+</ul>
+
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Resource <br class="atl-forced-newline" /> </th>
+<th class='confluenceTh'> Hyperic Server <br class="atl-forced-newline" />
+<br class="atl-forced-newline" /> </th>
+<th class='confluenceTh'> Hyperic Database&nbsp; <br class="atl-forced-newline" />
+required/recommended <br class="atl-forced-newline" /> </th>
+</tr>
+<tr>
+<td class='confluenceTd'> Processor </td>
+<td class='confluenceTd'> Medium: &nbsp;4 or more server class CPUs, 2 GHz or better <br class="atl-forced-newline" />
+Large: 6 or more server class CPUs, 2 Gz or better <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Medium: 4 or more server class CPUs, 2 GHz or better <br class="atl-forced-newline" />
+Large: 8 or more server class CPUs, 2 GHz or better&nbsp; <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> RAM </td>
+<td class='confluenceTd'> Medium: 8 GB <br class="atl-forced-newline" />  <font color="#000000">Large: 12 GB or more</font> </td>
+<td class='confluenceTd'> Medium: 6 GB or more <br class="atl-forced-newline" />
+Large: 16 GB or more&nbsp; </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Free disk space </td>
+<td class='confluenceTd'> 20 GB </td>
+<td class='confluenceTd'> Medium: 50 GB <br class="atl-forced-newline" />
+Large: 500 GB </td>
+</tr>
+</tbody></table>
+</div>
+
+
+<p><a name="SupportedConfigurationsandSystemRequirements-DBs"></a></p>
+<h1><a name="SupportedConfigurationsandSystemRequirements-HypericServerSupportedDatabases"></a>Hyperic Server-Supported Databases</h1>
+
+<p>For production deployments, VMware recommends running the Hyperic database on MySQL or Oracle. For deployments with more than 100, run the database on a dedicated host, not on the same machine as the Hyperic Server.</p>
+
+<p>Hyperic is packaged with a built-in PostgreSQL V8.2.5 database, which is suitable for evaluation or development environments. Hyperic does not support deployments that use the built-in database for production deployments with more than 25 managed platforms.</p>
+
+<p><b>Note:</b> <b>vFabric Hyperic includes JDBC drivers, Hyperic HQ does not.</b> In Hyperic HQ, the plugins packaged with the Hyperic Agent for MSSQL, Oracle, Informix, DB2, and Sybase do not include the database vendor's JDBC plugin. After installing Hyperic HQ you must download and install the vendor-provided JDBC drivers for these plugins to work. The database plugins in vFabric Hyperic include the JDBC drivers.</p>
+
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Database <br class="atl-forced-newline" /> </th>
+<th class='confluenceTh'> Version <br class="atl-forced-newline" />
+Required/Recommended <br class="atl-forced-newline" /> </th>
+</tr>
+<tr>
+<td class='confluenceTd'> MySQL Enterprise Server and MySQL Community Server <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> v5.0.x (v5.0.45 or later) <br class="atl-forced-newline" /> v5.1.x </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Oracle <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> 10g <br class="atl-forced-newline" /> 11g <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> PostgreSQL&#42; </td>
+<td class='confluenceTd'> 8.2.5  <br class="atl-forced-newline" /> 8.3</td>
+</tr>
+</tbody></table>
+</div>
+
+<p>&#42;Not supported for production deployment with more than 25 managed platforms.</p>
+
+<h1><a name="SupportedConfigurationsandSystemRequirements-SupportedBrowsers"></a>Supported Browsers</h1>
+
+<p>Hyperic supports the following browsers. Firefox is recommended.</p>
+
+<p><b>Note:</b> The Skype plugin for Firefox causes unexpected behavior in the Hyperic user interface. Disable the plugin to work around this problem.</p>
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Browser <br class="atl-forced-newline" /> </th>
+<th class='confluenceTh'> Version <br class="atl-forced-newline" /> </th>
+</tr>
+<tr>
+<td class='confluenceTd'> Firefox <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> 3.x </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Internet Explorer <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> 7, 8 (except on Windows 2008) <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Safari </td>
+<td class='confluenceTd'> 5.0.x, 5.1 <br class="atl-forced-newline" /> </td>
+</tr>
+</tbody></table>
+</div>
+
+
+<h1><a name="SupportedConfigurationsandSystemRequirements-AgentServerCompatibilityRequirements"></a>Agent Server Compatibility Requirements</h1>
+
+<p>The Hyperic Agents reporting to the Hyperic Server must be the same version as the Hyperic Server, or an earlier version than the Hyperic Server.</p>
+
+<h1><a name="SupportedConfigurationsandSystemRequirements-DriversforMonitoringDatabases"></a>Drivers for Monitoring Databases</h1>
+<p>In the open source version of Hyperic, the plugins packaged with the Hyperic Agent for MSSQL, Oracle, Informix, DB2, and Sybase do not include the database vendor's JDBC plugin. After installing Hyperic HQ you must download and install the vendor-provided JDBC drivers for these plugins to work.</p>
+
+<p>Note: The database plugins in vFabric Hyperic include the JDBC drivers.</p>
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on May 21, 2012 08:33</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>
