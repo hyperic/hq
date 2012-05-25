@@ -262,7 +262,7 @@ public class AgentConfig {
         }
     }
 
-    private static boolean loadProps(Properties props, File propFile) throws AgentConfigException {
+    private static synchronized boolean loadProps(Properties props, File propFile) throws AgentConfigException {
         Properties tmpProps;
         try {
             tmpProps = PropertyUtil.loadProperties(propFile.getPath());
