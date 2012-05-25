@@ -74,7 +74,9 @@ public class MeasurementDAO
     private final DBUtil dbUtil;
     private final MarkedStringEncryptor encryptor;
     protected final Log logger = LogFactory.getLog(this.getClass().getName());
-    
+    private final static  int ENCRYPT_UPDATE_TIMEOUT = 54000;
+    private final static  int ENCRYPT_UPDATE_CHUNK_SIZE = 500;
+
     @Autowired
     public MeasurementDAO(SessionFactory f, AgentDAO agentDao, DBUtil dbUtil, MarkedStringEncryptor encryptor) {
         super(Measurement.class, f);
@@ -86,40 +88,45 @@ public class MeasurementDAO
     public void encryptUnEncryptedDSNs() {
         Connection conn = null;
         Statement getDSNsStmt = null;
-        PreparedStatement setDSNsStmt = null;
         ResultSet rs = null;
         boolean mixedDSNs = false;
 
         try {
             conn = dbUtil.getConnection();
+            conn.setAutoCommit(false);
             getDSNsStmt = conn.createStatement();
-            rs = getDSNsStmt.executeQuery("SELECT DSN FROM EAM_MEASUREMENT");
+            rs = getDSNsStmt.executeQuery("SELECT ID, DSN FROM EAM_MEASUREMENT");
             if (!rs.next()) {
                 logger.debug("no metrics");
                 return;
             }
-            String dsn = rs.getString(1);
+            String dsn = rs.getString(2);
+            int id = rs.getInt(1);
             if (SecurityUtil.isMarkedEncrypted(dsn)) {
-                logger.debug("DSN column already encrypted");
+                logger.debug("DSN column is already encrypted");
                 return;
             }
-            for (int i = 500; !rs.isAfterLast() ; i+=500) {
+            for (int i = 1; !rs.isAfterLast() ; i++) {
+                PreparedStatement setDSNsStmt = null;
                 try {
                     List<String> dsns = new ArrayList<String>();
-                    setDSNsStmt = conn.prepareStatement("UPDATE EAM_MEASUREMENT SET DSN=? WHERE DSN=?");
+                    setDSNsStmt = conn.prepareStatement("UPDATE EAM_MEASUREMENT SET DSN=? WHERE ID=?");
+                    setDSNsStmt.setQueryTimeout(ENCRYPT_UPDATE_TIMEOUT);
                     setDSNsStmt.setString(1,this.encryptor.encrypt(dsn));
-                    setDSNsStmt.setString(2,dsn);
+                    setDSNsStmt.setInt(2,id);
                     dsns.add(dsn);
 
-                    for (int j = 0; j < i && rs.next() ; j++) {
-                        dsn = rs.getString(1);
+                    for (int j = 0; j < i*ENCRYPT_UPDATE_CHUNK_SIZE && rs.next() ; j++) {
+                        id = rs.getInt(1);
+                        dsn = rs.getString(2);
+                        // save updates of already encrypted dsns (should not happen, but just in case)
                         if (SecurityUtil.isMarkedEncrypted(dsn)) {
                             mixedDSNs = true;
                             continue;
                         }
                         setDSNsStmt.addBatch();
                         setDSNsStmt.setString(1,this.encryptor.encrypt(dsn));
-                        setDSNsStmt.setString(2,dsn);
+                        setDSNsStmt.setInt(2,id);
                         dsns.add(dsn);
                     }
                     int[] execInfo = setDSNsStmt.executeBatch();
@@ -129,12 +136,18 @@ public class MeasurementDAO
                         }
                     }
                 } finally {
-                    DBUtil.closeStatement(MeasurementDAO.class.getName(), setDSNsStmt);
+                   conn.commit();
+                   DBUtil.closeStatement(MeasurementDAO.class.getName(), setDSNsStmt);
                 }
             }
         } catch (SQLException e) {
             throw new SystemException(e);
         } finally {
+            try {
+                conn.setAutoCommit(true);
+            } catch (SQLException e) {
+                logger.error(e);
+            }
             DBUtil.closeConnection(MeasurementDAO.class.getName(), conn);
             if (mixedDSNs) {
                 logger.error("the DSN column of the Measurement table contains encrypted and un-encrypted values");
