@@ -82,12 +82,14 @@ public class MeasurementDAO
         this.dbUtil = dbUtil;
         this.encryptor = encryptor;
     }
-    
+
     public void encryptUnEncryptedDSNs() {
         Connection conn = null;
         Statement getDSNsStmt = null;
         PreparedStatement setDSNsStmt = null;
         ResultSet rs = null;
+        boolean mixedDSNs = false;
+
         try {
             conn = dbUtil.getConnection();
             getDSNsStmt = conn.createStatement();
@@ -101,36 +103,43 @@ public class MeasurementDAO
                 logger.debug("DSN column already encrypted");
                 return;
             }
-            List<String> dsns = new ArrayList<String>();
-            setDSNsStmt = conn.prepareStatement("UPDATE EAM_MEASUREMENT SET DSN=? WHERE DSN=?");
-            setDSNsStmt.setString(1,this.encryptor.encrypt(dsn));
-            setDSNsStmt.setString(2,dsn);
-            dsns.add(dsn);
-            boolean mixedDSNs = false;
-            while (rs.next()) {
-                dsn = rs.getString(1);
-                if (SecurityUtil.isMarkedEncrypted(dsn)) {
-                    mixedDSNs = true;
-                    continue;
-                }
-                setDSNsStmt.addBatch();
-                setDSNsStmt.setString(1,this.encryptor.encrypt(dsn));
-                setDSNsStmt.setString(2,dsn);
-                dsns.add(dsn);
-            }
-            if (mixedDSNs) {
-                logger.error("the DSN column of the Measurement table contains encrypted and un-encrypted values");
-            }
-            int[] execInfo = setDSNsStmt.executeBatch();
-            for (int i=0 ; i<execInfo.length ; i++) {
-                if (execInfo[i]==Statement.EXECUTE_FAILED) {
-                    logger.error("failed encrypting the following measurement's dsn DB column: " + dsns.get(i)); 
+            for (int i = 500; !rs.isAfterLast() ; i+=500) {
+                try {
+                    List<String> dsns = new ArrayList<String>();
+                    setDSNsStmt = conn.prepareStatement("UPDATE EAM_MEASUREMENT SET DSN=? WHERE DSN=?");
+                    setDSNsStmt.setString(1,this.encryptor.encrypt(dsn));
+                    setDSNsStmt.setString(2,dsn);
+                    dsns.add(dsn);
+
+                    for (int j = 0; j < i && rs.next() ; j++) {
+                        dsn = rs.getString(1);
+                        if (SecurityUtil.isMarkedEncrypted(dsn)) {
+                            mixedDSNs = true;
+                            continue;
+                        }
+                        setDSNsStmt.addBatch();
+                        setDSNsStmt.setString(1,this.encryptor.encrypt(dsn));
+                        setDSNsStmt.setString(2,dsn);
+                        dsns.add(dsn);
+                    }
+                    int[] execInfo = setDSNsStmt.executeBatch();
+                    for (int k=0 ; k<execInfo.length ; k++) {
+                        if (execInfo[k]==Statement.EXECUTE_FAILED) {
+                            logger.error("failed encrypting the following measurement's dsn DB column: " + dsns.get(k)); 
+                        }
+                    }
+                } finally {
+                    DBUtil.closeStatement(MeasurementDAO.class.getName(), setDSNsStmt);
                 }
             }
         } catch (SQLException e) {
             throw new SystemException(e);
         } finally {
             DBUtil.closeConnection(MeasurementDAO.class.getName(), conn);
+            if (mixedDSNs) {
+                logger.error("the DSN column of the Measurement table contains encrypted and un-encrypted values");
+            }
+
         }        
     }
 
