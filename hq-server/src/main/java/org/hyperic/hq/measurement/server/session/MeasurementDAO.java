@@ -105,7 +105,7 @@ public class MeasurementDAO
                 logger.debug("DSN column is already encrypted");
                 return;
             }
-            for (int i = 1; !rs.isAfterLast() ; i++) {
+            for (int chunkNum = 1; !rs.isAfterLast() ; chunkNum++) {
                 PreparedStatement setDSNsStmt = null;
                 try {
                     List<String> dsns = new ArrayList<String>();
@@ -115,7 +115,7 @@ public class MeasurementDAO
                     setDSNsStmt.setInt(2,id);
                     dsns.add(dsn);
 
-                    for (int j = 0; j < i*ENCRYPT_UPDATE_CHUNK_SIZE && rs.next() ; j++) {
+                    for (int rowNum = 0; rowNum < chunkNum*ENCRYPT_UPDATE_CHUNK_SIZE && rs.next() ; rowNum++) {
                         id = rs.getInt(1);
                         dsn = rs.getString(2);
                         // save updates of already encrypted dsns (should not happen, but just in case)
@@ -129,13 +129,12 @@ public class MeasurementDAO
                         dsns.add(dsn);
                     }
                     int[] execInfo = setDSNsStmt.executeBatch();
-                    for (int k=0 ; k<execInfo.length ; k++) {
-                        if (execInfo[k]==Statement.EXECUTE_FAILED) {
-                            logger.error("failed encrypting the following measurement's dsn DB column: " + dsns.get(k)); 
+                    for (int updateExecutionNum=0 ; updateExecutionNum<execInfo.length ; updateExecutionNum++) {
+                        if (execInfo[updateExecutionNum]==Statement.EXECUTE_FAILED) {
+                            logger.error("failed encrypting the following measurement's dsn DB column: " + dsns.get(updateExecutionNum)); 
                         }
                     }
                 } finally {
-                   conn.commit();
                    DBUtil.closeStatement(MeasurementDAO.class.getName(), setDSNsStmt);
                 }
             }
