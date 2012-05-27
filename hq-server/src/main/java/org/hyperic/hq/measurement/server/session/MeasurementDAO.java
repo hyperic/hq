@@ -93,7 +93,6 @@ public class MeasurementDAO
 
         try {
             conn = dbUtil.getConnection();
-            conn.setAutoCommit(false);
             getDSNsStmt = conn.createStatement();
             rs = getDSNsStmt.executeQuery("SELECT ID, DSN FROM EAM_MEASUREMENT");
             if (!rs.next()) {
@@ -143,11 +142,6 @@ public class MeasurementDAO
         } catch (SQLException e) {
             throw new SystemException(e);
         } finally {
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                logger.error(e);
-            }
             DBUtil.closeConnection(MeasurementDAO.class.getName(), conn);
             if (mixedDSNs) {
                 logger.error("the DSN column of the Measurement table contains encrypted and un-encrypted values");
