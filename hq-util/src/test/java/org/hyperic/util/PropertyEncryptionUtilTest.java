@@ -35,8 +35,6 @@ import java.util.Set;
 
 /**
  * Testing {@link PropertyEncryptionUtil} functionality.
- *
- * @author Adi Baron
  */
 public class PropertyEncryptionUtilTest extends TestCase {
 
