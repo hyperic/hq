@@ -41,7 +41,9 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.util.PropertyEncryptionUtil;
 import org.hyperic.util.PropertyUtil;
+import org.hyperic.util.PropertyUtilException;
 import org.hyperic.util.file.FileUtil;
 import org.hyperic.util.security.SecurityUtil;
 
@@ -137,7 +139,7 @@ public class AgentConfig {
         System.getProperty(PDK_PLUGIN_DIR_KEY, PROP_PDK_DIR[1] + "/plugins") };  
     public static final String[] PROP_PDK_WORK_DIR = 
     { PDK_WORK_DIR_KEY, 
-        System.getProperty(PDK_WORK_DIR_KEY, 
+        System.getProperty(PDK_WORK_DIR_KEY,
                 PROP_PDK_DIR[1] + "/" + WORK_DIR) };      
     public static final String[] PROP_PROXYHOST = 
     { "agent.proxyHost", DEFAULT_PROXY_HOST };
@@ -168,13 +170,14 @@ public class AgentConfig {
     public static final String BUNDLE_PROPFILE = PROP_BUNDLEHOME[1]
             + "/conf/"+DEFAULT_AGENT_PROPFILE_NAME;
 
-    public static final String DEFAULT_AGENT_PROP_ENC_KEY_FILE_NAME = "agent.propEncKey";
+    public static final String DEFAULT_AGENT_PROP_ENC_KEY_FILE_NAME = "agent.scu";
 
     public static final String DEFAULT_PROP_ENC_KEY_FILE = PROP_INSTALLHOME[1]
             + "/conf/"+DEFAULT_AGENT_PROP_ENC_KEY_FILE_NAME;
 
     public static final Set<String> ENCRYPTED_PROP_KEYS = new HashSet<String>();
-    {
+
+    static {
         ENCRYPTED_PROP_KEYS.add(HQ_PASS);
         ENCRYPTED_PROP_KEYS.add(SSL_KEYSTORE_PASSWORD);
     }
@@ -262,12 +265,21 @@ public class AgentConfig {
         }
     }
 
+    public static void ensurePropertiesEncryption(String propertiesFileName) throws AgentConfigException {
+        try {
+            PropertyEncryptionUtil.ensurePropertiesEncryption(
+                    propertiesFileName, AgentConfig.DEFAULT_PROP_ENC_KEY_FILE, ENCRYPTED_PROP_KEYS);
+        } catch (PropertyUtilException exc) {
+            throw new AgentConfigException(exc.getMessage());
+        }
+    }
+
     private static synchronized boolean loadProps(Properties props, File propFile) throws AgentConfigException {
         Properties tmpProps;
         try {
             tmpProps = PropertyUtil.loadProperties(propFile.getPath());
-        } catch (IOException e1) {
-            throw new AgentConfigException(e1.getMessage());
+        } catch (PropertyUtilException exc) {
+            throw new AgentConfigException(exc.getMessage());
         }
         if (!propFile.exists()) {
             logger.error(propFile + " does not exist");
@@ -278,40 +290,23 @@ public class AgentConfig {
             return false;
         }
         try {
-            // use the property encryption key to decrypt encrypted fileds and encrypt ones
-            // which should have been encrypted, but are not
-            // go over props which should have been encrypted in the prop file
-            Map<String,String> unEncProps = null;
-            String propEncKey = null;
+            String propEncKey = PropertyEncryptionUtil.getPropertyEncryptionKey(AgentConfig.DEFAULT_PROP_ENC_KEY_FILE);
+
             for (Enumeration<?> propKeys = tmpProps.propertyNames(); propKeys.hasMoreElements();) {
-                String tmpKey = (String)propKeys.nextElement();
-                String tmpValue = tmpProps.getProperty(tmpKey); 
+                String key = (String)propKeys.nextElement();
+                String value = tmpProps.getProperty(key);
+
                 // if property is defined in the prop file
-                if(tmpValue!=null) {
+                if(value!=null) {
                     // if encrypted, replace with decrypted value
-                    if (SecurityUtil.isMarkedEncrypted(tmpValue)) {
-                        if (propEncKey==null) {
-                            propEncKey = PropertyUtil.getPropEncKey(AgentConfig.DEFAULT_PROP_ENC_KEY_FILE);
-                        }
-                        tmpValue  = SecurityUtil.decrypt(SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM,propEncKey,tmpValue);
+                    if (SecurityUtil.isMarkedEncrypted(value)) {
+                        value  = SecurityUtil.decrypt(SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM,propEncKey,value);
                         // if not encrypted, although it should have, mark as candidate for encryption in the file
-                    } else if (ENCRYPTED_PROP_KEYS.contains(tmpKey)) {
-                        if (unEncProps==null) {
-                            unEncProps = new HashMap<String,String>();
-                        }
-                        unEncProps.put(tmpKey, tmpValue);
                     }
+                    value = value.trim();
                 }
-                
-                tmpValue = tmpValue.trim();
-                props.put(tmpKey, tmpValue);
-            }
-            // encrypt props which should have been encrypted, but are not
-            if (unEncProps!=null) {
-                if (propEncKey==null) {
-                    propEncKey = PropertyUtil.getPropEncKey(AgentConfig.DEFAULT_PROP_ENC_KEY_FILE);
-                }
-                PropertyUtil.storeProperties(propFile.getAbsolutePath(), propEncKey,unEncProps);
+
+                props.put(key, value);
             }
             return true;
         } catch (Exception e) {

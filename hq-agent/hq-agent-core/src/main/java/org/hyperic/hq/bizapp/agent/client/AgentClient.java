@@ -77,7 +77,9 @@ import org.hyperic.sigar.FileWatcher;
 import org.hyperic.sigar.FileWatcherThread;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
+import org.hyperic.util.PropertyEncryptionUtil;
 import org.hyperic.util.PropertyUtil;
+import org.hyperic.util.PropertyUtilException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.security.SecurityUtil;
 import org.tanukisoftware.wrapper.WrapperManager;
@@ -557,8 +559,8 @@ public class AgentClient {
         return address;
     }
 
-    private void cmdSetupIfNoProvider() 
-            throws AgentConnectionException, AgentRemoteException, 
+    private void cmdSetupIfNoProvider()
+            throws AgentConnectionException, AgentRemoteException,
             IOException, AutoQuestionException {
 
         Properties bootProps = this.config.getBootProperties();        
@@ -1179,14 +1181,18 @@ public class AgentClient {
 
             }
 
-    private static void cmdSetProp(String propKey, String propVal) throws FileNotFoundException, IOException, ClassNotFoundException {
-        String propEncKey = PropertyUtil.getPropEncKey(AgentConfig.DEFAULT_PROP_ENC_KEY_FILE);
-        final String propFile = System.getProperty(AgentConfig.PROP_PROPFILE,AgentConfig.DEFAULT_PROPFILE);
-        // encrypt property value
-        // save encrypted data to agent.properties file
-        Map<String,String> entriesToStore = new HashMap<String,String>();
-        entriesToStore.put(propKey, propVal);
-        PropertyUtil.storeProperties(propFile, propEncKey, entriesToStore);
+    private static void cmdSetProp(String propKey, String propVal) throws AgentConfigException {
+        ensurePropertiesEncryption();
+
+        try {
+            String propEncKey = PropertyEncryptionUtil.getPropertyEncryptionKey(AgentConfig.DEFAULT_PROP_ENC_KEY_FILE);
+            String propFile = System.getProperty(AgentConfig.PROP_PROPFILE,AgentConfig.DEFAULT_PROPFILE);
+            Map<String,String> entriesToStore = new HashMap<String,String>();
+            entriesToStore.put(propKey, propVal);
+            PropertyUtil.storeProperties(propFile, propEncKey, entriesToStore);
+        } catch (Exception exc) {
+            throw new AgentConfigException(exc.getMessage());
+        }
     }
 
     private String getStartupLogFile(Properties bootProps)  throws AgentConfigException {
@@ -1228,7 +1234,10 @@ public class AgentClient {
      *
      * @return An initialized AgentClient
      */
-    private static AgentClient initializeAgent(boolean generateToken){
+    private static AgentClient initializeAgent(boolean generateToken) throws AgentConfigException {
+
+        ensurePropertiesEncryption();
+
         SecureAgentConnection conn;
         AgentConfig cfg;
         String connIp, listenIp, authToken;
@@ -1358,16 +1367,11 @@ public class AgentClient {
     }
 
     public static void main(String args[]) {
+
         if(args.length==3 && args[0].equals(SET_PROPERTY)){
             try {
                 cmdSetProp(args[1],args[2]);
-            } catch (FileNotFoundException e) {
-                SYSTEM_ERR.println("Error: " + e.getMessage());
-                e.printStackTrace(SYSTEM_ERR);
-            } catch (IOException e) {
-                SYSTEM_ERR.println("Error: " + e.getMessage());
-                e.printStackTrace(SYSTEM_ERR);
-            } catch (ClassNotFoundException e) {
+            } catch (AgentConfigException e) {
                 SYSTEM_ERR.println("Error: " + e.getMessage());
                 e.printStackTrace(SYSTEM_ERR);
             }
@@ -1456,6 +1460,13 @@ public class AgentClient {
             SYSTEM_ERR.println("Error: " + exc.getMessage());
             exc.printStackTrace(SYSTEM_ERR);
         }
+    }
+
+    private static void ensurePropertiesEncryption() throws AgentConfigException {
+        // Get the name of the agent properties file.
+        final String propFile = System.getProperty(AgentConfig.PROP_PROPFILE, AgentConfig.DEFAULT_PROPFILE);
+        // Make sure the properties are encrypted.
+        AgentConfig.ensurePropertiesEncryption(propFile);
     }
 
     private static boolean checkCanWriteToLog (Properties props) {
