@@ -1191,7 +1191,7 @@ public class AgentClient {
             entriesToStore.put(propKey, propVal);
             PropertyUtil.storeProperties(propFile, propEncKey, entriesToStore);
         } catch (Exception exc) {
-            throw new AgentConfigException(exc.getMessage());
+            throw new AgentConfigException(exc);
         }
     }
 

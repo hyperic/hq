@@ -34,8 +34,6 @@ import java.util.*;
 
 /**
  * A set of utilities to use when encrypting/decryption properties.
- *
- * @author Adi Baron
  */
 public class PropertyEncryptionUtil {
 
@@ -47,57 +45,6 @@ public class PropertyEncryptionUtil {
     private static final String KEY_ENCRYPTION_KEY = "Security Kung-Fu";
 
     /**
-     * Creates a new encryption key and saves it as a serialized object to the files system.
-     *
-     * @param fileName the path and name of the file into which the encryption key is serialized.
-     * @return the encryption key.
-     * @throws PropertyUtilException if the file already exists, the provided file name is invalid,
-     *                               or the object serialization fails.
-     */
-    public static String createAndStorePropertyEncryptionKey(String fileName) throws PropertyUtilException {
-        // Validate the file-name
-        if (fileName == null || fileName.isEmpty()) {
-            throw new PropertyUtilException("Illegal Argument: fileName [" + fileName + "]");
-        }
-
-        // Create a new file instance.
-        File encryptionKeyFile = new File(fileName);
-
-        // Check if the file already exists. Overriding an encryption file isn't allowed.
-        if (encryptionKeyFile.exists()) {
-            throw new PropertyUtilException("Attempt to override an encryption key file [" + fileName + "]");
-        }
-
-        ObjectOutput output = null;
-        String encryptionKey = null;
-        try {
-            // Create a file output stream and a buffer.
-            OutputStream file = new FileOutputStream(encryptionKeyFile);
-            OutputStream buffer = new BufferedOutputStream(file);
-            // Create the object output stream using the buffer.
-            output = new ObjectOutputStream(buffer);
-            // Create the encryption key.
-            encryptionKey = SecurityUtil.generateRandomToken();
-            // Encrypt the key and save it ot the disk.
-            String encryptedKey = SecurityUtil.encrypt(
-                    SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM, KEY_ENCRYPTION_KEY, encryptionKey);
-            output.writeObject(encryptedKey);
-        } catch (Exception exc) {
-            throw new PropertyUtilException(exc);
-        } finally {
-            // Try to close the output stream.
-            if (output != null) {
-                try {
-                    output.close();
-                } catch (IOException ignore) { /* ignore */ }
-            }
-        }
-
-        // Return the key
-        return encryptionKey;
-    } // EOM
-
-    /**
      * Read the properties encryption key from a file.
      *
      * @param fileName the path and name of the file into which the encryption key is serialized.
@@ -107,7 +54,7 @@ public class PropertyEncryptionUtil {
      */
     public static String getPropertyEncryptionKey(String fileName) throws PropertyUtilException {
         // Validate the file-name
-        if (fileName == null || fileName.isEmpty()) {
+        if (fileName == null || fileName.trim().length() < 1) {
             throw new PropertyUtilException("Illegal Argument: fileName [" + fileName + "]");
         }
 
@@ -160,12 +107,12 @@ public class PropertyEncryptionUtil {
             throws PropertyUtilException {
 
         // Make sure that the properties file exists.
-        if (propsFileName == null || propsFileName.isEmpty()) {
+        if (propsFileName == null || propsFileName.trim().length() < 1) {
             throw new PropertyUtilException("Illegal Argument: propsFileName [" + propsFileName + "]");
         }
 
         // Make sure that the encryption key name is valid.
-        if (encryptionKeyFileName == null || encryptionKeyFileName.isEmpty()) {
+        if (encryptionKeyFileName == null || encryptionKeyFileName.trim().length() < 1) {
             throw new PropertyUtilException("Illegal Argument: encryptionKeyFileName [" + encryptionKeyFileName + "]");
         }
 
@@ -226,6 +173,57 @@ public class PropertyEncryptionUtil {
             // Release the lock on the properties file.
             releaseFileLock(lock);
         }
+    } // EOM
+
+    /**
+     * Creates a new encryption key and saves it as a serialized object to the files system.
+     *
+     * @param fileName the path and name of the file into which the encryption key is serialized.
+     * @return the encryption key.
+     * @throws PropertyUtilException if the file already exists, the provided file name is invalid,
+     *                               or the object serialization fails.
+     */
+    static String createAndStorePropertyEncryptionKey(String fileName) throws PropertyUtilException {
+        // Validate the file-name
+        if (fileName == null || fileName.trim().length() < 1) {
+            throw new PropertyUtilException("Illegal Argument: fileName [" + fileName + "]");
+        }
+
+        // Create a new file instance.
+        File encryptionKeyFile = new File(fileName);
+
+        // Check if the file already exists. Overriding an encryption file isn't allowed.
+        if (encryptionKeyFile.exists()) {
+            throw new PropertyUtilException("Attempt to override an encryption key file [" + fileName + "]");
+        }
+
+        ObjectOutput output = null;
+        String encryptionKey = null;
+        try {
+            // Create a file output stream and a buffer.
+            OutputStream file = new FileOutputStream(encryptionKeyFile);
+            OutputStream buffer = new BufferedOutputStream(file);
+            // Create the object output stream using the buffer.
+            output = new ObjectOutputStream(buffer);
+            // Create the encryption key.
+            encryptionKey = SecurityUtil.generateRandomToken();
+            // Encrypt the key and save it ot the disk.
+            String encryptedKey = SecurityUtil.encrypt(
+                    SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM, KEY_ENCRYPTION_KEY, encryptionKey);
+            output.writeObject(encryptedKey);
+        } catch (Exception exc) {
+            throw new PropertyUtilException(exc);
+        } finally {
+            // Try to close the output stream.
+            if (output != null) {
+                try {
+                    output.close();
+                } catch (IOException ignore) { /* ignore */ }
+            }
+        }
+
+        // Return the key
+        return encryptionKey;
     } // EOM
 
     /**
