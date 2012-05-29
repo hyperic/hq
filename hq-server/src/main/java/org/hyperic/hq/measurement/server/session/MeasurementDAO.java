@@ -78,69 +78,6 @@ public class MeasurementDAO
         this.encryptor = encryptor;
     }
 
-   /* public void encryptUnEncryptedDSNs() {
-        Connection conn = null;
-        Statement getDSNsStmt = null;
-        ResultSet rs = null;
-        boolean mixedDSNs = false;
-
-        try {
-            conn = dbUtil.getConnection();
-            getDSNsStmt = conn.createStatement();
-            rs = getDSNsStmt.executeQuery("SELECT ID, DSN FROM EAM_MEASUREMENT");
-            if (!rs.next()) {
-                logger.debug("no metrics");
-                return;
-            }
-            String dsn = rs.getString(2);
-            int id = rs.getInt(1);
-            if (SecurityUtil.isMarkedEncrypted(dsn)) {
-                logger.debug("DSN column is already encrypted");
-                return;
-            }
-            for (int chunkNum = 1; !rs.isAfterLast() ; chunkNum++) {
-                PreparedStatement setDSNsStmt = null;
-                try {
-                    List<String> dsns = new ArrayList<String>();
-                    setDSNsStmt = conn.prepareStatement("UPDATE EAM_MEASUREMENT SET DSN=? WHERE ID=?");
-                    setDSNsStmt.setQueryTimeout(ENCRYPT_UPDATE_TIMEOUT);
-                    setDSNsStmt.setString(1,this.encryptor.encrypt(dsn));
-                    setDSNsStmt.setInt(2,id);
-                    dsns.add(dsn);
-
-                    for (int rowNum = 0; rowNum < chunkNum*ENCRYPT_UPDATE_CHUNK_SIZE && rs.next() ; rowNum++) {
-                        id = rs.getInt(1);
-                        dsn = rs.getString(2);
-                        // save updates of already encrypted dsns (should not happen, but just in case)
-                        if (SecurityUtil.isMarkedEncrypted(dsn)) {
-                            mixedDSNs = true;
-                            continue;
-                        }
-                        setDSNsStmt.addBatch();
-                        setDSNsStmt.setString(1,this.encryptor.encrypt(dsn));
-                        setDSNsStmt.setInt(2,id);
-                        dsns.add(dsn);
-                    }
-                    int[] execInfo = setDSNsStmt.executeBatch();
-                    for (int updateExecutionNum=0 ; updateExecutionNum<execInfo.length ; updateExecutionNum++) {
-                        if (execInfo[updateExecutionNum]==Statement.EXECUTE_FAILED) {
-                            logger.error("failed encrypting the following measurement's dsn DB column: " + dsns.get(updateExecutionNum)); 
-                        }
-                    }
-                } finally {
-                   DBUtil.closeStatement(MeasurementDAO.class.getName(), setDSNsStmt);
-                }
-            }
-        } catch (SQLException e) {
-            throw new SystemException(e);
-        } finally {
-            DBUtil.closeConnection(MeasurementDAO.class.getName(), conn);
-            if (mixedDSNs) {
-                logger.error("the DSN column of the Measurement table contains encrypted and un-encrypted values");
-            }
-
-        }        
-    }*/
 
     public void removeBaseline(Measurement m) {
         m.setBaseline(null);

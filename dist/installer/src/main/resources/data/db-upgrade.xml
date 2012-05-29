@@ -8341,7 +8341,6 @@ has already been defined.
   </schemaSpec>
 
   <schemaSpec version="3.101">
-      <column-encryptor table="GUY_TEST" columns="COL2,COLS1" pkColumn="ID" batchSize="1000" />
       <schema-directSQL>
         <statement desc="Replace pass-through ARG1 with actual DSN" targetDB="postgresql">
             UPDATE EAM_MEASUREMENT SET dsn = (
