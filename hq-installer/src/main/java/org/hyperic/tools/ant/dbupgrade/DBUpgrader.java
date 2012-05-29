@@ -29,10 +29,10 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.ResultSetMetaData;
 import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -41,12 +41,13 @@ import java.util.List;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
-
-import org.hyperic.util.jdbc.DBUtil;
-import org.hyperic.util.jdbc.JDBC;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.tools.db.TypeMap;
-import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
+import org.hyperic.util.jdbc.DBUtil;
+import org.hyperic.util.jdbc.JDBC;
+import org.hyperic.util.security.MarkedStringEncryptor;
+import org.hyperic.util.security.SecurityUtil;
+import org.jasypt.encryption.pbe.PBEStringEncryptor;
 import org.jasypt.properties.PropertyValueEncryptionUtils;
 
 public class DBUpgrader extends Task {
@@ -55,7 +56,7 @@ public class DBUpgrader extends Task {
 
     
 
-    private List   _schemaSpecs = new ArrayList();
+    private final List   _schemaSpecs = new ArrayList();
     private String encryptionKey;
     private String _jdbcDriver;
     private String _jdbcUrl;
@@ -79,6 +80,8 @@ public class DBUpgrader extends Task {
     private SchemaVersion _startSchemaVersion;
     private String        _targetSchemaVersionStr;
     private SchemaVersion _targetSchemaVersion;
+    
+    private PBEStringEncryptor encryptor ; 
 
     public DBUpgrader () {}
 
@@ -121,6 +124,15 @@ public class DBUpgrader extends Task {
     public void setEncryptionKey(String encryptionKey) {
         this.encryptionKey = encryptionKey;
     }
+    
+    public final PBEStringEncryptor newEncryptor() { 
+        return new MarkedStringEncryptor(
+                SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM, this.encryptionKey) ;
+    }//EOM 
+    
+    PBEStringEncryptor getEncryptor() { 
+        return this.encryptor ; 
+    }//EOM
 
     public SchemaSpec createSchemaSpec () {
         SchemaSpec ss = new SchemaSpec(this);
@@ -132,6 +144,7 @@ public class DBUpgrader extends Task {
     public int getDBType () { return _dbtype; }
     public int getDBUtilType () { return _dbutilType; }
 
+    @Override
     public void execute () throws BuildException {
         validateAttributes();
 
@@ -275,7 +288,7 @@ public class DBUpgrader extends Task {
                                      + _typeMapFile.getAbsolutePath()
                                      + ": " + e, e);
         }
-
+        
         if ( _targetSchemaVersionStr == null )
             throw new BuildException("DBUpgrader: No 'targetSchemaVersion' attribute specified.");
         try {
@@ -283,6 +296,8 @@ public class DBUpgrader extends Task {
         } catch (IllegalArgumentException e) {
             throw new BuildException("SchemaSpec: " + e.getMessage(), e);
         }
+        
+        this.encryptor = this.newEncryptor() ; 
     }
 
     /**
@@ -404,6 +419,9 @@ public class DBUpgrader extends Task {
     }
 
     public Connection getConnection () throws SQLException {
+        
+       // if(true) return DriverManager.getConnection("jdbc:oracle:thin:@10.17.188.158:1521:ORCL", "nipuna", "nipuna") ;
+        
         if ( _jdbcUser == null && _jdbcPassword == null ) {
             return DriverManager.getConnection(_jdbcUrl);
         } else {
@@ -411,26 +429,19 @@ public class DBUpgrader extends Task {
                         
             if (PropertyValueEncryptionUtils.isEncryptedValue(password)) {
                 log("Encryption key is " + encryptionKey);
-                password = decryptPassword(
-                                "PBEWithMD5AndDES",
-                                encryptionKey,
-                                password);
+                password = decryptPassword(password);
             }
             
             return DriverManager.getConnection(_jdbcUrl, _jdbcUser, password);
         }
     }
     
-    private String decryptPassword(String algorithm,
-                                   String encryptionKey,
-                                   String clearTextPassword) {
+    private String decryptPassword(String clearTextPassword) {
         
         // TODO: This needs to be refactored into a security utility class
-        
-        StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
-        encryptor.setPassword(encryptionKey);
-        encryptor.setAlgorithm(algorithm);
-        
-        return PropertyValueEncryptionUtils.decrypt(clearTextPassword, encryptor);
+
+        return this.encryptor.decrypt(clearTextPassword) ; 
     }
+    
+     
 }

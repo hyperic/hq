@@ -25,11 +25,6 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -52,12 +47,10 @@ import org.hyperic.hq.appdef.server.session.AgentDAO;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.security.MarkedStringEncryptor;
-import org.hyperic.util.security.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -85,7 +78,7 @@ public class MeasurementDAO
         this.encryptor = encryptor;
     }
 
-    public void encryptUnEncryptedDSNs() {
+   /* public void encryptUnEncryptedDSNs() {
         Connection conn = null;
         Statement getDSNsStmt = null;
         ResultSet rs = null;
@@ -147,7 +140,7 @@ public class MeasurementDAO
             }
 
         }        
-    }
+    }*/
 
     public void removeBaseline(Measurement m) {
         m.setBaseline(null);

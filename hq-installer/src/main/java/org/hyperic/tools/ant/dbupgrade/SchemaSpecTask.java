@@ -33,11 +33,11 @@ import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hyperic.tools.db.TypeMap;
-import org.hyperic.util.jdbc.DBUtil;
-
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
+import org.hyperic.tools.db.TypeMap;
+import org.hyperic.util.jdbc.DBUtil;
+import org.jasypt.encryption.pbe.PBEStringEncryptor;
 
 public abstract class SchemaSpecTask extends Task {
     protected String _ctx = SchemaSpecTask.class.getName();
@@ -80,6 +80,10 @@ public abstract class SchemaSpecTask extends Task {
     public Connection getNewConnection () throws SQLException {
         return _upgrader.getConnection(); 
     }
+    
+    public final PBEStringEncryptor newEncryptor() { 
+        return this._upgrader.newEncryptor() ; 
+    }//EOM 
 
     public int getDBType () { return _upgrader.getDBType(); }
     

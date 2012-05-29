@@ -63,7 +63,6 @@ public class MeasurementSystemInitializer {
     public void init() {
         // Make sure we have the aux-log provider loaded
         MetricAuxLogProvider.class.toString();
-        this.measurementManager.encryptUnEncryptedDSNs();
         prefetchEnabledMeasurementsAndTemplates();
         startDataPurgeWorker();
     }
