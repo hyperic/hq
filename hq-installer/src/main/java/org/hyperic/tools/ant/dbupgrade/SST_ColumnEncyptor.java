@@ -80,6 +80,7 @@ public class SST_ColumnEncyptor extends SchemaSpecTask{
     private DatabaseType enumDatabaseType ; 
     
     private static AtomicInteger pages ;
+    private static final int DEFUALT_BATCH_SIZE = 1000 ;  
     
     public SST_ColumnEncyptor(){
     }//EOM 
@@ -93,7 +94,7 @@ public class SST_ColumnEncyptor extends SchemaSpecTask{
     }//EOM 
     
     public final void setBatchSize(final String batchSize) { 
-        this.batchSize = (batchSize == null ? 1000 : Integer.parseInt(batchSize)) ;  
+        this.batchSize = (batchSize == null ? DEFUALT_BATCH_SIZE : Integer.parseInt(batchSize)) ;  
     }//EOM 
     
     /**
@@ -120,7 +121,7 @@ public class SST_ColumnEncyptor extends SchemaSpecTask{
             final StringBuilder selectStatementbuilder = new StringBuilder() ;
                  
             for(final String column : arrColumns) {
-                if(column.length() == 1 || columns.contains(columns)) continue ;
+                if(column.length() == 0 || columns.contains(columns)) continue ;
                 //else 
                 columns.add(column) ;
                 selectStatementbuilder.append(column).append(',') ; 
@@ -185,7 +186,7 @@ public class SST_ColumnEncyptor extends SchemaSpecTask{
 
         try{ 
             //ensure batchsize is set if non was defined in the xml.
-            if(this.batchSize == 0) this.batchSize = 1000 ; 
+            if(this.batchSize == 0) this.batchSize = DEFUALT_BATCH_SIZE ; 
             
             final long before = System.currentTimeMillis() ; 
             
@@ -337,108 +338,114 @@ public class SST_ColumnEncyptor extends SchemaSpecTask{
             int iCurrentPageNumber = 0 ; 
             final int iBatchSize = SST_ColumnEncyptor.this.batchSize ; 
             String colVal = null ; 
-            //iterate over the partitions buffer and process until there are non (buffer < 0) 
-            //Note: cannot use the countDownLatch as the buffer as the countDown & getCount 
-            //are not bound as one atomic operations.  
-            while((iCurrentPageNumber = pages.getAndDecrement()) >= 0) { 
-                
-                long total = 0 ; 
-
-                try{
-                    long before = System.currentTimeMillis() ; 
-                           
-                    long beforeSelect = System.currentTimeMillis() ; 
-                   
-                    selectStatement = this.conn.prepareStatement(this.selectStatement) ;
-                    enumDatabaseType.bindPageInfo(selectStatement, iCurrentPageNumber, iBatchSize) ; 
-                    rs = selectStatement.executeQuery() ; 
-                    rs.setFetchSize(iBatchSize) ;
+            
+            try{ 
+                //iterate over the partitions buffer and process until there are non (buffer < 0) 
+                //Note: cannot use the countDownLatch as the buffer as the countDown & getCount 
+                //are not bound as one atomic operations.  
+                while((iCurrentPageNumber = pages.getAndDecrement()) >= 0) { 
                     
-                    long afterSelect = (System.currentTimeMillis()-beforeSelect) ; 
-                   
-                    long beforeBatch = System.currentTimeMillis() ;
-                    updateStatement = conn.prepareStatement(this.updateStatement) ;
-                    
-                    long beforeLoop= System.currentTimeMillis() ;
-                    while(true) {
-                        
-                        long beforeSingleLoop = System.currentTimeMillis() ;
-                        if(!rs.next()) break ; 
-                        long afterSingleLoop = (System.currentTimeMillis()-beforeSingleLoop) ;
-                       // System.out.println(msgPrefix + " rs.next : " + afterSingleLoop);
-                        
-                        //index starts from 2
-                        for(int i=1; i <= iNoOfEncryptableColumns; i++) { 
-                            colVal = rs.getString(i+1) ; 
-                            
-                            if(SecurityUtil.isMarkedEncrypted(colVal)){  
-                                colVal = encryptor.encrypt(colVal) ;
-                            }//EO if should encrypt
-                            
-                            updateStatement.setString(i, colVal) ;
-                        }//EO while there are more columns to encrypt 
-                        
-                        //set the where clause binding param to the next binding param index 
-                        updateStatement.setString(iNoOfEncryptableColumns+1, rs.getString(1)) ; 
-                        
-                        updateStatement.addBatch() ; 
+                    long total = 0 ; 
+    
+                    try{
+                        long before = System.currentTimeMillis() ; 
+                               
+                        long beforeSelect = System.currentTimeMillis() ; 
                        
-                    }///EO while there are more records
-                    long afterLoop = (System.currentTimeMillis()-beforeLoop) ;
-                    
-                    long beforeExecuteBatch= System.currentTimeMillis() ;
-                    updateStatement.executeBatch() ; 
-                    long afterExecuteBatch = (System.currentTimeMillis()-beforeExecuteBatch) ;
-                    
-                    long beforeCommit = System.currentTimeMillis() ;
-                    this.conn.commit() ;
-                    long afterCommit = (System.currentTimeMillis()-beforeCommit) ;
-                    long afterBatch = (System.currentTimeMillis()-beforeBatch) ;
-                    
-                    rs.close() ; 
-                    selectStatement.close() ; 
-                    updateStatement.close() ;
-                            
-                    total += (System.currentTimeMillis()-before) ;
-                            
-                    log(msgPrefix +  (total) + " select: " + afterSelect + " batch update: " + afterBatch + " commit time: " + afterCommit + " execute Batch: " + afterExecuteBatch + " loop: " + afterLoop ) ;
-                }catch(Throwable t) {
-                    //must keep record of the exception as more can occur during the finally block
-                    thrownExcpetion = new NestedBuildException(msgPrefix, t) ; 
-    
-                    try{ 
-                        this.conn.rollback() ;
-                    }catch(Throwable innerT) { 
-                        thrownExcpetion.addThrowable(t) ; 
-                    }//EO catch block 
-                }finally{
-                    try{ 
-                        if(rs != null) rs.close() ; 
-                        if(selectStatement != null) selectStatement.close() ; 
+                        selectStatement = this.conn.prepareStatement(this.selectStatement) ;
+                        enumDatabaseType.bindPageInfo(selectStatement, iCurrentPageNumber, iBatchSize) ; 
+                        rs = selectStatement.executeQuery() ; 
+                        rs.setFetchSize(iBatchSize) ;
                         
-                        if(updateStatement != null) updateStatement.close() ; 
-    
-                    }catch(Throwable t){
-                        //if an exception was previously thrown, add this one as a nested 
-                        //otherwise create a new one 
-                        if(thrownExcpetion == null) { 
-                            thrownExcpetion = new NestedBuildException(msgPrefix, t) ; 
-                        }else { 
+                        long afterSelect = (System.currentTimeMillis()-beforeSelect) ; 
+                       
+                        long beforeBatch = System.currentTimeMillis() ;
+                        updateStatement = conn.prepareStatement(this.updateStatement) ;
+                        
+                        long beforeLoop= System.currentTimeMillis() ;
+                        while(true) {
+                            
+                            long beforeSingleLoop = System.currentTimeMillis() ;
+                            if(!rs.next()) break ; 
+                            long afterSingleLoop = (System.currentTimeMillis()-beforeSingleLoop) ;
+                           // System.out.println(msgPrefix + " rs.next : " + afterSingleLoop);
+                            
+                            //index starts from 2
+                            for(int i=1; i <= iNoOfEncryptableColumns; i++) { 
+                                colVal = rs.getString(i+1) ; 
+                                
+                                if(SecurityUtil.isMarkedEncrypted(colVal)){  
+                                    colVal = encryptor.encrypt(colVal) ;
+                                }//EO if should encrypt
+                                
+                                updateStatement.setString(i, colVal) ;
+                            }//EO while there are more columns to encrypt 
+                            
+                            //set the where clause binding param to the next binding param index 
+                            updateStatement.setString(iNoOfEncryptableColumns+1, rs.getString(1)) ; 
+                            
+                            updateStatement.addBatch() ; 
+                           
+                        }///EO while there are more records
+                        long afterLoop = (System.currentTimeMillis()-beforeLoop) ;
+                        
+                        long beforeExecuteBatch= System.currentTimeMillis() ;
+                        updateStatement.executeBatch() ; 
+                        long afterExecuteBatch = (System.currentTimeMillis()-beforeExecuteBatch) ;
+                        
+                        long beforeCommit = System.currentTimeMillis() ;
+                        this.conn.commit() ;
+                        long afterCommit = (System.currentTimeMillis()-beforeCommit) ;
+                        long afterBatch = (System.currentTimeMillis()-beforeBatch) ;
+                        
+                        rs.close() ; 
+                        selectStatement.close() ; 
+                        updateStatement.close() ;
+                                
+                        total += (System.currentTimeMillis()-before) ;
+                                
+                        log(msgPrefix +  (total) + " select: " + afterSelect + " batch update: " + afterBatch + " commit time: " + afterCommit + " execute Batch: " + afterExecuteBatch + " loop: " + afterLoop ) ;
+                    }catch(Throwable t) {
+                        //must keep record of the exception as more can occur during the finally block
+                        thrownExcpetion = new NestedBuildException(msgPrefix, t) ; 
+        
+                        try{ 
+                            this.conn.rollback() ;
+                        }catch(Throwable innerT) { 
                             thrownExcpetion.addThrowable(t) ; 
-                        }//EO if an exception was already thrown 
-                    }//EO catch block
-                
-                    //decrement the gate semaphore 
-                    this.countdownSemaphore.countDown() ;
-                    log(msgPrefix +" after chunk countdown " + this.countdownSemaphore.getCount());
+                        }//EO catch block 
+                    }finally{
+                        try{ 
+                            if(rs != null) rs.close() ; 
+                            if(selectStatement != null) selectStatement.close() ; 
+                            
+                            if(updateStatement != null) updateStatement.close() ; 
+        
+                        }catch(Throwable t){
+                            //if an exception was previously thrown, add this one as a nested 
+                            //otherwise create a new one 
+                            if(thrownExcpetion == null) { 
+                                thrownExcpetion = new NestedBuildException(msgPrefix, t) ; 
+                            }else { 
+                                thrownExcpetion.addThrowable(t) ; 
+                            }//EO if an exception was already thrown 
+                        }//EO catch block
                     
-                    if(thrownExcpetion != null) { 
-                        log(thrownExcpetion, Project.MSG_ERR) ; 
-                        throw thrownExcpetion ;  
-                    }//EO if there was an error 
-                }//EO catch block
-                
-            }//EO while there are more pages to work on
+                        //decrement the gate semaphore 
+                        this.countdownSemaphore.countDown() ;
+                        log(msgPrefix +" after chunk countdown " + this.countdownSemaphore.getCount());
+                        
+                        if(thrownExcpetion != null) { 
+                            log(thrownExcpetion, Project.MSG_ERR) ; 
+                            throw thrownExcpetion ;  
+                        }//EO if there was an error 
+                    }//EO catch block
+                    
+                }//EO while there are more pages to work on
+            
+            }finally{ 
+                this.conn.close() ; 
+            }//EO catch block 
             
             log(msgPrefix +" exiting with chunks left: " + this.countdownSemaphore.getCount()) ;
             return null;
