@@ -50,7 +50,6 @@ import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.util.jdbc.DBUtil;
-import org.hyperic.util.security.MarkedStringEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -65,17 +64,15 @@ public class MeasurementDAO
         " upper(t.alias) = '" + MeasurementConstants.CAT_AVAILABILITY.toUpperCase() + "' ";
     private final AgentDAO agentDao;
     private final DBUtil dbUtil;
-    private final MarkedStringEncryptor encryptor;
     protected final Log logger = LogFactory.getLog(this.getClass().getName());
     private final static  int ENCRYPT_UPDATE_TIMEOUT = 54000;
     private final static  int ENCRYPT_UPDATE_CHUNK_SIZE = 500;
 
     @Autowired
-    public MeasurementDAO(SessionFactory f, AgentDAO agentDao, DBUtil dbUtil, MarkedStringEncryptor encryptor) {
+    public MeasurementDAO(SessionFactory f, AgentDAO agentDao, DBUtil dbUtil) {
         super(Measurement.class, f);
         this.agentDao = agentDao;
         this.dbUtil = dbUtil;
-        this.encryptor = encryptor;
     }
 
 

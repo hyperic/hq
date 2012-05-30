@@ -420,8 +420,6 @@ public class DBUpgrader extends Task {
 
     public Connection getConnection () throws SQLException {
         
-       // if(true) return DriverManager.getConnection("jdbc:oracle:thin:@10.17.188.158:1521:ORCL", "nipuna", "nipuna") ;
-        
         if ( _jdbcUser == null && _jdbcPassword == null ) {
             return DriverManager.getConnection(_jdbcUrl);
         } else {
@@ -437,9 +435,6 @@ public class DBUpgrader extends Task {
     }
     
     private String decryptPassword(String clearTextPassword) {
-        
-        // TODO: This needs to be refactored into a security utility class
-
         return this.encryptor.decrypt(clearTextPassword) ; 
     }
     
