@@ -25,18 +25,17 @@
 
 package org.hyperic.util;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Vector;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.util.security.SecurityUtil;
-import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
+
+import java.io.*;
+import java.util.*;
 
 public class PropertyUtil {
+
+    private static final Log LOG = LogFactory.getLog(PropertyUtil.class);
+
     /**
      * Expand variable references in property values.
      *
@@ -52,24 +51,24 @@ public class PropertyUtil {
      *
      */
     public static void expandVariables(Map props) {
-        ArrayList vars = new ArrayList();
+        List<String> vars = new ArrayList<String>();
 
-        for(Iterator i=props.entrySet().iterator(); i.hasNext(); ){
-            Map.Entry ent = (Map.Entry)i.next();
+        for (Object o : props.entrySet()) {
+            Map.Entry ent = (Map.Entry) o;
             String value;
             int idx;
 
-            value  = (String)ent.getValue();
-            idx    = value.indexOf("${");
+            value = (String) ent.getValue();
+            idx = value.indexOf("${");
 
-            if(idx == -1)
+            if (idx == -1)
                 continue;
 
             vars.clear();
-            while(idx != -1){
+            while (idx != -1) {
                 int endIdx = value.indexOf("}", idx);
 
-                if(endIdx == -1)
+                if (endIdx == -1)
                     break;
 
                 endIdx++;
@@ -77,13 +76,12 @@ public class PropertyUtil {
                 idx = value.indexOf("${", endIdx);
             }
 
-            for(Iterator j=vars.iterator(); j.hasNext(); ){
-                String replace = (String)j.next();
+            for (String replace : vars) {
                 String replaceVar, lookupVal;
 
                 replaceVar = replace.substring(2, replace.length() - 1);
-                lookupVal  = (String)props.get(replaceVar);
-                if(lookupVal == null)
+                lookupVal = (String) props.get(replaceVar);
+                if (lookupVal == null)
                     continue;
 
                 value = StringUtil.replace(value, replace,
@@ -107,7 +105,9 @@ public class PropertyUtil {
         } finally {
             if (fi != null) try {
                 fi.close();
-            } catch (IOException ignore) { /* ignore */ }
+            } catch (IOException ignore) {
+                LOG.trace(ignore);
+            }
         }
         return props;
     }
@@ -116,10 +116,10 @@ public class PropertyUtil {
      * encrypt the input entries and append them at the end of the property file.
      * Any entries with identical keys would be erased.
      *
-     * @param file
-     * @param propEncKey
-     * @param entriesToStore
-     * @throws IOException
+     * @param file the name of the properties file
+     * @param propEncKey the properties encryption key
+     * @param entriesToStore a map of properties to store
+     * @throws PropertyUtilException
      */
     public static void storeProperties(String file, String propEncKey, Map<String,String> entriesToStore)
             throws PropertyUtilException {
@@ -137,7 +137,7 @@ public class PropertyUtil {
     public static void storeProperties(String propFilePath, Map<String,String> newEntries)
             throws PropertyUtilException {
 
-        Vector<String> lineData = new Vector<String>();
+        List<String> lineData = new ArrayList<String>();
         Map<String,String> tmdEntries = new HashMap<String,String>(newEntries);
         BufferedReader reader = null;
         try {
@@ -154,7 +154,7 @@ public class PropertyUtil {
                 }
                 int start = pos;
                 boolean needsEscape = line.indexOf('\\', pos) != -1;
-                StringBuffer key = needsEscape ? new StringBuffer() : null;
+                StringBuilder key = needsEscape ? new StringBuilder() : null;
                 while ( pos < line.length()
                         && ! Character.isWhitespace(c = line.charAt(pos++))
                         && c != '=' && c != ':') {
@@ -188,12 +188,12 @@ public class PropertyUtil {
 
                 if (! isDelim && (c == ':' || c == '=')) {
                     pos++;
-                    while (pos < line.length() && Character.isWhitespace(c = line.charAt(pos))) {
+                    while (pos < line.length() && Character.isWhitespace(line.charAt(pos))) {
                         pos++;
                     }
                 }
                 if (!needsEscape) {
-                    String val=null;
+                    String val;
                     if ((val = tmdEntries.remove(keyString)) == null) {
                         val = line.substring(pos);
                     }
@@ -201,7 +201,7 @@ public class PropertyUtil {
                     continue;
                 }
 
-                StringBuffer element = new StringBuffer(line.length() - pos);
+                StringBuilder element = new StringBuilder(line.length() - pos);
                 while (pos < line.length()) {
                     c = line.charAt(pos++);
                     if (c == '\\') {
@@ -209,7 +209,7 @@ public class PropertyUtil {
                             line = reader.readLine();
                             if (line == null) {break;}
                             pos = 0;
-                            while ( pos < line.length() && Character.isWhitespace(c = line.charAt(pos))) {pos++;}
+                            while ( pos < line.length() && Character.isWhitespace(line.charAt(pos))) {pos++;}
                             element.ensureCapacity(line.length() - pos + element.length());
                         } else {
                             c = line.charAt(pos++);
@@ -220,7 +220,7 @@ public class PropertyUtil {
                         element.append(c);
                     }
                 }
-                String val=null;
+                String val;
                 if ((val = tmdEntries.remove(keyString)) == null) {
                     val = line.substring(pos);
                 }
@@ -235,15 +235,17 @@ public class PropertyUtil {
             if (reader!=null) {
                 try {
                     reader.close();
-                } catch (IOException ignore) { /* ignore */ }
+                } catch (IOException ignore) {
+                    LOG.trace(ignore);
+                }
             }
         }
 
         PrintWriter writer = null;
         try {
             writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(propFilePath), "ISO-8859-1"));
-            for (Iterator<String> itr = lineData.iterator(); itr.hasNext();) {
-                writer.println (itr.next());
+            for (String aLineData : lineData) {
+                writer.println(aLineData);
             }
             writer.flush ();
         } catch(Exception exc) {

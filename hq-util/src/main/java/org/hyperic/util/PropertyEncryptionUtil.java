@@ -28,8 +28,6 @@ package org.hyperic.util;
 import org.hyperic.util.security.SecurityUtil;
 
 import java.io.*;
-import java.nio.channels.FileChannel;
-import java.nio.channels.FileLock;
 import java.util.*;
 
 /**
@@ -121,57 +119,48 @@ public class PropertyEncryptionUtil {
             return;
         }
 
-        // Acquire lock on the properties file.
-        FileLock lock = lockFile(propsFileName);
+        // A flag indicating a new key.
+        boolean newEncryptionKey = false;
+        // The properties encryption key.
+        String encryptionKey;
 
-        // The rest of the code goes inside a try-finally block to make sure we release the lock on the file.
-        try {
-            // A flag indicating a new key.
-            boolean newEncryptionKey = false;
-            // The properties encryption key.
-            String encryptionKey;
+        // 'Reference' the encryption-key file.
+        File encryptionFile = new File(encryptionKeyFileName);
 
-            // 'Reference' the encryption-key file.
-            File encryptionFile = new File(encryptionKeyFileName);
+        // If the file doesn't exist, create a new one; otherwise load the key.
+        if (encryptionFile.exists()) {
+            encryptionKey = getPropertyEncryptionKey(encryptionKeyFileName);
+        } else {
+            encryptionKey = createAndStorePropertyEncryptionKey(encryptionKeyFileName);
+            newEncryptionKey = true;
+        }
 
-            // If the file doesn't exist, create a new one; otherwise load the key.
-            if (encryptionFile.exists()) {
-                encryptionKey = getPropertyEncryptionKey(encryptionKeyFileName);
-            } else {
-                encryptionKey = createAndStorePropertyEncryptionKey(encryptionKeyFileName);
-                newEncryptionKey = true;
+        // Load the properties from the filesystem.
+        Properties props = PropertyUtil.loadProperties(propsFileName);
+
+        // Check if the properties are already encrypted.
+        boolean alreadyEncrypted = isAlreadyEncrypted(props);
+
+        if (alreadyEncrypted && newEncryptionKey) {
+            // The encryption key is new, but the properties are already encrypted.
+            throw new PropertyUtilException(
+                    "The properties are already encrypted, but the encryption key is missing");
+        }
+
+        // Collect all the properties that should be encrypted but still aren't
+        Map<String, String> unEncProps = new HashMap<String, String>();
+        for (Enumeration<?> propKeys = props.propertyNames(); propKeys.hasMoreElements(); ) {
+            String key = (String) propKeys.nextElement();
+            String value = props.getProperty(key);
+
+            if (value != null && secureProps.contains(key) && !SecurityUtil.isMarkedEncrypted(value)) {
+                unEncProps.put(key, value);
             }
+        }
 
-            // Load the properties from the filesystem.
-            Properties props = PropertyUtil.loadProperties(propsFileName);
-
-            // Check if the properties are already encrypted.
-            boolean alreadyEncrypted = isAlreadyEncrypted(props);
-
-            if (alreadyEncrypted && newEncryptionKey) {
-                // The encryption key is new, but the properties are already encrypted.
-                throw new PropertyUtilException(
-                        "The properties are already encrypted, but the encryption key is missing");
-            }
-
-            // Collect all the properties that should be encrypted but still aren't
-            Map<String, String> unEncProps = new HashMap<String, String>();
-            for (Enumeration<?> propKeys = props.propertyNames(); propKeys.hasMoreElements(); ) {
-                String key = (String) propKeys.nextElement();
-                String value = props.getProperty(key);
-
-                if (value != null && secureProps.contains(key) && !SecurityUtil.isMarkedEncrypted(value)) {
-                    unEncProps.put(key, value);
-                }
-            }
-
-            // Encrypt secure properties.
-            if (unEncProps.size() > 0) {
-                PropertyUtil.storeProperties(propsFileName, encryptionKey, unEncProps);
-            }
-        } finally {
-            // Release the lock on the properties file.
-            releaseFileLock(lock);
+        // Encrypt secure properties.
+        if (unEncProps.size() > 0) {
+            PropertyUtil.storeProperties(propsFileName, encryptionKey, unEncProps);
         }
     } // EOM
 
@@ -224,44 +213,6 @@ public class PropertyEncryptionUtil {
 
         // Return the key
         return encryptionKey;
-    } // EOM
-
-    /**
-     * Lock the file <code>propsFileName</code>.
-     *
-     * @param propsFileName the name of the file to lock.
-     * @return a <code>FileLock</code> instance.
-     * @throws PropertyUtilException if locking operation fails.
-     */
-    private static FileLock lockFile(String propsFileName) throws PropertyUtilException {
-        try {
-            // 'Reference' the file
-            File file = new File(propsFileName);
-            // Make sure that the file exists.
-            if (!file.exists()) {
-                throw new PropertyUtilException("Properties file: [" + propsFileName + "] doesn't exist");
-            }
-            // Create a channel for the file.
-            FileChannel channel = new RandomAccessFile(file, "rw").getChannel();
-            // Return a lock (this code blocks until a lock is acquired).
-            return channel.lock();
-        } catch (IOException exc) {
-            throw new PropertyUtilException(exc);
-        }
-    } // EOM
-
-    /**
-     * Release the file-lock.
-     *
-     * @param lock the lock to release.
-     * @throws PropertyUtilException if the release operation fails.
-     */
-    private static void releaseFileLock(FileLock lock) throws PropertyUtilException {
-        try {
-            lock.release();
-        } catch (IOException exc) {
-            throw new PropertyUtilException(exc);
-        }
     } // EOM
 
     /**
