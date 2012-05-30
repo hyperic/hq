@@ -65,8 +65,6 @@ import org.hyperic.hibernate.dialect.MySQL5InnoDBDialect;
 import org.hyperic.util.security.SecurityUtil;
 import org.jasypt.encryption.pbe.PBEStringEncryptor;
 
-import com.mysql.jdbc.DatabaseMetaData;
-
 
 public class SST_ColumnEncyptor extends SchemaSpecTask{
     
