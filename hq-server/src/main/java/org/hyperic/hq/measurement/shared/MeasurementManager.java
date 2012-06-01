@@ -258,8 +258,6 @@ public interface MeasurementManager {
 
     public List<Object[]> findAllEnabledMeasurementsAndTemplates();
 
-    public void encryptUnEncryptedDSNs();
-    
     /**
      * Set the interval of Measurements based their template ID's Enable
      * Measurements and enqueue for scheduling after commit

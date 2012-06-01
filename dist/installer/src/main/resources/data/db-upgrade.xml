@@ -8341,7 +8341,6 @@ has already been defined.
   </schemaSpec>
 
   <schemaSpec version="3.101">
-
       <schema-directSQL>
         <statement desc="Replace pass-through ARG1 with actual DSN" targetDB="postgresql">
             UPDATE EAM_MEASUREMENT SET dsn = (
@@ -11746,14 +11745,18 @@ has already been defined.
     <schema-addColumn table="EAM_SRN" column="LAST_SCHEDULE_TIME" columnType="LONG" nullable="NOT NULL" default="0"/>
  </schemaSpec>
 
-    <schemaSpec version="3.210">
-        <!-- Delete all agent plugin sync status information. Data will be refreshed on startup -->
-       <schema-directSQL>
-         <statement desc="delete all agent plugin sync status">
-           DELETE FROM EAM_AGENT_PLUGIN_STATUS
-         </statement>
-       </schema-directSQL>  
-    </schemaSpec>	
+ <schemaSpec version="3.210">
+    <!-- Delete all agent plugin sync status information. Data will be refreshed on startup -->
+   <schema-directSQL>
+     <statement desc="delete all agent plugin sync status">
+       DELETE FROM EAM_AGENT_PLUGIN_STATUS
+     </statement>
+   </schema-directSQL>  
+ </schemaSpec>	
+	
+ <schemaSpec version="3.211">
+ 	<column-encryptor table="EAM_MEASUREMENT" columns="DSN" pkColumn="ID" /> 
+ </schemaSpec> 
 	
 </dbupgrade>
 </target>

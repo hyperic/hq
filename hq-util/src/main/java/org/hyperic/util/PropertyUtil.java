@@ -25,32 +25,22 @@
 
 package org.hyperic.util;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Vector;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.util.security.SecurityUtil;
-import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
+
+import java.io.*;
+import java.util.*;
 
 public class PropertyUtil {
+
+    private static final Log LOG = LogFactory.getLog(PropertyUtil.class);
+
     /**
      * Expand variable references in property values.
      *
      * I.e. if you have a props file:
-     * 
+     *
      * a=foo
      * b=bar
      * c=${a} ${b}
@@ -61,24 +51,24 @@ public class PropertyUtil {
      *
      */
     public static void expandVariables(Map props) {
-        ArrayList vars = new ArrayList();
+        List<String> vars = new ArrayList<String>();
 
-        for(Iterator i=props.entrySet().iterator(); i.hasNext(); ){
-            Map.Entry ent = (Map.Entry)i.next();
+        for (Object o : props.entrySet()) {
+            Map.Entry ent = (Map.Entry) o;
             String value;
             int idx;
 
-            value  = (String)ent.getValue();
-            idx    = value.indexOf("${");
+            value = (String) ent.getValue();
+            idx = value.indexOf("${");
 
-            if(idx == -1)
+            if (idx == -1)
                 continue;
 
             vars.clear();
-            while(idx != -1){
+            while (idx != -1) {
                 int endIdx = value.indexOf("}", idx);
 
-                if(endIdx == -1)
+                if (endIdx == -1)
                     break;
 
                 endIdx++;
@@ -86,16 +76,15 @@ public class PropertyUtil {
                 idx = value.indexOf("${", endIdx);
             }
 
-            for(Iterator j=vars.iterator(); j.hasNext(); ){
-                String replace = (String)j.next();
+            for (String replace : vars) {
                 String replaceVar, lookupVal;
 
                 replaceVar = replace.substring(2, replace.length() - 1);
-                lookupVal  = (String)props.get(replaceVar);
-                if(lookupVal == null)
+                lookupVal = (String) props.get(replaceVar);
+                if (lookupVal == null)
                     continue;
 
-                value = StringUtil.replace(value, replace, 
+                value = StringUtil.replace(value, replace,
                         lookupVal);
             }
             props.put(ent.getKey(), value);
@@ -103,55 +92,21 @@ public class PropertyUtil {
     }
 
     /**
-     * Strip a prefix from the keys in a properties object.
-     *
-     * Mainly used for backwards compatibility of net.covalent
-     * property keys.
-     */
-    public static void stripKeys(Properties props, String prefix)
-    {
-        Properties stripped = new Properties();
-
-        for(Iterator i = props.entrySet().iterator(); i.hasNext(); ){
-            Map.Entry ent = (Map.Entry)i.next();
-            String key = (String)ent.getKey();
-
-            if (key.startsWith(prefix)) {
-                stripped.setProperty(key.substring(prefix.length()),
-                        (String)ent.getValue());
-                // Remove, will be re-merged later
-                i.remove();
-            }
-        }
-
-        props.putAll(stripped);
-    }
-
-    /**
      * Load properties from a file.
      */
-    public static Properties loadProperties (String file) throws IOException {
+    public static Properties loadProperties (String file) throws PropertyUtilException {
         FileInputStream fi = null;
         Properties props = new Properties();
         try {
             fi = new FileInputStream(file);
             props.load(fi);
+        } catch (Exception exc) {
+            throw new PropertyUtilException(exc);
         } finally {
-            if (fi != null) fi.close();
-        }
-        return props;
-    }
-
-    public static Properties loadProperties(String file, String pbePass, String[] encryptedKeys) throws IOException {
-        Properties props = loadProperties(file);
-        if (pbePass==null || encryptedKeys==null || encryptedKeys.length==0){
-            return props;
-        }
-        StandardPBEStringEncryptor encryptor = SecurityUtil.getStandardPBEStringEncryptor(pbePass);
-        for (String encryptedKey : encryptedKeys) {
-            String encryptedVal = props.getProperty(encryptedKey);
-            if(encryptedVal!=null) {
-                props.setProperty(encryptedKey, encryptor.decrypt(encryptedVal));
+            if (fi != null) try {
+                fi.close();
+            } catch (IOException ignore) {
+                LOG.trace(ignore);
             }
         }
         return props;
@@ -160,67 +115,29 @@ public class PropertyUtil {
     /**
      * encrypt the input entries and append them at the end of the property file.
      * Any entries with identical keys would be erased.
-     * 
-     * @param file
-     * @param propEncKey
-     * @param entriesToStore
-     * @throws IOException
+     *
+     * @param file the name of the properties file
+     * @param propEncKey the properties encryption key
+     * @param entriesToStore a map of properties to store
+     * @throws PropertyUtilException
      */
-    public static void storeProperties(String file, String propEncKey, Map<String,String> entriesToStore) throws IOException {
+    public static void storeProperties(String file, String propEncKey, Map<String,String> entriesToStore)
+            throws PropertyUtilException {
+
         Map<String,String> encryptedEntriesToStore = new HashMap<String,String>();
-        for (Iterator<Map.Entry<String, String>> entriesToStoreItr = entriesToStore.entrySet().iterator();
-                entriesToStoreItr.hasNext();) {
-            Map.Entry<String, String> entryToStore = entriesToStoreItr.next();
-            String encryptedVal = SecurityUtil.encrypt(SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM,propEncKey,entryToStore.getValue());
+        for (Map.Entry<String, String> entryToStore : entriesToStore.entrySet()) {
+            String encryptedVal = SecurityUtil.encrypt(
+                    SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM, propEncKey, entryToStore.getValue());
             encryptedEntriesToStore.put(entryToStore.getKey(), encryptedVal);
         }
 
         storeProperties(file,encryptedEntriesToStore);
     }
 
-    /**
-     * Store properties to a file
-     */
-    public static void storeProperties(String file, Properties props, String header) throws IOException {
-        FileOutputStream os = null;
+    public static void storeProperties(String propFilePath, Map<String,String> newEntries)
+            throws PropertyUtilException {
 
-        try {
-            os = new FileOutputStream(file);
-            props.store(os, header);
-        } finally {
-            if (os != null) os.close();
-        }
-    }
-
-    public static String getPropEncKey(String propEncKeyPath) throws IOException, ClassNotFoundException {
-        String propEncKey = null;
-        File propEncKeyFile = new File(propEncKeyPath);
-
-        // get prop encryption from file
-        if (propEncKeyFile.exists()) {
-            ObjectInputStream propKeyOIS = null;
-            try {
-                propKeyOIS = new ObjectInputStream(new FileInputStream(propEncKeyFile));
-                propEncKey = (String) propKeyOIS.readObject();
-            } finally {
-                if (propKeyOIS!=null) {propKeyOIS.close();}
-            }
-            // generate key file
-        } else {
-            ObjectOutputStream propEncKeyOOS = null;
-            try {
-                propEncKeyOOS = new ObjectOutputStream(new FileOutputStream(propEncKeyFile));
-                propEncKey = SecurityUtil.generateRandomToken();
-                propEncKeyOOS.writeObject(propEncKey);
-            } finally {
-                if (propEncKeyOOS!=null) {propEncKeyOOS.close();}
-            }
-        }
-        return propEncKey;
-    }
-
-    public static void storeProperties(String propFilePath, Map<String,String> newEntries) throws NumberFormatException, IOException {
-        Vector<String> lineData = new Vector<String>();
+        List<String> lineData = new ArrayList<String>();
         Map<String,String> tmdEntries = new HashMap<String,String>(newEntries);
         BufferedReader reader = null;
         try {
@@ -237,7 +154,7 @@ public class PropertyUtil {
                 }
                 int start = pos;
                 boolean needsEscape = line.indexOf('\\', pos) != -1;
-                StringBuffer key = needsEscape ? new StringBuffer() : null;
+                StringBuilder key = needsEscape ? new StringBuilder() : null;
                 while ( pos < line.length()
                         && ! Character.isWhitespace(c = line.charAt(pos++))
                         && c != '=' && c != ':') {
@@ -271,12 +188,12 @@ public class PropertyUtil {
 
                 if (! isDelim && (c == ':' || c == '=')) {
                     pos++;
-                    while (pos < line.length() && Character.isWhitespace(c = line.charAt(pos))) {
+                    while (pos < line.length() && Character.isWhitespace(line.charAt(pos))) {
                         pos++;
                     }
                 }
                 if (!needsEscape) {
-                    String val=null;
+                    String val;
                     if ((val = tmdEntries.remove(keyString)) == null) {
                         val = line.substring(pos);
                     }
@@ -284,7 +201,7 @@ public class PropertyUtil {
                     continue;
                 }
 
-                StringBuffer element = new StringBuffer(line.length() - pos);
+                StringBuilder element = new StringBuilder(line.length() - pos);
                 while (pos < line.length()) {
                     c = line.charAt(pos++);
                     if (c == '\\') {
@@ -292,7 +209,7 @@ public class PropertyUtil {
                             line = reader.readLine();
                             if (line == null) {break;}
                             pos = 0;
-                            while ( pos < line.length() && Character.isWhitespace(c = line.charAt(pos))) {pos++;}
+                            while ( pos < line.length() && Character.isWhitespace(line.charAt(pos))) {pos++;}
                             element.ensureCapacity(line.length() - pos + element.length());
                         } else {
                             c = line.charAt(pos++);
@@ -303,7 +220,7 @@ public class PropertyUtil {
                         element.append(c);
                     }
                 }
-                String val=null;
+                String val;
                 if ((val = tmdEntries.remove(keyString)) == null) {
                     val = line.substring(pos);
                 }
@@ -312,17 +229,27 @@ public class PropertyUtil {
             for (Map.Entry<String,String> entry : tmdEntries.entrySet()) {
                 lineData.add(entry.getKey() + "=" + entry.getValue());
             }
+        } catch(Exception exc) {
+            throw new PropertyUtilException(exc);
         } finally {
-            if (reader!=null) {reader.close();}
+            if (reader!=null) {
+                try {
+                    reader.close();
+                } catch (IOException ignore) {
+                    LOG.trace(ignore);
+                }
+            }
         }
 
         PrintWriter writer = null;
         try {
             writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(propFilePath), "ISO-8859-1"));
-            for (Iterator<String> itr = lineData.iterator(); itr.hasNext();) {
-                writer.println (itr.next());
-            } 
+            for (String aLineData : lineData) {
+                writer.println(aLineData);
+            }
             writer.flush ();
+        } catch(Exception exc) {
+            throw new PropertyUtilException(exc);
         } finally {
             if (writer!=null) {writer.close();}
         }

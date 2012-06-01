@@ -215,10 +215,6 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         }
     }
 
-    public void encryptUnEncryptedDSNs() {
-        this.measurementDAO.encryptUnEncryptedDSNs();
-    }
-    
     public List<Measurement> createOrUpdateMeasurements(AppdefEntityID id, Integer[] templates, long[] intervals,
                                                         ConfigResponse props, Reference<Boolean> updated)
     throws MeasurementCreateException, TemplateNotFoundException {

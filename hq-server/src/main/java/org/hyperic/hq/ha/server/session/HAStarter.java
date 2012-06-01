@@ -42,7 +42,6 @@ public class HAStarter {
     
     @PostConstruct
     public void startHAService() {
-        this.measurementManager.encryptUnEncryptedDSNs();
         measurementManager.findAllEnabledMeasurementsAndTemplates();
         ((HAService) ProductProperties.getPropertyInstance("hyperic.hq.ha.service")).start();
     }
