@@ -21,15 +21,15 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Feb 22, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on May 31, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1329943804022 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1329943804022 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1329943804022 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1338502628334 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1338502628334 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1338502628334 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1329943804022'>
+/*]]>*/</style><div class='rbtoc1338502628334'>
 <ul>
     <li><a href='#UpgradeHypericAgent-AgentUpgradeMethods'>Agent Upgrade Methods</a></li>
     <li><a href='#UpgradeHypericAgent-PushAgentBundlefromthevFabricHypericServer'>Push Agent Bundle from the vFabric Hyperic Server</a></li>
@@ -59,14 +59,15 @@ div.rbtoc1329943804022 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 
 
+<p><a name="UpgradeHypericAgent-PushBundle"></a></p>
 <h1><a name="UpgradeHypericAgent-PushAgentBundlefromthevFabricHypericServer"></a>Push Agent Bundle from the vFabric Hyperic Server</h1>
 <p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
 
 <p>You can update one or more Hyperic Agents by pushing the new bundle to it from the Hyperic Server, using the Hyperic user interface. The bundle must reside in the <tt>ServerHome/hq-engine/hq-server/webapps/ROOT/WEB-INF/hq-agent-bundles</tt> directory.</p>
 
-<p>The agent upgrade command is available on the <b>Views</b> tab for an Hyperic Agent (or a group of agents). For more information see <a href="Start, Stop, and Other Agent Operations.html" title="Start, Stop, and Other Agent Operations">Start, Stop, and Other Agent Operations</a> in <em>vFabric Hyperic Installation and Configuration</em>.</p>
+<p>The agent upgrade command is available on the <b>Views</b> tab for an Hyperic Agent (or a group of agents). For more information see <a href="Start, Stop, and Other Agent Operations.html" title="Start, Stop, and Other Agent Operations">Start, Stop, and Other Agent Operations</a> in <em>vFabric Hyperic Configuration</em>.</p>
 
-<p><b>Note:</b> When you update an agent bundle, the agent configuration is preserved &#8212; the <tt>AgentHome/conf/agent.properties</tt> file is not overwritten.</p>
+<p><b>Note:</b> When you update an agent bundle, the configuration settings in the agent's <tt>AgentHome/conf/agent.properties</tt> file are not changed. However, the first time you start an agent that you have updated to 4.6.6 or later, passwords specified in the file will be encrypted.  </p>
 
 <div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Agent Name Unchanged by Bundle Upgrade Process</b><br />Note that if you upgrade a 4.x agent by pushing a new bundle from the Hyperic Server, the name of the agent is not changed. So, an agent name that contains the Hyperic version number &#8212; as is the default naming convention &#8212; reflects the originally installed version, rather than the version to which it has been upgraded. For example, if you push a 4.6 bundle to an agent whose name is "HQ Agent 4.5", the agent name will remain "HQ Agent 4.5".</td></tr></table></div>
 
@@ -90,7 +91,7 @@ div.rbtoc1329943804022 li {margin-left: 0px;padding-left: 0px;}
 		</div>
 </div></div></li>
 	<li>Unpack the agent bundle.</li>
-	<li>Edit the rollback.properties file in <tt>AgentHome/conf</tt> to specify the location of the new agent bundle and the bundle it will supersede.
+	<li>Edit the <tt>rollback.properties</tt> file in <tt>AgentHome/conf</tt> to specify the location of the new agent bundle and the bundle it will supersede.
 <div class='table-wrap'>
 <table class='confluenceTable'><tbody>
 <tr>
@@ -112,7 +113,7 @@ ROLLBACK_BUNDLE </td>
 </tbody></table>
 </div>
 </li>
-	<li>Restart the agent. For instructions, see <a href="Start, Stop, and Other Agent Operations.html" title="Start, Stop, and Other Agent Operations">Start, Stop, and Other Agent Operations</a> in <em>vFabric Hyperic Installation and Configuration</em>.</li>
+	<li>Restart the agent. For instructions, see <a href="Start, Stop, and Other Agent Operations.html" title="Start, Stop, and Other Agent Operations">Start, Stop, and Other Agent Operations</a> in <em>vFabric Hyperic Configuration</em>.</li>
 </ol>
 
 
@@ -234,7 +235,7 @@ hq-agent.bat start</pre>
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on May 21, 2012 08:33</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 01, 2012 08:26</font></td>
 		    </tr>
 	    </table>
     </body>

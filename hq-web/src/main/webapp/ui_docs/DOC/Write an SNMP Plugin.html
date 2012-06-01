@@ -412,108 +412,6 @@ nsIfName.3 = STRING: "vlan1"
                                 <br/>
                                                     </div>
 				    
-                                            <div class="tabletitle">
-                            <a name="comments">
-                                <h2>Comments:</h2>
-                            </a>
-                        </div>
-
-                        <table border="0" width="100%">
-                                                        <tr>
-                                <td >
-                                    <a name="comment-79037345"></a>
-                                    <font class="smallfont"><p>I'd like to develop an SNMP plug-in as an extension of network device plug-in in order to collect ip metrics by some including tag like &amp;netdevice-platform and discover interfaces as hyperic services by '&amp;netdevice-services'.<br/>
-I guess that some way I should include /etc/netdevice-platform.xml and /etc/netdevice-platform.xml /etc/netdevice-services.xml files as it was done with Cisco based plug-in and with JMX based plugin. Can you add some addition documentation about import capabilities?<br/>
-Thanks,<br/>
-Paolo</p></font>
-                                    <div align="left" class="smallfont" style="color: #666666; width: 98%; margin-bottom: 10px;">
-                                        <img src="images/icons/comment_16.gif" height="16" width="16" border="0" align="absmiddle"/>
-                                        Posted by paolo.bacco@italtel.it at Dec 17, 2008 00:52
-                                    </div>
-                                </td>
-                            </tr>
-                                                        <tr>
-                                <td  style="border-top: 1px dashed #666666">
-                                    <a name="comment-79037346"></a>
-                                    <font class="smallfont"><p>Hi everyone,</p>
-
-<p>Just wondering if i install hyperic on windows and want to implement a SNMP based plugin where do i save the MIB's?  </p>
-
-<p>Regards</p>
-
-<p>Ashwin</p>
-</font>
-                                    <div align="left" class="smallfont" style="color: #666666; width: 98%; margin-bottom: 10px;">
-                                        <img src="images/icons/comment_16.gif" height="16" width="16" border="0" align="absmiddle"/>
-                                        Posted by ashwin.kadle@gmail.com at Jan 16, 2009 22:36
-                                    </div>
-                                </td>
-                            </tr>
-                                                        <tr>
-                                <td  style="border-top: 1px dashed #666666">
-                                    <a name="comment-79037347"></a>
-                                    <font class="smallfont"><p>Hi Ashwin,</p>
-
-<p>there for you can set the following properties in your plugin:</p>
-
-<p>&lt;property name="MIBDIR" value="C:\mibs"/&gt;<br/>
-&lt;property name="MIBS" value="$</p>
-<div class="error"><span class="error">Unknown macro: {MIBDIR}</span> </div>
-<p>/NOTES-MIB.txt"/&gt;</p>
-
-<p>It's not important where the MIBs are stored because you can change the MIB directory in the configuration properties of your plugin.</p>
-
-<p>Please ask questions about Hyperic HQ Development forum:
-<a href="http://forums.hyperic.com/jiveforums/">http://forums.hyperic.com/jiveforums/</a></p>
-
-<p>Thanks,<br/>
-Mirko</p></font>
-                                    <div align="left" class="smallfont" style="color: #666666; width: 98%; margin-bottom: 10px;">
-                                        <img src="images/icons/comment_16.gif" height="16" width="16" border="0" align="absmiddle"/>
-                                        Posted by excowboy at Jan 17, 2009 14:40
-                                    </div>
-                                </td>
-                            </tr>
-                                                        <tr>
-                                <td  style="border-top: 1px dashed #666666">
-                                    <a name="comment-79037348"></a>
-                                    <font class="smallfont"><p>Thank you </p></font>
-                                    <div align="left" class="smallfont" style="color: #666666; width: 98%; margin-bottom: 10px;">
-                                        <img src="images/icons/comment_16.gif" height="16" width="16" border="0" align="absmiddle"/>
-                                        Posted by  at Jan 18, 2009 20:24
-                                    </div>
-                                </td>
-                            </tr>
-                                                        <tr>
-                                <td  style="border-top: 1px dashed #666666">
-                                    <a name="comment-79037349"></a>
-                                    <font class="smallfont"><p>Can I use an SNMP plug-in to change passwords across an entire closed network?</p></font>
-                                    <div align="left" class="smallfont" style="color: #666666; width: 98%; margin-bottom: 10px;">
-                                        <img src="images/icons/comment_16.gif" height="16" width="16" border="0" align="absmiddle"/>
-                                        Posted by  at Mar 20, 2009 08:55
-                                    </div>
-                                </td>
-                            </tr>
-                                                        <tr>
-                                <td  style="border-top: 1px dashed #666666">
-                                    <a name="comment-79037350"></a>
-                                    <font class="smallfont"><p>This XML mechanism is not convenient when it comes to implement multiple mibs, possibly with different versions.<br/>
-Would that be so difficult to simply build the XML (or whatever internal plugin representation) directly from the mib file?</p>
-
-<p>A simpler alternative would be an snmpWalk of the mib by Hyperic (being given the mib description) and the automatic collection proposal for all metrics.</p>
-
-<p>Is there anything in the roadmap about it?</p>
-
-<p>I could script this SNMP walk output in order to do it externally but this MIB parsing feature is a standard NMS one and as such belong to HQ.</p>
-
-<p>Sylvain</p></font>
-                                    <div align="left" class="smallfont" style="color: #666666; width: 98%; margin-bottom: 10px;">
-                                        <img src="images/icons/comment_16.gif" height="16" width="16" border="0" align="absmiddle"/>
-                                        Posted by sylvain.combe@sicap.com at Jun 24, 2010 23:25
-                                    </div>
-                                </td>
-                            </tr>
-                                                    </table>
                     			    </td>
 		    </tr>
 	    </table>
@@ -522,7 +420,7 @@ Would that be so difficult to simply build the XML (or whatever internal plugin 
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on May 21, 2012 08:35</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 01, 2012 08:28</font></td>
 		    </tr>
 	    </table>
     </body>

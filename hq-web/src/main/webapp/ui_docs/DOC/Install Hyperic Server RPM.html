@@ -21,15 +21,15 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on May 10, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on May 31, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1336680717933 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1336680717933 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1336680717933 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1338485112493 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1338485112493 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1338485112493 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1336680717933'>
+/*]]>*/</style><div class='rbtoc1338485112493'>
 <ul>
     <li><a href='#InstallHypericServerRPM-AboutHypericServerRPM'>About Hyperic Server RPM</a></li>
     <li><a href='#InstallHypericServerRPM-Step1InstallvFabricLicenseServer'>Step 1 - Install vFabric License Server</a></li>
@@ -67,48 +67,54 @@ div.rbtoc1336680717933 li {margin-left: 0px;padding-left: 0px;}
 
 <h1><a name="InstallHypericServerRPM-Step1InstallvFabricLicenseServer"></a>Step 1 - Install vFabric License Server </h1>
 
-<p>Install the vFabric License Server on the VM where your existing vCenter Server is installed. For instructions, see <a href="http://pubs.vmware.com/vfabric5/topic/com.vmware.vfabric.platform.5.1/vfabric/install-into-vcenter.html">Install vFabric License Server on Your vCenter Server</a> in <em>vFabric Suite 5.1</em>. </p>
+<p>Install the vFabric License Server on the VM where your existing vCenter Server is installed. For instructions, see <a href="http://pubs.vmware.com/vfabric51/topic/com.vmware.vfabric.platform.5.1/vfabric/install.html">Install vFabric License Server on Your vCenter Server</a> in <em>vFabric Suite 5.1</em>. </p>
 
 <h1><a name="InstallHypericServerRPM-Step2ActivatevFabricLicense"></a>Step 2 - Activate vFabric License </h1>
 
-<p>Active your vFabric Hyperic license. For instructions, see <a href="http://pubs.vmware.com/vfabric5/topic/com.vmware.vfabric.platform.5.1/vfabric/install-activate-licenses.html">Activate vFabric Platform Licenses</a> in <em>vFabric Suite 5.1</em>. </p>
+<p>Active your vFabric Hyperic license. For instructions, see <a href="http://pubs.vmware.com/vfabric51/topic/com.vmware.vfabric.platform.5.1/vfabric/install.html">Activate vFabric Platform Licenses</a> in <em>vFabric Suite 5.1</em>. </p>
 
 <h1><a name="InstallHypericServerRPM-Step3InstallvFabricRepositoryRPM"></a>Step 3 - Install vFabric Repository RPM </h1>
 
-<p>In this step you install the vFabric Repository RPM on the RHEL VM where you will install the Hyperic Server. This RPM allows you to browse the vFabric repository. </p>
+<p>IIn this step you install the vFabric Repository RPM on the RHEL VM where you will install the Hyperic Server. This RPM allows you to browse the vFabric repository. </p>
 
-<p>There are two vFabric repositories, both located on <tt>repo.vmware.com</tt>: </p>
+
+<p>vFabric RPM repositories are located on <tt>repo.vmware.com</tt>: </p>
+
 <ul>
-	<li><tt>vfabric-5.1-repo-5.1-1</tt> &#8212; Contains the vFabric component RPMs that are certified for vFabric 5.1.</li>
-	<li><tt>vfabric-all-repo</tt> &#8212; Contains vFabric component RPMs that were released after vFabric Suite 5.1, such as maintenance releases of components. These RPMs may not be certified to work with vFabric 5.1 RPMs. Additionally, the RPMs in <tt>vfabric-all-repo</tt> can be used by customers who have bought a product standalone; that is, they have not bought a vFabric 5.1 Suite Standard or Advanced license. DOES THIS MEAN THAT USERS WITHOUT A SUITE LICENSE CANNOT INSTALL FROM <tt>vfabric-repo-5.1</tt>?</li>
+	<li>vfabric-5-repo &#8212; vFabric component RPMs that are certified for vFabric Platform 5.</li>
+	<li>vfabric-5.1-repo-5.1-1 &#8212; vFabric component RPMs that are certified for vFabric Suite 5.1.</li>
+	<li>vfabric-all-repo &#8212; vFabric component RPMs for customers who have not bought a vFabric 5 Standard or Advanced license, and more recently released versions of vFabric components that may not necessarily be certified to work with those of vFabric 5 or vFabric 5.1.</li>
 </ul>
 
 
-<p>Each RPM repository has separate URLs for RHEL 5 and RHEL 6. </p>
-
-<p>If you wish to install only RPMs that are certified for vFabric 5.1 Suite Advanced or Standard, install <tt>vfabric-repo-5.1</tt> only. If you are upgrading a vFabric component to a version that has not yet been officially certified for vFabric Suite 5.1, install both repositories. </p>
+<p>If you have a vFabric Standard or Advanced license, plan to install only RPMs that are certified for vFabric 5 or 5.1, then install <tt>vfabric-5-repo-5-2</tt> or <tt>vfabric-5.1-repo-5.1-1</tt>, as appropriate. If you do not have a vFabric Standard or Advanced license, or want to install components that are yet certified for vFabric 5 or vFabric 5.1, install <tt>vfabric-all-repo</tt>. </p>
 
 <p><b>Procedure</b> </p>
 <ol>
 	<li>Log in to the RHEL VM as the <tt>root</tt> user (or as a user with <tt>sudo</tt> privileges).</li>
 	<li>Open a terminal window.</li>
-	<li>Install the <tt>vfabric-repo-5.1</tt> RPM, and optionally the <tt>vfabric-all-repo</tt> RPM. The URLs of the RPMs differ depending on the version of RHEL you are using.
+	<li>Install the desired repository RPMs. Note that the URLs of the RPMs vary depending on whether the version of RHEL you use.
 	<ul>
 		<li>For RHEL 5:
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
-<script type="syntaxhighlighter" class="theme: Confluence; brush: java; gutter: false"><![CDATA[rpm -Uvh http://repo.vmware.com/pub/rhel5/vfabric/5.1/vfabric-repo-5.1-1.noarch.rpm 
-rpm -Uvh http://repo.vmware.com/pub/rhel5/vfabric-all/vfabric-all-repo-1-1.noarch.rpm]]></script>
+<script type="syntaxhighlighter" class="theme: Confluence; brush: java; gutter: false"><![CDATA[rpm -Uvh http://repo.vmware.com/pub/rhel5/vfabric/5/vfabric-5-repo-5-2.noarch.rpm 
+\\ to install the vFabric 5 repository RPM 
+rpm -Uvh http://repo.vmware.com/pub/rhel5/vfabric/5.1/vfabric-5.1-repo-5.1-1.noarch.rpm 
+\\ to install the vFabric 5.1 repository RPM 
+rpm -Uvh http://repo.vmware.com/pub/rhel5/vfabric-all/vfabric-all-repo-1-1.noarch.rpm 
+\\ to install the "all-repo" repository RPM]]></script>
 </div></div> </li>
 		<li>For RHEL 6:
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
-<script type="syntaxhighlighter" class="theme: Confluence; brush: java; gutter: false"><![CDATA[rpm -Uvh http://repo.vmware.com/pub/rhel6/vfabric/5.1/vfabric-5.1-repo-5.1-1.noarch.rpm 
-rpm -Uvh http://repo.vmware.com/pub/rhel6/vfabric-all/vfabric-all-repo-1-1.noarch.rpm]]></script>
-</div></div> 
-<div class='panelMacro'><table class='noteMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/warning.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>Use <tt>sudo</tt> to run the preceding commands if you are not logged in as <tt>root</tt>.</td></tr></table></div> </li>
+<script type="syntaxhighlighter" class="theme: Confluence; brush: java; gutter: false"><![CDATA[rpm -Uvh http://repo.vmware.com/pub/rhel6/vfabric/5.1/vfabric-5.1-repo-5.1-1.noarch.rpm \\ to install the vFabric 5 repository RPM 
+rpm -Uvh http://repo.vmware.com/pub/rhel6/vfabric-all/vfabric-all-repo-1-1.noarch.rpm \\ to install the "all-repo" repository RPM]]></script>
+</div></div> </li>
 	</ul>
 	</li>
 </ol>
 
+
+<div class='panelMacro'><table class='noteMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/warning.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>Use <tt>sudo</tt> to run the preceding commands if you are not logged in as <tt>root</tt>.</td></tr></table></div> 
 
 <div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Searching the RPM repository</b><br />You can use the <tt>yum search vfabric</tt> command to list of vFabric components that you can install from the VMware repository. For example: 
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
@@ -136,7 +142,7 @@ This section has instructions for configuring Hyperic Server in a properties fil
 <p>To define Hyperic Server installation options in a properties file: </p>
 
 <ol>
-	<li>Running as <tt>root</tt>, or using <tt>sudo</tt>, create a directory for the properties file: CONFIRM THAT THIS IS NECESSARY
+	<li>Running as <tt>root</tt>, or using <tt>sudo</tt>, create a directory for the properties file:
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
 		<pre class="theme: Confluence; brush: java; gutter: false">mkdir -p /etc/vmware/vfabric/hyperic</pre>
@@ -339,7 +345,7 @@ HQ_ADMIN_EMAIL_ADDRESS=hqadmin@eng.vmware.com
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on May 21, 2012 08:33</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 01, 2012 08:26</font></td>
 		    </tr>
 	    </table>
     </body>
