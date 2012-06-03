@@ -42,6 +42,8 @@ public class PropertyEncryptionUtil {
      */
     private static final String KEY_ENCRYPTION_KEY = "Security Kung-Fu";
 
+    private static final String ENCRYPTION_KEY_PROP = "k";
+
     /**
      * Read the properties encryption key from a file.
      *
@@ -50,7 +52,8 @@ public class PropertyEncryptionUtil {
      * @throws PropertyUtilException if the file doesn't exist, the provided file name is invalid,
      *                               or if the deserialization fails.
      */
-    public static String getPropertyEncryptionKey(String fileName) throws PropertyUtilException {
+    public static synchronized String getPropertyEncryptionKey(String fileName) throws PropertyUtilException {
+
         // Validate the file-name
         if (fileName == null || fileName.trim().length() < 1) {
             throw new PropertyUtilException("Illegal Argument: fileName [" + fileName + "]");
@@ -64,28 +67,26 @@ public class PropertyEncryptionUtil {
             throw new PropertyUtilException("The encryption key file [" + fileName + "] doesn't exist");
         }
 
-        ObjectInput input = null;
-        String encryptionKey = null;
+        String encryptionKey;
         try {
-            // Create a file input stream and a buffer.
-            InputStream file = new FileInputStream(encryptionKeyFile);
-            InputStream buffer = new BufferedInputStream(file);
-            // Create the object input stream using the buffer.
-            input = new ObjectInputStream(buffer);
-            // Read the encrypted key.
-            String encryptedKey = (String) input.readObject();
-            // Decrypt the hey.
-            encryptionKey = SecurityUtil.decrypt(
-                    SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM, KEY_ENCRYPTION_KEY, encryptedKey);
-        } catch (Exception exc) {
-            throw new PropertyUtilException(exc);
-        } finally {
-            // Try to close the output stream.
-            if (input != null) {
-                try {
-                    input.close();
-                } catch (IOException ignore) { /* ignore */ }
+            // Read the properties file
+            Properties props = new Properties();
+            props.load(new FileInputStream(encryptionKeyFile));
+
+            // Get the encrypted key.
+            String encryptedKey = props.getProperty(ENCRYPTION_KEY_PROP);
+
+            if (encryptedKey != null) {
+                // Decrypt the hey.
+                encryptionKey = SecurityUtil.decrypt(
+                        SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM, KEY_ENCRYPTION_KEY, encryptedKey);
+            } else {
+                throw new PropertyUtilException("Invalid properties encryption key");
             }
+        } catch (FileNotFoundException exc) {
+            throw new PropertyUtilException(exc);
+        } catch (IOException exc) {
+            throw new PropertyUtilException(exc);
         }
 
         // Return the key.
@@ -100,7 +101,7 @@ public class PropertyEncryptionUtil {
      * @param secureProps           a set of names of secure properties.
      * @throws PropertyUtilException
      */
-    public static void ensurePropertiesEncryption(
+    public static synchronized void ensurePropertiesEncryption(
             String propsFileName, String encryptionKeyFileName, Set<String> secureProps)
             throws PropertyUtilException {
 
@@ -119,32 +120,30 @@ public class PropertyEncryptionUtil {
             return;
         }
 
-        // A flag indicating a new key.
-        boolean newEncryptionKey = false;
-        // The properties encryption key.
-        String encryptionKey;
-
-        // 'Reference' the encryption-key file.
-        File encryptionFile = new File(encryptionKeyFileName);
-
-        // If the file doesn't exist, create a new one; otherwise load the key.
-        if (encryptionFile.exists()) {
-            encryptionKey = getPropertyEncryptionKey(encryptionKeyFileName);
-        } else {
-            encryptionKey = createAndStorePropertyEncryptionKey(encryptionKeyFileName);
-            newEncryptionKey = true;
-        }
-
         // Load the properties from the filesystem.
         Properties props = PropertyUtil.loadProperties(propsFileName);
 
         // Check if the properties are already encrypted.
         boolean alreadyEncrypted = isAlreadyEncrypted(props);
 
-        if (alreadyEncrypted && newEncryptionKey) {
-            // The encryption key is new, but the properties are already encrypted.
-            throw new PropertyUtilException(
-                    "The properties are already encrypted, but the encryption key is missing");
+        // 'Reference' the encryption-key file.
+        File encryptionKeyFile = new File(encryptionKeyFileName);
+
+        // The properties encryption key.
+        String encryptionKey;
+
+        // If the encryption key file exists then load it. If it doesn't exist then create one, only if the properties
+        // aren't already encrypted. If the properties are encrypted then throw an exception (we can't do much with
+        // encrypted properties if the encryption key is missing).
+        if (encryptionKeyFile.exists()) {
+            encryptionKey = getPropertyEncryptionKey(encryptionKeyFileName);
+        } else {
+            if (alreadyEncrypted) {
+                // The encryption key is new, but the properties are already encrypted.
+                throw new PropertyUtilException(
+                        "The properties are already encrypted, but the encryption key is missing");
+            }
+            encryptionKey = createAndStorePropertyEncryptionKey(encryptionKeyFileName);
         }
 
         // Collect all the properties that should be encrypted but still aren't
@@ -172,7 +171,7 @@ public class PropertyEncryptionUtil {
      * @throws PropertyUtilException if the file already exists, the provided file name is invalid,
      *                               or the object serialization fails.
      */
-    static String createAndStorePropertyEncryptionKey(String fileName) throws PropertyUtilException {
+    static synchronized String createAndStorePropertyEncryptionKey(String fileName) throws PropertyUtilException {
         // Validate the file-name
         if (fileName == null || fileName.trim().length() < 1) {
             throw new PropertyUtilException("Illegal Argument: fileName [" + fileName + "]");
@@ -186,29 +185,20 @@ public class PropertyEncryptionUtil {
             throw new PropertyUtilException("Attempt to override an encryption key file [" + fileName + "]");
         }
 
-        ObjectOutput output = null;
-        String encryptionKey = null;
+        String encryptionKey;
         try {
-            // Create a file output stream and a buffer.
-            OutputStream file = new FileOutputStream(encryptionKeyFile);
-            OutputStream buffer = new BufferedOutputStream(file);
-            // Create the object output stream using the buffer.
-            output = new ObjectOutputStream(buffer);
             // Create the encryption key.
             encryptionKey = SecurityUtil.generateRandomToken();
             // Encrypt the key and save it ot the disk.
             String encryptedKey = SecurityUtil.encrypt(
                     SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM, KEY_ENCRYPTION_KEY, encryptionKey);
-            output.writeObject(encryptedKey);
+            // Store the key
+            Properties props = new Properties();
+            props.put(ENCRYPTION_KEY_PROP, encryptedKey);
+
+            props.store(new FileOutputStream(fileName), null);
         } catch (Exception exc) {
             throw new PropertyUtilException(exc);
-        } finally {
-            // Try to close the output stream.
-            if (output != null) {
-                try {
-                    output.close();
-                } catch (IOException ignore) { /* ignore */ }
-            }
         }
 
         // Return the key
