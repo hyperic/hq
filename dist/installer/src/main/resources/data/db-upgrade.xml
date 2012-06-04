@@ -11753,11 +11753,7 @@ has already been defined.
      </statement>
    </schema-directSQL>  
  </schemaSpec>	
-	
- <schemaSpec version="3.211">
- 	<column-encryptor table="EAM_MEASUREMENT" columns="DSN" pkColumn="ID" /> 
- </schemaSpec> 
-	
+		
 </dbupgrade>
 </target>
 </project>
