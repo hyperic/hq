@@ -7,7 +7,7 @@
 	<artifactId>bind-plugin</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - Bind Plugin</name>
-	<version>4.6.5.2.BUILD-SNAPSHOT</version>
+	<version>4.6.6</version>
 
 	<dependencies>
 		<dependency>
