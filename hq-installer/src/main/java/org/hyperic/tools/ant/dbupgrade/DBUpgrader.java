@@ -426,7 +426,6 @@ public class DBUpgrader extends Task {
             String password = _jdbcPassword;
                         
             if (PropertyValueEncryptionUtils.isEncryptedValue(password)) {
-                log("Encryption key is " + encryptionKey);
                 password = decryptPassword(password);
             }
             

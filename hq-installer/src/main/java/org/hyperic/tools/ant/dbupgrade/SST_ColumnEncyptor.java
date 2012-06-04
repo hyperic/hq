@@ -361,35 +361,48 @@ public class SST_ColumnEncyptor extends SchemaSpecTask{
                         updateStatement = conn.prepareStatement(this.updateStatement) ;
                         
                         long beforeLoop= System.currentTimeMillis() ;
+						boolean isDirty = false ; 
                         while(true) {
                             
                             long beforeSingleLoop = System.currentTimeMillis() ;
                             if(!rs.next()) break ; 
                             long afterSingleLoop = (System.currentTimeMillis()-beforeSingleLoop) ;
-                           // System.out.println(msgPrefix + " rs.next : " + afterSingleLoop);
                             
                             //index starts from 2
                             for(int i=1; i <= iNoOfEncryptableColumns; i++) { 
                                 colVal = rs.getString(i+1) ; 
                                 
-                                if(SecurityUtil.isMarkedEncrypted(colVal)){  
+                                if(!SecurityUtil.isMarkedEncrypted(colVal)){  
                                     colVal = encryptor.encrypt(colVal) ;
+									updateStatement.setString(i, colVal) ;
+									isDirty = true ; 
                                 }//EO if should encrypt
                                 
-                                updateStatement.setString(i, colVal) ;
+                                
                             }//EO while there are more columns to encrypt 
                             
-                            //set the where clause binding param to the next binding param index 
-                            updateStatement.setString(iNoOfEncryptableColumns+1, rs.getString(1)) ; 
-                            
-                            updateStatement.addBatch() ; 
+							if(isDirty) { 
+		                        //set the where clause binding param to the next binding param index 
+        	                    updateStatement.setString(iNoOfEncryptableColumns+1, rs.getString(1)) ; 
+        	                    
+        	                    updateStatement.addBatch() ; 
+							}//EO if dirty 
+
+							isDirty = false ; 
                            
                         }///EO while there are more records
                         long afterLoop = (System.currentTimeMillis()-beforeLoop) ;
                         
                         long beforeExecuteBatch= System.currentTimeMillis() ;
-                        updateStatement.executeBatch() ; 
+                        final int[] arrResults = updateStatement.executeBatch() ; 
                         long afterExecuteBatch = (System.currentTimeMillis()-beforeExecuteBatch) ;
+
+						final int iLength = arrResults.length ; 
+						for(int i=0; i<iLength; i++) { 
+							if(arrResults[i] == PreparedStatement.EXECUTE_FAILED) { 
+								log(msgPrefix + " Failed batch sequence: " + i) ; 
+							}//EO if failure 
+						}//EO while there are more results 
                         
                         long beforeCommit = System.currentTimeMillis() ;
                         this.conn.commit() ;
