@@ -13,7 +13,7 @@
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-pdk</artifactId>
-			<version>4.6.7.BUILD-SNAPSHOT.BUILD-SNAPSHOT</version>
+			<version>4.6.6.BUILD-SNAPSHOT.BUILD-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 	<build>
