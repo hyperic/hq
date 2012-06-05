@@ -22,11 +22,14 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
 package org.hyperic.hq.plugin.postgresql;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -36,384 +39,311 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.AutoServerDetector;
-import org.hyperic.hq.product.FileServerDetector;
 import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.RegistryServerDetector;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
-import org.hyperic.sigar.win32.RegistryKey;
 import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.file.FileUtil;
 import org.hyperic.util.jdbc.DBUtil;
 
-public class PostgreSQLServerDetector
-    extends ServerDetector
-    implements FileServerDetector,
-               RegistryServerDetector,
-               AutoServerDetector {
+public class PostgreSQLServerDetector extends ServerDetector implements AutoServerDetector {
 
-    private static Log log =  LogFactory.getLog(PostgreSQLServerDetector.class);
+    private Log log = LogFactory.getLog(PostgreSQLServerDetector.class);
+    private static final String PTQL_QUERY = "State.Name.re=post(master|gres),State.Name.Pne=$1,Args.0.re=.*post(master|gres)(.exe)?$";
+    private static final String DB_QUERY = "SELECT datname FROM pg_database WHERE datistemplate IS FALSE AND datallowconn IS TRUE";
+    private static final String TABLE_QUERY = "SELECT relname, schemaname FROM pg_stat_user_tables";
+    private static final String INDEX_QUERY = "SELECT indexrelname, schemaname FROM pg_stat_user_indexes";
 
-    private static final String POSTGRESQL_VERSION = "(PostgreSQL)";
-    //likely will only work w/ linux due to permissions
-    //and setting of argv[0] to the full binary path.
-    //State.Name == 'postgres' on OSX, 'postmaster' elsewhere
-    private static final String PTQL_QUERY =
-        "State.Name.re=post(master|gres),State.Name.Pne=$1,Args.0.re=.*post(master|gres)(.exe)?$";
-
-    // Table discovery query
-    private static final String TABLE_QUERY = 
-        "SELECT relname, schemaname FROM pg_stat_user_tables";
-    // Index discovery query
-    private static final String INDEX_QUERY =
-        "SELECT indexrelname, schemaname FROM pg_stat_user_indexes";
-
-    // Resource types and versions
-    static final String SERVER_NAME = "PostgreSQL";
-    static final String TABLE       = "Table";
-    static final String INDEX       = "Index";
-
-    static final String VERSION_74 = "7.4";
-    static final String VERSION_80 = "8.0";
-    static final String VERSION_81 = "8.1";
-    static final String VERSION_82 = "8.2";
-    static final String VERSION_83 = "8.3";
-    static final String VERSION_84 = "8.4";
-    static final String VERSION_90 = "9.0";
-
-    static final String HQ_SERVER_DB = "HQ PostgreSQL";
-    static final String HQ_SERVER_DB81 = "HQ PostgreSQL 8.1";
-    static final String HQ_SERVER_DB82 = "HQ PostgreSQL 8.2";
-    static final String HQ_SERVER_DB83 = "HQ PostgreSQL 8.3";
-    static final String HQ_SERVER_DB84 = "HQ PostgreSQL 8.4";
-    static final String HQ_SERVER_DB90 = "HQ PostgreSQL 9.0";
-
-
-    private static List getServerProcessList() {
-        ArrayList servers = new ArrayList();
+    public List getServerResources(ConfigResponse platformConfig) throws PluginException {
+        List servers = new ArrayList();
 
         long[] pids = getPids(PTQL_QUERY);
-        log.debug("[getServerProcessList] pids.length="+pids.length);
+        log.debug("[getServerProcessList] pids.length=" + pids.length);
 
-        for (int i=0; i<pids.length; i++) {
+        for (int i = 0; i < pids.length; i++) {
             String exe = getProcExe(pids[i]);
-            if (log.isDebugEnabled()) {
-                log.debug("[getServerProcessList] pid=" + pids[i] + " exec=" + exe + " args=" + Arrays.asList(getProcArgs(pids[i])));
+            List args = Arrays.asList(getProcArgs(pids[i]));
+            log.debug("[getServerProcessList] pid=" + pids[i] + " exec=" + exe + " args=" + args);
+            if (exe != null) {
+                String version = getVersion(exe);
+                String expectedVersion = getTypeProperty("version");
+                String pgData = getArgument("-D", args);
+                boolean correctVersion = Pattern.compile(expectedVersion).matcher(version).find();
+                log.debug("[getServerProcessList] version=" + version + " correctVersion=" + correctVersion);
+                if (correctVersion) {
+                    ServerResource server = createServerResource(exe);
+                    if (exe.indexOf("hqdb") != -1) {
+                        server.setName(getPlatformName() + " HQ " + getTypeInfo().getName());
+                    } else {
+                        if (pgData.length() > 0) {
+                            server.setName(server.getName() + " " + pgData);
+                            server.setIdentifier(server.getIdentifier() + "$" + pgData);
+                        }
+                    }
+                    ConfigResponse cprop = new ConfigResponse();
+                    cprop.setValue("version", version);
+                    setCustomProperties(server, cprop);
+                    setProductConfig(server, prepareConfig(pgData, args));
+                    servers.add(server);
+                }
             }
-            if (exe == null) {
-                continue;
-            }
-
-            File binary = new File(exe);
-
-            if (!binary.isAbsolute()) {
-                continue;
-            }
-            servers.add(binary.getAbsolutePath());
         }
-
         return servers;
     }
 
-    public List getServerResources(ConfigResponse platformConfig) 
-        throws PluginException
-    {
-        List servers = new ArrayList();
-        List paths = getServerProcessList();
-
-        for (int i = 0; i < paths.size(); i++) {
-            String dir = (String)paths.get(i);
-            log.debug("[getServerResources] dir="+dir);
-            List found = getServerList(dir);
-            if (!found.isEmpty()) {
-                servers.addAll(found);
-            }
-        }   
-
-        return servers;
-    }
-
-    public List getServerResources(ConfigResponse platformConfig, String path)
-        throws PluginException
-    {
-        // Normal file scan
-        return getServerList(path);
-    }
-
-    public List getServerResources (ConfigResponse platformConfig, 
-                                    String path, RegistryKey current) 
-        throws PluginException
-    {
-        return getServerList(path);
-    }
-
-    public List getServerList(String path) 
-        throws PluginException {
-
-        List servers = new ArrayList();
-        String version;
-
-        // Only check the binaries if they match the path we expect
-        if ((path.indexOf("pg_ctl.exe") == -1) &&
-            (path.indexOf("postgres") == -1) &&
-            (path.indexOf("postmaster") == -1))
-        {
-            return servers;
+    protected static String prepareUrl(ConfigResponse config, String db) throws PluginException {
+        String host = config.getValue(PostgreSQL.PROP_HOST);
+        String port = config.getValue(PostgreSQL.PROP_PORT);
+        if (db == null) {
+            db = config.getValue(PostgreSQL.PROP_DFDB);
         }
 
-        /**
-         * Determine version by locating the version string in the
-         * binary.  If binary is stripped, this would fail.  May be
-         * good to fall back to finding differences in files between
-         * the two versions
-         */
-        String binary;
-        if (path.indexOf("pg_ctl.exe") != -1) {
-            // Windows path includes arguments.. strip them first
-            binary = path.substring(0, path.indexOf("pg_ctl.exe") + 10);
-
-            // Some versions of windows quote the image path
-            if (binary.charAt(0) == '"') {
-                binary = binary.substring(1);
-            }
-        } else {
-            binary = path;
+        if ((db == null) || (host == null) || (port == null)) {
+            throw new PluginException("invalid configuration.");
         }
-
-        String errmsg =
-            "Unable to find '" + POSTGRESQL_VERSION + 
-            "' in: " + binary;
-        
-        String line;
-        try {
-            line = FileUtil.findString(binary, POSTGRESQL_VERSION);
-        } catch (IOException e) {
-            this.log.error(errmsg + ": " + e);
-            return servers;
-        }
-
-        if (line == null) {
-            // Unable to detrmine version
-            this.log.error(errmsg);
-            return servers;
-        } else {
-            int ix = line.lastIndexOf(" ");
-            if (ix != -1) {
-                version = line.substring(ix + 1);
-                this.log.debug("Found PostgreSQL version " + version);
-            } else {
-                // Unable to find version
-                this.log.error("Unable to determine PostgreSQL version " +
-                               "from version: " + line);
-                return servers;
-            }
-        }
-
-        String installPath = getParentDir(binary, 2);
-        log.debug("[getServerList] installPath="+installPath);
-        
-        ServerResource server = createServerResource(installPath);
-
-        // Set custom properties
-        ConfigResponse cprop = new ConfigResponse();
-        cprop.setValue("version", version);
-        server.setCustomProperties(cprop);
-
-        // Ensure 8.0 detector does not return 7.4 servers and vice versa
-        if (getTypeInfo().getVersion().equals(VERSION_74)) {
-            if (version.indexOf(VERSION_74) != -1) {
-                // Name is set here since we tack on the real version.
-                String name = getPlatformName() + " " +
-                    SERVER_NAME + " " + version;
-                server.setName(name);
-                servers.add(server);
-            }
-        } else if (getTypeInfo().getVersion().equals(VERSION_80)) {
-            if (version.indexOf(VERSION_80) != -1) {
-                // Name is set here since we tack on the real version.
-                String name;
-                if (installPath.indexOf("hqdb") != -1) {
-                    // 8.0 could be our backend database.  Set the
-                    // identifier and name.
-                    name = getPlatformName() + " " +
-                        HQ_SERVER_DB;
-                    server.setIdentifier(HQ_SERVER_DB);
-                } else {
-                    name = getPlatformName() + " " +
-                        SERVER_NAME + " " + version;
-                }
-
-                server.setName(name);
-                servers.add(server);
-            }
-        } else if (getTypeInfo().getVersion().equals(VERSION_81)) {
-            if (version.indexOf(VERSION_81) != -1) {
-                // Name is set here since we tack on the real version.
-                String name;
-                if (installPath.indexOf("hqdb") != -1) {
-                    // 8.1 could be our backend database.  Set the
-                    // identifier and name.
-                    name = getPlatformName() + " " +
-                        HQ_SERVER_DB81;
-                    server.setIdentifier(HQ_SERVER_DB81);
-                } else {
-                    name = getPlatformName() + " " +
-                        SERVER_NAME + " " + version;
-                }
-
-                server.setName(name);
-                servers.add(server);
-            }
-        } else if (getTypeInfo().getVersion().equals(VERSION_82)) {
-            if (version.indexOf(VERSION_82) != -1) {
-                String name;
-                if (installPath.indexOf("hqdb") != -1) {
-                    name = getPlatformName() + " " +
-                            HQ_SERVER_DB82;
-                    server.setIdentifier(HQ_SERVER_DB82);
-                } else {
-                    name = getPlatformName() + " " +
-                        SERVER_NAME + " " + version;
-                }
-
-                server.setName(name);
-                servers.add(server);
-            }
-        } else if (getTypeInfo().getVersion().equals(VERSION_83)) {
-            if (version.indexOf(VERSION_83) != -1) {
-                String name;
-                if (installPath.indexOf("hqdb") != -1) {
-                    name = getPlatformName() + " " +
-                            HQ_SERVER_DB83;
-                    server.setIdentifier(HQ_SERVER_DB83);
-                } else {
-                    name = getPlatformName() + " " +
-                        SERVER_NAME + " " + version;
-                }
-
-                server.setName(name);
-                servers.add(server);
-            }
-        } else if (getTypeInfo().getVersion().equals(VERSION_84)) {
-            if (version.indexOf(VERSION_84) != -1) {
-                String name;
-                if (installPath.indexOf("hqdb") != -1) {
-                    name = getPlatformName() + " " +
-                            HQ_SERVER_DB84;
-                    server.setIdentifier(HQ_SERVER_DB84);
-                } else {
-                    name = getPlatformName() + " " +
-                        SERVER_NAME + " " + version;
-                }
-
-            }
-        } else if (getTypeInfo().getVersion().equals(VERSION_90)) {
-            if (version.indexOf(VERSION_90) != -1) {
-                String name;
-                if (installPath.indexOf("hqdb") != -1) {
-                    name = getPlatformName() + " " + HQ_SERVER_DB90;
-                    server.setIdentifier(HQ_SERVER_DB90);
-                } else {
-                    name = getPlatformName() + " " + SERVER_NAME + " " + version;
-                }
-                server.setName(name);
-                servers.add(server);
-            }
-        }
-
-        return servers;
+        return "jdbc:postgresql://" + host + ":" + port + "/" + db;
     }
 
     @Override
-	protected List discoverServices(ConfigResponse config) 
-        throws PluginException
-    {
-        log.debug("[discoverServices] config="+config);
-        String url = config.getValue(PostgreSQLMeasurementPlugin.PROP_URL);
-        String user = config.getValue(PostgreSQLMeasurementPlugin.PROP_USER);
-        String pass = config.getValue(PostgreSQLMeasurementPlugin.PROP_PASSWORD);
+    protected List discoverServices(ConfigResponse config) throws PluginException {
+        log.debug("[discoverServices] config=" + config);
+        ArrayList services = new ArrayList();
+        String user = config.getValue(PostgreSQL.PROP_USER);
+        String pass = config.getValue(PostgreSQL.PROP_PASS);
+        String url = prepareUrl(config, null);
 
         try {
             Class.forName(PostgreSQLMeasurementPlugin.JDBC_DRIVER);
         } catch (ClassNotFoundException e) {
-            // No driver.  Should not happen.
-            throw new PluginException("Unable to load JDBC " +
-                                      "Driver: " + e.getMessage());
+            throw new PluginException("Unable to load JDBC Driver: " + e.getMessage());
         }
 
-        ArrayList services = new ArrayList();
         Connection conn = null;
         Statement stmt = null;
         ResultSet rs = null;
 
+        List<String> dataBases = new ArrayList<String>();
         try {
             conn = DriverManager.getConnection(url, user, pass);
-            // Discover all PostgreSQL tables.
             stmt = conn.createStatement();
-            rs = stmt.executeQuery(TABLE_QUERY);
-
+            rs = stmt.executeQuery(DB_QUERY);
             while (rs != null && rs.next()) {
-                String tablename = rs.getString(1);
-                String schemaname = rs.getString(2);
-
-                ServiceResource service = new ServiceResource();
-                service.setType(this, TABLE);
-                service.setServiceName(prependSchemaname(tablename, schemaname));
-
-                ConfigResponse productConfig = new ConfigResponse();
-                productConfig.setValue(PostgreSQLMeasurementPlugin.PROP_TABLE,
-                                       tablename);
-                productConfig.setValue(PostgreSQLMeasurementPlugin.PROP_SCHEMA, 
-                						schemaname);
-
-                service.setProductConfig(productConfig);
-                service.setMeasurementConfig();
-                service.setControlConfig();
-
-                services.add(service);
+                dataBases.add(rs.getString(1));
             }
-
-            if (config.getValue("indexes.enable", "fasle").equalsIgnoreCase("true")) {
-                rs.close();
-                rs = stmt.executeQuery(INDEX_QUERY);
-
-                while (rs != null && rs.next()) {
-                    String indexname = rs.getString(1);
-                    String schemaname = rs.getString(2);
-
-                    ServiceResource service = new ServiceResource();
-                    service.setType(this, INDEX);
-                    service.setServiceName(prependSchemaname(indexname, schemaname));
-
-                    ConfigResponse productConfig = new ConfigResponse();
-                    productConfig.setValue(PostgreSQLMeasurementPlugin.PROP_INDEX,
-                            indexname);
-                    productConfig.setValue(PostgreSQLMeasurementPlugin.PROP_SCHEMA, 
-    						schemaname);
-
-                    service.setProductConfig(productConfig);
-                    service.setMeasurementConfig();
-                    service.setControlConfig();
-
-                    services.add(service);
-                }
-            }
-
         } catch (SQLException e) {
-            throw new PluginException("Error querying for " +
-                                      "services: " + e.getMessage());
+            throw new PluginException("Error querying for DataBases: " + e.getMessage(), e);
         } finally {
             DBUtil.closeJDBCObjects(this.log, conn, stmt, rs);
         }
 
+        Pattern table_reg = null;
+        boolean table_all = config.getValue(PostgreSQL.PROP_TABLE_REG).equalsIgnoreCase("ALL");
+        boolean table_off = config.getValue(PostgreSQL.PROP_TABLE_REG).equalsIgnoreCase("OFF");
+        if (!table_all && !table_off) {
+            table_reg = Pattern.compile(config.getValue(PostgreSQL.PROP_TABLE_REG));
+        }
+
+        Pattern index_reg = null;
+        boolean index_all = config.getValue(PostgreSQL.PROP_INDEX_REG).equalsIgnoreCase("ALL");
+        boolean index_off = config.getValue(PostgreSQL.PROP_INDEX_REG).equalsIgnoreCase("OFF");
+        if (!index_all && !index_off) {
+            index_reg = Pattern.compile(config.getValue(PostgreSQL.PROP_INDEX_REG));
+        }
+
+        log.debug("[discoverServices] databases: " + dataBases);
+        for (int i = 0; i < dataBases.size(); i++) {
+            String dataBase = dataBases.get(i);
+            try {
+                conn = DriverManager.getConnection(prepareUrl(config, dataBase), user, pass);
+                stmt = conn.createStatement();
+                rs = stmt.executeQuery(TABLE_QUERY);
+
+                while (rs != null && rs.next()) {
+                    String tablename = rs.getString(1);
+                    String schemaname = rs.getString(2);
+                    if (isValidName(tablename, table_all, table_off, table_reg)) {
+                        ServiceResource service = new ServiceResource();
+                        service.setType(this, "Table");
+                        service.setServiceName("Table " + prepareName(dataBase, schemaname, tablename));
+
+                        ConfigResponse productConfig = new ConfigResponse();
+                        productConfig.setValue(PostgreSQL.PROP_DB, dataBase);
+                        productConfig.setValue(PostgreSQL.PROP_TABLE, tablename);
+                        productConfig.setValue(PostgreSQL.PROP_SCHEMA, schemaname);
+
+                        service.setProductConfig(productConfig);
+                        service.setMeasurementConfig();
+                        service.setControlConfig();
+
+                        services.add(service);
+                    }
+                }
+
+                if (config.getValue("indexes.enable", "fasle").equalsIgnoreCase("true")) {
+                    rs.close();
+                    rs = stmt.executeQuery(INDEX_QUERY);
+
+                    while (rs != null && rs.next()) {
+                        String indexname = rs.getString(1);
+                        String schemaname = rs.getString(2);
+
+                        if (isValidName(indexname, index_all, index_off, index_reg)) {
+                            ServiceResource service = new ServiceResource();
+                            service.setType(this, "Index");
+                            service.setServiceName("Index " + prepareName(dataBase, schemaname, indexname));
+
+                            ConfigResponse productConfig = new ConfigResponse();
+                            productConfig.setValue(PostgreSQL.PROP_DB, dataBase);
+                            productConfig.setValue(PostgreSQL.PROP_INDEX, indexname);
+                            productConfig.setValue(PostgreSQL.PROP_SCHEMA, schemaname);
+
+                            service.setProductConfig(productConfig);
+                            service.setMeasurementConfig();
+                            service.setControlConfig();
+
+                            services.add(service);
+                        }
+                    }
+                }
+            } catch (SQLException e) {
+                throw new PluginException("Error querying for services: " + e.getMessage(), e);
+            } finally {
+                DBUtil.closeJDBCObjects(this.log, conn, stmt, rs);
+            }
+        }
         return services;
     }
 
-	private String prependSchemaname(String itemname, String schemaname) {
-		return schemaname + "." +  itemname;
-	}
+    private String prepareName(String db, String sc, String name) {
+        return db + "." + sc + "." + name;
+    }
+
+    private String getVersion(String exec) {
+        String command[] = {exec, "--version"};
+        log.debug("[getVersionString] command= '" + Arrays.asList(command) + "'");
+        String version = "";
+        try {
+            Process cmd = Runtime.getRuntime().exec(command);
+            cmd.getOutputStream().close();
+            cmd.waitFor();
+            String out = inputStreamAsString(cmd.getInputStream());
+            String err = inputStreamAsString(cmd.getErrorStream());
+            if (log.isDebugEnabled()) {
+                if (cmd.exitValue() != 0) {
+                    log.error("[getVersionString] exit=" + cmd.exitValue());
+                    log.error("[getVersionString] out=" + out);
+                    log.error("[getVersionString] err=" + err);
+                } else {
+                    log.debug("[getVersionString] out=" + out);
+                }
+            }
+            version = out;
+        } catch (InterruptedException ex) {
+            log.debug("[getVersionString] Error:" + ex.getMessage(), ex);
+        } catch (IOException ex) {
+            log.debug("[getVersionString] Error:" + ex.getMessage(), ex);
+        }
+        return version;
+    }
+
+    private String inputStreamAsString(InputStream stream) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(stream));
+        StringBuilder sb = new StringBuilder();
+        try {
+            String line = null;
+            while ((line = br.readLine()) != null) {
+                sb.append(line).append("\n");
+            }
+        } finally {
+            br.close();
+        }
+        return sb.toString().trim();
+    }
+
+    private String getArgument(String opt, List<String> args) {
+        String res = "";
+        int i = args.indexOf(opt);
+        if (i > -1) {
+            res = args.get(i + 1);
+        }
+        return res.trim();
+    }
+
+    private String getConfiguration(String regex, String config) {
+        String res = "";
+        Matcher m = Pattern.compile(regex, Pattern.MULTILINE + Pattern.CASE_INSENSITIVE).matcher(config);
+        if (m.find()) {
+            res = m.group(1).trim();
+            res = res.replaceAll("=", "");
+            res = res.replaceAll("'", "");
+            res = res.replaceAll("\"", "");
+        }
+        return res.trim();
+    }
+
+    private String loadConfiguration(String pgData) {
+        String configuration = "";
+        File configFile = new File(pgData, "postgresql.conf");
+        if (configFile.exists() && configFile.canRead()) {
+            FileInputStream in = null;
+            try {
+                in = new FileInputStream(configFile);
+                configuration = inputStreamAsString(in);
+            } catch (IOException ex) {
+                log.error("Error reading file '" + configFile + "': " + ex.getMessage(), ex);
+            } finally {
+                if (in != null) {
+                    try {
+                        in.close();
+                    } catch (IOException ex) {
+                        log.error("Error closing file '" + configFile + "'");
+                    }
+                }
+            }
+        }
+        return configuration;
+    }
+
+    private ConfigResponse prepareConfig(String pgData, List<String> args) {
+        ConfigResponse cf = new ConfigResponse();
+        String configuration = loadConfiguration(pgData);
+
+        String addr = getConfiguration("^ *listen_addresses([^#]*)", configuration);
+        if (addr.length() > 0) {
+            cf.setValue(PostgreSQL.PROP_HOST, addr);
+        } else {
+            addr = getArgument("-h", args);
+            if (addr.length() > 0) {
+                cf.setValue(PostgreSQL.PROP_HOST, addr);
+            }
+        }
+
+        String port = getConfiguration("^ *port([^#]*)", configuration);
+        if (port.length() > 0) {
+            cf.setValue(PostgreSQL.PROP_PORT, port);
+        } else {
+            port = getArgument("-p", args);
+            if (port.length() > 0) {
+                cf.setValue(PostgreSQL.PROP_PORT, port);
+            }
+        }
+        return cf;
+    }
+
+    private boolean isValidName(String name, boolean all, boolean off, Pattern reg) {
+        boolean res;
+        if (all) {
+            res = true;
+        } else if (off) {
+            res = false;
+        } else {
+            res = reg.matcher(name).matches();
+        }
+        return res;
+    }
 }
