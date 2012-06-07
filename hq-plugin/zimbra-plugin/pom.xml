@@ -7,7 +7,7 @@
 	<artifactId>zimbra-plugin</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - Zimbra Plugin</name>
-	<version>4.6.7.BUILD-SNAPSHOT</version>
+	<version>4.6.6.BUILD-SNAPSHOT</version>
 
 	<properties>
 		<mail.version>1.4</mail.version>
