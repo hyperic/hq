@@ -385,7 +385,7 @@ public class AvailabilityDataDAO
             .append(" AND ").append(ALIAS_CLAUSE);
         final boolean hasIncludes = (includes != null && includes.size() > 0) ? true : false;
         if (hasIncludes) {
-            sql.append(" rle.availabilityDataId.measurement in (:mids)");
+            sql.append(" AND rle.availabilityDataId.measurement in (:mids)");
         }
         Query query = getSession().createQuery(sql.toString());
         if (!hasIncludes) {

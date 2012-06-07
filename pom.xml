@@ -5,7 +5,7 @@
 	<groupId>org.hyperic.hq</groupId>
 	<artifactId>hq-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>5.0.BUILD-SNAPSHOT</version>
+	<version>5.0</version>
 	<name>Hyperic HQ - Parent</name>
 
 	<properties>
@@ -29,7 +29,7 @@
 		<ehcache.version>1.5.0</ehcache.version>
 		<freemarker.version>2.3.4</freemarker.version>
 		<getopt.version>1.0.13</getopt.version>
-		<groovy.version>1.6.7</groovy.version> 
+		<groovy.version>1.7.0</groovy.version> 
 		<hibernate.version>3.2.6.ga</hibernate.version>
 		<hibernate-tools.version>3.2.3.GA</hibernate-tools.version>
         <hqapi.version>5.0.0</hqapi.version>
@@ -202,13 +202,16 @@
 				<artifactId>dnsjava</artifactId>
 				<version>${dns.version}</version>
 			</dependency>
-			
 			 <dependency>
 				<groupId>org.codehaus.groovy</groupId>
 				<artifactId>groovy-all</artifactId>
 				<version>${groovy.version}</version>
 			</dependency>
-			
+			<dependency>
+      			<groupId>commons-codec</groupId>
+    			<artifactId>commons-codec</artifactId>
+      			<version>${commons-codec.version}</version>
+    		</dependency>
 			<!-- <dependency>
 				<groupId>org.codehaus.gmaven.runtime</groupId>
 				<artifactId>gmaven-runtime-1.7</artifactId>

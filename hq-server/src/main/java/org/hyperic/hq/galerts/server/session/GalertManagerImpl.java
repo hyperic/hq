@@ -514,6 +514,22 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
         }
         return counts;
     }
+    
+    /**
+     * fill the number of alerts for the given array of AppdefEntityID's , mapping AppdefEntityID to it's alerts count
+     * 
+     */
+    public void fillAlertCount(AuthzSubject subj, AppdefEntityID[] ids, Map<AppdefEntityID, Integer> counts)
+        throws PermissionException {
+        for (int i = 0; i < ids.length; i++) {
+            if (ids[i].isGroup()) {
+                ResourceGroup group = resourceGroupManager.findResourceGroupById(subj, ids[i]
+                    .getId());
+
+                counts.put(ids[i], _logDAO.countAlerts(group).intValue());
+            }
+        }
+    }
 
     /**
      * 

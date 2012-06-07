@@ -25,23 +25,14 @@
 package org.hyperic.hq.plugin.mssql;
 
 import java.io.File;
-
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.regex.Pattern;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.product.*;
+import org.hyperic.sigar.win32.*;
 import org.hyperic.util.config.ConfigResponse;
-
-import org.hyperic.hq.product.AutoServerDetector;
-import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.ServerDetector;
-import org.hyperic.hq.product.ServerResource;
-import org.hyperic.hq.product.ServiceResource;
-import org.hyperic.hq.product.Win32ControlPlugin;
-
-import org.hyperic.sigar.win32.Pdh;
-import org.hyperic.sigar.win32.Service;
-import org.hyperic.sigar.win32.ServiceConfig;
-import org.hyperic.sigar.win32.Win32Exception;
 
 public class MsSQLDetector
         extends ServerDetector
@@ -50,64 +41,74 @@ public class MsSQLDetector
     static final String PROP_DB = "db.name";
     private static final String DB_NAME = "Database";
     private static final String DEFAULT_NAME = "MSSQL";
-    static final String DEFAULT_SERVICE_NAME =
-            DEFAULT_NAME + "SERVER";
+    static final String DEFAULT_SERVICE_NAME = DEFAULT_NAME + "SERVER";
+    private static final Log log = LogFactory.getLog(MsSQLDetector.class);
 
-    public List getServerResources(ConfigResponse platformConfig)
-            throws PluginException {
-
-        String versionFile =
-                getTypeProperty("mssql.version.file");
-
+    public List getServerResources(ConfigResponse platformConfig) throws PluginException {
         List configs;
         try {
             configs =
                     Service.getServiceConfigs("sqlservr.exe");
         } catch (Win32Exception e) {
+            log.debug("[getServerResources] Error: "+e.getMessage(), e);
             return null;
         }
+        
+        log.debug("[getServerResources] MSSQL Server found:'" + configs.size() + "'");
+
         if (configs.size() == 0) {
             return null;
         }
 
         List servers = new ArrayList();
         for (int i = 0; i < configs.size(); i++) {
-            ServiceConfig serviceConfig =
-                    (ServiceConfig) configs.get(i);
+            ServiceConfig serviceConfig = (ServiceConfig) configs.get(i);
             String name = serviceConfig.getName();
-            getLog().debug("[getServerResources] --> "+i+".name = " + name);
+            String instance = instaceName(name);
             File dir = new File(serviceConfig.getExe()).getParentFile();
-            File dll = new File(dir, versionFile);
-             getLog().debug("[getServerResources] --> "+i+".dll = " + dll);
-           if (!dll.exists()) {
-                continue;
-            }
-            dir = dir.getParentFile(); //strip "Binn"
 
-            ServerResource server =
-                    createServerResource(dir.getAbsolutePath(),
-                    name, false);
-            servers.add(server);
+            boolean correctVersion = false;
+            String regKey = getTypeProperty("regKey");
+
+            if (regKey != null) {
+                try {
+                    regKey = regKey.replace("%NAME%", instance);
+                    log.debug("[getServerResources] regKey:'" + regKey + "'");
+                    RegistryKey key = RegistryKey.LocalMachine.openSubKey(regKey);
+                    String version = key.getStringValue("CurrentVersion");
+                    String expectedVersion = getTypeProperty("version");
+                    correctVersion = Pattern.compile(expectedVersion).matcher(version).find();
+                    log.debug("[getServerResources] server:'" + instance + "' version:'" + version + "' expectedVersion:'" + expectedVersion + "' correctVersion:'" + correctVersion + "'");
+                } catch (Win32Exception ex) {
+                    log.debug("[getServerResources] Error accesing to windows registry to get '" + instance + "' version. " + ex.getMessage());
+                }
+            } else {
+                correctVersion = checkVersionOldStyle(dir);
+            }
+
+            if (correctVersion) {
+                dir = dir.getParentFile(); //strip "Binn"
+                ServerResource server = createServerResource(dir.getAbsolutePath(), name);
+                servers.add(server);
+            }
         }
 
         return servers;
     }
 
-    private ServerResource createServerResource(String installpath,
-            String name,
-            boolean isDefault) {
-        ServerResource server =
-                createServerResource(installpath);
+    private boolean checkVersionOldStyle(File dir) {
+        String versionFile = getTypeProperty("mssql.version.file");
+        File dll = new File(dir, versionFile);
+        boolean correctVersion = dll.exists();
+        getLog().debug("[checkVersionOldStyle] dll:'" + dll + "' correctVersion='" + correctVersion + "'");
+        return correctVersion;
+    }
 
-        if (!isDefault) {
-            String instance;
-            if (name.startsWith("MSSQL$")) {
-                instance = name.substring(6);
-            } else {
-                instance = name;
-            }
-            server.setName(server.getName() + " " + instance);
-        }
+    private ServerResource createServerResource(String installpath, String name) {
+        ServerResource server = createServerResource(installpath);
+
+        String instance = instaceName(name);
+        server.setName(server.getName() + " " + instance);
 
         ConfigResponse config = new ConfigResponse();
         config.setValue(Win32ControlPlugin.PROP_SERVICENAME, name);
@@ -118,6 +119,15 @@ public class MsSQLDetector
         return server;
     }
 
+    private static String instaceName(String name) {
+        String instance = name;
+        if (name.startsWith("MSSQL$")) {
+            instance = name.substring(6);
+        }
+        return instance;
+    }
+
+    @Override
     protected List discoverServices(ConfigResponse serverConfig)
             throws PluginException {
 
@@ -164,8 +174,5 @@ public class MsSQLDetector
         }
 
         return services;
-    }
-
-    public static void main(String argv[]) {
     }
 }

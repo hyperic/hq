@@ -142,7 +142,7 @@ drop table #tTables
 <!-- NUEVOS -->
     <filter name="buffer.manager" value="Buffer Manager:Platform=Win32:${name}"/>
 
-    <metrics name="Buffer-Manager">
+    <metrics name="Buffer-Manager_2012">
         <metric name="Page life expectancy"
             template="${buffer.manager}"
             category="UTILIZATION"
@@ -173,18 +173,6 @@ drop table #tTables
             group="Reliability"
             collectionType="trendsup"
             units="none"/>
-        <metric name="Free pages"
-            template="${buffer.manager}"
-            category="UTILIZATION"
-            group="Reliability"
-            collectionType="dynamic"
-            units="none"/>
-        <metric name="Stolen pages"
-            template="${buffer.manager}"
-            category="UTILIZATION"
-            group="Reliability"
-            collectionType="dynamic"
-            units="none"/>
         <metric name="Buffer Cache hit ratio"
             template="Buffer Manager:Type=Formatted:${name}"
             category="UTILIZATION"
@@ -192,6 +180,23 @@ drop table #tTables
             collectionType="dynamic"
             units="percent"/>
     </metrics>
+    
+    <metrics name="Buffer-Manager">
+        <include name="Buffer-Manager_2012"/>
+        <metric name="Free pages"
+                template="${buffer.manager}"
+                category="UTILIZATION"
+                group="Reliability"
+                collectionType="dynamic"
+                units="none"/>
+        <metric name="Stolen pages"
+                template="${buffer.manager}"
+                category="UTILIZATION"
+                group="Reliability"
+                collectionType="dynamic"
+                units="none"/>
+    </metrics>
+
 <!-- FIN NUEVOS -->
 
     <metrics name="mssql-avail">
@@ -713,5 +718,33 @@ drop table #tTables
           version="2008"
           include="2005">
         <property name="mssql.version.file" value="sqlsvc.dll"/>
+        <property name="regKey" value="SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL10.%NAME%\MSSQLServer\CurrentVersion"/>
+        <property name="version" value="10.00"/>
+    </server>
+    <server name="MsSQL"
+          version="2008 R2"
+          include="2008">
+        <property name="mssql.version.file" value="sqlsvc.dll"/>
+        <property name="regKey" value="SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL10_50.%NAME%\MSSQLServer\CurrentVersion"/>
+        <property name="version" value="10.5"/>
+    </server>
+    <server name="MsSQL"
+          version="2012"
+          include="2008">
+        <property name="mssql.version.file" value="sqlsvc.dll"/>
+        <property name="regKey" value="SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL11.%NAME%\MSSQLServer\CurrentVersion"/>
+        <property name="version" value="11.0.\d*\.\d*"/>
+        <metrics>
+            <include name="mssql-avail"/>
+            <include name="mssql-database"/>
+      <!-- server only -->
+            <include name="mssql-access"/>
+            <include name="mssql-general"/>
+            <include name="mssql-memory"/>
+            <include name="mssql-locks"/>
+            <include name="mssql-latches"/>
+            <include name="mssql-cache"/>
+            <include name="Buffer-Manager_2012"/>
+        </metrics>
     </server>
 </plugin>

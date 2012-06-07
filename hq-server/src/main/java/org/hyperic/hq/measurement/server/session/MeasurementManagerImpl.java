@@ -1449,8 +1449,18 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             boolean isUpdate = z instanceof ResourceUpdatedZevent;
 
             try {
-                // Handle reschedules for when agents are updated.
-                if (isUpdate) {
+            	if (isCreate) {
+            		//If this is the creation of a new measurement we will wait for 2 seconds
+            		//so that when we will call the getMergedConfigResponse() method for this resource all
+            		//the information will be there. Fix for Jira bug [HQ-3876]
+            		try{
+            			Thread.sleep(2000);
+            		}
+            		catch (Exception e) {
+            		}
+            	}
+            	// Handle reschedules for when agents are updated.
+            	if (isUpdate) {
                     if (debug) log.debug("Updated metric schedule for [" + id + "]");
                     eids.add(id);
                 }

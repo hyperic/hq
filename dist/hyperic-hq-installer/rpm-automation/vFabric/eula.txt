@@ -1,0 +1,378 @@
+﻿VMWARE END USER LICENSE AGREEMENT
+
+PLEASE NOTE THAT THE TERMS OF THIS END USER LICENSE AGREEMENT SHALL GOVERN 
+YOUR USE OF THE SOFTWARE, REGARDLESS OF ANY TERMS THAT MAY APPEAR DURING THE 
+INSTALLATION OF THE SOFTWARE.
+
+IMPORTANT-READ CAREFULLY:   BY DOWNLOADING, INSTALLING, OR USING THE 
+SOFTWARE, YOU (THE INDIVIDUAL OR LEGAL ENTITY) AGREE TO BE BOUND BY THE 
+TERMS OF THIS END USER LICENSE AGREEMENT ("EULA").  IF YOU DO NOT AGREE TO 
+THE TERMS OF THIS EULA, YOU MUST NOT DOWNLOAD, INSTALL, OR USE THE SOFTWARE, 
+AND YOU MUST DELETE OR RETURN THE UNUSED SOFTWARE TO THE VENDOR FROM WHICH 
+YOU ACQUIRED IT WITHIN THIRTY (30) DAYS AND REQUEST A REFUND OF THE LICENSE 
+FEE, IF ANY, THAT YOU PAID FOR THE SOFTWARE.
+
+EVALUATION LICENSE.  If You are licensing the Software for evaluation 
+purposes, your use of the Software is only permitted in a non-production 
+environment and for the period limited by the Software License Key.  
+Notwithstanding any other provision in this EULA, an Evaluation License of 
+the Software is provided "AS-IS" without support or warranty of any kind, 
+expressed or implied.
+
+1.	DEFINITIONS
+ 
+1.1	"Documentation" means, collectively, the operation instructions, 
+release notes, user manuals and/or help files for the Software in electronic 
+or written form.
+
+1.2	"Guest Operating Systems" means instances of third-party operating 
+systems licensed separately by You and installed in a Virtual Machine.
+
+1.3	"Software" means software products that are licensed to You under 
+this EULA, including, but not limited to, any related components purchased 
+or provided with the Software, Documentation, and any maintenance releases 
+thereto. 
+
+1.4     "Software License Key" means a valid serial number issued to You to 
+activate and use the Software.     
+
+1.5	"Open Source Software" means various software components including 
+open source software, that may be part of the Software, each licensed to You 
+under its own applicable license terms and conditions, which can be found in 
+the open_source_licenses.txt file, the Documentation or as applicable, the 
+corresponding source files for the Software available at 
+http://www.vmware.com/download/open_source.html.
+
+1.6	"Virtual Machine" means a software container that can run its own 
+operating system and execute applications like a physical machine.   
+	
+2.		GRANT AND USE RIGHTS FOR SOFTWARE 
+
+2.1	License Grant.  The Software is licensed, not sold.  Subject to the 
+terms of this EULA, VMware grants You a non-exclusive, non-transferable 
+license, without rights to sublicense, to use the Software in the country 
+where You are invoiced in accordance with the Documentation and the VMware 
+license model (per device, per processor, per server, per single user, per 
+virtual machine, or any other VMware approved license model) specified in 
+Section 8 of this EULA for which You have paid the applicable license fees. 
+If You were invoiced in the European Union for the Software, You may use 
+that Software in any of the European Union member states. For VMware 
+Workstation and Fusion, You may use the Software without the invoice-country 
+restriction.  You may allow third party consultants or contractors to access 
+and use the Software on Your behalf solely for Your internal business 
+operations, provided, they are bound by an agreement with You protecting 
+VMware's intellectual property with terms no less stringent than this EULA 
+and You ensure that such third party use of the Software complies with the 
+terms of this EULA.  You may make one backup, unmodified copy of the 
+Software solely for archival purpose.  If You upgrade or exchange the 
+Software from a previous validly licensed version, You must cease use of the 
+prior version of that Software.  You agree to provide written certification 
+of destruction of the previous version of the Software upon VMware's 
+request.
+
+2.2	Restrictions.  Except as expressly permitted by this EULA or by 
+applicable law, You may not (i) sell, lease, assign, license, sublicense, 
+distribute or otherwise transfer in whole or in part the Software; (ii) 
+permit any use of or access to the Software by any third party, (iii) 
+operate the Software on behalf of or for the benefit of any third party, 
+including the operation of any service that is accessed by a third party, 
+except that, for the purposes of this Section 2.2(iii), You may use the 
+Software to deliver hosted services to Your affiliates that are directly or 
+indirectly controlled by, or are under common control with You.  "Control" 
+in this Section 2.2(iii) means an ownership, voting or similar interest 
+representing fifty percent (50%) or more of the total interests then 
+outstanding of the relevant entity; (iv) decompile, disassemble, reverse 
+engineer, or otherwise attempt to derive source code from the Software; (v) 
+modify or create derivative works based upon the Software; or (vi) create, 
+develop, license, install, use, or deploy any software or services to 
+circumvent, enable, modify or provide access, permissions or rights which 
+violate the technical restrictions in the Software.  If You wish to exercise 
+any rights to reverse engineer to ensure interoperability in accordance with 
+applicable law, You must first provide VMware with written notice and all 
+reasonably requested information to info@vmware.com  within 30 days and 
+permit VMware to assess your claim and, at VMware's sole discretion, to 
+make an offer to provide alternatives that reduce any adverse impact on 
+VMware's intellectual property or other rights.
+
+2.3	VMware Tools.  You may use or distribute the suite of utilities and 
+drivers that may be part of the Software ("VMware Tools") to any third party 
+provided that (i) You only distribute the VMware Tools as a whole in object 
+code format, whether or not as part of the Virtual Machine You create with 
+the Software; and (ii) You agree to indemnify, hold harmless, and defend 
+VMware from and against any claims or lawsuits, including attorneys' fees, 
+that relate to your distribution of VMware Tools.
+
+2.4	Benchmarking.  You may use the Software to conduct internal 
+performance testing and benchmarking studies, the results of which only You 
+may publish or publicly disseminate, provided that VMware has reviewed and 
+approved of the methodology, assumptions and other parameters of your 
+testing and studies.  Please contact VMware at benchmark@vmware.com to 
+request such review.  For VMware Workstation and Fusion benchmarks, You may 
+publish or publicly disseminate the results without VMware's prior review 
+and approval.
+
+2.5	Third-party Software.  You are responsible for separately obtaining 
+and complying with any licenses necessary to operate third-party software, 
+including but not limited to, Guest Operating Systems and application 
+programs which the Software enables You to run.
+
+2.6	Data Collection and Privacy.  You agree that VMware may collect, 
+use, store and transmit technical and related information about your use of 
+the Software which may include internet protocol address, hardware 
+identification, operating system, application software, peripheral hardware, 
+and non-personally identifiable Software usage statistics ("Collected Data") 
+to facilitate the provisioning of updates, support, invoicing or online 
+services to You.  Collected Data is subject to VMware's Privacy Policy at 
+http://www.vmware.com/help/privacy.html . 
+
+2.7	Audit Rights. During the term of this EULA and for two (2) years 
+after termination or expiration of the EULA or support and subscription 
+services for the applicable Software has expired, You agree to maintain 
+accurate records as to your installation and use of the Software, sufficient 
+to provide evidence of compliance with the terms of this EULA. VMware, or an 
+independent third party designated by VMware, may audit, upon written notice 
+to You, your books, records, and computing devices to determine your 
+compliance with this EULA and your payment of the applicable license and 
+support services fees, if any, for the Software. VMware may conduct no more 
+than one (1) audit in any twelve (12) month period.  In the event that any 
+such audit reveals an underpayment by You of more than five percent (5%) of 
+the license amounts due to VMware in the period being audited, or that You 
+have breached any term of the EULA, then, in addition to paying to VMware 
+any underpayments for Software licenses and Support and Subscription ("SnS") 
+fees and any other remedies VMware may have, You will promptly pay to VMware 
+the audit costs incurred by VMware. 
+	
+3.	TITLE.  VMware retains all right, title, and interest in and to the 
+Software, the Software License Key(s) and all related intellectual property 
+rights. VMware retains all rights not expressly granted to You in this EULA. 
+
+4.	SUPPORT AND SUBSCRIPTION SERVICES.  Except as expressly specified in 
+Section 8 of this EULA, VMware does not provide any support or subscription 
+services for the Software under this EULA.  You have no rights to any 
+updates, upgrades or extensions or enhancements to the Software developed by 
+VMware unless you separately purchase VMware support or subscription 
+services.  These support or subscription services are subject to VMware's 
+then-current Support and Subscription Contract Terms and Conditions. 
+
+5. 	TERMINATION.  VMware may terminate this EULA immediately upon notice 
+if You fail to comply with any term of this EULA.  In the event of 
+termination, You must remove and destroy all copies of the Software and 
+Software License Key(s), including all backup copies, from the server and 
+all computers and terminals You own, possess or control and on which the 
+Software is installed.  Any obligations to pay fees incurred prior to 
+termination and Sections 1, 2, 3, 6, and 7 of this EULA shall survive 
+termination for any reason.
+
+6.	LIMITED WARRANTY AND LIMITATION OF LIABILITY
+
+6.1	Limited Warranty. VMware warrants that (i) the physical media, if 
+any, on which the Software is delivered will be free of defects in materials 
+and workmanship; and (ii) that the Software will substantially conform to 
+the functional description set forth in the standard Documentation 
+accompanying the Software for a period of 90 days after the date of delivery 
+of the Software License Key to You ("Warranty Period").  If the physical 
+media is defective and is returned to VMware within the Warranty Period, 
+your exclusive remedy will be VMware's option to repair or replace the 
+defective physical media..  To return the defective physical media, send an 
+email to sales@vmware.com  to request a return authorization number.  If 
+during the Warranty Period the Software does not substantially conform to 
+the functional description set forth in the Documentation, your exclusive 
+remedy will be that VMware shall, at its sole option, correct the defects in 
+the Software or refund the license fees You paid, if any, for the Software 
+provided that (i) the Software has been properly installed and used at all 
+times and in accordance with the  Documentation; (ii) no modification, 
+deletion or addition has been made to the Software by persons other than 
+VMware or its authorized representative; and (iii) VMware receives written 
+notice of the non-conformity within the Warranty Period. EXCEPT FOR THE 
+PRECEDING EXPRESS LIMITED WARRANTY, TO THE MAXIMUM EXTENT MANDATED BY LAW, 
+VMWARE AND ITS LICENSORS PROVIDE THE SOFTWARE WITHOUT ANY WARRANTIES OF ANY 
+KIND, EXPRESS, IMPLIED, STATUTORY, OR IN ANY OTHER PROVISION OF THIS EULA OR 
+COMMUNICATION WITH YOU, AND VMWARE AND ITS LICENSORS SPECIFICALLY DISCLAIM 
+ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, 
+AND NON-INFRINGEMENT.
+
+6.2	LIMITATION OF LIABILITY. TO THE MAXIMUM EXTENT MANDATED BY LAW, IN 
+NO EVENT WILL VMWARE AND ITS LICENSORS BE LIABLE FOR ANY LOST PROFITS OR 
+BUSINESS OPPORTUNITIES, LOSS OF USE, BUSINESS INTERRUPTION, LOSS OF DATA, OR 
+ANY OTHER INDIRECT, SPECIAL, INCIDENTAL, OR CONSE¬QUEN¬TIAL DAMAGES UNDER 
+ANY THEORY OF LIABILITY, WHETHER BASED IN CONTRACT, TORT, NEGLIGENCE, 
+PRODUCT LIABILITY, OR OTHERWISE.  BECAUSE SOME JURISDICTIONS DO NOT ALLOW 
+THE EXCLUSION OR LIMITATION OF LIABILITY FOR CONSEQUENTIAL OR INCIDENTAL 
+DAMAGES, THE PRECEDING LIMITATION MAY NOT APPLY TO YOU.  VMWARE'S AND ITS 
+LICENSORS' LIABILITY UNDER THIS EULA WILL NOT, IN ANY EVENT, EXCEED THE 
+LICENSE FEES YOU PAID FOR THE SOFTWARE, IF ANY. THE FOREGOING LIMITATIONS 
+SHALL APPLY REGARDLESS OF WHETHER VMWARE OR ITS LICENSORS HAVE BEEN ADVISED 
+OF THE POSSIBILITY OF SUCH DAMAGES AND REGARDLESS OF WHETHER ANY REMEDY 
+FAILS OF ITS ESSENTIAL PURPOSE. 
+
+7.	GENERAL
+
+7.1    	Entire Agreement.  This EULA represents the entire agreement between 
+the parties with respect to the Software, and supersedes any prior or 
+contemporaneous oral or written agreements concerning the subject matter 
+contained herein.   
+7.2	Headings.  Headings under this EULA are intended only for 
+convenience and shall not affect the interpretation of this EULA.
+
+7.3	Waiver and Modification.  No failure of either party to exercise or 
+enforce any of its rights under this EULA will act as a waiver of those 
+rights.  This EULA may only be modified, or any rights under it waived, by a 
+written agreement executed by the party against which it is asserted.
+
+7.4	Severability.  If any provision of this EULA is found illegal or 
+unenforceable, it will be enforced to the maximum extent permissible, and 
+the legality and enforceability of the other provisions of this EULA will 
+not be affected.
+
+7.5	Export Controls.  The Software is of United States origin and is 
+provided subject to the U.S. Export Administration Regulations.  Diversion 
+contrary to U.S. law is prohibited.  Without limiting the foregoing, you 
+agree that (1) you are not, and are not acting on behalf of, any person who 
+is a citizen, national, or resident of, or who is controlled by the 
+government of, Cuba, Iran, North Korea, Sudan, or Syria, or any other 
+country to which the United States has prohibited export transactions; (2) 
+you are not, and are not acting on behalf of, any person or entity listed on 
+the U.S. Treasury Department list of Specially Designated Nationals and 
+Blocked Persons, or the U.S. Commerce Department Denied Persons List or 
+Entity List; and (3) you will not use the Software for, and will not permit 
+the Software to be used for, any purposes prohibited by law, including, 
+without limitation, for any prohibited development, design, manufacture or 
+production of missiles or nuclear, chemical or biological weapons.
+
+7.6	U.S. Government Restricted Rights.  The Software and Documentation 
+are deemed to be "commercial computer software" and "commercial computer 
+software documentation," respectively, pursuant to DFAR Section 227.7202 and 
+FAR Section 12.212(b), as applicable.  Any use, modification, reproduction, 
+release, performance, display, or disclosure of the Software by the U.S. 
+Government shall be governed solely by the terms of this EULA.
+
+7.7	Governing Law.  This EULA is governed by the laws of the State of 
+California, United States of America, unless mandated by other law.  The 
+United Nations Convention for the International Sale of Goods shall not 
+apply.
+
+7.8	Contact Information.  Please direct legal notices or other 
+correspondence to VMware, Inc., 3401 Hillview Avenue, Palo Alto, California 
+94304, United States of America.  If You have any questions concerning this 
+EULA, please send an email to info@vmware.com.
+
+8.	SOFTWARE-SPECIFIC TERMS AND CONDITIONS.  In addition to the above 
+sections, the following Software are subject to the below terms and 
+conditions.  In the event of any conflict between the Software-specific 
+terms and conditions and sections 1-7 of the EULA, the Software-specific 
+terms and conditions shall control.
+
+VMware vFabric tc Server Standard Edition; 
+VMware vFabric tc Server Spring Edition; 
+VMware vFabric Hyperic; or
+VMware vFabric Enterprise Ready Server 
+
+If You license any of the above Software individually and not as part of 
+VMware vFabric Standard or Advanced, the following definitions and license 
+terms apply.
+
+"Processor" means a single physical chip that houses no more than six (6) 
+processor cores that executes the instructions of the Software.
+
+"Machine" means, solely with respect to vFabric Hyperic product, a license 
+to install and use on a Server, a Virtual Machine, or a network device. 
+
+Additional License Terms
+
+You may install and use the Software on the number of Processors and/or 
+Machines for which You have paid the applicable license fees. 
+
+VMware vFabric Standard
+
+VMware vFabric Standard includes VMware vFabric tc Server Spring Edition, 
+VMware vFabric Hyperic, VMware vFabric GemFire Application Cache Node, and 
+VMware vFabric Web Server, and features as described in the Documentation. 
+
+VMware vFabric Advanced 
+
+In addition to the Software which are included in the VMware vFabric 
+Standard, the VMware vFabric Advanced also includes VMware vFabric RabbitMQ 
+and VMware vFabric SQLFire Professional Edition; provided that VMware 
+vFabric SQLFire Professional Edition shall be made available to You when 
+VMware makes such component generally available.
+
+Additional License Terms for vFabric Standard and vFabric Advanced 
+
+If You license the VMware vFabric Standard or Advanced, You may only use the 
+Software which are included in these Editions for up to the number of 
+Virtual Machines for which you have paid the applicable license fees, and 
+each Virtual Machine running the Software cannot have more than two (2) 
+Virtual CPUs. As used herein, "Virtual CPU" means the virtual processing 
+power configured to a Virtual Machine.  If You run the Software in a Virtual 
+Machine with more than two (2) Virtual CPUs, then multiple licenses of the 
+Software are required.  However, the splitting of a license of the Software 
+to run in two (2) Virtual Machines, each with a single Virtual CPU, is 
+strictly prohibited.
+
+Subject to the foregoing paragraph, you may create linked clusters of 
+Virtual Machines of vFabric SQLFire Professional Edition; provided that each 
+such cluster may contain no more than two linked Virtual Machines of vFabric 
+SQLFire Professional Edition.
+
+VMware vFabric RabbitMQ
+
+If You license vFabricRabbitMQ, the following definitions and license terms 
+apply.
+
+"Processor" means a single physical chip that houses no more than six (6) 
+processor cores that executes the instructions of the Software.
+
+"vFabric RabbitMQ Server Software" means components of the Software that 
+provide the messaging and other services on behalf of clients
+
+"vFabric RabbitMQ Client Software" means the components of the Software that 
+execute in the user's application process and consume the services provided 
+by the vFabric RabbitMQ Server Software.
+
+Additional License Terms
+
+You may install and use vFabric RabbitMQ Server Software on the number of 
+Processors you have licensed or in a licensed vFabric Advanced Virtual 
+Machine. You are permitted to use and reproduce the vFabric RabbitMQ Client 
+Software on an unlimited number of computers solely for the purpose of 
+accessing licensed vFabric RabbitMQ Server Software.
+
+VMware vFabric GemFire 
+
+If You license VMware vFabric GemFire, the following definitions and license 
+terms apply.
+
+"Processor" means a single physical chip that houses no more than six (6) 
+processor cores that executes the instructions of the Software.
+
+"Node" means a server or personal computer hardware system capable of 
+running the Software.  A hardware partition or blade is considered a 
+separate hardware system.
+
+"Application Cache Node" means a Node that uses the Software for embedding a 
+data cache within an application's process space or for accessing data 
+available within a Data Management Node.
+
+"Data Management Node" means a Node that uses the Software to provide data 
+to one or more Application Cache Nodes.
+
+"Data Management Network" means two or more Data Management Nodes that are 
+interconnected for the purposes of sharing data.
+
+Additional License Terms
+
+You may install and use the Software on Application Cache Nodes and Data 
+Management Nodes which contain up to the maximum aggregate number of 
+Processors, for which you have paid the applicable license fees.  
+
+If you have purchased the "Unlimited Client Upgrade" for all of the Data 
+Management Nodes within a Data Management Network, then you may connect an 
+unlimited number of Application Cache Nodes to any Data Management Node 
+within the Data Management Network.
+
+If you have purchased the "Global WAN Upgrade" for all of the Data 
+Management Nodes within a Data Management Network, then you may enable the 
+Wide Area Network (WAN) communication for any Data Management Node within 
+the Data Management Network.   
+
+

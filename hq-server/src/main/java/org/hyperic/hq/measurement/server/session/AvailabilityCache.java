@@ -46,236 +46,236 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class AvailabilityCache {
 
-    // Default configuration
-    static final String CACHENAME          = "AvailabilityCache";
-    static final int    CACHESIZE          = 20000;
-    static final int    CACHESIZEINCREMENT = 1000;
+	// Default configuration
+	static final String CACHENAME          = "AvailabilityCache";
+	static final int    CACHESIZE          = 20000;
+	static final int    CACHESIZEINCREMENT = 1000;
 
-    private final Object _cacheLock = new Object();
-    private final Map _tranCacheState = new HashMap();
-    private Thread _tranThread;
-    private boolean _inTran = false;
+	private final Object _cacheLock = new Object();
+	private final Map _tranCacheState = new HashMap();
+	private Thread _tranThread;
+	private boolean _inTran = false;
 
-    // The internal EhCache
-    private Cache _cache;
-    // Cache.getSize() is expensive so we keep out own cache size count.
-    private int _cacheMaxSize;
-    private int _cacheSize;
+	// The internal EhCache
+	private Cache _cache;
+	// Cache.getSize() is expensive so we keep out own cache size count.
+	private int _cacheMaxSize;
+	private int _cacheSize;
 
-    private final Log _log = LogFactory.getLog(AvailabilityCache.class);
+	private final Log _log = LogFactory.getLog(AvailabilityCache.class);
 
-   
 
-    public AvailabilityCache() {
-        CacheManager cm = CacheManager.getInstance();
-        // Allow configuration of this cache throgh ehcache.xml
-        _cache = cm.getCache(CACHENAME);
 
-        if (_cache == null) {
-            _log.info("No default cache specified in ehcache.xml, using " +
-                      "default size of " + CACHESIZE + ".");
-            _cache = new Cache(CACHENAME, CACHESIZE, false, true, 0, 0);
-            cm.addCache(_cache);
-        }
-        
-        _cacheSize = 0;
-        _cacheMaxSize = _cache.getCacheConfiguration().getMaxElementsInMemory();
-    }
+	public AvailabilityCache() {
+		CacheManager cm = CacheManager.getInstance();
+		// Allow configuration of this cache throgh ehcache.xml
+		_cache = cm.getCache(CACHENAME);
 
-   
-    
-    private void captureCacheState(Integer metricId) {
-        synchronized (_tranCacheState) {
-            if (!_inTran || !Thread.currentThread().equals(_tranThread)) {
-                return;
-            }
-            if (_tranCacheState.containsKey(metricId)) {
-                return;
-            }
-            DataPoint pt;
-            pt = (DataPoint)get(metricId);
-            // doesn't matter if point is null
-            _tranCacheState.put(metricId, pt);
-        }
-    }
+		if (_cache == null) {
+			_log.info("No default cache specified in ehcache.xml, using " +
+					"default size of " + CACHESIZE + ".");
+			_cache = new Cache(CACHENAME, CACHESIZE, false, true, 0, 0);
+			cm.addCache(_cache);
+		}
 
-    public void rollbackTran() {
-        synchronized (_tranCacheState) {
-            if (!_inTran || !Thread.currentThread().equals(_tranThread)) {
-                return;
-            }
-            _inTran = false;
-            // scottmf, when I use an iterator here, under certain circumstances
-            // ConcurrentModificationException is thrown.  It is very hard
-            // to reproduce and not straight forward
-            Integer[] keys = (Integer[])_tranCacheState.keySet().toArray(new Integer[0]);
-            for (int i=0; i<keys.length; i++) {
-                DataPoint pt = (DataPoint)_tranCacheState.get(keys[i]);
-                if (pt == null) {
-                    remove(keys[i]);
-                } else {
-                    put(keys[i], pt);
-                }
-            }
-            _tranThread = null;
-            _tranCacheState.clear();
-            _tranCacheState.notifyAll();
-        }
-    }
+		_cacheSize = 0;
+		_cacheMaxSize = _cache.getCacheConfiguration().getMaxElementsInMemory();
+	}
 
-    public void commitTran() {
-        synchronized (_tranCacheState) {
-            if (!_inTran || !Thread.currentThread().equals(_tranThread)) {
-                return;
-            }
-            _inTran = false;
-            _tranThread = null;
-            _tranCacheState.clear();
-            _tranCacheState.notifyAll();
-        }
-    }
 
-    /**
-     * @return true if a new cache transaction was started, false if the
-     * currentThread was already participating in the current transaction
-     */
-    public boolean beginTran() {
-        synchronized (_tranCacheState) {
-            if (_inTran && Thread.currentThread().equals(_tranThread)) {
-                return false;
-            }
-            while (_inTran) {
-                try {
-                    _tranCacheState.wait();
-                } catch (InterruptedException e) {
-                }
-            }
-            _inTran = true;
-            _tranThread = Thread.currentThread();
-            _tranCacheState.clear();
-            return true;
-        }
-    }
 
-    /**
-     * Get a DataPoint from the cache based on Measurement id
-     * @param id The Measurement id in question.
-     * @return The DataPoint or the defaultState if the Measurement id is not
-     * located in the cache. 
-     */
-    public DataPoint get(Integer id, DataPoint defaultState) {
-        synchronized (_cacheLock) {
-            Element e = _cache.get(id);
+	private void captureCacheState(Integer metricId) {
+		synchronized (_tranCacheState) {
+			if (!_inTran || !Thread.currentThread().equals(_tranThread)) {
+				return;
+			}
+			if (_tranCacheState.containsKey(metricId)) {
+				return;
+			}
+			DataPoint pt;
+			pt = (DataPoint)get(metricId);
+			// doesn't matter if point is null
+			_tranCacheState.put(metricId, pt);
+		}
+	}
 
-            if (e == null) {
-                _cache.put(new Element(id, defaultState));
-                return defaultState;
-            }
+	public void rollbackTran() {
+		synchronized (_tranCacheState) {
+			if (!_inTran || !Thread.currentThread().equals(_tranThread)) {
+				return;
+			}
+			_inTran = false;
+			// scottmf, when I use an iterator here, under certain circumstances
+			// ConcurrentModificationException is thrown.  It is very hard
+			// to reproduce and not straight forward
+			Integer[] keys = (Integer[])_tranCacheState.keySet().toArray(new Integer[0]);
+			for (int i=0; i<keys.length; i++) {
+				DataPoint pt = (DataPoint)_tranCacheState.get(keys[i]);
+				if (pt == null) {
+					remove(keys[i]);
+				} else {
+					put(keys[i], pt);
+				}
+			}
+			_tranThread = null;
+			_tranCacheState.clear();
+			_tranCacheState.notifyAll();
+		}
+	}
 
-            return (DataPoint)e.getObjectValue();
-        }
-    }
+	public void commitTran() {
+		synchronized (_tranCacheState) {
+			if (!_inTran || !Thread.currentThread().equals(_tranThread)) {
+				return;
+			}
+			_inTran = false;
+			_tranThread = null;
+			_tranCacheState.clear();
+			_tranCacheState.notifyAll();
+		}
+	}
 
-    /**
-     * Remove id from cache
-     * @param id The Measurement id in question.
-     */
-    private boolean remove(Integer id) {
-        synchronized (_cacheLock) {
-            return _cache.remove(id);
-        }
-    }
+	/**
+	 * @return true if a new cache transaction was started, false if the
+	 * currentThread was already participating in the current transaction
+	 */
+	public boolean beginTran() {
+		synchronized (_tranCacheState) {
+			if (_inTran && Thread.currentThread().equals(_tranThread)) {
+				return false;
+			}
+			while (_inTran) {
+				try {
+					_tranCacheState.wait();
+				} catch (InterruptedException e) {
+				}
+			}
+			_inTran = true;
+			_tranThread = Thread.currentThread();
+			_tranCacheState.clear();
+			return true;
+		}
+	}
 
-    /**
-     * Get a DataPoint from the cache based on the Measurement id.
-     * @param id The Measurement id in question.
-     * @return The DataPoint or null if it does not exist in the cache.
-     */
-    public DataPoint get(Integer id) {
-        synchronized (_cacheLock) {
-            Element e = _cache.get(id);
+	/**
+	 * Get a DataPoint from the cache based on Measurement id
+	 * @param id The Measurement id in question.
+	 * @return The DataPoint or the defaultState if the Measurement id is not
+	 * located in the cache. 
+	 */
+	public DataPoint get(Integer id, DataPoint defaultState) {
+		synchronized (_cacheLock) {
+			Element e = _cache.get(id);
 
-            if (e != null) {
-                 return (DataPoint)e.getObjectValue();
-            }
+			if (e == null) {
+				_cache.put(new Element(id, defaultState));
+				return defaultState;
+			}
 
-            return null;
-        }
-    }
+			return (DataPoint)e.getObjectValue();
+		}
+	}
 
-    /**
-     * Put an item into the cache.
-     * @param id The Measurement id representing the availability data point.
-     * @param state The DataPoint to store for the given id.
-     */
-    public void put(Integer id, DataPoint state) {
-        synchronized (_cacheLock) {
-            boolean newTran = false;
-            try {
-                newTran = beginTran();
-                captureCacheState(id);
-                if (!_cache.isKeyInCache(id)) {
-                    if (isFull()) {
-                        incrementCacheSize();
-                    }
-                    _cache.put(new Element(id, state));
-                    _cacheSize++;
-                } else {
-                    // Update only, don't increment counter.
-                    _cache.put(new Element(id, state));
-                }
-            } finally {
-                if (newTran) {
-                    commitTran();
-                }
-            }
-        }
-    }
+	/**
+	 * Remove id from cache
+	 * @param id The Measurement id in question.
+	 */
+	public boolean remove(Integer id) {
+		synchronized (_cacheLock) {
+			return _cache.remove(id);
+		}
+	}
 
-    /**
-     * Get the total cache size
-     * @return The total cache size, as determined by EhCache.
-     */
-    int getSize() {
-        synchronized(_cacheLock) {
-            return _cache.getSize();
-        }
-    }
+	/**
+	 * Get a DataPoint from the cache based on the Measurement id.
+	 * @param id The Measurement id in question.
+	 * @return The DataPoint or null if it does not exist in the cache.
+	 */
+	public DataPoint get(Integer id) {
+		synchronized (_cacheLock) {
+			Element e = _cache.get(id);
 
-    /**
-     * Remove all elements from the AvailabilityCache.
-     */
-    void clear() {
-        synchronized (_cacheLock) {
-            boolean newTran = false;
-            try {
-                newTran = beginTran();
-                _cache.removeAll();
-                _cacheSize = 0;
-            } finally {
-                if (newTran) {
-                    commitTran();
-                }
-            }
-        }
-    }
+			if (e != null) {
+				return (DataPoint)e.getObjectValue();
+			}
 
-    private boolean isFull() {
-        synchronized (_cacheLock) {
-            return _cacheSize == _cacheMaxSize;
-        }
-    }
+			return null;
+		}
+	}
 
-    private void incrementCacheSize() {
-        _log.info("Asked to increment the " + CACHENAME + " cache.");
+	/**
+	 * Put an item into the cache.
+	 * @param id The Measurement id representing the availability data point.
+	 * @param state The DataPoint to store for the given id.
+	 */
+	public void put(Integer id, DataPoint state) {
+		synchronized (_cacheLock) {
+			boolean newTran = false;
+			try {
+				newTran = beginTran();
+				captureCacheState(id);
+				if (!_cache.isKeyInCache(id)) {
+					if (isFull()) {
+						incrementCacheSize();
+					}
+					_cache.put(new Element(id, state));
+					_cacheSize++;
+				} else {
+					// Update only, don't increment counter.
+					_cache.put(new Element(id, state));
+				}
+			} finally {
+				if (newTran) {
+					commitTran();
+				}
+			}
+		}
+	}
 
-        synchronized (_cacheLock) {
-            int curMax = _cache.getCacheConfiguration().getMaxElementsInMemory();
-            int newMax = curMax  + CACHESIZEINCREMENT;
+	/**
+	 * Get the total cache size
+	 * @return The total cache size, as determined by EhCache.
+	 */
+	int getSize() {
+		synchronized(_cacheLock) {
+			return _cache.getSize();
+		}
+	}
 
-            _cache.getCacheConfiguration().setMaxElementsInMemory(newMax);
-            _cacheMaxSize = newMax;
-            _log.info("Increased cache size from " + curMax + " to " + newMax);
-        }
-    }
+	/**
+	 * Remove all elements from the AvailabilityCache.
+	 */
+	void clear() {
+		synchronized (_cacheLock) {
+			boolean newTran = false;
+			try {
+				newTran = beginTran();
+				_cache.removeAll();
+				_cacheSize = 0;
+			} finally {
+				if (newTran) {
+					commitTran();
+				}
+			}
+		}
+	}
+
+	private boolean isFull() {
+		synchronized (_cacheLock) {
+			return _cacheSize == _cacheMaxSize;
+		}
+	}
+
+	private void incrementCacheSize() {
+		_log.info("Asked to increment the " + CACHENAME + " cache.");
+
+		synchronized (_cacheLock) {
+			int curMax = _cache.getCacheConfiguration().getMaxElementsInMemory();
+			int newMax = curMax  + CACHESIZEINCREMENT;
+
+			_cache.getCacheConfiguration().setMaxElementsInMemory(newMax);
+			_cacheMaxSize = newMax;
+			_log.info("Increased cache size from " + curMax + " to " + newMax);
+		}
+	}
 }
