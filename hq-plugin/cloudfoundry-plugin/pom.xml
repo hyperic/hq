@@ -10,10 +10,10 @@
 	<artifactId>cloudfoundry-plugin</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - Cloud Foundry Plugin</name>
-	<version>4.6.7.BUILD-SNAPSHOT.BUILD-SNAPSHOT</version>
+	<version>4.6.7.BUILD-SNAPSHOT</version>
 
 	<properties>
-		<hq.version>4.6.7.BUILD-SNAPSHOT.BUILD-SNAPSHOT</hq.version>
+		<hq.version>4.6.7.BUILD-SNAPSHOT</hq.version>
         <hqapi.version>5.0.0</hqapi.version>
 		<json.version>20080701</json.version>
 		<spring.framework.version>3.0.5.RELEASE</spring.framework.version>
