@@ -120,6 +120,7 @@ goto :eof
 
 :start
 "%_WRAPPER_EXE%" -t %_WRAPPER_CONF% "%wrapper_update1%"
+ping -3 XXX 127.0.0.1 >nul
 call :setup-if-no-provider
 goto :eof
 

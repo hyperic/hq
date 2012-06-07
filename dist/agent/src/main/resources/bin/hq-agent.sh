@@ -38,7 +38,7 @@ PIDDIR="../../wrapper"
 #  cause the start command to delay for the indicated period of time 
 #  (in seconds).
 # 
-WAIT_AFTER_STARTUP=0
+WAIT_AFTER_STARTUP=3
 
 # If set, the status, start_msg and stop_msg commands will print out detailed
 #   state information on the Wrapper and Java processes.
