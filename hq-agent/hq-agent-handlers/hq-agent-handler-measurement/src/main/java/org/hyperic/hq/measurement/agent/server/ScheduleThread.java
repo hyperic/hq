@@ -229,7 +229,7 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable {
                             if (pt.metric.isAvail()) {
                                 MetricValue data = new MetricValue(MeasurementConstants.AVAIL_DOWN);
                                 sender.processData(mt.meas.getDsnID(), data,
-                                                   mt.meas.getDerivedID());
+                                                   mt.meas.getDerivedID(), true);
                             }
                             // Task will be removed on next iteration
                         }
@@ -573,8 +573,8 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable {
                     rs.retry.add(meas);
                     return;
                 }
-
-                sender.processData(meas.getDsnID(), data, meas.getDerivedID());
+                
+                sender.processData(meas.getDsnID(), data, meas.getDerivedID(), category.equals(MeasurementConstants.CAT_AVAILABILITY));
                 synchronized (statsLock) {
                     statNumMetricsFetched++;
                 }
