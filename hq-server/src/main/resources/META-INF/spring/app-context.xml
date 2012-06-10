@@ -133,6 +133,7 @@
 
 	<context:component-scan base-package="org.hyperic,com.hyperic"> 
 	   <context:exclude-filter type="regex" expression="org.hyperic.cm.*"/>
+	   <context:exclude-filter type="regex" expression="org.hyperic.hq.api.*"/>
 	</context:component-scan>
 
 	<bean id="sessionFactory"  

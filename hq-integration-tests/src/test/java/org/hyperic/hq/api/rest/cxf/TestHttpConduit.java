@@ -41,10 +41,10 @@ import org.apache.cxf.message.Exchange;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.message.MessageImpl;
 import org.apache.cxf.service.model.EndpointInfo;
+import org.apache.cxf.systest.servlet.GetMethodQueryWebRequest;
 import org.apache.cxf.transport.http.HTTPConduit;
 import org.apache.cxf.ws.addressing.EndpointReferenceType;
 
-import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
@@ -93,7 +93,7 @@ public class TestHttpConduit extends HTTPConduit {
 			final String httpRequestMethod = (String)msg.get(Message.HTTP_REQUEST_METHOD);        
 			WebRequest req = null ; 
 			if(httpRequestMethod.equals("GET")) { 
-				req = new GetMethodWebRequest(sURL) ;
+				req = new GetMethodQueryWebRequest(sURL) ;
 			}else { 
 				req = new PostMethodWebRequest(sURL) ; 
 			}//EO if post 
