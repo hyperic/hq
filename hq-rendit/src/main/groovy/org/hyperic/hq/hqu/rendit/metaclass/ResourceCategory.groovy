@@ -337,22 +337,22 @@ class ResourceCategory {
 	}
 
 	static Platform toPlatform(Resource r) {
-		assert isPlatform(r)
+		//assert isPlatform(r)
 		platMan.findPlatformById(r.instanceId)
 	}
 
 	static Server toServer(Resource r) {
-		assert isServer(r)
+		//assert isServer(r)
 		svrMan.findServerById(r.instanceId)
 	}
 
 	static Service toService(Resource r) {
-		assert isService(r)
+		//assert isService(r)
 		svcMan.findServiceById(r.instanceId)
 	}
 	
 	static ResourceGroup toGroup(Resource r) {
-		assert isGroup(r)
+		//assert isGroup(r)
 		groupMan.findResourceGroupById(authzMan.overlordPojo, r.instanceId)
 	}
 	
@@ -420,8 +420,7 @@ class ResourceCategory {
 	static List getChildren(Resource r, Map args) {
 		if (r.isRoot()) {
 			// Need subsystem argument
-			assert args.inSubsystem, "Must specify an 'inSubsystem' argument " +
-			"[like 'appdef']"
+			//assert args.inSubsystem, "Must specify an 'inSubsystem' argument " + "[like 'appdef']"
 			if (args.inSubsystem == 'appdef') {
 				def overlord = authzMan.overlordPojo
 				def rhelp = new ResourceHelper(overlord)
@@ -431,7 +430,7 @@ class ResourceCategory {
 				"[${args.inSubsystem}]")
 			}
 		}
-		[]
+		
 	}
 	
 	static boolean isPlatformPrototype(Resource r) {

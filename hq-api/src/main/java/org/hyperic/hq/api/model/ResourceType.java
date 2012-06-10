@@ -29,13 +29,43 @@
  * *********************************************************************/
 package org.hyperic.hq.api.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlType;
+
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+
+@XmlType(name="resourceType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+@XmlEnum
 public enum ResourceType {
-    PLATFORM,
-    SERVER,
-    SERVICE,
-    APPLICATION,
-    ESCALATION,
-    GROUP,
-    SUBJECT,
-    ROLE
-}
+    PLATFORM(AppdefEntityConstants.APPDEF_TYPE_PLATFORM),
+    SERVER(AppdefEntityConstants.APPDEF_TYPE_SERVER),
+    SERVICE(AppdefEntityConstants.APPDEF_TYPE_SERVICE),
+    APPLICATION(AppdefEntityConstants.APPDEF_TYPE_APPLICATION),
+    ESCALATION(),
+    GROUP(AppdefEntityConstants.APPDEF_TYPE_GROUP),
+    SUBJECT(),
+    ROLE() ; 
+    
+    private static final Map<Integer, ResourceType> reverseValues = new HashMap<Integer,ResourceType>() ;
+    private static final int NO_APPDEF_TYPE = -999 ; 
+    
+    private int appdefTypeID ; 
+    
+    ResourceType(){ this.appdefTypeID = NO_APPDEF_TYPE ; }//EOC 
+    ResourceType(final int appdefTypeID) { 
+    	this.appdefTypeID = appdefTypeID ; 
+    }//EOM 
+    
+    static { 
+    	for(ResourceType enumResourceType : values()) { 
+    		if(enumResourceType.appdefTypeID != NO_APPDEF_TYPE) reverseValues.put(enumResourceType.appdefTypeID, enumResourceType) ;
+    	}//EO while there are more resources 
+    }//EO static block 
+    
+    public static final ResourceType valueOf(final int appDefType) { 
+    	return reverseValues.get(appDefType) ;
+    }//EOM 
+}//EOE 

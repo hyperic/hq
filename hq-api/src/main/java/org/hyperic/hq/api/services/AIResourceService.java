@@ -60,7 +60,6 @@ import org.hyperic.util.config.ConfigOption;
 @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 public interface AIResourceService {
-
     
     @GET
     @Path("/{discovery-id}")

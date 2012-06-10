@@ -32,6 +32,15 @@ package org.hyperic.hq.api.model;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 /** 
  * Approved resource.
@@ -40,22 +49,37 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @version 1.0 29 April 2012
  * @author Maya Anderson
  */
-@XmlRootElement(name = "Resource")
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement(name = "resource", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+@XmlType(name="ResourceType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 public class Resource {
-    
-    
-//    
-//    @XmlElement(name = "ResourceConfig", required = true)
-//    protected List<ResourceConfig> resourceConfig;
-//    @XmlElement(name = "ResourceProperty", required = true)
-//    protected List<ResourceProperty> resourceProperty;
 
+	@XmlAttribute
     private String id;
+	@XmlAttribute
     private String name;
-    
-    private ResourcePrototype resourcePrototype;
-    private List<Resource> subResources;
+	@XmlAttribute 
     private ResourceType resourceType;
+	@XmlAttribute
+    private ResourceStatusType resourceStatusType ;
+
+	@XmlElement
+    private String naturalID ;
+	@XmlElement
+    private ResourcePrototype resourcePrototype;
+	@XmlElement
+    private List<Resource> subResources;
+	@XmlElement(name = "resourceConfig", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+	private ResourceConfig resourceConfig;
+
+	//  @XmlElement(name = "ResourceProperty", required = true)
+//	private List<ResourceProperty> resourceProperty;
+
+	public Resource(){}//EOM 
+	
+	public Resource(final String id) { 
+		this.id = id ; 
+	}//EOM 
     
     public String getId() {
         return id;
@@ -75,6 +99,11 @@ public class Resource {
     public void setResourcePrototype(ResourcePrototype resourcePrototype) {
         this.resourcePrototype = resourcePrototype;
     }
+    
+    public void setResourcePrototypeFromString(final String name) {
+        this.resourcePrototype = new ResourcePrototype(name) ; 
+    }//EOM 
+    
     public List<Resource> getSubResources() {
         return subResources;
     }
@@ -82,10 +111,65 @@ public class Resource {
         this.subResources = subResources;
     }
     
+    public final void addSubResource(final Resource subResource) { 
+    	if(this.subResources == null) this.subResources = new ArrayList<Resource>() ; 
+    	this.subResources.add(subResource) ;
+    }//EOM 
+    
     public ResourceType getResourceType() {
         return resourceType;
     }
     public void setResourceType(ResourceType resourceType) {
         this.resourceType = resourceType;
     }    
+    
+    public final void setNaturalID(final String naturalID) { 
+    	this.naturalID = naturalID ;  
+    }//EOM 
+    
+    public final String getNaturalID() { 
+    	return this.naturalID ; 
+    }//EOM 
+    
+    public final void setResourceConfig(final ResourceConfig resourceConfig) { 
+    	this.resourceConfig = resourceConfig ; 
+    }//EOM 
+    
+    public final ResourceConfig getResourceConfig() { 
+    	return this.resourceConfig ; 
+    }//EOM
+    
+    public final void setResourceStatusType(final ResourceStatusType resourceStatusType) { 
+    	this.resourceStatusType = resourceStatusType; 
+    }//EOM 
+    
+    public final ResourceStatusType getResourceStatusType() { 
+    	return this.resourceStatusType ; 
+    }//EOM 
+    
+    @Override
+   	public String toString() {
+    	final StringBuilder builder = new StringBuilder(500) ; 
+    	return this.toString(builder, "").toString() ; 
+   	}
+    
+    public StringBuilder toString(final StringBuilder builder, final String indentation) {
+    	
+    	builder.append(indentation).append("Resource [id=").append(id).append(", name=" ).append(name).append(", uuid=").append(naturalID).append(", resourcePrototype=").
+			append(resourcePrototype).append(", resourceType=").append(resourceType).append(", resourceStatusType=").append(resourceStatusType).append("]").
+			append("\n").append(indentation).append(",resourceConfig=["); 
+    		(resourceConfig == null ? builder : resourceConfig.toString(builder.append("\n") , indentation)).append("]").
+    		append("\n").append(indentation).append(",subResources=[") ; 
+
+		if(this.subResources != null) { 
+			
+			for(Resource child : this.subResources) {
+				child.toString(builder.append("\n"), indentation+"\t").append("\n") ; 
+			}//EO while there are more resources 
+		}//EO if subresources != null 
+			
+		builder.append("]") ;
+		return builder ; 
+    }//EOM 
+
 }

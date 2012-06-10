@@ -77,23 +77,7 @@ public class ConfigResponse implements GenericValueMap, Serializable  {
         this.attributes = new HashMap();
         this.schema = schema;
 
-        if ( this.schema != null ) {
-
-            this.schemaOptionsMap = new HashMap();
-            List options = schema.getOptions();
-            ConfigOption opt = null;
-
-            for ( int i=0; i<options.size(); i++ ) {
-                opt = (ConfigOption) options.get(i);
-                this.schemaOptionsMap.put(opt.getName(), opt);
-                
-                // Fill in any default values
-                String def = opt.getDefault();
-                if (def != null) {
-                    this.attributes.put(opt.getName(), def);
-                }
-            }
-        }
+        this.setSchema(schema) ; 
     }
     
     /**
@@ -115,6 +99,29 @@ public class ConfigResponse implements GenericValueMap, Serializable  {
         this.attributes = attributes;
         this.schema = null;
     }
+    
+    public final void setSchema(final ConfigSchema configSchema) { 
+    	 if ( configSchema != null ) {
+
+    		 this.schema = configSchema ; 
+             this.schemaOptionsMap = new HashMap();
+             List options = schema.getOptions();
+             ConfigOption opt = null;
+             String sOptionKey = null ; 
+             for ( int i=0; i<options.size(); i++ ) {
+                 opt = (ConfigOption) options.get(i);
+                 sOptionKey = opt.getName() ; 
+                 this.schemaOptionsMap.put(sOptionKey, opt);
+                 
+                 // Fill in any default values
+                 String def = opt.getDefault();
+                 if (def != null && !attributes.containsKey(sOptionKey)) {
+                     this.attributes.put(sOptionKey, def);
+                 }
+             }
+         }
+    }//EOM 
+    
 
     public void setValue(String key, boolean value) {
         setValue(key, String.valueOf(value));
@@ -331,6 +338,10 @@ public class ConfigResponse implements GenericValueMap, Serializable  {
         }
         return props; 
     }
+    
+    public final Map getConfig() {
+    	return this.attributes ; 
+    }//EOM 
 
     public String toString(){
         StringBuffer rtn = new StringBuffer();
@@ -381,4 +392,8 @@ public class ConfigResponse implements GenericValueMap, Serializable  {
         throws InvalidOptionException {
         return StringUtil.explode(getValue(key), delimiter);
     }
+    
+    public final boolean supportsOption(final String sOptionKey) { 
+    	return (this.schemaOptionsMap != null && this.schemaOptionsMap.containsKey(sOptionKey)) ; 
+    }//EOM 
 }

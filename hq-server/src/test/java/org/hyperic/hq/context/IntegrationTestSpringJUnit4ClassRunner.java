@@ -20,9 +20,10 @@ public class IntegrationTestSpringJUnit4ClassRunner extends SpringJUnit4ClassRun
         try{ 
             oTestInstance = super.createTest();
         }catch(Throwable t) { 
+        	
             //dispose of the Bootstrap context 
            Bootstrap.dispose() ; 
-           throw (Exception) t ; 
+           throw (t instanceof RuntimeException ? (RuntimeException) t : new RuntimeException(t)) ; 
         }//EO catch block 
         
         return oTestInstance ; 

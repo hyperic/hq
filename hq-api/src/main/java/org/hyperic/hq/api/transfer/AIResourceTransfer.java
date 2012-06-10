@@ -116,7 +116,7 @@ public class AIResourceTransfer {
 
     private Resource createMockServer(String aiServerId) {
         Resource server = new Resource();
-        server.setId(aiServerId + "-" + aiServerId);
+        server.setNaturalID(aiServerId + "-" + aiServerId);
         server.setName("Server " + aiServerId);
         ResourcePrototype serverPrototype = new ResourcePrototype();
         serverPrototype.setName("A server");
@@ -147,7 +147,7 @@ public class AIResourceTransfer {
         serverResourcePrototype.setId("tomcatID");
         server.setResourcePrototype(serverResourcePrototype);
         server.setResourceType(ResourceType.SERVER);
-        server.setAutoinventoryId(id);
+        server.setNaturalID(id);
         server.setId(id + id);
         server.setName("Server " + id);
 

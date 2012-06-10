@@ -206,7 +206,7 @@ public class ProductPluginManager
         return platforms.get(name);
     }
 
-    private void setTypeInfo(String platform, String name, TypeInfo info) {
+    protected void setTypeInfo(String platform, String name, TypeInfo info) {
 
         HashMap<String, TypeInfo> platforms = this.types.get(platform);
 

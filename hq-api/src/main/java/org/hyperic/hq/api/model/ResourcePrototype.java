@@ -30,6 +30,7 @@
 package org.hyperic.hq.api.model;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 /** 
  * Resource prototype with the name, as defined in plugin xml.
@@ -38,11 +39,17 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @version 1.0 29 April 2012
  * @author Maya Anderson
  */
-@XmlRootElement(name = "AIResource")
+@XmlRootElement(name = "Resource", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+@XmlType(name = "ResourceProtoType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 public class ResourcePrototype {
     private String name;
     private String id;    
 
+    public ResourcePrototype() {}//EOM 
+    
+    public ResourcePrototype(final String name) { 
+    	this.name = name ; 
+    }//EOM 
     
     public String getName() {
         return name;
@@ -57,4 +64,8 @@ public class ResourcePrototype {
         this.id = id;
     }
 
+	@Override
+	public String toString() {
+		return "ResourcePrototype [name=" + name + ", id=" + id + "]";
+	}
 }

@@ -43,6 +43,7 @@ public class Bootstrap {
     static ApplicationContext appContext;
     private static Map<String, Object> testBeansByName = new HashMap<String, Object>();
     private static Map<Class<?>, Object> testBeansByType = new HashMap<Class<?>, Object>();
+    private static String[] springConfigLocations ;  
 
     @SuppressWarnings("unchecked")
     public static <T> T getBean(Class<T> beanClass) {
@@ -85,6 +86,18 @@ public class Bootstrap {
         //first dispose of any existing application context 
         dispose() ; 
         appContext = newAppContext ; 
+    }//EOM 
+    
+    public static final ApplicationContext getApplicationContext() { 
+    	return appContext ; 
+    }//EOM 
+    
+    public static final void setSpringConfigLocations(final String...arrSpringConfigLocations) { 
+    	springConfigLocations = arrSpringConfigLocations ; 
+    }//EOM 
+    
+    public static final String[] getSpringConfigLocations() { 
+    	return springConfigLocations ; 
     }//EOM 
     
     public static final void dispose() { 

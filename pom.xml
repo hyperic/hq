@@ -35,8 +35,8 @@
         <hqapi.version>5.0.0</hqapi.version>
 		<httpclient.version>4.1.1</httpclient.version>
 		<j2ee-management.version>1.1</j2ee-management.version>
-     	 	<jackson-mapper-asl.version>1.8.6</jackson-mapper-asl.version>
-	        <cxf.version>2.6.0</cxf.version>
+     	<jackson-mapper-asl.version>1.8.6</jackson-mapper-asl.version>
+	    <cxf.version>2.6.0</cxf.version>
 		<jasypt.version>1.6</jasypt.version>
 		<jdom.version>1.1</jdom.version>
 		<jmock.version>1.2.0</jmock.version>
@@ -47,7 +47,7 @@
 		<jsr107cache.version>1.0</jsr107cache.version>
 		<jstl.version>1.1.2</jstl.version>
 		<jug.version>2.0.0</jug.version>
-		<junit.version>4.8.2</junit.version>
+		<junit.version>4.10</junit.version>
 		<log4j.version>1.2.14</log4j.version>
 		<mail.version>1.4</mail.version>
 		<mockito.version>1.8.5</mockito.version>

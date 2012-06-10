@@ -3,6 +3,5 @@
 <wb-module deploy-name="hq-rendit">
 <wb-resource deploy-path="/" source-path="/src/main/resources"/>
 <wb-resource deploy-path="/" source-path="/src/main/java"/>
-<wb-resource deploy-path="/" source-path="/src/main/groovy"/>
 </wb-module>
 </project-modules>
