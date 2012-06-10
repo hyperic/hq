@@ -13,18 +13,18 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.hyperic.hq.api.model.Resource;
 import org.hyperic.hq.api.model.RestApiConstants;
-import org.hyperic.hq.api.model.resources.BatchResponse;
+//import org.hyperic.hq.api.model.resources.BatchResponse;
 import org.hyperic.hq.api.model.resources.BatchResponseBase;
 import org.hyperic.hq.api.model.resources.FailedResource;
-import org.hyperic.hq.api.model.resources.NullArgumentException;
+//import org.hyperic.hq.api.model.resources.NullArgumentException;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name="resourcesMeasurementsBatchResponse", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 @XmlType(name="resourcesMeasurementsBatchResponse", namespace="http://vmware.com/hyperic/hq/5.0/api/rest/v1")
 public class ResourcesMeasurementsBatchResponse extends BatchResponseBase {
-	@XmlElement
-    private List<Resource> resources;
+//	@XmlElement
+//    private List<Resource> resources;
 
 	public ResourcesMeasurementsBatchResponse() {
 		super();
@@ -65,12 +65,12 @@ public class ResourcesMeasurementsBatchResponse extends BatchResponseBase {
 //            }                                
 //        }
 //    }
-    
-    public List<Resource> getResources() {
-        return resources;
-    }
-
-    public void setResources(List<Resource> resourcesAddedToInventory) {
-        this.resources = resourcesAddedToInventory;
-    }
+//    
+//    public List<Resource> getResources() {
+//        return resources;
+//    }
+//
+//    public void setResources(List<Resource> resourcesAddedToInventory) {
+//        this.resources = resourcesAddedToInventory;
+//    }
 }
