@@ -1,41 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxrs="http://cxf.apache.org/jaxrs"
-	xmlns:cxf="http://cxf.apache.org/core" xmlns:util="http://www.springframework.org/schema/util"
-	xmlns:context="http://www.springframework.org/schema/context"
-	xsi:schemaLocation="
-http://www.springframework.org/schema/beans 
-http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
-http://cxf.apache.org/jaxrs
-http://cxf.apache.org/schemas/jaxrs.xsd
-http://cxf.apache.org/core 
-      http://cxf.apache.org/schemas/core.xsd
-http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd ">
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:jaxrs="http://cxf.apache.org/jaxrs"
+  xmlns:cxf="http://cxf.apache.org/core"    
+  xmlns:util="http://www.springframework.org/schema/util"   
+  xmlns:context="http://www.springframework.org/schema/context"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd http://cxf.apache.org/core http://cxf.apache.org/schemas/core.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd ">
 
 	<import resource="classpath:META-INF/cxf/cxf.xml" />
 	<import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
 	<context:property-placeholder />
 	<context:annotation-config />
 	<context:component-scan base-package="org.hyperic.hq.api" />
-		
-		
-	<bean name="restApiLogger" class="org.apache.commons.logging.LogFactory" 
-      factory-method="getLog">
-       <constructor-arg type="java.lang.Class" value="org.hyperic.hq.api.services.AIResourceService" />
-    </bean>
-
-	<bean name="aiResourceMapper" class="org.hyperic.hq.api.transfer.AIResourceMapper" />
-
-	<bean name="aiResourceTransfer" class="org.hyperic.hq.api.transfer.AIResourceTransfer" />
-
-	<bean name="aiResourceServiceImpl"
-		class="org.hyperic.hq.api.services.impl.AIResourceServiceImpl">
-		<!-- <property name="aiResourceTransfer" ref="aiResourceTransfer"/> -->
-	</bean>
-
-	<bean name="pluginServiceImpl" class="org.hyperic.hq.api.services.impl.PluginServiceImpl" />
-
 
 	<bean id="jaxbProvider" class="org.apache.cxf.jaxrs.provider.JAXBElementProvider">
 		<!-- <property name="schemaHandler" ref="schemaHolder" /> -->
@@ -45,30 +21,65 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 		<!-- <property name="schemaHandler" ref="schemaHolder"/> -->
 	</bean>
 
-	<jaxrs:server id="aiResourceService" address="/inventory/discovered-resources">
+	 <bean name="restApiLogger" class="org.apache.commons.logging.LogFactory" 
+      factory-method="getLog" >
+       <constructor-arg type="java.lang.String" value="org.hyperic.hq.api.rest" />
+    </bean>
+	
+	<util:map id="exceptionToErrorCodeMap" >
+        <entry key="org.hibernate.ObjectNotFoundException">
+                <value type="java.lang.String">1001</value>
+        </entry>
+        <entry key="org.hyperic.hq.appdef.shared.AIQApprovalException">
+                <value type="java.lang.String">1002</value>
+        </entry>
+        <entry key="org.hyperic.hq.authz.shared.PermissionException">
+                <value type="java.lang.String">1003</value>
+        </entry>
+         <entry key="java.lang.NumberFormatException">
+                <value type="java.lang.String">1005</value>
+        </entry>
+        <entry key="default">
+                <value type="java.lang.String">1006</value>
+        </entry>
+      </util:map>
+
+    <bean name="exceptionToErrorCodeMapper" class="org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper" >
+   	 <property name="exceptionToErrorCodeMap" ref="exceptionToErrorCodeMap" />
+    </bean>
+    
+    <bean class="org.hyperic.hq.api.transfer.impl.ResourceTransferImpl" />
+
+	<bean class="org.springframework.web.context.support.ServletContextPropertyPlaceholderConfigurer" />
+	<bean class="org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer" />
+
+	<bean name="resourceServiceImpl" class="org.hyperic.hq.api.services.impl.ResourceServiceImpl" />
+		
+    <bean name="pluginServiceImpl" class="org.hyperic.hq.api.services.impl.PluginServiceImpl" />		
+	
+	<jaxrs:server id="resourceService" address="/inventory/resources">
 		<jaxrs:serviceBeans>
-			<ref bean="aiResourceServiceImpl" />
+			<ref bean="resourceServiceImpl" />
 		</jaxrs:serviceBeans>
 		<jaxrs:providers>
-			<ref bean="jaxbProvider" />    
-			<ref bean="jsonProvider" />  
+			<ref bean="jaxbProvider" />
+			<ref bean="jsonProvider" />
 		</jaxrs:providers>
-		<jaxrs:features>
-			<cxf:logging />
-		</jaxrs:features>
+        <jaxrs:features>
+            <cxf:logging />
+        </jaxrs:features>		
 	</jaxrs:server>
 
-	<jaxrs:server id="pluginService" address="/plugins">
-		<jaxrs:serviceBeans>
-			<ref bean="pluginServiceImpl" />
-		</jaxrs:serviceBeans>
-		<jaxrs:providers>
-			 <ref bean="jaxbProvider" />    
-			<ref bean="jsonProvider" />  
-		</jaxrs:providers>
-		<jaxrs:features>
-			<cxf:logging />
-		</jaxrs:features>
-	</jaxrs:server>
-
+    <jaxrs:server id="pluginService" address="/plugins">
+        <jaxrs:serviceBeans>
+            <ref bean="pluginServiceImpl" />
+        </jaxrs:serviceBeans>
+        <jaxrs:providers>
+            <ref bean="jaxbProvider" />
+			<ref bean="jsonProvider" />
+        </jaxrs:providers>
+        <jaxrs:features>
+            <cxf:logging />
+        </jaxrs:features>        
+    </jaxrs:server>
 </beans>

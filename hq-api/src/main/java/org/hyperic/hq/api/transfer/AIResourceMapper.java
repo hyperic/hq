@@ -34,13 +34,13 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.hyperic.hq.api.model.AIResource;
+import org.hyperic.hq.api.model.Resource;
 import org.hyperic.hq.api.model.ResourcePrototype;
 import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
 
 /** 
  * Mapper between automatically discovered resources in API and in core Hyperic.
@@ -71,7 +71,7 @@ public class AIResourceMapper {
 		if (null == aiResource) {
 			aiResource = new AIResource();
 		}		
-		aiResource.setAutoinventoryId(aiPlatform.getFqdn());
+		aiResource.setNaturalID(aiPlatform.getFqdn());
 		// aiResource.setId(aiPlatform.get)
 		aiResource.setName(aiPlatform.getName());
 		aiResource.setResourceType(ResourceType.PLATFORM);
@@ -82,7 +82,7 @@ public class AIResourceMapper {
 
 		AIServerValue[] aiServerValues = aiPlatform.getAIServerValues();
 		if ((null != aiServerValues) && (aiServerValues.length > 0)) {
-			List<AIResource> subResources = new ArrayList<AIResource>(aiServerValues.length);
+			List<Resource> subResources = new ArrayList<Resource>(aiServerValues.length);
 			for (int i = 0; i < aiServerValues.length; i++) {
 				AIResource aiServer = mapAIServerValueToAIResource(aiServerValues[i], null);
 				subResources.add(aiServer);
@@ -104,7 +104,7 @@ public class AIResourceMapper {
 			aiResource = new AIResource();
 		}
 		
-		aiResource.setAutoinventoryId(aiServerValue.getAutoinventoryIdentifier());
+		aiResource.setNaturalID(aiServerValue.getAutoinventoryIdentifier());
 		String aiServerId = (null == aiServerValue.getId() ? null : aiServerValue.getId().toString()) ;
 		aiResource.setId(aiServerId);
 		aiResource.setName(aiServerValue.getName());

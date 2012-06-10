@@ -83,14 +83,15 @@ public class SenderThread
 
     private static final int    SEND_INTERVAL = 60000;
     private static final int    MAX_BATCHSIZE = 500;
-    private static final String DATA_LISTNAME = "measurement_spool";
-
+    private static final String MEASURENENT_LISTNAME = "measurement_spool";
+    private static final String AVAILABILITY_LISTNAME = "availability_spool";
+    
     private volatile boolean                   shouldDie;
     private          Log                       log;
     private          MeasurementCallbackClient client;
     private          AgentStorageProvider      storage;
     private          String                    agentToken;
-    private          LinkedList<String>        transitionQueue;
+    private          LinkedList<Record>        transitionQueue;
     // This toggle will avoid displaying non-stop messages about server down 
     private          int                       metricDup = 0;
     private          int                       maxBatchSize = MAX_BATCHSIZE;
@@ -113,19 +114,24 @@ public class SenderThread
         this.shouldDie       = false;
         this.storage         = storage;
         this.client          = setupClient();
-        this.transitionQueue = new LinkedList<String>();
+        this.transitionQueue = new LinkedList<Record>();
         this.metricDebug     = new HashSet();
         this.schedule        = schedule;
 
-        String info = bootProps.getProperty(DATA_LISTNAME);
-        if (info != null) {
-            storage.addOverloadedInfo(DATA_LISTNAME, info);
+        String measuementInfo = bootProps.getProperty(MEASURENENT_LISTNAME);
+        if (measuementInfo != null) {
+            storage.addOverloadedInfo(MEASURENENT_LISTNAME, measuementInfo);  
+        }
+        String AvailabilityInfo = bootProps.getProperty(AVAILABILITY_LISTNAME);
+        if (AvailabilityInfo != null) {
+            storage.addOverloadedInfo(AVAILABILITY_LISTNAME, AvailabilityInfo);  
         }
         // Setup our storage list
         try {
             // Create list early since we want a smaller recordsize
             // than the default of 1k.
-            this.storage.createList(DATA_LISTNAME, PROP_RECSIZE);
+            this.storage.createList(MEASURENENT_LISTNAME, PROP_RECSIZE);
+            this.storage.createList(AVAILABILITY_LISTNAME, PROP_RECSIZE);
         } catch (AgentStorageException ignore) {
             // Most likely an agent update where the existing rt schedule
             // already exists.  Will fall back to the old 1k size.
@@ -198,13 +204,18 @@ public class SenderThread
                   derivedID;
         final MetricValue data;
         private Integer hashCode = null;
+        private boolean isAvail;
 
-        private Record(int dsnId, MetricValue data, int derivedID){
+        private Record(int dsnId, MetricValue data, int derivedID, boolean isAvail){
             this.dsnId     = dsnId;
             this.data      = data;
             this.derivedID = derivedID;
+            this.isAvail  = isAvail;
         }
-        public int hashCode() {
+        public Record(int dsnID, MetricValue measVal, int derivedID) {
+			this (dsnID, measVal, derivedID, false);
+		}
+		public int hashCode() {
             if (hashCode != null) {
                 return hashCode.intValue();
             }
@@ -227,7 +238,7 @@ public class SenderThread
         }
         public String toString() {
             return "mId="+derivedID+",timestamp="+data.getTimestamp()+
-                ",value="+data.getValue();
+                ",value="+data.getValue()+",isAvail="+isAvail;
         }
     }
 
@@ -237,6 +248,7 @@ public class SenderThread
         ByteArrayInputStream bIs;
         DataInputStream dIs;
         MetricValue measVal;
+        boolean isAvail;
         int derivedID, dsnID;
         long retTime;
         
@@ -251,8 +263,7 @@ public class SenderThread
         return new Record(dsnID, measVal, derivedID);
     }
 
-    private static String encodeRecord(int dsnId, long timestamp, 
-                                       double value, int derivedID)
+    private static String encodeRecord(Record record)
         throws IOException 
     {
         ByteArrayOutputStream bOs;
@@ -261,25 +272,17 @@ public class SenderThread
         bOs = new ByteArrayOutputStream();
         dOs = new DataOutputStream(bOs);
 
-        dOs.writeInt(derivedID);
-        dOs.writeLong(timestamp);
-        dOs.writeInt(dsnId);
-        dOs.writeDouble(value);
+        dOs.writeInt(record.derivedID);
+        dOs.writeLong(record.data.getTimestamp());
+        dOs.writeInt(record.dsnId);
+        dOs.writeDouble(record.data.getValue());
         return Base64.encode(bOs.toByteArray());
     }
 
-    public void processData(int dsnId, MetricValue data, int derivedID){
-        String encodedRec;
+    public void processData(int dsnId, MetricValue data, int derivedID, boolean isAvail){
         double val;
 
         val = data.getValue();
-        try {
-            encodedRec = encodeRecord(dsnId, data.getTimestamp(), val, 
-                                      derivedID);
-        } catch(IOException exc){
-            this.log.error("Unable to encode record", exc);
-            return;
-        }
         
         if(this.metricDebug.contains(new Integer(derivedID))){
             this.log.info("metricDebug:  Placing DSN='" + dsnId + 
@@ -289,23 +292,19 @@ public class SenderThread
         }
 
         synchronized(this.transitionQueue){
-            this.transitionQueue.add(encodedRec);
+        	MetricValue measVal = new MetricValue(val, data.getTimestamp());
+            this.transitionQueue.add(new Record(dsnId, measVal, derivedID, isAvail));
         }
 
         if(this.metricDup != 0){
-            ArrayList dupeList;
+            ArrayList<Record> dupeList;
             long dTime;
             
-            dupeList = new ArrayList();
+            dupeList = new ArrayList<Record>();
             dTime    = data.getTimestamp();
             for(int i=0; i<this.metricDup; i++){
-                try {
-                    encodedRec = encodeRecord(dsnId, dTime + i + 1, val,
-                                              derivedID);
-                } catch(IOException exc){
-                    this.log.error("Unable to encode record", exc);
-                }
-                dupeList.add(encodedRec);
+                MetricValue measVal = new MetricValue(val, dTime + i + 1);
+                dupeList.add(new Record(dsnId, measVal, derivedID, isAvail));
             }
 
             synchronized(this.transitionQueue){
@@ -319,15 +318,22 @@ public class SenderThread
      * the storage provider, so it can be shipped to the server.
      */
     private void processTransitionQueue(){
-        synchronized(this.transitionQueue){
-            for (Iterator<String> i=this.transitionQueue.iterator(); i.hasNext(); ){
-                String val = i.next();
-                try {
-                    this.storage.addToList(DATA_LISTNAME, val);
-                } catch(Exception exc){
-                    this.log.error("Unable to store data: " + exc, exc);
-                }
-            }
+    	String encodedRec;
+    	synchronized(this.transitionQueue){
+    		for (Iterator<Record> i=this.transitionQueue.iterator(); i.hasNext(); ){
+    			Record rec = i.next();
+    			try {
+    				encodedRec = encodeRecord(rec);
+    				if (rec.isAvail) {
+    					this.storage.addToList(AVAILABILITY_LISTNAME, encodedRec);
+    				}
+    				else {
+    					this.storage.addToList(MEASURENENT_LISTNAME, encodedRec);
+    				}
+    			} catch(Exception exc){
+    				this.log.error("Unable to store data: " + exc, exc);
+    			}
+    		}
 
             this.transitionQueue.clear();
 
@@ -347,7 +353,7 @@ public class SenderThread
      *          sent, otherwise it returns the timestamp of the last
      *          measurement sent to the server.
      */
-    private Long sendBatch() {
+    private Long sendBatch(String listName) {
         MeasurementReportConstructor constructor;
         DSNList[] clientIds;
         long batchStart = 0, batchEnd = 0, lastMetricTime = 0, serverTime = 0;
@@ -368,7 +374,7 @@ public class SenderThread
         Set<Record> records = new HashSet<Record>();
         // first we are going to ensure that all the data points that
         // we send over to the server are unique
-        for (Iterator<String> it=storage.getListIterator(DATA_LISTNAME); it!=null && it.hasNext() && numUsed < maxBatchSize; numUsed++) {
+        for (Iterator<String> it=storage.getListIterator(listName); it!=null && it.hasNext() && numUsed < maxBatchSize; numUsed++) {
             try {
                 Record r = SenderThread.decodeRecord(it.next());
                 boolean didNotAlreadyExist = records.add(r); 
@@ -418,7 +424,7 @@ public class SenderThread
             srnList = this.schedule.getSRNsAsArray();
             if (srnList.length == 0) {
                 log.error("Agent does not have valid SRNs, but has metric data to send, removing measurements");
-                removeMeasurements(numUsed);
+                removeMeasurements(numUsed, listName);
                 return null;
             }
             
@@ -476,7 +482,7 @@ public class SenderThread
         }
         
         if(success){
-            removeMeasurements(numUsed);
+            removeMeasurements(numUsed, listName);
 
             this.stat_numBatchesSent++;
             this.stat_totBatchSendTime += (batchEnd - batchStart);
@@ -500,10 +506,10 @@ public class SenderThread
      *
      * @param num The maximum number of datapoints to remove.
      */
-    private int removeMeasurements(int num) {
+    private int removeMeasurements(int num, String listName) {
         int j = 0;
 
-        for (Iterator i = this.storage.getListIterator(DATA_LISTNAME);
+        for (Iterator i = this.storage.getListIterator(listName);
              i != null && i.hasNext() && j < num;
              j++) {
             i.next();
@@ -559,7 +565,7 @@ public class SenderThread
     }
 
     public void run(){
-        Long lastMetricTime;
+       
         Calendar controlCal = Calendar.getInstance();
         controlCal.setTimeInMillis(System.currentTimeMillis());
         Calendar cal = Calendar.getInstance();
@@ -590,34 +596,43 @@ public class SenderThread
                 if (log.isDebugEnabled()) {
                     log.debug("Woke up, sending batch of metrics.");
                 }
-                
-                lastMetricTime = this.sendBatch();
-                if(lastMetricTime != null){
-                    String backlogNum = "";
-                    final long start = System.currentTimeMillis();
-                    // Give it a single shot to catch up before starting to squawk
-                    while((lastMetricTime = this.sendBatch()) != null) {
-                        long now = System.currentTimeMillis();
-                        long tDiff = now - lastMetricTime.longValue();
-                        String backlog = Long.toString(tDiff / (60 * 1000));
-                        if(tDiff / (60 * 1000) > 1 && backlog.equals(backlogNum) == false) {
-                            backlogNum = backlog;
-                            this.log.info(backlog +  " minute(s) of metrics backlogged");
-                        }
-                        if(this.shouldDie == true){
-                            this.log.info("Dying with measurements backlogged");
-                            return;
-                        }
-                    }
-                    final long total = System.currentTimeMillis() - start;
-                    if (total > SEND_INTERVAL) {
-                        log.info("Agent took " + (total/1000) + " seconds to send its spooled metrics to the HQ Server.");
-                    } else if (log.isDebugEnabled()) {
-                        log.debug("Agent took " + total + " ms to send its spool");
-                    }
-                }
+                //We are sending 2 different batches, the first is for availability and the second
+                //is for measurement. We are doing this because we want to make sure that availability 
+                //data will get processed by the server even if the server is not able to process measurement
+                //data at the moment (Jira issue [HHQ-5566])
+                sendData(AVAILABILITY_LISTNAME);
+                sendData(MEASURENENT_LISTNAME);
             } catch (Throwable e) {
                 log.error(e.getMessage(), e);
+            }
+        }
+    }
+    
+    private void sendData(String listName) {
+    	Long lastMetricTime;
+        lastMetricTime = this.sendBatch(listName);
+        if(lastMetricTime != null){
+            String backlogNum = "";
+            final long start = System.currentTimeMillis();
+            // Give it a single shot to catch up before starting to squawk
+            while((lastMetricTime = this.sendBatch(listName)) != null) {
+                long now = System.currentTimeMillis();
+                long tDiff = now - lastMetricTime.longValue();
+                String backlog = Long.toString(tDiff / (60 * 1000));
+                if(tDiff / (60 * 1000) > 1 && backlog.equals(backlogNum) == false) {
+                    backlogNum = backlog;
+                    this.log.info(backlog +  " minute(s) of metrics backlogged");
+                }
+                if(this.shouldDie == true){
+                    this.log.info("Dying with measurements backlogged");
+                    return;
+                }
+            }
+            final long total = System.currentTimeMillis() - start;
+            if (total > SEND_INTERVAL) {
+                log.info("Agent took " + (total/1000) + " seconds to send its " + listName + " metrics to the HQ Server.");
+            } else if (log.isDebugEnabled()) {
+                log.debug("Agent took " + total + " ms to send its " + listName);
             }
         }
     }

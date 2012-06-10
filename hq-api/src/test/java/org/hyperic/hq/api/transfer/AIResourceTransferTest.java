@@ -68,7 +68,7 @@ public class AIResourceTransferTest extends AIResourceTransfer {
         AIResource aiResource = resourceTransfer.getAIResource(discoveryId, type);
         assertNotNull("aiResource hasn't been found", aiResource);
         assertEquals("Returned ai resource of incorrect type", type, aiResource.getResourceType());
-        assertEquals("Expected autoinventory id to be " + discoveryId + " but was " + aiResource.getAutoinventoryId(), discoveryId, aiResource.getAutoinventoryId());
+        assertEquals("Expected autoinventory id to be " + discoveryId + " but was " + aiResource.getId(), discoveryId, aiResource.getNaturalID());
     }
     
     @Test

@@ -301,16 +301,26 @@ public class ReportProcessorImpl implements ReportProcessor {
             }
             if (debug) watch.markTimeEnd("addData");
         }
-
-        DataInserter d = measurementInserterManager.getDataInserter();
-        if (debug) watch.markTimeBegin("sendMetricDataToDB");
-        sendMetricDataToDB(d, dataPoints, false);
-        if (debug) watch.markTimeEnd("sendMetricDataToDB");
-        DataInserter a = measurementInserterManager.getAvailDataInserter();
-        if (debug) watch.markTimeBegin("sendAvailDataToDB");
-        sendMetricDataToDB(a, availPoints, false);
-        sendMetricDataToDB(a, priorityAvailPts, true);
-        if (debug) watch.markTimeEnd("sendAvailDataToDB");
+        //Since we are sending the Availability data and the Metrics data in 2 different batches
+        //in agents with version >= 5.0, if this is an availability batch there is no need
+        //to call the BatchAggregateDataInserter (Jira issue [HHQ-5566]) and if the BatchAggregateDataInserter
+        //queue is available we will still be able to process the availability data
+        if (!dataPoints.isEmpty()) {
+        	DataInserter d = measurementInserterManager.getDataInserter();
+        	if (debug) watch.markTimeBegin("sendMetricDataToDB");
+        	sendMetricDataToDB(d, dataPoints, false);
+        	if (debug) watch.markTimeEnd("sendMetricDataToDB");
+        }
+        //Since we are sending the Availability data and the Metrics data in 2 different batches
+        //in agents with version >= 5.0, if this is a measurements batch there is no need
+        //to call the SynchronousAvailDataInserter (Jira issue [HHQ-5566])
+        if (!availPoints.isEmpty() || !priorityAvailPts.isEmpty()) {
+        	DataInserter a = measurementInserterManager.getAvailDataInserter();
+        	if (debug) watch.markTimeBegin("sendAvailDataToDB");
+        	sendMetricDataToDB(a, availPoints, false);
+        	sendMetricDataToDB(a, priorityAvailPts, true);
+        	if (debug) watch.markTimeEnd("sendAvailDataToDB");
+        }
         if (debug) log.debug(watch);
 
         // need to process these in background queue since I don't want cache misses to backup

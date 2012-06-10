@@ -55,7 +55,12 @@
             <groupId>org.easymock</groupId>
             <artifactId>easymockclassextension</artifactId>
             <scope>test</scope>
-        </dependency>		
+        </dependency>	
+          <dependency>
+	      <groupId>org.apache.cxf</groupId>
+	   	  <artifactId>cxf-rt-rs-extension-search</artifactId>
+	      <version>2.6.0</version>
+	     </dependency>	
 	</dependencies>
 
 </project>

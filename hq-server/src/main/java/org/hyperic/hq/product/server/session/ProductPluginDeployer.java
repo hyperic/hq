@@ -339,8 +339,9 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
 
     private void unpackJar(File pluginJarFile, File destDir, String prefix) throws Exception {
 
-        JarFile jar = new JarFile(pluginJarFile);
+    	JarFile jar = null ; 
         try {
+        	jar = new JarFile(pluginJarFile);
             for (Enumeration<JarEntry> e = jar.entries(); e.hasMoreElements();) {
                 JarEntry entry = e.nextElement();
                 String name = entry.getName();
@@ -358,8 +359,10 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
                     }
                 }
             }
+        }catch(Throwable t) { 
+        	t.printStackTrace() ; 
         } finally {
-            jar.close();
+            if(jar != null) jar.close();
         }
     }
 

@@ -167,14 +167,13 @@
     </condition>
 
     <mkdir dir="${server.hqdb.dir}"/>
-    <untar src="${install.dir}/data/hqdb/pgsql.tar.gz"
-           overwrite="false"
-           dest="${server.hqdb.dir}"
-           compression="gzip"/>
-    <copy todir="${server.hqdb.dir}/data">
-      <fileset dir="${install.dir}/data/hqdb/conf"
-               includes="**"/>
-    </copy>
+    <!--
+       - Only reason for this is to preserve the symlinks for PG, ant untar does not preserve symlinks
+       - bug: https://issues.apache.org/bugzilla/show_bug.cgi?id=19252
+      -->
+    <antcall target="untarLinux"/>
+    <antcall target="untarWin"/>
+
     <copy todir="${server.home}/bin">
       <fileset dir="${install.dir}/bin" includes="db-*${script-ext}"/>
     </copy>
@@ -195,6 +194,26 @@
   <target name="stop-pg" if="server.pgsql.available">
     <ant antfile="${install.dir}/data/server.xml"
          target="stop-postgresql"/>
+  </target>
+
+  <target name="untarLinux" unless="isWin32">
+    <exec executable="tar" os="Linux">
+      <arg value="xvfz"/>
+      <arg value="${install.dir}/data/hqdb/pgsql.tar.gz"/>
+      <arg value="-C"/>
+      <arg value="${server.hqdb.dir}"/>
+    </exec>
+  </target>
+
+  <target name="untarWin" if="isWin32">
+    <untar src="${install.dir}/data/hqdb/pgsql.tar.gz"
+           overwrite="false"
+           dest="${server.hqdb.dir}"
+           compression="gzip"/>
+    <copy todir="${server.hqdb.dir}/data">
+      <fileset dir="${install.dir}/data/hqdb/conf"
+               includes="**"/>
+    </copy>
   </target>
 
   <target name="recreate-symlinks" unless="isWin32">

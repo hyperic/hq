@@ -53,8 +53,9 @@ public class AllConfigResponses implements Serializable {
 
     public AllConfigResponses () {}
 
-    public void setResource(AppdefEntityID resource) {
+    public AppdefEntityID setResource(AppdefEntityID resource) {
         _resource = resource;
+        return resource  ;
     }
 
     public AppdefEntityID getResource() {

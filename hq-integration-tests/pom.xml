@@ -34,12 +34,13 @@
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-server</artifactId> 
 			<version>${project.version}</version>
-		</dependency>
-			<dependency>
+			<classifier>tests</classifier>
+			<scope>test</scope>
+		</dependency> 
+		<dependency>
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-server</artifactId> 
 			<version>${project.version}</version>
-			<classifier>tests</classifier>
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
@@ -70,11 +71,27 @@
 			<classifier>tests</classifier>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq</groupId>
+			<artifactId>hq-api</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
 		<!--  We use a version of dbunit that we patched -->
 		<dependency>
 			<groupId>org.hyperic</groupId>
 			<artifactId>dbunit</artifactId>
 		</dependency> 
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+		</dependency>
+		<dependency>
+            <groupId>httpunit</groupId>
+            <artifactId>httpunit</artifactId>
+            <version>1.6.2</version>
+            <scope>test</scope>
+		</dependency>
 	</dependencies>
 	
 	<build>
@@ -120,7 +137,7 @@
 							<includeTypes>zip</includeTypes>
 							<stripVersion>true</stripVersion>
 						</configuration>
-					</execution>
+					</execution>		
 				</executions>
 			</plugin>
 			<plugin>

@@ -55,9 +55,11 @@ import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.annotation.AnnotationConfigUtils;
+import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -66,7 +68,7 @@ import org.springframework.test.context.support.GenericXmlContextLoader;
 import org.springframework.util.StringUtils;
 
 public class IntegrationTestContextLoader extends AbstractContextLoader {
-	private final Log logger = LogFactory.getLog(IntegrationTestContextLoader.class);
+	protected static final Log logger = LogFactory.getLog(IntegrationTestContextLoader.class);
 	private static Sigar sigar ; 
 	private static Field platformBeanServerField ; 
 	
@@ -77,23 +79,26 @@ public class IntegrationTestContextLoader extends AbstractContextLoader {
 	    this.delegateLoader = new ExternalizingGenericXmlContextLoader() ;  
 	}//EOM
 	
-	private final void configureSigar(final ApplicationContext context) { 
-	    try {
+	public static final void configureSigar(final ApplicationContext context, final Log externalLogger) { 
+		final Log log = (externalLogger == null ? logger : externalLogger) ;
+
+		try {
             //Find the sigar libs on the test classpath
             final File sigarBin = new File(context.getResource("/libsigar-sparc64-solaris.so").getFile().getParent());
-            logger.info("Setting sigar path to : " + sigarBin.getAbsolutePath());
+            log.info("Setting sigar path to : " + sigarBin.getAbsolutePath());
             System.setProperty("org.hyperic.sigar.path",sigarBin.getAbsolutePath());
             
             //ensure that the Sigar native libraries are loaded and remain in the classloader's context 
             sigar = new Sigar() ; 
             Sigar.load() ; 
+            
         } catch (Throwable t) {
-            logger.error("Unable to initiailize sigar path",t);
+        	log.error("Unable to initiailize sigar path",t);
             throw new SystemException(t) ; 
         }//EO catch block
 	}//EOM 
 
-    public final ApplicationContext loadContext(final String... locations) throws Exception {
+    public ApplicationContext loadContext(final String... locations) throws Exception {
         if (logger.isDebugEnabled()) {
             logger.debug("Loading ApplicationContext for locations [" +
                     StringUtils.arrayToCommaDelimitedString(locations) + "].");
@@ -101,7 +106,7 @@ public class IntegrationTestContextLoader extends AbstractContextLoader {
         
         final GenericApplicationContext context = new ProxyingGenericApplicationContext();
         //verify sigar's resources existence & load native libraries 
-        this.configureSigar(context) ; 
+        configureSigar(context, logger) ; 
         
         //clean previous application context (if exists) and create a new one 
         Bootstrap.setAppContext(context) ; 
@@ -148,13 +153,16 @@ public class IntegrationTestContextLoader extends AbstractContextLoader {
 
                 // Close the state of this context itself.
                 this.closeBeanFactory();
+                
+                //close the parent as well 
+                if(this.getParent() != null) ((ConfigurableApplicationContext)this.getParent()).close() ; 
             }//EO if not active 
             else { 
                 super.close();
             }//EO else normal close 
         }//EOM 
         
-    }//EOC ExternalizingGenericApplicationContext
+    }//EOC DisposableApplicationContext
     
     /**
      * Wrapper around an {@link GenericApplicationContext} instance used to control its references.<br>
@@ -164,14 +172,22 @@ public class IntegrationTestContextLoader extends AbstractContextLoader {
      * @author guy
      *
      */
-    private static final class ProxyingGenericApplicationContext extends GenericApplicationContext { 
+    protected static final class ProxyingGenericApplicationContext extends GenericApplicationContext { 
        
-        private DisposableApplicationContext delegate ; 
+        private AbstractApplicationContext delegate ; 
+        private boolean isDelegateInstanceofGenericAppContext ; 
         
         public ProxyingGenericApplicationContext() {
             super() ; 
             this.delegate = new DisposableApplicationContext() ; 
+            this.isDelegateInstanceofGenericAppContext = true ; 
         }//EOM
+        
+        public ProxyingGenericApplicationContext(AbstractApplicationContext appcontext) {
+        	super() ; 
+        	this.delegate = appcontext ; 
+        	this.isDelegateInstanceofGenericAppContext = (appcontext instanceof GenericApplicationContext) ; 
+        }//EOM 
 
         @Override
         public void setParent(ApplicationContext parent) {
@@ -185,17 +201,23 @@ public class IntegrationTestContextLoader extends AbstractContextLoader {
 
         @Override
         public void setAllowBeanDefinitionOverriding(boolean allowBeanDefinitionOverriding) {
-            this.delegate.setAllowBeanDefinitionOverriding(allowBeanDefinitionOverriding);
+        	if(isDelegateInstanceofGenericAppContext) { 
+        		((GenericApplicationContext)this.delegate).setAllowBeanDefinitionOverriding(allowBeanDefinitionOverriding);
+        	}//EO if delegate is generic application context  
         }//EOM 
 
         @Override
         public void setAllowCircularReferences(boolean allowCircularReferences) {
-            this.delegate.setAllowCircularReferences(allowCircularReferences);
+        	if(isDelegateInstanceofGenericAppContext) { 
+        		((GenericApplicationContext)this.delegate).setAllowCircularReferences(allowCircularReferences);
+        	}//EO if delegate is generic application context 
         }//EOM 
-
+   
         @Override
         public void setResourceLoader(ResourceLoader resourceLoader) {
-            this.delegate.setResourceLoader(resourceLoader);
+        	if(isDelegateInstanceofGenericAppContext) { 
+        		((GenericApplicationContext)this.delegate).setResourceLoader(resourceLoader);
+        	}//EO if delegate is generic application context 
         }//EOM 
 
         @Override
@@ -211,41 +233,54 @@ public class IntegrationTestContextLoader extends AbstractContextLoader {
         @Override
         public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition)
                 throws BeanDefinitionStoreException {
-            this.delegate.registerBeanDefinition(beanName, beanDefinition);
+        	if(isDelegateInstanceofGenericAppContext) { 
+        		((GenericApplicationContext)this.delegate).registerBeanDefinition(beanName, beanDefinition);
+            }//EO if delegate is generic application context 
         }//EOM 
 
         @Override
         public void removeBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
-            
-            this.delegate.removeBeanDefinition(beanName);
+        	if(isDelegateInstanceofGenericAppContext) { 
+        		((GenericApplicationContext)this.delegate).removeBeanDefinition(beanName);
+            }//EO if delegate is generic application context 
         }
 
         @Override
         public BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
-            return this.delegate.getBeanDefinition(beanName);
+        	if(isDelegateInstanceofGenericAppContext) {   
+        		return ((GenericApplicationContext)this.delegate).getBeanDefinition(beanName);
+            }//EO if delegate is generic application context
+        	else throw new UnsupportedOperationException();
         }//EOM 
 
         @Override
         public boolean isBeanNameInUse(String beanName) {
-            return this.delegate.isBeanNameInUse(beanName);
+        	if(isDelegateInstanceofGenericAppContext) { 
+        		return ((GenericApplicationContext)this.delegate).isBeanNameInUse(beanName);
+            }//EO if delegate is generic application context
+        	else throw new UnsupportedOperationException();
         }//EOM 
-
+ 
         @Override
         public void registerAlias(String beanName, String alias) {
-            
-            this.delegate.registerAlias(beanName, alias);
+        	if(isDelegateInstanceofGenericAppContext) { 
+        		((GenericApplicationContext)this.delegate).registerAlias(beanName, alias);
+            }//EO if delegate is generic application context
         }//EOM 
 
         @Override
         public void removeAlias(String alias) {
-            
-            this.delegate.removeAlias(alias);
+        	if(isDelegateInstanceofGenericAppContext) { 
+        		((GenericApplicationContext)this.delegate).removeAlias(alias);
+            }//EO if delegate is generic application context
         }//EOM 
 
         @Override
         public boolean isAlias(String beanName) {
-            
-            return this.delegate.isAlias(beanName);
+        	if(isDelegateInstanceofGenericAppContext) { 
+        		return ((GenericApplicationContext)this.delegate).isAlias(beanName);
+            }//EO if delegate is generic application context
+        	else throw new UnsupportedOperationException() ;
         }//EOM 
 
         @Override

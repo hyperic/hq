@@ -40,50 +40,5 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @version 1.0 29 April 2012
  * @author Maya Anderson
  */
-@XmlRootElement(name = "AIResource")
-public class AIResource {
-	private String id;
-	private String name;
-    private ResourceType resourceType;	
-	private ResourcePrototype resourcePrototype;
-	private String autoinventoryId;
-	private List<AIResource> subResources;
-	
-	public String getId() {
-		return id;
-	}
-	public void setId(String id) {
-		this.id = id;
-	}
-	public ResourcePrototype getResourcePrototype() {
-		return resourcePrototype;
-	}
-	public void setResourcePrototype(ResourcePrototype resourceType) {
-		this.resourcePrototype = resourceType;
-	}
-	public String getAutoinventoryId() {
-		return autoinventoryId;
-	}
-	public void setAutoinventoryId(String autoinventoryId) {
-		this.autoinventoryId = autoinventoryId;
-	}
-	public List<AIResource> getSubResources() {
-		return subResources;
-	}
-	public void setSubResources(List<AIResource> subResources) {
-		this.subResources = subResources;
-	}
-	public String getName() {
-		return name;
-	}
-	public void setName(String name) {
-		this.name = name;
-	} 
-	
-    public ResourceType getResourceType() {
-        return resourceType;
-    }
-    public void setResourceType(ResourceType resourceType) {
-        this.resourceType = resourceType;
-    }	
-}
+@XmlRootElement(name = "AIResource", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+public class AIResource extends Resource{}
