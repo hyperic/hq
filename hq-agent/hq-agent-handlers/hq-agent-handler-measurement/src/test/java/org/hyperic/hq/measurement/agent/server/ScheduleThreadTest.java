@@ -276,7 +276,7 @@ public class ScheduleThreadTest extends TestCase {
 
     public static class SimpleSender implements org.hyperic.hq.measurement.agent.server.Sender {
 
-        public void processData(int dsnId, MetricValue data, int derivedID) {
+        public void processData(int dsnId, MetricValue data, int derivedID, boolean isAvail) {
         }
     }
 

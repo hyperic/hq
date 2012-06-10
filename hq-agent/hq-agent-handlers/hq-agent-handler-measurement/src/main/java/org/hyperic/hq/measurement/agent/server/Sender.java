@@ -30,6 +30,6 @@ import org.hyperic.hq.product.MetricValue;
 
 public interface Sender {
 
-    public void processData(int dsnId, MetricValue data, int derivedID);
+    public void processData(int dsnId, MetricValue data, int derivedID, boolean isAvail);
 
 }
