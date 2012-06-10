@@ -210,7 +210,7 @@ public class ResourceServiceTest extends BaseInfrastructureTest{
 
     @ServiceBindingsIteration(ResourceServiceTest.CONTEXT_URL + "/rest-api/inventory/resources")
     @PlatformsIteration
-  //  @Test
+   // @Test
     @Transactional(propagation=Propagation.NESTED)
     public final void testGetResourceWithInternalAndNaturalPlatformIDs() throws Throwable {
     	

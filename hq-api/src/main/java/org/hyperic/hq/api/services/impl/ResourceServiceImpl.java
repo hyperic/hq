@@ -37,7 +37,7 @@ import org.hyperic.hq.api.transfer.ResourceTransfer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Component
+//@Component
 public class ResourceServiceImpl implements ResourceService{
 	
 	@Autowired

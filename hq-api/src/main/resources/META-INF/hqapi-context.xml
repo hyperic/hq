@@ -47,6 +47,8 @@
     <bean name="exceptionToErrorCodeMapper" class="org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper" >
    	 <property name="exceptionToErrorCodeMap" ref="exceptionToErrorCodeMap" />
     </bean>
+    
+    <bean class="org.hyperic.hq.api.transfer.impl.ResourceTransferImpl" />
 
 	<bean class="org.springframework.web.context.support.ServletContextPropertyPlaceholderConfigurer" />
 	<bean class="org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer" />
