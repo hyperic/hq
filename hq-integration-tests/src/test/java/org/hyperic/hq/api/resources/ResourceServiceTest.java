@@ -243,6 +243,7 @@ public class ResourceServiceTest extends BaseInfrastructureTest{
 		this.assertResource(resource, this.currentPlatform, hierarchyDepth, this.testBed.persistedConfigAttributes) ;
     }//EOM 
     
+    @Test
     public final void testGetResourceOnlyConfig() throws Throwable { 
     	//Note: should still contain an internal id 
     }//EOM
