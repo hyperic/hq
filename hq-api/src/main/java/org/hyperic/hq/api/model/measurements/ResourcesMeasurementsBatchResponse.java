@@ -48,8 +48,8 @@ public class ResourcesMeasurementsBatchResponse extends BatchResponseBase {
 //        if (null == exceptionToErrorCodeMapper) {
 //            throw new NullArgumentException("exceptionToErrorCodeMap");
 //        }
-//        if (null != batchResponse) {
 //            if (null != batchResponse.getResponse()) {
+//        if (null != batchResponse) {
 //            	resources = batchResponse.getResponse();
 //            }  
 //            

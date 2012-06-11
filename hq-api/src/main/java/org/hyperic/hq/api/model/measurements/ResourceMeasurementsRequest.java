@@ -20,19 +20,19 @@ public class ResourceMeasurementsRequest {
 	@XmlElement
     private List<String> resourceIdsList;
 	@XmlElement
-    private List<String> metricTemplateNames;
+    private List<String> measurementTemplateNames;
 	
-	public List<String> getMetricTemplateNames() {
-		return metricTemplateNames;
+	public List<String> getMeasurementTemplateNames() {
+		return measurementTemplateNames;
 	}
-	public void setMetricTemplateNames(List<String> metricTemplateNames) {
-		this.metricTemplateNames = metricTemplateNames;
+	public void setMeasurementTemplateNames(List<String> measurementTemplateNames) {
+		this.measurementTemplateNames = measurementTemplateNames;
 	}
 	public ResourceMeasurementsRequest(){} 
-	public ResourceMeasurementsRequest(final ResourceType resourceType, final List<String> resourceIdsList, final List<String> metricTemplateNames) { 
+	public ResourceMeasurementsRequest(final ResourceType resourceType, final List<String> resourceIdsList, final List<String> measurementTemplateNames) { 
 		this.resourceType = resourceType;
 		this.resourceIdsList = resourceIdsList ;
-		this.metricTemplateNames = metricTemplateNames;
+		this.measurementTemplateNames = measurementTemplateNames;
 	}
 	public List<String> getResourceIdsList() {
 		return resourceIdsList;

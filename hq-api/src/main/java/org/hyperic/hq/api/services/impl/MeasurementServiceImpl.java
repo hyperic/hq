@@ -4,10 +4,11 @@ import org.hyperic.hq.api.model.measurements.ResourceMeasurementsRequestsCollect
 import org.hyperic.hq.api.model.measurements.ResourcesMeasurementsBatchResponse;
 import org.hyperic.hq.api.services.MeasurementService;
 import org.hyperic.hq.api.transfer.MeasurementTransfer;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class MeasurementServiceImpl implements MeasurementService {
-//    @Autowired
-//    private MeasurementTransfer measurementTransfer;
+    @Autowired
+    private MeasurementTransfer measurementTransfer;
     
 //    @Autowired
 //    @Qualifier("restApiLogger")
@@ -21,6 +22,6 @@ public class MeasurementServiceImpl implements MeasurementService {
     
 	public ResourcesMeasurementsBatchResponse getMetrics(final ResourceMeasurementsRequestsCollection resourceMeasurementsRequestsCollection/*,
 			final Date samplingStartTime, final Date samplingEndTime*/) {
-        return null;//measurementTransfer.getMetrics(resourceMeasurementsRequestsCollection);
+        return measurementTransfer.getMetrics(resourceMeasurementsRequestsCollection);
     }
 }
