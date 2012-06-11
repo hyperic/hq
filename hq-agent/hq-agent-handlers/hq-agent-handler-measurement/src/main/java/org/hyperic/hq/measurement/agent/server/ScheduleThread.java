@@ -574,7 +574,7 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable {
                     return;
                 }
                 
-                sender.processData(meas.getDsnID(), data, meas.getDerivedID(), category.equals(MeasurementConstants.CAT_AVAILABILITY));
+                sender.processData(meas.getDsnID(), data, meas.getDerivedID(), MeasurementConstants.CAT_AVAILABILITY.equals(category));
                 synchronized (statsLock) {
                     statNumMetricsFetched++;
                 }
