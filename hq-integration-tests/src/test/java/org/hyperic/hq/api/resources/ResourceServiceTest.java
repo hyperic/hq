@@ -11,8 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.cxf.jaxrs.client.Client;
-import org.apache.cxf.jaxrs.client.WebClient;
 import org.hyperic.hq.api.model.Resource;
 import org.hyperic.hq.api.model.ResourceConfig;
 import org.hyperic.hq.api.model.ResourceDetailsType;
@@ -22,7 +20,9 @@ import org.hyperic.hq.api.model.Resources;
 import org.hyperic.hq.api.model.resources.FailedResource;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.api.resources.ResourceServiceTest.ResourceServiceTestDataPopulator;
-import org.hyperic.hq.api.resources.WebTestCaseBase.ServiceBindingsIteration;
+import org.hyperic.hq.api.rest.AbstractRestTestDataPopulator;
+import org.hyperic.hq.api.rest.RestTestCaseBase;
+import org.hyperic.hq.api.rest.RestTestCaseBase.ServiceBindingsIteration;
 import org.hyperic.hq.api.services.ResourceService;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
@@ -46,41 +46,33 @@ import org.hyperic.hq.product.ServiceTypeInfo;
 import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.hq.product.pluginxml.PluginData;
 import org.hyperic.hq.product.shared.ProductManager;
-import org.hyperic.hq.test.TestHelper;
 import org.hyperic.hq.tests.context.TestData;
-import org.hyperic.hq.tests.context.TestDataPopulator;
 import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.StringConfigOption;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 
-import com.meterware.servletunit.ServletRunner;
-
+@DirtiesContext
 @ServiceBindingsIteration(ResourceServiceTest.CONTEXT_URL + "/rest-api/inventory/resources")
 @TestData(ResourceServiceTestDataPopulator.class)
-public class ResourceServiceTest extends WebTestCaseBase{
+public class ResourceServiceTest extends RestTestCaseBase<ResourceService, ResourceServiceTestDataPopulator>{
 
     private static final int GENERATE_CONFIG_FLAG = 2<<1 ; 
     private static final int FAILED_RESOURCE_FLAG = 2<<2 ;
     private static final int USE_NATURAL_ID_FLAG = 2<<3 ; 
     
     @Rule 
-    public TestRule chain = RuleChain.outerRule(new ServiceBindingsIterationInterceptor(ServiceBindingsIteration.class)).
-    		around(new PlatformsIterationInterceptor(PlatformsIteration.class)) ;
-    		
-	@Autowired
-	private ResourceServiceTestDataPopulator testBed ; 
-
-	private Platform currentPlatform ; 
-	private ResourceService resourceService ;
-
+    public RuleChain interceptorsChain = super.interceptorsChain.around(new PlatformsIterationInterceptor(PlatformsIteration.class)) ;
+    
+	private Platform currentPlatform ;
+	
 	@Retention(RetentionPolicy.RUNTIME) 
 	@Target({ElementType.METHOD})
 	private @interface PlatformsIteration { 
@@ -104,37 +96,15 @@ public class ResourceServiceTest extends WebTestCaseBase{
     	}//EOM 
     }//EO inner class PlatformsIterationInterceptor
     
-    private final class ServiceBindingsIterationInterceptor extends IterationInterceptor<ServiceBindingsIteration> { 
-    	
-    	public ServiceBindingsIterationInterceptor(final Class<ServiceBindingsIteration> serviceBindingsIterationType) { 
-    		super(serviceBindingsIterationType) ; 
-    	}//EOM 
-    	
-    	 @Override
-    	protected final void doBeforeEvaluation(final int iIterationIndex, ServiceBindingsIteration metadata) {
-    		resourceService = testBed.arrResourcesServices[iIterationIndex] ;
-    		final Client client =  WebClient.client(resourceService) ;
-    		WebClient.getConfig(client).getConduitSelector().getEndpoint().getEndpointInfo().setAddress(metadata.value()) ; 
-    	}//EOM 
-    	
-    	 @Override
-    	protected final int getIterationLength(final ServiceBindingsIteration metadata) {
-    		return testBed.arrResourcesServices.length ; 
-    	}//EOM 
-    }//EO inner class PlatformsIterationInterceptor
-    
-    
-    //@ServiceBindingsIteration(ResourceServiceTest.CONTEXT_URL + "/rest-api/inventory/resources")
     @PlatformsIteration(noOfPlatforms=1)
     @Test
     public final void testGetWADL() throws Throwable {
-    	final String WADL = this.getWADL(this.resourceService) ; 
+    	final String WADL = this.getWADL(this.service) ; 
     	System.out.println(WADL);
 	}//EOM
     
 
-    //@ServiceBindingsIteration(ResourceServiceTest.CONTEXT_URL + "/rest-api/inventory/resources")
-    @PlatformsIteration(noOfPlatforms=1)
+    @PlatformsIteration()
     @Test
     public final void testGetResourceWithInternalAndNaturalPlatformIDs() throws Throwable {
     	
@@ -150,7 +120,6 @@ public class ResourceServiceTest extends WebTestCaseBase{
 		
 	}//EOM 
     
-    //@ServiceBindingsIteration(ResourceServiceTest.CONTEXT_URL + "/rest-api/inventory/resources")
     @PlatformsIteration
     @Test
     public final void testGetResourceNoConfig() throws Throwable { 
@@ -200,8 +169,6 @@ public class ResourceServiceTest extends WebTestCaseBase{
     	
     }//EOM 
     
-    //@Ignore
-    //@ServiceBindingsIteration(ResourceServiceTest.CONTEXT_URL + "/rest-api/inventory/resources")
     @Test
     public final void testUpdateResources1Resource() throws Throwable{
     	this.innerTestUpdateResources(new int[]{ (USE_NATURAL_ID_FLAG | GENERATE_CONFIG_FLAG) } ) ;
@@ -272,7 +239,7 @@ public class ResourceServiceTest extends WebTestCaseBase{
     	ResourceBatchResponse response = null ; 
     	
     	try{ 
-    		response = resourceService.updateResources(resources) ;
+    		response = service.updateResources(resources) ;
     		this.assertUpdate(response, resources, testHarness, testHarnessMetadata) ; 
     	}catch(Throwable t){ 
     		t.printStackTrace() ; 
@@ -407,9 +374,9 @@ public class ResourceServiceTest extends WebTestCaseBase{
     	Resource resource = null; 
     	
     	if(ID != null) { 
-    		resource = resourceService.getResource(ID, resourceStatusType, hierarchyDepth, responseStructure) ;
+    		resource = service.getResource(ID, resourceStatusType, hierarchyDepth, responseStructure) ;
     	}else { 
-    		resource = resourceService.getResource(naturalID, enumResourceType, resourceStatusType, hierarchyDepth, responseStructure) ;
+    		resource = service.getResource(naturalID, enumResourceType, resourceStatusType, hierarchyDepth, responseStructure) ;
     	}//EO else if natural ID 
     	return resource ; 
     }//EOM 
@@ -445,7 +412,7 @@ public class ResourceServiceTest extends WebTestCaseBase{
     }//EOM 
     
     
-	public static class ResourceServiceTestDataPopulator extends TestHelper implements TestDataPopulator{ 
+	public static class ResourceServiceTestDataPopulator extends AbstractRestTestDataPopulator<ResourceService>{ 
 		
 		static final int NO_OF_TEST_PLATFORMS = 4 ;
 		
@@ -471,17 +438,11 @@ public class ResourceServiceTest extends WebTestCaseBase{
 	    private AppdefBoss appdefBoss ;
 	    @Autowired
 	    private SessionManager sessionManager;
-		@Autowired
-		private ServletRunner servletRunner ; 
-		
-	    private ResourceService resourceServiceXML ;
-	    private ResourceService resourceServiceJSON ;
 	    
-	    private ResourceService[] arrResourcesServices ; 
+	    public ResourceServiceTestDataPopulator() { 
+	    	super(ResourceService.class, CONTEXT_URL + "/rest-api/inventory/resources") ;
+	    }//EOM 
 	    
-	    
-	    public ResourceServiceTestDataPopulator(){super();}//EOM
-	     
 		@Override
 		public final void populate() throws Exception {
 			try{  
@@ -571,7 +532,7 @@ public class ResourceServiceTest extends WebTestCaseBase{
 		    		}//EO while more servers 
 		    	}//EO while there are more platforms
 		    	
-		    	this.generateResourceServices(); 
+		    	super.populate() ; 
 		        
 	    	}catch(Throwable t) { 
 	    		t.printStackTrace() ; 
@@ -629,13 +590,6 @@ public class ResourceServiceTest extends WebTestCaseBase{
 			this.configManager.setConfigResponse(this.authzSubjectManager.getOverlordPojo(), entityID, 
 							configResponse, ProductPlugin.CONFIGURABLE_TYPES[1], false);
 		}//EOM
-		
-	    public final void generateResourceServices() { 
-			final String sURL = CONTEXT_URL + "/rest-api/inventory/resources" ; 
-	    	resourceServiceXML = generateServiceClient(ResourceService.class, ServiceBindingType.XML, sURL, this.servletRunner) ;
-	    	resourceServiceJSON = generateServiceClient(ResourceService.class, ServiceBindingType.JSON, sURL, this.servletRunner) ;
-	    	arrResourcesServices = new ResourceService[] { resourceServiceJSON, resourceServiceXML } ;
-	    }//EOM 
 		
 	}//EOC ResourceServiceTestDataPopulator 
     
