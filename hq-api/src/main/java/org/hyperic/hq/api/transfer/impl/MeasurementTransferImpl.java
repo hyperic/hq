@@ -93,11 +93,14 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
 	private static final int MAX_DTPS = 400;
 	
 	@Autowired
-    private MeasurementManager measurementManager;
+    private MeasurementManager measurementMgr;
 	@Autowired
-    private TemplateManager templateManager;
+    private TemplateManager tmpltMgr;
 	@Autowired
-	private DataManager dataManager; 
+	private DataManager dataMgr; 
+	@Autowired
+	private MeasurementMapper mapper;
+	
 	private Log log ; 
 	
     public ResourcesMeasurementsBatchResponse getMetrics(final ResourceMeasurementsRequestsCollection rscMsmReqs/*,
@@ -105,25 +108,33 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
    	// null ResourcesMeasurementsBatchResponse?
     	// check that not too many DTPs fits in the time range
     	
-    	// get actual measurement templates
-    	Map<String,List<MeasurementTemplate>> tmpMap = new HashMap<String,List<MeasurementTemplate>>();
+    	// extract all input measurement templates
+    	Map<String,List<MeasurementTemplate>> tmpltMap = new HashMap<String,List<MeasurementTemplate>>();
     	for (ResourceMeasurementsRequest rscMsmReq : rscMsmReqs.getResourceMeasurementsRequestList()) {
-    		List<String> tmpNames = rscMsmReq.getMeasurementTemplateNames();
-    		for (String tmpName : tmpNames) {
-				if (!tmpMap.keySet().contains(tmpName)) {
+    		List<String> tmpltNames = rscMsmReq.getMeasurementTemplateNames();
+    		for (String tmpltName : tmpltNames) {
+				if (!tmpltMap.keySet().contains(tmpltName)) {
 //~~~verify:
-					List<MeasurementTemplate> tmps = (List<MeasurementTemplate>) this.templateManager.findTemplates(tmpName, null, new Integer[] {}, null);
-					tmpMap.put(tmpName, tmps);
+					List<MeasurementTemplate> tmplts = (List<MeasurementTemplate>) this.tmpltMgr.findTemplates(tmpltName, null, new Integer[] {}, null);
+					tmpltMap.put(tmpltName, tmplts);
 				}
 			}
 		}
-    	
+    	ResourcesMeasurementsBatchResponse msmtRes = new ResourcesMeasurementsBatchResponse();
     	for (ResourceMeasurementsRequest rscMsmReq : rscMsmReqs.getResourceMeasurementsRequestList()) {
         	// sort templates per their default interval group
+    		List<String> rscMsmTmpltNames = rscMsmReq.getMeasurementTemplateNames();
+    		Map<String,Integer> tmpltPerDefIntervalMap = new HashMap<String,Integer>();
+    		//~~...
+    		//~ MeasurementConstants
     		
     		// get metrics
+    		
 //~~~  implement method that decides table to go using the max-dtps val
-    		Map<Integer, double[]> metricsVals = this.dataManager.getAggregateDataByMetric(templateIDs, resourceIDs, begin, end, useAggressiveRollup, MAX_DTPS);
+//~~~ resource ids -  id / instanceId?    		
+    		Map<Integer, double[]> metricValsPerMsmt = this.dataMgr.getAggregateDataByMetric(templateIDs, resourceIDs, begin, end, useAggressiveRollup, MAX_DTPS);
+    		this.mapper.merge(msmtRes,metricValsPerMsmt)
     	}
+    	return null;
     }
 } 

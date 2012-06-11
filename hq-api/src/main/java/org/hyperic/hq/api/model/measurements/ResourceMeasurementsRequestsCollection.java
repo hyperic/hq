@@ -13,7 +13,7 @@ import org.hyperic.hq.api.model.RestApiConstants;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name="resourceMeasurementsRequestsCollection", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 @XmlType(name="resourceMeasurementsRequestsCollection", namespace="http://vmware.com/hyperic/hq/5.0/api/rest/v1")
-public class ResourceMeasurementsRequestsCollection {
+public class ResourceMeasurementsRequestsCollection {   //change to measurementResources
 	public ResourceMeasurementsRequestsCollection() {
 		super();
 	}

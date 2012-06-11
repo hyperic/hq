@@ -19,7 +19,7 @@ import org.hyperic.hq.api.model.measurements.ResourcesMeasurementsBatchResponse;
 public interface MeasurementService {
 	
 	@POST
-	@Path("/getMetrics")
+	@Path("/metrics")
 	ResourcesMeasurementsBatchResponse getMetrics(@QueryParam("resourceMeasurementsRequestsCollection") final ResourceMeasurementsRequestsCollection resourceMeasurementsRequestsCollection/*,
 			@QueryParam("samplingStartTime") final Date samplingStartTime,
 			@QueryParam("samplingEndTime") final Date samplingEndTime*/);
