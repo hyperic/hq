@@ -1,36 +1,18 @@
 package org.hyperic.hq.api.resources;
 
-import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ws.rs.core.MediaType;
-
 import org.apache.cxf.jaxrs.client.Client;
-import org.apache.cxf.jaxrs.client.ClientConfiguration;
-import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.apache.cxf.jaxrs.client.WebClient;
-import org.apache.cxf.jaxrs.provider.JAXBElementProvider;
-import org.apache.cxf.service.model.EndpointInfo;
-import org.apache.cxf.transport.Conduit;
-import org.apache.cxf.transport.ConduitInitiator;
-import org.apache.cxf.transport.ConduitInitiatorManager;
-import org.apache.cxf.transport.http.HTTPConduit;
-import org.apache.cxf.transport.http.HTTPTransportFactory;
-import org.apache.cxf.ws.addressing.EndpointReferenceType;
-import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
-import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
 import org.hyperic.hq.api.model.Resource;
 import org.hyperic.hq.api.model.ResourceConfig;
 import org.hyperic.hq.api.model.ResourceDetailsType;
@@ -40,7 +22,7 @@ import org.hyperic.hq.api.model.Resources;
 import org.hyperic.hq.api.model.resources.FailedResource;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.api.resources.ResourceServiceTest.ResourceServiceTestDataPopulator;
-import org.hyperic.hq.api.rest.cxf.TestHttpConduit;
+import org.hyperic.hq.api.resources.WebTestCaseBase.ServiceBindingsIteration;
 import org.hyperic.hq.api.services.ResourceService;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
@@ -51,10 +33,8 @@ import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.auth.shared.SessionManager;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.product.MeasurementPlugin;
 import org.hyperic.hq.product.PlatformTypeInfo;
@@ -66,44 +46,27 @@ import org.hyperic.hq.product.ServiceTypeInfo;
 import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.hq.product.pluginxml.PluginData;
 import org.hyperic.hq.product.shared.ProductManager;
-import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.hyperic.hq.test.TestHelper;
 import org.hyperic.hq.tests.context.TestData;
 import org.hyperic.hq.tests.context.TestDataPopulator;
-import org.hyperic.hq.tests.context.WebContainerContextLoader;
-import org.hyperic.hq.tests.context.WebContextConfiguration;
 import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.StringConfigOption;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.meterware.servletunit.ServletRunner;
 
-@DirtiesContext
-@ContextConfiguration(locations = { "classpath:META-INF/hqapi-context.xml" }, loader=WebContainerContextLoader.class)
-@WebContextConfiguration(contextRoot=ResourceServiceTest.CONTEXT, contextUrl=ResourceServiceTest.CONTEXT_URL, webXml=ResourceServiceTest.WEB_XML)
+@ServiceBindingsIteration(ResourceServiceTest.CONTEXT_URL + "/rest-api/inventory/resources")
 @TestData(ResourceServiceTestDataPopulator.class)
-public class ResourceServiceTest extends BaseInfrastructureTest{
+public class ResourceServiceTest extends WebTestCaseBase{
 
-	protected static final String WEB_XML = "/WEB-INF/web-spring.xml" ; 
-	protected static final String CONTEXT = "/tests" ; 
-	protected static final String CONTEXT_URL = "http://localhost" + CONTEXT ;
-	
-    
     private static final int GENERATE_CONFIG_FLAG = 2<<1 ; 
     private static final int FAILED_RESOURCE_FLAG = 2<<2 ;
     private static final int USE_NATURAL_ID_FLAG = 2<<3 ; 
@@ -124,54 +87,6 @@ public class ResourceServiceTest extends BaseInfrastructureTest{
 		int noOfPlatforms() default ResourceServiceTestDataPopulator.NO_OF_TEST_PLATFORMS ; 
 	}//EO inner class PlaformsIterator 
 	
-	@Retention(RetentionPolicy.RUNTIME) 
-	@Target({ElementType.METHOD})
-	private @interface ServiceBindingsIteration { 
-		String value() ; 
-	}//EO inner class ServiceBindingProviderIterator
-
-    private abstract class IterationInterceptor<T extends Annotation> implements TestRule { 
-    	
-    	private Class<T> annotationType ; 
-    	
-    	public IterationInterceptor(final Class<T> annotationType) { 
-    		this.annotationType = annotationType ; 
-    	}//EOM 
-    	
-    	@Override
-    	public Statement apply(final Statement base, final Description description) {
-    		return new Statement() { 
-    			
-    			@Override
-    			public final void evaluate() throws Throwable {
-    				final T metadata = description.getAnnotation(annotationType) ; 
-    				if(metadata == null) base.evaluate() ; 
-    				else {
-    					try{ 
-	    					final int iIterationLength = getIterationLength(metadata) ; 
-	    					
-	    					for(int i=0; i<iIterationLength; i++) {
-	    						
-	    						doBeforeEvaluation(i, metadata) ; 
-	    						
-	    						base.evaluate() ; 
-	    						
-	    					}//EO while there are more platforms  
-    					}finally{ 
-    						
-    					}//EO catch block 
-    					
-    				}//EO if the getresource annotation exists 
-    			}//EOM 
-    		};  
-    	}//EOM 
-    	
-    	protected abstract int getIterationLength(final T metadata) ; 
-    	
-    	protected abstract void doBeforeEvaluation(final int iIterationIndex, final T metadata) ;
-    		
-    }//EO inner calss IterationInterceptor 
-    
     private final class PlatformsIterationInterceptor extends IterationInterceptor<PlatformsIteration> { 
     	
     	public PlatformsIterationInterceptor(final Class<PlatformsIteration> platformsIterationType) { 
@@ -207,11 +122,20 @@ public class ResourceServiceTest extends BaseInfrastructureTest{
     		return testBed.arrResourcesServices.length ; 
     	}//EOM 
     }//EO inner class PlatformsIterationInterceptor
+    
+    
+    //@ServiceBindingsIteration(ResourceServiceTest.CONTEXT_URL + "/rest-api/inventory/resources")
+    @PlatformsIteration(noOfPlatforms=1)
+    @Test
+    public final void testGetWADL() throws Throwable {
+    	final String WADL = this.getWADL(this.resourceService) ; 
+    	System.out.println(WADL);
+	}//EOM
+    
 
-    @ServiceBindingsIteration(ResourceServiceTest.CONTEXT_URL + "/rest-api/inventory/resources")
-    @PlatformsIteration
-   // @Test
-    @Transactional(propagation=Propagation.NESTED)
+    //@ServiceBindingsIteration(ResourceServiceTest.CONTEXT_URL + "/rest-api/inventory/resources")
+    @PlatformsIteration(noOfPlatforms=1)
+    @Test
     public final void testGetResourceWithInternalAndNaturalPlatformIDs() throws Throwable {
     	
     	final int hierarchyDepth = 3 ; 
@@ -226,24 +150,24 @@ public class ResourceServiceTest extends BaseInfrastructureTest{
 		
 	}//EOM 
     
-    @ServiceBindingsIteration(ResourceServiceTest.CONTEXT_URL + "/rest-api/inventory/resources")
+    //@ServiceBindingsIteration(ResourceServiceTest.CONTEXT_URL + "/rest-api/inventory/resources")
     @PlatformsIteration
-    //@Test
+    @Test
     public final void testGetResourceNoConfig() throws Throwable { 
     	final int hierarchyDepth = 3 ; 
     	
     	final ResourceDetailsType[] responseStructure = { ResourceDetailsType.BASIC } ; 
     	
 		//internal id first 
-    	Resource resource = this.getApprovedResource(this.currentPlatform.getId()+"", null/*naturalID*/, null/*resourc type*/, hierarchyDepth, responseStructure) ;
-		this.assertResource(resource, this.currentPlatform, hierarchyDepth, this.testBed.persistedConfigAttributes) ; 
+    	Resource resource = this.getApprovedResource(this.currentPlatform.getResource().getId()+"", null/*naturalID*/, null/*resource type*/, hierarchyDepth, responseStructure) ;
+		this.assertResource(resource, this.currentPlatform, hierarchyDepth, null) ; 
 		
 		//now natural ID 
 		resource = this.getApprovedResource(null/*internal id*/, this.currentPlatform.getFqdn()/*naturalID*/,ResourceType.PLATFORM, hierarchyDepth, responseStructure) ;
-		this.assertResource(resource, this.currentPlatform, hierarchyDepth, this.testBed.persistedConfigAttributes) ;
+		this.assertResource(resource, this.currentPlatform, hierarchyDepth, null) ;
     }//EOM 
     
-    @Test
+   // @Test
     public final void testGetResourceOnlyConfig() throws Throwable { 
     	//Note: should still contain an internal id 
     }//EOM
@@ -276,13 +200,14 @@ public class ResourceServiceTest extends BaseInfrastructureTest{
     	
     }//EOM 
     
-    @Ignore
-    //@Test
+    //@Ignore
+    //@ServiceBindingsIteration(ResourceServiceTest.CONTEXT_URL + "/rest-api/inventory/resources")
+    @Test
     public final void testUpdateResources1Resource() throws Throwable{
     	this.innerTestUpdateResources(new int[]{ (USE_NATURAL_ID_FLAG | GENERATE_CONFIG_FLAG) } ) ;
     }//EOM
-    @Ignore
-    //@Test
+    
+    @Test
     public final void testUpdateResources2ResourcesSuccess() throws Throwable{
     	this.innerTestUpdateResources(new int[]{ 
     			(USE_NATURAL_ID_FLAG | GENERATE_CONFIG_FLAG), 
@@ -290,8 +215,7 @@ public class ResourceServiceTest extends BaseInfrastructureTest{
     		} 
     	) ;
     }//EOM
-    @Ignore
-    //@Test
+    @Test
     public final void testUpdateResources2ResourcesOneFailure() throws Throwable{
     	this.innerTestUpdateResources(new int[]{ 
     			(USE_NATURAL_ID_FLAG | GENERATE_CONFIG_FLAG), 
@@ -299,8 +223,7 @@ public class ResourceServiceTest extends BaseInfrastructureTest{
     		} 
     	) ;
     }//EOM
-    @Ignore
-    //@Test
+    @Test
     public final void testUpdateResources2Resources2Failures() throws Throwable{
     	this.innerTestUpdateResources(new int[]{ 
     			(USE_NATURAL_ID_FLAG | GENERATE_CONFIG_FLAG | FAILED_RESOURCE_FLAG), 
@@ -309,7 +232,7 @@ public class ResourceServiceTest extends BaseInfrastructureTest{
     	) ;
     }//EOM
     
-    //@Test
+    @Test
     public final void testUpdateResourcesNoActualUpdateSent() throws Throwable{
     	//TODO: dont know what the expected behaviour here is 
     	this.innerTestUpdateResources(new int[]{}) ;
@@ -447,6 +370,7 @@ public class ResourceServiceTest extends BaseInfrastructureTest{
 
     	Map<String,String> responseConfigMap = null ;  
     	final ResourceConfig resourceConfig = response.getResourceConfig() ; 
+    	if(expectedConfigMap == null && resourceConfig == null) return ;
     	
     	if(resourceConfig == null || (responseConfigMap = resourceConfig.getMapProps()) == null) Assert.fail("No Configurations were returned for resource with ID " + response.getId());
     	//else 
@@ -521,7 +445,7 @@ public class ResourceServiceTest extends BaseInfrastructureTest{
     }//EOM 
     
     
-	public static final class ResourceServiceTestDataPopulator extends TestHelper implements TestDataPopulator{ 
+	public static class ResourceServiceTestDataPopulator extends TestHelper implements TestDataPopulator{ 
 		
 		static final int NO_OF_TEST_PLATFORMS = 4 ;
 		
@@ -550,8 +474,8 @@ public class ResourceServiceTest extends BaseInfrastructureTest{
 		@Autowired
 		private ServletRunner servletRunner ; 
 		
-	    private static ResourceService resourceServiceXML ;
-	    private static ResourceService resourceServiceJSON ;
+	    private ResourceService resourceServiceXML ;
+	    private ResourceService resourceServiceJSON ;
 	    
 	    private ResourceService[] arrResourcesServices ; 
 	    
@@ -656,50 +580,7 @@ public class ResourceServiceTest extends BaseInfrastructureTest{
 		}//EOM 
 
 		@Override
-		public void destroy() throws Exception {
-			/*final AuthzSubject subject = this.authzSubjectManager.getOverlordPojo() ; 
-			
-			try{ 
-				final Integer sessionID = this.sessionManager.put(subject) ;
-				if(this.platforms != null) { 
-					for(Platform platform : this.platforms) {
-						try{
-							this.appdefBoss.removeAppdefEntity(sessionID, AppdefUtil.newAppdefEntityId(platform.getResource())) ;
-						}catch(Throwable t) {
-							t.printStackTrace() ; 
-						}//EO catch block 
-					}//EO while there are more platforms
-				}//EO if there were platforms 
-				  
-			}catch(Throwable t) { 
-				t.printStackTrace() ; 
-			}//EO catch block 
-			
-			Thread.currentThread().sleep(3000) ; 
-			
-			try{ 
-				if(this.serviceType != null) this.serviceManager.deleteServiceType(this.serviceType, subject, this.resourceGroupManager, this.resourceManager) ;
-			}catch(Throwable t) {
-				t.printStackTrace() ; 
-			}//EO catch block
-			
-			try{ 
-				if(this.serverType != null) this.serverManager.deleteServerType(this.serverType, subject, this.resourceGroupManager, this.resourceManager) ;
-			}catch(Throwable t) {
-				t.printStackTrace() ; 
-			}//EO catch block
-			
-			try{
-				Field platformsCollectionField = this.platformType.getClass().getDeclaredField("_platforms") ;
-				platformsCollectionField.setAccessible(true) ; 
-				final Collection platformsCollection = (Collection) platformsCollectionField.get(this.platformType) ;
-				if(platformsCollection != null) platformsCollection.clear() ; 
-				if(this.platformType != null) this.platformManager.deletePlatformType(this.platformType) ;
-			}catch(Throwable t) {
-				t.printStackTrace() ; 
-			}//EO catch block
-*/			
-		}//EOM
+		public void destroy() throws Exception {}//EOM 
 		
 		private final void registerMeasurementConfigSchema(final String pluginName, final String platformName,
 				final TypeInfo typeinfo) throws Throwable{ 
@@ -749,55 +630,12 @@ public class ResourceServiceTest extends BaseInfrastructureTest{
 							configResponse, ProductPlugin.CONFIGURABLE_TYPES[1], false);
 		}//EOM
 		
-		@BeforeClass 
 	    public final void generateResourceServices() { 
 			final String sURL = CONTEXT_URL + "/rest-api/inventory/resources" ; 
-	    	resourceServiceXML = generateServiceClient(ResourceService.class, ServiceBindingType.XML, sURL) ;
-	    	resourceServiceJSON = generateServiceClient(ResourceService.class, ServiceBindingType.JSON, sURL) ;
+	    	resourceServiceXML = generateServiceClient(ResourceService.class, ServiceBindingType.XML, sURL, this.servletRunner) ;
+	    	resourceServiceJSON = generateServiceClient(ResourceService.class, ServiceBindingType.JSON, sURL, this.servletRunner) ;
 	    	arrResourcesServices = new ResourceService[] { resourceServiceJSON, resourceServiceXML } ;
 	    }//EOM 
-
-		private final <T> T generateServiceClient(final Class<T> interfaceType, final ServiceBindingType enumServiceBindingType, final String url) { 
-			
-			final T serviceProxy = JAXRSClientFactory.create(url, interfaceType, enumServiceBindingType.getProviders());
-	        final Client client = WebClient.client(serviceProxy) ; 
-	        client.accept(enumServiceBindingType.getContentType()) ; 
-	        client.type(enumServiceBindingType.getContentType()) ; 
-	        
-	        final ClientConfiguration configuration = WebClient.getConfig(client) ; 
-	        configuration.getConduitSelector().getEndpoint().getEndpointInfo().setTransportId("test") ; 
-	        
-	        final ConduitInitiator conduitInitiator = new HTTPTransportFactory(configuration.getBus()) {
-	        	
-	        	public Conduit getConduit(EndpointInfo endpointInfo, EndpointReferenceType target) throws IOException {
-	        		final HTTPConduit delegate = (HTTPConduit) super.getConduit(endpointInfo, target) ;
-	        		return new TestHttpConduit(this.bus, delegate, endpointInfo, target, servletRunner) ; 
-	        	}//EOM 
-	        };//EO conduitInitiator
-	        
-	        ((ConduitInitiatorManager)configuration.getBus().getExtension(ConduitInitiatorManager.class)).registerConduitInitiator("test", conduitInitiator) ;
-	        return serviceProxy ; 
-		}//EOM 
-	    
-	    public enum ServiceBindingType { 
-	    	
-	    	JSON(Arrays.asList(new Object[]{ new JacksonJsonProvider(), new JacksonJaxbJsonProvider()}), MediaType.APPLICATION_JSON_TYPE){ 
-	    	},//EO JSON 
-	    	XML(Arrays.asList(new Object[]{ new JAXBElementProvider()}), MediaType.APPLICATION_XML_TYPE){ 
-	    	};//EO XML 
-	    	
-	    	private List providers ;
-	    	private MediaType contentType ; 
-	    	
-	    	ServiceBindingType(final List providers, final MediaType contentType) { 
-	    		this.providers = providers ; 
-	    		this.contentType = contentType ; 
-	    	};//EOM 
-	    	
-	    	public final List getProviders() { return this.providers ; }//EOM 
-	    	public final MediaType getContentType() { return this.contentType ; }//EOM 
-	    	
-	    }//EO enum servicebindingType 
 		
 	}//EOC ResourceServiceTestDataPopulator 
     

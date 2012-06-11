@@ -63,6 +63,7 @@ import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.scheduling.concurrent.ExecutorConfigurationSupport;
 import org.springframework.test.context.support.AbstractContextLoader;
 import org.springframework.test.context.support.GenericXmlContextLoader;
 import org.springframework.util.StringUtils;
@@ -70,14 +71,19 @@ import org.springframework.util.StringUtils;
 public class IntegrationTestContextLoader extends AbstractContextLoader {
 	protected static final Log logger = LogFactory.getLog(IntegrationTestContextLoader.class);
 	private static Sigar sigar ; 
-	private static Field platformBeanServerField ; 
+	private static Field platformBeanServerField ;
+	protected Class<?> testClass ; 
 	
 	private final ExternalizingGenericXmlContextLoader delegateLoader ;  
 	
 	public IntegrationTestContextLoader() { 
 	    super();
 	    this.delegateLoader = new ExternalizingGenericXmlContextLoader() ;  
-	}//EOM
+	}//EOM 
+	
+	public final void setTestClass(final Class<?> testClass) { 
+		this.testClass = testClass ; 
+	}//EOM 
 	
 	public static final void configureSigar(final ApplicationContext context, final Log externalLogger) { 
 		final Log log = (externalLogger == null ? logger : externalLogger) ;
@@ -374,6 +380,15 @@ public class IntegrationTestContextLoader extends AbstractContextLoader {
             if(this.delegate == null) { 
                 return ; 
             }//EO if already closed 
+            
+            try{  
+            	Object scheduler = this.delegate.getBean("scheduler") ; 
+            	if(scheduler instanceof ExecutorConfigurationSupport) ((ExecutorConfigurationSupport) scheduler).shutdown() ;
+            }catch(org.springframework.beans.factory.NoSuchBeanDefinitionException nsbde)  { 
+            	//swallow exception
+            }catch(Throwable t) { 
+            	t.printStackTrace() ; 
+            }//EO catch block 
             
             //Clear the JMX resources 
             this.resetJMXResources() ; 
