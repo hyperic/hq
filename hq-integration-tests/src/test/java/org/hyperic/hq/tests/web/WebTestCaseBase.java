@@ -51,7 +51,7 @@ public abstract class WebTestCaseBase extends BaseInfrastructureTest{
 
 	protected static final String WEB_XML = "/WEB-INF/web-spring.xml" ; 
 	protected static final String CONTEXT = "/tests" ; 
-	protected static final String CONTEXT_URL = "http://localhost" + CONTEXT ;
+	public static final String CONTEXT_URL = "http://localhost" + CONTEXT ;
     		
     protected static abstract class IterationInterceptor<T extends Annotation> implements TestRule { 
     	
