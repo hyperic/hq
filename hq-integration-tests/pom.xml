@@ -92,6 +92,12 @@
             <version>1.6.2</version>
             <scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.cxf.systests</groupId>
+			<artifactId>cxf-systests-transports</artifactId>
+			<version>2.6.0</version>
+			<classifier>tests</classifier>
+		</dependency> 
 	</dependencies>
 	
 	<build>

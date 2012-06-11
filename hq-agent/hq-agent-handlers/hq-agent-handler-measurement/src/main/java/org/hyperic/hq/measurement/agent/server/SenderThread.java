@@ -204,6 +204,7 @@ public class SenderThread
                   derivedID;
         final MetricValue data;
         private Integer hashCode = null;
+        //This field is not serialized 
         private boolean isAvail;
 
         private Record(int dsnId, MetricValue data, int derivedID, boolean isAvail){
