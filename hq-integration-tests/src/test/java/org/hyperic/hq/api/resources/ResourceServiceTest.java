@@ -57,7 +57,9 @@ import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 
+@DirtiesContext
 @ServiceBindingsIteration(ResourceServiceTest.CONTEXT_URL + "/rest-api/inventory/resources")
 @TestData(ResourceServiceTestDataPopulator.class)
 public class ResourceServiceTest extends RestTestCaseBase<ResourceService, ResourceServiceTestDataPopulator>{
@@ -94,7 +96,6 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     	}//EOM 
     }//EO inner class PlatformsIterationInterceptor
     
-    //@ServiceBindingsIteration(ResourceServiceTest.CONTEXT_URL + "/rest-api/inventory/resources")
     @PlatformsIteration(noOfPlatforms=1)
     @Test
     public final void testGetWADL() throws Throwable {
