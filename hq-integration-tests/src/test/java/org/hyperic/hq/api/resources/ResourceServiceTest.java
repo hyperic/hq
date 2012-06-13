@@ -395,7 +395,7 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 	    			responseChild.setResourceType(enumChildrenResourceType) ; 
 	    		}//EO if properties only set the resource type 
 	    		
-	    		this.assertResource(responseChild, expectedChild, iHierarchyDepth, configMap) ; 
+	    		this.assertResource(responseChild, expectedChild, iHierarchyDepth, configMap, responseStructure) ; 
 	    	}//EO while there are more children
     	}//EO if should assert nested
     	else { 
