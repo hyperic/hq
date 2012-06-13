@@ -41,7 +41,8 @@ import org.springframework.stereotype.Service;
 
 import com.vmware.commonagent.contracts.exceptions.CafException;
 
-@Service
+//TODO: Guys 13/12/2012 - temporarily removed so as to disable until implementation is copmleted
+//@Service
 public class CafManagerImpl implements CafManager{
 
 	private static final Logger log = LoggerFactory.getLogger(CafManagerImpl.class);
