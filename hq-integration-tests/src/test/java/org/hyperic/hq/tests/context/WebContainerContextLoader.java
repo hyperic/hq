@@ -27,6 +27,7 @@
 package org.hyperic.hq.tests.context;
 
 import java.io.File;
+import java.lang.reflect.Modifier;
 
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.context.IntegrationTestContextLoader;
@@ -53,7 +54,6 @@ import com.meterware.servletunit.ServletRunner;
 
 public class WebContainerContextLoader extends IntegrationTestContextLoader{
 
-	private Class<?> testClass ;
 	private WebContextConfiguration webContextConfig ;
 	
 	public WebContainerContextLoader() {super() ;}//EOM
@@ -63,21 +63,6 @@ public class WebContainerContextLoader extends IntegrationTestContextLoader{
 	protected static final String DEFAULT_CONTEXT = "/tests" ; 
 	protected static final String DEFAULT_CONTEXT_URL = "http://localhost" + DEFAULT_CONTEXT ; 
 	
-	/**
-	 * using this method to determine webXml metadata 
-	 */
-	@Override
-	protected final String[] generateDefaultLocations(final Class<?> clazz) {
-		if(this.testClass == null) this.testClass = clazz ; 
-		return super.generateDefaultLocations(clazz);
-	}//EOM  
-	
-	@Override
-	protected final String[] modifyLocations(final Class<?> clazz, final String... locations) {
-		if(this.testClass == null) this.testClass = clazz ; 
-		return super.modifyLocations(clazz, locations);
-	}//EOM 
-	
 	@Override
 	public final ApplicationContext loadContext(final String... locations) throws Exception {
 		
@@ -86,7 +71,8 @@ public class WebContainerContextLoader extends IntegrationTestContextLoader{
                     StringUtils.arrayToCommaDelimitedString(locations) + "].");
         }//EO if logger is enabled 
 		
-		 
+		//attempt to retrieve the class level webContextConfiguration annotations
+		//if undefined use the default values defined in this class 
 		this.webContextConfig = AnnotationUtils.findAnnotation(this.testClass, WebContextConfiguration.class) ;
 		
 		String webxml = null, contextRoot = null, contextUrl = null ; 
@@ -100,11 +86,16 @@ public class WebContainerContextLoader extends IntegrationTestContextLoader{
 			contextUrl = this.webContextConfig.contextUrl() ; 
 		}//EO else no custom annotation was defined 
 		
+		//set the spring context files locations in the bootstrap to be picked up by the TestBootstapContextListener class and 
+		//injected into the mock servlet configuration as the contextConfigLocation context-param 
 		Bootstrap.setSpringConfigLocations(locations) ; 
+		//create the mock web container which shall be initialized in accordance with the webxmlFile's configuration 
+		//and which shall initalize the spring context using the Bootstrap.getSpringConfigLocations 
 		final File webxmlFile = new File(this.testClass.getResource(webxml).getFile()) ;  
 		final ServletRunner sr = new ServletRunner(webxmlFile, contextRoot);
          
 		try {
+			//lazy load the services 
             sr.newClient().getResponse(contextUrl + "/services");
         } catch (HttpNotFoundException e) {
             // ignore, we just want to boot up the servlet
@@ -112,13 +103,15 @@ public class WebContainerContextLoader extends IntegrationTestContextLoader{
         
         HttpUnitOptions.setExceptionsThrownOnErrorStatus(true); 
 		
-        //at this stage the application context would have already been set in the bootstrap 
+        //at this stage the webApplicationContext would have already been set in the bootstrap by the TestBootstapContextListener 
         final ConfigurableApplicationContext applicationContext = (ConfigurableApplicationContext) Bootstrap.getApplicationContext() ; 
         //register the service runner in the application context for injection purposes 
         applicationContext.getBeanFactory().registerSingleton("servletRunner", sr) ; 
         
+        //wrap the context with a ProxyingGenericApplicationContext instance so as to control its shutdown 
         final ProxyingGenericApplicationContext actualContext = new ProxyingGenericApplicationContext((AbstractApplicationContext) applicationContext) ; 
         
+        //if the test class defines a TestData Annotation instantiate the test data populator class it defines and invoke its populate()  
         final TestData testDataAnnotation = AnnotationUtils.findAnnotation(this.testClass, TestData.class) ;
         if(testDataAnnotation != null) { 
         	
@@ -132,42 +125,34 @@ public class WebContainerContextLoader extends IntegrationTestContextLoader{
 
         	final TestDataPopulator testDataPopulator = (TestDataPopulator) applicationContext.getBean(testDataPopulatorClass) ;
         	
+        	//the populate() invocation shall be executed in the context of a transaction so that it could be rolledback when the context 
+        	//shuts down  
         	final PlatformTransactionManager txManager = (PlatformTransactionManager)applicationContext.getBean("transactionManager") ;
-        	//set Nested  trasnaction support 
+        	//set explicit nested tx support 
         	if(txManager instanceof HibernateTransactionManager) ((HibernateTransactionManager) txManager).setNestedTransactionAllowed(true) ; 
         	
-            //retrieve the bean and invoke the populate in a tx context 
+            //retrieve the txManager bean and invoke the populate in a new top level transaction. 
+        	//the transaction would be closed during the application context's shut down. 
+        	//all test methods are expected to be marked with Trasnactional(propagation=NESTED) 
+        	//which would cause spring to create a save point in already opened top level transaation 
+        	//and rollback onto it after each test method 
         	final TransactionTemplate txTemplate = new TransactionTemplate(txManager) ;
         	txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
         	final TransactionStatus txStatus = txManager.getTransaction(txTemplate);
         	
         	try{ 
+        		//invoke the populate() which is responsible for initializing the one-off test data 
+        		//shared across all test methods 
             	testDataPopulator.populate() ;
             }catch(Throwable t) {
+            	//ensure that the rx is rolledback prior to closing the session so that the top level transaction 
+            	//would be rolled back 
             	txStatus.setRollbackOnly() ;  
             	actualContext.close() ; 
             	throw (t instanceof RuntimeException ? (RuntimeException)t : new RuntimeException(t)) ;
             }//EO catch block 
         	
-        	
-/*        	txTemplate.execute(new TransactionCallback<String>() {
-        		@Override
-        		public final String doInTransaction(final TransactionStatus status) {
-        			
-    	            try{ 
-    	            	testDataPopulator.populate() ;
-    	            	return null ;
-    	            }catch(Throwable t) { 
-    	            	actualContext.close() ; 
-    	            	throw (t instanceof RuntimeException ? (RuntimeException)t : new RuntimeException(t)) ;
-    	            }finally{
-    	            	//rollback the tx 
-    	            	//status.setRollbackOnly() ; 
-    	            }//EO catch block 
-    	            
-        		}//EOM 
-        	}) ; */
-        	
+        	//Ensure that the context is shutdown prior to JVM shutdown so that resources are cleared properly. 
         	Runtime.getRuntime().addShutdownHook(new Thread() { 
         		
         		private TestDataPopulator populator = testDataPopulator ;  
@@ -182,6 +167,8 @@ public class WebContainerContextLoader extends IntegrationTestContextLoader{
         		}//EOM 
         	}) ; 
         	
+        	//Register shutdown sequence in which the webcontainer is shutdown and any top level transaction 
+        	//is rolledback so that the actions of the test data populator are reverted. 
         	applicationContext.addApplicationListener(new ApplicationListener<ContextClosedEvent>() {
             	@Override
             	public void onApplicationEvent(ContextClosedEvent event) {

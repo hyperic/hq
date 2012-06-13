@@ -26,8 +26,11 @@
  */ 
 package org.hyperic.hq.api.rest.cxf;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -45,12 +48,16 @@ import org.apache.cxf.systest.servlet.GetMethodQueryWebRequest;
 import org.apache.cxf.transport.http.HTTPConduit;
 import org.apache.cxf.ws.addressing.EndpointReferenceType;
 
+import com.meterware.httpunit.HttpException;
 import com.meterware.httpunit.PostMethodWebRequest;
+import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.meterware.servletunit.ServletRunner;
 
 public class TestHttpConduit extends HTTPConduit { 
+	
+	private static final String CONTENT_TYPE_HEADER = "Content-Type" ; 
 	private HTTPConduit delegate ; 
 	private Method setupURLMethod  ; 
 	private ServletRunner serviceRunner ; 
@@ -65,19 +72,30 @@ public class TestHttpConduit extends HTTPConduit {
 			this.setupURLMethod = this.delegate.getClass().getDeclaredMethod("setupURL", Message.class) ; 
 			this.setupURLMethod.setAccessible(true) ; 
 		}catch(Throwable t){ 
-			throw new RuntimeException(t) ; 
+			throw (t instanceof RuntimeException ? (RuntimeException)t : new RuntimeException(t)) ; 
 		}//EO catch block 
 	}//EOM 
 	
 	@Override
 	public void prepare(Message message) throws IOException {
-		this.delegate.prepare(message) ; 
-		final HttpURLConnection connection = (HttpURLConnection) message.get(KEY_HTTP_CONNECTION) ; 
-		message.put(KEY_HTTP_CONNECTION, new TestHttpURLConnection(connection, (String)message.get("Content-Type"))) ; 
+		//this.delegate.prepare(message) ; 
+		//final HttpURLConnection connection = (HttpURLConnection) message.get(KEY_HTTP_CONNECTION) ;
+		try{ 
+			final URL url = (URL) this.setupURLMethod.invoke(this.delegate, message) ; 
+			//final String sURL = url.toString() ;
+			
+			message.put(KEY_HTTP_CONNECTION, new TestHttpURLConnection(url, (String)message.get(CONTENT_TYPE_HEADER))) ;
+			
+			message.setContent(OutputStream.class, new ByteArrayOutputStream()) ; 
+		}catch(Throwable t) { 
+			throw (t instanceof RuntimeException ? (RuntimeException)t : new RuntimeException(t)) ;
+		}//EO catch block 
+		
 	}//EOM 
 	
 	@Override
 	public void close(Message msg) throws IOException {
+		//super.close(msg) ; 
 		
 		WebResponse response = null ;
 		InputStream inputStream  = null ; 
@@ -86,20 +104,28 @@ public class TestHttpConduit extends HTTPConduit {
 		Message inMessage = new MessageImpl();
         inMessage.setExchange(exchange);
         
+        ByteArrayOutputStream messagePayload = null ; 
+        
 		try{ 
-			final URL url = (URL) this.setupURLMethod.invoke(this.delegate, msg) ; 
-			final String sURL = url.toString() ;
+			final HttpURLConnection urlConnection = (HttpURLConnection) msg.get(KEY_HTTP_CONNECTION) ; 
+			final String sURL = urlConnection.getURL().toString(); 
 			
 			final String httpRequestMethod = (String)msg.get(Message.HTTP_REQUEST_METHOD);        
 			WebRequest req = null ; 
+			
 			if(httpRequestMethod.equals("GET")) { 
 				req = new GetMethodQueryWebRequest(sURL) ;
-			}else { 
-				req = new PostMethodWebRequest(sURL) ; 
+			}else if(httpRequestMethod.equals("PUT")) { 
+				messagePayload = (ByteArrayOutputStream) msg.getContent(java.io.OutputStream.class) ;
+				messagePayload.flush() ; 
+				final ByteArrayInputStream bis = new ByteArrayInputStream(messagePayload.toByteArray()) ;   
+				req = new PutMethodWebRequest(sURL, bis, (String) msg.get(CONTENT_TYPE_HEADER)) ;
+			}else{ 
+				throw new UnsupportedOperationException(httpRequestMethod + " is unsupported!") ; 
 			}//EO if post 
 			
-			req.setHeaderField("Content-Type", (String)msg.get("Content-Type")) ;
-			req.setHeaderField("Accept", (String)msg.get("Content-Type")) ;
+			req.setHeaderField(CONTENT_TYPE_HEADER, (String)msg.get(CONTENT_TYPE_HEADER)) ;
+			req.setHeaderField("Accept", (String)msg.get(CONTENT_TYPE_HEADER)) ;
 			response = serviceRunner.newClient().getResponse(req);
 			System.out.println(response.getText());
 			//this is the response 
@@ -108,8 +134,6 @@ public class TestHttpConduit extends HTTPConduit {
 			//TODO: NYI
             //new Headers(inMessage).readFromConnection(connection);
             final String ct = response.getContentType() ;
-            
-            //final HttpURLConnection connection =  (HttpURLConnection) msg.get(KEY_HTTP_CONNECTION) ;
             
             inMessage.put(Message.RESPONSE_CODE, response.getResponseCode());
             exchange.put(Message.RESPONSE_CODE, response.getResponseCode());
@@ -131,7 +155,12 @@ public class TestHttpConduit extends HTTPConduit {
             //TODO: NYI
             //cookies.readFromConnection(connection);
 		}catch(Exception t) { 
-			exchange.put(Exception.class, t);  
+			int iResponseCode = HttpURLConnection.HTTP_INTERNAL_ERROR ;  
+			if(t instanceof HttpException) iResponseCode = ((HttpException)t).getResponseCode() ; 
+			exchange.put(Message.RESPONSE_CODE, iResponseCode);
+			exchange.put(Exception.class, t);
+		}finally{
+			if(messagePayload != null) messagePayload.close() ;
 		}//EO catch block 
 		
 		inMessage.setContent(InputStream.class, inputStream);

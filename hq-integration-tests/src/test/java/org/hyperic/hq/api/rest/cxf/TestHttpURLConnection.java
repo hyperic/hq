@@ -1,7 +1,32 @@
+/*
+ * NOTE: This copyright does *not* cover user programs that use HQ
+ * program services by normal system calls through the application
+ * program interfaces provided as part of the Hyperic Plug-in Development
+ * Kit or the Hyperic Client Development Kit - this is merely considered
+ * normal use of the program, and does *not* fall under the heading of
+ * "derived work".
+ * 
+ * Copyright (C) [2004-2012], VMWare, Inc.
+ * This file is part of HQ.
+ * 
+ * HQ is free software; you can redistribute it and/or modify
+ * it under the terms version 2 of the GNU General Public License as
+ * published by the Free Software Foundation. This program is distributed
+ * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ * USA.
+ */
 package org.hyperic.hq.api.rest.cxf;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -13,26 +38,31 @@ public class TestHttpURLConnection extends HttpURLConnection {
 	private HttpURLConnection delegate ; 
 	
 	protected TestHttpURLConnection(HttpURLConnection delegate, final String contentType) {
-		super(delegate.getURL()) ; 
-		this.contentTypes = Arrays.asList(new String[]{ contentType }) ; 
+		this(delegate.getURL(), contentType) ; 
 		this.delegate = delegate  ;
-	}//EOM 
+	}//EOM
+	
+	protected TestHttpURLConnection(final URL url, final String contentType) {
+		super(url); 
+		this.contentTypes = Arrays.asList(new String[]{ contentType }) ; 
+	}//EOM
 	
 	@Override
 	public void connect() throws IOException {
 		//DO nothing
-		this.delegate.connect() ; 
+		//this.delegate.connect() ; 
 	}//EOM 
 	
 	@Override
 	public void disconnect() {
 		//DO nothing 
-		this.delegate.disconnect() ; 
+		//this.delegate.disconnect() ; 
 	}//EOM 
 
 	@Override
 	public final Map<String, List<String>> getHeaderFields() {
-		final Map<String, List<String>> headerFields = new HashMap<String,List<String>>(this.delegate.getHeaderFields()) ;
+//		final Map<String, List<String>> headerFields = new HashMap<String,List<String>>(this.delegate.getHeaderFields()) ;
+		final Map<String, List<String>> headerFields = new HashMap<String,List<String>>() ;
 		headerFields.put("content-type",  contentTypes);
 		headerFields.put("Content-type",  contentTypes);
 		return headerFields ; 
