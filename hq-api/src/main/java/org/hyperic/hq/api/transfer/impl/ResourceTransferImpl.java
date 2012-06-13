@@ -34,7 +34,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.api.model.Resource;
 import org.hyperic.hq.api.model.ResourceConfig;
@@ -75,7 +74,6 @@ import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 //@Component
@@ -90,7 +88,7 @@ public class ResourceTransferImpl implements ResourceTransfer{
 	private AppdefBoss appdepBoss ;
 	private PlatformManager platformManager ; 
 	private ExceptionToErrorCodeMapper errorHandler ; 
-	private Log log ; 
+	private Log log ;
 	
 	@Autowired  
     public ResourceTransferImpl(final AIQueueManager aiQueueManager, final ResourceManager resourceManager, 
@@ -186,7 +184,7 @@ public class ResourceTransferImpl implements ResourceTransfer{
 			}//EOM 
 							
 		}catch(Throwable t) { 
-			t.printStackTrace() ; 
+			throw (t instanceof RuntimeException ? (RuntimeException) t : new RuntimeException(t)) ; 
 		}//EO catch block 
 		
 		return currentResource ;  
@@ -201,7 +199,9 @@ public class ResourceTransferImpl implements ResourceTransfer{
 	
 	private final AuthzSubject getAuthzSubject() {
 		//TODO: replace with actual subject once security layer is implemented 
-		return authzSubjectManager.getOverlordPojo();
+		//return authzSubjectManager.getOverlordPojo();
+		AuthzSubject subject = authzSubjectManager.findSubjectByName("hqadmin") ;
+		return (subject != null ? subject : authzSubjectManager.getOverlordPojo()) ; 
 	}//EOM 
 	
 	@Transactional(readOnly=false)

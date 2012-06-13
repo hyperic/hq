@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.cxf.jaxrs.client.ServerWebApplicationException;
 import org.hyperic.hq.api.model.Resource;
 import org.hyperic.hq.api.model.ResourceConfig;
 import org.hyperic.hq.api.model.ResourceDetailsType;
@@ -59,6 +60,7 @@ import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.auth.shared.SessionManager;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.product.MeasurementPlugin;
 import org.hyperic.hq.product.PlatformTypeInfo;
@@ -79,9 +81,9 @@ import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
-import org.junit.rules.TestRule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.ExpectedException;
 
 @DirtiesContext
 @ServiceBindingsIteration(ResourceServiceTest.CONTEXT_URL + "/rest-api/inventory/resources")
@@ -160,37 +162,103 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 		this.assertResource(resource, this.currentPlatform, hierarchyDepth, null) ;
     }//EOM 
     
-   // @Test
+    @PlatformsIteration 
+    @Test
     public final void testGetResourceOnlyConfig() throws Throwable { 
+    	final int hierarchyDepth = 3 ;
     	//Note: should still contain an internal id 
+    	final ResourceDetailsType[] responseStructure = { ResourceDetailsType.PROPERTIES } ; 
+    	
+		//internal id first 
+    	Resource resource = this.getApprovedResource(this.currentPlatform.getResource().getId()+"", null/*naturalID*/, null/*resource type*/, hierarchyDepth, responseStructure) ;
+    	
+    	//set the resource type to platform for the validation's sake
+    	resource.setResourceType(ResourceType.PLATFORM) ; 
+		this.assertResource(resource, this.currentPlatform, hierarchyDepth, this.testBed.persistedConfigAttributes, ResourceDetailsType.PROPERTIES) ; 
     }//EOM
     
+    @PlatformsIteration(noOfPlatforms=1)
+    @Test
     public final void testGetResourceNoDepth() throws Throwable { 
+    	final int hierarchyDepth = 1 ;
+    	//Note: should still contain an internal id 
+    	final ResourceDetailsType[] responseStructure = { ResourceDetailsType.BASIC } ; 
     	
+		//internal id first 
+    	Resource resource = this.getApprovedResource(this.currentPlatform.getResource().getId()+"", null/*naturalID*/, null/*resource type*/, hierarchyDepth, responseStructure) ;
+		this.assertResource(resource, this.currentPlatform, hierarchyDepth, null) ;
     }//EOM 
     
+    @PlatformsIteration(noOfPlatforms=1)
+    @Test
     public final void testGetResourceDepth1() throws Throwable { 
-    	
+    	final int hierarchyDepth = 2 ;
+		//internal id first 
+    	Resource resource = this.getApprovedResource(this.currentPlatform, hierarchyDepth) ;
+		this.assertResource(resource, this.currentPlatform, hierarchyDepth, this.testBed.persistedConfigAttributes) ;
     }//EOM 
     
-    public final void testGetResourceDepth2() throws Throwable { 
-    	
-    }//EOM
-    
+    @PlatformsIteration(noOfPlatforms=1)
+    @Test
     public final void testGetResourceDepth5() throws Throwable { 
-    	
+    	final int hierarchyDepth = 5 ;
+    	Resource resource = this.getApprovedResource(this.currentPlatform, hierarchyDepth) ;
+		this.assertResource(resource, this.currentPlatform, hierarchyDepth, this.testBed.persistedConfigAttributes) ;
     }//EOM
     
+    @PlatformsIteration(noOfPlatforms=1)
+    @Test
     public final void testGetResourceNegativeDepth() throws Throwable { 
-    	
+    	//should error be raised or should the hierarchy be treated as 0 
+    	final int hierarchyDepth = -5 ;
+    	final Resource resource = this.getApprovedResource(this.currentPlatform, hierarchyDepth) ;
+		this.assertResource(resource, this.currentPlatform, hierarchyDepth, this.testBed.persistedConfigAttributes) ;
     }//EOM
     
+    @PlatformsIteration(noOfPlatforms=1)
+    @Test
     public final void testGetResourceByInvalidNaturalID() throws Throwable { 
-    	
+    	this.errorInterceptor.expect(ServerWebApplicationException.class) ; 
+    	final int hierarchyDepth = 1 ;
+    	final ResourceDetailsType[] responseStructure = { ResourceDetailsType.BASIC } ;
+    	this.getApprovedResource(null/*internal id*/, "BOGUS_FQDN234",ResourceType.PLATFORM, hierarchyDepth, responseStructure) ;
     }//EOM
     
+    @PlatformsIteration(noOfPlatforms=1)
+    @Test(expected=ServerWebApplicationException.class)
     public final void testGetResourceByInvalidInternalID() throws Throwable { 
+    	final int hierarchyDepth = 3 ;
+    	final ResourceDetailsType[] responseStructure = { ResourceDetailsType.BASIC } ; 
     	
+    	this.getApprovedResource("BOGUS_ID234", null/*naturalID*/, null/*resource type*/, hierarchyDepth, responseStructure) ;
+    }//EOM 
+    
+    @PlatformsIteration(noOfPlatforms=1)
+    @Test
+    public final void testGetServerByInternalID() throws Throwable { 
+    	final int hierarchyDepth = 2;
+    	//Note: should still contain an internal id 
+    	final ResourceDetailsType[] responseStructure = { ResourceDetailsType.ALL } ; 
+    	
+    	final Server server  = this.currentPlatform.getServers().iterator().next() ; 
+    	
+		//internal id first 
+    	Resource resource = this.getApprovedResource(server.getResource().getId()+"", null/*naturalID*/, null/*resource type*/, hierarchyDepth, responseStructure) ;
+		this.assertResource(resource, server, hierarchyDepth, this.testBed.persistedConfigAttributes) ; 
+    }//EOM 
+    
+    @PlatformsIteration(noOfPlatforms=1)
+    @Test
+    public final void testGetServiceByInternalID() throws Throwable { 
+    	final int hierarchyDepth = 3 ;
+    	//Note: should still contain an internal id 
+    	final ResourceDetailsType[] responseStructure = { ResourceDetailsType.ALL } ; 
+
+    	final Service service = this.currentPlatform.getServers().iterator().next().getServices().iterator().next() ; 
+    	
+		//internal id first 
+    	Resource resource = this.getApprovedResource(service.getResource().getId()+"", null/*naturalID*/, null/*resource type*/, hierarchyDepth, responseStructure) ;
+		this.assertResource(resource, service, hierarchyDepth, this.testBed.persistedConfigAttributes) ; 
     }//EOM 
     
     @Test
@@ -206,6 +274,7 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     		} 
     	) ;
     }//EOM
+    
     @Test
     public final void testUpdateResources2ResourcesOneFailure() throws Throwable{
     	this.innerTestUpdateResources(new int[]{ 
@@ -271,15 +340,24 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     	}//EO catch block 
     }//EOM 
     
-  private final void assertResource(final Resource responseResource, final AppdefResource expectedResource, int iHierarchyDepth, final Map<String,String> configMap) { 
+  private final void assertResource(final Resource responseResource, final AppdefResource expectedResource, int iHierarchyDepth, final Map<String,String> configMap) {
+	  this.assertResource(responseResource, expectedResource, iHierarchyDepth, configMap, ResourceDetailsType.ALL) ; 
+  }//EOM 
+    
+  private final void assertResource(final Resource responseResource, final AppdefResource expectedResource, int iHierarchyDepth, final Map<String,String> configMap, 
+		  final ResourceDetailsType responseStructure) { 
     	
+	  try{ 
     	final int expectedResouceID = expectedResource.getResource().getId() ;
     	final String type = expectedResource.getResource().getResourceType().getLocalizedName() ; 
     	
     	Assert.assertEquals(type+ " id", expectedResouceID+"", responseResource.getId()) ;
-    	Assert.assertEquals(type +" name", expectedResource.getName(), responseResource.getName()) ; 
     	
-    	//if(responseResource.getResourceType() != ResourceType.SERVER) 
+    	//assert resource level properties 
+    	if(responseStructure != ResourceDetailsType.PROPERTIES) { 
+    		Assert.assertEquals(type +" name", expectedResource.getName(), responseResource.getName()) ;
+    	}//EO if response includes resource level properties 
+    	
    		this.assertConfig(responseResource, configMap) ; 
 
     	final List<Resource> responseChildren = responseResource.getSubResources() ; 
@@ -287,13 +365,19 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     
     	if(--iHierarchyDepth > 0) {
     		
+    		ResourceType enumChildrenResourceType = null ; 
     		switch(responseResource.getResourceType()) { 
     			case PLATFORM : { 
 	    			expectedChildren = this.testBed.servers.get(expectedResource.getId()) ; 
+	    			enumChildrenResourceType = ResourceType.SERVER ; 
 	    		}break ;
 				case SERVER: { 
-					expectedChildren = this.testBed.services.get(expectedResource.getId()) ;			
+					expectedChildren = this.testBed.services.get(expectedResource.getId()) ;
+					enumChildrenResourceType = ResourceType.SERVICE ; 
 				}break ;
+				case SERVICE: { 
+					return  ;
+				}//EO case
     		}//EO switch block 
     		
     		final int iNoOfExpectedChildren = expectedChildren.size() ;
@@ -305,10 +389,24 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 	    	for(AppdefResource expectedChild : (Collection<AppdefResource>) expectedChildren) {
 	    		responseChild = responseChildren.get(iIndex++) ; 
 	    		
+	    		//if the response structure contains properties only, set the resource type 
+	    		//in the child 
+	    		if(responseStructure == ResourceDetailsType.PROPERTIES) {
+	    			responseChild.setResourceType(enumChildrenResourceType) ; 
+	    		}//EO if properties only set the resource type 
+	    		
 	    		this.assertResource(responseChild, expectedChild, iHierarchyDepth, configMap) ; 
 	    	}//EO while there are more children
     	}//EO if should assert nested
-    	
+    	else { 
+    		Assert.assertTrue("Hierarchy Depth was " + iHierarchyDepth + " yet sub resources were found", 
+    				(responseResource.getSubResources() == null || responseResource.getSubResources().isEmpty()) 
+    				) ; 
+    	}//EO else there should be no sub resources 
+	  }catch(Throwable t) { 
+		  t.printStackTrace() ; 
+		  throw new RuntimeException(t) ;  
+	  }//eOcatch b lok 
     }//EO while there are more resources to compare  
     
     private final void assertUpdate(final ResourceBatchResponse response, final Resources expectedResources, final Object[][] testHarness, final int[] testHarnessMetadata) { 
@@ -484,6 +582,8 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 	 	        addConfigSchemaMethod = PluginData. class.getDeclaredMethod("addConfigSchema", String.class, int.class, ConfigSchema.class); 
 		        addConfigSchemaMethod.setAccessible(true) ; 
 	 	        
+		        final AuthzSubject subject = this.getAuthzSubject() ; 
+		        
 		        String agentToken = "agentToken" + System.currentTimeMillis(); 
 		        testAgent = this.createAgent("127.0.0.1", 2144, "authToken", agentToken, "5.0");
 		       
@@ -522,11 +622,11 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 
 		    	for(int i=0; i < iNoOfPlatforms; i++) {
 		    		name = "test.ubuntu.eng.vmware.com." + i ; 
-		    		platform = this.createPlatform(agentToken, platformName, name, name) ;  
+		    		platform = this.createPlatform(agentToken, platformName, name, name, subject) ;  
 		    		this.platforms.add(platform) ; 
 		    		
 		    		//add configuration 
-		    		this.createConfig(platform.getEntityId(), persistedConfigAttributes) ; 
+		    		this.createConfig(platform.getEntityId(), persistedConfigAttributes, subject) ; 
 		    		
 		    		serversPerPlatfom = new ArrayList<AppdefResource>(iNoOfServesPerPlatform) ; 
 		    		this.servers.put(platform.getId(), serversPerPlatfom) ; 
@@ -534,12 +634,12 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 		    		for(int j=0; j < iNoOfServesPerPlatform; j++) { 
 		    			iServerCounter++ ; 
 			    		
-		    			server = this.createServer(platform, serverType, serverTypeName+ "_instance_"+iServerCounter) ; 
+		    			server = this.createServer(platform, serverType, serverTypeName+ "_instance_"+iServerCounter, subject) ; 
 		    			serversPerPlatfom.add(server) ; 
 		    			
 		    			//add configuration
 		    			//TODO: cannot create config for server 
-			    		this.createConfig(server.getEntityId(), persistedConfigAttributes) ;
+			    		this.createConfig(server.getEntityId(), persistedConfigAttributes, subject) ;
 		    			
 		    			servicesPerServer = new ArrayList<AppdefResource>(iNoOfServicesPerServer) ;
 		    			this.services.put(server.getId(), servicesPerServer) ;
@@ -547,11 +647,11 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 		    			for(int k=0; k < iNoOfServicesPerServer; k++) {
 		    				iServiceCounter++ ; 
 		    				
-		    				service = this.createService(server, serviceType, serviceTypeName+"_Instance_"+iServiceCounter, serviceTypeName + "_Instance_"+iServiceCounter, "my computer");
+		    				service = this.createService(server, serviceType, serviceTypeName+"_Instance_"+iServiceCounter, serviceTypeName + "_Instance_"+iServiceCounter, "my computer", subject);
 		    				servicesPerServer.add(service) ; 
 		    				
 		    				//add configuration 
-		    	    		this.createConfig(service.getEntityId(), persistedConfigAttributes) ;
+		    	    		this.createConfig(service.getEntityId(), persistedConfigAttributes, subject) ;
 		    			}//EO while there are more services to create 
 		    		}//EO while more servers 
 		    	}//EO while there are more platforms
@@ -562,6 +662,11 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 	    		t.printStackTrace() ; 
  	    		throw (t instanceof RuntimeException ? (RuntimeException)t : new RuntimeException(t)) ;  
 	    	}//EO catch block 
+		}//EOM 
+		
+		private final AuthzSubject getAuthzSubject() { 
+			AuthzSubject subject = this.authzSubjectManager.findSubjectByName("hqadmin") ;
+			return (subject != null ? subject : authzSubjectManager.getOverlordPojo()) ; 
 		}//EOM 
 
 		@Override
@@ -608,10 +713,10 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 		    setTypeInfoMethod.invoke(productPluginManager, platformName, pluginName, typeinfo) ;
 		}//EOM 
 		
-		private final void createConfig(final AppdefEntityID entityID, final Map<String,String> configMap) throws Throwable{
+		private final void createConfig(final AppdefEntityID entityID, final Map<String,String> configMap, final AuthzSubject subject) throws Throwable{
 		
 			final ConfigResponse configResponse = new ConfigResponse(configMap) ; 
-			this.configManager.setConfigResponse(this.authzSubjectManager.getOverlordPojo(), entityID, 
+			this.configManager.setConfigResponse(subject, entityID, 
 							configResponse, ProductPlugin.CONFIGURABLE_TYPES[1], false);
 		}//EOM
 		

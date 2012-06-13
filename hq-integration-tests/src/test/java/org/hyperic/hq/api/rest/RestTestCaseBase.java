@@ -55,6 +55,7 @@ import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
 import org.hyperic.hq.api.rest.cxf.TestHttpConduit;
 import org.hyperic.hq.tests.web.WebTestCaseBase;
 import org.junit.Rule;
+import org.junit.rules.ExpectedException;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,7 +66,8 @@ import com.meterware.servletunit.ServletRunner;
 @DirtiesContext
 public class RestTestCaseBase<V, T extends AbstractRestTestDataPopulator<V>> extends WebTestCaseBase{
 
-    public RuleChain interceptorsChain = RuleChain.outerRule(new ServiceBindingsIterationInterceptor(ServiceBindingsIteration.class)) ; 
+	protected final ExpectedException errorInterceptor = ExpectedException.none(); 
+    public RuleChain interceptorsChain = RuleChain.outerRule(errorInterceptor).around(new ServiceBindingsIterationInterceptor(ServiceBindingsIteration.class)) ; 
 	
 	@Autowired
 	protected T testBed ; 
