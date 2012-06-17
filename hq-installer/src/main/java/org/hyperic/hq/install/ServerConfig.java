@@ -584,7 +584,9 @@ extends BaseConfig {
 			schema.addOption(new HiddenConfigOption("server.caf.clientId", UUID.randomUUID().toString()));
 			if(isEEInstall) {
 				schema.addOption(new HiddenConfigOption("accept.eula",YesNoConfigOption.NO));
-				schema.addOption(new StringConfigOption("server.caf.brokerAddress", Q_BROKER_ADDRESS, "localhost"));
+				//TODO: we remove this question for now until the CAF feature is completed
+				//schema.addOption(new StringConfigOption("server.caf.brokerAddress", Q_BROKER_ADDRESS, "localhost"));
+				schema.addOption(new HiddenConfigOption("server.caf.brokerAddress","localhost"));
 			}
 			else {
 				schema.addOption(new HiddenConfigOption("server.caf.brokerAddress","localhost"));

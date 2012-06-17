@@ -1171,11 +1171,6 @@
 			</snapshots>
 		</repository>
 		<repository>
- 	 	    <id>nexusRelease</id>
- 			<name>Nexus Release Repository</name>
- 	 		<url>http://cos-nexus.wp.fsi:8081/nexus/content/repositories/releases</url>
- 	 	 </repository>
-		<repository>
 			<id>cm-release</id>
 			<name>Configuration Monitor Repository</name>
 			<url>http://maven.cm.hyperic.org/release</url>
