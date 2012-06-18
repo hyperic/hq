@@ -4,12 +4,11 @@
 	<modelVersion>4.0.0</modelVersion>
 	
 	<parent>
-		<groupId>org.hyperic.hq</groupId>
-		<artifactId>hq-parent</artifactId>
-		<version>4.6.6.BUILD-SNAPSHOT</version>
+		<groupId>org.hyperic.hq.agent.handler</groupId>
+		<artifactId>modules</artifactId>
+		<version>5.0</version>
 	</parent>
-	
-	<groupId>org.hyperic.hq.agent.handler</groupId>
+		
 	<artifactId>hq-agent-handler-measurement</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ Agent Handler - Measurement</name>
@@ -32,6 +31,17 @@
 	</dependencies>
 	
 	<build>
+		<pluginManagement>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+				 		<configuration>
+          					<skipTests>true</skipTests>
+        				</configuration>
+					</plugin>
+				</plugins>
+			</pluginManagement>
 		<plugins>
 			<plugin>
 				<artifactId>maven-jar-plugin</artifactId>
@@ -53,8 +63,9 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-source-plugin</artifactId>
-			</plugin>
+			</plugin>  
 		</plugins>
+		
 	</build>
 
 </project>

@@ -6,20 +6,21 @@
 	<parent>
 		<groupId>org.hyperic.hq</groupId>
 		<artifactId>hq-parent</artifactId>
-		<version>4.6.6.BUILD-SNAPSHOT</version>
+		<version>5.0</version>
 	</parent>
 
 	<artifactId>hq-bootstrap</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ - Bootstrap</name>
 
-
 	<dependencies>
-		<dependency>
+		<!--  transitive from hq-common -->
+		<!-- <dependency>
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-util</artifactId>
 			<version>${project.version}</version>
-		</dependency>
+		</dependency> 
+		-->  
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-common</artifactId>
@@ -36,11 +37,16 @@
   			<artifactId>ant-apache-log4j</artifactId>
   			<scope>runtime</scope>
 		</dependency>
-		<dependency>
+		<dependency> 
+  			<groupId>org.easymock</groupId>
+  			<artifactId>easymockclassextension</artifactId>
+		</dependency>
+		<!-- <dependency>
 			<groupId>org.apache.tomcat</groupId>
 			<artifactId>tomcat-jdbc</artifactId>
 			<scope>runtime</scope>
 		</dependency>
+		 
 		<dependency>
 			<groupId>org.apache.tomcat</groupId>
 			<artifactId>juli</artifactId>
@@ -50,24 +56,17 @@
   			<groupId>org.easymock</groupId>
   			<artifactId>easymock</artifactId>
 		</dependency>
-		<dependency>
-  			<groupId>org.easymock</groupId>
-  			<artifactId>easymockclassextension</artifactId>
-		</dependency>
+		 
 		<dependency>
 			<groupId>org.jasypt</groupId>
 			<artifactId>jasypt</artifactId>
   			<scope>runtime</scope>
 		</dependency>
-        <dependency>
-            <groupId>com.ibm.icu</groupId>
-            <artifactId>icu4j</artifactId>
-            <scope>compile</scope>
-        </dependency>
 		<dependency>
   			<groupId>junit</groupId>
   			<artifactId>junit</artifactId>
 		</dependency>
+		-->
 	</dependencies>
 	
 	<build>

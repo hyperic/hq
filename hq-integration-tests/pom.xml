@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.hyperic.hq</groupId>
 		<artifactId>hq-parent</artifactId>
-		<version>4.6.6.BUILD-SNAPSHOT</version>
+		<version>5.0</version>
 	</parent>
 
 	<artifactId>hq-integration-tests</artifactId>
@@ -34,13 +34,19 @@
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-server</artifactId> 
 			<version>${project.version}</version>
-		</dependency>
-			<dependency>
+			<classifier>tests</classifier>
+			<scope>test</scope>
+		</dependency> 
+		<dependency>
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-server</artifactId> 
 			<version>${project.version}</version>
-			<classifier>tests</classifier>
 		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq</groupId>
+			<artifactId>hq-api</artifactId> 
+			<version>${project.version}</version>					
+		</dependency>		
 		<dependency>
 			<groupId>org.hyperic.hq.agent.handler</groupId>
 			<artifactId>hq-agent-handler-measurement</artifactId>
@@ -65,10 +71,32 @@
 			<classifier>tests</classifier>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq</groupId>
+			<artifactId>hq-api</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
 		<!--  We use a version of dbunit that we patched -->
 		<dependency>
 			<groupId>org.hyperic</groupId>
 			<artifactId>dbunit</artifactId>
+		</dependency> 
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+		</dependency>
+		<dependency>
+            <groupId>httpunit</groupId>
+            <artifactId>httpunit</artifactId>
+            <version>1.6.2</version>
+            <scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.cxf.systests</groupId>
+			<artifactId>cxf-systests-transports</artifactId>
+			<version>2.6.0</version>
+			<classifier>tests</classifier>
 		</dependency> 
 	</dependencies>
 	
@@ -115,13 +143,12 @@
 							<includeTypes>zip</includeTypes>
 							<stripVersion>true</stripVersion>
 						</configuration>
-					</execution>
+					</execution>		
 				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>${surefire.version}</version>
 				<executions>
 					<execution>
 						<phase>test</phase>
