@@ -3,61 +3,46 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<parent>
-        <groupId>org.hyperic.hq.plugin</groupId>
-        <artifactId>modules</artifactId>
-       <version>5.0</version>
-    </parent>
-
+	<groupId>org.hyperic.hq.plugin</groupId>
 	<artifactId>apache-plugin</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - Apache Plugin</name>
+	<version>4.6.6.BUILD-SNAPSHOT</version>
 
 	<properties>
-		<!-- <junit.version>4.8.1</junit.version> -->
+		<junit.version>4.6</junit.version>
 		<mockito.version>1.8.5</mockito.version>
 	</properties>
 
 	<dependencies>
-		    <!-- inhetited from modules parent 		
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-pdk</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-         -->
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>netservices-plugin</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-	    <!-- inhetited from modules parent 
+		<!-- During a clover build, we end up using an instrumented hq-pdk jar.  
+		Since we are skipping instrumentation, we end up with a ClassNotFoundException for clover on exec-->
 		<dependency>
            	<groupId>com.cenqua.clover</groupId>
             <artifactId>clover</artifactId>
             <version>2.6.3</version>
 			<scope>test</scope>
        </dependency>
-		-->
 		<dependency>
     			<groupId>org.mockito</groupId>
     			<artifactId>mockito-all</artifactId>
     			<version>${mockito.version}</version>
 		</dependency>
-	<!--            <dependency>
+                <dependency>
                         <groupId>junit</groupId>
                         <artifactId>junit</artifactId>
                         <version>${junit.version}</version>
                 </dependency>
-	-->
-		<dependency>
-			<groupId>org.hyperic</groupId>
-			<artifactId>sigar</artifactId>
-			<version>${sigar.version}</version>
-			<type>zip</type>
-			<classifier>libs</classifier>
-			<scope>provided</scope>
-		</dependency>
 	</dependencies>
 
 	<build>
@@ -103,9 +88,25 @@
 					</archive>
 				</configuration>
 			</plugin>
-			<plugin> 
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>validate-plugin-xml</id>
+						<goals>
+							<goal>java</goal>
+						</goals>
+						<phase>process-resources</phase>
+					</execution>
+				</executions>
+				<configuration>
+					<mainClass>org.hyperic.hq.product.validation.PluginXmlValidator</mainClass>
+					<arguments>
+						<argument>${basedir}</argument>
+					</arguments>
+					<classpathScope>test</classpathScope>
+				</configuration>
 			</plugin>
 			<plugin>
 				<artifactId>maven-resources-plugin</artifactId>
@@ -144,27 +145,6 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>unpack-sigar</id>
-						<goals>
-							<goal>unpack-dependencies</goal>
-						</goals>
-						<phase>generate-test-resources</phase>
-						<configuration>
-							<outputDirectory>${project.build.directory}/generated-test-resources</outputDirectory>
-							<includeGroupIds>org.hyperic</includeGroupIds>
-							<includeArtifactIds>sigar</includeArtifactIds>
-							<excludeTransitive>true</excludeTransitive>
-							<includeTypes>zip</includeTypes>
-							<stripVersion>true</stripVersion>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
 				<groupId>com.atlassian.maven.plugins</groupId>
 				<artifactId>maven-clover2-plugin</artifactId>
 				<version>2.6.3</version>
@@ -172,16 +152,9 @@
 					<skip>true</skip>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<argLine>-Djava.library.path=${project.build.directory}/generated-test-resources</argLine>
-				</configuration>
-			</plugin>
 		</plugins>
 	</build>
-<!-- 	<repositories>
+	<repositories>
 		<repository>
 			<id>hyperic-snapshot</id>
 			<name>Hyperic Snapshot Repository</name>
@@ -225,5 +198,5 @@
 		<developerConnection>scm:git:git://git.springsource.org/hq/hq.git</developerConnection>
 		<url>https://fisheye.springsource.org/browse/hq</url>
 	</scm>
- -->
+
 </project>

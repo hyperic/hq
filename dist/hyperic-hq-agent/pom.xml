@@ -1,21 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Previously noJRE.xml -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
 		<groupId>org.hyperic.hq</groupId>
 		<artifactId>hq-parent</artifactId>
-		<version>5.0</version>
-		<relativePath>../../pom.xml</relativePath>
+		<version>4.6.6.BUILD-SNAPSHOT</version>
 	</parent>
 
 	<groupId>org.hyperic.hq.dist</groupId>
 	<artifactId>hyperic-hq-agent</artifactId>
 	<packaging>pom</packaging>
-	<name>Hyperic HQ Distribution - Hyperic HQ Agent Modules</name>
+	<name>Hyperic HQ Distribution - Hyperic HQ Agent</name>
 
 	<dependencies>
 		<dependency>
@@ -24,26 +21,24 @@
 			<version>${project.version}</version>
 			<type>tar.gz</type>
 		</dependency>
+		<!--  <dependency>
+			<groupId>org.hyperic.hq.dist</groupId>
+			<artifactId>support</artifactId>
+			<version>${project.version}</version>
+			<type>tar.gz</type>
+		</dependency>	
+		-->
 	</dependencies>
 
-	<build>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<artifactId>maven-deploy-plugin</artifactId>
-					<configuration>
-						<skip combine.self="override">true</skip>
-					</configuration>
-				</plugin>
-			</plugins>
-   		</pluginManagement>
+
+	<!--  <build>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>unpack-agent</id>
+						<id>unpack-support</id>
 						<goals>
 							<goal>unpack-dependencies</goal>
 						</goals>
@@ -51,67 +46,256 @@
 						<configuration>
 							<outputDirectory>${project.build.directory}/generated-resources</outputDirectory>
 							<includeGroupIds>org.hyperic.hq.dist</includeGroupIds>
-							<includeArtifactIds>agent</includeArtifactIds>
+							<includeArtifactIds>support</includeArtifactIds>
 							<excludeTransitive>true</excludeTransitive>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>	
 		</plugins>
-	</build>
-
-	<profiles> 
-	  
-	   <profile> 
-		<id>All-Installers</id> 
-		<activation>
-		<property><name>all-installers</name></property>
-		</activation>
-		<modules> 
-		      <!-- will use the no-JRE instead <module>modules/apple-osx</module>-->
-		      <module>modules/hyperic-hq-agent-parent</module>
-		      <module>modules/noJRE</module>
-		      <module>modules/hpux-11</module>
-		      <module>modules/ppc-aix</module>
-		      <module>modules/sparc-solaris</module>
-		      <module>modules/win32</module> 
-		      <module>modules/x86-linux</module> 
-		      <module>modules/x86-64-linux</module>   
-		</modules> 
-	    </profile> 
-		<profile> 
-			<id>CI-Build</id> 
-			<activation>
-        		<property><name>CI-build</name></property>
-   			</activation>
-			<modules> 
-			    <module>modules/hyperic-hq-agent-parent</module>
-			    <module>modules/noJRE</module>
-			</modules> 
-		</profile>  
-		<profile> 
-			<id>Daily-Build</id> 
-			<activation>
-        		<property><name>daily-build</name></property>
-   			</activation>
-			<modules> 
-			    <module>modules/hyperic-hq-agent-parent</module>
-			    <module>modules/noJRE</module>
-			</modules> 
-		</profile>  
-		<profile> 
-		    <id>no-JRE</id> 
-		    <activation>
-       			<activeByDefault>true</activeByDefault>
-		    </activation>
-		    <modules> 
-			<module>modules/hyperic-hq-agent-parent</module>
-			<module>modules/noJRE</module>
-		    </modules> 
-		</profile> 
-
-	</profiles> 	
+	</build> -->
 	
+	<profiles>
+		<profile>
+    			<id>default</id>
+				<activation>
+       				<activeByDefault>true</activeByDefault>
+   				</activation>
+    			<build>
+					<plugins>
+						<plugin>
+							<artifactId>maven-assembly-plugin</artifactId>
+							<configuration>
+								<descriptors>
+					    			<descriptor>src/main/assembly/noJRE.xml</descriptor>
+									<descriptor>src/main/assembly/apple-osx.xml</descriptor>
+									<descriptor>src/main/assembly/hpux-11.xml</descriptor>
+									<descriptor>src/main/assembly/ppc-aix.xml</descriptor>
+									<descriptor>src/main/assembly/sparc-solaris.xml</descriptor>
+									<descriptor>src/main/assembly/win32.xml</descriptor>
+									<descriptor>src/main/assembly/x86-linux.xml</descriptor>
+									<descriptor>src/main/assembly/x86-64-linux.xml</descriptor>
+								</descriptors>
+							</configuration>
+						</plugin>
+					</plugins>
+				</build>
+				<dependencies>
+						<dependency>
+							<groupId>org.hyperic.jre</groupId>
+							<artifactId>amd64-linux</artifactId>
+							<version>1.6_30</version>
+							<type>tar.gz</type>
+						</dependency>
+						<dependency>
+							<groupId>org.hyperic.jre</groupId>
+							<artifactId>x86-linux</artifactId>
+							<version>1.6_30</version>
+							<type>tar.gz</type>
+						</dependency>
+						<dependency>
+							<groupId>org.hyperic.jre</groupId>
+							<artifactId>sparc-sun-solaris</artifactId>
+							<version>1.6_30</version>
+							<type>tar.gz</type>
+						</dependency> 
+						<dependency>
+							<groupId>org.hyperic.jre</groupId>
+							<artifactId>hpux-11-risc</artifactId>
+							<version>1.6_012</version>
+							<type>tar.gz</type>
+						</dependency>
+						<dependency>
+							<groupId>org.hyperic.jre</groupId>
+							<artifactId>x86-win32</artifactId>
+							<version>1.6_30</version>
+							<type>zip</type>
+						</dependency>
+						<dependency>
+							<groupId>org.hyperic.jre</groupId>
+							<artifactId>ppc-aix32</artifactId>
+							<version>1.6_29</version>
+							<type>tar.gz</type>
+						</dependency>
+					</dependencies>
+  		</profile>
+		<profile>
+    			<id>noJRE</id>
+    			<build>
+					<plugins>
+						<plugin>
+							<artifactId>maven-assembly-plugin</artifactId>
+							<configuration>
+								<descriptors>
+									<descriptor>src/main/assembly/noJRE.xml</descriptor>
+								</descriptors>
+							</configuration>
+						</plugin>
+					</plugins>
+				</build>
+  		</profile>
+		 <profile>
+    			<id>apple-osx</id>
+    			<build>
+					<plugins>
+						<plugin>
+							<artifactId>maven-assembly-plugin</artifactId>
+							<configuration>
+								<descriptors>
+									<descriptor>src/main/assembly/apple-osx.xml</descriptor>
+								</descriptors>
+							</configuration>
+						</plugin>
+					</plugins>
+				</build>
+  		</profile>
+		<profile>
+    			<id>hpux-11</id>
+    			<build>
+					<plugins>
+						<plugin>
+							<artifactId>maven-assembly-plugin</artifactId>
+							<configuration>
+								<descriptors>
+									<descriptor>src/main/assembly/hpux-11.xml</descriptor>
+								</descriptors>
+							</configuration>
+						</plugin>
+					</plugins>
+				</build>
+				<dependencies>
+						<dependency>
+							<groupId>org.hyperic.jre</groupId>
+							<artifactId>hpux-11-risc</artifactId>
+							<version>1.6_012</version>
+							<type>tar.gz</type>
+						</dependency>
+				</dependencies>
+  		</profile>
+		<profile>
+    			<id>ppc-aix</id>
+    			<build>
+					<plugins>
+						<plugin>
+							<artifactId>maven-assembly-plugin</artifactId>
+							<configuration>
+								<descriptors>
+									<descriptor>src/main/assembly/ppc-aix.xml</descriptor>
+								</descriptors>
+							</configuration>
+						</plugin>
+					</plugins>
+				</build>
+				<dependencies>
+					<dependency>
+						<groupId>org.hyperic.jre</groupId>
+						<artifactId>ppc-aix32</artifactId>
+						<version>1.6_29</version>
+						<type>tar.gz</type>
+					</dependency>
+				</dependencies>
+  		</profile>
+		<profile>
+    			<id>sparc-solaris</id>
+    			<build>
+					<plugins>
+						<plugin>
+							<artifactId>maven-assembly-plugin</artifactId>
+							<configuration>
+								<descriptors>
+									<descriptor>src/main/assembly/sparc-solaris.xml</descriptor>
+								</descriptors>
+							</configuration>
+						</plugin>
+					</plugins>
+				</build>
+				<dependencies>
+					<dependency>
+						<groupId>org.hyperic.jre</groupId>
+						<artifactId>sparc-sun-solaris</artifactId>
+						<version>1.6_30</version>
+						<type>tar.gz</type>
+					</dependency>
+				</dependencies>
+  		</profile>
+		<profile>
+    			<id>win32</id>
+    			<build>
+					<plugins>
+						<plugin>
+							<artifactId>maven-assembly-plugin</artifactId>
+							<configuration>
+								<descriptors>
+									<descriptor>src/main/assembly/win32.xml</descriptor>
+								</descriptors>
+							</configuration>
+						</plugin>
+					</plugins>
+				</build>
+				<dependencies>
+						<dependency>
+							<groupId>org.hyperic.jre</groupId>
+							<artifactId>x86-win32</artifactId>
+							<version>1.6_30</version>
+							<type>zip</type>
+						</dependency>
+				</dependencies>
+  		</profile>
+		<profile>
+    			<id>x86-linux</id>
+    			<build>
+					<plugins>
+						<plugin>
+							<artifactId>maven-assembly-plugin</artifactId>
+							<configuration>
+								<descriptors>
+									<descriptor>src/main/assembly/x86-linux.xml</descriptor>
+								</descriptors>
+							</configuration>
+						</plugin>
+					</plugins>
+				</build>
+				<dependencies>
+						<dependency>
+							<groupId>org.hyperic.jre</groupId>
+							<artifactId>x86-linux</artifactId>
+							<version>1.6_30</version>
+							<type>tar.gz</type>
+						</dependency>
+				</dependencies>
+  		</profile>
+		<profile>
+    			<id>x86-64-linux</id>
+    			<build>
+					<plugins>
+						<plugin>
+							<artifactId>maven-assembly-plugin</artifactId>
+							<configuration>
+								<descriptors>
+									<descriptor>src/main/assembly/x86-64-linux.xml</descriptor>
+								</descriptors>
+							</configuration>
+						</plugin>
+					</plugins>
+				</build>
+				<dependencies>
+						<dependency>
+							<groupId>org.hyperic.jre</groupId>
+							<artifactId>amd64-linux</artifactId>
+							<version>1.6_30</version>
+							<type>tar.gz</type>
+						</dependency>
+				</dependencies>
+  		</profile>
+	</profiles>
+
+	
+	<repositories>
+		<repository>
+			<id>hyperic-jres</id>
+			<name>Hyperic JREs Repository</name>
+			<url>http://maven.hyperic.org/jres</url>
+		</repository>
+	</repositories>
+
 </project>
-
-

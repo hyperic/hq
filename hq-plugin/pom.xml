@@ -6,13 +6,14 @@
 	 <parent>
         <groupId>org.hyperic.hq</groupId>
         <artifactId>hq-parent</artifactId>
-       <version>5.0</version>
+       <version>4.6.6.BUILD-SNAPSHOT</version>
     </parent>
+
 	<groupId>org.hyperic.hq.plugin</groupId>
 	<artifactId>modules</artifactId>
 	<packaging>pom</packaging>
 	<name>Hyperic HQ Plugin - Modules</name>
-	<version>5.0</version>
+	<version>4.6.6.BUILD-SNAPSHOT</version>
 
 	<modules>
 		<module>examples</module>
@@ -76,49 +77,7 @@
 		<module>zimbra-plugin</module>
 	</modules>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.hyperic.hq</groupId>
-			<artifactId>hq-pdk</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<!-- During a clover build, we end up using an instrumented hq-pdk jar.  
-		Since we are skipping instrumentation, we end up with a ClassNotFoundException for clover on exec-->
-		<dependency>
-           	<groupId>com.cenqua.clover</groupId>
-            <artifactId>clover</artifactId>
-            <version>2.6.3</version>
-			<scope>test</scope>
-       </dependency>
-	</dependencies> 
-
 	<build>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-			        <artifactId>maven-antrun-plugin</artifactId>
-					<version>${maven-antrun-plugin.version}</version>
-					<executions> 
-						<execution>  
-							<id>validate-plugin-xml</id>
-							<phase>process-resources</phase>
-							<configuration>   
-								<target> 
-									<java classname="org.hyperic.hq.product.validation.PluginXmlValidator" fork="false" failonerror="true">
-										<arg value="${basedir}" />
-										<classpath refid="maven.test.classpath" />
-									</java>
-								</target>
-							</configuration>
-							<goals>
-								<goal>run</goal>
-							</goals>					
-						</execution>
-					</executions>
-				</plugin>
-			</plugins>
-		</pluginManagement>
 		<plugins>
 			<plugin>
 				<artifactId>maven-deploy-plugin</artifactId>

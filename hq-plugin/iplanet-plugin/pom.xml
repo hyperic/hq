@@ -3,22 +3,20 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<parent>
-        <groupId>org.hyperic.hq.plugin</groupId>
-        <artifactId>modules</artifactId>
-       <version>5.0</version>
-    </parent>
-<artifactId>iplanet-plugin</artifactId>
+	<groupId>org.hyperic.hq.plugin</groupId>
+	<artifactId>iplanet-plugin</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - iPlanet Plugin</name>
+	<version>4.6.6.BUILD-SNAPSHOT</version>
 
-	<!-- inhetited from modules parent 
 	<dependencies>
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-pdk</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<!-- During a clover build, we end up using an instrumented hq-pdk jar.  
+		Since we are skipping instrumentation, we end up with a ClassNotFoundException for clover on exec-->
 		<dependency>
            	<groupId>com.cenqua.clover</groupId>
             <artifactId>clover</artifactId>
@@ -26,7 +24,7 @@
 			<scope>test</scope>
        </dependency>
 	</dependencies>
-	--> 
+
 	<build>
 		<plugins>
 			<plugin>
@@ -70,7 +68,7 @@
 					</archive>
 				</configuration>
 			</plugin>
-			<!-- <plugin>
+			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
 				<version>1.1</version>
@@ -90,10 +88,6 @@
 					</arguments>
 					<classpathScope>test</classpathScope>
 				</configuration>
-			</plugin> -->
-			<plugin> 
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
 			</plugin>
 			<plugin>
 				<artifactId>maven-resources-plugin</artifactId>

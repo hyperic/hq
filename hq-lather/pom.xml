@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.hyperic.hq</groupId>
 		<artifactId>hq-parent</artifactId>
-		<version>5.0</version>
+		<version>4.6.6.BUILD-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>hq-lather</artifactId>
@@ -38,7 +38,6 @@
 					<descriptors>
 						<descriptor>src/main/assembly/agent.xml</descriptor>
 					</descriptors>
-					<appendAssemblyId>true</appendAssemblyId>
 				</configuration>
 			</plugin>
 			<plugin>

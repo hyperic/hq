@@ -6,8 +6,7 @@
 	<parent>
 		<groupId>org.hyperic.hq</groupId>
 		<artifactId>hq-parent</artifactId>
-		<version>5.0</version>
-		<relativePath>../../pom.xml</relativePath>
+		<version>4.6.6.BUILD-SNAPSHOT</version>
 	</parent>
 	
 	<groupId>org.hyperic.hq.agent</groupId>
@@ -16,6 +15,16 @@
 	<name>Hyperic HQ Agent - Core</name>
 
 	<dependencies>
+        <dependency>
+            <groupId>org.jasypt</groupId>
+            <artifactId>jasypt</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.ibm.icu</groupId>
+            <artifactId>icu4j</artifactId>
+            <scope>compile</scope>
+        </dependency>
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-lather</artifactId>
@@ -62,7 +71,6 @@
 					<descriptors>
 						<descriptor>src/main/assembly/agent.xml</descriptor>
 					</descriptors>
-					<appendAssemblyId>true</appendAssemblyId>
 				</configuration>
 			</plugin>
 			<plugin>

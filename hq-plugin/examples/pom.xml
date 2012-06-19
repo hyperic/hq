@@ -3,15 +3,11 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<parent>
-        <groupId>org.hyperic.hq.plugin</groupId>
-        <artifactId>modules</artifactId>
-       <version>5.0</version>
-    </parent>
-
+	<groupId>org.hyperic.hq.plugin</groupId>
 	<artifactId>examples</artifactId>
 	<packaging>pom</packaging>
 	<name>Hyperic HQ Plugin - Examples</name>
+	<version>4.6.6.BUILD-SNAPSHOT</version>
 
 	<build>
 		<plugins>
@@ -65,7 +61,6 @@
 						<descriptors>
 							<descriptor>src/main/assembly/assembly.xml</descriptor>
 						</descriptors>
-						<appendAssemblyId>false</appendAssemblyId>
 					</configuration>
 				</plugin>
 				<plugin>

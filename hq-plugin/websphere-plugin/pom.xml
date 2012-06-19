@@ -3,39 +3,23 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<parent>
-        <groupId>org.hyperic.hq.plugin</groupId>
-        <artifactId>modules</artifactId>
-       <version>5.0</version>
-    </parent>
+	<groupId>org.hyperic.hq.plugin</groupId>
 	<artifactId>websphere-plugin</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - WebSphere Plugin</name>
+	<version>4.6.6.BUILD-SNAPSHOT</version>
 
 	<properties>
-		<!-- <junit.version>4.6</junit.version> -->
-		<sigar.version>1.6.4</sigar.version>
+		<junit.version>4.6</junit.version>
+		<sigar.version>1.6.6</sigar.version>
 	</properties>
 
 	<dependencies>
-		<!-- inherited from modules parent 
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-pdk</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>${junit.version}</version>
-		</dependency>
-		<dependency>
-           	<groupId>com.cenqua.clover</groupId>
-            <artifactId>clover</artifactId>
-            <version>2.6.3</version>
-			<scope>test</scope>
-       </dependency>
-		-->
 		<dependency>
 			<groupId>org.hyperic</groupId>
 			<artifactId>websphere-jmx</artifactId>
@@ -47,6 +31,11 @@
 			<version>1.0.0</version>
 		</dependency>
 		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>org.hyperic</groupId>
 			<artifactId>sigar</artifactId>
 			<version>${sigar.version}</version>
@@ -54,6 +43,14 @@
 			<classifier>libs</classifier>
 			<scope>provided</scope>
 		</dependency>
+		<!-- During a clover build, we end up using an instrumented hq-pdk jar.  
+		Since we are skipping instrumentation, we end up with a ClassNotFoundException for clover on exec-->
+		<dependency>
+           	<groupId>com.cenqua.clover</groupId>
+            <artifactId>clover</artifactId>
+            <version>2.6.3</version>
+			<scope>test</scope>
+       </dependency>
 	</dependencies>
 
 	<build>
@@ -105,9 +102,25 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin> 
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>validate-plugin-xml</id>
+						<goals>
+							<goal>java</goal>
+						</goals>
+						<phase>process-resources</phase>
+					</execution>
+				</executions>
+				<configuration>
+					<mainClass>org.hyperic.hq.product.validation.PluginXmlValidator</mainClass>
+					<arguments>
+						<argument>${basedir}</argument>
+					</arguments>
+					<classpathScope>test</classpathScope>
+				</configuration>
 			</plugin>
 			<plugin>
 				<artifactId>maven-jar-plugin</artifactId>

@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.hyperic.hq</groupId>
 		<artifactId>hq-parent</artifactId>
-		<version>5.0</version>
+		<version>4.6.6.BUILD-SNAPSHOT</version>
 	</parent>
 	
 
@@ -35,19 +35,19 @@
   			<groupId>commons-fileupload</groupId>
   			<artifactId>commons-fileupload</artifactId>
 		</dependency>
-	<!-- 	<dependency>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-		</dependency>  
-	 	<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-		</dependency> 
+		</dependency>
 		<dependency>
 			<groupId>org.easymock</groupId>
 			<artifactId>easymock</artifactId>
@@ -55,25 +55,14 @@
 		<dependency>
 			<groupId>org.easymock</groupId>
 			<artifactId>easymockclassextension</artifactId>
-		</dependency>-->
+		</dependency>
 	</dependencies>
 	
 	<build>
-
 		<plugins>
 			<plugin>
-				<groupId>org.codehaus.gmaven</groupId>
+				<groupId>org.codehaus.groovy.maven</groupId>
 				<artifactId>gmaven-plugin</artifactId>
-<!-- <executions>
-                <execution>
-                    <goals>
-                        <goal>generateStubs</goal>
-                        <goal>compile</goal>
-                        <goal>generateTestStubs</goal>
-                        <goal>testCompile</goal>
-                    </goals>
-                </execution>
-            </executions> -->
 			</plugin>
 			<plugin>
 				<groupId>com.atlassian.maven.plugins</groupId>
@@ -83,15 +72,14 @@
 					<skip>false</skip>
 				</configuration>
 			</plugin>
-			<!-- <plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-eclipse-plugin</artifactId>
 				<configuration>
 					<skip>true</skip>
 				</configuration>
 			</plugin>
-			-->
-			<plugin> 
+			<plugin>
 				<artifactId>maven-source-plugin</artifactId>
 			</plugin>
 		</plugins>

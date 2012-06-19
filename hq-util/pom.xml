@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.hyperic.hq</groupId>
 		<artifactId>hq-parent</artifactId>
-		<version>5.0</version>
+		<version>4.6.6.BUILD-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>hq-util</artifactId>
@@ -14,6 +14,16 @@
 	<name>Hyperic HQ - Util</name>
 
 	<dependencies>
+        <dependency>
+            <groupId>org.jasypt</groupId>
+            <artifactId>jasypt</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.ibm.icu</groupId>
+            <artifactId>icu4j</artifactId>
+            <scope>compile</scope>
+        </dependency>
 		<dependency>
 			<groupId>org.apache.ant</groupId>
 			<artifactId>ant</artifactId>
@@ -93,7 +103,6 @@
 					<descriptors>
 						<descriptor>src/main/assembly/agent.xml</descriptor>
 					</descriptors>
-					<appendAssemblyId>true</appendAssemblyId> 
 				</configuration>
 			</plugin>
 			<plugin>
