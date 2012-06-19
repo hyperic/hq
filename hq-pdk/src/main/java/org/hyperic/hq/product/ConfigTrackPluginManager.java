@@ -32,6 +32,7 @@ import org.hyperic.cm.filemonitor.FileMonitor;
 import org.hyperic.cm.filemonitor.IFileMonitor;
 import org.hyperic.cm.filemonitor.MonitorStatus;
 import org.hyperic.hq.agent.AgentConfig;
+import org.hyperic.hq.context.Bootstrap;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -53,19 +54,20 @@ public class ConfigTrackPluginManager extends TrackEventPluginManager {
      }
 
     private void initMonitor() {
-        // determine the data dir for tracking local data
+
+    	// don't initialize file monitor if running on server
+    	if (Bootstrap.isServer()) {
+    		log.info("Running on Server - FileMonitor not initiated");
+			return;
+    	}
+    	
+    	// determine the data dir for tracking local data
         final String dataDir = getProperty(AgentConfig.PROP_DATADIR[0],
             AgentConfig.PROP_DATADIR[1]);
         final File f = new File(dataDir);
-
-        if (!f.exists()){
-    		log.info("Running on Server, FileMonitor not initiated");
-    		return;
-    	}
-
-    		
+		
     	if (fileMonitor == null){ 
-        	log.info("Running on Agent, initiating FileMonitor");
+        	log.info("Running on Agent - initiating FileMonitor");
     		fileMonitor = FileMonitor.getInstance();
     	}
     	

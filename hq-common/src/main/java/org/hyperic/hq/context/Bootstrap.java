@@ -77,6 +77,12 @@ public class Bootstrap {
         return Bootstrap.appContext != null;
     }
     
+    public static boolean isServer() {
+    	// this is a convenient method that should be used with care as it relies
+    	// on the fact that currently the agent is not deployed with spring framework
+    	return hasAppContext();
+    }
+
     /**
      * Sets the {@link ApplicationContext} subsequent to disposing of an existing 
      * context.
