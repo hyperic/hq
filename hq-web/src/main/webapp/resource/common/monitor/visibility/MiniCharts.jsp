@@ -123,7 +123,7 @@ while ( i.hasNext() ) {
           <td class="MiniChartHeader" align="left">
             <html:link action="/Resource">
             	<html:param name="eid" value="${eid}"/>
-            	${resource.name}
+                <c:out value="${resource.name}" escapeXml="true"/>
             </html:link>
             <fmt:message key="parenthesis">
               <fmt:param value="${resource.appdefResourceTypeValue.name}"/>

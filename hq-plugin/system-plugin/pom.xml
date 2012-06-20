@@ -9,7 +9,6 @@
         <artifactId>modules</artifactId>
        <version>5.0</version>
     </parent>
-
 	<artifactId>system-plugin</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - System Plugin</name>

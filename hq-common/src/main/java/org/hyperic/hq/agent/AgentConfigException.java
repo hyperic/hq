@@ -33,4 +33,8 @@ public class AgentConfigException extends AgentException {
     public AgentConfigException(String msg){
         super(msg);
     }
+
+    public AgentConfigException(Throwable cause) {
+        super(cause);    //To change body of overridden methods use File | Settings | File Templates.
+    }
 }

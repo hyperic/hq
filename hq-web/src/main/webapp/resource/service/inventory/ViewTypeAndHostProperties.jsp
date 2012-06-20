@@ -47,7 +47,7 @@
             		<html:param name="mode" value="view"/>
             		<html:param name="type" value="${Resource.server.entityId.type}"/>
             		<html:param name="rid" value="${Resource.server.id}"/>
-            		${Resource.server.name}
+                    <c:out value="${Resource.server.name}" escapeXml="true"/>
             	</html:link></td>
             </c:when>
             <c:otherwise>
@@ -57,7 +57,7 @@
             		<html:param name="mode" value="view"/>
             		<html:param name="type" value="${ParentResource.entityId.type}"/>
             		<html:param name="rid" value="${ParentResource.id}"/>
-            		${ParentResource.name}
+                    <c:out value="${ParentResource.name}" escapeXml="true"/>
             	</html:link>
             </td>
             </c:otherwise>

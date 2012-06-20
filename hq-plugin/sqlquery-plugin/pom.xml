@@ -8,7 +8,6 @@
         <artifactId>modules</artifactId>
        <version>5.0</version>
     </parent>
-
 	<artifactId>sqlquery-plugin</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - SQL Query Plugin</name>
