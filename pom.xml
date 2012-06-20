@@ -16,6 +16,7 @@
 		<ant-contrib.version>1.0b2</ant-contrib.version>
 		<apache-taglibs.version>1.1.2</apache-taglibs.version>
 		<backport-util-concurrent.version>3.1</backport-util-concurrent.version>
+		<commons-lang.version>2.5</commons-lang.version>
 		<clover2.version>2.6.3</clover2.version>
 		<commons-fileupload.version>1.2.1</commons-fileupload.version>
 		<commons-io.version>1.4</commons-io.version>
@@ -38,6 +39,7 @@
      	<jackson-mapper-asl.version>1.8.6</jackson-mapper-asl.version>
 	    <cxf.version>2.6.0</cxf.version>
 		<jasypt.version>1.6</jasypt.version>
+		<icu4j.version>3.8</icu4j.version>
 		<jdom.version>1.1</jdom.version>
 		<jmock.version>1.2.0</jmock.version>
 		<jms.version>1.1</jms.version>
@@ -60,7 +62,7 @@
 		<quartz.version>1.7.2</quartz.version>
 		<roo.version>1.0.2.RELEASE</roo.version>
 		<servlet-api.version>2.4</servlet-api.version>
-		<sigar.version>1.6.4</sigar.version>
+		<sigar.version>1.6.6</sigar.version>
         <slf4j.version>1.6.1</slf4j.version>
 		<snmp.version>1.11</snmp.version>
 		<spring-framework.version>3.0.5.RELEASE</spring-framework.version>
@@ -94,6 +96,11 @@
 
 	<dependencyManagement>
 		<dependencies>
+                        <dependency>
+		                <groupId>commons-lang</groupId>
+			        <artifactId>commons-lang</artifactId>
+			        <version>${commons-lang.version}</version>
+                        </dependency>
 			<dependency>
 				<groupId>backport-util-concurrent</groupId>
 				<artifactId>backport-util-concurrent</artifactId>
@@ -293,6 +300,11 @@
 				<groupId>org.jasypt</groupId>
 				<artifactId>jasypt</artifactId>
 				<version>${jasypt.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.ibm.icu</groupId>
+				<artifactId>icu4j</artifactId>
+				<version>${icu4j.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jdom</groupId>

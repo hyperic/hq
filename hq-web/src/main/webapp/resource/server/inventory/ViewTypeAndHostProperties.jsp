@@ -42,7 +42,7 @@
 				<html:param name="mode" value="view"/>
 				<html:param name="type" value="${Resource.platform.entityId.type}"/>
 				<html:param name="rid" value="${Resource.platform.id}"/>
-				${Resource.platform.name}
+                <c:out value="${Resource.platform.name}" escapeXml="true"/>
 			</html:link>
 		</td>
 	</tr>

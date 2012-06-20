@@ -136,9 +136,8 @@ public class ConfigSchemaTask
                 : new AutomatedResponseBuilder(this, 
                                                this.itsLoadFile,
                                                this.itsIfDefined);
-        } catch (IOException e) {
-            throw new BuildException("Error loading properties from file: " 
-                                     + this.itsLoadFile.getPath());
+        } catch (Exception exc) {
+            throw new BuildException("Error loading properties from file: " + this.itsLoadFile.getPath(), exc);
         }
         ConfigResponse response = null;
         ConfigResponse mergedResponse = null;

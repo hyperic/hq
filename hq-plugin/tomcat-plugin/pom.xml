@@ -8,7 +8,6 @@
         <artifactId>modules</artifactId>
        <version>5.0</version>
     </parent>
-
 	<artifactId>tomcat-plugin</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - Tomcat Plugin</name>

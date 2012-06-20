@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.hyperic.util.PropertyUtil;
+import org.hyperic.util.PropertyUtilException;
 import org.springframework.util.StringUtils;
 
 public class AutomatedResponseBuilder extends InteractiveResponseBuilder {
@@ -52,7 +53,7 @@ public class AutomatedResponseBuilder extends InteractiveResponseBuilder {
 
     public AutomatedResponseBuilder (InteractiveResponseBuilder_IOHandler io,
                                      File propFile,
-                                     String requiredProp) throws IOException {
+                                     String requiredProp) throws PropertyUtilException {
         super(io);
         this.props = PropertyUtil.loadProperties(propFile.getPath());
         this.requiredProp = requiredProp;

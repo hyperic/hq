@@ -22,12 +22,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
+
 package org.hyperic.hq.plugin.exchange;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.*;
@@ -39,27 +39,27 @@ import org.hyperic.util.config.ConfigResponse;
 //2007 - Edge role does not have MSExchangeIS or most of the other services
 //both Edge and Hub have MSExchangeTransport
 public class ExchangeTransportDetector
-        extends ServerDetector
-        implements AutoServerDetector {
+    extends ServerDetector
+    implements AutoServerDetector {
 
     private static final Log log =
             LogFactory.getLog(ExchangeTransportDetector.class.getName());
 
     private static final String TRANSPORT =
-            ExchangeDetector.EX + "Transport";
+        ExchangeDetector.EX + "Transport";
 
     private static final String SMTP_SEND =
-            "SmtpSend";
+        "SmtpSend";
 
     private static final String SMTP_RECEIVE =
-            "SmtpReceive";
+        "SmtpReceive";
 
     private static final String[] SERVICES = {
         SMTP_SEND, SMTP_RECEIVE
     };
 
     public List getServerResources(ConfigResponse platformConfig)
-            throws PluginException {
+        throws PluginException {
 
         List servers = new ArrayList();
 
@@ -82,18 +82,17 @@ public class ExchangeTransportDetector
                 exch.close();
             }
         }
-        
+
         File bin = new File(exe).getParentFile();
-        String expectedVersion = getTypeProperty("version");
-        String regKey = getTypeProperty("regKey");
-        Map<String, String> info = ExchangeDetector.getExchangeVersionInfo(regKey);
-        if (!ExchangeDetector.checkVersion(info.get("version"), expectedVersion)) {
-            log.debug("[getServerResources] 'Exchange Transport' on '" + bin
-                    + "' is not a " + getTypeInfo().getName());
+        if (!isInstallTypeVersion(bin.getPath())) {
+            log.debug("[getServerResources] exchange on '" + bin
+                    + "' IS NOT a " + getTypeInfo().getName());
             return null;
+        } else {
+            log.debug("[getServerResources] exchange on '" + bin
+                    + "' IS a " + getTypeInfo().getName());
         }
-
-
+        
         ServerResource server = createServerResource(exe);
         server.setIdentifier(TRANSPORT);
         server.setProductConfig();
@@ -107,14 +106,14 @@ public class ExchangeTransportDetector
 
         try {
             String[] instances =
-                    Pdh.getInstances(TRANSPORT + " " + type);
+                Pdh.getInstances(TRANSPORT + " " + type);
 
             for (int i=0; i<instances.length; i++) {
                 String name = instances[i];
                 if (name.equalsIgnoreCase("_Total")) {
                     continue;
                 }
-
+                
                 ServiceResource service = new ServiceResource();
                 service.setType(this, type);
                 service.setName(type + " " + name);
@@ -131,7 +130,7 @@ public class ExchangeTransportDetector
         }
 
         return services;
-
+        
     }
 
     @Override

@@ -27,8 +27,15 @@ package org.hyperic.util.security;
 
 import java.util.Random;
 
-public class SecurityUtil {
+import org.jasypt.encryption.StringEncryptor;
+import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
+import org.jasypt.properties.PropertyValueEncryptionUtils;
 
+public class SecurityUtil {
+    public final static String DEFAULT_ENCRYPTION_ALGORITHM = "PBEWithMD5AndDES";
+    public final static String ENC_MARK_PREFIX = "ENC(";
+    public final static String ENC_MARK_POSTFIX = ")";
+    
     /**
      * Generates a token of up to 100 chars of a (generally) random
      * token.
@@ -47,5 +54,64 @@ public class SecurityUtil {
         rand2 = r.nextLong();
         return System.currentTimeMillis() + "-" +
             Math.abs(rand1) + "-" + Math.abs(rand2);
+    }
+    
+
+    public static boolean isMarkedEncrypted(String str) {
+        if (str==null) {
+            return false;
+        }
+        String uStr = str.toUpperCase();
+        return uStr.startsWith(ENC_MARK_PREFIX) && uStr.endsWith(ENC_MARK_POSTFIX);
+    }
+    
+    public static String unmark(String str) {
+        return str.substring(ENC_MARK_PREFIX.length(), str.length()-ENC_MARK_POSTFIX.length()); 
+    }
+    
+    public static String mark(String str) {
+        return new StringBuilder().append(ENC_MARK_PREFIX).append(str).append(ENC_MARK_POSTFIX).toString(); 
+    }
+
+    public static StandardPBEStringEncryptor getStandardPBEStringEncryptor(String pbePass) {
+        StandardPBEStringEncryptor encryptor =  new StandardPBEStringEncryptor();
+        encryptor.setAlgorithm(SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM);
+        encryptor.setPassword(pbePass);
+        return encryptor;
+    }
+    
+    /**
+     * 
+     * @param encryptor initialized encryptor
+     * @param data
+     * @return
+     */
+    public static String encrypt(StringEncryptor encryptor, String data) {
+        return PropertyValueEncryptionUtils.encrypt(data,encryptor);
+    }
+
+    public static String encrypt(String encryptionAlgorithm, String encryptionKey, String data) {
+        StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
+        encryptor.setPassword(encryptionKey);
+        encryptor.setAlgorithm(encryptionAlgorithm);
+        return encrypt(encryptor,data);
+    }
+
+    public static String decrypt(StringEncryptor encryptor, String data) {
+        return PropertyValueEncryptionUtils.decrypt(data,encryptor);
+    }
+    
+    /**
+     * 
+     * @param encryptor initialized encryptor
+     * @param data
+     * @return
+     */
+    public static String decrypt(String encryptionAlgorithm, String encryptionKey, String data) {
+        StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
+        
+        encryptor.setPassword(encryptionKey);
+        encryptor.setAlgorithm(encryptionAlgorithm);
+        return decrypt(encryptor,data);
     }
 }

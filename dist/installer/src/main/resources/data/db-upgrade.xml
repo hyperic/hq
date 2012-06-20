@@ -8341,7 +8341,6 @@ has already been defined.
   </schemaSpec>
 
   <schemaSpec version="3.101">
-
       <schema-directSQL>
         <statement desc="Replace pass-through ARG1 with actual DSN" targetDB="postgresql">
             UPDATE EAM_MEASUREMENT SET dsn = (
@@ -11758,7 +11757,6 @@ has already been defined.
 	<schemaSpec version="3.211">
 	    <schema-addColumn table="EAM_AGENT" column="CAF_PME_ID" columnType="VARCHAR2"/>
 	</schemaSpec>
-	
 </dbupgrade>
 </target>
 </project>

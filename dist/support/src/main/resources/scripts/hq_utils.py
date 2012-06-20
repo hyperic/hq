@@ -96,10 +96,10 @@ def detectHQInformation(hq_home):
 
     if installation_type == SERVER or installation_type == AGENT:
         # TODO Get sigar version automatically
-        sigar_jar = os.path.abspath(os.path.join(gd.getGlobalData(gd.SUPPORT_BASE),'lib','sigar','sigar-1.6.4.jar'))
+        sigar_jar = os.path.abspath(os.path.join(gd.getGlobalData(gd.SUPPORT_BASE),'lib','sigar','sigar-1.6.6.jar'))
     else:
         # On dev machines, we need to take the sigar jar from the target folder
-        sigar_jar = os.path.abspath(os.path.join(gd.getGlobalData(gd.SUPPORT_PROJECT_BASE),'target','generated-resources','lib-sigar','sigar-1.6.4.jar'))
+        sigar_jar = os.path.abspath(os.path.join(gd.getGlobalData(gd.SUPPORT_PROJECT_BASE),'target','generated-resources','lib-sigar','sigar-1.6.6.jar'))
     addGlobalData(gd.SIGAR_JAR,sigar_jar)
 
     addGlobalData(gd.RUN_SIGAR,'%(java_executable)s -jar %(sigar_jar)s' % vars())

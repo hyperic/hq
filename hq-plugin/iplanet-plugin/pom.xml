@@ -8,8 +8,7 @@
         <artifactId>modules</artifactId>
        <version>5.0</version>
     </parent>
-
-	<artifactId>iplanet-plugin</artifactId>
+<artifactId>iplanet-plugin</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - iPlanet Plugin</name>
 
