@@ -26,34 +26,56 @@
 package org.hyperic.hq.plugin.system;
 
 import java.util.ArrayList;
-
-import org.hyperic.sigar.Sigar;
-import org.hyperic.sigar.SigarException;
-import org.hyperic.sigar.NetFlags;
-import org.hyperic.sigar.NetInterfaceConfig;
-import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.config.EncodingException;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.hyperic.hq.appdef.shared.AIServiceValue;
+import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.sigar.NetFlags;
+import org.hyperic.sigar.NetInterfaceConfig;
+import org.hyperic.sigar.NetRoute;
+import org.hyperic.sigar.Sigar;
+import org.hyperic.sigar.SigarException;
+import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.EncodingException;
 
 public class NetifDetector
     extends SystemServerDetector {
 
-    protected String getServerType() {
+    @Override
+	protected String getServerType() {
         return SystemPlugin.NETWORK_SERVER_NAME;
     }
 
-    protected ArrayList getSystemServiceValues(Sigar sigar, ConfigResponse config)
+    @Override
+	protected ArrayList getSystemServiceValues(Sigar sigar, ConfigResponse config)
         throws SigarException {
+        boolean discoverVirtualInterfaces = false;
         ArrayList services = new ArrayList();
-
+        //this is a set because we don't want the same network interface name to appear twice or more 
+    	Set<String> networkInterfacesNames = new HashSet<String>();
+    	
+    	//Check if we need to discover virtual network interfaces Jira issue [HHQ-5569]
+        if (null != config.getValue(ProductPlugin.PROP_PLATFORM_DISCOVER_VIRTUAL_INTERFACES)) {
+        	if (Boolean.TRUE.toString().equalsIgnoreCase(config.getValue(ProductPlugin.PROP_PLATFORM_DISCOVER_VIRTUAL_INTERFACES))) {
+        		discoverVirtualInterfaces = true;
+            	//We do this so we will also discover network bonding (like bond0 if exists)
+            	NetRoute[] routes = sigar.getNetRouteList();
+            	for (NetRoute route : routes) {
+            		networkInterfacesNames.add(route.getIfname());
+            	}
+        	}
+        }
+    	
         String[] ifNames = sigar.getNetInterfaceList();
-
-        for (int i=0; i<ifNames.length; i++) {
-            String name = ifNames[i];
+        for(String name : ifNames) {
+        	 networkInterfacesNames.add(name);
+        }
+       
+        for (String name : networkInterfacesNames) {
             NetInterfaceConfig ifconfig;
-
-            if (name.indexOf(':') != -1) {
+            
+            if (name.indexOf(':') != -1 && !discoverVirtualInterfaces) {
                 continue; //filter out virtual ips
             }
 

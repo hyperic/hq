@@ -27,9 +27,7 @@ package org.hyperic.hq.plugin.system;
 
 import java.util.Properties;
 
-import org.hyperic.sigar.FileInfo;
-import org.hyperic.sigar.NetFlags;
-
+import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricNotFoundException;
@@ -37,12 +35,17 @@ import org.hyperic.hq.product.MetricUnreachableException;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.SigarMeasurementPlugin;
+import org.hyperic.sigar.FileInfo;
+import org.hyperic.sigar.NetFlags;
 
 public class SystemMeasurementPlugin
     extends SigarMeasurementPlugin
 {
 
-    private void reportError(Metric metric, Exception e) {
+    private static final String _3A = "%3A";
+	private static final String NETWORK_SERVER_INTERFACE = "NetworkServer Interface";
+
+	private void reportError(Metric metric, Exception e) {
         getLog().error(metric + ": " + e.getMessage(), e);
         getManager().reportEvent(metric,
                                  System.currentTimeMillis(),
@@ -50,13 +53,23 @@ public class SystemMeasurementPlugin
                                  "system", e.getMessage());
     }
 
-    public MetricValue getValue(Metric metric) 
+    @Override
+	public MetricValue getValue(Metric metric) 
         throws PluginException,
                MetricNotFoundException,
                MetricUnreachableException
     {
+    	 String name = metric.getObjectName();
+    	 //Virtual network interfaces have only availability data so if we will try to get other kind
+    	 //of metrics for them via Sigar an exception will get thrown.
+    	 //Jira issue [HHQ-5569]
+    	 if (name.contains(NETWORK_SERVER_INTERFACE) && name.contains(_3A) && !metric.getCategory().
+    			 equals(MeasurementConstants.CAT_AVAILABILITY)) {
+         	return new MetricValue(Double.NaN);
+         }
+    	 
         String domain = metric.getDomainName();
-
+        
         Properties props = metric.getObjectProperties();
         String type = props.getProperty("Type");
         boolean isFsUsage = type.endsWith("FileSystemUsage");
@@ -156,7 +169,7 @@ public class SystemMeasurementPlugin
         throws MetricNotFoundException {
 
         try {
-            return (double)getSigar().getCpuInfoList().length;
+            return getSigar().getCpuInfoList().length;
         } catch (Exception e) {
             throw new MetricNotFoundException(e.getMessage(), e);
         }
