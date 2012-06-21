@@ -26,6 +26,7 @@
 package org.hyperic.hq.api.transfer.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,9 +44,10 @@ import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourceStatusType;
 import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.api.model.Resources;
-import org.hyperic.hq.api.model.measurements.ResourceMeasurementsRequest;
+import org.hyperic.hq.api.model.measurements.MeasurementsRequest;
+import org.hyperic.hq.api.model.measurements.MeasurementsRequest;
+import org.hyperic.hq.api.model.measurements.MeasurementsResponse;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementsRequestsCollection;
-import org.hyperic.hq.api.model.measurements.ResourcesMeasurementsBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.api.transfer.MeasurementTransfer;
 import org.hyperic.hq.api.transfer.ResourceTransfer;
@@ -74,6 +76,7 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.DataManager;
+import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.product.PluginException;
@@ -83,6 +86,8 @@ import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;
+import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -98,43 +103,28 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     private TemplateManager tmpltMgr;
 	@Autowired
 	private DataManager dataMgr; 
-	@Autowired
-	private MeasurementMapper mapper;
+//	@Autowired
+//	private MeasurementMapper mapper;
 	
 	private Log log ; 
 	
-    public ResourcesMeasurementsBatchResponse getMetrics(final ResourceMeasurementsRequestsCollection rscMsmReqs/*,
-			final Date begin, final Date end*/) {
+    public MeasurementsResponse getMetrics(final MeasurementsRequest msmtReq, final Date begin, final Date end) {
    	// null ResourcesMeasurementsBatchResponse?
     	// check that not too many DTPs fits in the time range
     	
     	// extract all input measurement templates
-    	Map<String,List<MeasurementTemplate>> tmpltMap = new HashMap<String,List<MeasurementTemplate>>();
-    	for (ResourceMeasurementsRequest rscMsmReq : rscMsmReqs.getResourceMeasurementsRequestList()) {
-    		List<String> tmpltNames = rscMsmReq.getMeasurementTemplateNames();
-    		for (String tmpltName : tmpltNames) {
-				if (!tmpltMap.keySet().contains(tmpltName)) {
-//~~~verify:
-					List<MeasurementTemplate> tmplts = (List<MeasurementTemplate>) this.tmpltMgr.findTemplates(tmpltName, null, new Integer[] {}, null);
-					tmpltMap.put(tmpltName, tmplts);
-				}
-			}
-		}
-    	ResourcesMeasurementsBatchResponse msmtRes = new ResourcesMeasurementsBatchResponse();
-    	for (ResourceMeasurementsRequest rscMsmReq : rscMsmReqs.getResourceMeasurementsRequestList()) {
-        	// sort templates per their default interval group
-    		List<String> rscMsmTmpltNames = rscMsmReq.getMeasurementTemplateNames();
-    		Map<String,Integer> tmpltPerDefIntervalMap = new HashMap<String,Integer>();
-    		//~~...
-    		//~ MeasurementConstants
-    		
-    		// get metrics
-    		
+    	List<String> tmplNames = msmtReq.getMeasurementTemplateNames();
+		List<MeasurementTemplate> tmpls = (List<MeasurementTemplate>) this.tmpltMgr.findTemplates(tmplNames);
+		MeasurementsResponse msmtRes = new MeasurementsResponse();
+        // sort templates per their default interval group
+    	Map<String,Integer> tmpltPerDefIntervalMap = new HashMap<String,Integer>();
+    	//~ MeasurementConstants
+    	// get metrics
 //~~~  implement method that decides table to go using the max-dtps val
 //~~~ resource ids -  id / instanceId?    		
-    		Map<Integer, double[]> metricValsPerMsmt = this.dataMgr.getAggregateDataByMetric(templateIDs, resourceIDs, begin, end, useAggressiveRollup, MAX_DTPS);
-    		this.mapper.merge(msmtRes,metricValsPerMsmt)
-    	}
+//    		Map<Integer, double[]> metricValsPerMsmt = this.dataMgr.getAggregateDataByMetric(templateIDs, resourceIDs, begin, end, useAggressiveRollup, MAX_DTPS);
+    	PageList<HighLowMetricValue> metrics = this.dataMgr.getHistoricalData(msmts, begin, end, PageControl.PAGE_ALL, prependAvailUnknowns, MAX_DTPS);
+//    		this.mapper.merge(msmtRes,metricValsPerMsmt)
     	return null;
     }
 } 

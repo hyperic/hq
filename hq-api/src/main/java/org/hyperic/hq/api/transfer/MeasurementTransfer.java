@@ -1,7 +1,9 @@
 package org.hyperic.hq.api.transfer;
 
+import java.util.Date;
+
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementsRequestsCollection;
-import org.hyperic.hq.api.model.measurements.ResourcesMeasurementsBatchResponse;
+import org.hyperic.hq.api.model.measurements.MeasurementsResponse;
 
 /**
  * 
@@ -16,6 +18,6 @@ public interface MeasurementTransfer {
 	 * 								
 	 * @return
 	 */
-    public ResourcesMeasurementsBatchResponse getMetrics(final ResourceMeasurementsRequestsCollection resourceMeasurementsRequestsCollection/*,
-			final Date samplingStartTime, final Date samplingEndTime*/);
+    public MeasurementsResponse getMetrics(final ResourceMeasurementsRequestsCollection resourceMeasurementsRequestsCollection,
+			final Date begin, final Date end);
 }

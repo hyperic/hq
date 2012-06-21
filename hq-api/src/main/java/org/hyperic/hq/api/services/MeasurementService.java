@@ -10,7 +10,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementsRequestsCollection;
-import org.hyperic.hq.api.model.measurements.ResourcesMeasurementsBatchResponse;
+import org.hyperic.hq.api.model.measurements.MeasurementsResponse;
 
 
 @Path("/") 
@@ -20,7 +20,7 @@ public interface MeasurementService {
 	
 	@POST
 	@Path("/metrics")
-	ResourcesMeasurementsBatchResponse getMetrics(@QueryParam("resourceMeasurementsRequestsCollection") final ResourceMeasurementsRequestsCollection resourceMeasurementsRequestsCollection/*,
+	MeasurementsResponse getMetrics(@QueryParam("resourceMeasurementsRequestsCollection") final ResourceMeasurementsRequestsCollection resourceMeasurementsRequestsCollection/*,
 			@QueryParam("samplingStartTime") final Date samplingStartTime,
 			@QueryParam("samplingEndTime") final Date samplingEndTime*/);
 }
