@@ -16,6 +16,16 @@
 	<name>Hyperic HQ Agent - Core</name>
 
 	<dependencies>
+	        <dependency>
+        	    <groupId>org.jasypt</groupId>
+	            <artifactId>jasypt</artifactId>
+        	    <scope>compile</scope>
+	        </dependency>
+        	<dependency>
+	            <groupId>com.ibm.icu</groupId>
+        	    <artifactId>icu4j</artifactId>
+	            <scope>compile</scope>
+	        </dependency>
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-lather</artifactId>
