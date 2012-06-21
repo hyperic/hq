@@ -129,7 +129,10 @@ public class TestHttpConduit extends HTTPConduit {
 			//extract the headers map from the msg (stored against the Message.PROTOCOL_HEADERS) 
 			final MultivaluedMap<String,String> protocolHeadersMap = (MultivaluedMap<String,String>) msg.get(org.apache.cxf.message.Message.PROTOCOL_HEADERS) ;
 			if(protocolHeadersMap != null) { 
-				req.setHeaderField(HttpHeaders.AUTHORIZATION, protocolHeadersMap.getFirst(HttpHeaders.AUTHORIZATION))  ;
+				final String authorizationToken = protocolHeadersMap.getFirst(HttpHeaders.AUTHORIZATION) ;
+				if(authorizationToken != null) { 
+					req.setHeaderField(HttpHeaders.AUTHORIZATION, authorizationToken)  ;
+				}//EO if authorizationToken was not null
 			}//EO if the protocol headers were defined 
 			
 			response = serviceRunner.newClient().getResponse(req);

@@ -53,6 +53,7 @@ import org.apache.cxf.transport.http.HTTPTransportFactory;
 import org.apache.cxf.ws.addressing.EndpointReferenceType;
 import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
 import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
+import org.eclipse.jetty.http.HttpException;
 import org.hyperic.hq.api.rest.RestTestCaseBase.SecurityInfo;
 import org.hyperic.hq.api.rest.cxf.TestHttpConduit;
 import org.hyperic.hq.tests.web.WebTestCaseBase;
@@ -174,6 +175,9 @@ public class RestTestCaseBase<V, T extends AbstractRestTestDataPopulator<V>> ext
     	String wadl = null ;
     	
     	final ByteArrayInputStream bais = (ByteArrayInputStream) wadlResponse.getEntity() ;
+    	if(bais == null) { 
+    		throw new HttpException(wadlResponse.getStatus()) ; 
+    	}//EO if no wadl response was sent 
     	try{ 
     		final byte[] arrBytes = new byte[bais.available()] ;
     		bais.read(arrBytes) ; 
