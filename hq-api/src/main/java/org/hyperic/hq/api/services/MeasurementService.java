@@ -1,6 +1,6 @@
 package org.hyperic.hq.api.services;
 
-import java.util.Date;
+import java.util.Calendar;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -9,8 +9,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import org.hyperic.hq.api.model.measurements.ResourceMeasurementsRequestsCollection;
-import org.hyperic.hq.api.model.measurements.MeasurementsResponse;
+import org.hyperic.hq.api.model.measurements.MeasurementRequest;
+import org.hyperic.hq.api.model.measurements.MeasurementResponse;
 
 
 @Path("/") 
@@ -20,7 +20,7 @@ public interface MeasurementService {
 	
 	@POST
 	@Path("/metrics")
-	MeasurementsResponse getMetrics(@QueryParam("resourceMeasurementsRequestsCollection") final ResourceMeasurementsRequestsCollection resourceMeasurementsRequestsCollection/*,
-			@QueryParam("samplingStartTime") final Date samplingStartTime,
-			@QueryParam("samplingEndTime") final Date samplingEndTime*/);
+	MeasurementResponse getMetrics(@QueryParam("MeasurementRequest") final MeasurementRequest measurementRequest,
+			@QueryParam("begin") final Calendar begin,
+			@QueryParam("end") final Calendar end);
 }

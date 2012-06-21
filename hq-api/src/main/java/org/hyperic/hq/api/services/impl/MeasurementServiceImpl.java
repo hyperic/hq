@@ -1,7 +1,9 @@
 package org.hyperic.hq.api.services.impl;
 
-import org.hyperic.hq.api.model.measurements.ResourceMeasurementsRequestsCollection;
-import org.hyperic.hq.api.model.measurements.MeasurementsResponse;
+import java.util.Calendar;
+
+import org.hyperic.hq.api.model.measurements.MeasurementRequest;
+import org.hyperic.hq.api.model.measurements.MeasurementResponse;
 import org.hyperic.hq.api.services.MeasurementService;
 import org.hyperic.hq.api.transfer.MeasurementTransfer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +22,8 @@ public class MeasurementServiceImpl implements MeasurementService {
 //        this.logger = logger;
 //    }        
     
-	public MeasurementsResponse getMetrics(final ResourceMeasurementsRequestsCollection resourceMeasurementsRequestsCollection/*,
-			final Date samplingStartTime, final Date samplingEndTime*/) {
-        return measurementTransfer.getMetrics(resourceMeasurementsRequestsCollection);
+	public MeasurementResponse getMetrics(final MeasurementRequest measurementRequest,
+			final Calendar begin, final Calendar end) {
+        return measurementTransfer.getMetrics(measurementRequest,begin,end);
     }
 }

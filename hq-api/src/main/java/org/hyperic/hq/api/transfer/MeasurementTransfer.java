@@ -1,9 +1,9 @@
 package org.hyperic.hq.api.transfer;
 
-import java.util.Date;
+import java.util.Calendar;
 
-import org.hyperic.hq.api.model.measurements.ResourceMeasurementsRequestsCollection;
-import org.hyperic.hq.api.model.measurements.MeasurementsResponse;
+import org.hyperic.hq.api.model.measurements.MeasurementRequest;
+import org.hyperic.hq.api.model.measurements.MeasurementResponse;
 
 /**
  * 
@@ -18,6 +18,6 @@ public interface MeasurementTransfer {
 	 * 								
 	 * @return
 	 */
-    public MeasurementsResponse getMetrics(final ResourceMeasurementsRequestsCollection resourceMeasurementsRequestsCollection,
-			final Date begin, final Date end);
+    public MeasurementResponse getMetrics(final MeasurementRequest measurementRequest,
+			final Calendar begin, final Calendar end);
 }

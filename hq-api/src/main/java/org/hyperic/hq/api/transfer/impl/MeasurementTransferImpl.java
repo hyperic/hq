@@ -26,7 +26,7 @@
 package org.hyperic.hq.api.transfer.impl;
 
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +44,8 @@ import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourceStatusType;
 import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.api.model.Resources;
+import org.hyperic.hq.api.model.measurements.MeasurementRequest;
+import org.hyperic.hq.api.model.measurements.MeasurementResponse;
 import org.hyperic.hq.api.model.measurements.MeasurementsRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementsRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementsResponse;
@@ -108,7 +110,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
 	
 	private Log log ; 
 	
-    public MeasurementsResponse getMetrics(final MeasurementsRequest msmtReq, final Date begin, final Date end) {
+    public MeasurementResponse getMetrics(final MeasurementRequest msmtReq, final Calendar begin, final Calendar end) {
    	// null ResourcesMeasurementsBatchResponse?
     	// check that not too many DTPs fits in the time range
     	

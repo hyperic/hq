@@ -18,21 +18,21 @@ public class ResourceMeasurementsRequestsCollection {   //change to measurementR
 		super();
 	}
 
-	public List<ResourceMeasurementsRequest> getResourceMeasurementsRequestList() {
+	public List<MeasurementRequest> getResourceMeasurementsRequestList() {
 		return resourceMeasurementsRequestList;
 	}
 
 	public void setResourceMeasurementsRequestList(
-			List<ResourceMeasurementsRequest> resourceMeasurementsRequestList) {
+			List<MeasurementRequest> resourceMeasurementsRequestList) {
 		this.resourceMeasurementsRequestList = resourceMeasurementsRequestList;
 	}
 
 	public ResourceMeasurementsRequestsCollection(
-			List<ResourceMeasurementsRequest> resourceMeasurementsRequestList) {
+			List<MeasurementRequest> resourceMeasurementsRequestList) {
 		super();
 		this.resourceMeasurementsRequestList = resourceMeasurementsRequestList;
 	}
 
 	@XmlElement
-	List<ResourceMeasurementsRequest> resourceMeasurementsRequestList;
+	List<MeasurementRequest> resourceMeasurementsRequestList;
 }
