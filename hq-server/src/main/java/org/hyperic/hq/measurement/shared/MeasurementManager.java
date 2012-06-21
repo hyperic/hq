@@ -213,6 +213,7 @@ public interface MeasurementManager {
      * Get an Availabilty Measurement by AppdefEntityId
      * @deprecated Use getAvailabilityMeasurement(Resource) instead.
      */
+    @Deprecated
     public Measurement getAvailabilityMeasurement(AuthzSubject subject, AppdefEntityID id);
 
     /**

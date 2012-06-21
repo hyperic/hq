@@ -177,20 +177,9 @@ public class ViewAction
         for (int i = 0; i < ents.length; i++) {
             CacheEntry ent = ents[i];
             MetricValue val = vals[i];
-            if (val == null) {
-                // If we don't have measurement data for this resource,
-                // assume that it is down.
-                double mval = MeasurementConstants.AVAIL_DOWN;
-                if (arrayIds[i].isApplication()) {
-                    // A little expensive, hopefully we don't have to do it very
-                    // often
-                    mval = measurementBoss.getAvailability(sessionId, arrayIds[i]);
-                }
-                val = new MetricValue(mval);
-            }
 
             // If no avail measurement is scheduled, skip this resource
-            if (ent != null) {
+            if (ent != null && val != null) {
                 if (ent.getType() == null) {
                     AppdefResourceValue resVal = appdefBoss.findById(sessionId, arrayIds[i]);
                     ent.setType(resVal.getAppdefResourceTypeValue());

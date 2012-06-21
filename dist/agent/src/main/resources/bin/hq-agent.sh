@@ -38,7 +38,7 @@ PIDDIR="../../wrapper"
 #  cause the start command to delay for the indicated period of time 
 #  (in seconds).
 # 
-WAIT_AFTER_STARTUP=0
+WAIT_AFTER_STARTUP=3
 
 # If set, the status, start_msg and stop_msg commands will print out detailed
 #   state information on the Wrapper and Java processes.
@@ -606,6 +606,7 @@ testpid() {
         pid=""
     fi
 } 
+
  
 start() {
     echo -n "Starting $APP_LONG_NAME..."
@@ -849,7 +850,7 @@ case "$1" in
         ;;        
 
     *)
-        echo "Usage: $0 { start | stop | restart | status | dump | ping | setup }"
+        echo "Usage: $0 { start | stop | restart | status | dump | ping | setup | set-property }"
         exit 1
         ;;
 esac

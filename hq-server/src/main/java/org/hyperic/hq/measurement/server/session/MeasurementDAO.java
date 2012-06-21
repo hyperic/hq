@@ -33,6 +33,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.FlushMode;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -47,8 +49,11 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.util.jdbc.DBUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
+
 
 @Repository
 public class MeasurementDAO
@@ -57,13 +62,19 @@ public class MeasurementDAO
         " upper(t.alias) != '" + MeasurementConstants.CAT_AVAILABILITY.toUpperCase() + "' ";
     private static final String ALIAS_CLAUSE =
         " upper(t.alias) = '" + MeasurementConstants.CAT_AVAILABILITY.toUpperCase() + "' ";
-    private AgentDAO agentDao;
+    private final AgentDAO agentDao;
+    private final DBUtil dbUtil;
+    protected final Log logger = LogFactory.getLog(this.getClass().getName());
+    private final static  int ENCRYPT_UPDATE_TIMEOUT = 54000;
+    private final static  int ENCRYPT_UPDATE_CHUNK_SIZE = 500;
 
     @Autowired
-    public MeasurementDAO(SessionFactory f, AgentDAO agentDao) {
+    public MeasurementDAO(SessionFactory f, AgentDAO agentDao, DBUtil dbUtil) {
         super(Measurement.class, f);
         this.agentDao = agentDao;
+        this.dbUtil = dbUtil;
     }
+
 
     public void removeBaseline(Measurement m) {
         m.setBaseline(null);
@@ -413,7 +424,7 @@ public class MeasurementDAO
                      + "join g.resource r " + "where m.instanceId = r.instanceId and "
                      + "rg = ? and m.template.id = ? and m.enabled = true";
 
-        return (List<Measurement>) getSession().createQuery(sql).setParameter(0, g).setInteger(1,
+        return getSession().createQuery(sql).setParameter(0, g).setInteger(1,
             templateId.intValue()).setCacheable(true).setCacheRegion(
             "ResourceGroup.getMetricsCollecting").list();
     }
@@ -448,7 +459,7 @@ public class MeasurementDAO
         if (list.size() == 0) {
             return null;
         }
-        return (Measurement) list.get(0);
+        return list.get(0);
     }
 
     @SuppressWarnings("unchecked")
@@ -765,7 +776,7 @@ public class MeasurementDAO
                 java.lang.Number count = (java.lang.Number) tuple[1];
                 Long curCount;
 
-                curCount = (Long) idToCount.get(id);
+                curCount = idToCount.get(id);
                 if (curCount == null) {
                     curCount = new Long(0);
                 }

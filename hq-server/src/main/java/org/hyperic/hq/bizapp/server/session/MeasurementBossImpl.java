@@ -829,8 +829,9 @@ public class MeasurementBossImpl implements MeasurementBoss {
         int i=0;
         for (final Measurement m : measurements) {
             if (m != null && data.containsKey(m.getId())) {
-                ret[i++] = data.get(m.getId());
+                ret[i] = data.get(m.getId());
             }
+            i++;
         }
 
         return ret;
