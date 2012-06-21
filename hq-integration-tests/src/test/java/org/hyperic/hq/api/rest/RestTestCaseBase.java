@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -52,22 +53,24 @@ import org.apache.cxf.transport.http.HTTPTransportFactory;
 import org.apache.cxf.ws.addressing.EndpointReferenceType;
 import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
 import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
+import org.hyperic.hq.api.rest.RestTestCaseBase.SecurityInfo;
 import org.hyperic.hq.api.rest.cxf.TestHttpConduit;
 import org.hyperic.hq.tests.web.WebTestCaseBase;
-import org.junit.Rule;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.RuleChain;
-import org.junit.rules.TestRule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 
 import com.meterware.servletunit.ServletRunner;
 
+@SecurityInfo(username="hqadmin",password="hqadmin")
 @DirtiesContext
 public class RestTestCaseBase<V, T extends AbstractRestTestDataPopulator<V>> extends WebTestCaseBase{
 
 	protected final ExpectedException errorInterceptor = ExpectedException.none(); 
-    public RuleChain interceptorsChain = RuleChain.outerRule(errorInterceptor).around(new ServiceBindingsIterationInterceptor(ServiceBindingsIteration.class)) ; 
+    public RuleChain interceptorsChain = RuleChain.outerRule(errorInterceptor).
+    		around(new ServiceBindingsIterationInterceptor(ServiceBindingsIteration.class)).
+    		around(new SecurityInterceptor()) ; 
 	
 	@Autowired
 	protected T testBed ; 
@@ -80,6 +83,41 @@ public class RestTestCaseBase<V, T extends AbstractRestTestDataPopulator<V>> ext
 		String value() ; 
 	}//EO inner class ServiceBindingProviderIterator
 	
+	@Retention(RetentionPolicy.RUNTIME) 
+	@Target({ElementType.METHOD, ElementType.TYPE})
+	public @interface SecurityInfo { 
+		boolean ignore()  default false ;
+		String username() default "hqadmin" ; 
+		String password() default "hqadmin"  ;
+		
+	}//EO inner class SecurityInfo 
+	
+	protected final class SecurityInterceptor extends IterationInterceptor<SecurityInfo>{ 
+		
+		public SecurityInterceptor() { 
+			super(SecurityInfo.class) ; 
+		}//EOM 
+		
+		protected boolean shouldSkip(final SecurityInfo metadata) { 
+			return metadata.ignore() ;  
+		}//EOM
+		
+		@Override
+		protected final void doBeforeEvaluation(final int iIterationIndex, final SecurityInfo metadata) {
+			final Client client =  WebClient.client(service) ;
+			final String credentialsToken = metadata.username() + ":" + metadata.password() ; 
+			final String authorizationHeader = "Basic " +org.apache.cxf.common.util.Base64Utility.encode(credentialsToken.getBytes());        
+			client.header(HttpHeaders.AUTHORIZATION, authorizationHeader) ; 
+		}//EOM 
+		
+		@Override
+		protected final int getIterationLength(final SecurityInfo metadata) {
+			return 1 ; 
+		}//EOM 
+		
+	}//EO inner class SecurityInterceptor
+	
+	
 	protected final class ServiceBindingsIterationInterceptor extends IterationInterceptor<ServiceBindingsIteration> { 
     	
     	public ServiceBindingsIterationInterceptor(final Class<ServiceBindingsIteration> serviceBindingsIterationType) { 
@@ -88,7 +126,7 @@ public class RestTestCaseBase<V, T extends AbstractRestTestDataPopulator<V>> ext
     	
     	 @Override
     	protected final void doBeforeEvaluation(final int iIterationIndex, final ServiceBindingsIteration metadata) {
-    		 service = testBed.getServices()[iIterationIndex] ;
+    		service = testBed.getServices()[iIterationIndex] ;
     		final Client client =  WebClient.client(service) ;
     		WebClient.getConfig(client).getConduitSelector().getEndpoint().getEndpointInfo().setAddress(metadata.value()) ; 
     	}//EOM 
