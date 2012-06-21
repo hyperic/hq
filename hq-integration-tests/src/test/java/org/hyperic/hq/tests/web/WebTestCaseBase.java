@@ -79,7 +79,7 @@ public abstract class WebTestCaseBase extends BaseInfrastructureTest{
     					}//EO if not yet initialized 
     					else if(!(metadataTemp instanceof Boolean)) metadata = (T) metadataTemp ; 
     				}//EO if cls level metadata was not already cached 
-    				if(metadata == null) base.evaluate() ; 
+    				if(metadata == null || shouldSkip(metadata)) base.evaluate() ; 
     				else {
     					try{ 
 	    					final int iIterationLength = getIterationLength(metadata) ; 
@@ -100,6 +100,7 @@ public abstract class WebTestCaseBase extends BaseInfrastructureTest{
     		};  
     	}//EOM 
     	
+    	protected boolean shouldSkip(final T metadata) { return false ; }//EOM 
     	protected abstract int getIterationLength(final T metadata) ; 
     	
     	protected abstract void doBeforeEvaluation(final int iIterationIndex, final T metadata) ;

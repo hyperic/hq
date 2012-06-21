@@ -29,9 +29,6 @@
  * *********************************************************************/
 package org.hyperic.hq.api.model;
 
-import java.util.List;
-
-import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +36,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
@@ -67,8 +65,11 @@ public class Resource {
     private String naturalID ;
 	@XmlElement
     private ResourcePrototype resourcePrototype;
-	@XmlElement
+	
+	@XmlElementWrapper(name="subResources", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+	@XmlElement(name = "resource", namespace=RestApiConstants.SCHEMA_NAMESPACE)
     private List<Resource> subResources;
+	
 	@XmlElement(name = "resourceConfig", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 	private ResourceConfig resourceConfig;
 
