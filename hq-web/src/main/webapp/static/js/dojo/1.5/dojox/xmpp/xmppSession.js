@@ -327,11 +327,10 @@ var n=msg.childNodes[i];
 if(n.hasChildNodes()){
 switch(n.nodeName){
 case "status":
+	p.priority=parseInt(n.firstChild.nodeValue); 
+	break;
 case "show":
 p[n.nodeName]=n.firstChild.nodeValue;
-break;
-case "status":
-p.priority=parseInt(n.firstChild.nodeValue);
 break;
 case "x":
 if(n.firstChild&&n.firstChild.firstChild&&n.firstChild.firstChild.nodeValue!=""){

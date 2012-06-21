@@ -22,27 +22,37 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
+ *
+ * **********************************************************************
+ * 20 June 2012
+ * Maya Anderson
+ * *********************************************************************/
+package org.hyperic.hq.api.services.impl;
+
+import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+
+/**
+ * Message context holder to be passed between api methods.
+ * @author Maya Anderson
+ *
  */
-package org.hyperic.hq.api.transfer;
+public class ApiMessageContext {
 
-import org.hyperic.hq.api.model.Resource;
-import org.hyperic.hq.api.model.ResourceDetailsType;
-import org.hyperic.hq.api.model.ResourceStatusType;
-import org.hyperic.hq.api.model.ResourceType;
-import org.hyperic.hq.api.model.Resources;
-import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
-import org.hyperic.hq.api.services.impl.ApiMessageContext;
-import org.hyperic.hq.auth.shared.SessionNotFoundException;
-import org.hyperic.hq.auth.shared.SessionTimeoutException;
+    private final Integer sessionId;
+    private final AuthzSubjectValue subject;
+    
 
-public interface ResourceTransfer {
 
-	Resource getResource(ApiMessageContext messageContext, final String platformNaturalID, final ResourceType resourceType, 
-			final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) throws SessionNotFoundException, SessionTimeoutException ; 
-	
-	Resource getResource(final String platformID, final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) ; 
-	
-	
-	ResourceBatchResponse approveResource(final Resources aiResources) ;
-	ResourceBatchResponse updateResources(final Resources resources); 
-}//EOI 
+    public ApiMessageContext(Integer sessionId, AuthzSubjectValue subject) {
+        this.sessionId = sessionId;
+        this.subject = subject;
+    }
+
+    public AuthzSubjectValue getSubject() {
+        return this.subject;
+    }
+    
+    public Integer getSessionId() {
+        return this.sessionId;
+    }
+}

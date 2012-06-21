@@ -62,6 +62,7 @@ import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.auth.shared.SessionManager;
+import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.product.MeasurementPlugin;
@@ -412,7 +413,7 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 	  }//eOcatch b lok 
     }//EO while there are more resources to compare  
     
-    private final void assertUpdate(final ResourceBatchResponse response, final Resources expectedResources, final Object[][] testHarness, final int[] testHarnessMetadata) { 
+    private final void assertUpdate(final ResourceBatchResponse response, final Resources expectedResources, final Object[][] testHarness, final int[] testHarnessMetadata) throws SessionNotFoundException { 
     	Resource responseResource = null; 
     	
     	final List<Resource> resourceList = expectedResources.getResources() ; 
@@ -478,24 +479,24 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     	
     }//EOM 
     
-    private final Resource getApprovedResource(final AppdefResource appdefResource, final int hierarchyDepth) {
+    private final Resource getApprovedResource(final AppdefResource appdefResource, final int hierarchyDepth) throws SessionNotFoundException {
     	return this.getApprovedResource(appdefResource.getResource().getId()+"", hierarchyDepth) ; 
     }//EOM 
     
-    private final Resource getApprovedResource(final String ID, final int hierarchyDepth) {
+    private final Resource getApprovedResource(final String ID, final int hierarchyDepth) throws SessionNotFoundException {
     	return this.getResource(ID, null /*naturalID*/, null /*resourceType*/, ResourceStatusType.APPROVED, hierarchyDepth, new ResourceDetailsType[]{ ResourceDetailsType.ALL } ) ;
     }//EOM 
     
-    private final Resource getApprovedResource(final String naturalID, final ResourceType enumResourceType, final int hierarchyDepth) {
+    private final Resource getApprovedResource(final String naturalID, final ResourceType enumResourceType, final int hierarchyDepth) throws SessionNotFoundException {
     	return this.getResource(null/*ID*/, naturalID, enumResourceType, ResourceStatusType.APPROVED, hierarchyDepth, new ResourceDetailsType[]{ ResourceDetailsType.ALL } ) ;
     }//EOM 
     
-    private final Resource getApprovedResource(final String ID, final String naturalID, final ResourceType enumResourceType, final int hierarchyDepth, final ResourceDetailsType[] responseStructure) { 
+    private final Resource getApprovedResource(final String ID, final String naturalID, final ResourceType enumResourceType, final int hierarchyDepth, final ResourceDetailsType[] responseStructure) throws SessionNotFoundException { 
     	return this.getResource(ID, naturalID, enumResourceType, ResourceStatusType.APPROVED, hierarchyDepth, responseStructure) ; 
     }
     
     private final Resource getResource(final String ID, final String naturalID, final ResourceType enumResourceType, 
-    						final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseStructure) {
+    						final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseStructure) throws SessionNotFoundException {
     	Resource resource = null; 
     	
     	if(ID != null) { 
@@ -505,6 +506,7 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     	}//EO else if natural ID 
     	return resource ; 
     }//EOM 
+    
     
     private final Resources generateResources(final int iNoOfResources, final Object[][] arrResources ) { 
     	final Resources resources = new Resources() ;
@@ -673,7 +675,7 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 			return (subject != null ? subject : authzSubjectManager.getOverlordPojo()) ; 
 		}//EOM 
 
-		@Override
+//		@Override
 		public void destroy() throws Exception {}//EOM 
 		
 		private final void registerMeasurementConfigSchema(final String pluginName, final String platformName,

@@ -25,7 +25,12 @@
  */
 package org.hyperic.hq.api.services.impl;
 
+import javax.servlet.ServletException;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
 import org.apache.cxf.jaxrs.ext.search.SearchContext;
+import org.hyperic.hq.api.common.SessionUtils;
 import org.hyperic.hq.api.model.Resource;
 import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourceStatusType;
@@ -34,11 +39,14 @@ import org.hyperic.hq.api.model.Resources;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.api.services.ResourceService;
 import org.hyperic.hq.api.transfer.ResourceTransfer;
+import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
+import org.hyperic.hq.auth.shared.SessionNotFoundException;
+import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 //@Component
-public class ResourceServiceImpl implements ResourceService{
+public class ResourceServiceImpl extends RestApiService implements ResourceService{
 	
 	@Autowired
 	private ResourceTransfer resourceTransfer ; 
@@ -47,11 +55,32 @@ public class ResourceServiceImpl implements ResourceService{
 	private SearchContext context ;
 	
 	public final Resource getResource(final String platformNaturalID, final ResourceType resourceType, final ResourceStatusType resourceStatusType, 
-			final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) { 
-		return this.resourceTransfer.getResource(platformNaturalID, resourceType, resourceStatusType, hierarchyDepth, responseMetadata)  ; 
+			final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) throws SessionNotFoundException {
+	    ApiMessageContext apiMessageContext = null;
+	    try {
+	        apiMessageContext = SessionUtils.newApiMessageContext(super.messageContext.getHttpServletRequest());
+        } catch (ServletException e) {
+            WebApplicationException webApplicationException = 
+                    errorHandler.newWebApplicationException(e, Response.Status.UNAUTHORIZED, ExceptionToErrorCodeMapper.ErrorCode.INVALID_SESSION);            
+            throw webApplicationException;
+        }
+	    	    
+	    Resource resource = null;
+		try {
+            resource = this.resourceTransfer.getResource(apiMessageContext, platformNaturalID, resourceType, resourceStatusType, hierarchyDepth, responseMetadata);            
+//        } catch (SessionNotFoundException e) {
+//            WebApplicationException webApplicationException = 
+//                    errorHandler.newWebApplicationException(e, Response.Status.UNAUTHORIZED, ExceptionToErrorCodeMapper.ErrorCode.INVALID_SESSION);            
+//            throw webApplicationException;
+        } catch (SessionTimeoutException e) {
+            WebApplicationException webApplicationException = 
+                    errorHandler.newWebApplicationException(e, Response.Status.UNAUTHORIZED, ExceptionToErrorCodeMapper.ErrorCode.SESSION_TIMEOUT);            
+            throw webApplicationException;
+        } 
+		return resource;
 	}//EOM 
-	
-	public final Resource getResource(final String platformID, final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) { 
+
+    public final Resource getResource(final String platformID, final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) { 
 		return this.resourceTransfer.getResource(platformID, resourceStatusType, hierarchyDepth, responseMetadata) ; 
 	}//EOM 
 	

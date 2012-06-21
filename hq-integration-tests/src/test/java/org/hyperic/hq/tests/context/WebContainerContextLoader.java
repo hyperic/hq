@@ -170,7 +170,7 @@ public class WebContainerContextLoader extends IntegrationTestContextLoader{
         	//Register shutdown sequence in which the webcontainer is shutdown and any top level transaction 
         	//is rolledback so that the actions of the test data populator are reverted. 
         	applicationContext.addApplicationListener(new ApplicationListener<ContextClosedEvent>() {
-            	@Override
+//            	@Override
             	public void onApplicationEvent(ContextClosedEvent event) {
             		sr.shutDown() ;
             		if(txStatus != null) { 

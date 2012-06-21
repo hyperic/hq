@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hyperic.hq.api.common.InterfaceUser;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.ui.util.MonitorUtils;
@@ -41,7 +42,7 @@ import org.hyperic.util.config.InvalidOptionValueException;
  * A representation of the person currently interacting with the
  * application.
  */
-public class WebUser {
+public class WebUser implements InterfaceUser {
 
     public static final String PREF_FAV_RESOURCE_METRICS_PREFIX =
         ".resource.common.monitor.visibility.favoriteMetrics";
