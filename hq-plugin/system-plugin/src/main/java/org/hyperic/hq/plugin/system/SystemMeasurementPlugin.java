@@ -30,6 +30,7 @@ import java.util.Properties;
 import org.hyperic.sigar.FileInfo;
 import org.hyperic.sigar.NetFlags;
 
+import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricNotFoundException;
@@ -44,166 +45,175 @@ import org.hyperic.sigar.ptql.ProcessQuery;
 import org.hyperic.sigar.ptql.ProcessQueryFactory;
 
 public class SystemMeasurementPlugin
-    extends SigarMeasurementPlugin
+extends SigarMeasurementPlugin
 {
 
-    private void reportError(Metric metric, Exception e) {
-        getLog().error(metric + ": " + e.getMessage(), e);
-        getManager().reportEvent(metric,
-                                 System.currentTimeMillis(),
-                                 LogTrackPlugin.LOGLEVEL_ERROR,
-                                 "system", e.getMessage());
-    }
+	private static final String _3A = "%3A";
+	private static final String NETWORK_SERVER_INTERFACE = "NetworkServer Interface";
 
-    public MetricValue getValue(Metric metric) 
-        throws PluginException,
-               MetricNotFoundException,
-               MetricUnreachableException
-    {
-        String domain = metric.getDomainName();
+	private void reportError(Metric metric, Exception e) {
+		getLog().error(metric + ": " + e.getMessage(), e);
+		getManager().reportEvent(metric,
+				System.currentTimeMillis(),
+				LogTrackPlugin.LOGLEVEL_ERROR,
+				"system", e.getMessage());
+	}
 
-        Properties props = metric.getObjectProperties();
-        String type = props.getProperty("Type");
-        boolean isFsUsage = type.endsWith("FileSystemUsage");
+	public MetricValue getValue(Metric metric) 
+			throws PluginException, MetricNotFoundException, MetricUnreachableException{
+		
+		String name = metric.getObjectName();
+		//Virtual network interfaces have only availability data so if we will try to get other kind
+		//of metrics for them via Sigar an exception will get thrown.
+		//Jira issue [HHQ-5569]
+		if (name.contains(NETWORK_SERVER_INTERFACE) && name.contains(_3A) && !metric.getCategory().
+				equals(MeasurementConstants.CAT_AVAILABILITY)) {
+			return new MetricValue(Double.NaN);
+		}
+		String domain = metric.getDomainName();
 
-        if (domain.equals("sigar.ext")) {
-            if (type.equals("CpuInfo")) {
-                return new MetricValue(getNumCpus());
-            }
-            else if (type.equals("DiskUsage")) {
-                //back-compat w/ old template
-                String arg = props.getProperty("Arg");
-                return new MetricValue(getDiskUsage(arg));
-            } else if (type.equals("ChildProcesses")) {
-                String arg = props.getProperty("Arg");
-                return new MetricValue(getChildProcessCount(arg));
-            }
-        }
-        //else better be "system.avail"
+		Properties props = metric.getObjectProperties();
+		String type = props.getProperty("Type");
+		boolean isFsUsage = type.endsWith("FileSystemUsage");
 
-        if (type.equals("Platform")) {
-            return new MetricValue(Metric.AVAIL_UP);
-        }
+		if (domain.equals("sigar.ext")) {
+			if (type.equals("CpuInfo")) {
+				return new MetricValue(getNumCpus());
+			}
+			else if (type.equals("DiskUsage")) {
+				//back-compat w/ old template
+				String arg = props.getProperty("Arg");
+				return new MetricValue(getDiskUsage(arg));
+			} else if (type.equals("ChildProcesses")) {
+				String arg = props.getProperty("Arg");
+				return new MetricValue(getChildProcessCount(arg));
+			}
+		}
+		//else better be "system.avail"
 
-        if (type.equals("NetIfconfig")) {
-            double avail;
+		if (type.equals("Platform")) {
+			return new MetricValue(Metric.AVAIL_UP);
+		}
 
-            int value = (int)super.getValue(metric).getValue();
-            if (((value & NetFlags.IFF_UP) > 0) && ((value & NetFlags.IFF_RUNNING) == NetFlags.IFF_RUNNING)) {
-                avail = Metric.AVAIL_UP;
-            } else if ((value & NetFlags.IFF_UP) > 0 ) {
-                avail = Metric.AVAIL_WARN;
-            } else {
-                avail = Metric.AVAIL_DOWN;
-            }
+		if (type.equals("NetIfconfig")) {
+			double avail;
 
-            return new MetricValue(avail);
-        }
+			int value = (int)super.getValue(metric).getValue();
+			if (((value & NetFlags.IFF_UP) > 0) && ((value & NetFlags.IFF_RUNNING) == NetFlags.IFF_RUNNING)) {
+				avail = Metric.AVAIL_UP;
+			} else if ((value & NetFlags.IFF_UP) > 0 ) {
+				avail = Metric.AVAIL_WARN;
+			} else {
+				avail = Metric.AVAIL_DOWN;
+			}
 
-        if (isFsUsage) {
-            double avail;
-            try {
-                super.getValue(metric).getValue();
-                avail = Metric.AVAIL_UP;
-            } catch (Exception e) {
-                avail = Metric.AVAIL_DOWN;
-                reportError(metric, e);
-            }
+			return new MetricValue(avail);
+		}
 
-            return new MetricValue(avail);
-        }
+		if (isFsUsage) {
+			double avail;
+			try {
+				super.getValue(metric).getValue();
+				avail = Metric.AVAIL_UP;
+			} catch (Exception e) {
+				avail = Metric.AVAIL_DOWN;
+				reportError(metric, e);
+			}
 
-        if (type.equals("FileInfo") ||
-            type.equals("DirStats"))
-        {
-            String attr = metric.getAttributeName();
-            double avail;
+			return new MetricValue(avail);
+		}
 
-            try {
-                double val =
-                    super.getValue(metric).getValue();
-                avail = Metric.AVAIL_UP;
+		if (type.equals("FileInfo") ||
+				type.equals("DirStats"))
+		{
+			String attr = metric.getAttributeName();
+			double avail;
 
-                //for directories, verify the type.
-                if (attr.equals("Type") &&
-                    (val != FileInfo.TYPE_DIR))
-                {
-                    avail = Metric.AVAIL_DOWN;
-                }
-            } catch (MetricNotFoundException e) {
-                //SigarFileNotFoundException
-                avail = Metric.AVAIL_DOWN;
-            }
+			try {
+				double val =
+						super.getValue(metric).getValue();
+				avail = Metric.AVAIL_UP;
 
-            return new MetricValue(avail);
-        }
+				//for directories, verify the type.
+				if (attr.equals("Type") &&
+						(val != FileInfo.TYPE_DIR))
+				{
+					avail = Metric.AVAIL_DOWN;
+				}
+			} catch (MetricNotFoundException e) {
+				//SigarFileNotFoundException
+				avail = Metric.AVAIL_DOWN;
+			}
 
-        if (type.equals("CpuPercList")) {
-            try {
-                super.getValue(metric);
-                // If we can get the metric, return avail up
-                return new MetricValue(Metric.AVAIL_UP);
-            } catch (Exception e) {
-                return new MetricValue(Metric.AVAIL_DOWN);
-            }
-        }
+			return new MetricValue(avail);
+		}
 
-        if (type.equals("MultiProcCpu")) {
-            double val = super.getValue(metric).getValue();
-            if (val >= 1) {
-                return new MetricValue(Metric.AVAIL_UP);
-            }
-            else {
-                return new MetricValue(Metric.AVAIL_DOWN);
-            }
-        }
-        throw new MetricNotFoundException(metric.toString());
-    }
+		if (type.equals("CpuPercList")) {
+			try {
+				super.getValue(metric);
+				// If we can get the metric, return avail up
+				return new MetricValue(Metric.AVAIL_UP);
+			} catch (Exception e) {
+				return new MetricValue(Metric.AVAIL_DOWN);
+			}
+		}
 
-    private double getChildProcessCount(String arg)
-        throws MetricNotFoundException {
+		if (type.equals("MultiProcCpu")) {
+			double val = super.getValue(metric).getValue();
+			if (val >= 1) {
+				return new MetricValue(Metric.AVAIL_UP);
+			}
+			else {
+				return new MetricValue(Metric.AVAIL_DOWN);
+			}
+		}
+		throw new MetricNotFoundException(metric.toString());
+	}
 
-        try {
-            Sigar s = getSigar();
-            long processIds[] = s.getProcList();
-            ProcessQuery query = ProcessQueryFactory.getInstance().getQuery(arg);
-            long parentPid = query.findProcess(s);
+	private double getChildProcessCount(String arg)
+			throws MetricNotFoundException {
 
-            double count = 0;
-            for (long pid : processIds) {
-                ProcState state;
-                try {
-                    state = s.getProcState(pid);
-                    if (parentPid == state.getPpid()) {
-                        count++;
-                    }
-                } catch (SigarException e) {
-                    //ok, Process likely went away
-                }
-            }
-            return count;
-        } catch (Exception e) {
-            throw new MetricNotFoundException(e.getMessage(), e);
-        }
-    }
+		try {
+			Sigar s = getSigar();
+			long processIds[] = s.getProcList();
+			ProcessQuery query = ProcessQueryFactory.getInstance().getQuery(arg);
+			long parentPid = query.findProcess(s);
 
-    private double getNumCpus()
-        throws MetricNotFoundException {
+			double count = 0;
+			for (long pid : processIds) {
+				ProcState state;
+				try {
+					state = s.getProcState(pid);
+					if (parentPid == state.getPpid()) {
+						count++;
+					}
+				} catch (SigarException e) {
+					//ok, Process likely went away
+				}
+			}
+			return count;
+		} catch (Exception e) {
+			throw new MetricNotFoundException(e.getMessage(), e);
+		}
+	}
 
-        try {
-            return (double)getSigar().getCpuInfoList().length;
-        } catch (Exception e) {
-            throw new MetricNotFoundException(e.getMessage(), e);
-        }
-    }
-    
-    private long getDiskUsage(String arg)
-        throws MetricNotFoundException {
+	private double getNumCpus()
+			throws MetricNotFoundException {
 
-        try {
-            return getSigar().getDirUsage(arg).getDiskUsage();
-        } catch (Exception e) {
-            throw new MetricNotFoundException(e.getMessage(), e);
-        }
-    }
+		try {
+			return (double)getSigar().getCpuInfoList().length;
+		} catch (Exception e) {
+			throw new MetricNotFoundException(e.getMessage(), e);
+		}
+	}
+
+	private long getDiskUsage(String arg)
+			throws MetricNotFoundException {
+
+		try {
+			return getSigar().getDirUsage(arg).getDiskUsage();
+		} catch (Exception e) {
+			throw new MetricNotFoundException(e.getMessage(), e);
+		}
+	}
 }
