@@ -52,8 +52,7 @@ import org.hyperic.util.config.ReturnStepsException;
 import org.hyperic.util.config.StringConfigOption;
 import org.hyperic.util.config.YesNoConfigOption;
 import org.hyperic.util.jdbc.DriverLoadException;
-import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
-import org.jasypt.properties.PropertyValueEncryptionUtils;
+import org.hyperic.util.security.SecurityUtil;
 
 public class ServerConfig
 extends BaseConfig {
@@ -584,7 +583,9 @@ extends BaseConfig {
 			schema.addOption(new HiddenConfigOption("server.caf.clientId", UUID.randomUUID().toString()));
 			if(isEEInstall) {
 				schema.addOption(new HiddenConfigOption("accept.eula",YesNoConfigOption.NO));
-				schema.addOption(new StringConfigOption("server.caf.brokerAddress", Q_BROKER_ADDRESS, "localhost"));
+				//TODO: we remove this question for now until the CAF feature is completed
+				//schema.addOption(new StringConfigOption("server.caf.brokerAddress", Q_BROKER_ADDRESS, "localhost"));
+				schema.addOption(new HiddenConfigOption("server.caf.brokerAddress","localhost"));
 			}
 			else {
 				schema.addOption(new HiddenConfigOption("server.caf.brokerAddress","localhost"));
@@ -823,14 +824,7 @@ extends BaseConfig {
 	}
 
 	private String encryptPassword(String algorithm, String encryptionKey, String clearTextPassword) {
-
-		// TODO: This needs to be refactored into a security utility class
-
-		StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
-		encryptor.setPassword(encryptionKey);
-		encryptor.setAlgorithm(algorithm);
-
-		return PropertyValueEncryptionUtils.encrypt(clearTextPassword, encryptor);
+		return SecurityUtil.encrypt(algorithm, encryptionKey, clearTextPassword);
 	}
 
 	protected boolean databaseExists(ConfigResponse config) throws EarlyExitException {

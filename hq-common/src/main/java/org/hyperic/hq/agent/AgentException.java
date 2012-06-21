@@ -37,4 +37,7 @@ public class AgentException extends Exception {
     public AgentException(String msg){
         super(msg);
     }
+    public AgentException(Throwable cause) {
+        super(cause);
+    }
 }

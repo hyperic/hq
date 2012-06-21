@@ -44,12 +44,26 @@
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
    
-    <bean id="jasyptConfiguration"
+   <bean id="jasyptConfiguration"
         class="org.jasypt.encryption.pbe.config.EnvironmentStringPBEConfig">
         <property name="algorithm" value="PBEWithMD5AndDES" />
         <property name="passwordSysPropertyName" value="server.encryption-key" />
     </bean>
     
+	<!--	
+	<bean id="markedStringEncryptor" class="org.hyperic.util.security.MarkedStringEncryptor">
+        <property name="config" ref="jasyptConfiguration" />
+    </bean>
+  
+    <bean id="hibernateStringEncryptor" class="org.jasypt.hibernate.encryptor.HibernatePBEStringEncryptor">
+        <property name="registeredName">
+            <value>markedStringEncryptorHibernateWrapper</value>
+        </property>
+        <property name="encryptor">
+            <ref bean="markedStringEncryptor" />
+        </property>
+    </bean> -->
+  
     <bean id="propertyPasswordEncryptor"
         class="org.jasypt.encryption.pbe.StandardPBEStringEncryptor">
         <property name="config" ref="jasyptConfiguration" />
@@ -72,7 +86,6 @@
 				<value>classpath:/jms.properties</value>
 				<value>classpath:/hibernate.properties</value>
 				<value>classpath:/tweak.properties</value>
-				<value>classpath:/hq-caf.properties</value>
 				<value>file:#{ systemProperties['user.home'] }/.hq/build.properties</value>
 				<value>classpath:/hq-server.conf</value>
 			</list>

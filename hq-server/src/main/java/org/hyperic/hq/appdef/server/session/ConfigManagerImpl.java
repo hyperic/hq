@@ -27,6 +27,8 @@ package org.hyperic.hq.appdef.server.session;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -49,6 +51,7 @@ import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -62,6 +65,8 @@ public class ConfigManagerImpl implements ConfigManager {
     private ServerDAO serverDAO;
     private PlatformDAO platformDAO;
     private ResourceManager resourceManager;
+    @Value("${server.discover.virtual.interfaces}")
+    private boolean autoDiscoverVirtualInterfaces;
 
     @Autowired
     public ConfigManagerImpl(ConfigResponseDAO configResponseDAO, ServiceDAO serviceDAO,
@@ -345,6 +350,9 @@ public class ConfigManagerImpl implements ConfigManager {
                 res.setValue(ProductPlugin.PROP_PLATFORM_TYPE, platform.typeName);
                 res.setValue(ProductPlugin.PROP_PLATFORM_IP, platform.ip);
                 res.setValue(ProductPlugin.PROP_PLATFORM_ID, String.valueOf(platform.id));
+                for (String key : platform.attributes.keySet()) {
+                	res.setValue(key, platform.attributes.get(key));
+                }
             }
         } catch (Exception exc) {
             log.warn("Error setting platform properies: " + exc, exc);
@@ -578,7 +586,21 @@ public class ConfigManagerImpl implements ConfigManager {
         PlatformConfigStuff pConfig = new PlatformConfigStuff(platform.getId().intValue(), platform.getName(), platform
             .getFqdn(), platform.getPlatformType().getName());
         loadPlatformIp(platform, pConfig);
+        loadPlatformExtraAttributesForServer(server, pConfig);
         return pConfig;
+    }
+    
+    private void loadPlatformExtraAttributesForServer(Server server,PlatformConfigStuff pConfig) {
+    	//Check if the server want's the agents to discover virtual network interfaces
+    	//Jira issue [HHQ-5569]
+    	if (server.getAppdefResourceType().getName().equalsIgnoreCase("NetworkServer")) {	
+    		pConfig.attributes.put(ProductPlugin.PROP_PLATFORM_DISCOVER_VIRTUAL_INTERFACES, 
+    				Boolean.FALSE.toString());    		
+    		if (autoDiscoverVirtualInterfaces) {   				
+    			pConfig.attributes.put(ProductPlugin.PROP_PLATFORM_DISCOVER_VIRTUAL_INTERFACES, 
+    					Boolean.TRUE.toString());  				        			
+    		}
+    	}
     }
 
     private PlatformConfigStuff getPlatformStuffForPlatform(Integer id) throws AppdefEntityNotFoundException {
@@ -621,6 +643,7 @@ public class ConfigManagerImpl implements ConfigManager {
         public String name;
         public String fqdn;
         public String typeName;
+        public Map<String, String> attributes = new HashMap<String, String>();
 
         public PlatformConfigStuff(int id, String name, String fqdn, String typeName) {
             this.id = id;

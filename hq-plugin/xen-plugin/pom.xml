@@ -8,7 +8,6 @@
         <artifactId>modules</artifactId>
        <version>5.0</version>
     </parent>
-
 	<artifactId>xen-plugin</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - Xen Plugin</name>

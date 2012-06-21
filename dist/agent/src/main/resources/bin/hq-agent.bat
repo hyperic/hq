@@ -65,7 +65,7 @@ rem Find the requested command.
 for /F %%v in ('echo %1^|findstr "^start$ ^stop$ ^restart$ ^install$ ^remove$ ^query$ ^ping$ ^setup"') do call :exec set COMMAND=%%v
 
 if "%COMMAND%" == "" (
-    echo Usage: %0 { start : stop : restart : install : remove : query : ping : setup }
+    echo Usage: %0 { start : stop : restart : install : remove : query : ping : setup : set-property }
     pause
     goto :eof
 ) else (
@@ -120,6 +120,7 @@ goto :eof
 
 :start
 "%_WRAPPER_EXE%" -t %_WRAPPER_CONF% "%wrapper_update1%"
+ping -3 XXX 127.0.0.1 >nul
 call :setup-if-no-provider
 goto :eof
 

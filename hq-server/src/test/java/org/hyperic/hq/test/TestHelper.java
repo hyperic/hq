@@ -55,6 +55,7 @@ import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.appdef.shared.ValidationException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
@@ -112,26 +113,37 @@ public class TestHelper {
     	return txTemplate ; 
     }//EOM 
     
-	protected Platform createPlatform(String agentToken, String platformType,
+    protected Platform createPlatform(String agentToken, String platformType,
 			String fqdn, String name) throws ApplicationException {
+    	return this.createPlatform(agentToken, platformType, fqdn, name, authzSubjectManager.getOverlordPojo()) ; 
+    }//EOM 
+    
+	protected Platform createPlatform(String agentToken, String platformType,
+			String fqdn, String name, final AuthzSubject subject) throws ApplicationException {
 		AIPlatformValue aiPlatform = new AIPlatformValue();
 		aiPlatform.setCpuCount(2);
 		aiPlatform.setPlatformTypeName(platformType);
 		aiPlatform.setAgentToken(agentToken);
 		aiPlatform.setFqdn(fqdn);
 		aiPlatform.setName(name);
-		return platformManager.createPlatform(
-				authzSubjectManager.getOverlordPojo(), aiPlatform);
+		return platformManager.createPlatform(subject, aiPlatform);
 	}
 
 	protected Server createServer(Platform platform, ServerType serverType,
 			String name) throws PlatformNotFoundException,
 			AppdefDuplicateNameException, ValidationException,
 			PermissionException, NotFoundException {
+		return this.createServer(platform, serverType, name, this.authzSubjectManager.getOverlordPojo()) ; 
+	}//EOM 
+	
+	protected Server createServer(Platform platform, ServerType serverType,
+			String name, final AuthzSubject subject) throws PlatformNotFoundException,
+			AppdefDuplicateNameException, ValidationException,
+			PermissionException, NotFoundException {
 		ServerValue server = new ServerValue();
 		server.setName(name);
 		return serverManager.createServer(
-				authzSubjectManager.getOverlordPojo(), platform.getId(),
+				subject, platform.getId(),
 				serverType.getId(), server);
 	}
 
@@ -160,8 +172,15 @@ public class TestHelper {
 			String serviceName, String description, String location)
 			throws ServerNotFoundException, AppdefDuplicateNameException,
 			ValidationException, PermissionException {
+		return this.createService(server, serviceType, serviceName, description, location, this.authzSubjectManager.getOverlordPojo()) ; 
+	}//EOM
+	
+	protected Service createService(Server server, ServiceType serviceType,
+			String serviceName, String description, String location, final AuthzSubject subject)
+			throws ServerNotFoundException, AppdefDuplicateNameException,
+			ValidationException, PermissionException {
 		return serviceManager.createService(
-				authzSubjectManager.getOverlordPojo(), server.getId(),
+				subject, server.getId(),
 				serviceType.getId(), serviceName, "Spring JDBC Template",
 				"my computer");
 	}

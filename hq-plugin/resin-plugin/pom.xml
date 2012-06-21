@@ -8,7 +8,6 @@
         <artifactId>modules</artifactId>
        <version>5.0</version>
     </parent>
-
 	<artifactId>resin-plugin</artifactId>
 	<packaging>pom</packaging>
 	<name>Hyperic HQ Plugin - Resin Plugin</name>

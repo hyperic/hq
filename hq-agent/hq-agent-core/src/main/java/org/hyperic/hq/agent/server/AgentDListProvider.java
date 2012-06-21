@@ -34,6 +34,14 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.security.GeneralSecurityException;
+import java.security.KeyStore;
+import java.security.KeyStore.PrivateKeyEntry;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableEntryException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -43,8 +51,14 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.AgentKeystoreConfig;
 import org.hyperic.hq.agent.db.DiskList;
 import org.hyperic.util.file.FileUtil;
+import org.hyperic.util.security.KeystoreConfig;
+import org.hyperic.util.security.KeystoreManager;
+import org.hyperic.util.security.MarkedStringEncryptor;
+import org.hyperic.util.security.SecurityUtil;
+import org.jasypt.encryption.StringEncryptor;
 
 public class AgentDListProvider implements AgentStorageProvider {
     private static final int RECSIZE  = 4000;
@@ -52,6 +66,7 @@ public class AgentDListProvider implements AgentStorageProvider {
     private static final long MAXSIZE = 50 * 1024 * 1024; // 50MB
     private static final long CHKSIZE = 10 * 1024 * 1024;  // 10MB
     private static final int CHKPERC  = 50; // Only allow < 50% free
+    private static final String DEFAULT_PRIVATE_KEY_KEY = "hq";
 
     private final Log      log;        // da logger
     private HashMap  keyVals;    // The key-value pairs
@@ -60,7 +75,7 @@ public class AgentDListProvider implements AgentStorageProvider {
     private File     writeDir;   // Dir to write stuff to
     private File     keyValFile;
     private File     keyValFileBackup;
-
+    
     // Dirty flag for when writing to keyvals.  Set to true at startup
     // to force an initial flush.
     private boolean  keyValDirty = true;      // Dirty flag for when writing to keyvals
@@ -69,6 +84,8 @@ public class AgentDListProvider implements AgentStorageProvider {
     private long      chkSize = CHKSIZE;
     private int       chkPerc = CHKPERC;
 
+    private StringEncryptor encryptor = null;
+    
     public AgentDListProvider(){
         this.log     = LogFactory.getLog(AgentDListProvider.class);
         this.keyVals = null;
@@ -203,6 +220,16 @@ public class AgentDListProvider implements AgentStorageProvider {
         return set;
     }
 
+    protected String getKeyvalsPass() throws KeyStoreException, IOException, NoSuchAlgorithmException, UnrecoverableEntryException {
+        KeystoreConfig keystoreConfig = new AgentKeystoreConfig();
+        KeyStore keystore = KeystoreManager.getKeystoreManager().getKeyStore(keystoreConfig);
+        KeyStore.Entry e = keystore.getEntry(DEFAULT_PRIVATE_KEY_KEY,
+                new KeyStore.PasswordProtection(keystoreConfig.getFilePassword().toCharArray()));
+        byte[] pk = ((PrivateKeyEntry)e).getPrivateKey().getEncoded();
+        ByteBuffer encryptionKey = Charset.forName("US-ASCII").encode(ByteBuffer.wrap(pk).toString());
+        return encryptionKey.toString();
+    }
+    
     //synchronized because concurrent threads cannot
     //have this.keyValFile open for writing on win32
     public synchronized void flush()
@@ -219,17 +246,23 @@ public class AgentDListProvider implements AgentStorageProvider {
             fOs = new FileOutputStream(this.keyValFile);
             bOs = new BufferedOutputStream(fOs);
             dOs = new DataOutputStream(bOs);
-
+            if (this.encryptor==null) {
+                this.encryptor = new MarkedStringEncryptor(SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM,getKeyvalsPass());
+            }
             synchronized(this.keyVals){
                 dOs.writeLong(this.keyVals.size());
+                
                 for(Iterator i=this.keyVals.entrySet().iterator(); 
                         i.hasNext();
                         )
                 {
                     Map.Entry ent = (Map.Entry)i.next();
 
-                    dOs.writeUTF((String)ent.getKey());
-                    dOs.writeUTF((String)ent.getValue());
+                    String encryptedKey = SecurityUtil.encrypt(this.encryptor, (String)ent.getKey());
+                    String encryptedVal =  SecurityUtil.encrypt(this.encryptor, (String)ent.getValue());
+
+                    dOs.writeUTF(encryptedKey);
+                    dOs.writeUTF(encryptedVal);
                 }
 
                 dOs.flush();
@@ -241,6 +274,8 @@ public class AgentDListProvider implements AgentStorageProvider {
             this.log.error("Error flushing data", exc);
             throw new AgentStorageException("Error flushing data: " +
                     exc.getMessage());
+        } catch (GeneralSecurityException e) {
+            throw new AgentStorageException(e.getMessage());
         } finally {
             try {if(fOs != null)fOs.close();} catch(IOException exc){}
         }
@@ -326,12 +361,23 @@ public class AgentDListProvider implements AgentStorageProvider {
             dIs = new DataInputStream(bIs);
 
             nEnts = dIs.readLong();
+
+            if (this.encryptor==null) {
+                this.encryptor = new MarkedStringEncryptor(SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM,getKeyvalsPass());
+            }
             while(nEnts-- != 0){
-                this.keyVals.put(dIs.readUTF(), dIs.readUTF());
+                String key = dIs.readUTF();
+                String val = dIs.readUTF();
+                String decryptedKey = SecurityUtil.isMarkedEncrypted(key)?SecurityUtil.decrypt(encryptor, key):key;
+                String decryptedVal = SecurityUtil.isMarkedEncrypted(val)?SecurityUtil.decrypt(encryptor, val):val;
+                this.keyVals.put(decryptedKey, decryptedVal);
             }
         } catch(FileNotFoundException exc){
             // Normal when it doesn't exist
-        } catch(IOException exc){
+        } catch (GeneralSecurityException e) {
+            this.log.error(e.getMessage());
+            throw new AgentStorageException(e.getMessage());
+ 	} catch(IOException exc){
             this.log.error("Error reading " + this.keyValFile + " loading " +
                     "last known good version");
 
@@ -345,8 +391,13 @@ public class AgentDListProvider implements AgentStorageProvider {
                 dIs = new DataInputStream(bIs);
 
                 nEnts = dIs.readLong();
+                if (this.encryptor==null) {
+                    this.encryptor = new MarkedStringEncryptor(SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM,getKeyvalsPass());
+                }
                 while(nEnts-- != 0) {
-                    this.keyVals.put(dIs.readUTF(), dIs.readUTF());
+                    String denryptedKey = SecurityUtil.encrypt(this.encryptor, dIs.readUTF());
+                    String decryptedVal = SecurityUtil.encrypt(this.encryptor, dIs.readUTF());
+                    this.keyVals.put(denryptedKey, decryptedVal);
                 }
             } catch (FileNotFoundException e) {
                 // Already checked this before, shouldn't happen
@@ -354,9 +405,13 @@ public class AgentDListProvider implements AgentStorageProvider {
                 // Throw original error
                 throw new AgentStorageException("Error reading " + 
                         this.keyValFile + ": " +
-                        exc.getMessage());
+                        e.getMessage());
+            
+            } catch(GeneralSecurityException e){
+                // Throw original error
+                throw new AgentStorageException(e.getMessage());
             }
-        } finally {
+    } finally {
             try {if(fIs != null)fIs.close();} catch(IOException exc){}
         }
             }

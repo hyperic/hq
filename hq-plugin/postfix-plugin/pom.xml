@@ -4,11 +4,10 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-        <groupId>org.hyperic.hq.plugin</groupId>
+       <groupId>org.hyperic.hq.plugin</groupId>
         <artifactId>modules</artifactId>
        <version>5.0</version>
     </parent>
-
 	<artifactId>postfix-plugin</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - Postfix Plugin</name>

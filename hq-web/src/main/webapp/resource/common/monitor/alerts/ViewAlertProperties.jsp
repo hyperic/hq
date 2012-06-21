@@ -49,7 +49,7 @@
 						<html:param name="mode" value="viewDefinition"/>
 						<html:param name="eid" value="${Resource.entityId.appdefKey}"/>
 						<html:param name="ad" value="${alertDef.id}"/>
-					    ${alertDef.name}
+                        <c:out value="${alertDef.name}" escapeXml="true"/>
 					</html:link>
 				</c:when>
 				<c:otherwise>
@@ -76,7 +76,7 @@
 				           paramId="eid" 
 				           paramName="Resource"
 						   paramProperty="entityId">
-					${Resource.name}
+                    <c:out value="${Resource.name}" escapeXml="true"/>
 				</html:link>
 			</c:if>
 		</td>
