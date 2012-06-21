@@ -60,6 +60,7 @@ public abstract class ProductPlugin extends GenericPlugin {
     public static final String PROP_PLATFORM_FQDN = "platform.fqdn";
     public static final String PROP_PLATFORM_IP   = "platform.ip";
     public static final String PROP_PLATFORM_ID   = "platform.id";
+    public static final String PROP_PLATFORM_DISCOVER_VIRTUAL_INTERFACES = "platform.discover.virtual.interfaces";
     
     public static final int DEPLOYMENT_ORDER_LAST = TypeInfo.TYPE_SERVICE + 1;
     
@@ -109,7 +110,8 @@ public abstract class ProductPlugin extends GenericPlugin {
                    plugin.getExtension() + " registered");
     }
 
-    public void init(PluginManager manager)
+    @Override
+	public void init(PluginManager manager)
         throws PluginException
     {
         this.manager = (ProductPluginManager)manager;
@@ -287,7 +289,8 @@ public abstract class ProductPlugin extends GenericPlugin {
         return getPlugin(this, name, type, info);
     }
 
-    public ConfigSchema getConfigSchema(TypeInfo info, ConfigResponse config) {
+    @Override
+	public ConfigSchema getConfigSchema(TypeInfo info, ConfigResponse config) {
         if (this.data != null) {
             ConfigSchema schema =
                 this.data.getConfigSchema(info, CFGTYPE_IDX_PRODUCT);
