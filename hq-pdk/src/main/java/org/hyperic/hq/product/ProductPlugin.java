@@ -51,7 +51,7 @@ public abstract class ProductPlugin extends GenericPlugin {
 
     //server import attribute propagated by ConfigManager
     public static final String PROP_INSTALLPATH   = "installpath";
-
+    public static final String PROP_PLATFORM_DISCOVER_VIRTUAL_INTERFACES = "platform.discover.virtual.interfaces";
     public static final String PROP_RESOURCE_NAME = "resource.name";
 
     //platform attributes propogated by ConfigManager
