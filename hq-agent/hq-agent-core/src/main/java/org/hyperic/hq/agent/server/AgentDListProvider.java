@@ -34,8 +34,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.KeyStore.PrivateKeyEntry;
@@ -66,7 +64,6 @@ public class AgentDListProvider implements AgentStorageProvider {
     private static final long MAXSIZE = 50 * 1024 * 1024; // 50MB
     private static final long CHKSIZE = 10 * 1024 * 1024;  // 10MB
     private static final int CHKPERC  = 50; // Only allow < 50% free
-    private static final String DEFAULT_PRIVATE_KEY_KEY = "hq";
 
     private final Log      log;        // da logger
     private HashMap  keyVals;    // The key-value pairs
@@ -74,7 +71,7 @@ public class AgentDListProvider implements AgentStorageProvider {
     private HashMap  overloads;
     private File     writeDir;   // Dir to write stuff to
     private File     keyValFile;
-    private File     keyValFileBackup;
+    private File     keyValFileBackup; 
     
     // Dirty flag for when writing to keyvals.  Set to true at startup
     // to force an initial flush.
@@ -223,11 +220,11 @@ public class AgentDListProvider implements AgentStorageProvider {
     protected String getKeyvalsPass() throws KeyStoreException, IOException, NoSuchAlgorithmException, UnrecoverableEntryException {
         KeystoreConfig keystoreConfig = new AgentKeystoreConfig();
         KeyStore keystore = KeystoreManager.getKeystoreManager().getKeyStore(keystoreConfig);
-        KeyStore.Entry e = keystore.getEntry(DEFAULT_PRIVATE_KEY_KEY,
+             
+        KeyStore.Entry e = keystore.getEntry(keystoreConfig.getAlias(),
                 new KeyStore.PasswordProtection(keystoreConfig.getFilePassword().toCharArray()));
-        byte[] pk = ((PrivateKeyEntry)e).getPrivateKey().getEncoded();
-        ByteBuffer encryptionKey = Charset.forName("US-ASCII").encode(ByteBuffer.wrap(pk).toString());
-        return encryptionKey.toString();
+        final String pk = ((PrivateKeyEntry)e).getPrivateKey().toString() ;  
+        return pk.replaceAll("[^a-zA-Z0-9]", "_") ;
     }
     
     //synchronized because concurrent threads cannot
@@ -526,6 +523,6 @@ public class AgentDListProvider implements AgentStorageProvider {
         long      chkSize;
         int       chkPerc;
     }
+    
+    }
 
-
-}
