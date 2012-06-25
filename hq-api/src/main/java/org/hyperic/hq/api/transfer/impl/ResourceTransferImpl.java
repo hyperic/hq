@@ -113,10 +113,10 @@ public class ResourceTransferImpl implements ResourceTransfer{
 	    
 	public final Resource getResource(ApiMessageContext messageContext, final String platformNaturalID, final ResourceType resourceType, 
 			final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) throws SessionNotFoundException, SessionTimeoutException {
+	    AuthzSubject authzSubject = messageContext.getAuthzSubject();
 		if(resourceStatusType == ResourceStatusType.AUTO_DISCOVERED) { 
 			return this.getAIResource(platformNaturalID, resourceType, hierarchyDepth, responseMetadata) ; 
-		}else { 
-			AuthzSubject authzSubject = messageContext.getSubject().getAuthzSubject();
+		}else { 			
             return this.getResourceInner(new Context(authzSubject, platformNaturalID, resourceType, responseMetadata, this), hierarchyDepth) ;  
 		}//EO else if approved resource 
 	}//EOM
@@ -129,11 +129,12 @@ public class ResourceTransferImpl implements ResourceTransfer{
 	 * @param responseMetadata
 	 * @return
 	 */
-	public final Resource getResource(final String platformID, final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) {
+	public final Resource getResource(ApiMessageContext messageContext, final String platformID, final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) {
+	    AuthzSubject authzSubject = messageContext.getAuthzSubject();
 		if(resourceStatusType == ResourceStatusType.AUTO_DISCOVERED) { 
 			throw new UnsupportedOperationException("AI Resource load by internal ID is unsupported") ; 
 		}else { 
-			return this.getResourceInner(new Context(this.getAuthzSubject(), platformID, responseMetadata, this), hierarchyDepth) ;
+			return this.getResourceInner(new Context(authzSubject, platformID, responseMetadata, this), hierarchyDepth) ;
 		}//EO else if approved resource type 
 		 
 	}//EOM 
@@ -197,21 +198,21 @@ public class ResourceTransferImpl implements ResourceTransfer{
 	}//EOM
 	
 	
-	public final ResourceBatchResponse approveResource(final Resources aiResources) {
+	public final ResourceBatchResponse approveResource(ApiMessageContext messageContext, final Resources aiResources) {
 		//NYI 
 		return null; 
 	}//EOM 
 	
-	private final AuthzSubject getAuthzSubject() {
-		//TODO: replace with actual subject once security layer is implemented 
-		//return authzSubjectManager.getOverlordPojo();
-		AuthzSubject subject = authzSubjectManager.findSubjectByName("hqadmin") ;
-		return (subject != null ? subject : authzSubjectManager.getOverlordPojo()) ; 
-	}//EOM
+//	private final AuthzSubject getAuthzSubject() {
+//		//TODO: replace with actual subject once security layer is implemented 
+//		//return authzSubjectManager.getOverlordPojo();
+//		AuthzSubject subject = authzSubjectManager.findSubjectByName("hqadmin") ;
+//		return (subject != null ? subject : authzSubjectManager.getOverlordPojo()) ; 
+//	}//EOM
 	
 	
 	@Transactional(readOnly=false)
-	public final ResourceBatchResponse updateResources(final Resources resources) {
+	public final ResourceBatchResponse updateResources(ApiMessageContext messageContext, final Resources resources) {
 
 		final ResourceBatchResponse response = new ResourceBatchResponse(this.errorHandler) ; 
 		
@@ -224,7 +225,8 @@ public class ResourceTransferImpl implements ResourceTransfer{
 		Resource inputResource = null ; 
 		ResourceConfig resourceConfig = null ; 
 		
-		final Context flowContext = new Context(this.getAuthzSubject(), this) ; 
+		AuthzSubject authzSubject = messageContext.getAuthzSubject();
+		final Context flowContext = new Context(authzSubject, this) ; 
 		
 		for(int i=0; i < noOfInputResources; i++) { 
 			

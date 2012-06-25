@@ -29,6 +29,7 @@
  * *********************************************************************/
 package org.hyperic.hq.api.services.impl;
 
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 
 /**
@@ -39,17 +40,17 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 public class ApiMessageContext {
 
     private final Integer sessionId;
-    private final AuthzSubjectValue subject;
+    private final AuthzSubject authzSubject;
     
 
 
-    public ApiMessageContext(Integer sessionId, AuthzSubjectValue subject) {
+    public ApiMessageContext(Integer sessionId, AuthzSubject authzSubject) {
         this.sessionId = sessionId;
-        this.subject = subject;
+           this.authzSubject = authzSubject;
     }
 
-    public AuthzSubjectValue getSubject() {
-        return this.subject;
+    public AuthzSubject getAuthzSubject() {
+        return this.authzSubject;
     }
     
     public Integer getSessionId() {

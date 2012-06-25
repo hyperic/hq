@@ -37,12 +37,12 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 
 public interface ResourceTransfer {
 
-	Resource getResource(ApiMessageContext messageContext, final String platformNaturalID, final ResourceType resourceType, 
+	Resource getResource(final ApiMessageContext messageContext, final String platformNaturalID, final ResourceType resourceType, 
 			final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) throws SessionNotFoundException, SessionTimeoutException ; 
 	
-	Resource getResource(final String platformID, final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) ; 
+	Resource getResource(final ApiMessageContext messageContext, final String platformID, final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) ; 
 	
 	
-	ResourceBatchResponse approveResource(final Resources aiResources) ;
-	ResourceBatchResponse updateResources(final Resources resources); 
+	ResourceBatchResponse approveResource(final ApiMessageContext messageContext, final Resources aiResources) ;
+	ResourceBatchResponse updateResources(final ApiMessageContext messageContext, final Resources resources); 
 }//EOI 

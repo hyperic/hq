@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.cxf.jaxrs.client.ServerWebApplicationException;
-import org.apache.cxf.jaxrs.client.WebClient;
 import org.hyperic.hq.api.model.Resource;
 import org.hyperic.hq.api.model.ResourceConfig;
 import org.hyperic.hq.api.model.ResourceDetailsType;
@@ -62,7 +61,6 @@ import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.auth.shared.SessionManager;
-import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.product.MeasurementPlugin;
@@ -88,6 +86,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.ExpectedException;
 
+@SecurityInfo(username="hqadmin",password="hqadmin")
 @DirtiesContext
 @ServiceBindingsIteration(ResourceServiceTest.CONTEXT_URL + "/rest-api/inventory/resources")
 @TestData(ResourceServiceTestDataPopulator.class)
@@ -193,6 +192,7 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 		this.assertResource(resource, this.currentPlatform, hierarchyDepth, null) ;
     }//EOM 
     
+//    @SecurityInfo(username="hqadmin",password="hqadmin")
     @PlatformsIteration(noOfPlatforms=1)
     @Test
     public final void testGetResourceDepth1() throws Throwable { 
@@ -413,7 +413,7 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 	  }//eOcatch b lok 
     }//EO while there are more resources to compare  
     
-    private final void assertUpdate(final ResourceBatchResponse response, final Resources expectedResources, final Object[][] testHarness, final int[] testHarnessMetadata) throws SessionNotFoundException { 
+    private final void assertUpdate(final ResourceBatchResponse response, final Resources expectedResources, final Object[][] testHarness, final int[] testHarnessMetadata) throws Throwable { 
     	Resource responseResource = null; 
     	
     	final List<Resource> resourceList = expectedResources.getResources() ; 
@@ -479,31 +479,33 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     	
     }//EOM 
     
-    private final Resource getApprovedResource(final AppdefResource appdefResource, final int hierarchyDepth) throws SessionNotFoundException {
+    private final Resource getApprovedResource(final AppdefResource appdefResource, final int hierarchyDepth) throws Throwable {
     	return this.getApprovedResource(appdefResource.getResource().getId()+"", hierarchyDepth) ; 
     }//EOM 
     
-    private final Resource getApprovedResource(final String ID, final int hierarchyDepth) throws SessionNotFoundException {
+    private final Resource getApprovedResource(final String ID, final int hierarchyDepth) throws Throwable {
     	return this.getResource(ID, null /*naturalID*/, null /*resourceType*/, ResourceStatusType.APPROVED, hierarchyDepth, new ResourceDetailsType[]{ ResourceDetailsType.ALL } ) ;
     }//EOM 
     
-    private final Resource getApprovedResource(final String naturalID, final ResourceType enumResourceType, final int hierarchyDepth) throws SessionNotFoundException {
+    private final Resource getApprovedResource(final String naturalID, final ResourceType enumResourceType, final int hierarchyDepth) throws Throwable {
     	return this.getResource(null/*ID*/, naturalID, enumResourceType, ResourceStatusType.APPROVED, hierarchyDepth, new ResourceDetailsType[]{ ResourceDetailsType.ALL } ) ;
     }//EOM 
     
-    private final Resource getApprovedResource(final String ID, final String naturalID, final ResourceType enumResourceType, final int hierarchyDepth, final ResourceDetailsType[] responseStructure) throws SessionNotFoundException { 
+    private final Resource getApprovedResource(final String ID, final String naturalID, final ResourceType enumResourceType, final int hierarchyDepth, final ResourceDetailsType[] responseStructure) throws Throwable { 
     	return this.getResource(ID, naturalID, enumResourceType, ResourceStatusType.APPROVED, hierarchyDepth, responseStructure) ; 
     }
     
     private final Resource getResource(final String ID, final String naturalID, final ResourceType enumResourceType, 
-    						final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseStructure) throws SessionNotFoundException {
-    	Resource resource = null; 
-    	
+    						final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseStructure) throws Throwable {
+    	Resource resource = null;
+    	 	
     	if(ID != null) { 
-    		resource = service.getResource(ID, resourceStatusType, hierarchyDepth, responseStructure) ;
+                resource = service.getResource(ID, resourceStatusType, hierarchyDepth, responseStructure) ;
+
     	}else { 
     		resource = service.getResource(naturalID, enumResourceType, resourceStatusType, hierarchyDepth, responseStructure) ;
     	}//EO else if natural ID 
+
     	return resource ; 
     }//EOM 
     

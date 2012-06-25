@@ -11,6 +11,9 @@ import org.apache.cxf.jaxrs.impl.ResponseBuilderImpl;
 import org.hyperic.hq.api.common.InterfaceUser;
 import org.hyperic.hq.api.services.ResourceService;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
+import org.hyperic.hq.auth.shared.SessionManager;
+import org.hyperic.hq.auth.shared.SessionNotFoundException;
+import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class RestApiService {
@@ -19,6 +22,9 @@ public class RestApiService {
     protected ExceptionToErrorCodeMapper errorHandler;
     @javax.ws.rs.core.Context
     protected MessageContext messageContext;
+    
+    @Autowired 
+    SessionManager sessionManager;
 
     /**
      * The session scope attribute under which the User object
@@ -31,7 +37,7 @@ public class RestApiService {
         super();
     }
 
-    private WebApplicationException createWebApplicationException(ServletException e, Response.Status status, String errorCode) {
+    protected WebApplicationException createWebApplicationException(ServletException e, Response.Status status, String errorCode) {
         ResponseBuilderImpl builder = new ResponseBuilderImpl();
         builder.status(status);
         builder.entity(errorCode);
@@ -43,10 +49,11 @@ public class RestApiService {
 
     /** Return the <code>ApiMessageContext</code> representing the person currently
      * interacting with the product.
+     * @throws SessionTimeoutException 
+     * @throws SessionNotFoundException 
      * @exception WebApplicationException if the session cannot be accessed or does not contain correct information
      */
-    protected ApiMessageContext newApiMessageContext(HttpServletRequest request)
-        throws ServletException {
+    protected ApiMessageContext newApiMessageContext(HttpServletRequest request) throws SessionNotFoundException, SessionTimeoutException {
         //do not create a session one should already exist.
         HttpSession session = request.getSession(false);
         if (session == null) {            
@@ -62,8 +69,10 @@ public class RestApiService {
             WebApplicationException webApplicationException = 
                     errorHandler.newWebApplicationException(Response.Status.UNAUTHORIZED, ExceptionToErrorCodeMapper.ErrorCode.INVALID_SESSION);            
             throw webApplicationException;            
-        }
-        return new ApiMessageContext(webUser.getSessionId(), webUser.getSubject());
+        }       
+        
+        Integer sessionId = webUser.getSessionId();
+        return new ApiMessageContext(sessionId, sessionManager.getSubject(sessionId));
     }    
     
     
@@ -75,6 +84,7 @@ public class RestApiService {
      *            the http session
      */
     protected static InterfaceUser getWebUser(HttpSession session) {
+
         if (session == null) {
             return null;
         }
