@@ -101,21 +101,21 @@ public class RuntimeReportProcessor {
 
     private final AgentManager agentManager;
     
-    private AuditManager auditManager;
+    private final AuditManager auditManager;
     
-    private ResourceManager resourceManager;
+    private final ResourceManager resourceManager;
     
-    private MeasurementProcessor measurementProcessor;
+    private final MeasurementProcessor measurementProcessor;
     
-    private ZeventEnqueuer zEventManager;
+    private final ZeventEnqueuer zEventManager;
 
     private AuthzSubject _overlord;
-    private List<ServiceMergeInfo> _serviceMerges = new ArrayList<ServiceMergeInfo>();
-    private Set<ServiceType> serviceTypeMerges = new HashSet<ServiceType>();
+    private final List<ServiceMergeInfo> _serviceMerges = new ArrayList<ServiceMergeInfo>();
+    private final Set<ServiceType> serviceTypeMerges = new HashSet<ServiceType>();
     private String _agentToken;
-    private ServiceTypeFactory serviceTypeFactory;
-    private AIAuditFactory aiAuditFactory;
-    private SessionFactory sessionFactory;
+    private final ServiceTypeFactory serviceTypeFactory;
+    private final AIAuditFactory aiAuditFactory;
+    private final SessionFactory sessionFactory;
 
     @Autowired
     public RuntimeReportProcessor(AutoinventoryManager aiMgr, PlatformManager platformMgr, ServerManager serverMgr,
@@ -453,7 +453,12 @@ public class RuntimeReportProcessor {
             if (update = (server != null)) {
                 // UPDATE SERVER
                 log.info("Updating server: " + server.getName());
-
+                // Want to make sure that the Resource gets love after commit - 
+                //The auto inventory configuration will get updated without
+                //triggering run time scan at the agent
+                ResourceUpdatedZevent event =
+                               new ResourceUpdatedZevent(subject, server.getEntityId());
+                zEventManager.enqueueEventAfterCommit(event);
                 ServerValue foundAppdefServer = AIConversionUtil.mergeAIServerIntoServer(aiserver, server
                     .getServerValue());
                 server = serverManager.updateServer(subject, foundAppdefServer);

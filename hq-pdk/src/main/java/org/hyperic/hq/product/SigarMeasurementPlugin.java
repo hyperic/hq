@@ -29,21 +29,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.sigar.Sigar;
-import org.hyperic.sigar.SigarProxy;
-import org.hyperic.sigar.SigarProxyCache;
 import org.hyperic.sigar.SigarException;
 import org.hyperic.sigar.SigarNotImplementedException;
+import org.hyperic.sigar.SigarProxy;
+import org.hyperic.sigar.SigarProxyCache;
 import org.hyperic.sigar.jmx.SigarInvokerJMX;
-
+import org.hyperic.sigar.ptql.MalformedQueryException;
+import org.hyperic.sigar.ptql.ProcessFinder;
 import org.hyperic.sigar.ptql.ProcessQuery;
 import org.hyperic.sigar.ptql.ProcessQueryFactory;
-import org.hyperic.sigar.ptql.ProcessFinder;
-import org.hyperic.sigar.ptql.MalformedQueryException;
 import org.hyperic.sigar.ptql.QueryLoadException;
-
 import org.hyperic.util.StringUtil;
-
 import org.hyperic.util.config.ConfigResponse;
 
 public class SigarMeasurementPlugin extends MeasurementPlugin {
@@ -51,12 +49,16 @@ public class SigarMeasurementPlugin extends MeasurementPlugin {
     public static final String DOMAIN      = "sigar";
     public static final String PTQL_DOMAIN = "sigar.ptql";
     public static final String PTQL_CONFIG = "process.query";
-
+    
     private Sigar      sigar        = null;
     private SigarProxy sigarProxy   = null;
     private ProcessFinder processFinder = null;
     private static final Map AVAIL_ATTRS = new HashMap();
 
+    protected static final String _3A = "%3A";
+    protected static final String NETWORK_SERVER_INTERFACE = "NetworkServer Interface";
+  	protected static final String NET_IF_STATAS = "NetIfstat";
+    
     //Availability helpers. Assume resource is available if
     //we can collect the given attribute.
     static {
@@ -84,14 +86,16 @@ public class SigarMeasurementPlugin extends MeasurementPlugin {
         return this.sigar;
     }
     
-    public void shutdown() throws PluginException {
+    @Override
+	public void shutdown() throws PluginException {
         if (this.sigar != null) {
             this.sigar.close();
         }
         super.shutdown();
     }
 
-    public String translate(String template, ConfigResponse config) {
+    @Override
+	public String translate(String template, ConfigResponse config) {
         if (template.indexOf(PTQL_DOMAIN + ":") > 0) {
             //do not encode the query input.
             String newTemplate =
@@ -189,7 +193,8 @@ public class SigarMeasurementPlugin extends MeasurementPlugin {
         return new MetricValue(returnVal, System.currentTimeMillis());
     }
 
-    public MetricValue getValue(Metric metric) 
+    @Override
+	public MetricValue getValue(Metric metric) 
         throws PluginException,
                MetricNotFoundException,
                MetricUnreachableException
@@ -200,8 +205,17 @@ public class SigarMeasurementPlugin extends MeasurementPlugin {
         String name = metric.getObjectName();
         String attr = metric.getAttributeName();
 
+        //Virtual network interfaces have only availability data so if we will try to get other kind
+        //of metrics for them via Sigar an exception will get thrown.
+        //Jira issue [HHQ-5569]
+        if ((name.contains(NETWORK_SERVER_INTERFACE) ||
+        		name.contains(NET_IF_STATAS))&& name.contains(_3A) && (null == metric.getCategory() ||
+        		!metric.getCategory().equals(MeasurementConstants.CAT_AVAILABILITY) )) {
+        	return new MetricValue(Double.NaN);
+        }
+
         if (this.sigar == null) {
-            getSigar();
+        	getSigar();
         }
 
         //XXX: Until these are supported within SIGAR
@@ -307,7 +321,7 @@ public class SigarMeasurementPlugin extends MeasurementPlugin {
                 useVal = new Double(avail);
             }
             else {
-                useVal = new Double((int)c);
+                useVal = new Double(c);
             }
         }
         else {

@@ -32,7 +32,6 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.hyperic.hq.agent.AgentRemoteValue;
 import org.hyperic.util.GenericValueMap;
 import org.hyperic.util.StringUtil;
@@ -49,9 +48,9 @@ public class ConfigStorage {
     private static Log log =
         LogFactory.getLog(ConfigStorage.class.getName());
 
-    private AgentStorageProvider storage;
-    private String keylistName;
-    private String rootPrefix;
+    private final AgentStorageProvider storage;
+    private final String keylistName;
+    private final String rootPrefix;
 
     public ConfigStorage(AgentStorageProvider storage,
                          String keylistName,
@@ -76,8 +75,8 @@ public class ConfigStorage {
         return keys;
     }
     
-    public Map load() {
-        Map configs = new HashMap();
+    public Map<Key, ConfigResponse> load() {
+        Map<Key, ConfigResponse> configs = new HashMap<Key, ConfigResponse>();
         StringTokenizer tok =
             new StringTokenizer(getKeys(), Key.DELIM);
 
@@ -270,12 +269,14 @@ public class ConfigStorage {
             return this.typeName;
         }
 
-        public int hashCode() {
+        @Override
+		public int hashCode() {
             //same as AppdefEntityID.hashCode()
             return this.type * this.id;
         }
 
-        public boolean equals(Object o) {
+        @Override
+		public boolean equals(Object o) {
             if (o instanceof Key) {
                 Key k = (Key)o;
                 
@@ -287,7 +288,8 @@ public class ConfigStorage {
             }
         }
 
-        public String toString() {
+        @Override
+		public String toString() {
             return this.key;
         }
     }

@@ -30,6 +30,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentRemoteValue;
 import org.hyperic.hq.agent.server.AgentDaemon;
@@ -37,6 +39,7 @@ import org.hyperic.hq.agent.server.AgentRunningException;
 import org.hyperic.hq.agent.server.AgentStorageException;
 import org.hyperic.hq.agent.server.AgentStorageProvider;
 import org.hyperic.hq.agent.server.ConfigStorage;
+import org.hyperic.hq.agent.server.ConfigStorage.Key;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.CompositeRuntimeResourceReport;
@@ -56,9 +59,6 @@ import org.hyperic.util.PluginLoader;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.timer.StopWatch;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 class RuntimeAutodiscoverer implements RuntimeScanner {
 
     private static final long DEFAULT_SCAN_INTERVAL = 15 * 60000;
@@ -72,11 +72,11 @@ class RuntimeAutodiscoverer implements RuntimeScanner {
     private static Log _log =
         LogFactory.getLog(RuntimeAutodiscoverer.class.getName());
 
-    private AutoinventoryCommandsServer _aicmd;
-    private AgentDaemon                 _agent;
-    private AutoinventoryCallbackClient _client;
+    private final AutoinventoryCommandsServer _aicmd;
+    private final AgentDaemon                 _agent;
+    private final AutoinventoryCallbackClient _client;
     private AutoinventoryPluginManager  _apm;
-    private ConfigStorage _storage, _serviceStorage;
+    private final ConfigStorage _storage, _serviceStorage;
 
     //"current" interval can be changed on demand by the
     //trigger methods to scan sooner than the "normal" interval.
@@ -140,7 +140,7 @@ class RuntimeAutodiscoverer implements RuntimeScanner {
 
         ConfigStorage.Key key = configStorage.getKey(args);
         boolean isEnable = (args.getValue("disable.rtad") == null);
-
+        boolean isUpdate = (null != configStorage.load().get(key));
         try {
             _lastReport = null; //clear cache
             if (isEnable) {
@@ -152,9 +152,13 @@ class RuntimeAutodiscoverer implements RuntimeScanner {
                         _insertsDuringScan.put(key, config);
                     }
                 } else {
-                    _log.debug("Triggering scan after storing config for: " +
-                              key);
-                    triggerScan();
+                	_log.debug("Triggering scan after storing config for: " +
+                			key);
+                	//If this is an update of the configuration for an existing resource
+                	//we will wait until the next run time scan
+                	if (!isUpdate) {
+                		triggerScan();
+                	}
                 }
             } else {
                 configStorage.remove(key);
@@ -197,7 +201,7 @@ class RuntimeAutodiscoverer implements RuntimeScanner {
     /** @see org.hyperic.hq.autoinventory.RuntimeScanner#doRuntimeScan */
     public void doRuntimeScan() throws AutoinventoryException {
         //This Map is a copy, we can do with it as we please.
-        Map configs = _storage.load();
+        Map<Key, ConfigResponse> configs = _storage.load();
         
         _isRuntimeScanning = (configs.size() > 0);
 

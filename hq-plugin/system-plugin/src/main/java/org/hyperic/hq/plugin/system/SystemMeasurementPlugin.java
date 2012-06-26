@@ -42,9 +42,6 @@ public class SystemMeasurementPlugin
     extends SigarMeasurementPlugin
 {
 
-    private static final String _3A = "%3A";
-	private static final String NETWORK_SERVER_INTERFACE = "NetworkServer Interface";
-
 	private void reportError(Metric metric, Exception e) {
         getLog().error(metric + ": " + e.getMessage(), e);
         getManager().reportEvent(metric,
