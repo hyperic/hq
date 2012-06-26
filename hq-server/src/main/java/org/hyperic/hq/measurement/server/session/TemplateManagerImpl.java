@@ -309,14 +309,9 @@ public class TemplateManagerImpl implements TemplateManager {
         return ids;
     }
 
-    /**
-     * Look up a measurement template IDs for a monitorable type.
-     * 
-     * @return an array of ID values
-     */
     @Transactional(readOnly = true)
-    public List<MeasurementTemplate> findTemplates(List<String> type) {
-        return measurementTemplateDAO.findTemplatesByMonitorableType(type);
+    public /*Map<String,List<MeasurementTemplate>>*/List<MeasurementTemplate> findTemplatesByName(List<String> tmpNames) {
+    	return measurementTemplateDAO.findTemplatesByName(tmpNames);
     }
 
     /**

@@ -45,6 +45,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.PostConstruct;
@@ -84,14 +85,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ibm.icu.util.Calendar;
+
 /**
  * The DataManagerImpl can be used to retrieve measurement data points
  * 
  */
 @Service
 @Transactional
-public class DataManagerImpl implements DataManager {
 
+public class DataManagerImpl implements DataManager {
     private static final String ERR_START = "Begin and end times must be positive";
     private static final String ERR_END = "Start time must be earlier than end time";
     private static final String LOG_CTX = DataManagerImpl.class.getName();
@@ -136,7 +139,7 @@ public class DataManagerImpl implements DataManager {
     private boolean confDefaultsLoaded = false;
 
     // Purge intervals, loaded once on first invocation.
-    private long purgeRaw, purge1h, purge6h;
+    private long purgeRaw, purge1h, purge6h, purge1d;
 
     private static final long HOURS_PER_MEAS_TAB = MeasTabManagerUtil.NUMBER_OF_TABLES_PER_DAY;
 
@@ -894,11 +897,14 @@ public class DataManagerImpl implements DataManager {
         String purgeRawString = conf.getProperty(HQConstants.DataPurgeRaw);
         String purge1hString = conf.getProperty(HQConstants.DataPurge1Hour);
         String purge6hString = conf.getProperty(HQConstants.DataPurge6Hour);
+        String purge1dString = conf.getProperty(HQConstants.DataPurge1Day);
 
         try {
             purgeRaw = Long.parseLong(purgeRawString);
             purge1h = Long.parseLong(purge1hString);
             purge6h = Long.parseLong(purge6hString);
+            purge1d = Long.parseLong(purge1dString);
+            
             confDefaultsLoaded = true;
         } catch (NumberFormatException e) {
             // Shouldn't happen unless manual edit of config table
@@ -906,11 +912,61 @@ public class DataManagerImpl implements DataManager {
         }
     }
 
-    private String getDataTable(long begin, long end, int measId) {
-        Integer[] empty = new Integer[1];
-        empty[0] = new Integer(measId);
-        return getDataTable(begin, end, empty);
+    protected interface IDataTablePickingStrategy {
+        String getDataTable(long begin, long end, int measId);
     }
+    
+    protected class DataTablePickingTimeFrameStrategy implements IDataTablePickingStrategy {
+        protected final long HOUR_IN_MILLI = TimeUnit.MILLISECONDS.convert(1L, TimeUnit.HOURS);
+        protected final long SIX_HOURS_IN_MILLI = TimeUnit.MILLISECONDS.convert(6L, TimeUnit.HOURS);
+        protected final long DAY_IN_MILLI = TimeUnit.MILLISECONDS.convert(1L, TimeUnit.DAYS);
+        
+        protected int maxDTPs;
+        
+        DataTablePickingTimeFrameStrategy(int maxDTPs) {
+            this.maxDTPs=maxDTPs;
+        }
+        
+        
+        /**
+         *  find the aggregation table with the greatest interval which is smaller than the requested time frame
+         *  and which the time frame doesn't cover a range which is even partially after its purge has been done
+         *  and in which no more than maxDTPs fit in the requested time frame
+         */
+        public String getDataTable(long begin, long end, Measurement msmt) {
+            long tf = end - begin;  // the time frame
+            long maxInterval = tf / this.maxDTPs; // the max interval for which maxDTPs DTPs still fit in the time frame
+            String correctTable = null;
+            if (tf<msmt.getInterval()) {
+                return null;
+            }
+            long now = System.currentTimeMillis();
+            if (msmt.getInterval()<=maxInterval && begin>=DataManagerImpl.this.purgeRaw+now) {
+                correctTable = MeasurementConstants.TAB_DATA;
+            } else if (tf>=HOUR_IN_MILLI) {
+                if (HOUR_IN_MILLI<=maxInterval && begin>=DataManagerImpl.this.purge1h+now) {
+                    correctTable = MeasurementConstants.TAB_DATA_1H;
+                } else if (tf>=SIX_HOURS_IN_MILLI) {
+                    if (SIX_HOURS_IN_MILLI<=maxInterval && begin>=DataManagerImpl.this.purge6h+now) {
+                        correctTable = MeasurementConstants.TAB_DATA_6H;
+                    } else if (/*tf>=DAY_IN_MILLI &&*/ DAY_IN_MILLI<=maxInterval && begin>=DataManagerImpl.this.purge1d+now) {
+                        correctTable = MeasurementConstants.TAB_DATA_1D;
+                    }
+                }
+            }
+            return correctTable;
+        }
+    }
+    
+    protected class DataTablePickingRegularStrategy implements IDataTablePickingStrategy {
+        public String getDataTable(long begin, long end, int measId) {
+            Integer[] empty = new Integer[1];
+            empty[0] = new Integer(measId);
+            return DataManagerImpl.this.getDataTable(begin, end, empty);
+        }
+    }
+    
+
 
     private boolean usesMetricUnion(long begin) {
         long now = System.currentTimeMillis();
@@ -982,6 +1038,13 @@ public class DataManagerImpl implements DataManager {
         }
     }
 
+    public PageList<HighLowMetricValue> getHistoricalData(Measurement m, 
+            long begin, long end, PageControl pc, boolean prependAvailUnknowns, int maxDtps) {
+        
+        return null;
+    }
+
+
     /**
      * Fetch the list of historical data points given a begin and end time
      * range. Returns a PageList of DataPoints without begin rolled into time
@@ -1021,7 +1084,7 @@ public class DataManagerImpl implements DataManager {
      * 
      */
     @Transactional(readOnly = true)
-    public PageList<HighLowMetricValue> getHistoricalData(Measurement m, long begin, long end,
+    public PageList<HighLowMetricValutf>=DAY_IN_MILLI &&e> getHistoricalData(Measurement m, long begin, long end,
                                                           PageControl pc) {
         return getHistoricalData(m, begin, end, pc, false);
     }

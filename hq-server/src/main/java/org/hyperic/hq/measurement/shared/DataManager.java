@@ -85,6 +85,9 @@ public interface DataManager {
     public PageList<HighLowMetricValue> getHistoricalData(Measurement m, long begin, long end, PageControl pc,
                                                           boolean prependAvailUnknowns);
 
+    public PageList<HighLowMetricValue> getHistoricalData(Measurement m, long begin, long end, PageControl pc,
+            boolean prependAvailUnknowns, int maxDtps);
+
     /**
      * Fetch the list of historical data points given a begin and end time
      * range. Returns a PageList of DataPoints without begin rolled into time

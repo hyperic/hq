@@ -180,7 +180,8 @@ public class MeasurementTemplateDAO
         return getSession().createQuery(sql).setString(0, type).setString(1, cat).list();
     }
 
-    Map<String,List<MeasurementTemplate>> findTemplatesByName(List<String> tmpNames) {
+    /*Map<String,MeasurementTemplate>*/
+    List<MeasurementTemplate> findTemplatesByName(List<String> tmpNames) {
     	StringBuilder whereCondition = new StringBuilder();
     	if (tmpNames.size()>0) {
     		whereCondition.append("where t.name=?");
@@ -194,12 +195,14 @@ public class MeasurementTemplateDAO
         for (String tmpName : tmpNames) {
         	getTmpQuery.setString(i++, tmpName);
 		}
-        List<MeasurementTemplate> tmps = getTmpQuery.list();
+        List<MeasurementTemplate> tmpsRes = getTmpQuery.list();
+        
         // sort answer into the map
-        Map<String,List<MeasurementTemplate>> tmpsMap = new HashMap<String,List<MeasurementTemplate>>();
-        for (String tmpName : tmpNames) {
-        	tmpNames.
-        }
+//        Map<String,MeasurementTemplate> tmpsMap = new HashMap<String,MeasurementTemplate>();
+//        for (MeasurementTemplate tmpRes : tmpsRes) {
+//        	tmpsMap.put(tmpRes.getName(),tmpRes);
+//        }
+        return tmpsRes;
     }
 
     @SuppressWarnings("unchecked")

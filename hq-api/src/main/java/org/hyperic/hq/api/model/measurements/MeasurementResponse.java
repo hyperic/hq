@@ -25,7 +25,7 @@ import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 public class MeasurementResponse extends BatchResponseBase {
 //	@XmlElement
 //    private List<Resource> resources;
-	private List<Measurement> measurements = new List<Measurement>;
+	private List<Measurement> measurements = new ArrayList<Measurement>();
 	
 	public MeasurementResponse(
 			ExceptionToErrorCodeMapper exceptionToErrorCodeMapper) {
@@ -46,10 +46,6 @@ public class MeasurementResponse extends BatchResponseBase {
 	
 	public List<Measurement> getMeasurements() {
 		return this.measurements;
-	}
-	
-	public void putMetrics(Measurement msmt, List<Metric> metrics) {
-		
 	}
 	
 //    public ResourcesMeasurementsBatchResponse(BatchResponse<Resource> batchResponse, ExceptionToErrorCodeMapper exceptionToErrorCodeMapper) {
@@ -76,6 +72,6 @@ public class MeasurementResponse extends BatchResponseBase {
 
 	@Override
 	public boolean equals(Object obj) {
-		return ;super.equals(obj);
+		return false;//super.equals(obj);
 	}
 }

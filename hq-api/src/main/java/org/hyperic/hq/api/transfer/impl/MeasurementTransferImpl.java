@@ -46,10 +46,9 @@ import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.api.model.Resources;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
-import org.hyperic.hq.api.model.measurements.MeasurementsRequest;
-import org.hyperic.hq.api.model.measurements.MeasurementsRequest;
-import org.hyperic.hq.api.model.measurements.MeasurementsResponse;
-import org.hyperic.hq.api.model.measurements.ResourceMeasurementsRequestsCollection;
+import org.hyperic.hq.api.model.measurements.MeasurementRequest;
+import org.hyperic.hq.api.model.measurements.MeasurementRequest;
+import org.hyperic.hq.api.model.measurements.MeasurementResponse;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.api.transfer.MeasurementTransfer;
 import org.hyperic.hq.api.transfer.ResourceTransfer;
@@ -115,21 +114,28 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     	// check that not too many DTPs fits in the time range
     	
     	// extract all input measurement templates
-    	List<String> tmplNames = msmtReq.getMeasurementTemplateNames();
-		List<MeasurementTemplate> tmpls = (List<MeasurementTemplate>) this.tmpltMgr.findTemplates(tmplNames);
-		MeasurementResponse msmtRes = new MeasurementResponse();
+    	List<String> tmpNames = msmtReq.getMeasurementTemplateNames();
+    	List<MeasurementTemplate> tmps = this.tmpltMgr.findTemplatesByName(tmpNames);
 		String rscId = msmtReq.getResourceId();
 		// get measurements
-		Map<Integer, List<Integer>> resIdsToTemplIds = new HashMap<Integer, List<Integer>>();
-		resIdsToTemplIds.put(new Integer(rscId), tmplsIds);
-		Map<Resource, List<Measurement>> rscToMsmts = this.measurementMgr.findMeasurements(authSubject, resIdsToTemplIds);
-		
+		Map<Integer, List<Integer>> resIdsToTmpIds = new HashMap<Integer, List<Integer>>();
+		List<Integer> tmpIds = new ArrayList<Integer>();
+		for (MeasurementTemplate tmp : tmps) {
+		    tmpIds.add(tmp.getId());
+        }
+		resIdsToTmpIds.put(new Integer(rscId), tmpIds);
+		Map<Resource, List<Measurement>> rscToMsmts = this.measurementMgr.findMeasurements(authSubject, resIdsToTmpIds);
+		List<Measurement> msmts = rscToMsmts.get(rscId);
+        MeasurementResponse msmtRes = new MeasurementResponse();
     	//~ MeasurementConstants
     	// get metrics
-//~~~  implement method that decides table to go using the max-dtps val
+        for (Measurement msmt : msmts) {
+            PageList<HighLowMetricValue> metrics = this.dataMgr.getHistoricalData(msmt, begin, end, PageControl.PAGE_ALL, prependAvailUnknowns, MAX_DTPS);
+        }
+        
+        //~~~  implement method that decides table to go using the max-dtps val
 //~~~ resource ids -  id / instanceId?    		
 //    		Map<Integer, double[]> metricValsPerMsmt = this.dataMgr.getAggregateDataByMetric(templateIDs, resourceIDs, begin, end, useAggressiveRollup, MAX_DTPS);
-    	PageList<HighLowMetricValue> metrics = this.dataMgr.getHistoricalData(msmts, begin, end, PageControl.PAGE_ALL, prependAvailUnknowns, MAX_DTPS);
 //    		this.mapper.merge(msmtRes,metricValsPerMsmt)
     	return null;
     }
