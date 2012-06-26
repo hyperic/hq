@@ -10,13 +10,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.hyperic.hq.api.measurements.MeasurementServiceTest.MeasurementServiceTestDataPopulator;
-import org.hyperic.hq.api.model.Resource;
 import org.hyperic.hq.api.model.ResourceDetailsType;
+import org.hyperic.hq.api.model.measurements.Measurement;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
 import org.hyperic.hq.api.model.measurements.MeasurementsRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementsResponse;
-import org.hyperic.hq.api.resources.ResourceServiceTest.PlatformsIteration;
+import org.hyperic.hq.api.model.measurements.Metric;
+//import org.hyperic.hq.api.resources.ResourceServiceTest.PlatformsIteration;
 import org.hyperic.hq.api.rest.AbstractRestTestDataPopulator;
 import org.hyperic.hq.api.rest.RestTestCaseBase;
 import org.hyperic.hq.api.rest.RestTestCaseBase.ServiceBindingsIteration;
@@ -34,6 +35,7 @@ import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.product.MeasurementPlugin;
 import org.hyperic.hq.product.PlatformTypeInfo;
 import org.hyperic.hq.product.PluginManager;
@@ -49,6 +51,7 @@ import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.StringConfigOption;
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
@@ -65,7 +68,7 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
     public RuleChain interceptorsChain = super.interceptorsChain ;
     
     public static class MeasurementServiceTestDataPopulator extends AbstractRestTestDataPopulator<MeasurementService>{
-		static final int NO_OF_TEST_PLATFORMS = 4 ;
+		static final int NO_OF_TEST_PLATFORMS = 1 ;
 		
 		private Method addConfigSchemaMethod ; 
 	    private Method setTypeInfoMethod ;
@@ -79,7 +82,7 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
 	    private Map<Integer, List<AppdefResource>> services ;
 	    private PlatformType platformType ; 
 	    private ServerType serverType ; 
-	    private ServiceType serviceType ; 
+//	    private ServiceType serviceType ; 
 	    
 	    @Autowired
 	    private ConfigManager configManager ;
@@ -120,69 +123,33 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
 		        final String platformName = "Linux" ; 
 		        final String serverTypeName = "Tomcat" ; 
 		        final String serverTypeinfoName = serverTypeName + " " + platformName ; 
-		        final String serviceTypeName = "Spring JDBC Template" ;
-		        final String serviceTypeinfoName = serviceTypeName + " " + platformName ; 
 		        
 		        this.platformType = this.platformManager.createPlatformType(platformName, pluginName) ; 
 		        this.serverType = this.createServerType(serverTypeName, "6.0", new String[]{ platformName }, pluginName, false);
-		        this.serviceType = createServiceType(serviceTypeName, pluginName, serverType);
 		        //create the platform, server and service plugins for configSchema support 
-		        this.registerMeasurementConfigSchema(platformName, platformName, new PlatformTypeInfo(platformName)) ;
-		        
-		        final ServerTypeInfo serverTypeInfo = new ServerTypeInfo(serverTypeinfoName, serverTypeName, "x") ; 
-		        this.registerMeasurementConfigSchema(serverTypeName, platformName, serverTypeInfo) ; 
-		        this.registerMeasurementConfigSchema(serviceTypeName, platformName, new ServiceTypeInfo(serviceTypeinfoName, serviceTypeName, serverTypeInfo)) ; 
-		        
-		        final int iNoOfPlatforms = NO_OF_TEST_PLATFORMS, iNoOfServesPerPlatform = 2, iNoOfServicesPerServer = 2 ; 
+		        final int iNoOfPlatforms = NO_OF_TEST_PLATFORMS, iNoOfServesPerPlatform = 1;//, iNoOfServicesPerServer = 2 ; 
 		        
 		        //create the test platforms, servers and services 
 		        this.platforms = new ArrayList<Platform>() ; 
 		        this.servers = new HashMap<Integer, List<AppdefResource>>() ;
-		        this.services = new HashMap<Integer, List<AppdefResource>>() ;
 		    	List<AppdefResource> serversPerPlatfom = null ;
-		    	List<AppdefResource> servicesPerServer = null ; 
 		    	
 		    	Platform platform= null ; 
 		    	Server server = null ;
-		    	Service service = null ; 
 		    	String name = null ;
 		    	
-		    	int iServerCounter = 0, iServiceCounter = 0;  
-
-		    	for(int i=0; i < iNoOfPlatforms; i++) {
-		    		name = "test.ubuntu.eng.vmware.com." + i ; 
+		    		name = "test.ubuntu.eng.vmware.com.";// + i ; 
 		    		platform = this.createPlatform(agentToken, platformName, name, name, subject) ;  
 		    		this.platforms.add(platform) ; 
-		    		
-		    		//add configuration 
-		    		this.createConfig(platform.getEntityId(), persistedConfigAttributes, subject) ; 
 		    		
 		    		serversPerPlatfom = new ArrayList<AppdefResource>(iNoOfServesPerPlatform) ; 
 		    		this.servers.put(platform.getId(), serversPerPlatfom) ; 
 		    		
-		    		for(int j=0; j < iNoOfServesPerPlatform; j++) { 
-		    			iServerCounter++ ; 
 			    		
-		    			server = this.createServer(platform, serverType, serverTypeName+ "_instance_"+iServerCounter, subject) ; 
+		    			server = this.createServer(platform, serverType, serverTypeName/*+ "_instance_"+iServerCounter*/, subject) ; 
 		    			serversPerPlatfom.add(server) ; 
 		    			
-		    			//add configuration
-			    		this.createConfig(server.getEntityId(), persistedConfigAttributes, subject) ;
 		    			
-		    			servicesPerServer = new ArrayList<AppdefResource>(iNoOfServicesPerServer) ;
-		    			this.services.put(server.getId(), servicesPerServer) ;
-		    			
-		    			for(int k=0; k < iNoOfServicesPerServer; k++) {
-		    				iServiceCounter++ ; 
-		    				
-		    				service = this.createService(server, serviceType, serviceTypeName+"_Instance_"+iServiceCounter, serviceTypeName + "_Instance_"+iServiceCounter, "my computer", subject);
-		    				servicesPerServer.add(service) ; 
-		    				
-		    				//add configuration 
-		    	    		this.createConfig(service.getEntityId(), persistedConfigAttributes, subject) ;
-		    			} 
-		    		} 
-		    	}
 		    					
 		    	super.populate() ; 
 	    	}catch(Throwable t) { 
@@ -196,128 +163,114 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
 			return (subject != null ? subject : authzSubjectManager.getOverlordPojo()) ; 
 		}//EOM 
 		
-		private final void registerMeasurementConfigSchema(final String pluginName, final String platformName,
-				final TypeInfo typeinfo) throws Throwable{ 
-		 
-			final PluginManager measurementPluginManager = this.productManager.getPluginManager(ProductPlugin.TYPE_MEASUREMENT);
-			
-			//TODO: plugins are not discarded with the transaction, must either explicitly remove in the @after or check for existence here
-			final String pluginTypeInfoName = typeinfo.getName() ; 
-			if(measurementPluginManager.isRegistered(pluginTypeInfoName)) return ;  
-			
-			final ProductPluginManager productPluginManager = (ProductPluginManager) this.productManager.getPluginManager(ProductPlugin.TYPE_PRODUCT) ; 
-
-			final int iNoOfConfigKeys = persistedConfigAttributes.size() ; 
-		    //create config schema + additional bogus 
-		    final ConfigOption[] configOptions = new ConfigOption[iNoOfConfigKeys+1] ;
-		   
-		    String configKey = null ; 
-		    int iIndex = 0 ;
-		    for(Map.Entry<String, String> entry : persistedConfigAttributes.entrySet()){
-		    	configKey = entry.getKey() ;  
-		    	configOptions[iIndex++] = new StringConfigOption(configKey, configKey, entry.getValue() + ".def") ;  
-		    }//EO while there are more config options to define 
-		    
-		    //add the bogus additional key 
-		    configKey = "some.other.property" ; 
-		    configOptions[iNoOfConfigKeys] = new StringConfigOption(configKey, configKey, configKey+".def") ;  
-		    
-		    //create a measurement plugin, add a config schema to it and register it with the measurement plugin manager 
-		    final MeasurementPlugin plugin = new MeasurementPlugin() ;
-		    //must be the qualified name e.g. 'Tomcat Linux'
-		    plugin.setName(pluginTypeInfoName) ; 
-		    
-		    PluginData pluginData = new PluginData() ; 
-		    addConfigSchemaMethod.invoke(pluginData, pluginTypeInfoName, 1 /*ProductPlugin.TYPE_MEASUREMENT*/, new ConfigSchema(configOptions)) ;
-		    plugin.setData(pluginData) ; 
-		    measurementPluginManager.registerPlugin(plugin) ; 
-		    
-		    
-		    //add the type info to the product manager (must be the actual name e.g. Tomcat)
-		    setTypeInfoMethod.invoke(productPluginManager, platformName, pluginName, typeinfo) ;
-		} 
-		
-		private final void createConfig(final AppdefEntityID entityID, final Map<String,String> configMap, final AuthzSubject subject) throws Throwable{
-		
-			final ConfigResponse configResponse = new ConfigResponse(configMap) ; 
-			this.configManager.setConfigResponse(subject, entityID, 
-							configResponse, ProductPlugin.CONFIGURABLE_TYPES[1], false);
-		}
-
 		@Override
 		public void destroy() throws Exception {} 
 	}
     
-    protected void baseTest(String rscId, String[] tmpNames,
-    		int sMin, int sh, int sd, int sm, int sy, 
-    		int eMin, int eh, int ed, int em, int ey) throws Throwable {
-    	Calendar begin = new GregorianCalendar(),
-    			 end = new GregorianCalendar();
-    	begin.set(Calendar.MINUTE, sMin);
-    	begin.set(Calendar.HOUR_OF_DAY, sh);
-    	begin.set(Calendar.DAY_OF_MONTH, sd);
-    	begin.set(Calendar.MONTH, sm);
-    	begin.set(Calendar.YEAR, sy);
-    	end.set(Calendar.MINUTE, eMin);
-    	end.set(Calendar.HOUR_OF_DAY, eh);
-    	end.set(Calendar.DAY_OF_MONTH, ed);
-    	end.set(Calendar.MONTH, em);
-    	end.set(Calendar.YEAR, ey);
-
-    	baseTest(rscId, tmpNames, begin, end);
-    }
+//    protected void baseTest(String rscId, String[] tmpNames,
+//    		int sMin, int sh, int sd, int sm, int sy, 
+//    		int eMin, int eh, int ed, int em, int ey,
+//    		MeasurementResponse expectedRes) throws Throwable {
+//    	Calendar begin = new GregorianCalendar(),
+//    			 end = new GregorianCalendar();
+//    	begin.set(Calendar.MINUTE, sMin);
+//    	begin.set(Calendar.HOUR_OF_DAY, sh);
+//    	begin.set(Calendar.DAY_OF_MONTH, sd);
+//    	begin.set(Calendar.MONTH, sm);
+//    	begin.set(Calendar.YEAR, sy);
+//    	end.set(Calendar.MINUTE, eMin);
+//    	end.set(Calendar.HOUR_OF_DAY, eh);
+//    	end.set(Calendar.DAY_OF_MONTH, ed);
+//    	end.set(Calendar.MONTH, em);
+//    	end.set(Calendar.YEAR, ey);
+//
+//    	baseTest(rscId, tmpNames, begin, end,expectedRes);
+//    }
     
-    protected void baseTest(String rscId, String[] tmpNames,
-    		Calendar begin,	Calendar end) throws Throwable {
-    	List<String> tmpNamesList = Arrays.asList(tmpNames);
-    	MeasurementRequest req = new MeasurementRequest(rscId,tmpNamesList);
-
+    protected void baseTest(Calendar begin,	Calendar end,
+    		MeasurementRequest req, MeasurementResponse expectedRes) throws Throwable {
     	MeasurementResponse res = service.getMetrics(req, begin, end);
+    	Assert.assertEquals(res,expectedRes);
     }
 
     /**
-     * ......|--|...
-     * 		...........
+     * +[+-+]+-+-x
      * 
      * @throws Throwable
      */
     @Test
-    public final void testGetMetricsWinStrtBeforePrgSmallerThan400() throws Throwable {
+    public final void testGetMetricsWinStartsBeforePrgSmallerThan400() throws Throwable {
     	Calendar begin = GregorianCalendar.getInstance();
     	Calendar end = GregorianCalendar.getInstance();
     	end.set(Calendar.SECOND, begin.get(Calendar.SECOND));
     	end.set(Calendar.MINUTE, begin.get(Calendar.MINUTE));
     	begin.add(Calendar.HOUR_OF_DAY,-1);
-
-    	baseTest(RES_TOMCAT_01_ID, new String[] {TMP_CPU},begin,end);
+    	// build req
+    	MeasurementRequest req = new MeasurementRequest();
+    	req.setResourceId(this.tomcatResourceId);
+    	List<String> tmpNames = new ArrayList<String>();
+    	tmpNames.add(this.cpuUsageTmpName);
+    	req.setMeasurementTemplateNames(tmpNames);
+    	// build expected res
+    	org.hyperic.hq.measurement.server.session.Measurement[] msmts = {this.cpuUsageMsmt};
+    	MeasurementResponse expRes = produceResponseObj(msmts,begin,end,MeasurementConstants.TAB_DATA_1D);
+    	
+    	baseTest(begin,end,req,expRes);
     }
     
+
+    MeasurementResponse produceResponseObj(org.hyperic.hq.measurement.server.session.Measurement[] hqMsmts,
+    		Calendar begin, Calendar end, String aggTable) {
+    	MeasurementResponse svcRes = new MeasurementResponse();
+    	for (int i = 0; i < hqMsmts.length; i++) {
+    		Measurement svcMsmt = produceServiceMeasurement(hqMsmts[i],begin,end, aggTable);
+    		svcRes.add(svcMsmt);
+		}
+ 
+    	return svcRes;
+    }
+    
+    Measurement produceServiceMeasurement(org.hyperic.hq.measurement.server.session.Measurement hqMsmt,
+    		Calendar begin, Calendar end, String aggTable) {
+    	Measurement svcMsmt=  new Measurement();
+    	svcMsmt.setInterval(hqMsmt.getInterval());
+    	svcMsmt.setName(hqMsmt.getName?);
+    	svcMsmt.setId(hqMsmt.getId/instanceId);
+    	List<Metric> svcMetrics = produceServiceMetrics(hqMsmt,begin,end, aggTable);
+		svcMsmt.setMetrics(svcMetrics);
+		return svcMsmt;
+    }
+    
+    List<Metric> produceServiceMetrics(org.hyperic.hq.measurement.server.session.Measurement hqMsmt,
+    		Calendar begin, Calendar end, String aggTable) {
+    	Arrays.copyOfRange(original, from, to, newType)
+    }
     
     /**
-     * ............p
-     * 		a.|--|......
+     * +-+-+-+-+-x
+     * +[-+--+]-+--+--+
      * 
      * @throws Throwable
      */
     @Test
-    public final void testGetMetricsWinStrtBeforePrgBiggerThan400() throws Throwable { 
+    public final void testGetMetricsWinStartsBeforePrgBiggerThan400() throws Throwable { 
     	Calendar begin = GregorianCalendar.getInstance();
     	Calendar end = GregorianCalendar.getInstance();
     	end.set(Calendar.SECOND, begin.get(Calendar.SECOND));
     	end.set(Calendar.MINUTE, begin.get(Calendar.MINUTE));
     	begin.add(Calendar.DAY_OF_MONTH,-2);
 
-    	baseTest(RES_TOMCAT_01_ID, new String[] {TMP_CPU},begin,end);
+    	baseTest(begin,end,req,expRes);
     }     
     
     /**
-     * ........p
-     * 		a.....|--|..
-     * 
+     * +-+-x
+     * +--+--+[-+-]+--+
+     *   
      * @throws Throwable
      */
     @Test
-    public final void testGetMetricsWinEndsAfterPurge() throws Throwable { 
+    public final void testGetMetricsWinEndsAfterPrg() throws Throwable { 
     	Calendar begin = GregorianCalendar.getInstance();
     	Calendar end = GregorianCalendar.getInstance();
     	end.set(Calendar.SECOND, begin.get(Calendar.SECOND));
@@ -327,22 +280,20 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
     	begin.add(Calendar.DAY_OF_MONTH,-2);
     	begin.add(Calendar.HOUR,-2);
 
-    	baseTest(RES_TOMCAT_01_ID, new String[] {TMP_CPU},begin,end);
+    	baseTest(begin,end,req,expRes);
     }
     
     /**
-     * ........|--p  |
-     * 		a..........
+     * +-+-+-+[+-x  ]
      * 
      * @throws Throwable
      */
     @Test
-    public final void testGetMetricsWinEndsBeforePurgeStartsAfterPurge() throws Throwable { 
+    public final void testGetMetricsWinEndsBeforePrgStartsAfterPrg() throws Throwable { 
     }
     
     /**
-     * ............p
-     * 		|  a--|.......
+     *   [  a-+]+-+-+-
      * 
      * @throws Throwable
      */
@@ -351,8 +302,7 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
     }
 
     /**
-     * ...........p
-     * 		a..||.......
+     * +--+-[+]-+--+--+
      * 
      * @throws Throwable
      */

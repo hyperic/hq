@@ -117,9 +117,13 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     	// extract all input measurement templates
     	List<String> tmplNames = msmtReq.getMeasurementTemplateNames();
 		List<MeasurementTemplate> tmpls = (List<MeasurementTemplate>) this.tmpltMgr.findTemplates(tmplNames);
-		MeasurementsResponse msmtRes = new MeasurementsResponse();
-        // sort templates per their default interval group
-    	Map<String,Integer> tmpltPerDefIntervalMap = new HashMap<String,Integer>();
+		MeasurementResponse msmtRes = new MeasurementResponse();
+		String rscId = msmtReq.getResourceId();
+		// get measurements
+		Map<Integer, List<Integer>> resIdsToTemplIds = new HashMap<Integer, List<Integer>>();
+		resIdsToTemplIds.put(new Integer(rscId), tmplsIds);
+		Map<Resource, List<Measurement>> rscToMsmts = this.measurementMgr.findMeasurements(authSubject, resIdsToTemplIds);
+		
     	//~ MeasurementConstants
     	// get metrics
 //~~~  implement method that decides table to go using the max-dtps val

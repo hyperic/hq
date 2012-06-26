@@ -25,25 +25,33 @@ import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 public class MeasurementResponse extends BatchResponseBase {
 //	@XmlElement
 //    private List<Resource> resources;
+	private List<Measurement> measurements = new List<Measurement>;
+	
+	public MeasurementResponse(
+			ExceptionToErrorCodeMapper exceptionToErrorCodeMapper) {
+		super(exceptionToErrorCodeMapper);
+	}
+
+	public MeasurementResponse(List<FailedResource> failedResources) {
+		super(failedResources);
+	}
 
 	public MeasurementResponse() {
 		super();
 	}
 
-//	public ResourcesMeasurementsBatchResponse(
-//			List<FailedResource> failedResources) {
-//		super(failedResources);
-//	}
-//
-//    public ResourcesMeasurementsBatchResponse(List<Resource> resourcesAddedToInventory, List<FailedResource> failedResources) {
-//        super(failedResources);
-//        this.resources = resourcesAddedToInventory;
-//    }
-//    
-//    public ResourcesMeasurementsBatchResponse(final ExceptionToErrorCodeMapper exceptionToErrorCodeMapper) { 
-//    	super(exceptionToErrorCodeMapper) ; 
-//    }//EOM 
-//    
+	public void add(Measurement msmt) {
+		this.measurements.add(msmt);
+	}
+	
+	public List<Measurement> getMeasurements() {
+		return this.measurements;
+	}
+	
+	public void putMetrics(Measurement msmt, List<Metric> metrics) {
+		
+	}
+	
 //    public ResourcesMeasurementsBatchResponse(BatchResponse<Resource> batchResponse, ExceptionToErrorCodeMapper exceptionToErrorCodeMapper) {
 //        if (null == exceptionToErrorCodeMapper) {
 //            throw new NullArgumentException("exceptionToErrorCodeMap");
@@ -65,12 +73,9 @@ public class MeasurementResponse extends BatchResponseBase {
 //            }                                
 //        }
 //    }
-//    
-//    public List<Resource> getResources() {
-//        return resources;
-//    }
-//
-//    public void setResources(List<Resource> resourcesAddedToInventory) {
-//        this.resources = resourcesAddedToInventory;
-//    }
+
+	@Override
+	public boolean equals(Object obj) {
+		return ;super.equals(obj);
+	}
 }

@@ -310,6 +310,16 @@ public class TemplateManagerImpl implements TemplateManager {
     }
 
     /**
+     * Look up a measurement template IDs for a monitorable type.
+     * 
+     * @return an array of ID values
+     */
+    @Transactional(readOnly = true)
+    public List<MeasurementTemplate> findTemplates(List<String> type) {
+        return measurementTemplateDAO.findTemplatesByMonitorableType(type);
+    }
+
+    /**
      * Update the default interval for a list of meas. templates
      * 
      * @subject - the subject

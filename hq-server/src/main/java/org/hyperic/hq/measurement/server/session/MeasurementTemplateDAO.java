@@ -180,6 +180,28 @@ public class MeasurementTemplateDAO
         return getSession().createQuery(sql).setString(0, type).setString(1, cat).list();
     }
 
+    Map<String,List<MeasurementTemplate>> findTemplatesByName(List<String> tmpNames) {
+    	StringBuilder whereCondition = new StringBuilder();
+    	if (tmpNames.size()>0) {
+    		whereCondition.append("where t.name=?");
+    	}
+    	for (int i=1 ; i<tmpNames.size() ; i++) {
+    		whereCondition.append("or t.name=?");
+		}
+        String sql = "select t from MeasurementTemplate t " + whereCondition + "order by t.name";
+        Query getTmpQuery = getSession().createQuery(sql); 
+        int i=-1;
+        for (String tmpName : tmpNames) {
+        	getTmpQuery.setString(i++, tmpName);
+		}
+        List<MeasurementTemplate> tmps = getTmpQuery.list();
+        // sort answer into the map
+        Map<String,List<MeasurementTemplate>> tmpsMap = new HashMap<String,List<MeasurementTemplate>>();
+        for (String tmpName : tmpNames) {
+        	tmpNames.
+        }
+    }
+
     @SuppressWarnings("unchecked")
     List<MeasurementTemplate> findDefaultsByMonitorableType(String mt, int appdefType) {
         String sql = "select t from MeasurementTemplate t " + "join fetch t.monitorableType mt "
