@@ -920,14 +920,16 @@ public class DataManagerImpl implements DataManager {
      *  and which the time frame doesn't cover a range which is even partially after its purge has been done
      *  and in which no more than maxDTPs fit in the requested time frame
      */
-    public String getDataTable(long begin, long end, long msmtInterval, int maxDTPs) {
+    public String getDataTable(long begin, long end, Measurement msmt, int maxDTPs) {
         long tf = end - begin;  // the time frame
         long maxInterval = tf / maxDTPs; // the max interval for which maxDTPs DTPs still fit in the time frame
+        long msmtInterval = msmt.getInterval();
         if (tf<msmtInterval) { return null;}
         long now = System.currentTimeMillis();
         if (end>now || end<begin) { return null;}
         if (msmtInterval<=maxInterval && begin>=DataManagerImpl.this.purgeRaw+now) {
-            return MeasurementConstants.TAB_DATA;
+            return MeasurementUnionStatementBuilder.getUnionStatement(begin, end, msmt.getId().intValue(),
+                    measurementDAO.getHQDialect());
         }
         if (tf<HOUR_IN_MILLI) { return null;}
         if (HOUR_IN_MILLI<=maxInterval && begin>=DataManagerImpl.this.purge1h+now) {
@@ -1157,7 +1159,7 @@ public class DataManagerImpl implements DataManager {
         Statement stmt = null;
         ResultSet rs = null;
         // The table to query from
-        final String table = getDataTable(begin, end, m.getId().intValue(),maxDTPs);
+        final String table = getDataTable(begin, end, m,maxDTPs);
         final HQDialect dialect = measurementDAO.getHQDialect();
         try {
             conn = dbUtil.getConnection();

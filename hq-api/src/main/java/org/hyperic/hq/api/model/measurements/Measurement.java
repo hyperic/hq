@@ -11,6 +11,8 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.hyperic.hq.api.model.RestApiConstants;
 
+import edu.emory.mathcs.backport.java.util.Collections;
+
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "measurement", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 //@XmlType(name=???, namespace=RestApiConstants.SCHEMA_NAMESPACE)?????
@@ -41,5 +43,20 @@ public class Measurement {
 	}
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	
+	/**
+	 * order of metrics does matter
+	 */
+	@Override
+	public boolean equals(Object obj) {
+	    if (obj==null || !(obj instanceof Measurement)) {
+	        return false;
+	    }
+	    Measurement other = (Measurement) obj;
+	    return (this.name==null?other.name==null:(other.name!=null && this.name.equals(other.name))
+	            && this.interval == other.interval
+	            && this.metrics==null?other.metrics==null:(other.metrics!=null && this.metrics.equals(other.metrics)));
 	}
 }

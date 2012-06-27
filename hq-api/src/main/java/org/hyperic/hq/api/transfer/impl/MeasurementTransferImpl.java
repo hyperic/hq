@@ -102,8 +102,6 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     @Autowired
     private AuthzSubjectManager authzSubjectManager;
 
-//	private Log log ; 
-	
     public MeasurementResponse getMetrics(final MeasurementRequest hqMsmtReq, final Calendar begin, final Calendar end) {
         MeasurementResponse res = new MeasurementResponse();
     	// extract all input measurement templates

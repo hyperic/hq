@@ -20,11 +20,10 @@ import org.hyperic.hq.api.model.resources.FailedResource;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name="resourcesMeasurementsBatchResponse", namespace=RestApiConstants.SCHEMA_NAMESPACE)
-@XmlType(name="resourcesMeasurementsBatchResponse", namespace="http://vmware.com/hyperic/hq/5.0/api/rest/v1")
+@XmlRootElement(name="measurementResponse", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+@XmlType(name="measurementResponse", namespace="http://vmware.com/hyperic/hq/5.0/api/rest/v1")
 public class MeasurementResponse extends BatchResponseBase {
-//	@XmlElement
-//    private List<Resource> resources;
+	@XmlElement
 	private List<Measurement> measurements = new ArrayList<Measurement>();
 	
 	public MeasurementResponse(
@@ -48,30 +47,10 @@ public class MeasurementResponse extends BatchResponseBase {
 		return this.measurements;
 	}
 	
-//    public ResourcesMeasurementsBatchResponse(BatchResponse<Resource> batchResponse, ExceptionToErrorCodeMapper exceptionToErrorCodeMapper) {
-//        if (null == exceptionToErrorCodeMapper) {
-//            throw new NullArgumentException("exceptionToErrorCodeMap");
-//        }
-//            if (null != batchResponse.getResponse()) {
-//        if (null != batchResponse) {
-//            	resources = batchResponse.getResponse();
-//            }  
-//            
-//            Map<String,Exception> failedIds = batchResponse.getFailedIds(); 
-//            if (null != failedIds) {
-//                List<FailedResource> failedResources = new ArrayList<FailedResource>(failedIds.size());
-//                for (Entry<String,Exception> failedIdException : failedIds.entrySet()) {
-//                    Exception exception = failedIdException.getValue();
-//                    String resourceId = failedIdException.getKey();
-//                    failedResources.add(new FailedResource(resourceId, exceptionToErrorCodeMapper.getErrorCode(exception), exception.getMessage()));
-//                }
-//                super.setFailedResources(failedResources);
-//            }                                
-//        }
-//    }
-
 	@Override
 	public boolean equals(Object obj) {
-		return false;//super.equals(obj);
+		if (obj==null || !(obj instanceof MeasurementResponse)) {return false;}
+		MeasurementResponse other = (MeasurementResponse) obj;
+	    return this.measurements==null?other.measurements==null:(other.measurements!=null && this.measurements.equals(other.measurements));
 	}
 }

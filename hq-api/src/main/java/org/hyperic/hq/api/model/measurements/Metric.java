@@ -47,4 +47,14 @@ public class Metric {
 	public void setTimestamp(long timestamp) {
 		this.timestamp = timestamp;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+	    if (obj==null || !(obj instanceof Metric)) { return false;}
+	    Metric other = (Metric) obj;
+	    return this.highValue==other.highValue
+	            && this.lowValue==other.lowValue
+	            && this.value==other.value
+	            && this.timestamp==other.timestamp;
+	}
 }
