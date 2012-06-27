@@ -38,12 +38,10 @@ import java.util.TreeSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
-import org.hyperic.hq.api.model.Resource;
 import org.hyperic.hq.api.model.ResourceConfig;
 import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourceStatusType;
 import org.hyperic.hq.api.model.ResourceType;
-import org.hyperic.hq.api.model.Resources;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
@@ -53,6 +51,7 @@ import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.api.transfer.MeasurementTransfer;
 import org.hyperic.hq.api.transfer.ResourceTransfer;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
+import org.hyperic.hq.api.transfer.mapping.MeasurementMapper;
 import org.hyperic.hq.api.transfer.mapping.ResourceMapper;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.shared.AIQueueManager;
@@ -65,6 +64,7 @@ import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
@@ -80,13 +80,6 @@ import org.hyperic.hq.measurement.shared.DataManager;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.TemplateManager;
-import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.PluginNotFoundException;
-import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
-import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.config.ConfigSchema;
-import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,19 +97,19 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     private TemplateManager tmpltMgr;
 	@Autowired
 	private DataManager dataMgr; 
-//	@Autowired
-//	private MeasurementMapper mapper;
+	@Autowired
+	private MeasurementMapper mapper;
+    @Autowired
+    private AuthzSubjectManager authzSubjectManager;
+
+//	private Log log ; 
 	
-	private Log log ; 
-	
-    public MeasurementResponse getMetrics(final MeasurementRequest msmtReq, final Calendar begin, final Calendar end) {
-   	// null ResourcesMeasurementsBatchResponse?
-    	// check that not too many DTPs fits in the time range
-    	
+    public MeasurementResponse getMetrics(final MeasurementRequest hqMsmtReq, final Calendar begin, final Calendar end) {
+        MeasurementResponse res = new MeasurementResponse();
     	// extract all input measurement templates
-    	List<String> tmpNames = msmtReq.getMeasurementTemplateNames();
+    	List<String> tmpNames = hqMsmtReq.getMeasurementTemplateNames();
     	List<MeasurementTemplate> tmps = this.tmpltMgr.findTemplatesByName(tmpNames);
-		String rscId = msmtReq.getResourceId();
+		String rscId = hqMsmtReq.getResourceId();
 		// get measurements
 		Map<Integer, List<Integer>> resIdsToTmpIds = new HashMap<Integer, List<Integer>>();
 		List<Integer> tmpIds = new ArrayList<Integer>();
@@ -124,19 +117,30 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
 		    tmpIds.add(tmp.getId());
         }
 		resIdsToTmpIds.put(new Integer(rscId), tmpIds);
-		Map<Resource, List<Measurement>> rscToMsmts = this.measurementMgr.findMeasurements(authSubject, resIdsToTmpIds);
-		List<Measurement> msmts = rscToMsmts.get(rscId);
-        MeasurementResponse msmtRes = new MeasurementResponse();
-    	//~ MeasurementConstants
-    	// get metrics
-        for (Measurement msmt : msmts) {
-            PageList<HighLowMetricValue> metrics = this.dataMgr.getHistoricalData(msmt, begin, end, PageControl.PAGE_ALL, prependAvailUnknowns, MAX_DTPS);
+		AuthzSubject authSubject = this.getAuthzSubject();
+		List<Measurement> hqMsmts = null;
+		try {
+            Map<Resource, List<Measurement>> rscTohqMsmts = this.measurementMgr.findMeasurements(authSubject, resIdsToTmpIds);
+            hqMsmts = rscTohqMsmts.get(rscId);
+        } catch (PermissionException e) {
+            res.addFailedResource(e,rscId, null, null) ;
+            return res;
         }
-        
-        //~~~  implement method that decides table to go using the max-dtps val
-//~~~ resource ids -  id / instanceId?    		
-//    		Map<Integer, double[]> metricValsPerMsmt = this.dataMgr.getAggregateDataByMetric(templateIDs, resourceIDs, begin, end, useAggressiveRollup, MAX_DTPS);
-//    		this.mapper.merge(msmtRes,metricValsPerMsmt)
-    	return null;
+    	// get metrics
+        for (Measurement hqMsmt : hqMsmts) {
+            PageList<HighLowMetricValue> hqMetrics = this.dataMgr.getHistoricalData(hqMsmt, begin.getTimeInMillis(), end.getTimeInMillis(), PageControl.PAGE_ALL, true, MAX_DTPS);
+            org.hyperic.hq.api.model.measurements.Measurement msmt = this.mapper.toMeasurement(hqMsmt);
+            List<org.hyperic.hq.api.model.measurements.Metric> metrics = this.mapper.toMetrics(hqMetrics);
+            msmt.setMetrics(metrics);
+            res.add(msmt);
+        }
+        return res;
+    }
+    
+    private final AuthzSubject getAuthzSubject() {
+        //TODO: replace with actual subject once security layer is implemented 
+        //return authzSubjectManager.getOverlordPojo();
+        AuthzSubject subject = authzSubjectManager.findSubjectByName("hqadmin") ;
+        return (subject != null ? subject : authzSubjectManager.getOverlordPojo()) ; 
     }
 } 
