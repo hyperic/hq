@@ -25,6 +25,10 @@
   USA.
  -->
 
+<!DOCTYPE plugin [
+  <!ENTITY multi-process-metrics SYSTEM "/pdk/plugins/multi-process-metrics.xml">
+]>
+
 <plugin package="org.hyperic.hq.plugin.postgresql">
     <property name="PLUGIN_VERSION" value="@project.version@"/>
     <classpath>
@@ -35,11 +39,73 @@
 
     <property name="service-config"
             value="jdbcUrl=jdbc:postgresql://%postgresql.host%:%postgresql.port%/%db%,jdbcUser=%postgresql.user%,jdbcPassword=%postgresql.pass%"/>
+    <property name="service-collector-config"
+            value="postgresql.host=%postgresql.host%,postgresql.port=%postgresql.port%,postgresql.user=%postgresql.user%,postgresql.pass=%postgresql.pass%,db=%db%"/>
     <property name="server-config"
-            value="jdbcUrl=jdbc:postgresql://%postgresql.host%:%postgresql.port%/%postgresql.dfdb%,jdbcUser=%postgresql.user%,jdbcPassword=%postgresql.pass%"/>
+            value="postgresql.host=%postgresql.host%,postgresql.port=%postgresql.port%,postgresql.user=%postgresql.user%,postgresql.pass=%postgresql.pass%,postgresql.dfdb=%postgresql.dfdb%"/>
 
-    <property name="template" value="${domain}:Type=Server,postgresql.dfdb=%postgresql.dfdb%:${alias}:${server-config}"/>
+    <property name="template" value="${domain}:${server-config}:${alias}:"/>
     <metrics name="pg-server">
+        <metric name="Availability"
+            alias="Availability"
+            template="sigar.postgres:Type=MultiProcCpu:Availability:${server-config}"
+            category="AVAILABILITY"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+        <metric name="Number of Processes"
+            alias="NumProcesses"
+            template="sigar.postgres:Type=MultiProcCpu:Processes:${server-config}"
+            category="UTILIZATION"
+            units="none"
+            collectionType="dynamic"/>
+
+        <metric name="Memory Size"
+            alias="MemSize"
+            template="sigar.postgres:Type=MultiProcMem:Size:${server-config}"
+            category="UTILIZATION"
+            units="B"
+            collectionType="dynamic"/>
+
+        <metric name="Resident Memory Size"
+            alias="ResidentMemSize"
+            template="sigar.postgres:Type=MultiProcMem:Resident:${server-config}"
+            category="UTILIZATION"
+            units="B"
+            collectionType="dynamic"/>
+
+        <metric name="Cpu System Time"
+            alias="SystemTime"
+            template="sigar.postgres:Type=MultiProcCpu:Sys:${server-config}"
+            category="UTILIZATION"
+            units="ms"
+            collectionType="trendsup"/>
+
+        <metric name="Cpu User Time"
+            alias="UserTime"
+            template="sigar.postgres:Type=MultiProcCpu:User:${server-config}"
+            category="UTILIZATION"
+            units="ms"
+            collectionType="trendsup"/>
+
+        <metric name="Cpu Total Time"
+            alias="TotalTime"
+            template="sigar.postgres:Type=MultiProcCpu:Total:${server-config}"
+            category="UTILIZATION"
+            units="ms"
+            collectionType="trendsup"/>
+
+        <metric name="Cpu Usage"
+            alias="Usage"
+            template="sigar.postgres:Type=MultiProcCpu:Percent:${server-config}"
+            category="UTILIZATION"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+    </metrics>
+
+    <property name="template" value="${domain}:db=%db%:${alias}:${service-config}"/>
+    <metrics name="pg-db">
         <metric name="Availability"
             category="AVAILABILITY"
             indicator="true"
@@ -55,6 +121,11 @@
             alias="LocksHeld"
             category="UTILIZATION"
             units="none"
+            collectionType="dynamic"/>
+        <metric name="Database Size"
+            alias="DatabaseSize"
+            category="UTILIZATION"
+            units="B"
             collectionType="dynamic"/>
         <metric name="Data Space Used"
             alias="DataSpaceUsed"
@@ -91,8 +162,8 @@
             collectionType="trendsup"/>
     </metrics>
 
-    <property name="template" value="${domain}:Type=Table,table=%table%,schema=%schema%:${alias}:${service-config}"/>
-    <metrics name="pg-table">
+    <property name="template" value="collector:${service-collector-config}:table.%schema%.%table%.${alias}:schema=%schema%,table=%table%"/>
+    <metrics name="pg-table-collector">
         <metric name="Availability"
             category="AVAILABILITY"
             indicator="true"
@@ -119,18 +190,6 @@
             category="UTILIZATION"
             units="none"
             collectionType="trendsup"/>
-        <metric name="Data Space Used"
-            alias="DataSpaceUsed"
-            category="UTILIZATION"
-            indicator="true"
-            units="KB"
-            collectionType="dynamic"/>
-        <metric name="Index Space Used"
-            alias="IndexSpaceUsed"
-            category="UTILIZATION"
-            indicator="true"
-            units="KB"
-            collectionType="dynamic"/>
         <metric name="Number Of Row Inserts"
             alias="n_tup_ins"
             category="THROUGHPUT"
@@ -149,7 +208,23 @@
             collectionType="trendsup"/>
     </metrics>
 
-    <property name="template" value="${domain}:Type=Index,index=%index%,schema=%schema%:${alias}:${service-config}"/>
+    <property name="template" value="${domain}:table=%table%,schema=%schema%:${alias}:${service-config}"/>
+    <metrics name="pg-table">
+        <metric name="Data Space Used"
+            alias="DataSpaceUsed"
+            category="UTILIZATION"
+            indicator="true"
+            units="KB"
+            collectionType="dynamic"/>
+        <metric name="Index Space Used"
+            alias="IndexSpaceUsed"
+            category="UTILIZATION"
+            indicator="true"
+            units="KB"
+            collectionType="dynamic"/>
+    </metrics>
+
+    <property name="template" value="collector:type=index,${service-collector-config}:index.%schema%.%index%.${alias}:schema=%schema%,index=%index%"/>
     <metrics name="pg-index">
         <metric name="Availability"
             category="AVAILABILITY"
@@ -175,7 +250,7 @@
             units="none"
             collectionType="trendsup"/>
     </metrics>
-
+    
   <!-- ==================== Plugin Help =========================== -->
 
     <help name="PostgreSQL">
@@ -251,11 +326,12 @@
     <server name="PostgreSQL" version="7.4">
         <property name="version" value="7\.4"/>
 
-        <plugin type="measurement" class="PostgreSQLMeasurementPlugin"/>
+        <plugin type="measurement" class="ServerMeasurement"/>
         <plugin type="autoinventory" class="PostgreSQLServerDetector"/>
-        <plugin type="control" class="PostgreSQLControlPlugin"/>
         <plugin type="config_track" class="org.hyperic.hq.product.FileChangeTrackPlugin"/>
- 
+        <plugin type="control" class="ServerControl"/>
+        <actions include="stop,start"/>
+
         <plugin type="config_track" platform="unix" class="org.hyperic.hq.product.FileChangeTrackPlugin">
             <monitored>
                 <folder path="data" recursive="false" filter=".*\.conf"/>
@@ -271,26 +347,44 @@
         </plugin>
         <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="false" />
 
-        <actions include="Analyze,ResetStatistics,Vacuum,VacuumAnalyze"/>
-
         <metrics include="pg-server"/>
 
         <properties>
             <property name="version" description="PostgreSQL Version"/>
         </properties>
 
-        <config>
+        <config type ="product">
             <option name="postgresql.host" description="Listen Addresses" default="localhost"/>
             <option name="postgresql.port" description="Listen Port" default="5432"/>
             <option name="postgresql.dfdb" description="Default Database" default="postgres"/>
             <option name="postgresql.user" description="User Name"/>
             <option name="postgresql.pass" description="User Password" type="secret"/>
-            <option name="postgresql.table.regex" description="Tables Regular Expresion" default="ALL"/>
-            <option name="postgresql.index.regex" description="Indexes Regular Expresion" default="OFF"/>
+            <option name="postgresql.pgdata" description="pgdata Full path"/>
+            <option name="postgresql.table.regex" description="Autodiscover Tables Regular Expresion" default="ALL"/>
+            <option name="postgresql.index.regex" description="Autodiscover Indexes Regular Expresion" default="OFF"/>
+        </config>
+        <config type ="measurement">
+        </config>
+        <config type ="control">
+            <option name="postgresql.program" description="Absoulte path to control command" default="/etc/init.d/postgres"/>
+            <option name="postgresql.prefix" description="Control command prefix" default="sudo"/>
+            <option name="postgresql.timeout" description="Control action timeout" default="30"/>
         </config>
 
+        <service name="DataBase">
+            <plugin type="measurement" class="DataBaseMeasurementPlugin"/>
+            <plugin type="control" class="TableControlPlugin"/>
+            <actions include="Analyze,Vacuum,VacuumAnalyze,Reindex"/>
+            <config>
+                <option name="db" description="DataBase Name"/>
+            </config>
+            <metrics include="pg-db"/>
+        </service>
+
         <service name="Table">
-            <plugin type="control" class="PostgreSQLControlPlugin"/>
+            <plugin type="measurement" class="TableMeasurementPlugin"/>
+            <plugin type="collector" class="TableIndexCollector"/>
+            <plugin type="control" class="TableControlPlugin"/>
             <actions include="Analyze,Vacuum,VacuumAnalyze,Reindex"/>
 
             <config>
@@ -299,11 +393,14 @@
                 <option name="schema" description="Schema Name"/>                
             </config>
 
+            <metrics include="pg-table-collector"/>
             <metrics include="pg-table"/>
         </service>
 
         <service name="Index">
-            <plugin type="control" class="PostgreSQLControlPlugin"/>
+            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+            <plugin type="collector" class="TableIndexCollector"/>
+            <plugin type="control" class="IndexControlPlugin"/>
             <actions include="Reindex"/>
 
             <config>
@@ -320,8 +417,12 @@
         <property name="version" value="8.\d*"/>
     </server>
 
+    <server name="HQ PostgreSQL" version="8.x" include="PostgreSQL 8.x"/>
+
     <server name="PostgreSQL" version="9.x" include="8.x">
         <property name="version" value="9.\d*"/>
     </server>
+
+    <server name="vPostgres" version="9.x" include="PostgreSQL 9.x"/>
 
 </plugin>

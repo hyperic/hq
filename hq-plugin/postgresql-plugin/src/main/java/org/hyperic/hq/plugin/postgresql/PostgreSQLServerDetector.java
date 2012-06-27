@@ -37,6 +37,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import java.util.regex.Matcher;
@@ -73,52 +74,56 @@ public class PostgreSQLServerDetector extends ServerDetector implements AutoServ
                 String version = getVersion(exe);
                 String expectedVersion = getTypeProperty("version");
                 String pgData = getArgument("-D", args);
+                try {
+                    pgData = new File(pgData).getCanonicalPath();
+                } catch (IOException ex) {
+                    log.debug(ex, ex);
+                }
                 boolean correctVersion = Pattern.compile(expectedVersion).matcher(version).find();
                 log.debug("[getServerProcessList] version=" + version + " correctVersion=" + correctVersion);
+
+                //check for vPostgres and HQ
+                final boolean isHQ = exe.indexOf("hqdb") != -1;
+                if (correctVersion) {
+                    File vflicense = new File(new File(exe).getParent(), "vflicense");
+                    if (getTypeInfo().getName().startsWith("vPostgres")) {
+                        correctVersion = vflicense.exists();
+                    } else if (getTypeInfo().getName().startsWith("HQ")) {
+                        correctVersion = isHQ;
+                    } else {
+                        correctVersion = !(vflicense.exists() || isHQ);
+                    }
+                }
+
                 if (correctVersion) {
                     ServerResource server = createServerResource(exe);
-                    if (exe.indexOf("hqdb") != -1) {
-                        server.setName(getPlatformName() + " HQ " + getTypeInfo().getName());
-                    } else {
-                        if (pgData.length() > 0) {
-                            server.setName(server.getName() + " " + pgData);
-                            server.setIdentifier(server.getIdentifier() + "$" + pgData);
-                        }
-                    }
+                    server.setIdentifier(server.getIdentifier() + "$" + pgData);
                     ConfigResponse cprop = new ConfigResponse();
                     cprop.setValue("version", version);
                     setCustomProperties(server, cprop);
                     setProductConfig(server, prepareConfig(pgData, args));
+                    String basename = getPlatformName() + " " + getTypeInfo().getName();
+                    server.setName(prepareName(basename + " " + (isHQ ? PostgreSQL.HQ_SERVER_NAME : PostgreSQL.SERVER_NAME), server.getProductConfig(), null));
                     servers.add(server);
+                } else {
+                    log.debug("[getServerProcessList] pid='" + pids[i] + "' Is not a '" + getTypeInfo().getName() + "'");
                 }
             }
         }
         return servers;
     }
 
-    protected static String prepareUrl(ConfigResponse config, String db) throws PluginException {
-        String host = config.getValue(PostgreSQL.PROP_HOST);
-        String port = config.getValue(PostgreSQL.PROP_PORT);
-        if (db == null) {
-            db = config.getValue(PostgreSQL.PROP_DFDB);
-        }
-
-        if ((db == null) || (host == null) || (port == null)) {
-            throw new PluginException("invalid configuration.");
-        }
-        return "jdbc:postgresql://" + host + ":" + port + "/" + db;
-    }
-
     @Override
-    protected List discoverServices(ConfigResponse config) throws PluginException {
-        log.debug("[discoverServices] config=" + config);
+    protected List discoverServices(ConfigResponse serverConfig) throws PluginException {
+        log.debug("[discoverServices] config=" + serverConfig);
+        boolean isHQ = getTypeInfo().getName().startsWith("HQ");
         ArrayList services = new ArrayList();
-        String user = config.getValue(PostgreSQL.PROP_USER);
-        String pass = config.getValue(PostgreSQL.PROP_PASS);
-        String url = prepareUrl(config, null);
+        String user = serverConfig.getValue(PostgreSQL.PROP_USER);
+        String pass = serverConfig.getValue(PostgreSQL.PROP_PASS);
+        String url = PostgreSQL.prepareUrl(serverConfig.toProperties(), null);
 
         try {
-            Class.forName(PostgreSQLMeasurementPlugin.JDBC_DRIVER);
+            Class.forName(ResourceMeasurement.JDBC_DRIVER);
         } catch (ClassNotFoundException e) {
             throw new PluginException("Unable to load JDBC Driver: " + e.getMessage());
         }
@@ -142,24 +147,38 @@ public class PostgreSQLServerDetector extends ServerDetector implements AutoServ
         }
 
         Pattern table_reg = null;
-        boolean table_all = config.getValue(PostgreSQL.PROP_TABLE_REG).equalsIgnoreCase("ALL");
-        boolean table_off = config.getValue(PostgreSQL.PROP_TABLE_REG).equalsIgnoreCase("OFF");
+        boolean table_all = serverConfig.getValue(PostgreSQL.PROP_TABLE_REG).equalsIgnoreCase("ALL");
+        boolean table_off = serverConfig.getValue(PostgreSQL.PROP_TABLE_REG).equalsIgnoreCase("OFF");
         if (!table_all && !table_off) {
-            table_reg = Pattern.compile(config.getValue(PostgreSQL.PROP_TABLE_REG));
+            table_reg = Pattern.compile(serverConfig.getValue(PostgreSQL.PROP_TABLE_REG));
         }
 
         Pattern index_reg = null;
-        boolean index_all = config.getValue(PostgreSQL.PROP_INDEX_REG).equalsIgnoreCase("ALL");
-        boolean index_off = config.getValue(PostgreSQL.PROP_INDEX_REG).equalsIgnoreCase("OFF");
+        boolean index_all = serverConfig.getValue(PostgreSQL.PROP_INDEX_REG).equalsIgnoreCase("ALL");
+        boolean index_off = serverConfig.getValue(PostgreSQL.PROP_INDEX_REG).equalsIgnoreCase("OFF");
         if (!index_all && !index_off) {
-            index_reg = Pattern.compile(config.getValue(PostgreSQL.PROP_INDEX_REG));
+            index_reg = Pattern.compile(serverConfig.getValue(PostgreSQL.PROP_INDEX_REG));
         }
 
         log.debug("[discoverServices] databases: " + dataBases);
         for (int i = 0; i < dataBases.size(); i++) {
             String dataBase = dataBases.get(i);
+            ServiceResource db = new ServiceResource();
+            db.setType(this, "DataBase");
+
+            ConfigResponse dbPC = new ConfigResponse();
+            dbPC.setValue(PostgreSQL.PROP_DB, dataBase);
+
+            db.setProductConfig(dbPC);
+            db.setMeasurementConfig();
+            db.setControlConfig();
+
+            db.setServiceName(prepareName(isHQ ? PostgreSQL.HQ_DB_NAME : PostgreSQL.DB_NAME, serverConfig, dbPC));
+
+            services.add(db);
+
             try {
-                conn = DriverManager.getConnection(prepareUrl(config, dataBase), user, pass);
+                conn = DriverManager.getConnection(PostgreSQL.prepareUrl(serverConfig.toProperties(), dataBase), user, pass);
                 stmt = conn.createStatement();
                 rs = stmt.executeQuery(TABLE_QUERY);
 
@@ -169,45 +188,45 @@ public class PostgreSQLServerDetector extends ServerDetector implements AutoServ
                     if (isValidName(tablename, table_all, table_off, table_reg)) {
                         ServiceResource service = new ServiceResource();
                         service.setType(this, "Table");
-                        service.setServiceName("Table " + prepareName(dataBase, schemaname, tablename));
 
-                        ConfigResponse productConfig = new ConfigResponse();
-                        productConfig.setValue(PostgreSQL.PROP_DB, dataBase);
-                        productConfig.setValue(PostgreSQL.PROP_TABLE, tablename);
-                        productConfig.setValue(PostgreSQL.PROP_SCHEMA, schemaname);
+                        ConfigResponse tablePC = new ConfigResponse();
+                        tablePC.setValue(PostgreSQL.PROP_DB, dataBase);
+                        tablePC.setValue(PostgreSQL.PROP_TABLE, tablename);
+                        tablePC.setValue(PostgreSQL.PROP_SCHEMA, schemaname);
 
-                        service.setProductConfig(productConfig);
+                        service.setProductConfig(tablePC);
                         service.setMeasurementConfig();
                         service.setControlConfig();
+
+                        service.setServiceName(prepareName(isHQ ? PostgreSQL.HQ_TABLE_NAME : PostgreSQL.TABLE_NAME, serverConfig, tablePC));
 
                         services.add(service);
                     }
                 }
+                DBUtil.closeJDBCObjects(this.log, null, stmt, rs);
 
-                if (config.getValue("indexes.enable", "fasle").equalsIgnoreCase("true")) {
-                    rs.close();
-                    rs = stmt.executeQuery(INDEX_QUERY);
+                stmt = conn.createStatement();
+                rs = stmt.executeQuery(INDEX_QUERY);
+                while (rs != null && rs.next()) {
+                    String indexname = rs.getString(1);
+                    String schemaname = rs.getString(2);
 
-                    while (rs != null && rs.next()) {
-                        String indexname = rs.getString(1);
-                        String schemaname = rs.getString(2);
+                    if (isValidName(indexname, index_all, index_off, index_reg)) {
+                        ServiceResource service = new ServiceResource();
+                        service.setType(this, "Index");
 
-                        if (isValidName(indexname, index_all, index_off, index_reg)) {
-                            ServiceResource service = new ServiceResource();
-                            service.setType(this, "Index");
-                            service.setServiceName("Index " + prepareName(dataBase, schemaname, indexname));
+                        ConfigResponse indexPC = new ConfigResponse();
+                        indexPC.setValue(PostgreSQL.PROP_DB, dataBase);
+                        indexPC.setValue(PostgreSQL.PROP_INDEX, indexname);
+                        indexPC.setValue(PostgreSQL.PROP_SCHEMA, schemaname);
 
-                            ConfigResponse productConfig = new ConfigResponse();
-                            productConfig.setValue(PostgreSQL.PROP_DB, dataBase);
-                            productConfig.setValue(PostgreSQL.PROP_INDEX, indexname);
-                            productConfig.setValue(PostgreSQL.PROP_SCHEMA, schemaname);
+                        service.setProductConfig(indexPC);
+                        service.setMeasurementConfig();
+                        service.setControlConfig();
 
-                            service.setProductConfig(productConfig);
-                            service.setMeasurementConfig();
-                            service.setControlConfig();
+                        service.setServiceName(prepareName(isHQ ? PostgreSQL.INDEX_NAME : PostgreSQL.INDEX_NAME, serverConfig, indexPC));
 
-                            services.add(service);
-                        }
+                        services.add(service);
                     }
                 }
             } catch (SQLException e) {
@@ -219,8 +238,22 @@ public class PostgreSQLServerDetector extends ServerDetector implements AutoServ
         return services;
     }
 
-    private String prepareName(String db, String sc, String name) {
-        return db + "." + sc + "." + name;
+    private String prepareName(String pattern, ConfigResponse serverConf, ConfigResponse serviceConf) {
+        List<ConfigResponse> props = new ArrayList<ConfigResponse>();
+        String res = pattern;
+        props.add(serverConf);
+        if (serviceConf != null) {
+            props.add(serviceConf);
+        }
+
+        for (int i = 0; i < props.size(); i++) {
+            ConfigResponse cfg = props.get(i);
+            for (Iterator<String> it = cfg.getKeys().iterator(); it.hasNext();) {
+                String key = it.next();
+                res = res.replace("${" + key + "}", cfg.getValue(key));
+            }
+        }
+        return res.trim();
     }
 
     private String getVersion(String exec) {
@@ -311,10 +344,14 @@ public class PostgreSQLServerDetector extends ServerDetector implements AutoServ
 
     private ConfigResponse prepareConfig(String pgData, List<String> args) {
         ConfigResponse cf = new ConfigResponse();
+        cf.setValue(PostgreSQL.PROP_DATA, pgData);
         String configuration = loadConfiguration(pgData);
 
         String addr = getConfiguration("^ *listen_addresses([^#]*)", configuration);
         if (addr.length() > 0) {
+            if (addr.equals("*")) {
+                addr = "localhost";
+            }
             cf.setValue(PostgreSQL.PROP_HOST, addr);
         } else {
             addr = getArgument("-h", args);
