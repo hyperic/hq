@@ -223,6 +223,11 @@ public class AgentDListProvider implements AgentStorageProvider {
              
         KeyStore.Entry e = keystore.getEntry(keystoreConfig.getAlias(),
                 new KeyStore.PasswordProtection(keystoreConfig.getFilePassword().toCharArray()));
+ 	    
+		if(e == null) { 
+			throw new UnrecoverableEntryException("Encryptor password generation failure: No such alias") ; 
+		}//EO if no such key exists 		
+
         final String pk = ((PrivateKeyEntry)e).getPrivateKey().toString() ;  
         return pk.replaceAll("[^a-zA-Z0-9]", "_") ;
     }
