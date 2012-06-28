@@ -158,7 +158,8 @@
 					</execution>
 				</executions>
 				<configuration>
-					<argLine>-Xmx1700m -XX:MaxPermSize=192m -XX:-UseGCOverheadLimit -XX:+HeapDumpOnOutOfMemoryError</argLine>
+					<!--  pass an encryption key in case non is defined in the server.encryption-key sys property -->
+					<argLine>-Xmx1700m -XX:MaxPermSize=192m -XX:-UseGCOverheadLimit -XX:+HeapDumpOnOutOfMemoryError -Dtests.server.encryption-key=38e58edd0226</argLine>
 				</configuration>
 			</plugin>
 			<plugin>

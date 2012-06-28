@@ -47,6 +47,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
+import org.hibernate.cfg.Configuration;
 import org.hibernate.jmx.StatisticsService;
 import org.hyperic.hq.common.DiagnosticObject;
 import org.hyperic.hq.common.DiagnosticsLogger;
@@ -102,7 +103,11 @@ public class CacheInitializingLocalSessionFactoryBean
     @Override
     protected void afterSessionFactoryCreation() throws Exception {
         super.afterSessionFactoryCreation();
-        registerMBeans();
+        final Configuration configurations = this.getConfiguration() ; 
+        if(configurations != null) { 
+            log.info("DATABASE CONNECTION URL: " + this.getConfiguration().getProperty("hibernate.connection.url")) ; 
+        }//EO if configuration were provided 
+        registerMBeans(); 
         initEhCacheDiagnostics();
         preloadCache();
     }
