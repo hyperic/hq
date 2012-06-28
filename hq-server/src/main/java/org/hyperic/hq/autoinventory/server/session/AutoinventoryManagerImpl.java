@@ -40,11 +40,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.server.session.AppdefResource;
-import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
-import org.hyperic.hq.appdef.server.session.ResourceZevent;
-import org.hyperic.hq.appdef.server.session.Server;
+import org.hyperic.hq.appdef.server.session.*;
 import org.hyperic.hq.appdef.shared.AIAppdefResourceValue;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
@@ -101,6 +97,8 @@ import org.hyperic.hq.scheduler.ScheduleValue;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -796,6 +794,49 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
                 }
             }
         }
+    }
+
+    public void invokeAutoApprove() throws AutoinventoryException {
+        AuthzSubject subject = getHQAdmin();
+
+        PageList<AIPlatformValue> queue = this.aiQueueManager.getQueue(subject, true, true, true, new PageControl());
+
+        for (AIPlatformValue aiPlatformValue : queue) {
+            if (aiPlatformValue.isAutoApprove()) {
+                performAutoApprove(subject, aiPlatformValue);
+            }
+        }
+    }
+
+    private void performAutoApprove(AuthzSubject subject, AIPlatformValue aiPlatform) {
+        log.info("Auto-approving inventory for " + aiPlatform.getFqdn());
+
+        List<Integer> ips = buildAIResourceIds(aiPlatform.getAIIpValues());
+        List<Integer> platforms = Collections.singletonList(aiPlatform.getId());
+
+        List<Integer> servers = new ArrayList<Integer>();
+        AIServerValue[] aiServerValues = aiPlatform.getAIServerValues();
+        for (AIServerValue aiServerValue : aiServerValues) {
+            if (aiServerValue.isAutoApprove() || isServerVirtual(aiServerValue)) {
+                servers.add(aiServerValue.getId());
+            }
+        }
+
+        try {
+            aiQueueManager.processQueue(subject, platforms, servers, ips, AIQueueConstants.Q_DECISION_APPROVE);
+        } catch (Exception e) {
+            throw new SystemException(e);
+        }
+    }
+
+    private boolean isServerVirtual(AIServerValue aiServerValue) {
+        try {
+            ServerType serverType = serverManager.findServerTypeByName(aiServerValue.getServerTypeName());
+            return serverType.isVirtual();
+        } catch (NotFoundException exc) {
+            log.error("Ignoring non-existent server type: " + aiServerValue.getServerTypeName(), exc);
+        }
+        return false;
     }
 
     /**

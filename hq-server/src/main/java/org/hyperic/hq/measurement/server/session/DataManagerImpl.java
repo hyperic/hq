@@ -45,6 +45,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.PostConstruct;
@@ -84,14 +85,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ibm.icu.util.Calendar;
+
 /**
  * The DataManagerImpl can be used to retrieve measurement data points
  * 
  */
 @Service
 @Transactional
-public class DataManagerImpl implements DataManager {
 
+public class DataManagerImpl implements DataManager {
     private static final String ERR_START = "Begin and end times must be positive";
     private static final String ERR_END = "Start time must be earlier than end time";
     private static final String LOG_CTX = DataManagerImpl.class.getName();
@@ -105,6 +108,9 @@ public class DataManagerImpl implements DataManager {
     private static final BigDecimal MAX_DB_NUMBER = new BigDecimal("10000000000000000000000");
 
     private static final long MINUTE = 60 * 1000, HOUR = 60 * MINUTE;
+    protected final long HOUR_IN_MILLI = TimeUnit.MILLISECONDS.convert(1L, TimeUnit.HOURS);
+    protected final long SIX_HOURS_IN_MILLI = TimeUnit.MILLISECONDS.convert(6L, TimeUnit.HOURS);
+    protected final long DAY_IN_MILLI = TimeUnit.MILLISECONDS.convert(1L, TimeUnit.DAYS);
 
     // Table names
     private static final String TAB_DATA_1H = MeasurementConstants.TAB_DATA_1H;
@@ -136,7 +142,7 @@ public class DataManagerImpl implements DataManager {
     private boolean confDefaultsLoaded = false;
 
     // Purge intervals, loaded once on first invocation.
-    private long purgeRaw, purge1h, purge6h;
+    private long purgeRaw, purge1h, purge6h, purge1d;
 
     private static final long HOURS_PER_MEAS_TAB = MeasTabManagerUtil.NUMBER_OF_TABLES_PER_DAY;
 
@@ -894,11 +900,14 @@ public class DataManagerImpl implements DataManager {
         String purgeRawString = conf.getProperty(HQConstants.DataPurgeRaw);
         String purge1hString = conf.getProperty(HQConstants.DataPurge1Hour);
         String purge6hString = conf.getProperty(HQConstants.DataPurge6Hour);
+        String purge1dString = conf.getProperty(HQConstants.DataPurge1Day);
 
         try {
             purgeRaw = Long.parseLong(purgeRawString);
             purge1h = Long.parseLong(purge1hString);
             purge6h = Long.parseLong(purge6hString);
+            purge1d = Long.parseLong(purge1dString);
+            
             confDefaultsLoaded = true;
         } catch (NumberFormatException e) {
             // Shouldn't happen unless manual edit of config table
@@ -906,11 +915,58 @@ public class DataManagerImpl implements DataManager {
         }
     }
 
-    private String getDataTable(long begin, long end, int measId) {
+    /**
+     *  find the aggregation table with the greatest interval which is smaller than the requested time frame
+     *  and which the time frame doesn't cover a range which is even partially after its purge has been done
+     *  and in which no more than maxDTPs fit in the requested time frame
+     */
+    protected String getDataTable(long begin, long end, Measurement msmt, int maxDTPs) throws IllegalArgumentException {
+        long tf = end - begin;  // the time frame
+        long maxInterval = tf / maxDTPs; // the max interval for which maxDTPs DTPs still fit in the time frame
+        long msmtInterval = msmt.getInterval();
+        if (tf<msmtInterval) { 
+            MeasurementTemplate tmp = msmt.getTemplate();
+            throw new IllegalArgumentException("requested time frame is of size " + tf + " milliseconds, which is smaller than the time interval of the measurement " + tmp!=null?tmp.getName():"" + " which is " + msmtInterval + " milliseconds");
+        }
+        long now = System.currentTimeMillis();
+        if (end>now || end<begin) { 
+            throw new IllegalArgumentException("illegal time frame boundries");
+        }
+        if (!confDefaultsLoaded) {
+            loadConfigDefaults();
+        }
+        if (msmtInterval>=maxInterval && begin>=now-DataManagerImpl.this.purgeRaw/* usesMetricUnion(begin, end, false)*/) {
+            return MeasurementUnionStatementBuilder.getUnionStatement(begin, end, msmt.getId().intValue(), measurementDAO.getHQDialect());
+        }
+        if (tf<HOUR_IN_MILLI) { 
+            MeasurementTemplate tmp = msmt.getTemplate();
+            throw new IllegalArgumentException("requested time frame is of size " + tf + " milliseconds, which is smaller than the hourly aggregated time interval of the measurement " + tmp!=null?tmp.getName():"");
+        }
+        if (HOUR_IN_MILLI>=maxInterval && begin>=now-DataManagerImpl.this.purge1h) {
+            return MeasurementConstants.TAB_DATA_1H;
+        }
+        if (tf<SIX_HOURS_IN_MILLI) { 
+            MeasurementTemplate tmp = msmt.getTemplate();
+            throw new IllegalArgumentException("requested time frame is of size " + tf + " milliseconds, which is smaller than the 6-hourly aggregated time interval of the measurement " + tmp!=null?tmp.getName():"");
+        }
+        if (SIX_HOURS_IN_MILLI>=maxInterval && begin>=now-DataManagerImpl.this.purge6h) {
+            return MeasurementConstants.TAB_DATA_6H;
+        }
+        if (tf<DAY_IN_MILLI) { 
+            MeasurementTemplate tmp = msmt.getTemplate();
+            throw new IllegalArgumentException("requested time frame is of size " + tf + " milliseconds, which is smaller than the daily aggregated time interval of the measurement " + tmp!=null?tmp.getName():"");
+        }
+        // return daily aggregated data even if the time frame is beyond the purge time or contains more than 400 DTPs
+        return MeasurementConstants.TAB_DATA_1D;
+    }
+    
+    public String getDataTable(long begin, long end, int measId) {
         Integer[] empty = new Integer[1];
         empty[0] = new Integer(measId);
         return getDataTable(begin, end, empty);
     }
+    
+
 
     private boolean usesMetricUnion(long begin) {
         long now = System.currentTimeMillis();
@@ -982,6 +1038,17 @@ public class DataManagerImpl implements DataManager {
         }
     }
 
+
+    @Transactional(readOnly = true)
+    public List<HighLowMetricValue> getHistoricalData(Measurement m, long begin, long end,
+                                                          boolean prependAvailUnknowns, int maxDTPs) {
+        if (m.getTemplate().isAvailability()) {
+            return availabilityManager.getHistoricalAvailData(m, begin, end, PageControl.PAGE_ALL, prependAvailUnknowns);
+        } else {
+            return getHistData(m, begin, end, maxDTPs);
+        }
+    }
+    
     /**
      * Fetch the list of historical data points given a begin and end time
      * range. Returns a PageList of DataPoints without begin rolled into time
@@ -1092,6 +1159,50 @@ public class DataManagerImpl implements DataManager {
             DBUtil.closeJDBCObjects(LOG_CTX, conn, stmt, rs);
         }
     }
+
+    private List<HighLowMetricValue> getHistData(final Measurement m, long begin, long end, int maxDTPs) {
+        checkTimeArguments(begin, end);
+        begin = TimingVoodoo.roundDownTime(begin, MINUTE);
+        end = TimingVoodoo.roundDownTime(end, MINUTE);
+        final ArrayList<HighLowMetricValue> history = new ArrayList<HighLowMetricValue>();
+        // Get the data points and add to the ArrayList
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        // The table to query from
+        final String table = getDataTable(begin, end, m,maxDTPs);
+        try {
+            conn = dbUtil.getConnection();
+            stmt = conn.createStatement();
+            try {
+                final StringBuilder sqlBuf = new StringBuilder()
+                .append("SELECT ")
+                .append((table.equals(TAB_DATA_1H) || table.equals(TAB_DATA_6H) || table.equals(TAB_DATA_1D))?
+                        ("maxvalue as peak, minvalue as low, "):"")
+                .append("value, timestamp FROM ")
+                .append(table).append(" WHERE timestamp BETWEEN ")
+                .append(begin).append(" AND ").append(end)
+                .append(" AND measurement_id=").append(m.getId())
+                .append(" ORDER BY timestamp ").append("ASC");
+                final String sql = sqlBuf.toString();
+                if (log.isDebugEnabled()) {
+                    log.debug(sql);
+                }
+                rs = stmt.executeQuery(sql);
+                while (rs.next()) {
+                    history.add(getMetricValue(rs));
+                }
+                return new ArrayList<HighLowMetricValue>(history);
+            } catch (SQLException e) {
+                throw new SystemException("Can't lookup historical data for " + m, e);
+            }
+        } catch (SQLException e) {
+            throw new SystemException("Can't open connection", e);
+        } finally {
+            DBUtil.closeJDBCObjects(LOG_CTX, conn, stmt, rs);
+        }
+    }
+
 
     public Collection<HighLowMetricValue> getRawData(Measurement m, long begin, long end,
                                                      AtomicLong publishedInterval) {
