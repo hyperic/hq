@@ -1,5 +1,5 @@
 package org.hyperic.hq.api.measurements;
-
+/*
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -57,12 +57,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
-
-@DirtiesContext
-@ServiceBindingsIteration(MeasurementServiceTest.CONTEXT_URL + "/rest-api/data/measuremenet")
-@TestData(MeasurementServiceTestDataPopulator.class)
-public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService, MeasurementServiceTestDataPopulator> {
-    @Rule 
+*/
+//@DirtiesContext
+//@ServiceBindingsIteration(MeasurementServiceTest.CONTEXT_URL + "/rest-api/data/measuremenet")
+//@TestData(MeasurementServiceTestDataPopulator.class)
+public class MeasurementServiceTest {//extends RestTestCaseBase<MeasurementService, MeasurementServiceTestDataPopulator> {
+ /*   @Rule 
     public RuleChain interceptorsChain = super.interceptorsChain ;
     
     public static class MeasurementServiceTestDataPopulator extends AbstractRestTestDataPopulator<MeasurementService>{
@@ -144,7 +144,7 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
 		    		this.servers.put(platform.getId(), serversPerPlatfom) ; 
 		    		
 			    		
-		    			server = this.createServer(platform, serverType, serverTypeName/*+ "_instance_"+iServerCounter*/, subject) ; 
+		    			server = this.createServer(platform, serverType, serverTypeName/*+ "_instance_"+iServerCounter*//*, subject) ; 
 		    			serversPerPlatfom.add(server) ; 
 		    			
 		    			
@@ -189,14 +189,14 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
 //    	MeasurementResponse res = service.getMetrics(req, begin, end);
 //    	Assert.assertEquals(res,expectedRes);
     }
-
+*/
     /**
      * +[+-+]+-+-x
      * 
      * @throws Throwable
      */
-    @Test
-    public final void testGetMetricsWinStartsBeforePrgSmallerThan400() throws Throwable {
+    //@Test
+ /*   public final void testGetMetricsWinStartsBeforePrgSmallerThan400() throws Throwable {
     	Calendar begin = GregorianCalendar.getInstance();
     	Calendar end = GregorianCalendar.getInstance();
     	end.set(Calendar.SECOND, begin.get(Calendar.SECOND));
@@ -242,15 +242,15 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
     		Calendar begin, Calendar end, String aggTable) {
         return null;//    	Arrays.copyOfRange(original, from, to, newType)
     }
-    
+ */   
     /**
      * +-+-+-+-+-x
      * +[-+--+]-+--+--+
      * 
      * @throws Throwable
      */
-    @Test
-    public final void testGetMetricsWinStartsBeforePrgBiggerThan400() throws Throwable { 
+    //@Test
+ /*   public final void testGetMetricsWinStartsBeforePrgBiggerThan400() throws Throwable { 
     	Calendar begin = GregorianCalendar.getInstance();
     	Calendar end = GregorianCalendar.getInstance();
     	end.set(Calendar.SECOND, begin.get(Calendar.SECOND));
@@ -259,15 +259,15 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
 
 //    	baseTest(begin,end,req,expRes);
     }     
-    
+  */  
     /**
      * +-+-x
      * +--+--+[-+-]+--+
      *   
      * @throws Throwable
      */
-    @Test
-    public final void testGetMetricsWinEndsAfterPrg() throws Throwable { 
+//    @Test
+/*    public final void testGetMetricsWinEndsAfterPrg() throws Throwable { 
     	Calendar begin = GregorianCalendar.getInstance();
     	Calendar end = GregorianCalendar.getInstance();
     	end.set(Calendar.SECOND, begin.get(Calendar.SECOND));
@@ -278,32 +278,32 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
     	begin.add(Calendar.HOUR,-2);
 
 //    	baseTest(begin,end,req,expRes);
-    }
+    }*/
     
     /**
      * +-+-+-+[+-x  ]
      * 
      * @throws Throwable
      */
-    @Test
-    public final void testGetMetricsWinEndsBeforePrgStartsAfterPrg() throws Throwable { 
-    }
+  //  @Test
+    //public final void testGetMetricsWinEndsBeforePrgStartsAfterPrg() throws Throwable { 
+    //}
     
     /**
      *   [  a-+]+-+-+-
      * 
      * @throws Throwable
      */
-    @Test
-    public final void testGetMetricsWinEndsBeforeAgg() throws Throwable { 
-    }
+    //@Test
+  //  public final void testGetMetricsWinEndsBeforeAgg() throws Throwable { 
+    //}
 
     /**
      * +--+-[+]-+--+--+
      * 
      * @throws Throwable
      */
-    @Test
-    public final void testGetMetricsWinSmallerThanInterval() throws Throwable { 
-    }
+    //@Test
+    //public final void testGetMetricsWinSmallerThanInterval() throws Throwable { 
+  //  }
 }
