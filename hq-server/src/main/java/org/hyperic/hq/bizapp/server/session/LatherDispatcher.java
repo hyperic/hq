@@ -34,4 +34,5 @@ public interface LatherDispatcher {
     LatherValue dispatch(LatherContext ctx, String method, LatherValue arg)
         throws LatherRemoteException;
 
+    void invokeAutoApprove() throws LatherRemoteException;
 }

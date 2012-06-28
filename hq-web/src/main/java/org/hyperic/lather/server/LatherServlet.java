@@ -46,7 +46,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.autoinventory.ScanStateCore;
 import org.hyperic.hq.bizapp.server.session.LatherDispatcher;
+import org.hyperic.hq.bizapp.shared.lather.AiSendReport_args;
+import org.hyperic.hq.bizapp.shared.lather.CommandInfo;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.lather.LatherContext;
 import org.hyperic.lather.LatherRemoteException;
@@ -279,7 +282,11 @@ public class LatherServlet extends HttpServlet {
 
             try {
                 res = latherDispatcher.dispatch(ctx, method, arg);
-                                                         
+
+                if (CommandInfo.CMD_AI_SEND_REPORT.equals(method)) {
+                    handleAutoApprovals(arg);
+                }
+
                 issueSuccessResponse(this.resp, this.xcoder, res);
             }  catch(IllegalArgumentException exc){
                 String msg = "IllegalArgumentException when invoking LatherDispatcher from Ip=" +
@@ -292,6 +299,15 @@ public class LatherServlet extends HttpServlet {
                 issueErrorResponse(resp, exc.toString());
             } catch(LatherRemoteException exc){
                 issueErrorResponse(resp, exc.toString());
+            }
+        }
+
+        private void handleAutoApprovals(LatherValue arg) throws LatherRemoteException {
+            ScanStateCore scanStateCore = ((AiSendReport_args) arg).getCore();
+            boolean autoApprove = scanStateCore.getPlatform().isAutoApprove();
+
+            if (autoApprove) {
+                this.latherDispatcher.invokeAutoApprove();
             }
         }
 

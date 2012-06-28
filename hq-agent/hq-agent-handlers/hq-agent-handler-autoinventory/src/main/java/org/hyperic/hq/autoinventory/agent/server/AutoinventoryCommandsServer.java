@@ -379,6 +379,7 @@ public class AutoinventoryCommandsServer
 
         // If the auto-approve configuration wasn't provided then exit.
         if (!autoApproveConfig.exists()) {
+            _log.info("no resource is auto approved");
             return;
         }
 
@@ -390,8 +391,9 @@ public class AutoinventoryCommandsServer
         AIServerValue[] aiServerValues = aiPlatformValue.getAIServerValues();
         if (aiServerValues != null) {
             for (AIServerValue aiServerValue : aiServerValues) {
-                boolean autoApproved = autoApproveConfig.isAutoApproved(aiServerValue.getName());
-                aiServerValue.setAutoApprove(autoApproved);
+                boolean approveServer = autoApproveConfig.isAutoApproved(aiServerValue.getName());
+                _log.info("--- Auto-Approve for Server: [" + aiServerValue.getName() + "] is: " + approveServer);
+                aiServerValue.setAutoApprove(approveServer);
             }
         }
     }

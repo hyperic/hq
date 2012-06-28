@@ -222,14 +222,19 @@ public class AgentConfig {
 
     private File logdir;
 
-    private final AutoApproveConfig autoApproveConfig;
+    private static AutoApproveConfig autoApproveConfig = null;
 
 	private AgentConfig(){
         this.proxyIp = AgentConfig.DEFAULT_PROXY_HOST;
         this.proxyPort = AgentConfig.DEFAULT_PROXY_PORT;
         this.notifyUpPort = AgentConfig.DEFAULT_NOTIFY_UP_PORT;
         this.enabledCiphers = AgentConfig.DEFAULT_ENBALED_CIPHERS.split(",");
-        this.autoApproveConfig = new AutoApproveConfig(PROP_INSTALLHOME[1] + "/conf/");
+
+        synchronized (AgentConfig.class) {
+            if (autoApproveConfig == null) {
+                autoApproveConfig = new AutoApproveConfig(PROP_INSTALLHOME[1] + "/conf/");
+            }
+        }
     }
 
     /**

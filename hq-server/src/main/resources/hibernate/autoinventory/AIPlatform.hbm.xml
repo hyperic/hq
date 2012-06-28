@@ -151,6 +151,11 @@
       <key on-delete="cascade" column="AIQ_PLATFORM_ID"/>
       <one-to-many class="AIServer"/>
     </bag>
+
+      <property name="autoApprove" type="boolean">
+          <column name="AUTO_APPROVE" not-null="true" default="false"/>
+      </property>
+
   </class>
 
 </hibernate-mapping>
