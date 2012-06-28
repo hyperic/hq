@@ -44,25 +44,24 @@
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
    
-   <bean id="jasyptConfiguration"
-        class="org.jasypt.encryption.pbe.config.EnvironmentStringPBEConfig">
+   <bean id="jasyptConfiguration" scope="prototype" class="org.jasypt.encryption.pbe.config.EnvironmentStringPBEConfig">
         <property name="algorithm" value="PBEWithMD5AndDES" />
         <property name="passwordSysPropertyName" value="server.encryption-key" />
+        <property name="poolSize" value="5"  /> 
     </bean>
-    
-	<!--	
+	
 	<bean id="markedStringEncryptor" class="org.hyperic.util.security.MarkedStringEncryptor">
         <property name="config" ref="jasyptConfiguration" />
     </bean>
   
-    <bean id="hibernateStringEncryptor" class="org.jasypt.hibernate.encryptor.HibernatePBEStringEncryptor">
+    <bean id="hibernateStringEncryptor" class="org.jasypt.hibernate.encryptor.HibernatePBEStringEncryptor" lazy-init="false">
         <property name="registeredName">
             <value>markedStringEncryptorHibernateWrapper</value>
         </property>
         <property name="encryptor">
             <ref bean="markedStringEncryptor" />
         </property>
-    </bean> -->
+    </bean> 
   
     <bean id="propertyPasswordEncryptor"
         class="org.jasypt.encryption.pbe.StandardPBEStringEncryptor">

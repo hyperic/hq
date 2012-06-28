@@ -982,7 +982,11 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
      */
     @Transactional(readOnly = true)
     public List<Object[]> findAllEnabledMeasurementsAndTemplates() {
-        return measurementDAO.findAllEnabledMeasurementsAndTemplates();
+    	log.info("Commencing Measurement cache preload sequence") ;
+    	final StopWatch watch = new StopWatch(); 
+    	final List<Object[]>  list = measurementDAO.findAllEnabledMeasurementsAndTemplates();
+    	log.info("Finished Measurement cache preload equence  of " + list.size() + " entries in " + watch + " seconds") ; 
+       return list ; 
     }
 
     /**
@@ -1742,5 +1746,6 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         this.srnManager = null ; 
         this.zeventManager = null ; 
     }
-
+    
+    
 }
