@@ -44,7 +44,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.meterware.servletunit.ServletRunner;
 
 @DirtiesContext
-@ContextConfiguration(locations = { "classpath:META-INF/hqapi-context.xml" }, loader=WebContainerContextLoader.class)
+@ContextConfiguration(locations = { "classpath:META-INF/hqapi-context.xml" , "classpath*:WEB-INF/security-web-context-spring.xml" }, loader=WebContainerContextLoader.class)
 @WebContextConfiguration(contextRoot=WebTestCaseBase.CONTEXT, contextUrl=WebTestCaseBase.CONTEXT_URL, webXml=WebTestCaseBase.WEB_XML)
 @Transactional(propagation=Propagation.NESTED)
 public abstract class WebTestCaseBase extends BaseInfrastructureTest{

@@ -69,6 +69,7 @@ import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.ObjectNotFoundException;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
@@ -112,7 +113,7 @@ public class ResourceTransferImpl implements ResourceTransfer{
     }//EOM 
 	    
 	public final Resource getResource(ApiMessageContext messageContext, final String platformNaturalID, final ResourceType resourceType, 
-			final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) throws SessionNotFoundException, SessionTimeoutException {
+			final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) throws SessionNotFoundException, SessionTimeoutException, ObjectNotFoundException {
 	    AuthzSubject authzSubject = messageContext.getAuthzSubject();
 		if(resourceStatusType == ResourceStatusType.AUTO_DISCOVERED) { 
 			return this.getAIResource(platformNaturalID, resourceType, hierarchyDepth, responseMetadata) ; 
@@ -128,8 +129,9 @@ public class ResourceTransferImpl implements ResourceTransfer{
 	 * @param hierarchyDepth
 	 * @param responseMetadata
 	 * @return
+	 * @throws ObjectNotFoundException 
 	 */
-	public final Resource getResource(ApiMessageContext messageContext, final String platformID, final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) {
+	public final Resource getResource(ApiMessageContext messageContext, final String platformID, final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) throws ObjectNotFoundException {
 	    AuthzSubject authzSubject = messageContext.getAuthzSubject();
 		if(resourceStatusType == ResourceStatusType.AUTO_DISCOVERED) { 
 			throw new UnsupportedOperationException("AI Resource load by internal ID is unsupported") ; 
@@ -147,8 +149,9 @@ public class ResourceTransferImpl implements ResourceTransfer{
 	 * @param hierarchyDepth
 	 * @param responseMetadata
 	 * @return
+	 * @throws ObjectNotFoundException 
 	 */
-	private final Resource getResourceInner(final Context flowContext, int hierarcyDepth) { 
+	private final Resource getResourceInner(final Context flowContext, int hierarcyDepth) throws ObjectNotFoundException { 
 		
 		Resource currentResource =  null ; 
 		try{ 
@@ -188,7 +191,9 @@ public class ResourceTransferImpl implements ResourceTransfer{
 				}//EO while there are more children 
 				
 			}//EOM 
-							
+			
+		} catch (ObjectNotFoundException e) {
+		    throw e;
 		}catch(Throwable t) { 
 			throw (t instanceof RuntimeException ? (RuntimeException) t : new RuntimeException(t)) ; 
 		}//EO catch block 

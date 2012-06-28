@@ -34,13 +34,14 @@ import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.api.services.impl.ApiMessageContext;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.common.ObjectNotFoundException;
 
 public interface ResourceTransfer {
 
 	Resource getResource(final ApiMessageContext messageContext, final String platformNaturalID, final ResourceType resourceType, 
-			final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) throws SessionNotFoundException, SessionTimeoutException ; 
+			final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) throws SessionNotFoundException, SessionTimeoutException, ObjectNotFoundException ; 
 	
-	Resource getResource(final ApiMessageContext messageContext, final String platformID, final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) ; 
+	Resource getResource(final ApiMessageContext messageContext, final String platformID, final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) throws ObjectNotFoundException ; 
 	
 	
 	ResourceBatchResponse approveResource(final ApiMessageContext messageContext, final Resources aiResources) ;

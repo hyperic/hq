@@ -86,7 +86,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.ExpectedException;
 
-@SecurityInfo(username="hqadmin",password="hqadmin")
 @DirtiesContext
 @ServiceBindingsIteration(ResourceServiceTest.CONTEXT_URL + "/rest-api/inventory/resources")
 @TestData(ResourceServiceTestDataPopulator.class)
@@ -124,9 +123,9 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     	}//EOM 
     }//EO inner class PlatformsIterationInterceptor
     
-    //@SecurityInfo(username="hqadmin",password="hqadmin")
+    @SecurityInfo(username="hqadmin",password="hqadmin")
     @PlatformsIteration(noOfPlatforms=1)
-    @Test
+//    @Test
     public final void testGetWADL() throws Throwable {
     	final String WADL = this.getWADL(this.service) ; 
     	System.out.println(WADL);
@@ -192,7 +191,7 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 		this.assertResource(resource, this.currentPlatform, hierarchyDepth, null) ;
     }//EOM 
     
-//    @SecurityInfo(username="hqadmin",password="hqadmin")
+    @SecurityInfo(username="hqadmin",password="hqadmin")
     @PlatformsIteration(noOfPlatforms=1)
     @Test
     public final void testGetResourceDepth1() throws Throwable { 
@@ -596,10 +595,10 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 		        testAgent = this.createAgent("127.0.0.1", 2144, "authToken", agentToken, "5.0");
 		       
 		        final String pluginName = "Test_Plugin" ;
-		        final String platformName = "Linux" ; 
-		        final String serverTypeName = "Tomcat" ; 
+		        final String platformName = "Linux1" ; 
+		        final String serverTypeName = "Tomcat1" ; 
 		        final String serverTypeinfoName = serverTypeName + " " + platformName ; 
-		        final String serviceTypeName = "Spring JDBC Template" ;
+		        final String serviceTypeName = "Spring JDBC Template1" ;
 		        final String serviceTypeinfoName = serviceTypeName + " " + platformName ; 
 		        
 		        this.platformType = this.platformManager.createPlatformType(platformName, pluginName) ; 

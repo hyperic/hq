@@ -40,6 +40,7 @@ import org.hyperic.hq.api.transfer.ResourceTransfer;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.common.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 //@Component
@@ -53,37 +54,53 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
 	
 	public final Resource getResource(final String platformNaturalID, final ResourceType resourceType, final ResourceStatusType resourceStatusType, 
 			final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) throws SessionNotFoundException, SessionTimeoutException {
-	    ApiMessageContext apiMessageContext = newApiMessageContext(messageContext.getHttpServletRequest());
-	    	 	    
-	    Resource resource = this.resourceTransfer.getResource(apiMessageContext, platformNaturalID, resourceType, resourceStatusType, hierarchyDepth, responseMetadata);            
-
+	    ApiMessageContext apiMessageContext = newApiMessageContext();
+	    
+	    Resource resource = null;
+	    try {
+	        resource = this.resourceTransfer.getResource(apiMessageContext, platformNaturalID, resourceType, resourceStatusType, hierarchyDepth, responseMetadata);            
+	    } catch (ObjectNotFoundException e) {
+            logger.warn("Platform with the natural ID " + platformNaturalID + " not found.");
+            WebApplicationException webApplicationException = 
+                    errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID, platformNaturalID);            
+            throw webApplicationException;	        
+	    }
 		return resource;
 	}//EOM 
 
     public final Resource getResource(final String platformID, final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) throws SessionNotFoundException, SessionTimeoutException {
-        ApiMessageContext apiMessageContext = newApiMessageContext(messageContext.getHttpServletRequest());
-		return this.resourceTransfer.getResource(apiMessageContext, platformID, resourceStatusType, hierarchyDepth, responseMetadata) ; 
+        ApiMessageContext apiMessageContext = newApiMessageContext();
+        Resource resource = null;
+        try {
+            resource =  this.resourceTransfer.getResource(apiMessageContext, platformID, resourceStatusType, hierarchyDepth, responseMetadata) ;
+        } catch (ObjectNotFoundException e) {
+            logger.warn("Platform with the natural ID " + platformID + " not found.");
+            WebApplicationException webApplicationException = 
+                    errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID, platformID);            
+            throw webApplicationException;
+        } 
+        return resource;
 	}//EOM 
 	
 	public final ResourceBatchResponse getResources() throws SessionNotFoundException, SessionTimeoutException { 
-	    ApiMessageContext apiMessageContext = newApiMessageContext(messageContext.getHttpServletRequest());
+	    ApiMessageContext apiMessageContext = newApiMessageContext();
 		//TODO: NYI 
 		//return this.resourceTransfer.getResources(criteria);
 		throw new UnsupportedOperationException() ; 
 	}//EOM 
 	
 	public final ResourceBatchResponse approveResource(final Resources aiResources) throws SessionNotFoundException, SessionTimeoutException {
-	    ApiMessageContext apiMessageContext = newApiMessageContext(messageContext.getHttpServletRequest());
+	    ApiMessageContext apiMessageContext = newApiMessageContext();
 		return this.resourceTransfer.approveResource(apiMessageContext, aiResources) ; 
 	}//EOM 
 	
 	public final ResourceBatchResponse updateResources(final Resources resources) throws SessionNotFoundException, SessionTimeoutException { 
-	    ApiMessageContext apiMessageContext = newApiMessageContext(messageContext.getHttpServletRequest());
+	    ApiMessageContext apiMessageContext = newApiMessageContext();
 		return this.resourceTransfer.updateResources(apiMessageContext, resources) ; 
 	}//EOM
 	
 	public final ResourceBatchResponse updateResourcesByCriteria(final Resource updateData) throws SessionNotFoundException, SessionTimeoutException {
-	    ApiMessageContext apiMessageContext = newApiMessageContext(messageContext.getHttpServletRequest());
+	    ApiMessageContext apiMessageContext = newApiMessageContext();
 		//TODO: NYI 
 		//return this.resourceTransfer.approveResource(cirteria, updateData) ;
 		throw new UnsupportedOperationException() ; 
