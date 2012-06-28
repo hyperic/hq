@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
@@ -15,13 +16,14 @@ import edu.emory.mathcs.backport.java.util.Collections;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "measurement", namespace=RestApiConstants.SCHEMA_NAMESPACE)
-//@XmlType(name=???, namespace=RestApiConstants.SCHEMA_NAMESPACE)?????
+@XmlType(name="MeasurementType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 public class Measurement {
 	@XmlAttribute
 	private long interval;
 	@XmlAttribute
 	private String name;
-	@XmlElement
+	@XmlElementWrapper(name="metrics", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+	@XmlElement(name="metric", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 	private List<Metric> metrics;
 	
 	public Measurement() {}

@@ -1,6 +1,7 @@
 package org.hyperic.hq.api.services.impl;
 
 import java.util.Calendar;
+import java.util.Date;
 
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
@@ -23,7 +24,7 @@ public class MeasurementServiceImpl implements MeasurementService {
 //    }        
     
 	public MeasurementResponse getMetrics(final MeasurementRequest measurementRequest,
-			final Calendar begin, final Calendar end) {
+			final String begin, final String end) {
         return measurementTransfer.getMetrics(measurementRequest,begin,end);
     }
 }

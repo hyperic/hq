@@ -310,7 +310,7 @@ public class TemplateManagerImpl implements TemplateManager {
     }
 
     @Transactional(readOnly = true)
-    public /*Map<String,List<MeasurementTemplate>>*/List<MeasurementTemplate> findTemplatesByName(List<String> tmpNames) {
+    public List<MeasurementTemplate> findTemplatesByName(List<String> tmpNames) {
     	return measurementTemplateDAO.findTemplatesByName(tmpNames);
     }
 

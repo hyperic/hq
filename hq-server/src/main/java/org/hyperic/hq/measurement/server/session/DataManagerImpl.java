@@ -920,30 +920,44 @@ public class DataManagerImpl implements DataManager {
      *  and which the time frame doesn't cover a range which is even partially after its purge has been done
      *  and in which no more than maxDTPs fit in the requested time frame
      */
-    public String getDataTable(long begin, long end, Measurement msmt, int maxDTPs) {
+    protected String getDataTable(long begin, long end, Measurement msmt, int maxDTPs) throws IllegalArgumentException {
         long tf = end - begin;  // the time frame
         long maxInterval = tf / maxDTPs; // the max interval for which maxDTPs DTPs still fit in the time frame
         long msmtInterval = msmt.getInterval();
-        if (tf<msmtInterval) { return null;}
-        long now = System.currentTimeMillis();
-        if (end>now || end<begin) { return null;}
-        if (msmtInterval<=maxInterval && begin>=DataManagerImpl.this.purgeRaw+now) {
-            return MeasurementUnionStatementBuilder.getUnionStatement(begin, end, msmt.getId().intValue(),
-                    measurementDAO.getHQDialect());
+        if (tf<msmtInterval) { 
+            MeasurementTemplate tmp = msmt.getTemplate();
+            throw new IllegalArgumentException("requested time frame is of size " + tf + " milliseconds, which is smaller than the time interval of the measurement " + tmp!=null?tmp.getName():"" + " which is " + msmtInterval + " milliseconds");
         }
-        if (tf<HOUR_IN_MILLI) { return null;}
-        if (HOUR_IN_MILLI<=maxInterval && begin>=DataManagerImpl.this.purge1h+now) {
+        long now = System.currentTimeMillis();
+        if (end>now || end<begin) { 
+            throw new IllegalArgumentException("illegal time frame boundries");
+        }
+        if (!confDefaultsLoaded) {
+            loadConfigDefaults();
+        }
+        if (msmtInterval>=maxInterval && begin>=now-DataManagerImpl.this.purgeRaw/* usesMetricUnion(begin, end, false)*/) {
+            return MeasurementUnionStatementBuilder.getUnionStatement(begin, end, msmt.getId().intValue(), measurementDAO.getHQDialect());
+        }
+        if (tf<HOUR_IN_MILLI) { 
+            MeasurementTemplate tmp = msmt.getTemplate();
+            throw new IllegalArgumentException("requested time frame is of size " + tf + " milliseconds, which is smaller than the hourly aggregated time interval of the measurement " + tmp!=null?tmp.getName():"");
+        }
+        if (HOUR_IN_MILLI>=maxInterval && begin>=now-DataManagerImpl.this.purge1h) {
             return MeasurementConstants.TAB_DATA_1H;
         }
-        if (tf<SIX_HOURS_IN_MILLI) { return null;}
-        if (SIX_HOURS_IN_MILLI<=maxInterval && begin>=DataManagerImpl.this.purge6h+now) {
+        if (tf<SIX_HOURS_IN_MILLI) { 
+            MeasurementTemplate tmp = msmt.getTemplate();
+            throw new IllegalArgumentException("requested time frame is of size " + tf + " milliseconds, which is smaller than the 6-hourly aggregated time interval of the measurement " + tmp!=null?tmp.getName():"");
+        }
+        if (SIX_HOURS_IN_MILLI>=maxInterval && begin>=now-DataManagerImpl.this.purge6h) {
             return MeasurementConstants.TAB_DATA_6H;
         }
-        //            if (tf<DAY_IN_MILLI) { return null;}
-        if (DAY_IN_MILLI<=maxInterval && begin>=DataManagerImpl.this.purge1d+now) {
-            return MeasurementConstants.TAB_DATA_1D;
+        if (tf<DAY_IN_MILLI) { 
+            MeasurementTemplate tmp = msmt.getTemplate();
+            throw new IllegalArgumentException("requested time frame is of size " + tf + " milliseconds, which is smaller than the daily aggregated time interval of the measurement " + tmp!=null?tmp.getName():"");
         }
-        return null;
+        // return daily aggregated data even if the time frame is beyond the purge time or contains more than 400 DTPs
+        return MeasurementConstants.TAB_DATA_1D;
     }
     
     public String getDataTable(long begin, long end, int measId) {
@@ -1026,14 +1040,12 @@ public class DataManagerImpl implements DataManager {
 
 
     @Transactional(readOnly = true)
-    public PageList<HighLowMetricValue> getHistoricalData(Measurement m, long begin, long end,
-                                                          PageControl pc,
+    public List<HighLowMetricValue> getHistoricalData(Measurement m, long begin, long end,
                                                           boolean prependAvailUnknowns, int maxDTPs) {
         if (m.getTemplate().isAvailability()) {
-            return availabilityManager.getHistoricalAvailData(m, begin, end, pc,
-                prependAvailUnknowns);
+            return availabilityManager.getHistoricalAvailData(m, begin, end, PageControl.PAGE_ALL, prependAvailUnknowns);
         } else {
-            return getHistData(m, begin, end, pc, maxDTPs);
+            return getHistData(m, begin, end, maxDTPs);
         }
     }
     
@@ -1148,8 +1160,7 @@ public class DataManagerImpl implements DataManager {
         }
     }
 
-    private PageList<HighLowMetricValue> getHistData(final Measurement m, long begin, long end,
-            final PageControl pc, int maxDTPs) {
+    private List<HighLowMetricValue> getHistData(final Measurement m, long begin, long end, int maxDTPs) {
         checkTimeArguments(begin, end);
         begin = TimingVoodoo.roundDownTime(begin, MINUTE);
         end = TimingVoodoo.roundDownTime(end, MINUTE);
@@ -1160,51 +1171,28 @@ public class DataManagerImpl implements DataManager {
         ResultSet rs = null;
         // The table to query from
         final String table = getDataTable(begin, end, m,maxDTPs);
-        final HQDialect dialect = measurementDAO.getHQDialect();
         try {
             conn = dbUtil.getConnection();
             stmt = conn.createStatement();
             try {
-                final boolean sizeLimit = (pc.getPagesize() != PageControl.SIZE_UNLIMITED);
                 final StringBuilder sqlBuf = new StringBuilder()
-                .append("SELECT :fields FROM ")
+                .append("SELECT ")
+                .append((table.equals(TAB_DATA_1H) || table.equals(TAB_DATA_6H) || table.equals(TAB_DATA_1D))?
+                        ("maxvalue as peak, minvalue as low, "):"")
+                .append("value, timestamp FROM ")
                 .append(table).append(" WHERE timestamp BETWEEN ")
                 .append(begin).append(" AND ").append(end)
                 .append(" AND measurement_id=").append(m.getId())
-                .append(" ORDER BY timestamp ").append(pc.isAscending() ? "ASC" : "DESC");
-                Integer total = null;
-                if (sizeLimit) {
-                    // need to get the total count if there is a limit on the
-                    // size. Otherwise we can just take the size of the
-                    // resultset
-                    rs = stmt.executeQuery(sqlBuf.toString().replace(":fields", "count(*)"));
-                    total = (rs.next()) ? new Integer(rs.getInt(1)) : new Integer(1);
-                    rs.close();
-                    if (total.intValue() == 0) {
-                        return new PageList<HighLowMetricValue>();
-                    }
-                    if (log.isDebugEnabled()) {
-                        log.debug("paging: offset= " + pc.getPageEntityIndex() + ", pagesize=" +
-                                pc.getPagesize());
-                    }
+                .append(" ORDER BY timestamp ").append("ASC");
+                final String sql = sqlBuf.toString();
+                if (log.isDebugEnabled()) {
+                    log.debug(sql);
                 }
-                final int offset = pc.getPageEntityIndex();
-                final int limit = pc.getPagesize();
-                final String sql = (sizeLimit) ?
-                        dialect.getLimitBuf(sqlBuf.toString(), offset, limit) : sqlBuf.toString();
-                        if (log.isDebugEnabled()) {
-                            log.debug(sql);
-                        }
-                        final StopWatch timer = new StopWatch();
-                        rs = stmt.executeQuery(sql.replace(":fields", "value, timestamp"));
-                        if (log.isTraceEnabled()) {
-                            log.trace("getHistoricalData() execute time: " + timer.getElapsed());
-                        }
-                        while (rs.next()) {
-                            history.add(getMetricValue(rs));
-                        }
-                        total = (total == null) ? new Integer(history.size()) : total;
-                        return new PageList<HighLowMetricValue>(history, total.intValue());
+                rs = stmt.executeQuery(sql);
+                while (rs.next()) {
+                    history.add(getMetricValue(rs));
+                }
+                return new ArrayList<HighLowMetricValue>(history);
             } catch (SQLException e) {
                 throw new SystemException("Can't lookup historical data for " + m, e);
             }

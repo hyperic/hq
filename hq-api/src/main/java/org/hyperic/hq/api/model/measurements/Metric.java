@@ -9,8 +9,8 @@ import javax.xml.bind.annotation.XmlType;
 import org.hyperic.hq.api.model.RestApiConstants;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-//@XmlRootElement(name = "metric", namespace=RestApiConstants.SCHEMA_NAMESPACE)??
-//@XmlType(name=???, namespace=RestApiConstants.SCHEMA_NAMESPACE)?????
+//@XmlRootElement(name = "metric", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+@XmlType(name="MetricType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 public class Metric {
 	@XmlAttribute
 	private double  highValue;

@@ -25,6 +25,7 @@ public class MeasurementMapper {
             metric.setLowValue(hqMetric.getLowValue());
             metric.setValue(hqMetric.getValue());
             metric.setTimestamp(hqMetric.getTimestamp());
+            metrics.add(metric);
         }
         return metrics;
     }

@@ -25,55 +25,24 @@
  */
 package org.hyperic.hq.api.transfer.impl;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.agent.AgentConnectionException;
-import org.hyperic.hq.api.model.ResourceConfig;
-import org.hyperic.hq.api.model.ResourceDetailsType;
-import org.hyperic.hq.api.model.ResourceStatusType;
-import org.hyperic.hq.api.model.ResourceType;
+import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
-import org.hyperic.hq.api.model.measurements.MeasurementRequest;
-import org.hyperic.hq.api.model.measurements.MeasurementRequest;
-import org.hyperic.hq.api.model.measurements.MeasurementResponse;
-import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.api.transfer.MeasurementTransfer;
-import org.hyperic.hq.api.transfer.ResourceTransfer;
-import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 import org.hyperic.hq.api.transfer.mapping.MeasurementMapper;
-import org.hyperic.hq.api.transfer.mapping.ResourceMapper;
-import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.shared.AIQueueManager;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
-import org.hyperic.hq.appdef.shared.CPropManager;
-import org.hyperic.hq.appdef.shared.ConfigFetchException;
-import org.hyperic.hq.appdef.shared.PlatformManager;
-import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.ResourceManager;
-import org.hyperic.hq.autoinventory.AutoinventoryException;
-import org.hyperic.hq.bizapp.server.session.ProductBossImpl.ConfigSchemaAndBaseResponse;
-import org.hyperic.hq.bizapp.shared.AllConfigResponses;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.bizapp.shared.ProductBoss;
-import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.DataManager;
@@ -83,9 +52,6 @@ import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 //@Component
 public class MeasurementTransferImpl implements MeasurementTransfer {
@@ -102,35 +68,58 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     @Autowired
     private AuthzSubjectManager authzSubjectManager;
 
-    public MeasurementResponse getMetrics(final MeasurementRequest hqMsmtReq, final Calendar begin, final Calendar end) {
+    public MeasurementResponse getMetrics(final MeasurementRequest hqMsmtReq, final String begin, final String end) {
         MeasurementResponse res = new MeasurementResponse();
-    	// extract all input measurement templates
-    	List<String> tmpNames = hqMsmtReq.getMeasurementTemplateNames();
-    	List<MeasurementTemplate> tmps = this.tmpltMgr.findTemplatesByName(tmpNames);
-		String rscId = hqMsmtReq.getResourceId();
-		// get measurements
-		Map<Integer, List<Integer>> resIdsToTmpIds = new HashMap<Integer, List<Integer>>();
-		List<Integer> tmpIds = new ArrayList<Integer>();
-		for (MeasurementTemplate tmp : tmps) {
-		    tmpIds.add(tmp.getId());
-        }
-		resIdsToTmpIds.put(new Integer(rscId), tmpIds);
-		AuthzSubject authSubject = this.getAuthzSubject();
-		List<Measurement> hqMsmts = null;
-		try {
+        String rscId = hqMsmtReq.getResourceId();
+        try {
+            final DateFormat dateFormat = new SimpleDateFormat() ;
+            Date beginDate = null, endDate = null ; 
+            try {
+                beginDate = dateFormat.parse(begin) ; 
+                endDate = dateFormat.parse(end) ;
+            } catch (ParseException e) {
+                throw new IllegalArgumentException("cannot parse the begin/end time frame arguments",e);
+            }
+            AuthzSubject authSubject = this.getAuthzSubject();
+            // extract all input measurement templates
+            List<String> tmpNames = hqMsmtReq.getMeasurementTemplateNames();
+            if (tmpNames==null || tmpNames.size()==0) {
+                throw new UnsupportedOperationException("request must contain at least one measurement template name");
+            }
+            List<MeasurementTemplate> tmps = this.tmpltMgr.findTemplatesByName(tmpNames);
+            if (tmps==null || tmps.size()==0) {
+                throw new ObjectNotFoundException("there are no measurement templates which carries the requested template names", MeasurementTemplate.class.getName());
+            }
+            // get measurements
+            Map<Integer, List<Integer>> resIdsToTmpIds = new HashMap<Integer, List<Integer>>();
+            List<Integer> tmpIds = new ArrayList<Integer>();
+            for (MeasurementTemplate tmp : tmps) {
+                tmpIds.add(tmp.getId());
+            }
+            resIdsToTmpIds.put(new Integer(rscId), tmpIds);
             Map<Resource, List<Measurement>> rscTohqMsmts = this.measurementMgr.findMeasurements(authSubject, resIdsToTmpIds);
-            hqMsmts = rscTohqMsmts.get(rscId);
-        } catch (PermissionException e) {
+            
+            if (rscTohqMsmts==null || rscTohqMsmts.size()==0 || rscTohqMsmts.values().isEmpty()) {
+                throw new ObjectNotFoundException("there are no measurements of the requested templates types on the requested resource", Measurement.class.getName());
+            }
+            List<Measurement> hqMsmts = rscTohqMsmts.values().iterator().next();    // there should be only one list of measurements for one resource
+            if (hqMsmts==null || hqMsmts.size()==0) {
+                throw new ObjectNotFoundException("there are no measurements of the requested templates types on the requested resource", Measurement.class.getName());
+            }
+
+            // get metrics
+            for (Measurement hqMsmt : hqMsmts) {
+                org.hyperic.hq.api.model.measurements.Measurement msmt = this.mapper.toMeasurement(hqMsmt);
+                List<HighLowMetricValue> hqMetrics = this.dataMgr.getHistoricalData(hqMsmt, beginDate.getTime(), endDate.getTime(), true, MAX_DTPS);
+                if (hqMetrics!=null && hqMetrics.size()!=0) {
+                    List<org.hyperic.hq.api.model.measurements.Metric> metrics = this.mapper.toMetrics(hqMetrics);
+                    msmt.setMetrics(metrics);
+                }
+                res.add(msmt);
+            }
+        } catch (Throwable e) {
             res.addFailedResource(e,rscId, null, null) ;
             return res;
-        }
-    	// get metrics
-        for (Measurement hqMsmt : hqMsmts) {
-            PageList<HighLowMetricValue> hqMetrics = this.dataMgr.getHistoricalData(hqMsmt, begin.getTimeInMillis(), end.getTimeInMillis(), PageControl.PAGE_ALL, true, MAX_DTPS);
-            org.hyperic.hq.api.model.measurements.Measurement msmt = this.mapper.toMeasurement(hqMsmt);
-            List<org.hyperic.hq.api.model.measurements.Metric> metrics = this.mapper.toMetrics(hqMetrics);
-            msmt.setMetrics(metrics);
-            res.add(msmt);
         }
         return res;
     }

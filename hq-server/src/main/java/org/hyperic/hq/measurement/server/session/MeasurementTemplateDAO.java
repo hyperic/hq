@@ -35,6 +35,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
@@ -180,28 +181,26 @@ public class MeasurementTemplateDAO
         return getSession().createQuery(sql).setString(0, type).setString(1, cat).list();
     }
 
-    /*Map<String,MeasurementTemplate>*/
+    @SuppressWarnings("unchecked")
     List<MeasurementTemplate> findTemplatesByName(List<String> tmpNames) {
-    	StringBuilder whereCondition = new StringBuilder();
-    	if (tmpNames.size()>0) {
-    		whereCondition.append("where t.name=?");
+    	if (tmpNames==null || tmpNames.size()==0) {
+    	    throw new IllegalArgumentException("no template names passed to MeasurementTemplateImpl.findTemplatesByName()");
     	}
-    	for (int i=1 ; i<tmpNames.size() ; i++) {
-    		whereCondition.append("or t.name=?");
+        StringBuilder sql = new StringBuilder().append("select t from MeasurementTemplate t where");
+    	for (int i=0 ; i<tmpNames.size()-1 ; i++) {
+    		sql.append(" name=? or");
 		}
-        String sql = "select t from MeasurementTemplate t " + whereCondition + "order by t.name";
-        Query getTmpQuery = getSession().createQuery(sql); 
-        int i=-1;
+        sql.append(" name=? order by t.name");
+        Query getTmpQuery = getSession().createQuery(sql.toString());
+        if (getTmpQuery==null) {
+            throw new HibernateException("failed creating template retrieval by name query");
+        }
+        int i=0;
         for (String tmpName : tmpNames) {
         	getTmpQuery.setString(i++, tmpName);
 		}
         List<MeasurementTemplate> tmpsRes = getTmpQuery.list();
         
-        // sort answer into the map
-//        Map<String,MeasurementTemplate> tmpsMap = new HashMap<String,MeasurementTemplate>();
-//        for (MeasurementTemplate tmpRes : tmpsRes) {
-//        	tmpsMap.put(tmpRes.getName(),tmpRes);
-//        }
         return tmpsRes;
     }
 
@@ -279,8 +278,8 @@ public class MeasurementTemplateDAO
         //We need JdbcTemplate to throw runtime Exception to roll back tx if batch update fails, else we'll get partial write
         jdbcTemplate.batchUpdate(templatesql, new BatchPreparedStatementSetter() {
             HashMap<String, Category> cats = new HashMap<String, Category>();
-
             public void setValues(PreparedStatement stmt, int i) throws SQLException {
+                
                 MeasurementInfo info = combinedInfos.get(i).getMeasurementInfo();
                 Category cat = (Category) cats.get(info.getCategory());
                 if (cat == null) {

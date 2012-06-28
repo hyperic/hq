@@ -1,6 +1,7 @@
 package org.hyperic.hq.api.services;
 
 import java.util.Calendar;
+import java.util.Date;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -20,7 +21,7 @@ public interface MeasurementService {
 	
 	@POST
 	@Path("/metrics")
-	MeasurementResponse getMetrics(@QueryParam("MeasurementRequest") final MeasurementRequest measurementRequest,
-			@QueryParam("begin") final Calendar begin,
-			@QueryParam("end") final Calendar end);
+	MeasurementResponse getMetrics(final MeasurementRequest measurementRequest,
+			@QueryParam("begin") final String begin,
+			@QueryParam("end") final String end);
 }
