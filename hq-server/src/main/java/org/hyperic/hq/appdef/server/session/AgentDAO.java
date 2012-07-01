@@ -221,11 +221,7 @@ public class AgentDAO extends HibernateDAO<Agent> {
      * @return number of agents, whose version is older than that of the server
      */
     public long getNumOldAgents() {
-        final String sql = new StringBuilder(150)
-        .append("select count(a) from Agent a where ")
-        .append(LIMIT_A_TO_OLD_AGENTS)
-        .append("and exists (select 1 from Platform p where p.agent.id = a.id)")
-        .toString();
+        final String sql = "select count(a) from Agent a where " + LIMIT_A_TO_OLD_AGENTS;        
         final Query query = getSession().createQuery(sql);
         query.setParameter("serverVersion", serverConfigManager.getServerMajorVersion());        
         return ((Number) query.uniqueResult()).longValue();
