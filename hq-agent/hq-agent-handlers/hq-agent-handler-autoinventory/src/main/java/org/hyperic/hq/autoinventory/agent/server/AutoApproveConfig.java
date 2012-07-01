@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-package org.hyperic.hq.agent;
+package org.hyperic.hq.autoinventory.agent.server;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
