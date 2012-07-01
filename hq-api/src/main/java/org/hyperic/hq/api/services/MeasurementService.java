@@ -12,6 +12,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
+import org.hyperic.hq.authz.shared.PermissionException;
 
 
 @Path("/") 
@@ -23,5 +24,5 @@ public interface MeasurementService {
 	@Path("/metrics")
 	MeasurementResponse getMetrics(final MeasurementRequest measurementRequest,
 			@QueryParam("begin") final String begin,
-			@QueryParam("end") final String end);
+			@QueryParam("end") final String end) throws PermissionException;
 }

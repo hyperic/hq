@@ -68,6 +68,7 @@ import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
+import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.product.ServiceTypeInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,6 +107,9 @@ public class TestHelper {
     
     @Autowired
     protected PlatformTransactionManager txManager ; 
+    
+    @Autowired
+    protected MeasurementManager msmtManager;
     
     protected TransactionTemplate newTxTemplate(final int propagationType) { 
     	final TransactionTemplate txTemplate = new TransactionTemplate(this.txManager) ;
