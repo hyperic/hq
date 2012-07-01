@@ -213,7 +213,7 @@
     float: right;
 }
 
-#agentSummaryPanel,#oldAgentSummaryPanel {
+#agentSummaryPanel,#unsyncAgentsSummaryPanel {
     margin-top: 0;
 }
 
@@ -360,9 +360,11 @@ input[type="text"] {
     width: 400px;
 }
 
-#agentSummaryPanel .cancelLink,#oldAgentSummaryPanel .cancelLink {
+#agentSummaryPanel .cancelLink {
     float: right;
 }
+
+
 
 #agentSummaryList {
     max-height: 290px;
@@ -385,23 +387,43 @@ input[type="text"] {
     margin-right: auto;
 }
 
-#oldAgentSummaryPanel {
+#unsyncAgentsSummaryPanel {
     width: 600px;
+    height: 700px;
+	text-align: left;
 }
 
-#oldAgentSummaryPanel ul {
+
+#unsyncAgentsSummaryPanel .cancelLink {
+	float: right;
+	margin-bottom: 10px;
+}
+
+#unsyncAgentsSummaryPanel .oldSummaryListDiv {
+    height: 200px;
+    overflow-x:auto;
+    overflow-y:auto;
+    border: 1px solid gray;
+}
+
+#unsyncAgentsSummaryPanel .curSummaryListDiv {
+    height: 200px;
+    overflow-x:auto;
+    overflow-y:auto;
+    border: 1px solid gray;
+}
+
+
+#unsyncAgentsSummaryPanel ul {
     margin: 0;
     padding: 0;
     list-style: none;
     background-color: #fff;
-    border: 1px solid gray;
-    border-top: 0;
-    border-bottom: 1px solid gray;
     max-height: 400px;
     overflow: auto;
 }
 
-#oldAgentSummaryPanel .gridheader {
+#unsyncAgentsSummaryPanel .gridheader {
     background: url("/static/images/table_header_large.png") repeat-x 0 0
         transparent;
     overflow: hidden;
@@ -412,18 +434,18 @@ input[type="text"] {
     text-align: left;
 }
 
-#oldAgentSummaryPanel .gridheader span.column {
+#unsyncAgentsSummaryPanel .gridheader span.column {
     padding-top: 0.25em;
     padding-left: 0.5em;
     height: 25px;
     text-align: left;
 }
 
-#oldAgentSummaryPanel .gridrow {
+#unsyncAgentsSummaryPanel .gridrow {
     text-align: left;
 }
 
-#oldAgentSummaryPanel .gridrow span.column {
+#unsyncAgentsSummaryPanel .gridrow span.column {
     padding: 0.5em 0;
     padding-left: 0.5em;
 }

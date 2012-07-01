@@ -223,10 +223,10 @@ public class PluginManagerController extends BaseController implements Applicati
         }
         
         info.put("agentErrorCount", agentErrorCount);
+        long numAgentsTotal = agentManager.getAgentCountUsed();
         long numAutoUpdatingAgents = agentManager.getNumAutoUpdatingAgents();
         info.put("syncableAgentCount", numAutoUpdatingAgents);
-        long totalAgentCount = numAutoUpdatingAgents + agentManager.getNumOldAgents(); 
-        info.put("totalAgentCount", totalAgentCount);
+        info.put("totalAgentCount", numAgentsTotal);
         String serverVersion = getServerVersion();
         info.put("serverVersion", serverVersion);
         return info;
@@ -249,7 +249,7 @@ public class PluginManagerController extends BaseController implements Applicati
     
     @RequestMapping(method = RequestMethod.GET, value="/agent/old/summary", headers="Accept=application/json")
     public @ResponseBody  List<Map<String,String>> getOldAgentStatusSummary() {
-        List<Agent> oldAgents = agentManager.getOldAgents();        
+        List<Agent> oldAgents = agentManager.getOldAgentsUsed(); 
         List<Map<String,String>> oldAgentVersions = new ArrayList<Map<String,String>>(oldAgents.size());
         for (Agent agent : oldAgents) {
             Map<String,String> agentInfoMap = new HashMap<String, String>(2);
@@ -263,7 +263,23 @@ public class PluginManagerController extends BaseController implements Applicati
         return oldAgentVersions;
     }         
     
+    @RequestMapping(method = RequestMethod.GET, value="/agent/old/summary1", headers="Accept=application/json")
+    public @ResponseBody  List<Map<String,String>> getCurrentNonSyncAgentStatusSummary() {
+        List<Agent> oldAgents = agentManager.getCurrentNonSyncAgents();
+        List<Map<String,String>> oldAgentVersions = new ArrayList<Map<String,String>>(oldAgents.size());
+        for (Agent agent : oldAgents) {
+            Map<String,String> agentInfoMap = new HashMap<String, String>(2);
+            String version = agent.getVersion();        
+            agentInfoMap.put("version", version);
+            String agentName = getAgentName(agent);
+            agentInfoMap.put("agentName", agentName);
+            oldAgentVersions.add(agentInfoMap);
+        }
+        
+        return oldAgentVersions;
+    }         
     
+        
     @RequestMapping(method = RequestMethod.GET, value="/status/{pluginId}", headers="Accept=application/json")
     public @ResponseBody List<Map<String, Object>> getAgentStatus(@PathVariable int pluginId, 
         @RequestParam("searchWord") String searchWord, @RequestParam("status") String status) {

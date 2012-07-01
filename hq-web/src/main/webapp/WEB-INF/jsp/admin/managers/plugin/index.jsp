@@ -36,13 +36,13 @@
           <c:choose>
                 <c:when test="${info.totalAgentCount>info.syncableAgentCount}">
                     <span id="outdatedAgents"> 
-                       <img id="warningIcon" alt="Warning!" src="<spring:url value="/static/images/warning.png"/>" />&nbsp; 
+                       <img id="warningIcon" alt="Warning. Click to view details." src="<spring:url value="/static/images/warning.png"/>" />&nbsp; 
                        <span id="agentInfoAllCount">${info.syncableAgentCount} / ${info.totalAgentCount}</span>&nbsp;&nbsp; 
                        <fmt:message key="admin.managers.Plugin.information.agent.count" />
                     </span>
                 </c:when>
                 <c:otherwise>
-                    <span id="allAgentsCurrent"> 
+                    <span id="allAgentsSynched"> 
                        <span id="agentInfoAllCount">${info.syncableAgentCount} / ${info.totalAgentCount}</span>&nbsp;&nbsp;
                         <fmt:message key="admin.managers.Plugin.information.agent.count" />
                     </span>
@@ -159,7 +159,7 @@
     </div>
     <a href="#" class="cancelLink"><fmt:message key="admin.managers.plugin.button.close" /></a>
 </div>
-<div id="oldAgentSummaryPanel" style="visibility:hidden;">
+<div id="unsyncAgentsSummaryPanel" style="visibility:hidden;">
     <div>
         <h3>
             <fmt:message key="admin.managers.Plugin.summary.oldagents.server" />
@@ -173,10 +173,24 @@
     </div>
     <img id="oldAgentSummaryLoadingIcon"
             src="<spring:url value="/static/images/ajax-loader-blue.gif"/>" alt="loading" />
-    <ul id="oldAgentSummaryList">
-    </ul>
+    <div class="oldSummaryListDiv">
+	    <ul id="oldAgentSummaryList">
+	    </ul>
+	</div>
+    <div>
+      <p><fmt:message key="admin.managers.Plugin.summary.curagents.title" /></p>
+      <p><fmt:message key="admin.managers.Plugin.summary.curagents.content" /></p>
+    </div>
+    <div class="gridheader clear">       
+        <span class="column span-large"><fmt:message key="admin.managers.Plugin.summary.curagents.agent.name" /></span> 
+        <span class="column span-med"><fmt:message key="admin.managers.Plugin.summary.curagents.agent.version" /></span>
+    </div>
+    <div class="curSummaryListDiv">
+    	<ul id="currentNonSyncAgentSummaryList">
+    	</ul>
+	</div>
 
-    <a href="#" class="cancelLink"><fmt:message key="admin.managers.plugin.button.close" /></a>
+    <a href="#" class="cancelLink" style="text-align:bottom"><fmt:message key="admin.managers.plugin.button.close" /></a>
 </div>
 
 <script src="<spring:url value="/static/js/admin/managers/plugin/pluginMgr.js" />" type="text/javascript"></script> 
@@ -273,7 +287,7 @@
         });
         
         new hqDijit.Tooltip({
-            connectId:["allAgentsCurrent"],
+            connectId:["allAgentsSynched"],
             label: "<fmt:message key='admin.managers.Plugin.information.agent.count.tip' />"
         });
         
@@ -361,7 +375,7 @@
 
         function seeOldAgentSummary(){
             hqDojo.style("oldAgentSummaryLoadingIcon","display","block");
-            hqDijit.byId("oldAgentSummaryPanelDialog").show();
+            hqDijit.byId("unsyncAgentsSummaryPanelDialog").show();
             
             var agentUl = hqDojo.byId("oldAgentSummaryList");
             var xhrArgs = {
@@ -394,7 +408,43 @@
             };
             hqDojo.xhrGet(xhrArgs);
         }
-        
+
+        function seeCurrentNonSyncAgentStatusSummary(){
+            hqDojo.style("oldAgentSummaryLoadingIcon","display","block");
+            hqDijit.byId("unsyncAgentsSummaryPanelDialog").show();
+            
+            var agentUl = hqDojo.byId("currentNonSyncAgentSummaryList");
+            var xhrArgs = {
+                    preventCache:true,
+                    url: "<spring:url value='/app/admin/managers/plugin/agent/old/summary1'/>",
+                    load: function(response) {                      
+                        hqDojo.forEach(response, function(versionMap){
+                            var li = hqDojo.create("li", {
+                                "class":"gridrow clear"
+                            },agentUl);    
+                            var agentVersion = versionMap.version;
+                            var agentName = versionMap.agentName;       
+                            hqDojo.create("span", {
+                                "class": "column span-large",
+                                "innerHTML":agentName 
+                            },li);     
+                            hqDojo.create("span", {
+                                "class": "column span-med",
+                                "innerHTML": agentVersion
+                            },li);                                                                 
+                        });
+                        hqDojo.style("oldAgentSummaryLoadingIcon","display","none");
+                    },
+                    handleAs: "json",
+                    headers: { 
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
+                    }   
+                    
+            };
+            hqDojo.xhrGet(xhrArgs);
+        }
+
         var showStatusDialog = new hqDijit.Dialog({
             id: "showStatusPanelDialog"
         });
@@ -441,24 +491,25 @@
         
           
         var oldAgentSummaryDialog = new hqDijit.Dialog({
-            id:"oldAgentSummaryPanelDialog",
-            title: "<fmt:message key="admin.managers.Plugin.summary.oldagents.title" />"
+            id:"unsyncAgentsSummaryPanelDialog",
+            title: "<fmt:message key="admin.managers.Plugin.summary.unsyncagents.title" />"
         }); 
-        var oldAgentSummaryPanel = hqDojo.byId("oldAgentSummaryPanel");
+        var unsyncAgentsSummaryPanel = hqDojo.byId("unsyncAgentsSummaryPanel");
         hqDojo.style(oldAgentSummaryDialog.closeButtonNode,"visibility","hidden");
-        oldAgentSummaryDialog.setContent(oldAgentSummaryPanel);
+        oldAgentSummaryDialog.setContent(unsyncAgentsSummaryPanel);
         
-        var oldAgentSummaryContent = hqDojo.query("#oldAgentSummaryPanelDialog .dijitDialogPaneContent")[0];
+        var oldAgentSummaryContent = hqDojo.query("#unsyncAgentsSummaryPanelDialog .dijitDialogPaneContent")[0];
         hqDojo.create("span",{
                              "class":"helpLink",
                              "id":"oldAgentSummaryHelp",
                              "innerHTML":"<fmt:message key="admin.managers.Plugin.troubleshooting"/>"
                          },oldAgentSummaryContent); 
         
-        hqDojo.style(oldAgentSummaryPanel,"visibility","visible");
-        hqDojo.query("#oldAgentSummaryPanelDialog .cancelLink").onclick(function(e){
-            hqDijit.byId("oldAgentSummaryPanelDialog").hide();
+        hqDojo.style(unsyncAgentsSummaryPanel,"visibility","visible");
+        hqDojo.query("#unsyncAgentsSummaryPanelDialog .cancelLink").onclick(function(e){
+            hqDijit.byId("unsyncAgentsSummaryPanelDialog").hide();
             hqDojo.empty("oldAgentSummaryList");
+            hqDojo.empty("currentNonSyncAgentSummaryList");
         });        
 
         hqDojo.behavior.add({
@@ -492,6 +543,7 @@
             "#outdatedAgents":{
                 onclick: function(evt){
                     seeOldAgentSummary();
+                    seeCurrentNonSyncAgentStatusSummary();
                 }
             },          
             "#agentStatusHelp":{

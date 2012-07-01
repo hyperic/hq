@@ -184,29 +184,65 @@ public class AgentDAO extends HibernateDAO<Agent> {
     }
 
     /**
+     * Get a list of all agents in the system, whose version is older than server's version and 
+     *  which are actually used (e. have platforms)
+     */
+    @SuppressWarnings("unchecked")
+    public List<Agent> findOldAgentsUsed() {
+        final String sql = new StringBuilder(150)
+        .append("from Agent a where ")
+        .append(LIMIT_A_TO_OLD_AGENTS)
+        .append("and exists (select 1 from Platform p where p.agent.id = a.id)")
+        .toString();
+        final Query query = getSession().createQuery(sql);
+        query.setParameter("serverVersion", serverConfigManager.getServerMajorVersion());
+        return query.list();
+    }
+  
+    
+    /**
+     * Get a list of all agents in the system, whose version is equal to or newer than server's version and 
+     *  which are actually used (e. have platforms)
+     */
+    @SuppressWarnings("unchecked")
+    public List<Agent> findUpToDateAgentsUsed() {
+        final String sql = new StringBuilder(150)
+        .append("from Agent a where ")
+        .append(LIMIT_A_TO_CURRENT_AGENTS)
+        .append("and exists (select 1 from Platform p where p.agent.id = a.id)")
+        .toString();
+        final Query query = getSession().createQuery(sql);
+        query.setParameter("serverVersion", serverConfigManager.getServerMajorVersion());
+        return query.list();
+    }
+    
+    /**
      * 
      * @return number of agents, whose version is older than that of the server
      */
     public long getNumOldAgents() {
-        final String sql = "select count(a) from Agent a where " + LIMIT_A_TO_OLD_AGENTS;        
+        final String sql = new StringBuilder(150)
+        .append("select count(a) from Agent a where ")
+        .append(LIMIT_A_TO_OLD_AGENTS)
+        .append("and exists (select 1 from Platform p where p.agent.id = a.id)")
+        .toString();
         final Query query = getSession().createQuery(sql);
         query.setParameter("serverVersion", serverConfigManager.getServerMajorVersion());        
         return ((Number) query.uniqueResult()).longValue();
     }
     
 
-    public long getNumAutoUpdatingAgents() {
+    public long getNumVersionUpToDateAgents() {
         final String sql = new StringBuilder(150)
-            .append("select count(a) from Agent a where ")
-            .append(LIMIT_A_TO_CURRENT_AGENTS)
-            .append("and exists (select 1 from Platform p where p.agent.id = a.id)")
-            .toString();
-        final Query query = getSession().createQuery(sql);
-        query.setParameter("serverVersion", serverConfigManager.getServerMajorVersion());
-        return ((Number) query.uniqueResult()).longValue();
+        .append("select count(a) from Agent a where ")
+        .append(LIMIT_A_TO_CURRENT_AGENTS)
+        .append("and exists (select 1 from Platform p where p.agent.id = a.id)")
+        .toString();
+	    final Query query = getSession().createQuery(sql);
+	    query.setParameter("serverVersion", serverConfigManager.getServerMajorVersion());
+	    return ((Number) query.uniqueResult()).longValue();    	
     }
     
-
     /**
      * 
      * @param agent
