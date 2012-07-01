@@ -98,7 +98,7 @@ public class RestApiService {
      * @param session
      *            the http session
      */
-    protected static InterfaceUser getApiUser(HttpSession session) {
+    public static InterfaceUser getApiUser(HttpSession session) {
 
         if (session == null) {
             return null;
@@ -110,7 +110,7 @@ public class RestApiService {
         return (InterfaceUser) attr;
     }  
     
-    protected static Integer getSessionId(HttpSession session) {
+    public static Integer getSessionId(HttpSession session) {
         InterfaceUser user = getApiUser(session);
         if (null != user) {
             return user.getSessionId();

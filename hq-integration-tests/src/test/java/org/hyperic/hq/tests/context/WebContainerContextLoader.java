@@ -28,7 +28,14 @@ package org.hyperic.hq.tests.context;
 
 import java.io.File;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
 
+import junit.framework.Assert;
+
+import org.hyperic.hq.api.rest.AbstractRestTestDataPopulator;
+import org.hyperic.hq.api.rest.AuthenticationTest;
+import org.hyperic.hq.api.rest.RestTestCaseBase;
+import org.hyperic.hq.api.rest.AbstractRestTestDataPopulator.RestTestData;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.context.IntegrationTestContextLoader;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -109,21 +116,12 @@ public class WebContainerContextLoader extends IntegrationTestContextLoader{
         applicationContext.getBeanFactory().registerSingleton("servletRunner", sr) ; 
         
         //wrap the context with a ProxyingGenericApplicationContext instance so as to control its shutdown 
-        final ProxyingGenericApplicationContext actualContext = new ProxyingGenericApplicationContext((AbstractApplicationContext) applicationContext) ; 
+        final ProxyingGenericApplicationContext actualContext = new ProxyingGenericApplicationContext((AbstractApplicationContext) applicationContext) ;
+        
+        final TestDataPopulator testDataPopulator = this.getTestDataPopulator(applicationContext) ; 
         
         //if the test class defines a TestData Annotation instantiate the test data populator class it defines and invoke its populate()  
-        final TestData testDataAnnotation = AnnotationUtils.findAnnotation(this.testClass, TestData.class) ;
-        if(testDataAnnotation != null) { 
-        	
-        	final Class<?>testDataPopulatorClass = testDataAnnotation.value() ; 
-        	
-        	final DefaultListableBeanFactory beansFactory = (DefaultListableBeanFactory) applicationContext.getBeanFactory() ;
-        	final AbstractBeanDefinition beanDefinition = 
-        				BeanDefinitionBuilder.rootBeanDefinition(testDataPopulatorClass).getBeanDefinition() ;
-        	
-        	beansFactory.registerBeanDefinition(testDataPopulatorClass.getName(), beanDefinition) ;
-
-        	final TestDataPopulator testDataPopulator = (TestDataPopulator) applicationContext.getBean(testDataPopulatorClass) ;
+        if(testDataPopulator != null) { 
         	
         	//the populate() invocation shall be executed in the context of a transaction so that it could be rolledback when the context 
         	//shuts down  
@@ -185,5 +183,43 @@ public class WebContainerContextLoader extends IntegrationTestContextLoader{
 		
         return actualContext ; 
 	}//EOM
+	
+	private final TestDataPopulator getTestDataPopulator(final ConfigurableApplicationContext applicationContext) { 
+	    TestDataPopulator testDataPopulator  = null ; 
+	    
+	    //first attempt to locate a RestTestdata annotation, if found, attempt 
+        Class<? extends TestDataPopulator> testDataPopulatorClass = null ;  
+         
+        //first attempt to retrieve a RestTestData annotation 
+        final RestTestData restTestDataAnnotation = AnnotationUtils.findAnnotation(this.testClass, RestTestData.class) ;
+        final TestData testDataAnnotation = AnnotationUtils.findAnnotation(this.testClass, TestData.class) ;
+
+        if(testDataAnnotation != null) { 
+            testDataPopulatorClass = testDataAnnotation.value() ;
+        }else if(RestTestCaseBase.class.isAssignableFrom(this.testClass)  ) { 
+            final ParameterizedType genericSuprtClassType = (ParameterizedType) AuthenticationTest.class.getGenericSuperclass() ; 
+            final ParameterizedType testDataPopulatorType = (ParameterizedType) genericSuprtClassType.getActualTypeArguments()[1] ;
+            testDataPopulatorClass = (Class<? extends TestDataPopulator>) testDataPopulatorType.getRawType() ;
+        }//EO else if not an instance of ResttestCaseBase
+        
+        //if the test class defines a TestData Annotation instantiate the test data populator class it defines and invoke its populate()  
+        if(testDataPopulatorClass != null) { 
+            
+            final DefaultListableBeanFactory beansFactory = (DefaultListableBeanFactory) applicationContext.getBeanFactory() ;
+            final AbstractBeanDefinition beanDefinition = 
+                        BeanDefinitionBuilder.rootBeanDefinition(testDataPopulatorClass).getBeanDefinition() ;
+            
+            beansFactory.registerBeanDefinition(testDataPopulatorClass.getName(), beanDefinition) ;
+
+            testDataPopulator = (TestDataPopulator) applicationContext.getBean(testDataPopulatorClass) ;
+            
+            //set the rest test data in the instance 
+            if(testDataPopulator instanceof AbstractRestTestDataPopulator) { 
+                ((AbstractRestTestDataPopulator) testDataPopulator).setRestTestData(restTestDataAnnotation) ;
+            }//EO if instanceof AbstractRestTestDataPopulator
+        }///EO if a testdatapopulator class was inferred 
+        
+        return testDataPopulator  ; 
+	}//EOM 
 	
 }//EOC 

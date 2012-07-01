@@ -14,7 +14,7 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 public interface SessionManagementService {
     
-    @PUT
+    @PUT // Consider using Delete
     @Path("/logout")
     void logout() throws SessionNotFoundException, SessionTimeoutException ;  
             

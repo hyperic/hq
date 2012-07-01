@@ -60,7 +60,7 @@
 																basicAuthenticationFilter,
 																basicAuthenticationExceptionTranslationFilter,
 																apiBasicSessionManagementFilter,
-			    	                                     		apiFilterSecurityInterceptor"/>
+			    	                                     		filterSecurityInterceptor"/>
 			<sec:filter-chain pattern="/**" filters="securityContextPersistenceFilter,
 													 logoutFilter,
 			                                         basicAuthenticationFilter,
@@ -191,6 +191,7 @@
 		    	<sec:intercept-url pattern="/app/login" access="ROLE_ANONYMOUS,ROLE_HQ_USER" />
 		    	<sec:intercept-url pattern="/**" access="ROLE_HQ_USER" />
 		    	<sec:intercept-url pattern="/hqu/hqapi*/**" access="ROLE_HQ_USER" />
+		    	<sec:intercept-url pattern="/rest-api/**" access="ROLE_HQ_USER" />  
 			</sec:filter-security-metadata-source>
 		</property>
 	</bean>
@@ -210,8 +211,7 @@
         </property>
         <property name="securityMetadataSource">
             <sec:filter-security-metadata-source>
-                <sec:intercept-url pattern="/hqu/hqapi*/**" access="ROLE_HQ_USER" /> 
-                <sec:intercept-url pattern="/rest-api/**" access="ROLE_HQ_USER" />                
+                <sec:intercept-url pattern="/hqu/hqapi*/**" access="ROLE_HQ_USER" />                               
             </sec:filter-security-metadata-source>
         </property>
     </bean>

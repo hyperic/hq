@@ -48,6 +48,8 @@ import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionMessage;
 import org.apache.struts.action.ActionMessages;
 import org.apache.struts.util.MessageResources;
+import org.hyperic.hq.api.common.InterfaceUser;
+import org.hyperic.hq.api.services.impl.RestApiService;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
@@ -188,7 +190,12 @@ public class RequestUtils {
 
     public static int getSessionIdInt(HttpServletRequest request)
         throws ServletException {
-        return getWebUser(request).getSessionId().intValue();
+        InterfaceUser interfaceUser = getWebUser(request);
+        if (null == interfaceUser) {
+            HttpSession session = request.getSession(false);
+            interfaceUser = RestApiService.getApiUser(session);
+        }
+        return interfaceUser.getSessionId().intValue();
     }       
     
     /**

@@ -60,7 +60,7 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
 	    try {
 	        resource = this.resourceTransfer.getResource(apiMessageContext, platformNaturalID, resourceType, resourceStatusType, hierarchyDepth, responseMetadata);            
 	    } catch (ObjectNotFoundException e) {
-            logger.warn("Platform with the natural ID " + platformNaturalID + " not found.");
+            logger.warn("Resource with the natural ID " + platformNaturalID + " not found.");
             WebApplicationException webApplicationException = 
                     errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID, platformNaturalID);            
             throw webApplicationException;	        
@@ -74,7 +74,7 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
         try {
             resource =  this.resourceTransfer.getResource(apiMessageContext, platformID, resourceStatusType, hierarchyDepth, responseMetadata) ;
         } catch (ObjectNotFoundException e) {
-            logger.warn("Platform with the natural ID " + platformID + " not found.");
+            logger.warn("Resource with the natural ID " + platformID + " not found.");
             WebApplicationException webApplicationException = 
                     errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID, platformID);            
             throw webApplicationException;

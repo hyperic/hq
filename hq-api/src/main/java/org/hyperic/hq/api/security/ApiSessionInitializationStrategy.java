@@ -116,7 +116,7 @@ public class ApiSessionInitializationStrategy implements SessionAuthenticationSt
             // Add WebUser to Session
             session.setAttribute(RestApiService.APIUSER_SES_ATTR, webUser);
 
-            if (debug) log.debug("WebUser object created and stashed in the session");
+            if (debug) log.debug("ApiUser object created and stashed in the session");
             
         } catch (SessionException e) {
             if (debug) {

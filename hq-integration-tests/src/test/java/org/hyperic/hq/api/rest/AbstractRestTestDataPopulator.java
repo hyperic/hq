@@ -24,10 +24,15 @@
  */
 package org.hyperic.hq.api.rest;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.Array;
 
 import org.hyperic.hq.api.rest.RestTestCaseBase.ServiceBindingType;
 import org.hyperic.hq.test.TestHelper;
+import org.hyperic.hq.tests.context.TestData;
 import org.hyperic.hq.tests.context.TestDataPopulator;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -35,6 +40,17 @@ import com.meterware.servletunit.ServletRunner;
 
 public abstract class AbstractRestTestDataPopulator<T> extends TestHelper implements TestDataPopulator{ 
 
+    /**
+     * Mutually exclusive with the existence of {@link TestData}
+     * @author guys
+     */
+    @Target(ElementType.TYPE)
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface RestTestData { 
+        String  serviceURL() ; 
+        Class<?> serviceInterface() ; 
+    }//EO inner annotation RestTestData 
+    
 	@Autowired
 	protected ServletRunner servletRunner ; 
 	
@@ -43,16 +59,27 @@ public abstract class AbstractRestTestDataPopulator<T> extends TestHelper implem
     private String serviceURL ; 
     private Class<T> serviceInterface ; 
     
+    public AbstractRestTestDataPopulator(){}//EOM 
+    
     public AbstractRestTestDataPopulator(final Class<T> serviceInterface, final String serviceURL) { 
     	super() ; 
     	this.serviceInterface = serviceInterface ; 
     	this.serviceURL = serviceURL ; 
     }//EOM 
     
+    public final void setRestTestData(final RestTestData restTestMetadata) { 
+        if(restTestMetadata != null) { 
+            this.serviceURL = restTestMetadata.serviceURL() ; 
+            this.serviceInterface = (Class<T>) restTestMetadata.serviceInterface() ; 
+        }//EO if not null 
+    }//EOM 
+    
 //    @Override
 	public void populate() throws Exception {
     	this.generateServices() ; 
     }//EOM 
+	
+	public void destroy() throws Exception { /*do nothing*/}//EOM  
     
     protected final void generateServices() { 
     	arrServices = (T[]) Array.newInstance(this.serviceInterface, 2); 

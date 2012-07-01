@@ -24,7 +24,7 @@ public class SessionManagementServiceImpl extends RestApiService implements Sess
         if (session == null) {            
             logger.warn("Web session does not exist for the request!");
             WebApplicationException webApplicationException = 
-                    errorHandler.newWebApplicationException(Response.Status.UNAUTHORIZED, ExceptionToErrorCodeMapper.ErrorCode.INVALID_SESSION);            
+                    errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.INVALID_SESSION);            
             throw webApplicationException;
         }
         session.invalidate();
