@@ -719,6 +719,16 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         }
     }
 
+    public void invokeAutoApprove() throws LatherRemoteException {
+        try {
+            autoinventoryManager.invokeAutoApprove();
+        } catch (AutoinventoryException exc) {
+            log.error("Error in invokeAutoApprove: " + exc.getMessage(), exc);
+            throw new LatherRemoteException(exc.getMessage());
+        }
+
+    }
+
     private LatherValue runCommand(LatherContext ctx, String method, LatherValue arg)
         throws LatherRemoteException {
         LatherValue rtn = null;

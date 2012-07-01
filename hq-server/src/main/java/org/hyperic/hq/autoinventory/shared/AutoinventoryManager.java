@@ -209,4 +209,5 @@ public interface AutoinventoryManager {
      */
     public void handleResourceEvents(List<ResourceZevent> events);
 
+    void invokeAutoApprove() throws AutoinventoryException;
 }

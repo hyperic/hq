@@ -114,6 +114,10 @@
     <property name="modifiedTime" type="long">
       <column name="MTIME" not-null="false"/>
     </property>
+
+      <property name="autoApprove" type="boolean">
+          <column name="AUTO_APPROVE" not-null="true" default="false"/>
+      </property>
   </class>
 
 </hibernate-mapping>

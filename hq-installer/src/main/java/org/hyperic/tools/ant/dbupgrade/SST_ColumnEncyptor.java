@@ -76,7 +76,7 @@ public class SST_ColumnEncyptor extends SchemaSpecTask{
     private int batchSize ; 
     private PBEStringEncryptor encryptor;
     private DatabaseType enumDatabaseType ; 
-    
+     
     private static AtomicInteger pages ;
     private static final int DEFUALT_BATCH_SIZE = 1000 ;  
     
@@ -198,7 +198,7 @@ public class SST_ColumnEncyptor extends SchemaSpecTask{
             //calculate the number of partitions taking into account the remainder...
             final int iNoOfchunks =  (iNoOfExistingRecords+this.batchSize-1)/this.batchSize ;
             
-            this.log("No of chunks: " + iNoOfchunks);
+            this.log("[SST_ColumnEncryptor.execute()]: No of records: " + iNoOfExistingRecords + " No of chunks: " + iNoOfchunks, Project.MSG_WARN);
             
             rs.close() ; 
             ps.close();   

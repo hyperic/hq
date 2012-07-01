@@ -222,11 +222,19 @@ public class AgentConfig {
 
     private File logdir;
 
+    private static AutoApproveConfig autoApproveConfig = null;
+
 	private AgentConfig(){
         this.proxyIp = AgentConfig.DEFAULT_PROXY_HOST;
         this.proxyPort = AgentConfig.DEFAULT_PROXY_PORT;
         this.notifyUpPort = AgentConfig.DEFAULT_NOTIFY_UP_PORT;
         this.enabledCiphers = AgentConfig.DEFAULT_ENBALED_CIPHERS.split(",");
+
+        synchronized (AgentConfig.class) {
+            if (autoApproveConfig == null) {
+                autoApproveConfig = new AutoApproveConfig(PROP_INSTALLHOME[1] + "/conf/");
+            }
+        }
     }
 
     /**
@@ -761,5 +769,12 @@ public class AgentConfig {
 	public void setEnabledCiphers(String[] enabledCiphers) {
 		this.enabledCiphers = enabledCiphers;
 	}
+
+    /**
+     * @return The auto-approval configuration. Never null.
+     */
+    public AutoApproveConfig getAutoApproveConfig() {
+        return this.autoApproveConfig;
+    }
 
 }

@@ -56,6 +56,7 @@ public class AIPlatform extends PlatformBase
     private byte[] measurementConfig;
     private Collection aiips = new ArrayList();
     private Collection aiservers =  new ArrayList();
+    private boolean autoApprove;
 
     public AIPlatform()
     {
@@ -80,6 +81,7 @@ public class AIPlatform extends PlatformBase
         setProductConfig(apv.getProductConfig());
         setMeasurementConfig(apv.getMeasurementConfig());
         setControlConfig(apv.getControlConfig());
+        setAutoApprove(apv.isAutoApprove());
     }
 
     public String getPlatformTypeName()
@@ -298,6 +300,14 @@ public class AIPlatform extends PlatformBase
         return !PlatformDetector.isSupportedPlatform(getPlatformTypeName());
     }
 
+    public boolean isAutoApprove() {
+        return autoApprove;
+    }
+
+    public void setAutoApprove(boolean autoApprove) {
+        this.autoApprove = autoApprove;
+    }
+
     private AIPlatformValue aipValue = new AIPlatformValue();
     /**
      * @deprecated use (this) AIPlatformValue object
@@ -340,6 +350,7 @@ public class AIPlatform extends PlatformBase
                 ((AIServer)iAIServerValue.next()).getAIServerValue() );
         }
         aipValue.cleanAIServerValue();
+        aipValue.setAutoApprove(isAutoApprove());
         return aipValue;
     }
 
