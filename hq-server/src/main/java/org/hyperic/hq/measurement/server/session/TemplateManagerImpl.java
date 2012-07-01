@@ -309,6 +309,11 @@ public class TemplateManagerImpl implements TemplateManager {
         return ids;
     }
 
+    @Transactional(readOnly = true)
+    public List<MeasurementTemplate> findTemplatesByName(List<String> tmpNames) {
+    	return measurementTemplateDAO.findTemplatesByName(tmpNames);
+    }
+
     /**
      * Update the default interval for a list of meas. templates
      * 

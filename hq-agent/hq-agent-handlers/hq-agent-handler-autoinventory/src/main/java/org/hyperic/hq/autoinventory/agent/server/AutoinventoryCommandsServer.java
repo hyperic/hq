@@ -32,10 +32,7 @@ import java.io.PrintStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.agent.AgentAPIInfo;
-import org.hyperic.hq.agent.AgentAssertionException;
-import org.hyperic.hq.agent.AgentRemoteException;
-import org.hyperic.hq.agent.AgentRemoteValue;
+import org.hyperic.hq.agent.*;
 import org.hyperic.hq.agent.server.AgentDaemon;
 import org.hyperic.hq.agent.server.AgentNotificationHandler;
 import org.hyperic.hq.agent.server.AgentRunningException;
@@ -43,6 +40,8 @@ import org.hyperic.hq.agent.server.AgentServerHandler;
 import org.hyperic.hq.agent.server.AgentStartException;
 import org.hyperic.hq.agent.server.AgentStorageProvider;
 import org.hyperic.hq.agent.server.AgentTransportLifecycle;
+import org.hyperic.hq.appdef.shared.AIPlatformValue;
+import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.ScanConfiguration;
 import org.hyperic.hq.autoinventory.ScanConfigurationCore;
@@ -60,19 +59,19 @@ import org.hyperic.hq.product.AutoinventoryPluginManager;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.StringUtil;
 
-public class AutoinventoryCommandsServer 
-    implements AgentServerHandler, AgentNotificationHandler, ScanListener 
+public class AutoinventoryCommandsServer
+    implements AgentServerHandler, AgentNotificationHandler, ScanListener
 {
     // max sleep is 1 hour between attempts to send AI report to server.
     public static final long AIREPORT_MAX_SLEEP_WAIT = (60000 * 60);
 
     // we'll keep trying for 30 days to send our a report.
     public static final long AIREPORT_MAX_TRY_TIME = AIREPORT_MAX_SLEEP_WAIT * 24 * 30;
-    
+
     private AICommandsAPI               _verAPI;
     private AgentDaemon                 _agent;
-    private AgentStorageProvider        _storage;        
-    private Log                         _log;              
+    private AgentStorageProvider        _storage;
+    private Log                         _log;
     private RuntimeAutodiscoverer       _rtAutodiscoverer;
     private AICommandsService           _aiCommandsService;
 
@@ -112,7 +111,7 @@ public class AutoinventoryCommandsServer
         }
     }
 
-    private AgentRemoteValue dispatchCommand_internal(String cmd, 
+    private AgentRemoteValue dispatchCommand_internal(String cmd,
                                                       AgentRemoteValue args)
         throws AgentRemoteException {
 
@@ -123,16 +122,16 @@ public class AutoinventoryCommandsServer
 
         if(cmd.equals(_verAPI.command_startScan)){
             ScanConfigurationCore scanConfig = null;
-            
+
             try {
                 scanConfig = ScanConfigurationCore.fromAgentRemoteValue(
-                                        AICommandsAPI.PROP_SCANCONFIG, args);  
+                                        AICommandsAPI.PROP_SCANCONFIG, args);
             } catch ( Exception e ) {
                 _log.error("Error starting scan.", e);
-                throw new AgentRemoteException("Error starting scan: " + 
+                throw new AgentRemoteException("Error starting scan: " +
                                                e.toString());
             }
-            
+
             _aiCommandsService.startScan(scanConfig, false);
             return null;
 
@@ -143,15 +142,15 @@ public class AutoinventoryCommandsServer
         } else if(cmd.equals(_verAPI.command_getScanStatus)){
             AgentRemoteValue rval = new AgentRemoteValue();
             ScanStateCore state = _aiCommandsService.getScanStatus(false);
-            
+
             try {
                 state.toAgentRemoteValue("scanState", rval);
             } catch ( Exception e ) {
                 _log.error("Error getting scan state.", e);
-                throw new AgentRemoteException("Error getting scan status: " + 
+                throw new AgentRemoteException("Error getting scan status: " +
                                                e.toString());
             }
-            
+
             return rval;
 
         } else if(cmd.equals(_verAPI.command_pushRuntimeDiscoveryConfig)){
@@ -171,7 +170,7 @@ public class AutoinventoryCommandsServer
         } catch(AgentRunningException exc){
             throw new AgentAssertionException("Agent should be running here");
         }
-        
+
         AutoinventoryPluginManager pluginManager;
 
         try {
@@ -179,49 +178,49 @@ public class AutoinventoryCommandsServer
                 agent.getPluginManager(ProductPlugin.TYPE_AUTOINVENTORY);
         } catch (Exception e) {
             throw new AgentStartException("Unable to get auto inventory " +
-                                          "plugin manager: " + 
+                                          "plugin manager: " +
                                           e.getMessage());
         }
 
         // Initialize the runtime autodiscoverer
-        _rtAutodiscoverer = new RuntimeAutodiscoverer(this, _storage, 
+        _rtAutodiscoverer = new RuntimeAutodiscoverer(this, _storage,
                                                       _agent, _client);
 
         // Fire up the scan manager
-        _scanManager = new ScanManager(this, _log, pluginManager,  
+        _scanManager = new ScanManager(this, _log, pluginManager,
                                       _rtAutodiscoverer);
-        
-        _aiCommandsService = new AICommandsService(pluginManager, 
-                                                   _rtAutodiscoverer, 
+
+        _aiCommandsService = new AICommandsService(pluginManager,
+                                                   _rtAutodiscoverer,
                                                    _scanManager);
-        
+
         AgentTransportLifecycle agentTransportLifecycle;
-        
+
         try {
             agentTransportLifecycle = agent.getAgentTransportLifecycle();
         } catch (Exception e) {
             throw new AgentStartException("Unable to get agent transport lifecycle: "+
                                             e.getMessage());
         }
-        
+
         _log.info("Registering AI Commands Service with Agent Transport");
-        
+
         try {
             agentTransportLifecycle.registerService(AICommandsClient.class, _aiCommandsService);
         } catch (Exception e) {
             throw new AgentStartException("Failed to register AI Commands Service.", e);
-        }    
-                
+        }
+
         _scanManager.startup();
 
         // Do we have a provider?
         if ( CommandsAPIInfo.getProvider(_storage) == null ) {
-            agent.registerNotifyHandler(this, 
+            agent.registerNotifyHandler(this,
                                         CommandsAPIInfo.NOTIFY_SERVER_SET);
         } else {
             _rtAutodiscoverer.triggerDefaultScan();
         }
-                        
+
         _log.info("Autoinventory Commands Server started up");
     }
 
@@ -241,7 +240,7 @@ public class AutoinventoryCommandsServer
     protected void scheduleDefaultScan () {
         _log.debug("Scheduling DefaultScan...");
         ScanConfiguration scanConfig = new ScanConfiguration();
-        
+
         scanConfig.setIsDefaultScan(true);
 
         _aiCommandsService.startScan(scanConfig);
@@ -256,7 +255,7 @@ public class AutoinventoryCommandsServer
         _log.info("Autoinventory Commands Server shut down");
     }
 
-    private AutoinventoryCallbackClient setupClient() { 
+    private AutoinventoryCallbackClient setupClient() {
         StorageProviderFetcher fetcher =
             new StorageProviderFetcher(_storage);
 
@@ -268,7 +267,7 @@ public class AutoinventoryCommandsServer
      * the EAM server.
      * @see org.hyperic.hq.autoinventory.ScanListener#scanComplete
      */
-    public void scanComplete (ScanState scanState) 
+    public void scanComplete (ScanState scanState)
         throws AutoinventoryException, SystemException {
 
         // Special handling for periodic default scans
@@ -295,7 +294,8 @@ public class AutoinventoryCommandsServer
         _aiCommandsService.setMostRecentState(scanState);
 
         // Issue a warning if we could not even detect the platform
-        if ( scanState.getPlatform() == null ) {
+        AIPlatformValue aiPlatformValue = scanState.getPlatform();
+        if (aiPlatformValue == null) {
             try {
                 ByteArrayOutputStream errInfo = new ByteArrayOutputStream();
                 PrintStream errInfoPS = new PrintStream(errInfo);
@@ -313,6 +313,9 @@ public class AutoinventoryCommandsServer
             }
         }
 
+        // Handle auto approval
+        applyAutoApproval(aiPlatformValue);
+
         // But regardless, we always report back to the server, so it
         // knows the scan has been completed.
         scanState.setCertDN(_certDN);
@@ -329,7 +332,7 @@ public class AutoinventoryCommandsServer
 
                 }
                 _client.aiSendReport(scanState);
-                _log.info("Autoinventory report " + 
+                _log.info("Autoinventory report " +
                          "successfully sent to server.");
                 break;
 
@@ -340,7 +343,7 @@ public class AutoinventoryCommandsServer
                         "platform data to server for maximum time of " +
                         StringUtil.formatDuration(AIREPORT_MAX_TRY_TIME) +
                         ", giving up.  Error was: " + e.getMessage();
-                        
+
                     if(_log.isDebugEnabled()){
                         _log.debug(eMsg, e);
                     } else {
@@ -366,6 +369,31 @@ public class AutoinventoryCommandsServer
                         sleepWaitMillis = AIREPORT_MAX_SLEEP_WAIT;
                     }
                 } catch ( InterruptedException ie ) {}
+            }
+        }
+    }
+
+    private void applyAutoApproval(AIPlatformValue aiPlatformValue) {
+        // Get the auto-approve config
+        AutoApproveConfig autoApproveConfig = _agent.getBootConfig().getAutoApproveConfig();
+
+        // If the auto-approve configuration wasn't provided then exit.
+        if (!autoApproveConfig.exists()) {
+            _log.info("no resource is auto approved");
+            return;
+        }
+
+        // Platform auto-approval
+        boolean approvePlatform = autoApproveConfig.isAutoApproved(AutoApproveConfig.PLATFORM_PROPERTY_NAME);
+        aiPlatformValue.setAutoApprove(approvePlatform);
+
+        // Servers auto-approval
+        AIServerValue[] aiServerValues = aiPlatformValue.getAIServerValues();
+        if (aiServerValues != null) {
+            for (AIServerValue aiServerValue : aiServerValues) {
+                boolean approveServer = autoApproveConfig.isAutoApproved(aiServerValue.getName());
+                _log.info("--- Auto-Approve for Server: [" + aiServerValue.getName() + "] is: " + approveServer);
+                aiServerValue.setAutoApprove(approveServer);
             }
         }
     }

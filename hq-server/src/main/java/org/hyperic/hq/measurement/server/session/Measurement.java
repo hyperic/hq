@@ -25,19 +25,20 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import groovy.lang.Lazy;
+
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
 import org.hyperic.hibernate.PersistedObject;
-import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hibernate.usertypes.EncryptedStringType.LazyDecryptableValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.server.session.Resource;
 
 public class Measurement extends PersistedObject
     implements ContainerManagedTimestampTrackable, Serializable
@@ -48,7 +49,7 @@ public class Measurement extends PersistedObject
     private long                _mtime;
     private boolean             _enabled = true;
     private long                _interval;
-    private String              _formula;
+    private LazyDecryptableValue    _formula;
     private Collection          _baselines = new ArrayList();
     private Collection          _availabilityData = new ArrayList();
     private Resource            _resource;
@@ -141,14 +142,22 @@ public class Measurement extends PersistedObject
         }
         _interval = interval;
     }
+    
+    public LazyDecryptableValue getFormula() { 
+    	return this._formula ; 
+    }//EOM 
+    
+    public void setFormula(final LazyDecryptableValue formula) { 
+    	this._formula = formula ;  
+    }//EOM   
 
     public String getDsn() {
-        return _formula;
+        return (_formula == null ? null : this._formula.get()) ; 
     }
-
+    
     protected void setDsn(String formula) {
-        _formula = formula;
-    }
+    	this._formula = LazyDecryptableValue.set(this._formula, formula) ; 
+    }//EOM
 
     public AppdefEntityID getEntityId() {
         return new AppdefEntityID(getAppdefType(), getInstanceId());

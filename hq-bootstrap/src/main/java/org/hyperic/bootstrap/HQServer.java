@@ -258,8 +258,9 @@ public class HQServer {
         try {
             appContext = new ClassPathXmlApplicationContext(
                 new String[] { "classpath*:/META-INF/spring/bootstrap-context.xml" });
-        } catch (Exception e) {
-            System.err.println("Error initializing bootstrap class: " + e.getMessage());						
+        } catch (Exception e) { 
+            System.err.println("Error initializing bootstrap class: " + e.toString() + " " + e.getMessage());						
+            e.printStackTrace() ; 
             return;
         }
         HQServer server = appContext.getBean(HQServer.class);

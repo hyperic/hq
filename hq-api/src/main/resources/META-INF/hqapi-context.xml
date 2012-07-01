@@ -76,11 +76,13 @@
     </bean>
     
     <bean class="org.hyperic.hq.api.transfer.impl.ResourceTransferImpl" />
+    <bean class="org.hyperic.hq.api.transfer.impl.MeasurementTransferImpl" />
 
 	<bean class="org.springframework.web.context.support.ServletContextPropertyPlaceholderConfigurer" />
 	<bean class="org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer" />
 
 	<bean name="resourceServiceImpl" class="org.hyperic.hq.api.services.impl.ResourceServiceImpl" />
+	<bean name="measurementServiceImpl" class="org.hyperic.hq.api.services.impl.MeasurementServiceImpl" />
 		
     <bean name="pluginServiceImpl" class="org.hyperic.hq.api.services.impl.PluginServiceImpl" />		
 	
@@ -112,9 +114,9 @@
         </jaxrs:features>		
 	</jaxrs:server>	
 
-    <jaxrs:server id="pluginService" address="/plugins">
-        <jaxrs:serviceBeans>
-            <ref bean="pluginServiceImpl" />
+	<jaxrs:server id="measurementService" address="/measurements">
+		<jaxrs:serviceBeans>
+			<ref bean="measurementServiceImpl" />
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <ref bean="jaxbProvider" />

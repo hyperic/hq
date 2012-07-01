@@ -35,33 +35,34 @@ import org.hyperic.hq.appdef.shared.AIServerValue;
 public class AiPlatformLatherValue
     extends AiLatherValue
 {
-    private static final String PROP_AIIPVALUES     = "AIIpValues";
-    private static final String PROP_AISERVERVALUES = "AIServerValues";
-    private static final String PROP_CTIME          = "CTime";
-    private static final String PROP_MTIME          = "MTime";
-    private static final String PROP_AGENTTOKEN     = "agentToken";
-    private static final String PROP_CERTDN         = "certdn";
-    private static final String PROP_CPUCOUNT       = "cpuCount";
-    private static final String PROP_DESCRIPTION    = "description";
-    private static final String PROP_DIFF           = "diff";
-    private static final String PROP_FQDN           = "fqdn";
-    private static final String PROP_ID             = "id";
-    private static final String PROP_IGNORED        = "ignored";
-    private static final String PROP_LOCATION       = "location";
-    private static final String PROP_NAME           = "name";
-    private static final String PROP_TYPENAME       = "os"; //left as "os" for backcompat
-    private static final String PROP_QUEUESTATUS    = "queueStatus";
-    private static final String PROP_CPROPS         = "cprops";
-    private static final String PROP_CONTROLCONFIG  = "controlConfig";
+    private static final String PROP_AIIPVALUES         = "AIIpValues";
+    private static final String PROP_AISERVERVALUES     = "AIServerValues";
+    private static final String PROP_CTIME              = "CTime";
+    private static final String PROP_MTIME              = "MTime";
+    private static final String PROP_AGENTTOKEN         = "agentToken";
+    private static final String PROP_CERTDN             = "certdn";
+    private static final String PROP_CPUCOUNT           = "cpuCount";
+    private static final String PROP_DESCRIPTION        = "description";
+    private static final String PROP_DIFF               = "diff";
+    private static final String PROP_FQDN               = "fqdn";
+    private static final String PROP_ID                 = "id";
+    private static final String PROP_IGNORED            = "ignored";
+    private static final String PROP_LOCATION           = "location";
+    private static final String PROP_NAME               = "name";
+    private static final String PROP_TYPENAME           = "os"; //left as "os" for backcompat
+    private static final String PROP_QUEUESTATUS        = "queueStatus";
+    private static final String PROP_CPROPS             = "cprops";
+    private static final String PROP_CONTROLCONFIG      = "controlConfig";
     private static final String PROP_MEASUREMENTCONFIG  = "measurementConfig";
     private static final String PROP_PRODUCTCONFIG      = "productConfig";
+    private static final String PROP_AUTO_APPROVE       = "autoApprove";
 
     public AiPlatformLatherValue(){
         super();
     }
 
     public AiPlatformLatherValue(AIPlatformValue v){
-        super();
+        this();
 
         if(v.customPropertiesHasBeenSet()) {
             this.setByteAValue(PROP_CPROPS, v.getCustomProperties());
@@ -96,7 +97,7 @@ public class AiPlatformLatherValue
         }
 
         if(v.cpuCountHasBeenSet() && v.getCpuCount() != null){
-            this.setIntValue(PROP_CPUCOUNT, v.getCpuCount().intValue());
+            this.setIntValue(PROP_CPUCOUNT, v.getCpuCount());
         }
 
         if(v.descriptionHasBeenSet()){
@@ -112,7 +113,7 @@ public class AiPlatformLatherValue
         }
 
         if(v.idHasBeenSet() && v.getId() != null){
-            this.setIntValue(PROP_ID, v.getId().intValue());
+            this.setIntValue(PROP_ID, v.getId());
         }
 
         if(v.ignoredHasBeenSet()){
@@ -138,20 +139,20 @@ public class AiPlatformLatherValue
         if(v.getAIIpValues() != null){
             AIIpValue[] ips = v.getAIIpValues();
 
-            for(int i=0; i<ips.length; i++){
-                this.addObjectToList(PROP_AIIPVALUES, 
-                                     new AiIpLatherValue(ips[i]));
+            for (AIIpValue ip : ips) {
+                this.addObjectToList(PROP_AIIPVALUES, new AiIpLatherValue(ip));
             }
         }
 
         if(v.getAIServerValues() != null){
             AIServerValue[] svrs = v.getAIServerValues();
 
-            for(int i=0; i<svrs.length; i++){
-                this.addObjectToList(PROP_AISERVERVALUES,
-                                     new AiServerLatherValue(svrs[i]));
+            for (AIServerValue svr : svrs) {
+                this.addObjectToList(PROP_AISERVERVALUES, new AiServerLatherValue(svr));
             }
         }
+
+        this.setIntValue(PROP_AUTO_APPROVE, v.isAutoApprove() ? 1 : 0);
     }
 
     public AIPlatformValue getAIPlatformValue(){
@@ -159,101 +160,101 @@ public class AiPlatformLatherValue
         
         try {
             r.setCustomProperties(this.getByteAValue(PROP_CPROPS));
-        } catch(LatherKeyNotFoundException exc){}
+        } catch(LatherKeyNotFoundException exc){ /* ignore */}
         
         try {
             r.setControlConfig(this.getByteAValue(PROP_CONTROLCONFIG));
-        } catch(LatherKeyNotFoundException exc){}
+        } catch(LatherKeyNotFoundException exc){ /* ignore */}
 
         try {
             r.setMeasurementConfig(this.getByteAValue(PROP_MEASUREMENTCONFIG));
-        } catch(LatherKeyNotFoundException exc){}
+        } catch(LatherKeyNotFoundException exc){ /* ignore */}
 
         try {
             r.setProductConfig(this.getByteAValue(PROP_PRODUCTCONFIG));
-        } catch(LatherKeyNotFoundException exc){}
+        } catch(LatherKeyNotFoundException exc){ /* ignore */}
 
         try {
-            r.setCTime(new Long((long)this.getDoubleValue(PROP_CTIME)));
-        } catch(LatherKeyNotFoundException exc){}
+            r.setCTime((long) this.getDoubleValue(PROP_CTIME));
+        } catch(LatherKeyNotFoundException exc){ /* ignore */}
 
         try {
-            r.setMTime(new Long((long)this.getDoubleValue(PROP_MTIME)));
-        } catch(LatherKeyNotFoundException exc){}
+            r.setMTime((long) this.getDoubleValue(PROP_MTIME));
+        } catch(LatherKeyNotFoundException exc){ /* ignore */}
 
         try {
             r.setAgentToken(this.getStringValue(PROP_AGENTTOKEN));
-        } catch(LatherKeyNotFoundException exc){}
+        } catch(LatherKeyNotFoundException exc){ /* ignore */}
 
         try {
             r.setCertdn(this.getStringValue(PROP_CERTDN));
-        } catch(LatherKeyNotFoundException exc){}
+        } catch(LatherKeyNotFoundException exc){ /* ignore */}
 
         try {
-            r.setCpuCount(new Integer(this.getIntValue(PROP_CPUCOUNT)));
-        } catch(LatherKeyNotFoundException exc){}
+            r.setCpuCount(this.getIntValue(PROP_CPUCOUNT));
+        } catch(LatherKeyNotFoundException exc){ /* ignore */}
 
         try {
             r.setDescription(this.getStringValue(PROP_DESCRIPTION));
-        } catch(LatherKeyNotFoundException exc){}
+        } catch(LatherKeyNotFoundException exc){ /* ignore */}
 
         try {
             r.setDiff((long)this.getDoubleValue(PROP_DIFF));
-        } catch(LatherKeyNotFoundException exc){}
+        } catch(LatherKeyNotFoundException exc){ /* ignore */}
 
         try {
             r.setFqdn(this.getStringValue(PROP_FQDN));
-        } catch(LatherKeyNotFoundException exc){}
+        } catch(LatherKeyNotFoundException exc){ /* ignore */}
 
         try {
-            r.setId(new Integer(this.getIntValue(PROP_ID)));
-        } catch(LatherKeyNotFoundException exc){}
+            r.setId(this.getIntValue(PROP_ID));
+        } catch(LatherKeyNotFoundException exc){ /* ignore */}
 
         try {
-            r.setIgnored(this.getIntValue(PROP_IGNORED) == 1 ? true : false);
-        } catch(LatherKeyNotFoundException exc){}
+            r.setIgnored(this.getIntValue(PROP_IGNORED) == 1);
+        } catch(LatherKeyNotFoundException exc){ /* ignore */}
 
         try {
             r.setLocation(this.getStringValue(PROP_LOCATION));
-        } catch(LatherKeyNotFoundException exc){}
+        } catch(LatherKeyNotFoundException exc){ /* ignore */}
 
         try {
             r.setName(this.getStringValue(PROP_NAME));
-        } catch(LatherKeyNotFoundException exc){}
+        } catch(LatherKeyNotFoundException exc){ /* ignore */}
 
         try {
             r.setPlatformTypeName(this.getStringValue(PROP_TYPENAME));
-        } catch(LatherKeyNotFoundException exc){}
+        } catch(LatherKeyNotFoundException exc){ /* ignore */}
 
         try {
             r.setQueueStatus(this.getIntValue(PROP_QUEUESTATUS));
-        } catch(LatherKeyNotFoundException exc){}
+        } catch(LatherKeyNotFoundException exc){ /* ignore */}
 
         try {
             LatherValue[] ips = this.getObjectList(PROP_AIIPVALUES);
-            
-            for(int i=0; i<ips.length; i++){
-                AiIpLatherValue ipVal = (AiIpLatherValue)ips[i];
 
+            for (LatherValue ip : ips) {
+                AiIpLatherValue ipVal = (AiIpLatherValue) ip;
                 r.addAIIpValue(ipVal.getAIIpValue());
             }
-        } catch(LatherKeyNotFoundException exc){}
+        } catch(LatherKeyNotFoundException exc){ /* ignore */}
 
         try {
             LatherValue[] svrs = this.getObjectList(PROP_AISERVERVALUES);
 
-            for(int i=0; i<svrs.length; i++){
-                AiServerLatherValue svVal = (AiServerLatherValue)svrs[i];
-
+            for (LatherValue svr : svrs) {
+                AiServerLatherValue svVal = (AiServerLatherValue) svr;
                 r.addAIServerValue(svVal.getAIServerValue());
             }
-        } catch(LatherKeyNotFoundException exc){}
-        
+        } catch(LatherKeyNotFoundException exc){ /* ignore */}
+
+        try {
+            r.setAutoApprove(this.getIntValue(PROP_AUTO_APPROVE) == 1);
+        } catch(LatherKeyNotFoundException exc){ /* ignore */}
+
         return r;
     }
 
-    public void validate()
-        throws LatherRemoteException
-    {
+    public void validate() throws LatherRemoteException {
     }
 }

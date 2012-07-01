@@ -173,6 +173,7 @@ public class AIPlatformValue
 	  this.AIIpValues = otherValue.AIIpValues;
 	// TODO Clone is better no ?
 	  this.AIServerValues = otherValue.AIServerValues;
+       super.setAutoApprove(otherValue.isAutoApprove());
    }
 
    public String getAgentToken()

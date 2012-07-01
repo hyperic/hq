@@ -24,37 +24,51 @@
 */ 
 package org.hyperic.util.security;
 
+import java.lang.reflect.Field;
 import java.security.Provider;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jasypt.encryption.pbe.PBEStringEncryptor;
+import org.jasypt.encryption.pbe.PooledPBEStringEncryptor;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.jasypt.encryption.pbe.config.PBEConfig;
 import org.jasypt.salt.SaltGenerator;
+import org.springframework.beans.factory.InitializingBean;
 
 /**
- * a PBE Strign Encryptor, which marks the values it encrypts with a default prefix and postfix,
+ * a PBE String Encryptor, which marks the values it encrypts with a default prefix and postfix,
  * which enables us later on to know whether those values are encrypted or not.
  * 
  * @author yakarn
  *
  */
-public class MarkedStringEncryptor implements PBEStringEncryptor {
-    protected StandardPBEStringEncryptor encryptor;
+public class MarkedStringEncryptor implements PBEStringEncryptor, InitializingBean {
+    protected PooledPBEStringEncryptor encryptor;
     protected final static String PREFIX = SecurityUtil.ENC_MARK_PREFIX;
     protected final static String POSTFIX = SecurityUtil.ENC_MARK_POSTFIX;
     protected final Log logger = LogFactory.getLog(this.getClass().getName());
+    private static final int DEFAULT_POOL_SIZE = 1 ; 
+
+    public MarkedStringEncryptor(int poolsize) {
+        this.encryptor = new PooledPBEStringEncryptor();
+        this.setPoolSize(poolsize) ; 
+    }//EOM
 
     public MarkedStringEncryptor() {
-        this.encryptor = new StandardPBEStringEncryptor();
-    }
-
-    public MarkedStringEncryptor(String algorithm,String password) {
-        this();
+        this(DEFAULT_POOL_SIZE) ;  
+    }//EOM
+    
+    public MarkedStringEncryptor(String algorithm,String password, int poolsize) {
+    	this(poolsize);
         this.setAlgorithm(algorithm);
-        this.setPassword(password);
-    }
+        this.setPassword(password); 
+    }//EOM
+    
+    public MarkedStringEncryptor(String algorithm,String password) {
+    	this(algorithm, password, DEFAULT_POOL_SIZE) ; 
+    }//EOM
 
     public String encrypt(String message) {
         logger.debug("encrypting: " + message);
@@ -97,7 +111,7 @@ public class MarkedStringEncryptor implements PBEStringEncryptor {
     public void setProvider(Provider provider) {
         encryptor.setProvider(provider);
     }
-
+    
     public void setStringOutputType(String stringOutputType) {
         encryptor.setStringOutputType(stringOutputType);
     }
@@ -109,7 +123,15 @@ public class MarkedStringEncryptor implements PBEStringEncryptor {
     public void initialize() {
         encryptor.initialize();
     }
-
+    
+    public final void setPoolSize(final int poolSize) { 
+    	this.encryptor.setPoolSize(poolSize) ; 
+    }//EOM 
+    
+    public void afterPropertiesSet() throws Exception {
+    	this.initialize() ; 
+    }//EOM 
+    
     @Override
     public int hashCode() {
         return this.encryptor.hashCode();

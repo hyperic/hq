@@ -28,10 +28,9 @@
 -->
 
 <hibernate-mapping package="org.hyperic.hq.measurement.server.session">
-   <!-- <typedef name="encryptedString" class="org.jasypt.hibernate.type.EncryptedStringType">
+   <typedef name="encryptedString" class="org.hyperic.hibernate.usertypes.EncryptedStringType">
       <param name="encryptorRegisteredName">markedStringEncryptorHibernateWrapper</param>
-    </typedef>
-   -->
+   </typedef>
     
   <class name="Measurement" table="EAM_MEASUREMENT">
 
@@ -67,7 +66,7 @@
     <property name="interval" type="long">
       <column name="COLL_INTERVAL" not-null="true"/>
     </property>
-    <property name="dsn" type="string">
+    <property name="formula" type="encryptedString" access="property">
       <column name="DSN" not-null="true" length="2048"/>
     </property>
 
