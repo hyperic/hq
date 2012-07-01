@@ -93,7 +93,14 @@ public class AIResourceTransfer {
     public void setAiResourceMapper(AIResourceMapper aiResourceMapper) {
         this.aiResourceMapper = aiResourceMapper;
     }
+    
+    public SessionManager getSessionManager() {
+        return sessionManager;
+    }
 
+    public void setSessionManager(SessionManager sessionManager) {
+        this.sessionManager = sessionManager;
+    }
 
     public AIResource getAIResource(String discoveryId, ResourceType type) {
         //TODO Maya replace with correct identity after implementing security 
