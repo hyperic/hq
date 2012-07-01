@@ -26,10 +26,7 @@
 package org.hyperic.hq.plugin.system;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 
-import org.hyperic.sigar.NetRoute;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
 import org.hyperic.sigar.NetFlags;
@@ -38,127 +35,109 @@ import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 
 import org.hyperic.hq.appdef.shared.AIServiceValue;
-import org.hyperic.hq.product.ProductPlugin;
 
 public class NetifDetector
-extends SystemServerDetector {
+    extends SystemServerDetector {
 
-	protected String getServerType() {
-		return SystemPlugin.NETWORK_SERVER_NAME;
-	}
+    protected String getServerType() {
+        return SystemPlugin.NETWORK_SERVER_NAME;
+    }
 
-	protected ArrayList getSystemServiceValues(Sigar sigar, ConfigResponse config)
-			throws SigarException {
-		boolean discoverVirtualInterfaces = false;
-		ArrayList services = new ArrayList();
+    protected ArrayList getSystemServiceValues(Sigar sigar, ConfigResponse config)
+        throws SigarException {
+        ArrayList services = new ArrayList();
 
-		//this is a set because we don't want the same network interface name to appear twice or more 
-		Set<String> networkInterfacesNames = new HashSet<String>();
+        String[] ifNames = sigar.getNetInterfaceList();
 
-		//Check if we need to discover virtual network interfaces Jira issue [HHQ-5569]
-		if (null != config.getValue(ProductPlugin.PROP_PLATFORM_DISCOVER_VIRTUAL_INTERFACES)) {
-			if (Boolean.TRUE.toString().equalsIgnoreCase(config.getValue(ProductPlugin.PROP_PLATFORM_DISCOVER_VIRTUAL_INTERFACES))) {
-				discoverVirtualInterfaces = true;
-				//We do this so we will also discover network bonding (like bond0 if exists)
-				NetRoute[] routes = sigar.getNetRouteList();
-				for (NetRoute route : routes) {
-					networkInterfacesNames.add(route.getIfname());
-				}
-			}
-		}  	    	
-		String[] ifNames = sigar.getNetInterfaceList();  
-		for(String name : ifNames) {
-			networkInterfacesNames.add(name);
-		}
+        for (int i=0; i<ifNames.length; i++) {
+            String name = ifNames[i];
+            NetInterfaceConfig ifconfig;
 
-		for (String name : networkInterfacesNames) {
-			NetInterfaceConfig ifconfig;
+            if (name.indexOf(':') != -1) {
+                continue; //filter out virtual ips
+            }
 
-			if (name.indexOf(':') != -1 && !discoverVirtualInterfaces) {
-				continue; //filter out virtual ips
-			}
+            try {
+                ifconfig = sigar.getNetInterfaceConfig(name);
+            } catch (SigarException e) {
+                getLog().debug("getNetInterfaceConfig(" + name + "): " +
+                               e.getMessage(), e);
+                continue;
+            }
 
-			try {
-				ifconfig = sigar.getNetInterfaceConfig(name);
-			} catch (SigarException e) {
-				getLog().debug("getNetInterfaceConfig(" + name + "): " +
-						e.getMessage(), e);
-				continue;
-			}
+            if (NetFlags.isAnyAddress(ifconfig.getAddress())) {
+                continue;
+            }
 
-			if (NetFlags.isAnyAddress(ifconfig.getAddress())) {
-				continue;
-			}
+            long flags = ifconfig.getFlags();
 
-			long flags = ifconfig.getFlags();
+            String type;
 
-			String type;
+            if ((flags & NetFlags.IFF_UP) <= 0) {
+                continue;
+            }
 
-			if ((flags & NetFlags.IFF_UP) <= 0) {
-				continue;
-			}
+            //FreeBSD has a handful of these by default 
+            if ((flags & NetFlags.IFF_POINTOPOINT) > 0) {
+                continue;
+            }
 
-			//FreeBSD has a handful of these by default 
-			if ((flags & NetFlags.IFF_POINTOPOINT) > 0) {
-				continue;
-			}
+            if ((flags & NetFlags.IFF_LOOPBACK) > 0) {
+                type = "loopback";
+            }
+            else {
+                type = ifconfig.getType().toLowerCase();
+            }
 
-			if ((flags & NetFlags.IFF_LOOPBACK) > 0) {
-				type = "loopback";
-			}
-			else {
-				type = ifconfig.getType().toLowerCase();
-			}
+            String info = "Network Interface " + name + " (" + type + ")";
 
-			String info = "Network Interface " + name + " (" + type + ")";
+            AIServiceValue svc = 
+                createSystemService(SystemPlugin.NETWORK_INTERFACE_SERVICE,
+                                    getFullServiceName(info),
+                                    SystemPlugin.PROP_NETIF,
+                                    name);
 
-			AIServiceValue svc = 
-					createSystemService(SystemPlugin.NETWORK_INTERFACE_SERVICE,
-							getFullServiceName(info),
-							SystemPlugin.PROP_NETIF,
-							name);
+            String desc = ifconfig.getDescription();
+            if (!desc.equals(name)) {
+                //XXX only the case on windows
+                svc.setDescription(desc);
+            }
 
-			String desc = ifconfig.getDescription();
-			if (!desc.equals(name)) {
-				//XXX only the case on windows
-				svc.setDescription(desc);
-			}
+            ConfigResponse cprops = new ConfigResponse();
 
-			ConfigResponse cprops = new ConfigResponse();
+            cprops.setValue("mtu", String.valueOf(ifconfig.getMtu()));
 
-			cprops.setValue("mtu", String.valueOf(ifconfig.getMtu()));
+            cprops.setValue("flags", NetFlags.getIfFlagsString(flags).trim());
 
-			cprops.setValue("flags", NetFlags.getIfFlagsString(flags).trim());
+            String mac = ifconfig.getHwaddr();
+            if (!mac.equals(NetFlags.NULL_HWADDR)) {
+                cprops.setValue("mac", mac);
+            }
 
-			String mac = ifconfig.getHwaddr();
-			if (!mac.equals(NetFlags.NULL_HWADDR)) {
-				cprops.setValue("mac", mac);
-			}
+            String[][] addrs = {
+                { "address", ifconfig.getAddress() },
+                { "netmask", ifconfig.getNetmask() },
+                { "broadcast", ifconfig.getBroadcast() },
+            };
 
-			String[][] addrs = {
-					{ "address", ifconfig.getAddress() },
-					{ "netmask", ifconfig.getNetmask() },
-					{ "broadcast", ifconfig.getBroadcast() },
-			};
+            for (int j=0; j<addrs.length; j++) {
+                String key = addrs[j][0];
+                String val = addrs[j][1];
+                if (NetFlags.isAnyAddress(val)) {
+                    continue;
+                }
+                cprops.setValue(key, val);
+            }
 
-			for (int j=0; j<addrs.length; j++) {
-				String key = addrs[j][0];
-				String val = addrs[j][1];
-				if (NetFlags.isAnyAddress(val)) {
-					continue;
-				}
-				cprops.setValue(key, val);
-			}
+            try {
+                svc.setCustomProperties(cprops.encode());
+            } catch (EncodingException e) {
+                getLog().error("Error encoding cprops: " + e.getMessage());
+            }
+            
+            services.add(svc);
+        }
 
-			try {
-				svc.setCustomProperties(cprops.encode());
-			} catch (EncodingException e) {
-				getLog().error("Error encoding cprops: " + e.getMessage());
-			}
-
-			services.add(svc);
-		}
-
-		return services;
-	}
+        return services;
+    }
 }
