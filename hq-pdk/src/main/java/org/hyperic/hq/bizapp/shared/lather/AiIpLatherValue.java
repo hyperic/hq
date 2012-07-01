@@ -30,108 +30,108 @@ import org.hyperic.lather.LatherRemoteException;
 import org.hyperic.lather.LatherKeyNotFoundException;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 
-public class AiIpLatherValue
-    extends LatherValue
-{
-    private static final String PROP_CTIME       = "CTime";
-    private static final String PROP_MACADDRESS  = "MACAddress";
-    private static final String PROP_MTIME       = "MTime";
-    private static final String PROP_ADDRESS     = "address";
-    private static final String PROP_DIFF        = "diff";
-    private static final String PROP_ID          = "id";
-    private static final String PROP_IGNORED     = "ignored";
-    private static final String PROP_NETMASK     = "netmask";
-    private static final String PROP_PRIMARYKEY  = "primaryKey";
+public class AiIpLatherValue extends LatherValue {
+
+    private static final String PROP_CTIME = "CTime";
+    private static final String PROP_MACADDRESS = "MACAddress";
+    private static final String PROP_MTIME = "MTime";
+    private static final String PROP_ADDRESS = "address";
+    private static final String PROP_DIFF = "diff";
+    private static final String PROP_ID = "id";
+    private static final String PROP_IGNORED = "ignored";
+    private static final String PROP_NETMASK = "netmask";
     private static final String PROP_QUEUESTATUS = "queueStatus";
 
-    public AiIpLatherValue(){
+    public AiIpLatherValue() {
         super();
     }
 
-    public AiIpLatherValue(AIIpValue v){
-        super();
+    public AiIpLatherValue(AIIpValue v) {
+        this();
 
-        if(v.cTimeHasBeenSet()){
-            this.setDoubleValue(PROP_CTIME, (double)v.getCTime().longValue());
+        if (v.cTimeHasBeenSet()) {
+            this.setDoubleValue(PROP_CTIME, (double) v.getCTime().longValue());
         }
 
-        if(v.mACAddressHasBeenSet()){
-            this.setStringValue(PROP_MACADDRESS, v.getMACAddress());
+        String macAddress = v.getMACAddress();
+        if (v.mACAddressHasBeenSet() && macAddress != null) {
+            this.setStringValue(PROP_MACADDRESS, macAddress);
         }
 
-        if(v.mTimeHasBeenSet()){
-            this.setDoubleValue(PROP_MTIME, (double)v.getMTime().longValue());
+        if (v.mTimeHasBeenSet()) {
+            this.setDoubleValue(PROP_MTIME, (double) v.getMTime().longValue());
         }
 
-        if(v.addressHasBeenSet()){
-            this.setStringValue(PROP_ADDRESS, v.getAddress());
+        String address = v.getAddress();
+        if (v.addressHasBeenSet() && address != null) {
+            this.setStringValue(PROP_ADDRESS, address);
         }
 
-        if(v.diffHasBeenSet()){
-            this.setDoubleValue(PROP_DIFF, (double)v.getDiff());
+        if (v.diffHasBeenSet()) {
+            this.setDoubleValue(PROP_DIFF, (double) v.getDiff());
         }
 
-        if(v.idHasBeenSet()){
-            this.setIntValue(PROP_ID, v.getId().intValue());
+        if (v.idHasBeenSet()) {
+            this.setIntValue(PROP_ID, v.getId());
         }
 
-        if(v.ignoredHasBeenSet()){
+        if (v.ignoredHasBeenSet()) {
             this.setIntValue(PROP_IGNORED, v.getIgnored() ? 1 : 0);
         }
 
-        if(v.netmaskHasBeenSet()){
-            this.setStringValue(PROP_NETMASK, v.getNetmask());
+        String netmask = v.getNetmask();
+        if (v.netmaskHasBeenSet() && netmask != null) {
+            this.setStringValue(PROP_NETMASK, netmask);
         }
 
-        if(v.queueStatusHasBeenSet()){
+        if (v.queueStatusHasBeenSet()) {
             this.setIntValue(PROP_QUEUESTATUS, v.getQueueStatus());
         }
     }
 
-    public AIIpValue getAIIpValue(){
+    public AIIpValue getAIIpValue() {
         AIIpValue r = new AIIpValue();
 
         try {
-            r.setCTime(new Long((long)this.getDoubleValue(PROP_CTIME)));
-        } catch(LatherKeyNotFoundException exc){}
+            r.setCTime((long) this.getDoubleValue(PROP_CTIME));
+        } catch (LatherKeyNotFoundException exc) { /* ignore */ }
 
         try {
             r.setMACAddress(this.getStringValue(PROP_MACADDRESS));
-        } catch(LatherKeyNotFoundException exc){}
+        } catch (LatherKeyNotFoundException exc) { /* ignore */ }
 
         try {
-            r.setMTime(new Long((long)this.getDoubleValue(PROP_MTIME)));
-        } catch(LatherKeyNotFoundException exc){}
+            r.setMTime((long) this.getDoubleValue(PROP_MTIME));
+        } catch (LatherKeyNotFoundException exc) { /* ignore */ }
 
         try {
             r.setAddress(this.getStringValue(PROP_ADDRESS));
-        } catch(LatherKeyNotFoundException exc){}
+        } catch (LatherKeyNotFoundException exc) { /* ignore */ }
 
         try {
-            r.setDiff((long)this.getDoubleValue(PROP_DIFF));
-        } catch(LatherKeyNotFoundException exc){}
+            r.setDiff((long) this.getDoubleValue(PROP_DIFF));
+        } catch (LatherKeyNotFoundException exc) { /* ignore */ }
 
         try {
-            r.setId(new Integer(this.getIntValue(PROP_ID)));
-        } catch(LatherKeyNotFoundException exc){}
+            r.setId(this.getIntValue(PROP_ID));
+        } catch (LatherKeyNotFoundException exc) { /* ignore */ }
 
         try {
-            r.setIgnored(this.getIntValue(PROP_IGNORED) == 1 ? true : false);
-        } catch(LatherKeyNotFoundException exc){}
+            r.setIgnored(this.getIntValue(PROP_IGNORED) == 1);
+        } catch (LatherKeyNotFoundException exc) { /* ignore */ }
 
         try {
             r.setNetmask(this.getStringValue(PROP_NETMASK));
-        } catch(LatherKeyNotFoundException exc){}
+        } catch (LatherKeyNotFoundException exc) { /* ignore */ }
 
         try {
             r.setQueueStatus(this.getIntValue(PROP_QUEUESTATUS));
-        } catch(LatherKeyNotFoundException exc){}
+        } catch (LatherKeyNotFoundException exc) { /* ignore */ }
 
         return r;
     }
 
     public void validate()
-        throws LatherRemoteException
-    {
+            throws LatherRemoteException {
     }
 }

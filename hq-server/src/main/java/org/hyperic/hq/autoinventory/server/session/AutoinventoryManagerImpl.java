@@ -603,7 +603,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
      * @param stateCore The ScanState that was detected during the autoinventory
      *        scan.
      */
-    public void reportAIData(String agentToken, ScanStateCore stateCore)
+    public AIPlatformValue reportAIData(String agentToken, ScanStateCore stateCore)
         throws AutoinventoryException {
 
         final boolean debug = log.isDebugEnabled();
@@ -615,7 +615,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
         // and not even the platform could be detected.
         if (state.getPlatform() == null) {
             log.warn("ScanState did not even contain a platform, ignoring.");
-            return;
+            return null;
         }
 
         // TODO: G
@@ -650,6 +650,8 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
             false, true);
         approvePlatformDevice(subject, aiPlatform);
         checkAgentAssignment(subject, agentToken, aiPlatform);
+
+        return aiPlatform;
     }
        
     private void addAIServersToAIPlatform(ScanStateCore stateCore, ScanState state,AIPlatformValue aiPlatform)
@@ -796,26 +798,14 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
         }
     }
 
-    public void invokeAutoApprove() throws AutoinventoryException {
+    public void invokeAutoApprove(AIPlatformValue aiPlatformValue) throws AutoinventoryException {
         AuthzSubject subject = getHQAdmin();
 
-        PageList<AIPlatformValue> queue = this.aiQueueManager.getQueue(subject, true, true, true, new PageControl());
-
-        for (AIPlatformValue aiPlatformValue : queue) {
-            if (aiPlatformValue.isAutoApprove()) {
-                performAutoApprove(subject, aiPlatformValue);
-            }
-        }
-    }
-
-    private void performAutoApprove(AuthzSubject subject, AIPlatformValue aiPlatform) {
-        log.info("Auto-approving inventory for " + aiPlatform.getFqdn());
-
-        List<Integer> ips = buildAIResourceIds(aiPlatform.getAIIpValues());
-        List<Integer> platforms = Collections.singletonList(aiPlatform.getId());
+        List<Integer> ips = buildAIResourceIds(aiPlatformValue.getAIIpValues());
+        List<Integer> platforms = Collections.singletonList(aiPlatformValue.getId());
 
         List<Integer> servers = new ArrayList<Integer>();
-        AIServerValue[] aiServerValues = aiPlatform.getAIServerValues();
+        AIServerValue[] aiServerValues = aiPlatformValue.getAIServerValues();
         for (AIServerValue aiServerValue : aiServerValues) {
             if (aiServerValue.isAutoApprove() || isServerVirtual(aiServerValue)) {
                 servers.add(aiServerValue.getId());
