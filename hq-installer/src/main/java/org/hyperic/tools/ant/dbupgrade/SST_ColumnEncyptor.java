@@ -198,11 +198,7 @@ public class SST_ColumnEncyptor extends SchemaSpecTask{
             //calculate the number of partitions taking into account the remainder...
             final int iNoOfchunks =  (iNoOfExistingRecords+this.batchSize-1)/this.batchSize ;
             
-<<<<<<< HEAD
-            this.log("No of chunks: " + iNoOfchunks);
-=======
             this.log("[SST_ColumnEncryptor.execute()]: No of records: " + iNoOfExistingRecords + " No of chunks: " + iNoOfchunks, Project.MSG_WARN);
->>>>>>> 9c9cd05decd0cf96c85ebb87240d0c45be84d589
             
             rs.close() ; 
             ps.close();   
