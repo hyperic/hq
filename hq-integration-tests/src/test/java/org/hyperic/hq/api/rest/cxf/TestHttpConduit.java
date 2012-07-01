@@ -37,6 +37,9 @@ import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MultivaluedMap;
+
 import org.apache.cxf.Bus;
 import org.apache.cxf.common.logging.LogUtils;
 import org.apache.cxf.helpers.HttpHeaderHelper;
@@ -49,7 +52,6 @@ import org.apache.cxf.transport.http.HTTPConduit;
 import org.apache.cxf.ws.addressing.EndpointReferenceType;
 
 import com.meterware.httpunit.HttpException;
-import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
@@ -95,8 +97,6 @@ public class TestHttpConduit extends HTTPConduit {
 	
 	@Override
 	public void close(Message msg) throws IOException {
-		//super.close(msg) ; 
-		
 		WebResponse response = null ;
 		InputStream inputStream  = null ; 
 		
@@ -123,9 +123,18 @@ public class TestHttpConduit extends HTTPConduit {
 			}else{ 
 				throw new UnsupportedOperationException(httpRequestMethod + " is unsupported!") ; 
 			}//EO if post 
-			
 			req.setHeaderField(CONTENT_TYPE_HEADER, (String)msg.get(CONTENT_TYPE_HEADER)) ;
 			req.setHeaderField("Accept", (String)msg.get(CONTENT_TYPE_HEADER)) ;
+			
+			//extract the headers map from the msg (stored against the Message.PROTOCOL_HEADERS) 
+			final MultivaluedMap<String,String> protocolHeadersMap = (MultivaluedMap<String,String>) msg.get(org.apache.cxf.message.Message.PROTOCOL_HEADERS) ;
+			if(protocolHeadersMap != null) { 
+				final String authorizationToken = protocolHeadersMap.getFirst(HttpHeaders.AUTHORIZATION) ;
+				if(authorizationToken != null) { 
+					req.setHeaderField(HttpHeaders.AUTHORIZATION, authorizationToken)  ;
+				}//EO if authorizationToken was not null
+			}//EO if the protocol headers were defined 
+			
 			response = serviceRunner.newClient().getResponse(req);
 			System.out.println(response.getText());
 			//this is the response 

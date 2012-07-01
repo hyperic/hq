@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.cxf.jaxrs.client.ServerWebApplicationException;
+import org.apache.cxf.jaxrs.client.WebClient;
 import org.hyperic.hq.api.model.Resource;
 import org.hyperic.hq.api.model.ResourceConfig;
 import org.hyperic.hq.api.model.ResourceDetailsType;
@@ -47,6 +48,7 @@ import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.api.resources.ResourceServiceTest.ResourceServiceTestDataPopulator;
 import org.hyperic.hq.api.rest.AbstractRestTestDataPopulator;
 import org.hyperic.hq.api.rest.RestTestCaseBase;
+import org.hyperic.hq.api.rest.RestTestCaseBase.SecurityInfo;
 import org.hyperic.hq.api.rest.RestTestCaseBase.ServiceBindingsIteration;
 import org.hyperic.hq.api.services.ResourceService;
 import org.hyperic.hq.appdef.Agent;
@@ -122,6 +124,7 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     	}//EOM 
     }//EO inner class PlatformsIterationInterceptor
     
+    //@SecurityInfo(username="hqadmin",password="hqadmin")
     @PlatformsIteration(noOfPlatforms=1)
     @Test
     public final void testGetWADL() throws Throwable {
@@ -567,6 +570,7 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 	    
 		@Override
 		public final void populate() throws Exception {
+			
 			try{  
 				persistedConfigAttributes  = new HashMap<String,String>() ; 
 		    	persistedConfigAttributes.put("log_track.level", "Warn") ;

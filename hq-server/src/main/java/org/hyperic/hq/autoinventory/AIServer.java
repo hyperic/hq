@@ -43,6 +43,7 @@ public class AIServer extends ServerBase
     private Integer queueStatus;
     private long diff;
     private boolean ignored;
+    private boolean autoApprove;
 
     /**
      * default constructor
@@ -186,6 +187,14 @@ public class AIServer extends ServerBase
         this.ignored = ignored;
     }
 
+    public boolean isAutoApprove() {
+        return autoApprove;
+    }
+
+    public void setAutoApprove(boolean autoApprove) {
+        this.autoApprove = autoApprove;
+    }
+
     private AIServerValue aIServerValue = new AIServerValue();
     /**
      * legacy DTO pattern
@@ -202,6 +211,7 @@ public class AIServer extends ServerBase
         aIServerValue.setResponseTimeConfig(getResponseTimeConfig());
         aIServerValue.setDiff(getDiff());
         aIServerValue.setIgnored(isIgnored());
+        aIServerValue.setAutoApprove(isAutoApprove());
         aIServerValue.setServerTypeName(
             (getServerTypeName() == null) ? "" : getServerTypeName());
         aIServerValue.setName(getName());
@@ -225,6 +235,7 @@ public class AIServer extends ServerBase
         setResponseTimeConfig( valueHolder.getResponseTimeConfig() );
         setDiff( valueHolder.getDiff() );
         setIgnored( valueHolder.getIgnored() );
+        setAutoApprove( valueHolder.isAutoApprove());
         setServerTypeName( valueHolder.getServerTypeName() );
         setName( valueHolder.getName() );
         setAutoinventoryIdentifier( valueHolder.getAutoinventoryIdentifier() );
