@@ -32,10 +32,8 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -160,20 +158,19 @@ public class AgentConfig {
     
     public static final String DEFAULT_AGENT_PROPFILE_NAME = "agent.properties";
     
-    public static final String DEFAULT_PROPFILE = PROP_INSTALLHOME[1]
-            + "/conf/"+DEFAULT_AGENT_PROPFILE_NAME;
+    public static final String AGENT_CONF_DIR = PROP_INSTALLHOME[1] + "/conf/";
+
+    public static final String DEFAULT_PROPFILE = AGENT_CONF_DIR + DEFAULT_AGENT_PROPFILE_NAME;
 
     public static final String ROLLBACK_PROPFILE = "agent.rollbackPropFile";
-    public static final String DEFAULT_ROLLBACKPROPFILE = PROP_INSTALLHOME[1]
-            + "/conf/rollback.properties";
 
-    public static final String BUNDLE_PROPFILE = PROP_BUNDLEHOME[1]
-            + "/conf/"+DEFAULT_AGENT_PROPFILE_NAME;
+    public static final String DEFAULT_ROLLBACKPROPFILE = AGENT_CONF_DIR + "rollback.properties";
+
+    public static final String BUNDLE_PROPFILE = AGENT_CONF_DIR + DEFAULT_AGENT_PROPFILE_NAME;
 
     public static final String DEFAULT_AGENT_PROP_ENC_KEY_FILE_NAME = "agent.scu";
 
-    public static final String DEFAULT_PROP_ENC_KEY_FILE = PROP_INSTALLHOME[1]
-            + "/conf/"+DEFAULT_AGENT_PROP_ENC_KEY_FILE_NAME;
+    public static final String DEFAULT_PROP_ENC_KEY_FILE = AGENT_CONF_DIR + DEFAULT_AGENT_PROP_ENC_KEY_FILE_NAME;
 
     public static final Set<String> ENCRYPTED_PROP_KEYS = new HashSet<String>();
 
@@ -222,19 +219,11 @@ public class AgentConfig {
 
     private File logdir;
 
-    private static AutoApproveConfig autoApproveConfig = null;
-
 	private AgentConfig(){
         this.proxyIp = AgentConfig.DEFAULT_PROXY_HOST;
         this.proxyPort = AgentConfig.DEFAULT_PROXY_PORT;
         this.notifyUpPort = AgentConfig.DEFAULT_NOTIFY_UP_PORT;
         this.enabledCiphers = AgentConfig.DEFAULT_ENBALED_CIPHERS.split(",");
-
-        synchronized (AgentConfig.class) {
-            if (autoApproveConfig == null) {
-                autoApproveConfig = new AutoApproveConfig(PROP_INSTALLHOME[1] + "/conf/");
-            }
-        }
     }
 
     /**
@@ -554,6 +543,10 @@ public class AgentConfig {
         return logdir;
     }
     
+    public String getConfDirName() {
+        return AGENT_CONF_DIR;
+    }
+
     /**
      * Sets the port the Agent should listen on.
      *
@@ -769,12 +762,5 @@ public class AgentConfig {
 	public void setEnabledCiphers(String[] enabledCiphers) {
 		this.enabledCiphers = enabledCiphers;
 	}
-
-    /**
-     * @return The auto-approval configuration. Never null.
-     */
-    public AutoApproveConfig getAutoApproveConfig() {
-        return this.autoApproveConfig;
-    }
 
 }

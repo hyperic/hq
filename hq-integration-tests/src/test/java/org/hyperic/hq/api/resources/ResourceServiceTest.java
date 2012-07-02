@@ -123,8 +123,8 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     	}//EOM 
     }//EO inner class PlatformsIterationInterceptor
     
-    @SecurityInfo(username="hqadmin",password="hqadmin")
-    @PlatformsIteration(noOfPlatforms=1)
+//    @SecurityInfo(username="hqadmin",password="hqadmin")
+//    @PlatformsIteration(noOfPlatforms=1)
 //    @Test
     public final void testGetWADL() throws Throwable {
     	final String WADL = this.getWADL(this.service) ; 
@@ -132,7 +132,7 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 	}//EOM
     
 
-    @PlatformsIteration()
+    @PlatformsIteration
     @Test
     public final void testGetResourceWithInternalAndNaturalPlatformIDs() throws Throwable {
     	

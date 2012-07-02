@@ -46,14 +46,17 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.autoinventory.ScanStateCore;
 import org.hyperic.hq.bizapp.server.session.LatherDispatcher;
+import org.hyperic.hq.bizapp.shared.lather.AiPlatformLatherValue;
 import org.hyperic.hq.bizapp.shared.lather.AiSendReport_args;
 import org.hyperic.hq.bizapp.shared.lather.CommandInfo;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.lather.LatherContext;
 import org.hyperic.lather.LatherRemoteException;
 import org.hyperic.lather.LatherValue;
+import org.hyperic.lather.NullLatherValue;
 import org.hyperic.lather.client.LatherHTTPClient;
 import org.hyperic.lather.xcode.LatherXCoder;
 import org.hyperic.util.encoding.Base64;
@@ -284,7 +287,7 @@ public class LatherServlet extends HttpServlet {
                 res = latherDispatcher.dispatch(ctx, method, arg);
 
                 if (CommandInfo.CMD_AI_SEND_REPORT.equals(method)) {
-                    handleAutoApprovals(arg);
+                    res = handleAutoApprovals(res);
                 }
 
                 issueSuccessResponse(this.resp, this.xcoder, res);
@@ -302,13 +305,20 @@ public class LatherServlet extends HttpServlet {
             }
         }
 
-        private void handleAutoApprovals(LatherValue arg) throws LatherRemoteException {
-            ScanStateCore scanStateCore = ((AiSendReport_args) arg).getCore();
-            boolean autoApprove = scanStateCore.getPlatform().isAutoApprove();
+        private LatherValue handleAutoApprovals(LatherValue arg) throws LatherRemoteException {
 
-            if (autoApprove) {
-                this.latherDispatcher.invokeAutoApprove();
+            if (arg == null || arg instanceof NullLatherValue) {
+                return NullLatherValue.INSTANCE;
             }
+
+            AiPlatformLatherValue aiPlatformLatherValue = (AiPlatformLatherValue) arg;
+            AIPlatformValue aiPlatformValue = aiPlatformLatherValue.getAIPlatformValue();
+
+            if (aiPlatformValue.isAutoApprove()) {
+                this.latherDispatcher.invokeAutoApprove(aiPlatformValue);
+            }
+
+            return NullLatherValue.INSTANCE;
         }
 
         public void run(){

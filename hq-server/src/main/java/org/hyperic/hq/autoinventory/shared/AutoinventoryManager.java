@@ -32,10 +32,7 @@ import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
-import org.hyperic.hq.appdef.shared.AgentNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.ServerTypeValue;
-import org.hyperic.hq.appdef.shared.ValidationException;
+import org.hyperic.hq.appdef.shared.*;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -175,7 +172,7 @@ public interface AutoinventoryManager {
      * @param stateCore The ScanState that was detected during the autoinventory
      *        scan.
      */
-    public void reportAIData(String agentToken, ScanStateCore stateCore)
+    public AIPlatformValue reportAIData(String agentToken, ScanStateCore stateCore)
         throws AutoinventoryException;
 
     /**
@@ -209,5 +206,5 @@ public interface AutoinventoryManager {
      */
     public void handleResourceEvents(List<ResourceZevent> events);
 
-    void invokeAutoApprove() throws AutoinventoryException;
+    void invokeAutoApprove(AIPlatformValue aiPlatformValue) throws AutoinventoryException;
 }
