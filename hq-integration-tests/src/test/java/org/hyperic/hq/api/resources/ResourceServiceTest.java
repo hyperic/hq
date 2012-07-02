@@ -132,8 +132,8 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 	}//EOM
     
 
-//    @PlatformsIteration()
-//    @Test
+    @PlatformsIteration
+    @Test
     public final void testGetResourceWithInternalAndNaturalPlatformIDs() throws Throwable {
     	
     	final int hierarchyDepth = 3 ; 
@@ -148,8 +148,8 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 		
 	}//EOM 
     
-//    @PlatformsIteration
-//    @Test
+    @PlatformsIteration
+    @Test
     public final void testGetResourceNoConfig() throws Throwable { 
     	final int hierarchyDepth = 3 ; 
     	
@@ -164,8 +164,8 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 		this.assertResource(resource, this.currentPlatform, hierarchyDepth, null) ;
     }//EOM 
     
-//    @PlatformsIteration 
-//    @Test
+    @PlatformsIteration 
+    @Test
     public final void testGetResourceOnlyConfig() throws Throwable { 
     	final int hierarchyDepth = 3 ;
     	//Note: should still contain an internal id 
@@ -179,8 +179,8 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 		this.assertResource(resource, this.currentPlatform, hierarchyDepth, this.testBed.persistedConfigAttributes, ResourceDetailsType.PROPERTIES) ; 
     }//EOM
     
-//    @PlatformsIteration(noOfPlatforms=1)
-//    @Test
+    @PlatformsIteration(noOfPlatforms=1)
+    @Test
     public final void testGetResourceNoDepth() throws Throwable { 
     	final int hierarchyDepth = 1 ;
     	//Note: should still contain an internal id 
