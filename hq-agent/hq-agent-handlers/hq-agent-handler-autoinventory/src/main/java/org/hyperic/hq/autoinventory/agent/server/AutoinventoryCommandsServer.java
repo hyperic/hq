@@ -25,30 +25,16 @@
 
 package org.hyperic.hq.autoinventory.agent.server;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.agent.*;
-import org.hyperic.hq.agent.server.AgentDaemon;
-import org.hyperic.hq.agent.server.AgentNotificationHandler;
-import org.hyperic.hq.agent.server.AgentRunningException;
-import org.hyperic.hq.agent.server.AgentServerHandler;
-import org.hyperic.hq.agent.server.AgentStartException;
-import org.hyperic.hq.agent.server.AgentStorageProvider;
-import org.hyperic.hq.agent.server.AgentTransportLifecycle;
+import org.hyperic.hq.agent.AgentAPIInfo;
+import org.hyperic.hq.agent.AgentAssertionException;
+import org.hyperic.hq.agent.AgentRemoteException;
+import org.hyperic.hq.agent.AgentRemoteValue;
+import org.hyperic.hq.agent.server.*;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIServerValue;
-import org.hyperic.hq.autoinventory.AutoinventoryException;
-import org.hyperic.hq.autoinventory.ScanConfiguration;
-import org.hyperic.hq.autoinventory.ScanConfigurationCore;
-import org.hyperic.hq.autoinventory.ScanListener;
-import org.hyperic.hq.autoinventory.ScanManager;
-import org.hyperic.hq.autoinventory.ScanState;
-import org.hyperic.hq.autoinventory.ScanStateCore;
+import org.hyperic.hq.autoinventory.*;
 import org.hyperic.hq.autoinventory.agent.AICommandsAPI;
 import org.hyperic.hq.autoinventory.agent.client.AICommandsClient;
 import org.hyperic.hq.bizapp.agent.CommandsAPIInfo;
@@ -59,9 +45,13 @@ import org.hyperic.hq.product.AutoinventoryPluginManager;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.StringUtil;
 
-public class AutoinventoryCommandsServer
-    implements AgentServerHandler, AgentNotificationHandler, ScanListener
-{
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
+
+public class AutoinventoryCommandsServer implements AgentServerHandler, AgentNotificationHandler, ScanListener {
+
     // max sleep is 1 hour between attempts to send AI report to server.
     public static final long AIREPORT_MAX_SLEEP_WAIT = (60000 * 60);
 
@@ -74,6 +64,8 @@ public class AutoinventoryCommandsServer
     private Log                         _log;
     private RuntimeAutodiscoverer       _rtAutodiscoverer;
     private AICommandsService           _aiCommandsService;
+
+    private AutoApproveConfig           _autoApproveConfig;
 
     // The CertDN uniquely identifies this agent
     protected String _certDN;
@@ -96,8 +88,7 @@ public class AutoinventoryCommandsServer
         return AICommandsAPI.commandSet;
     }
 
-    public AgentRemoteValue dispatchCommand(String cmd, AgentRemoteValue args,
-                                            InputStream in, OutputStream out)
+    public AgentRemoteValue dispatchCommand(String cmd, AgentRemoteValue args, InputStream in, OutputStream out)
         throws AgentRemoteException {
 
         _log.debug("AICommandsServer: asked to invoke cmd=" + cmd);
@@ -111,56 +102,6 @@ public class AutoinventoryCommandsServer
         }
     }
 
-    private AgentRemoteValue dispatchCommand_internal(String cmd,
-                                                      AgentRemoteValue args)
-        throws AgentRemoteException {
-
-        // Anytime we get a request from the server, it means the server
-        // is available.  So, if there is a scan sleeping in "scanComplete",
-        // wake it up now
-        _scanManager.interruptHangingScan();
-
-        if(cmd.equals(_verAPI.command_startScan)){
-            ScanConfigurationCore scanConfig = null;
-
-            try {
-                scanConfig = ScanConfigurationCore.fromAgentRemoteValue(
-                                        AICommandsAPI.PROP_SCANCONFIG, args);
-            } catch ( Exception e ) {
-                _log.error("Error starting scan.", e);
-                throw new AgentRemoteException("Error starting scan: " +
-                                               e.toString());
-            }
-
-            _aiCommandsService.startScan(scanConfig, false);
-            return null;
-
-        } else if(cmd.equals(_verAPI.command_stopScan)){
-            _aiCommandsService.stopScan(false);
-            return null;
-
-        } else if(cmd.equals(_verAPI.command_getScanStatus)){
-            AgentRemoteValue rval = new AgentRemoteValue();
-            ScanStateCore state = _aiCommandsService.getScanStatus(false);
-
-            try {
-                state.toAgentRemoteValue("scanState", rval);
-            } catch ( Exception e ) {
-                _log.error("Error getting scan state.", e);
-                throw new AgentRemoteException("Error getting scan status: " +
-                                               e.toString());
-            }
-
-            return rval;
-
-        } else if(cmd.equals(_verAPI.command_pushRuntimeDiscoveryConfig)){
-            _aiCommandsService.pushRuntimeDiscoveryConfig(args, false);
-            return null;
-        } else {
-            throw new AgentRemoteException("Unknown command: " + cmd);
-        }
-    }
-
     public void startup (AgentDaemon agent) throws AgentStartException {
         try {
             _agent   = agent;
@@ -170,6 +111,9 @@ public class AutoinventoryCommandsServer
         } catch(AgentRunningException exc){
             throw new AgentAssertionException("Agent should be running here");
         }
+
+        // Read the auto-approve configuration.
+        _autoApproveConfig = new AutoApproveConfig(_agent.getBootConfig().getConfDirName());
 
         AutoinventoryPluginManager pluginManager;
 
@@ -183,16 +127,12 @@ public class AutoinventoryCommandsServer
         }
 
         // Initialize the runtime autodiscoverer
-        _rtAutodiscoverer = new RuntimeAutodiscoverer(this, _storage,
-                                                      _agent, _client);
+        _rtAutodiscoverer = new RuntimeAutodiscoverer(this, _storage, _agent, _client);
 
         // Fire up the scan manager
-        _scanManager = new ScanManager(this, _log, pluginManager,
-                                      _rtAutodiscoverer);
+        _scanManager = new ScanManager(this, _log, pluginManager, _rtAutodiscoverer);
 
-        _aiCommandsService = new AICommandsService(pluginManager,
-                                                   _rtAutodiscoverer,
-                                                   _scanManager);
+        _aiCommandsService = new AICommandsService(pluginManager, _rtAutodiscoverer, _scanManager);
 
         AgentTransportLifecycle agentTransportLifecycle;
 
@@ -231,21 +171,6 @@ public class AutoinventoryCommandsServer
         }
     }
 
-    /**
-     * This is the scan that's run when the agent first starts up,
-     * and periodically thereafter.  This method is called by the
-     * ScanManager when the RuntimeAutodiscoverer says it's time for
-     * a DefaultScan (by default, every 15 mins)
-     */
-    protected void scheduleDefaultScan () {
-        _log.debug("Scheduling DefaultScan...");
-        ScanConfiguration scanConfig = new ScanConfiguration();
-
-        scanConfig.setIsDefaultScan(true);
-
-        _aiCommandsService.startScan(scanConfig);
-    }
-
     public void shutdown () {
         _log.info("Autoinventory Commands Server shutting down");
         // Give the scan manager 3 seconds to shut down.
@@ -255,20 +180,12 @@ public class AutoinventoryCommandsServer
         _log.info("Autoinventory Commands Server shut down");
     }
 
-    private AutoinventoryCallbackClient setupClient() {
-        StorageProviderFetcher fetcher =
-            new StorageProviderFetcher(_storage);
-
-        return new AutoinventoryCallbackClient(fetcher);
-    }
-
     /**
      * This is where we report our autoinventory-detected data to
      * the EAM server.
      * @see org.hyperic.hq.autoinventory.ScanListener#scanComplete
      */
-    public void scanComplete (ScanState scanState)
-        throws AutoinventoryException, SystemException {
+    public void scanComplete (ScanState scanState) throws AutoinventoryException, SystemException {
 
         // Special handling for periodic default scans
         if (scanState.getIsDefaultScan()) {
@@ -368,30 +285,97 @@ public class AutoinventoryCommandsServer
                     if ( sleepWaitMillis > AIREPORT_MAX_SLEEP_WAIT ) {
                         sleepWaitMillis = AIREPORT_MAX_SLEEP_WAIT;
                     }
-                } catch ( InterruptedException ie ) {}
+                } catch ( InterruptedException ie ) { /* ignore */ }
             }
         }
     }
 
-    private void applyAutoApproval(AIPlatformValue aiPlatformValue) {
-        // Get the auto-approve config
-        AutoApproveConfig autoApproveConfig = _agent.getBootConfig().getAutoApproveConfig();
+    /**
+     * This is the scan that's run when the agent first starts up,
+     * and periodically thereafter.  This method is called by the
+     * ScanManager when the RuntimeAutodiscoverer says it's time for
+     * a DefaultScan (by default, every 15 mins)
+     */
+    protected void scheduleDefaultScan () {
+        _log.debug("Scheduling DefaultScan...");
+        ScanConfiguration scanConfig = new ScanConfiguration();
 
+        scanConfig.setIsDefaultScan(true);
+
+        _aiCommandsService.startScan(scanConfig);
+    }
+
+    private AgentRemoteValue dispatchCommand_internal(String cmd, AgentRemoteValue args)
+            throws AgentRemoteException {
+
+        // Anytime we get a request from the server, it means the server
+        // is available.  So, if there is a scan sleeping in "scanComplete",
+        // wake it up now
+        _scanManager.interruptHangingScan();
+
+        if(cmd.equals(AICommandsAPI.command_startScan)){
+            ScanConfigurationCore scanConfig;
+
+            try {
+                scanConfig = ScanConfigurationCore.fromAgentRemoteValue(AICommandsAPI.PROP_SCANCONFIG, args);
+            } catch ( Exception e ) {
+                _log.error("Error starting scan.", e);
+                throw new AgentRemoteException("Error starting scan: " +
+                        e.toString());
+            }
+
+            _aiCommandsService.startScan(scanConfig, false);
+            return null;
+
+        } else if(cmd.equals(AICommandsAPI.command_stopScan)){
+            _aiCommandsService.stopScan(false);
+            return null;
+
+        } else if(cmd.equals(AICommandsAPI.command_getScanStatus)){
+            AgentRemoteValue rval = new AgentRemoteValue();
+            ScanStateCore state = _aiCommandsService.getScanStatus(false);
+
+            try {
+                state.toAgentRemoteValue("scanState", rval);
+            } catch ( Exception e ) {
+                _log.error("Error getting scan state.", e);
+                throw new AgentRemoteException("Error getting scan status: " +
+                        e.toString());
+            }
+
+            return rval;
+
+        } else if(cmd.equals(AICommandsAPI.command_pushRuntimeDiscoveryConfig)){
+            _aiCommandsService.pushRuntimeDiscoveryConfig(args, false);
+            return null;
+        } else {
+            throw new AgentRemoteException("Unknown command: " + cmd);
+        }
+    }
+
+    private AutoinventoryCallbackClient setupClient() {
+        StorageProviderFetcher fetcher =
+                new StorageProviderFetcher(_storage);
+
+        return new AutoinventoryCallbackClient(fetcher);
+    }
+
+    private void applyAutoApproval(AIPlatformValue aiPlatformValue) {
         // If the auto-approve configuration wasn't provided then exit.
-        if (!autoApproveConfig.exists()) {
+        if (!_autoApproveConfig.exists()) {
             _log.info("no resource is auto approved");
             return;
         }
 
         // Platform auto-approval
-        boolean approvePlatform = autoApproveConfig.isAutoApproved(AutoApproveConfig.PLATFORM_PROPERTY_NAME);
+        boolean approvePlatform = _autoApproveConfig.isAutoApproved(AutoApproveConfig.PLATFORM_PROPERTY_NAME);
         aiPlatformValue.setAutoApprove(approvePlatform);
 
         // Servers auto-approval
         AIServerValue[] aiServerValues = aiPlatformValue.getAIServerValues();
         if (aiServerValues != null) {
             for (AIServerValue aiServerValue : aiServerValues) {
-                boolean approveServer = autoApproveConfig.isAutoApproved(aiServerValue.getName());
+                boolean approveServer = _autoApproveConfig.isAutoApproved(aiServerValue.getName());
                 _log.info("--- Auto-Approve for Server: [" + aiServerValue.getName() + "] is: " + approveServer);
                 aiServerValue.setAutoApprove(approveServer);
             }

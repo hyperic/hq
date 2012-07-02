@@ -45,10 +45,8 @@ public class AiServerLatherValue extends AiLatherValue {
 	private static final String PROP_INSTALLPATH                = "installPath";
 	private static final String PROP_MEASUREMENTCONFIG          = "measurementConfig";
 	private static final String PROP_NAME                       = "name";
-	private static final String PROP_PRIMARYKEY                 = "primaryKey";
 	private static final String PROP_PRODUCTCONFIG              = "productConfig";
 	private static final String PROP_QUEUESTATUS                = "queueStatus";
-	private static final String PROP_QUEUESTATUSSTR             = "queueStatusStr";
 	private static final String PROP_RESPONSETIMECONFIG         = "responseTimeConfig";
 	private static final String PROP_SERVERTYPENAME             = "serverTypeName";
 	private static final String PROP_SERVICESAUTOMANAGED        = "servicesAutomanaged";
@@ -76,60 +74,72 @@ public class AiServerLatherValue extends AiLatherValue {
 			this.setDoubleValue(PROP_MTIME, (double) v.getMTime().longValue());
 		}
 
-		if (v.autoinventoryIdentifierHasBeenSet()) {
-			this.setStringValue(PROP_AUTOINVENTORYIDENTIFIER, v.getAutoinventoryIdentifier());
+        String autoinventoryIdentifier = v.getAutoinventoryIdentifier();
+        if (v.autoinventoryIdentifierHasBeenSet() && autoinventoryIdentifier != null) {
+            this.setStringValue(PROP_AUTOINVENTORYIDENTIFIER, autoinventoryIdentifier);
 		}
 
-		if (v.controlConfigHasBeenSet()) {
-			this.setByteAValue(PROP_CONTROLCONFIG, v.getControlConfig());
+        byte[] controlConfig = v.getControlConfig();
+        if (v.controlConfigHasBeenSet() && controlConfig != null) {
+            this.setByteAValue(PROP_CONTROLCONFIG, controlConfig);
 		}
 
-		if (v.descriptionHasBeenSet()) {
-			this.setStringValue(PROP_DESCRIPTION, v.getDescription(), 300);
+        String description = v.getDescription();
+        if (v.descriptionHasBeenSet() && description != null) {
+            this.setStringValue(PROP_DESCRIPTION, description, 300);
 		}
 
 		if (v.diffHasBeenSet()) {
 			this.setDoubleValue(PROP_DIFF, (double) v.getDiff());
 		}
 
-		if (v.idHasBeenSet()) {
-			this.setIntValue(PROP_ID, v.getId());
+        Integer id = v.getId();
+        if (v.idHasBeenSet() && id != null) {
+            this.setIntValue(PROP_ID, id);
 		}
 
 		if (v.ignoredHasBeenSet()) {
 			this.setIntValue(PROP_IGNORED, v.getIgnored() ? 1 : 0);
 		}
 
-		if (v.installPathHasBeenSet()) {
-			this.setStringValue(PROP_INSTALLPATH, v.getInstallPath());
+        String installPath = v.getInstallPath();
+        if (v.installPathHasBeenSet() && installPath != null) {
+            this.setStringValue(PROP_INSTALLPATH, installPath);
 		}
 
-		if (v.measurementConfigHasBeenSet()) {
-			this.setByteAValue(PROP_MEASUREMENTCONFIG, v.getMeasurementConfig());
+        byte[] measurementConfig = v.getMeasurementConfig();
+        if (v.measurementConfigHasBeenSet() && measurementConfig != null) {
+            this.setByteAValue(PROP_MEASUREMENTCONFIG, measurementConfig);
 		}
 
-		if (v.nameHasBeenSet()) {
-			this.setStringValue(PROP_NAME, v.getName());
+        String name = v.getName();
+        if (v.nameHasBeenSet() && name != null) {
+            this.setStringValue(PROP_NAME, name);
 		}
 
-		if (v.customPropertiesHasBeenSet()) {
-			this.setByteAValue(PROP_CPROPS, v.getCustomProperties());
+        byte[] customProperties = v.getCustomProperties();
+        if (v.customPropertiesHasBeenSet() && customProperties != null) {
+            this.setByteAValue(PROP_CPROPS, customProperties);
 		}
 
-		if (v.productConfigHasBeenSet()) {
-			this.setByteAValue(PROP_PRODUCTCONFIG, v.getProductConfig());
+        byte[] productConfig = v.getProductConfig();
+        if (v.productConfigHasBeenSet() && productConfig != null) {
+            this.setByteAValue(PROP_PRODUCTCONFIG, productConfig);
 		}
 
 		if (v.queueStatusHasBeenSet()) {
 			this.setIntValue(PROP_QUEUESTATUS, v.getQueueStatus());
 		}
 
-		if (v.responseTimeConfigHasBeenSet()) {
-			this.setByteAValue(PROP_RESPONSETIMECONFIG, v.getResponseTimeConfig());
+        byte[] responseTimeConfig = v.getResponseTimeConfig();
+        if (v.responseTimeConfigHasBeenSet() && responseTimeConfig != null) {
+            this.setByteAValue(PROP_RESPONSETIMECONFIG, responseTimeConfig);
 		}
 
-		if (v.serverTypeNameHasBeenSet()) {
-			this.setStringValue(PROP_SERVERTYPENAME, v.getServerTypeName());
+        String serverTypeName = v.getServerTypeName();
+        if (v.serverTypeNameHasBeenSet() && serverTypeName != null
+                ) {
+            this.setStringValue(PROP_SERVERTYPENAME, serverTypeName);
 		}
 
 		if (v.servicesAutomanagedHasBeenSet()) {
