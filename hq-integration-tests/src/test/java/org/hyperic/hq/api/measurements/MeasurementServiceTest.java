@@ -37,6 +37,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.product.MeasurementPlugin;
 import org.hyperic.hq.product.PlatformTypeInfo;
 import org.hyperic.hq.product.PluginManager;
@@ -71,7 +72,9 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
 
     public static class MeasurementServiceTestDataPopulator extends AbstractRestTestDataPopulator<MeasurementService>{
 		static final int NO_OF_TEST_PLATFORMS = 1 ;
-		
+	    
+		protected TemplateManager tmpltMgr;
+
 		protected Method addConfigSchemaMethod ; 
 		protected Method setTypeInfoMethod ;
 	    protected Map<String,String> persistedConfigAttributes ; 
@@ -134,13 +137,13 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
 		        final List<String> tmpNames = new ArrayList<String>() ; 
 		        tmpNames.add("Availability") ; 
 		        tmpNames.add("JVM Free Memory") ; 
-//		        List<MeasurementTemplate> tmps = this.createTemplates(tmpNames);
+		        List<MeasurementTemplate> tmps = this.tmpltMgr.findTemplatesByName(tmpNames);
 		        
                 // create measurements
-//		        List<org.hyperic.hq.measurement.server.session.Measurement> msmts = this.createMeasurements(server,tmps);
+		        List<org.hyperic.hq.measurement.server.session.Measurement> msmts = this.createMeasurements(this.rsc,tmps);
 		        
                 // create metrics
-//		        List<org.hyperic.hq.measurement.server.session.Metric> dtps = this.createMetrics(msmts);
+		        List<org.hyperic.hq.measurement.server.session.Metric> dtps = this.createMetrics(msmts);
 		        
 		        super.populate() ; 
 		    }catch(Throwable t) { 
@@ -230,7 +233,7 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
     
     List<Metric> generateServiceMetrics(org.hyperic.hq.measurement.server.session.Measurement hqMsmt,
     		Date begin, Date end, String aggTable) {
-//        Map<String,List> a = this.testBed.metrics.get(hqMsmt);
+        Map<String,List> a = this.testBed.metrics.get(hqMsmt);
         return null;//    	Arrays.copyOfRange(original, from, to, newType)
     }
     /**

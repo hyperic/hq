@@ -30,6 +30,7 @@ import java.util.Set;
 
 import org.hibernate.SessionFactory;
 import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformType;
@@ -68,6 +69,9 @@ import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
+import org.hyperic.hq.measurement.server.session.Measurement;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.product.ServiceTypeInfo;
@@ -300,4 +304,11 @@ public class TestHelper {
 		return application;
 	}
 
+	protected List<Measurement> createMeasurements(AppdefResource rsc, List<MeasurementTemplate> tmps) {
+	    
+	}
+	
+	protected List<HighLowMetricValue> createMetrics(Map<Measurement, Map<String, List<>) {
+	    
+	}
 }// EOC
