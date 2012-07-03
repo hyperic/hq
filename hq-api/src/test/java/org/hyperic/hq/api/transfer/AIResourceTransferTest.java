@@ -14,6 +14,9 @@ import org.hyperic.hq.appdef.server.session.AIQueueManagerImpl;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueManager;
 import org.hyperic.hq.appdef.shared.AIServerValue;
+import org.hyperic.hq.auth.shared.SessionManager;
+import org.hyperic.hq.auth.shared.SessionNotFoundException;
+import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
@@ -29,6 +32,7 @@ public class AIResourceTransferTest extends AIResourceTransfer {
     AIResourceTransfer resourceTransfer;
     AIQueueManager aiQueueManager;
     AuthzSubjectManager authzSubjectManager;
+    SessionManager sessionManager;
     
     
     @BeforeClass
@@ -47,6 +51,8 @@ public class AIResourceTransferTest extends AIResourceTransfer {
         resourceTransfer.setAiQueueManager(aiQueueManager);
         authzSubjectManager = EasyMock.createMock(AuthzSubjectManagerImpl.class);
         resourceTransfer.setAuthzSubjectManager(authzSubjectManager);
+        sessionManager = EasyMock.createMock(SessionManager.class);
+        resourceTransfer.setSessionManager(sessionManager);
 //        resourceTransfer.setAiResourceMapper(EasyMock.createMock(AIResourceMapper.class));
 
     }
@@ -56,13 +62,15 @@ public class AIResourceTransferTest extends AIResourceTransfer {
     }
 
     @Test
-    public final void testGetAIResourcePlatform() {
+    public final void testGetAIResourcePlatform() throws SessionNotFoundException, SessionTimeoutException {
         resourceTransfer.setAiResourceMapper(new AIResourceMapper());
         String discoveryId = "ubuntu.eng.vmware.com";
         AIPlatformValue aiPlatformValue = getMockAIPlatform(discoveryId);
         EasyMock.expect(authzSubjectManager.getOverlordPojo()).andReturn(null);
-        EasyMock.expect(aiQueueManager.findAIPlatformByFqdn(null, discoveryId)).andStubReturn(aiPlatformValue);
-        EasyMock.replay(authzSubjectManager, aiQueueManager);        
+        EasyMock.replay(authzSubjectManager);
+        EasyMock.expect(aiQueueManager.findAIPlatformByFqdn(null, discoveryId)).andStubReturn(aiPlatformValue);        
+        EasyMock.expect(sessionManager.getSubject(1)).andReturn(authzSubjectManager.getOverlordPojo());
+        EasyMock.replay(aiQueueManager, sessionManager);        
         
         ResourceType type = ResourceType.PLATFORM;
         AIResource aiResource = resourceTransfer.getAIResource(discoveryId, type);
@@ -72,13 +80,16 @@ public class AIResourceTransferTest extends AIResourceTransfer {
     }
     
     @Test
-    public final void testGetAIResourceServer() {
+    public final void testGetAIResourceServer() throws SessionNotFoundException, SessionTimeoutException {
         resourceTransfer.setAiResourceMapper(new AIResourceMapper());
         String discoveryId = "ubuntu.eng.vmware.com Apache Tomcat 6.0";
         AIServerValue aiServerValue = getMockAIServer(discoveryId);
+        
         EasyMock.expect(authzSubjectManager.getOverlordPojo()).andReturn(null);
+        EasyMock.replay(authzSubjectManager);
         EasyMock.expect(aiQueueManager.findAIServerByName(null, discoveryId)).andStubReturn(aiServerValue);
-        EasyMock.replay(authzSubjectManager, aiQueueManager);       
+        EasyMock.expect(sessionManager.getSubject(1)).andReturn(authzSubjectManager.getOverlordPojo());
+        EasyMock.replay(aiQueueManager, sessionManager);       
         
         ResourceType type = ResourceType.SERVER;
         AIResource aiResource = resourceTransfer.getAIResource(discoveryId, type);

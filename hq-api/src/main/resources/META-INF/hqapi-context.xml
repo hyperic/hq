@@ -86,6 +86,8 @@
 		
     <bean name="pluginServiceImpl" class="org.hyperic.hq.api.services.impl.PluginServiceImpl" />		
 	
+	<bean name="sessionManagementImpl" class="org.hyperic.hq.api.services.impl.SessionManagementServiceImpl" />
+	
 	<jaxrs:server id="resourceService" address="/inventory/resources">
 		<jaxrs:serviceBeans>
 			<ref bean="resourceServiceImpl" />
@@ -99,9 +101,9 @@
         </jaxrs:features>		
 	</jaxrs:server>
 	
-	<jaxrs:server id="measurementService" address="/measurements">
+	<jaxrs:server id="sessionService" address="/session">
 		<jaxrs:serviceBeans>
-			<ref bean="measurementServiceImpl" />
+			<ref bean="sessionManagementImpl" />
 		</jaxrs:serviceBeans>
 		<jaxrs:providers>
 			<ref bean="jaxbProvider" />
@@ -110,11 +112,11 @@
         <jaxrs:features>
             <cxf:logging />
         </jaxrs:features>		
-	</jaxrs:server>
+	</jaxrs:server>	
 
-    <jaxrs:server id="pluginService" address="/plugins">
-        <jaxrs:serviceBeans>
-            <ref bean="pluginServiceImpl" />
+	<jaxrs:server id="measurementService" address="/measurements">
+		<jaxrs:serviceBeans>
+			<ref bean="measurementServiceImpl" />
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <ref bean="jaxbProvider" />

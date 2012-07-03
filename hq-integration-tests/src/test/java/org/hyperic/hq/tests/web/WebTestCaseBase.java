@@ -36,6 +36,7 @@ import org.hyperic.hq.tests.context.WebContextConfiguration;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Propagation;
@@ -44,7 +45,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.meterware.servletunit.ServletRunner;
 
 @DirtiesContext
-@ContextConfiguration(locations = { "classpath:META-INF/hqapi-context.xml" }, loader=WebContainerContextLoader.class)
+@ContextConfiguration(locations = { "classpath:META-INF/hqapi-context.xml" , "classpath*:WEB-INF/security-web-context-spring.xml" }, loader=WebContainerContextLoader.class)
 @WebContextConfiguration(contextRoot=WebTestCaseBase.CONTEXT, contextUrl=WebTestCaseBase.CONTEXT_URL, webXml=WebTestCaseBase.WEB_XML)
 @Transactional(propagation=Propagation.NESTED)
 public abstract class WebTestCaseBase extends BaseInfrastructureTest{
@@ -64,7 +65,7 @@ public abstract class WebTestCaseBase extends BaseInfrastructureTest{
     		this.annotationType = annotationType ; 
     	}//EOM 
     	
-    	@Override
+//    	@Override
     	public Statement apply(final Statement base, final Description description) {
     		return new Statement() { 
     			
@@ -74,7 +75,8 @@ public abstract class WebTestCaseBase extends BaseInfrastructureTest{
     				if(metadata == null) {  
     					final Object metadataTemp = clsLevelMetadata.get(annotationType) ; 
     					if(metadataTemp == null) { 
-    						metadata = description.getTestClass().getAnnotation(annotationType) ;
+    						metadata = AnnotationUtils.findAnnotation(description.getTestClass(), annotationType) ; 
+    						        
     						clsLevelMetadata.put(annotationType, (metadata == null ? Boolean.FALSE : metadata)) ; 
     					}//EO if not yet initialized 
     					else if(!(metadataTemp instanceof Boolean)) metadata = (T) metadataTemp ; 
@@ -90,6 +92,8 @@ public abstract class WebTestCaseBase extends BaseInfrastructureTest{
 	    						
 	    						base.evaluate() ; 
 	    						
+	    						doAfterEvaluation(i, metadata) ; 
+	    						
 	    					}//EO while there are more platforms  
     					}finally{ 
     						
@@ -104,6 +108,7 @@ public abstract class WebTestCaseBase extends BaseInfrastructureTest{
     	protected abstract int getIterationLength(final T metadata) ; 
     	
     	protected abstract void doBeforeEvaluation(final int iIterationIndex, final T metadata) ;
+    	protected void doAfterEvaluation(final int iIterationIndex, final T metadata) {}//EOM
     		
     }//EO inner calss IterationInterceptor 
     

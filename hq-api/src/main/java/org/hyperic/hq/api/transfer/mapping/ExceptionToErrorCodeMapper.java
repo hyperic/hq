@@ -30,8 +30,14 @@ import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+
 import org.apache.commons.logging.Log;
+import org.apache.cxf.jaxrs.impl.ResponseBuilderImpl;
 import org.hyperic.hq.api.model.resources.FailedResource;
+import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper.ErrorCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -94,6 +100,24 @@ public class ExceptionToErrorCodeMapper  {
     	if(additionalDescription == null) additionalDescription =  this.getDescription(errorCode, args) ; 
     	return new FailedResource(resourceID, errorCode, additionalDescription) ;
     }//EOM 
+      
+    
+    public final WebApplicationException newWebApplicationException(final Throwable e, final Response.Status status, final ErrorCode errorCode, 
+            final Object...errorArguments) {
+        ResponseBuilderImpl builder = new ResponseBuilderImpl();
+        builder.status(status);
+        builder.entity(getDescription(errorCode.getErrorCode(), errorArguments));
+        Response response = builder.build();
+
+        WebApplicationException webApplicationException = new WebApplicationException(e, response);
+        return webApplicationException;
+    }       
+    
+    public final WebApplicationException newWebApplicationException(final Response.Status status, final ErrorCode errorCode, final Object...errorArguments) {
+        return newWebApplicationException(null, status, errorCode, errorArguments);
+    }        
+    
+  
     
     public final void log(final Throwable t) {
     	this.log(t, null/*additionalMessage*/) ; 
@@ -103,5 +127,22 @@ public class ExceptionToErrorCodeMapper  {
     	this.logger.error(additionalMessage, t) ; 
     }//EOM 
     
-    
+    public enum ErrorCode {
+        INVALID_SESSION("2001"),
+        SESSION_TIMEOUT("2002"),
+        RESOURCE_NOT_FOUND_BY_ID("3001");
+        
+        private final String errorCode;
+
+        // Constructor
+        ErrorCode(String errorCode) {
+            this.errorCode = errorCode;
+        }
+
+        public String getErrorCode() {
+            return errorCode;
+        }
+    }
+
+
 }

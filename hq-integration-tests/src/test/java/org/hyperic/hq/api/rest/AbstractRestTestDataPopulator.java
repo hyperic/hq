@@ -24,10 +24,17 @@
  */
 package org.hyperic.hq.api.rest;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.Array;
+
+import junit.framework.Assert;
 
 import org.hyperic.hq.api.rest.RestTestCaseBase.ServiceBindingType;
 import org.hyperic.hq.test.TestHelper;
+import org.hyperic.hq.tests.context.TestData;
 import org.hyperic.hq.tests.context.TestDataPopulator;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -35,6 +42,17 @@ import com.meterware.servletunit.ServletRunner;
 
 public abstract class AbstractRestTestDataPopulator<T> extends TestHelper implements TestDataPopulator{ 
 
+    /**
+     * Mutually exclusive with the existence of {@link TestData}
+     * @author guys
+     */
+    @Target(ElementType.TYPE)
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface RestTestData { 
+        String  serviceURL() ; 
+        Class<?> serviceInterface() ; 
+    }//EO inner annotation RestTestData 
+    
 	@Autowired
 	protected ServletRunner servletRunner ; 
 	
@@ -43,18 +61,34 @@ public abstract class AbstractRestTestDataPopulator<T> extends TestHelper implem
     private String serviceURL ; 
     private Class<T> serviceInterface ; 
     
+    public AbstractRestTestDataPopulator(){}//EOM 
+    
     public AbstractRestTestDataPopulator(final Class<T> serviceInterface, final String serviceURL) { 
     	super() ; 
     	this.serviceInterface = serviceInterface ; 
     	this.serviceURL = serviceURL ; 
     }//EOM 
     
-    @Override
+    public final void setRestTestData(final RestTestData restTestMetadata) { 
+        if(restTestMetadata != null) { 
+            this.serviceURL = restTestMetadata.serviceURL() ; 
+            this.serviceInterface = (Class<T>) restTestMetadata.serviceInterface() ; 
+        }//EO if not null 
+    }//EOM 
+    
+//    @Override
 	public void populate() throws Exception {
     	this.generateServices() ; 
     }//EOM 
+	
+	public void destroy() throws Exception { /*do nothing*/}//EOM  
     
+    @SuppressWarnings("unchecked")
     protected final void generateServices() { 
+        final String msgSuffix = " (Ensure the @RestTestData annotation is properly defined or that the populator class initializes the values internally)." ; 
+        
+        Assert.assertNotNull("Service Interface must not be empty  when generating stubs " + msgSuffix,  this.serviceInterface) ;
+        Assert.assertNotNull("Service URL must not be empty  when generating stubs " + msgSuffix, this.serviceURL) ;
     	arrServices = (T[]) Array.newInstance(this.serviceInterface, 2); 
     	arrServices[0]  = RestTestCaseBase.generateServiceClient(this.serviceInterface, ServiceBindingType.XML, this.serviceURL, this.servletRunner) ;
     	arrServices[1] = RestTestCaseBase.generateServiceClient(this.serviceInterface, ServiceBindingType.JSON, this.serviceURL, this.servletRunner) ;

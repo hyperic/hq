@@ -42,6 +42,7 @@ import org.hyperic.hq.api.model.ResourceStatusType;
 import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.api.model.Resources;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
+import org.hyperic.hq.api.services.impl.ApiMessageContext;
 import org.hyperic.hq.api.transfer.ResourceTransfer;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 import org.hyperic.hq.api.transfer.mapping.ResourceMapper;
@@ -55,6 +56,9 @@ import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
+import org.hyperic.hq.auth.shared.SessionManager;
+import org.hyperic.hq.auth.shared.SessionNotFoundException;
+import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -65,6 +69,7 @@ import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.ObjectNotFoundException;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
@@ -87,14 +92,14 @@ public class ResourceTransferImpl implements ResourceTransfer{
 	private CPropManager cpropManager ;
 	private AppdefBoss appdepBoss ;
 	private PlatformManager platformManager ; 
-	private ExceptionToErrorCodeMapper errorHandler ; 
+	private ExceptionToErrorCodeMapper errorHandler ;
 	private Log log ;
 	
 	@Autowired  
     public ResourceTransferImpl(final AIQueueManager aiQueueManager, final ResourceManager resourceManager, 
     		final AuthzSubjectManager authzSubjectManager, final ResourceMapper resourceMapper, 
     		final ProductBoss productBoss, final CPropManager cpropManager, final AppdefBoss appdepBoss, 
-    		final PlatformManager platformManager, final ExceptionToErrorCodeMapper errorHandler,  @Qualifier("restApiLogger")Log log) { 
+    		final PlatformManager platformManager, final ExceptionToErrorCodeMapper errorHandler, @Qualifier("restApiLogger")Log log) { 
     	this.aiQueueManager = aiQueueManager ; 
     	this.resourceManager = resourceManager ; 
     	this.authzSubjectManager = authzSubjectManager ; 
@@ -107,12 +112,13 @@ public class ResourceTransferImpl implements ResourceTransfer{
     	this.log = log ;
     }//EOM 
 	    
-	public final Resource getResource(final String platformNaturalID, final ResourceType resourceType, final ResourceStatusType resourceStatusType, 
-			final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) {
+	public final Resource getResource(ApiMessageContext messageContext, final String platformNaturalID, final ResourceType resourceType, 
+			final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) throws SessionNotFoundException, SessionTimeoutException, ObjectNotFoundException {
+	    AuthzSubject authzSubject = messageContext.getAuthzSubject();
 		if(resourceStatusType == ResourceStatusType.AUTO_DISCOVERED) { 
 			return this.getAIResource(platformNaturalID, resourceType, hierarchyDepth, responseMetadata) ; 
-		}else { 
-			return this.getResourceInner(new Context(this.getAuthzSubject(), platformNaturalID, resourceType, responseMetadata, this), hierarchyDepth) ;  
+		}else { 			
+            return this.getResourceInner(new Context(authzSubject, platformNaturalID, resourceType, responseMetadata, this), hierarchyDepth) ;  
 		}//EO else if approved resource 
 	}//EOM
 	
@@ -123,12 +129,14 @@ public class ResourceTransferImpl implements ResourceTransfer{
 	 * @param hierarchyDepth
 	 * @param responseMetadata
 	 * @return
+	 * @throws ObjectNotFoundException 
 	 */
-	public final Resource getResource(final String platformID, final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) {
+	public final Resource getResource(ApiMessageContext messageContext, final String platformID, final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) throws ObjectNotFoundException {
+	    AuthzSubject authzSubject = messageContext.getAuthzSubject();
 		if(resourceStatusType == ResourceStatusType.AUTO_DISCOVERED) { 
 			throw new UnsupportedOperationException("AI Resource load by internal ID is unsupported") ; 
 		}else { 
-			return this.getResourceInner(new Context(this.getAuthzSubject(), platformID, responseMetadata, this), hierarchyDepth) ;
+			return this.getResourceInner(new Context(authzSubject, platformID, responseMetadata, this), hierarchyDepth) ;
 		}//EO else if approved resource type 
 		 
 	}//EOM 
@@ -141,8 +149,9 @@ public class ResourceTransferImpl implements ResourceTransfer{
 	 * @param hierarchyDepth
 	 * @param responseMetadata
 	 * @return
+	 * @throws ObjectNotFoundException 
 	 */
-	private final Resource getResourceInner(final Context flowContext, int hierarcyDepth) { 
+	private final Resource getResourceInner(final Context flowContext, int hierarcyDepth) throws ObjectNotFoundException { 
 		
 		Resource currentResource =  null ; 
 		try{ 
@@ -182,7 +191,9 @@ public class ResourceTransferImpl implements ResourceTransfer{
 				}//EO while there are more children 
 				
 			}//EOM 
-							
+			
+		} catch (ObjectNotFoundException e) {
+		    throw e;
 		}catch(Throwable t) { 
 			throw (t instanceof RuntimeException ? (RuntimeException) t : new RuntimeException(t)) ; 
 		}//EO catch block 
@@ -192,20 +203,21 @@ public class ResourceTransferImpl implements ResourceTransfer{
 	}//EOM
 	
 	
-	public final ResourceBatchResponse approveResource(final Resources aiResources) {
+	public final ResourceBatchResponse approveResource(ApiMessageContext messageContext, final Resources aiResources) {
 		//NYI 
 		return null; 
 	}//EOM 
 	
-	private final AuthzSubject getAuthzSubject() {
-		//TODO: replace with actual subject once security layer is implemented 
-		//return authzSubjectManager.getOverlordPojo();
-		AuthzSubject subject = authzSubjectManager.findSubjectByName("hqadmin") ;
-		return (subject != null ? subject : authzSubjectManager.getOverlordPojo()) ; 
-	}//EOM 
+//	private final AuthzSubject getAuthzSubject() {
+//		//TODO: replace with actual subject once security layer is implemented 
+//		//return authzSubjectManager.getOverlordPojo();
+//		AuthzSubject subject = authzSubjectManager.findSubjectByName("hqadmin") ;
+//		return (subject != null ? subject : authzSubjectManager.getOverlordPojo()) ; 
+//	}//EOM
+	
 	
 	@Transactional(readOnly=false)
-	public final ResourceBatchResponse updateResources(final Resources resources) {
+	public final ResourceBatchResponse updateResources(ApiMessageContext messageContext, final Resources resources) {
 
 		final ResourceBatchResponse response = new ResourceBatchResponse(this.errorHandler) ; 
 		
@@ -218,7 +230,8 @@ public class ResourceTransferImpl implements ResourceTransfer{
 		Resource inputResource = null ; 
 		ResourceConfig resourceConfig = null ; 
 		
-		final Context flowContext = new Context(this.getAuthzSubject(), this) ; 
+		AuthzSubject authzSubject = messageContext.getAuthzSubject();
+		final Context flowContext = new Context(authzSubject, this) ; 
 		
 		for(int i=0; i < noOfInputResources; i++) { 
 			

@@ -7,7 +7,7 @@
     normal use of the program, and does *not* fall under the heading of
      "derived work".
 
-     Copyright (C) [2009-2010], VMware, Inc.
+     Copyright (C) [2009-2012], VMware, Inc.
      This file is part of HQ.
 
      HQ is free software; you can redistribute it and/or modify
@@ -28,51 +28,22 @@
 
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:sec="http://www.springframework.org/schema/security"
+	xmlns:context="http://www.springframework.org/schema/context"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.xsd
-		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+           http://www.springframework.org/schema/context 
+           http://www.springframework.org/schema/context/spring-context-2.5.xsd
+           http://www.springframework.org/schema/security 
+           http://www.springframework.org/schema/security/spring-security-3.0.xsd">
 
 	<bean id="filterChainProxy" class="org.springframework.security.web.FilterChainProxy">
 		<sec:filter-chain-map path-type="ant">
-			<sec:filter-chain pattern="/lather/**" filters="none" />
-			<sec:filter-chain pattern="/jboss-lather/**" filters="none" />
-			<sec:filter-chain pattern="/*.ico" filters="none" />
-			<sec:filter-chain pattern="/rss/**" filters="none" />
-			<sec:filter-chain pattern="/static/**" filters="none" />
-			<sec:filter-chain pattern="/css/**" filters="none" />
-			<sec:filter-chain pattern="/js/**" filters="none" />
-			<sec:filter-chain pattern="/images/**" filters="none" />
-			<sec:filter-chain pattern="/ui_docs/**" filters="none" />
-			<sec:filter-chain pattern="/ServerInvokerServlet/**" filters="none"/>
-            <sec:filter-chain pattern="/transport/**" filters="none" />
-			<sec:filter-chain pattern="/hqu/hqapi*/**" filters="securityContextPersistenceFilter,
-																basicAuthenticationFilter,
-																basicAuthenticationExceptionTranslationFilter,
-																basicSessionManagementFilter,
-			    	                                     		apiFilterSecurityInterceptor" />
-			<sec:filter-chain pattern="/hqu/health/status/**" filters="securityContextPersistenceFilter,
-																basicAuthenticationFilter,
-																basicAuthenticationExceptionTranslationFilter,
-																basicSessionManagementFilter,
-			    	                                     		filterSecurityInterceptor" /> 
-             <!-- TODO: change to correct filters -->
              <sec:filter-chain pattern="/rest-api/**" filters="securityContextPersistenceFilter,
 																basicAuthenticationFilter,
 																basicAuthenticationExceptionTranslationFilter,
 																apiBasicSessionManagementFilter,
-			    	                                     		filterSecurityInterceptor"/>
-			<sec:filter-chain pattern="/**" filters="securityContextPersistenceFilter,
-													 logoutFilter,
-			                                         basicAuthenticationFilter,
-													 formBasedAuthenticationFilter,
-													 formAnonymousAuthFilter,
-													 requestCacheAwareFilter,
-													 securityContextHolderAwareRequestFilter,
-			                                         formSessionManagementFilter,
-			                                         formAuthenticationExceptionTranslationFilter,
-			                                         filterSecurityInterceptor" />
-                                       
-			                                   
+			    	                                     		filterSecurityInterceptor"/>                                     			                                   
 		</sec:filter-chain-map>
 	</bean>
 
@@ -84,6 +55,7 @@
 	</bean>
 
 	<!-- For logout -->
+	<!-- 
 	<bean id="logoutFilter" class="org.springframework.security.web.authentication.logout.LogoutFilter">
 		<constructor-arg value="/app/login" />
 		<constructor-arg>
@@ -92,6 +64,7 @@
 			</list>
 		</constructor-arg>
 	</bean>
+	 -->
 
 	<!-- For basic authentication -->
 	<bean id="basicAuthenticationFilter" class="org.springframework.security.web.authentication.www.BasicAuthenticationFilter">
@@ -110,68 +83,22 @@
 		</property>
 	</bean>
 	
-	<bean id="basicSessionManagementFilter" class="org.springframework.security.web.session.SessionManagementFilter">
-		<constructor-arg ref="securityContextRepository" />
-		<property name="sessionAuthenticationStrategy" ref="baseSessionInitializationStrategy" />
-	</bean>
-	
 	<!-- For REST API with basic authentication -->
 	<bean id="apiBasicSessionManagementFilter" class="org.springframework.security.web.session.SessionManagementFilter">
 		<constructor-arg ref="securityContextRepository" />
 		<property name="sessionAuthenticationStrategy" ref="apiSessionInitializationStrategy" />
 	</bean>
+	
+	<bean id="apiSessionInitializationStrategy" class="org.hyperic.hq.api.security.ApiSessionInitializationStrategy" />
 
 	<!-- For form-based authentication -->
 	<bean id="httpSessionRequestCache" class="org.springframework.security.web.savedrequest.HttpSessionRequestCache" />
 	
-	<bean id="formBasedAuthenticationFilter" class="org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter">
-		<property name="authenticationManager" ref="authenticationManager" />
-		<property name="sessionAuthenticationStrategy" ref="UISessionInitializationStrategy" />
-		<property name="authenticationSuccessHandler">
-			<bean class="org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler">
-				<property name="defaultTargetUrl" value="/Dashboard.do" />
-				<property name="requestCache" ref="httpSessionRequestCache" />
-				<property name="redirectStrategy">
-					<bean class="org.hyperic.hq.ui.security.RegistrationRedirectStrategy">
-						<constructor-arg value="/admin/user/UserAdmin.do?mode=register" />
-					</bean>
-				</property>
-			</bean>
-		</property>
-		<property name="authenticationFailureHandler">
-			<bean class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler">
-				<property name="defaultFailureUrl" value="/app/login?authfailed=true" />
-			</bean>
-		</property>
-	</bean>
-	
-	<bean id="formAuthenticationEntryPoint" class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
-		<property name="loginFormUrl" value="/app/login" />
-	</bean>
-
-	<bean id="formAuthenticationExceptionTranslationFilter" class="org.springframework.security.web.access.ExceptionTranslationFilter">
-		<property name="authenticationEntryPoint" ref="formAuthenticationEntryPoint" />
-		<property name="requestCache" ref="httpSessionRequestCache" />
-	</bean>
-	
-	<bean id="formSessionManagementFilter" class="org.springframework.security.web.session.SessionManagementFilter">
-		<constructor-arg ref="securityContextRepository" />
-		<property name="sessionAuthenticationStrategy" ref="UISessionInitializationStrategy" />
-	</bean>
-	
-	<bean id="formAnonymousAuthFilter" class="org.springframework.security.web.authentication.AnonymousAuthenticationFilter">
-  		<property name="key" value="allyourbasebelongtous!"/>
-  		<property name="userAttribute" value="anonymousUser,ROLE_ANONYMOUS"/>
-	</bean>
-	
-	<!-- Request cache aware filter, this makes sure the original request is used after authenticating -->
+		<!-- Request cache aware filter, this makes sure the original request is used after authenticating -->
 	<bean id="requestCacheAwareFilter" class="org.springframework.security.web.savedrequest.RequestCacheAwareFilter" />
 	
 	<!-- Security context holder aware request filter --> 
 	<bean id="securityContextHolderAwareRequestFilter" class="org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter" />
-
-    <!-- Setup expression handler (for JSP tags) -->
-    <bean id="expressionHandler" class="org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler" />
 
 	<!-- Setup the filter security interceptor -->
 	<bean id="filterSecurityInterceptor" class="org.springframework.security.web.access.intercept.FilterSecurityInterceptor">
@@ -191,12 +118,12 @@
 		    	<sec:intercept-url pattern="/app/login" access="ROLE_ANONYMOUS,ROLE_HQ_USER" />
 		    	<sec:intercept-url pattern="/**" access="ROLE_HQ_USER" />
 		    	<sec:intercept-url pattern="/hqu/hqapi*/**" access="ROLE_HQ_USER" />
-		    	<sec:intercept-url pattern="/rest-api/**" access="ROLE_HQ_USER" />  
 			</sec:filter-security-metadata-source>
 		</property>
-	</bean>
+	</bean>	
 	
 	<!-- Setup the filter security interceptor for API requests-->
+	<!-- 
     <bean id="apiFilterSecurityInterceptor" class="org.hyperic.hq.ui.security.ApiFilterSecurityInterceptor">
         <property name="authenticationManager" ref="authenticationManager" />
         <property name="accessDecisionManager">
@@ -211,10 +138,13 @@
         </property>
         <property name="securityMetadataSource">
             <sec:filter-security-metadata-source>
-                <sec:intercept-url pattern="/hqu/hqapi*/**" access="ROLE_HQ_USER" />                               
+                <sec:intercept-url pattern="/hqu/hqapi*/**" access="ROLE_HQ_USER" /> 
+                <sec:intercept-url pattern="/rest-api/**" access="ROLE_HQ_USER" />                
             </sec:filter-security-metadata-source>
         </property>
     </bean>
-	
-	
+	-->
+
+    
+      
 </beans>

@@ -41,6 +41,9 @@ import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueManager;
 import org.hyperic.hq.appdef.shared.AIServerValue;
+import org.hyperic.hq.auth.shared.SessionManager;
+import org.hyperic.hq.auth.shared.SessionNotFoundException;
+import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +66,9 @@ public class AIResourceTransfer {
 
     @Autowired
     private AIResourceMapper aiResourceMapper;
+    
+    @Autowired
+    private SessionManager sessionManager;
     
     public AIQueueManager getAiQueueManager() {
         return aiQueueManager;
@@ -87,11 +93,29 @@ public class AIResourceTransfer {
     public void setAiResourceMapper(AIResourceMapper aiResourceMapper) {
         this.aiResourceMapper = aiResourceMapper;
     }
+    
+    public SessionManager getSessionManager() {
+        return sessionManager;
+    }
 
+    public void setSessionManager(SessionManager sessionManager) {
+        this.sessionManager = sessionManager;
+    }
 
     public AIResource getAIResource(String discoveryId, ResourceType type) {
         //TODO Maya replace with correct identity after implementing security 
-        AuthzSubject authzSubject = authzSubjectManager.getOverlordPojo();        
+//        AuthzSubject authzSubject = authzSubjectManager.getOverlordPojo();
+        AuthzSubject authzSubject = null;
+        try {
+            authzSubject = sessionManager.getSubject(1);
+        } catch (SessionNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (SessionTimeoutException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
         AIResource aiResource = null;
         if (ResourceType.PLATFORM == type) {
             AIPlatformValue aiPlatform = this.aiQueueManager.findAIPlatformByFqdn(

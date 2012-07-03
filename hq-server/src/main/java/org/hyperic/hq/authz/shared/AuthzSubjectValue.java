@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.authz.shared;
 
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+
 /**
  * Value object for AuthzSubject.
  *
@@ -192,6 +194,14 @@ public String getSMSAddress()
 	  return(str.toString());
    }
 
+
+   public AuthzSubject getAuthzSubject() {
+       
+       AuthzSubject _valueObj = new AuthzSubject(getActive(), getAuthDsn(), getDepartment(), getEmailAddress(), isHtmlEmail(), getFirstName(), getLastName(), getFirstName(), getPhoneNumber(), getSMSAddress(), getSystem());
+
+       return _valueObj;
+   }   
+   
    /**
 	* A Value object have an identity if its attributes making its Primary Key
 	* has all been set.  One object without identity is never equal to any other

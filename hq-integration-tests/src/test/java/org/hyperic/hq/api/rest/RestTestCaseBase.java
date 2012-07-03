@@ -37,6 +37,7 @@ import java.util.Map;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 import org.apache.cxf.jaxrs.client.Client;
@@ -105,10 +106,16 @@ public class RestTestCaseBase<V, T extends AbstractRestTestDataPopulator<V>> ext
 		
 		@Override
 		protected final void doBeforeEvaluation(final int iIterationIndex, final SecurityInfo metadata) {
-			final Client client =  WebClient.client(service) ;
+			final Client client =  WebClient.client(service) ; 
 			final String credentialsToken = metadata.username() + ":" + metadata.password() ; 
-			final String authorizationHeader = "Basic " +org.apache.cxf.common.util.Base64Utility.encode(credentialsToken.getBytes());        
-			client.header(HttpHeaders.AUTHORIZATION, authorizationHeader) ; 
+			final String authorizationHeader = "Basic " +org.apache.cxf.common.util.Base64Utility.encode(credentialsToken.getBytes());			
+			client.header(HttpHeaders.AUTHORIZATION, authorizationHeader);  
+		}//EOM 
+		
+		@Override
+		protected final void doAfterEvaluation(final int iIterationIndex, final SecurityInfo metadata) {
+		    final Client client =  WebClient.client(service) ;
+		    client.reset() ; 
 		}//EOM 
 		
 		@Override

@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.cxf.jaxrs.client.ServerWebApplicationException;
-import org.apache.cxf.jaxrs.client.WebClient;
 import org.hyperic.hq.api.model.Resource;
 import org.hyperic.hq.api.model.ResourceConfig;
 import org.hyperic.hq.api.model.ResourceDetailsType;
@@ -124,16 +123,16 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     	}//EOM 
     }//EO inner class PlatformsIterationInterceptor
     
-    //@SecurityInfo(username="hqadmin",password="hqadmin")
-    @PlatformsIteration(noOfPlatforms=1)
-    @Test
+//    @SecurityInfo(username="hqadmin",password="hqadmin")
+//    @PlatformsIteration(noOfPlatforms=1)
+//    @Test
     public final void testGetWADL() throws Throwable {
     	final String WADL = this.getWADL(this.service) ; 
     	System.out.println(WADL);
 	}//EOM
     
 
-    @PlatformsIteration()
+    @PlatformsIteration
     @Test
     public final void testGetResourceWithInternalAndNaturalPlatformIDs() throws Throwable {
     	
@@ -192,6 +191,7 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 		this.assertResource(resource, this.currentPlatform, hierarchyDepth, null) ;
     }//EOM 
     
+    @SecurityInfo(username="hqadmin",password="hqadmin")
     @PlatformsIteration(noOfPlatforms=1)
     @Test
     public final void testGetResourceDepth1() throws Throwable { 
@@ -412,7 +412,7 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 	  }//eOcatch b lok 
     }//EO while there are more resources to compare  
     
-    private final void assertUpdate(final ResourceBatchResponse response, final Resources expectedResources, final Object[][] testHarness, final int[] testHarnessMetadata) { 
+    private final void assertUpdate(final ResourceBatchResponse response, final Resources expectedResources, final Object[][] testHarness, final int[] testHarnessMetadata) throws Throwable { 
     	Resource responseResource = null; 
     	
     	final List<Resource> resourceList = expectedResources.getResources() ; 
@@ -478,33 +478,36 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     	
     }//EOM 
     
-    private final Resource getApprovedResource(final AppdefResource appdefResource, final int hierarchyDepth) {
+    private final Resource getApprovedResource(final AppdefResource appdefResource, final int hierarchyDepth) throws Throwable {
     	return this.getApprovedResource(appdefResource.getResource().getId()+"", hierarchyDepth) ; 
     }//EOM 
     
-    private final Resource getApprovedResource(final String ID, final int hierarchyDepth) {
+    private final Resource getApprovedResource(final String ID, final int hierarchyDepth) throws Throwable {
     	return this.getResource(ID, null /*naturalID*/, null /*resourceType*/, ResourceStatusType.APPROVED, hierarchyDepth, new ResourceDetailsType[]{ ResourceDetailsType.ALL } ) ;
     }//EOM 
     
-    private final Resource getApprovedResource(final String naturalID, final ResourceType enumResourceType, final int hierarchyDepth) {
+    private final Resource getApprovedResource(final String naturalID, final ResourceType enumResourceType, final int hierarchyDepth) throws Throwable {
     	return this.getResource(null/*ID*/, naturalID, enumResourceType, ResourceStatusType.APPROVED, hierarchyDepth, new ResourceDetailsType[]{ ResourceDetailsType.ALL } ) ;
     }//EOM 
     
-    private final Resource getApprovedResource(final String ID, final String naturalID, final ResourceType enumResourceType, final int hierarchyDepth, final ResourceDetailsType[] responseStructure) { 
+    private final Resource getApprovedResource(final String ID, final String naturalID, final ResourceType enumResourceType, final int hierarchyDepth, final ResourceDetailsType[] responseStructure) throws Throwable { 
     	return this.getResource(ID, naturalID, enumResourceType, ResourceStatusType.APPROVED, hierarchyDepth, responseStructure) ; 
     }
     
     private final Resource getResource(final String ID, final String naturalID, final ResourceType enumResourceType, 
-    						final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseStructure) {
-    	Resource resource = null; 
-    	
+    						final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseStructure) throws Throwable {
+    	Resource resource = null;
+    	 	
     	if(ID != null) { 
-    		resource = service.getResource(ID, resourceStatusType, hierarchyDepth, responseStructure) ;
+                resource = service.getResource(ID, resourceStatusType, hierarchyDepth, responseStructure) ;
+
     	}else { 
     		resource = service.getResource(naturalID, enumResourceType, resourceStatusType, hierarchyDepth, responseStructure) ;
     	}//EO else if natural ID 
+
     	return resource ; 
     }//EOM 
+    
     
     private final Resources generateResources(final int iNoOfResources, final Object[][] arrResources ) { 
     	final Resources resources = new Resources() ;
@@ -592,10 +595,10 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 		        testAgent = this.createAgent("127.0.0.1", 2144, "authToken", agentToken, "5.0");
 		       
 		        final String pluginName = "Test_Plugin" ;
-		        final String platformName = "Linux" ; 
-		        final String serverTypeName = "Tomcat" ; 
+		        final String platformName = "Linux1" ; 
+		        final String serverTypeName = "Tomcat1" ; 
 		        final String serverTypeinfoName = serverTypeName + " " + platformName ; 
-		        final String serviceTypeName = "Spring JDBC Template" ;
+		        final String serviceTypeName = "Spring JDBC Template1" ;
 		        final String serviceTypeinfoName = serviceTypeName + " " + platformName ; 
 		        
 		        this.platformType = this.platformManager.createPlatformType(platformName, pluginName) ; 
@@ -673,7 +676,7 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 			return (subject != null ? subject : authzSubjectManager.getOverlordPojo()) ; 
 		}//EOM 
 
-		@Override
+//		@Override
 		public void destroy() throws Exception {}//EOM 
 		
 		private final void registerMeasurementConfigSchema(final String pluginName, final String platformName,
