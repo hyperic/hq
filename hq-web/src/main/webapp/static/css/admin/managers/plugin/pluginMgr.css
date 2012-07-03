@@ -389,7 +389,7 @@ input[type="text"] {
 
 #unsyncAgentsSummaryPanel {
     width: 600px;
-    height: 700px;
+    height: 600px;
 	text-align: left;
 }
 
@@ -399,15 +399,8 @@ input[type="text"] {
 	margin-bottom: 10px;
 }
 
-#unsyncAgentsSummaryPanel .oldSummaryListDiv {
-    height: 200px;
-    overflow-x:auto;
-    overflow-y:auto;
-    border: 1px solid gray;
-}
-
-#unsyncAgentsSummaryPanel .curSummaryListDiv {
-    height: 200px;
+#unsyncAgentsSummaryPanel .oldSummaryListDiv, .curSummaryListDiv{
+    height: 150px;
     overflow-x:auto;
     overflow-y:auto;
     border: 1px solid gray;

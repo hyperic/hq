@@ -247,36 +247,33 @@ public class PluginManagerController extends BaseController implements Applicati
         return agentNames;
     }                   
     
+    private List<Map<String,String>> createAgentVersionList(Collection<Agent> agents)
+    {
+        List<Map<String,String>> res = new ArrayList<Map<String,String>>(agents.size());
+        for (Agent agent : agents) {
+            Map<String,String> agentInfoMap = new HashMap<String, String>(2);
+            String version = agent.getVersion();        
+            agentInfoMap.put("version", version);
+            String agentName = getAgentName(agent);
+            agentInfoMap.put("agentName", agentName);
+            res.add(agentInfoMap);
+        }
+        
+        return res;   	
+    }
+
     @RequestMapping(method = RequestMethod.GET, value="/agent/old/summary", headers="Accept=application/json")
     public @ResponseBody  List<Map<String,String>> getOldAgentStatusSummary() {
         List<Agent> oldAgents = agentManager.getOldAgentsUsed(); 
-        List<Map<String,String>> oldAgentVersions = new ArrayList<Map<String,String>>(oldAgents.size());
-        for (Agent agent : oldAgents) {
-            Map<String,String> agentInfoMap = new HashMap<String, String>(2);
-            String version = agent.getVersion();        
-            agentInfoMap.put("version", version);
-            String agentName = getAgentName(agent);
-            agentInfoMap.put("agentName", agentName);
-            oldAgentVersions.add(agentInfoMap);
-        }
-        
-        return oldAgentVersions;
+        return (createAgentVersionList(oldAgents));
     }         
     
-    @RequestMapping(method = RequestMethod.GET, value="/agent/old/summary1", headers="Accept=application/json")
+    
+     
+    @RequestMapping(method = RequestMethod.GET, value="/agent/unsynchable/cur/summary", headers="Accept=application/json")
     public @ResponseBody  List<Map<String,String>> getCurrentNonSyncAgentStatusSummary() {
-        List<Agent> oldAgents = agentManager.getCurrentNonSyncAgents();
-        List<Map<String,String>> oldAgentVersions = new ArrayList<Map<String,String>>(oldAgents.size());
-        for (Agent agent : oldAgents) {
-            Map<String,String> agentInfoMap = new HashMap<String, String>(2);
-            String version = agent.getVersion();        
-            agentInfoMap.put("version", version);
-            String agentName = getAgentName(agent);
-            agentInfoMap.put("agentName", agentName);
-            oldAgentVersions.add(agentInfoMap);
-        }
-        
-        return oldAgentVersions;
+        List<Agent> curUnsynchableAgents = agentManager.getCurrentNonSyncAgents();
+        return (createAgentVersionList(curUnsynchableAgents));
     }         
     
         
