@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.hyperic.hq.plugin</groupId>
 		<artifactId>hq-plugin-parent</artifactId>
-		<version>4.5.2.3.BUILD-SNAPSHOT</version>
+		<version>4.5.2.3.0</version>
 	</parent>
 
 	<artifactId>websphere-plugin</artifactId>
