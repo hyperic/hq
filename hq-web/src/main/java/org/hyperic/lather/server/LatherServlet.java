@@ -9,7 +9,7 @@
  * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
  * This file is part of HQ.
  * 
- * HQ is free software; you can redistribute it and/or modify
+ * HQ is free software; you can redistribute it nd/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
  * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
@@ -34,7 +34,9 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -47,10 +49,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
-import org.hyperic.hq.autoinventory.ScanStateCore;
 import org.hyperic.hq.bizapp.server.session.LatherDispatcher;
 import org.hyperic.hq.bizapp.shared.lather.AiPlatformLatherValue;
-import org.hyperic.hq.bizapp.shared.lather.AiSendReport_args;
 import org.hyperic.hq.bizapp.shared.lather.CommandInfo;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.lather.LatherContext;
@@ -82,7 +82,7 @@ public class LatherServlet extends HttpServlet {
     private static final String PROP_EXECTIMEOUT = PROP_PREFIX + "execTimeout";
     private static final String PROP_CONNID = PROP_PREFIX + "connID";
 
-    private final Log log = LogFactory.getLog(LatherServlet.class);
+    private static final Log log = LogFactory.getLog(LatherServlet.class);
    
     private Random       rand;
     private int          execTimeout;
@@ -250,67 +250,79 @@ public class LatherServlet extends HttpServlet {
         this.doServiceCall(req, resp, method[0], val, xCoder, ctx);
     }
 
-    private class ServiceCaller 
-        extends Thread
-    {
+    private class ServiceCaller implements Runnable {
+    	
         private HttpServletResponse resp;
         
-        private LatherXCoder        xcoder;
+        private LatherXCoder xcoder;
         private LatherValue arg;
         private LatherContext ctx;
         private String method;
-        private Log                 log;
         private LatherDispatcher latherDispatcher;
         
+        private Thread thread;
+        private final AtomicBoolean finished = new AtomicBoolean(false);
+        private AtomicLong startTime;
+        
 
-        private ServiceCaller(HttpServletResponse resp, 
-                          LatherXCoder xcoder, LatherContext ctx, String method, LatherValue arg, 
-                           Log log, LatherDispatcher latherDispatcher)
-        {
-            super(method + "-" + ids.getAndIncrement());
-            this.resp    = resp;
-           
-            this.xcoder  = xcoder;
+        private ServiceCaller(HttpServletResponse resp, LatherXCoder xcoder, LatherContext ctx, String method,
+        		LatherValue arg, LatherDispatcher latherDispatcher) {
+        	
+        	this.resp = resp;
+            this.xcoder = xcoder;
             this.ctx = ctx;
             this.method = method;
             this.arg = arg;
-            this.log     = log;
             this.latherDispatcher = latherDispatcher;
+            this.thread = Thread.currentThread();
+        }
+
+        private boolean hasStarted() {
+        	return startTime != null;
+        }
+
+        private boolean isFinished() {
+        	return finished.get();
+        }
+
+        private void markFinished() {
+        	this.thread = null;
+        	finished.set(true);
         }
                           
-        private void doInvoke()
-            throws IOException 
-        {
-            LatherValue res;
-
-            try {
-                res = latherDispatcher.dispatch(ctx, method, arg);
-
-                if (CommandInfo.CMD_AI_SEND_REPORT.equals(method)) {
+        public void run() {
+        	
+        	try {
+        		startTime = new AtomicLong(System.currentTimeMillis());
+        		LatherValue res = latherDispatcher.dispatch(ctx, method, arg);
+        		if (thread.isInterrupted()) {
+        			return;
+        		}
+        		
+        		if (CommandInfo.CMD_AI_SEND_REPORT.equals(method)) {
                     res = handleAutoApprovals(res);
                 }
-
-                issueSuccessResponse(this.resp, this.xcoder, res);
-            }  catch(IllegalArgumentException exc){
-                String msg = "IllegalArgumentException when invoking LatherDispatcher from Ip=" +
-                    ctx.getCallerIP() + ", method=" + method;
-                log.error(msg, exc);
-                resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, msg);
-            } catch(RuntimeException exc){
-                log.error("RuntimeException when invoking LatherDispatcher from Ip=" + ctx.getCallerIP() +
-                          ", method=" + method, exc);
-                issueErrorResponse(resp, exc.toString());
-            } catch(LatherRemoteException exc){
-                issueErrorResponse(resp, exc.toString());
-            }
+        		
+        		issueSuccessResponse(this.resp, this.xcoder, res);
+        	
+        	} catch(Exception e) {
+        		log.error("error while invoking LatherDispatcher from ip=" + ctx.getCallerIP() +
+        				", method=" + method + ": " + e, e);
+        		try {
+        			issueErrorResponse(resp, e.toString());
+        		} catch(IOException ioe){
+        			log.warn("IO error sending lather response method=" + method + ", ip=" + ctx.getCallerIP() + ": " + ioe, ioe);
+        		}
+        	}
         }
-
+        
         private LatherValue handleAutoApprovals(LatherValue arg) throws LatherRemoteException {
 
             if (arg == null || arg instanceof NullLatherValue) {
                 return NullLatherValue.INSTANCE;
             }
 
+            
             AiPlatformLatherValue aiPlatformLatherValue = (AiPlatformLatherValue) arg;
             AIPlatformValue aiPlatformValue = aiPlatformLatherValue.getAIPlatformValue();
 
@@ -321,44 +333,103 @@ public class LatherServlet extends HttpServlet {
             return NullLatherValue.INSTANCE;
         }
 
-        public void run(){
-            try {
-                this.doInvoke();
-            } catch(IOException exc){
-                this.log.warn("IOException", exc);
-            }
+        public void interrupt() {
+        	if (thread != null)
+        		thread.interrupt();
+        }
+
+        public boolean isExpired() {
+        	if (startTime == null) {
+        		return false;
+        	}
+        	final long now = System.currentTimeMillis();
+        	if ((startTime.get() + execTimeout) <= now) {
+        		return true;
+        	}
+        	return false;
+        }
+
+        public String toString() {
+        	return "method=" + method + ", ip=" + ctx.getCallerIP();
         }
     }
 
-    private void doServiceCall(HttpServletRequest req, HttpServletResponse resp, 
-                           String methName, LatherValue args,
-                           LatherXCoder xCoder, LatherContext ctx)
-        throws IOException
-    {
-       
-        ServiceCaller caller;
-      
+    private void doServiceCall(HttpServletRequest req, HttpServletResponse resp, String methName, LatherValue args,
+    		LatherXCoder xCoder, LatherContext ctx)
+    				throws IOException {
+    	
+    	final LatherDispatcher latherDispatcher = Bootstrap.getBean(LatherDispatcher.class);
+    	final ServiceCaller caller = new ServiceCaller(resp, xCoder, ctx, methName, args, latherDispatcher);
+    	final Thread currentThread = Thread.currentThread();
+    	final String threadName = currentThread.getName();
 
-        LatherDispatcher latherDispatcher = Bootstrap.getBean(LatherDispatcher.class);
-
-        caller = new ServiceCaller(resp, xCoder, 
-                               ctx, methName, args,
-                              this.log, latherDispatcher);
-        caller.start();
-        try {
-            caller.join(this.execTimeout);
-            if(caller.isAlive()){
-                this.log.warn("Execution of '" + methName + "' exceeded " +
-                              (this.execTimeout / 1000) + " seconds");
-                caller.interrupt();
-                caller.join(5000);  /* Sleep for a small amount more, to give
-                                       it a chance to succeed */
-            }
-        } catch(InterruptedException exc){
-            this.log.warn("Interrupted while trying to join thread " +
-                          "executing '" + methName + "'");
-        }
+    	try {
+    		currentThread.setName(methName + "-" + ids.getAndIncrement());
+    		LatherThreadMonitor.get().register(caller);
+    		caller.run();
+    		if (currentThread.isInterrupted()) {
+    			throw new InterruptedException();
+    		}
+    	} catch(InterruptedException exc){
+    		log.warn("Interrupted while trying to execute lather method=" + methName + " from ip=" + ctx.getCallerIP());
+    	} finally {
+    		caller.markFinished();
+    		currentThread.setName(threadName);
+    	}
     }
+    
+    private static class LatherThreadMonitor extends Thread {
+    	
+    	private static final LatherThreadMonitor instance = new LatherThreadMonitor();
+    	
+    	static {
+    		log.info("Starting Lather Thread Monitor");
+    		instance.start();
+    	}
+    	
+    	private static final ConcurrentLinkedQueue<ServiceCaller> queue = new ConcurrentLinkedQueue<LatherServlet.ServiceCaller>();
+    	
+    	private LatherThreadMonitor() {
+    		super("LatherThreadMonitor");
+    		setDaemon(true);
+    	}
+    	
+    	private static LatherThreadMonitor get() {
+    		return instance;
+    	}
+    	
+    	public void register(ServiceCaller caller) {
+    		queue.add(caller);
+    	}
 
-   
+    	public void run() {
+    		
+    		final boolean debug = log.isDebugEnabled();
+    		final long inspectionInterval = 1000;
+    		int callerIndex = 0;
+
+    		while (true) {
+    			try {
+    				
+    				for (ServiceCaller caller : queue) {
+    					if (caller.isFinished()) {
+    						queue.remove(caller);
+    					} else if (caller.isExpired()) {
+    						log.warn("Expiring Lather thread " + caller);
+    						caller.interrupt();
+    						queue.remove(caller);
+    					}
+    					callerIndex++;
+    				}
+    				sleep(inspectionInterval);
+    				if (debug)
+    					log.debug("LatherThreadMonitor current queue size = " + queue.size() + ", " + callerIndex + " threads were inspected");
+    				callerIndex = 0;
+
+    			} catch (Throwable t) {
+    				log.error(t,t);
+    			}
+    		}
+    	}
+    }
 }
