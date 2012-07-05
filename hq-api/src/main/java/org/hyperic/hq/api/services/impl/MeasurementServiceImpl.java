@@ -1,9 +1,5 @@
 package org.hyperic.hq.api.services.impl;
 
-import java.util.Calendar;
-import java.util.Date;
-
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
 import org.hibernate.ObjectNotFoundException;
@@ -12,22 +8,26 @@ import org.hyperic.hq.api.model.measurements.MeasurementResponse;
 import org.hyperic.hq.api.services.MeasurementService;
 import org.hyperic.hq.api.transfer.MeasurementTransfer;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
+import org.hyperic.hq.auth.shared.SessionNotFoundException;
+import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.text.ParseException;
 
-public class MeasurementServiceImpl implements MeasurementService {
+public class MeasurementServiceImpl extends RestApiService implements MeasurementService {
     @Autowired
     private MeasurementTransfer measurementTransfer;
     @Autowired
     private ExceptionToErrorCodeMapper errorHandler ; 
     
 	public MeasurementResponse getMetrics(final MeasurementRequest measurementRequest,
-			final String begin, final String end) throws PermissionException {
+			final String rscId, final String begin, final String end) 
+			        throws PermissionException, SessionNotFoundException, SessionTimeoutException {
 	    try {
-	        return measurementTransfer.getMetrics(measurementRequest,begin,end);
+	        ApiMessageContext apiMessageContext = newApiMessageContext();
+	        return measurementTransfer.getMetrics(apiMessageContext, measurementRequest, rscId, begin, end);
         } catch (UnsupportedOperationException e) {
             throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.BAD_MEASUREMENT_REQ, "the request is missing the resource ID or the measurement template names\n",e.getMessage());
         } catch (ParseException e) {
@@ -40,7 +40,9 @@ public class MeasurementServiceImpl implements MeasurementService {
             if (Measurement.class.getName().equals(missingObj)) {
                 throw errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.MEASUREMENT_NOT_FOUND, "there are no measurements of the requested templates types on the requested resource");
             }
-            throw e;//errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode., "");
+            throw errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID, "");
+        } catch (IllegalArgumentException e) {
+            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.WRONG_DATE_VALUES, e.getMessage());
         }
     }
 }

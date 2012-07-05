@@ -108,9 +108,9 @@ public class DataManagerImpl implements DataManager {
     private static final BigDecimal MAX_DB_NUMBER = new BigDecimal("10000000000000000000000");
 
     private static final long MINUTE = 60 * 1000, HOUR = 60 * MINUTE;
-    protected final long HOUR_IN_MILLI = TimeUnit.MILLISECONDS.convert(1L, TimeUnit.HOURS);
-    protected final long SIX_HOURS_IN_MILLI = TimeUnit.MILLISECONDS.convert(6L, TimeUnit.HOURS);
-    protected final long DAY_IN_MILLI = TimeUnit.MILLISECONDS.convert(1L, TimeUnit.DAYS);
+    protected final static long HOUR_IN_MILLI = TimeUnit.MILLISECONDS.convert(1L, TimeUnit.HOURS);
+    protected final static long SIX_HOURS_IN_MILLI = TimeUnit.MILLISECONDS.convert(6L, TimeUnit.HOURS);
+    protected final static long DAY_IN_MILLI = TimeUnit.MILLISECONDS.convert(1L, TimeUnit.DAYS);
 
     // Table names
     private static final String TAB_DATA_1H = MeasurementConstants.TAB_DATA_1H;

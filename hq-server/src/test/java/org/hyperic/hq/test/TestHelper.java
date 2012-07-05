@@ -44,11 +44,14 @@ import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.ApplicationManager;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
+import org.hyperic.hq.appdef.shared.ConfigFetchException;
+import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerManager;
@@ -69,12 +72,18 @@ import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
+import org.hyperic.hq.measurement.MeasurementCreateException;
+import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.measurement.shared.DataManager;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
+import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.product.ServiceTypeInfo;
+import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.EncodingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -113,7 +122,14 @@ public class TestHelper {
     protected PlatformTransactionManager txManager ; 
     
     @Autowired
+    private ConfigManager configManager ;
+
+    @Autowired
     protected MeasurementManager msmtManager;
+    
+    @Autowired
+    protected DataManager dataManager;
+    
     
     protected TransactionTemplate newTxTemplate(final int propagationType) { 
     	final TransactionTemplate txTemplate = new TransactionTemplate(this.txManager) ;
@@ -304,11 +320,35 @@ public class TestHelper {
 		return application;
 	}
 
-	protected List<Measurement> createMeasurements(AppdefResource rsc, List<MeasurementTemplate> tmps) {
+	protected List<Measurement> createMeasurements(AppdefResource rsc, List<MeasurementTemplate> tmps, long interval)  
+            throws AppdefEntityNotFoundException, ConfigFetchException, PermissionException, EncodingException,
+            MeasurementCreateException, TemplateNotFoundException {
 	    
+	    long[] intervals = new long[tmps.size()];
+	    for (int i = 0; i < intervals.length; i++) {
+            intervals[i]=interval;
+        }
+	    return createMeasurements(rsc, tmps, intervals);
+	}
+
+	protected List<Measurement> createMeasurements(AppdefResource rsc, List<MeasurementTemplate> tmps, long[] intervals) 
+	        throws AppdefEntityNotFoundException, ConfigFetchException, PermissionException, EncodingException,
+	        MeasurementCreateException, TemplateNotFoundException {
+	    
+	    AuthzSubject subject = authzSubjectManager.getOverlordPojo();
+	    ConfigResponse mergedCR = 
+	            this.configManager.getMergedConfigResponse(subject,
+	                    ProductPlugin.TYPE_MEASUREMENT, rsc.getEntityId(), true);
+        Integer[] tids = new Integer[tmps.size()];
+	    int i = 0;
+        for (MeasurementTemplate tmp : tmps) {
+	        tids[i++] = tmp.getId();
+        }
+	    return this.msmtManager.createMeasurements(subject, rsc.getEntityId(), tids, intervals, mergedCR);
 	}
 	
-	protected List<HighLowMetricValue> createMetrics(Map<Measurement, Map<String, List<>) {
-	    
-	}
+//	protected List<HighLowMetricValue> createMetrics(Map<Measurement, Map<String, List>>) {
+//	    dataManager
+//	    return null;
+//	}
 }// EOC

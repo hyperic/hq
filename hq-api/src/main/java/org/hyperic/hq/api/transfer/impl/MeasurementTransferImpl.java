@@ -38,6 +38,7 @@ import org.apache.commons.logging.Log;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
+import org.hyperic.hq.api.services.impl.ApiMessageContext;
 import org.hyperic.hq.api.transfer.MeasurementTransfer;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 import org.hyperic.hq.api.transfer.mapping.MeasurementMapper;
@@ -63,38 +64,35 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     private TemplateManager tmpltMgr;
 	private DataManager dataMgr; 
 	private MeasurementMapper mapper;
-    private AuthzSubjectManager authzSubjectManager;
-    private ExceptionToErrorCodeMapper errorHandler ; 
     
     @Autowired
-    public MeasurementTransferImpl(MeasurementManager measurementMgr, TemplateManager tmpltMgr, DataManager dataMgr,
-            AuthzSubjectManager authzSubjectManager, ExceptionToErrorCodeMapper errorHandler) {
+    public MeasurementTransferImpl(MeasurementManager measurementMgr, TemplateManager tmpltMgr, DataManager dataMgr, MeasurementMapper mapper) {
         super();
         this.measurementMgr = measurementMgr;
         this.tmpltMgr = tmpltMgr;
+        this.mapper=mapper;
         this.dataMgr = dataMgr;
-        this.authzSubjectManager = authzSubjectManager;
-        this.errorHandler = errorHandler;
     }
 
-    public MeasurementResponse getMetrics(final MeasurementRequest hqMsmtReq, final String begin, final String end) 
+    public MeasurementResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest hqMsmtReq, 
+            final String rscId, final String begin, final String end) 
             throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException {
 
         MeasurementResponse res = new MeasurementResponse();
-        if (hqMsmtReq==null || hqMsmtReq.getResourceId()==null || hqMsmtReq.getMeasurementTemplateNames()==null || hqMsmtReq.getMeasurementTemplateNames().size()==0) {
+        if (hqMsmtReq==null || rscId==null || hqMsmtReq.getMeasurementTemplateNames()==null || hqMsmtReq.getMeasurementTemplateNames().size()==0) {
             throw new UnsupportedOperationException("the request is missing the resource ID or the measurement template names");
         }
-        String rscId = hqMsmtReq.getResourceId();
         final DateFormat dateFormat = new SimpleDateFormat() ;
         Date beginDate = null, endDate = null ; 
         beginDate = dateFormat.parse(begin) ; 
         endDate = dateFormat.parse(end) ;
-        AuthzSubject authSubject = this.getAuthzSubject();
-        
+        AuthzSubject authzSubject = apiMessageContext.getAuthzSubject();
+
         // extract all input measurement templates
         List<String> tmpNames = hqMsmtReq.getMeasurementTemplateNames();
         List<MeasurementTemplate> tmps = this.tmpltMgr.findTemplatesByName(tmpNames);
         if (tmps==null || tmps.size()==0) {
+
             throw new ObjectNotFoundException("there are no measurement templates which carries the requested template names", MeasurementTemplate.class.getName());
         }
         
@@ -105,7 +103,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             tmpIds.add(tmp.getId());
         }
         resIdsToTmpIds.put(new Integer(rscId), tmpIds);
-        Map<Resource, List<Measurement>> rscTohqMsmts = this.measurementMgr.findMeasurements(authSubject, resIdsToTmpIds);
+        Map<Resource, List<Measurement>> rscTohqMsmts = this.measurementMgr.findMeasurements(authzSubject, resIdsToTmpIds);
 
         if (rscTohqMsmts==null || rscTohqMsmts.size()==0 || rscTohqMsmts.values().isEmpty()) {
             throw new ObjectNotFoundException("there are no measurements of the requested templates types on the requested resource", Measurement.class.getName());
@@ -126,12 +124,5 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             res.add(msmt);
         }
         return res;
-    }
-    
-    private final AuthzSubject getAuthzSubject() {
-        //TODO: replace with actual subject once security layer is implemented 
-        //return authzSubjectManager.getOverlordPojo();
-        AuthzSubject subject = authzSubjectManager.findSubjectByName("hqadmin") ;
-        return (subject != null ? subject : authzSubjectManager.getOverlordPojo()) ; 
     }
 } 

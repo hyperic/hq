@@ -128,12 +128,13 @@ public class ExceptionToErrorCodeMapper  {
     }//EOM 
     
     public enum ErrorCode {
+        RESOURCE_NOT_FOUND_BY_ID("1001"),
         INVALID_SESSION("2001"),
         SESSION_TIMEOUT("2002"),
-        RESOURCE_NOT_FOUND_BY_ID("3001"),
         TEMPLATE_NOT_FOUND("3002"),
         MEASUREMENT_NOT_FOUND("3003"),
         WRONG_DATE_FORMAT("4001"),
+        WRONG_DATE_VALUES("4002"),
         BAD_MEASUREMENT_REQ("5001");
         
         private final String errorCode;

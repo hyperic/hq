@@ -1,11 +1,10 @@
 package org.hyperic.hq.api.transfer;
 
 import java.text.ParseException;
-import java.util.Calendar;
-import java.util.Date;
 
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
+import org.hyperic.hq.api.services.impl.ApiMessageContext;
 import org.hyperic.hq.authz.shared.PermissionException;
 
 /**
@@ -23,6 +22,6 @@ public interface MeasurementTransfer {
 	 * @throws ParseException 
 	 * @throws PermissionException 
 	 */
-    public MeasurementResponse getMetrics(final MeasurementRequest measurementRequest,
-			final String begin, final String end) throws ParseException, PermissionException;
+    public MeasurementResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest measurementRequest,
+			final String rscId, final String begin, final String end) throws ParseException, PermissionException;
 }

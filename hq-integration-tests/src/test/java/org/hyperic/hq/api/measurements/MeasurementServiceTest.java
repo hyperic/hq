@@ -2,6 +2,7 @@ package org.hyperic.hq.api.measurements;
 
 import java.lang.reflect.Method;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -10,6 +11,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.hyperic.hq.api.measurements.MeasurementServiceTest.MeasurementServiceTestDataPopulator;
 import org.hyperic.hq.api.model.ResourceDetailsType;
@@ -20,6 +22,7 @@ import org.hyperic.hq.api.model.measurements.Metric;
 //import org.hyperic.hq.api.resources.ResourceServiceTest.PlatformsIteration;
 import org.hyperic.hq.api.rest.AbstractRestTestDataPopulator;
 import org.hyperic.hq.api.rest.RestTestCaseBase;
+import org.hyperic.hq.api.rest.RestTestCaseBase.SecurityInfo;
 import org.hyperic.hq.api.rest.RestTestCaseBase.ServiceBindingsIteration;
 import org.hyperic.hq.api.services.MeasurementService;
 import org.hyperic.hq.appdef.Agent;
@@ -68,12 +71,20 @@ import edu.emory.mathcs.backport.java.util.Arrays;
 public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService, MeasurementServiceTestDataPopulator> {
     @Rule 
     public RuleChain interceptorsChain = super.interceptorsChain ;
-    private final DateFormat DATE_FORMAT = new SimpleDateFormat() ;
+    private final static DateFormat DATE_FORMAT = new SimpleDateFormat() ;
 
     public static class MeasurementServiceTestDataPopulator extends AbstractRestTestDataPopulator<MeasurementService>{
 		static final int NO_OF_TEST_PLATFORMS = 1 ;
-	    
-		protected TemplateManager tmpltMgr;
+	    protected final static long HOUR_IN_MILLI = TimeUnit.MILLISECONDS.convert(1L, TimeUnit.HOURS);
+	    protected final static long SIX_HOURS_IN_MILLI = TimeUnit.MILLISECONDS.convert(6L, TimeUnit.HOURS);
+	    protected final static long DAY_IN_MILLI = TimeUnit.MILLISECONDS.convert(1L, TimeUnit.DAYS);
+        protected final static long RAW_DATA_PURGE_TIME =  172800000L;
+        protected final static long HOURLY_DATA_PURGE_TIME =  1209600000L;
+        protected final static long SIX_HOURLY_DATA_PURGE_TIME = 2678400000L;
+        protected final static long DAILY_DATA_PURGE_TIME =  31536000000L;
+        protected Date now;;
+
+        protected TemplateManager tmpltMgr;
 
 		protected Method addConfigSchemaMethod ; 
 		protected Method setTypeInfoMethod ;
@@ -93,8 +104,9 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
         protected List<org.hyperic.hq.measurement.server.session.Measurement> msmts;
 //        protected List<org.hyperic.hq.measurement.server.session.Metric> dtps;
         
-		public MeasurementServiceTestDataPopulator(Class<MeasurementService> serviceInterface, String serviceURL) {
+		public MeasurementServiceTestDataPopulator(Class<MeasurementService> serviceInterface, String serviceURL) throws ParseException {
 	    	super(MeasurementService.class, CONTEXT_URL + "/rest-api/data/measuremenet") ;
+	        now = DATE_FORMAT.parse("16/06/79 00:00 AM");
 		}
 
 		@Override
@@ -133,17 +145,61 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
 		        
 		        this.rsc = this.createServer(platform, serverType, serverTypeName, subject) ; 
 
+		        
+		        
                 // create measurement templates
 		        final List<String> tmpNames = new ArrayList<String>() ; 
 		        tmpNames.add("Availability") ; 
 		        tmpNames.add("JVM Free Memory") ; 
+		        
 		        List<MeasurementTemplate> tmps = this.tmpltMgr.findTemplatesByName(tmpNames);
 		        
                 // create measurements
-		        List<org.hyperic.hq.measurement.server.session.Measurement> msmts = this.createMeasurements(this.rsc,tmps);
+		        List<org.hyperic.hq.measurement.server.session.Measurement> msmts = this.createMeasurements(this.rsc, tmps, 5*60*1000L);
 		        
+		        Map<org.hyperic.hq.measurement.server.session.Measurement,Map<String,List<?>>> msmtToMetricsPerAggTable = 
+		                new HashMap<org.hyperic.hq.measurement.server.session.Measurement,Map<String,List<?>>>();
+		        for (org.hyperic.hq.measurement.server.session.Measurement msmt : msmts) {
+                    Map<String,List> aggTableToMetrics = new HashMap<String,List>();
+                    List rawDTPs = new ArrayList();
+                    long msmtInterval = msmt.getInterval();
+                    long beginRaw = now.getTime()-RAW_DATA_PURGE_TIME;
+                    long numOfRawDTPsTillNow = (int) Math.floor(beginRaw/msmtInterval);
+                    for (long i = 0 ; i<numOfRawDTPsTillNow  ; i++) {
+                        long timestamp = beginRaw+(i*msmtInterval);
+                        long val = i+1;
+                        rawDTPs.add();
+                    }
+                    aggTableToMetrics.put(MeasurementConstants.TAB_DATA, rawDTPs.subList(0, ));
+                    
+                    List hourlyData = new ArrayList();
+                    long beginRHourly = now.getTime()-HOURLY_DATA_PURGE_TIME;
+                    long endHourly = now.getTime()-HOUR_IN_MILLI ;
+                    long numOfHourlyDTPsTillEnd = (int) Math.floor((endHourly-beginRHourly)/HOUR_IN_MILLI);
+                    for (long i = 0 ; i<numOfHourlyDTPsTillEnd  ; i++) {
+                        long timestamp = beginRHourly+(i*HOUR_IN_MILLI);
+                        long highVal = 10*(i+1);
+                        long lowVal = highVal-10;
+                        long val =highVal-5;
+                        hourlyData.add();;
+                    }
+                    aggTableToMetrics.put(MeasurementConstants.TAB_DATA_1H, hourlyData);
+
+//                    List sixHourlyData = new ArrayList();
+//                    for (long i = 0; i < DAILY_DATA_PURGE_TIME ; i+=SIX_HOURS_IN_MILLI) {
+//                        sixHourlyData.add();
+//                    }
+//                    aggTableToMetrics.put(MeasurementConstants.TAB_DATA_6H, sixHourlyData.subList(0, (int) Math.floor(RAW_DATA_PURGE_TIME/msmtInterval)));
+//                    
+//                    List dailyData = new ArrayList();
+//                    for (long i = 0; i < DAILY_DATA_PURGE_TIME ; i+=DAY_IN_MILLI) {
+//                        dailyData.add();
+//                    }
+//                    aggTableToMetrics.put(MeasurementConstants.TAB_DATA_1D, dailyData.subList(0, (int) Math.floor(RAW_DATA_PURGE_TIME/msmtInterval)));
+                    msmtToMetricsPerAggTable.put(msmt, aggTableToMetrics);
+		        }
                 // create metrics
-		        List<org.hyperic.hq.measurement.server.session.Metric> dtps = this.createMetrics(msmts);
+		        List<org.hyperic.hq.measurement.server.session.Metric> metrics = this.createMetrics(msmtToMetricsPerAggTable);
 		        
 		        super.populate() ; 
 		    }catch(Throwable t) { 
@@ -191,6 +247,7 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
      * 
      * @throws Throwable
      */
+    @SecurityInfo(username="hqadmin",password="hqadmin")
     //@Test
     public final void testGetMetricsWinStartsBeforePrgSmallerThan400() throws Throwable {
         Date begin = new Date();
@@ -242,6 +299,7 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
      * 
      * @throws Throwable
      */
+    @SecurityInfo(username="hqadmin",password="hqadmin")
     //@Test
     public final void testGetMetricsWinStartsBeforePrgBiggerThan400() throws Throwable { 
 //    	Calendar begin = GregorianCalendar.getInstance();
@@ -259,6 +317,7 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
      *   
      * @throws Throwable
      */
+    @SecurityInfo(username="hqadmin",password="hqadmin")
 //    @Test
     public final void testGetMetricsWinEndsAfterPrg() throws Throwable { 
     	Calendar begin = GregorianCalendar.getInstance();
@@ -278,6 +337,7 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
      * 
      * @throws Throwable
      */
+    @SecurityInfo(username="hqadmin",password="hqadmin")
   //  @Test
     public final void testGetMetricsWinEndsBeforePrgStartsAfterPrg() throws Throwable { 
     }
@@ -287,6 +347,7 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
      * 
      * @throws Throwable
      */
+    @SecurityInfo(username="hqadmin",password="hqadmin")
     //@Test
     public final void testGetMetricsWinEndsBeforeAgg() throws Throwable { 
     }
@@ -296,6 +357,7 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
      * 
      * @throws Throwable
      */
+    @SecurityInfo(username="hqadmin",password="hqadmin")
     //@Test
     public final void testGetMetricsWinSmallerThanInterval() throws Throwable { 
     }
