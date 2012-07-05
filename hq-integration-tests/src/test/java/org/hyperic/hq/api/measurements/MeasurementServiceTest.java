@@ -39,9 +39,12 @@ import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.product.MeasurementPlugin;
+import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PlatformTypeInfo;
 import org.hyperic.hq.product.PluginManager;
 import org.hyperic.hq.product.ProductPlugin;
@@ -82,27 +85,31 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
         protected final static long HOURLY_DATA_PURGE_TIME =  1209600000L;
         protected final static long SIX_HOURLY_DATA_PURGE_TIME = 2678400000L;
         protected final static long DAILY_DATA_PURGE_TIME =  31536000000L;
-        protected Date now;;
+        protected Date now;
 
         protected TemplateManager tmpltMgr;
 
-		protected Method addConfigSchemaMethod ; 
-		protected Method setTypeInfoMethod ;
-	    protected Map<String,String> persistedConfigAttributes ; 
-	    protected Map<String,String> requestConfigAttributes ;
+//		protected Method addConfigSchemaMethod ; 
+//		protected Method setTypeInfoMethod ;
+//	    protected Map<String,String> persistedConfigAttributes ; 
+//	    protected Map<String,String> requestConfigAttributes ;
 		
 	    protected Agent testAgent;
 		
-		protected List<AppdefResource> platforms = new ArrayList<AppdefResource>(); 
+		protected Platform platform;//List<AppdefResource> platforms = new ArrayList<AppdefResource>(); 
 //        protected List<AppdefResource> servers = new ArrayList<AppdefResource>(); 
         protected AppdefResource rsc; 
-        protected PlatformType platformType ; 
-	    protected ServerType serverType ; 
-	    protected ServiceType serviceType ; 
+//        protected PlatformType platformType ; 
+//	    protected ServerType serverType ; 
+//	    protected ServiceType serviceType ; 
 	    
 	    protected List<MeasurementTemplate> tmps;
         protected List<org.hyperic.hq.measurement.server.session.Measurement> msmts;
 //        protected List<org.hyperic.hq.measurement.server.session.Metric> dtps;
+        protected Map<org.hyperic.hq.measurement.server.session.Measurement,Map<String,List<DataPoint>>> hqMetrics = 
+                new HashMap<org.hyperic.hq.measurement.server.session.Measurement,Map<String,List<DataPoint>>>();
+//        protected Map<org.hyperic.hq.measurement.server.session.Measurement,Map<String,List<Metric>>> expApiMetrics = 
+//                new HashMap<org.hyperic.hq.measurement.server.session.Measurement,Map<String,List<Metric>>>();
         
 		public MeasurementServiceTestDataPopulator(Class<MeasurementService> serviceInterface, String serviceURL) throws ParseException {
 	    	super(MeasurementService.class, CONTEXT_URL + "/rest-api/data/measuremenet") ;
@@ -112,19 +119,19 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
 		@Override
 		public final void populate() throws Exception {
 		    try {
-		        persistedConfigAttributes  = new HashMap<String,String>() ; 
-		        persistedConfigAttributes.put("log_track.level", "Warn") ;
-		        persistedConfigAttributes.put("config_track.files", "/etc/hq") ;
+//		        persistedConfigAttributes  = new HashMap<String,String>() ; 
+//		        persistedConfigAttributes.put("log_track.level", "Warn") ;
+//		        persistedConfigAttributes.put("config_track.files", "/etc/hq") ;
 
-		        requestConfigAttributes  = new HashMap<String,String>() ;
-		        requestConfigAttributes.put("log_track.level", "BOGUS_LEVEL_" + System.currentTimeMillis()) ;
-		        requestConfigAttributes.put("config_track.files", "BOGUS_PATH_" + + System.currentTimeMillis()) ;
+//		        requestConfigAttributes  = new HashMap<String,String>() ;
+//		        requestConfigAttributes.put("log_track.level", "BOGUS_LEVEL_" + System.currentTimeMillis()) ;
+//		        requestConfigAttributes.put("config_track.files", "BOGUS_PATH_" + + System.currentTimeMillis()) ;
 
-		        setTypeInfoMethod = ProductPluginManager.class.getDeclaredMethod("setTypeInfo", String.class,String.class, TypeInfo.class) ;
-		        setTypeInfoMethod.setAccessible(true) ; 
+//		        setTypeInfoMethod = ProductPluginManager.class.getDeclaredMethod("setTypeInfo", String.class,String.class, TypeInfo.class) ;
+//		        setTypeInfoMethod.setAccessible(true) ; 
 
-		        addConfigSchemaMethod = PluginData. class.getDeclaredMethod("addConfigSchema", String.class, int.class, ConfigSchema.class); 
-		        addConfigSchemaMethod.setAccessible(true) ; 
+//		        addConfigSchemaMethod = PluginData. class.getDeclaredMethod("addConfigSchema", String.class, int.class, ConfigSchema.class); 
+//		        addConfigSchemaMethod.setAccessible(true) ; 
 
 		        final AuthzSubject subject = this.getAuthzSubject() ; 
 
@@ -135,14 +142,13 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
 		        final String platformName = "Linux" ; 
 		        final String serverTypeName = "Tomcat" ; 
 
-		        this.platformType = this.platformManager.createPlatformType(platformName, pluginName) ; 
-		        this.serverType = this.createServerType(serverTypeName, "6.0", new String[]{ platformName }, pluginName, false);
+		        PlatformType platformType = this.platformManager.createPlatformType(platformName, pluginName) ; 
+		        ServerType serverType = this.createServerType(serverTypeName, "6.0", new String[]{ platformName }, pluginName, false);
 		        //create the test platforms, servers and services 
 
 		        String name = "test.ubuntu.eng.vmware.com."; 
-		        Platform platform = this.createPlatform(agentToken, platformName, name, name, subject) ;  
-		        this.platforms.add(platform);
-		        
+		        platform = this.createPlatform(agentToken, platformName, name, name, subject) ;  
+//		        this.platforms.add(platform);
 		        this.rsc = this.createServer(platform, serverType, serverTypeName, subject) ; 
 
 		        
@@ -157,50 +163,55 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
                 // create measurements
 		        List<org.hyperic.hq.measurement.server.session.Measurement> msmts = this.createMeasurements(this.rsc, tmps, 5*60*1000L);
 		        
-		        Map<org.hyperic.hq.measurement.server.session.Measurement,Map<String,List<?>>> msmtToMetricsPerAggTable = 
-		                new HashMap<org.hyperic.hq.measurement.server.session.Measurement,Map<String,List<?>>>();
 		        for (org.hyperic.hq.measurement.server.session.Measurement msmt : msmts) {
-                    Map<String,List> aggTableToMetrics = new HashMap<String,List>();
-                    List rawDTPs = new ArrayList();
+                    Map<String,List<DataPoint>> aggTableToMetrics = new HashMap<String,List<DataPoint>>();
+                    // raw
+                    List<DataPoint> rawDTPs = new ArrayList<DataPoint>();
                     long msmtInterval = msmt.getInterval();
                     long beginRaw = now.getTime()-RAW_DATA_PURGE_TIME;
                     long numOfRawDTPsTillNow = (int) Math.floor(beginRaw/msmtInterval);
-                    for (long i = 0 ; i<numOfRawDTPsTillNow  ; i++) {
-                        long timestamp = beginRaw+(i*msmtInterval);
-                        long val = i+1;
-                        rawDTPs.add();
-                    }
-                    aggTableToMetrics.put(MeasurementConstants.TAB_DATA, rawDTPs.subList(0, ));
                     
-                    List hourlyData = new ArrayList();
-                    long beginRHourly = now.getTime()-HOURLY_DATA_PURGE_TIME;
-                    long endHourly = now.getTime()-HOUR_IN_MILLI ;
-                    long numOfHourlyDTPsTillEnd = (int) Math.floor((endHourly-beginRHourly)/HOUR_IN_MILLI);
-                    for (long i = 0 ; i<numOfHourlyDTPsTillEnd  ; i++) {
-                        long timestamp = beginRHourly+(i*HOUR_IN_MILLI);
-                        long highVal = 10*(i+1);
-                        long lowVal = highVal-10;
-                        long val =highVal-5;
-                        hourlyData.add();;
+                    for (long i = 0 ; i<numOfRawDTPsTillNow  ; i++) {
+                        rawDTPs.add(new DataPoint(msmt.getId(), new MetricValue(i+1,beginRaw+(i*msmtInterval))));
                     }
+                    this.dataManager.addData(rawDTPs);
+                    aggTableToMetrics.put(MeasurementConstants.TAB_DATA, rawDTPs);
+                    // 1 hour
+                    List<DataPoint> hourlyData = new ArrayList<DataPoint>();
+                    long beginHourly = now.getTime()-HOURLY_DATA_PURGE_TIME;
+                    long endHourly = now.getTime()-HOUR_IN_MILLI ;
+                    long numOfHourlyDTPsTillEnd = (int) Math.floor((endHourly-beginHourly)/HOUR_IN_MILLI);
+                    for (long i = 0 ; i<numOfHourlyDTPsTillEnd  ; i++) {
+                        double val = 10*(i+1);
+                        hourlyData.add(new DataPoint(msmt.getId(), new HighLowMetricValue(val,val+5,val-5,beginHourly+(i*HOUR_IN_MILLI))));
+                    }
+                    this.dataManager.addData(hourlyData, MeasurementConstants.TAB_DATA_1H);
                     aggTableToMetrics.put(MeasurementConstants.TAB_DATA_1H, hourlyData);
+                    // six hours
+                    List<DataPoint> sixHourlyData = new ArrayList<DataPoint>();
+                    long beginSixHourly = now.getTime()-SIX_HOURLY_DATA_PURGE_TIME;
+                    long endSixHourly = now.getTime()-SIX_HOURS_IN_MILLI ;
+                    long numOfSixHourlyDTPsTillEnd = (int) Math.floor((endSixHourly-beginSixHourly)/SIX_HOURS_IN_MILLI);
+                    for (long i = 0 ; i<numOfSixHourlyDTPsTillEnd  ; i++) {
+                        double val = 100*(i+1);
+                        sixHourlyData.add(new DataPoint(msmt.getId(), new HighLowMetricValue(val,val+5,val-5,beginSixHourly+(i*SIX_HOURS_IN_MILLI))));
+                    }
+                    this.dataManager.addData(sixHourlyData, MeasurementConstants.TAB_DATA_6H);
+                    aggTableToMetrics.put(MeasurementConstants.TAB_DATA_6H, sixHourlyData);
+                    // day
+                    List<DataPoint> dailyData = new ArrayList<DataPoint>();
+                    long beginDaily = now.getTime()-DAILY_DATA_PURGE_TIME;
+                    long endDaily = now.getTime()-DAY_IN_MILLI ;
+                    long numOfdailyDTPsTillEnd = (int) Math.floor((endDaily-beginDaily)/DAY_IN_MILLI);
+                    for (long i = 0 ; i<numOfdailyDTPsTillEnd  ; i++) {
+                        double val = 1000*(i+1);
+                        dailyData.add(new DataPoint(msmt.getId(), new HighLowMetricValue(val,val+5,val-5,beginDaily+(i*DAY_IN_MILLI))));
+                    }
+                    this.dataManager.addData(dailyData, MeasurementConstants.TAB_DATA_1D);
+                    aggTableToMetrics.put(MeasurementConstants.TAB_DATA_1D, dailyData);
 
-//                    List sixHourlyData = new ArrayList();
-//                    for (long i = 0; i < DAILY_DATA_PURGE_TIME ; i+=SIX_HOURS_IN_MILLI) {
-//                        sixHourlyData.add();
-//                    }
-//                    aggTableToMetrics.put(MeasurementConstants.TAB_DATA_6H, sixHourlyData.subList(0, (int) Math.floor(RAW_DATA_PURGE_TIME/msmtInterval)));
-//                    
-//                    List dailyData = new ArrayList();
-//                    for (long i = 0; i < DAILY_DATA_PURGE_TIME ; i+=DAY_IN_MILLI) {
-//                        dailyData.add();
-//                    }
-//                    aggTableToMetrics.put(MeasurementConstants.TAB_DATA_1D, dailyData.subList(0, (int) Math.floor(RAW_DATA_PURGE_TIME/msmtInterval)));
-                    msmtToMetricsPerAggTable.put(msmt, aggTableToMetrics);
+                    hqMetrics.put(msmt, aggTableToMetrics);
 		        }
-                // create metrics
-		        List<org.hyperic.hq.measurement.server.session.Metric> metrics = this.createMetrics(msmtToMetricsPerAggTable);
-		        
 		        super.populate() ; 
 		    }catch(Throwable t) { 
 		        t.printStackTrace() ; 
@@ -236,9 +247,9 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
 //    	baseTest(rscId, tmpNames, begin, end,expectedRes);
 //    }
     
-    protected void baseTest(Date begin,	Date end,
+    protected void baseTest(Date begin,	Date end, 
     		MeasurementRequest req, MeasurementResponse expectedRes) throws Throwable {
-    	MeasurementResponse res = service.getMetrics(req, DATE_FORMAT.format(begin), DATE_FORMAT.format(end));
+    	MeasurementResponse res = service.getMetrics(req, String.valueOf(this.testBed.rsc.getId()), DATE_FORMAT.format(begin), DATE_FORMAT.format(end));
     	Assert.assertEquals(res,expectedRes);
     }
 
@@ -258,11 +269,10 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
     	for (MeasurementTemplate tmp : this.testBed.tmps) {
     	    tmpNames.add(tmp.getName());
         }
-        final MeasurementRequest req = new MeasurementRequest(String.valueOf(this.testBed.rsc.getId()), tmpNames) ; 
+        final MeasurementRequest req = new MeasurementRequest(tmpNames) ; 
         // build expected res
         final MeasurementResponse expRes = generateResponseObj(this.testBed.msmts,begin,end,MeasurementConstants.TAB_DATA_1D);
-            
-        baseTest(begin,end,req,expRes);
+        baseTest(begin, end, req, expRes);
     }
     
 
@@ -281,8 +291,7 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
     		Date begin, Date end, String aggTable) {
     	Measurement svcMsmt=  new Measurement();
     	svcMsmt.setInterval(hqMsmt.getInterval());
-//    	svcMsmt.setName(hqMsmt.getName?);
-//    	svcMsmt.setId(hqMsmt.getId/instanceId);
+    	svcMsmt.setName(hqMsmt.getTemplate().getName());
     	List<Metric> svcMetrics = generateServiceMetrics(hqMsmt,begin,end, aggTable);
 		svcMsmt.setMetrics(svcMetrics);
 		return svcMsmt;
@@ -290,9 +299,30 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
     
     List<Metric> generateServiceMetrics(org.hyperic.hq.measurement.server.session.Measurement hqMsmt,
     		Date begin, Date end, String aggTable) {
-        Map<String,List> a = this.testBed.metrics.get(hqMsmt);
-        return null;//    	Arrays.copyOfRange(original, from, to, newType)
+        Map<String,List<DataPoint>> hqAggTableToDTPs = this.testBed.hqMetrics.get(hqMsmt);
+        List<DataPoint> hqDTPs = hqAggTableToDTPs.get(aggTable);
+        List<Metric> metrics = new ArrayList<Metric>();
+        long beginMilli = begin.getTime(),
+                endMilli = end.getTime();
+        
+        for (DataPoint hqDtp : hqDTPs) {
+            long hqDtpTime = hqDtp.getTimestamp(); 
+            if (beginMilli<=hqDtpTime && hqDtpTime<=endMilli) {
+                Metric metric = new Metric();
+                metric.setTimestamp(hqDtpTime);
+                MetricValue hqMetricVal = hqDtp.getMetricValue();
+                metric.setValue(hqMetricVal.getValue());
+                if (!MeasurementConstants.TAB_DATA.equals(aggTable)) {
+                    HighLowMetricValue hqHighLowMetricValue = (HighLowMetricValue) hqMetricVal;
+                    metric.setHighValue(hqHighLowMetricValue.getHighValue());
+                    metric.setLowValue(hqHighLowMetricValue.getLowValue());
+                }
+                metrics.add(metric);
+            }
+        }
+        return metrics;
     }
+    
     /**
      * +-+-+-+-+-x
      * +[-+--+]-+--+--+

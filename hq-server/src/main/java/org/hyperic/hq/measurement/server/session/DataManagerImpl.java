@@ -80,6 +80,8 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.orm.hibernate3.HibernateTransactionManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -258,6 +260,47 @@ public class DataManagerImpl implements DataManager {
         List<DataPoint> pts = Collections.singletonList(new DataPoint(meas.getId(), mv));
 
         addData(pts, overwrite);
+    }
+
+    public void addData(List<DataPoint> data, String aggTable) {
+//        HQDialect dialect = measurementDAO.getHQDialect();
+//        boolean succeeded = false;
+
+        Connection conn = safeGetConnection();
+
+        try {
+//            boolean autocommit = conn.getAutoCommit();
+
+            try {
+//                conn.setAutoCommit(false);
+//                if (dialect.supportsMultiInsertStmt()) {
+                    insertDataWithOneInsert(data, aggTable, conn);
+//                } else {
+//                    insertDataInBatch(data, aggTable, conn);
+//                }
+
+//                if (succeeded) {
+                    conn.commit();
+//                    sendMetricEvents(data);
+//                } else {
+//                    conn.rollback();
+//                    conn.setAutoCommit(true);
+//                    List<DataPoint> processed = addDataWithCommits(data, true, conn);
+//                    sendMetricEvents(processed);
+//                }
+
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+//                conn.setAutoCommit(autocommit);
+            }
+        } catch (SQLException e) {
+//            log.debug("Transaction failed around inserting metric data.", e);
+        } finally {
+            DBUtil.closeConnection(LOG_CTX, conn);
+        }
+//        return succeeded;
     }
 
     /**
@@ -680,6 +723,39 @@ public class DataManagerImpl implements DataManager {
         return true;
     }
 
+    private void insertDataWithOneInsert(List<DataPoint> dpts, String table, Connection conn) {
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+                StringBuilder values = new StringBuilder();
+                int rowsToUpdate = 0;
+                for (Iterator<DataPoint> i = dpts.iterator(); i.hasNext();) {
+                    DataPoint pt = i.next();
+                    Integer metricId = pt.getMetricId();
+                    HighLowMetricValue metricVal = (HighLowMetricValue) pt.getMetricValue();
+                    BigDecimal val = new BigDecimal(metricVal.getValue());
+                    BigDecimal highVal = new BigDecimal(metricVal.getHighValue());
+                    BigDecimal lowVal = new BigDecimal(metricVal.getLowValue());
+                    rowsToUpdate++;
+                    values.append("(").append(metricId.intValue()).append(", ").append(
+                            metricVal.getTimestamp()).append(", ").append(
+                                    getDecimalInRange(val, metricId)).append(", ").append(
+                                    getDecimalInRange(lowVal, metricId)).append(", ").append(
+                                    getDecimalInRange(highVal, metricId)).append("),");
+                }
+                String sql = "insert into " + table + " (measurement_id, timestamp, value, minvalue, maxvalue)" + 
+                             " values " + values.substring(0, values.length() - 1);
+                stmt = conn.createStatement();
+                stmt.executeUpdate(sql);
+        } catch (SQLException e) {
+            // If there is a SQLException, then none of the data points
+            // should be inserted. Roll back the txn.
+        } finally {
+            DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
+        }
+    }
+    
+    
     /**
      * Insert the metric data points to the DB in batch.
      * 

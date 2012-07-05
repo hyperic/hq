@@ -79,13 +79,16 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException {
 
         MeasurementResponse res = new MeasurementResponse();
-        if (hqMsmtReq==null || rscId==null || hqMsmtReq.getMeasurementTemplateNames()==null || hqMsmtReq.getMeasurementTemplateNames().size()==0) {
-            throw new UnsupportedOperationException("the request is missing the resource ID or the measurement template names");
+        if (hqMsmtReq==null || rscId==null || hqMsmtReq.getMeasurementTemplateNames()==null || hqMsmtReq.getMeasurementTemplateNames().size()==0 || begin==null || end==null || begin.length()<=0 || end.length()<=0) {
+            throw new UnsupportedOperationException("the request is missing the resource ID, the measurement template names, the begining or end of the time frame");
         }
         final DateFormat dateFormat = new SimpleDateFormat() ;
         Date beginDate = null, endDate = null ; 
         beginDate = dateFormat.parse(begin) ; 
         endDate = dateFormat.parse(end) ;
+        if (beginDate.after(endDate) || beginDate.getTime()<=0 || endDate.after(new Date())) {
+            throw new IllegalArgumentException();
+        }
         AuthzSubject authzSubject = apiMessageContext.getAuthzSubject();
 
         // extract all input measurement templates
