@@ -24,7 +24,14 @@
  */
 package org.hyperic.hq.api.rest.cxf;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Arrays;
@@ -36,6 +43,7 @@ public class TestHttpURLConnection extends HttpURLConnection {
 
 	private List<String> contentTypes ; 
 	private HttpURLConnection delegate ; 
+	private Throwable error ; 
 	
 	protected TestHttpURLConnection(HttpURLConnection delegate, final String contentType) {
 		this(delegate.getURL(), contentType) ; 
@@ -61,7 +69,6 @@ public class TestHttpURLConnection extends HttpURLConnection {
 
 	@Override
 	public final Map<String, List<String>> getHeaderFields() {
-//		final Map<String, List<String>> headerFields = new HashMap<String,List<String>>(this.delegate.getHeaderFields()) ;
 		final Map<String, List<String>> headerFields = new HashMap<String,List<String>>() ;
 		headerFields.put("content-type",  contentTypes);
 		headerFields.put("Content-type",  contentTypes);
@@ -71,6 +78,33 @@ public class TestHttpURLConnection extends HttpURLConnection {
 	@Override
 	public boolean usingProxy() {
 		return this.delegate.usingProxy() ; 
-	}//EOC 
+	}//EOC
 	
+	public final void setError(final Throwable t) { 
+	    this.error = t ; 
+	}//EOM 
+	
+	@Override
+	public final InputStream getErrorStream() { 
+	    try{ 
+	        return this.exceptionToInputStream(this.error) ; 
+	    }catch(IOException t) { 
+	        throw new RuntimeException(t) ; 
+	    }//EO catch block 
+	}//EOM 
+	
+	private final InputStream exceptionToInputStream(final Throwable t) throws IOException{
+	    if(this.error == null) return null ; 
+	    final StringWriter sr = new StringWriter() ;  
+	    try{ 
+	        this.error.printStackTrace(new PrintWriter(sr)) ;
+	    }finally{ 
+	        sr.flush()  ;
+            sr.close() ;
+	    }//EO catch block 
+	    
+	    return new ByteArrayInputStream(sr.toString().getBytes()) ; 
+
+	}//EOM 
+
 }//EOC TestHttpURLConnection

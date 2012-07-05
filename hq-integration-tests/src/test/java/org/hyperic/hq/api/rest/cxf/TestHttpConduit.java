@@ -52,6 +52,7 @@ import org.apache.cxf.transport.http.HTTPConduit;
 import org.apache.cxf.ws.addressing.EndpointReferenceType;
 
 import com.meterware.httpunit.HttpException;
+import com.meterware.httpunit.HttpInternalErrorException;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
@@ -104,12 +105,11 @@ public class TestHttpConduit extends HTTPConduit {
 		Message inMessage = new MessageImpl();
         inMessage.setExchange(exchange);
         
-        ByteArrayOutputStream messagePayload = null ; 
-        
+        ByteArrayOutputStream messagePayload = null ;
+        final HttpURLConnection urlConnection = (HttpURLConnection) msg.get(KEY_HTTP_CONNECTION) ; 
+        final String sURL = urlConnection.getURL().toString();
 		try{ 
-			final HttpURLConnection urlConnection = (HttpURLConnection) msg.get(KEY_HTTP_CONNECTION) ; 
-			final String sURL = urlConnection.getURL().toString(); 
-			
+			 
 			final String httpRequestMethod = (String)msg.get(Message.HTTP_REQUEST_METHOD);        
 			WebRequest req = null ; 
 			
@@ -163,12 +163,16 @@ public class TestHttpConduit extends HTTPConduit {
             
             //TODO: NYI
             //cookies.readFromConnection(connection);
-		}catch(Exception t) { 
-			int iResponseCode = HttpURLConnection.HTTP_INTERNAL_ERROR ;  
-			if(t instanceof HttpException) iResponseCode = ((HttpException)t).getResponseCode() ; 
-			exchange.put(Message.RESPONSE_CODE, iResponseCode);
-			exchange.put(Exception.class, t);
-		}finally{
+		}catch(Exception t) {
+		    HttpException httpe = null  ; 
+		    if(t instanceof HttpException) httpe = (HttpException) t;  
+		    else { 
+		        httpe = new HttpInternalErrorException(new URL(sURL), t) ;
+		    }//EO if not instance of http exception 
+		    
+		    exchange.put(Message.RESPONSE_CODE, httpe.getResponseCode());
+		    ((TestHttpURLConnection)urlConnection).setError(t) ; 
+		}finally{ 
 			if(messagePayload != null) messagePayload.close() ;
 		}//EO catch block 
 		

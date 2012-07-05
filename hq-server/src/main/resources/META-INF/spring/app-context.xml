@@ -146,6 +146,8 @@
 			</map>
 		</property>
 	</bean>
+	
+	<bean scope="prototype" id="org.hyperic.hq.bizapp.agent.client.SecureAgentConnection" class="org.hyperic.hq.bizapp.agent.client.SecureAgentConnection" />
 
 	<context:component-scan base-package="org.hyperic,com.hyperic"> 
 	   <context:exclude-filter type="regex" expression="org.hyperic.cm.*"/>

@@ -89,7 +89,7 @@
 		<property name="sessionAuthenticationStrategy" ref="apiSessionInitializationStrategy" />
 	</bean>
 	
-	<bean id="apiSessionInitializationStrategy" class="org.hyperic.hq.api.security.ApiSessionInitializationStrategy" />
+	<bean id="apiSessionInitializationStrategy" class="org.hyperic.hq.api.security.ApiSessionInitializationStrategy" /> 
 
 	<!-- For form-based authentication -->
 	<bean id="httpSessionRequestCache" class="org.springframework.security.web.savedrequest.HttpSessionRequestCache" />
@@ -122,29 +122,4 @@
 		</property>
 	</bean>	
 	
-	<!-- Setup the filter security interceptor for API requests-->
-	<!-- 
-    <bean id="apiFilterSecurityInterceptor" class="org.hyperic.hq.ui.security.ApiFilterSecurityInterceptor">
-        <property name="authenticationManager" ref="authenticationManager" />
-        <property name="accessDecisionManager">
-            <bean class="org.springframework.security.access.vote.AffirmativeBased">
-                <property name="allowIfAllAbstainDecisions" value="false" />
-                <property name="decisionVoters">
-                    <list>
-                        <bean class="org.springframework.security.access.vote.RoleVoter" />
-                    </list>
-                </property>
-            </bean>
-        </property>
-        <property name="securityMetadataSource">
-            <sec:filter-security-metadata-source>
-                <sec:intercept-url pattern="/hqu/hqapi*/**" access="ROLE_HQ_USER" /> 
-                <sec:intercept-url pattern="/rest-api/**" access="ROLE_HQ_USER" />                
-            </sec:filter-security-metadata-source>
-        </property>
-    </bean>
-	-->
-
-    
-      
 </beans>

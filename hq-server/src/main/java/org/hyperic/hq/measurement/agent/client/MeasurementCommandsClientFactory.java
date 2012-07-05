@@ -33,8 +33,11 @@ import org.hyperic.hq.bizapp.agent.client.SecureAgentConnection;
 import org.hyperic.hq.security.ServerKeystoreConfig;
 import org.hyperic.hq.transport.AgentProxyFactory;
 import org.hyperic.util.security.KeystoreConfig;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
 /**
@@ -42,13 +45,14 @@ import org.springframework.stereotype.Component;
  * uses the legacy or new transport.
  */
 @Component
-public class MeasurementCommandsClientFactory {
+public class MeasurementCommandsClientFactory implements ApplicationContextAware{
 
     private AgentManager agentManager;
     
     private AgentProxyFactory agentProxyFactory;
     private KeystoreConfig keystoreConfig;
     private boolean acceptUnverifiedCertificates;
+    private ApplicationContext appContext ; 
     
     @Autowired
     public MeasurementCommandsClientFactory(AgentManager agentManager, 
@@ -78,13 +82,19 @@ public class MeasurementCommandsClientFactory {
         return getClient(agent);
     }
     
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.appContext = applicationContext ;
+    }//EOM 
+    
     public MeasurementCommandsClient getClient(Agent agent) {
         if (agent.isNewTransportAgent()) {
             return new MeasurementCommandsClientImpl(agent, agentProxyFactory);
         } else {
-            return new LegacyMeasurementCommandsClientImpl(
-                new SecureAgentConnection(agent.getAddress(),agent.getPort(),agent.getAuthToken(),
-                                          keystoreConfig, acceptUnverifiedCertificates));
+            final SecureAgentConnection agentConn = (SecureAgentConnection) this.appContext.getBean(SecureAgentConnection.class.getName(),  
+                    agent.getAddress(),agent.getPort(),agent.getAuthToken(),
+                    keystoreConfig, acceptUnverifiedCertificates) ; 
+            
+            return new LegacyMeasurementCommandsClientImpl(agentConn);
         }         
     }
 
