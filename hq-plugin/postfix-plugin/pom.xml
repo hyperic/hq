@@ -6,7 +6,7 @@
 	<parent>
        <groupId>org.hyperic.hq.plugin</groupId>
         <artifactId>modules</artifactId>
-       <version>5.0</version>
+       <version>BETA</version>
     </parent>
 	<artifactId>postfix-plugin</artifactId>
 	<packaging>jar</packaging>
