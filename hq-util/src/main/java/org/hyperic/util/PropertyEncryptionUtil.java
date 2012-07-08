@@ -195,8 +195,16 @@ public class PropertyEncryptionUtil {
             // Store the key
             Properties props = new Properties();
             props.put(ENCRYPTION_KEY_PROP, encryptedKey);
-
+            
             props.store(new FileOutputStream(fileName), null);
+            
+            // set read/write permissions to be given to the owner only
+            File encKeyFile = new File(fileName);
+            encKeyFile.setReadable(false, false);
+            encKeyFile.setReadable(true, true);
+            encKeyFile.setWritable(false, false);
+            encKeyFile.setWritable(true, true);
+
         } catch (Exception exc) {
             throw new PropertyUtilException(exc);
         }
