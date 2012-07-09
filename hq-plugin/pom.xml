@@ -6,13 +6,13 @@
 	 <parent>
         <groupId>org.hyperic.hq</groupId>
         <artifactId>hq-parent</artifactId>
-       <version>BETA</version>
+       <version>0.0.BETA</version>
     </parent>
 	<groupId>org.hyperic.hq.plugin</groupId>
 	<artifactId>modules</artifactId>
 	<packaging>pom</packaging>
 	<name>Hyperic HQ Plugin - Modules</name>
-	<version>BETA</version>
+	<version>0.0.BETA</version>
 
 	<modules>
 		<module>examples</module>

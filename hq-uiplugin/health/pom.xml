@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.hyperic.hq.uiplugin</groupId>
 		<artifactId>hq-uiplugin-parent</artifactId>
-		<version>BETA</version>
+		<version>0.0.BETA</version>
 		<relativePath>../hq-uiplugin-parent/pom.xml</relativePath>
 	</parent>
 

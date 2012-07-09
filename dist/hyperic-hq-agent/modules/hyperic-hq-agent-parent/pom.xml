@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.hyperic.hq</groupId>
 		<artifactId>hq-parent</artifactId>
-		<version>BETA</version>
+		<version>0.0.BETA</version>
 		<relativePath>../../../../pom.xml</relativePath>
 	</parent>
 

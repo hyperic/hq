@@ -5,13 +5,13 @@
   <parent>
 		<groupId>org.hyperic.hq.uiplugin</groupId>
 		<artifactId>hq-uiplugin-parent</artifactId>
-		<version>BETA</version>
+		<version>0.0.BETA</version>
 		<relativePath>../hq-uiplugin-parent/pom.xml</relativePath>
   </parent>
 
   <groupId>org.hyperic.hq.uiplugin</groupId>
   <artifactId>scaffold-archetype</artifactId>
-  <version>BETA</version>
+  <version>0.0.BETA</version>
   <packaging>jar</packaging>
 
   <name>Hyperic HQ UI Plugin Project Archetype - Scaffold</name>

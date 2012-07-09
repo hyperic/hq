@@ -6,7 +6,7 @@
 	<parent>
 		<artifactId>hq-parent</artifactId>
 		<groupId>org.hyperic.hq</groupId>
-		<version>BETA</version>
+		<version>0.0.BETA</version>
 	</parent>
 	<artifactId>hq-api</artifactId>
 	<name>hq-api</name>

@@ -5,7 +5,7 @@
   <parent>
         <groupId>org.hyperic.hq.plugin</groupId>
         <artifactId>modules</artifactId>
-       <version>BETA</version>
+       <version>0.0.BETA</version>
    </parent>
     
   <artifactId>scaffold-jar-archetype</artifactId>

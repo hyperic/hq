@@ -7,13 +7,13 @@
   <!--   <parent>
         <groupId>org.hyperic.hq</groupId>
         <artifactId>hq-parent</artifactId>
-        <version>BETA</version>
+        <version>0.0.BETA</version>
     </parent>
   --> 
     
     <groupId>org.hyperic.hq.dist</groupId>
     <artifactId>support</artifactId>
-    <version>BETA</version>
+    <version>0.0.BETA</version>
     <packaging>pom</packaging>
     <name>Hyperic HQ Distribution - Hyperic HQ Server Support Bundle</name>
     
