@@ -364,6 +364,25 @@ public class FileUtil {
     }
 
     /**
+     * Give write permissions to the file's owner only.
+     *
+     * @param file
+     * @throws  SecurityException
+     *          If a security manager exists and its <code>{@link
+     *          java.lang.SecurityManager#checkWrite(java.lang.String)}</code>
+     *          method denies write access to the file
+     */    
+    public static void setWritableByOwnerOnly(File file) {
+        // Remove all write permissions
+        boolean isOwnerOnly = false;
+        file.setWritable(false, isOwnerOnly);
+
+        // Add owner-only write permission
+        file.setWritable(true);
+    }
+
+
+    /**
      * Chop the last element off a path.  For example, if you pass in
      * /usr/local/foo then this will return /usr/local
      * If there is not enough to chop off, this throws IllegalArgumentException
