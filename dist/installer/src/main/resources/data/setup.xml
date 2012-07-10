@@ -311,6 +311,8 @@ __ll__
                 <include name="**/wrapper" />
             </fileset>
         </chmod>
+        <echo>^^^INFO: Setting permissions on ${agent-dir}/conf/agent.properties...</echo>
+        <chmod file="${agent-dir}/conf/agent.properties" perm="600"/>
         <echo>^^^INFO: Setting permissions on agent binaries...</echo>
         <antcall target="chmod-exec">
             <param name="chmod.dir" value="${agent-dir}"/>

@@ -109,6 +109,8 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         expect(mockPluginManager.isPluginSyncEnabled()).andStubReturn(false);
         expect(mockPluginManager.getCustomPluginDir()).andStubReturn(new File("/root/hq/test"));
         expect(mockAgentManager.getNumAutoUpdatingAgents()).andReturn(Long.parseLong("0"));
+        expect(mockAgentManager.getAgentCountUsed()).andStubReturn(Integer.parseInt("0"));
+        expect(mockAgentManager.getAgentCountUsed()).andStubReturn(Integer.parseInt("0"));
         expect(mockAgentManager.getNumOldAgents()).andStubReturn(Long.parseLong("0"));
 
         String serverVersion = "4.5.6.BUILD-SNAPSHOT"; 
@@ -141,6 +143,7 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         expect(mockPluginManager.isPluginSyncEnabled()).andStubReturn(true);
         expect(mockPluginManager.getCustomPluginDir()).andStubReturn(new File("/root/hq/test"));
         expect(mockAgentManager.getNumAutoUpdatingAgents()).andStubReturn(Long.parseLong("3"));
+        expect(mockAgentManager.getAgentCountUsed()).andStubReturn(Integer.parseInt("3"));
         expect(mockAgentManager.getNumOldAgents()).andStubReturn(Long.parseLong("0"));
         
         String serverVersion = "4.5.6.BUILD-SNAPSHOT"; 
@@ -180,6 +183,7 @@ public class PluginManagerControllerTest extends BaseControllerTest {
     public void testInfoNull() throws ConfigPropertyException{
         expect(mockPluginManager.getStatusesByAgentId(AgentPluginStatusEnum.SYNC_FAILURE)).andStubReturn(null);
         expect(mockAgentManager.getNumAutoUpdatingAgents()).andReturn(Long.parseLong("0"));
+        expect(mockAgentManager.getAgentCountUsed()).andStubReturn(Integer.parseInt("0"));
         expect(mockAgentManager.getNumOldAgents()).andStubReturn(Long.parseLong("0"));        
 
         String serverVersion = "4.5.6.BUILD-SNAPSHOT"; 
@@ -200,6 +204,7 @@ public class PluginManagerControllerTest extends BaseControllerTest {
     public void testInfo() throws ConfigPropertyException{
         expect(mockPluginManager.getStatusesByAgentId(AgentPluginStatusEnum.SYNC_FAILURE)).andStubReturn(getStatusesByAgentId());
         expect(mockAgentManager.getNumAutoUpdatingAgents()).andReturn(Long.parseLong("3"));
+        expect(mockAgentManager.getAgentCountUsed()).andStubReturn(Integer.parseInt("4"));
         expect(mockAgentManager.getNumOldAgents()).andStubReturn(Long.parseLong("1"));        
 
         String serverVersion = "4.5.6.BUILD-SNAPSHOT"; 

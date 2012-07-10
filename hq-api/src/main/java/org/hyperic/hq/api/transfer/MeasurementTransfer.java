@@ -1,10 +1,11 @@
 package org.hyperic.hq.api.transfer;
 
-import java.util.Calendar;
-import java.util.Date;
+import java.text.ParseException;
 
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
+import org.hyperic.hq.api.services.impl.ApiMessageContext;
+import org.hyperic.hq.authz.shared.PermissionException;
 
 /**
  * 
@@ -18,7 +19,9 @@ public interface MeasurementTransfer {
 	 * 								no measurements will be calculated for measurementTemplates which are unknown in the system
 	 * 								
 	 * @return
+	 * @throws ParseException 
+	 * @throws PermissionException 
 	 */
-    public MeasurementResponse getMetrics(final MeasurementRequest measurementRequest,
-			final String begin, final String end);
+    public MeasurementResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest measurementRequest,
+			final String rscId, final String begin, final String end) throws ParseException, PermissionException;
 }

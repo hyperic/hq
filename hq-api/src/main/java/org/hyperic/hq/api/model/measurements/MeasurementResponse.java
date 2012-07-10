@@ -11,27 +11,15 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.hyperic.hq.api.model.RestApiConstants;
-import org.hyperic.hq.api.model.resources.BatchResponseBase;
-import org.hyperic.hq.api.model.resources.FailedResource;
-import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name="measurementResponse", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 @XmlType(name="MeasurementResponseType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
-public class MeasurementResponse extends BatchResponseBase {
+public class MeasurementResponse {
     @XmlElementWrapper(name="measurements",namespace=RestApiConstants.SCHEMA_NAMESPACE)
 	@XmlElement(name="measurement",namespace=RestApiConstants.SCHEMA_NAMESPACE)
 	private List<Measurement> measurements = new ArrayList<Measurement>();
 	
-	public MeasurementResponse(
-			ExceptionToErrorCodeMapper exceptionToErrorCodeMapper) {
-		super(exceptionToErrorCodeMapper);
-	}
-
-	public MeasurementResponse(List<FailedResource> failedResources) {
-		super(failedResources);
-	}
-
 	public MeasurementResponse() {
 		super();
 	}

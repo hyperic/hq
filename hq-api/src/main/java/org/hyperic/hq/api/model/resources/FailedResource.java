@@ -65,4 +65,12 @@ public class FailedResource {
     public void setErrorDescription(String errorDescription) {
         this.errorDescription = errorDescription;
     }
+
+    @Override
+    public final String toString() {
+        return "FailedResource [resourceId=" + resourceId + ", errorCode=" + errorCode + ", errorDescription="
+                + errorDescription + "]";
+    }//EOM 
+    
+     
 }
