@@ -25,6 +25,7 @@
  */
 package org.hyperic.util;
 
+import org.hyperic.util.file.FileUtil;
 import org.hyperic.util.security.SecurityUtil;
 
 import java.io.*;
@@ -163,6 +164,8 @@ public class PropertyEncryptionUtil {
         }
     } // EOM
 
+    
+    
     /**
      * Creates a new encryption key and saves it as a serialized object to the files system.
      *
@@ -200,11 +203,8 @@ public class PropertyEncryptionUtil {
             
             // set read/write permissions to be given to the owner only
             File encKeyFile = new File(fileName);
-            encKeyFile.setReadable(false, false);
-            encKeyFile.setReadable(true, true);
-            encKeyFile.setWritable(false, false);
-            encKeyFile.setWritable(true, true);
-
+            FileUtil.setReadableByOwnerOnly(encKeyFile);
+            FileUtil.setWritableByOwnerOnly(encKeyFile);
         } catch (Exception exc) {
             throw new PropertyUtilException(exc);
         }
