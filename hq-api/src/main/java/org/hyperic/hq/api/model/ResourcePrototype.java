@@ -39,8 +39,8 @@ import javax.xml.bind.annotation.XmlType;
  * @version 1.0 29 April 2012
  * @author Maya Anderson
  */
-@XmlRootElement(name = "Resource", namespace=RestApiConstants.SCHEMA_NAMESPACE)
-@XmlType(name = "ResourceProtoType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+@XmlRootElement(namespace=RestApiConstants.SCHEMA_NAMESPACE)
+@XmlType(namespace=RestApiConstants.SCHEMA_NAMESPACE)
 public class ResourcePrototype {
     private String name;
     private String id;    
