@@ -26,9 +26,12 @@
 package org.hyperic.hq.api.model.resources;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+
 import org.hyperic.hq.api.model.RestApiConstants;
 
 @XmlRootElement(name="FailedResource", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+@XmlType(name="FailedResourceType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 public class FailedResource {
 
     String resourceId;

@@ -29,11 +29,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 import org.hyperic.hq.api.model.RestApiConstants;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 
 @XmlRootElement(name="ResponseBase", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+@XmlType(name="ResponseBaseType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 public class BatchResponseBase {
 
     private List<FailedResource> failedResources;
