@@ -1,5 +1,5 @@
 package org.hyperic.hq.api.measurements;
-
+/*
 import java.lang.reflect.Method;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -44,8 +44,8 @@ import org.springframework.test.annotation.DirtiesContext;
 
 @DirtiesContext
 @ServiceBindingsIteration(MeasurementServiceTest.CONTEXT_URL + "/rest-api/data/measuremenet")
-@TestData(MeasurementServiceTestDataPopulator.class)
-public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService, MeasurementServiceTestDataPopulator> {
+@TestData(MeasurementServiceTestDataPopulator.class)*/
+public class MeasurementServiceTest {/*extends RestTestCaseBase<MeasurementService, MeasurementServiceTestDataPopulator> {
     @Rule 
     public RuleChain interceptorsChain = super.interceptorsChain ;
     private final static DateFormat DATE_FORMAT = new SimpleDateFormat() ;
@@ -180,7 +180,7 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
      * 
      * @throws Throwable
      */
-    @SecurityInfo(username="hqadmin",password="hqadmin")
+/*    @SecurityInfo(username="hqadmin",password="hqadmin")
     @Test
     public final void testGetMetricsWinStartsBeforePrgSmallerThan400() throws Throwable {
         Date begin = new Date();
@@ -251,8 +251,8 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
      * 
      * @throws Throwable
      */
-    @SecurityInfo(username="hqadmin",password="hqadmin")
-    //@Test
+/*    @SecurityInfo(username="hqadmin",password="hqadmin")
+    @Test
     public final void testGetMetricsWinStartsBeforePrgBiggerThan400() throws Throwable { 
         //    	Calendar begin = GregorianCalendar.getInstance();
         //    	Calendar end = GregorianCalendar.getInstance();
@@ -269,8 +269,8 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
      *   
      * @throws Throwable
      */
-    @SecurityInfo(username="hqadmin",password="hqadmin")
-    //    @Test
+/*    @SecurityInfo(username="hqadmin",password="hqadmin")
+    @Test
     public final void testGetMetricsWinEndsAfterPrg() throws Throwable { 
         Calendar begin = GregorianCalendar.getInstance();
         Calendar end = GregorianCalendar.getInstance();
@@ -289,7 +289,7 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
      * 
      * @throws Throwable
      */
-    @SecurityInfo(username="hqadmin",password="hqadmin")
+/*    @SecurityInfo(username="hqadmin",password="hqadmin")
     //  @Test
     public final void testGetMetricsWinEndsBeforePrgStartsAfterPrg() throws Throwable { 
     }
@@ -299,7 +299,7 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
      * 
      * @throws Throwable
      */
-    @SecurityInfo(username="hqadmin",password="hqadmin")
+/*    @SecurityInfo(username="hqadmin",password="hqadmin")
     //@Test
     public final void testGetMetricsWinEndsBeforeAgg() throws Throwable { 
     }
@@ -309,8 +309,8 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
      * 
      * @throws Throwable
      */
-    @SecurityInfo(username="hqadmin",password="hqadmin")
+/*    @SecurityInfo(username="hqadmin",password="hqadmin")
     //@Test
     public final void testGetMetricsWinSmallerThanInterval() throws Throwable { 
-    }
+    }*/
 }

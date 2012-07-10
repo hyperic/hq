@@ -25,7 +25,9 @@
  */
 package org.hyperic.hq.api.transfer.impl;
 
+import java.math.RoundingMode;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -127,5 +129,17 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             res.add(msmt);
         }
         return res;
+    }
+    
+    
+    public static void main(String[] args) {
+        double x = 3.8642005333333E-2;
+        final DecimalFormat df = new DecimalFormat();
+        df.setMaximumFractionDigits(3);
+        df.setGroupingUsed(false);
+        df.setRoundingMode(RoundingMode.DOWN);
+        System.out.println(x);
+        System.out.println(df.format(x));
+        System.out.println(Double.valueOf(df.format(x)));
     }
 } 

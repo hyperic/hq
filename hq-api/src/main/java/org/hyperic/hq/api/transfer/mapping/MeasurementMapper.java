@@ -1,5 +1,7 @@
 package org.hyperic.hq.api.transfer.mapping;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,6 +12,16 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class MeasurementMapper {
+    protected final static DecimalFormat df = new DecimalFormat();
+    
+    {
+        df.setMaximumFractionDigits(3);
+        df.setGroupingUsed(false);
+        df.setRoundingMode(RoundingMode.DOWN);
+    }
+    
+    
+    
     public Measurement toMeasurement(org.hyperic.hq.measurement.server.session.Measurement hqMsmt) {
         Measurement msmt = new Measurement();
         msmt.setInterval(hqMsmt.getInterval());
@@ -21,9 +33,9 @@ public class MeasurementMapper {
         List<Metric> metrics = new ArrayList<Metric>();
         for (HighLowMetricValue hqMetric : hqMetrics) {
             Metric metric = new Metric();
-            metric.setHighValue(hqMetric.getHighValue());
-            metric.setLowValue(hqMetric.getLowValue());
-            metric.setValue(hqMetric.getValue());
+            metric.setHighValue(Double.valueOf(df.format(hqMetric.getHighValue())));
+            metric.setLowValue(Double.valueOf(df.format(hqMetric.getLowValue())));
+            metric.setValue(Double.valueOf(df.format(hqMetric.getValue())));
             metric.setTimestamp(hqMetric.getTimestamp());
             metrics.add(metric);
         }
