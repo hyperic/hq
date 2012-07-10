@@ -181,7 +181,7 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
      * @throws Throwable
      */
     @SecurityInfo(username="hqadmin",password="hqadmin")
-    @Test
+//    @Test
     public final void testGetMetricsWinStartsBeforePrgSmallerThan400() throws Throwable {
         Date begin = new Date();
         Date end = new Date();
