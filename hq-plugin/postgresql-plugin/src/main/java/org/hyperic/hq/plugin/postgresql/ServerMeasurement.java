@@ -27,6 +27,7 @@ package org.hyperic.hq.plugin.postgresql;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 import org.apache.commons.logging.Log;
@@ -43,6 +44,7 @@ import org.hyperic.sigar.SigarNotImplementedException;
 import org.hyperic.sigar.SigarProxy;
 import org.hyperic.sigar.SigarProxyCache;
 import org.hyperic.sigar.jmx.SigarInvokerJMX;
+import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.jdbc.DBUtil;
 
 public class ServerMeasurement extends SigarMeasurementPlugin {
@@ -51,107 +53,118 @@ public class ServerMeasurement extends SigarMeasurementPlugin {
     private long pid = -1;
     private Sigar sigar = null;
     private SigarProxy sigarProxy = null;
+    private String actualConfig = "";
 
     @Override
     public MetricValue getValue(Metric metric) throws PluginException, MetricNotFoundException, MetricUnreachableException {
-        log.debug("[getValue] metric=" + metric);
-        if (metric.isAvail()) {
-            findPid(metric);
-        }
-
-        if (this.sigar == null) {
-            getSigar();
-        }
-
         MetricValue res;
-        if (pid != -1) {
+
+        initSigar();
+
+        log.debug("[getValue] metric=" + metric);
+        try {
+            findPid(metric);
+        } catch (PluginException ex) {
             if (metric.isAvail()) {
-                res = new MetricValue(Metric.AVAIL_UP);
+                log.debug(ex,ex);
+                return new MetricValue(Metric.AVAIL_DOWN);
             } else {
-                String oName = "sigar:Type=" + metric.getObjectProperty("Type") + ",Arg=State.Ppid.eq=" + pid;
-                log.debug("[getValue] oName=" + oName);
-                String attr = metric.getAttributeName();
-                SigarInvokerJMX invoker = SigarInvokerJMX.getInstance(this.sigarProxy, oName);
-                try {
-                    Object systemValue;
-                    synchronized (this.sigar) {
-                        systemValue = invoker.invoke(attr);
-                    }
-                    if (systemValue instanceof Double) {
-                        res = new MetricValue((Double) systemValue);
-                    } else if (systemValue instanceof Long) {
-                        res = new MetricValue(new Double(((Long) systemValue).longValue()));
-                    } else if (systemValue instanceof Integer) {
-                        res = new MetricValue(new Double(((Integer) systemValue).intValue()));
-                    } else {
-                        PluginException ex = new PluginException("Error on systemValue '" + systemValue + "' (" + systemValue.getClass() + ")");
-                        log.debug(ex, ex);
-                        throw ex;
-                    }
-                } catch (SigarNotImplementedException e) {
-                    return MetricValue.NONE;
-                } catch (SigarException e) {
-                    throw new MetricNotFoundException(e.getMessage(), e);
-                }
+                throw ex;
             }
+        }
+
+        if (metric.isAvail()) {
+            res = new MetricValue(Metric.AVAIL_UP);
         } else {
-            if (metric.isAvail()) {
-                res = new MetricValue(Metric.AVAIL_DOWN);
-            } else {
-                throw new MetricUnreachableException("Pid not found");
+            String oName = "sigar:Type=" + metric.getObjectProperty("Type") + ",Arg=State.Ppid.eq=" + pid;
+            log.debug("[getValue] oName=" + oName);
+            String attr = metric.getAttributeName();
+            SigarInvokerJMX invoker = SigarInvokerJMX.getInstance(this.sigarProxy, oName);
+            try {
+                Object systemValue;
+                synchronized (this.sigar) {
+                    systemValue = invoker.invoke(attr);
+                }
+                if (systemValue instanceof Double) {
+                    res = new MetricValue((Double) systemValue);
+                } else if (systemValue instanceof Long) {
+                    res = new MetricValue(new Double(((Long) systemValue).longValue()));
+                } else if (systemValue instanceof Integer) {
+                    res = new MetricValue(new Double(((Integer) systemValue).intValue()));
+                } else {
+                    PluginException ex = new PluginException("Error on systemValue '" + systemValue + "' (" + systemValue.getClass() + ")");
+                    log.debug(ex, ex);
+                    throw ex;
+                }
+            } catch (SigarNotImplementedException e) {
+                pid = -1;
+                throw new MetricUnreachableException(e.getMessage(), e);
+            } catch (SigarException e) {
+                pid = -1;
+                throw new MetricNotFoundException(e.getMessage(), e);
             }
         }
         return res;
     }
 
-    @Override
-    protected Sigar getSigar() throws PluginException {
-        if (this.sigar != null) {
-            return this.sigar;
-        }
-        try {
-            this.sigar = new Sigar();
-            this.sigarProxy = SigarProxyCache.newInstance(sigar);
-        } catch (UnsatisfiedLinkError le) {
-            getLog().warn("unable to load sigar: " + le.getMessage());
-            return null;
+    protected void initSigar() throws PluginException {
+        if (this.sigar == null) {
+            try {
+                this.sigar = new Sigar();
+                this.sigarProxy = SigarProxyCache.newInstance(sigar);
+            } catch (UnsatisfiedLinkError ex) {
+                log.debug("unable to load sigar: " + ex.getMessage(), ex);
+                this.sigar = null;
+                this.sigarProxy = null;
+                throw new PluginException(ex.getMessage(), ex);
+            }
         }
 
-        return this.sigar;
     }
 
-    private void findPid(Metric metric) {
+    private void findPid(Metric metric) throws PluginException {
         Properties props = metric.getProperties();
         String user = props.getProperty(PostgreSQL.PROP_USER);
         String pass = props.getProperty(PostgreSQL.PROP_PASS);
+        String url = PostgreSQL.prepareUrl(props, null);
 
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
+        String newConfig = url + "-" + user + "-" + pass;
+        boolean isNewConfig = !newConfig.equalsIgnoreCase(actualConfig);
+        if (isNewConfig) {
+            log.debug("[findPid] new config detected");
+            actualConfig = newConfig;
+        }
 
-        try {
-            String url = PostgreSQL.prepareUrl(props, null);
-            conn = DriverManager.getConnection(url, user, pass);
-            stmt = conn.createStatement();
-            stmt.execute("select pg_backend_pid()");
+        // look for the PID 
+        // IF config have changed (to test is the new config is valid)
+        // OR no PID
+        // OR always for Availability
+        if (isNewConfig || (pid == -1) || (metric.isAvail())) {
 
-            rs = stmt.getResultSet();
-            if (rs.next()) {
-                int conectionPid = rs.getInt(1);
-                try {
+            Connection conn = null;
+            Statement stmt = null;
+            ResultSet rs = null;
+
+            try {
+                conn = DriverManager.getConnection(url, user, pass);
+                stmt = conn.createStatement();
+                stmt.execute("select pg_backend_pid()");
+
+                rs = stmt.getResultSet();
+                if (rs.next()) {
+                    int conectionPid = rs.getInt(1);
                     pid = new Sigar().getProcState(conectionPid).getPpid();
-                } catch (SigarException ex) {
-                    log.debug("[findPid] Error getting PID:" + ex, ex);
-                    pid = -1;
+                    log.debug("[findPid] conection PID:" + conectionPid + " ==> main Process PID:" + pid);
                 }
-                log.debug("[findPid] conection PID:" + conectionPid + " ==> main Process PID:" + pid);
+            } catch (SQLException ex) {
+                pid = -1;
+                throw new PluginException(ex.getMessage(), ex);
+            } catch (SigarException ex) {
+                pid = -1;
+                throw new PluginException(ex.getMessage(), ex);
+            } finally {
+                DBUtil.closeJDBCObjects(getLog(), conn, stmt, rs);
             }
-
-        } catch (Exception ex) {
-            log.debug("[findPid] Error getting PID:" + ex, ex);
-            pid = -1;
-        } finally {
-            DBUtil.closeJDBCObjects(getLog(), conn, stmt, rs);
         }
     }
 }
