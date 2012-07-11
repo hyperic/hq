@@ -51,6 +51,7 @@ import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.RoleManager;
+import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.common.ApplicationException;
@@ -58,6 +59,7 @@ import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.pager.PageControl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -67,7 +69,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class BaseSessionInitializationStrategy implements SessionAuthenticationStrategy {
-    private static Log log = LogFactory.getLog(BaseSessionInitializationStrategy.class.getName());
+    private static final String LDAP_PREFIX = "LDAP\\";
+	private static Log log = LogFactory.getLog(BaseSessionInitializationStrategy.class.getName());
     private SessionManager sessionManager;
     private AuthzSubjectManager authzSubjectManager;
     private AuthzBoss authzBoss;
@@ -94,11 +97,18 @@ public class BaseSessionInitializationStrategy implements SessionAuthenticationS
         final boolean debug = log.isDebugEnabled();
 
         if (debug) log.debug("Initializing UI session parameters...");
-
+        boolean updateRoles = false;
         String username = authentication.getName();
-        
-        // The following is logic taken from the old HQ Authentication Filter
+        //If the user logged in with his LDAP credentials we want to add a LDAP\ prefix to
+        //his user name and we also want to update his roles
+        if (null != authentication.getPrincipal() && 
+        		authentication.getPrincipal().getClass().getName().contains("Ldap")
+        		&& !username.toLowerCase().startsWith(LDAP_PREFIX.toLowerCase())) {
+        	username = LDAP_PREFIX + username;
+        	updateRoles = true;
+        }
         try {
+        	// The following is logic taken from the old HQ Authentication Filter
             int sessionId = sessionManager.put(authzSubjectManager.findSubjectByName(username));
             HttpSession session = request.getSession();
             ServletContext ctx = session.getServletContext();
@@ -107,12 +117,28 @@ public class BaseSessionInitializationStrategy implements SessionAuthenticationS
             AuthzSubject subj = authzBoss.getCurrentSubject(sessionId);
             boolean needsRegistration = false;
             
-            if (subj == null) {
+            if (subj == null || updateRoles) {
                 try {
                     AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
-                    subj = authzSubjectManager.createSubject(
-                        overlord, username, true, HQConstants.ApplicationName, "", "", "", "",
-                        "", "", false);
+                    if (null == subj) {
+                    	needsRegistration = true;
+                    	subj = authzSubjectManager.createSubject(
+                    			overlord, username, true, HQConstants.ApplicationName, "", "", "", "",
+                    			"", "", false);
+                    }
+                    //For LDAP users we first want to remove all the existing 'LDAP' roles and then add the current roles he belongs to.
+                    //We are doing that because for LDAP users we do an automatic mapping of the roles according to the group the
+                    //user belongs to, and if the user has been removed or added from some group we want this to be reflected in his roles.
+                    if (updateRoles) {
+                    	Collection<RoleValue> roles = roleManager.getRoles(subj, PageControl.PAGE_ALL);
+                    	for (RoleValue role : roles) {
+                    		String roleName = role.getName().toLowerCase();
+							if (roleName.startsWith(LDAP_PREFIX.toLowerCase())) {
+                    			roleManager.removeSubjects(authzSubjectManager.getOverlordPojo(), role.getId(), 
+                    					new Integer[] {subj.getId()});
+                    		}
+                    	}
+                    }
                     //every user has ROLE_HQ_USER.  If other roles assigned, automatically assign them to new user
                     if(authentication.getAuthorities().size() > 1) {
                         Collection<Role> roles = roleManager.getAllRoles();
@@ -121,7 +147,14 @@ public class BaseSessionInitializationStrategy implements SessionAuthenticationS
                                 continue;
                             }
                             for(Role role: roles) {
-                                if(("ROLE_" + role.getName()).equalsIgnoreCase(authority.getAuthority())) {
+                            	String roleName = role.getName().toLowerCase();
+								String ldapPrefix = LDAP_PREFIX.toLowerCase();
+								String ldapRoleName = "";
+								if (roleName.startsWith(ldapPrefix)) {
+                            		ldapRoleName = roleName.substring(roleName.indexOf(ldapPrefix)+5).trim();
+                            	}
+                                if((("ROLE_" + role.getName()).equalsIgnoreCase(authority.getAuthority())) || 
+                                		(("ROLE_" + ldapRoleName).equalsIgnoreCase(authority.getAuthority()))) {
                                     roleManager.addSubjects(authzSubjectManager.getOverlordPojo(), role.getId(), 
                                         new Integer[] {subj.getId()});
                                 }
@@ -133,7 +166,6 @@ public class BaseSessionInitializationStrategy implements SessionAuthenticationS
                         "Unable to add user to authorization system");
                 }
                 
-                needsRegistration = true;
                 sessionId = sessionManager.put(subj);
             } else {
                 needsRegistration = subj.getEmailAddress() == null ||

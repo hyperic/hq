@@ -247,7 +247,10 @@ __ll__
   </target>
     
     <target name="unpack-agent">
-       <echo>^^^INFO:
+        <antcall target="pre-agent-unpack">
+              <param name="agent-dir" value="${hyperic-hq-agent.installdir}/agent-${version}"/>
+        </antcall>
+      <echo>^^^INFO:
             Unpacking ${agent.bundle} to: ${hyperic-hq-agent.installdir}/agent-${version}...
        </echo>
        <untar src="${agent.bundle}"
@@ -262,6 +265,9 @@ __ll__
     </target>
     
     <target name="unzip-agent">
+        <antcall target="pre-agent-unpack">
+              <param name="agent-dir" value="${hyperic-hq-agent.installdir}/agent-${version}"/>
+        </antcall>
          <echo>^^^INFO:
                     Unpacking ${agent.bundle} to: ${hyperic-hq-agent.installdir}/agent-${version}...
         </echo>
@@ -275,6 +281,9 @@ __ll__
     </target>
     
     <target name="unpack-ee-agent">
+        <antcall target="pre-agent-unpack">
+            <param name="agent-dir" value="${hyperic-hq-agent.installdir}/agent-${version}-EE"/>
+        </antcall>
        <echo>^^^INFO:
             Unpacking ${agent.bundle} to: ${hyperic-hq-agent.installdir}/agent-${version}-EE...
        </echo>
@@ -289,6 +298,9 @@ __ll__
     </target>
     
     <target name="unzip-ee-agent">
+        <antcall target="pre-agent-unpack">
+              <param name="agent-dir" value="${hyperic-hq-agent.installdir}/agent-${version}-EE"/>
+        </antcall>
          <echo>^^^INFO:
                     Unpacking ${agent.bundle} to: ${hyperic-hq-agent.installdir}/agent-${version}-EE...
         </echo>
@@ -301,6 +313,17 @@ __ll__
           </antcall>
     </target>
     
+	<target name="check-agent-dir-exists">
+	  <echo>^^^DEBUG: Looking for previous installation</echo>
+	  <condition property="agentdirexists">
+	    <available file="${agent-dir}" type="dir"/>
+	  </condition>
+	 </target>
+
+	 <target name="pre-agent-unpack" depends="check-agent-dir-exists" if="agentdirexists">	 	
+	    <fail>Agent installation directory '${agent-dir}' already exists. Please remove it or supply a different directory name.</fail>
+	</target>
+	
     <target name="post-agent-unpack">
         <echo>^^^INFO: Setting permissions on ${agent-dir}...</echo>
         <chmod perm="go-rwx" type="both">
@@ -329,7 +352,6 @@ __ll__
           if="hyperic-hq-agent.installdir"
           description="Install the HQ agent.">
     <echo>^^^INFO: Installing the agent...</echo>
-    <echo>^^^DEBUG: Looking for previous installation</echo>
    
     <foreach param="agent.bundle" target="unpack-agent">
         <param name="hyperic-hq-agent.installdir" value="${hyperic-hq-agent.installdir}"/>
