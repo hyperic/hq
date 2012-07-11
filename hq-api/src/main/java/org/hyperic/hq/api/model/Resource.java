@@ -49,7 +49,7 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "resource", namespace=RestApiConstants.SCHEMA_NAMESPACE)
-@XmlType(name="ResourceType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+@XmlType(name="ResourceTypeType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 public class Resource {
 
 	@XmlAttribute

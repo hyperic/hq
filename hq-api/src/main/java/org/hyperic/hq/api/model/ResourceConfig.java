@@ -32,6 +32,7 @@ import java.util.Map;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
  
+@XmlRootElement(namespace=RestApiConstants.SCHEMA_NAMESPACE)
 @XmlType(name="ResourceConfigType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 public class ResourceConfig implements Serializable{
 	

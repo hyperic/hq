@@ -30,8 +30,8 @@ import java.io.Serializable;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-@XmlRootElement(name = "criteria", namespace=RestApiConstants.SCHEMA_NAMESPACE)
-@XmlType(name="Criteria", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+@XmlRootElement(namespace=RestApiConstants.SCHEMA_NAMESPACE)
+@XmlType(namespace=RestApiConstants.SCHEMA_NAMESPACE)
 public class Criteria implements Serializable{
 	
 	private static final long serialVersionUID = 2275006886627562384L;

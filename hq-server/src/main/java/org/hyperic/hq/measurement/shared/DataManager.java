@@ -70,6 +70,14 @@ public interface DataManager {
     public void addData(List<DataPoint> data, boolean overwrite);
 
     /**
+     * adds the data to the specified aggregation table (excluding the raw data table)
+     * 
+     * @param data
+     * @param aggTable
+     */
+    public void addData(List<DataPoint> data, String aggTable);
+
+    /**
      * Fetch the list of historical data points given a begin and end time
      * range. Returns a PageList of DataPoints without begin rolled into time
      * windows.

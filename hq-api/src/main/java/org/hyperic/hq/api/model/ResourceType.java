@@ -37,7 +37,7 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 
-@XmlType(name="resourceType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+@XmlType(name="resourceTypeEnum", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 @XmlEnum
 public enum ResourceType {
     PLATFORM(AppdefEntityConstants.APPDEF_TYPE_PLATFORM),
