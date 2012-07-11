@@ -1,6 +1,6 @@
 open_source_license.txt
 
-Hyperic HQ 4.6.5 GA
+Hyperic HQ 0.0 BETA
 Enterprise and Open Source Editions
 
 

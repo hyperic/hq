@@ -1,378 +1,57 @@
-﻿VMWARE END USER LICENSE AGREEMENT
+﻿VMWARE, INC. 
+BETA LICENSE AGREEMENT
 
-PLEASE NOTE THAT THE TERMS OF THIS END USER LICENSE AGREEMENT SHALL GOVERN 
-YOUR USE OF THE SOFTWARE, REGARDLESS OF ANY TERMS THAT MAY APPEAR DURING THE 
-INSTALLATION OF THE SOFTWARE.
+Note: BY CLICKING "I AGREE," ACCESSING, DOWNLOADING, INSTALLING, UPLOADING, COPYING OR USING THE BETA SOFTWARE, YOU CONCLUDE AND AGREE TO THIS BETA LICENSE AGREEMENT ("AGREEMENT") IN A LEGALLY BINDING MANNER WITH VMWARE, INC., 3401 HILLVIEW AVENUE, PALO ALTO, CA 94304, USA ("VMware"). IF YOU HAVE SPECIFIED IN CONNECTION WITH THE REGISTRATION PROCESS FOR THIS SOFTWARE BETA TEST PROGRAM THAT YOU ARE ACTING ON BEHALF OF A COMPANY OR OTHER ORGANIZATION, YOU REPRESENT THAT YOU ARE AUTHORIZED TO LEGALLY BIND SUCH ORGANIZATION AND THAT YOU CONCLUDE THE AGREEMENT ON BEHALF OF SUCH ORGANIZATION. IN THE FOLLOWING, THE TERMS "YOU" AND "LICENSEE" SHALL REFER, JOINTLY AND SEVERALLY, TO YOU INDIVIDUALLY AND ANY ORGANIZATION ON WHOSE BEHALF YOU ACT.
+IF YOU DO NOT AGREE TO THE TERMS OF THIS BETA LICENSE AGREEMENT, THEN DO *NOT* CLICK "I AGREE," ACCESS, DOWNLOAD, INSTALL, UPLOAD, COPY OR USE THE BETA SOFTWARE.
+1.	DEFINITIONS.
+(a)  "Beta Software" shall mean the beta version of VMware's software and the media and Documentation provided by VMware to Licensee and for which Licensee is granted a use license pursuant to this Agreement.  The Beta Software will be provided in object form only.
+(b)  "Documentation" shall mean the printed or online written reference material furnished to Licensee in conjunction with the Beta Software, including, without limitation, instructions, beta testing guidelines, and end user guides.
+(c)  "Intellectual Property Rights" shall mean all intellectual property rights, including, without limitation, patent, copyright, trademark, and trade secret, recognized in any jurisdiction worldwide, whether perfected or not, and any similar and other proprietary rights.
+(d)  "Open Source Software" means code that is provided with the Beta Software and identified as open source code or otherwise as being subject to open source license terms.
+(e)  "Updates" shall mean a modification, error correction, bug fix, new release, or other update to or for the Beta Software.
 
-IMPORTANT-READ CAREFULLY:   BY DOWNLOADING, INSTALLING, OR USING THE 
-SOFTWARE, YOU (THE INDIVIDUAL OR LEGAL ENTITY) AGREE TO BE BOUND BY THE 
-TERMS OF THIS END USER LICENSE AGREEMENT ("EULA").  IF YOU DO NOT AGREE TO 
-THE TERMS OF THIS EULA, YOU MUST NOT DOWNLOAD, INSTALL, OR USE THE SOFTWARE, 
-AND YOU MUST DELETE OR RETURN THE UNUSED SOFTWARE TO THE VENDOR FROM WHICH 
-YOU ACQUIRED IT WITHIN THIRTY (30) DAYS AND REQUEST A REFUND OF THE LICENSE 
-FEE, IF ANY, THAT YOU PAID FOR THE SOFTWARE.
+2.	LICENSE GRANT, USE AND OWNERSHIP
+	(a)  Limited License.  Subject to the terms and conditions of this Agreement, VMware grants to Licensee a non-exclusive, revocable (at any time and for any reason, at VMware's sole discretion), royalty-free, non-transferable,  non-assignable license (without the right to sublicense):
+  (i) to use the Beta Software in accordance with the Documentation solely for purposes of (A) internal testing and evaluation on whether or not to license commercial versions of the Beta Software if such commercial versions ever become available, and (B) development necessary for complementary Licensee products to be interoperable with the Beta Software, 
+ (ii) to use the Documentation provided with the Beta Software in support of Licensee's authorized use of the Beta Software, and
+ (iii) to copy Beta Software for archival or backup purposes, provided that all titles and trademarks, copyright, and restricted rights notices are reproduced on such copies.
 
-EVALUATION LICENSE.  If You are licensing the Software for evaluation 
-purposes, your use of the Software is only permitted in a non-production 
-environment and for the period limited by the Software License Key.  
-Notwithstanding any other provision in this EULA, an Evaluation License of 
-the Software is provided "AS-IS" without support or warranty of any kind, 
-expressed or implied.
+(b)  Evaluation Feedback. The purpose of this limited license is the testing and evaluation of the Beta Software and Documentation and development by Licensee of Licensee products that communicate with the Software.  In furtherance of this purpose, Licensee shall provide feedback to VMware concerning the functionality and performance of the Beta Software from time to time as reasonably requested by VMware, including, without limitation, identifying potential errors and improvements.  Licensee will provide the requested feedback in a manner that is convenient to Licensee subject to reasonable availability of Licensee's personnel.  Notwithstanding the foregoing, prior to Licensee disclosing to VMware any information under this Agreement that Licensee considers proprietary or confidential, Licensee shall obtain VMware's prior written approval to disclose such information to VMware, and without such prior written approval from VMware, Licensee shall not disclose any such information to VMware.  VMware may use feedback to improve or enhance its products and, accordingly, you hereby grant to VMware a non-exclusive, perpetual, irrevocable, royalty-free, transferable, worldwide right and license, with the right to sublicense, to use, reproduce, disclose, distribute, modify, prepare derivative works of and otherwise exploit the feedback and other information without restriction in any manner now known or in the future conceived and to make, use, sell, offer to sell, import and export any product or service that incorporates the feedback and other information .
+(c)  Restrictions.  Licensee shall not copy or use the Beta Software (including the Documentation) or disseminate Confidential Information to any third party including but not limited to its partners, affiliates or subsidiaries.  Except to the extent that any applicable mandatory laws prevent VMware's restraining Licensee from doing so, Licensee will not, and will not permit any third party to, sublicense, rent, copy, modify, create derivative works of, translate, reverse engineer, decompile, disassemble, or otherwise reduce to human perceivable form any portion of the Beta Software or accompanying Documentation.  Without limiting the generality of the foregoing, Licensee shall not use the Beta Software for Licensee's product development or any other commercial purpose, including, but not limited to sales or marketing activities, except as expressly permitted in this Agreement.  The Beta Software and all performance data and test results, including without limitation, benchmark test results (collectively "Performance Data"), relating  to the Beta Software are the Confidential Information of VMware, and will be treated in accordance with the terms of Section 4 of this Agreement.  Accordingly, Licensee shall not publish or disclose to any third party any Performance Data relating to the Beta Software.  
 
-1.	DEFINITIONS
- 
-1.1	"Documentation" means, collectively, the operation instructions, 
-release notes, user manuals and/or help files for the Software in electronic 
-or written form.
+(d)  Ownership.  VMware and its licensors shall own and retain all right, title and interest in and to the Intellectual Property Rights in the Beta Software and any derivative works thereof, subject only to the limited license expressly set forth in Section 2(a) hereof.  Licensee does not acquire any other rights, express or implied, in the Beta Software.  ALL RIGHTS NOT EXPRESSLY GRANTED HEREUNDER ARE RESERVED TO VMWARE. 
+(e)  No Support Services.  VMware is under no obligation to support the Beta Software in any way or to provide any Updates to Licensee.  In the event VMware, in its sole discretion, supplies any Update to Licensee, the Update shall be deemed Beta Software under this Agreement and shall be subject to the terms and conditions of this Agreement.
+	(f)  Third-Party Software.  The Beta Software may enable a computer to run multiple instances of third-party guest operating systems and application programs.  Licensee acknowledges that Licensee is responsible for obtaining any licenses necessary to operate any third-party software, including guest operating systems and application programs.
+(g)  Open Source Software.  Except Sections 5, 6, and 7, the terms and conditions of this Agreement shall not apply to any Open Source Software accompanying the Beta Software.  Any such Open Source Software is provided under the terms of the open source license agreement or copyright notice accompanying such Open Source Software or in the open_source_licenses file accompanying the Beta Software. 
 
-1.2	"Guest Operating Systems" means instances of third-party operating 
-systems licensed separately by You and installed in a Virtual Machine.
+3.	TERM AND TERMINATION.  Unless otherwise terminated as specified under this Agreement, Licensee's rights with respect to the Beta Software will terminate upon the earlier of (a) the initial commercial release by VMware of a generally available version of the Beta Software or (b) automatic expiration of the Beta Software based on the system date.  Either party may terminate this Agreement at any time for any reason or no reason by providing the other party advance written notice thereof.  VMware hereby terminates this Agreement and any Licensee rights with respect to the Beta Software without notice in the event of improper disclosure of VMware's Beta Software as specified under Section 4 (Confidentiality) below. Upon any expiration or termination of this Agreement, the rights and licenses granted to Licensee under this Agreement shall immediately terminate, and Licensee shall immediately cease using, and will destroy or render practically inaccessible the Beta Software, Documentation, and all other tangible items in Licensee's possession or control that contain Confidential Information.  The rights and obligations of the parties set forth in Sections 2(b), 2(c), 2(d), 2(e), 2(f), 2(g), 3, 4, 5, 6, 7 and 8 survive termination or expiration of this Agreement for any reason.  
 
-1.3	"Software" means software products that are licensed to You under 
-this EULA, including, but not limited to, any related components purchased 
-or provided with the Software, Documentation, and any maintenance releases 
-thereto. 
+?
+4.	CONFIDENTIALITY.  
+(a) "Confidential Information" shall mean the Beta Software, all information regarding the Beta Software (including any trade secrets, know-how, inventions, techniques, processes, and algorithms embodied in the Beta Software), Documentation, Performance Data, any Updates, and other information provided by VMware to Licensee under this Agreement, whether disclosed orally, in writing, or by examination or inspection, other than information that Licensee can demonstrate (i) was already known to Licensee, other than under an obligation of confidentiality, at the time of disclosure; (ii) was generally available in the public domain at the time of disclosure to Licensee; (iii) became generally available in the public domain after disclosure other than through any act or omission of Licensee; (iv) was subsequently lawfully disclosed to Licensee by a third party without any obligation of confidentiality; or (v) was independently developed by Licensee without use of or reference to any information or materials disclosed by VMware or its suppliers.  If Licensee is required to disclose Confidential Information by applicable law or court order, Licensee shall notify VMware of the required disclosure promptly in writing and shall cooperate with VMware in any lawful action to contest or limit the scope of the required disclosure.  Confidential Information shall include without limitation any information relating to VMware products, product roadmaps, and other technical, business, financial and product development plans, forecasts and strategies.  Licensee shall not use any Confidential Information for any purpose other than as expressly authorized under this Agreement.  In no event shall Licensee use the Beta Software or any Confidential Information to develop, manufacture, market, sell, or distribute any product or service, including any VMware products except as expressly set forth in this Agreement.  Licensee shall not disclose any Confidential Information to any third party. Without limiting the foregoing, Licensee shall use at least the same degree of care that it uses to prevent the disclosure of its own confidential information of like importance, but in no event less than reasonable care, to prevent the disclosure of such Confidential Information.
+(b)  Additional Confidentiality Restrictions for Highly Confidential Beta Software.  For certain Beta Software designated by VMware as highly confidential ("Highly Confidential Beta Software") in VMware's correspondence to you regarding this beta program or in any Documentation, additional heightened confidentiality restrictions designated below will apply, in addition to accepting the terms of this Agreement.
+(i)  Licensee shall limit dissemination of Highly Confidential Beta Software and related information concerning product features, future technologies and roadmaps only to Information Technology teams and/or software/solutions development teams of Licensee designated by VMware, and only to individuals on those teams who have a need to know the Confidential Information for purposes expressly authorized under this Agreement.  For clarity and without limiting the generality of the foregoing, Licensee shall not disseminate any Highly Confidential Beta Software to Licensee's sales and marketing field organizations.  Licensee will assign an employee who will be primarily responsible ("Primary Contact") for ensuring that the terms of this Agreement are complied with.  
+(ii)  Improper Disclosure of Highly Confidential Beta Software.  Licensee acknowledges that damages for improper disclosure of Highly Confidential Beta Software or related information concerning product features, future technologies and roadmaps may be irreparable and that monetary damages would be inadequate to compensate VMware for any breach of this Agreement.  In the event that VMware reasonably believes that Licensee has disseminated certain of such Highly Confidential Beta Software or related information concerning product features, future technologies and roadmaps to an unauthorized party, Licensee will be immediately removed from VMware's Beta Software program and will not be permitted to participate in any VMware Beta Software program in the future.  Additionally, all rights and licenses granted to Licensee under this Agreement shall immediately terminate in accordance with Section 3 herein (Term and Termination), and (b) in addition to all other remedies available in law or otherwise, VMware is entitled to seek equitable relief, including injunction and preliminary injunction against the threatened breach of this Agreement or  the continuation of any such breach. 
+5.	LIMITATION OF LIABILITY.  IT IS UNDERSTOOD THAT THE BETA SOFTWARE IS PROVIDED WITHOUT CHARGE FOR LIMITED EVALUATION PURPOSES.  ACCORDINGLY, TO THE FULLEST EXTENT PERMITTED BY LAW, BUT SUBJECT ALWAYS TO THIS SECTION 5, THE TOTAL LIABILITY OF VMWARE AND ITS LICENSORS ARISING OUT OF OR RELATED TO THIS AGREEMENT SHALL NOT EXCEED $100.00.  TO THE FULLEST EXTENT PERMITTED BY LAW, IN NO EVENT SHALL VMWARE OR ITS LICENSORS HAVE LIABILITY FOR ANY INDIRECT, INCIDENTAL, SPECIAL, OR CONSEQUENTIAL DAMAGES OR DAMAGES FOR LOSS OF BUSINESS PROFITS, BUSINESS INTERRUPTION, OR LOSS OF BUSINESS INFORMATION, HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY (INCLUDING WITHOUT LIMITATION, TORT, STATUTE, CONTRACT OR OTHER), EVEN IF VMWARE AND ITS LICENSORS HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.  THESE LIMITATIONS SHALL APPLY NOTWITHSTANDING ANY FAILURE OF ESSENTIAL PURPOSE OF ANY LIMITED REMEDY.  THE PARTIES ACKNOWLEDGE THAT THE VARIOUS CONSIDERATIONS DUE TO VMWARE IN ACCORDANCE WITH THE TERMS OF THIS AGREEMENT WERE TAKEN INTO ACCOUNT IN DETERMINING THE LIMITATION OF LIABILITY SET FORTH IN THIS SECTION 5. LICENSEE ACKNOWLEDGES AND AGREES THIS LIMITATION IS AN ESSENTIAL ELEMENT OF THIS AGREEMENT AND THAT VMWARE WOULD NOT ENTER INTO THIS AGREEMENT WITHOUT THESE LIMITATIONS ON ITS LIABILITY.
+You can recover from Microsoft and its suppliers only direct damages up to U.S. $5.00.
+6.	WARRANTY DISCLAIMER.  IT IS UNDERSTOOD THAT THE BETA SOFTWARE, OPEN SOURCE SOFTWARE, DOCUMENTATION, AND ANY UPDATES MAY CONTAIN ERRORS AND ARE PROVIDED FOR LIMITED EVALUATION ONLY.  TO THE FULLEST EXTENT PERMITTED BY LAW, AND SUBJECT TO SECTION 5, THE BETA SOFTWARE, THE OPEN SOURCE SOFTWARE, THE DOCUMENTATION, AND ANY UPDATES ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, WHETHER EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE.  TO THE FULLEST EXTENT PERMITTED BY LAW, AND SUBJECT TO SECTION 5, VMWARE AND ITS LICENSORS SPECIFICALLY DISCLAIM ALL IMPLIED WARRANTIES OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE.  Licensee acknowledges that VMware has not publicly announced the availability of the Beta Software, that VMware has not promised or guaranteed to Licensee that such Beta Software will be announced or made available to anyone in the future, that VMware has no express or implied obligation to Licensee to announce or introduce the Beta Software, and that VMware may not introduce a product similar to or compatible with the Beta Software and that any version number (if any) referenced is subject to change and does not in any way represent VMware's commitment to release any product in the future. Accordingly, Licensee acknowledges that any research or development that it performs regarding the Beta Software or any product associated with the Beta Software is done entirely at Licensee's own risk.  Specifically, the Beta Software may contain features, functionality or modules that will not be included in the production version of the Beta Software, if released, or that will be marketed separately for additional fees.
 
-1.4     "Software License Key" means a valid serial number issued to You to 
-activate and use the Software.     
+7.	OTHER PROVISIONS
+(a)  Governing Law, Injunctive Relief and Legal Costs.  
+(aa) Choice of Law. This Agreement and any dispute arising out of or related to this Agreement or the Beta Software ("Dispute") will be governed by California law, without regard to its choice of law principles.  The United Nations Convention for the International Sale of Goods shall not apply.
+(bb) Injunctive Relief.  Either party may, at its sole discretion, seek preliminary judicial relief in any court of competent jurisdiction (including, but not limited to, preliminary injunctive relief). Also, the provisions of this Section 7 (a) may be enforced by any court of competent jurisdiction.
+ (b)  Export Regulations.  The Beta Software is of United States origin and is provided subject to the U.S. Export Administration Regulations.  Diversion contrary to U.S. law is prohibited.  Without limiting the foregoing, you agree that (1) you are not, and are not acting on behalf of, any person who is a citizen, national, or resident of, or who is controlled by the government of, Cuba, Iran, North Korea, Sudan, or Syria, or any other country to which the United States has prohibited export transactions; (2) you are not, and are not acting on behalf of, any person or entity listed on the U.S. Treasury Department list of Specially Designated Nationals and Blocked Persons, or the U.S. Commerce Department Denied Persons List or Entity List; and (3) you will not use the Beta Software for, and will not permit the Beta Software to be used for, any purposes prohibited by law, including, without limitation, for any prohibited development, design, manufacture or production of missiles or nuclear, chemical or biological weapons.  U.S. Export Control Classification Numbers (ECCN's) may be found at VMware help page: http://www.vmware.com/help/export-control.
+(c)  Modification.  This is the entire agreement between the parties relating to the subject matter hereof and to the fullest extent permitted by law, all other terms, representations, negotiations, arrangements or understandings are rejected.  This Agreement supersedes and replaces any other agreements, representations, negotiations, arrangements or understandings between the parties and Licensee hereby waives any form requirements that may be contained in previous agreements and agrees that this Agreement shall take precedent with respect to its subject matter.  No party has entered into this Agreement relying on any representations made by or on behalf of the other, other than those expressly made in this Agreement.  No waiver or modification of this Agreement shall be valid unless in writing signed by each party.  
+(d)  Language of Contract.  The parties have required that this Agreement and all documents relating thereto be drawn up in English. Les parties ont demand que cette convention ainsi que tous les documents que s'y attachent soient rdigs en anglais.
+(e) Severability. If any provision of this Agreement is held to be illegal, invalid or unenforceable, the provision will be enforced to the maximum extent permissible so as to effect the intent of the parties, and the remaining provisions of this Agreement will remain in full force and effect.  
 
-1.5	"Open Source Software" means various software components including 
-open source software, that may be part of the Software, each licensed to You 
-under its own applicable license terms and conditions, which can be found in 
-the open_source_licenses.txt file, the Documentation or as applicable, the 
-corresponding source files for the Software available at 
-http://www.vmware.com/download/open_source.html.
+(f) Waivers.   Any waiver of these terms must be in writing and signed by the waiving party to be effective. 
 
-1.6	"Virtual Machine" means a software container that can run its own 
-operating system and execute applications like a physical machine.   
-	
-2.		GRANT AND USE RIGHTS FOR SOFTWARE 
+(g) Data Privacy.  VMware's privacy policy (http://www.vmware.com/help/privacy.html) shall apply.
 
-2.1	License Grant.  The Software is licensed, not sold.  Subject to the 
-terms of this EULA, VMware grants You a non-exclusive, non-transferable 
-license, without rights to sublicense, to use the Software in the country 
-where You are invoiced in accordance with the Documentation and the VMware 
-license model (per device, per processor, per server, per single user, per 
-virtual machine, or any other VMware approved license model) specified in 
-Section 8 of this EULA for which You have paid the applicable license fees. 
-If You were invoiced in the European Union for the Software, You may use 
-that Software in any of the European Union member states. For VMware 
-Workstation and Fusion, You may use the Software without the invoice-country 
-restriction.  You may allow third party consultants or contractors to access 
-and use the Software on Your behalf solely for Your internal business 
-operations, provided, they are bound by an agreement with You protecting 
-VMware's intellectual property with terms no less stringent than this EULA 
-and You ensure that such third party use of the Software complies with the 
-terms of this EULA.  You may make one backup, unmodified copy of the 
-Software solely for archival purpose.  If You upgrade or exchange the 
-Software from a previous validly licensed version, You must cease use of the 
-prior version of that Software.  You agree to provide written certification 
-of destruction of the previous version of the Software upon VMware's 
-request.
+(h) Relationship Between the Parties.  The relationship between you and VMware is that of licensee/licensor. Neither party will represent that it has any authority to assume or create any obligation, express or implied, on behalf of the other party, nor to represent the other party as agent, employee, franchisee, or in any other capacity.  Nothing in this Agreement shall be construed to limit either party's right to independently develop or distribute software that is functionally similar to the other party's products, so long as proprietary information of the other party is not included in such software.
 
-2.2	Restrictions.  Except as expressly permitted by this EULA or by 
-applicable law, You may not (i) sell, lease, assign, license, sublicense, 
-distribute or otherwise transfer in whole or in part the Software; (ii) 
-permit any use of or access to the Software by any third party, (iii) 
-operate the Software on behalf of or for the benefit of any third party, 
-including the operation of any service that is accessed by a third party, 
-except that, for the purposes of this Section 2.2(iii), You may use the 
-Software to deliver hosted services to Your affiliates that are directly or 
-indirectly controlled by, or are under common control with You.  "Control" 
-in this Section 2.2(iii) means an ownership, voting or similar interest 
-representing fifty percent (50%) or more of the total interests then 
-outstanding of the relevant entity; (iv) decompile, disassemble, reverse 
-engineer, or otherwise attempt to derive source code from the Software; (v) 
-modify or create derivative works based upon the Software; or (vi) create, 
-develop, license, install, use, or deploy any software or services to 
-circumvent, enable, modify or provide access, permissions or rights which 
-violate the technical restrictions in the Software.  If You wish to exercise 
-any rights to reverse engineer to ensure interoperability in accordance with 
-applicable law, You must first provide VMware with written notice and all 
-reasonably requested information to info@vmware.com  within 30 days and 
-permit VMware to assess your claim and, at VMware's sole discretion, to 
-make an offer to provide alternatives that reduce any adverse impact on 
-VMware's intellectual property or other rights.
+(h) Notice of Restricted Rights.  Oracle programs delivered as part of the Beta Software subject to the DOD FAR Supplement are 'commercial computer software' and use, duplication, and disclosure of the Oracle programs, including documentation, shall be subject to the licensing restrictions set forth in this Agreement. Otherwise, such Oracle programs delivered subject to the Federal Acquisition Regulations are 'restricted computer software' and use, duplication, and disclosure of the Oracle programs, including documentation, shall be subject to the restrictions in FAR 52.227-19, Commercial Computer Software-Restricted Rights (June 1987).
 
-2.3	VMware Tools.  You may use or distribute the suite of utilities and 
-drivers that may be part of the Software ("VMware Tools") to any third party 
-provided that (i) You only distribute the VMware Tools as a whole in object 
-code format, whether or not as part of the Virtual Machine You create with 
-the Software; and (ii) You agree to indemnify, hold harmless, and defend 
-VMware from and against any claims or lawsuits, including attorneys' fees, 
-that relate to your distribution of VMware Tools.
-
-2.4	Benchmarking.  You may use the Software to conduct internal 
-performance testing and benchmarking studies, the results of which only You 
-may publish or publicly disseminate, provided that VMware has reviewed and 
-approved of the methodology, assumptions and other parameters of your 
-testing and studies.  Please contact VMware at benchmark@vmware.com to 
-request such review.  For VMware Workstation and Fusion benchmarks, You may 
-publish or publicly disseminate the results without VMware's prior review 
-and approval.
-
-2.5	Third-party Software.  You are responsible for separately obtaining 
-and complying with any licenses necessary to operate third-party software, 
-including but not limited to, Guest Operating Systems and application 
-programs which the Software enables You to run.
-
-2.6	Data Collection and Privacy.  You agree that VMware may collect, 
-use, store and transmit technical and related information about your use of 
-the Software which may include internet protocol address, hardware 
-identification, operating system, application software, peripheral hardware, 
-and non-personally identifiable Software usage statistics ("Collected Data") 
-to facilitate the provisioning of updates, support, invoicing or online 
-services to You.  Collected Data is subject to VMware's Privacy Policy at 
-http://www.vmware.com/help/privacy.html . 
-
-2.7	Audit Rights. During the term of this EULA and for two (2) years 
-after termination or expiration of the EULA or support and subscription 
-services for the applicable Software has expired, You agree to maintain 
-accurate records as to your installation and use of the Software, sufficient 
-to provide evidence of compliance with the terms of this EULA. VMware, or an 
-independent third party designated by VMware, may audit, upon written notice 
-to You, your books, records, and computing devices to determine your 
-compliance with this EULA and your payment of the applicable license and 
-support services fees, if any, for the Software. VMware may conduct no more 
-than one (1) audit in any twelve (12) month period.  In the event that any 
-such audit reveals an underpayment by You of more than five percent (5%) of 
-the license amounts due to VMware in the period being audited, or that You 
-have breached any term of the EULA, then, in addition to paying to VMware 
-any underpayments for Software licenses and Support and Subscription ("SnS") 
-fees and any other remedies VMware may have, You will promptly pay to VMware 
-the audit costs incurred by VMware. 
-	
-3.	TITLE.  VMware retains all right, title, and interest in and to the 
-Software, the Software License Key(s) and all related intellectual property 
-rights. VMware retains all rights not expressly granted to You in this EULA. 
-
-4.	SUPPORT AND SUBSCRIPTION SERVICES.  Except as expressly specified in 
-Section 8 of this EULA, VMware does not provide any support or subscription 
-services for the Software under this EULA.  You have no rights to any 
-updates, upgrades or extensions or enhancements to the Software developed by 
-VMware unless you separately purchase VMware support or subscription 
-services.  These support or subscription services are subject to VMware's 
-then-current Support and Subscription Contract Terms and Conditions. 
-
-5. 	TERMINATION.  VMware may terminate this EULA immediately upon notice 
-if You fail to comply with any term of this EULA.  In the event of 
-termination, You must remove and destroy all copies of the Software and 
-Software License Key(s), including all backup copies, from the server and 
-all computers and terminals You own, possess or control and on which the 
-Software is installed.  Any obligations to pay fees incurred prior to 
-termination and Sections 1, 2, 3, 6, and 7 of this EULA shall survive 
-termination for any reason.
-
-6.	LIMITED WARRANTY AND LIMITATION OF LIABILITY
-
-6.1	Limited Warranty. VMware warrants that (i) the physical media, if 
-any, on which the Software is delivered will be free of defects in materials 
-and workmanship; and (ii) that the Software will substantially conform to 
-the functional description set forth in the standard Documentation 
-accompanying the Software for a period of 90 days after the date of delivery 
-of the Software License Key to You ("Warranty Period").  If the physical 
-media is defective and is returned to VMware within the Warranty Period, 
-your exclusive remedy will be VMware's option to repair or replace the 
-defective physical media..  To return the defective physical media, send an 
-email to sales@vmware.com  to request a return authorization number.  If 
-during the Warranty Period the Software does not substantially conform to 
-the functional description set forth in the Documentation, your exclusive 
-remedy will be that VMware shall, at its sole option, correct the defects in 
-the Software or refund the license fees You paid, if any, for the Software 
-provided that (i) the Software has been properly installed and used at all 
-times and in accordance with the  Documentation; (ii) no modification, 
-deletion or addition has been made to the Software by persons other than 
-VMware or its authorized representative; and (iii) VMware receives written 
-notice of the non-conformity within the Warranty Period. EXCEPT FOR THE 
-PRECEDING EXPRESS LIMITED WARRANTY, TO THE MAXIMUM EXTENT MANDATED BY LAW, 
-VMWARE AND ITS LICENSORS PROVIDE THE SOFTWARE WITHOUT ANY WARRANTIES OF ANY 
-KIND, EXPRESS, IMPLIED, STATUTORY, OR IN ANY OTHER PROVISION OF THIS EULA OR 
-COMMUNICATION WITH YOU, AND VMWARE AND ITS LICENSORS SPECIFICALLY DISCLAIM 
-ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, 
-AND NON-INFRINGEMENT.
-
-6.2	LIMITATION OF LIABILITY. TO THE MAXIMUM EXTENT MANDATED BY LAW, IN 
-NO EVENT WILL VMWARE AND ITS LICENSORS BE LIABLE FOR ANY LOST PROFITS OR 
-BUSINESS OPPORTUNITIES, LOSS OF USE, BUSINESS INTERRUPTION, LOSS OF DATA, OR 
-ANY OTHER INDIRECT, SPECIAL, INCIDENTAL, OR CONSE¬QUEN¬TIAL DAMAGES UNDER 
-ANY THEORY OF LIABILITY, WHETHER BASED IN CONTRACT, TORT, NEGLIGENCE, 
-PRODUCT LIABILITY, OR OTHERWISE.  BECAUSE SOME JURISDICTIONS DO NOT ALLOW 
-THE EXCLUSION OR LIMITATION OF LIABILITY FOR CONSEQUENTIAL OR INCIDENTAL 
-DAMAGES, THE PRECEDING LIMITATION MAY NOT APPLY TO YOU.  VMWARE'S AND ITS 
-LICENSORS' LIABILITY UNDER THIS EULA WILL NOT, IN ANY EVENT, EXCEED THE 
-LICENSE FEES YOU PAID FOR THE SOFTWARE, IF ANY. THE FOREGOING LIMITATIONS 
-SHALL APPLY REGARDLESS OF WHETHER VMWARE OR ITS LICENSORS HAVE BEEN ADVISED 
-OF THE POSSIBILITY OF SUCH DAMAGES AND REGARDLESS OF WHETHER ANY REMEDY 
-FAILS OF ITS ESSENTIAL PURPOSE. 
-
-7.	GENERAL
-
-7.1    	Entire Agreement.  This EULA represents the entire agreement between 
-the parties with respect to the Software, and supersedes any prior or 
-contemporaneous oral or written agreements concerning the subject matter 
-contained herein.   
-7.2	Headings.  Headings under this EULA are intended only for 
-convenience and shall not affect the interpretation of this EULA.
-
-7.3	Waiver and Modification.  No failure of either party to exercise or 
-enforce any of its rights under this EULA will act as a waiver of those 
-rights.  This EULA may only be modified, or any rights under it waived, by a 
-written agreement executed by the party against which it is asserted.
-
-7.4	Severability.  If any provision of this EULA is found illegal or 
-unenforceable, it will be enforced to the maximum extent permissible, and 
-the legality and enforceability of the other provisions of this EULA will 
-not be affected.
-
-7.5	Export Controls.  The Software is of United States origin and is 
-provided subject to the U.S. Export Administration Regulations.  Diversion 
-contrary to U.S. law is prohibited.  Without limiting the foregoing, you 
-agree that (1) you are not, and are not acting on behalf of, any person who 
-is a citizen, national, or resident of, or who is controlled by the 
-government of, Cuba, Iran, North Korea, Sudan, or Syria, or any other 
-country to which the United States has prohibited export transactions; (2) 
-you are not, and are not acting on behalf of, any person or entity listed on 
-the U.S. Treasury Department list of Specially Designated Nationals and 
-Blocked Persons, or the U.S. Commerce Department Denied Persons List or 
-Entity List; and (3) you will not use the Software for, and will not permit 
-the Software to be used for, any purposes prohibited by law, including, 
-without limitation, for any prohibited development, design, manufacture or 
-production of missiles or nuclear, chemical or biological weapons.
-
-7.6	U.S. Government Restricted Rights.  The Software and Documentation 
-are deemed to be "commercial computer software" and "commercial computer 
-software documentation," respectively, pursuant to DFAR Section 227.7202 and 
-FAR Section 12.212(b), as applicable.  Any use, modification, reproduction, 
-release, performance, display, or disclosure of the Software by the U.S. 
-Government shall be governed solely by the terms of this EULA.
-
-7.7	Governing Law.  This EULA is governed by the laws of the State of 
-California, United States of America, unless mandated by other law.  The 
-United Nations Convention for the International Sale of Goods shall not 
-apply.
-
-7.8	Contact Information.  Please direct legal notices or other 
-correspondence to VMware, Inc., 3401 Hillview Avenue, Palo Alto, California 
-94304, United States of America.  If You have any questions concerning this 
-EULA, please send an email to info@vmware.com.
-
-8.	SOFTWARE-SPECIFIC TERMS AND CONDITIONS.  In addition to the above 
-sections, the following Software are subject to the below terms and 
-conditions.  In the event of any conflict between the Software-specific 
-terms and conditions and sections 1-7 of the EULA, the Software-specific 
-terms and conditions shall control.
-
-VMware vFabric tc Server Standard Edition; 
-VMware vFabric tc Server Spring Edition; 
-VMware vFabric Hyperic; or
-VMware vFabric Enterprise Ready Server 
-
-If You license any of the above Software individually and not as part of 
-VMware vFabric Standard or Advanced, the following definitions and license 
-terms apply.
-
-"Processor" means a single physical chip that houses no more than six (6) 
-processor cores that executes the instructions of the Software.
-
-"Machine" means, solely with respect to vFabric Hyperic product, a license 
-to install and use on a Server, a Virtual Machine, or a network device. 
-
-Additional License Terms
-
-You may install and use the Software on the number of Processors and/or 
-Machines for which You have paid the applicable license fees. 
-
-VMware vFabric Standard
-
-VMware vFabric Standard includes VMware vFabric tc Server Spring Edition, 
-VMware vFabric Hyperic, VMware vFabric GemFire Application Cache Node, and 
-VMware vFabric Web Server, and features as described in the Documentation. 
-
-VMware vFabric Advanced 
-
-In addition to the Software which are included in the VMware vFabric 
-Standard, the VMware vFabric Advanced also includes VMware vFabric RabbitMQ 
-and VMware vFabric SQLFire Professional Edition; provided that VMware 
-vFabric SQLFire Professional Edition shall be made available to You when 
-VMware makes such component generally available.
-
-Additional License Terms for vFabric Standard and vFabric Advanced 
-
-If You license the VMware vFabric Standard or Advanced, You may only use the 
-Software which are included in these Editions for up to the number of 
-Virtual Machines for which you have paid the applicable license fees, and 
-each Virtual Machine running the Software cannot have more than two (2) 
-Virtual CPUs. As used herein, "Virtual CPU" means the virtual processing 
-power configured to a Virtual Machine.  If You run the Software in a Virtual 
-Machine with more than two (2) Virtual CPUs, then multiple licenses of the 
-Software are required.  However, the splitting of a license of the Software 
-to run in two (2) Virtual Machines, each with a single Virtual CPU, is 
-strictly prohibited.
-
-Subject to the foregoing paragraph, you may create linked clusters of 
-Virtual Machines of vFabric SQLFire Professional Edition; provided that each 
-such cluster may contain no more than two linked Virtual Machines of vFabric 
-SQLFire Professional Edition.
-
-VMware vFabric RabbitMQ
-
-If You license vFabricRabbitMQ, the following definitions and license terms 
-apply.
-
-"Processor" means a single physical chip that houses no more than six (6) 
-processor cores that executes the instructions of the Software.
-
-"vFabric RabbitMQ Server Software" means components of the Software that 
-provide the messaging and other services on behalf of clients
-
-"vFabric RabbitMQ Client Software" means the components of the Software that 
-execute in the user's application process and consume the services provided 
-by the vFabric RabbitMQ Server Software.
-
-Additional License Terms
-
-You may install and use vFabric RabbitMQ Server Software on the number of 
-Processors you have licensed or in a licensed vFabric Advanced Virtual 
-Machine. You are permitted to use and reproduce the vFabric RabbitMQ Client 
-Software on an unlimited number of computers solely for the purpose of 
-accessing licensed vFabric RabbitMQ Server Software.
-
-VMware vFabric GemFire 
-
-If You license VMware vFabric GemFire, the following definitions and license 
-terms apply.
-
-"Processor" means a single physical chip that houses no more than six (6) 
-processor cores that executes the instructions of the Software.
-
-"Node" means a server or personal computer hardware system capable of 
-running the Software.  A hardware partition or blade is considered a 
-separate hardware system.
-
-"Application Cache Node" means a Node that uses the Software for embedding a 
-data cache within an application's process space or for accessing data 
-available within a Data Management Node.
-
-"Data Management Node" means a Node that uses the Software to provide data 
-to one or more Application Cache Nodes.
-
-"Data Management Network" means two or more Data Management Nodes that are 
-interconnected for the purposes of sharing data.
-
-Additional License Terms
-
-You may install and use the Software on Application Cache Nodes and Data 
-Management Nodes which contain up to the maximum aggregate number of 
-Processors, for which you have paid the applicable license fees.  
-
-If you have purchased the "Unlimited Client Upgrade" for all of the Data 
-Management Nodes within a Data Management Network, then you may connect an 
-unlimited number of Application Cache Nodes to any Data Management Node 
-within the Data Management Network.
-
-If you have purchased the "Global WAN Upgrade" for all of the Data 
-Management Nodes within a Data Management Network, then you may enable the 
-Wide Area Network (WAN) communication for any Data Management Node within 
-the Data Management Network.   
-
-
+8.	ASSIGNMENT.  Licensee shall not and cannot assign this Agreement or any rights or obligations hereunder, directly or indirectly, by operation of law, merger, acquisition of stock or assets, or otherwise without the prior written consent of VMware.   Any attempted assignment or transfer in violation of the foregoing will be null and void.  Subject to the foregoing, this Agreement shall inure to the benefit of and be binding upon the parties and their respective successors and permitted assigns.
+9. 	CONTACT INFORMATION.  If you have any questions about this Agreement, please direct all correspondence to: VMware, Inc., 3401 Hillview Avenue, Palo Alto, CA 94304, United States of America.  VMware is a trademark of VMware, Inc. and is registered in the U.S. and numerous other countries. 
