@@ -1,0 +1,308 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : WebSphere 7.0 server</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : WebSphere 7.0 server
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <h3><a name="WebSphere7.0server-WebSphere7.0server"></a>WebSphere 7.0 server</h3>
+<p><b>Log Track Supported:</b> Yes<br/>
+<b>Config Track Supported:</b> No<br/>
+<b>Custom Properties Supported:</b> </p>
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'>Name</th>
+<th class='confluenceTh'>Description</th>
+</tr>
+<tr>
+<td class='confluenceTd'>javaVendor</td>
+<td class='confluenceTd'>Java Vendor</td>
+</tr>
+<tr>
+<td class='confluenceTd'>javaVersion</td>
+<td class='confluenceTd'>Java Version</td>
+</tr>
+<tr>
+<td class='confluenceTd'>version</td>
+<td class='confluenceTd'>WebSphere Version</td>
+</tr>
+<tr>
+<td class='confluenceTd'>pid</td>
+<td class='confluenceTd'>Process ID</td>
+</tr>
+<tr>
+<td class='confluenceTd'>cellName</td>
+<td class='confluenceTd'>Cell Name</td>
+</tr>
+<tr>
+</tr>
+</tbody></table>
+</div>
+
+<p><b>Supported Control Actions:</b> start,stop,restart<br/>
+<b>Supported Metrics:</b> </p>
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'>Name</th>
+<th class='confluenceTh'>Alias</th>
+<th class='confluenceTh'>Units</th>
+<th class='confluenceTh'>Category</th>
+<th class='confluenceTh'>Default On</th>
+<th class='confluenceTh'>Default Interval</th>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Availability</font></td>
+<td class='confluenceTd'><font color="navy">Availability</font></td>
+<td class='confluenceTd'><font color="navy">percentage</font></td>
+<td class='confluenceTd'><font color="navy">AVAILABILITY</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">JVM Total Memory</font></td>
+<td class='confluenceTd'><font color="gray">totalMemory</font></td>
+<td class='confluenceTd'><font color="gray">KB</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">JVM Free Memory</font></td>
+<td class='confluenceTd'><font color="gray">freeMemory</font></td>
+<td class='confluenceTd'><font color="gray">KB</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">JVM Used Memory</font></td>
+<td class='confluenceTd'><font color="navy">usedMemory</font></td>
+<td class='confluenceTd'><font color="navy">KB</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Global Transactions Begun</font></td>
+<td class='confluenceTd'><font color="gray">globalTransBegun</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Global Transactions Begun per Minute</font></td>
+<td class='confluenceTd'><font color="gray">globalTransBegun1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Global Transactions Involved</font></td>
+<td class='confluenceTd'><font color="gray">globalTransInvolved</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Local Transactions Begun</font></td>
+<td class='confluenceTd'><font color="gray">localTransBegun</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Local Transactions Begun per Minute</font></td>
+<td class='confluenceTd'><font color="gray">localTransBegun1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Global Transactions Active</font></td>
+<td class='confluenceTd'><font color="gray">activeGlobalTrans</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Local Transactions Active</font></td>
+<td class='confluenceTd'><font color="gray">activeLocalTrans</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Optmized Transactions</font></td>
+<td class='confluenceTd'><font color="gray">numOptimization</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Optmized Transactions per Minute</font></td>
+<td class='confluenceTd'><font color="gray">numOptimization1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Global Transactions Committed</font></td>
+<td class='confluenceTd'><font color="gray">globalTransCommitted</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Global Transactions Committed per Minute</font></td>
+<td class='confluenceTd'><font color="navy">globalTransCommitted1m</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Local Transactions Committed</font></td>
+<td class='confluenceTd'><font color="gray">localTransCommitted</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Local Transactions Committed per Minute</font></td>
+<td class='confluenceTd'><font color="gray">localTransCommitted1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Global Transactions Rolled Back</font></td>
+<td class='confluenceTd'><font color="gray">globalTransRolledBack</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Global Transactions Rolled Back per Minute</font></td>
+<td class='confluenceTd'><font color="navy">globalTransRolledBack1m</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Local Transactions Rolled Back</font></td>
+<td class='confluenceTd'><font color="gray">localTransRolledBack</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Local Transactions Rolled Back per Minute</font></td>
+<td class='confluenceTd'><font color="gray">localTransRolledBack1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Global Transactions Timed Out</font></td>
+<td class='confluenceTd'><font color="gray">globalTransTimeout</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Global Transactions Timed Out per Minute</font></td>
+<td class='confluenceTd'><font color="gray">globalTransTimeout1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Local Transactions Timed Out</font></td>
+<td class='confluenceTd'><font color="gray">localTransTimeout</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Local Transactions Timed Out per Minute</font></td>
+<td class='confluenceTd'><font color="gray">localTransTimeout1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+</tr>
+</tbody></table>
+</div>
+
+
+<p><b>Configuration help:</b> </p>
+
+
+  
+  <p>
+  <b>NOTE:</b> WebSphere 7.0 server types are configured via
+  AutoDiscovery.
+  </p>
+  <p>
+  See <b>WebSphere Admin 7.0</b> server for product
+  setup information.
+  </p>
+  
+    
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 10, 2012 14:24</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

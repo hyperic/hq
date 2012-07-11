@@ -1,15 +1,15 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>vFabric Hyperic 4.6.5 : Install Hyperic Server RPM</title>
+        <title>vFabric Hyperic 5.0 : Install Hyperic Server RPM</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
-<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
- - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
- -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.5.html">Hyperic 4.6.5 Release Notes</a> </b>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
  <p>
  <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
@@ -17,76 +17,141 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6.5 : Install Hyperic Server RPM
+                            vFabric Hyperic 5.0 : Install Hyperic Server RPM
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on May 31, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1325709339307 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1325709339307 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1325709339307 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1338485112493 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1338485112493 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1338485112493 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1325709339307'>
+/*]] >*/</style><div class='rbtoc1338485112493'>
 <ul>
-    <li><a href='#InstallHypericServerRPM-AbouttheHypericServerRPMs'>About the Hyperic Server RPMs</a></li>
-    <li><a href='#InstallHypericServerRPM-Step1SpecifyServerConfigurationinPropertiesFile'>Step 1 - Specify Server Configuration in Properties File</a></li>
-    <li><a href='#InstallHypericServerRPM-Step2InstallHypericServer'>Step 2 - Install Hyperic Server</a></li>
-    <li><a href='#InstallHypericServerRPM-Step3ConfigureHypericServerAfterRPMInstallation'>Step 3 - Configure Hyperic Server After RPM Installation</a></li>
-<ul>
-    <li><a href='#InstallHypericServerRPM-ConfigureHypericServerInteractivelyafterInstallation'>Configure Hyperic Server Interactively after Installation</a></li>
-    <li><a href='#InstallHypericServerRPM-ConfigureHypericServerinPropertiesFileafterInstallation'>Configure Hyperic Server in Properties File after Installation</a></li>
+    <li><a href='#InstallHypericServerRPM-AboutHypericServerRPM'>About Hyperic Server RPM</a></li>
+    <li><a href='#InstallHypericServerRPM-Step1InstallvFabricLicenseServer'>Step 1 - Install vFabric License Server</a></li>
+    <li><a href='#InstallHypericServerRPM-Step2ActivatevFabricLicense'>Step 2 - Activate vFabric License</a></li>
+    <li><a href='#InstallHypericServerRPM-Step3InstallvFabricRepositoryRPM'>Step 3 - Install vFabric Repository RPM</a></li>
+    <li><a href='#InstallHypericServerRPM-Step4SpecifyServerConfiguration'>Step 4 - Specify Server Configuration</a></li>
+    <li><a href='#InstallHypericServerRPM-Step5InstallHypericServer'>Step 5 - Install Hyperic Server</a></li>
+    <li><a href='#InstallHypericServerRPM-Step6StarttheHypericServer'>Step 6 - Start the Hyperic Server</a></li>
+    <li><a href='#InstallHypericServerRPM-AfterInstallingHypericServer'>After Installing Hyperic Server</a></li>
     <li><a href='#InstallHypericServerRPM-ServerPropertiesFileforRPMInstallation'>Server Properties File for RPM Installation</a></li>
-</ul>
-</ul></div>
+</ul></div> 
+<blockquote><p><b>About this page...</b> </p>
 
-<blockquote>
-<p><b>About this page...</b> </p>
+<p>This page has instructions for installing Hyperic Server 4.6 from an RPM to an RHEL 5 or RHEL 6 virtual machine</p>
 
-<p>This page has instructions for installing Hyperic Server 4.6 from an RPM downloaded from the VMware YUM repository.  </p>
+<p>Before running the installer, see <a href="http://support.hyperic.com/display/465/Hyperic+Installation+and+Startup+Process" title="Hyperic Installation and Startup Process">Hyperic Installation and Startup Process</a> for information about where server installation fits in the implementation process. For production environments, there are several steps to perform before installing the Hyperic Server, including database setup and SSL configuration. </p></blockquote> 
 
-<p>For information about installing Hyperic Server to a Red Hat Enterprise Linux (RHEL) VM directly from the VMware YUM repository, see <a href="http://10.150.104.52:8080/infocenter/index.jsp?topic=/com.vmware.vfabric.platform.5.0.0/vfabric/install-repo-install.html">http://10.150.104.52:8080/infocenter/index.jsp?topic=/com.vmware.vfabric.platform.5.0.0/vfabric/install-repo-install.html</a>. </p>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="/images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Installing a downloaded RPM?</b><br />Steps 1 through 3 apply if you are installing Hyperic Server from the VMware RPM repository. If instead, you have downloaded the server RPM, skip to <a href="#InstallHypericServerRPM-ConfigInFile">Step 4 - Specify Server Configuration</a>.</td></tr></table></div>
 
-<p>Before running the installer, see <a href="Hyperic Installation and Startup Process.html" title="Hyperic Installation and Startup Process">Hyperic Installation and Startup Process</a> for information about where server installation fits in the implementation process. For production environments, there are several steps to perform before installing the Hyperic Server, including database setup and SSL configuration. </p></blockquote>
+<h1><a name="InstallHypericServerRPM-AboutHypericServerRPM"></a>About Hyperic Server RPM </h1>
 
-<h1><a name="InstallHypericServerRPM-AbouttheHypericServerRPMs"></a>About the Hyperic Server RPMs</h1>
+<p>The name of the vFabric Hyperic Server RPM package is <tt>vfabric-hyperic-server</tt>, appended by an architecture suffix, such as <tt>.noarch</tt> or <tt>.x86_64</tt>. </p>
 
-<p>Two Hyperic Server RPMs are available:</p>
-
-<ul>
-	<li><tt>vfabric-hyperic-server-4.6.EE-1.i386.rpm</tt> &#8212; Contains vFabric Hyperic Server for the i386 architecture.</li>
-	<li><tt>vfabric-hyperic-server-4.6.EE-1.x86_64.rpm</tt> &#8212; Contains vFabric Hyperic Server for the x86-64 architecture.</li>
-</ul>
-
-
-<p>The Hyperic Server in Hyperic RPMs includes a 1.6 JRE.</p>
-
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>For more information about Hyperic RPMs, including where to obtain them, see <a href="Select and Download an Installer.html" title="Select and Download an Installer">Select and Download an Installer</a>.</td></tr></table></div>
-
-<p>When you install the server RPM, there are two ways to define the required installation options:</p>
+<p>When you install the server RPM, there are two ways to define the required installation options: </p>
 
 <ul>
-	<li>You can specify required Hyperic Server installation options in a properties file prior to installing the server, as described in <a href="#InstallHypericServerRPM-FileConfig">Step 1</a>, or</li>
-	<li>You can supply configuration options after installing the server, using one of the methods described in <a href="#InstallHypericServerRPM-PostInstallConfig">Step 3</a>.</li>
+	<li>You can specify required Hyperic Server installation options in a properties file prior to installing the server, as described in <a href="#InstallHypericServerRPM-ConfigInFile">Step 4 - Specify Server Configuration in Properties File</a>, or</li>
+	<li>You can supply configuration options after installing the server, using one of the methods described in <a href="#InstallHypericServerRPM-ConfigAfter">Configure Hyperic Server After RPM Installation</a>.</li>
 </ul>
 
 
-<h1><a name="InstallHypericServerRPM-Step1SpecifyServerConfigurationinPropertiesFile"></a>Step 1 - Specify Server Configuration in Properties File </h1>
-<p><a name="InstallHypericServerRPM-FileConfig"></a>To define Hyperic Server installation options in a properties file:</p>
+<p>The installation owner and the installation group are both <tt>hyperic</tt> </p>
+
+<p>By default, yum will install the server in <tt>/opt/hyperic/server-current</tt>, where <tt>/opt/hyperic/server-current</tt> is a symbolic link to a sibling versioned directory, such as <tt>/opt/hyperic/server-4.6-EE</tt>. </p>
+
+<h1><a name="InstallHypericServerRPM-Step1InstallvFabricLicenseServer"></a>Step 1 - Install vFabric License Server </h1>
+
+<p>Install the vFabric License Server on the VM where your existing vCenter Server is installed. For instructions, see <a href="http://pubs.vmware.com/vfabric51/topic/com.vmware.vfabric.platform.5.1/vfabric/install.html">Install vFabric License Server on Your vCenter Server</a> in <em>vFabric Suite 5.1</em>. </p>
+
+<h1><a name="InstallHypericServerRPM-Step2ActivatevFabricLicense"></a>Step 2 - Activate vFabric License </h1>
+
+<p>Active your vFabric Hyperic license. For instructions, see <a href="http://pubs.vmware.com/vfabric51/topic/com.vmware.vfabric.platform.5.1/vfabric/install.html">Activate vFabric Platform Licenses</a> in <em>vFabric Suite 5.1</em>. </p>
+
+<h1><a name="InstallHypericServerRPM-Step3InstallvFabricRepositoryRPM"></a>Step 3 - Install vFabric Repository RPM </h1>
+
+<p>IIn this step you install the vFabric Repository RPM on the RHEL VM where you will install the Hyperic Server. This RPM allows you to browse the vFabric repository. </p>
+
+
+<p>vFabric RPM repositories are located on <tt>repo.vmware.com</tt>: </p>
+
+<ul>
+	<li>vfabric-5-repo &#8212; vFabric component RPMs that are certified for vFabric Platform 5.</li>
+	<li>vfabric-5.1-repo-5.1-1 &#8212; vFabric component RPMs that are certified for vFabric Suite 5.1.</li>
+	<li>vfabric-all-repo &#8212; vFabric component RPMs for customers who have not bought a vFabric 5 Standard or Advanced license, and more recently released versions of vFabric components that may not necessarily be certified to work with those of vFabric 5 or vFabric 5.1.</li>
+</ul>
+
+
+<p>If you have a vFabric Standard or Advanced license, plan to install only RPMs that are certified for vFabric 5 or 5.1, then install <tt>vfabric-5-repo-5-2</tt> or <tt>vfabric-5.1-repo-5.1-1</tt>, as appropriate. If you do not have a vFabric Standard or Advanced license, or want to install components that are yet certified for vFabric 5 or vFabric 5.1, install <tt>vfabric-all-repo</tt>. </p>
+
+<p><b>Procedure</b> </p>
+<ol>
+	<li>Log in to the RHEL VM as the <tt>root</tt> user (or as a user with <tt>sudo</tt> privileges).</li>
+	<li>Open a terminal window.</li>
+	<li>Install the desired repository RPMs. Note that the URLs of the RPMs vary depending on whether the version of RHEL you use.
+	<ul>
+		<li>For RHEL 5:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<script type="syntaxhighlighter" class="theme: Confluence; brush: java; gutter: false"><![CDATA[rpm -Uvh http://repo.vmware.com/pub/rhel5/vfabric/5/vfabric-5-repo-5-2.noarch.rpm 
+\\ to install the vFabric 5 repository RPM 
+rpm -Uvh http://repo.vmware.com/pub/rhel5/vfabric/5.1/vfabric-5.1-repo-5.1-1.noarch.rpm 
+\\ to install the vFabric 5.1 repository RPM 
+rpm -Uvh http://repo.vmware.com/pub/rhel5/vfabric-all/vfabric-all-repo-1-1.noarch.rpm 
+\\ to install the "all-repo" repository RPM]]></script>
+</div></div> </li>
+		<li>For RHEL 6:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<script type="syntaxhighlighter" class="theme: Confluence; brush: java; gutter: false"><![CDATA[rpm -Uvh http://repo.vmware.com/pub/rhel6/vfabric/5.1/vfabric-5.1-repo-5.1-1.noarch.rpm \\ to install the vFabric 5 repository RPM 
+rpm -Uvh http://repo.vmware.com/pub/rhel6/vfabric-all/vfabric-all-repo-1-1.noarch.rpm \\ to install the "all-repo" repository RPM]]></script>
+</div></div> </li>
+	</ul>
+	</li>
+</ol>
+
+
+<div class='panelMacro'><table class='noteMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/warning.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>Use <tt>sudo</tt> to run the preceding commands if you are not logged in as <tt>root</tt>.</td></tr></table></div> 
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Searching the RPM repository</b><br />You can use the <tt>yum search vfabric</tt> command to list of vFabric components that you can install from the VMware repository. For example: 
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<script type="syntaxhighlighter" class="theme: Confluence; brush: java; gutter: false"><![CDATA[yum search vfabric 
+... 
+======================================== Matched: vfabric ========================================= 
+vfabric-eula.noarch : VMware vFabric 5.1 End User License Agreement 
+vfabric-gemfire.noarch : VMware vFabric GemFire 
+vfabric-hyperic-agent.noarch : VMware vFabric Hyperic Agent 
+vfabric-hyperic-server.x86_64 : VMware vFabric Hyperic Server 
+vfabric-insight-agent.noarch : com.springsource.insight.dist.vfabric:agent-rpm 
+vfabric-insight-dashboard.noarch : com.springsource.insight.dist.vfabric:dashboard-rpm 
+vfabric-rabbitmq-java-client-bin.noarch : The RabbitMQ Java Client Library 
+vfabric-rabbitmq-server.x86_64 : The RabbitMQ server 
+vfabric-sqlfire.noarch : VMware vFabric SQLFire 
+vfabric-tc-server-standard.noarch : VMware vFabric tc Server Standard 
+vfabric-web-server.x86_64 : VMware vFabric Web Server]]></script>
+</div></div></td></tr></table></div> 
+
+<h1><a name="InstallHypericServerRPM-Step4SpecifyServerConfiguration"></a>Step 4 - Specify Server Configuration </h1>
+
+<p><a name="InstallHypericServerRPM-ConfigInFile"></a> <br/>
+This section has instructions for configuring Hyperic Server in a properties file prior to installation. If you do not create a properties file prior to installing the server, the installer will configure the Hyperic Server in accordance with a default properties file.</p>
+
+<p>To define Hyperic Server installation options in a properties file: </p>
 
 <ol>
-	<li>Running as root, or using sudo, create a directory for the properties file:
+	<li>Running as <tt>root</tt>, or using <tt>sudo</tt>, create a directory for the properties file:
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
 		<pre class="theme: Confluence; brush: java; gutter: false">mkdir -p /etc/vmware/vfabric/hyperic</pre>
 		</div>
-</div></div></li>
+</div></div> </li>
 	<li>Specify the server installation settings in a file named <tt>vfabric_hyperic_server.properties</tt>.
+<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>You must name the file exactly as described and put it in the specified location for the RPM installation to work correctly.</td></tr></table></div> 
 	<ul>
-		<li>See <a href="#InstallHypericServerRPM-ServerPropertiesFileforRPMInstallation">Server Properties File for RPM Installation</a> for a listing of a sample <tt>vfabric_hyperic_server.properties</tt> file, with . which configures Hyperic Server to use the built-in local Postgresql database. You can edit the properties file to configure Hyperic Server to use an external &#8212; either local or remote &#8212; Postgresql, MySQL, or Oracle database.
-<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Do not change installation directory property</b><br />The value of <tt>HQ_SERVER_INSTALL_PATH</tt> must be <tt>/opt/hyperic</tt>. Do not change the value.</td></tr></table></div></li>
+		<li>See <a href="#InstallHypericServerRPM-ServerPropertiesFileforRPMInstallation">Server Properties File for RPM Installation</a> for a listing of a sample <tt>vfabric_hyperic_server.properties</tt> file. Note that the example properties file configures Hyperic Server to use the built-in local Postgresql database. You can edit the properties file to configure Hyperic Server to use an external &#8212; either local or remote &#8212; Postgresql, MySQL, or Oracle database.</li>
 	</ul>
 	</li>
 	<li>Copy <tt>vfabric_hyperic_server.properties</tt> to the <tt>/etc/vmware/vfabric/hyperic/</tt> directory.</li>
@@ -94,176 +159,170 @@ div.rbtoc1325709339307 li {margin-left: 0px;padding-left: 0px;}
 </ol>
 
 
-<h1><a name="InstallHypericServerRPM-Step2InstallHypericServer"></a>Step 2 - Install Hyperic Server</h1>
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>The RPM installer requires that your SMTP server is listening on port 25 on the Hyperic Server host.</td></tr></table></div>
-
-<p>To install Hyperic Server:</p>
+<h1><a name="InstallHypericServerRPM-Step5InstallHypericServer"></a>Step 5 - Install Hyperic Server </h1>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Start local SMTP server on Hyperic Server host</b><br />The RPM installer requires that your SMTP server is listening on port 25 on the Hyperic Server host.</td></tr></table></div> 
+<p>To install Hyperic Server: </p>
 <ol>
 	<li>On the platform where you wish to install the Hyperic Server:
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
 		<pre class="theme: Confluence; brush: java; gutter: false">yum install vfabric-hyperic-server</pre>
 		</div>
-</div></div></li>
-	<li>What happens next depends on whether you specified the server configuration in the <tt>/etc/vmware/vfabric/hyperic/vfabric_hyperic_server.properties</tt>"
+</div></div> 
+<div class='panelMacro'><table class='noteMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/warning.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><tt>yum</tt> command automatically choses the appropriate RPM package based on your architecture (32&#45; or 64-bit). You can also install the RPM with a particular architecture by specifying the appropriate suffix. For example, to install the 64-bit RPM of vFabric Web Server: <tt>yum install vfabric-web-server.x86_64</tt></td></tr></table></div> </li>
+	<li><tt>yum</tt> resolves dependencies and displays the packages it plans to install.
+<div class='panelMacro'><table class='noteMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/warning.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>If this is the first time that you have installed a vFabric component on the VM, <tt>yum</tt> also installs the <tt>vfabric-eula</tt> RPM and prompts you to accept the VMware license agreement.</td></tr></table></div> </li>
+	<li>Enter <tt>y</tt> at the prompt to start the installation installation.</li>
+	<li>What happens next depends on whether you specified the server configuration in the <tt>/etc/vmware/vfabric/hyperic/vfabric_hyperic_server.properties</tt> file.
 	<ul>
-		<li>If you <em>did</em> create the properties file, the setup dialog and responses from the properties file are displayed, and an "Installation Complete" message appear. After seeing this message, proceed to the <a href="Hyperic Installation and Startup Process.html#HypericInstallationandStartupProcess-StartServer">Start the Hyperic Server</a> step of <a href="Hyperic Installation and Startup Process.html" title="Hyperic Installation and Startup Process">Hyperic Installation and Startup Process</a>.</li>
+		<li>If you <em>did</em> create the properties file, the setup dialog and responses from the properties file are displayed, and an "Installation Complete" message appear. After seeing this message, proceed to the <a href="http://support.hyperic.com/display/465/Hyperic+Installation+and+Startup+Process#HypericInstallationandStartupProcess-StartServer">Start the Hyperic Server</a> step of <a href="http://support.hyperic.com/display/465/Hyperic+Installation+and+Startup+Process" title="Hyperic Installation and Startup Process">Hyperic Installation and Startup Process</a>.</li>
 		<li>If you <em>did not</em> specify the server configuration in the properties file, the following message is displayed:
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
-		<pre class="theme: Confluence; brush: java; gutter: false">/etc/vmware/vfabric/hyperic/vfabric_hyperic_server.properties, not found. HQ will be installed, but not configured.
+		<pre class="theme: Confluence; brush: java; gutter: false">/etc/vmware/vfabric/hyperic/vfabric_hyperic_server.properties, not found. HQ will be installed, but not configured. 
 
-Please use /opt/hyperic/hyperic-hqee-installer/setup.sh to interactively
+Please use /opt/hyperic/hyperic-hqee-installer/setup.sh to interactively 
 configure HQ.</pre>
 		</div>
-</div></div></li>
+</div></div> </li>
 	</ul>
 	</li>
-	<li>Proceed to <a href="#InstallHypericServerRPM-Step3ConfigureHypericServerAfterRPMInstallation">Step 3 &#45; Configure Hyperic Server After RPM Installation</a>.</li>
 </ol>
 
 
-<h1><a name="InstallHypericServerRPM-Step3ConfigureHypericServerAfterRPMInstallation"></a>Step 3 - Configure Hyperic Server After RPM Installation</h1>
-<p><a name="InstallHypericServerRPM-PostInstallConfig"></a>If you did not perform <a href="#InstallHypericServerRPM-FileConfig">Step 1</a>, supply required configuration data using one of the methods described below. </p>
+<h1><a name="InstallHypericServerRPM-Step6StarttheHypericServer"></a>Step 6 - Start the Hyperic Server </h1>
 
-<h2><a name="InstallHypericServerRPM-ConfigureHypericServerInteractivelyafterInstallation"></a>Configure Hyperic Server Interactively after Installation</h2>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Need to configure a license?</b><br />If you obtained Hyperic Server standalone, rather than as a part of vFabric Suite, perform the steps in <a href="Install or Configure vFabric Hyperic License.html" title="Install or Configure vFabric Hyperic License">Install or Configure vFabric Hyperic License</a> before starting the Hyperic Server.</td></tr></table></div>
 
-<p>If you did not configure the Hyperic Server in <tt>/etc/vmware/vfabric/hyperic/vfabric_hyperic_server.properties</tt>, you can supply configuration data interactively by running the regular Hyperic installer. (Note that the installer allows you to install the Hyperic Agent on the platform, as well as the Hyperic Server, if you wish.)</p>
+<p><tt>yum</tt> installs Hyperic Server to start automatically each time your RHEL VM is booted. The init script is <tt>/etc/init.d/hyperic-hq-server</tt>. </p>
+
+<p>Follow these steps to start the Hyperic server manually: </p>
 
 <ol>
-	<li>Run the setup script in <tt>/opt/hyperic/hyperic-hqee-installer</tt>.
-	<ul>
-		<li><b>Note:</b> You must run <tt>setup.sh</tt> as the "hyperic" user.
+	<li>Log in to the RHEL VM as <tt>root</tt>.</li>
+	<li>Open a terminal window and run the init script:
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
-		<pre class="theme: Confluence; brush: java; gutter: false">$ sh setup.sh</pre>
+		<pre class="theme: Confluence; brush: java; gutter: false">/etc/init.d/hyperic-hq-server start</pre>
 		</div>
-</div></div></li>
+</div></div> 
+<div class='panelMacro'><table class='noteMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/warning.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>The first time Hyperic Server starts it may take a few minutes to initialize; subsequent startups will be faster.</td></tr></table></div> </li>
+	<li>After Hyperic Server starts, invoke the Hyperic user interface in your browser:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">http://host:7080</pre>
+		</div>
+</div></div> 
+	<ul>
+		<li>Where <tt>host</tt> is the hostname of the RHEL VM on which you just installed Hyperic Server. #&#42; If your browser is on the same computer on which you installed Hyperic Server, you can use <tt>localhost</tt> rather than the name of the computer.</li>
 	</ul>
 	</li>
-	<li>Follow the instructions for running <tt>setup.sh</tt> at <a href="Run Hyperic Installer.html" title="Run Hyperic Installer">Run Hyperic Installer</a>.</li>
-	<li>After installing the Hyperic Server, proceed with license installation (for vFabric Server only) and start the server, as described in the <a href="Hyperic Installation and Startup Process.html#HypericInstallationandStartupProcess-license">Install License</a> and <a href="Hyperic Installation and Startup Process.html#HypericInstallationandStartupProcess-StartServer">Start the Hyperic Server</a> steps of <a href="Hyperic Installation and Startup Process.html" title="Hyperic Installation and Startup Process">Hyperic Installation and Startup Process</a>.</li>
+	<li>Log in using the default administration username/password of hqadmin/hqadmin; be sure to change the password after you log into the Hyperic UI.</li>
 </ol>
 
 
-<h2><a name="InstallHypericServerRPM-ConfigureHypericServerinPropertiesFileafterInstallation"></a>Configure Hyperic Server in Properties File after Installation</h2>
+<h1><a name="InstallHypericServerRPM-AfterInstallingHypericServer"></a>After Installing Hyperic Server</h1>
 
-<ol>
-	<li>Specify the server installation settings in a file named <tt>vfabric_hyperic_server.properties</tt>.
-	<ul>
-		<li>See <a href="#InstallHypericServerRPM-ServerPropertiesFileforRPMInstallation">Server Properties File for RPM Installation</a> for a sample <tt>vfabric_hyperic_server.properties</tt> file. The sample properties file configures Hyperic Server to use the built-in local Postgresql database. You can edit the properties file to configure Hyperic Server to use an external &#8212; either local or remote &#8212; Postgresql, MySQL, or Oracle database.
-<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Do not change installation directory property</b><br />The value of <tt>HQ_SERVER_INSTALL_PATH</tt> must be <tt>/opt/hyperic</tt>. Do not change the value.</td></tr></table></div></li>
-		<li>Copy <tt>vfabric_hyperic_server.properties</tt> to the <tt>/etc/vmware/vfabric/hyperic/</tt> directory.</li>
-	</ul>
-	</li>
-	<li>Run the <tt>setup_from_properties_file.sh</tt> script in <tt>/opt/hyperic/hyperic-hqee-installer</tt>:
-	<ul>
-		<li><b>Note:</b> You must run <tt>setup_from_properties_file.sh</tt> as root, or as the "hyperic" user.
-<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
-<div id="root">
-		<pre class="theme: Confluence; brush: java; gutter: false">$ sh setup_from_properties_file.sh</pre>
-		</div>
-</div></div></li>
-	</ul>
-	</li>
-	<li>After installing the Hyperic Server, proceed with license installation (for vFabric Server only) and start the server, as described in the <a href="Hyperic Installation and Startup Process.html#HypericInstallationandStartupProcess-license">Install License</a> and <a href="Hyperic Installation and Startup Process.html#HypericInstallationandStartupProcess-StartServer">Start the Hyperic Server</a> steps of <a href="Hyperic Installation and Startup Process.html" title="Hyperic Installation and Startup Process">Hyperic Installation and Startup Process</a>.</li>
-</ol>
+<ul>
+	<li>For information about installing the Hyperic Agent, see <a href="Install Hyperic Agent RPM.html" title="Install Hyperic Agent RPM">Install Hyperic Agent RPM</a>.</li>
+	<li>For information and required and optional Hyperic Server Configuration see <a href="Hyperic Installation and Startup Process.html" title="Hyperic Installation and Startup Process">Hyperic Installation and Startup Process</a>.</li>
+</ul>
 
 
-<h2><a name="InstallHypericServerRPM-ServerPropertiesFileforRPMInstallation"></a>Server Properties File for RPM Installation</h2>
-<p>This section contains a listing of <tt>vfabric_hyperic_server.properties</tt>.</p>
+<h1><a name="InstallHypericServerRPM-ServerPropertiesFileforRPMInstallation"></a>Server Properties File for RPM Installation </h1>
+
+<p>This section contains a listing of <tt>vfabric_hyperic_server.properties</tt>. </p>
 
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
-		<pre class="theme: Confluence; brush: java; gutter: false"># Properties file for vFabric Hyperic Server Configuration
-#
-# This file must be place in /etc/vmware/vfabric/hyperic/ with a name of
-# vfabric_hyperic_server.properties to be used by the vfabric-hyperic-server
-# rpm for vFabric Hyperic Server configuration.
-#
+		<pre class="theme: Confluence; brush: java; gutter: false"># Properties file for vFabric Hyperic Server Configuration 
 # 
-# To configure the build-in local Postgresql database uncomment the below
-# sections. See below for other database types.
-#
-################################################################################
-# Configuration of local built-in Postgresql database
-
-# Use the local built-in Postgresql database instead of other database types
-BUILT_IN_POSTGRESQL=yes
-
-# Do you accept the terms of the agreement?
-HQ_ACCEPT_EULA=y
-
-# HQ server installation path
-HQ_SERVER_INSTALL_PATH=/opt/hyperic
-
-# email address that HQ will use as the sender for email messages
-HQ_SENDER_EMAIL_ADDRESS=hqadmin@eng.vmware.com
-
-# encryption key to use to encrypt the database password
-HQ_DB_CRYPT_KEY=12345678
-
-# username be for the initial admin user
-HQ_ADMIN_USER=hqadmin
-
-# password be for the initial admin user
-HQ_ADMIN_PASSWORD=hqadmin
-
-# email address be for the initial admin user
-HQ_ADMIN_EMAIL_ADDRESS=hqadmin@eng.vmware.com
-
-
-# End of configuration for local built-in Postgresql database
-################################################################################
-
-
-
-# To configure HQ with a local or remote database other than the built-in
-# local instance of Postgresql comment out the above section and uncomment
-# the properties in the section below. Support databases include local or remote
-# versions of MySQL, Oracle, and Postgresql.
+# This file must be place in /etc/vmware/vfabric/hyperic/ with a name of 
+# vfabric_hyperic_server.properties to be used by the vfabric-hyperic-server 
+# rpm for vFabric Hyperic Server configuration. 
+# 
+# 
+# To configure the build-in local Postgresql database uncomment the below 
+# sections. See below for other database types. 
 # 
 ################################################################################
-# For configuration with local or remote MySQL, Oracle, and Postgresql databases
+# Configuration of local built-in Postgresql database 
 
-### Do you accept the terms of the agreement?
-#HQ_ACCEPT_EULA=y
+# Use the local built-in Postgresql database instead of other database types 
+BUILT_IN_POSTGRESQL=yes 
 
-### HQ server installation path
-#HQ_SERVER_INSTALL_PATH=/opt/hyperic
+# Do you accept the terms of the agreement? 
+HQ_ACCEPT_EULA=y 
 
-### email address that HQ will use as the sender for email messages
-#HQ_SENDER_EMAIL_ADDRESS=hqadmin@eng.vmware.com
+# HQ server installation path 
+HQ_SERVER_INSTALL_PATH=/opt/hyperic 
 
-### database type of [mysql|oracle|postgesql]
-#HQ_DB_TYPE=mysql
+# email address that HQ will use as the sender for email messages 
+HQ_SENDER_EMAIL_ADDRESS=hqadmin@eng.vmware.com 
 
-### JDBC connection URL for HQ database
-#HQ_JDBC=jdbc:mysql://10.0.0.1:3306/hqdb
+# encryption key to use to encrypt the database password 
+HQ_DB_CRYPT_KEY=12345678 
 
-### username to use to connect to the database
-#HQ_DB_USERNAME=hqadmin
+# username be for the initial admin user 
+HQ_ADMIN_USER=hqadmin 
 
-### password to use to connect to the database
-#HQ_DB_PASSWORD=hqadmin
+# password be for the initial admin user 
+HQ_ADMIN_PASSWORD=hqadmin 
 
-### encryption key to use to encrypt the database password
-#HQ_DB_CRYPT_KEY=12345678
+# email address be for the initial admin user 
+HQ_ADMIN_EMAIL_ADDRESS=hqadmin@eng.vmware.com 
 
-### username be for the initial admin user
-#HQ_ADMIN_USER=hqadmin
 
-### password be for the initial admin user
-#HQ_ADMIN_PASSWORD=hqadmin
+# End of configuration for local built-in Postgresql database 
+################################################################################
 
-### email address be for the initial admin user
-#HQ_ADMIN_EMAIL_ADDRESS=hqadmin@eng.vmware.com
 
-# End of configuration
+
+# To configure HQ with a local or remote database other than the built-in 
+# local instance of Postgresql comment out the above section and uncomment 
+# the properties in the section below. Support databases include local or remote 
+# versions of MySQL, Oracle, and Postgresql. 
+# 
+################################################################################
+# For configuration with local or remote MySQL, Oracle, and Postgresql databases 
+
+### Do you accept the terms of the agreement? 
+#HQ_ACCEPT_EULA=y 
+
+### HQ server installation path 
+#HQ_SERVER_INSTALL_PATH=/opt/hyperic 
+
+### email address that HQ will use as the sender for email messages 
+#HQ_SENDER_EMAIL_ADDRESS=hqadmin@eng.vmware.com 
+
+### database type of [mysql|oracle|postgesql] 
+#HQ_DB_TYPE=mysql 
+
+### JDBC connection URL for HQ database 
+#HQ_JDBC=jdbc:mysql://10.0.0.1:3306/hqdb 
+
+### username to use to connect to the database 
+#HQ_DB_USERNAME=hqadmin 
+
+### password to use to connect to the database 
+#HQ_DB_PASSWORD=hqadmin 
+
+### encryption key to use to encrypt the database password 
+#HQ_DB_CRYPT_KEY=12345678 
+
+### username be for the initial admin user 
+#HQ_ADMIN_USER=hqadmin 
+
+### password be for the initial admin user 
+#HQ_ADMIN_PASSWORD=hqadmin 
+
+### email address be for the initial admin user 
+#HQ_ADMIN_EMAIL_ADDRESS=hqadmin@eng.vmware.com 
+
+# End of configuration 
 ################################################################################</pre>
 		</div>
 </div></div>
-
 
 				    					    <br/>
                         <div class="tabletitle">
@@ -274,7 +333,7 @@ HQ_ADMIN_EMAIL_ADDRESS=hqadmin@eng.vmware.com
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/78578321/78872617.properties">vfabric_hyperic_server.properties</a> (application/octet-stream)
+                                <a href="attachments/79659664/79921941.properties">vfabric_hyperic_server.properties</a> (application/octet-stream)
                                 <br/>
                                                     </div>
 				    
@@ -286,7 +345,7 @@ HQ_ADMIN_EMAIL_ADDRESS=hqadmin@eng.vmware.com
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Feb 28, 2012 11:11</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 10, 2012 14:22</font></td>
 		    </tr>
 	    </table>
     </body>

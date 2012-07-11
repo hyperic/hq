@@ -1,15 +1,15 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>vFabric Hyperic 4.6.5 : Windows Service Service</title>
+        <title>vFabric Hyperic 5.0 : Windows Service Service</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
-<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
- - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
- -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.5.html">Hyperic 4.6.5 Release Notes</a> </b>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
  <p>
  <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
@@ -17,22 +17,22 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6.5 : Windows Service Service
+                            vFabric Hyperic 5.0 : Windows Service Service
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Feb 22, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Mar 23, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
  
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1329948132295 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1329948132295 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1329948132295 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1332532858725 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1332532858725 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1332532858725 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1329948132295'>
+/*]] >*/</style><div class='rbtoc1332532858725'>
 <ul>
     <li><a href='#WindowsServiceService-MonitoringaWindowsService'>Monitoring a Windows Service</a></li>
     <li><a href='#WindowsServiceService-ResourcePlugin%2CFunctions%2CandClasses'>Resource Plugin, Functions, and Classes</a></li>
@@ -50,17 +50,7 @@ div.rbtoc1329948132295 li {margin-left: 0px;padding-left: 0px;}
 
 <h1><a name="WindowsServiceService-ResourcePlugin%2CFunctions%2CandClasses"></a>Resource Plugin, Functions, and Classes </h1>
 
-<p>The Windows Service service type is managed by Hyperic's netservices plugin and performs the following functions: </p>
-
-<ul>
-	<li>Metric collection using the <tt>org.hyperic.hq.plugin.netservices.TCPSocketCollector</tt> class.</li>
-</ul>
-
-
-<ul>
-	<li>event tracking using the <tt>reportEvent</tt> method in the <tt>Collector</tt> class.</li>
-</ul>
-
+<p>The Windows Service service type is managed by Hyperic's system plugin.</p>
 
 <h1><a name="WindowsServiceService-ConfiguretheWindowsServiceinHyperic"></a>Configure the Windows Service in Hyperic </h1>
 
@@ -78,10 +68,10 @@ div.rbtoc1329948132295 li {margin-left: 0px;padding-left: 0px;}
 		<li>Locate the Service Name on the <b>General</b> tab.</li>
 	</ol>
 	</li>
-	<li>In the Hyperic user interfaace, navigate to the Windows platform where the service runs.</li>
+	<li>In the Hyperic user interface, navigate to the Windows platform where the service runs.</li>
 	<li>Select <b>New Platform Service</b> from the <b>Tools</b> menu.</li>
 	<li>On <b>New Service</b> page, enter a name for the service and select "Windows Service" from the <b>Service Type</b> pull-down.</li>
-	<li>Supply all required values on the <b>Configuration Properties</b> page. Configuration options are defined below in <a href="#WindowsServiceService-WindowsServiceConfigurationOptions">Windows Service Configuration Options</a>.</li>
+	<li>Supply all required values on the <b>Configuration Properties</b> page. Configuration options are shown below in <a href="#WindowsServiceService-WindowsServiceConfigurationPropertiesPage">Windows Service Configuration Properties Page</a>.</li>
 </ol>
 
 
@@ -89,7 +79,7 @@ div.rbtoc1329948132295 li {margin-left: 0px;padding-left: 0px;}
 
 <p>The <b>Configuration Properties</b> page for the Windows Service service type is shown below. </p>
 
-<p><span class="image-wrap" style=""><img src="attachments/79038211/79135686.png" width="750" style="border: 0px solid black"/></span></p>
+<p><span class="image-wrap" style=""><img src="attachments/79660206/79921885.png" width="750" style="border: 0px solid black"/></span></p>
 
 
 
@@ -211,7 +201,7 @@ div.rbtoc1329948132295 li {margin-left: 0px;padding-left: 0px;}
 
 <p>The <b>Monitoring Defaults</b> page for the Windows Service service type is shown below: </p>
 
-<p><span class="image-wrap" style=""><img src="attachments/79038211/79135201.png" width="800" style="border: 0px solid black"/></span> </p>
+<p><span class="image-wrap" style=""><img src="attachments/79660206/79921508.png" width="800" style="border: 0px solid black"/></span> </p>
 
 <h1><a name="WindowsServiceService-EventTracking"></a>Event Tracking </h1>
 
@@ -230,7 +220,7 @@ div.rbtoc1329948132295 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Feb 28, 2012 11:12</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 10, 2012 14:24</font></td>
 		    </tr>
 	    </table>
     </body>

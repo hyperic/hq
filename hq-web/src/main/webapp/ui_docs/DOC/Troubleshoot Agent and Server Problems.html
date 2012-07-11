@@ -1,15 +1,15 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>vFabric Hyperic 4.6.5 : Troubleshoot Agent and Server Problems</title>
+        <title>vFabric Hyperic 5.0 : Troubleshoot Agent and Server Problems</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
-<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
- - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
- -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.5.html">Hyperic 4.6.5 Release Notes</a> </b>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
  <p>
  <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
@@ -17,11 +17,11 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6.5 : Troubleshoot Agent and Server Problems
+                            vFabric Hyperic 5.0 : Troubleshoot Agent and Server Problems
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Feb 16, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 11, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    
@@ -30,11 +30,11 @@
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1329431605451 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1329431605451 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1329431605451 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1339450073020 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1339450073020 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1339450073020 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1329431605451'>
+/*]] >*/</style><div class='rbtoc1339450073020'>
 <ul>
     <li><a href='#TroubleshootAgentandServerProblems-LookingforClues'>Looking for Clues</a></li>
 <ul>
@@ -57,6 +57,7 @@ div.rbtoc1329431605451 li {margin-left: 0px;padding-left: 0px;}
     <li><a href='#TroubleshootAgentandServerProblems-ServerDoesNotHaveAgentToken'>Server Does Not Have Agent Token</a></li>
     <li><a href='#TroubleshootAgentandServerProblems-AgentStartScriptTimeout'>Agent Start Script Timeout</a></li>
     <li><a href='#TroubleshootAgentandServerProblems-JavaServiceWrapperTimeout'>Java Service Wrapper Timeout</a></li>
+    <li><a href='#TroubleshootAgentandServerProblems-ProblemRunningStartScriptsetupOption'>Problem Running Start Script setup Option</a></li>
 </ul>
     <li><a href='#TroubleshootAgentandServerProblems-InvalidorUnknownAvailability'>Invalid or Unknown Availability</a></li>
 <ul>
@@ -224,7 +225,8 @@ Connection closed by foreign host.
 
 <h2><a name="TroubleshootAgentandServerProblems-LicenseIssues"></a>License Issues </h2>
 
-<p>In vFabric Hyperic, the number of platforms you can manage is limited by your license.  For more information, see Installing or Configuring a vFabric Hyperic License.</p>
+<p>In vFabric Hyperic, the number of platforms you can manage is limited by your license.  For more information, see <a href="Install or Configure vFabric Hyperic License.html" title="Install or Configure vFabric Hyperic License">Install or Configure vFabric Hyperic License</a>.</p>
+
 <h2><a name="TroubleshootAgentandServerProblems-BackloggedHypericServer"></a>Backlogged Hyperic Server</h2>
 
 <p>When the Hyperic Server starts after a period of downtime, it can be inundated with metric reports from agents that continued to run while the server was down. When the server is processing a large metric backlog from many agents, the maximum size of the agent-server connection pool size can become a bottleneck and affect server performance.</p>
@@ -278,7 +280,7 @@ Connection closed by foreign host.
 	</li>
 	<li>Verify the address and listen port for the Hyperic Server.
 	<ul>
-		<li>Is there a firewall between agent and server? See the instructions in <a href="http://support.hyperic.com/display/~mmcgarry/Configure+Agent+-+Server+Communication+Interactively" title="Configure Agent - Server Communication Interactively">Configure Agent - Server Communication Interactively</a> or <a href="http://support.hyperic.com/display/~mmcgarry/Configure+Agent+-+Server+Communication+in+Properties+File" title="Configure Agent - Server Communication in Properties File">Configure Agent - Server Communication in Properties File</a>.</li>
+		<li>Is there a firewall between agent and server? See the instructions in Configure Agent &#45; Server Communication Interactively or Configure Agent &#45; Server Communication in Properties File.</li>
 	</ul>
 	</li>
 	<li>Verify the Hyperic Server is up.</li>
@@ -349,6 +351,27 @@ Connection closed by foreign host.
 		</div>
 </div></div>
 
+<h2><a name="TroubleshootAgentandServerProblems-ProblemRunningStartScriptsetupOption"></a>Problem Running Start Script setup Option</h2>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>If agent.scu is missing...</b><br />Iff a Hyperic Agent's <tt>AgentHome/conf/agent.scu</tt> file is missing, subsequent attempts to run the agent start script (<tt>hq-agent.sh</tt> or <tt>hq-agent.bat</tt>) with the <tt>setup</tt> option will fail. To resolve this problem, you must either:
+
+<ul>
+	<li>Reinstall the agent, or</li>
+</ul>
+
+
+<ul>
+	<li>Perform these steps:
+	<ol>
+		<li>Stop the agent.</li>
+		<li>Delete its <tt>/data</tt> directory.</li>
+		<li>Set <tt>agent.setup.camPword</tt> in <tt>AgentHome/conf/agent.properties</tt> to a plain text value.</li>
+		<li>Start the agent.</li>
+	</ol>
+	</li>
+</ul>
+</td></tr></table></div>
+
 <h1><a name="TroubleshootAgentandServerProblems-InvalidorUnknownAvailability"></a>Invalid or Unknown Availability</h1>
 
 <p>This section describes reasons that Hyperic might incorrectly show an agent (or agent-managed resource) as unavailable, show its availability status as "Unknown" (availability icon is grey), or "flapping" availability values.</p>
@@ -359,12 +382,7 @@ Connection closed by foreign host.
 
 <p>To solve an offset problem, install NTP and synchronize system clocks on the agent and server hosts.</p>
 
-<p>To prevent agent and server becoming significantly out-of-sync, you can run NTP on each system, use Hyperic to monitor the offset on each system, and set alerts based on the offset metric. To do so, configure a platform service of type "NTP" to monitor each NTP service, and set alerts to fire when an offset from the time authority grows unacceptably high. For more information, see the "Monitoring Network Services" section in <em>Configure Resources for Monitoring</em>. </p>
-
-
-
-<p><a href="Network Platform Services.html" title="Network Platform Services">Network Platform Services</a></p>
-
+<p>To prevent agent and server becoming significantly out-of-sync, you can run NTP on each system, use Hyperic to monitor the offset on each system, and set alerts based on the offset metric. To do so, configure a platform service of type "NTP" to monitor each NTP service, and set alerts to fire when an offset from the time authority grows unacceptably high. For more information, see the "Network Services" section in <em>vFabric Hyperic Resource Configuration and Metrics</em>. </p>
 
 <h2><a name="TroubleshootAgentandServerProblems-OverloadedBackend"></a>Overloaded Backend</h2>
 
@@ -372,7 +390,7 @@ Connection closed by foreign host.
 
 <p>You can view Hyperic Server process statistics, as well as load and utilization data - load, process, system and JVM memory, and so on - on the <b>HQ Health</b> page.</p>
 
-<p>Based on your load, it may be appropriate to tune Hyperic Server, the Hyperic database, or both. For more information, see <a href="Scaling and Tuning Hyperic Performance.html" title="Scaling and Tuning Hyperic Performance">Scaling and Tuning Hyperic Performance</a> in  <em>vFabric Hyperic Installation and Configuration</em>. </p>
+<p>Based on your load, it may be appropriate to tune Hyperic Server, the Hyperic database, or both. For more information, see <a href="Scaling and Tuning Hyperic Performance.html" title="Scaling and Tuning Hyperic Performance">Scaling and Tuning Hyperic Performance</a>. </p>
 
 <p><b>Important:</b> First and foremost: run the Hyperic database on dedicated hardware. Competition for system resources can slow down metric processing.</p>
 
@@ -427,7 +445,6 @@ Connection closed by foreign host.
 		</div>
 </div></div>
 
-
 				    
                     			    </td>
 		    </tr>
@@ -437,7 +454,7 @@ Connection closed by foreign host.
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Feb 28, 2012 11:11</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 10, 2012 14:22</font></td>
 		    </tr>
 	    </table>
     </body>
