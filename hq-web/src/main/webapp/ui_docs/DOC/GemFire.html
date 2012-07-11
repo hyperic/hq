@@ -1,15 +1,15 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>vFabric Hyperic 4.6.5 : GemFire</title>
+        <title>vFabric Hyperic 5.0 : GemFire</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
-<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
- - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
- -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.5.html">Hyperic 4.6.5 Release Notes</a> </b>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
  <p>
  <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
@@ -17,11 +17,11 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6.5 : GemFire
+                            vFabric Hyperic 5.0 : GemFire
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Feb 22, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jul 03, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
@@ -31,11 +31,11 @@
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1329944441891 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1329944441891 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1329944441891 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1341332390898 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1341332390898 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1341332390898 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1329944441891'>
+/*]]>*/</style><div class='rbtoc1341332390898'>
 <ul>
     <li><a href='#GemFire-GemFirePluginOverview'>GemFire Plugin Overview</a></li>
 <ul>
@@ -518,7 +518,7 @@ RegionCollector <br class="atl-forced-newline" /> </td>
 <ol>
 	<li>If you plan to run the Hyperic Agent on the same platform as the JMX Agent for the DS, skip to Step 2. If you plan to run the Hyperic Agent on a <em>different</em> platform than the JMX Agent for the DS, you must ensure that the Hyperic Agent can connect to the JMX Agent's RMI service &#8212; you can do this by specifying the JMX Agent's <tt>rmi-bind-address</tt> when you start it:<br/>
 <tt>./agent start rmi-bind-address=IP_Address &#45;dir/AgentHome</tt> </li>
-	<li>Enable statistics sampling for each GemFire member in the DS &#8212; by default, statistics sampling is not enabled. To enable it, edit each member's <tt>gemfire.properties</tt> file to set the&nbsp;<tt>statistic-sampling-enabled</tt> property to <tt>true</tt>.</li>
+	<li>Enable statistics sampling for each GemFire member in the DS &#8212; by default, statistics sampling is not enabled. To enable it, edit each member's <tt>gemfire.properties</tt> file to set the <tt>statistic-sampling-enabled</tt> property to <tt>true</tt>.</li>
 </ol>
 
 
@@ -527,7 +527,7 @@ RegionCollector <br class="atl-forced-newline" /> </td>
 <p>If you have not already done so, either: </p>
 
 <ul>
-	<li>install a Hyperic Agent to monitor the DS, either on the same platform as the JMX Agent, or on another platform (see <a href="Install an Agent-Only Package.html" title="Install an Agent-Only Package">Install an Agent&#45;Only Package</a> in <em>vFabric Hyperic Installation and Configuration</em> for instructions), or</li>
+	<li>install a Hyperic Agent to monitor the DS, either on the same platform as the JMX Agent, or on another platform (see <a href="Install an Agent-Only Package.html" title="Install an Agent-Only Package">Install an Agent&#45;Only Package</a> in <em>Getting Started with vFabric Hyperic</em> for instructions), or</li>
 	<li>Select an existing Hyperic Agent on a remote platform to monitor the DS.</li>
 </ul>
 
@@ -971,13 +971,6 @@ cache.region.lost </td>
 
 <p>VMware vFabric™ Hyperic®'s GemFire plugin provides a live data user interface for viewing metrics in real-time. &nbsp;(As opposed to the <b>Monitor</b> tab for a GemFire component, which presents metrics that have been saved to the Hyperic database.) &nbsp;</p>
 
-<ul>
-	<li><a href="#GemFire-GemFireViewforaDS">GemFire View for a DS</a></li>
-	<li><a href="#GemFire-GemFireViewforaCacheServerorApplicationPeer">GemFire View for a Cache Server or Application Peer</a></li>
-	<li><a href="#GemFire-GemFireViewforaGatewayHub">GemFire View for a Gateway Hub</a></li>
-</ul>
-
-
 <div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Learn About GemFire Monitoring</b><br />See <a href="GemFire.html" title="GemFire">GemFire</a> in <em>vFabric Hyperic Resource Configuration and Metrics</em>.</td></tr></table></div>
 <h2><a name="GemFire-GemFireViewforaDS"></a>GemFire View for a DS</h2>
 
@@ -993,7 +986,7 @@ cache.region.lost </td>
 <p>The table in the middle of the GemFire View for a DS displays inventory properties and last reported metric values for each server (including Cache Servers, Gateway Hubs and Application Peers) the DS.</p>
 
 
-<p><span class="image-wrap" style=""><img src="attachments/79038211/79135333.png" width="750px" style="border: 0px solid black"/></span></p>
+<p><span class="image-wrap" style=""><img src="attachments/79660206/79921872.png" width="750px" style="border: 0px solid black"/></span></p>
 
 
 
@@ -1011,7 +1004,7 @@ cache.region.lost </td>
 </ul>
 
 
-<p><span class="image-wrap" style=""><img src="attachments/79038211/79135332.png" width="750px" style="border: 0px solid black"/></span></p>
+<p><span class="image-wrap" style=""><img src="attachments/79660206/79921871.png" width="750px" style="border: 0px solid black"/></span></p>
 
 
 
@@ -1019,7 +1012,7 @@ cache.region.lost </td>
 
 <p>The HQ GemFire View for a Gateway Hub displays inventory data and live measurements for the Gateway Hub, the Hubs and Regions it contains, and any clients connected to the Hub.</p>
 
-<p><span class="image-wrap" style=""><img src="attachments/79038211/79135331.png" width="750px" style="border: 0px solid black"/></span></p>
+<p><span class="image-wrap" style=""><img src="attachments/79660206/79921870.png" width="750px" style="border: 0px solid black"/></span></p>
 
  
 
@@ -1032,7 +1025,7 @@ cache.region.lost </td>
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Feb 28, 2012 11:12</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 10, 2012 14:23</font></td>
 		    </tr>
 	    </table>
     </body>

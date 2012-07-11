@@ -1,15 +1,15 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>vFabric Hyperic 4.6.5 : Hyperic Installation and Startup Process</title>
+        <title>vFabric Hyperic 5.0 : Hyperic Installation and Startup Process</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
-<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
- - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
- -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.5.html">Hyperic 4.6.5 Release Notes</a> </b>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
  <p>
  <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
@@ -17,19 +17,19 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6.5 : Hyperic Installation and Startup Process
+                            vFabric Hyperic 5.0 : Hyperic Installation and Startup Process
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Feb 15, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on May 29, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1329332380039 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1329332380039 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1329332380039 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1338330620192 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1338330620192 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1338330620192 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1329332380039'>
+/*]] >*/</style><div class='rbtoc1338330620192'>
 <ul>
     <li><a href='#HypericInstallationandStartupProcess-Step1ObtainHypericInstaller'>Step 1 - Obtain Hyperic Installer</a></li>
     <li><a href='#HypericInstallationandStartupProcess-Step2SetUpHypericDatabase'>Step 2 - Set Up Hyperic Database</a></li>
@@ -44,6 +44,7 @@ div.rbtoc1329332380039 li {margin-left: 0px;padding-left: 0px;}
 <p>This page lists required and optional steps for a new installation of the Hyperic Server and Hyperic Agent. Steps that are not required for all installations are marked "Optional" or "As Necessary". </p>
 
 <p>For upgrade options and instruction see <a href="Hyperic Upgrade Processes.html" title="Hyperic Upgrade Processes">Hyperic Upgrade Processes</a>.</p></blockquote>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Note:</b> If you obtain vFabric Hyperic as part of vFabric Suite (previously known as "vFabric Platform"), first complete the license activation and installation procedures in <em>Getting Started with vFabric Suite</em>. Then follow procedures in this document to set up your environment for vFabric Hyperic and complete any remaining Hyperic-specific installation and configuration tasks.</td></tr></table></div> 
 
 <h1><a name="HypericInstallationandStartupProcess-Step1ObtainHypericInstaller"></a>Step 1 &#8211; Obtain Hyperic Installer</h1>
 
@@ -55,8 +56,8 @@ If you are installing Hyperic for production use, configure an external Hyperic 
 
 <p>Follow the instructions for the database you use: </p>
 <ul>
-	<li><a href="Set Up MySQL.html" title="Set Up MySQL">Set Up MySQL</a></li>
-	<li><a href="Set Up Oracle.html" title="Set Up Oracle">Set Up Oracle</a></li>
+	<li>Set Up mySql</li>
+	<li>Set Up Oracle</li>
 	<li><a href="Set Up PostgreSQL.html" title="Set Up PostgreSQL">Set Up PostgreSQL</a></li>
 </ul>
 
@@ -65,8 +66,8 @@ If you are installing Hyperic for production use, configure an external Hyperic 
 <blockquote>
 <p>For information about Hyperic database requirements and recommendations, see: </p>
 <ul>
-	<li><a href="Installation Requirements.html#InstallationRequirements-DatabaseTypes">Hyperic Server Supported Databases</a></li>
-	<li><a href="Installation Requirements.html#InstallationRequirements-DatabaseRequirements">Hyperic Database Requirements</a></li>
+	<li><a href="Supported Configurations and System Requirements.html#SupportedConfigurationsandSystemRequirements-DBs">Hyperic Server Supported Databases</a></li>
+	<li>Hyperic Database Requirements</li>
 </ul>
 </blockquote> 
 
@@ -118,7 +119,7 @@ If you are installing Hyperic for production use, configure an external Hyperic 
 		<li>Follow the instructions for installer you are using:
 		<ul>
 			<li><a href="Run Hyperic Installer.html" title="Run Hyperic Installer">Run Hyperic Installer</a></li>
-			<li><a href="Run Windows MSI Installer.html" title="Run Windows MSI Installer">Run Windows MSI Installer</a></li>
+			<li>Run Windows MSI Installer</li>
 			<li><a href="Install Hyperic Server RPM.html" title="Install Hyperic Server RPM">Install Hyperic Server RPM</a></li>
 		</ul>
 		</li>
@@ -136,6 +137,17 @@ If you are installing Hyperic for production use, configure an external Hyperic 
 	<ul>
 		<li>Follow the instructions that apply to your environment:
 		<ul>
+			<li>If you installed the Hyperic Server from the VMware yum repository to an RHEL VM, the Hyperic Server is configured to start automatically each time the VM starts up. If you installed the Hyperic Server for a downloaded RPM, following these steps to start the Hyperic Server as a daemon:
+			<ol>
+				<li>Log in to the Hyperic Server host as <tt>root</tt>.</li>
+				<li>Open a terminal window and run the <tt>/etc/init.d/hyperic-hq-server</tt> script with the <tt>start</tt> parameter:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">/etc/init.d/hyperic-hq-server start</pre>
+		</div>
+</div></div> </li>
+			</ol>
+			</li>
 			<li>On Unix-Like platforms, to start the Hyperic Server as a daemon:
 			<ol>
 				<li>Open a command shell.</li>
@@ -216,7 +228,7 @@ hq-server.bat start</pre>
 	<ul>
 		<li><a href="Install an Agent-Only Package.html" title="Install an Agent-Only Package">Install an Agent-Only Package</a></li>
 		<li><a href="Run Hyperic Installer.html" title="Run Hyperic Installer">Run Hyperic Installer</a></li>
-		<li><a href="Run Windows MSI Installer.html" title="Run Windows MSI Installer">Run Windows MSI Installer</a></li>
+		<li>Run Windows MSI Installer</li>
 		<li><a href="Install Hyperic Agent RPM.html" title="Install Hyperic Agent RPM">Install Hyperic Agent RPM</a></li>
 	</ul>
 	</li>
@@ -308,17 +320,17 @@ Are you sure you want to continue connecting? [default=no]: yes</pre>
 
 
 <h1><a name="HypericInstallationandStartupProcess-Step5NextStepsforNewInstallations"></a>Step 5 - Next Steps for New Installations </h1>
-
-<p>If your Hyperic database runs on Oracle, see:</p>
+<p><a name="HypericInstallationandStartupProcess-NextSteps"></a><br/>
+If your Hyperic database runs on Oracle, see:</p>
 <ul>
-	<li><a href="Set Up Oracle.html#SetUpOracle-RowMovement">Enable Row Movement</a> on <a href="Set Up Oracle.html" title="Set Up Oracle">Set Up Oracle</a></li>
-	<li><a href="Set Up Oracle.html#SetUpOracle-TuneOracle">Tuning Hyperic Database on Oracle for Medium to Large Environments</a> on <a href="Set Up Oracle.html" title="Set Up Oracle">Set Up Oracle</a></li>
+	<li>Enable Row Movement on Set Up Oracle</li>
+	<li>Tuning Hyperic Database on Oracle for Medium to Large Environments on Set Up Oracle</li>
 </ul>
 
 
 <p>If your Hyperic database runs on MySQL, see:</p>
 <ul>
-	<li><a href="Set Up MySQL.html#SetUpMySQL-BatchAgg">Tune the Batch Aggregate Inserter for MySQL</a> on <a href="Set Up MySQL.html" title="Set Up MySQL">Set Up MySQL</a></li>
+	<li>Tune the Batch Aggregate Inserter for MySQL on Set Up MySQL</li>
 </ul>
 
 
@@ -348,7 +360,7 @@ Are you sure you want to continue connecting? [default=no]: yes</pre>
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Feb 28, 2012 11:11</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 10, 2012 14:22</font></td>
 		    </tr>
 	    </table>
     </body>

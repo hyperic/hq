@@ -1,15 +1,15 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>vFabric Hyperic 4.6.5 : vSphere</title>
+        <title>vFabric Hyperic 5.0 : vSphere</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
-<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
- - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
- -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.5.html">Hyperic 4.6.5 Release Notes</a> </b>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
  <p>
  <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
@@ -17,22 +17,22 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6.5 : vSphere
+                            vFabric Hyperic 5.0 : vSphere
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Feb 21, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on May 31, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
  
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1329860893369 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1329860893369 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1329860893369 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1338502703828 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1338502703828 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1338502703828 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1329860893369'>
+/*]] >*/</style><div class='rbtoc1338502703828'>
 <ul>
     <li><a href='#vSphere-vSpherePluginOverview'>vSphere Plugin Overview</a></li>
 <ul>
@@ -72,9 +72,12 @@ div.rbtoc1329860893369 li {margin-left: 0px;padding-left: 0px;}
     <li><a href='#vSphere-MetricDocumentation'>Metric Documentation</a></li>
 <ul>
     <li><a href='#vSphere-VMwarevSphereHostMetrics'>VMware vSphere Host Metrics</a></li>
+    <li><a href='#vSphere-VMwarevSphereHostDSMetrics'>VMware vSphere Host DS Metrics</a></li>
     <li><a href='#vSphere-VMwarevSphereVMMetrics'>VMware vSphere VM Metrics</a></li>
+    <li><a href='#vSphere-VMwarevSphereVMDSMetrics'>VMware vSphere VM DS Metrics</a></li>
 </ul>
 </ul></div> 
+
  
 
 <h1><a name="vSphere-vSpherePluginOverview"></a>vSphere Plugin Overview </h1>
@@ -85,13 +88,13 @@ div.rbtoc1329860893369 li {margin-left: 0px;padding-left: 0px;}
 
 <h2><a name="vSphere-SupportedVersionsandRequirements"></a>Supported Versions and Requirements </h2>
 
-<p>The vSphere plugin supports vSphere v4.0 and 4.1 and ESX 4.0 and 4.1, and ESXi 4.0 and 4.1. The plugin requires Hyperic Agent v4.6 or later, and HQApi 5.0.0 or later. </p>
+<p>The vSphere plugin supports vSphere 5.0, v4.1 and 4.0; ESX 5.0, v4.1 and 4.0; and ESXi 5.0, v4.1 and 4. The plugin requires Hyperic Agent v4.6 or later, and HQApi 5.0.0 or later. </p>
 
 <div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Number of Managed VMs</b><br />Testing of the vSphere plugin indicates the Hyperic Agent can manage 1000 VMs without becoming overloaded.</td></tr></table></div> 
 
 <h2><a name="vSphere-vSphereResourcesandtheHypericInventoryModel"></a>vSphere Resources and the Hyperic Inventory Model </h2>
 
-<p>The vSphere plugin defines three new Hyperic resource types. </p>
+<p>The vSphere plugin defines five Hyperic resource types. </p>
 
 <ul>
 	<li><b>VMware vCenter</b> &#8212; vCenter is the vSphere management service for administering and managing vSphere Hosts and VMs. The vSphere plugin accesses vCenter functions via the vCenter SDK. You install an Hyperic Agent on the same system as vCenter to enable management of vSphere Hosts and VMs.</li>
@@ -99,12 +102,22 @@ div.rbtoc1329860893369 li {margin-left: 0px;padding-left: 0px;}
 
 
 <ul>
-	<li><b>VMware vSphere Host</b> &#8212; A vSphere Host is a physical ESX host for VMs.&nbsp;</li>
+	<li><b>VMware vSphere Host</b> &#8212; A vSphere Host is a physical ESX host for VMs.</li>
+</ul>
+
+
+<ul>
+	<li><b>VMware vSphere Host DS</b> &#8212; This resource represents the host datastore.</li>
 </ul>
 
 
 <ul>
 	<li><b>VMware vSphere VM</b> &#8212; vSphere VM's run on a vSphere Host. You install an Hyperic Agent in a vSphere VM to enable management of supported server types (such as Tomcat, JBoss or other supported server types) running in the VM. In vFabric Hyperic, if you run a Hyperic Agent on vCenter and on the VMs that the vCenter instance administers, you can correlate VM and managed server behavior in the vFabric Hyperic's <b>HQ vSphere</b> user interface.</li>
+</ul>
+
+
+<ul>
+	<li><b>VMware vSphere VM DS</b> &#8212; This resource represents the VM datastore.</li>
 </ul>
 
 
@@ -116,19 +129,27 @@ div.rbtoc1329860893369 li {margin-left: 0px;padding-left: 0px;}
 <td class='confluenceTd'> <b>Inventory Type</b> </td>
 </tr>
 <tr>
-<td class='confluenceTd'> VMware vCenter <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> &nbsp; &nbsp; VMware vCenter </td>
+<td class='confluenceTd'> server (child resource on the platform running vCenter)</td>
+</tr>
+<tr>
+<td class='confluenceTd'> VMware vSphere Host <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> platform </td>
+</tr>
+<tr>
+<td class='confluenceTd'> &nbsp;&nbsp; VMware vSphere Host DS <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> server </td>
 </tr>
 <tr>
-<td class='confluenceTd'> &nbsp; &nbsp; VMware vSphere Host <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>VMware vSphere VM <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> platform </td>
 </tr>
 <tr>
-<td class='confluenceTd'> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;VMware vSphere VM <br class="atl-forced-newline" /> </td>
-<td class='confluenceTd'> platform </td>
+<td class='confluenceTd'> &nbsp; &nbsp; VMware vSphere VM DS <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> server</td>
 </tr>
 <tr>
-<td class='confluenceTd'> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Hyperic Agent-managed resource in VM &nbsp; &nbsp; &nbsp;&nbsp; <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> &nbsp; &nbsp; Hyperic Agent-managed resource in VM &nbsp; &nbsp; &nbsp;&nbsp; <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> server </td>
 </tr>
 </tbody></table>
@@ -143,7 +164,7 @@ div.rbtoc1329860893369 li {margin-left: 0px;padding-left: 0px;}
 
 <p>You install a Hyperic Agent on a platform that can access vCenter Server over the network. To minimize the load on the vCenter platform, do not install the agent on the same platform as vCenter.</p>
 
-<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>SSL Requirements for 4.6.x Agents</b><br />In Hyperic 4.6.x, to communicate with the vCenter server over SSL, you must configure a keystore for the agent and manually import the vCenter SSL certificate into the agent keystore if the server’s certificate is unverified.</td></tr></table></div>
+<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>SSL Requirements for 4.6.x Agents</b><br />In Hyperic 4.6.x, to communicate with the vCenter server over SSL, you must configure a keystore for the agent and manually import the vCenter SSL certificate into the agent keystore if the server's certificate is unverified.</td></tr></table></div>
 
 <p>To discover and manage vSphere Hosts and VMs, the plugin must be able to connect to the vCenter SDK port, so after vCenter is discovered, you must enable the plugin to connect to the SDK port by defining the SDK connection settings on the vCenter server's <b>Configuration Properties</b> page. </p>
 
@@ -191,7 +212,7 @@ div.rbtoc1329860893369 li {margin-left: 0px;padding-left: 0px;}
 			<li>vProcessor Sockets</li>
 			<li>Cores per Socket</li>
 			<li>Data Center<br/>
-<span class="image-wrap" style=""><img src="attachments/79038211/79135262.png" style="border: 0px solid black"/></span> </li>
+<span class="image-wrap" style=""><img src="attachments/79660206/79921796.png" style="border: 0px solid black"/></span> </li>
 		</ul>
 		</li>
 	</ul>
@@ -253,7 +274,7 @@ div.rbtoc1329860893369 li {margin-left: 0px;padding-left: 0px;}
 			<li>Virtual CPUs</li>
 			<li>Tools Version</li>
 			<li>Config File<br/>
-<span class="image-wrap" style=""><img src="attachments/79038211/79135262.png" style="border: 0px solid black"/></span> </li>
+<span class="image-wrap" style=""><img src="attachments/79660206/79921796.png" style="border: 0px solid black"/></span> </li>
 		</ul>
 		</li>
 	</ul>
@@ -327,17 +348,17 @@ div.rbtoc1329860893369 li {margin-left: 0px;padding-left: 0px;}
 <h3><a name="vSphere-ViewaVMwarevCenterInstanceintheResourceHub"></a>View a VMware vCenter Instance in the Resource Hub </h3>
 
 <p>Use <b>Resources &gt; Browse &gt; Servers &gt; Server Type Dropdown &gt; VMware vCenter</b> to navigate to VMware vCenter instance. The <b>Current Health</b> page for the vCenter instance appears. See the thumbnail below for a screenshot. <br/>
-<span class="image-wrap" style=""><img src="attachments/79038211/79135251.png" style="border: 0px solid black"/></span> </p>
+<span class="image-wrap" style=""><img src="attachments/79660206/79921795.png" style="border: 0px solid black"/></span> </p>
 
 <h3><a name="vSphere-ViewaVMwarevSphereHostintheResourceHub"></a>View a VMware vSphere Host in the Resource Hub </h3>
 
 <p>Use <b>Resources &gt; Browse &gt; Platforms &gt; Platform Type Dropdown &gt; vSphere Host</b> to navigate to a vSphere Host. The <b>Current Health</b> page for the host. See the thumbnail below for a screenshot. <br/>
-<span class="image-wrap" style=""><img src="attachments/79038211/79135252.png" style="border: 0px solid black"/></span> </p>
+<span class="image-wrap" style=""><img src="attachments/79660206/79921794.png" style="border: 0px solid black"/></span> </p>
 
 <h3><a name="vSphere-ViewaVMwarevSphereVMintheResourceHub"></a>View a VMware vSphere VM in the Resource Hub </h3>
 
 <p>Use <b>Resources &gt; Browse &gt; Platforms &gt; Platform Type Dropdown &gt; vSphere VM</b> to navigate to a vSphere VM. The <b>Current Health</b> page for the VM. See the thumbnail below for a screenshot. <br/>
-<span class="image-wrap" style=""><img src="attachments/79038211/79135250.png" style="border: 0px solid black"/></span> </p>
+<span class="image-wrap" style=""><img src="attachments/79660206/79921792.png" style="border: 0px solid black"/></span> </p>
 
 <div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>When you browse platforms on the <b>Resources &gt; Browse</b> page, if the filter is set to "All Platform Types", vSphere VMs will <em>not</em> appear in the list of platforms. You must select "vSphere VM" in the platform types filter to display a list of vSphere VMs in the Resource Hub.</td></tr></table></div> 
 
@@ -370,7 +391,7 @@ div.rbtoc1329860893369 li {margin-left: 0px;padding-left: 0px;}
 <p>If the <tt>accept.unverified.certificates</tt> property in <tt>agent.properties</tt> is "true", the vSphere plugin will automatically import the VMware vCenter server's unverified SSL certificate to the keystore accessible to the Hyperic 4.6.x agent. This is not recommended because it is less secure and expose the Hyperic Agent to man-in-the-middle attacks.</p></td></tr></table></div>
 <h2><a name="vSphere-Step2InstallHypericAgent"></a>Step 2 - Install Hyperic Agent</h2>
 
-<p>Install a Hyperic Agent on the platform from which you will remotely monitor vCenter Server. For instructions, see <a href="Install an Agent-Only Package.html" title="Install an Agent-Only Package">Install an Agent&#45;Only Package</a> in <em>vFabric Hyperic Installation and Configuration</em>. </p>
+<p>Install a Hyperic Agent on the platform from which you will remotely monitor vCenter Server. For instructions, see <a href="Install an Agent-Only Package.html" title="Install an Agent-Only Package">Install an Agent&#45;Only Package</a> in <em>Getting Started with vFabric Hyperic</em>. </p>
 
 <div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Interactive Agent Configuration is Not Supported</b><br />You must configure the Hyperic Agent in its properties file. <b>Do not start the Hyperic Agent until you have configured its startup setting in its <tt>agent.properties</tt> file, as described in the following section</b>.</td></tr></table></div> 
 
@@ -432,7 +453,7 @@ Perform the configuration steps in this section if your vCenter instance manages
 
 <ol>
 	<li>Navigate to the &nbsp;<b>Configuration Properties</b>&nbsp;page for the VMware vCenter instance.<br/>
-<span class="image-wrap" style=""><img src="attachments/79038211/79135259.png" style="border: 0px solid black"/></span> </li>
+<span class="image-wrap" style=""><img src="attachments/79660206/79921803.png" style="border: 0px solid black"/></span> </li>
 	<li>Enter the vCenter SDK URL, supplying an URL with a fully-qualified domain name or an IP address.
 <div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>vCenter URLs must be unique</b><br />Due to a known problem (<a href="https://jira.hyperic.com/browse/HQ-2418">https://jira.hyperic.com/browse/HQ-2418</a>), each vCenter Server resource managed by Hyperic must be configured with a unique URL. If multiple vCenter Server resources are defined with the same URL, for instance the default 
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
@@ -495,8 +516,8 @@ Perform the configuration steps in this section if your vCenter instance manages
 	<li>Scroll down to the resource type and click <b>Edit Metric Template</b>.
 	<ul>
 		<li>Click the thumbnails below to view the <b>Monitoring Defaults</b> pages for vSphere Hosts and VMs.<br/>
-<span class="image-wrap" style=""><img src="attachments/79038211/79135256.png" style="border: 0px solid black"/></span> <br/>
-<span class="image-wrap" style=""><img src="attachments/79038211/79135257.png" style="border: 0px solid black"/></span> </li>
+<span class="image-wrap" style=""><img src="attachments/79660206/79921790.png" style="border: 0px solid black"/></span> <br/>
+<span class="image-wrap" style=""><img src="attachments/79660206/79921801.png" style="border: 0px solid black"/></span> </li>
 	</ul>
 	</li>
 </ol>
@@ -506,7 +527,7 @@ Perform the configuration steps in this section if your vCenter instance manages
 
 <p>Installing a Hyperic Agent in each VM enables you to manage Hyperic-supported server types running in it.  In vFabric Hyperic, this enables you to correlate the behavior of resources throughout the managed resource hierarchy &#8212; from vCenter to managed servers in the VM. </p>
 
-<p>For installation instructions, see <a href="Install an Agent-Only Package.html" title="Install an Agent-Only Package">Install an Agent&#45;Only Package</a> in <em>vFabric Hyperic Installation and Configuration</em>. </p>
+<p>For installation instructions, see <a href="Install an Agent-Only Package.html" title="Install an Agent-Only Package">Install an Agent&#45;Only Package</a> in <em>Getting Started with vFabric Hyperic</em>. </p>
 
 <p><b>Note:</b> If you run a Hyperic Agent in a VM, Hyperic creates an operating system type platform type for it in inventory. For instance, if you run and agent in a VM running Linux, Hyperic creates a platform of type "Linux" for the system, in addition to the platform of type "vSphere VM" create for the VM itself. </p>
 
@@ -518,7 +539,7 @@ Perform the configuration steps in this section if your vCenter instance manages
 
 <h1><a name="vSphere-MetricDocumentation"></a>Metric Documentation </h1>
 
-<p>The following sections define the metrics available </p>
+<p>The following sections define the metrics available.</p>
 
 <h2><a name="vSphere-VMwarevSphereHostMetrics"></a>VMware vSphere Host Metrics </h2>
 
@@ -897,6 +918,120 @@ Memory Shared - Memory Shared Common = Host memory saved by sharing <br class="a
 </div>
  
 
+<h2><a name="vSphere-VMwarevSphereHostDSMetrics"></a>VMware vSphere Host DS Metrics </h2>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'>Name</th>
+<th class='confluenceTh'>Alias</th>
+<th class='confluenceTh'>Units</th>
+<th class='confluenceTh'>Category</th>
+<th class='confluenceTh'>Default On</th>
+<th class='confluenceTh'>Default Interval</th>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Availability</font></td>
+<td class='confluenceTd'><font color="navy">Availability</font></td>
+<td class='confluenceTd'><font color="navy">percentage</font></td>
+<td class='confluenceTd'><font color="navy">AVAILABILITY</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Average read requests per second</font></td>
+<td class='confluenceTd'><font color="navy">datastore.numberReadAveraged.average</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Average write requests per second</font></td>
+<td class='confluenceTd'><font color="navy">datastore.numberWriteAveraged.average</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Read latency</font></td>
+<td class='confluenceTd'><font color="navy">datastore.totalReadLatency.average</font></td>
+<td class='confluenceTd'><font color="navy">ms</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Write latency</font></td>
+<td class='confluenceTd'><font color="navy">datastore.totalWriteLatency.average</font></td>
+<td class='confluenceTd'><font color="navy">ms</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Storage I/O Control aggregated IOPS</font></td>
+<td class='confluenceTd'><font color="gray">datastore.datastoreIops.average</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Storage I/O Control normalized latency</font></td>
+<td class='confluenceTd'><font color="gray">datastore.sizeNormalizedDatastoreLatency.average</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Storage DRS datastore read I/O rate</font></td>
+<td class='confluenceTd'><font color="gray">datastore.datastoreReadIops.latest</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Storage DRS datastore write I/O rate</font></td>
+<td class='confluenceTd'><font color="gray">datastore.datastoreWriteIops.latest</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Storage DRS datastore outstanding read requests</font></td>
+<td class='confluenceTd'><font color="gray">datastore.datastoreReadOIO.latest</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Storage DRS datastore outstanding write requests</font></td>
+<td class='confluenceTd'><font color="gray">datastore.datastoreWriteOIO.latest</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Storage I/O Control datastore maximum queue depth</font></td>
+<td class='confluenceTd'><font color="gray">datastore.datastoreMaxQueueDepth.latest</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">5 min</font></td>
+</tr>
+<tr>
+</tr>
+</tbody></table>
+</div>
+ 
+
 <h2><a name="vSphere-VMwarevSphereVMMetrics"></a>VMware vSphere VM Metrics </h2>
 <div class='table-wrap'>
 <table class='confluenceTable'><tbody>
@@ -1176,6 +1311,63 @@ While a VM may&nbsp;have been configured to use 4 GB of RAM, as an example, it m
 </div>
 
 
+<h2><a name="vSphere-VMwarevSphereVMDSMetrics"></a>VMware vSphere VM DS Metrics </h2>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'>Name</th>
+<th class='confluenceTh'>Alias</th>
+<th class='confluenceTh'>Units</th>
+<th class='confluenceTh'>Category</th>
+<th class='confluenceTh'>Default On</th>
+<th class='confluenceTh'>Default Interval</th>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Availability</font></td>
+<td class='confluenceTd'><font color="navy">Availability</font></td>
+<td class='confluenceTd'><font color="navy">percentage</font></td>
+<td class='confluenceTd'><font color="navy">AVAILABILITY</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Average read requests per second</font></td>
+<td class='confluenceTd'><font color="navy">datastore.numberReadAveraged.average</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Average write requests per second</font></td>
+<td class='confluenceTd'><font color="navy">datastore.numberWriteAveraged.average</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Read latency</font></td>
+<td class='confluenceTd'><font color="navy">datastore.totalReadLatency.average</font></td>
+<td class='confluenceTd'><font color="navy">ms</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Write latency</font></td>
+<td class='confluenceTd'><font color="navy">datastore.totalWriteLatency.average</font></td>
+<td class='confluenceTd'><font color="navy">ms</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+</tr>
+</tbody></table>
+</div>
+
 
 
 
@@ -1188,7 +1380,7 @@ While a VM may&nbsp;have been configured to use 4 GB of RAM, as an example, it m
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Feb 28, 2012 11:12</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 10, 2012 14:23</font></td>
 		    </tr>
 	    </table>
     </body>
