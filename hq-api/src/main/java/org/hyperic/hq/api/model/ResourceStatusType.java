@@ -28,7 +28,7 @@ package org.hyperic.hq.api.model;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlType;
 
-@XmlType(name="resourceStatusType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+@XmlType(namespace=RestApiConstants.SCHEMA_NAMESPACE)
 @XmlEnum
 public enum ResourceStatusType {
 

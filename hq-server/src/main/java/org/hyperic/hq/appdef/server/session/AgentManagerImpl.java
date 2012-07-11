@@ -311,6 +311,26 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         return agentDao.findOldAgents();
     } 
     
+    
+    
+    /**
+     * Get a list of all agents in the system, whose version is older than server's version and 
+     *  which are actually used (e. have platforms)
+     */
+    @Transactional(readOnly = true)
+    public List<Agent> getOldAgentsUsed() {
+        return agentDao.findOldAgentsUsed();    	
+    }
+    
+
+    /**
+     * Get a list of all agents in the system, whose version is older than server's version
+     */
+    @Transactional(readOnly = true)
+    public List<Agent> getCurrentNonSyncAgents() {
+    	return agentPluginStatusDAO.getCurrentNonSyncAgents();
+    }
+
     /**
      * Get a count of all the agents in the system
      */
@@ -1623,7 +1643,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     
     @Transactional(readOnly=true)
     public long getNumAutoUpdatingAgents() {
-        return agentDao.getNumAutoUpdatingAgents();
+        return agentPluginStatusDAO.getNumAutoUpdatingAgents();
     }
     
     @Transactional(readOnly=true)

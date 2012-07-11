@@ -323,14 +323,11 @@
     </help>  
     <help name="PostgreSQL 9.x" include="PostgreSQL 8.x"/> 
 
-    <server name="PostgreSQL" version="7.4">
-        <property name="version" value="7\.4"/>
-
+    <server name="HQ PostgreSQL" version="9.x">
+        <property name="version" value="9.\d*"/>
         <plugin type="measurement" class="ServerMeasurement"/>
         <plugin type="autoinventory" class="PostgreSQLServerDetector"/>
         <plugin type="config_track" class="org.hyperic.hq.product.FileChangeTrackPlugin"/>
-        <plugin type="control" class="ServerControl"/>
-        <actions include="stop,start"/>
 
         <plugin type="config_track" platform="unix" class="org.hyperic.hq.product.FileChangeTrackPlugin">
             <monitored>
@@ -413,11 +410,15 @@
         </service>
     </server>
 
+    <server name="PostgreSQL" version="7.4" include="HQ PostgreSQL 9.x">
+        <property name="version" value="7\.4"/>
+        <plugin type="control" class="ServerControl"/>
+        <actions include="stop,start"/>
+    </server>
+
     <server name="PostgreSQL" version="8.x" include="7.4">
         <property name="version" value="8.\d*"/>
     </server>
-
-    <server name="HQ PostgreSQL" version="8.x" include="PostgreSQL 8.x"/>
 
     <server name="PostgreSQL" version="9.x" include="8.x">
         <property name="version" value="9.\d*"/>

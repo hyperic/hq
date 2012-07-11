@@ -3,59 +3,41 @@ package org.hyperic.hq.maven.HQplugins;
 /*
  * Copyright 2001-2005 The Apache Software Foundation.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
-import com.jcraft.jsch.Channel;
-import com.jcraft.jsch.ChannelExec;
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.Session;
-import com.jcraft.jsch.UserInfo;
-import java.io.BufferedReader;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.jcraft.jsch.*;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import org.apache.maven.plugin.logging.Log;
-import org.codehaus.plexus.util.cli.CommandLineUtils;
-import org.codehaus.plexus.util.cli.Commandline;
-import org.codehaus.plexus.util.cli.StreamConsumer;
 
 /**
  * @goal run
  */
-public class RunPlugin extends AbstractMojo implements UserInfo, StreamConsumer {
+public class RunPlugin extends AbstractMojo implements UserInfo, UIKeyboardInteractive {
 
     Log log = getLog();
     private String remotePass;
     /**
-     * Location of the file.
      * @parameter expression="${project.basedir}"
-     * @required
      */
     private File dir;
     /**
-     * Location of the file.
      * @parameter expression="${project.version}"
-     * @required
      */
     private String version;
     /**
@@ -64,6 +46,9 @@ public class RunPlugin extends AbstractMojo implements UserInfo, StreamConsumer 
     protected String config;
 
     public void execute() throws MojoExecutionException {
+        JSch.setLogger(new MyLogger());
+        log.info("dir=" + dir);
+        log.info("version=" + version);
         String plugin = dir.getName().split("-plugin")[0];
         File hq = new File(System.getProperty("user.home"), ".hq");
         File configFile;
@@ -90,8 +75,8 @@ public class RunPlugin extends AbstractMojo implements UserInfo, StreamConsumer 
         String method = props.getProperty("method", null);
         String action = props.getProperty("action", null);
         String type = props.getProperty("type", null);
-        String pluginArgs = props.getProperty("plugin.args", "");
-        pluginArgs = pluginArgs.replaceAll("([^\\s]*=)", "-D$1");
+        String pluginArgsS = props.getProperty("plugin.args", "");
+        List<String> pluginArgs = Arrays.asList(pluginArgsS.replaceAll("([^\\s]*=)", "-D$1").split(" "));
         boolean debug = props.getProperty("debug", "false").equalsIgnoreCase("true");
         boolean pause = props.getProperty("pause", "false").equalsIgnoreCase("true");
         String agentV = new File(agentBundle).getName().substring("agent-".length());
@@ -102,21 +87,38 @@ public class RunPlugin extends AbstractMojo implements UserInfo, StreamConsumer 
             pdkJar = "hq-product.jar";
         }
 
-        String cmd = javaBin
-                + (debug ? " -Xdebug -Xrunjdwp:transport=dt_socket,address=8998,server=y,suspend=y" : "")
-                + " -ea -jar " + agentBundle + "/pdk/lib/" + pdkJar
-                + " -p " + plugin
-                + " -Dpause-on-error=" + pause
-                + " -Dplugins.include=" + plugin
-                + " -Dlog=" + logL
-                + " -m " + method
-                + ((action != null) ? " -a " + action : "")
-                + ((type != null) ? " -t \"" + type + "\"" : "")
-                + " " + pluginArgs;
-
-        if (sudo != null) {
-            cmd = "sudo -u " + sudo + " " + cmd;
+        List<String> cmd = new ArrayList();
+        cmd.add(javaBin);
+        if (debug) {
+            cmd.add("-Xdebug");
+            cmd.add("-Xrunjdwp:transport=dt_socket,address=8998,server=y,suspend=y");
         }
+        cmd.add("-ea");
+        cmd.add("-jar");
+        cmd.add(agentBundle + "/pdk/lib/" + pdkJar);
+        cmd.add("-p");
+        cmd.add(plugin);
+        cmd.add("-m");
+        cmd.add(method);
+        if (action != null) {
+            cmd.add("-a");
+            cmd.add(action);
+        }
+        if (type != null) {
+            cmd.add("-t");
+            cmd.add("\"" + type + "\"");
+        }
+
+        if ((pluginArgs.size() > 0) && (pluginArgs.get(0).trim().length() > 0)) {
+            cmd.addAll(pluginArgs);
+        }
+        cmd.add("-Dpause-on-error=" + pause);
+        cmd.add("-Dplugins.include=" + plugin);
+        cmd.add("-Dlog=" + logL);
+
+//        if (sudo != null) {
+//            cmd = "sudo -u " + sudo + " " + cmd;
+//        }
 
         boolean remote = props.getProperty("remote", "false").equalsIgnoreCase("true");
         boolean copy = props.getProperty("copy", "false").equalsIgnoreCase("true");
@@ -134,7 +136,7 @@ public class RunPlugin extends AbstractMojo implements UserInfo, StreamConsumer 
         log.info("copy            => '" + copy + "'");
         log.info("debug           => '" + debug + "'");
         log.info("pause           => '" + pause + "'");
-        log.info("cmd             => '" + cmd + "'");
+        log.info("cmd             => '" + join(cmd) + "'");
 
         boolean copyPdk = props.getProperty("copy-pdk", "false").equalsIgnoreCase("true");
         File pdkOrg = null;
@@ -177,7 +179,7 @@ public class RunPlugin extends AbstractMojo implements UserInfo, StreamConsumer 
                 }
             }
             if (method != null) {
-                executeRemote(remoteUser, remoteHost, cmd + " 2>&1");
+                executeRemote(remoteUser, remoteHost, join(cmd) + " 2>&1");
             }
         } else {
             if (copy) {
@@ -187,15 +189,22 @@ public class RunPlugin extends AbstractMojo implements UserInfo, StreamConsumer 
                 }
             }
             if (method != null) {
-                executeLocal(cmd);
+                executeLocal(cmd, agentBundle);
             }
         }
     }
 
-    private void executeLocal(String cmd) throws MojoExecutionException {
+    private void executeLocal(List<String> argl, String agentBundle) throws MojoExecutionException {
         try {
-            Commandline cl = new Commandline(cmd);
-            CommandLineUtils.executeCommandLine(cl, null, this, this);
+            String[] args = (String[]) argl.toArray(new String[argl.size()]);
+            File workingDir = new File(agentBundle, "../..");
+            log.info("user            => '" + workingDir + "'");
+            Process cmd = Runtime.getRuntime().exec(args, null, workingDir);
+            StreamConnector stdOut = new StreamConnector(cmd.getErrorStream(), System.out);
+            StreamConnector errOut = new StreamConnector(cmd.getInputStream(), System.out);
+            stdOut.start();
+            errOut.start();
+            cmd.waitFor();
         } catch (Exception ex) {
             throw new MojoExecutionException("error", ex);
         }
@@ -207,6 +216,7 @@ public class RunPlugin extends AbstractMojo implements UserInfo, StreamConsumer 
         try {
             JSch jsch = new JSch();
             session = jsch.getSession(user, host, 22);
+            session.setConfig("PreferredAuthentications", "password");
             session.setUserInfo(this);
             session.setTimeout(10 * 1000);
             session.connect();
@@ -227,6 +237,7 @@ public class RunPlugin extends AbstractMojo implements UserInfo, StreamConsumer 
             System.out.println("exit-status: " + channel.getExitStatus());
 
         } catch (Exception ex) {
+            ex.printStackTrace();
             throw new MojoExecutionException("error", ex);
         } finally {
             if (channel != null) {
@@ -278,7 +289,7 @@ public class RunPlugin extends AbstractMojo implements UserInfo, StreamConsumer 
             JSch jsch = new JSch();
             Session session = jsch.getSession(user, host, 22);
 
-            // username and password will be given via UserInfo interface.
+            session.setConfig("PreferredAuthentications", "password");
             session.setUserInfo(this);
             session.connect();
 
@@ -340,7 +351,7 @@ public class RunPlugin extends AbstractMojo implements UserInfo, StreamConsumer 
             session.disconnect();
 
         } catch (Exception e) {
-            System.out.println(e);
+            e.printStackTrace();
             try {
                 if (fis != null) {
                     fis.close();
@@ -389,30 +400,66 @@ public class RunPlugin extends AbstractMojo implements UserInfo, StreamConsumer 
     }
 
     public String getPassphrase() {
+        System.out.println("-->getPassphrase");
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public String getPassword() {
+        System.out.println("-->getPassword");
         return remotePass;
     }
 
     public boolean promptPassword(String string) {
+        System.out.println("-->promptPassword");
         return true;
     }
 
     public boolean promptPassphrase(String string) {
+        System.out.println("-->promptPassphrase");
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public boolean promptYesNo(String string) {
+        System.out.println("-->promptYesNo");
         return true;
     }
 
     public void showMessage(String string) {
+        System.out.println("-->showMessage");
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public void consumeLine(String s) {
-        System.out.println(s);
+    private String join(List<String> l) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < l.size(); i++) {
+            sb.append(l.get(i)).append(" ");
+        }
+        return sb.toString().trim();
+    }
+
+    public String[] promptKeyboardInteractive(String string, String string1, String string2, String[] strings, boolean[] blns) {
+        return null;
+    }
+
+    public static class MyLogger implements com.jcraft.jsch.Logger {
+
+        static Map<Integer, String> name = new java.util.HashMap<Integer, String>();
+
+        static {
+            name.put(new Integer(DEBUG), "DEBUG: ");
+            name.put(new Integer(INFO), "INFO: ");
+            name.put(new Integer(WARN), "WARN: ");
+            name.put(new Integer(ERROR), "ERROR: ");
+            name.put(new Integer(FATAL), "FATAL: ");
+        }
+
+        public boolean isEnabled(int level) {
+            return true;
+        }
+
+        public void log(int level, String message) {
+//            System.err.print(name.get(new Integer(level)));
+//            System.err.println(message);
+        }
     }
 }

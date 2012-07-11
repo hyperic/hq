@@ -54,6 +54,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
+import org.hyperic.hq.appdef.shared.InvalidConfigException;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.auth.shared.SessionManager;
@@ -259,12 +260,15 @@ public class ResourceTransferImpl implements ResourceTransfer{
 
 				resourceID = ResourceTypeStrategy.getResourceIdentifier(flowContext.currResource) ; 
 				
-				String description = resourceID; 
+				String description = resourceID, additionalDescription = null ; 
 				if(t instanceof NumberFormatException) {
 					description = "Resource ID " + resourceID ; 
 				}//EO if number format 
+				else if(t instanceof InvalidConfigException) { 
+				    additionalDescription = t.getMessage() ; 
+				}//EO else if InvalidConfigException
 				
-				response.addFailedResource(t,resourceID, null /*additional Description*/, description) ;
+				response.addFailedResource(t,resourceID, additionalDescription /*additional Description*/, description) ;
 				resourceID = null  ;
 			}//EO catch block 
 			
@@ -362,6 +366,7 @@ public class ResourceTransferImpl implements ResourceTransfer{
 					 if( (bKeySupported = (oldValue != null || currConfigData.supportsOption(sKey))) && (oldValue == null || !oldValue.equals(sNewValue))) { 
 							newConfigData.setValue(sKey, sNewValue) ; 
 							bHadConfigResponsesChanged = true ; 
+							allConfigs.setShouldConfig(i, true) ; 
 					 }//EO if the config option was provided and was different than the current 
 					 
 					 bOverallKeySupported = (bOverallKeySupported || bKeySupported) ;  
@@ -379,7 +384,11 @@ public class ResourceTransferImpl implements ResourceTransfer{
 		}//EO while there are more new entries 
 		
 		//only store the configResponse if modifications were made 
-		if(bHadConfigResponsesChanged) this.appdepBoss.setAllConfigResponses(flowContext.subject, allConfigs, rollbackConfigs, false /*isUserManaged*/) ;
+		if(bHadConfigResponsesChanged) {
+		    //allConfigs.setEnableRuntimeAIScan(true) ;  
+		    //rollbackConfigs.setEnableRuntimeAIScan(true); 
+		    this.appdepBoss.setAllConfigResponses(flowContext.subject, allConfigs, rollbackConfigs, false /*isUserManaged*/) ;
+		}//EO if there was a change 
 
 		//TODO: pojo fields modifications 
 	}//EOM 

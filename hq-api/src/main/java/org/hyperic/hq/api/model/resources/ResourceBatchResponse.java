@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 import org.apache.commons.lang.NullArgumentException;
 import org.hyperic.hq.api.model.Resource;
@@ -39,6 +40,7 @@ import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 import org.hyperic.hq.appdef.shared.BatchResponse;
 
 @XmlRootElement(name="ResourceResponse", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+@XmlType(name="ResourceResponseType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 public class ResourceBatchResponse extends BatchResponseBase {
     private List<Resource> resources;
     

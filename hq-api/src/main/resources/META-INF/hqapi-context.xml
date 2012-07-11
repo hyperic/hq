@@ -66,6 +66,9 @@
          <entry key="java.lang.NumberFormatException">
                 <value type="java.lang.String">1005</value>
         </entry>
+        <entry key="org.hyperic.hq.appdef.shared.InvalidConfigException"> 
+        	<value type="java.lang.String">1007</value>
+        </entry>
         <entry key="default">
                 <value type="java.lang.String">1006</value>
         </entry>

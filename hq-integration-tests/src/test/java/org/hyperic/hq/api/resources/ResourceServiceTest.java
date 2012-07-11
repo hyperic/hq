@@ -35,7 +35,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.core.HttpHeaders;
+
+import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.apache.cxf.jaxrs.client.ServerWebApplicationException;
+import org.apache.cxf.jaxrs.client.WebClient;
+import org.easymock.EasyMock;
+import org.hyperic.hq.agent.AgentRemoteValue;
 import org.hyperic.hq.api.model.Resource;
 import org.hyperic.hq.api.model.ResourceConfig;
 import org.hyperic.hq.api.model.ResourceDetailsType;
@@ -47,7 +53,6 @@ import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.api.resources.ResourceServiceTest.ResourceServiceTestDataPopulator;
 import org.hyperic.hq.api.rest.AbstractRestTestDataPopulator;
 import org.hyperic.hq.api.rest.RestTestCaseBase;
-import org.hyperic.hq.api.rest.RestTestCaseBase.SecurityInfo;
 import org.hyperic.hq.api.rest.RestTestCaseBase.ServiceBindingsIteration;
 import org.hyperic.hq.api.services.ResourceService;
 import org.hyperic.hq.appdef.Agent;
@@ -62,7 +67,11 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.bizapp.agent.client.SecureAgentConnection;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.measurement.agent.MeasurementCommandsAPI;
+import org.hyperic.hq.measurement.agent.commands.TrackPluginRemove_args;
 import org.hyperic.hq.product.MeasurementPlugin;
 import org.hyperic.hq.product.PlatformTypeInfo;
 import org.hyperic.hq.product.PluginManager;
@@ -78,16 +87,22 @@ import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.StringConfigOption;
+import org.hyperic.util.security.KeystoreConfig;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.ExpectedException;
+import org.springframework.test.context.ContextConfiguration;
 
 @DirtiesContext
 @ServiceBindingsIteration(ResourceServiceTest.CONTEXT_URL + "/rest-api/inventory/resources")
+@ContextConfiguration(locations = { "ResourceServiceTest-context.xml"}) 
 @TestData(ResourceServiceTestDataPopulator.class)
 public class ResourceServiceTest extends RestTestCaseBase<ResourceService, ResourceServiceTestDataPopulator>{
 
@@ -123,16 +138,15 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     	}//EOM 
     }//EO inner class PlatformsIterationInterceptor
     
-    @SecurityInfo(username="hqadmin",password="hqadmin")
-    @PlatformsIteration(noOfPlatforms=1)
-//    @Test
+    //@PlatformsIteration(noOfPlatforms=1)
+    //@Test
     public final void testGetWADL() throws Throwable {
-    	final String WADL = this.getWADL(this.service) ; 
-    	System.out.println(WADL);
-	}//EOM
-    
+        final String WADL = this.getWADL(this.service) ; 
+        System.out.println(WADL);
+    }//EOM
 
-    @PlatformsIteration()
+    
+    @PlatformsIteration
     @Test
     public final void testGetResourceWithInternalAndNaturalPlatformIDs() throws Throwable {
     	
@@ -164,7 +178,7 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 		this.assertResource(resource, this.currentPlatform, hierarchyDepth, null) ;
     }//EOM 
     
-    @PlatformsIteration 
+    @PlatformsIteration(noOfPlatforms=1) 
     @Test
     public final void testGetResourceOnlyConfig() throws Throwable { 
     	final int hierarchyDepth = 3 ;
@@ -356,7 +370,7 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     	
     	Assert.assertEquals(type+ " id", expectedResouceID+"", responseResource.getId()) ;
     	
-    	//assert resource level properties 
+    	//assert erties 
     	if(responseStructure != ResourceDetailsType.PROPERTIES) { 
     		Assert.assertEquals(type +" name", expectedResource.getName(), responseResource.getName()) ;
     	}//EO if response includes resource level properties 
@@ -539,7 +553,6 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 		return resource ;
     }//EOM 
     
-    
 	public static class ResourceServiceTestDataPopulator extends AbstractRestTestDataPopulator<ResourceService>{ 
 		
 		static final int NO_OF_TEST_PLATFORMS = 4 ;
@@ -548,7 +561,7 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 	    private Method setTypeInfoMethod ;
 	    private Map<String,String> persistedConfigAttributes ; 
 	    private Map<String,String> requestConfigAttributes ;
-		
+        
 		private Agent testAgent;
 		
 		private List<Platform> platforms ;  
@@ -576,12 +589,13 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 			
 			try{  
 				persistedConfigAttributes  = new HashMap<String,String>() ; 
-		    	persistedConfigAttributes.put("log_track.level", "Warn") ;
-		    	persistedConfigAttributes.put("config_track.files", "/etc/hq") ;
+		    	persistedConfigAttributes.put("test.log_track.level", "Warn") ;
+		    	//persistedConfigAttributes.put("config_track.files", "/etc/hq") ;
+		    	persistedConfigAttributes.put("some.config.prop", "property.existing.val") ;
 		    	
 		    	requestConfigAttributes  = new HashMap<String,String>() ;
-		    	requestConfigAttributes.put("log_track.level", "BOGUS_LEVEL_" + System.currentTimeMillis()) ;
-		    	requestConfigAttributes.put("config_track.files", "BOGUS_PATH_" + + System.currentTimeMillis()) ;
+		    	requestConfigAttributes.put("test.log_track.level", "BOGUS_LEVEL_" + System.currentTimeMillis()) ;
+		    	requestConfigAttributes.put("some.config.prop", "BOGUS_PATH_" + + System.currentTimeMillis()) ;
 		    	
 	    		setTypeInfoMethod = ProductPluginManager.class.getDeclaredMethod("setTypeInfo", String.class,String.class, TypeInfo.class) ;
 	 	        setTypeInfoMethod.setAccessible(true) ; 
@@ -727,6 +741,37 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 							configResponse, ProductPlugin.CONFIGURABLE_TYPES[1], false);
 		}//EOM
 		
-	}//EOC ResourceServiceTestDataPopulator 
-    
+	}//EOC ResourceServiceTestDataPopulator
+	
+	@Component("mockFactory")
+	public static class MockFactory { 
+	    
+	    private SecureAgentConnection secureAgentConnectionSingleton ;
+	    
+	    public final SecureAgentConnection newSecureAgentConnection(String agentAddress, int agentPort, final String authToken, 
+	            final KeystoreConfig keystoreConfig, final boolean acceptUnverifiedCertificate) {
+	        
+	        if(this.secureAgentConnectionSingleton == null) { 
+	            try{ 
+	                final MeasurementCommandsAPI verAPI = new MeasurementCommandsAPI() ; 
+	                final TrackPluginRemove_args args = new TrackPluginRemove_args() ;
+	                //final Method sendCommandMethod = AgentConnection.class.getDeclaredMethod("sendCommand", String.class, int.class, AgentRemoteValue.class) ;
+	                //AgentConnection.class.
+	                this.secureAgentConnectionSingleton = EasyMock.createMock(SecureAgentConnection.class)  ;
+	                EasyMock.expect(secureAgentConnectionSingleton.getAgentAddress()).andReturn("").anyTimes() ; 
+	                EasyMock.expect(secureAgentConnectionSingleton.getAgentPort()).andReturn(0).anyTimes() ; 
+	                EasyMock.expect(secureAgentConnectionSingleton.sendCommand(EasyMock.anyObject(String.class), 
+	                        EasyMock.anyInt(), EasyMock.anyObject(AgentRemoteValue.class))).andReturn(null).anyTimes() ;
+	                EasyMock.replay(secureAgentConnectionSingleton) ;
+	                
+	            }catch(Throwable t) { 
+	                throw (t instanceof RuntimeException ? (RuntimeException)t : new RuntimeException(t)) ;
+	            }//EO catch 
+	        }//EO if not yet initialized  
+	         
+	      return secureAgentConnectionSingleton ;
+	    }//EOM 
+	    
+	}//EO inner class MockFactory
+	
 }//EOC 

@@ -78,6 +78,22 @@ public interface AgentManager {
     public List<Agent> getOldAgents();    
     
     /**
+     * Get a list of all agents in the system, whose version is older than server's version and 
+     *  which are actually used (e. have platforms)
+     */
+    @Transactional(readOnly = true)
+    public List<Agent> getOldAgentsUsed();    
+    
+
+    /**
+     * Get a list of all agents in the system, whose version is older than server's version
+     */
+    @Transactional(readOnly = true)
+    public List<Agent> getCurrentNonSyncAgents();    
+    
+
+    
+    /**
      * Get a count of all the agents in the system
      */
     public int getAgentCount();

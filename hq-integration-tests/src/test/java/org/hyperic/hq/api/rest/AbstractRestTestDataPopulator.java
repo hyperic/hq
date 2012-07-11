@@ -30,6 +30,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Array;
 
+import junit.framework.Assert;
+
 import org.hyperic.hq.api.rest.RestTestCaseBase.ServiceBindingType;
 import org.hyperic.hq.test.TestHelper;
 import org.hyperic.hq.tests.context.TestData;
@@ -81,7 +83,12 @@ public abstract class AbstractRestTestDataPopulator<T> extends TestHelper implem
 	
 	public void destroy() throws Exception { /*do nothing*/}//EOM  
     
+    @SuppressWarnings("unchecked")
     protected final void generateServices() { 
+        final String msgSuffix = " (Ensure the @RestTestData annotation is properly defined or that the populator class initializes the values internally)." ; 
+        
+        Assert.assertNotNull("Service Interface must not be empty  when generating stubs " + msgSuffix,  this.serviceInterface) ;
+        Assert.assertNotNull("Service URL must not be empty  when generating stubs " + msgSuffix, this.serviceURL) ;
     	arrServices = (T[]) Array.newInstance(this.serviceInterface, 2); 
     	arrServices[0]  = RestTestCaseBase.generateServiceClient(this.serviceInterface, ServiceBindingType.XML, this.serviceURL, this.servletRunner) ;
     	arrServices[1] = RestTestCaseBase.generateServiceClient(this.serviceInterface, ServiceBindingType.JSON, this.serviceURL, this.servletRunner) ;

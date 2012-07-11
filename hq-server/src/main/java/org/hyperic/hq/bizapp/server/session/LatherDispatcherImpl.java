@@ -47,16 +47,7 @@ import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.Service;
-import org.hyperic.hq.appdef.shared.AgentCreateException;
-import org.hyperic.hq.appdef.shared.AgentManager;
-import org.hyperic.hq.appdef.shared.AgentNotFoundException;
-import org.hyperic.hq.appdef.shared.AgentUnauthorizedException;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefEntityValue;
-import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.appdef.shared.ConfigManager;
-import org.hyperic.hq.appdef.shared.PlatformManager;
-import org.hyperic.hq.appdef.shared.ServiceValue;
+import org.hyperic.hq.appdef.shared.*;
 import org.hyperic.hq.appdef.shared.resourceTree.PlatformNode;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.appdef.shared.resourceTree.ServerNode;
@@ -69,25 +60,7 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.ScanStateCore;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
-import org.hyperic.hq.bizapp.shared.lather.AiSendReport_args;
-import org.hyperic.hq.bizapp.shared.lather.AiSendRuntimeReport_args;
-import org.hyperic.hq.bizapp.shared.lather.CommandInfo;
-import org.hyperic.hq.bizapp.shared.lather.ControlGetPluginConfig_args;
-import org.hyperic.hq.bizapp.shared.lather.ControlGetPluginConfig_result;
-import org.hyperic.hq.bizapp.shared.lather.ControlSendCommandResult_args;
-import org.hyperic.hq.bizapp.shared.lather.MeasurementGetConfigs_args;
-import org.hyperic.hq.bizapp.shared.lather.MeasurementGetConfigs_result;
-import org.hyperic.hq.bizapp.shared.lather.MeasurementSendReport_args;
-import org.hyperic.hq.bizapp.shared.lather.MeasurementSendReport_result;
-import org.hyperic.hq.bizapp.shared.lather.PluginReport_args;
-import org.hyperic.hq.bizapp.shared.lather.RegisterAgent_args;
-import org.hyperic.hq.bizapp.shared.lather.RegisterAgent_result;
-import org.hyperic.hq.bizapp.shared.lather.SecureAgentLatherValue;
-import org.hyperic.hq.bizapp.shared.lather.TrackSend_args;
-import org.hyperic.hq.bizapp.shared.lather.UpdateAgent_args;
-import org.hyperic.hq.bizapp.shared.lather.UpdateAgent_result;
-import org.hyperic.hq.bizapp.shared.lather.UserIsValid_args;
-import org.hyperic.hq.bizapp.shared.lather.UserIsValid_result;
+import org.hyperic.hq.bizapp.shared.lather.*;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
@@ -494,18 +467,17 @@ public class LatherDispatcherImpl implements LatherDispatcher {
      * Called by agents to report platforms, servers, and services detected via
      * autoinventory scans.
      */
-    private NullLatherValue cmdAiSendReport(AiSendReport_args args) throws LatherRemoteException {
+    private LatherValue cmdAiSendReport(AiSendReport_args args) throws LatherRemoteException {
 
         ScanStateCore core = args.getCore();
 
         try {
-            autoinventoryManager.reportAIData(args.getAgentToken(), core);
+            AIPlatformValue aiPlatformValue = autoinventoryManager.reportAIData(args.getAgentToken(), core);
+            return aiPlatformValue == null? NullLatherValue.INSTANCE : new AiPlatformLatherValue(aiPlatformValue);
         } catch (AutoinventoryException exc) {
             log.error("Error in AiSendReport: " + exc.getMessage(), exc);
             throw new LatherRemoteException(exc.getMessage());
         }
-
-        return NullLatherValue.INSTANCE;
     }
 
     /**
@@ -719,9 +691,9 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         }
     }
 
-    public void invokeAutoApprove() throws LatherRemoteException {
+    public void invokeAutoApprove(AIPlatformValue aiPlatformValue) throws LatherRemoteException {
         try {
-            autoinventoryManager.invokeAutoApprove();
+            autoinventoryManager.invokeAutoApprove(aiPlatformValue);
         } catch (AutoinventoryException exc) {
             log.error("Error in invokeAutoApprove: " + exc.getMessage(), exc);
             throw new LatherRemoteException(exc.getMessage());

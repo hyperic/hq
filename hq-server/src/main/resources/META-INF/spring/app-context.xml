@@ -42,8 +42,12 @@
 		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
-   
-   <bean id="jasyptConfiguration" scope="prototype" class="org.jasypt.encryption.pbe.config.EnvironmentStringPBEConfig">
+
+   <!--  two encryption passwords are defined here: the default server.encryption-key system property (used by hyperic server runtime), 
+         and the tests.server.encryption-key system property defined in the vm args of the integration tests surefire plugin. 
+         If not null the server.encryption-key would override any value defined in the tests.server.encryption-key. 
+   -->
+   <bean id="jasyptConfiguration" scope="prototype" class="org.hyperic.util.security.StrictEnvironmentPBEConfig">
         <property name="algorithm" value="PBEWithMD5AndDES" />
         <property name="password" value="#{ systemProperties['tests.server.encryption-key'] }" />
         <property name="passwordSysPropertyName" value="server.encryption-key" />
@@ -142,6 +146,8 @@
 			</map>
 		</property>
 	</bean>
+	
+	<bean scope="prototype" id="org.hyperic.hq.bizapp.agent.client.SecureAgentConnection" class="org.hyperic.hq.bizapp.agent.client.SecureAgentConnection" />
 
 	<context:component-scan base-package="org.hyperic,com.hyperic"> 
 	   <context:exclude-filter type="regex" expression="org.hyperic.cm.*"/>
