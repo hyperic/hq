@@ -1,15 +1,15 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>vFabric Hyperic 4.6.5 : Hyperic Security Features and Recommendations</title>
+        <title>vFabric Hyperic 5.0 : Hyperic Security Features and Recommendations</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
-<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
- - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
- -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.5.html">Hyperic 4.6.5 Release Notes</a> </b>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
  <p>
  <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
@@ -17,51 +17,82 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6.5 : Hyperic Security Features and Recommendations
+                            vFabric Hyperic 5.0 : Hyperic Security Features and Recommendations
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Feb 22, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jul 10, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1329933505207 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1329933505207 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1329933505207 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1341955198101 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1341955198101 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1341955198101 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1329933505207'>
+/*]]>*/</style><div class='rbtoc1341955198101'>
 <ul>
     <li><a href='#HypericSecurityFeaturesandRecommendations-SSLBestPracticesforNewHypericInstallations'>SSL Best Practices for New Hyperic Installations</a></li>
     <li><a href='#HypericSecurityFeaturesandRecommendations-AgentInitiatedCommunication'>Agent-Initiated Communication</a></li>
+    <li><a href='#HypericSecurityFeaturesandRecommendations-PasswordEncryption'>Password Encryption</a></li>
     <li><a href='#HypericSecurityFeaturesandRecommendations-ProtectionofSensitiveData'>Protection of Sensitive Data</a></li>
     <li><a href='#HypericSecurityFeaturesandRecommendations-UseLDAPAuthentication'>Use LDAP Authentication</a></li>
-</ul></div>
+</ul></div> 
 
-<h1><a name="HypericSecurityFeaturesandRecommendations-SSLBestPracticesforNewHypericInstallations"></a>SSL Best Practices for New Hyperic Installations</h1>
+<h1><a name="HypericSecurityFeaturesandRecommendations-SSLBestPracticesforNewHypericInstallations"></a>SSL Best Practices for New Hyperic Installations </h1>
 
-<p>Hyperic 4.6 and later supports the use of SSL communication for both server-to-agent and agent-to-server communications. VMware recommends that you install trusted keystores from you CA for Hyperic 4.6.x components. If you do not configure your own SSL keystores for Hyperic Agents and the Hyperic Server, the components will generate keystores with self-signed certificates &#8212; this is not recommended. </p>
+<p>Hyperic supports the use of SSL communication for both server-to-agent and agent-to-server communications. VMware recommends that you install trusted keystores from you CA for Hyperic . If you do not configure your own SSL keystores for Hyperic Agents and the Hyperic Server, the components will generate keystores with self-signed certificates &#8212; this is not recommended. </p>
 
-<p>For more information about SSL communications, configuration, and default behavior in Hyperic, see [About SSL in Hyperic.</p>
+<p>For more information about SSL communications, configuration, and default behavior in Hyperic, see <a href="About SSL in Hyperic.html" title="About SSL in Hyperic">About SSL in Hyperic</a>. </p>
 
 
-<h1><a name="HypericSecurityFeaturesandRecommendations-AgentInitiatedCommunication"></a>Agent-Initiated Communication</h1>
+<h1><a name="HypericSecurityFeaturesandRecommendations-AgentInitiatedCommunication"></a>Agent-Initiated Communication </h1>
 
 <p>You can configure Hyperic such that Hyperic Agents initiate all communications with the Hyperic Server. This feature &#8212; referred to as <em>unidirectional communication</em> is useful if your network topology requires managed platforms to initiate all communication with processes outside a firewall. </p>
 
-<p>You can configure unidirectional communication interactively at first agent startup, or with the <tt>agent.setup.unidirectional</tt> in the agent's <tt>agent.properties</tt> file.  See the requirements described at <tt><a href="agent.setup.unidirectional.html" title="agent.setup.unidirectional">agent.setup.unidirectional</a></tt>.</p>
+<p>You can configure unidirectional communication interactively at first agent startup, or with the <tt>agent.setup.unidirectional</tt> in the agent's <tt>agent.properties</tt> file. See the requirements described at <tt><a href="agent.setup.unidirectional.html" title="agent.setup.unidirectional">agent.setup.unidirectional</a></tt>. </p>
 
-<h1><a name="HypericSecurityFeaturesandRecommendations-ProtectionofSensitiveData"></a>Protection of Sensitive Data</h1>
+<p><a name="HypericSecurityFeaturesandRecommendations-PasswordEncryption"></a> </p>
+<h1><a name="HypericSecurityFeaturesandRecommendations-PasswordEncryption"></a>Password Encryption </h1>
+
+<p>This section has information about the credentials that the Hyperic Server and the Hyperic Agent must provide to related product components during normal operation, and how those credentials are supplied, saved, and secured. </p>
+
+<p>Regardless of how the passwords used by the server or agent are supplied, or where they are saved, the password values are always encrypted. Specifically: </p>
+
+<ul>
+	<li>The Hyperic Server supplies a username and password to connect to the Hyperic database. In Hyperic 4.5 and later, the Hyperic installer prompts for the database credentials during the installation process, and saves them in <tt>ServerHome/conf/hq-server.conf</tt>. The value of the password is encrypted.</li>
+</ul>
+
+
+<ul>
+	<li>The Hyperic Agent supplies a username and password to connect to the Hyperic Server. There are two ways to define the credentials:
+	<ul>
+		<li>You can define the username and password for connecting to the server interactively, the first time you start the agent. Upon successful first connection to the server, the agent saves the credentials in its <tt>/data</tt> directory. The value of the password is encrypted.</li>
+		<li>You can define the username and password for connecting to the server in the agent's <tt>agent.properties</tt> file prior to starting the agent for the first time. At first startup, the agent will use the credentials specified in the properties file, and upon successful connection to the server, the agent will (as with interactive configuration) save the credentials in its <tt>/data</tt> directory, encypting the password. The agent will also remove the plain text password from the properties file, and add a password property definition with an encrypted value. Note that you can add encrypted properties to <tt>agent.properties</tt> yourself, as described in <a href="Encrypt Agent Property Value.html" title="Encrypt Agent Property Value">Encrypt Agent Property Value</a>.</li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul>
+	<li>If the server and agent have user-managed keystores, each component stores the password to its keystore in its properties file.
+	<ul>
+		<li>The Hyperic's Server's keystore can be configured interactively at installation. The keystore path and password are saved in <tt>hq-server.conf</tt>, with the password encrypted. If you define the keystore password in the properties file yourself, after installation, The Hyperic Server will encrypt the password value at next startup.</li>
+		<li>The Hyperic's Agent's keystore can only be configured in the <tt>agent.properties</tt> file. You can add encrypted properties to <tt>agent.properties</tt> yourself, as described in <a href="Encrypt Agent Property Value.html" title="Encrypt Agent Property Value">Encrypt Agent Property Value</a>. Otherwise, if you define the password in plain text in the properties file, the agent will encrypt the value at next startup.</li>
+	</ul>
+	</li>
+</ul>
+
+
+<h1><a name="HypericSecurityFeaturesandRecommendations-ProtectionofSensitiveData"></a>Protection of Sensitive Data </h1>
 
 <p>In this version of Hyperic, the Hyperic installer writes some sensitive data to installation log files. </p>
 
-<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Sensitive Data Best Practices</b><br />After successfully installing Hyperic Server, delete <tt>InstallerHome/logs/hq-install.log</tt> and <tt>hq-install.log.verbose</tt>, or the whole the exploded installer.</td></tr></table></div>
+<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Sensitive Data Best Practices</b><br />After successfully installing Hyperic Server, delete <tt>InstallerHome/logs/hq-install.log</tt> and <tt>hq-install.log.verbose</tt>, or the whole the exploded installer.</td></tr></table></div> 
 
 
-<h1><a name="HypericSecurityFeaturesandRecommendations-UseLDAPAuthentication"></a>Use LDAP Authentication</h1>
+<h1><a name="HypericSecurityFeaturesandRecommendations-UseLDAPAuthentication"></a>Use LDAP Authentication </h1>
 
-<p>Hyperic Server encrypts user passwords using a encryption key you supply during installation. Note however, that Hyperic Server does <em>not</em> have a strength-of-password policy, or a lockout policy for failed login attempts. Best practice is to integrate Hyperic with your existing enterprise directory. For information about integrating Hyperic with LDAP, Active Directory, and Kerberos, see <a href="Configure LDAP Properties.html" title="Configure LDAP Properties">Configure LDAP Properties</a> and <a href="Configure Kerberos Properties.html" title="Configure Kerberos Properties">Configure Kerberos Properties</a>.</p>
-
-
+<p>Hyperic Server encrypts user passwords using a encryption key you supply during installation. Note however, that Hyperic Server does <em>not</em> have a strength-of-password policy, or a lockout policy for failed login attempts. Best practice is to integrate Hyperic with your existing enterprise directory. For information about integrating Hyperic with LDAP, Active Directory, and Kerberos, see <a href="Configure LDAP Properties.html" title="Configure LDAP Properties">Configure LDAP Properties</a> and <a href="Configure Kerberos Properties.html" title="Configure Kerberos Properties">Configure Kerberos Properties</a>. </p>
 
 				    
                     			    </td>
@@ -72,7 +103,7 @@ div.rbtoc1329933505207 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Feb 28, 2012 11:11</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 10, 2012 14:22</font></td>
 		    </tr>
 	    </table>
     </body>

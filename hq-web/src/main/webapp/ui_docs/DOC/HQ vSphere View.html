@@ -1,15 +1,15 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>vFabric Hyperic 4.6.5 : HQ vSphere View</title>
+        <title>vFabric Hyperic 5.0 : HQ vSphere View</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
-<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
- - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
- -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.5.html">Hyperic 4.6.5 Release Notes</a> </b>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
  <p>
  <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
@@ -17,25 +17,48 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6.5 : HQ vSphere View
+                            vFabric Hyperic 5.0 : HQ vSphere View
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on May 09, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+				    <style type='text/css'>/*<![CDATA[*/
+div.rbtoc1336582842564 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1336582842564 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1336582842564 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1336582842564'>
+<ul>
+    <li><a href='#HQvSphereView-AbouttheHQvSpherePage'>About the HQ vSphere Page</a></li>
+<ul>
+    <li><a href='#HQvSphereView-DisplaytheHQvSpherePage'>Display the HQ vSphere Page</a></li>
+    <li><a href='#HQvSphereView-HQvSphereandResourcePermissions'>HQ vSphere and Resource Permissions</a></li>
+</ul>
+    <li><a href='#HQvSphereView-HQvSphereInventoryTab'>HQ vSphere Inventory Tab</a></li>
+    <li><a href='#HQvSphereView-HQvSphereSummaryTab'>HQ vSphere Summary Tab</a></li>
+<ul>
+    <li><a href='#HQvSphereView-SummaryTabforvCenter'>Summary Tab for vCenter</a></li>
+    <li><a href='#HQvSphereView-SummaryTabforvSphereHosts'>Summary Tab for vSphere Hosts</a></li>
+    <li><a href='#HQvSphereView-SummaryTabforvSphereVM'>Summary Tab for vSphere VM</a></li>
+    <li><a href='#HQvSphereView-SummaryTabforaManagedResourceintheVM'>Summary Tab for a Managed Resource in the VM</a></li>
+</ul>
+    <li><a href='#HQvSphereView-HQvSpherePerformanceTab'>HQ vSphere Performance Tab</a></li>
+<ul>
+    <li><a href='#HQvSphereView-ViewMetrics'>View Metrics</a></li>
+    <li><a href='#HQvSphereView-CorrelateMetrics'>Correlate Metrics</a></li>
+</ul>
+    <li><a href='#HQvSphereView-HQvSphereControlTab'>HQ vSphere Control Tab</a></li>
+    <li><a href='#HQvSphereView-Metrics'>Metrics</a></li>
+<ul>
+    <li><a href='#HQvSphereView-VMwarevSphereHostMetrics'>VMware vSphere Host Metrics</a></li>
+    <li><a href='#HQvSphereView-VMwarevSphereVMMetrics'>VMware vSphere VM Metrics</a></li>
+</ul>
+</ul></div>
+<p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
 
 <p>This page describes <b>HQ vSphere</b> page, enabled by the vSphere plugin in VMware vFabric™ Hyperic®. This page is present in the Hyperic user interface only if you have vSphere components under management. </p>
-
-<ul>
-	<li><a href="#HQvSphereView-AbouttheHQvSpherePage">About the HQ vSphere Page</a></li>
-	<li><a href="#HQvSphereView-HQvSphereInventoryTab">HQ vSphere Inventory Tab</a></li>
-	<li><a href="#HQvSphereView-HQvSphereSummaryTab">HQ vSphere Summary Tab</a></li>
-	<li><a href="#HQvSphereView-HQvSpherePerformanceTab">HQ vSphere Performance Tab</a></li>
-	<li><a href="#HQvSphereView-HQvSphereControlTab">HQ vSphere Control Tab</a></li>
-</ul>
-
 
 
 
@@ -59,7 +82,7 @@
 
 <p>You can also navigate to the <b>HQ vSphere</b> page from the Resource Hub. The resource page for a vCenter server or vSphere Host has a <b>View in HQ vSphere</b> link above the <b>Monitor</b> tab. </p>
 
-<p><span class="image-wrap" style=""><img src="attachments/79038211/79135363.png" width="750" style="border: 0px solid black"/></span></p>
+<p><span class="image-wrap" style=""><img src="attachments/79660206/79921836.png" width="750" style="border: 0px solid black"/></span></p>
 
 <h2><a name="HQvSphereView-HQvSphereandResourcePermissions"></a>HQ vSphere and Resource Permissions</h2>
 
@@ -114,41 +137,41 @@
 
 
 <p>The screenshot shows an expanded hierarchy in the <b>Inventory</b> tab.<br/>
-<span class="image-wrap" style=""><img src="attachments/79038211/79135364.png" width="650 px}" style="border: 0px solid black"/></span></p>
+<span class="image-wrap" style=""><img src="attachments/79660206/79921837.png" width="650 px}" style="border: 0px solid black"/></span></p>
 
 <div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Icons in the vSphere Inventory Tab</b><br />The icon to the left of an item in the resource tree indicates the type of the resource, and for a VM, its availability status. For information about how VM availability is determined, see <a href="#HQvSphereView-VmMetrics">VMware vSphere VM Metrics</a> below.
 <div class='table-wrap'>
 <table class='confluenceTable'><tbody>
 <tr>
-<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/79038082/79135170.png" width="20" style="border: 0px solid black"/></span> </td>
+<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/79660252/79921421.png" width="20" style="border: 0px solid black"/></span> </td>
 <td class='confluenceTd'> vCenter Server </td>
 </tr>
 <tr>
-<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/79038082/79135162.png" width="20" style="border: 0px solid black"/></span> </td>
+<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/79660252/79921430.png" width="20" style="border: 0px solid black"/></span> </td>
 <td class='confluenceTd'> vSphere Host </td>
 </tr>
 <tr>
-<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/79038082/79135168.png" width="20" style="border: 0px solid black"/></span> </td>
+<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/79660252/79921428.png" width="20" style="border: 0px solid black"/></span> </td>
 <td class='confluenceTd'> VM whose availability is <tt>Up</tt> </td>
 </tr>
 <tr>
-<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/79038082/79135176.png" width="20" style="border: 0px solid black"/></span> </td>
+<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/79660252/79921419.png" width="20" style="border: 0px solid black"/></span> </td>
 <td class='confluenceTd'> VM whose availability is <tt>Paused</tt> </td>
 </tr>
 <tr>
-<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/79038082/79135164.png" width="20" style="border: 0px solid black"/></span> </td>
+<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/79660252/79921432.png" width="20" style="border: 0px solid black"/></span> </td>
 <td class='confluenceTd'> VM whose availability is <tt>Powered Off</tt> </td>
 </tr>
 <tr>
-<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/79038082/79135169.png" width="20" style="border: 0px solid black"/></span> </td>
+<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/79660252/79921422.png" width="20" style="border: 0px solid black"/></span> </td>
 <td class='confluenceTd'> VM whose availability status is <tt>Down</tt> </td>
 </tr>
 <tr>
-<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/79038082/79135175.png" width="20" style="border: 0px solid black"/></span> </td>
+<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/79660252/79921420.png" width="20" style="border: 0px solid black"/></span> </td>
 <td class='confluenceTd'> VM whose availability status is <tt>Unknown</tt> </td>
 </tr>
 <tr>
-<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/79038082/79135163.png" width="20" style="border: 0px solid black"/></span> </td>
+<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/79660252/79921431.png" width="20" style="border: 0px solid black"/></span> </td>
 <td class='confluenceTd'> A Hyperic-managed resource running in a VM that has an Hyperic Agent running in it. </td>
 </tr>
 </tbody></table>
@@ -238,7 +261,7 @@
 
 <p>Click the thumbnail for an example screenshot; the  selected resource is a DB2 server running on a VM whose name is "vmcent54x64-db297".</p>
 
-<p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 995x607" href='http://support.hyperic.com/download/attachments/79038211/ServerInVmSummaryTab.png'><img src="attachments/thumbnails/79038211/79135365" style="border: 0px solid black"/></a></span></p>
+<p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 995x607" href='http://support.hyperic.com/download/attachments/79660206/ServerInVmSummaryTab.png'><img src="attachments/thumbnails/79660206/79921842" style="border: 0px solid black"/></a></span></p>
 
 <p>To view inventory properties for the managed resource itself, click the <b>view resource</b> link next to the resource name to view the resource in the Resource Hub.</p>
 
@@ -256,12 +279,12 @@
 <p>The <b>Performance</b> tab displays an <b>Availability</b> bar, and a chart for each metric currently enabled for the selected resource type.</p>
 
 <p>Click the thumbnail for the <b>Performance</b> tab for a vSphere Host.<br/>
-<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1072x1584" href='http://support.hyperic.com/download/attachments/79038211/VsphereHostPerfTab.png'><img src="attachments/thumbnails/79038211/79135366" style="border: 0px solid black"/></a></span></p>
+<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1072x1584" href='http://support.hyperic.com/download/attachments/79660206/VsphereHostPerfTab.png'><img src="attachments/thumbnails/79660206/79921843" style="border: 0px solid black"/></a></span></p>
 
 <p>Click the thumbnail for the <b>Performance</b> tab for a vSphere VM.<br/>
-<span class="image-wrap" style=""><a class="confluence-thumbnail-link 986x1104" href='http://support.hyperic.com/download/attachments/79038211/VmPerformanceTab.png'><img src="attachments/thumbnails/79038211/79135342" style="border: 0px solid black"/></a></span></p>
+<span class="image-wrap" style=""><a class="confluence-thumbnail-link 986x1104" href='http://support.hyperic.com/download/attachments/79660206/VmPerformanceTab.png'><img src="attachments/thumbnails/79660206/79921881" style="border: 0px solid black"/></a></span></p>
 
-<p>The tables in <a href="VMware vSphere Host Metrics.html" title="VMware vSphere Host Metrics">VMware vSphere Host Metrics</a> and <a href="VMware vSphere Host Metrics.html" title="VMware vSphere Host Metrics">VMware vSphere Host Metrics</a> list supported vSphere metrics and default settings.</p>
+<p>The tables in <a href="http://support.hyperic.com/display/DOCS50/VMware+vSphere+Host+Metrics" title="VMware vSphere Host Metrics">VMware vSphere Host Metrics</a> and <a href="http://support.hyperic.com/display/DOCS50/VMware+vSphere+Host+Metrics" title="VMware vSphere Host Metrics">VMware vSphere Host Metrics</a> list supported vSphere metrics and default settings.</p>
 
 <p>Twelve hours history is displayed by default. You can use the <b>Data Range</b> pull-down to set the display range to the most recent:</p>
 
@@ -279,19 +302,19 @@
 
 <ul>
 	<li><b>Compare each VM metric with its vSphere Host equivalent</b> &#8212; For example compare the VM's "Disk Usage (Average)" metric to its host's "Disk Usage (Average)" metric; the VM's "CPU Usage (Average)" metric to its host's "CPU Usage (Average)" metric; and so on. Click the thumbnail for an example screenshot.<br/>
-<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1129x1285" href='http://support.hyperic.com/download/attachments/79038211/VmHostAlltoAll.png'><img src="attachments/thumbnails/79038211/79135341" style="border: 0px solid black"/></a></span></li>
+<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1129x1285" href='http://support.hyperic.com/download/attachments/79660206/VmHostAlltoAll.png'><img src="attachments/thumbnails/79660206/79921880" style="border: 0px solid black"/></a></span></li>
 </ul>
 
 
 <ul>
 	<li><b>Compare each VM metric to a selected vSphere Host metric</b> &#8212; For example, compare each VM metric to the "Disk Usage (Average)" metric of its vSphere host. Click the thumbnail for an example screenshot.<br/>
-<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1099x1087" href='http://support.hyperic.com/download/attachments/79038211/VmHostAlltoOne.png'><img src="attachments/thumbnails/79038211/79135337" style="border: 0px solid black"/></a></span></li>
+<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1099x1087" href='http://support.hyperic.com/download/attachments/79660206/VmHostAlltoOne.png'><img src="attachments/thumbnails/79660206/79921876" style="border: 0px solid black"/></a></span></li>
 </ul>
 
 
 <ul>
 	<li><b>Compare metrics for a managed resource in the VM with performance of the VM or the vSphere host</b> &#8212; Use the <b>Compare</b> pull-down to select a VM or Host metric - the charts for the managed resource metrics will be overlayed with the line for the selected VM or host metric. Click the thumbnail for an example in which the vSphere Hosts's "CPU Usage (Average)" counter is overlayed on each Hyperic Agent metric chart.<br/>
-<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1110x1248" href='http://support.hyperic.com/download/attachments/79038211/ApptoHostCompare.png'><img src="attachments/thumbnails/79038211/79135338" style="border: 0px solid black"/></a></span></li>
+<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1110x1248" href='http://support.hyperic.com/download/attachments/79660206/ApptoHostCompare.png'><img src="attachments/thumbnails/79660206/79921877" style="border: 0px solid black"/></a></span></li>
 </ul>
 
 
@@ -301,7 +324,7 @@
 
 <p>Click the thumbnail to see the an example screenshot.</p>
 
-<p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 975x727" href='http://support.hyperic.com/download/attachments/79038211/VmControlTab.png'><img src="attachments/thumbnails/79038211/79135340" style="border: 0px solid black"/></a></span></p>
+<p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 975x727" href='http://support.hyperic.com/download/attachments/79660206/VmControlTab.png'><img src="attachments/thumbnails/79660206/79921879" style="border: 0px solid black"/></a></span></p>
 
 <div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>If a VM does not have an agent running in it, no <b>Control</b> tab appears. You can run control actions from the "Control" page for the VM in the Resource Hub. Click <b>view resource</b> next to the "Hostname" property on the VM's <b>Summary</b> tab.</td></tr></table></div>
 
@@ -980,7 +1003,7 @@ While a VM may&nbsp;have been configured to use 4 GB of RAM, as an example, it m
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Feb 28, 2012 11:12</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 10, 2012 14:23</font></td>
 		    </tr>
 	    </table>
     </body>

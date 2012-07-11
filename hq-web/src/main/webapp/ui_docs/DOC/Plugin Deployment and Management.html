@@ -1,15 +1,15 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>vFabric Hyperic 4.6.5 : Plugin Deployment and Management</title>
+        <title>vFabric Hyperic 5.0 : Plugin Deployment and Management</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
-<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
- - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
- -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.5.html">Hyperic 4.6.5 Release Notes</a> </b>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
  <p>
  <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
@@ -17,19 +17,19 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6.5 : Plugin Deployment and Management
+                            vFabric Hyperic 5.0 : Plugin Deployment and Management
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Feb 28, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jul 10, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1330449979428 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1330449979428 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1330449979428 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1341941934125 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1341941934125 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1341941934125 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1330449979428'>
+/*]]>*/</style><div class='rbtoc1341941934125'>
 <ul>
     <li><a href='#PluginDeploymentandManagement-KeyHypericPluginManagementFeatures'>Key Hyperic Plugin Management Features</a></li>
     <li><a href='#PluginDeploymentandManagement-VersionRequirementsforPluginSynchronization'>Version Requirements for Plugin Synchronization</a></li>
@@ -49,7 +49,7 @@ div.rbtoc1330449979428 li {margin-left: 0px;padding-left: 0px;}
 
 <h1><a name="PluginDeploymentandManagement-KeyHypericPluginManagementFeatures"></a>Key Hyperic Plugin Management Features</h1>
 
-<p>Hyperic 4.6.5 product plugin management and deployment features ensure that all Hyperic 4.6.5 Agents reporting a Hyperic 4.6.5 Server run exactly the same product plugins as those deployed to the server. The key features are:</p>
+<p>Hyperic product plugin management and deployment features ensure that all Hyperic Agents reporting the Hyperic Server run exactly the same product plugins as those deployed to the server. The key features are:</p>
 
 <ul>
 	<li>Plugin management interface &#8212; <b>Plugin Manager</b> is a user interface for deployment-wide management of product plugins. You use the <b>Plugin Manager</b> to deploy and manage plugins on the Hyperic Server and Hyperic Agents that report to the server. For more information, see <a href="#PluginDeploymentandManagement-AboutPluginManager">About Plugin Manager</a> below.</li>
@@ -57,13 +57,13 @@ div.rbtoc1330449979428 li {margin-left: 0px;padding-left: 0px;}
 
 
 <ul>
-	<li>Server-Agent Plugin Synchronization (SAPS) &#8212; A Hyperic 4.6.5 Agent and the Hyperic 4.6.5 Server it reports to cooperate to ensure that the agent is running exactly the same set of plugins as the server. For more information, see <a href="#PluginDeploymentandManagement-AboutPluginSyncatStartup">About Plugin Sync at Startup</a> below. SAPS is enabled by default, and can be disabled using the <tt>server.pluginsync.enabled</tt> property in the server's <tt>ServerHome\conf\server.conf</tt> file.</li>
+	<li>Server-Agent Plugin Synchronization (SAPS) &#8212; A Hyperic Agent and the Hyperic Server it reports to cooperate to ensure that the agent is running exactly the same set of plugins as the server. For more information, see <a href="#PluginDeploymentandManagement-AboutPluginSyncatStartup">About Plugin Sync at Startup</a> below. SAPS is enabled by default, and can be disabled using the <tt>server.pluginsync.enabled</tt> property in the server's <tt>ServerHome\conf\server.conf</tt> file.</li>
 </ul>
 
 
 <h1><a name="PluginDeploymentandManagement-VersionRequirementsforPluginSynchronization"></a>Version Requirements for Plugin Synchronization</h1>
 
-<p>In Hyperic 4.6.5, the SAPS process will <em>not</em> synchronize plugins on agents of an earlier version than the Hyperic Server. The Hyperic 4.6.5 Server can only synchronize plugins on agents running the same or later version. The <b>Plugin Manager</b> user interface indicates how many of the agents reporting to the server are in sync.  If there are agents that are out-of-date, you can see which agents need upgrading. For more information, see <a href="ui-Administration.Plugin.Manager.html" title="ui-Administration.Plugin.Manager">ui&#45;Administration.Plugin.Manager</a>.</p>
+<p>The SAPS process will <em>not</em> synchronize plugins on agents of an earlier version than the Hyperic Server. The Hyperic Server can only synchronize plugins on agents running the same or later version. The <b>Plugin Manager</b> user interface indicates how many of the agents reporting to the server are in sync.  If there are agents that are out-of-date, you can see which agents need upgrading. For more information, see <a href="ui-Administration.Plugin.Manager.html" title="ui-Administration.Plugin.Manager">ui&#45;Administration.Plugin.Manager</a>.</p>
 
 <h1><a name="PluginDeploymentandManagement-PluginAdministrationTasks"></a>Plugin Administration Tasks </h1>
 
@@ -195,7 +195,7 @@ compares the MD5 checksum of the plugins it loaded with the MD5 checksums in the
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Feb 28, 2012 11:12</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 10, 2012 14:23</font></td>
 		    </tr>
 	    </table>
     </body>
