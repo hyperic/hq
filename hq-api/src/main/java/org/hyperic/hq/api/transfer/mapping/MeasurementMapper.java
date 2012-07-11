@@ -17,7 +17,7 @@ public class MeasurementMapper {
     {
         df.setMaximumFractionDigits(3);
         df.setGroupingUsed(false);
-        df.setRoundingMode(RoundingMode.DOWN);
+        df.setRoundingMode(RoundingMode.HALF_EVEN);
     }
     
     
