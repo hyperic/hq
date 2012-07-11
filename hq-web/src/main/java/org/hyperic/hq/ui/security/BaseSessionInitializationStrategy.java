@@ -102,8 +102,7 @@ public class BaseSessionInitializationStrategy implements SessionAuthenticationS
         //If the user logged in with his LDAP credentials we want to add a LDAP\ prefix to
         //his user name and we also want to update his roles
         if (null != authentication.getPrincipal() && 
-        		authentication.getPrincipal().getClass().getName().contains("Ldap")
-        		&& !username.toLowerCase().startsWith(LDAP_PREFIX.toLowerCase())) {
+        		authentication.getPrincipal().getClass().getName().contains("Ldap")) {
         	username = LDAP_PREFIX + username;
         	updateRoles = true;
         }

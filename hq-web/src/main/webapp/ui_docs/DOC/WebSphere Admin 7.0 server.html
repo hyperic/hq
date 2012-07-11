@@ -1,0 +1,185 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : WebSphere Admin 7.0 server</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : WebSphere Admin 7.0 server
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <h3><a name="WebSphereAdmin7.0server-WebSphereAdmin7.0server"></a>WebSphere Admin 7.0 server</h3>
+<p><b>Log Track Supported:</b> No<br/>
+<b>Config Track Supported:</b> No<br/>
+<b>Custom Properties Supported:</b> </p>
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'>Name</th>
+<th class='confluenceTh'>Description</th>
+</tr>
+<tr>
+<td class='confluenceTd'>javaVendor</td>
+<td class='confluenceTd'>Java Vendor</td>
+</tr>
+<tr>
+<td class='confluenceTd'>javaVersion</td>
+<td class='confluenceTd'>Java Version</td>
+</tr>
+<tr>
+<td class='confluenceTd'>version</td>
+<td class='confluenceTd'>WebSphere Version</td>
+</tr>
+<tr>
+<td class='confluenceTd'>pid</td>
+<td class='confluenceTd'>Process ID</td>
+</tr>
+<tr>
+<td class='confluenceTd'>cellName</td>
+<td class='confluenceTd'>Cell Name</td>
+</tr>
+<tr>
+</tr>
+</tbody></table>
+</div>
+
+<p><b>Supported Control Actions:</b> start,stop,restart<br/>
+<b>Supported Metrics:</b> </p>
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'>Name</th>
+<th class='confluenceTh'>Alias</th>
+<th class='confluenceTh'>Units</th>
+<th class='confluenceTh'>Category</th>
+<th class='confluenceTh'>Default On</th>
+<th class='confluenceTh'>Default Interval</th>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Availability</font></td>
+<td class='confluenceTd'><font color="navy">Availability</font></td>
+<td class='confluenceTd'><font color="navy">percentage</font></td>
+<td class='confluenceTd'><font color="navy">AVAILABILITY</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">JVM Total Memory</font></td>
+<td class='confluenceTd'><font color="gray">totalMemory</font></td>
+<td class='confluenceTd'><font color="gray">KB</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">JVM Free Memory</font></td>
+<td class='confluenceTd'><font color="gray">freeMemory</font></td>
+<td class='confluenceTd'><font color="gray">KB</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">JVM Used Memory</font></td>
+<td class='confluenceTd'><font color="navy">usedMemory</font></td>
+<td class='confluenceTd'><font color="navy">KB</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Number of JVMs</font></td>
+<td class='confluenceTd'><font color="navy">NumJVMs</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+</tr>
+</tbody></table>
+</div>
+
+
+<p><b>Configuration help:</b> </p>
+
+
+  
+    <p>
+    <h4>The HQ Agent must be run using the IBM JDK to monitor WebSphere:</h4>
+    </p>
+
+    <pre>
+    % export HQ_JAVA_HOME=/opt/IBM/WebSphere/AppServer/java
+    % hq-agent.sh start
+    </pre>    
+  
+    
+  
+    <p><h4>Enable WebSphere PMI</h4></p>
+
+    WebSphere 7.0 has PMI enabled at the Basic level by default,
+    which is sufficient for HQ to collect the metrics enabled by
+    default.  The PMI level may need to be increased to collect
+    certain metrics not enabled by default.
+
+    <ul>
+      <li>Using a Web browser open the administration view </li>
+      <li><b>Server</b> -> <b>Application Servers</b> ->
+          <b>${server.name}</b> -> <b>Performance Monitoring Infrastructure</b> </li>
+      <li>Select the Runtime or Configuration tab </li>
+      <li>Set level to Basic or higher </li>
+      <li>Click OK </li>
+      <li>Click Save to apply changes to the master configuration </li>
+      <li>Restart server </li>
+    </ul>
+  
+    
+  
+    <p>
+    <h4>Global Security Configuration</h4>
+    If Global Security is enabled,
+    check that the user running the agent has read access to
+    <i>${installpath}/properties/ssl.client.props</i>
+    and that the following properties are correct:
+    </p>
+
+    <pre>
+    com.ibm.ssl.keyStore=...
+    com.ibm.ssl.keyStorePassword=...
+    com.ibm.ssl.trustStore=...
+    com.ibm.ssl.trustStorePassword=...
+    </pre>
+  
+    
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 10, 2012 14:24</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>
