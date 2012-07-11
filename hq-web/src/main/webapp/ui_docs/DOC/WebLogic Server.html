@@ -1,15 +1,15 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>vFabric Hyperic 4.6.5 : WebLogic Server</title>
+        <title>vFabric Hyperic 5.0 : WebLogic Server</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
-<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
- - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
- -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.5.html">Hyperic 4.6.5 Release Notes</a> </b>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
  <p>
  <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
@@ -17,19 +17,19 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6.5 : WebLogic Server
+                            vFabric Hyperic 5.0 : WebLogic Server
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Feb 22, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 14, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1329946134147 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1329946134147 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1329946134147 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1339693936333 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1339693936333 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1339693936333 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1329946134147'>
+/*]] >*/</style><div class='rbtoc1339693936333'>
 <ul>
     <li><a href='#WebLogicServer-Introduction'>Introduction</a></li>
     <li><a href='#WebLogicServer-ConfigurationOverview'>Configuration Overview</a></li>
@@ -134,7 +134,7 @@ HQ_JAVA_HOME=/usr/local/bea/jdk150_04
 </pre>
 </div></div> 
 
-<p>For Hyperic Agent v4.x on Windows platforms you must specify HQ_JAVA_HOME as a <b>system</b> variable. For more information, see <a href="Configure JREs for Hyperic Components.html" title="Configure JREs for Hyperic Components">Configure JREs for Hyperic Components</a> in <em>vFabric Hyperic Installation and Configuration</em>. </p>
+<p>For Hyperic Agent v4.x on Windows platforms you must specify HQ_JAVA_HOME as a <b>system</b> variable. For more information, see "Configure JREs for Hyperic Components" in <em>Getting Started with vFabric Hyperic</em>. </p>
 
 <h2><a name="WebLogicServer-RunAgentwithRequiredPermissions"></a>Run Agent with Required Permissions </h2>
 
@@ -218,7 +218,7 @@ HQ_JAVA_HOME=/usr/local/bea/jdk150_04
 
 <h3><a name="WebLogicServer-TwoWaySSL"></a>Two-Way SSL </h3>
 
-<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Agent Properties for Two-Way-SSL with WLS Admin Server</b><br />In Two-Way SSL, each side presents an SSL certificate to the other - the client must trust the server cert and the server must trust the client cert. The process is:
+<p>In Two-Way SSL, each side presents an SSL certificate to the other - the client must trust the server cert and the server must trust the client cert. The process is:</p>
 
 <ol>
 	<li>HQ Agent initiates a connection with the Administration Server.</li>
@@ -237,7 +237,8 @@ HQ_JAVA_HOME=/usr/local/bea/jdk150_04
 </ul>
 
 
-<p>Weblogic docs: <a href="http://download.oracle.com/docs/cd/E11035_01/wls100/security/SSL_client.html#wp1033891">Using Two-Way SSL Authentication</a></p></td></tr></table></div> 
+<p>Weblogic docs: <a href="http://download.oracle.com/docs/cd/E11035_01/wls100/security/SSL_client.html#wp1033891">Using Two-Way SSL Authentication</a></p>
+
 
 <h2><a name="WebLogicServer-RestartAgent"></a>Restart Agent </h2>
 
@@ -282,7 +283,7 @@ HQ_JAVA_HOME=/usr/local/bea/jdk150_04
 	<li>Navigate to the Admin Server in the Hyperic user interface.
 	<ol>
 		<li>Choose <b>Browse</b> from the Resources tab and click <b>Servers</b>.&nbsp;</li>
-		<li>To narrow the list of servers displayed, enter WebLogic in the Keyword box and click <span class="image-wrap" style=""><img src="attachments/79038211/79135522.png" height="17" width="17" style="border: 0px solid black"/></span>.</li>
+		<li>To narrow the list of servers displayed, enter WebLogic in the Keyword box and click <span class="image-wrap" style=""><img src="attachments/79660206/79921890.png" height="17" width="17" style="border: 0px solid black"/></span>.</li>
 		<li>Select the admin server from the list to display its Inventory page.</li>
 	</ol>
 	</li>
@@ -590,7 +591,7 @@ weblogic.discover.fqdn.10.0.0.4=appserver2.hyperic.com
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Feb 28, 2012 11:12</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 10, 2012 14:23</font></td>
 		    </tr>
 	    </table>
     </body>

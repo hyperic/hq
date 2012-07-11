@@ -1,15 +1,15 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>vFabric Hyperic 4.6.5 : Set Up Alert Action Script</title>
+        <title>vFabric Hyperic 5.0 : Set Up Alert Action Script</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
-<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
- - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
- -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.5.html">Hyperic 4.6.5 Release Notes</a> </b>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
  <p>
  <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
@@ -17,7 +17,7 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6.5 : Set Up Alert Action Script
+                            vFabric Hyperic 5.0 : Set Up Alert Action Script
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
@@ -32,7 +32,7 @@ div.rbtoc1325699212603 {margin-left: 1.5em;padding: 0px;}
 div.rbtoc1325699212603 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
 div.rbtoc1325699212603 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1325699212603'>
+/*]] >*/</style><div class='rbtoc1325699212603'>
 <ul>
     <li><a href='#ui-Alert.Script-DefineaScriptActionforanAlert'>Define a Script Action for an Alert</a></li>
     <li><a href='#ui-Alert.Script-EnvironmentVariablesforFiredAlertData'>Environment Variables for Fired Alert Data</a></li>
@@ -46,14 +46,14 @@ div.rbtoc1325699212603 li {margin-left: 0px;padding-left: 0px;}
 
 <p>To use the script action feature, write a script that implements the action or logic you wish to perform with the alert-related environment variables. When you configure the alert, specify the script to be executed when the alert fires. The script is server-side only, meaning it must be accessible and executable by the same user running the HQ Server process.</p>
 
-<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Agent-side Scripts</b><br />If you wish to execute agent-side scripts, see <a href="Configure a Custom Control Action.html" title="Configure a Custom Control Action">Configure a Custom Control Action</a>.</td></tr></table></div>
+<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="/images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Agent-side Scripts</b><br />If you wish to execute agent-side scripts, see <a href="Configure a Custom Control Action.html" title="Configure a Custom Control Action">Configure a Custom Control Action</a>.</td></tr></table></div>
 
 <p>Script actions can be defined for resource alerts and resource type alerts. In this version of Hyperic, escalation schemes do not support script actions.</p>
 
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Script actions are synchronous</b><br />Script actions execute one at a time. Until a script action completes, additional alerts will not fire on the resource.</td></tr></table></div>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="/images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Script actions are synchronous</b><br />Script actions execute one at a time. Until a script action completes, additional alerts will not fire on the resource.</td></tr></table></div>
 
 
-<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Script actions and memory</b><br />Script actions are forked by the the Hyperic Server's Java process. Most operating systems duplicate the Java process's memory before executing the new process; exact behavior varies by operating system. If the operating system does not provide for over-committing memory, script execution requires an amount of free memory equal to the amount of memory that the Hyperic Server's Java process consumes &#8212; otherwise, the script action will not run.</td></tr></table></div>
+<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="/images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Script actions and memory</b><br />Script actions are forked by the the Hyperic Server's Java process. Most operating systems duplicate the Java process's memory before executing the new process; exact behavior varies by operating system. If the operating system does not provide for over-committing memory, script execution requires an amount of free memory equal to the amount of memory that the Hyperic Server's Java process consumes &#8212; otherwise, the script action will not run.</td></tr></table></div>
 
 <h1><a name="SetUpAlertActionScript-EnvironmentVariablesforFiredAlertData"></a>Environment Variables for Fired Alert Data</h1>
 
@@ -182,7 +182,7 @@ close LOGFILE;]]></script>
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Feb 28, 2012 11:11</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 10, 2012 14:22</font></td>
 		    </tr>
 	    </table>
     </body>

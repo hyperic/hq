@@ -1,15 +1,15 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>vFabric Hyperic 4.6.5 : Metrics and Metric Collection</title>
+        <title>vFabric Hyperic 5.0 : Metrics and Metric Collection</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
-<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
- - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
- -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.5.html">Hyperic 4.6.5 Release Notes</a> </b>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
  <p>
  <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
@@ -17,7 +17,7 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6.5 : Metrics and Metric Collection
+                            vFabric Hyperic 5.0 : Metrics and Metric Collection
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
@@ -31,7 +31,7 @@ div.rbtoc1325700481771 {margin-left: 1.5em;padding: 0px;}
 div.rbtoc1325700481771 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
 div.rbtoc1325700481771 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1325700481771'>
+/*]] >*/</style><div class='rbtoc1325700481771'>
 <ul>
     <li><a href='#MetricsandMetricCollection-MetricCategories'>Metric Categories</a></li>
 <ul>
@@ -72,37 +72,37 @@ div.rbtoc1325700481771 li {margin-left: 0px;padding-left: 0px;}
 </tr>
 <tr>
 <td class='confluenceTd'> Green </td>
-<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/79038082/79135188.gif" style="border: 0px solid black"/></span> </td>
+<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/79660252/79921522.gif" style="border: 0px solid black"/></span> </td>
 <td class='confluenceTd'>Up </td>
 <td class='confluenceTd'>For an individual resource, indicates that its availability status is "up". <br class="atl-forced-newline" /> <br class="atl-forced-newline" />  For a group, indicates that none of the group members has availability status of  "down".  </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Yellow </td>
-<td class='confluenceTd'><span class="image-wrap" style=""><img src="attachments/79038082/79135189.gif" style="border: 0px solid black"/></span>  </td>
+<td class='confluenceTd'><span class="image-wrap" style=""><img src="attachments/79660252/79921527.gif" style="border: 0px solid black"/></span>  </td>
 <td class='confluenceTd'>Warn </td>
 <td class='confluenceTd'> This state is valid for a group only. It indicates that (1) one or more group members, but not all members, have the availability state of "down", and (2) the remaining members have status "green". </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Blue </td>
-<td class='confluenceTd'><span class="image-wrap" style=""><img src="attachments/79038082/79135191.gif" style="border: 0px solid black"/></span>  </td>
+<td class='confluenceTd'><span class="image-wrap" style=""><img src="attachments/79660252/79921525.gif" style="border: 0px solid black"/></span>  </td>
 <td class='confluenceTd'>Maintenance/Paused </td>
 <td class='confluenceTd'>This icon appears only for a VM or a group of VMs.  <br class="atl-forced-newline" /> <br class="atl-forced-newline" /> For an individual VM indicates it is paused.<br class="atl-forced-newline" /> <br class="atl-forced-newline" />  For a group, indicates that all VMs in the group are paused.     </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Red </td>
-<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/79038082/79135190.gif" style="border: 0px solid black"/></span> </td>
+<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/79660252/79921528.gif" style="border: 0px solid black"/></span> </td>
 <td class='confluenceTd'> Down</td>
 <td class='confluenceTd'> For an individual resource, indicates that its availability status is "down".<br class="atl-forced-newline" /> <br class="atl-forced-newline" />   For a group, indicates that all members of the group have either availability status "red" or "unknown".  </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Grey </td>
-<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/79038082/79135187.gif" style="border: 0px solid black"/></span> </td>
+<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/79660252/79921521.gif" style="border: 0px solid black"/></span> </td>
 <td class='confluenceTd'>Unknown </td>
 <td class='confluenceTd'>For an individual resource, indicates that its availability is unknown. <br class="atl-forced-newline" /> <br class="atl-forced-newline" /> For a group, indicates that the availability of at least one of the members is unknown. <br class="atl-forced-newline" /> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Blue </td>
-<td class='confluenceTd'><span class="image-wrap" style=""><img src="attachments/79038082/79135685.gif" style="border: 0px solid black"/></span> </td>
+<td class='confluenceTd'><span class="image-wrap" style=""><img src="attachments/79660252/79921886.gif" style="border: 0px solid black"/></span> </td>
 <td class='confluenceTd'>Suspended/Powered Off </td>
 <td class='confluenceTd'>This icon appears only for a VM or a group of VMs.  <br class="atl-forced-newline" /> <br class="atl-forced-newline" /> For an single VM indicates it is suspended or powered off. <br class="atl-forced-newline" /> <br class="atl-forced-newline" /> For a group of VMs, indicates that all VMs in the group are suspended or powered down.   </td>
 </tr>
@@ -190,7 +190,7 @@ div.rbtoc1325700481771 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 
 
-<p><span class="image-wrap" style=""><img src="attachments/79038211/79135380.png" width="700pxpxpxpx" style="border: 0px solid black"/></span></p>
+<p><span class="image-wrap" style=""><img src="attachments/79660206/79921675.png" width="700pxpxpxpx" style="border: 0px solid black"/></span></p>
 
 <h2><a name="MetricsandMetricCollection-HowaBaselineisCalculated"></a>How a Baseline is Calculated</h2>
 
@@ -220,7 +220,7 @@ div.rbtoc1325700481771 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Feb 28, 2012 11:11</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 10, 2012 14:22</font></td>
 		    </tr>
 	    </table>
     </body>

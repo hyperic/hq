@@ -1,15 +1,15 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>vFabric Hyperic 4.6.5 : Spring Insight</title>
+        <title>vFabric Hyperic 5.0 : Spring Insight</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
-<b><a href="vFabric Hyperic 4.6.5.html" title="vFabric Hyperic 4.6.5 Documentation Home">vFabric Hyperic 4.6.5 Documentation Home (Internal)</a>
- - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6.5 Documentation Home (Online)</a>
- -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.5.html">Hyperic 4.6.5 Release Notes</a> </b>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
  <p>
  <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
@@ -17,22 +17,22 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6.5 : Spring Insight
+                            vFabric Hyperic 5.0 : Spring Insight
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Feb 21, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on May 31, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1329861132173 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1329861132173 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1329861132173 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1338502742205 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1338502742205 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1338502742205 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1329861132173'>
+/*]] >*/</style><div class='rbtoc1338502742205'>
 <ul>
     <li><a href='#SpringInsight-SpringInsightPluginOverview'>Spring Insight Plugin Overview</a></li>
 <ul>
@@ -89,7 +89,7 @@ div.rbtoc1329861132173 li {margin-left: 0px;padding-left: 0px;}
 
 <ul>
 	<li>Collects application metrics from a Spring Insight Dashboard as described below in <a href="#SpringInsight-MetricCollection">Metric Collection</a>.</li>
-	<li>Provides two built-in resource type alerts that apply to all Spring Insight Application resources. The alerts are described in <a href="#SpringInsight-PreConfiguredAlertDefinitions">Pre&#45;Configured Alert Definitions</a>.</li>
+	<li>Provides two built-in resource type alerts that apply to all Spring Insight Application resources. The alerts are described in <a href="#SpringInsight-AlertDefinitions">Pre-Configured Alert Definitions</a>.</li>
 	<li>Provides a user interface for viewing the health of Spring Insight Applications and for analyzing application health and performance issues. For more information, see <a href="#SpringInsight-SpringInsightApplicationsView">Spring Insight Applications View</a> below.</li>
 </ul>
 
@@ -162,7 +162,7 @@ div.rbtoc1329861132173 li {margin-left: 0px;padding-left: 0px;}
 
 <h2><a name="SpringInsight-Step1%3AInstallHypericAgents"></a>Step 1: Install Hyperic Agents</h2>
 
-<p>If you have not already done so, install and start a Hyperic Agent on the host where the Insight Dashboard runs, and on each host of each Insight Agent reporting to the Insight Dashboard. See <a href="Install an Agent-Only Package.html" title="Install an Agent-Only Package">Install an Agent&#45;Only Package</a> in <em>vFabric Hyperic Installation and Configuration</em> for instructions.</p>
+<p>If you have not already done so, install and start a Hyperic Agent on the host where the Insight Dashboard runs, and on each host of each Insight Agent reporting to the Insight Dashboard. See <a href="Install an Agent-Only Package.html" title="Install an Agent-Only Package">Install an Agent&#45;Only Package</a> in <em>Getting Started with vFabric Hyperic</em> for instructions.</p>
 
 <h2><a name="SpringInsight-Step2%3AImportInsightDashboardtoHypericInventory"></a>Step 2: Import Insight Dashboard to Hyperic Inventory</h2>
 
@@ -187,7 +187,7 @@ div.rbtoc1329861132173 li {margin-left: 0px;padding-left: 0px;}
 
 <h2><a name="SpringInsight-Step3%3ATailorAlertDefinitions%28Optional%29"></a>Step 3: Tailor Alert Definitions (Optional)</h2>
 
-<p>The Spring Insight plugin provides two built-in resource type alerts for <b>Spring Insight Application</b> resources, described below in <a href="#SpringInsight-PreConfiguredAlertDefinitions">Pre&#45;Configured Alert Definitions</a>.  </p>
+<p>The Spring Insight plugin provides two built-in resource type alerts for <b>Spring Insight Application</b> resources, described below in <a href="#SpringInsight-AlertDefinitions">Pre-Configured Alert Definitions</a>.  </p>
 
 <p>To view and edit one of the alert definitions:</p>
 
@@ -197,7 +197,7 @@ div.rbtoc1329861132173 li {margin-left: 0px;padding-left: 0px;}
 	<li>Scroll down to the <b>Spring Insight Application</b> resource type and click <b>Edit Alerts</b>.
 	<ul>
 		<li>The <b>Monitoring Defaults</b> page displays key information about the alert.<br/>
-<span class="image-wrap" style=""><img src="attachments/79037547/79135069.png" width="750" style="border: 0px solid black"/></span></li>
+<span class="image-wrap" style=""><img src="attachments/79659606/79921627.png" width="750" style="border: 0px solid black"/></span></li>
 	</ul>
 	</li>
 	<li>On the <b>Monitoring Defaults &gt; Spring Insight Application services</b> page, you can:
@@ -231,7 +231,7 @@ div.rbtoc1329861132173 li {margin-left: 0px;padding-left: 0px;}
 </tr>
 <tr>
 <td class='confluenceTd'> resource name </td>
-<td class='confluenceTd'> The plugin forms the Hyperic name for a Spring Insight Dashboard by concatenating: parent platforms FQDN, a space, the string "Spring Insight Dashboard", a space, and WHAT IS FINAL COMPONENT?   </td>
+<td class='confluenceTd'> The plugin forms the Hyperic name for a Spring Insight Dashboard by concatenating: parent platforms FQDN, a space, and the string "Spring Insight Dashboard". </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Description </td>
@@ -270,7 +270,7 @@ div.rbtoc1329861132173 li {margin-left: 0px;padding-left: 0px;}
 </div>
 
 
-
+<p><a name="SpringInsight-MetricCollection"></a></p>
 <h2><a name="SpringInsight-MetricCollection"></a>Metric Collection</h2>
 
 <p>The following sections define the metrics for each Spring Insight resource type.</p>
@@ -395,7 +395,7 @@ div.rbtoc1329861132173 li {margin-left: 0px;padding-left: 0px;}
 <h3><a name="SpringInsight-PlatformMetrics"></a>Platform Metrics</h3>
 <p>You can chart any metric you collect for the platform where the application server runs on the <b>Spring Insight Applications</b> view. For definitions of the available metrics, see <a href="http://support.hyperic.com/display/hyperforge/Operating+System+Metrics">http://support.hyperic.com/display/hyperforge/Operating+System+Metrics</a>].</p>
 
-
+<p><a name="SpringInsight-AlertDefinitions"></a></p>
 <h2><a name="SpringInsight-PreConfiguredAlertDefinitions"></a>Pre-Configured Alert Definitions </h2>
 
 <p>The Spring Insight plugin provides two pre-configured alert definitions for <b>Spring Insight Application</b> resources. The built-in alert definitions specify <em>resource type alerts</em> &#8212; alerts that are assigned at the resource type level, rather than to individual resource instances.  </p>
@@ -421,6 +421,7 @@ div.rbtoc1329861132173 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 
 
+<p><a name="SpringInsight-SpringInsightApplicationsView"></a></p>
 <h2><a name="SpringInsight-SpringInsightApplicationsView"></a>Spring Insight Applications View</h2>
 
 <p>The <b>Spring Insight Application</b> page is available on the <b>Resources</b> tab if you have Insight Operations components under Hyperic management. This view presents health metrics for an Insight application along with metrics for related resources (for example, the application server where the application runs, the machine that hosts the application server, or a database that the application reads and updates) over the same timeframe.</p>
@@ -436,10 +437,10 @@ div.rbtoc1329861132173 li {margin-left: 0px;padding-left: 0px;}
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/79037547/79135069.png">InsightAppAlerts.png</a> (image/png)
+                                <a href="attachments/79659606/79921627.png">InsightAppAlerts.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/79037547/79135070.png">DataService.png</a> (image/png)
+                                <a href="attachments/79659606/79921626.png">DataService.png</a> (image/png)
                                 <br/>
                                                     </div>
 				    
@@ -451,7 +452,7 @@ div.rbtoc1329861132173 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Feb 28, 2012 11:12</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 10, 2012 14:23</font></td>
 		    </tr>
 	    </table>
     </body>
