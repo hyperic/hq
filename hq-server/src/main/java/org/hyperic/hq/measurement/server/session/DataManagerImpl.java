@@ -1045,7 +1045,7 @@ public class DataManagerImpl implements DataManager {
         if (m.getTemplate().isAvailability()) {
             return availabilityManager.getHistoricalAvailData(m, begin, end, PageControl.PAGE_ALL, prependAvailUnknowns);
         } else {
-            return getHistData(m, begin, end, maxDTPs);
+            return getNonAvailabilityMetricData(m, begin, end, maxDTPs);
         }
     }
     
@@ -1160,7 +1160,7 @@ public class DataManagerImpl implements DataManager {
         }
     }
 
-    private List<HighLowMetricValue> getHistData(final Measurement m, long begin, long end, int maxDTPs) {
+    private List<HighLowMetricValue> getNonAvailabilityMetricData(final Measurement m, long begin, long end, int maxDTPs) {
         checkTimeArguments(begin, end);
         begin = TimingVoodoo.roundDownTime(begin, MINUTE);
         end = TimingVoodoo.roundDownTime(end, MINUTE);
