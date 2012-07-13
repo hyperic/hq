@@ -82,7 +82,6 @@ public class TableIndexCollector extends Collector {
                     String schemaName = rs.getString("schemaname");
                     setValue("table." + schemaName + "." + tableName + "." + Metric.ATTR_AVAIL, Metric.AVAIL_UP);
                     for (int c = 1; c <= md.getColumnCount(); c++) {
-                        log.debug("===> table." + schemaName + "." + tableName + "." + md.getColumnLabel(c)+"="+ rs.getString(c));
                         setValue("table." + schemaName + "." + tableName + "." + md.getColumnLabel(c), rs.getString(c));
                     }
                 }

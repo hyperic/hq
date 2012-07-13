@@ -32,6 +32,7 @@ import java.sql.Statement;
 import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricNotFoundException;
 import org.hyperic.hq.product.MetricUnreachableException;
@@ -44,7 +45,6 @@ import org.hyperic.sigar.SigarNotImplementedException;
 import org.hyperic.sigar.SigarProxy;
 import org.hyperic.sigar.SigarProxyCache;
 import org.hyperic.sigar.jmx.SigarInvokerJMX;
-import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.jdbc.DBUtil;
 
 public class ServerMeasurement extends SigarMeasurementPlugin {
@@ -57,6 +57,10 @@ public class ServerMeasurement extends SigarMeasurementPlugin {
 
     @Override
     public MetricValue getValue(Metric metric) throws PluginException, MetricNotFoundException, MetricUnreachableException {
+        if (metric.getDomainName().equals("collector")) {
+            return Collector.getValue(this, metric);
+        }
+
         MetricValue res;
 
         initSigar();
@@ -66,7 +70,7 @@ public class ServerMeasurement extends SigarMeasurementPlugin {
             findPid(metric);
         } catch (PluginException ex) {
             if (metric.isAvail()) {
-                log.debug(ex,ex);
+                log.debug(ex, ex);
                 return new MetricValue(Metric.AVAIL_DOWN);
             } else {
                 throw ex;

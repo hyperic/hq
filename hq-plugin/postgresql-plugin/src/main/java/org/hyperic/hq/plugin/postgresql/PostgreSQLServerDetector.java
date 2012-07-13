@@ -56,7 +56,7 @@ public class PostgreSQLServerDetector extends ServerDetector implements AutoServ
 
     private Log log = LogFactory.getLog(PostgreSQLServerDetector.class);
     private static final String PTQL_QUERY = "State.Name.re=post(master|gres),State.Name.Pne=$1,Args.0.re=.*post(master|gres)(.exe)?$";
-    private static final String DB_QUERY = "SELECT datname FROM pg_database WHERE datistemplate IS FALSE AND datallowconn IS TRUE";
+    protected static final String DB_QUERY = "SELECT datname FROM pg_database WHERE datistemplate IS FALSE AND datallowconn IS TRUE";
     private static final String TABLE_QUERY = "SELECT relname, schemaname FROM pg_stat_user_tables";
     private static final String INDEX_QUERY = "SELECT indexrelname, schemaname FROM pg_stat_user_indexes";
 
