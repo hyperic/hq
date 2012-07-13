@@ -48,7 +48,12 @@ public class TableIndexCollector extends Collector {
     private List<String> indexes = new ArrayList<String>();
     private String whereTable = "";
     private String whereIndex = "";
+    private boolean firstCollect = true;
 
+    /**
+     * in the first collect call we collet metrics for all tables and indexes (where* are enpty)
+     * afert that we onlu collect metrics for configured tables and indexes (where* have values)
+     */
     @Override
     public void collect() {
         Properties p = getProperties();
@@ -60,8 +65,6 @@ public class TableIndexCollector extends Collector {
         String queryIndex = "SELECT * FROM pg_stat_user_indexes " + whereIndex;
 
         Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
 
         try {
             String url = PostgreSQL.prepareUrl(p, db);
@@ -69,31 +72,36 @@ public class TableIndexCollector extends Collector {
             conn = DriverManager.getConnection(url, user, pass);
 
             // TABLES
-            log.debug("[collect] queryTable='" + queryTable + "'");
-            stmt = conn.createStatement();
-            rs = stmt.executeQuery(queryTable);
-            ResultSetMetaData md = rs.getMetaData();
-            while (rs.next()) {
-                String tableName = rs.getString("relname");
-                String schemaName = rs.getString("schemaname");
-                setValue("table." + schemaName + "." + tableName + "." + Metric.ATTR_AVAIL, Metric.AVAIL_UP);
-                for (int c = 1; c < md.getColumnCount(); c++) {
-                    setValue("table." + schemaName + "." + tableName + "." + md.getColumnLabel(c), rs.getString(c));
+            if (firstCollect || (tables.size() > 0)) {
+                log.debug("[collect] queryTable='" + queryTable + "'");
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(queryTable);
+                ResultSetMetaData md = rs.getMetaData();
+                while (rs.next()) {
+                    String tableName = rs.getString("relname");
+                    String schemaName = rs.getString("schemaname");
+                    setValue("table." + schemaName + "." + tableName + "." + Metric.ATTR_AVAIL, Metric.AVAIL_UP);
+                    for (int c = 1; c <= md.getColumnCount(); c++) {
+                        log.debug("===> table." + schemaName + "." + tableName + "." + md.getColumnLabel(c)+"="+ rs.getString(c));
+                        setValue("table." + schemaName + "." + tableName + "." + md.getColumnLabel(c), rs.getString(c));
+                    }
                 }
+                DBUtil.closeJDBCObjects(log, null, stmt, rs);
             }
-            DBUtil.closeJDBCObjects(log, null, stmt, rs);
 
             // INDXES
-            log.debug("[collect] queryInex='" + queryIndex + "'");
-            stmt = conn.createStatement();
-            rs = stmt.executeQuery(queryIndex);
-            md = rs.getMetaData();
-            while (rs.next()) {
-                String indexrelName = rs.getString("indexrelname");
-                String schemaName = rs.getString("schemaname");
-                setValue("index." + schemaName + "." + indexrelName + "." + Metric.ATTR_AVAIL, Metric.AVAIL_UP);
-                for (int c = 1; c < md.getColumnCount(); c++) {
-                    setValue("index." + schemaName + "." + indexrelName + "." + md.getColumnLabel(c), rs.getString(c));
+            if (firstCollect || (indexes.size() > 0)) {
+                log.debug("[collect] queryInex='" + queryIndex + "'");
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(queryIndex);
+                ResultSetMetaData md = rs.getMetaData();
+                while (rs.next()) {
+                    String indexrelName = rs.getString("indexrelname");
+                    String schemaName = rs.getString("schemaname");
+                    setValue("index." + schemaName + "." + indexrelName + "." + Metric.ATTR_AVAIL, Metric.AVAIL_UP);
+                    for (int c = 1; c <= md.getColumnCount(); c++) {
+                        setValue("index." + schemaName + "." + indexrelName + "." + md.getColumnLabel(c), rs.getString(c));
+                    }
                 }
             }
         } catch (Exception e) {
@@ -101,8 +109,9 @@ public class TableIndexCollector extends Collector {
             setErrorMessage(msg, e);
             log.debug("[collect] " + msg, e);
         } finally {
-            DBUtil.closeJDBCObjects(log, conn, stmt, rs);
+            DBUtil.closeJDBCObjects(log, conn, null, null);
         }
+        firstCollect = false;
     }
 
     @Override
@@ -112,7 +121,7 @@ public class TableIndexCollector extends Collector {
         String index = metric.getProperties().getProperty(PostgreSQL.PROP_INDEX);
 
         boolean updateWhere = false;
-        if (!tables.contains(table)) {
+        if ((table != null) && (!tables.contains(table))) {
             tables.add(table);
             updateWhere = true;
         }
@@ -122,8 +131,9 @@ public class TableIndexCollector extends Collector {
             updateWhere = true;
         }
 
-        if (!indexes.contains(index)) {
+        if ((index != null) && (!indexes.contains(index))) {
             indexes.add(index);
+            updateWhere = true;
         }
 
         if (updateWhere) {
