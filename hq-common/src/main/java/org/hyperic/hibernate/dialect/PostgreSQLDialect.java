@@ -73,9 +73,8 @@ public class PostgreSQLDialect
         return false;
     }
 
-    public boolean supportsMultiInsertStmt()
-    {
-        return false;
+    public boolean supportsMultiInsertStmt() {
+        return true;
     }
 
     public boolean tableExists(Statement stmt, String tableName)

@@ -85,8 +85,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ibm.icu.util.Calendar;
-
 /**
  * The DataManagerImpl can be used to retrieve measurement data points
  * 
@@ -632,50 +630,50 @@ public class DataManagerImpl implements DataManager {
      */
     private boolean insertDataWithOneInsert(List<DataPoint> data, Connection conn) {
         Statement stmt = null;
-        ResultSet rs = null;
-        Map<String, List<DataPoint>> buckets = MeasRangeObj.getInstance().bucketData(data);
-
+        final Map<String, Set<DataPoint>> buckets = MeasRangeObj.getInstance().bucketDataEliminateDups(data);
+        final boolean debug = log.isDebugEnabled();
+        String sql = "";
         try {
-            for (Iterator<Map.Entry<String, List<DataPoint>>> it = buckets.entrySet().iterator(); it
-                .hasNext();) {
-                Map.Entry<String, List<DataPoint>> entry = it.next();
-                String table = entry.getKey();
-                List<DataPoint> dpts = entry.getValue();
-
-                StringBuilder values = new StringBuilder();
-                int rowsToUpdate = 0;
-                for (Iterator<DataPoint> i = dpts.iterator(); i.hasNext();) {
-                    DataPoint pt = i.next();
-                    Integer metricId = pt.getMetricId();
-                    MetricValue val = pt.getMetricValue();
-                    BigDecimal bigDec;
-                    bigDec = new BigDecimal(val.getValue());
-                    rowsToUpdate++;
-                    values.append("(").append(val.getTimestamp()).append(", ").append(
-                        metricId.intValue()).append(", ").append(
-                        getDecimalInRange(bigDec, metricId)).append("),");
+            for (Entry<String, Set<DataPoint>> entry : buckets.entrySet()) {
+                final String table = entry.getKey();
+                final Set<DataPoint> dpts = entry.getValue();
+                final int dptsSize = dpts.size();
+                final StringBuilder values = new StringBuilder(dptsSize*15);
+                int rows = 0;
+                for (final DataPoint pt : dpts) {
+                    final Integer metricId = pt.getMetricId();
+                    final MetricValue val = pt.getMetricValue();
+                    final BigDecimal bigDec = new BigDecimal(val.getValue());
+                    rows++;
+                    values.append("(").append(val.getTimestamp()).append(",")
+                          .append(metricId.intValue()).append(",")
+                          .append(getDecimalInRange(bigDec, metricId)).append(")");
+                    if (rows < dptsSize) {
+                        values.append(",");
+                    }
                 }
-                String sql = "insert into " + table + " (timestamp, measurement_id, " +
-                             "value) values " + values.substring(0, values.length() - 1);
+                sql = "insert into " + table + " (timestamp, measurement_id, value) values " + values;
                 stmt = conn.createStatement();
-                int rows = stmt.executeUpdate(sql);
-                if (log.isDebugEnabled()) {
-                    log.debug("Inserted " + rows + " rows into " + table + " (attempted " +
-                              rowsToUpdate + " rows)");
+                final int rowsUpdated = stmt.executeUpdate(sql);
+                stmt.close();
+                stmt = null;
+                if (debug) {
+                    log.debug("Inserted " + rowsUpdated + " rows into " + table + " (attempted " + rows + " rows)");
                 }
-                if (rows < rowsToUpdate)
+                if (rowsUpdated < rows) {
                     return false;
+                }
             }
         } catch (SQLException e) {
             // If there is a SQLException, then none of the data points
             // should be inserted. Roll back the txn.
-            if (log.isDebugEnabled()) {
-                log.debug("Error inserting data with one insert stmt: " + e.getMessage() +
-                          " (this is ok)");
+            if (debug) {
+                log.debug("Error inserting data with one insert stmt: " + e +
+                          ".  Server will retry the insert in degraded mode.  sql=\n" + sql);
             }
             return false;
         } finally {
-            DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
+            DBUtil.closeStatement(LOG_CTX, stmt);
         }
         return true;
     }
