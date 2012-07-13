@@ -39,7 +39,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -229,6 +228,7 @@ public class SrnManagerImpl implements SRNManager {
             final ScheduleRevNum srn = scheduleRevNumDAO.get(new SrnId(aeid));
             if (srn == null) {
                 if (debug) log.debug("no srn associated with aeid=" + aeid + " scheduling");
+                scheduleRevNumDAO.create(aeid);
                 rtn.add(aeid);
             } else if (srn.getSrn() != srnObj.getRevisionNumber() && canSchedule(srn, now, overrideRestrictions)) {
                 if (debug) {
@@ -275,7 +275,7 @@ public class SrnManagerImpl implements SRNManager {
         final Set<AppdefEntityID> toReschedule = getOutOfSyncEntitiesToSchedule(srnList, overrideRestrictions);
         if (debug) watch.markTimeEnd("setOutOfSyncEntities");
         enqueueRescheduleEventAfterCommit(toReschedule);
-        if (debug) log.debug(watch);
+        if (debug && watch.getElapsed() > 10) log.debug(watch);
     }
 
     private void enqueueRescheduleEventAfterCommit(Set<AppdefEntityID> toReschedule) {
