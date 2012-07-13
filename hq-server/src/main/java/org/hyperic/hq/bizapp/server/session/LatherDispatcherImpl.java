@@ -102,6 +102,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
     private HashSet<String> secureCommands = new HashSet<String>();
 
     private static final String LATHER_RUN_COMMAND_TIME = ConcurrentStatsCollector.LATHER_RUN_COMMAND_TIME;
+    private static final String LATHER_REMOTE_EXCEPTION = ConcurrentStatsCollector.LATHER_REMOTE_EXCEPTION;
 
     private AgentManager agentManager;
     private AuthManager authManager;
@@ -153,6 +154,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
     @PostConstruct
     public void initStatsCollector() {
     	concurrentStatsCollector.register(LATHER_RUN_COMMAND_TIME);
+    	concurrentStatsCollector.register(LATHER_REMOTE_EXCEPTION);
         concurrentStatsCollector.register(ConcurrentStatsCollector.CMD_PING);
         concurrentStatsCollector.register(ConcurrentStatsCollector.CMD_USERISVALID);
         concurrentStatsCollector.register(ConcurrentStatsCollector.CMD_MEASUREMENT_SEND_REPORT);
@@ -440,7 +442,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         try {
             authManager.authenticate(arg.getUser(), arg.getPword());
         } catch (Exception exc) {
-            log.warn("An invalid user(" + arg.getUser() + ") connected from " + ctx.getCallerIP());
+            log.warn("An invalid user(" + arg.getUser() + ") connected from " + ctx.getCallerIP() + ": " + exc, exc);
             return new UserIsValid_result(false);
         }
         return new UserIsValid_result(true);
@@ -456,7 +458,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         try {
             reportProcessor.handleMeasurementReport(args.getReport());
         } catch (DataInserterException e) {
-            throw new LatherRemoteException("Unable to insert data " + e.getMessage());
+            throw new LatherRemoteException("Unable to insert data " + e, e);
         }
 
         res.setTime(now());
@@ -476,7 +478,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
             return aiPlatformValue == null? NullLatherValue.INSTANCE : new AiPlatformLatherValue(aiPlatformValue);
         } catch (AutoinventoryException exc) {
             log.error("Error in AiSendReport: " + exc.getMessage(), exc);
-            throw new LatherRemoteException(exc.getMessage());
+            throw new LatherRemoteException(exc.getMessage(), exc);
         }
     }
 
@@ -682,6 +684,9 @@ public class LatherDispatcherImpl implements LatherDispatcher {
             conn = agentManager.getAgentConnection(method, ctx.getCallerIP(), agentId);
             start = now();
             return runCommand(ctx, method, arg);
+        } catch (LatherRemoteException e) {
+            concurrentStatsCollector.addStat(1, LATHER_REMOTE_EXCEPTION);
+            throw e;
         } finally {
             if (conn != null) {
                 agentManager.disconnectAgent(conn);
