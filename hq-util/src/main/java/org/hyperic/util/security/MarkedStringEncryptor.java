@@ -24,15 +24,12 @@
 */ 
 package org.hyperic.util.security;
 
-import java.lang.reflect.Field;
 import java.security.Provider;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jasypt.encryption.pbe.PBEStringEncryptor;
 import org.jasypt.encryption.pbe.PooledPBEStringEncryptor;
-import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.jasypt.encryption.pbe.config.PBEConfig;
 import org.jasypt.salt.SaltGenerator;
 import org.springframework.beans.factory.InitializingBean;
