@@ -251,7 +251,7 @@ public class LatherServlet extends HttpServlet {
     }
 
     private class ServiceCaller implements Runnable {
-    	
+        
         private HttpServletResponse resp;
         
         private LatherXCoder xcoder;
@@ -266,9 +266,9 @@ public class LatherServlet extends HttpServlet {
         
 
         private ServiceCaller(HttpServletResponse resp, LatherXCoder xcoder, LatherContext ctx, String method,
-        		LatherValue arg, LatherDispatcher latherDispatcher) {
-        	
-        	this.resp = resp;
+                LatherValue arg, LatherDispatcher latherDispatcher) {
+            
+            this.resp = resp;
             this.xcoder = xcoder;
             this.ctx = ctx;
             this.method = method;
@@ -278,42 +278,42 @@ public class LatherServlet extends HttpServlet {
         }
 
         private boolean hasStarted() {
-        	return startTime != null;
+            return startTime != null;
         }
 
         private boolean isFinished() {
-        	return finished.get();
+            return finished.get();
         }
 
         private void markFinished() {
-        	this.thread = null;
-        	finished.set(true);
+            this.thread = null;
+            finished.set(true);
         }
                           
         public void run() {
-        	
-        	try {
-        		startTime = new AtomicLong(System.currentTimeMillis());
-        		LatherValue res = latherDispatcher.dispatch(ctx, method, arg);
-        		if (thread.isInterrupted()) {
-        			return;
-        		}
-        		
-        		if (CommandInfo.CMD_AI_SEND_REPORT.equals(method)) {
+            
+            try {
+                startTime = new AtomicLong(System.currentTimeMillis());
+                LatherValue res = latherDispatcher.dispatch(ctx, method, arg);
+                if (thread.isInterrupted()) {
+                    return;
+                }
+                
+                if (CommandInfo.CMD_AI_SEND_REPORT.equals(method)) {
                     res = handleAutoApprovals(res);
                 }
-        		
-        		issueSuccessResponse(this.resp, this.xcoder, res);
-        	
-        	} catch(Exception e) {
-        		log.error("error while invoking LatherDispatcher from ip=" + ctx.getCallerIP() +
-        				", method=" + method + ": " + e, e);
-        		try {
-        			issueErrorResponse(resp, e.toString());
-        		} catch(IOException ioe){
-        			log.warn("IO error sending lather response method=" + method + ", ip=" + ctx.getCallerIP() + ": " + ioe, ioe);
-        		}
-        	}
+                
+                issueSuccessResponse(this.resp, this.xcoder, res);
+            
+            } catch(Exception e) {
+                log.error("error while invoking LatherDispatcher from ip=" + ctx.getCallerIP() +
+                        ", method=" + method + ": " + e, e);
+                try {
+                    issueErrorResponse(resp, e.toString());
+                } catch(IOException ioe){
+                    log.warn("IO error sending lather response method=" + method + ", ip=" + ctx.getCallerIP() + ": " + ioe, ioe);
+                }
+            }
         }
         
         private LatherValue handleAutoApprovals(LatherValue arg) throws LatherRemoteException {
@@ -334,102 +334,102 @@ public class LatherServlet extends HttpServlet {
         }
 
         public void interrupt() {
-        	if (thread != null)
-        		thread.interrupt();
+            if (thread != null)
+                thread.interrupt();
         }
 
         public boolean isExpired() {
-        	if (startTime == null) {
-        		return false;
-        	}
-        	final long now = System.currentTimeMillis();
-        	if ((startTime.get() + execTimeout) <= now) {
-        		return true;
-        	}
-        	return false;
+            if (startTime == null) {
+                return false;
+            }
+            final long now = System.currentTimeMillis();
+            if ((startTime.get() + execTimeout) <= now) {
+                return true;
+            }
+            return false;
         }
 
         public String toString() {
-        	return "method=" + method + ", ip=" + ctx.getCallerIP();
+            return "method=" + method + ", ip=" + ctx.getCallerIP();
         }
     }
 
     private void doServiceCall(HttpServletRequest req, HttpServletResponse resp, String methName, LatherValue args,
-    		LatherXCoder xCoder, LatherContext ctx)
-    				throws IOException {
-    	
-    	final LatherDispatcher latherDispatcher = Bootstrap.getBean(LatherDispatcher.class);
-    	final ServiceCaller caller = new ServiceCaller(resp, xCoder, ctx, methName, args, latherDispatcher);
-    	final Thread currentThread = Thread.currentThread();
-    	final String threadName = currentThread.getName();
+            LatherXCoder xCoder, LatherContext ctx)
+                    throws IOException {
+        
+        final LatherDispatcher latherDispatcher = Bootstrap.getBean(LatherDispatcher.class);
+        final ServiceCaller caller = new ServiceCaller(resp, xCoder, ctx, methName, args, latherDispatcher);
+        final Thread currentThread = Thread.currentThread();
+        final String threadName = currentThread.getName();
 
-    	try {
-    		currentThread.setName(methName + "-" + ids.getAndIncrement());
-    		LatherThreadMonitor.get().register(caller);
-    		caller.run();
-    		if (currentThread.isInterrupted()) {
-    			throw new InterruptedException();
-    		}
-    	} catch(InterruptedException exc){
-    		log.warn("Interrupted while trying to execute lather method=" + methName + " from ip=" + ctx.getCallerIP());
-    	} finally {
-    		caller.markFinished();
-    		currentThread.setName(threadName);
-    	}
+        try {
+            currentThread.setName(methName + "-" + ids.getAndIncrement());
+            LatherThreadMonitor.get().register(caller);
+            caller.run();
+            if (currentThread.isInterrupted()) {
+                throw new InterruptedException();
+            }
+        } catch(InterruptedException exc){
+            log.warn("Interrupted while trying to execute lather method=" + methName + " from ip=" + ctx.getCallerIP());
+        } finally {
+            caller.markFinished();
+            currentThread.setName(threadName);
+        }
     }
     
     private static class LatherThreadMonitor extends Thread {
-    	
-    	private static final LatherThreadMonitor instance = new LatherThreadMonitor();
-    	
-    	static {
-    		log.info("Starting Lather Thread Monitor");
-    		instance.start();
-    	}
-    	
-    	private static final ConcurrentLinkedQueue<ServiceCaller> queue = new ConcurrentLinkedQueue<LatherServlet.ServiceCaller>();
-    	
-    	private LatherThreadMonitor() {
-    		super("LatherThreadMonitor");
-    		setDaemon(true);
-    	}
-    	
-    	private static LatherThreadMonitor get() {
-    		return instance;
-    	}
-    	
-    	public void register(ServiceCaller caller) {
-    		queue.add(caller);
-    	}
+        
+        private static final LatherThreadMonitor instance = new LatherThreadMonitor();
+        
+        static {
+            log.info("Starting Lather Thread Monitor");
+            instance.start();
+        }
+        
+        private static final ConcurrentLinkedQueue<ServiceCaller> queue = new ConcurrentLinkedQueue<LatherServlet.ServiceCaller>();
+        
+        private LatherThreadMonitor() {
+            super("LatherThreadMonitor");
+            setDaemon(true);
+        }
+        
+        private static LatherThreadMonitor get() {
+            return instance;
+        }
+        
+        public void register(ServiceCaller caller) {
+            queue.add(caller);
+        }
 
-    	public void run() {
-    		
-    		final boolean debug = log.isDebugEnabled();
-    		final long inspectionInterval = 1000;
-    		int callerIndex = 0;
+        public void run() {
+            
+            final boolean debug = log.isDebugEnabled();
+            final long inspectionInterval = 1000;
+            int callerIndex = 0;
 
-    		while (true) {
-    			try {
-    				
-    				for (ServiceCaller caller : queue) {
-    					if (caller.isFinished()) {
-    						queue.remove(caller);
-    					} else if (caller.isExpired()) {
-    						log.warn("Expiring Lather thread " + caller);
-    						caller.interrupt();
-    						queue.remove(caller);
-    					}
-    					callerIndex++;
-    				}
-    				sleep(inspectionInterval);
-    				if (debug)
-    					log.debug("LatherThreadMonitor current queue size = " + queue.size() + ", " + callerIndex + " threads were inspected");
-    				callerIndex = 0;
+            while (true) {
+                try {
+                    
+                    for (ServiceCaller caller : queue) {
+                        if (caller.isFinished()) {
+                            queue.remove(caller);
+                        } else if (caller.isExpired()) {
+                            log.warn("Expiring Lather thread " + caller);
+                            caller.interrupt();
+                            queue.remove(caller);
+                        }
+                        callerIndex++;
+                    }
+                    sleep(inspectionInterval);
+                    if (debug)
+                        log.debug("LatherThreadMonitor current queue size = " + queue.size() + ", " + callerIndex + " threads were inspected");
+                    callerIndex = 0;
 
-    			} catch (Throwable t) {
-    				log.error(t,t);
-    			}
-    		}
-    	}
+                } catch (Throwable t) {
+                    log.error(t,t);
+                }
+            }
+        }
     }
 }
