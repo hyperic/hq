@@ -32,9 +32,13 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.SessionFactory;
+import org.hibernate.engine.SessionFactoryImplementor;
+import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManager;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.shared.AlertManager;
 import org.hyperic.hq.events.shared.EventLogManager;
 import org.hyperic.hq.ha.HAUtil;
@@ -174,10 +178,13 @@ public class DataPurgeJob implements Runnable {
         try {
             // Announce
             log.info("Data compression starting at " + TimeUtil.toString(time_start));
+            HQDialect dialect =
+                (HQDialect) ((SessionFactoryImplementor) Bootstrap.getBean(SessionFactory.class)).getDialect();
 
-            runDBAnalyze();
-            concurrentStatsCollector.addStat((now() - time_start),
-                ConcurrentStatsCollector.DB_ANALYZE_TIME);
+            if (dialect.analyzeDb()) {
+                runDBAnalyze();
+                concurrentStatsCollector.addStat((now() - time_start), ConcurrentStatsCollector.DB_ANALYZE_TIME);
+            }
 
             final long start = now();
             // Round down to the nearest hour.
@@ -340,17 +347,6 @@ public class DataPurgeJob implements Runnable {
             return;
         }
 
-        long vacuumStart = System.currentTimeMillis();
-        if (TimingVoodoo.roundDownTime(time_start, MeasurementConstants.HOUR) == TimingVoodoo
-            .roundDownTime(time_start, maintInterval)) {
-            log.info("Performing database maintenance (VACUUM ANALYZE)");
-            serverConfigManager.vacuum();
-
-            log.info("Database maintenance completed in " +
-                     ((System.currentTimeMillis() - vacuumStart) / 1000) + " seconds.");
-        } else {
-            log.info("Not performing database maintenance");
-        }
     }
 
     protected void purge(Properties conf, long now) {

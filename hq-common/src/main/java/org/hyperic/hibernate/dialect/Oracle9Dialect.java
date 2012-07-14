@@ -251,4 +251,8 @@ public class Oracle9Dialect
         
         return installDate.getTime();
 	}
+
+    public boolean analyzeDb() {
+        return true;
+    }
 }
