@@ -96,16 +96,6 @@ public interface ServerConfigManager {
     long analyzeHqMetricTables(boolean analyzePrevMetricDataTable);
 
     /**
-     * Run database-specific cleanup routines -- on PostgreSQL we do a VACUUM
-     * ANALYZE. On other databases we just return -1. Since 3.1 we do not want
-     * to vacuum the hq_metric_data tables, only the compressed
-     * eam_measurement_xxx tables.
-     * @return The time it took to vaccum, in milliseconds, or -1 if the
-     *         database is not PostgreSQL.
-     */
-    long vacuum();
-
-    /**
      * Get all the {@link ConfigProperty}s
      */
     Collection<ConfigProperty> getConfigProperties();
