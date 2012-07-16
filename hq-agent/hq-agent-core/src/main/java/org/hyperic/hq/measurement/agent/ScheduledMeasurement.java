@@ -37,10 +37,11 @@ import org.hyperic.util.encoding.Base64;
 public class ScheduledMeasurement {
     private String         dsn;
     private long           interval;
-    private int            derivedID;
+    private Integer        derivedID;
     private int            dsnID;
     private AppdefEntityID ent;
     private String         category;
+    private long           lastCollected;
 
     public ScheduledMeasurement(String dsn, long interval, int derivedID,
                                 int dsnID, AppdefEntityID ent, String category)
@@ -60,7 +61,8 @@ public class ScheduledMeasurement {
         String dsn    = getDSN();
         StringBuffer buf = new StringBuffer(64);
         buf.append("[derivedId=").append(getDerivedID()).
-            append("|dsnId=").append(getDsnID()).append("]");
+            append("|dsnId=").append(getDsnID()).append("]").
+            append("|interval=").append(getInterval()).append("]");
         return buf.toString();
     }
 
@@ -136,4 +138,28 @@ public class ScheduledMeasurement {
             return null;
         }
     }
+    
+    public boolean equals(Object rhs) {
+        if (this == rhs) {
+            return true;
+        }
+        if (rhs instanceof ScheduledMeasurement) {
+            ScheduledMeasurement m = (ScheduledMeasurement) rhs;
+            return derivedID.equals(m.derivedID);
+        }
+        return false;
+    }
+    
+    public int hashCode() {
+        return derivedID.hashCode();
+    }
+
+    public long getLastCollected() {
+        return lastCollected;
+    }
+
+    public void setLastCollected(long lastCollected) {
+        this.lastCollected = lastCollected;
+    }
+
 }

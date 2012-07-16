@@ -217,10 +217,15 @@ public abstract class AbstractStatsCollector {
         });
         register(new StatCollector() {
             private long last = 0;
+            private boolean isFirst = true;
             public String getId() {
                 return SIGAR_TCP_RETRANS;
             }
             public long getVal() throws StatUnreachableException {
+                if (isFirst) {
+                    isFirst = false;
+                    throw new StatUnreachableException("don't collect first value");
+                }
                 try {
                     long curr = sigar.getTcp().getRetransSegs();
                     long rtn = curr - last;
@@ -233,10 +238,15 @@ public abstract class AbstractStatsCollector {
         });
         register(new StatCollector() {
             private long last = 0;
+            private boolean isFirst = true;
             public String getId() {
                 return SIGAR_PAGEOUT;
             }
             public long getVal() throws StatUnreachableException {
+                if (isFirst) {
+                    isFirst = false;
+                    throw new StatUnreachableException("don't collect first value");
+                }
                 try {
                     long curr = sigar.getSwap().getPageOut();
                     long rtn = curr - last;
@@ -249,10 +259,15 @@ public abstract class AbstractStatsCollector {
         });
         register(new StatCollector() {
             private long last = 0;
+            private boolean isFirst = true;
             public String getId() {
                 return SIGAR_PAGEIN;
             }
             public long getVal() throws StatUnreachableException {
+                if (isFirst) {
+                    isFirst = false;
+                    throw new StatUnreachableException("don't collect first value");
+                }
                 try {
                     long curr = sigar.getSwap().getPageIn();
                     long rtn = curr - last;

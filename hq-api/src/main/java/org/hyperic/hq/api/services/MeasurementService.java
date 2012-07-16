@@ -22,9 +22,8 @@ import org.hyperic.hq.authz.shared.PermissionException;
 public interface MeasurementService {
 	
 	@POST
-//	@GET
 	@Path("/metrics/{rscId}")
-	MeasurementResponse getMetrics(/*@QueryParam("measurementRequest")*/ final MeasurementRequest measurementRequest,
+	MeasurementResponse getMetrics(final MeasurementRequest measurementRequest,
 	        @PathParam("rscId") final String rscId,
 	        @QueryParam("begin") final String begin,
 			@QueryParam("end") final String end) 

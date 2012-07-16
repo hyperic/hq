@@ -34,17 +34,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
 import org.hyperic.hq.api.services.impl.ApiMessageContext;
 import org.hyperic.hq.api.transfer.MeasurementTransfer;
-import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 import org.hyperic.hq.api.transfer.mapping.MeasurementMapper;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
@@ -52,11 +49,8 @@ import org.hyperic.hq.measurement.shared.DataManager;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.TemplateManager;
-import org.hyperic.util.pager.PageControl;
-import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
 
-//@Component
 public class MeasurementTransferImpl implements MeasurementTransfer {
     private static final int MAX_DTPS = 400;
 	
@@ -79,7 +73,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException {
 
         MeasurementResponse res = new MeasurementResponse();
-        if (hqMsmtReq==null || rscId==null || hqMsmtReq.getMeasurementTemplateNames()==null || hqMsmtReq.getMeasurementTemplateNames().size()==0 || begin==null || end==null || begin.length()<=0 || end.length()<=0) {
+        if (hqMsmtReq==null || rscId==null || "".equals(rscId) || hqMsmtReq.getMeasurementTemplateNames()==null || hqMsmtReq.getMeasurementTemplateNames().size()==0 || begin==null || end==null || begin.length()<=0 || end.length()<=0) {
             throw new UnsupportedOperationException("the request is missing the resource ID, the measurement template names, the begining or end of the time frame");
         }
         final DateFormat dateFormat = new SimpleDateFormat() ;

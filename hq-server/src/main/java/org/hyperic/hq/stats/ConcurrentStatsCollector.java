@@ -84,6 +84,7 @@ public class ConcurrentStatsCollector extends AbstractStatsCollector {
                                CMD_USERISVALID = "LATHER_" + CommandInfo.CMD_USERISVALID.toUpperCase(),
                                AGENT_PLUGIN_SYNC_RESTARTS = "AGENT_PLUGIN_SYNC_RESTARTS",
                                LATHER_RUN_COMMAND_TIME = "LATHER_RUN_COMMAND_TIME";
+    public static final String LATHER_REMOTE_EXCEPTION = "LATHER_REMOTE_EXCEPTION";
     private TaskScheduler taskScheduler;
 
     @Override

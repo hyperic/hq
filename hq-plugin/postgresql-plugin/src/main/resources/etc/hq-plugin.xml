@@ -39,11 +39,29 @@
 
     <property name="service-config"
             value="jdbcUrl=jdbc:postgresql://%postgresql.host%:%postgresql.port%/%db%,jdbcUser=%postgresql.user%,jdbcPassword=%postgresql.pass%"/>
+    
     <property name="service-collector-config"
             value="postgresql.host=%postgresql.host%,postgresql.port=%postgresql.port%,postgresql.user=%postgresql.user%,postgresql.pass=%postgresql.pass%,db=%db%"/>
+    
     <property name="server-config"
             value="postgresql.host=%postgresql.host%,postgresql.port=%postgresql.port%,postgresql.user=%postgresql.user%,postgresql.pass=%postgresql.pass%,postgresql.dfdb=%postgresql.dfdb%"/>
 
+    <property name="template" value="collector:${server-config}:${alias}:"/>
+    <metrics name="pg-server-collector">
+        <metric name="Connections"
+            alias="connections"
+            category="UTILIZATION"
+            indicator="true"
+            units="none"
+            collectionType="dynamic"/>
+        <metric name="Connections Usage"
+            alias="connections_usage"
+            category="UTILIZATION"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+    </metrics>
+    
     <property name="template" value="${domain}:${server-config}:${alias}:"/>
     <metrics name="pg-server">
         <metric name="Availability"
@@ -106,22 +124,6 @@
 
     <property name="template" value="${domain}:db=%db%:${alias}:${service-config}"/>
     <metrics name="pg-db">
-        <metric name="Availability"
-            category="AVAILABILITY"
-            indicator="true"
-            units="percentage"
-            collectionType="dynamic"/>
-        <metric name="Backends"
-            alias="numbackends"
-            category="UTILIZATION"
-            indicator="true"
-            units="none"
-            collectionType="dynamic"/>
-        <metric name="Locks Held"
-            alias="LocksHeld"
-            category="UTILIZATION"
-            units="none"
-            collectionType="dynamic"/>
         <metric name="Database Size"
             alias="DatabaseSize"
             category="UTILIZATION"
@@ -137,6 +139,38 @@
             alias="IndexSpaceUsed"
             category="UTILIZATION"
             units="KB"
+            collectionType="dynamic"/>
+    </metrics>
+
+    <property name="template" value="collector:${server-config}:%db%.${alias}"/>
+    <metrics name="pg-db-collector">
+        <metric name="Availability"
+            category="AVAILABILITY"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+        <metric name="Backends"
+            alias="numbackends"
+            category="UTILIZATION"
+            indicator="true"
+            units="none"
+            collectionType="dynamic"/>
+        <metric name="Connections Usage"
+            alias="connections_usage"
+            category="UTILIZATION"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+        <metric name="Locks Held"
+            alias="granted_locks"
+            category="UTILIZATION"
+            indicator="true"
+            units="none"
+            collectionType="dynamic"/>
+        <metric name="Locks Awaited"
+            alias="awaited_locks"
+            category="UTILIZATION"
+            units="none"
             collectionType="dynamic"/>
         <metric name="Commits"
             alias="xact_commit"
@@ -155,9 +189,52 @@
             indicator="true"
             units="none"
             collectionType="trendsup"/>
-        <metric name="Buffer Hits"
+        <metric name="Blocks Hits"
             alias="blks_hit"
             category="THROUGHPUT"
+            units="none"
+            collectionType="trendsup"/>
+        <metric name="Blocks Reads"
+            alias="blks_read"
+            category="THROUGHPUT"
+            units="none"
+            collectionType="trendsup"/>
+        <metric name="Indexes Scans"
+            alias="idx_scan"
+            category="UTILIZATION"
+            units="none"
+            collectionType="trendsup"/>
+        <metric name="Indexes Reads"
+            alias="idx_tup_read"
+            category="UTILIZATION"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+        <metric name="Indexes Scan Rows Read"
+            alias="idx_tup_fetch"
+            category="UTILIZATION"
+            units="none"
+            collectionType="trendsup"/>
+        <metric name="Indexes Blocks Reads"
+            alias="idx_blks_read"
+            category="UTILIZATION"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+        <metric name="Indexes Blocks Hit"
+            alias="idx_blks_hit"
+            category="UTILIZATION"
+            units="none"
+            collectionType="trendsup"/>
+        <metric name="Tables Sequential Scans"
+            alias="seq_scan"
+            category="UTILIZATION"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+        <metric name="Tables Sequential Scan Rows Read"
+            alias="seq_tup_read"
+            category="UTILIZATION"
             units="none"
             collectionType="trendsup"/>
     </metrics>
@@ -326,6 +403,7 @@
     <server name="HQ PostgreSQL" version="9.x">
         <property name="version" value="9.\d*"/>
         <plugin type="measurement" class="ServerMeasurement"/>
+        <plugin type="collector" class="ServerCollector"/>
         <plugin type="autoinventory" class="PostgreSQLServerDetector"/>
         <plugin type="config_track" class="org.hyperic.hq.product.FileChangeTrackPlugin"/>
 
@@ -345,6 +423,7 @@
         <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="false" />
 
         <metrics include="pg-server"/>
+        <metrics include="pg-server-collector"/>
 
         <properties>
             <property name="version" description="PostgreSQL Version"/>
@@ -370,11 +449,13 @@
 
         <service name="DataBase">
             <plugin type="measurement" class="DataBaseMeasurementPlugin"/>
+            <plugin type="collector" class="DataBaseCollector"/>
             <plugin type="control" class="TableControlPlugin"/>
             <actions include="Analyze,Vacuum,VacuumAnalyze,Reindex"/>
             <config>
                 <option name="db" description="DataBase Name"/>
             </config>
+            <metrics include="pg-db-collector"/>
             <metrics include="pg-db"/>
         </service>
 

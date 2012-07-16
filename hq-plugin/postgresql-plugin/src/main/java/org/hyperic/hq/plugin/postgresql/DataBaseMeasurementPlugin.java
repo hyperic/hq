@@ -36,19 +36,11 @@ public class DataBaseMeasurementPlugin extends ResourceMeasurement {
     protected String getQuery(Metric metric) {
 
         String attributeName = metric.getAttributeName();
-        if (metric.isAvail()) {
-            attributeName = "numbackends";
-        }
-
         String db = metric.getObjectProperty(PostgreSQL.PROP_DB);
 
         String serverQuery = null;
         // Check metrics that require joins across tables.
-        if (attributeName.equals("LocksHeld")) {
-            serverQuery = "SELECT COUNT(*) FROM PG_STAT_DATABASE, PG_LOCKS "
-                    + "WHERE PG_LOCKS.DATABASE = PG_STAT_DATABASE.DATID AND "
-                    + "PG_STAT_DATABASE.DATNAME = '" + db + "'";
-        } else if (attributeName.equals("DatabaseSize")) {
+        if (attributeName.equals("DatabaseSize")) {
             serverQuery = "SELECT pg_database_size(d.oid) "
                     + "FROM pg_database d where datname='" + db + "'";
         } else if (attributeName.equals("DataSpaceUsed")) {
@@ -59,10 +51,6 @@ public class DataBaseMeasurementPlugin extends ResourceMeasurement {
             serverQuery = "SELECT SUM(relpages) * 8 FROM pg_class WHERE "
                     + "relname IN (SELECT indexrelname from "
                     + "pg_stat_user_indexes)";
-        } else {
-            // Else normal query from pg_stat_database
-            serverQuery = "SELECT " + attributeName + " FROM pg_stat_database "
-                    + "WHERE datname='" + db + "'";
         }
 
         log.debug("[getQuery] serverQuery='" + serverQuery + "'");

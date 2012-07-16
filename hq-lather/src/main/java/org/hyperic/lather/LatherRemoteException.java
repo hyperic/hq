@@ -30,9 +30,12 @@ package org.hyperic.lather;
  * It is propogated back to the client over the transport mechanism, and
  * will be thrown by the client when a method invocation fails.
  */
-public final class LatherRemoteException
-    extends Exception
-{
+@SuppressWarnings("serial")
+public final class LatherRemoteException extends Exception {
+    public LatherRemoteException(String s, Throwable cause){
+        super(s, cause);
+    }
+
     public LatherRemoteException(String s){
         super(s);
     }

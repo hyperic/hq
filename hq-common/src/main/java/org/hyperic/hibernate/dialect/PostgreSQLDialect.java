@@ -37,9 +37,8 @@ import org.hyperic.util.jdbc.DBUtil;
  * This class must be public for Hibernate to access it.
  */
 public class PostgreSQLDialect 
-    extends org.hibernate.dialect.PostgreSQLDialect
-    implements HQDialect
-{
+extends org.hibernate.dialect.PostgreSQLDialect
+implements HQDialect {
     private static final String logCtx = PostgreSQLDialect.class.getName();
     
     public boolean supportsDeferrableConstraints() {
@@ -73,9 +72,8 @@ public class PostgreSQLDialect
         return false;
     }
 
-    public boolean supportsMultiInsertStmt()
-    {
-        return false;
+    public boolean supportsMultiInsertStmt() {
+        return true;
     }
 
     public boolean tableExists(Statement stmt, String tableName)
@@ -210,5 +208,9 @@ public class PostgreSQLDialect
         }
         
         return installDate.getTime();
-	}	
+	}
+
+    public boolean analyzeDb() {
+        return false;
+    }	
 }

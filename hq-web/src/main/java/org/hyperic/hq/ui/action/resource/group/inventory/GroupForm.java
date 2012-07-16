@@ -218,7 +218,7 @@ public class GroupForm
 
             if (_groupType.intValue() == Constants.APPDEF_TYPE_GROUP_ADHOC ||
                 _groupType.intValue() == Constants.APPDEF_TYPE_GROUP_COMPAT) {
-                if (_typeAndResourceTypeId.equals("-1"))
+                if ((_typeAndResourceTypeId == null) || (_typeAndResourceTypeId.equals("-1")) )
                     errors.add("typeAndResourceTypeId", new ActionMessage("resource.group.inventory.error."
                                                                           + "ResourceTypeIsRequired"));
             }

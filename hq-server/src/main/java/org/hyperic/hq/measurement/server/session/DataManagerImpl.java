@@ -80,14 +80,10 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.orm.hibernate3.HibernateTransactionManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.ibm.icu.util.Calendar;
 
 /**
  * The DataManagerImpl can be used to retrieve measurement data points
@@ -260,47 +256,6 @@ public class DataManagerImpl implements DataManager {
         List<DataPoint> pts = Collections.singletonList(new DataPoint(meas.getId(), mv));
 
         addData(pts, overwrite);
-    }
-
-    public void addData(List<DataPoint> data, String aggTable) {
-//        HQDialect dialect = measurementDAO.getHQDialect();
-//        boolean succeeded = false;
-
-        Connection conn = safeGetConnection();
-
-        try {
-//            boolean autocommit = conn.getAutoCommit();
-
-            try {
-//                conn.setAutoCommit(false);
-//                if (dialect.supportsMultiInsertStmt()) {
-                    insertDataWithOneInsert(data, aggTable, conn);
-//                } else {
-//                    insertDataInBatch(data, aggTable, conn);
-//                }
-
-//                if (succeeded) {
-                    conn.commit();
-//                    sendMetricEvents(data);
-//                } else {
-//                    conn.rollback();
-//                    conn.setAutoCommit(true);
-//                    List<DataPoint> processed = addDataWithCommits(data, true, conn);
-//                    sendMetricEvents(processed);
-//                }
-
-            } catch (SQLException e) {
-                conn.rollback();
-                throw e;
-            } finally {
-//                conn.setAutoCommit(autocommit);
-            }
-        } catch (SQLException e) {
-//            log.debug("Transaction failed around inserting metric data.", e);
-        } finally {
-            DBUtil.closeConnection(LOG_CTX, conn);
-        }
-//        return succeeded;
     }
 
     /**
@@ -675,87 +630,54 @@ public class DataManagerImpl implements DataManager {
      */
     private boolean insertDataWithOneInsert(List<DataPoint> data, Connection conn) {
         Statement stmt = null;
-        ResultSet rs = null;
-        Map<String, List<DataPoint>> buckets = MeasRangeObj.getInstance().bucketData(data);
-
+        final Map<String, Set<DataPoint>> buckets = MeasRangeObj.getInstance().bucketDataEliminateDups(data);
+        final boolean debug = log.isDebugEnabled();
+        String sql = "";
         try {
-            for (Iterator<Map.Entry<String, List<DataPoint>>> it = buckets.entrySet().iterator(); it
-                .hasNext();) {
-                Map.Entry<String, List<DataPoint>> entry = it.next();
-                String table = entry.getKey();
-                List<DataPoint> dpts = entry.getValue();
-
-                StringBuilder values = new StringBuilder();
-                int rowsToUpdate = 0;
-                for (Iterator<DataPoint> i = dpts.iterator(); i.hasNext();) {
-                    DataPoint pt = i.next();
-                    Integer metricId = pt.getMetricId();
-                    MetricValue val = pt.getMetricValue();
-                    BigDecimal bigDec;
-                    bigDec = new BigDecimal(val.getValue());
-                    rowsToUpdate++;
-                    values.append("(").append(val.getTimestamp()).append(", ").append(
-                        metricId.intValue()).append(", ").append(
-                        getDecimalInRange(bigDec, metricId)).append("),");
+            for (Entry<String, Set<DataPoint>> entry : buckets.entrySet()) {
+                final String table = entry.getKey();
+                final Set<DataPoint> dpts = entry.getValue();
+                final int dptsSize = dpts.size();
+                final StringBuilder values = new StringBuilder(dptsSize*15);
+                int rows = 0;
+                for (final DataPoint pt : dpts) {
+                    final Integer metricId = pt.getMetricId();
+                    final MetricValue val = pt.getMetricValue();
+                    final BigDecimal bigDec = new BigDecimal(val.getValue());
+                    rows++;
+                    values.append("(").append(val.getTimestamp()).append(",")
+                          .append(metricId.intValue()).append(",")
+                          .append(getDecimalInRange(bigDec, metricId)).append(")");
+                    if (rows < dptsSize) {
+                        values.append(",");
+                    }
                 }
-                String sql = "insert into " + table + " (timestamp, measurement_id, " +
-                             "value) values " + values.substring(0, values.length() - 1);
+                sql = "insert into " + table + " (timestamp, measurement_id, value) values " + values;
                 stmt = conn.createStatement();
-                int rows = stmt.executeUpdate(sql);
-                if (log.isDebugEnabled()) {
-                    log.debug("Inserted " + rows + " rows into " + table + " (attempted " +
-                              rowsToUpdate + " rows)");
+                final int rowsUpdated = stmt.executeUpdate(sql);
+                stmt.close();
+                stmt = null;
+                if (debug) {
+                    log.debug("Inserted " + rowsUpdated + " rows into " + table + " (attempted " + rows + " rows)");
                 }
-                if (rows < rowsToUpdate)
+                if (rowsUpdated < rows) {
                     return false;
+                }
             }
         } catch (SQLException e) {
             // If there is a SQLException, then none of the data points
             // should be inserted. Roll back the txn.
-            if (log.isDebugEnabled()) {
-                log.debug("Error inserting data with one insert stmt: " + e.getMessage() +
-                          " (this is ok)");
+            if (debug) {
+                log.debug("Error inserting data with one insert stmt: " + e +
+                          ".  Server will retry the insert in degraded mode.  sql=\n" + sql);
             }
             return false;
         } finally {
-            DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
+            DBUtil.closeStatement(LOG_CTX, stmt);
         }
         return true;
     }
 
-    private void insertDataWithOneInsert(List<DataPoint> dpts, String table, Connection conn) {
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-                StringBuilder values = new StringBuilder();
-                int rowsToUpdate = 0;
-                for (Iterator<DataPoint> i = dpts.iterator(); i.hasNext();) {
-                    DataPoint pt = i.next();
-                    Integer metricId = pt.getMetricId();
-                    HighLowMetricValue metricVal = (HighLowMetricValue) pt.getMetricValue();
-                    BigDecimal val = new BigDecimal(metricVal.getValue());
-                    BigDecimal highVal = new BigDecimal(metricVal.getHighValue());
-                    BigDecimal lowVal = new BigDecimal(metricVal.getLowValue());
-                    rowsToUpdate++;
-                    values.append("(").append(metricId.intValue()).append(", ").append(
-                            metricVal.getTimestamp()).append(", ").append(
-                                    getDecimalInRange(val, metricId)).append(", ").append(
-                                    getDecimalInRange(lowVal, metricId)).append(", ").append(
-                                    getDecimalInRange(highVal, metricId)).append("),");
-                }
-                String sql = "insert into " + table + " (measurement_id, timestamp, value, minvalue, maxvalue)" + 
-                             " values " + values.substring(0, values.length() - 1);
-                stmt = conn.createStatement();
-                stmt.executeUpdate(sql);
-        } catch (SQLException e) {
-            // If there is a SQLException, then none of the data points
-            // should be inserted. Roll back the txn.
-        } finally {
-            DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
-        }
-    }
-    
-    
     /**
      * Insert the metric data points to the DB in batch.
      * 
@@ -1121,7 +1043,7 @@ public class DataManagerImpl implements DataManager {
         if (m.getTemplate().isAvailability()) {
             return availabilityManager.getHistoricalAvailData(m, begin, end, PageControl.PAGE_ALL, prependAvailUnknowns);
         } else {
-            return getHistData(m, begin, end, maxDTPs);
+            return getNonAvailabilityMetricData(m, begin, end, maxDTPs);
         }
     }
     
@@ -1236,7 +1158,7 @@ public class DataManagerImpl implements DataManager {
         }
     }
 
-    private List<HighLowMetricValue> getHistData(final Measurement m, long begin, long end, int maxDTPs) {
+    private List<HighLowMetricValue> getNonAvailabilityMetricData(final Measurement m, long begin, long end, int maxDTPs) {
         checkTimeArguments(begin, end);
         begin = TimingVoodoo.roundDownTime(begin, MINUTE);
         end = TimingVoodoo.roundDownTime(end, MINUTE);

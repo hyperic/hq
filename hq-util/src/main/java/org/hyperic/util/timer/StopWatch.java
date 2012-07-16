@@ -87,7 +87,7 @@ public class StopWatch {
     public String toString() {
         final long elap = getElapsed();
         final StringBuilder buf = new StringBuilder(64);
-        buf.append(StringUtil.formatDuration(elap, 2, true));
+        buf.append(elap).append(" ms");
         if (_markerMap.size() > 0) {
             buf.append(" { Markers: ");
             for (Entry<String, LinkedList<TimeSlice>> entry : _markerMap.entrySet()) {
@@ -113,7 +113,7 @@ public class StopWatch {
             total += elapsed.longValue();
         }
         buf.append(" [").append(marker).append("=")
-           .append((total == -1) ? "null" : StringUtil.formatDuration(total, 2, true))
+           .append((total == -1) ? "null" : total + " ms")
            .append("]");
     }
 
