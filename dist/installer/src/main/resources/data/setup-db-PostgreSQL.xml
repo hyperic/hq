@@ -203,6 +203,10 @@
       <arg value="-C"/>
       <arg value="${server.hqdb.dir}"/>
     </exec>
+    <copy todir="${server.hqdb.dir}/data">
+       <fileset dir="${install.dir}/data/hqdb/conf"
+                includes="**"/>
+     </copy>
   </target>
 
   <target name="untarWin" if="isWin32">
