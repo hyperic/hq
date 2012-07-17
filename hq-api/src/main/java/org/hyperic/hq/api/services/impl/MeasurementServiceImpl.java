@@ -45,4 +45,14 @@ public class MeasurementServiceImpl extends RestApiService implements Measuremen
             throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.WRONG_DATE_VALUES, e.getMessage());
         }
     }
+
+    public MeasurementResponse getAggregatedMetricData(MeasurementRequest hqMsmtReq, String rscId, String begin,
+            String end) throws ParseException, PermissionException, SessionNotFoundException, SessionTimeoutException {
+        try {
+            ApiMessageContext apiMessageContext = newApiMessageContext();
+            return measurementTransfer.getAggregatedMetricData(apiMessageContext, hqMsmtReq, rscId, begin, end);
+        } catch (ParseException e) {
+            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.WRONG_DATE_FORMAT, "cannot parse the begin/end time frame arguments\n",e.getMessage());
+        }
+    }
 }

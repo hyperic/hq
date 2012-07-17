@@ -2,6 +2,7 @@ package org.hyperic.hq.api.transfer;
 
 import java.text.ParseException;
 
+import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
 import org.hyperic.hq.api.services.impl.ApiMessageContext;
@@ -24,4 +25,8 @@ public interface MeasurementTransfer {
 	 */
     public MeasurementResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest measurementRequest,
 			final String rscId, final String begin, final String end) throws ParseException, PermissionException;
+    
+    public MeasurementResponse getAggregatedMetricData(ApiMessageContext apiMessageContext, final MeasurementRequest hqMsmtReq, 
+            final String rscId, final String begin, final String end) 
+            throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException;
 }

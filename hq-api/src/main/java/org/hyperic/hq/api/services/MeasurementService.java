@@ -1,7 +1,8 @@
 package org.hyperic.hq.api.services;
 
+import java.text.ParseException;
+
 import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -28,4 +29,12 @@ public interface MeasurementService {
 	        @QueryParam("begin") final String begin,
 			@QueryParam("end") final String end) 
 			        throws PermissionException, SessionNotFoundException, SessionTimeoutException;
+	
+    @POST
+    @Path("/metrics/aggregation/{rscId}")
+    public MeasurementResponse getAggregatedMetricData(final MeasurementRequest hqMsmtReq, 
+            @PathParam("rscId") final String rscId, 
+            @QueryParam("begin") final String begin, 
+            @QueryParam("end") final String end) 
+            throws ParseException, PermissionException, SessionNotFoundException, SessionTimeoutException;
 }
