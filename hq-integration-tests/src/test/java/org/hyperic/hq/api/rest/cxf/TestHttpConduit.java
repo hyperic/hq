@@ -53,6 +53,7 @@ import org.apache.cxf.ws.addressing.EndpointReferenceType;
 
 import com.meterware.httpunit.HttpException;
 import com.meterware.httpunit.HttpInternalErrorException;
+import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
@@ -120,6 +121,11 @@ public class TestHttpConduit extends HTTPConduit {
 				messagePayload.flush() ; 
 				final ByteArrayInputStream bis = new ByteArrayInputStream(messagePayload.toByteArray()) ;   
 				req = new PutMethodWebRequest(sURL, bis, (String) msg.get(CONTENT_TYPE_HEADER)) ;
+            }else if(httpRequestMethod.equals("POST")) { 
+                messagePayload = (ByteArrayOutputStream) msg.getContent(java.io.OutputStream.class) ;
+                messagePayload.flush() ; 
+                final ByteArrayInputStream bis = new ByteArrayInputStream(messagePayload.toByteArray()) ;   
+                req = new PostMethodWebRequest(sURL, bis, (String) msg.get(CONTENT_TYPE_HEADER)) ;
 			}else{ 
 				throw new UnsupportedOperationException(httpRequestMethod + " is unsupported!") ; 
 			}//EO if post 

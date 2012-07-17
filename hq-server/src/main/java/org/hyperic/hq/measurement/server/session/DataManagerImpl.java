@@ -260,6 +260,53 @@ public class DataManagerImpl implements DataManager {
         addData(pts, overwrite);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void addData(List<DataPoint> data, String aggTable) throws SQLException {
+        Connection conn = safeGetConnection();
+        try {
+            try {
+                insertDataWithOneInsert(data, aggTable, conn);
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+            }
+        } finally {
+            DBUtil.closeConnection(LOG_CTX, conn);
+        }
+    }
+         
+    private void insertDataWithOneInsert(List<DataPoint> dpts, String table, Connection conn) {
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            StringBuilder values = new StringBuilder();
+            for (Iterator<DataPoint> i = dpts.iterator(); i.hasNext();) {
+                DataPoint pt = i.next();
+                Integer metricId = pt.getMetricId();
+                HighLowMetricValue metricVal = (HighLowMetricValue) pt.getMetricValue();
+                BigDecimal val = new BigDecimal(metricVal.getValue());
+                BigDecimal highVal = new BigDecimal(metricVal.getHighValue());
+                BigDecimal lowVal = new BigDecimal(metricVal.getLowValue());
+                values.append("(").append(metricId.intValue()).append(", ").append(
+                        metricVal.getTimestamp()).append(", ").append(
+                                getDecimalInRange(val, metricId)).append(", ").append(
+                                        getDecimalInRange(lowVal, metricId)).append(", ").append(
+                                                getDecimalInRange(highVal, metricId)).append("),");
+            }
+            String sql = "insert into " + table + " (measurement_id, timestamp, value, minvalue, maxvalue)" + 
+                    " values " + values.substring(0, values.length() - 1);
+            stmt = conn.createStatement();
+            stmt.executeUpdate(sql);
+        } catch (SQLException e) {
+            // If there is a SQLException, then none of the data points
+            // should be inserted. Roll back the txn.
+        } finally {
+            DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
+        }
+    }
+    
     /**
      * Write metric data points to the DB with transaction
      * 
