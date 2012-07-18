@@ -5,6 +5,7 @@ import javax.ws.rs.core.Response;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
+import org.hyperic.hq.api.model.measurements.ResourceMeasurementBatchResponse;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequests;
 import org.hyperic.hq.api.services.MeasurementService;
 import org.hyperic.hq.api.transfer.MeasurementTransfer;
@@ -47,7 +48,7 @@ public class MeasurementServiceImpl extends RestApiService implements Measuremen
         }
     }
 
-    public MeasurementResponse getAggregatedMetricData(ResourceMeasurementRequests hqMsmtReqs, String begin, String end)
+    public ResourceMeasurementBatchResponse getAggregatedMetricData(ResourceMeasurementRequests hqMsmtReqs, String begin, String end)
             throws ParseException, PermissionException, SessionNotFoundException, SessionTimeoutException {
         try {
             ApiMessageContext apiMessageContext = newApiMessageContext();

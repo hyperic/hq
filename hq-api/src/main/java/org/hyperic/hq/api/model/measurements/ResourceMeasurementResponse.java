@@ -15,8 +15,11 @@ public class ResourceMeasurementResponse extends MeasurementResponse {
     @XmlAttribute
     protected String rscId;
 
-    public ResourceMeasurementResponse() {
+    public ResourceMeasurementResponse() {}
+    
+    public ResourceMeasurementResponse(String rscId) {
         super();
+        this.rscId=rscId;
     }
 
     public String getRscId() {

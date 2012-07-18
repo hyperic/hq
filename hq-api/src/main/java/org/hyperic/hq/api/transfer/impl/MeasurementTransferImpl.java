@@ -37,10 +37,13 @@ import java.util.Map;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
+import org.hyperic.hq.api.model.measurements.ResourceMeasurementBatchResponse;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequest;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequests;
+import org.hyperic.hq.api.model.measurements.ResourceMeasurementResponse;
 import org.hyperic.hq.api.services.impl.ApiMessageContext;
 import org.hyperic.hq.api.transfer.MeasurementTransfer;
+import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 import org.hyperic.hq.api.transfer.mapping.MeasurementMapper;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -61,14 +64,17 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     private TemplateManager tmpltMgr;
 	private DataManager dataMgr; 
 	private MeasurementMapper mapper;
-    
+    private ExceptionToErrorCodeMapper errorHandler ;
+
     @Autowired
-    public MeasurementTransferImpl(MeasurementManager measurementMgr, TemplateManager tmpltMgr, DataManager dataMgr, MeasurementMapper mapper) {
+    public MeasurementTransferImpl(MeasurementManager measurementMgr, TemplateManager tmpltMgr, DataManager dataMgr, 
+            MeasurementMapper mapper, ExceptionToErrorCodeMapper errorHandler) {
         super();
         this.measurementMgr = measurementMgr;
         this.tmpltMgr = tmpltMgr;
         this.mapper=mapper;
         this.dataMgr = dataMgr;
+        this.errorHandler = errorHandler;
     }
     
     protected Date[] getTimeFrame(final String begin, final String end) throws ParseException {
@@ -138,7 +144,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     public ResourceMeasurementBatchResponse getAggregatedMetricData(ApiMessageContext apiMessageContext,
             ResourceMeasurementRequests hqMsmtReqs, String begin, String end)
             throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException {
-        ResourceMeasurementBatchResponse res = new ResourceMeasurementBatchResponse();
+        ResourceMeasurementBatchResponse res = new ResourceMeasurementBatchResponse(this.errorHandler);
         if (hqMsmtReqs==null || hqMsmtReqs.getMeasurementRequests()==null || hqMsmtReqs.getMeasurementRequests().size()==0 || begin==null || end==null || begin.length()<=0 || end.length()<=0) {
             throw new UnsupportedOperationException("the request is missing the resource ID, the measurement template names, the begining or end of the time frame");
         }
@@ -150,13 +156,12 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         for (ResourceMeasurementRequest hqMsmtReq : hqMsmtReqs.getMeasurementRequests()) {
             String rscId = hqMsmtReq.getRscId();
             if (rscId==null || "".equals(rscId)) {
-                ResourceMeasurementBatchResponse.addFailedResource();
                 continue;
             }
             List<String> tmpNames = hqMsmtReq.getMeasurementTemplateNames();
             List<MeasurementTemplate> tmps = this.tmpltMgr.findTemplatesByName(tmpNames);
             if (tmps==null || tmps.size()==0) {
-                ResourceMeasurementBatchResponse.addFailedResource();
+                res.addFailedResource(rscId,ExceptionToErrorCodeMapper.ErrorCode.TEMPLATE_NOT_FOUND.getErrorCode(),null,new Object[] {});
                 continue;
                 //throw new ObjectNotFoundException("there are no measurement templates which carries the requested template names", MeasurementTemplate.class.getName());
             }
@@ -167,6 +172,8 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
                 tmpIdToTmp.put(tmp.getId(), tmp);
             }
             Map<Integer, double[]> msmtNamesToAgg = this.dataMgr.getAggregateDataByTemplate(hqMsmts, beginDate.getTime(), endDate.getTime());
+            
+            ResourceMeasurementResponse msmtRes = new ResourceMeasurementResponse(rscId);
             for (Map.Entry<Integer, double[]> msmtNameToAggEntry : msmtNamesToAgg.entrySet()) {
                 Integer tmpId = msmtNameToAggEntry.getKey();
                 double[] agg = msmtNameToAggEntry.getValue();
@@ -181,10 +188,10 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
                     continue;
                 }
                 org.hyperic.hq.api.model.measurements.Measurement msmt = this.mapper.toMeasurement(tmp,avg);
-                res.add(msmt);
+                msmtRes.add(msmt);
             }
+            res.addResponse(msmtRes);
         }
-
         return res;
     }
 } 

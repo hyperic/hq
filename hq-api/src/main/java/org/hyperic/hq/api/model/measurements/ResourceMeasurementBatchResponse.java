@@ -36,10 +36,10 @@ public class ResourceMeasurementBatchResponse extends BatchResponseBase {
     public void setResponses(List<ResourceMeasurementResponse> responses) {
         this.responses = responses;
     }
-    public void addResponses(List<ResourceMeasurementResponse> responses) {
+    public void addResponse(ResourceMeasurementResponse response) {
         if (this.responses==null) {
             this.responses = new ArrayList<ResourceMeasurementResponse>();
         }
-        this.responses.addAll(responses);
+        this.responses.add(response);
     }
 }
