@@ -5,6 +5,7 @@ import javax.ws.rs.core.Response;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
+import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequests;
 import org.hyperic.hq.api.services.MeasurementService;
 import org.hyperic.hq.api.transfer.MeasurementTransfer;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
@@ -46,11 +47,11 @@ public class MeasurementServiceImpl extends RestApiService implements Measuremen
         }
     }
 
-    public MeasurementResponse getAggregatedMetricData(MeasurementRequest hqMsmtReq, String rscId, String begin,
-            String end) throws ParseException, PermissionException, SessionNotFoundException, SessionTimeoutException {
+    public MeasurementResponse getAggregatedMetricData(ResourceMeasurementRequests hqMsmtReqs, String begin, String end)
+            throws ParseException, PermissionException, SessionNotFoundException, SessionTimeoutException {
         try {
             ApiMessageContext apiMessageContext = newApiMessageContext();
-            return measurementTransfer.getAggregatedMetricData(apiMessageContext, hqMsmtReq, rscId, begin, end);
+            return measurementTransfer.getAggregatedMetricData(apiMessageContext, hqMsmtReqs, begin, end);
         } catch (ParseException e) {
             throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.WRONG_DATE_FORMAT, "cannot parse the begin/end time frame arguments\n",e.getMessage());
         }

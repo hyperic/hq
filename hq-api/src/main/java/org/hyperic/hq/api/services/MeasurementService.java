@@ -11,6 +11,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
+import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequests;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
@@ -31,9 +32,8 @@ public interface MeasurementService {
 			        throws PermissionException, SessionNotFoundException, SessionTimeoutException;
 	
     @POST
-    @Path("/metrics/aggregation/{rscId}")
-    public MeasurementResponse getAggregatedMetricData(final MeasurementRequest hqMsmtReq, 
-            @PathParam("rscId") final String rscId, 
+    @Path("/metrics/aggregation")
+    public MeasurementResponse getAggregatedMetricData(final ResourceMeasurementRequests hqMsmtReq, 
             @QueryParam("begin") final String begin, 
             @QueryParam("end") final String end) 
             throws ParseException, PermissionException, SessionNotFoundException, SessionTimeoutException;

@@ -37,6 +37,8 @@ import java.util.Map;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
+import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequest;
+import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequests;
 import org.hyperic.hq.api.services.impl.ApiMessageContext;
 import org.hyperic.hq.api.transfer.MeasurementTransfer;
 import org.hyperic.hq.api.transfer.mapping.MeasurementMapper;
@@ -133,11 +135,11 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         return res;
     }
     
-    public MeasurementResponse getAggregatedMetricData(ApiMessageContext apiMessageContext, final MeasurementRequest hqMsmtReq, 
-            final String rscId, final String begin, final String end) 
+    public ResourceMeasurementBatchResponse getAggregatedMetricData(ApiMessageContext apiMessageContext,
+            ResourceMeasurementRequests hqMsmtReqs, String begin, String end)
             throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException {
-        MeasurementResponse res = new MeasurementResponse();
-        if (hqMsmtReq==null || rscId==null || "".equals(rscId) || hqMsmtReq.getMeasurementTemplateNames()==null || hqMsmtReq.getMeasurementTemplateNames().size()==0 || begin==null || end==null || begin.length()<=0 || end.length()<=0) {
+        ResourceMeasurementBatchResponse res = new ResourceMeasurementBatchResponse();
+        if (hqMsmtReqs==null || hqMsmtReqs.getMeasurementRequests()==null || hqMsmtReqs.getMeasurementRequests().size()==0 || begin==null || end==null || begin.length()<=0 || end.length()<=0) {
             throw new UnsupportedOperationException("the request is missing the resource ID, the measurement template names, the begining or end of the time frame");
         }
         AuthzSubject authzSubject = apiMessageContext.getAuthzSubject();
@@ -145,35 +147,44 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         Date beginDate = timeFrame[0], endDate = timeFrame[1];
         
         // extract all input measurement templates
-        List<String> tmpNames = hqMsmtReq.getMeasurementTemplateNames();
-        List<MeasurementTemplate> tmps = this.tmpltMgr.findTemplatesByName(tmpNames);
-        if (tmps==null || tmps.size()==0) {
-            throw new ObjectNotFoundException("there are no measurement templates which carries the requested template names", MeasurementTemplate.class.getName());
+        for (ResourceMeasurementRequest hqMsmtReq : hqMsmtReqs.getMeasurementRequests()) {
+            String rscId = hqMsmtReq.getRscId();
+            if (rscId==null || "".equals(rscId)) {
+                ResourceMeasurementBatchResponse.addFailedResource();
+                continue;
+            }
+            List<String> tmpNames = hqMsmtReq.getMeasurementTemplateNames();
+            List<MeasurementTemplate> tmps = this.tmpltMgr.findTemplatesByName(tmpNames);
+            if (tmps==null || tmps.size()==0) {
+                ResourceMeasurementBatchResponse.addFailedResource();
+                continue;
+                //throw new ObjectNotFoundException("there are no measurement templates which carries the requested template names", MeasurementTemplate.class.getName());
+            }
+            List<Measurement> hqMsmts = getMeasurements(rscId, tmps,authzSubject);
+            // sort tmps as per their IDs
+            Map<Integer,MeasurementTemplate> tmpIdToTmp = new HashMap<Integer,MeasurementTemplate>();
+            for (MeasurementTemplate tmp : tmps) {
+                tmpIdToTmp.put(tmp.getId(), tmp);
+            }
+            Map<Integer, double[]> msmtNamesToAgg = this.dataMgr.getAggregateDataByTemplate(hqMsmts, beginDate.getTime(), endDate.getTime());
+            for (Map.Entry<Integer, double[]> msmtNameToAggEntry : msmtNamesToAgg.entrySet()) {
+                Integer tmpId = msmtNameToAggEntry.getKey();
+                double[] agg = msmtNameToAggEntry.getValue();
+                // no val for that msmt
+                if (agg==null || agg.length<=MeasurementConstants.IND_AVG) {
+                    continue;
+                }
+                double avg = agg[MeasurementConstants.IND_AVG];
+                MeasurementTemplate tmp = tmpIdToTmp.get(tmpId);
+                // ignore tmps which were not requested (should not happen)
+                if (tmp==null) {
+                    continue;
+                }
+                org.hyperic.hq.api.model.measurements.Measurement msmt = this.mapper.toMeasurement(tmp,avg);
+                res.add(msmt);
+            }
         }
 
-        List<Measurement> hqMsmts = getMeasurements(rscId, tmps,authzSubject);
-        // sort tmps as per their IDs
-        Map<Integer,MeasurementTemplate> tmpIdToTmp = new HashMap<Integer,MeasurementTemplate>();
-        for (MeasurementTemplate tmp : tmps) {
-            tmpIdToTmp.put(tmp.getId(), tmp);
-        }
-        Map<Integer, double[]> msmtNamesToAgg = this.dataMgr.getAggregateDataByTemplate(hqMsmts, beginDate.getTime(), endDate.getTime());
-        for (Map.Entry<Integer, double[]> msmtNameToAggEntry : msmtNamesToAgg.entrySet()) {
-            Integer tmpId = msmtNameToAggEntry.getKey();
-            double[] agg = msmtNameToAggEntry.getValue();
-            // no val for that msmt
-            if (agg==null || agg.length<=MeasurementConstants.IND_AVG) {
-                continue;
-            }
-            double avg = agg[MeasurementConstants.IND_AVG];
-            MeasurementTemplate tmp = tmpIdToTmp.get(tmpId);
-            // ignore tmps which were not requested (should not happen)
-            if (tmp==null) {
-                continue;
-            }
-            org.hyperic.hq.api.model.measurements.Measurement msmt = this.mapper.toMeasurement(tmp,avg);
-            res.add(msmt);
-        }
         return res;
     }
 } 
