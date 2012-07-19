@@ -38,6 +38,7 @@ import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.util.ConfigPropertyException;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -86,7 +87,9 @@ public class InternalAuthenticationProvider implements AuthenticationProvider {
                 if (authProvider.supports(serverConfig)) {
                     try {
                         result = authProvider.authenticate(username, password);
-                    } catch (AuthenticationException e) {
+                    }catch (UserDisabledException e) {
+                    	throw e;
+                    }catch (AuthenticationException e) {
                         lastException = e;
                     } catch (Exception e) {
 						lastException = new AuthenticationException(e.getMessage(), e) {
