@@ -12,6 +12,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementBatchResponse;
+import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequest;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequests;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
@@ -34,7 +35,7 @@ public interface MeasurementService {
 	
     /**
      * 
-     * @param hqMsmtReq
+     * @param request
      * @param begin
      * @param end
      * @return measurement requests with no resource id would be skipped 
@@ -45,7 +46,7 @@ public interface MeasurementService {
      */
 	@POST
     @Path("/metrics/aggregation")
-    public ResourceMeasurementBatchResponse getAggregatedMetricData(final ResourceMeasurementRequests hqMsmtReq, 
+    public ResourceMeasurementBatchResponse getAggregatedMetricData(final ResourceMeasurementRequest request, 
             @QueryParam("begin") final String begin, 
             @QueryParam("end") final String end) 
             throws ParseException, PermissionException, SessionNotFoundException, SessionTimeoutException;
