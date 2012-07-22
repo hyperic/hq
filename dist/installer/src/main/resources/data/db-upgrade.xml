@@ -11774,7 +11774,12 @@ has already been defined.
 		        </statement>
 		       </schema-directSQL>  
 		    </schemaSpec>
-		
+
+    <schemaSpec version="3.214">
+        <schema-addColumn table="EAM_AIQ_PLATFORM" column="AUTO_APPROVE" columnType="BOOLEAN" nullable="NOT NULL" default="FALSE"/>
+        <schema-addColumn table="EAM_AIQ_SERVER" column="AUTO_APPROVE" columnType="BOOLEAN" nullable="NOT NULL" default="FALSE"/>
+    </schemaSpec>
+
 </dbupgrade>
 </target>
 </project>
