@@ -46,7 +46,7 @@ public interface MeasurementService {
      */
 	@POST
     @Path("/metrics/aggregation")
-    public ResourceMeasurementBatchResponse getAggregatedMetricData(final ResourceMeasurementRequest request, 
+    public ResourceMeasurementBatchResponse getAggregatedMetricData(final ResourceMeasurementRequests request, 
             @QueryParam("begin") final String begin, 
             @QueryParam("end") final String end) 
             throws ParseException, PermissionException, SessionNotFoundException, SessionTimeoutException;

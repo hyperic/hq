@@ -23,6 +23,7 @@ public class ResourceMeasurementRequests implements Serializable {
     @XmlElement(name="request", namespace=RestApiConstants.SCHEMA_NAMESPACE)
     protected List<ResourceMeasurementRequest> resourceMeasurementRequests = new ArrayList<ResourceMeasurementRequest>();
 
+    public ResourceMeasurementRequests() {}
     public ResourceMeasurementRequests(List<ResourceMeasurementRequest> resourceMeasurementRequests) {
         super();
         this.resourceMeasurementRequests = resourceMeasurementRequests;

@@ -3,6 +3,8 @@ package org.hyperic.hq.api.model.measurements;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -13,7 +15,8 @@ import org.hyperic.hq.api.model.resources.BatchResponseBase;
 import org.hyperic.hq.api.model.resources.FailedResource;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 
-@XmlRootElement(name="ResourceMeasurementResponses", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement(name="resourceMeasurementResponses", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 @XmlType(name="ResourceMeasurementResponsesType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 public class ResourceMeasurementBatchResponse extends BatchResponseBase {
     @XmlElementWrapper(name="resources",namespace=RestApiConstants.SCHEMA_NAMESPACE)
