@@ -78,7 +78,7 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
 
         public MeasurementServiceTestDataPopulator() throws ParseException {
             super(MeasurementService.class, CONTEXT_URL + "/rest-api/measurements") ;
-            now = DATE_FORMAT.parse("16/06/79 00:00 AM");
+            now = DATE_FORMAT.parse("16/07/11 00:00 AM");
         }
         
         @Override
@@ -88,7 +88,7 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
 
                 String agentToken = "agentToken" + System.currentTimeMillis(); 
                 this.testAgent = this.createAgent("127.0.0.1", 2144, "authToken", agentToken, "5.0");
-String x = "";//String.valueOf(new Random().nextInt());
+String x = "_demo2";//String.valueOf(new Random().nextInt());
                 final String pluginName = "Test_Plugin";
                 final String platName = "test.ubuntu.eng.vmware.com." + x; 
                 final String platType = "platTypeTest" + x;
