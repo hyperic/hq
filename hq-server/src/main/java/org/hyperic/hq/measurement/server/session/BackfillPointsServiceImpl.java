@@ -265,7 +265,7 @@ public class BackfillPointsServiceImpl implements BackfillPointsService {
             if (debug) {
                 log.debug(new StringBuilder(256).append("platform name=").append(platform.getName())
                                                 .append(", resourceid=").append(platform.getId())
-                                                .append(", measurementid=").append(rdp.getMetricId())
+                                                .append(", measurementid=").append(rdp.getMeasurementId())
                                                 .append(" is being marked ").append(rdp.getValue())
                                                 .append(" with timestamp = ")
                                                 .append(TimeUtil.toString(rdp.getTimestamp()))

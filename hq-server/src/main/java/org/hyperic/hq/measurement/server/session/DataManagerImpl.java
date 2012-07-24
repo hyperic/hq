@@ -529,7 +529,7 @@ public class DataManagerImpl implements DataManager {
         Analyzer analyzer = getAnalyzer();
         if (analyzer != null) {
             for (DataPoint dp : data) {
-                analyzer.analyzeMetricValue(dp.getMetricId(), dp.getMetricValue());
+                analyzer.analyzeMetricValue(dp.getMeasurementId(), dp.getMetricValue());
             }
         }
     }
@@ -547,7 +547,7 @@ public class DataManagerImpl implements DataManager {
 
         for (DataPoint dp : data) {
 
-            Integer metricId = dp.getMetricId();
+            Integer metricId = dp.getMeasurementId();
             MetricValue val = dp.getMetricValue();
             MeasurementEvent event = new MeasurementEvent(metricId, val);
 
@@ -646,7 +646,7 @@ public class DataManagerImpl implements DataManager {
                 int rowsToUpdate = 0;
                 for (Iterator<DataPoint> i = dpts.iterator(); i.hasNext();) {
                     DataPoint pt = i.next();
-                    Integer metricId = pt.getMetricId();
+                    Integer metricId = pt.getMeasurementId();
                     MetricValue val = pt.getMetricValue();
                     BigDecimal bigDec;
                     bigDec = new BigDecimal(val.getValue());
@@ -785,7 +785,7 @@ public class DataManagerImpl implements DataManager {
                 }
                 for (Iterator<DataPoint> i = dpts.iterator(); i.hasNext();) {
                     DataPoint pt = i.next();
-                    Integer metricId = pt.getMetricId();
+                    Integer metricId = pt.getMeasurementId();
                     MetricValue val = pt.getMetricValue();
                     BigDecimal bigDec;
                     bigDec = new BigDecimal(val.getValue());
@@ -852,7 +852,7 @@ public class DataManagerImpl implements DataManager {
 
                 for (Iterator<DataPoint> i = dpts.iterator(); i.hasNext();) {
                     DataPoint pt = i.next();
-                    Integer metricId = pt.getMetricId();
+                    Integer metricId = pt.getMeasurementId();
                     MetricValue val = pt.getMetricValue();
                     BigDecimal bigDec;
                     bigDec = new BigDecimal(val.getValue());
