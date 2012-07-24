@@ -31,7 +31,7 @@ public class MeasurementRequest implements Serializable {
 	}
 	public MeasurementRequest(){} 
 	
-	public MeasurementRequest(final List<String> measurementTemplateNames) { 
+	public MeasurementRequest(List<String> measurementTemplateNames) { 
 		this.measurementTemplateNames = measurementTemplateNames;
 	}
 }

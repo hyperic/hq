@@ -46,9 +46,7 @@ SET INSTALL_MODE=quick
 if "%1"=="" goto startSetup
 if "%1"=="-upgrade" SET INSTALL_MODE=upgrade
 if "%1"=="-updateScale" goto startUpdateScale
-if "%1"=="-oracle" SET INSTALL_MODE=oracle
 if "%1"=="-postgresql" SET INSTALL_MODE=postgresql
-if "%1"=="-mysql" SET INSTALL_MODE=mysql
 if "%1"=="-full" SET INSTALL_MODE=full
 rem Didn't match an option, assume it if the file we use
 if not "%INSTALL_MODE%"=="quick" goto finishArgs

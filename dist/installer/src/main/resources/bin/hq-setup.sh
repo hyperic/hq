@@ -110,12 +110,8 @@ while [ ! "x${1}" = "x" ] ; do
      esac
     echo "Please enter the current server installation directory"
     read SERVER_DIR
-  elif [ "x${1}" = "x-oracle" ] ; then
-    INSTALL_MODE=oracle
   elif [ "x${1}" = "x-postgresql" ] ; then
     INSTALL_MODE=postgresql
-  elif [ "x${1}" = "x-mysql" ] ; then
-    INSTALL_MODE=mysql
   else
     SETUP_FILE="${1}"
   fi

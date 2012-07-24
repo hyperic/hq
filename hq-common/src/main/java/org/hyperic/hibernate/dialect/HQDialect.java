@@ -125,4 +125,9 @@ public interface HQDialect
     public String getMetricDataHint();
     
     public Long getSchemaCreationTimestampInMillis(Statement stmt) throws SQLException;
+
+    /**
+     * @return true if HQ should analyze the database type, false if it should not
+     */
+    public boolean analyzeDb();
 }

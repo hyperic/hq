@@ -93,7 +93,7 @@ public class JdbcHQAuthenticationProvider implements HQAuthenticationProvider {
                               "} failed because account is disabled.");
                 }
 
-                throw new BadCredentialsException("login.error.accountDisabled");
+                throw new UserDisabledException();
             } else if (!passwordEncoder.isPasswordValid(principal.getPassword(), password, null)) {
                 if (debug) {
                     log.debug("Authentication of user {" + username +

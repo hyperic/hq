@@ -29,8 +29,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -82,13 +84,25 @@ public class MeasRangeObj
         }
     }
 
-    public Map<String, List<DataPoint>> bucketData(List<DataPoint> data)
-    {
+    public Map<String, Set<DataPoint>> bucketDataEliminateDups(List<DataPoint> data) {
+        HashMap<String, Set<DataPoint>> buckets = new HashMap<String, Set<DataPoint>>();
+        List<MeasRange> ranges = getRanges();
+        for (DataPoint pt : data ) {
+            String table = getTable(ranges, pt.getMetricValue().getTimestamp());
+            Set<DataPoint> dpts;
+            if (null == (dpts = buckets.get(table))) {
+                dpts = new HashSet<DataPoint>();
+                buckets.put(table, dpts);
+            }
+            dpts.add(pt);
+        }
+        return buckets;
+    }
+
+    public Map<String, List<DataPoint>> bucketData(List<DataPoint> data) {
         HashMap<String, List<DataPoint>> buckets = new HashMap<String, List<DataPoint>>();
         List<MeasRange> ranges = getRanges();
-        for (DataPoint pt : data )
-        {
-            
+        for (DataPoint pt : data ) {
             String table = getTable(ranges, pt.getMetricValue().getTimestamp());
             List<DataPoint> dpts;
             if (null == (dpts = buckets.get(table))) {

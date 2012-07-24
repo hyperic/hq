@@ -105,6 +105,7 @@
                 <prop key="server.pluginsync.enabled">true</prop>
                 <prop key="server.custom.plugin.dir"></prop>
                 <prop key="vfabric.licenseServer.url"></prop>
+                <prop key="vcops.license.key"></prop>
 				<prop key="server.keystore.path">hyperic.keystore</prop>
 				<prop key="server.keystore.password">hyperic</prop>
 				<prop key="accept.unverified.certificates">false</prop>

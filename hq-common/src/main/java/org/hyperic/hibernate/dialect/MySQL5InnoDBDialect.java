@@ -425,4 +425,8 @@ public class MySQL5InnoDBDialect
         
         return installDate.getTime();
 	}
+
+    public boolean analyzeDb() {
+        return true;
+    }
 }

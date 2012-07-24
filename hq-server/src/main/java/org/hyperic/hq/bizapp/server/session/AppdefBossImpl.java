@@ -3205,6 +3205,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return all navigable resources for the given appdef entity
      * 
      */
+    @Transactional(readOnly=true)
     public ResourceTreeNode[] getNavMapData(int sessionId, AppdefEntityID adeId)
         throws SessionNotFoundException, SessionTimeoutException, PermissionException,
         AppdefEntityNotFoundException {
@@ -3237,9 +3238,9 @@ public class AppdefBossImpl implements AppdefBoss {
      *         resource type
      * 
      */
+    @Transactional(readOnly=true)
     public ResourceTreeNode[] getNavMapData(int sessionId, AppdefEntityID[] adeIds, int ctype)
-        throws SessionNotFoundException, SessionTimeoutException, PermissionException,
-        AppdefEntityNotFoundException {
+    throws SessionNotFoundException, SessionTimeoutException, PermissionException, AppdefEntityNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return appdefStatManager.getNavMapDataForAutoGroup(subject, adeIds, new Integer(ctype));
     }
@@ -3248,10 +3249,9 @@ public class AppdefBossImpl implements AppdefBoss {
      * Get the list of resources that are unavailable
      * 
      */
-    public Collection<DownResource> getUnavailableResources(AuthzSubject user, String typeId,
-                                                            PageInfo info)
-        throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException,
-        PermissionException {
+    @Transactional(readOnly=true)
+    public Collection<DownResource> getUnavailableResources(AuthzSubject user, String typeId, PageInfo info)
+    throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException, PermissionException {
         List<DownMetricValue> unavailEnts = availabilityManager.getUnavailEntities(null);
 
         if (unavailEnts.size() == 0) {
@@ -3259,8 +3259,7 @@ public class AppdefBossImpl implements AppdefBoss {
         }
 
         DownResSortField sortField = (DownResSortField) info.getSort();
-        Set<DownResource> ret = new TreeSet<DownResource>(sortField.getComparator(!info
-            .isAscending()));
+        Set<DownResource> ret = new TreeSet<DownResource>(sortField.getComparator(!info.isAscending()));
 
         int appdefType = -1;
         int appdefTypeId = -1;
@@ -3318,6 +3317,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * 
      */
     @SuppressWarnings("unchecked")
+    @Transactional(readOnly=true)
     public Map<String, List<AppdefResourceType>> getUnavailableResourcesCount(AuthzSubject user)
         throws AppdefEntityNotFoundException, PermissionException {
         // Keys for the Map table, UI should localize instead of showing key
@@ -3376,6 +3376,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * Check whether or not a given resource exists in the virtual hierarchy
      * 
      */
+    @Transactional(readOnly=true)
     public boolean hasVirtualResourceRelation(Resource resource) {
         return resourceManager.hasResourceRelation(resource, resourceManager.getVirtualRelation());
     }

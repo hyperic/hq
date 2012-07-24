@@ -153,7 +153,7 @@ class MeasurementSchedule {
      * and returns an Iterator to a collection containing this metrics
      */
     private Iterator<ScheduledMeasurement> createMeasurementList(Collection<String> records){
-        ArrayList<ScheduledMeasurement> metrics = new ArrayList<ScheduledMeasurement>();
+        Set<ScheduledMeasurement> metrics = new HashSet<ScheduledMeasurement>();
         long i = -1;
         for (String value : records) {
             i++;

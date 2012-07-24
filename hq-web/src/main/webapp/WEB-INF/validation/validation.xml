@@ -531,13 +531,9 @@
 
     <!-- user admin forms -->
     <form name="EditUserForm">
-      <field property="name" depends="required,mask">
+      <field property="name" depends="required">
         <arg0 key="common.label.Name" />
         <msg name="required" key="admin.user.error.notSpecified.name"/>
-        <var>
-         <var-name>mask</var-name>
-         <var-value>${UserName}</var-value>
-        </var>
       </field>
       <field property="firstName" depends="required,mask,maxlength">
         <arg0 key="admin.user.generalProperties.First" />

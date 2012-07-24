@@ -11767,14 +11767,19 @@ has already been defined.
     <!--add LDAP\ prefix to the existing LDAP user's name and sort name, this SQL statement is for vPostger since it's the only supported 
     	database in Hyperic 5.0 -->
 		        <statement>
-		       	    update EAM_SUBJECT set SORT_NAME = 'LDAP\' || SORT_NAME where NAME not in (Select PRINCIPAL from EAM_PRINCIPAL) and EAM_SUBJECT.SORT_NAME IS NOT NULL and (select count(propvalue) from eam_config_props where propkey='CAM_JAAS_PROVIDER' and propvalue='LDAP')=1
+		       	    update EAM_SUBJECT set SORT_NAME = 'LDAP\\' || SORT_NAME where NAME not in (Select PRINCIPAL from EAM_PRINCIPAL) and EAM_SUBJECT.SORT_NAME IS NOT NULL and (select count(propvalue) from eam_config_props where propkey='CAM_JAAS_PROVIDER' and propvalue='LDAP')=1
 		       	</statement>
 		        <statement>
-		       		update EAM_SUBJECT set NAME = 'LDAP\' || NAME where NAME not in (Select PRINCIPAL from EAM_PRINCIPAL) and EAM_SUBJECT.SORT_NAME IS NOT NULL and (select count(propvalue) from eam_config_props where propkey='CAM_JAAS_PROVIDER' and propvalue='LDAP')=1
+		       		update EAM_SUBJECT set NAME = 'LDAP\\' || NAME where NAME not in (Select PRINCIPAL from EAM_PRINCIPAL) and EAM_SUBJECT.SORT_NAME IS NOT NULL and (select count(propvalue) from eam_config_props where propkey='CAM_JAAS_PROVIDER' and propvalue='LDAP')=1
 		        </statement>
 		       </schema-directSQL>  
 		    </schemaSpec>
-		
+
+    <schemaSpec version="3.214">
+        <schema-addColumn table="EAM_AIQ_PLATFORM" column="AUTO_APPROVE" columnType="BOOLEAN" nullable="NOT NULL" default="FALSE"/>
+        <schema-addColumn table="EAM_AIQ_SERVER" column="AUTO_APPROVE" columnType="BOOLEAN" nullable="NOT NULL" default="FALSE"/>
+    </schemaSpec>
+
 </dbupgrade>
 </target>
 </project>

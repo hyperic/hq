@@ -31,15 +31,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -49,6 +52,7 @@ import org.hyperic.hq.agent.server.monitor.AgentMonitorSimple;
 import org.hyperic.hq.agent.stats.AgentStatsCollector;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.agent.ScheduledMeasurement;
 import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.MeasurementValueGetter;
@@ -85,7 +89,8 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable {
     static final String PROP_QUEUE_SIZE = "scheduleThread.queuesize.";
 
     // How often we check schedules when we think they are empty.
-    private static final int POLL_PERIOD = 1000;
+    private static final int ONE_SECOND = 1000;
+    private static final int POLL_PERIOD = ONE_SECOND;
     private static final int UNREACHABLE_EXPIRE = (60 * 1000) * 5;
 
     private static final long FETCH_TIME  = 2000; // 2 seconds.
@@ -129,6 +134,8 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable {
     private long statMaxFetchTime = Long.MIN_VALUE;
     private long statMinFetchTime = Long.MAX_VALUE;
     private final AgentStatsCollector statsCollector;
+    private final Random rand = new Random();
+    private final int offset;
 
     ScheduleThread(Sender sender, MeasurementValueGetter manager, Properties config) throws AgentStartException {
         this.statsCollector = AgentStatsCollector.getInstance();
@@ -138,6 +145,13 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable {
         this.agentConfig = config;
         this.manager = manager;
         this.sender = sender;
+        int tmp = getFudgeFactor();
+        if (tmp <= 0) {
+            offset = ONE_SECOND;
+        } else {
+            offset = tmp;
+            log.info("fudgeFactor is set to " + offset + " ms");
+        }
 
         String sLogFetchTimeout = agentConfig.getProperty(PROP_FETCH_LOG_TIMEOUT);
         if(sLogFetchTimeout != null){
@@ -502,7 +516,22 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable {
                         log.debug("Skipping duplicate mid=" + mid + ", aid=" + rs.id);
                     }
                 }
+                long lastCollected = meas.getLastCollected();
+                long now = now();
+                // HHQ-5483 - agent is collecting metrics too frequently.  I don't want to mess with the scheduling
+                // algorithm at this time, so I am simply putting checks in to prevent this scenario from occurring
+                if (lastCollected + meas.getInterval() - offset > now) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("ALREADY COLLECTED meas=" + meas + " @ " + TimeUtil.toString(lastCollected));
+                    }
+                    return;
+                }
+                if (log.isDebugEnabled()) {
+                    log.debug("collecting data for meas=" + meas);
+                }
                 data = getValue(dsn);
+                long time = TimingVoodoo.roundDownTime(now, 60000);
+				meas.setLastCollected(time);
                 if (data == null) {
                     // Don't allow plugins to return null from getValue(),
                     // convert these to MetricValue.NONE
@@ -584,6 +613,10 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable {
                 }
             }
         }
+
+        private long now() {
+            return System.currentTimeMillis();
+        }
     }
 
     private int getQueueSize(String plugin) {
@@ -614,13 +647,11 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable {
         return 1;
     }
 
-    private void collect(ResourceSchedule rs, List items)
-    {
+    private void collect(ResourceSchedule rs, List items) {
+        final boolean debug = log.isDebugEnabled();
         for (int i=0; i<items.size() && (!shouldDie.get()); i++) {
-            ScheduledMeasurement meas =
-                (ScheduledMeasurement)items.get(i);
+            ScheduledMeasurement meas = (ScheduledMeasurement)items.get(i);
             ParsedTemplate tmpl = toParsedTemplate(meas);
-
             ThreadPoolExecutor executor;
             String plugin;
             synchronized (executors) {
@@ -628,27 +659,26 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable {
                     GenericPlugin p = manager.getPlugin(tmpl.plugin).getProductPlugin();
                     plugin = p.getName();
                 } catch (PluginNotFoundException e) {
-                    if (log.isDebugEnabled()) {
+                    if (debug) {
                         log.debug("Could not find plugin name from template '" + tmpl.plugin +
                                   "'. Associated plugin might not be initialized yet.");
                     }
                     continue;
                 }
-
                 executor = executors.get(plugin);
                 if (executor == null) {
-                    int poolSize = getPoolSize(plugin);
-                    int queueSize = getQueueSize(plugin);
+                    final int poolSize = getPoolSize(plugin);
+                    final int queueSize = getQueueSize(plugin);
                     log.info("Creating executor for plugin '" + plugin +
                               "' with a poolsize=" + poolSize + " queuesize=" + queueSize);
+                    final ThreadFactory factory = getFactory(plugin);
                     executor = new ThreadPoolExecutor(poolSize, poolSize,
                                                  60, TimeUnit.SECONDS,
-                                                 new LinkedBlockingQueue<Runnable>(queueSize),
+                                                 new LinkedBlockingQueue<Runnable>(queueSize), factory,
                                                  new ThreadPoolExecutor.AbortPolicy());
                     executors.put(plugin, executor);
                 }
             }
-
             MetricTask metricTask = new MetricTask(rs, meas);
             statsCollector.addStat(1, SCHEDULE_THREAD_METRIC_TASKS_SUBMITTED);
             try {
@@ -661,6 +691,20 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable {
                 statNumMetricsFailed++;
             }
         }
+    }
+
+    private ThreadFactory getFactory(final String plugin) {
+        final SecurityManager s = System.getSecurityManager();
+        final ThreadGroup group = (s != null)? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
+        return new ThreadFactory() {
+            private final AtomicLong num = new AtomicLong();
+            public Thread newThread(Runnable r) {
+                final Thread rtn = new Thread(group, r);
+                rtn.setDaemon(true);
+                rtn.setName(plugin + "-" + num.getAndIncrement());
+                return rtn;
+            }
+        };
     }
 
     private long collect(ResourceSchedule rs) {
@@ -743,9 +787,13 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable {
      * waits the appropriate time, and executes scheduled operations.
      */
     public void run(){
-        boolean isDebug = log.isDebugEnabled();
+        final boolean isDebug = log.isDebugEnabled();
+        final int fudgeFactor = getFudgeFactor();
         while (!shouldDie.get()) {
             long timeOfNext = collect();
+            if (fudgeFactor > 0) {
+                timeOfNext += rand.nextInt(fudgeFactor);
+            }
             long now = System.currentTimeMillis();
             if (timeOfNext > now) {
                 long wait = timeOfNext - now;
@@ -763,6 +811,19 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable {
             }
         }
         log.info("Schedule thread shut down");
+    }
+
+    /**
+     * HQ-3904 Fudge factor is only for scale environments.  DO NOT USE IN PRODUCTION!
+     */
+    private int getFudgeFactor() {
+        final String val = agentConfig.getProperty("agent.dsl.fudge", "0");
+        try {
+            return Integer.parseInt(val);
+        } catch (NumberFormatException e) {
+            log.debug("val=" + val + " is not a valid number.  Fudge factor will be 0 seconds");
+            return 0;
+        }
     }
 
     // MONITOR METHODS

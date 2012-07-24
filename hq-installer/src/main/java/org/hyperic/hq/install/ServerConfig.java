@@ -25,8 +25,10 @@
 
 package org.hyperic.hq.install;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Properties;
@@ -72,18 +74,11 @@ extends BaseConfig {
 	public static final String ENV_LARGE_DESC = " (larger than 250 platforms)";    
 
 	// database names that appear in the select list
-	public static final String DBC_ORA10 = "Oracle 10g/11g";
 	public static final String DBC_PGSQL = "PostgreSQL";
 	public static final String DBC_BUILTIN = "HQ Built-in Database";
-	public static final String DBC_MYSQL = "MySQL Enterprise / Community Server 5.x";
-	// This note has been added to met a condition of our MySQL license
-	// agreement
-	public static final String DBC_MYSQL_NOTE = "*\n\n\t*Sign up for a MySQL Enterprise Trial subscription at http://www.mysql.com/trials/partner1569.\n";
 
 	// database names we need to use internally
-	public static final String DB_ORA9 = "Oracle9i";
 	public static final String DB_PGSQL = "PostgreSQL";
-	public static final String DB_MYSQL = "MySQL";
 
 	// Required for postgresql
 	public static final String PGSQL_PROTOCOL = "?protocolVersion=2";
@@ -120,12 +115,12 @@ extends BaseConfig {
 	public static final String Q_MAIL_FROM = "Enter the email address that " + PN +
 			" will use as the sender for " + "email messages";
 	public static final String Q_DATABASE = "The " + PN + " built-in database is provided for EVALUATION PURPOSES ONLY. " +
-			"For production use, MySQL or Oracle is recommended. " + 
+			"For production purposes use vPosgreSQL. " + 
 			"What backend database should the " + PN +
 			" server use?";
-	public static final String Q_DB_HOSTNAME = "Enter the DB hostname";
-	public static final String Q_DB_PORT = "Enter the DB port";
-	public static final String Q_DB_NAME = "Enter the DB name";
+	public static final String Q_DB_HOSTNAME = "Enter the vPostgres DB hostname";
+	public static final String Q_DB_PORT = "Enter the vPostgres DB port";
+	public static final String Q_DB_NAME = "Enter the vPostgres DB name";
 	public static final String Q_JDBC_URL = "Override the JDBC connection URL for the %%DBNAME%% database";
 	public static final String Q_JDBC_USER = "Enter the username to use to connect to the database";
 	public static final String Q_JDBC_PASSWORD = "Enter the password to use to connect to the database.";
@@ -325,70 +320,54 @@ extends BaseConfig {
 
 		case 6:
 			boolean usingSmallEnv = previous.getValue("install.profile").contentEquals(ENV_SMALL);
-			if (installMode.isOracle()) {
-				schema.addOption(new HiddenConfigOption("server.database.choice", DBC_ORA10));
-			} else if (installMode.isPostgres()) {
+			if (installMode.isPostgres()) {
 				schema.addOption(new HiddenConfigOption("server.database.choice", DBC_PGSQL));
-			} else if (installMode.isMySQL()) {
-				schema.addOption(new HiddenConfigOption("server.database.choice", DBC_MYSQL));
-			} else if (installMode.isQuick() && haveBuiltinDB) {
+			} 
+			else if (installMode.isQuick() && haveBuiltinDB) {
 				schema.addOption(new HiddenConfigOption("server.database.choice", DBC_BUILTIN));
-			} else {
-				// ...setup the different ConfigOptionDisplay values for the
-				// databases
-				// we support...
-				ConfigOptionDisplay builtInOption = new ConfigOptionDisplay(DBC_BUILTIN);
-				if (!usingSmallEnv) {
-					builtInOption = new ConfigOptionDisplay(DBC_BUILTIN + "(not recommended since you have selected " + previous.getValue("install.profile") +
-							" installation profile and the build in DB should be used only with small profiles)");
+			} 
+			else {
+
+				if (!haveBuiltinDB) {
+					schema.addOption(new HiddenConfigOption("server.database.choice", DBC_PGSQL));
 				}
-				ConfigOptionDisplay oracleOption = new ConfigOptionDisplay(DBC_ORA10);
-				ConfigOptionDisplay postgresOption = new ConfigOptionDisplay(DBC_PGSQL);
-				// ...check for the install type (.org or EE) and show the
-				// MySQL note accordingly...
-				ConfigOptionDisplay mysqlOption = (isEEInstall) ? new ConfigOptionDisplay(
-						DBC_MYSQL, null, DBC_MYSQL_NOTE) : new ConfigOptionDisplay(DBC_MYSQL);
-						ConfigOptionDisplay defaultDB = haveBuiltinDB ? builtInOption : oracleOption;
-						ConfigOptionDisplay[] dbs = haveBuiltinDB ? new ConfigOptionDisplay[] { builtInOption,
-								oracleOption,
-								postgresOption,
-								mysqlOption }
-						: new ConfigOptionDisplay[] { oracleOption,
-								postgresOption,
-								mysqlOption };
-						schema.addOption(new InstallConfigOption("server.database.choice", Q_DATABASE,
-								defaultDB, dbs));
+				else {
+					ConfigOptionDisplay builtInOption = new ConfigOptionDisplay(DBC_BUILTIN);
+					if (!usingSmallEnv) {
+						builtInOption = new ConfigOptionDisplay(DBC_BUILTIN + "(not recommended since you have selected " + previous.getValue("install.profile") +
+								" installation profile and the build in DB should be used only with small profiles)");
+					}
+
+					ConfigOptionDisplay postgresOption = new ConfigOptionDisplay(DBC_PGSQL);
+					ConfigOptionDisplay defaultDB =  builtInOption;
+					ConfigOptionDisplay[] dbs =   new ConfigOptionDisplay[] { builtInOption, postgresOption};
+					schema.addOption(new InstallConfigOption("server.database.choice", Q_DATABASE,
+							defaultDB, dbs));
+				}
 			}
 			break;
 
 		case 7:
 			// determine server.database from server.database.choice...
 			dbChoiceStr = previous.getValue("server.database.choice");
-			if (dbChoiceStr.equals(DBC_ORA10))
-				dbChoice = DB_ORA9;
-			else if (dbChoiceStr.startsWith(DBC_PGSQL))
+
+			if (dbChoiceStr.startsWith(DBC_PGSQL)){
 				dbChoice = DB_PGSQL;
-			else if (dbChoiceStr.startsWith(DBC_MYSQL))
-				dbChoice = DB_MYSQL;
+			}
 			else if (dbChoiceStr.startsWith(DBC_BUILTIN)) {
 				dbChoice = DB_PGSQL;
 				schema.addOption(new HiddenConfigOption("using.builtin.db", "true"));
-			} else
+			} 
+			else{
 				throw new IllegalStateException("Invalid database: " + dbChoiceStr);
-
+			}
 			schema.addOption(new HiddenConfigOption("server.database", dbChoice));
 			if(!dbChoiceStr.startsWith(DBC_BUILTIN)) {
 				schema.addOption(new StringConfigOption("server.database.host", Q_DB_HOSTNAME, "localhost"));
 			}
-			if (dbChoice.equals(DB_ORA9)) {
-				schema.addOption(new PortConfigOption("server.database.port", Q_DB_PORT, 1521));
-			} 
-			else if (dbChoiceStr.startsWith(DBC_PGSQL) && !dbChoiceStr.startsWith(DBC_BUILTIN)) {
+			if (dbChoiceStr.startsWith(DBC_PGSQL) && !dbChoiceStr.startsWith(DBC_BUILTIN)) {
 				schema.addOption(new PortConfigOption("server.database.port", Q_DB_PORT, 5432));
 			} 
-			else if (dbChoice.equals(DB_MYSQL)) {
-				schema.addOption(new PortConfigOption("server.database.port", Q_DB_PORT, 3306));
-			}
 			if(!dbChoiceStr.startsWith(DBC_BUILTIN)) {
 				schema.addOption(new StringConfigOption("server.database.name", Q_DB_NAME, PRODUCT));
 			}
@@ -400,21 +379,7 @@ extends BaseConfig {
 			dbHost = previous.getValue("server.database.host");
 			dbPort = previous.getValue("server.database.port");
 			dbName = previous.getValue("server.database.name");
-			if (dbChoice.equals(DB_ORA9)) {
-				schema.addOption(new StringConfigOption("server.database-url", StringUtil
-						.replace(Q_JDBC_URL, "%%DBNAME%%", dbChoiceStr),
-						"jdbc:oracle:thin:@" + dbHost + ":" + dbPort + ":" + dbName));
-				schema.addOption(new HiddenConfigOption("server.database-driver",
-						"oracle.jdbc.driver.OracleDriver"));
-
-				schema.addOption(new HiddenConfigOption("server.quartzDelegate",
-						"org.quartz.impl.jdbcjobstore.oracle.OracleDelegate"));
-				schema.addOption(new HiddenConfigOption("server.hibernate.dialect",
-						"org.hyperic.hibernate.dialect.Oracle9Dialect"));
-				schema.addOption(new HiddenConfigOption("server.connection-validation-sql",
-						"select 1 from dual"));
-
-			} else if (dbChoiceStr.startsWith(DBC_PGSQL)) {
+			if (dbChoiceStr.startsWith(DBC_PGSQL)) {
 				schema.addOption(new StringConfigOption("server.database-url", StringUtil
 						.replace(Q_JDBC_URL, "%%DBNAME%%", dbChoiceStr),
 						"jdbc:postgresql://" + dbHost + ":" + dbPort + "/" + dbName + PGSQL_PROTOCOL));
@@ -426,19 +391,8 @@ extends BaseConfig {
 						"org.hyperic.hibernate.dialect.PostgreSQLDialect"));
 				schema.addOption(new HiddenConfigOption("server.connection-validation-sql",
 						"select 1"));
-			} else if (dbChoice.equals(DB_MYSQL)) {
-				schema.addOption(new StringConfigOption("server.database-url", StringUtil
-						.replace(Q_JDBC_URL, "%%DBNAME%%", dbChoiceStr),
-						"jdbc:mysql://" + dbHost + ":" + dbPort +"/" + dbName));
-				schema.addOption(new HiddenConfigOption("server.database-driver",
-						"com.mysql.jdbc.Driver"));
-				schema.addOption(new HiddenConfigOption("server.quartzDelegate",
-						"org.quartz.impl.jdbcjobstore.StdJDBCDelegate"));
-				schema.addOption(new HiddenConfigOption("server.hibernate.dialect",
-						"org.hyperic.hibernate.dialect.MySQL5InnoDBDialect"));
-				schema.addOption(new HiddenConfigOption("server.connection-validation-sql",
-						"select 1"));
-			} else {
+			} 
+			else {
 				if (!installMode.isQuick()) {
 					// In "full" mode, we even let them pick the pgsql port
 					schema.addOption(new PortConfigOption("server.postgresql.port",
@@ -474,6 +428,19 @@ extends BaseConfig {
 		case 9:
 			dbChoiceStr = previous.getValue("server.database.choice");
 			if(!dbChoiceStr.startsWith(DBC_BUILTIN)) {
+				try {
+			       	 FileWriter fstream = new FileWriter("/tmp/out.txt");
+			       	  BufferedWriter out = new BufferedWriter(fstream);
+			       	
+			           	 out.write(previous.getValue("server.database-url") + "\n");
+			           	out.write(previous.getValue("server.database-user") + "\n");
+			           	out.write(previous.getValue("server.database-password") + "\n");
+			      	  out.close();
+
+			       	}
+			       	catch (Exception e) {
+							// TODO: handle exception
+						}
 				boolean exists = InstallDBUtil.checkConnectionExists(previous.getValue("server.database-url"), previous.getValue("server.database-user"),
 						previous.getValue("server.database-password"));
 				if (!exists) {
@@ -856,32 +823,21 @@ extends BaseConfig {
 	}
 
 	private class InstallMode {
-		boolean _oracleQuickMode = false;
 		boolean _postgresQuickMode = false;
-		boolean _mysqlQuickMode = false;
 		boolean _quickMode = false;
 
 		InstallMode(String mode) {
-			_oracleQuickMode = mode.equals(INSTALLMODE_ORACLE);
 			_postgresQuickMode = mode.equals(INSTALLMODE_POSTGRESQL);
-			_mysqlQuickMode = mode.equals(INSTALLMODE_MYSQL);
 			_quickMode = mode.equals(INSTALLMODE_QUICK);
-		}
-
-		boolean isOracle() {
-			return _oracleQuickMode;
 		}
 
 		boolean isPostgres() {
 			return _postgresQuickMode;
 		}
 
-		boolean isMySQL() {
-			return _mysqlQuickMode;
-		}
-
+		
 		boolean isQuick() {
-			return _postgresQuickMode || _oracleQuickMode || _mysqlQuickMode || _quickMode;
+			return _postgresQuickMode || _quickMode;
 		}
 	}
 
