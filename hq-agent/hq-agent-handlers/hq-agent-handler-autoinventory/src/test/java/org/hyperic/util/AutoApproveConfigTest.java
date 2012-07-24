@@ -1,4 +1,4 @@
-package org.hyperic.hq.autoinventory.agent.server;
+package org.hyperic.util;
 
 import junit.framework.TestCase;
 import org.junit.Test;
