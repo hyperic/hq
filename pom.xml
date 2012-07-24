@@ -38,6 +38,7 @@
 		<j2ee-management.version>1.1</j2ee-management.version>
      	<jackson-mapper-asl.version>1.8.6</jackson-mapper-asl.version>
 	    <cxf.version>2.6.0</cxf.version>
+		<joda-time.version>1.6.2</joda-time.version>
 		<jasypt.version>1.8</jasypt.version>
 		<icu4j.version>3.8</icu4j.version>
 		<jdom.version>1.1</jdom.version>
@@ -296,6 +297,11 @@
 				<artifactId>hqapi1</artifactId>
 				<version>${hqapi.version}</version>
 			</dependency>
+		        <dependency>
+		            <groupId>joda-time</groupId>
+		            <artifactId>joda-time</artifactId>
+		            <version>${joda-time.version}</version>
+		        </dependency>
 			<dependency>
 				<groupId>org.jasypt</groupId>
 				<artifactId>jasypt</artifactId> 
