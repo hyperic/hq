@@ -25,9 +25,7 @@
  */
 package org.hyperic.hq.api.transfer.impl;
 
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -55,6 +53,8 @@ import org.hyperic.hq.measurement.shared.DataManager;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.TemplateManager;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class MeasurementTransferImpl implements MeasurementTransfer {
@@ -77,12 +77,12 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         this.errorHandler = errorHandler;
     }
     
-    protected Date[] getTimeFrame(final String begin, final String end) throws ParseException {
-        final DateFormat dateFormat = new SimpleDateFormat() ;
-        Date[] timeFrame = new Date[2];
-        timeFrame[0] = dateFormat.parse(begin) ; 
-        timeFrame[1] = dateFormat.parse(end) ;
-        if (timeFrame[0].after(timeFrame[1]) || timeFrame[0].getTime()<=0 || timeFrame[1].after(new Date())) {
+    protected long[] getTimeFrame(final String begin, final String end) throws ParseException {
+        final DateTimeFormatter dateFormat = ISODateTimeFormat.dateTimeParser() ;
+        long[] timeFrame = new long[2];
+        timeFrame[0] = dateFormat.parseMillis(begin) ; 
+        timeFrame[1] = dateFormat.parseMillis(end) ;
+        if (timeFrame[0]>=timeFrame[1] || timeFrame[0]<=0 || timeFrame[1]>=new Date().getTime()) {
             throw new IllegalArgumentException();
         }
         return timeFrame;
@@ -117,8 +117,8 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             throw new UnsupportedOperationException("the request is missing the resource ID, the measurement template names, the begining or end of the time frame");
         }
         AuthzSubject authzSubject = apiMessageContext.getAuthzSubject();
-        Date[] timeFrame = getTimeFrame(begin, end);
-        Date beginDate = timeFrame[0], endDate = timeFrame[1]; 
+        long[] timeFrame = getTimeFrame(begin, end);
+        long beginMilli = timeFrame[0], endMilli = timeFrame[1]; 
 
         // extract all input measurement templates
         List<String> tmpNames = hqMsmtReq.getMeasurementTemplateNames();
@@ -131,7 +131,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         // get metrics
         for (Measurement hqMsmt : hqMsmts) {
             org.hyperic.hq.api.model.measurements.Measurement msmt = this.mapper.toMeasurement(hqMsmt);
-            List<HighLowMetricValue> hqMetrics = this.dataMgr.getHistoricalData(hqMsmt, beginDate.getTime(), endDate.getTime(), true, MAX_DTPS);
+            List<HighLowMetricValue> hqMetrics = this.dataMgr.getHistoricalData(hqMsmt, beginMilli, endMilli, true, MAX_DTPS);
             if (hqMetrics!=null && hqMetrics.size()!=0) {
                 List<org.hyperic.hq.api.model.measurements.Metric> metrics = this.mapper.toMetrics(hqMetrics);
                 msmt.setMetrics(metrics);
@@ -149,8 +149,8 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             throw new UnsupportedOperationException("the request is missing the resource ID, the measurement template names, the begining or end of the time frame");
         }
         AuthzSubject authzSubject = apiMessageContext.getAuthzSubject();
-        Date[] timeFrame = getTimeFrame(begin, end);
-        Date beginDate = timeFrame[0], endDate = timeFrame[1];
+        long[] timeFrame = getTimeFrame(begin, end);
+        long beginMilli = timeFrame[0], endMilli = timeFrame[1];
         
         // extract all input measurement templates
         for (ResourceMeasurementRequest hqMsmtReq : hqMsmtReqs.getMeasurementRequests()) {
@@ -171,7 +171,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             for (MeasurementTemplate tmp : tmps) {
                 tmpIdToTmp.put(tmp.getId(), tmp);
             }
-            Map<Integer, double[]> msmtNamesToAgg = this.dataMgr.getAggregateDataByTemplate(hqMsmts, beginDate.getTime(), endDate.getTime());
+            Map<Integer, double[]> msmtNamesToAgg = this.dataMgr.getAggregateDataByTemplate(hqMsmts, beginMilli, endMilli);
             
             ResourceMeasurementResponse msmtRes = new ResourceMeasurementResponse(rscId);
             for (Map.Entry<Integer, double[]> msmtNameToAggEntry : msmtNamesToAgg.entrySet()) {
@@ -194,4 +194,4 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         }
         return res;
     }
-} 
+}
