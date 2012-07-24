@@ -11,6 +11,7 @@ import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.common.TimeframeBaseException;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +42,7 @@ public class MeasurementServiceImpl extends RestApiService implements Measuremen
                 throw errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.MEASUREMENT_NOT_FOUND, "there are no measurements of the requested templates types on the requested resource");
             }
             throw errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID, "");
-        } catch (IllegalArgumentException e) {
+        } catch (TimeframeBaseException e) {
             throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.WRONG_DATE_VALUES, e.getMessage());
         }
     }

@@ -55,6 +55,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.common.ProductProperties;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.TimeframeBoundriesException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.common.util.MessagePublisher;
@@ -919,18 +920,20 @@ public class DataManagerImpl implements DataManager {
      *  find the aggregation table with the greatest interval which is smaller than the requested time frame
      *  and which the time frame doesn't cover a range which is even partially after its purge has been done
      *  and in which no more than maxDTPs fit in the requested time frame
+     * @throws TimeframeSizeException 
+     * @throws TimeframeBoundriesException 
      */
-    protected String getDataTable(long begin, long end, Measurement msmt, int maxDTPs) throws IllegalArgumentException {
+    protected String getDataTable(long begin, long end, Measurement msmt, int maxDTPs) throws IllegalArgumentException, TimeframeSizeException, TimeframeBoundriesException {
         long tf = end - begin;  // the time frame
         long maxInterval = tf / maxDTPs; // the max interval for which maxDTPs DTPs still fit in the time frame
         long msmtInterval = msmt.getInterval();
         if (tf<msmtInterval) { 
             MeasurementTemplate tmp = msmt.getTemplate();
-            throw new IllegalArgumentException("requested time frame is of size " + tf + " milliseconds, which is smaller than the time interval of the measurement " + tmp!=null?tmp.getName():"" + " which is " + msmtInterval + " milliseconds");
+            throw new TimeframeSizeException("requested time frame is of size " + tf + " milliseconds, which is smaller than the time interval of the measurement " + tmp!=null?tmp.getName():"" + " which is " + msmtInterval + " milliseconds");
         }
         long now = System.currentTimeMillis();
         if (end>now || end<begin) { 
-            throw new IllegalArgumentException("illegal time frame boundries");
+            throw new TimeframeBoundriesException("illegal time frame boundries");
         }
         if (!confDefaultsLoaded) {
             loadConfigDefaults();
@@ -940,21 +943,21 @@ public class DataManagerImpl implements DataManager {
         }
         if (tf<HOUR_IN_MILLI) { 
             MeasurementTemplate tmp = msmt.getTemplate();
-            throw new IllegalArgumentException("requested time frame is of size " + tf + " milliseconds, which is smaller than the hourly aggregated time interval of the measurement " + tmp!=null?tmp.getName():"");
+            throw new TimeframeSizeException("requested time frame is of size " + tf + " milliseconds, which is smaller than the hourly aggregated time interval of the measurement " + tmp!=null?tmp.getName():"");
         }
         if (HOUR_IN_MILLI>=maxInterval && begin>=now-DataManagerImpl.this.purge1h) {
             return MeasurementConstants.TAB_DATA_1H;
         }
         if (tf<SIX_HOURS_IN_MILLI) { 
             MeasurementTemplate tmp = msmt.getTemplate();
-            throw new IllegalArgumentException("requested time frame is of size " + tf + " milliseconds, which is smaller than the 6-hourly aggregated time interval of the measurement " + tmp!=null?tmp.getName():"");
+            throw new TimeframeSizeException("requested time frame is of size " + tf + " milliseconds, which is smaller than the 6-hourly aggregated time interval of the measurement " + tmp!=null?tmp.getName():"");
         }
         if (SIX_HOURS_IN_MILLI>=maxInterval && begin>=now-DataManagerImpl.this.purge6h) {
             return MeasurementConstants.TAB_DATA_6H;
         }
         if (tf<DAY_IN_MILLI) { 
             MeasurementTemplate tmp = msmt.getTemplate();
-            throw new IllegalArgumentException("requested time frame is of size " + tf + " milliseconds, which is smaller than the daily aggregated time interval of the measurement " + tmp!=null?tmp.getName():"");
+            throw new TimeframeSizeException("requested time frame is of size " + tf + " milliseconds, which is smaller than the daily aggregated time interval of the measurement " + tmp!=null?tmp.getName():"");
         }
         // return daily aggregated data even if the time frame is beyond the purge time or contains more than 400 DTPs
         return MeasurementConstants.TAB_DATA_1D;
@@ -1041,7 +1044,7 @@ public class DataManagerImpl implements DataManager {
 
     @Transactional(readOnly = true)
     public List<HighLowMetricValue> getHistoricalData(Measurement m, long begin, long end,
-                                                          boolean prependAvailUnknowns, int maxDTPs) {
+                                                          boolean prependAvailUnknowns, int maxDTPs) throws IllegalArgumentException, TimeframeSizeException, TimeframeBoundriesException {
         if (m.getTemplate().isAvailability()) {
             return availabilityManager.getHistoricalAvailData(m, begin, end, PageControl.PAGE_ALL, prependAvailUnknowns);
         } else {
@@ -1160,7 +1163,7 @@ public class DataManagerImpl implements DataManager {
         }
     }
 
-    private List<HighLowMetricValue> getNonAvailabilityMetricData(final Measurement m, long begin, long end, int maxDTPs) {
+    private List<HighLowMetricValue> getNonAvailabilityMetricData(final Measurement m, long begin, long end, int maxDTPs) throws IllegalArgumentException, TimeframeSizeException, TimeframeBoundriesException {
         checkTimeArguments(begin, end);
         begin = TimingVoodoo.roundDownTime(begin, MINUTE);
         end = TimingVoodoo.roundDownTime(end, MINUTE);

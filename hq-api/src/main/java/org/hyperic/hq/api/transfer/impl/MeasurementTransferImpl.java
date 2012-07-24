@@ -43,8 +43,10 @@ import org.hyperic.hq.api.transfer.mapping.MeasurementMapper;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.common.TimeframeBoundriesException;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.measurement.server.session.TimeframeSizeException;
 import org.hyperic.hq.measurement.shared.DataManager;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
@@ -70,7 +72,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
 
     public MeasurementResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest hqMsmtReq, 
             final String rscId, final String begin, final String end) 
-            throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException {
+            throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException, IllegalArgumentException, TimeframeSizeException, TimeframeBoundriesException {
 
         MeasurementResponse res = new MeasurementResponse();
         if (hqMsmtReq==null || rscId==null || "".equals(rscId) || hqMsmtReq.getMeasurementTemplateNames()==null || hqMsmtReq.getMeasurementTemplateNames().size()==0 || begin==null || end==null || begin.length()<=0 || end.length()<=0) {
@@ -89,7 +91,6 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         List<String> tmpNames = hqMsmtReq.getMeasurementTemplateNames();
         List<MeasurementTemplate> tmps = this.tmpltMgr.findTemplatesByName(tmpNames);
         if (tmps==null || tmps.size()==0) {
-
             throw new ObjectNotFoundException("there are no measurement templates which carries the requested template names", MeasurementTemplate.class.getName());
         }
         
