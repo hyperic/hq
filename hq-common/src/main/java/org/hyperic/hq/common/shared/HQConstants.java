@@ -132,4 +132,8 @@ public class HQConstants {
     //SSL keystore config
     public static final String SSL_SERVER_KEYSTORE = "SSL_SERVER_KEYSTORE";
     public static final String SSL_SERVER_KEYPASS = "SSL_SERVER_KEYPASS";
+    
+    public static final String ORGANIZATION_AUTHENTICATION = "orgAuth";
+    public static final String ORG_AUTH_PREFIX = "org\\";
+
 }
