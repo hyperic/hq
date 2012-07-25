@@ -30,20 +30,32 @@
 package org.hyperic.hq.api.transfer.mapping;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.hyperic.hq.api.model.AIResource;
+import org.hyperic.hq.api.model.ConfigurationValue;
+import org.hyperic.hq.api.model.PropertyList;
 import org.hyperic.hq.api.model.Resource;
 import org.hyperic.hq.api.model.ResourceConfig;
 import org.hyperic.hq.api.model.ResourcePrototype;
 import org.hyperic.hq.api.model.ResourceType;
+import org.hyperic.hq.api.model.resources.ComplexIp;
+import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIServerValue;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.PlatformManager;
+import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.bizapp.server.session.ProductBossImpl.ConfigSchemaAndBaseResponse;
+import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.config.ConfigResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /** 
@@ -55,6 +67,13 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ResourceMapper {
+    
+    private PlatformManager platformManager;
+    
+    @Autowired  
+    public ResourceMapper(final PlatformManager platformManager) { 
+        this.platformManager = platformManager;   
+    }//EOM     
 
 	public AIResource mapAIPLarformValueToAIResource(AIPlatformValue aiPlatform,
 			AIResource aiResource) {
@@ -141,7 +160,7 @@ public class ResourceMapper {
 		return (o1 == o2 || (o1 != null && o1.equals(o2)) ) ; 
 	}//EOM 
 	
-	public final Resource mergeConfig(final Resource resource, final ConfigSchemaAndBaseResponse[] configResponses) {
+	public final Resource mergeConfig(ResourceType resourceType, org.hyperic.hq.authz.server.session.Resource backendResource, final Resource resource, final ConfigSchemaAndBaseResponse[] configResponses) throws AppdefEntityNotFoundException {
 		if(configResponses == null) return resource ;  
 		
 		final Map<String,String> configValues = new HashMap<String,String>() ; 
@@ -163,8 +182,141 @@ public class ResourceMapper {
 		final ResourceConfig resourceConfig = new ResourceConfig() ;
 		resourceConfig.setMapProps(configValues) ; 
 		resource.setResourceConfig(resourceConfig) ; 
+		
+		// Add resource-type specific properties
+		
+        //derive the resource type load strategy using the resource type enum 
+        //Note: of the resourceType is null, then the generic resource resource type 
+        //would be used 
+		if (null == resourceType) {
+		    resourceType = ResourceType.valueOf(backendResource.getResourceType().getAppdefType());
+		}
+        final ResourceTypeMapperStrategy resourceTypeStrategy = ResourceTypeMapperStrategy.valueOf(resourceType);        
+        MappingContext context = new MappingContext(backendResource, configResponses, this, resourceType, resource);
+        resourceTypeStrategy.mergeConfig(context);
+        
 		return resource ; 
 	}//EOM
+	
+	public final static ComplexIp toIp(org.hyperic.hq.appdef.Ip backendIp) {
+	    ComplexIp ip = new ComplexIp();
+	    if (null != backendIp) {
+	        ip.setAddress(backendIp.getAddress());
+	        ip.setNetmask(backendIp.getNetmask());
+	        ip.setMac(backendIp.getMacAddress());
+	    }
+	    return ip;
+	}
+
+	/**
+	 * Resource-type specific mapping
+	 *
+	 */
+    private enum ResourceTypeMapperStrategy { 
+        
+        PLATFORM(AppdefEntityConstants.APPDEF_TYPE_PLATFORM) { 
+
+            @Override
+            final Resource mergeConfig(final MappingContext mappingFlowContext) throws PlatformNotFoundException {
+                org.hyperic.hq.authz.server.session.Resource backendResource = mappingFlowContext.backendResource;
+                Platform platform = mappingFlowContext.visitor.platformManager.findPlatformById(backendResource.getInstanceId());
+                Resource curResource = mappingFlowContext.currResource;
+
+                // Add Mac Addresses to the resource multivalue property map
+                Collection<org.hyperic.hq.appdef.Ip> backendMacAddresses = platform.getIps();
+                if (null != backendMacAddresses) {
+                    Collection<ConfigurationValue> ips = new ArrayList<ConfigurationValue>(backendMacAddresses.size());
+                    for (org.hyperic.hq.appdef.Ip backendIp : backendMacAddresses) {
+                        ips.add(toIp(backendIp));
+                    }
+                    curResource.getResourceConfig().putMapListProps(IP_MAC_ADDRESS, ips);
+                }
+                return curResource;
+            }// EOM
+
+        },//EO PLATFORM
+        SERVER(AppdefEntityConstants.APPDEF_TYPE_SERVER) {
+            
+        },//EO SERVER
+        SERVICE(AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
+            
+        },//EO SERVER
+        RESOURCE(-999){
+            
+        };//EO RESOURCE
+        
+        
+        private static final String IP_MAC_ADDRESS = "IP_MAC_ADDRESS";
+
+        /**
+         * Do configuration properties' mapping for specific resource types.
+         * @param mappingflowContext
+         * @return
+         * @throws AppdefEntityNotFoundException
+         */
+        Resource mergeConfig(final org.hyperic.hq.api.transfer.mapping.ResourceMapper.MappingContext mappingflowContext) throws AppdefEntityNotFoundException {
+            // Do nothing - just return the same resource
+            return mappingflowContext.currResource;
+        }
+        
+        private static final ResourceTypeMapperStrategy[] cachedValues ; 
+        private static final int iNoOfStrategies ;
+        
+        private int appdefEntityType ;  
+        
+        static{ 
+            cachedValues = values() ; 
+            iNoOfStrategies = cachedValues.length ; 
+        }//EO static block
+        
+        private ResourceTypeMapperStrategy(final int appdefEntityType) { 
+            this.appdefEntityType = appdefEntityType ; 
+        }//EOM 
+        
+        static final ResourceTypeMapperStrategy valueOf(final int iStrategyType) { 
+            return (iStrategyType >= iNoOfStrategies ? RESOURCE : cachedValues[iStrategyType]) ; 
+        }//EOM 
+        
+        static final ResourceTypeMapperStrategy valueOf(final ResourceType enumResourceType) {
+            return (enumResourceType == null ? RESOURCE : valueOf(enumResourceType.name()) ) ; 
+        }//EOM 
+
+    
+        
+    }//EOE 
+    
+
+    
+    
+    final static class MappingContext  { 
+        org.hyperic.hq.authz.server.session.Resource backendResource ; 
+        ConfigSchemaAndBaseResponse[] configResponses ;         
+        ResourceMapper visitor; 
+        ResourceType resourceType;  
+        Resource currResource ;               
+        
+        public MappingContext() {
+            
+        }        
+
+        public MappingContext(org.hyperic.hq.authz.server.session.Resource backendResource,
+                ConfigSchemaAndBaseResponse[] configResponses, ResourceMapper visitor, ResourceType resourceType,
+                Resource currResource) {
+            this.backendResource = backendResource;
+            this.configResponses = configResponses;
+            this.visitor = visitor;
+            this.resourceType = resourceType;
+            this.currResource = currResource;
+        }
+
+        public final void reset() { 
+            this.backendResource = null;
+            this.configResponses = new ConfigSchemaAndBaseResponse[ProductPlugin.CONFIGURABLE_TYPES.length];                        
+            this.currResource = null;                        
+        }//EOM 
+        
+    }//EO inner class Context 
+	
 	
 	
 }//EOC
