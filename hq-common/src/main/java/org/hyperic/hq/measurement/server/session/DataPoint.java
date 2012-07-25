@@ -35,46 +35,57 @@ import org.hyperic.hq.product.MetricValue;
  * {@link DataManagerImpl#addData(java.util.List, boolean)
  */
 public class DataPoint implements Serializable {
-    private final Integer     _metricId;
-    private final MetricValue _val;
+    private final Integer     measurementId;
+    private final MetricValue metricVal;
     
-    public DataPoint(int metricId, double val, long timestamp) {
-        _val = new MetricValue(val, timestamp);
-        _metricId = new Integer(metricId);
+    public DataPoint(DataPoint other) {
+    	this.metricVal = new MetricValue(other.getMetricValue(), other.getTimestamp());
+        this.measurementId = other.getMeasurementId();
+    }
+
+    /**
+     * 
+     * @param measId - measurement Id
+     * @param metricVal
+     * @param timestamp
+     */
+    public DataPoint(int measId, double metricVal, long timestamp) {
+    	this.metricVal = new MetricValue(metricVal, timestamp);
+        this.measurementId = new Integer(measId);
     }
     
-    public DataPoint(Integer metricId, MetricValue val) {
-        _metricId = metricId;
-        _val      = val;
+    public DataPoint(Integer measurementId, MetricValue metricVal) {
+        this.measurementId = measurementId;
+        this.metricVal      = metricVal;
     }
     
-    public Integer getMetricId() {
-        return _metricId;
+    public Integer getMeasurementId() {
+        return measurementId;
     }
     
     public MetricValue getMetricValue() {
-        return _val;
+        return this.metricVal;
     }
     
     public double getValue() {
-        return _val.getValue();
+        return this.metricVal.getValue();
     }
     
     public long getTimestamp() {
-        return _val.getTimestamp();
+        return this.metricVal.getTimestamp();
     }
     
     public String toString() {
-        return "id=" + _metricId + " val=" + _val.getValue() + 
-            " time=" + _val.getTimestamp();
+        return "id=" + measurementId + " val=" + this.metricVal.getValue() + 
+            " time=" + this.metricVal.getTimestamp();
     }
     
     /**
      * Checks if metricId && timestamp hashCodes match (not value)
      */
     public int hashCode() {
-        return 17 + (37*_metricId.hashCode()) +
-            (37*new Long(_val.getTimestamp()).hashCode());
+        return 17 + (37*measurementId.hashCode()) +
+            (37*new Long(this.metricVal.getTimestamp()).hashCode());
     }
     
     /**
@@ -88,7 +99,7 @@ public class DataPoint implements Serializable {
             return false;
         }
         DataPoint d = (DataPoint)rhs;
-        if (d.getMetricId().equals(getMetricId()) &&
+        if (d.getMeasurementId().equals(getMeasurementId()) &&
             d.getTimestamp() == getTimestamp()) {
             return true;
         }
