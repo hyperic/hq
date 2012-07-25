@@ -5,11 +5,10 @@
 <%@ page import="org.hyperic.hq.context.Bootstrap"%>
 <%@ page import="org.hyperic.hq.common.shared.ServerConfigManager"%>
 <%@ page import="java.util.Properties"%>
-<%@ page import="java.lang.Boolean"%>
 <%
 ServerConfigManager serverConfig = (ServerConfigManager)Bootstrap.getBean(ServerConfigManager.class); 
 Properties serverProps = serverConfig.getConfig();
-Boolean ldapInUse = "LDAP".equals(serverProps.getProperty(HQConstants.AUTHENTICATION_TYPE));
+boolean ldapInUse = "LDAP".equals(serverProps.getProperty(HQConstants.AUTHENTICATION_TYPE));
 String realm = serverProps.getProperty("KERBEROS_REALM");
 String kdc = serverProps.getProperty("KERBEROS_KDC");
 
