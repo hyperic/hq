@@ -16,7 +16,7 @@ public class MeasurementMapper {
     protected final static int MAX_FRACTION_DIGITS = 3;
     protected final static DecimalFormat df = new DecimalFormat();
     
-    {
+    static {
         df.setMaximumFractionDigits(MAX_FRACTION_DIGITS);
         df.setGroupingUsed(false);
         df.setRoundingMode(RoundingMode.HALF_EVEN);
