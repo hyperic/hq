@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 public class MeasurementMapper {
     protected final static DecimalFormat df = new DecimalFormat();
     
-    {
+    static {
         df.setMaximumFractionDigits(3);
         df.setGroupingUsed(false);
         df.setRoundingMode(RoundingMode.DOWN);
