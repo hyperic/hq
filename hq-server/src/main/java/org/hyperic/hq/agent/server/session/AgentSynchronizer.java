@@ -138,6 +138,7 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
     }
     
     public void addAgentJob(AgentDataTransferJob agentJob) {
+        if (log.isDebugEnabled()) log.debug("adding job=" + agentJob);
         synchronized (agentJobs) {
             agentJobs.add(new StatefulAgentDataTransferJob(agentJob));
         }
