@@ -214,7 +214,7 @@ public class CloudFoundryDetector extends ServerDetector implements AutoServerDe
         throws PluginException {
     	    	
         List<ServiceResource> services = new ArrayList<ServiceResource>();
-        CloudFoundryProxy cf = new CloudFoundryProxy(serverConfig.toProperties(), false);
+        CloudFoundryProxy cf = new CloudFoundryProxy(serverConfig.toProperties());
 
 		services.addAll(discoverCloudApplications(cf, serverConfig));
 		services.addAll(discoverCloudServices(cf, serverConfig));

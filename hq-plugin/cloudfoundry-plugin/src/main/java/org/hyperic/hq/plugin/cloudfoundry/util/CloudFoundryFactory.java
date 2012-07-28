@@ -59,18 +59,6 @@ public class CloudFoundryFactory {
                 _log.info(e.getMessage());
                 throw new PluginException(e);
             }
-        	
-        	String token = null;
-            try {
-                token = cf.login();                
-            } catch (Exception ex) {
-                _log.info(ex.getMessage());
-                throw new PluginException(ex);
-            } finally {
-            	if (_log.isDebugEnabled()) {
-            		_log.debug("email=" + email + ", token=" + token);
-            	}
-            }
         } else {
             throw new PluginException("Missing Cloud Foundry account information");
         }

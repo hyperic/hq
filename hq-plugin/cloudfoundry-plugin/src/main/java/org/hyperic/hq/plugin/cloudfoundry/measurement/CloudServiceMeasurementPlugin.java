@@ -24,70 +24,8 @@
  */
 package org.hyperic.hq.plugin.cloudfoundry.measurement;
 
-import java.net.MalformedURLException;
-import java.util.List;
-import java.util.Properties;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.cloudfoundry.util.CloudFoundryProxy;
 import org.hyperic.hq.product.MeasurementPlugin;
-import org.hyperic.hq.product.Metric;
-import org.hyperic.hq.product.MetricNotFoundException;
-import org.hyperic.hq.product.MetricUnreachableException;
-import org.hyperic.hq.product.MetricValue;
-import org.hyperic.hq.product.PluginException;
-
-import org.cloudfoundry.client.lib.CloudService;
-import org.cloudfoundry.client.lib.CloudFoundryClient;
 
 public class CloudServiceMeasurementPlugin extends MeasurementPlugin {
 
-    private static final Log _log = LogFactory.getLog(CloudServiceMeasurementPlugin.class);
-
-    @Override
-    public MetricValue getValue(Metric metric)
-    throws PluginException, MetricNotFoundException, MetricUnreachableException {
-        try {
-        	String metricName = metric.getAttributeName();        	        	        	
-            CloudFoundryProxy cf = null;
-            
-            try {
-            	cf = new CloudFoundryProxy(metric.getObjectProperties());
-            } catch (Exception e) {
-                if (metric.isAvail()) {
-                	return new MetricValue(Metric.AVAIL_DOWN);                	
-                }
-                // TODO: update message
-                throw new MetricUnreachableException("Cannot validate connection");
-            }
-            
-            String serviceName = metric.getObjectProperties().getProperty("service");
-        	CloudService cs = cf.getService(serviceName);
-
-            if (metric.isAvail()) {
-            	if (cs == null) {
-            		return new MetricValue(Metric.AVAIL_DOWN);
-            	} else {
-            		return new MetricValue(Metric.AVAIL_UP);
-            	}
-            } else if (metricName.equals("Uptime")) {
-            	if (cs == null) {
-            		throw new MetricUnreachableException("No service found with name=" + serviceName);
-            	}
-            	long now = System.currentTimeMillis();
-            	long uptime = (now - cs.getMeta().getCreated().getTime())/1000;
-            	
-            	return new MetricValue(uptime);
-            }
-        } catch (Exception e) {
-            if (metric.isAvail()) {
-                return new MetricValue(Metric.AVAIL_DOWN);
-            }
-            throw new MetricUnreachableException(e.getMessage(),e);
-        } finally {
-            //
-        }
-        return null;
-    }
 }
