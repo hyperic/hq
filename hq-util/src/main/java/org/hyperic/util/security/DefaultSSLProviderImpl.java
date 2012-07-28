@@ -34,6 +34,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateExpiredException;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -172,19 +173,36 @@ public class DefaultSSLProviderImpl implements SSLProvider {
                 try {
                     defaultTrustManager.checkServerTrusted(chain, authType);
                 } catch (CertificateException e){
+                    CertificateExpiredException expiredCertException = getCertExpiredException(e);
+                    if(expiredCertException!=null){
+                        log.error("Fail the connection because received certificate is expired. " +
+                        		"Please update the certificate.",expiredCertException);
+                        throw new CertificateException(e);
+                    }
                     if (acceptUnverifiedCertificates) {
                         log.info("Import the certification. (Received certificate is not trusted by keystore)");
                         importCertificate(chain);
                     }else{
-                        log.error("Fail the connection because received certificate is not trusted by keystore: alias="
+                        log.warn("Fail the connection because received certificate is not trusted by keystore: alias="
                             + keystoreConfig.getAlias()
-                            + ", path="
-                            + keystoreConfig.getFilePath()
-                            + " , acceptUnverifiedCertificates="
-                            + acceptUnverifiedCertificates,e);
+                            + ", path=" + keystoreConfig.getFilePath());
+                        log.debug("Fail the connection because received certificate is not trusted by keystore: alias="
+                            + keystoreConfig.getAlias()
+                            + ", path=" + keystoreConfig.getFilePath()
+                            +", acceptUnverifiedCertificates="+acceptUnverifiedCertificates,e);
                         throw new CertificateException(e);
                     }
                 }
+            }
+            
+            private CertificateExpiredException getCertExpiredException(Exception e){  
+                while(e !=null){
+                    if(e instanceof CertificateExpiredException){
+                        return (CertificateExpiredException)e;
+                    }
+                    e = (Exception) e.getCause();
+                }
+                return null;
             }
 
             public void checkClientTrusted(X509Certificate[] chain,
