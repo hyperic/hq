@@ -141,6 +141,10 @@ public interface AvailabilityManager {
      *        sendDataToEventHandlers directly afterwards.
      */
     public void addData(List<DataPoint> availPoints, boolean sendData);
+    public void addData(List<DataPoint> availDataPoints, boolean sendData, boolean addedByServer);
+
+    
+    public void addMeasurementIDsMonitoredByServer(Collection<Integer> measurementIDs);
 
     /**
      * This method should only be called by the AvailabilityCheckService and is
