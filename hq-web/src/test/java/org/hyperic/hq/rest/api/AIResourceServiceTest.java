@@ -25,6 +25,8 @@ import org.hyperic.hq.api.model.ResourceStatusType;
 import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.api.model.Resources;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
+import org.hyperic.hq.api.model.PropertyList;
+import org.hyperic.hq.api.model.resources.ComplexIp;
 import org.hyperic.hq.api.services.AIResourceService;
 import org.hyperic.hq.api.services.ResourceService;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
@@ -173,7 +175,14 @@ public class AIResourceServiceTest {
         updatedResource.setResourceType(type);
         Map<String, String> mapProps = new HashMap<String, String>(1);
         mapProps.put("key1", "value1");
-        ResourceConfig resourceConfig = new ResourceConfig(updatedResource.getId(), mapProps);
+        Map<String, PropertyList> mapListProps = new HashMap<String, PropertyList>(2);
+        ComplexIp[] macAddresses = { new ComplexIp("netmask1", "mac1", "address1"), new ComplexIp("netmask2", "mac2", "address2") };
+        mapListProps.put("key1", new PropertyList(macAddresses));        
+        mapListProps.put("key2", new PropertyList(macAddresses));
+        ResourceConfig resourceConfig = new ResourceConfig(updatedResource.getId(), mapProps, mapListProps);
+
+
+
         updatedResource.setResourceConfig(resourceConfig);
         resourceList.add(updatedResource);
         Resources resources = new Resources(resourceList);
