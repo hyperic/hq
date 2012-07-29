@@ -871,7 +871,7 @@ public class ResourceManagerImpl implements ResourceManager {
         if (debug) watch.markTimeEnd("permissionManager.findViewableResources");
 
         if (debug) watch.markTimeBegin("resourceGroupManager.getMembers");
-        final Collection<Resource> resources = resourceGroupManager.getMembers(group);
+        final List<Resource> resources = resourceGroupManager.getMembers(group);
         if (debug) watch.markTimeEnd("resourceGroupManager.getMembers");
         if (resources.isEmpty()) {
             return Collections.emptyList();

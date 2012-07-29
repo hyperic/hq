@@ -515,22 +515,24 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable {
                     if (isDebug) {
                         log.debug("Skipping duplicate mid=" + mid + ", aid=" + rs.id);
                     }
+                    return;
                 }
                 long lastCollected = meas.getLastCollected();
                 long now = now();
+                long nowRounded = TimingVoodoo.roundDownTime(now, 60000);
                 // HHQ-5483 - agent is collecting metrics too frequently.  I don't want to mess with the scheduling
                 // algorithm at this time, so I am simply putting checks in to prevent this scenario from occurring
-                if (lastCollected + meas.getInterval() - offset > now) {
-                    if (log.isDebugEnabled()) {
+                if (lastCollected + meas.getInterval() > nowRounded) {
+                    if (isDebug) {
                         log.debug("ALREADY COLLECTED meas=" + meas + " @ " + TimeUtil.toString(lastCollected));
                     }
                     return;
                 }
-                if (log.isDebugEnabled()) {
+                if (isDebug) {
                     log.debug("collecting data for meas=" + meas);
                 }
                 data = getValue(dsn);
-                long time = TimingVoodoo.roundDownTime(now, 60000);
+                long time = TimingVoodoo.roundDownTime(now, meas.getInterval());
 				meas.setLastCollected(time);
                 if (data == null) {
                     // Don't allow plugins to return null from getValue(),

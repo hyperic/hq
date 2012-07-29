@@ -30,9 +30,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.hyperic.hq.common.TimeframeBoundriesException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.server.session.Measurement;
+import org.hyperic.hq.measurement.server.session.TimeframeSizeException;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -86,7 +88,7 @@ public interface DataManager {
     public PageList<HighLowMetricValue> getHistoricalData(Measurement m, long begin, long end, PageControl pc,
                                                           boolean prependAvailUnknowns);
 
-    public List<HighLowMetricValue> getHistoricalData(Measurement m, long begin, long end, boolean prependAvailUnknowns, int maxDtps);
+    public List<HighLowMetricValue> getHistoricalData(Measurement m, long begin, long end, boolean prependAvailUnknowns, int maxDtps) throws IllegalArgumentException, TimeframeSizeException, TimeframeBoundriesException;
 
     /**
      * Fetch the list of historical data points given a begin and end time

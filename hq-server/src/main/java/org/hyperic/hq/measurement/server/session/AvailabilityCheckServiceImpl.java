@@ -26,6 +26,7 @@
 package org.hyperic.hq.measurement.server.session;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -145,6 +146,12 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
             return;
         }
         final List<DataPoint> backfillPoints = new ArrayList<DataPoint>(backfillData.values());
+        Collection<Integer> measurementIDs = new ArrayList<Integer>();
+        for (DataPoint dPoint : backfillPoints) {
+            measurementIDs.add(dPoint.getMeasurementId());            				
+		}
+        availabilityManager.addMeasurementIDsMonitoredByServer(measurementIDs);
+
         final boolean debug = log.isDebugEnabled();
         final int batchSize = 500;
         for (int i=0; i < backfillPoints.size(); i+=batchSize) {
@@ -155,7 +162,7 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
             int end = Math.min(i + batchSize, backfillPoints.size());
             // use this method signature to not send data to event handlers from here.
             // send it outside the synchronized cache block from the calling method
-            availabilityManager.addData(backfillPoints.subList(i, end), false);
+            availabilityManager.addData(backfillPoints.subList(i, end), false, true);
         }
     }
 

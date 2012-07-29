@@ -42,10 +42,11 @@ public interface HQAuthenticationProvider extends Ordered {
      * 
      * @param serverConfigProps The server configuration properties, should
      *        include authentication-related props
+     * @param authDetails 
      * @return true if the server configuration indicates that this type of
      *         authentication should be used
      */
-    boolean supports(Properties serverConfigProps);
+    boolean supports(Properties serverConfigProps, Object authDetails);
 
     /**
      * 
