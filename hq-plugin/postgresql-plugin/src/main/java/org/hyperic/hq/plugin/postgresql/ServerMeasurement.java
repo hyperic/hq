@@ -150,7 +150,7 @@ public class ServerMeasurement extends SigarMeasurementPlugin {
             ResultSet rs = null;
 
             try {
-                conn = DriverManager.getConnection(url, user, pass);
+                conn = ConnectionManager.getConnection(url, user, pass);
                 stmt = conn.createStatement();
                 stmt.execute("select pg_backend_pid()");
 

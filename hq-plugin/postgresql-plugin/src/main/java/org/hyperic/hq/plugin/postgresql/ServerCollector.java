@@ -38,7 +38,7 @@ public class ServerCollector extends Collector {
         try {
             String url = PostgreSQL.prepareUrl(p, null);
             log.debug("[collect] url:'" + url + "'");
-            conn = DriverManager.getConnection(url, user, pass);
+            conn = ConnectionManager.getConnection(url, user, pass);
             getConnectionsMetrics(conn);
         } catch (Exception e) {
             final String msg = "Error getting metrics: " + e.getMessage();

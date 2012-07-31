@@ -69,7 +69,7 @@ public class TableIndexCollector extends Collector {
         try {
             String url = PostgreSQL.prepareUrl(p, db);
             log.debug("[collect] url:'" + url + "'");
-            conn = DriverManager.getConnection(url, user, pass);
+            conn = ConnectionManager.getConnection(url, user, pass);
 
             // TABLES
             if (firstCollect || (tables.size() > 0)) {

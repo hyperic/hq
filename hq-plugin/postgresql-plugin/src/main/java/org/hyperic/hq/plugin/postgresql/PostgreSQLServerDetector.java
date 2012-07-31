@@ -134,7 +134,7 @@ public class PostgreSQLServerDetector extends ServerDetector implements AutoServ
 
         List<String> dataBases = new ArrayList<String>();
         try {
-            conn = DriverManager.getConnection(url, user, pass);
+            conn = ConnectionManager.getConnection(url, user, pass);
             stmt = conn.createStatement();
             rs = stmt.executeQuery(DB_QUERY);
             while (rs != null && rs.next()) {
@@ -178,7 +178,7 @@ public class PostgreSQLServerDetector extends ServerDetector implements AutoServ
             services.add(db);
 
             try {
-                conn = DriverManager.getConnection(PostgreSQL.prepareUrl(serverConfig.toProperties(), dataBase), user, pass);
+                conn = ConnectionManager.getConnection(PostgreSQL.prepareUrl(serverConfig.toProperties(), dataBase), user, pass);
                 stmt = conn.createStatement();
                 rs = stmt.executeQuery(TABLE_QUERY);
 

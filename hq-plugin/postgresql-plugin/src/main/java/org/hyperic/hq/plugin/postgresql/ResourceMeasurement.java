@@ -24,13 +24,9 @@
  */
 package org.hyperic.hq.plugin.postgresql;
 
-import java.io.File;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.JDBCMeasurementPlugin;
 import org.hyperic.hq.product.Metric;
@@ -42,10 +38,12 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
+import org.hyperic.util.jdbc.DBUtil;
 
 public abstract class ResourceMeasurement extends JDBCMeasurementPlugin {
 
     protected static final String JDBC_DRIVER = "org.postgresql.Driver";
+    private Connection conn;
 
     @Override
     protected final void getDriver() throws ClassNotFoundException {
@@ -54,7 +52,12 @@ public abstract class ResourceMeasurement extends JDBCMeasurementPlugin {
 
     @Override
     protected final Connection getConnection(String url, String user, String password) throws SQLException {
-        return DriverManager.getConnection(url, user, password);
+        return getCachedConnection(url, user, password);
+    }
+
+    protected Connection getCachedConnection(String url, String user, String password) throws SQLException {
+        conn = DriverManager.getConnection(url, user, password);
+        return conn;
     }
 
     @Override
@@ -82,6 +85,7 @@ public abstract class ResourceMeasurement extends JDBCMeasurementPlugin {
         } else {
             res = super.getValue(metric);
         }
+        DBUtil.closeJDBCObjects(getLog(), conn, null, null);
         return res;
     }
 }

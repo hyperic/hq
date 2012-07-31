@@ -45,7 +45,7 @@ public abstract class ResourceControl extends JDBCControlPlugin {
     }
 
     protected final Connection getConnection(String url, String user, String password) throws SQLException {
-        return DriverManager.getConnection(url, user, password);
+        return ConnectionManager.getConnection(url, user, password);
     }
 
     @Override

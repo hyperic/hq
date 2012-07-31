@@ -71,6 +71,7 @@ public class DataBaseCollector extends Collector {
         + "WHERE l.granted=false "
         + "GROUP BY 2"
     };
+    // these metrics are null when the value is 0
     private String posibleNULLMetrics[] = {"granted_locks", "awaited_locks"};
 
     @Override
@@ -85,7 +86,7 @@ public class DataBaseCollector extends Collector {
         try {
             String url = PostgreSQL.prepareUrl(p, null);
             log.debug("[collect] url:'" + url + "'");
-            conn = DriverManager.getConnection(url, user, pass);
+            conn = ConnectionManager.getConnection(url, user, pass);
             for (int j = 0; j < query.length; j++) {
                 String q = query[j];
                 extartMetrics(q, conn, j == 0);
@@ -98,12 +99,15 @@ public class DataBaseCollector extends Collector {
                 setValue(db + "." + Metric.ATTR_AVAIL, Metric.AVAIL_UP);
                 url = PostgreSQL.prepareUrl(p, db);
                 log.debug("[collect] url:'" + url + "'");
-                conn = DriverManager.getConnection(url, user, pass);
+                conn = ConnectionManager.getConnection(url, user, pass);
 
                 for (int j = 0; j < queryDB.length; j++) {
                     String q = queryDB[j];
                     extartMetrics(q, conn, false);
                 }
+
+                DBUtil.closeJDBCObjects(log, conn, null, null);
+                conn = null; // avoid closing twice
             }
         } catch (Exception e) {
             final String msg = "Error getting metrics: " + e.getMessage();
