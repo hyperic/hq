@@ -83,9 +83,14 @@ public class AutoApproveConfig {
         // reference the auto-approve properties file (if exists).
         File autoApprovePropsFile = new File(agentConfigDir, AUTO_APPROVE_PROPS_FILE_NAME);
 
-        // if the file exists then load it.
+        // if the file exists then load it and convert all keys to lowercase.
         if (autoApprovePropsFile.exists()) {
-            this.autoApproveProps = loadAutoApproveProps(autoApprovePropsFile);
+            this.autoApproveProps = new Properties();
+            Properties tmpProps = loadAutoApproveProps(autoApprovePropsFile);
+            for (Object keyRef : tmpProps.keySet()) {
+                String key = (String) keyRef;
+                this.autoApproveProps.put(key.toLowerCase(), tmpProps.getProperty(key));
+            }
             LOG.info("Resources auto-approval configuration loaded");
         } else {
             this.autoApproveProps = null;
@@ -109,7 +114,8 @@ public class AutoApproveConfig {
      * @return true if the resource was marked as auto approve; false otherwise.
      */
     public boolean isAutoApproved(String resourceName) {
-        return this.exists() && Boolean.valueOf(this.autoApproveProps.getProperty(resourceName));
+        return resourceName != null && this.exists() &&
+                Boolean.valueOf(this.autoApproveProps.getProperty(resourceName.toLowerCase()));
     } // EOM
 
     /**

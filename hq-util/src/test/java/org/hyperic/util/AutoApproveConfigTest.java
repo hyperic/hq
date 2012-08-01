@@ -38,7 +38,7 @@ public class AutoApproveConfigTest {
     public void createAutoConfigProvidingExistingFileAndApprovedPlatform() {
         AutoApproveConfig autoApproveConfig = new AutoApproveConfig("src/test/resources");
         TestCase.assertTrue(autoApproveConfig.exists());
-        TestCase.assertTrue(autoApproveConfig.isAutoApproved("platform"));
+        TestCase.assertTrue(autoApproveConfig.isAutoApproved("pLATfORm"));
     }
 
     private void testCtorException(String agentConfigFolderName, String msg) {
