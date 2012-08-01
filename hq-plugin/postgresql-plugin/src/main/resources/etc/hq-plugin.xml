@@ -60,6 +60,12 @@
                 indicator="true"
                 units="percentage"
                 collectionType="dynamic"/>
+        <metric name="Connections Idle"
+                alias="idle_backends"
+                category="UTILIZATION"
+                indicator="true"
+                units="none"
+                collectionType="dynamic"/>
     </metrics>
     
     <property name="template" value="${domain}:${server-config}:${alias}:"/>
@@ -199,10 +205,15 @@
                 indicator="true"
                 units="percentage"
                 collectionType="dynamic"/>
-        <metric name="Backends"
+        <metric name="Connections"
                 alias="numbackends"
                 category="UTILIZATION"
                 indicator="true"
+                units="none"
+                collectionType="dynamic"/>
+        <metric name="Connections Idle"
+                alias="idle_backends"
+                category="UTILIZATION"
                 units="none"
                 collectionType="dynamic"/>
         <metric name="Connections Usage"

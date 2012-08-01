@@ -69,7 +69,13 @@ public class DataBaseCollector extends Collector {
         + "FROM pg_locks l "
         + "JOIN pg_database d ON (d.oid=l.database) "
         + "WHERE l.granted=false "
-        + "GROUP BY 2"
+        + "GROUP BY 2",
+        "SELECT "
+        + "datname, "
+        + "count(current_query) AS idle_backends "
+        + "FROM pg_stat_activity "
+        + "WHERE current_query = '<IDLE>' "
+        + "GROUP BY 1;"
     };
     private String posibleNULLMetrics[] = {"granted_locks", "awaited_locks"};
 
