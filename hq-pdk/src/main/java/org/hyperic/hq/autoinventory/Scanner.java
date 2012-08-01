@@ -104,11 +104,10 @@ public class Scanner {
         }
         isDevice = !type.equals(platformType); 
 
-        if (isDevice && _log.isDebugEnabled()) {
+        if (isDevice && _log.isDebugEnabled() && config != null) {
             String fqdn = config.getValue(ProductPlugin.PROP_PLATFORM_FQDN);
             String addr = config.getValue(ProductPlugin.PROP_PLATFORM_IP);
-            _log.debug("Running discovery for another platform: " +
-                       type + "=" + fqdn + "/" + addr);
+            _log.debug("Running discovery for another platform: " + type + "=" + fqdn + "/" + addr);
         }
 
         try {
@@ -187,8 +186,8 @@ public class Scanner {
                 return;
             }
             
-            ServerDetector[] serverDetectors =
-                loadDetectors(pValue.getPlatformTypeName(), serverSigs);
+            ServerDetector[] serverDetectors = loadDetectors(pValue.getPlatformTypeName(), serverSigs);
+
             if ( serverDetectors == null || serverDetectors.length == 0 ) {
                 _log.warn("No server detectors were loaded.");
             }
@@ -238,7 +237,6 @@ public class Scanner {
                                            ServerSignature[] serverSigs) 
         throws AutoinventoryException {
 
-        ServerSignature sig;
         ServerDetector detector;
         List<ServerDetector> detectorList = new ArrayList<ServerDetector>();
         
@@ -250,9 +248,8 @@ public class Scanner {
                 pluginName = serverSigs[i].getServerTypeName();
 
                 try {
-                    detector =
-                        (ServerDetector)_pluginManager.getPlatformPlugin(type,
-                                                                         pluginName);
+                    detector = (ServerDetector)_pluginManager.getPlatformPlugin(type, pluginName);
+                    detector.setAutoApproveConfig(_autoApproveConfig);
                 } catch (PluginNotFoundException ne) {
                     //plugins are not required to support AI
                     _log.warn(ne.getMessage());
@@ -288,18 +285,11 @@ public class Scanner {
     }
 
     public boolean equals ( Object o ) {
-        if ( o instanceof Scanner ) {
+        if (o instanceof Scanner) {
             Scanner s = (Scanner) o;
-            if (!s._scanConfig.equals(_scanConfig)) {
-                return false;
-            }
-            if (s._pluginManager != _pluginManager) {
-                return false;
-            }
-            if (s._scanListener != _scanListener) {
-                return false;
-            }
-            return true;
+            return s._scanConfig.equals(_scanConfig) &&
+                    s._pluginManager == _pluginManager
+                    && s._scanListener == _scanListener;
         }
         return false;
     }

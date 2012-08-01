@@ -46,10 +46,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.xpath.XPathAPI;
-import org.hyperic.hq.appdef.shared.AIPlatformValue;
-import org.hyperic.hq.appdef.shared.AIServerExtValue;
-import org.hyperic.hq.appdef.shared.AIServiceTypeValue;
-import org.hyperic.hq.appdef.shared.AIServiceValue;
+import org.hyperic.hq.appdef.shared.*;
 import org.hyperic.hq.autoinventory.ServerSignature;
 import org.hyperic.sigar.NetFlags;
 import org.hyperic.sigar.ProcExe;
@@ -58,6 +55,7 @@ import org.hyperic.sigar.SigarException;
 import org.hyperic.sigar.SigarProxy;
 import org.hyperic.sigar.SigarProxyCache;
 import org.hyperic.sigar.ptql.ProcessFinder;
+import org.hyperic.util.AutoApproveConfig;
 import org.hyperic.util.PluginLoader;
 import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
@@ -98,7 +96,13 @@ public abstract class ServerDetector
     private Properties properties;
     private PluginUpdater pluginUpdater = new PluginUpdater();
 
+    private AutoApproveConfig autoApproveConfig;
+
     public ServerDetector() {}
+
+    public void setAutoApproveConfig(AutoApproveConfig autoApproveConfig) {
+        this.autoApproveConfig = autoApproveConfig;
+    }
 
     /**
      * @deprecated - Plugins should not use this method.
@@ -1008,6 +1012,16 @@ public abstract class ServerDetector
 
         String name = getProductPlugin(server.getType()).getName();
         mergeConfigDefaults(name, this.ppm, config);
+
+        AIServerValue aiServerValue = (AIServerValue) server.getResource();
+        String resourceName = aiServerValue.getServerTypeName();
+
+        Properties autoApproveProps = autoApproveConfig.getPropertiesForResource(resourceName);
+        for (Object keyRef : autoApproveProps.keySet()) {
+            String key = (String) keyRef;
+            config.setValue(key, autoApproveProps.getProperty(key));
+        }
+
         server.setProductConfig(config);
     }
     

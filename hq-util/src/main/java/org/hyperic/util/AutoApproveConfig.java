@@ -83,13 +83,13 @@ public class AutoApproveConfig {
         // reference the auto-approve properties file (if exists).
         File autoApprovePropsFile = new File(agentConfigDir, AUTO_APPROVE_PROPS_FILE_NAME);
 
-        // if the file exists then load it and convert all keys to lowercase.
+        // if the file exists then load it.
         if (autoApprovePropsFile.exists()) {
             this.autoApproveProps = new Properties();
             Properties tmpProps = loadAutoApproveProps(autoApprovePropsFile);
             for (Object keyRef : tmpProps.keySet()) {
                 String key = (String) keyRef;
-                this.autoApproveProps.put(key.toLowerCase(), tmpProps.getProperty(key));
+                this.autoApproveProps.put(key, tmpProps.getProperty(key));
             }
             LOG.info("Resources auto-approval configuration loaded");
         } else {
@@ -115,7 +115,38 @@ public class AutoApproveConfig {
      */
     public boolean isAutoApproved(String resourceName) {
         return resourceName != null && this.exists() &&
-                Boolean.valueOf(this.autoApproveProps.getProperty(resourceName.toLowerCase()));
+                Boolean.valueOf(this.autoApproveProps.getProperty(resourceName));
+    } // EOM
+
+    /**
+     * Get the set of properties that were specified for a resource with name <tt>resourceName</tt>. If the resource
+     * isn't auto-approved then an empty properties instance is returned. The name of the resource is stripped from the
+     * property keys.
+     *
+     * @param resourceName the name of the resource to get resource for.
+     * @return a <tt>Properties</tt> instance that were set for the resource. May be empty.
+     */
+    public Properties getPropertiesForResource(String resourceName) {
+        // Create the result properties.
+        Properties result = new Properties();
+
+        // If the resource isn't auto-approved then return the empty properties.
+        if (!isAutoApproved(resourceName)) {
+            return result;
+        }
+
+        // The length of the prefix (used for the stripping).
+        int prefixLength = resourceName.length() + 1;
+
+        // Iterate the properties and collect all with key that start with resourceName.
+        for (Object keyRef : this.autoApproveProps.keySet()) {
+            String key = (String) keyRef;
+            if (!key.equals(resourceName) && key.startsWith(resourceName)) {
+                result.put(key.substring(prefixLength), this.autoApproveProps.getProperty(key));
+            }
+        }
+
+        return result;
     } // EOM
 
     /**

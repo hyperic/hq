@@ -25,12 +25,8 @@
 
 package org.hyperic.hq.autoinventory.scanimpl;
 
-import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.hyperic.hq.appdef.shared.AIServerExtValue;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.product.AutoServerDetector;
@@ -39,6 +35,8 @@ import org.hyperic.hq.product.ServerResource;
 import org.hyperic.util.PluginLoader;
 import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
+
+import java.util.List;
 
 public class NullScan extends ScanMethodBase {
     private static final Log log = LogFactory.getLog(NullScan.class);
@@ -60,40 +58,37 @@ public class NullScan extends ScanMethodBase {
     }
 
     private static final ConfigOption[] OPTS = new ConfigOption[0];
+
     protected ConfigOption[] getOptionsArray(){
         return OPTS;
     }
 
     public void scan(ConfigResponse platformConfig, ServerDetector[] serverDetectors)
-        throws AutoinventoryException 
-    {
-        for(int i=0; i<serverDetectors.length; i++){
-            ServerDetector detector = serverDetectors[i];
+        throws AutoinventoryException {
+
+        for (ServerDetector detector : serverDetectors) {
 
             if (!(detector instanceof AutoServerDetector)) {
                 continue;
             }
 
             if (log.isDebugEnabled()) {
-                log.debug("Running AutoServerDetector for: " +
-                          detector.getTypeInfo().getName());
+                log.debug("Running AutoServerDetector for: " + detector.getTypeInfo().getName());
             }
-            
+
             PluginLoader.setClassLoader(detector);
             try {
-                List servers =
-                    ((AutoServerDetector)detector).getServerResources(platformConfig);
+                List servers = ((AutoServerDetector) detector).getServerResources(platformConfig);
                 if (servers != null) {
                     for (Object server : servers) {
                         AIServerValue xsrv;
                         if (server instanceof AIServerValue) {
-                            xsrv = (AIServerValue)server;
-                        }
-                        else {
-                            xsrv = (AIServerValue)((ServerResource)server).getResource();
+                            xsrv = (AIServerValue) server;
+                        } else {
+                            xsrv = (AIServerValue) ((ServerResource) server).getResource();
                         }
 
-                        if (_autoApproveConfig.isAutoApproved(xsrv.getServerTypeName().toLowerCase())) {
+                        if (_autoApproveConfig.isAutoApproved(xsrv.getServerTypeName())) {
                             xsrv.setAutoApprove(true);
                         }
                     }
@@ -102,11 +97,9 @@ public class NullScan extends ScanMethodBase {
                     _state.setAreServersIncluded(true);
                 }
             } catch (Exception e) {
-                this.log.error("AutoScan failed for " +
-                               detector.getTypeInfo().getName() , e);
+                log.error("AutoScan failed for " + detector.getTypeInfo().getName(), e);
             } catch (NoClassDefFoundError e) {
-                this.log.error("AutoScan failed for " +
-                               detector.getTypeInfo().getName() , e);
+                log.error("AutoScan failed for " + detector.getTypeInfo().getName(), e);
             } finally {
                 PluginLoader.resetClassLoader(detector);
             }
