@@ -128,7 +128,8 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
 
     private AvailabilityDataDAO availabilityDataDAO;
 
-    private Set<Integer> measurementIDsMonitoredByServer;
+    //private Set<Integer> measurementIDsMonitoredByServer;
+    private AvailabilityFallbackCheckQue fallbackCheckQue;
     private MeasurementDAO measurementDAO;
     private MessagePublisher messagePublisher;
     private RegisteredTriggers registeredTriggers;
@@ -154,7 +155,8 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         this.availabilityCache = availabilityCache;
         this.concurrentStatsCollector = concurrentStatsCollector;
         this.agentDAO = agentDAO;
-        this.measurementIDsMonitoredByServer = new HashSet<Integer>();
+        //this.measurementIDsMonitoredByServer = new HashSet<Integer>();
+        this.fallbackCheckQue = new AvailabilityFallbackCheckQue();
     }
 
     @PostConstruct
@@ -186,6 +188,12 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         return measurementDAO.findAvailMeasurementsByInstances(AppdefEntityConstants.APPDEF_TYPE_PLATFORM, null);
     }
 
+    
+    public AvailabilityFallbackCheckQue getFallbackCheckQue() {
+    	return this.fallbackCheckQue;
+    }
+    
+    
     /**
      * @return Down time in ms for the Resource availability
      * 
@@ -812,13 +820,8 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         if (availDataPoints == null || availDataPoints.size() == 0) {
             return;
         }
-        List<DataPoint> availPoints = availDataPoints;
-        if (addedByServer) {
-        	availPoints = getPointsForPlatformsCalculatedByServer(availDataPoints);
-        } 
-        else {
-        	removePlatformsMonitoredByAgentFromList(availPoints);
-        }
+        Collection<DataPoint> pointsToUpdate = this.fallbackCheckQue.beforeDataUpdate(availDataPoints, addedByServer);
+        List<DataPoint> availPoints =  new ArrayList<DataPoint>(pointsToUpdate);
         
         List<DataPoint> updateList = new ArrayList<DataPoint>(availPoints.size());
         List<DataPoint> outOfOrderAvail = new ArrayList<DataPoint>(availPoints.size());
@@ -854,27 +857,6 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     }
 
     
-    private List<DataPoint> getPointsForPlatformsCalculatedByServer(Collection<DataPoint> availDataPoints) {
-		List<DataPoint> res = new ArrayList<DataPoint>();
-		for (DataPoint dataPoint : availDataPoints) {
-			if ( measurementIDsMonitoredByServer.contains( dataPoint.getMeasurementId() ) ) {
-				res.add(dataPoint);
-			}
-		}
-		return res;
-	}
-    
-    public void addMeasurementIDsMonitoredByServer(Collection<Integer> measurementIDs)
-    {
-    	measurementIDsMonitoredByServer.addAll(measurementIDs);
-    }
-
-	private void removePlatformsMonitoredByAgentFromList(Collection<DataPoint> availDataPoints) {
-		for (DataPoint dataPoint : availDataPoints) {
-			measurementIDsMonitoredByServer.remove(dataPoint.getMeasurementId());
-		}
-		
-	}
 
 	private void flushCreateAndRemoves(Map<DataPoint, AvailabilityDataRLE> createMap,
                                        Map<DataPoint, AvailabilityDataRLE> removeMap) {
