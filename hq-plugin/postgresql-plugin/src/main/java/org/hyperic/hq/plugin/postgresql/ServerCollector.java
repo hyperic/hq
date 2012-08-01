@@ -70,16 +70,17 @@ public class ServerCollector extends Collector {
             stmt = conn.createStatement();
             rs = stmt.executeQuery(statsQ);
             while (rs.next()) {
-                double numBlockRead = rs.getDouble("blks_read");
-                double numBlockHit = rs.getDouble("blks_hit");
-                double numBlockHitP = numBlockHit > 0 ? (numBlockHit / (numBlockRead + numBlockHit)) : 0;
-                setValue("numXact", rs.getDouble("xact_commit"));
-                setValue("numRollback", rs.getDouble("xact_rollback"));
-                setValue("numBlockRead", numBlockRead);
-                setValue("numBlockHit",numBlockHit);
-                setValue("numBlockHitP",numBlockHitP);
-                setValue("numTupleFetched", rs.getDouble("tup_fetched"));
-                setValue("numTupleAltered", rs.getDouble("tup_inserted") + rs.getDouble("tup_updated") + rs.getDouble("tup_deleted"));
+                double blksRead = rs.getDouble("blks_read");
+                double blksHit = rs.getDouble("blks_hit");
+                double blksHitP = blksHit > 0 ? (blksHit / (blksRead + blksHit)) : 0;
+                double tupAltered = rs.getDouble("tup_inserted") + rs.getDouble("tup_updated") + rs.getDouble("tup_deleted");
+                setValue("xact_commit", rs.getDouble("xact_commit"));
+                setValue("xact_rollback", rs.getDouble("xact_rollback"));
+                setValue("blks_read", blksRead);
+                setValue("blks_hit",blksHit);
+                setValue("blks_hit_p",blksHitP);
+                setValue("tup_fetched", rs.getDouble("tup_fetched"));
+                setValue("tup_altered", tupAltered);
             }
         } finally {
             DBUtil.closeJDBCObjects(log, null, stmt, rs);
