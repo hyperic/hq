@@ -131,7 +131,7 @@ public class AutoinventoryCommandsServer implements AgentServerHandler, AgentNot
         _rtAutodiscoverer = new RuntimeAutodiscoverer(this, _storage, _agent, _client);
 
         // Fire up the scan manager
-        _scanManager = new ScanManager(this, _log, pluginManager, _rtAutodiscoverer);
+        _scanManager = new ScanManager(this, _log, pluginManager, _rtAutodiscoverer, _autoApproveConfig);
 
         _aiCommandsService = new AICommandsService(pluginManager, _rtAutodiscoverer, _scanManager);
 

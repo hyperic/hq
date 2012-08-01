@@ -30,9 +30,12 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.hyperic.hq.appdef.shared.AIServerExtValue;
+import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.ServerDetector;
+import org.hyperic.hq.product.ServerResource;
 import org.hyperic.util.PluginLoader;
 import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
@@ -81,6 +84,20 @@ public class NullScan extends ScanMethodBase {
                 List servers =
                     ((AutoServerDetector)detector).getServerResources(platformConfig);
                 if (servers != null) {
+                    for (Object server : servers) {
+                        AIServerValue xsrv;
+                        if (server instanceof AIServerValue) {
+                            xsrv = (AIServerValue)server;
+                        }
+                        else {
+                            xsrv = (AIServerValue)((ServerResource)server).getResource();
+                        }
+
+                        if (_autoApproveConfig.isAutoApproved(xsrv.getServerTypeName().toLowerCase())) {
+                            xsrv.setAutoApprove(true);
+                        }
+                    }
+
                     _state.addServers(this, servers);
                     _state.setAreServersIncluded(true);
                 }

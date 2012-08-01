@@ -98,7 +98,7 @@ public class PluginDiscoverer implements ScanListener {
         this.log = LogFactory.getLog(PluginDiscoverer.class);
         this.pm = pd.apm;
         this.platformConfig = getPlatformConfig();
-        this.scanManager = new ScanManager(this, this.log, this.pm, null); 
+        this.scanManager = new ScanManager(this, this.log, this.pm, null, null);
 
         this.scanManager.startup();
 
