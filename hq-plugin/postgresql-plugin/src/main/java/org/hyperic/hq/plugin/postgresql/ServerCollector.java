@@ -72,7 +72,7 @@ public class ServerCollector extends Collector {
             while (rs.next()) {
                 double blksRead = rs.getDouble("blks_read");
                 double blksHit = rs.getDouble("blks_hit");
-                double blksHitP = blksHit > 0 ? (blksHit / (blksRead + blksHit)) : 0;
+                double blksHitP = (blksRead + blksHit) > 0 ? (blksHit / (blksRead + blksHit)) : 0;
                 double tupAltered = rs.getDouble("tup_inserted") + rs.getDouble("tup_updated") + rs.getDouble("tup_deleted");
                 setValue("xact_commit", rs.getDouble("xact_commit"));
                 setValue("xact_rollback", rs.getDouble("xact_rollback"));

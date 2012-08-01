@@ -121,7 +121,7 @@ public class DataBaseCollector extends Collector {
 
             double blksRead = Double.parseDouble((String) getResult().getValues().get(db + ".blks_read"));
             double blksHit = Double.parseDouble((String) getResult().getValues().get(db + ".blks_hit"));
-            double blksHitP = blksHit > 0 ? (blksHit / (blksRead + blksHit)) : 0;
+            double blksHitP = (blksRead + blksHit) > 0 ? (blksHit / (blksRead + blksHit)) : 0;
             double tupAltered = Double.parseDouble((String) getResult().getValues().get(db + ".tup_inserted"))
                     + Double.parseDouble((String) getResult().getValues().get(db + ".tup_updated"))
                     + Double.parseDouble((String) getResult().getValues().get(db + ".tup_deleted"));
