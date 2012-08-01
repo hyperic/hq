@@ -55,6 +55,8 @@ public class MeasurementServiceImpl extends RestApiService implements Measuremen
             return measurementTransfer.getAggregatedMetricData(apiMessageContext, hqMsmtReqs, begin, end);
         } catch (ParseException e) {
             throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.WRONG_DATE_FORMAT, "cannot parse the begin/end time frame arguments\n",e.getMessage());
+        } catch (IllegalArgumentException e) {
+            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.WRONG_DATE_VALUES, e.getMessage());
         }
     }
 }

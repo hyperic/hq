@@ -82,7 +82,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         long[] timeFrame = new long[2];
         timeFrame[0] = dateFormat.parseMillis(begin) ; 
         timeFrame[1] = dateFormat.parseMillis(end) ;
-        if (timeFrame[0]>=timeFrame[1] || timeFrame[0]<=0 || timeFrame[1]>=new Date().getTime()) {
+        if (timeFrame[0]>=timeFrame[1] || timeFrame[1]>new Date().getTime()) {
             throw new IllegalArgumentException();
         }
         return timeFrame;
@@ -171,7 +171,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             for (MeasurementTemplate tmp : tmps) {
                 tmpIdToTmp.put(tmp.getId(), tmp);
             }
-            Map<Integer, double[]> msmtNamesToAgg = this.dataMgr.getAggregateDataByTemplate(hqMsmts, beginMilli, endMilli);
+            Map<Integer, double[]> msmtNamesToAgg = this.dataMgr.getAggregateDataAndAvailUpByTemplate(hqMsmts, beginMilli, endMilli);
             
             ResourceMeasurementResponse msmtRes = new ResourceMeasurementResponse(rscId);
             for (Map.Entry<Integer, double[]> msmtNameToAggEntry : msmtNamesToAgg.entrySet()) {

@@ -157,4 +157,6 @@ public interface AvailabilityManager {
      */
     public boolean platformIsAvailable(int agentId);
 
+    public Map<Integer, double[]> getAggregateDataAndAvailUpByTemplate(Integer[] avIds, long begin, long end);
+
 }
