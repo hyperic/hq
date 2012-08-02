@@ -584,7 +584,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
                 if (!unavailMsmtsIds.remove(msmt.getId())) {
                     throw new RuntimeException("unknown availability measurement returned while querying for availability data");
                 }
-                Integer key = msmt.getTemplate().getId();
+                Integer key = msmt.getId();
                 double[] data = new double[IND_TOTAL_TIME + 1];
                 data[IND_AVG] = ((Double)objs[1]).doubleValue() / timeFrame;
                 msmtToAvg.put(key, data);
