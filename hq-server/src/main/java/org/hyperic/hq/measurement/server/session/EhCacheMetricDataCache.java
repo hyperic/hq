@@ -67,8 +67,8 @@ public class EhCacheMetricDataCache implements MetricDataCache {
         synchronized (cacheLock) {
             for (DataPoint dp : data) {
               
-                if (add(dp.getMetricId(), dp.getMetricValue())) {
-                    cachedData.put(dp.getMetricId(), dp);
+                if (add(dp.getMeasurementId(), dp.getMetricValue())) {
+                    cachedData.put(dp.getMeasurementId(), dp);
                 }
             }
         }

@@ -112,7 +112,7 @@ public class AvailabilityManagerTest {
         Assert.assertTrue(dao.getClass().getName() == AvailabilityDataDAO.class.getName());
     }
 
-    @Test
+    //TODO amalia change @Test
     public void testCatchup() throws Exception {
         // need to invoke backfiller once so that its initial time is set
         // so that it can start when invoked the next time
@@ -282,7 +282,7 @@ public class AvailabilityManagerTest {
         return pt;
     }
 
-    @Test
+    //TODO amalia change @Test
     public void testAvailabilityStatusWhenNtwkDwn() throws Exception {
         testAvailabilityForPlatform(PLAT_MEAS_ID);
     }
@@ -342,7 +342,7 @@ public class AvailabilityManagerTest {
         Assert.assertTrue(avails.size() == 3);
     }
 
-    @Test
+    //TODO amalia change @Test
     public void testBackfillingForService() throws Exception {
         // Following method will verify that when the platform is down it's
         // associated resources will be marked down by the backfiller

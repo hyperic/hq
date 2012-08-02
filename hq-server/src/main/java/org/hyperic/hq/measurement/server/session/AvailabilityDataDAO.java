@@ -127,7 +127,7 @@ public class AvailabilityDataDAO
             " WHERE availabilityDataId.measurement = :meas").append(
             " AND availabilityDataId.startime = :startime").toString();
         List<AvailabilityDataRLE> list = getSession().createQuery(sql).setLong("startime",
-            state.getTimestamp()).setInteger("meas", state.getMetricId().intValue()).list();
+            state.getTimestamp()).setInteger("meas", state.getMeasurementId().intValue()).list();
         if (list.isEmpty()) {
             return null;
         }
@@ -141,7 +141,7 @@ public class AvailabilityDataDAO
             " AND availabilityDataId.startime > :startime").append(" ORDER BY startime asc")
             .toString();
         return getSession().createQuery(sql).setLong("startime", state.getTimestamp()).setInteger(
-            "meas", state.getMetricId().intValue()).list();
+            "meas", state.getMeasurementId().intValue()).list();
     }
 
     @SuppressWarnings("unchecked")
@@ -151,7 +151,7 @@ public class AvailabilityDataDAO
             " AND availabilityDataId.startime > :startime").append(" ORDER BY startime asc")
             .toString();
         List<AvailabilityDataRLE> list = getSession().createQuery(sql).setLong("startime",
-            state.getTimestamp()).setInteger("meas", state.getMetricId().intValue()).setMaxResults(
+            state.getTimestamp()).setInteger("meas", state.getMeasurementId().intValue()).setMaxResults(
             1).list();
         if (list.isEmpty()) {
             return null;
@@ -171,7 +171,7 @@ public class AvailabilityDataDAO
             " AND availabilityDataId.startime < :startime").append(" ORDER BY startime desc")
             .toString();
         List<AvailabilityDataRLE> list = getSession().createQuery(sql).setLong("startime",
-            state.getTimestamp()).setInteger("meas", state.getMetricId().intValue()).setMaxResults(
+            state.getTimestamp()).setInteger("meas", state.getMeasurementId().intValue()).setMaxResults(
             1).list();
         if (list.isEmpty()) {
             return null;

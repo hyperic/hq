@@ -35,6 +35,7 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.ext.DownMetricValue;
 import org.hyperic.hq.measurement.server.session.AvailabilityDataRLE;
+import org.hyperic.hq.measurement.server.session.AvailabilityFallbackCheckQue;
 import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.product.MetricValue;
@@ -141,7 +142,9 @@ public interface AvailabilityManager {
      *        sendDataToEventHandlers directly afterwards.
      */
     public void addData(List<DataPoint> availPoints, boolean sendData);
+    public void addData(List<DataPoint> availDataPoints, boolean sendData, boolean addedByServer);
 
+    
     /**
      * This method should only be called by the AvailabilityCheckService and is
      * used to filter availability data points based on hierarchical alerting
@@ -156,5 +159,7 @@ public interface AvailabilityManager {
      * @see PlatformDetector#isSupportedPlatform()
      */
     public boolean platformIsAvailable(int agentId);
+
+    public AvailabilityFallbackCheckQue getFallbackCheckQue();
 
 }

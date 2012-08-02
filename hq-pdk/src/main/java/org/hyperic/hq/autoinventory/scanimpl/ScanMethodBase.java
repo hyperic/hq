@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.autoinventory.scanimpl;
 
+import org.hyperic.util.AutoApproveConfig;
 import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.ConfigResponse;
@@ -42,15 +43,18 @@ public abstract class ScanMethodBase implements ScanMethod {
     protected ScanState _state = null;
     protected Scanner _scanner = null;
 
+    protected AutoApproveConfig _autoApproveConfig;
+
     public ScanMethodBase () {}
 
     public int getAuthorityLevel () { return _authorityLevel; }
     public void setAuthorityLevel (int level) { _authorityLevel = level; }
 
-    public void init(Scanner scanner, ConfigResponse config)
+    public void init(Scanner scanner, ConfigResponse config, AutoApproveConfig autoApproveConfig)
         throws AutoinventoryException {
         _scanner = scanner;
         _config = config;
+        _autoApproveConfig = autoApproveConfig;
 
         if ( _scanner != null ) {
             _state = _scanner.getScanState();

@@ -32,8 +32,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -45,6 +47,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDAO;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.session.Role;
@@ -55,6 +58,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.shared.HierarchicalAlertingManager;
 import org.hyperic.hq.events.shared.MaintenanceEventManager;
+import org.hyperic.hq.util.Reference;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
@@ -64,8 +68,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component("permissionManager")
-public class PermissionManagerImpl
-    extends PermissionManager {
+public class PermissionManagerImpl extends PermissionManager {
     private static final Log _log = LogFactory.getLog(PermissionManagerImpl.class.getName());
 
     private final String _falseToken;
@@ -95,9 +98,7 @@ public class PermissionManagerImpl
                                                   + "WHERE PROTO_ID = 0 AND SORT_NAME LIKE UPPER(?))) ";
 
     private Connection getConnection() throws SQLException {
-
         return dbUtil.getConnection();
-
     }
 
     @Autowired
@@ -496,6 +497,45 @@ public class PermissionManagerImpl
                     rtn.add(val);
                 }
             }
+        }
+        return rtn;
+    }
+
+    public Map<Integer, Reference<Integer>> findViewableInstanceCounts(AuthzSubject subj,
+                                                                       Collection<ResourceType> types) {
+        if (types.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        final ResourceDAO resourceDAO = getResourceDAO();
+        final Collection<Resource> resources = (subj.getId().equals(1)) ?
+            resourceDAO.findAll() : resourceDAO.findByOwner(subj);
+        final Map<Integer, Reference<Integer>> rtn = new HashMap<Integer, Reference<Integer>>();
+        final Set<Integer> typeIds = new HashSet<Integer>();
+        for (final ResourceType type : types) {
+            typeIds.add(type.getId());
+        }
+        ResourceGroupManager resourceGroupManager = Bootstrap.getBean(ResourceGroupManager.class);
+        for (final Resource r : resources) {
+            if (r == null || r.isInAsyncDeleteState() || r.isSystem() || !typeIds.contains(r.getResourceType().getId())) {
+                continue;
+            }
+            final AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(r);
+            int appdefType = -1;
+            if (r.getResourceType().getId().equals(AuthzConstants.authzGroup)) {
+                ResourceGroup group = resourceGroupManager.getResourceGroupById(r.getInstanceId());
+                if (group == null) {
+                    continue;
+                }
+                appdefType = group.getGroupType();
+            } else {
+                appdefType = aeid.getType();
+            }
+            Reference<Integer> count = rtn.get(appdefType);
+            if (count == null) {
+                count = new Reference<Integer>(0);
+                rtn.put(appdefType, count);
+            }
+            count.set(count.get()+1);
         }
         return rtn;
     }

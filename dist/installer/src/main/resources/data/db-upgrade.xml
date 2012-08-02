@@ -11764,14 +11764,11 @@ has already been defined.
 	
 	  <schemaSpec version="3.213">
 		       <schema-directSQL>  	
-    <!--add LDAP\ prefix to the existing LDAP user's name and sort name, this SQL statement is for vPostger since it's the only supported 
-    	database in Hyperic 5.0 -->
+    <!--add org\ prefix to the existing organization user's name and sort name, this SQL statement is for vPostger since it's the only supported 
+    	database in Hyperic 5.0 (organization users are users we authenticate with the organization ldap/kerberos -->
 		        <statement>
-		       	    update EAM_SUBJECT set SORT_NAME = 'LDAP\\' || SORT_NAME where NAME not in (Select PRINCIPAL from EAM_PRINCIPAL) and EAM_SUBJECT.SORT_NAME IS NOT NULL and (select count(propvalue) from eam_config_props where propkey='CAM_JAAS_PROVIDER' and propvalue='LDAP')=1
-		       	</statement>
-		        <statement>
-		       		update EAM_SUBJECT set NAME = 'LDAP\\' || NAME where NAME not in (Select PRINCIPAL from EAM_PRINCIPAL) and EAM_SUBJECT.SORT_NAME IS NOT NULL and (select count(propvalue) from eam_config_props where propkey='CAM_JAAS_PROVIDER' and propvalue='LDAP')=1
-		        </statement>
+		       	    update EAM_SUBJECT set SORT_NAME = 'org\\' || SORT_NAME, NAME = 'org\\' || NAME where NAME not in (Select PRINCIPAL from EAM_PRINCIPAL) and EAM_SUBJECT.SORT_NAME IS NOT NULL 
+		       	</statement>	 
 		       </schema-directSQL>  
 		    </schemaSpec>
 

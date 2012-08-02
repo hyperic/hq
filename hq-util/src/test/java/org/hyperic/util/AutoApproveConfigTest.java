@@ -1,7 +1,9 @@
-package org.hyperic.hq.autoinventory.agent.server;
+package org.hyperic.util;
 
 import junit.framework.TestCase;
 import org.junit.Test;
+
+import java.util.Properties;
 
 /**
  *
@@ -35,10 +37,22 @@ public class AutoApproveConfigTest {
     }
 
     @Test
-    public void createAutoConfigProvidingExistingFileAndApprovedPlatform() {
+    public void getPropertiesForResource() {
         AutoApproveConfig autoApproveConfig = new AutoApproveConfig("src/test/resources");
         TestCase.assertTrue(autoApproveConfig.exists());
-        TestCase.assertTrue(autoApproveConfig.isAutoApproved("platform"));
+        TestCase.assertTrue(autoApproveConfig.isAutoApproved("MySQL 5.1.x"));
+
+        Properties props4res = autoApproveConfig.getPropertiesForResource("MySQL 5.1.x");
+        TestCase.assertEquals(2, props4res.size());
+    }
+
+    @Test
+    public void getPropertiesForNoExistingResource() {
+        AutoApproveConfig autoApproveConfig = new AutoApproveConfig("src/test/resources");
+        TestCase.assertTrue(autoApproveConfig.exists());
+
+        Properties props4res = autoApproveConfig.getPropertiesForResource("your sql");
+        TestCase.assertEquals(0, props4res.size());
     }
 
     private void testCtorException(String agentConfigFolderName, String msg) {

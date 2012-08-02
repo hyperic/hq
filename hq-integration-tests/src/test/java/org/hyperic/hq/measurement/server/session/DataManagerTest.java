@@ -230,7 +230,7 @@ public class DataManagerTest
                 int rowsToUpdate = 0;
                 for (Iterator<DataPoint> i = dpts.iterator(); i.hasNext();) {
                     DataPoint pt = i.next();
-                    Integer metricId = pt.getMetricId();
+                    Integer metricId = pt.getMeasurementId();
                     rowsToUpdate++;
                     values.append(metricId.intValue()).append(",");
                 }
@@ -253,7 +253,7 @@ public class DataManagerTest
 
     private void cleanupMetricDataCache(List<DataPoint> dataPoints) {
         for (DataPoint dpts : dataPoints) {
-            metricDataCache.remove(dpts.getMetricId());
+            metricDataCache.remove(dpts.getMeasurementId());
         }
     }
 
@@ -285,7 +285,7 @@ public class DataManagerTest
         Integer metricId;
         Long timeStamp;
         for (DataPoint dp : randomDataPoints) {
-            metricId = dp.getMetricId();
+            metricId = dp.getMeasurementId();
             timeStamp = dp.getTimestamp();
             // Compare the metricDataCache with the test data points
             assertTrue(metricDataCache.get(metricId, timeStamp).equals(dp.getMetricValue()));

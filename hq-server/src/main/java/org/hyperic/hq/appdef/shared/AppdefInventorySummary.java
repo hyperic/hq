@@ -25,13 +25,19 @@
 
 package org.hyperic.hq.appdef.shared;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.hyperic.hq.appdef.server.session.AppdefStatManagerImpl;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.authz.server.session.ResourceType;
+import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.PermissionManager;
+import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.util.Reference;
 
 
 /**
@@ -77,7 +83,7 @@ public class AppdefInventorySummary implements java.io.Serializable {
         getServerSummary(countTypes);
         getServiceSummary(countTypes);
         getAppSummary(countTypes);
-        getGroupSummary();
+        setGroupSummary();
     }
 
     /**
@@ -243,21 +249,28 @@ public class AppdefInventorySummary implements java.io.Serializable {
        se. Rather, we'll encapsulate a map-like structure and provide
        accessors to the group summary count information. This also has the
        added benefit of keeping our types ordered where maps lose this attr. */
-    private void getGroupSummary() {
-        Map grpTypeMap = appdefStatManager.getGroupCountsMap(this._user);
+    private void setGroupSummary() {
+        final ResourceManager resourceManager = Bootstrap.getBean(ResourceManager.class);
+        final Collection<ResourceType> types = new ArrayList<ResourceType>();
+        types.add(resourceManager.findResourceTypeById(AuthzConstants.authzPlatform));
+        types.add(resourceManager.findResourceTypeById(AuthzConstants.authzServer));
+        types.add(resourceManager.findResourceTypeById(AuthzConstants.authzService));
+        types.add(resourceManager.findResourceTypeById(AuthzConstants.authzApplication));
+        types.add(resourceManager.findResourceTypeById(AuthzConstants.authzGroup));
+        PermissionManager permissionManager = Bootstrap.getBean(PermissionManager.class);
+        final Map<Integer, Reference<Integer>> grpTypeMap = permissionManager.findViewableInstanceCounts(_user, types);
+        groupCntAdhocApp = get(grpTypeMap, AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP);
+        groupCntAdhocGroup = get(grpTypeMap, AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP);
+        groupCntAdhocPSS = get(grpTypeMap, AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS);
+        clusterCount = get(grpTypeMap, AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC);
+        compatGroupCount =
+            get(grpTypeMap, AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC) +
+            get(grpTypeMap, AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS);
+    }
 
-        groupCntAdhocApp = ((Integer)grpTypeMap.get(new Integer(
-            AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP))).intValue();
-        groupCntAdhocGroup = ((Integer)grpTypeMap.get(new Integer(
-            AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP))).intValue();
-        groupCntAdhocPSS = ((Integer)grpTypeMap.get(new Integer(
-            AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS))).intValue();
-        clusterCount = ((Integer)grpTypeMap.get(new Integer(
-            AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC))).intValue();
-        compatGroupCount = (((Integer)grpTypeMap.get(new Integer(
-            AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC))).intValue() + 
-            ((Integer)grpTypeMap.get(new Integer(
-            AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS))).intValue());
+    private int get(Map<Integer, Reference<Integer>> grpTypeMap, int appdefType) {
+        Reference<Integer> ref = grpTypeMap.get(appdefType);
+        return (ref == null) ? 0 : ref.get();
     }
 
     private int countMapTotals(Map integerMap) {

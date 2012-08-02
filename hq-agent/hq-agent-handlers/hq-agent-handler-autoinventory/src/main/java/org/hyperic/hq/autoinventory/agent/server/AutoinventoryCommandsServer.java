@@ -43,6 +43,7 @@ import org.hyperic.hq.bizapp.client.StorageProviderFetcher;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.product.AutoinventoryPluginManager;
 import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.util.AutoApproveConfig;
 import org.hyperic.util.StringUtil;
 
 import java.io.ByteArrayOutputStream;
@@ -65,7 +66,7 @@ public class AutoinventoryCommandsServer implements AgentServerHandler, AgentNot
     private RuntimeAutodiscoverer       _rtAutodiscoverer;
     private AICommandsService           _aiCommandsService;
 
-    private AutoApproveConfig           _autoApproveConfig;
+    private AutoApproveConfig _autoApproveConfig;
 
     // The CertDN uniquely identifies this agent
     protected String _certDN;
@@ -130,7 +131,7 @@ public class AutoinventoryCommandsServer implements AgentServerHandler, AgentNot
         _rtAutodiscoverer = new RuntimeAutodiscoverer(this, _storage, _agent, _client);
 
         // Fire up the scan manager
-        _scanManager = new ScanManager(this, _log, pluginManager, _rtAutodiscoverer);
+        _scanManager = new ScanManager(this, _log, pluginManager, _rtAutodiscoverer, _autoApproveConfig);
 
         _aiCommandsService = new AICommandsService(pluginManager, _rtAutodiscoverer, _scanManager);
 

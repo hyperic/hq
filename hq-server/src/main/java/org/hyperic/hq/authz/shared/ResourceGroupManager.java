@@ -214,7 +214,7 @@ public interface ResourceGroupManager
      * Get all the members of a group.
      * @return {@link Resource}s
      */
-    public Collection<Resource> getMembers(ResourceGroup g);
+    public List<Resource> getMembers(ResourceGroup g);
 
     /**
      * Get the member type counts of a group
@@ -339,5 +339,7 @@ public interface ResourceGroupManager
     public void removeGroupsCompatibleWith(String name) throws VetoException;
 
     public ResourceGroup getGroupById(Integer id);
+
+    public ResourceGroup getResourceGroupById(Integer id);
 
 }

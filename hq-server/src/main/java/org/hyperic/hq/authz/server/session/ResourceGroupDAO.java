@@ -240,10 +240,9 @@ public class ResourceGroupDAO
      * @return {@link Resource}s
      */
     @SuppressWarnings("unchecked")
-    Collection<Resource> getMembers(ResourceGroup g) {
-        return (Collection<Resource>) createQuery(
-            "select g.resource from GroupMember g " + "where g.group = :group "
-                + "and g.resource.resourceType is not null " + "order by g.resource.name")
+    List<Resource> getMembers(ResourceGroup g) {
+        return (List<Resource>) createQuery("select g.resource from GroupMember g where g.group = :group " +
+                                            "and g.resource.resourceType is not null " + "order by g.resource.name")
             .setParameter("group", g).list();
     }
 
