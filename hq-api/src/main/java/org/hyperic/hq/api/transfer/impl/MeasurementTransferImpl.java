@@ -166,28 +166,28 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
                 //throw new ObjectNotFoundException("there are no measurement templates which carries the requested template names", MeasurementTemplate.class.getName());
             }
             List<Measurement> hqMsmts = getMeasurements(rscId, tmps,authzSubject);
-            // sort tmps as per their IDs
-            Map<Integer,MeasurementTemplate> tmpIdToTmp = new HashMap<Integer,MeasurementTemplate>();
-            for (MeasurementTemplate tmp : tmps) {
-                tmpIdToTmp.put(tmp.getId(), tmp);
+            // sort msmts as per their IDs
+            Map<Integer,Measurement> msmtIdToMsmt = new HashMap<Integer,Measurement>();
+            for (Measurement msmt : hqMsmts) {
+                msmtIdToMsmt.put(msmt.getId(), msmt);
             }
-            Map<Integer, double[]> msmtNamesToAgg = this.dataMgr.getAggregateDataAndAvailUpByTemplate(hqMsmts, beginMilli, endMilli);
+            Map<Integer, double[]> msmtNamesToAgg = this.dataMgr.getAggregateDataAndAvailUpByMetric(hqMsmts, beginMilli, endMilli);
             
             ResourceMeasurementResponse msmtRes = new ResourceMeasurementResponse(rscId);
             for (Map.Entry<Integer, double[]> msmtNameToAggEntry : msmtNamesToAgg.entrySet()) {
-                Integer tmpId = msmtNameToAggEntry.getKey();
+                Integer msmtId = msmtNameToAggEntry.getKey();
                 double[] agg = msmtNameToAggEntry.getValue();
                 // no val for that msmt
                 if (agg==null || agg.length<=MeasurementConstants.IND_AVG) {
                     continue;
                 }
                 double avg = agg[MeasurementConstants.IND_AVG];
-                MeasurementTemplate tmp = tmpIdToTmp.get(tmpId);
+                Measurement hqMsmt = msmtIdToMsmt.get(msmtId);
                 // ignore tmps which were not requested (should not happen)
-                if (tmp==null) {
+                if (hqMsmt==null) {
                     continue;
                 }
-                org.hyperic.hq.api.model.measurements.Measurement msmt = this.mapper.toMeasurement(tmp,avg);
+                org.hyperic.hq.api.model.measurements.Measurement msmt = this.mapper.toMeasurement(hqMsmt,avg);
                 msmtRes.add(msmt);
             }
             res.addResponse(msmtRes);

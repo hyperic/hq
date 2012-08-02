@@ -573,23 +573,28 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     }
 
     @Transactional(readOnly = true)
-    public Map<Integer, double[]> getAggregateDataAndAvailUpByTemplate(Integer[] mids, long begin, long end) {
+    public Map<Integer, double[]> getAggregateDataAndAvailUpByMetric(final List<Integer> mids, long begin, long end) {
         List<Object[]> avails = availabilityDataDAO.findAggregateAvailabilityUp(mids, begin, end);
-        if (null == avails || avails.size() == 0) {
-            return new HashMap<Integer, double[]>();
-        }
         Map<Integer, double[]> msmtToAvg = new HashMap<Integer, double[]>();
         long timeFrame = end - begin;
-        for (Object[] objs : avails) {
-            Integer key = ((Measurement) objs[0]).getTemplate().getId();
-            // there should not be duplicate measurements, but just in case
-            if (msmtToAvg.containsKey(key)) {
-                _log.error("duplicate availability measurements");
-                throw new RuntimeException("duplicate availability measurements");
+        Set<Integer> unavailMsmtsIds = new HashSet<Integer>(mids);
+        if (null != avails) {
+            for (Object[] objs : avails) {
+                Measurement msmt = (Measurement) objs[0];
+                if (!unavailMsmtsIds.remove(msmt.getId())) {
+                    throw new RuntimeException("unknown availability measurement returned while querying for availability data");
+                }
+                Integer key = msmt.getTemplate().getId();
+                double[] data = new double[IND_TOTAL_TIME + 1];
+                data[IND_AVG] = ((Double)objs[1]).doubleValue() / timeFrame;
+                msmtToAvg.put(key, data);
             }
-            double[] data = new double[IND_TOTAL_TIME + 1];
-            data[IND_AVG] = ((Double)objs[1]).doubleValue() / timeFrame;
-            msmtToAvg.put(key, data);
+        }
+        
+        // resources which were not up in the time frame, wouldn't be returned, and have to be initialized
+        final double[] availDownData = new double[IND_TOTAL_TIME + 1];
+        for (Integer unavailMsmtId : unavailMsmtsIds) {
+            msmtToAvg.put(unavailMsmtId, availDownData);
         }
         return msmtToAvg;
 

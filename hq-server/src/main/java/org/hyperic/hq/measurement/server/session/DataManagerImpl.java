@@ -1302,22 +1302,27 @@ public class DataManagerImpl implements DataManager {
             MeasurementConstants.COLL_TYPE_DYNAMIC, false, PageControl.PAGE_ALL);
         return getAggData(pts);
     }
-
+    
     @Transactional(readOnly = true)
-    public Map<Integer, double[]> getAggregateDataAndAvailUpByTemplate(final List<Measurement> measurements,
-                                                             final long begin, final long end) {
-//        checkTimeArguments(begin, end);
-        final long interval = (end - begin) / 60;
-        final List<Integer> availIds = new ArrayList<Integer>();
-        final Map<Integer, List<Measurement>> measIdsByTempl = new HashMap<Integer, List<Measurement>>();
-        setMeasurementObjects(measurements, availIds, measIdsByTempl);
-        final Integer[] avIds = availIds.toArray(new Integer[0]);
-        final Map<Integer, double[]> rtn = availabilityManager.getAggregateDataAndAvailUpByTemplate(avIds,
-            begin, end);
-        rtn.putAll(getAggDataByTempl(measIdsByTempl, begin, end, interval));
+    public Map<Integer, double[]> getAggregateDataAndAvailUpByMetric(final List<Measurement> measurements,
+            final long begin, final long end) {
+        List<Integer> avids = new ArrayList<Integer>();
+        List<Integer> mids = new ArrayList<Integer>();
+        for (Measurement meas : measurements) {
+
+            MeasurementTemplate t = meas.getTemplate();
+            if (t.isAvailability()) {
+                avids.add(meas.getId());
+            } else {
+                mids.add(meas.getId());
+            }
+        }
+        Map<Integer, double[]> rtn = getAggDataByMetric(mids.toArray(new Integer[0]),begin, end, false);
+        rtn.putAll(availabilityManager.getAggregateDataAndAvailUpByMetric(avids,begin, end));
         return rtn;
     }
 
+    
     /**
      * Fetch the list of historical data points, grouped by template, given a
      * begin and end time range. Does not return an entry for templates with no

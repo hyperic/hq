@@ -223,7 +223,7 @@ public interface DataManager {
      */
     public Collection<HighLowMetricValue> getRawData(Measurement m, long begin, long end, AtomicLong publishedInterval);
 
-    public Map<Integer, double[]> getAggregateDataAndAvailUpByTemplate(List<Measurement> hqMsmts, long beginMilli,
+    public Map<Integer, double[]> getAggregateDataAndAvailUpByMetric(final List<Measurement> hqMsmts, long beginMilli,
             long endMilli);
 
 }

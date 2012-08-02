@@ -31,9 +31,9 @@ public class MeasurementMapper {
         return msmt;
     }
 
-    public Measurement toMeasurement(MeasurementTemplate tmp, double avg) {
+    public Measurement toMeasurement(org.hyperic.hq.measurement.server.session.Measurement hqMsmt, double avg) {
         Measurement msmt = new Measurement();
-        msmt.setName(tmp.getName());
+        msmt.setName(hqMsmt.getTemplate().getName());
         msmt.setAvg(avg);
         return msmt;
     }

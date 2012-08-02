@@ -344,8 +344,8 @@ public class AvailabilityDataDAO
     }
 
     @SuppressWarnings("unchecked")
-    List<Object[]> findAggregateAvailabilityUp(Integer[] mids, long start, long end) {
-        if (mids.length == 0) {
+    List<Object[]> findAggregateAvailabilityUp(final List<Integer> mids, final long start, final long end) {
+        if (mids==null || mids.size() == 0) {
             return null;
         }
         String sql = new StringBuilder()
@@ -355,14 +355,13 @@ public class AvailabilityDataDAO
             .append(" GROUP BY m.id, m._version_, m.instanceId, m.template, m.mtime,m.enabled, m.interval, m.formula,m.resource")
             .append(" ORDER BY rle.endtime")
             .toString();
-        final List<Integer> measIds = Arrays.asList(mids);
-        final int size = measIds.size();
+        final int size = mids.size();
         final HQDialect dialect = getHQDialect();
         final int batchSize = dialect.getMaxExpressions() < 0 ? Integer.MAX_VALUE : dialect.getMaxExpressions();
         final List<Object[]> rtn = new ArrayList<Object[]>(size);
         for (int i=0; i<size; i+=batchSize) {
             final int last = Math.min(i+batchSize, size);
-            final List sublist = measIds.subList(i, last);
+            final List<Integer> sublist = mids.subList(i, last);
             rtn.addAll(getSession()
                         .createQuery(sql)
                          .setLong("startime", start)
