@@ -96,14 +96,14 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             tmpIds.add(tmp.getId());
         }
         resIdsToTmpIds.put(new Integer(rscId), tmpIds);
-        Map<Resource, List<Measurement>> rscTohqMsmts = this.measurementMgr.findMeasurements(authzSubject, resIdsToTmpIds);
-
+        Map<Resource, List<Measurement>> rscTohqMsmts = null;
+        rscTohqMsmts = this.measurementMgr.findMeasurements(authzSubject, resIdsToTmpIds);
         if (rscTohqMsmts==null || rscTohqMsmts.size()==0 || rscTohqMsmts.values().isEmpty()) {
-            throw new ObjectNotFoundException("there are no measurements of the requested templates types on the requested resource", Measurement.class.getName());
+            throw new ObjectNotFoundException("there are no measurements of the requested types on the requested resource", Measurement.class.getName());
         }
         List<Measurement> hqMsmts = rscTohqMsmts.values().iterator().next();    // there should be only one list of measurements for one resource
         if (hqMsmts==null || hqMsmts.size()==0) {
-            throw new ObjectNotFoundException("there are no measurements of the requested templates types on the requested resource", Measurement.class.getName());
+            throw new ObjectNotFoundException("there are no measurements of the requested types on the requested resource", Measurement.class.getName());
         }
         return hqMsmts;
     }
@@ -146,7 +146,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException {
         ResourceMeasurementBatchResponse res = new ResourceMeasurementBatchResponse(this.errorHandler);
         if (hqMsmtReqs==null || hqMsmtReqs.getMeasurementRequests()==null || hqMsmtReqs.getMeasurementRequests().size()==0 || begin==null || end==null || begin.length()<=0 || end.length()<=0) {
-            throw new UnsupportedOperationException("the request is missing the resource ID, the measurement template names, the begining or end of the time frame");
+            throw new UnsupportedOperationException("the request is missing some essential details");
         }
         AuthzSubject authzSubject = apiMessageContext.getAuthzSubject();
         long[] timeFrame = getTimeFrame(begin, end);
@@ -155,15 +155,15 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         // extract all input measurement templates
         for (ResourceMeasurementRequest hqMsmtReq : hqMsmtReqs.getMeasurementRequests()) {
             String rscId = hqMsmtReq.getRscId();
+            try {
             if (rscId==null || "".equals(rscId)) {
-                continue;
+                throw new ObjectNotFoundException("no resource ID supplied",Resource.class.getName());
             }
             List<String> tmpNames = hqMsmtReq.getMeasurementTemplateNames();
             List<MeasurementTemplate> tmps = this.tmpltMgr.findTemplatesByName(tmpNames);
             if (tmps==null || tmps.size()==0) {
                 res.addFailedResource(rscId,ExceptionToErrorCodeMapper.ErrorCode.TEMPLATE_NOT_FOUND.getErrorCode(),null,new Object[] {});
                 continue;
-                //throw new ObjectNotFoundException("there are no measurement templates which carries the requested template names", MeasurementTemplate.class.getName());
             }
             List<Measurement> hqMsmts = getMeasurements(rscId, tmps,authzSubject);
             // sort msmts as per their IDs
@@ -191,6 +191,10 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
                 msmtRes.add(msmt);
             }
             res.addResponse(msmtRes);
+            }catch(Throwable t) { 
+                this.errorHandler.log(t) ; 
+                res.addFailedResource(t,rscId, null , null) ;
+            }
         }
         return res;
     }
