@@ -2981,7 +2981,7 @@ public class AppdefBossImpl implements AppdefBoss {
     public AppdefInventorySummary getInventorySummary(int sessionId, boolean countTypes)
         throws SessionNotFoundException, SessionTimeoutException {
         AuthzSubject who = sessionManager.getSubject(sessionId);
-        return new AppdefInventorySummary(who, countTypes, appdefStatManager);
+        return new AppdefInventorySummary(who, countTypes, permissionManager);
     }
 
     /**
@@ -3055,8 +3055,7 @@ public class AppdefBossImpl implements AppdefBoss {
                 } catch (PermissionException pe) {
                     aiSubject = authzSubjectManager.getSubjectById(AuthzConstants.rootSubjectId);
                 }
-                autoinventoryManager.startScan(aiSubject, id, new ScanConfigurationCore(), null,
-                    null, null);
+                autoinventoryManager.startScan(aiSubject, id, new ScanConfigurationCore(), null, null, null);
             }
         } catch (InvalidConfigException e) {
             // setValidationError for InventoryHelper.isResourceConfigured
