@@ -112,7 +112,7 @@ public class AvailabilityManagerTest {
         Assert.assertTrue(dao.getClass().getName() == AvailabilityDataDAO.class.getName());
     }
 
-    //TODO amalia change @Test
+    @Test
     public void testCatchup() throws Exception {
         // need to invoke backfiller once so that its initial time is set
         // so that it can start when invoked the next time
@@ -196,7 +196,7 @@ public class AvailabilityManagerTest {
     }
 
     private void backfill(long baseTime) {
-        availabilityCheckService.backfill(baseTime);
+        availabilityCheckService.testBackfill(baseTime);
         dao.getSession().flush();
         dao.getSession().clear();
     }
@@ -282,7 +282,7 @@ public class AvailabilityManagerTest {
         return pt;
     }
 
-    //TODO amalia change @Test
+    @Test
     public void testAvailabilityStatusWhenNtwkDwn() throws Exception {
         testAvailabilityForPlatform(PLAT_MEAS_ID);
     }
@@ -309,7 +309,7 @@ public class AvailabilityManagerTest {
         if (avails.size() != 3) {
             dumpAvailsToLogger(avails);
         }
-        Assert.assertTrue(avails.size() == 3);
+        Assert.assertEquals("After initializing data:", 3, avails.size());
         // Assume that the network is down from the interval
         // "baseTime+interval*2"
         // Invoke the backfiller for every two interval
@@ -342,7 +342,7 @@ public class AvailabilityManagerTest {
         Assert.assertTrue(avails.size() == 3);
     }
 
-    //TODO amalia change @Test
+    @Test
     public void testBackfillingForService() throws Exception {
         // Following method will verify that when the platform is down it's
         // associated resources will be marked down by the backfiller
@@ -365,6 +365,7 @@ public class AvailabilityManagerTest {
         pt = new DataPoint(measId, new MetricValue(1.0, baseTime + interval * 10));
         list.add(pt);
         addData(list);
+        //Thread.sleep(10000);
         List<AvailabilityDataRLE> avails = aMan.getHistoricalAvailData(meas.getResource(),
             baseTime, baseTime + (interval * 20));
         if (avails.size() != 1) {
@@ -377,7 +378,7 @@ public class AvailabilityManagerTest {
         if (avails.size() != 1) {
             dumpAvailsToLogger(avails);
         }
-        Assert.assertTrue(avails.size() == 1);
+        Assert.assertEquals("Verifying initial data", 1, avails.size());
         // Invoking the backfiller with exactly the same time of the last update
         // time
         backfill(baseTime + interval * 10);

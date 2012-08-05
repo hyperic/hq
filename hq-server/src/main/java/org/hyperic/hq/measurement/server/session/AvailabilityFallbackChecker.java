@@ -10,8 +10,10 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.product.MetricValue;
+
 
 
 /**
@@ -40,17 +42,30 @@ public class AvailabilityFallbackChecker {
     private final Object lock = new Object();
 
 	private AvailabilityManager availabilityManager;
+	private AvailabilityCache availabilityCache;
+	private long curTimeStamp = 0;
 
 	
     private void logDebug(String message) {
-    	//log.info("aaa==========:" + message);
+    	if (availabilityManager.isDevDebug())
+    		log.info("aaa==========:" + message);
     }
+    
+    
 
-	public AvailabilityFallbackChecker(AvailabilityManager availabilityManager) {
+	public AvailabilityFallbackChecker(AvailabilityManager availabilityManager, AvailabilityCache availabilityCache) {
 		this.availabilityManager = availabilityManager;
+		this.availabilityCache = availabilityCache;
 	}
 	
 
+	public void testCheckAvailability(Collection<ResourceDataPoint> availabilityDataPoints, long curTimeStamp) {
+		this.curTimeStamp = curTimeStamp;
+		checkAvailability(availabilityDataPoints);
+		this.curTimeStamp = 0;		
+	}
+
+	
 	public void checkAvailability(Collection<ResourceDataPoint> availabilityDataPoints) {
 		logDebug("checkAvailability: start");
 		Collection<ResourceDataPoint> resPlatforms = new ArrayList<ResourceDataPoint>();
@@ -108,16 +123,17 @@ public class AvailabilityFallbackChecker {
 	 */
     
     
-	private boolean isHQAgent(Integer descendantMeasurementID) {
-		// TODO Auto-generated method stub
-		return false;
+	private boolean isHQAgent(Measurement meas) {
+		// TODO check if agent, and if so - mark it as down.
+//		Resource measResource = meas.getResource();
+//		Resource prototype = measResource.getPrototype();
+//		String prototypeName = prototype.getName();
+//		if (prototypeName.equals(AppdefEntityConstants.HQ_AGENT_PROTOTYPE_NAME))
+			return true;
+
+//		return false;
 	}
 
-	private Collection<Integer> getPlatformDescendants(
-			DataPoint availabilityDataPoint) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	private void storeUpdates(Collection<DataPoint> availabilityDataPoints) {
 		List<DataPoint> availDataPoints = new ArrayList<DataPoint>(availabilityDataPoints);
@@ -170,29 +186,29 @@ public class AvailabilityFallbackChecker {
 				continue;
 			}
 			
+			//TODO Uncomment
+//			double assocStatus = MeasurementConstants.AVAIL_UNKNOWN;
 			double assocStatus = MeasurementConstants.AVAIL_DOWN;
 			if (rdp.getMetricValue().getValue() == MeasurementConstants.AVAIL_UP) {
 				assocStatus = MeasurementConstants.AVAIL_UNKNOWN;
 			}
 			
 			for (Measurement meas : associatedResources) {
+
 				if (!meas.isEnabled()) {
 					continue;
 				}
-				// TODO check if agent, and if so - mark it as down.
+				double curStatus = assocStatus;
+				if (isHQAgent(meas))
+					curStatus = MeasurementConstants.AVAIL_DOWN;
 				
-//				final long end = getEndWindow(current, meas);
-//				final DataPoint defaultPt = new DataPoint(meas.getId()
-//						.intValue(), MeasurementConstants.AVAIL_NULL, end);
-//				final DataPoint lastPt = availabilityCache.get(meas.getId(),
-//						defaultPt);
-//				final long backfillTime = lastPt.getTimestamp() + meas.getInterval();
-//				if (backfillTime > current) {
-//					// TODO this means that the resource was updated during the last interval. Shouldn't platform be removed from the list???
-//					continue;
-//				}
-				final long backfillTime = getCurTimestamp();
-				final MetricValue val = new MetricValue(assocStatus, backfillTime);
+				final long curTimeStamp = getCurTimestamp();
+				final long backfillTime = getBackfillTime(curTimeStamp, meas);
+				if (backfillTime > curTimeStamp) {
+					// TODO this means that the resource was updated during the last interval. Shouldn't platform be marked as UP?
+					continue;
+				}
+				final MetricValue val = new MetricValue(curStatus, backfillTime);
 				final MeasDataPoint point = new MeasDataPoint(meas.getId(), val, true);
 				res.add(point);
 			}
@@ -200,70 +216,28 @@ public class AvailabilityFallbackChecker {
 		logDebug("addStatusOfPlatformsDescendants: end, res size: " + res.size() );
 		return res;
 	}
-	/*
-	private Map<Integer, DataPoint> getBackfillPts(Map<Integer, ResourceDataPoint> downPlatforms, long current) {
-//		final boolean debug = log.isDebugEnabled();
-		final Map<Integer, DataPoint> rtn = new HashMap<Integer, DataPoint>();
-		final List<Integer> resourceIds = new ArrayList<Integer>(
-				downPlatforms.keySet());
-		final Map<Integer, List<Measurement>> rHierarchy = availabilityManager.getAvailMeasurementChildren(
-				resourceIds, AuthzConstants.ResourceEdgeContainmentRelation);
-		for (ResourceDataPoint rdp : downPlatforms.values()) {
-			final Resource platform = rdp.getResource();
-//			if (debug) {
-//				log.debug(new StringBuilder(256).append("platform name=")
-//						.append(platform.getName()).append(", resourceid=")
-//						.append(platform.getId()).append(", measurementid=")
-//						.append(rdp.getMeasurementId())
-//						.append(" is being marked ").append(rdp.getValue())
-//						.append(" with timestamp = ")
-//						.append(TimeUtil.toString(rdp.getTimestamp()))
-//						.toString());
-//			}
-			rtn.put(platform.getId(), rdp);
-			if (rdp.getValue() != MeasurementConstants.AVAIL_DOWN) {
-				// platform may be paused, so skip pausing its children
-				continue;
-			}
-			final List<Measurement> associatedResources = rHierarchy.get(platform.getId());
-			if (associatedResources == null) {
-				continue;
-			}
-//			if (debug) {
-//				log.debug("platform [resource id " + platform.getId()
-//						+ "] has " + associatedResources.size()
-//						+ " associated resources");
-//			}
-			for (Measurement meas : associatedResources) {
-				if (!meas.isEnabled()) {
-					continue;
-				}
-//				final long end = getEndWindow(current, meas);
-//				final DataPoint defaultPt = new DataPoint(meas.getId()
-//						.intValue(), MeasurementConstants.AVAIL_NULL, end);
-//				final DataPoint lastPt = availabilityCache.get(meas.getId(),
-//						defaultPt);
-//				final long backfillTime = lastPt.getTimestamp() + meas.getInterval();
-//				if (backfillTime > current) {
-//					// TODO this means that the resource was updated during the last interval. Shouldn't platform be removed from the list???
-//					continue;
-//				}
-//				if (debug) {
-//					log.debug("measurement id " + meas.getId()
-//							+ " is being marked down, time=" + backfillTime);
-//				}
-				final long backfillTime = getCurTimestamp();
-				final MetricValue val = new MetricValue(MeasurementConstants.AVAIL_DOWN, backfillTime);
-				final MeasDataPoint point = new MeasDataPoint(meas.getId(),
-						val, meas.getTemplate().isAvailability());
-				rtn.put(meas.getResource().getId(), point);
-			}
-		}
-		return rtn;
+	
+	private long getBackfillTime(long current, Measurement meas) {
+		final long end = getEndWindow(current, meas);
+		final DataPoint defaultPt = new DataPoint(meas.getId()
+				.intValue(), MeasurementConstants.AVAIL_NULL, end);
+		final DataPoint lastPt = availabilityCache.get(meas.getId(),
+				defaultPt);
+		final long backfillTime = lastPt.getTimestamp() + meas.getInterval();
+		return backfillTime;
 	}
-	*/
+	
+    // End is at least more than 1 interval away
+    private long getEndWindow(long current, Measurement meas) {
+        return TimingVoodoo.roundDownTime((current - meas.getInterval()), meas.getInterval());
+    }
+
+
+	
 	
     private long getCurTimestamp() {
+    	if (this.curTimeStamp != 0)
+    		return this.curTimeStamp;
         return System.currentTimeMillis();
     }
 

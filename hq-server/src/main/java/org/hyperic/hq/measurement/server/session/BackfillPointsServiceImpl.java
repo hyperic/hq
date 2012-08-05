@@ -97,7 +97,8 @@ public class BackfillPointsServiceImpl implements BackfillPointsService {
 
     
     private void logDebug(String message) {
-    	//log.info("aaa==========:" + message);
+    	if (availabilityManager.isDevDebug())
+    		log.info("aaa==========:" + message);
     }
 
     @PostConstruct
