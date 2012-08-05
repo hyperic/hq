@@ -1349,7 +1349,27 @@ public class DataManagerImpl implements DataManager {
             MeasurementConstants.COLL_TYPE_DYNAMIC, false, PageControl.PAGE_ALL);
         return getAggData(pts);
     }
+    
+    @Transactional(readOnly = true)
+    public Map<Integer, double[]> getAggregateDataAndAvailUpByMetric(final List<Measurement> measurements,
+            final long begin, final long end) {
+        List<Integer> avids = new ArrayList<Integer>();
+        List<Integer> mids = new ArrayList<Integer>();
+        for (Measurement meas : measurements) {
 
+            MeasurementTemplate t = meas.getTemplate();
+            if (t.isAvailability()) {
+                avids.add(meas.getId());
+            } else {
+                mids.add(meas.getId());
+            }
+        }
+        Map<Integer, double[]> rtn = getAggDataByMetric(mids.toArray(new Integer[0]),begin, end, false);
+        rtn.putAll(availabilityManager.getAggregateDataAndAvailUpByMetric(avids,begin, end));
+        return rtn;
+    }
+
+    
     /**
      * Fetch the list of historical data points, grouped by template, given a
      * begin and end time range. Does not return an entry for templates with no
@@ -1409,6 +1429,11 @@ public class DataManagerImpl implements DataManager {
         return rtn;
     }
 
+    /**
+     * @param measurements      source measurements list
+     * @param availIds          measurements from the source list of type availability
+     * @param measIdsByTempl    measurements from the source list which are not of type availability, sorted as per their type
+     */
     private final void setMeasurementObjects(final List<Measurement> measurements,
                                              final List<Integer> availIds,
                                              final Map<Integer, List<Measurement>> measIdsByTempl) {

@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.hyperic.hq.api.model.measurements.Measurement;
 import org.hyperic.hq.api.model.measurements.Metric;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +28,13 @@ public class MeasurementMapper {
         Measurement msmt = new Measurement();
         msmt.setInterval(hqMsmt.getInterval());
         msmt.setName(hqMsmt.getTemplate().getName());
+        return msmt;
+    }
+
+    public Measurement toMeasurement(org.hyperic.hq.measurement.server.session.Measurement hqMsmt, double avg) {
+        Measurement msmt = new Measurement();
+        msmt.setName(hqMsmt.getTemplate().getName());
+        msmt.setAvg(avg);
         return msmt;
     }
 

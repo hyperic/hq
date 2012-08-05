@@ -12,7 +12,6 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.hyperic.hq.api.model.RestApiConstants;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "measurement", namespace=RestApiConstants.SCHEMA_NAMESPACE)
@@ -20,8 +19,10 @@ import edu.emory.mathcs.backport.java.util.Collections;
 public class Measurement {
 	@XmlAttribute
 	private long interval;
-	@XmlAttribute
-	private String name;
+    @XmlAttribute
+    private String name;
+    @XmlAttribute
+    private Double avg;	
 	@XmlElementWrapper(name="metrics", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 	@XmlElement(name="metric", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 	private List<Metric> metrics;
@@ -59,6 +60,15 @@ public class Measurement {
 	    Measurement other = (Measurement) obj;
 	    return (this.name==null?other.name==null:(other.name!=null && this.name.equals(other.name))
 	            && this.interval == other.interval
+	            && this.avg == other.avg
 	            && this.metrics==null?other.metrics==null:(other.metrics!=null && this.metrics.equals(other.metrics)));
 	}
+
+    public double getAvg() {
+        return avg;
+    }
+
+    public void setAvg(double avg) {
+        this.avg = avg;
+    }
 }
