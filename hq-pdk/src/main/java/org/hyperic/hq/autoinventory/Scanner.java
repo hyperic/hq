@@ -34,6 +34,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.hyperic.sigar.OperatingSystem;
+import org.hyperic.util.AutoApproveConfig;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.PlatformResource;
@@ -55,6 +56,10 @@ public class Scanner {
     private ScanConfiguration _scanConfig = null;
     private ScanListener _scanListener = null;
 
+    /** The auto-approval configuration instance */
+    private AutoApproveConfig _autoApproveConfig;
+
+
     private volatile ScanState _state = new ScanState();
     private volatile boolean _isInterrupted = false;
 
@@ -70,12 +75,14 @@ public class Scanner {
      */
     public Scanner (ScanConfiguration scanConfig, 
                     ScanListener listener,
-                    AutoinventoryPluginManager apm) {
+                    AutoinventoryPluginManager apm,
+                    AutoApproveConfig autoApproveConfig) {
 
         _scanConfig = scanConfig;
         _scanListener = listener;
         _pluginManager = apm;
         if (_scanConfig.getIsDefaultScan()) _state.setIsDefaultScan(true);
+        _autoApproveConfig = autoApproveConfig;
     }
 
     public boolean getIsInterrupted () { return _isInterrupted; }
@@ -97,11 +104,10 @@ public class Scanner {
         }
         isDevice = !type.equals(platformType); 
 
-        if (isDevice && _log.isDebugEnabled()) {
+        if (isDevice && _log.isDebugEnabled() && config != null) {
             String fqdn = config.getValue(ProductPlugin.PROP_PLATFORM_FQDN);
             String addr = config.getValue(ProductPlugin.PROP_PLATFORM_IP);
-            _log.debug("Running discovery for another platform: " +
-                       type + "=" + fqdn + "/" + addr);
+            _log.debug("Running discovery for another platform: " + type + "=" + fqdn + "/" + addr);
         }
 
         try {
@@ -180,8 +186,8 @@ public class Scanner {
                 return;
             }
             
-            ServerDetector[] serverDetectors =
-                loadDetectors(pValue.getPlatformTypeName(), serverSigs);
+            ServerDetector[] serverDetectors = loadDetectors(pValue.getPlatformTypeName(), serverSigs);
+
             if ( serverDetectors == null || serverDetectors.length == 0 ) {
                 _log.warn("No server detectors were loaded.");
             }
@@ -192,8 +198,7 @@ public class Scanner {
                 if ( _isInterrupted ) { setStateInterrupted(); return; }
                 
                 scanMethod = _state.findScanMethod(smStates[i].getMethodClass());
-                scanMethod.init(this,
-                                _scanConfig.getScanMethodConfig(scanMethod));
+                scanMethod.init(this, _scanConfig.getScanMethodConfig(scanMethod), _autoApproveConfig);
                 try {
                     scanMethod.scan(platformConfig, serverDetectors);
                 } catch ( Exception e ) {
@@ -232,7 +237,6 @@ public class Scanner {
                                            ServerSignature[] serverSigs) 
         throws AutoinventoryException {
 
-        ServerSignature sig;
         ServerDetector detector;
         List<ServerDetector> detectorList = new ArrayList<ServerDetector>();
         
@@ -244,9 +248,8 @@ public class Scanner {
                 pluginName = serverSigs[i].getServerTypeName();
 
                 try {
-                    detector =
-                        (ServerDetector)_pluginManager.getPlatformPlugin(type,
-                                                                         pluginName);
+                    detector = (ServerDetector)_pluginManager.getPlatformPlugin(type, pluginName);
+                    detector.setAutoApproveConfig(_autoApproveConfig);
                 } catch (PluginNotFoundException ne) {
                     //plugins are not required to support AI
                     _log.warn(ne.getMessage());
@@ -282,18 +285,11 @@ public class Scanner {
     }
 
     public boolean equals ( Object o ) {
-        if ( o instanceof Scanner ) {
+        if (o instanceof Scanner) {
             Scanner s = (Scanner) o;
-            if (!s._scanConfig.equals(_scanConfig)) {
-                return false;
-            }
-            if (s._pluginManager != _pluginManager) {
-                return false;
-            }
-            if (s._scanListener != _scanListener) {
-                return false;
-            }
-            return true;
+            return s._scanConfig.equals(_scanConfig) &&
+                    s._pluginManager == _pluginManager
+                    && s._scanListener == _scanListener;
         }
         return false;
     }

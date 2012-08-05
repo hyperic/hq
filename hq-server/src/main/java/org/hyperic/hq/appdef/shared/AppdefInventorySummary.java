@@ -27,8 +27,6 @@ package org.hyperic.hq.appdef.shared;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -36,6 +34,7 @@ import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.authz.shared.TypeCounts;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.util.Reference;
 
@@ -45,6 +44,7 @@ import org.hyperic.hq.util.Reference;
  * for a given user. It is used primarily by the dashboard resource
  * summary portlet. 
  */
+@SuppressWarnings("serial")
 public class AppdefInventorySummary implements java.io.Serializable {
 
     public static int COUNT_UNKNOWN = 0;
@@ -59,19 +59,16 @@ public class AppdefInventorySummary implements java.io.Serializable {
     private int groupCntAdhocPSS   = COUNT_UNKNOWN;
     private int groupCntAdhocApp   = COUNT_UNKNOWN;
     private int compatGroupCount   = COUNT_UNKNOWN;
-    private Map platformTypeMap    = null;
-    private Map serverTypeMap      = null;
-    private Map serviceTypeMap     = null;
-    private Map appTypeMap         = null;
-    private List platformTypes     = null;
-    private List serverTypes       = null;
-    private List serviceTypes      = null;
-    private AppdefStatManager appdefStatManager;
+    private Map<Integer, Reference<Integer>> platformTypeMap    = null;
+    private Map<Integer, Reference<Integer>> serverTypeMap      = null;
+    private Map<Integer, Reference<Integer>> serviceTypeMap     = null;
+    private Map<Integer, Reference<Integer>> appTypeMap         = null;
+    private PermissionManager permissionManager;
   
 
-    public AppdefInventorySummary(AuthzSubject user, boolean countTypes, AppdefStatManager appdefStatManager) {
+    public AppdefInventorySummary(AuthzSubject user, boolean countTypes, PermissionManager permissionManager) {
         _user = user;
-        this.appdefStatManager = appdefStatManager;
+        this.permissionManager = permissionManager;
         init(countTypes);
     }
 
@@ -79,11 +76,28 @@ public class AppdefInventorySummary implements java.io.Serializable {
      * Populate the summary
      */
     private void init(boolean countTypes) {
-        getPlatformSummary(countTypes);
-        getServerSummary(countTypes);
-        getServiceSummary(countTypes);
-        getAppSummary(countTypes);
-        setGroupSummary();
+        final ResourceManager resourceManager = Bootstrap.getBean(ResourceManager.class);
+        final Collection<ResourceType> types = new ArrayList<ResourceType>();
+        types.add(resourceManager.findResourceTypeById(AuthzConstants.authzPlatform));
+        types.add(resourceManager.findResourceTypeById(AuthzConstants.authzServer));
+        types.add(resourceManager.findResourceTypeById(AuthzConstants.authzService));
+        types.add(resourceManager.findResourceTypeById(AuthzConstants.authzApplication));
+        types.add(resourceManager.findResourceTypeById(AuthzConstants.authzGroup));
+        final TypeCounts typeCounts = permissionManager.findViewableInstanceCounts(_user, types);
+        platformTypeMap = typeCounts.getProtoTypeCounts(AppdefEntityConstants.APPDEF_TYPE_PLATFORM);
+        platformCount = getCount(typeCounts, AppdefEntityConstants.APPDEF_TYPE_PLATFORM);
+        serverTypeMap = typeCounts.getProtoTypeCounts(AppdefEntityConstants.APPDEF_TYPE_SERVER);
+        serverCount = getCount(typeCounts, AppdefEntityConstants.APPDEF_TYPE_SERVER);
+        serverTypeMap = typeCounts.getProtoTypeCounts(AppdefEntityConstants.APPDEF_TYPE_SERVICE);
+        serviceCount = getCount(typeCounts, AppdefEntityConstants.APPDEF_TYPE_SERVICE);
+        appTypeMap = typeCounts.getProtoTypeCounts(AppdefEntityConstants.APPDEF_TYPE_APPLICATION);
+        appCount = getCount(typeCounts, AppdefEntityConstants.APPDEF_TYPE_APPLICATION);
+        setGroupSummary(typeCounts);
+    }
+
+    private int getCount(TypeCounts typeCounts, int appdefType) {
+        final Reference<Integer> count = typeCounts.getAppdefTypeCounts().get(appdefType);
+        return (count == null) ? 0 : count.get();
     }
 
     /**
@@ -149,24 +163,11 @@ public class AppdefInventorySummary implements java.io.Serializable {
         return groupCntAdhocApp;
     }
 
-    /** XXX begin unimplemented stuff! **/
-    public List getPlatformTypes () {
-        return this.platformTypes; 
-    }
-
-    public List getServerTypes () { 
-        return this.serverTypes;
-    }
-
-    public List getServiceTypes () {
-        return this.serviceTypes;
-    }
-
     /**
      * @return a map whose keys are the type names, values are
      * count of viewable instances of that type
      */
-    public Map getPlatformTypeMap() {
+    public Map<Integer, Reference<Integer>> getPlatformTypeMap() {
         return platformTypeMap;
     }
 
@@ -174,7 +175,7 @@ public class AppdefInventorySummary implements java.io.Serializable {
      * @return a map whose keys are the type names, values are
      * count of viewable instances of that type
      */
-    public Map getServerTypeMap() {
+    public Map<Integer, Reference<Integer>> getServerTypeMap() {
         return serverTypeMap;
     }
 
@@ -182,7 +183,7 @@ public class AppdefInventorySummary implements java.io.Serializable {
      * @return a map whose keys are the type names, values are
      * count of viewable instances of that type
      */
-    public Map getServiceTypeMap() {
+    public Map<Integer, Reference<Integer>> getServiceTypeMap() {
         return serviceTypeMap;
     }
 
@@ -190,95 +191,23 @@ public class AppdefInventorySummary implements java.io.Serializable {
      * @return a map whose keys are the type names, values are
      * count of viewable instances of that type
      */
-    public Map getAppTypeMap() {
+    public Map<Integer, Reference<Integer>> getAppTypeMap() {
         return appTypeMap;
     }
-    
-    private void getPlatformSummary(boolean countTypes) {
-        if (countTypes) {
-            platformTypeMap = appdefStatManager
-                .getPlatformCountsByTypeMap(_user);
-            if (platformTypeMap != null) {
-                platformCount = countMapTotals(platformTypeMap);
-            }
-        } else {
-            platformCount = appdefStatManager.getPlatformsCount(_user);
-        }
-    }
-
-    private void getServerSummary(boolean countTypes) {
-        if (countTypes) {
-            serverTypeMap = appdefStatManager
-                .getServerCountsByTypeMap(this._user);
-            if (serverTypeMap != null) {
-                serverCount = countMapTotals(serverTypeMap);
-            }
-        } else {
-            serverCount = appdefStatManager.getServersCount(_user);
-        }
-    }
-
-    private void getServiceSummary(boolean countTypes) {
-        if (countTypes) {
-            serviceTypeMap = appdefStatManager
-                .getServiceCountsByTypeMap(this._user);
-            if (serviceTypeMap != null) {
-                serviceCount = countMapTotals(serviceTypeMap);
-            }
-        } else {
-            serviceCount = appdefStatManager.getServicesCount(_user);
-        }
-    }
-
-    private void getAppSummary(boolean countTypes) {
-        if (countTypes) {
-            appTypeMap = appdefStatManager
-                .getApplicationCountsByTypeMap(this._user);
-            if (appTypeMap != null) {
-                appCount = countMapTotals(appTypeMap);
-            }
-        } else {
-            appCount = appdefStatManager.getApplicationsCount(_user);
-        }
-    }
-
-  
 
     /* With groups, we have multiple types and each type may or may not
        break down to further group types. So we're not returning a "map" per
        se. Rather, we'll encapsulate a map-like structure and provide
        accessors to the group summary count information. This also has the
        added benefit of keeping our types ordered where maps lose this attr. */
-    private void setGroupSummary() {
-        final ResourceManager resourceManager = Bootstrap.getBean(ResourceManager.class);
-        final Collection<ResourceType> types = new ArrayList<ResourceType>();
-        types.add(resourceManager.findResourceTypeById(AuthzConstants.authzPlatform));
-        types.add(resourceManager.findResourceTypeById(AuthzConstants.authzServer));
-        types.add(resourceManager.findResourceTypeById(AuthzConstants.authzService));
-        types.add(resourceManager.findResourceTypeById(AuthzConstants.authzApplication));
-        types.add(resourceManager.findResourceTypeById(AuthzConstants.authzGroup));
-        PermissionManager permissionManager = Bootstrap.getBean(PermissionManager.class);
-        final Map<Integer, Reference<Integer>> grpTypeMap = permissionManager.findViewableInstanceCounts(_user, types);
-        groupCntAdhocApp = get(grpTypeMap, AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP);
-        groupCntAdhocGroup = get(grpTypeMap, AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP);
-        groupCntAdhocPSS = get(grpTypeMap, AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS);
-        clusterCount = get(grpTypeMap, AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC);
+    private void setGroupSummary(TypeCounts typeCounts) {
+        groupCntAdhocApp = getCount(typeCounts, AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP);
+        groupCntAdhocGroup = getCount(typeCounts, AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP);
+        groupCntAdhocPSS = getCount(typeCounts, AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS);
+        clusterCount = getCount(typeCounts, AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC);
         compatGroupCount =
-            get(grpTypeMap, AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC) +
-            get(grpTypeMap, AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS);
+            getCount(typeCounts, AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC) +
+            getCount(typeCounts, AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS);
     }
 
-    private int get(Map<Integer, Reference<Integer>> grpTypeMap, int appdefType) {
-        Reference<Integer> ref = grpTypeMap.get(appdefType);
-        return (ref == null) ? 0 : ref.get();
-    }
-
-    private int countMapTotals(Map integerMap) {
-        int total = 0;
-        for (Iterator i = integerMap.keySet().iterator();i.hasNext();) {
-            int incr = ((Integer)integerMap.get(i.next())).intValue();
-            total += incr;
-        }
-        return total;
-    }
 }

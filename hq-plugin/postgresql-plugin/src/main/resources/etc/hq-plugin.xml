@@ -19,11 +19,11 @@
   PARTICULAR PURPOSE. See the GNU General Public License for more
   details.
   
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
-  USA.
- -->
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ USA.
+-->
 
 <!DOCTYPE plugin [
   <!ENTITY multi-process-metrics SYSTEM "/pdk/plugins/multi-process-metrics.xml">
@@ -38,297 +38,377 @@
     <filter name="domain" value="postgresql"/>
 
     <property name="service-config"
-            value="jdbcUrl=jdbc:postgresql://%postgresql.host%:%postgresql.port%/%db%,jdbcUser=%postgresql.user%,jdbcPassword=%postgresql.pass%"/>
+              value="jdbcUrl=jdbc:postgresql://%postgresql.host%:%postgresql.port%/%db%,jdbcUser=%postgresql.user%,jdbcPassword=%postgresql.pass%"/>
     
     <property name="service-collector-config"
-            value="postgresql.host=%postgresql.host%,postgresql.port=%postgresql.port%,postgresql.user=%postgresql.user%,postgresql.pass=%postgresql.pass%,db=%db%"/>
+              value="postgresql.host=%postgresql.host%,postgresql.port=%postgresql.port%,postgresql.user=%postgresql.user%,postgresql.pass=%postgresql.pass%,db=%db%"/>
     
     <property name="server-config"
-            value="postgresql.host=%postgresql.host%,postgresql.port=%postgresql.port%,postgresql.user=%postgresql.user%,postgresql.pass=%postgresql.pass%,postgresql.dfdb=%postgresql.dfdb%"/>
+              value="postgresql.host=%postgresql.host%,postgresql.port=%postgresql.port%,postgresql.user=%postgresql.user%,postgresql.pass=%postgresql.pass%,postgresql.dfdb=%postgresql.dfdb%"/>
 
     <property name="template" value="collector:${server-config}:${alias}:"/>
     <metrics name="pg-server-collector">
         <metric name="Connections"
-            alias="connections"
-            category="UTILIZATION"
-            indicator="true"
-            units="none"
-            collectionType="dynamic"/>
+                alias="connections"
+                category="UTILIZATION"
+                indicator="true"
+                units="none"
+                collectionType="dynamic"/>
         <metric name="Connections Usage"
-            alias="connections_usage"
-            category="UTILIZATION"
-            indicator="true"
-            units="percentage"
-            collectionType="dynamic"/>
+                alias="connections_usage"
+                category="UTILIZATION"
+                indicator="true"
+                units="percentage"
+                collectionType="dynamic"/>
+        <metric name="Connections Idle"
+                alias="idle_backends"
+                category="UTILIZATION"
+                indicator="true"
+                units="none"
+                collectionType="dynamic"/>
     </metrics>
     
     <property name="template" value="${domain}:${server-config}:${alias}:"/>
     <metrics name="pg-server">
         <metric name="Availability"
-            alias="Availability"
-            template="sigar.postgres:Type=MultiProcCpu:Availability:${server-config}"
-            category="AVAILABILITY"
-            indicator="true"
-            units="percentage"
-            collectionType="dynamic"/>
+                alias="Availability"
+                template="sigar.postgres:Type=MultiProcCpu:Availability:${server-config}"
+                category="AVAILABILITY"
+                indicator="true"
+                units="percentage"
+                collectionType="dynamic"/>
         <metric name="Number of Processes"
-            alias="NumProcesses"
-            template="sigar.postgres:Type=MultiProcCpu:Processes:${server-config}"
-            category="UTILIZATION"
-            units="none"
-            collectionType="dynamic"/>
+                alias="NumProcesses"
+                template="sigar.postgres:Type=MultiProcCpu:Processes:${server-config}"
+                category="UTILIZATION"
+                units="none"
+                collectionType="dynamic"/>
 
         <metric name="Memory Size"
-            alias="MemSize"
-            template="sigar.postgres:Type=MultiProcMem:Size:${server-config}"
-            category="UTILIZATION"
-            units="B"
-            collectionType="dynamic"/>
+                alias="MemSize"
+                template="sigar.postgres:Type=MultiProcMem:Size:${server-config}"
+                category="UTILIZATION"
+                units="B"
+                collectionType="dynamic"/>
 
         <metric name="Resident Memory Size"
-            alias="ResidentMemSize"
-            template="sigar.postgres:Type=MultiProcMem:Resident:${server-config}"
-            category="UTILIZATION"
-            units="B"
-            collectionType="dynamic"/>
+                alias="ResidentMemSize"
+                template="sigar.postgres:Type=MultiProcMem:Resident:${server-config}"
+                category="UTILIZATION"
+                units="B"
+                collectionType="dynamic"/>
 
         <metric name="Cpu System Time"
-            alias="SystemTime"
-            template="sigar.postgres:Type=MultiProcCpu:Sys:${server-config}"
-            category="UTILIZATION"
-            units="ms"
-            collectionType="trendsup"/>
+                alias="SystemTime"
+                template="sigar.postgres:Type=MultiProcCpu:Sys:${server-config}"
+                category="UTILIZATION"
+                units="ms"
+                collectionType="trendsup"/>
 
         <metric name="Cpu User Time"
-            alias="UserTime"
-            template="sigar.postgres:Type=MultiProcCpu:User:${server-config}"
-            category="UTILIZATION"
-            units="ms"
-            collectionType="trendsup"/>
+                alias="UserTime"
+                template="sigar.postgres:Type=MultiProcCpu:User:${server-config}"
+                category="UTILIZATION"
+                units="ms"
+                collectionType="trendsup"/>
 
         <metric name="Cpu Total Time"
-            alias="TotalTime"
-            template="sigar.postgres:Type=MultiProcCpu:Total:${server-config}"
-            category="UTILIZATION"
-            units="ms"
-            collectionType="trendsup"/>
+                alias="TotalTime"
+                template="sigar.postgres:Type=MultiProcCpu:Total:${server-config}"
+                category="UTILIZATION"
+                units="ms"
+                collectionType="trendsup"/>
 
         <metric name="Cpu Usage"
-            alias="Usage"
-            template="sigar.postgres:Type=MultiProcCpu:Percent:${server-config}"
-            category="UTILIZATION"
-            indicator="true"
-            units="percentage"
-            collectionType="dynamic"/>
+                alias="Usage"
+                template="sigar.postgres:Type=MultiProcCpu:Percent:${server-config}"
+                category="UTILIZATION"
+                indicator="true"
+                units="percentage"
+                collectionType="dynamic"/>
     </metrics>
 
     <property name="template" value="${domain}:db=%db%:${alias}:${service-config}"/>
     <metrics name="pg-db">
         <metric name="Database Size"
-            alias="DatabaseSize"
-            category="UTILIZATION"
-            units="B"
-            collectionType="dynamic"/>
+                alias="DatabaseSize"
+                category="UTILIZATION"
+                units="B"
+                collectionType="dynamic"/>
         <metric name="Data Space Used"
-            alias="DataSpaceUsed"
-            category="UTILIZATION"
-            indicator="true"
-            units="KB"
-            collectionType="dynamic"/>
+                alias="DataSpaceUsed"
+                category="UTILIZATION"
+                indicator="true"
+                units="KB"
+                collectionType="dynamic"/>
         <metric name="Index Space Used"
-            alias="IndexSpaceUsed"
-            category="UTILIZATION"
-            units="KB"
-            collectionType="dynamic"/>
+                alias="IndexSpaceUsed"
+                category="UTILIZATION"
+                units="KB"
+                collectionType="dynamic"/>
+    </metrics>
+
+    <property name="template" value="collector:${server-config}:${alias}"/>
+    <metrics name="pg-dbstats-collector">
+        <metric name="Commits" 
+                alias="xact_commit"
+                category="THROUGHPUT"
+                indicator="true"
+                units="none"
+                collectionType="trendsup"
+                rate="1s"/>
+        <metric name="Rollbacks"
+                alias="xact_rollback"
+                category="THROUGHPUT"
+                indicator="true"
+                units="none"
+                collectionType="trendsup"
+                rate="1s"/>
+        <metric name="Buffer Read"
+                alias="blks_read"
+                category="THROUGHPUT"
+                indicator="true"
+                units="none"
+                collectionType="trendsup"
+                rate="1s"/>
+        <metric name="Buffer Hits"
+                alias="blks_hit"
+                category="THROUGHPUT"
+                units="none"
+                collectionType="trendsup"
+                rate="1s"/>
+        <metric name="Buffer Hits %"
+                alias="blks_hit_p"
+                category="THROUGHPUT"
+                indicator="true"
+                units="percentage"/>
+        <metric name="Rows Read"
+                alias="tup_fetched"
+                category="THROUGHPUT"
+                indicator="true"
+                units="none"
+                collectionType="trendsup"
+                rate="1s"/>
+        <metric name="Rows Write"
+                alias="tup_altered"
+                category="THROUGHPUT"
+                indicator="true"
+                units="none"
+                collectionType="trendsup"
+                rate="1s"/>
     </metrics>
 
     <property name="template" value="collector:${server-config}:%db%.${alias}"/>
     <metrics name="pg-db-collector">
         <metric name="Availability"
-            category="AVAILABILITY"
-            indicator="true"
-            units="percentage"
-            collectionType="dynamic"/>
-        <metric name="Backends"
-            alias="numbackends"
-            category="UTILIZATION"
-            indicator="true"
-            units="none"
-            collectionType="dynamic"/>
+                category="AVAILABILITY"
+                indicator="true"
+                units="percentage"
+                collectionType="dynamic"/>
+        <metric name="Connections"
+                alias="numbackends"
+                category="UTILIZATION"
+                indicator="true"
+                units="none"
+                collectionType="dynamic"/>
+        <metric name="Connections Idle"
+                alias="idle_backends"
+                category="UTILIZATION"
+                units="none"
+                collectionType="dynamic"/>
         <metric name="Connections Usage"
-            alias="connections_usage"
-            category="UTILIZATION"
-            indicator="true"
-            units="percentage"
-            collectionType="dynamic"/>
-        <metric name="Locks Held"
-            alias="granted_locks"
-            category="UTILIZATION"
-            indicator="true"
-            units="none"
-            collectionType="dynamic"/>
-        <metric name="Locks Awaited"
-            alias="awaited_locks"
-            category="UTILIZATION"
-            units="none"
-            collectionType="dynamic"/>
-        <metric name="Commits"
-            alias="xact_commit"
-            category="THROUGHPUT"
-            indicator="true"
-            units="none"
-            collectionType="trendsup"/>
+                alias="connections_usage"
+                category="UTILIZATION"
+                indicator="true"
+                units="percentage"
+                collectionType="dynamic"/>
+        <metric name="Commits" 
+                alias="xact_commit"
+                category="THROUGHPUT"
+                indicator="true"
+                units="none"
+                collectionType="trendsup"
+                rate="1s"/>
         <metric name="Rollbacks"
-            alias="xact_rollback"
-            category="THROUGHPUT"
-            units="none"
-            collectionType="trendsup"/>
-        <metric name="Blocks Read"
-            alias="blks_read"
-            category="THROUGHPUT"
-            indicator="true"
-            units="none"
-            collectionType="trendsup"/>
-        <metric name="Blocks Hits"
-            alias="blks_hit"
-            category="THROUGHPUT"
-            units="none"
-            collectionType="trendsup"/>
-        <metric name="Blocks Reads"
-            alias="blks_read"
-            category="THROUGHPUT"
-            units="none"
-            collectionType="trendsup"/>
+                alias="xact_rollback"
+                category="THROUGHPUT"
+                indicator="true"
+                units="none"
+                collectionType="trendsup"
+                rate="1s"/>
+        <metric name="Buffer Read"
+                alias="blks_read"
+                category="THROUGHPUT"
+                indicator="true"
+                units="none"
+                collectionType="trendsup"
+                rate="1s"/>
+        <metric name="Buffer Hits"
+                alias="blks_hit"
+                category="THROUGHPUT"
+                units="none"
+                collectionType="trendsup"
+                rate="1s"/>
+        <metric name="Buffer Hits %"
+                alias="blks_hit_p"
+                category="THROUGHPUT"
+                indicator="true"
+                units="percentage"/>
+        <metric name="Rows Read"
+                alias="tup_fetched"
+                category="THROUGHPUT"
+                indicator="true"
+                units="none"
+                collectionType="trendsup"
+                rate="1s"/>
+        <metric name="Rows Write"
+                alias="tup_altered"
+                category="THROUGHPUT"
+                indicator="true"
+                units="none"
+                collectionType="trendsup"
+                rate="1s"/>
+        <metric name="Locks Held"
+                alias="granted_locks"
+                category="UTILIZATION"
+                indicator="true"
+                units="none"
+                collectionType="dynamic"/>
+        <metric name="Locks Awaited"
+                alias="awaited_locks"
+                category="UTILIZATION"
+                units="none"
+                collectionType="dynamic"/>
         <metric name="Indexes Scans"
-            alias="idx_scan"
-            category="UTILIZATION"
-            units="none"
-            collectionType="trendsup"/>
+                alias="idx_scan"
+                category="UTILIZATION"
+                units="none"
+                collectionType="trendsup"/>
         <metric name="Indexes Reads"
-            alias="idx_tup_read"
-            category="UTILIZATION"
-            indicator="true"
-            units="none"
-            collectionType="trendsup"/>
+                alias="idx_tup_read"
+                category="UTILIZATION"
+                indicator="true"
+                units="none"
+                collectionType="trendsup"/>
         <metric name="Indexes Scan Rows Read"
-            alias="idx_tup_fetch"
-            category="UTILIZATION"
-            units="none"
-            collectionType="trendsup"/>
+                alias="idx_tup_fetch"
+                category="UTILIZATION"
+                units="none"
+                collectionType="trendsup"/>
         <metric name="Indexes Blocks Reads"
-            alias="idx_blks_read"
-            category="UTILIZATION"
-            indicator="true"
-            units="none"
-            collectionType="trendsup"/>
+                alias="idx_blks_read"
+                category="UTILIZATION"
+                indicator="true"
+                units="none"
+                collectionType="trendsup"/>
         <metric name="Indexes Blocks Hit"
-            alias="idx_blks_hit"
-            category="UTILIZATION"
-            units="none"
-            collectionType="trendsup"/>
+                alias="idx_blks_hit"
+                category="UTILIZATION"
+                units="none"
+                collectionType="trendsup"/>
         <metric name="Tables Sequential Scans"
-            alias="seq_scan"
-            category="UTILIZATION"
-            indicator="true"
-            units="none"
-            collectionType="trendsup"/>
+                alias="seq_scan"
+                category="UTILIZATION"
+                indicator="true"
+                units="none"
+                collectionType="trendsup"/>
         <metric name="Tables Sequential Scan Rows Read"
-            alias="seq_tup_read"
-            category="UTILIZATION"
-            units="none"
-            collectionType="trendsup"/>
+                alias="seq_tup_read"
+                category="UTILIZATION"
+                units="none"
+                collectionType="trendsup"/>
     </metrics>
 
     <property name="template" value="collector:${service-collector-config}:table.%schema%.%table%.${alias}:schema=%schema%,table=%table%"/>
     <metrics name="pg-table-collector">
         <metric name="Availability"
-            category="AVAILABILITY"
-            indicator="true"
-            units="percentage"
-            collectionType="dynamic"/>
+                category="AVAILABILITY"
+                indicator="true"
+                units="percentage"
+                collectionType="dynamic"/>
         <metric name="Sequential Scans"
-            alias="seq_scan"
-            category="UTILIZATION"
-            indicator="true"
-            units="none"
-            collectionType="trendsup"/>
+                alias="seq_scan"
+                category="UTILIZATION"
+                indicator="true"
+                units="none"
+                collectionType="trendsup"/>
         <metric name="Index Scans"
-            alias="idx_scan"
-            category="UTILIZATION"
-            units="none"
-            collectionType="trendsup"/>
+                alias="idx_scan"
+                category="UTILIZATION"
+                units="none"
+                collectionType="trendsup"/>
         <metric name="Sequential Scan Rows Read"
-            alias="seq_tup_read"
-            category="UTILIZATION"
-            units="none"
-            collectionType="trendsup"/>
+                alias="seq_tup_read"
+                category="UTILIZATION"
+                units="none"
+                collectionType="trendsup"/>
         <metric name="Index Scan Rows Read"
-            alias="idx_tup_fetch"
-            category="UTILIZATION"
-            units="none"
-            collectionType="trendsup"/>
+                alias="idx_tup_fetch"
+                category="UTILIZATION"
+                units="none"
+                collectionType="trendsup"/>
         <metric name="Number Of Row Inserts"
-            alias="n_tup_ins"
-            category="THROUGHPUT"
-            indicator="true"
-            units="none"
-            collectionType="trendsup"/>
+                alias="n_tup_ins"
+                category="THROUGHPUT"
+                indicator="true"
+                units="none"
+                collectionType="trendsup"/>
         <metric name="Number Of Row Updates"
-            alias="n_tup_upd"
-            category="THROUGHPUT"
-            units="none"
-            collectionType="trendsup"/>
+                alias="n_tup_upd"
+                category="THROUGHPUT"
+                units="none"
+                collectionType="trendsup"/>
         <metric name="Number Of Row Deletes"
-            alias="n_tup_del"
-            category="THROUGHPUT"
-            units="none"
-            collectionType="trendsup"/>
+                alias="n_tup_del"
+                category="THROUGHPUT"
+                units="none"
+                collectionType="trendsup"/>
     </metrics>
 
     <property name="template" value="${domain}:table=%table%,schema=%schema%:${alias}:${service-config}"/>
     <metrics name="pg-table">
         <metric name="Data Space Used"
-            alias="DataSpaceUsed"
-            category="UTILIZATION"
-            indicator="true"
-            units="KB"
-            collectionType="dynamic"/>
+                alias="DataSpaceUsed"
+                category="UTILIZATION"
+                indicator="true"
+                units="KB"
+                collectionType="dynamic"/>
         <metric name="Index Space Used"
-            alias="IndexSpaceUsed"
-            category="UTILIZATION"
-            indicator="true"
-            units="KB"
-            collectionType="dynamic"/>
+                alias="IndexSpaceUsed"
+                category="UTILIZATION"
+                indicator="true"
+                units="KB"
+                collectionType="dynamic"/>
     </metrics>
 
     <property name="template" value="collector:type=index,${service-collector-config}:index.%schema%.%index%.${alias}:schema=%schema%,index=%index%"/>
     <metrics name="pg-index">
         <metric name="Availability"
-            category="AVAILABILITY"
-            indicator="true"
-            units="percentage"
-            collectionType="dynamic"/>
+                category="AVAILABILITY"
+                indicator="true"
+                units="percentage"
+                collectionType="dynamic"/>
         <metric name="Index Scans"
-            alias="idx_scan"
-            category="UTILIZATION"
-            indicator="true"
-            units="none"
-            collectionType="trendsup"/>
+                alias="idx_scan"
+                category="UTILIZATION"
+                indicator="true"
+                units="none"
+                collectionType="trendsup"/>
         <metric name="Index Reads"
-            alias="idx_tup_read"
-            category="UTILIZATION"
-            indicator="true"
-            units="none"
-            collectionType="trendsup"/>
+                alias="idx_tup_read"
+                category="UTILIZATION"
+                indicator="true"
+                units="none"
+                collectionType="trendsup"/>
         <metric name="Index Fetches"
-            alias="idx_tup_fetch"
-            category="UTILIZATION"
-            indicator="false"
-            units="none"
-            collectionType="trendsup"/>
+                alias="idx_tup_fetch"
+                category="UTILIZATION"
+                indicator="false"
+                units="none"
+                collectionType="trendsup"/>
     </metrics>
     
-  <!-- ==================== Plugin Help =========================== -->
+    <!-- ==================== Plugin Help =========================== -->
 
     <help name="PostgreSQL">
     <![CDATA[
@@ -410,7 +490,7 @@
         <plugin type="config_track" platform="unix" class="org.hyperic.hq.product.FileChangeTrackPlugin">
             <monitored>
                 <folder path="data" recursive="false" filter=".*\.conf"/>
-            	<!-- system variable PGDATA -->
+                <!-- system variable PGDATA -->
                 <folder path="*PGDATA*" recursive="false" filter=".*\.conf"/>
             </monitored>
         </plugin>
@@ -424,6 +504,7 @@
 
         <metrics include="pg-server"/>
         <metrics include="pg-server-collector"/>
+        <metrics include="pg-dbstats-collector"/>
 
         <properties>
             <property name="version" description="PostgreSQL Version"/>

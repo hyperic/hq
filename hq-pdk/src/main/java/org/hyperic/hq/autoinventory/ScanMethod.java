@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.autoinventory;
 
+import org.hyperic.util.AutoApproveConfig;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.hq.product.ServerDetector;
@@ -68,8 +69,9 @@ public interface ScanMethod {
      * Initialize this scan method.
      * @param scanner The Scanner that will be running the show.
      * @param config The configuration information for this scan method.
+     * @param autoApproveConfig The auto-approval configuration instance.
      */
-    public void init(Scanner scanner, ConfigResponse config)
+    public void init(Scanner scanner, ConfigResponse config, AutoApproveConfig autoApproveConfig)
         throws AutoinventoryException;
 
     /**

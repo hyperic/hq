@@ -501,15 +501,14 @@ public class PermissionManagerImpl extends PermissionManager {
         return rtn;
     }
 
-    public Map<Integer, Reference<Integer>> findViewableInstanceCounts(AuthzSubject subj,
-                                                                       Collection<ResourceType> types) {
+    public TypeCounts findViewableInstanceCounts(AuthzSubject subj, Collection<ResourceType> types) {
+        final TypeCounts rtn = new TypeCounts();
         if (types.isEmpty()) {
-            return Collections.emptyMap();
+            return rtn;
         }
         final ResourceDAO resourceDAO = getResourceDAO();
         final Collection<Resource> resources = (subj.getId().equals(1)) ?
             resourceDAO.findAll() : resourceDAO.findByOwner(subj);
-        final Map<Integer, Reference<Integer>> rtn = new HashMap<Integer, Reference<Integer>>();
         final Set<Integer> typeIds = new HashSet<Integer>();
         for (final ResourceType type : types) {
             typeIds.add(type.getId());
@@ -519,6 +518,7 @@ public class PermissionManagerImpl extends PermissionManager {
             if (r == null || r.isInAsyncDeleteState() || r.isSystem() || !typeIds.contains(r.getResourceType().getId())) {
                 continue;
             }
+            final int protoType = r.getPrototype().getId();
             final AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(r);
             int appdefType = -1;
             if (r.getResourceType().getId().equals(AuthzConstants.authzGroup)) {
@@ -530,12 +530,8 @@ public class PermissionManagerImpl extends PermissionManager {
             } else {
                 appdefType = aeid.getType();
             }
-            Reference<Integer> count = rtn.get(appdefType);
-            if (count == null) {
-                count = new Reference<Integer>(0);
-                rtn.put(appdefType, count);
-            }
-            count.set(count.get()+1);
+            rtn.incrementAppdefTypeCount(appdefType);
+            rtn.incrementProtoTypeCount(appdefType, protoType);
         }
         return rtn;
     }
