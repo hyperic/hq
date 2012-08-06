@@ -16,7 +16,8 @@ fi
 LD_LIBRARY_PATH=${HQDB_DIR}/lib \
 DYLD_LIBRARY_PATH=${HQDB_DIR}/lib \
 SHLIB_PATH=${HQDB_DIR}/lib \
-  ${HQDB_DIR}/bin/pg_ctl start -s \
-    -l ${HQ_DIR}/logs/hqdb.log \
-    -D ${HQDB_DIR}/data
+  ${HQDB_DIR}/bin/pg_ctl  \
+    -D ${HQDB_DIR}/data   \
+    -l ${HQ_DIR}/logs/hqdb.log start
+   
 
