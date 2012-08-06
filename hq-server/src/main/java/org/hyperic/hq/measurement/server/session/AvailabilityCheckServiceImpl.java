@@ -100,8 +100,8 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
 
     
     private void logDebug(String message) {
-    	if (availabilityManager.isDevDebug())
-    		log.info("aaa==========:" + message);
+    	//if (availabilityManager.isDevDebug())
+    	//	log.info("aaa==========:" + message);
     }
 
     
@@ -245,8 +245,9 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
                 log.debug("Availability Check Service started executing: " + lDate);
             }
             // Don't start backfilling immediately
+            //TODO amalia
             if (!forceStart && !canStart(current)) {
-                log.info("not starting availability check");
+            	log.info("not starting availability check");
                 return;
             }
             synchronized (IS_RUNNING_LOCK) {

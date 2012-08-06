@@ -126,6 +126,7 @@ public class AvailabilityFallbackChecker {
 	private boolean isHQAgent(Measurement meas) {
 		// TODO check if agent, and if so - mark it as down.
 //		Resource measResource = meas.getResource();
+//		logDebug("isHQHagent: " + measResource.toString());
 //		Resource prototype = measResource.getPrototype();
 //		String prototypeName = prototype.getName();
 //		if (prototypeName.equals(AppdefEntityConstants.HQ_AGENT_PROTOTYPE_NAME))
@@ -162,9 +163,33 @@ public class AvailabilityFallbackChecker {
 	private ResourceDataPoint getPlatformStatusFromVC(ResourceDataPoint availabilityDataPoint) {
 		logDebug("getPlatformStatusFromVC" );
 		// TODO Auto-generated method stub
-		return null;
+/*		Integer platformId = availabilityDataPoint.getResource().getId();
+		List<Integer> resourceIds = new ArrayList<Integer>();
+		resourceIds.add(platformId);
+		final Map<Integer, List<Measurement>> rHierarchy = availabilityManager.getAvailMeasurementChildren(
+				resourceIds, AuthzConstants.ResourceEdgeVirtualRelation);
+		if (isEmptyMap(rHierarchy)) {
+			return null;
+		}
+*/		return null;
 	}
 	
+	private boolean isEmptyMap(Map<Integer, List<Measurement>> rHierarchy) {
+		// TODO Auto-generated method stub
+		if (rHierarchy == null)
+			return true;
+		if (rHierarchy.size() ==0)
+			return true;
+		if (rHierarchy.isEmpty())
+			return true;
+		for (List<Measurement> list : rHierarchy.values()) {
+			
+		}
+		return false;
+	}
+
+
+
 	private Collection<DataPoint> addStatusOfPlatformsDescendants(Collection<ResourceDataPoint> checkedPlatforms) {
 		logDebug("addStatusOfPlatformsDescendants: start" );
 		final Collection<DataPoint> res = new ArrayList<DataPoint>();
