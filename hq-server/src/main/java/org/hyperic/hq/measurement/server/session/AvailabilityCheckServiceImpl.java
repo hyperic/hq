@@ -36,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -100,8 +101,8 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
 
     
     private void logDebug(String message) {
-    	//if (availabilityManager.isDevDebug())
-    	//	log.info("aaa==========:" + message);
+    	if (availabilityManager.isDevDebug())
+    		log.info("aaa==========:" + message);
     }
 
     
@@ -458,4 +459,10 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
 
     }
 
+    
+    @PreDestroy
+    public void destroy() {
+    	this._workerExecutor.shutdown();
+    }
+    
 }

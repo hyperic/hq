@@ -87,40 +87,6 @@ public class AvailabilityFallbackChecker {
     }
 
 
-	/**
-	 * add the DataPoints of the 
-	 * @param availabilityDataPoint
-	 * @param platformsDescendants
-
-	private void addPlatformDescendants(ResourceDataPoint availabilityDataPoint,
-			Collection<DataPoint> platformsDescendants) {
-
-		long timestamp = availabilityDataPoint.getTimestamp();
-		
-		double descendantGenStatus = MeasurementConstants.AVAIL_DOWN;
-		double platformStatus = availabilityDataPoint.getMetricValue().getValue();
-		if (platformStatus == MeasurementConstants.AVAIL_UP) {
-			descendantGenStatus = MeasurementConstants.AVAIL_UNKNOWN;;
-		}
-			
-		Collection<Integer> descendantsMeasurementIDs = getPlatformDescendants(availabilityDataPoint);
-		if (descendantsMeasurementIDs == null) {
-			return;
-		}
-		
-		boolean foundHQAgent = false;
-		for (Integer descendantMeasurementID : descendantsMeasurementIDs) {
-			double descendantStatus = descendantGenStatus;
-			if ((!foundHQAgent) && (isHQAgent(descendantMeasurementID)) ) {
-				foundHQAgent = true;
-				descendantStatus = MeasurementConstants.AVAIL_DOWN;
-			}
-			DataPoint descendantDataPoint = new DataPoint(descendantMeasurementID, new MetricValue(descendantStatus, timestamp));
-			platformsDescendants.add(descendantDataPoint);
-		}
-		
-	}
-	 */
     
     
 	private boolean isHQAgent(Measurement meas) {
@@ -162,16 +128,26 @@ public class AvailabilityFallbackChecker {
 
 	private ResourceDataPoint getPlatformStatusFromVC(ResourceDataPoint availabilityDataPoint) {
 		logDebug("getPlatformStatusFromVC" );
-		// TODO Auto-generated method stub
-/*		Integer platformId = availabilityDataPoint.getResource().getId();
-		List<Integer> resourceIds = new ArrayList<Integer>();
-		resourceIds.add(platformId);
-		final Map<Integer, List<Measurement>> rHierarchy = availabilityManager.getAvailMeasurementChildren(
-				resourceIds, AuthzConstants.ResourceEdgeVirtualRelation);
-		if (isEmptyMap(rHierarchy)) {
-			return null;
-		}
-*/		return null;
+//		Integer platformId = availabilityDataPoint.getResource().getId();
+//		List<Integer> resourceIds = new ArrayList<Integer>();
+//		resourceIds.add(platformId);
+//		final Map<Integer, List<Measurement>> virtualParent = availabilityManager.getAvailMeasurementParent(
+//				resourceIds, AuthzConstants.ResourceEdgeVirtualRelation);
+//		if (isEmptyMap(virtualParent)) {
+//			return null;
+//		}
+//		// else - there should be a single measurement of the related VM Instance:
+//		List<Measurement> resourceEdgeVirtualRelations = virtualParent.get(platformId);
+//		if ((resourceEdgeVirtualRelations == null) | (resourceEdgeVirtualRelations.isEmpty()) )
+//		{
+//			return null;
+//		}
+//		if (resourceEdgeVirtualRelations.size() != 1) {
+//			log.warn("getPlatfromStatusFromVC: Platform " + platformId + " got " + resourceEdgeVirtualRelations.size() + " virtual parents. Ignoring.");
+//			return null;
+//		}
+		
+		return null;
 	}
 	
 	private boolean isEmptyMap(Map<Integer, List<Measurement>> rHierarchy) {
