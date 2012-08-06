@@ -26,16 +26,13 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefStatManager;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
@@ -102,74 +99,6 @@ public class AppdefStatManagerTest
             new ArrayList<AppdefEntityID>(0));
         flushSession();
         clearSession();
-    }
-
-    @Test
-    public void testGetPlatformCountsByTypeMap() {
-        Map<String, Integer> platformCounts = appdefStatManager
-            .getPlatformCountsByTypeMap(authzSubjectManager.getOverlordPojo());
-        final Map<String, Integer> expected = new HashMap<String, Integer>();
-        expected.put("TestPlatform", 2);
-        expected.put("MyPlatform", 1);
-        assertEquals(expected, platformCounts);
-    }
-
-    @Test
-    public void testGetPlatformsCount() {
-        assertEquals(3, appdefStatManager.getPlatformsCount(authzSubjectManager.getOverlordPojo()));
-    }
-
-    @Test
-    public void testGetServerCountsByTypeMap() {
-        Map<String, Integer> serverCounts = appdefStatManager
-            .getServerCountsByTypeMap(authzSubjectManager.getOverlordPojo());
-        final Map<String, Integer> expected = new HashMap<String, Integer>();
-        expected.put("TestServer", 1);
-        expected.put("SomeServer", 3);
-        assertEquals(expected, serverCounts);
-    }
-
-    @Test
-    public void testGetServersCount() {
-        assertEquals(4, appdefStatManager.getServersCount(authzSubjectManager.getOverlordPojo()));
-    }
-
-    @Test
-    public void testGetServiceCountsByTypeMap() {
-        Map<String, Integer> serviceCounts = appdefStatManager
-            .getServiceCountsByTypeMap(authzSubjectManager.getOverlordPojo());
-        final Map<String, Integer> expected = new HashMap<String, Integer>();
-        expected.put("TestService", 1);
-        expected.put("WebAppService", 1);
-        assertEquals(expected, serviceCounts);
-    }
-
-    @Test
-    public void testGetServicesCount() {
-        assertEquals(2, appdefStatManager.getServicesCount(authzSubjectManager.getOverlordPojo()));
-    }
-
-    @Test
-    public void testGetApplicationCountsByTypeMap() {
-        Map<String, Integer> appCounts = appdefStatManager
-            .getApplicationCountsByTypeMap(authzSubjectManager.getOverlordPojo());
-        final Map<String, Integer> expected = new HashMap<String, Integer>();
-        expected.put("Generic Application", 2);
-        expected.put("J2EE Application", 1);
-        assertEquals(expected, appCounts);
-    }
-
-    @Test
-    public void testGetGroupCountsMap() {
-        Map<Integer, Integer> groupCounts = appdefStatManager.getGroupCountsMap(authzSubjectManager
-            .getOverlordPojo());
-        final Map<Integer, Integer> expected = new HashMap<Integer, Integer>();
-        expected.put(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP, 0);
-        expected.put(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP, 0);
-        expected.put(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS, 0);
-        expected.put(AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS, 1);
-        expected.put(AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC, 0);
-        assertEquals(expected, groupCounts);
     }
 
     @Test

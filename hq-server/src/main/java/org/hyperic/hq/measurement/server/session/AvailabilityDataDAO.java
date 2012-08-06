@@ -46,6 +46,7 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+
 @Repository
 public class AvailabilityDataDAO
     extends HibernateDAO<AvailabilityDataRLE> {

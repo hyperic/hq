@@ -128,12 +128,18 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
 
     private AvailabilityDataDAO availabilityDataDAO;
 
+    //private Set<Integer> measurementIDsMonitoredByServer;
+    private AvailabilityFallbackCheckQue fallbackCheckQue;
     private MeasurementDAO measurementDAO;
     private MessagePublisher messagePublisher;
     private RegisteredTriggers registeredTriggers;
     private AvailabilityCache availabilityCache;
     private ConcurrentStatsCollector concurrentStatsCollector;
     private AgentDAO agentDAO;
+    
+	public boolean isDevDebug() {
+		return false;
+	}
     
     @Autowired
     public AvailabilityManagerImpl(AuthzSubjectManager authzSubjectManager, ResourceManager resourceManager, 
@@ -153,6 +159,8 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         this.availabilityCache = availabilityCache;
         this.concurrentStatsCollector = concurrentStatsCollector;
         this.agentDAO = agentDAO;
+        //this.measurementIDsMonitoredByServer = new HashSet<Integer>();
+        this.fallbackCheckQue = new AvailabilityFallbackCheckQue();
     }
 
     @PostConstruct
@@ -184,6 +192,12 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         return measurementDAO.findAvailMeasurementsByInstances(AppdefEntityConstants.APPDEF_TYPE_PLATFORM, null);
     }
 
+    
+    public AvailabilityFallbackCheckQue getFallbackCheckQue() {
+    	return this.fallbackCheckQue;
+    }
+    
+    
     /**
      * @return Down time in ms for the Resource availability
      * 
@@ -786,9 +800,19 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      * 
      */
     public void addData(List<DataPoint> availPoints) {
-        addData(availPoints, true);
+        addData(availPoints, true, false);
     }
 
+    
+    public void addData(List<DataPoint> availDataPoints, boolean sendData) {
+        addData(availDataPoints, sendData, false);
+    }
+    
+    private void logDebug(String message) {
+    	if (isDevDebug())
+    		_log.info("aaa==========:" + message);
+    }
+    
     /**
      * Process Availability data.
      * For each measurement Id (for each resource's availability):
@@ -801,10 +825,13 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      * 
      * 
      */
-    public void addData(List<DataPoint> availPoints, boolean sendData) {
-        if (availPoints == null || availPoints.size() == 0) {
+    public void addData(List<DataPoint> availDataPoints, boolean sendData, boolean addedByServer) {
+        if (availDataPoints == null || availDataPoints.size() == 0) {
             return;
         }
+        Collection<DataPoint> pointsToUpdate = this.fallbackCheckQue.beforeDataUpdate(availDataPoints, addedByServer);
+        List<DataPoint> availPoints =  new ArrayList<DataPoint>(pointsToUpdate);
+        
         List<DataPoint> updateList = new ArrayList<DataPoint>(availPoints.size());
         List<DataPoint> outOfOrderAvail = new ArrayList<DataPoint>(availPoints.size());
         Map<DataPoint, AvailabilityDataRLE> createMap = new HashMap<DataPoint, AvailabilityDataRLE>();
@@ -815,11 +842,16 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             try {
                 availabilityCache.beginTran();
                 updateCache(availPoints, updateList, outOfOrderAvail);
+                logDebug("addData: after updateCache: availPoints:" + availPoints.size() + " updateList: " + updateList.size() + " outOfOrderAvail:" + outOfOrderAvail.size());
                 currAvails = createCurrAvails(outOfOrderAvail, updateList); // get current DB Availability state for the measurements.
+                logDebug("addData: after createCurrAvails: availPoints:" + availPoints.size() + " updateList: " + updateList.size() + " outOfOrderAvail:" + outOfOrderAvail.size());
                 state = captureCurrAvailState(currAvails); // this method is called for logging.
                 updateStates(updateList, currAvails, createMap, removeMap);
+                logDebug("addData: after updateStates: availPoints:" + availPoints.size() + " currAvails: " + currAvails.size() + " createMap:" + createMap.size() + " removeMap:" + removeMap.size());
                 updateOutOfOrderState(outOfOrderAvail, currAvails, createMap, removeMap);
+                logDebug("addData: after updateOutOfOrderState: availPoints:" + availPoints.size() + " currAvails: " + currAvails.size() + " createMap:" + createMap.size() + " removeMap:" + removeMap.size());
                 flushCreateAndRemoves(createMap, removeMap);
+                logDebug("addData: after flushCreateAndRemoves");
                 logErrorInfo(state, availPoints, currAvails);
                 availabilityCache.commitTran();
             } catch (Throwable e) {
@@ -838,7 +870,9 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         }
     }
 
-    private void flushCreateAndRemoves(Map<DataPoint, AvailabilityDataRLE> createMap,
+    
+
+	private void flushCreateAndRemoves(Map<DataPoint, AvailabilityDataRLE> createMap,
                                        Map<DataPoint, AvailabilityDataRLE> removeMap) {
         final StopWatch watch = new StopWatch();
         final boolean debug = _log.isDebugEnabled();
@@ -876,6 +910,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             id.setMeasurement(rle.getMeasurement());
             id.setStartime(rle.getStartime());
             availabilityDataDAO.create(rle.getMeasurement(), rle.getStartime(), rle.getEndtime(), rle.getAvailVal());
+            logDebug("added: Availability "+rle.getAvailVal() + " starttime " + rle.getStartime() + " endtime " + rle.getEndtime());
         }
         if (debug) {
             watch.markTimeEnd("create");

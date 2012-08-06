@@ -31,6 +31,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.product.AutoinventoryPluginManager;
 
 import org.apache.commons.logging.Log;
+import org.hyperic.util.AutoApproveConfig;
 
 /**
  * The ScanManager controls the Scanner and ensures that only 1 scan is 
@@ -67,6 +68,9 @@ public class ScanManager implements ScanListener {
     /** Our runtime autodiscovery scanner, can be null */
     private RuntimeScanner rtScanner = null;
 
+    /** The auto-approval configuration instance*/
+    private AutoApproveConfig autoApproveConfig;
+
     /** When was the last time we ran a runtime scan? */
     private long lastRtScan;
 
@@ -85,11 +89,13 @@ public class ScanManager implements ScanListener {
     public ScanManager (ScanListener listener,
                         Log log,
                         AutoinventoryPluginManager apm,
-                        RuntimeScanner rtScanner) {
+                        RuntimeScanner rtScanner,
+                        AutoApproveConfig autoApproveConfig) {
         this.listener = listener;
         this.log = log;
         this.apm = apm;
         this.rtScanner = rtScanner;
+        this.autoApproveConfig = autoApproveConfig;
     }
 
     /**
@@ -223,7 +229,7 @@ public class ScanManager implements ScanListener {
 
         Scanner scanner;
 
-        scanner = new Scanner(scanConfig, this, this.apm);
+        scanner = new Scanner(scanConfig, this, this.apm, this.autoApproveConfig);
 
         synchronized (scannerList) {
             if (scannerList.contains(scanner)) {

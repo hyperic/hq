@@ -29,6 +29,28 @@
  * *********************************************************************/
 package org.hyperic.hq.api.model;
 
-public class ConfigurationValue {
+import java.io.Serializable;
+
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSeeAlso;
+import javax.xml.bind.annotation.XmlTransient;
+
+import org.codehaus.jackson.annotate.JsonTypeInfo;
+import org.codehaus.jackson.annotate.JsonTypeInfo.As;
+import org.codehaus.jackson.annotate.JsonTypeInfo.Id;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
+import org.hyperic.hq.api.model.resources.ComplexIp;
+
+@XmlSeeAlso({ComplexIp.class})
+//@JsonDeserialize(as=ComplexIp.class) // supports only one subclass :-(
+@JsonTypeInfo(use=Id.CLASS, include=As.PROPERTY, property="@class")
+@XmlRootElement(namespace=RestApiConstants.SCHEMA_NAMESPACE)
+@XmlTransient
+public abstract class ConfigurationValue implements Serializable {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 2160541690130840548L;
 
 }

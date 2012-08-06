@@ -414,9 +414,11 @@ public class ResourceDAO
 
     @SuppressWarnings("unchecked")
     public Collection<Resource> getUnconfiguredResources() {
-        String hql = "from Resource r " +
-                     "where resourceType.id in (:platformType, :serverType, :serviceType) " +
-                     "and r not in (select resource from Measurement) ";
+        String hql = new StringBuilder(256)
+            .append("from Resource r ")
+            .append("where resourceType.id in (:platformType, :serverType, :serviceType) ")
+            .append("and not exists (select 1 from Measurement m where r.id = m.resource.id)")
+            .toString();
         Collection<Resource> rtn =
             getSession().createQuery(hql)
                         .setParameter("platformType", AuthzConstants.authzPlatform)

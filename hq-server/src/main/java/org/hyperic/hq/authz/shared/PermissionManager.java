@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.hibernate.Query;
@@ -55,6 +56,7 @@ import org.hyperic.hq.events.shared.HierarchicalAlertingManager;
 import org.hyperic.hq.events.shared.MaintenanceEventManager;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
+import org.hyperic.hq.util.Reference;
 import org.hyperic.util.pager.PageControl;
 
 public abstract class PermissionManager {
@@ -356,8 +358,13 @@ public abstract class PermissionManager {
         return findViewableInstances(subj, resourceTypes);
     }
 
-    public abstract List<AppdefEntityID> findViewableInstances(
-        AuthzSubject subj, Collection<ResourceType> types);
+    /**
+     * @return Map of {@link Integer} representing the AppdefTypeID to the count of associated resources which are
+     * viewable by the {@link AuthzSubject}
+     */
+    public abstract TypeCounts findViewableInstanceCounts(AuthzSubject subj, Collection<ResourceType> types);
+
+    public abstract List<AppdefEntityID> findViewableInstances(AuthzSubject subj, Collection<ResourceType> types);
 
     /**
      * Check for create child object permission for a given resource Child

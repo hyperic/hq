@@ -42,6 +42,8 @@ import org.apache.cxf.jaxrs.client.ServerWebApplicationException;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.easymock.EasyMock;
 import org.hyperic.hq.agent.AgentRemoteValue;
+import org.hyperic.hq.api.model.ConfigurationValue;
+import org.hyperic.hq.api.model.PropertyList;
 import org.hyperic.hq.api.model.Resource;
 import org.hyperic.hq.api.model.ResourceConfig;
 import org.hyperic.hq.api.model.ResourceDetailsType;
@@ -49,6 +51,7 @@ import org.hyperic.hq.api.model.ResourceStatusType;
 import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.api.model.Resources;
 import org.hyperic.hq.api.model.resources.FailedResource;
+import org.hyperic.hq.api.model.resources.ComplexIp;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.api.resources.ResourceServiceTest.ResourceServiceTestDataPopulator;
 import org.hyperic.hq.api.rest.AbstractRestTestDataPopulator;
@@ -154,14 +157,17 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     	
 		//internal id first 
     	Resource resource = this.getApprovedResource(this.currentPlatform, hierarchyDepth) ;
-		this.assertResource(resource, this.currentPlatform, hierarchyDepth, this.testBed.persistedConfigAttributes) ; 
+		this.assertResource(resource, this.currentPlatform, hierarchyDepth, this.testBed.persistedConfigAttributes, this.testBed.persistedListConfigAttributes) ; 
 		
 		//now natural ID 
 		resource = this.getApprovedResource(this.currentPlatform.getFqdn(), ResourceType.PLATFORM, hierarchyDepth) ;
-		this.assertResource(resource, this.currentPlatform, hierarchyDepth, this.testBed.persistedConfigAttributes) ; 
+		this.assertResource(resource, this.currentPlatform, hierarchyDepth, this.testBed.persistedConfigAttributes, this.testBed.persistedListConfigAttributes) ; 
 		
 	}//EOM 
     
+
+
+
     @PlatformsIteration
     @Test
     public final void testGetResourceNoConfig() throws Throwable { 
@@ -186,13 +192,12 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     	final ResourceDetailsType[] responseStructure = { ResourceDetailsType.PROPERTIES } ; 
     	
 		//internal id first 
-    	Resource resource = this.getApprovedResource(this.currentPlatform.getResource().getId()+"", null/*naturalID*/, null/*resource type*/, hierarchyDepth, responseStructure) ;
+    	Resource resource = this.getApprovedResource(this.currentPlatform.getResource().getId()+"", null/*naturalID*/, null/*resource type*/,  hierarchyDepth, responseStructure) ;
     	
-    	//set the resource type to platform for the validation's sake
-    	resource.setResourceType(ResourceType.PLATFORM) ; 
-		this.assertResource(resource, this.currentPlatform, hierarchyDepth, this.testBed.persistedConfigAttributes, ResourceDetailsType.PROPERTIES) ; 
-    }//EOM
-    
+		this.assertResource(resource, this.currentPlatform, hierarchyDepth, this.testBed.persistedConfigAttributes, this.testBed.persistedListConfigAttributes, ResourceDetailsType.PROPERTIES) ; 
+    }//EOM   
+
+
     @PlatformsIteration(noOfPlatforms=1)
     @Test
     public final void testGetResourceNoDepth() throws Throwable { 
@@ -212,7 +217,7 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     	final int hierarchyDepth = 2 ;
 		//internal id first 
     	Resource resource = this.getApprovedResource(this.currentPlatform, hierarchyDepth) ;
-		this.assertResource(resource, this.currentPlatform, hierarchyDepth, this.testBed.persistedConfigAttributes) ;
+		this.assertResource(resource, this.currentPlatform, hierarchyDepth, this.testBed.persistedConfigAttributes, this.testBed.persistedListConfigAttributes) ;
     }//EOM 
     
     @PlatformsIteration(noOfPlatforms=1)
@@ -220,7 +225,7 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     public final void testGetResourceDepth5() throws Throwable { 
     	final int hierarchyDepth = 5 ;
     	Resource resource = this.getApprovedResource(this.currentPlatform, hierarchyDepth) ;
-		this.assertResource(resource, this.currentPlatform, hierarchyDepth, this.testBed.persistedConfigAttributes) ;
+		this.assertResource(resource, this.currentPlatform, hierarchyDepth, this.testBed.persistedConfigAttributes, this.testBed.persistedListConfigAttributes) ;
     }//EOM
     
     @PlatformsIteration(noOfPlatforms=1)
@@ -229,7 +234,7 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     	//should error be raised or should the hierarchy be treated as 0 
     	final int hierarchyDepth = -5 ;
     	final Resource resource = this.getApprovedResource(this.currentPlatform, hierarchyDepth) ;
-		this.assertResource(resource, this.currentPlatform, hierarchyDepth, this.testBed.persistedConfigAttributes) ;
+		this.assertResource(resource, this.currentPlatform, hierarchyDepth, this.testBed.persistedConfigAttributes, this.testBed.persistedListConfigAttributes) ;
     }//EOM
     
     @PlatformsIteration(noOfPlatforms=1)
@@ -357,73 +362,90 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     	}//EO catch block 
     }//EOM 
     
+    
   private final void assertResource(final Resource responseResource, final AppdefResource expectedResource, int iHierarchyDepth, final Map<String,String> configMap) {
 	  this.assertResource(responseResource, expectedResource, iHierarchyDepth, configMap, ResourceDetailsType.ALL) ; 
   }//EOM 
     
+  private void assertResource(final Resource responseResource, final AppdefResource expectedResource, int iHierarchyDepth, final Map<String,String> configMap, 
+          final Map<String, PropertyList> configListsMap) {
+      this.assertResource(responseResource, expectedResource, iHierarchyDepth, configMap, configListsMap, ResourceDetailsType.ALL) ;
+      
+  }
+  
+  private final void assertResource(final Resource responseResource, final AppdefResource expectedResource, int iHierarchyDepth, final Map<String,String> configMap, 
+          final Map<String, PropertyList> configListsMap, final ResourceDetailsType responseStructure) {
+      
+      try{ 
+        final int expectedResouceID = expectedResource.getResource().getId() ;
+        final String type = expectedResource.getResource().getResourceType().getLocalizedName() ; 
+        
+        Assert.assertEquals(type+ " id", expectedResouceID+"", responseResource.getId()) ;
+        
+        //assert erties 
+        if(responseStructure == ResourceDetailsType.PROPERTIES) { 
+            // In PROPERTIES view only ID might be present, without the type 
+            if (null == responseResource.getResourceType())  {
+                responseResource.setResourceType(ResourceType.valueOf(expectedResource.getResource().getResourceType().getAppdefType()));
+            }
+        } else {
+            Assert.assertEquals(type +" name", expectedResource.getName(), responseResource.getName()) ; 
+        } //EO else if response includes resource level properties
+        
+        this.assertConfig(responseResource, configMap, configListsMap) ; 
+
+        final List<Resource> responseChildren = responseResource.getSubResources() ; 
+        List<AppdefResource> expectedChildren = null ;
+    
+        if(--iHierarchyDepth > 0) {
+            
+            ResourceType enumChildrenResourceType = null ; 
+            switch(responseResource.getResourceType()) { 
+                case PLATFORM : { 
+                    expectedChildren = this.testBed.servers.get(expectedResource.getId()) ; 
+                    enumChildrenResourceType = ResourceType.SERVER ; 
+                }break ;
+                case SERVER: { 
+                    expectedChildren = this.testBed.services.get(expectedResource.getId()) ;
+                    enumChildrenResourceType = ResourceType.SERVICE ; 
+                }break ;
+                case SERVICE: { 
+                    return  ;
+                }//EO case
+            }//EO switch block 
+            
+            final int iNoOfExpectedChildren = expectedChildren.size() ;
+            final int iNoOfResponseChildren = (responseChildren == null ? 0 : responseChildren.size()) ; 
+            Assert.assertEquals("Number Of children", iNoOfExpectedChildren, iNoOfResponseChildren) ; 
+            
+            Resource responseChild = null ; 
+            int iIndex = 0 ; 
+            for(AppdefResource expectedChild : (Collection<AppdefResource>) expectedChildren) {
+                responseChild = responseChildren.get(iIndex++) ; 
+                
+                //if the response structure contains properties only, set the resource type 
+                //in the child 
+                if(responseStructure == ResourceDetailsType.PROPERTIES) {
+                    responseChild.setResourceType(enumChildrenResourceType) ; 
+                }//EO if properties only set the resource type 
+                
+                this.assertResource(responseChild, expectedChild, iHierarchyDepth, configMap, responseStructure) ; 
+            }//EO while there are more children
+        }//EO if should assert nested
+        else { 
+            Assert.assertTrue("Hierarchy Depth was " + iHierarchyDepth + " yet sub resources were found", 
+                    (responseResource.getSubResources() == null || responseResource.getSubResources().isEmpty()) 
+                    ) ; 
+        }//EO else there should be no sub resources 
+      }catch(Throwable t) { 
+          t.printStackTrace() ; 
+          throw new RuntimeException(t) ;  
+      }//eOcatch b lok 
+  } //EOM  
+  
   private final void assertResource(final Resource responseResource, final AppdefResource expectedResource, int iHierarchyDepth, final Map<String,String> configMap, 
 		  final ResourceDetailsType responseStructure) { 
-    	
-	  try{ 
-    	final int expectedResouceID = expectedResource.getResource().getId() ;
-    	final String type = expectedResource.getResource().getResourceType().getLocalizedName() ; 
-    	
-    	Assert.assertEquals(type+ " id", expectedResouceID+"", responseResource.getId()) ;
-    	
-    	//assert erties 
-    	if(responseStructure != ResourceDetailsType.PROPERTIES) { 
-    		Assert.assertEquals(type +" name", expectedResource.getName(), responseResource.getName()) ;
-    	}//EO if response includes resource level properties 
-    	
-   		this.assertConfig(responseResource, configMap) ; 
-
-    	final List<Resource> responseChildren = responseResource.getSubResources() ; 
-    	List<AppdefResource> expectedChildren = null ;
-    
-    	if(--iHierarchyDepth > 0) {
-    		
-    		ResourceType enumChildrenResourceType = null ; 
-    		switch(responseResource.getResourceType()) { 
-    			case PLATFORM : { 
-	    			expectedChildren = this.testBed.servers.get(expectedResource.getId()) ; 
-	    			enumChildrenResourceType = ResourceType.SERVER ; 
-	    		}break ;
-				case SERVER: { 
-					expectedChildren = this.testBed.services.get(expectedResource.getId()) ;
-					enumChildrenResourceType = ResourceType.SERVICE ; 
-				}break ;
-				case SERVICE: { 
-					return  ;
-				}//EO case
-    		}//EO switch block 
-    		
-    		final int iNoOfExpectedChildren = expectedChildren.size() ;
-        	final int iNoOfResponseChildren = (responseChildren == null ? 0 : responseChildren.size()) ; 
-        	Assert.assertEquals("Number Of children", iNoOfExpectedChildren, iNoOfResponseChildren) ; 
-    		
-	    	Resource responseChild = null ; 
-	    	int iIndex = 0 ; 
-	    	for(AppdefResource expectedChild : (Collection<AppdefResource>) expectedChildren) {
-	    		responseChild = responseChildren.get(iIndex++) ; 
-	    		
-	    		//if the response structure contains properties only, set the resource type 
-	    		//in the child 
-	    		if(responseStructure == ResourceDetailsType.PROPERTIES) {
-	    			responseChild.setResourceType(enumChildrenResourceType) ; 
-	    		}//EO if properties only set the resource type 
-	    		
-	    		this.assertResource(responseChild, expectedChild, iHierarchyDepth, configMap, responseStructure) ; 
-	    	}//EO while there are more children
-    	}//EO if should assert nested
-    	else { 
-    		Assert.assertTrue("Hierarchy Depth was " + iHierarchyDepth + " yet sub resources were found", 
-    				(responseResource.getSubResources() == null || responseResource.getSubResources().isEmpty()) 
-    				) ; 
-    	}//EO else there should be no sub resources 
-	  }catch(Throwable t) { 
-		  t.printStackTrace() ; 
-		  throw new RuntimeException(t) ;  
-	  }//eOcatch b lok 
+          assertResource(responseResource, expectedResource, iHierarchyDepth, configMap, null, responseStructure);
     }//EO while there are more resources to compare  
     
     private final void assertUpdate(final ResourceBatchResponse response, final Resources expectedResources, final Object[][] testHarness, final int[] testHarnessMetadata) throws Throwable { 
@@ -470,7 +492,11 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 		}//EO while there are more resources 
     }//EOM 
     
-    private final void assertConfig(final Resource response, final Map<String,String> expectedConfigMap) { 
+    private final void assertConfig(final Resource response, final Map<String,String> expectedConfigMap) {
+        assertConfig(response, expectedConfigMap, null);
+    }
+    
+    private final void assertConfig(final Resource response, final Map<String,String> expectedConfigMap, final Map<String,PropertyList> expectedConfigListMap) { 
     	
     	if(response == null) Assert.fail("No Response Resource was found by service"); 
 
@@ -490,8 +516,41 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     		Assert.assertEquals("Config response Value differs for key " + key, expectedValue, responseValue) ;
     	}//EO while there are more expected properties 
     	
+    	if (expectedConfigListMap == null) return;
+    	
+    	Map<String,PropertyList> responseConfigListMap = resourceConfig.getMapListProps();
+    	if (((null == expectedConfigListMap) || expectedConfigListMap.isEmpty()) ^
+    	        ((null == responseConfigListMap) || responseConfigListMap.isEmpty())) {
+    	    if ((null == responseConfigListMap) || responseConfigListMap.isEmpty()) Assert.fail("No Configuration Lists were returned for resource with ID " + response.getId());
+    	    // else
+    	    Assert.fail("No Configuration Lists were expected for resource with ID " + response.getId());
+    	}
+    	PropertyList expectedValueList = null, responseValueList = null;
+    	if (null != expectedConfigListMap) {
+    	    for (Map.Entry<String, PropertyList> entry : expectedConfigListMap.entrySet()) {
+    	        key = entry.getKey();
+    	        expectedValueList = entry.getValue();
+    	        responseValueList = responseConfigListMap.get(key);
+    	        compareValueLists(responseValueList, expectedValueList, key, response.getId());
+    	    }
+    	}
+    	
     }//EOM 
     
+    private static void compareValueLists(final PropertyList responseValueList, final PropertyList expectedValueList, final String key, final String id) {
+        List<ConfigurationValue> responseProperties = responseValueList.getProperties();
+        List<ConfigurationValue> expectedPoperties = expectedValueList.getProperties();
+        String errorMessageSuffix = " for key " + key + " for resource ID " + id;
+        Assert.assertFalse("Empty property list received " + errorMessageSuffix, 
+                ((null == responseProperties) || responseProperties.isEmpty()));
+        int expectedPropertiesListSize = expectedPoperties.size();
+        Assert.assertEquals("Mismatch in the length of the property list " + errorMessageSuffix, expectedPropertiesListSize, responseProperties.size());
+        for (int i = 0; i < expectedPropertiesListSize; ++i) {
+            Assert.assertEquals("Unexpected value in the property list " + errorMessageSuffix, expectedPoperties.get(i), responseProperties.get(i));
+        }
+    }
+
+
     private final Resource getApprovedResource(final AppdefResource appdefResource, final int hierarchyDepth) throws Throwable {
     	return this.getApprovedResource(appdefResource.getResource().getId()+"", hierarchyDepth) ; 
     }//EOM 
@@ -540,7 +599,7 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     }//EOM 
     
     private final ResourceConfig generateResourceConfig(final Map<String,String> configMap) { 
-    	return new ResourceConfig(null, configMap) ; 
+    	return new ResourceConfig(null, configMap, null) ; 
     }//EOM 
     
     private final Resource generateResource(final String ID, final String naturalID, final ResourceType enumResourceType, 
@@ -555,12 +614,16 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     
 	public static class ResourceServiceTestDataPopulator extends AbstractRestTestDataPopulator<ResourceService>{ 
 		
-		static final int NO_OF_TEST_PLATFORMS = 4 ;
+		private static final String IP_MAC_ADDRESS = "IP_MAC_ADDRESS";
+
+        static final int NO_OF_TEST_PLATFORMS = 4 ;
 		
 		private Method addConfigSchemaMethod ; 
 	    private Method setTypeInfoMethod ;
-	    private Map<String,String> persistedConfigAttributes ; 
-	    private Map<String,String> requestConfigAttributes ;
+	    private Map<String,String> persistedConfigAttributes ; 	    
+	    private Map<String,String> requestConfigAttributes ;	    
+	    // these  are readonly properties, so won't be mapped from reqest, just have to be fetched
+	    private Map<String, PropertyList> persistedListConfigAttributes;
         
 		private Agent testAgent;
 		
@@ -596,6 +659,11 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 		    	requestConfigAttributes  = new HashMap<String,String>() ;
 		    	requestConfigAttributes.put("test.log_track.level", "BOGUS_LEVEL_" + System.currentTimeMillis()) ;
 		    	requestConfigAttributes.put("some.config.prop", "BOGUS_PATH_" + + System.currentTimeMillis()) ;
+		    	
+		    	persistedListConfigAttributes = new HashMap<String, PropertyList>();		    	
+		    	ComplexIp[] macAddresses = { new ComplexIp("netmask1", "mac1", "address1"), new ComplexIp("netmask2", "mac2", "address2") };
+                PropertyList macAddressAttributes = new PropertyList(macAddresses);
+                persistedListConfigAttributes.put(IP_MAC_ADDRESS, macAddressAttributes );
 		    	
 	    		setTypeInfoMethod = ProductPluginManager.class.getDeclaredMethod("setTypeInfo", String.class,String.class, TypeInfo.class) ;
 	 	        setTypeInfoMethod.setAccessible(true) ; 
@@ -647,7 +715,12 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 		    		this.platforms.add(platform) ; 
 		    		
 		    		//add configuration 
-		    		this.createConfig(platform.getEntityId(), persistedConfigAttributes, subject) ; 
+		    		this.createConfig(platform.getEntityId(), persistedConfigAttributes, subject) ;
+		    		List<ConfigurationValue> ipPropertyList = persistedListConfigAttributes.get(IP_MAC_ADDRESS).getProperties();
+		    		for (Object ip : ipPropertyList) {
+                        ComplexIp complexIp = (ComplexIp)ip;
+                        platform.addIp(complexIp.getAddress(), complexIp.getNetmask(), complexIp.getMac()); 
+                    }		    		
 		    		
 		    		serversPerPlatfom = new ArrayList<AppdefResource>(iNoOfServesPerPlatform) ; 
 		    		this.servers.put(platform.getId(), serversPerPlatfom) ; 

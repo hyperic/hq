@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-package org.hyperic.hq.autoinventory.agent.server;
+package org.hyperic.util;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -85,7 +85,12 @@ public class AutoApproveConfig {
 
         // if the file exists then load it.
         if (autoApprovePropsFile.exists()) {
-            this.autoApproveProps = loadAutoApproveProps(autoApprovePropsFile);
+            this.autoApproveProps = new Properties();
+            Properties tmpProps = loadAutoApproveProps(autoApprovePropsFile);
+            for (Object keyRef : tmpProps.keySet()) {
+                String key = (String) keyRef;
+                this.autoApproveProps.put(key, tmpProps.getProperty(key));
+            }
             LOG.info("Resources auto-approval configuration loaded");
         } else {
             this.autoApproveProps = null;
@@ -109,7 +114,39 @@ public class AutoApproveConfig {
      * @return true if the resource was marked as auto approve; false otherwise.
      */
     public boolean isAutoApproved(String resourceName) {
-        return this.exists() && Boolean.valueOf(this.autoApproveProps.getProperty(resourceName));
+        return resourceName != null && this.exists() &&
+                Boolean.valueOf(this.autoApproveProps.getProperty(resourceName));
+    } // EOM
+
+    /**
+     * Get the set of properties that were specified for a resource with name <tt>resourceName</tt>. If the resource
+     * isn't auto-approved then an empty properties instance is returned. The name of the resource is stripped from the
+     * property keys.
+     *
+     * @param resourceName the name of the resource to get resource for.
+     * @return a <tt>Properties</tt> instance that were set for the resource. May be empty.
+     */
+    public Properties getPropertiesForResource(String resourceName) {
+        // Create the result properties.
+        Properties result = new Properties();
+
+        // If the resource isn't auto-approved then return the empty properties.
+        if (!isAutoApproved(resourceName)) {
+            return result;
+        }
+
+        // The length of the prefix (used for the stripping).
+        int prefixLength = resourceName.length() + 1;
+
+        // Iterate the properties and collect all with key that start with resourceName.
+        for (Object keyRef : this.autoApproveProps.keySet()) {
+            String key = (String) keyRef;
+            if (!key.equals(resourceName) && key.startsWith(resourceName)) {
+                result.put(key.substring(prefixLength), this.autoApproveProps.getProperty(key));
+            }
+        }
+
+        return result;
     } // EOM
 
     /**

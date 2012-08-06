@@ -25,8 +25,6 @@
  */
 package org.hyperic.hq.appdef.shared;
 
-import java.util.Map;
-
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceTreeNode;
@@ -35,68 +33,6 @@ import org.hyperic.hq.bizapp.shared.uibeans.ResourceTreeNode;
  * Local interface for AppdefStatManager.
  */
 public interface AppdefStatManager {
-    /**
-     * <p>
-     * Return map of platform counts.
-     * </p>
-     */
-    public Map<String, Integer> getPlatformCountsByTypeMap(AuthzSubject subject);
-
-    /**
-     * <p>
-     * Return platforms count.
-     * </p>
-     */
-    public int getPlatformsCount(AuthzSubject subject);
-
-    /**
-     * <p>
-     * Return map of server counts.
-     * </p>
-     */
-    public Map<String, Integer> getServerCountsByTypeMap(AuthzSubject subject);
-
-    /**
-     * <p>
-     * Return servers count.
-     * </p>
-     */
-    public int getServersCount(AuthzSubject subject);
-
-    /**
-     * <p>
-     * Return map of service counts.
-     * </p>
-     */
-    public Map<String, Integer> getServiceCountsByTypeMap(AuthzSubject subject);
-
-    /**
-     * <p>
-     * Return services count.
-     * </p>
-     */
-    public int getServicesCount(AuthzSubject subject);
-
-    /**
-     * <p>
-     * Return map of app counts.
-     * </p>
-     */
-    public Map<String, Integer> getApplicationCountsByTypeMap(AuthzSubject subject);
-
-    /**
-     * <p>
-     * Return apps count.
-     * </p>
-     */
-    public int getApplicationsCount(AuthzSubject subject);
-
-    /**
-     * <p>
-     * Return map of grp counts.
-     * </p>
-     */
-    public Map<Integer, Integer> getGroupCountsMap(AuthzSubject subject);
 
     /**
      * <p>
