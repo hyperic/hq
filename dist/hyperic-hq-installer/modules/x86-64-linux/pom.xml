@@ -17,8 +17,8 @@
 	<dependencies>	
 		<dependency>
 			<groupId>postgresql</groupId>
-			<artifactId>vpostgresql</artifactId>
-			<version>9.1.3</version>
+			<artifactId>postgresql</artifactId>
+			<version>9.1.4</version>
 			<classifier>x86-64-linux</classifier>
 			<type>zip</type>
 		</dependency>

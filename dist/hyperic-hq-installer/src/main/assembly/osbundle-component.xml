@@ -29,7 +29,7 @@
 			<unpack>true</unpack>
 			<includes>
 				<!-- <include>postgresql:postgresql:*:x86-64-linux</include> --> 
-				<include>postgresql:postgresql:*:${postgres.classifier}</include>
+				<include>postgresql:*:*:${postgres.classifier}</include>
 			</includes>
 		</dependencySet>
 
