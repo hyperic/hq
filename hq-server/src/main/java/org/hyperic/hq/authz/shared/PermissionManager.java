@@ -695,6 +695,7 @@ public abstract class PermissionManager {
     /**
      * Search viewable resources of any type
      * @return a list of Integers representing instance ids
+     * @deprecated
      */
     public abstract List<Integer> findViewableResources(AuthzSubject subj, String searchFor,
                                                         PageControl pc);
@@ -857,5 +858,8 @@ public abstract class PermissionManager {
      */
     public abstract <T> Set<T> findViewableResources(AuthzSubject subj, Collection<ResourceType> resourceTypes,
                                                      IntegerConverter<T> converter);
+
+    public abstract <T> Set<T> findViewableResources(AuthzSubject subject, Collection<ResourceType> types,
+                                                     boolean orderName, IntegerConverter<T> integerConverter);
 
 }
