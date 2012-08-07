@@ -66,7 +66,6 @@ public class AvailabilityFallbackCheckQue {
     	logDebug("addToQue: start, curQueSize: " + getSize());
     	if (this.currentPlatformsInQue.containsKey(platformId)) 
     		return false;
-    	//RecheckPlatformDataPoint platformDataPoint = createRecheckDataPoint(platformId, dataPoint);
     	this.platformsRecheckQue.add(dataPoint);
     	this.currentPlatformsInQue.put(platformId, dataPoint);
     	this.measurementIdToPlatformId.put(dataPoint.getMeasurementId(), platformId);
@@ -191,42 +190,5 @@ public class AvailabilityFallbackCheckQue {
     
 	
 
-
-    // -----------------------------------------------------------------------------------
-    // -----------------------------------------------------------------------------------
-	
-//	public RecheckPlatformDataPoint createRecheckDataPoint(Integer platformId, DataPoint other) {
-//		return (new RecheckPlatformDataPoint(platformId, other));
-//	};
-//	
-//
-//    
-//	public class RecheckPlatformDataPoint extends DataPoint implements Comparable<RecheckPlatformDataPoint> {
-//		/**
-//		 * 
-//		 */
-//		private static final long serialVersionUID = 1L;
-//		private Integer platformId;
-//		
-//		public RecheckPlatformDataPoint(Integer platformId, DataPoint other) {
-//			super(other);
-//			this.platformId = platformId;
-//		}
-//		
-//		public Integer getPlatformId() {
-//			return platformId;
-//		}
-//
-//		/**
-//		 * Note: if 2 DataPoints differ by timestamp only, it will still return 0!
-//		 */
-//		public int compareTo(RecheckPlatformDataPoint other) {
-//			if (other == null)
-//				return 1;
-//			
-//			return (platformId.compareTo(other.getPlatformId()));
-//		}
-//	}
-		
 
 }

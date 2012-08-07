@@ -210,6 +210,13 @@
               FREAD_ONLY="FALSE"/>
               
        
+        <!-- Availability Fallback Checks -->
+        <data ID="71" PROPKEY="AVAIL_FALLBACK_CHECKERS" PROPVALUE="1" 
+              DEFAULT_PROPVALUE="" FREAD_ONLY="FALSE"/>
+        <data ID="72" PROPKEY="AVAIL_FALLBACK_BATCHSIZE" PROPVALUE="1000" 
+              DEFAULT_PROPVALUE="" FREAD_ONLY="FALSE"/>
+        <data ID="73" PROPKEY="AVAIL_FALLBACK_QUEUE" PROPVALUE="500000" 
+              DEFAULT_PROPVALUE="" FREAD_ONLY="FALSE"/>
     </table>
 
 </Covalent.DBSetup>

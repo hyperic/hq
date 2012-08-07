@@ -36,5 +36,6 @@ public interface AvailabilityCheckService {
      * Only used for integration tests
      */
     void backfill(long timeInMillis);
+    void testBackfill(long timeInMillis);
 
 }

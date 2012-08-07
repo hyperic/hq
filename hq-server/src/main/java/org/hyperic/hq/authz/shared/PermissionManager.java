@@ -362,7 +362,7 @@ public abstract class PermissionManager {
      * @return Map of {@link Integer} representing the AppdefTypeID to the count of associated resources which are
      * viewable by the {@link AuthzSubject}
      */
-    public abstract Map<Integer, Reference<Integer>> findViewableInstanceCounts(AuthzSubject subj, Collection<ResourceType> types);
+    public abstract TypeCounts findViewableInstanceCounts(AuthzSubject subj, Collection<ResourceType> types);
 
     public abstract List<AppdefEntityID> findViewableInstances(AuthzSubject subj, Collection<ResourceType> types);
 
