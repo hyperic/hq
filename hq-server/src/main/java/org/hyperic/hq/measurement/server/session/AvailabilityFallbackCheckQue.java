@@ -25,7 +25,7 @@ public class AvailabilityFallbackCheckQue {
 
     
     private void logDebug(String message) {
-    	//log.info("aaa==========:" + message);
+    	log.info("aaa==========:" + message);
     }
     
     // -----------------------------------------------------------------------------------
@@ -63,9 +63,12 @@ public class AvailabilityFallbackCheckQue {
      * @return
      */
     public synchronized boolean addToQue(Integer platformId, ResourceDataPoint dataPoint) {
-    	logDebug("addToQue: start, curQueSize: " + getSize());
-    	if (this.currentPlatformsInQue.containsKey(platformId)) 
+    	logDebug("addToQue: start " + platformId+ ", curQueSize: " + getSize());
+    	if (this.currentPlatformsInQue.containsKey(platformId)) {
+    		logDebug("addToQue: platformsRecheckQue " + platformsRecheckQue.toString());
+    		logDebug("addToQue: platformsRecheckInProgress " + this.platformsRecheckInProgress.toString());
     		return false;
+    	}
     	this.platformsRecheckQue.add(dataPoint);
     	this.currentPlatformsInQue.put(platformId, dataPoint);
     	this.measurementIdToPlatformId.put(dataPoint.getMeasurementId(), platformId);
@@ -137,14 +140,15 @@ public class AvailabilityFallbackCheckQue {
 	    			this.platformsPendingQueRemoval.remove(platformId);
 	    	    	ResourceDataPoint platformDataPoint = this.currentPlatformsInQue.get(platformId);
 					this.platformsRecheckQue.remove(platformDataPoint);
-					this.currentPlatformsInQue.remove(platformId);
 					this.measurementIdToPlatformId.remove(measurementId);
 					this.platformIdToLastUpdateTimestamp.remove(platformId);
+					this.currentPlatformsInQue.remove(platformId);
 				}
 				else {
 					res.add(dataPoint);
 					ResourceDataPoint queDataPoint = this.currentPlatformsInQue.get(platformId);
 					ResourceDataPoint pointToAddToQue = new ResourceDataPoint(queDataPoint.getResource(), dataPoint);
+					this.currentPlatformsInQue.remove(platformId);
 					addToQue(platformId, pointToAddToQue);
 					this.platformIdToLastUpdateTimestamp.put(platformId, curTimeStamp);
 				}	
@@ -153,7 +157,7 @@ public class AvailabilityFallbackCheckQue {
 			else {
 				// update from agent
 				res.add(dataPoint);
-				removeFromQue(platformId);
+				removeFromQueBeforeUpdateFromAgent(platformId);
 			}
 			
 		}
@@ -169,25 +173,30 @@ public class AvailabilityFallbackCheckQue {
         return System.currentTimeMillis();
     }
 
-    private synchronized boolean removeFromQue(Integer platformId) {
-    	ResourceDataPoint platformDataPoint = this.currentPlatformsInQue.get(platformId);
+
+    
+    private synchronized boolean removeFromQueBeforeUpdateFromAgent(Integer platformId) {
+    	logDebug("removeFromQueBeforeUpdateFromAgent: start " + platformId+ ", curQueSize: " + getSize());
+		if (this.platformsRecheckInProgress.contains(platformId)) {
+			this.platformsPendingQueRemoval.add(platformId);
+			return true;
+		}
+		
+
+		ResourceDataPoint platformDataPoint = this.currentPlatformsInQue.get(platformId);
     	if (platformDataPoint == null) {
-    		// this platform may be in recheck process
-    		if (this.platformsRecheckInProgress.contains(platformId)) {
-    			this.platformsPendingQueRemoval.add(platformId);
-    			return true;
-    		}
     		return false;
     	}
     	//else 
 		this.platformsRecheckQue.remove(platformDataPoint);
-		this.currentPlatformsInQue.remove(platformId);   
-		this.measurementIdToPlatformId.remove(platformId);
+		this.currentPlatformsInQue.remove(platformId); 
 		this.platformIdToLastUpdateTimestamp.remove(platformId);
+		Integer measId = platformDataPoint.getMeasurementId();
+		this.measurementIdToPlatformId.remove(measId);
+		
     	return true;
     }
 
-    
 	
 
 

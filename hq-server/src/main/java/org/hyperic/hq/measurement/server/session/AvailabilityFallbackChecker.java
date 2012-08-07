@@ -7,8 +7,12 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Hibernate;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceDAO;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
@@ -43,6 +47,7 @@ public class AvailabilityFallbackChecker {
 
 	private AvailabilityManager availabilityManager;
 	private AvailabilityCache availabilityCache;
+	private ResourceManager resourceManager;
 	private long curTimeStamp = 0;
 
 	
@@ -53,13 +58,14 @@ public class AvailabilityFallbackChecker {
     
     
 
-	public AvailabilityFallbackChecker(AvailabilityManager availabilityManager, AvailabilityCache availabilityCache) {
+	public AvailabilityFallbackChecker(AvailabilityManager availabilityManager, AvailabilityCache availabilityCache, ResourceManager resourceManager) {
 		this.availabilityManager = availabilityManager;
 		this.availabilityCache = availabilityCache;
+		this.resourceManager = resourceManager;
 	}
 	
 
-	public void testCheckAvailability(Collection<ResourceDataPoint> availabilityDataPoints, long curTimeStamp) {
+	public void checkAvailability(Collection<ResourceDataPoint> availabilityDataPoints, long curTimeStamp) {
 		this.curTimeStamp = curTimeStamp;
 		checkAvailability(availabilityDataPoints);
 		this.curTimeStamp = 0;		
@@ -72,6 +78,7 @@ public class AvailabilityFallbackChecker {
 		for (ResourceDataPoint availabilityDataPoint : availabilityDataPoints) {
 			ResourceDataPoint platformAvailPoint = checkPlatformAvailability(availabilityDataPoint);
 			resPlatforms.add(platformAvailPoint);
+			logDebug("checkAvailability: " + platformAvailPoint.getValue());
 			//addPlatformDescendants(platformAvailPoint, res);
 		}
 		logDebug("checkAvailability: found " + resPlatforms.size() + " Platforms.");
@@ -89,16 +96,29 @@ public class AvailabilityFallbackChecker {
 
     
     
+	// check if agent, and if so - mark it as down.
 	private boolean isHQAgent(Measurement meas) {
-		// TODO check if agent, and if so - mark it as down.
-//		Resource measResource = meas.getResource();
-//		logDebug("isHQHagent: " + measResource.toString());
-//		Resource prototype = measResource.getPrototype();
-//		String prototypeName = prototype.getName();
-//		if (prototypeName.equals(AppdefEntityConstants.HQ_AGENT_PROTOTYPE_NAME))
+		return true;
+		/*
+		try {
+			// Need to reload the Resource, since LazyEvaluation session may be closed.
+			Resource measResource = meas.getResource();
+			Integer measResourceId = measResource.getId();
+			measResource = resourceManager.findResourceById(measResourceId);
+			if (measResource == null)
+				return false;
+			Resource prototype = measResource.getPrototype();
+			String prototypeName = prototype.getName();
+			if (prototypeName.equals(AppdefEntityConstants.HQ_AGENT_PROTOTYPE_NAME)) {
+				logDebug("isHQHagent:  Found: " + measResourceId);
+				return true;
+			}
+		} catch (Exception e) {
+			logDebug(e.toString());
 			return true;
-
-//		return false;
+		}
+		return false;
+		*/
 	}
 
 
@@ -128,25 +148,39 @@ public class AvailabilityFallbackChecker {
 
 	private ResourceDataPoint getPlatformStatusFromVC(ResourceDataPoint availabilityDataPoint) {
 		logDebug("getPlatformStatusFromVC" );
-//		Integer platformId = availabilityDataPoint.getResource().getId();
-//		List<Integer> resourceIds = new ArrayList<Integer>();
-//		resourceIds.add(platformId);
-//		final Map<Integer, List<Measurement>> virtualParent = availabilityManager.getAvailMeasurementParent(
-//				resourceIds, AuthzConstants.ResourceEdgeVirtualRelation);
-//		if (isEmptyMap(virtualParent)) {
-//			return null;
-//		}
-//		// else - there should be a single measurement of the related VM Instance:
-//		List<Measurement> resourceEdgeVirtualRelations = virtualParent.get(platformId);
-//		if ((resourceEdgeVirtualRelations == null) | (resourceEdgeVirtualRelations.isEmpty()) )
-//		{
-//			return null;
-//		}
-//		if (resourceEdgeVirtualRelations.size() != 1) {
-//			log.warn("getPlatfromStatusFromVC: Platform " + platformId + " got " + resourceEdgeVirtualRelations.size() + " virtual parents. Ignoring.");
-//			return null;
-//		}
-		
+		Integer platformId = availabilityDataPoint.getResource().getId();
+		List<Integer> resourceIds = new ArrayList<Integer>();
+		resourceIds.add(platformId);
+		final Map<Integer, List<Measurement>> virtualParent = availabilityManager.getAvailMeasurementParent(
+				resourceIds, AuthzConstants.ResourceEdgeVirtualRelation);
+		if (isEmptyMap(virtualParent)) {
+			return null;
+		}
+		// else - there should be a single measurement of the related VM Instance:
+		List<Measurement> resourceEdgeVirtualRelations = virtualParent.get(platformId);
+		if ((resourceEdgeVirtualRelations == null) | (resourceEdgeVirtualRelations.isEmpty()) )
+		{
+			return null;
+		}
+		if (resourceEdgeVirtualRelations.size() != 1) {
+			log.warn("getPlatfromStatusFromVC: Platform " + platformId + " got " + resourceEdgeVirtualRelations.size() + " virtual parents. Ignoring.");
+			return null;
+		}
+		// we now have the VM Instance Measurement ID. We will copy its latest availability status
+		Measurement vmParentMeasurement = resourceEdgeVirtualRelations.get(0);
+		long endTimeStamp = getEndWindow(getCurTimestamp(), vmParentMeasurement);
+        final DataPoint defaultParentDataPoint = new DataPoint(vmParentMeasurement.getId().intValue(), MeasurementConstants.AVAIL_NULL, endTimeStamp);
+        final DataPoint lastParentDataPoint = availabilityCache.get(vmParentMeasurement.getId(), defaultParentDataPoint);
+        if (lastParentDataPoint == null)
+        	return null;
+        double parentStatus = lastParentDataPoint.getValue();
+        if ((parentStatus == MeasurementConstants.AVAIL_UP) || (parentStatus == MeasurementConstants.AVAIL_DOWN)) {
+        	DataPoint newDataPoint = new DataPoint(availabilityDataPoint.getMeasurementId(), lastParentDataPoint.getMetricValue());
+        	ResourceDataPoint resPoint = new ResourceDataPoint(availabilityDataPoint.getResource(), newDataPoint);
+    		logDebug("getPlatformStatusFromVC: found parent " + resPoint.toString());
+        	return resPoint;
+        }
+
 		return null;
 	}
 	
@@ -178,17 +212,11 @@ public class AvailabilityFallbackChecker {
 		for (ResourceDataPoint rdp : checkedPlatforms) {
 			final Resource platform = rdp.getResource();
 			res.add(rdp);
-			if (rdp.getValue() != MeasurementConstants.AVAIL_DOWN) {
-				// platform may be paused, so skip pausing its children
-				continue;
-			}
 			final List<Measurement> associatedResources = rHierarchy.get(platform.getId());
 			if (associatedResources == null) {
 				continue;
 			}
-			
-			//TODO Uncomment
-//			double assocStatus = MeasurementConstants.AVAIL_UNKNOWN;
+
 			double assocStatus = MeasurementConstants.AVAIL_DOWN;
 			if (rdp.getMetricValue().getValue() == MeasurementConstants.AVAIL_UP) {
 				assocStatus = MeasurementConstants.AVAIL_UNKNOWN;
