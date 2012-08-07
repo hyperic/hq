@@ -76,13 +76,16 @@
     <mkdir dir="${server.product.dir}/lib"/>
     <copy todir="${server.product.dir}/lib">
       <fileset dir="${install.dir}/lib">
-        <include name="postgresql-8.2-505.jdbc3.jar"/>
+        <include name="postgresql-9.1-901-A.jdbc4.jar"/>
       </fileset>
     </copy>
 
     <if>
       <istrue value="${setup.upgrade}" />
       <then>
+      	<fail>
+      	      Upgrading Hyperic server that uses the embedded database is not supported.
+      	</fail>
         <!-- First copy the HQ database -->
         <echo>^^^INFO: Copying database, this may take some time...</echo>
         <!-- Can change this to move to preserve space -->
@@ -96,7 +99,8 @@
           <fileset dir="${server.hqdb.dir}/bin" includes="*"/>
           <fileset dir="${server.home}/bin" includes="db-*"/>
         </chmod>
-        <chmod dir="${server.hqdb.dir}/data" perm="700"/>
+    	<antcall target="changeDataFolderPermLinux"/>
+        <antcall target="changeDataFolderPermWin"/>
       </then>
       <else>
         <!-- New installation, copy fresh postgres installation -->
@@ -117,7 +121,8 @@
         <!-- XXX: recreate symlinks.. lame -->
         <antcall target="recreate-symlinks"/>
         <delete dir="${server.hqdb.dir}" includes="**/dir.links"/>
-        <chmod dir="${server.hqdb.dir}/data" perm="700"/>
+      	<antcall target="changeDataFolderPermLinux"/>
+      	<antcall target="changeDataFolderPermWin"/>
         <ant antfile="setup.xml" target="chmod-exec">
         <property name="chmod.dir"
                   value="${server.product.dir}/hqdb"/>
@@ -158,6 +163,15 @@
     </trycatch>
   </target>
   
+
+	  <target name="changeDataFolderPermLinux" unless="isWin32">
+	  	 <chmod dir="${server.hqdb.dir}/data" perm="700"/>
+	  </target>
+
+	  <target name="changeDataFolderPermWin" if="isWin32">
+	  	 <chmod dir="${server.hqdb.dir}/data" perm="777"/>
+	  </target>
+	
   <target name="copy-pg" if="server.pgsql.available">
     <condition property="script-ext" value=".bat">
       <os family="windows"/>
