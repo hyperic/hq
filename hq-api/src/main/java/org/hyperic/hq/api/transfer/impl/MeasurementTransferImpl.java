@@ -27,6 +27,7 @@ package org.hyperic.hq.api.transfer.impl;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -46,6 +47,7 @@ import org.hyperic.hq.api.transfer.mapping.MeasurementMapper;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.common.TimeframeBoundriesException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
@@ -77,13 +79,13 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         this.errorHandler = errorHandler;
     }
     
-    protected long[] getTimeFrame(final String begin, final String end) throws ParseException {
+    protected long[] getTimeFrame(final String begin, final String end) throws ParseException, TimeframeBoundriesException {
         final DateTimeFormatter dateFormat = ISODateTimeFormat.dateTimeParser() ;
         long[] timeFrame = new long[2];
         timeFrame[0] = dateFormat.parseMillis(begin) ; 
         timeFrame[1] = dateFormat.parseMillis(end) ;
-        if (timeFrame[0]>=timeFrame[1] || timeFrame[1]>new Date().getTime()) {
-            throw new IllegalArgumentException();
+        if (timeFrame[0]>=timeFrame[1] || timeFrame[1]>Calendar.getInstance().getTimeInMillis()) {
+            throw new TimeframeBoundriesException("Begin= " +begin +", End=" +end);
         }
         return timeFrame;
     }
@@ -99,22 +101,28 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         Map<Resource, List<Measurement>> rscTohqMsmts = null;
         rscTohqMsmts = this.measurementMgr.findMeasurements(authzSubject, resIdsToTmpIds);
         if (rscTohqMsmts==null || rscTohqMsmts.size()==0 || rscTohqMsmts.values().isEmpty()) {
-            throw new ObjectNotFoundException("there are no measurements of the requested types on the requested resource", Measurement.class.getName());
+            throw new ObjectNotFoundException(tmps.toString(), Measurement.class.getName());
         }
         List<Measurement> hqMsmts = rscTohqMsmts.values().iterator().next();    // there should be only one list of measurements for one resource
         if (hqMsmts==null || hqMsmts.size()==0) {
-            throw new ObjectNotFoundException("there are no measurements of the requested types on the requested resource", Measurement.class.getName());
+            throw new ObjectNotFoundException(tmps.toString(), Measurement.class.getName());
         }
         return hqMsmts;
     }
     
     public MeasurementResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest hqMsmtReq, 
             final String rscId, final String begin, final String end) 
-            throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException {
+            throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException {
 
         MeasurementResponse res = new MeasurementResponse();
-        if (hqMsmtReq==null || rscId==null || "".equals(rscId) || hqMsmtReq.getMeasurementTemplateNames()==null || hqMsmtReq.getMeasurementTemplateNames().size()==0 || begin==null || end==null || begin.length()<=0 || end.length()<=0) {
-            throw new UnsupportedOperationException("the request is missing the resource ID, the measurement template names, the begining or end of the time frame");
+        if (hqMsmtReq==null || rscId==null || "".equals(rscId) 
+                || hqMsmtReq==null || hqMsmtReq.getMeasurementTemplateNames()==null || hqMsmtReq.getMeasurementTemplateNames().size()==0 
+                || begin==null || end==null || begin.length()<=0 || end.length()<=0) {
+            throw new UnsupportedOperationException("Resource ID= " +rscId
+                            + hqMsmtReq!=null?", Measurements Names= "+ hqMsmtReq.getMeasurementTemplateNames():""
+                            + ", Message Body= " + hqMsmtReq
+                            + ", Begin= " + begin
+                            + ", End= " + end);
         }
         AuthzSubject authzSubject = apiMessageContext.getAuthzSubject();
         long[] timeFrame = getTimeFrame(begin, end);
@@ -124,7 +132,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         List<String> tmpNames = hqMsmtReq.getMeasurementTemplateNames();
         List<MeasurementTemplate> tmps = this.tmpltMgr.findTemplatesByName(tmpNames);
         if (tmps==null || tmps.size()==0) {
-            throw new ObjectNotFoundException("there are no measurement templates which carries the requested template names", MeasurementTemplate.class.getName());
+            throw new ObjectNotFoundException(tmpNames.toString(), MeasurementTemplate.class.getName());
         }
 
         List<Measurement> hqMsmts = getMeasurements(rscId, tmps,authzSubject);
@@ -139,11 +147,11 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             res.add(msmt);
         }
         return res;
-    }
+     }
     
     public ResourceMeasurementBatchResponse getAggregatedMetricData(ApiMessageContext apiMessageContext,
             ResourceMeasurementRequests hqMsmtReqs, String begin, String end)
-            throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException {
+            throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException {
         ResourceMeasurementBatchResponse res = new ResourceMeasurementBatchResponse(this.errorHandler);
         if (hqMsmtReqs==null || hqMsmtReqs.getMeasurementRequests()==null || hqMsmtReqs.getMeasurementRequests().size()==0 || begin==null || end==null || begin.length()<=0 || end.length()<=0) {
             throw new UnsupportedOperationException("the request is missing some essential details");

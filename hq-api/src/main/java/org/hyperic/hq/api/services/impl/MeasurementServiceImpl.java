@@ -13,10 +13,13 @@ import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.common.TimeframeBoundriesException;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.text.ParseException;
+import java.util.Calendar;
+import java.util.Date;
 
 public class MeasurementServiceImpl extends RestApiService implements MeasurementService {
     @Autowired
@@ -25,24 +28,31 @@ public class MeasurementServiceImpl extends RestApiService implements Measuremen
     private ExceptionToErrorCodeMapper errorHandler ; 
     
 	public MeasurementResponse getMetrics(final MeasurementRequest measurementRequest,
-			final String rscId, final String begin, final String end) 
-			        throws PermissionException, SessionNotFoundException, SessionTimeoutException {
+			final String rscId, final String begin, final String end)
+			        throws Throwable {
 	    try {
+	        try {
+//	        String begin = begin_.toString();
 	        ApiMessageContext apiMessageContext = newApiMessageContext();
 	        return measurementTransfer.getMetrics(apiMessageContext, measurementRequest, rscId, begin, end);
+	        
+	        } catch (Throwable t) {
+	            errorHandler.log(t);
+	            throw t;
+	        }
         } catch (UnsupportedOperationException e) {
-            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.BAD_MEASUREMENT_REQ, "the request is missing the resource ID or the measurement template names\n",e.getMessage());
+            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.BAD_MEASUREMENT_REQ, e.getMessage());
         } catch (ParseException e) {
-            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.WRONG_DATE_FORMAT, "cannot parse the begin/end time frame arguments\n",e.getMessage());
+            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.WRONG_DATE_FORMAT, e.getMessage());
         } catch (ObjectNotFoundException e) {
             String missingObj = e.getEntityName();
             if (MeasurementTemplate.class.getName().equals(missingObj)) {
-                throw errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.TEMPLATE_NOT_FOUND, "there are no measurement templates which carries the requested template names");
+                throw errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.TEMPLATE_NOT_FOUND, e.getIdentifier());
             }
             if (Measurement.class.getName().equals(missingObj)) {
-                throw errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.MEASUREMENT_NOT_FOUND, "there are no measurements of the requested templates types on the requested resource");
+                throw errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.MEASUREMENT_NOT_FOUND, e.getIdentifier());
             }
-            throw errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID, "");
+            throw errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID, e.getIdentifier());
         } catch (IllegalArgumentException e) {
             throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.WRONG_DATE_VALUES, e.getMessage());
         }
@@ -55,7 +65,7 @@ public class MeasurementServiceImpl extends RestApiService implements Measuremen
             return measurementTransfer.getAggregatedMetricData(apiMessageContext, hqMsmtReqs, begin, end);
         } catch (ParseException e) {
             throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.WRONG_DATE_FORMAT, "cannot parse the begin/end time frame arguments\n",e.getMessage());
-        } catch (IllegalArgumentException e) {
+        } catch (TimeframeBoundriesException e) {
             throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.WRONG_DATE_VALUES, e.getMessage());
         }
     }

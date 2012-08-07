@@ -57,6 +57,7 @@ import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
+import com.meterware.httpunit.MessageBodyWebRequest.InputStreamMessageBody;
 import com.meterware.servletunit.ServletRunner;
 
 public class TestHttpConduit extends HTTPConduit { 
@@ -125,7 +126,15 @@ public class TestHttpConduit extends HTTPConduit {
                 messagePayload = (ByteArrayOutputStream) msg.getContent(java.io.OutputStream.class) ;
                 messagePayload.flush() ; 
                 final ByteArrayInputStream bis = new ByteArrayInputStream(messagePayload.toByteArray()) ;   
-                req = new PostMethodWebRequest(sURL, bis, (String) msg.get(CONTENT_TYPE_HEADER)) ;
+                String urlString ="", queryString = "";
+                int pos = sURL.indexOf('?');
+                if (pos>0) {
+                    urlString = sURL.substring(0,pos);
+                    queryString = sURL.substring(pos + 1);
+                } else {
+                    urlString = sURL;
+                }
+                req = new PostMethodWebRequestThatWorks(urlString, queryString, bis, (String) msg.get(CONTENT_TYPE_HEADER));
 			}else{ 
 				throw new UnsupportedOperationException(httpRequestMethod + " is unsupported!") ; 
 			}//EO if post 
@@ -187,3 +196,18 @@ public class TestHttpConduit extends HTTPConduit {
 	}//EOM 
 	
 }//EOC 
+
+
+class PostMethodWebRequestThatWorks extends PostMethodWebRequest {
+    private String queryString;
+    
+    public PostMethodWebRequestThatWorks( String urlString, String queryString, InputStream source, String contentType) {    
+        super(urlString, source, contentType );
+        this.queryString = queryString;
+    }
+
+    public String getQueryString() {
+        return this.queryString;
+    }                    
+}
+

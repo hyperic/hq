@@ -9,6 +9,7 @@ import org.hyperic.hq.api.model.measurements.ResourceMeasurementBatchResponse;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequests;
 import org.hyperic.hq.api.services.impl.ApiMessageContext;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.common.TimeframeBoundriesException;
 
 /**
  * 
@@ -24,11 +25,14 @@ public interface MeasurementTransfer {
 	 * @return
 	 * @throws ParseException 
 	 * @throws PermissionException 
+	 * @throws TimeframeBoundriesException 
+	 * @throws ObjectNotFoundException 
+	 * @throws UnsupportedOperationException 
 	 */
     public MeasurementResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest measurementRequest,
-			final String rscId, final String begin, final String end) throws ParseException, PermissionException;
+			final String rscId, final String begin, final String end) throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException;
     
     public ResourceMeasurementBatchResponse getAggregatedMetricData(ApiMessageContext apiMessageContext, final ResourceMeasurementRequests hqMsmtReqs, 
             final String begin, final String end) 
-            throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException;
+            throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException;
 }

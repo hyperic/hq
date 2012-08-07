@@ -6,7 +6,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,7 +54,7 @@ import org.springframework.test.annotation.DirtiesContext;
 public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService, MeasurementServiceTestDataPopulator> {
     @Rule 
     public RuleChain interceptorsChain = super.interceptorsChain ;
-    private final static DateFormat DATE_FORMAT = new SimpleDateFormat() ;
+//    private final static DateFormat DATE_FORMAT = new SimpleDateFormat() ;
 
     public static class MeasurementServiceTestDataPopulator extends AbstractRestTestDataPopulator<MeasurementService>{
         static final int NO_OF_TEST_PLATFORMS = 1 ;
@@ -67,7 +66,7 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
         protected final static long HOURLY_DATA_PURGE_TIME =  1209600000L;
         protected final static long SIX_HOURLY_DATA_PURGE_TIME = 2678400000L;
         protected final static long DAILY_DATA_PURGE_TIME =  31536000000L;
-        protected final Date now;
+        protected final Calendar now = Calendar.getInstance();
         protected Agent testAgent;
         protected Platform platform;
         protected AppdefResource rsc; 
@@ -78,7 +77,6 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
 
         public MeasurementServiceTestDataPopulator() throws ParseException {
             super(MeasurementService.class, CONTEXT_URL + "/rest-api/measurements") ;
-            now = DATE_FORMAT.parse("16/07/11 00:00 AM");
         }
         
         @Override
@@ -88,7 +86,7 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
 
                 String agentToken = "agentToken" + System.currentTimeMillis(); 
                 this.testAgent = this.createAgent("127.0.0.1", 2144, "authToken", agentToken, "5.0");
-String x = "_demo2";//String.valueOf(new Random().nextInt());
+String x = "1";//String.valueOf(new Random().nextInt());
                 final String pluginName = "Test_Plugin";
                 final String platName = "test.ubuntu.eng.vmware.com." + x; 
                 final String platType = "platTypeTest" + x;
@@ -135,7 +133,7 @@ String x = "_demo2";//String.valueOf(new Random().nextInt());
                     // raw
                     List<DataPoint> rawDTPs = new ArrayList<DataPoint>();
                     long msmtInterval = msmt.getInterval();
-                    long beginRaw = now.getTime()-RAW_DATA_PURGE_TIME;
+                    long beginRaw = now.getTimeInMillis()-RAW_DATA_PURGE_TIME;
                     long numOfRawDTPsTillNow = (int) Math.floor(RAW_DATA_PURGE_TIME/msmtInterval);
 
                     for (long i = 0 ; i<numOfRawDTPsTillNow  ; i++) {
@@ -145,8 +143,8 @@ String x = "_demo2";//String.valueOf(new Random().nextInt());
                     aggTableToMetrics.put(MeasurementConstants.TAB_DATA, rawDTPs);
                     // 1 hour
                     List<DataPoint> hourlyData = new ArrayList<DataPoint>();
-                    long beginHourly = now.getTime()-HOURLY_DATA_PURGE_TIME;
-                    long endHourly = now.getTime()-HOUR_IN_MILLI ;
+                    long beginHourly = now.getTimeInMillis()-HOURLY_DATA_PURGE_TIME;
+                    long endHourly = now.getTimeInMillis()-HOUR_IN_MILLI ;
                     long numOfHourlyDTPsTillEnd = (int) Math.floor((endHourly-beginHourly)/HOUR_IN_MILLI);
                     for (long i = 0 ; i<numOfHourlyDTPsTillEnd  ; i++) {
                         double val = 10*(i+1);
@@ -156,8 +154,8 @@ String x = "_demo2";//String.valueOf(new Random().nextInt());
                     aggTableToMetrics.put(MeasurementConstants.TAB_DATA_1H, hourlyData);
                     // six hours
                     List<DataPoint> sixHourlyData = new ArrayList<DataPoint>();
-                    long beginSixHourly = now.getTime()-SIX_HOURLY_DATA_PURGE_TIME;
-                    long endSixHourly = now.getTime()-SIX_HOURS_IN_MILLI ;
+                    long beginSixHourly = now.getTimeInMillis()-SIX_HOURLY_DATA_PURGE_TIME;
+                    long endSixHourly = now.getTimeInMillis()-SIX_HOURS_IN_MILLI ;
                     long numOfSixHourlyDTPsTillEnd = (int) Math.floor((endSixHourly-beginSixHourly)/SIX_HOURS_IN_MILLI);
                     for (long i = 0 ; i<numOfSixHourlyDTPsTillEnd  ; i++) {
                         double val = 100*(i+1);
@@ -167,8 +165,8 @@ String x = "_demo2";//String.valueOf(new Random().nextInt());
                     aggTableToMetrics.put(MeasurementConstants.TAB_DATA_6H, sixHourlyData);
                     // day
                     List<DataPoint> dailyData = new ArrayList<DataPoint>();
-                    long beginDaily = now.getTime()-DAILY_DATA_PURGE_TIME;
-                    long endDaily = now.getTime()-DAY_IN_MILLI ;
+                    long beginDaily = now.getTimeInMillis()-DAILY_DATA_PURGE_TIME;
+                    long endDaily = now.getTimeInMillis()-DAY_IN_MILLI ;
                     long numOfdailyDTPsTillEnd = (int) Math.floor((endDaily-beginDaily)/DAY_IN_MILLI);
                     for (long i = 0 ; i<numOfdailyDTPsTillEnd  ; i++) {
                         double val = 1000*(i+1);
@@ -195,7 +193,7 @@ String x = "_demo2";//String.valueOf(new Random().nextInt());
     }
 
     MeasurementResponse generateResponseObj(List<org.hyperic.hq.measurement.server.session.Measurement> hqMsmts,
-            Date begin, Date end, String aggTable) {
+            Calendar begin, Calendar end, String aggTable) {
         MeasurementResponse svcRes = new MeasurementResponse();
         for (org.hyperic.hq.measurement.server.session.Measurement msmt : hqMsmts) {
             Measurement svcMsmt = generateServiceMeasurement(msmt,begin,end, aggTable);
@@ -206,7 +204,7 @@ String x = "_demo2";//String.valueOf(new Random().nextInt());
     }
 
     Measurement generateServiceMeasurement(org.hyperic.hq.measurement.server.session.Measurement hqMsmt,
-            Date begin, Date end, String aggTable) {
+            Calendar begin, Calendar end, String aggTable) {
         Measurement svcMsmt=  new Measurement();
         svcMsmt.setInterval(hqMsmt.getInterval());
         svcMsmt.setName(hqMsmt.getTemplate().getName());
@@ -216,12 +214,12 @@ String x = "_demo2";//String.valueOf(new Random().nextInt());
     }
 
     List<Metric> generateServiceMetrics(org.hyperic.hq.measurement.server.session.Measurement hqMsmt,
-            Date begin, Date end, String aggTable) {
+            Calendar begin, Calendar end, String aggTable) {
         Map<String,List<DataPoint>> hqAggTableToDTPs = this.testBed.hqMetrics.get(hqMsmt);
         List<DataPoint> hqDTPs = hqAggTableToDTPs.get(aggTable);
         List<Metric> metrics = new ArrayList<Metric>();
-        long beginMilli = begin.getTime(),
-                endMilli = end.getTime();
+        long beginMilli = begin.getTimeInMillis(),
+                endMilli = end.getTimeInMillis();
         for (DataPoint hqDtp : hqDTPs) {
             long hqDtpTime = hqDtp.getTimestamp();
             if (beginMilli<=hqDtpTime && hqDtpTime<=endMilli) {
@@ -240,7 +238,23 @@ String x = "_demo2";//String.valueOf(new Random().nextInt());
         return metrics;
     }
 
-    protected void baseTest(Date begin,	Date end, String aggTable) throws Throwable {
+    protected static String toISO8601Str(Calendar c) {
+        int     month = c.get(Calendar.MONTH),
+                day = c.get(Calendar.DAY_OF_MONTH),
+                hour = c.get(Calendar.HOUR_OF_DAY),
+                minute = c.get(Calendar.MINUTE),
+                utcOffset = (c.get(Calendar.ZONE_OFFSET)+c.get(Calendar.DST_OFFSET))/(60*60*1000);
+        return new StringBuilder()
+            .append(c.get(Calendar.YEAR))
+            .append('-').append(month<9?'0':"").append(month+1)   // gregorian calendaric month begins at 0 instead of 1
+            .append('-').append(day<10?'0':"").append(day)
+            .append('T').append(hour<10?'0':"").append(hour) 
+            .append(':').append(minute<10?'0':"").append(c.get(minute))
+            .append('+').append(utcOffset<10?'0':"").append(utcOffset).append("00")
+            .toString();
+    }
+    
+    protected void baseTest(Calendar begin,	Calendar end, String aggTable) throws Throwable {
         // build req
         List<String> tmpNames = new ArrayList<String>();
         for (MeasurementTemplate tmp : this.testBed.tmps) {
@@ -249,9 +263,7 @@ String x = "_demo2";//String.valueOf(new Random().nextInt());
         final MeasurementRequest req = new MeasurementRequest(tmpNames) ; 
         // build expected res
         final MeasurementResponse expRes = generateResponseObj(this.testBed.msmts,begin,end,aggTable);
-//        Logger log = Logger.getRootLogger().getLogger("org.apache.cxf");
-//        log.setLevel(Level.DEBUG);
-        MeasurementResponse res = service.getMetrics(req, String.valueOf(this.testBed.rsc.getId()), DATE_FORMAT.format(begin), DATE_FORMAT.format(end));
+        MeasurementResponse res = service.getMetrics(req, String.valueOf(this.testBed.rsc.getResource().getId()), toISO8601Str(begin), toISO8601Str(end));
         Assert.assertEquals(res,expRes);
     }
 
@@ -263,9 +275,10 @@ String x = "_demo2";//String.valueOf(new Random().nextInt());
     @SecurityInfo(username="hqadmin",password="hqadmin")
     @Test
     public final void testGetMetricsWinStartsBeforePrgSmallerThan400() throws Throwable {
-//        Date begin = new Date(this.testBed.now.getTime()-TimeUnit.MILLISECONDS.convert(1L, TimeUnit.HOURS));
-//        Date end = this.testBed.now;
-//        baseTest(begin, end, MeasurementConstants.TAB_DATA);
+        Calendar end = (Calendar) this.testBed.now.clone();
+        Calendar begin = (Calendar) this.testBed.now.clone();
+        begin.add(Calendar.HOUR_OF_DAY, -1);
+        baseTest(begin, end, MeasurementConstants.TAB_DATA);
     }
 
 
@@ -278,10 +291,7 @@ String x = "_demo2";//String.valueOf(new Random().nextInt());
     @SecurityInfo(username="hqadmin",password="hqadmin")
 //    @Test
     public final void testGetMetricsWinStartsBeforePrgBiggerThan400() throws Throwable { 
-        Date begin = new Date();
-        Date end = new Date();
-        begin.setHours(begin.getHours()-1);
-        baseTest(begin, end, MeasurementConstants.TAB_DATA_1H);
+//        baseTest(begin, end, MeasurementConstants.TAB_DATA_1H);
     }     
 
     /**
@@ -293,8 +303,8 @@ String x = "_demo2";//String.valueOf(new Random().nextInt());
     @SecurityInfo(username="hqadmin",password="hqadmin")
 //    @Test
     public final void testGetMetricsWinEndsAfterPrg() throws Throwable { 
-        Calendar begin = GregorianCalendar.getInstance();
-        Calendar end = GregorianCalendar.getInstance();
+        Calendar begin = Calendar.getInstance();
+        Calendar end = Calendar.getInstance();
         end.set(Calendar.SECOND, begin.get(Calendar.SECOND));
         end.set(Calendar.MINUTE, begin.get(Calendar.MINUTE));
         end.add(Calendar.DAY_OF_MONTH,-2);
