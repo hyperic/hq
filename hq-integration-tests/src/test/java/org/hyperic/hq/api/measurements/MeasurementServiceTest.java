@@ -303,20 +303,6 @@ String x = "";//String.valueOf(new Random().nextInt());
         baseTest(begin, end, MeasurementConstants.TAB_DATA_1H);
     }
 
-    /**
-     * +-+-+-+[+-x  ]
-     * 
-     * @throws Throwable
-     */
-    @SecurityInfo(username="hqadmin",password="hqadmin")
-    @Test
-    public final void testGetMetricsWinEndsBeforePrgStartsAfterPrg() throws Throwable { 
-        Calendar end = (Calendar) this.testBed.now.clone();
-        end.add(Calendar.MILLISECOND, (int) (-1*MeasurementServiceTestDataPopulator.RAW_DATA_PURGE_TIME)+(30*60*1000));
-        Calendar begin = (Calendar) end.clone();
-        begin.add(Calendar.HOUR_OF_DAY, -1);
-        baseTest(begin, end, MeasurementConstants.TAB_DATA);
-    }
 
     /**
      *   [  a-+]+-+-+-
@@ -329,21 +315,6 @@ String x = "";//String.valueOf(new Random().nextInt());
         Calendar end = (Calendar) this.testBed.now.clone();
         Calendar begin = (Calendar) end.clone();
         begin.add(Calendar.HOUR_OF_DAY, -7);
-        baseTest(begin, end, MeasurementConstants.TAB_DATA_1H);
-    }
-
-    /**
-     * +--+-[+]-+--+--+
-     * 
-     * @throws Throwable
-     */
-    @SecurityInfo(username="hqadmin",password="hqadmin")
-    @Test
-    public final void testGetMetricsWinSmallerThanInterval() throws Throwable { 
-        Calendar end = (Calendar) this.testBed.now.clone();
-        end.add(Calendar.MILLISECOND, (int) (-1*MeasurementServiceTestDataPopulator.SIX_HOURLY_DATA_PURGE_TIME)-(60*60*1000));
-        Calendar begin = (Calendar) end.clone();
-        begin.add(Calendar.HOUR_OF_DAY, -1);
         baseTest(begin, end, MeasurementConstants.TAB_DATA_1H);
     }
 }
