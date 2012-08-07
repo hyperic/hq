@@ -22,7 +22,7 @@ public class Measurement {
     @XmlAttribute
     private String name;
     @XmlAttribute
-    private Double avg;	
+    private double avg;	
 	@XmlElementWrapper(name="metrics", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 	@XmlElement(name="metric", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 	private List<Metric> metrics;
