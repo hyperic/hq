@@ -230,10 +230,14 @@ __ll__
   <!-- If the installer was started by someone double-clicking on the
        setup.bat file, we don't want to make the DOS window just
        disappear on them when the install is done -->
-  <target name="pause-before-exit" if="isWin32">
+  <target name="pause-before-exit" if="isWin32" unless="server.automatic.installation">
     <if>
       <istrue value="${server.pgsql.available}" />
+    	
       <then>
+      	<else>
+      	  	<echo message="The value of property foo is not bar" />
+      	    	 </else>
         <input message="Press the Enter key to exit setup."/>
       </then>
     </if>
