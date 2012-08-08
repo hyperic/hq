@@ -92,6 +92,7 @@ import org.springframework.transaction.annotation.Transactional;
  * to retrieve Availability Data RLE points
  * 
  */
+@SuppressWarnings("restriction")
 @Service
 @Transactional
 public class AvailabilityManagerImpl implements AvailabilityManager {
@@ -979,8 +980,8 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      */
     private HashSet<Integer> getMidsWithinAllowedDataWindow(final List<DataPoint> states, final long now) {
         HashSet<Integer> mids = new HashSet<Integer>();
-        int i = 0;
-        for (Iterator<DataPoint> it = states.iterator(); it.hasNext(); i++) {
+        //int i = 0;
+        for (Iterator<DataPoint> it = states.iterator(); it.hasNext(); ) {
             DataPoint pt = it.next();
             long timestamp = pt.getTimestamp();
             // only allow data for the last MAX_DATA_BACKLOG_TIME ms

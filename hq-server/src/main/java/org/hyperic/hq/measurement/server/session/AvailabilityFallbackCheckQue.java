@@ -25,7 +25,7 @@ public class AvailabilityFallbackCheckQue {
 
     
     private void logDebug(String message) {
-    	log.info("aaa==========:" + message);
+    	log.debug("aaa==========:" + message);
     }
     
     // -----------------------------------------------------------------------------------
@@ -88,7 +88,7 @@ public class AvailabilityFallbackCheckQue {
     		boolean added = addToQue(platformId, platformsToAdd.get(platformId));
     		res += added ? 1 : 0;
 		}
-    	logDebug("addToQue: added "+res);
+    	log.info("addToQue: added "+res);
     	return res;
     }
     

@@ -34,6 +34,6 @@ import java.util.Map;
  */
 public interface BackfillPointsService {
 
-    Map<Integer, DataPoint> getBackfillPoints(long current);
+    //Map<Integer, DataPoint> getBackfillPoints(long current);
     Map<Integer, ResourceDataPoint> getBackfillPlatformPoints(long current);
 }
