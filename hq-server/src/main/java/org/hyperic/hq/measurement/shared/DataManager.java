@@ -39,6 +39,7 @@ import org.hyperic.hq.measurement.server.session.TimeframeSizeException;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import java.sql.Connection;
 
 /**
  * Local interface for DataManager.
@@ -60,6 +61,8 @@ public interface DataManager {
      */
     public boolean addData(List<DataPoint> data);
 
+    public boolean addData(List<DataPoint> data, Connection conn);
+
     /**
      * Write metric datapoints to the DB without transaction
      * @param data a list of {@link DataPoint}s
@@ -72,7 +75,7 @@ public interface DataManager {
      */
     public void addData(List<DataPoint> data, boolean overwrite);
 
-    public void addData(List<DataPoint> data, String aggTable) throws SQLException;
+    public void addData(List<DataPoint> data, String aggTable, Connection conn) throws Exception;
 
     /**
      * Fetch the list of historical data points given a begin and end time

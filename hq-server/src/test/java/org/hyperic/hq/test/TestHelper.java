@@ -24,6 +24,7 @@
  */
 package org.hyperic.hq.test;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -74,6 +75,7 @@ import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
+import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.DataManager;
@@ -346,4 +348,12 @@ public class TestHelper {
         }
 	    return this.msmtManager.createMeasurements(subject, rsc.getEntityId(), tids, intervals, cr);
 	}
+	
+    public void addData(List<DataPoint> data, String aggTable) throws Exception {
+        this.dataManager.addData(data, aggTable, this.sessionFactory.getCurrentSession().connection());
+    }
+    
+    public void addData(List<DataPoint> data) {
+        this.dataManager.addData(data, this.sessionFactory.getCurrentSession().connection());
+    }
 }// EOC

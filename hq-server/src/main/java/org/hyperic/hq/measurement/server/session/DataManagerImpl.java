@@ -260,17 +260,13 @@ public class DataManagerImpl implements DataManager {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void addData(List<DataPoint> data, String aggTable) throws SQLException {
-        Connection conn = safeGetConnection();
+    public void addData(List<DataPoint> data, String aggTable, Connection conn) throws Exception {
         try {
-            try {
-                insertDataWithOneInsert(data, aggTable, conn);
-                conn.commit();
-            } catch (SQLException e) {
-                conn.rollback();
-                throw e;
-            } finally {
-            }
+            insertDataWithOneInsert(data, aggTable, conn);
+            conn.commit();
+        } catch (Exception e) {
+            conn.rollback();
+            throw e;
         } finally {
             DBUtil.closeConnection(LOG_CTX, conn);
         }
@@ -305,6 +301,15 @@ public class DataManagerImpl implements DataManager {
             DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
         }
     }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public boolean addData(List<DataPoint> data) {
+        return this._addData(data,safeGetConnection());
+    }
+    
+    public boolean addData(List<DataPoint> data, Connection conn) {
+        return this._addData(data,safeGetConnection());
+    }
     
     /**
      * Write metric data points to the DB with transaction
@@ -315,8 +320,7 @@ public class DataManagerImpl implements DataManager {
      * 
      * 
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public boolean addData(List<DataPoint> data) {
+    protected boolean _addData(List<DataPoint> data, Connection conn) {
         if (shouldAbortDataInsertion(data)) {
             return true;
         }
@@ -329,7 +333,6 @@ public class DataManagerImpl implements DataManager {
         boolean succeeded = false;
         final boolean debug = log.isDebugEnabled();
 
-        Connection conn = safeGetConnection();
         if (conn == null) {
             return false;
         }
