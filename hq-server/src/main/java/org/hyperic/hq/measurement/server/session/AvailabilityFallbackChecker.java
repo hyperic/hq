@@ -8,6 +8,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Hibernate;
+import org.hibernate.Session;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDAO;
@@ -17,6 +18,8 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.product.MetricValue;
+import org.springframework.integration.file.remote.session.SessionFactory;
+import org.springframework.orm.hibernate3.SessionFactoryUtils;
 
 
 
@@ -48,6 +51,7 @@ public class AvailabilityFallbackChecker {
 	private AvailabilityManager availabilityManager;
 	private AvailabilityCache availabilityCache;
 	private ResourceManager resourceManager;
+	//AvailabilityDataDAO availabilityDao;
 	private long curTimeStamp = 0;
 
 	
@@ -98,27 +102,33 @@ public class AvailabilityFallbackChecker {
     
 	// check if agent, and if so - mark it as down.
 	private boolean isHQAgent(Measurement meas) {
-		return true;
-		/*
+		//return true;
+		
 		try {
-			// Need to reload the Resource, since LazyEvaluation session may be closed.
+			// Need to re-attach the Resource, since session may be closed.
+			//Session session = SessionFactoryUtils.getSession(availabilityDao.getFactory(), true);
+			
 			Resource measResource = meas.getResource();
-			Integer measResourceId = measResource.getId();
-			measResource = resourceManager.findResourceById(measResourceId);
-			if (measResource == null)
-				return false;
+			measResource = resourceManager.getResourceById(measResource.getId());
+			//Integer protoId = measResource.getPrototypeId();
+			//Resource prototype = resourceManager.findResourceById(protoId);
 			Resource prototype = measResource.getPrototype();
+			if (prototype == null)
+				return false;
+			
 			String prototypeName = prototype.getName();
 			if (prototypeName.equals(AppdefEntityConstants.HQ_AGENT_PROTOTYPE_NAME)) {
-				logDebug("isHQHagent:  Found: " + measResourceId);
+				logDebug("isHQHagent:  Found: " + measResource.getId());
 				return true;
 			}
+			//session.close();
+			
 		} catch (Exception e) {
 			logDebug(e.toString());
-			return true;
-		}
+			return false;
+		} 
 		return false;
-		*/
+		
 	}
 
 
@@ -177,7 +187,7 @@ public class AvailabilityFallbackChecker {
         if ((parentStatus == MeasurementConstants.AVAIL_UP) || (parentStatus == MeasurementConstants.AVAIL_DOWN)) {
         	DataPoint newDataPoint = new DataPoint(availabilityDataPoint.getMeasurementId(), lastParentDataPoint.getMetricValue());
         	ResourceDataPoint resPoint = new ResourceDataPoint(availabilityDataPoint.getResource(), newDataPoint);
-    		logDebug("getPlatformStatusFromVC: found parent " + resPoint.toString());
+    		logDebug("getPlatformStatusFromVC: found parent measurement: " + lastParentDataPoint.getMeasurementId() + " adding point: " + resPoint.toString());
         	return resPoint;
         }
 

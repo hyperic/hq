@@ -40,7 +40,6 @@ import javax.annotation.PreDestroy;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.authz.server.session.ResourceDAO;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.ServerConfigManager;
@@ -87,7 +86,7 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
 	private ScheduledThreadPoolExecutor _workerExecutor;
 	private AvailabilityFallbackCheckQue checkQue;
 	private AvailabilityFallbackChecker fallbackChecker = null;
-	private ResourceManager resourceMgr;
+	private ResourceManager resourceManager;
     
 
     @Autowired
@@ -96,13 +95,13 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
                                         AvailabilityCache availabilityCache,
                                         BackfillPointsService backfillPointsService,
                                         ServerConfigManager serverConfigManager,
-                                        ResourceManager resourceMgr) {
+                                        ResourceManager resourceManager) {
         this.concurrentStatsCollector = concurrentStatsCollector;
         this.availabilityCache = availabilityCache;
         this.availabilityManager = availabilityManager;
         this.backfillPointsService = backfillPointsService;
         this.serverConfigManager = serverConfigManager;
-        this.resourceMgr = resourceMgr;
+        this.resourceManager = resourceManager;
         setup();
     }
 
@@ -173,7 +172,7 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
     	this._workers = new ArrayList<AvailabilityFallbackChecker>();
         for (int i=0; i<_numWorkers; ++i) {
         	logDebug("createFallbackCheckers: creating thread #" + i);
-        	AvailabilityFallbackChecker checker = new AvailabilityFallbackChecker(availabilityManager, availabilityCache, resourceMgr);
+        	AvailabilityFallbackChecker checker = new AvailabilityFallbackChecker(availabilityManager, availabilityCache, resourceManager);
         	this._workers.add(checker);
         	AvailabilityPlatformFallbackCheckThread checkThread = new AvailabilityPlatformFallbackCheckThread(checker);
             _workerThreads.add(checkThread);
@@ -299,7 +298,7 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
                 checkQue.addToQue(backfillPoints);
                 List<ResourceDataPoint> availabilityDataPoints = pollWorkList();
                 if (fallbackChecker == null)
-                	fallbackChecker = new AvailabilityFallbackChecker(this.availabilityManager, availabilityCache, resourceMgr);
+                	fallbackChecker = new AvailabilityFallbackChecker(this.availabilityManager, availabilityCache, resourceManager);
                 fallbackChecker.checkAvailability(availabilityDataPoints, current);
             } finally {
                 synchronized (IS_RUNNING_LOCK) {
