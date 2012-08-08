@@ -297,6 +297,8 @@ public class AvailabilityDataDAO
             start).setLong("endtime", end).list();
     }
 
+ 
+    
     /**
      * @return List of Object[]. [0] = Measurement Obj [1] = min(availVal), [2]
      *         = max(availVal), [3] = avg(availVal) [4] = mid count, [5] = total
@@ -332,6 +334,35 @@ public class AvailabilityDataDAO
         for (int i=0; i<size; i+=batchSize) {
             final int last = Math.min(i+batchSize, size);
             final List sublist = measIds.subList(i, last);
+            rtn.addAll(getSession()
+                        .createQuery(sql)
+                         .setLong("startime", start)
+                       .setLong("endtime", end)
+                         .setParameterList("mids", sublist, new IntegerType())
+                       .list());
+        }
+        return rtn;
+    }
+
+    @SuppressWarnings("unchecked")
+    List<Object[]> findAggregateAvailabilityUp(final List<Integer> mids, final long start, final long end) {
+        if (mids==null || mids.size() == 0) {
+            return null;
+        }
+        String sql = new StringBuilder()
+            .append("SELECT m, sum(").append(TOTAL_TIME).append(")")
+            .append(" FROM Measurement m JOIN m.availabilityData rle")
+            .append(" WHERE m in (:mids) AND rle.endtime > :startime AND rle.availabilityDataId.startime < :endtime AND rle.availVal = " + MeasurementConstants.AVAIL_UP)
+            .append(" GROUP BY m.id, m._version_, m.instanceId, m.template, m.mtime,m.enabled, m.interval, m.formula,m.resource")
+            .append(" ORDER BY rle.endtime")
+            .toString();
+        final int size = mids.size();
+        final HQDialect dialect = getHQDialect();
+        final int batchSize = dialect.getMaxExpressions() < 0 ? Integer.MAX_VALUE : dialect.getMaxExpressions();
+        final List<Object[]> rtn = new ArrayList<Object[]>(size);
+        for (int i=0; i<size; i+=batchSize) {
+            final int last = Math.min(i+batchSize, size);
+            final List<Integer> sublist = mids.subList(i, last);
             rtn.addAll(getSession()
                         .createQuery(sql)
                          .setLong("startime", start)

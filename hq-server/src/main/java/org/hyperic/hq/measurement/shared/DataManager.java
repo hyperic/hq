@@ -25,6 +25,7 @@
  */
 package org.hyperic.hq.measurement.shared;
 
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -71,6 +72,7 @@ public interface DataManager {
      */
     public void addData(List<DataPoint> data, boolean overwrite);
 
+    public void addData(List<DataPoint> data, String aggTable) throws SQLException;
 
     /**
      * Fetch the list of historical data points given a begin and end time
@@ -224,5 +226,8 @@ public interface DataManager {
      * 
      */
     public Collection<HighLowMetricValue> getRawData(Measurement m, long begin, long end, AtomicLong publishedInterval);
+
+    public Map<Integer, double[]> getAggregateDataAndAvailUpByMetric(final List<Measurement> hqMsmts, long beginMilli,
+            long endMilli);
 
 }

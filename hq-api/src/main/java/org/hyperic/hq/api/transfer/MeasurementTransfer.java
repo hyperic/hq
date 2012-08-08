@@ -27,15 +27,15 @@ public interface MeasurementTransfer {
 	 * @throws ParseException 
 	 * @throws PermissionException 
 	 * @throws TimeframeBoundriesException 
-	 * @throws TimeframeSizeException 
-	 * @throws IllegalArgumentException 
 	 * @throws ObjectNotFoundException 
 	 * @throws UnsupportedOperationException 
+	 * @throws TimeframeSizeException 
+	 * @throws IllegalArgumentException 
 	 */
     public MeasurementResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest measurementRequest,
-			final String rscId, final String begin, final String end) throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException, IllegalArgumentException, TimeframeSizeException, TimeframeBoundriesException;
+			final String rscId, final String begin, final String end) throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException, TimeframeSizeException;
     
     public ResourceMeasurementBatchResponse getAggregatedMetricData(ApiMessageContext apiMessageContext, final ResourceMeasurementRequests hqMsmtReqs, 
             final String begin, final String end) 
-            throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException;
+            throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException;
 }
