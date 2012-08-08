@@ -46,7 +46,6 @@ import org.springframework.test.annotation.DirtiesContext;
 public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService, MeasurementServiceTestDataPopulator> {
     @Rule 
     public RuleChain interceptorsChain = super.interceptorsChain ;
-//    private final static DateFormat DATE_FORMAT = new SimpleDateFormat() ;
 
     public static class MeasurementServiceTestDataPopulator extends AbstractRestTestDataPopulator<MeasurementService>{
         static final int NO_OF_TEST_PLATFORMS = 1 ;
@@ -78,13 +77,12 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
 
                 String agentToken = "agentToken" + System.currentTimeMillis(); 
                 this.testAgent = this.createAgent("127.0.0.1", 2144, "authToken", agentToken, "5.0");
-String x = "";//String.valueOf(new Random().nextInt());
                 final String pluginName = "Test_Plugin";
-                final String platName = "test.ubuntu.eng.vmware.com." + x; 
-                final String platType = "platTypeTest" + x;
-                final String serverName = "svrTest" + x;
+                final String platName = "test.ubuntu.eng.vmware.com."; 
+                final String platType = "platTypeTest";
+                final String serverName = "svrTest";
                 final String serverVer = "1.0";
-                final String tmpName = "Template Test" + x;
+                final String tmpName = "Template Test";
                 PlatformType platformType = this.platformManager.createPlatformType(platType, pluginName) ; 
                 platform = this.createPlatform(agentToken, platType, platName, platName, subject) ;  
                 ServerType serverType = this.createServerType(serverName, serverVer, new String[]{ platType }, pluginName, false);
