@@ -32,10 +32,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -58,7 +56,6 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.shared.HierarchicalAlertingManager;
 import org.hyperic.hq.events.shared.MaintenanceEventManager;
-import org.hyperic.hq.util.Reference;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
@@ -447,7 +444,7 @@ public class PermissionManagerImpl extends PermissionManager {
         }
         final ResourceDAO resourceDAO = getResourceDAO();
         final Collection<Resource> resources = (subj.getId().equals(1)) ?
-            resourceDAO.findAll() : resourceDAO.findByOwner(subj);
+            resourceDAO.findAll() : resourceDAO.findByOwner(subj, false);
         final List<AppdefEntityID> rtn = new ArrayList<AppdefEntityID>(resources.size());
         final Set<Integer> typeIds = new HashSet<Integer>();
         for (final ResourceType type : resourceTypes) {
@@ -474,14 +471,19 @@ public class PermissionManagerImpl extends PermissionManager {
 
     public <T> Set<T> findViewableResources(AuthzSubject subj, Collection<ResourceType> resourceTypes,
                                             IntegerConverter<T> converter) {
+        return findViewableResources(subj, resourceTypes, false, converter);
+    }
+
+    public <T> Set<T> findViewableResources(AuthzSubject subj, Collection<ResourceType> resourceTypes,
+                                            boolean orderName, IntegerConverter<T> converter) {
         if (resourceTypes.isEmpty()) {
             return Collections.emptySet();
         }
         final ResourceDAO resourceDAO = getResourceDAO();
         final Collection<Resource> resources = (subj.getId().equals(1)) ?
-            resourceDAO.findAll() : resourceDAO.findByOwner(subj);
-        final Set<T> rtn = new HashSet<T>();
+            resourceDAO.findAllOrderByName() : resourceDAO.findByOwner(subj, orderName);
         final Set<Integer> typeIds = new HashSet<Integer>();
+        final Set<T> rtn = new HashSet<T>();
         for (final ResourceType type : resourceTypes) {
             typeIds.add(type.getId());
         }
@@ -508,7 +510,7 @@ public class PermissionManagerImpl extends PermissionManager {
         }
         final ResourceDAO resourceDAO = getResourceDAO();
         final Collection<Resource> resources = (subj.getId().equals(1)) ?
-            resourceDAO.findAll() : resourceDAO.findByOwner(subj);
+            resourceDAO.findAll() : resourceDAO.findByOwner(subj, false);
         final Set<Integer> typeIds = new HashSet<Integer>();
         for (final ResourceType type : types) {
             typeIds.add(type.getId());
