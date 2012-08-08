@@ -163,4 +163,6 @@ public interface AvailabilityManager {
 
     public AvailabilityFallbackCheckQue getFallbackCheckQue();
 
+    public Map<Integer, double[]> getAggregateDataAndAvailUpByMetric(final List<Integer> avIds, long begin, long end);
+
 }

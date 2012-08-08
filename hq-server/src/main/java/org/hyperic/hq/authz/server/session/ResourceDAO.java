@@ -218,8 +218,8 @@ public class ResourceDAO
     }
 
     @SuppressWarnings("unchecked")
-    public Collection<Resource> findByOwner(AuthzSubject owner) {
-        String sql = "from Resource where owner.id = ?";
+    public Collection<Resource> findByOwner(AuthzSubject owner, boolean orderName) {
+        String sql = "from Resource where owner.id = ?" + (orderName ? " order by name" : "");
         return getSession().createQuery(sql).setInteger(0, owner.getId().intValue()).list();
     }
 
