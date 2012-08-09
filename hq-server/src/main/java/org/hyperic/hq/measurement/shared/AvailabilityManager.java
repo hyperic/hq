@@ -165,4 +165,6 @@ public interface AvailabilityManager {
 
     public Map<Integer, double[]> getAggregateDataAndAvailUpByMetric(final List<Integer> avIds, long begin, long end);
 
+    public Map<Integer, DownMetricValue> getUnavailResMap();
+
 }

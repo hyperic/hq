@@ -240,10 +240,22 @@ public class ResourceGroupDAO
      * @return {@link Resource}s
      */
     @SuppressWarnings("unchecked")
+    int getNumMembers(ResourceGroup g) {
+        String hql = "select count(g.resource) from GroupMember g " +
+                     "where g.group = :group and g.resource.resourceType is not null";
+        return ((Number) createQuery(hql).setParameter("group", g).uniqueResult()).intValue();
+    }
+
+    /**
+     * Get resources belonging to a group via the persistence mechanism.
+     * 
+     * @return {@link Resource}s
+     */
+    @SuppressWarnings("unchecked")
     List<Resource> getMembers(ResourceGroup g) {
-        return (List<Resource>) createQuery("select g.resource from GroupMember g where g.group = :group " +
-                                            "and g.resource.resourceType is not null " + "order by g.resource.name")
-            .setParameter("group", g).list();
+        String hql = "select g.resource from GroupMember g " +
+                     "where g.group = :group and g.resource.resourceType is not null order by g.resource.name";
+        return (List<Resource>) createQuery(hql).setParameter("group", g).list();
     }
 
     /**
