@@ -129,7 +129,7 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
                     for (long i = 0 ; i<numOfRawDTPsTillNow  ; i++) {
                         rawDTPs.add(new DataPoint(msmt.getId(), new HighLowMetricValue(i+1,i+1,i+1,beginRaw+(i*msmtInterval))));
                     }
-                    this.dataManager.addData(rawDTPs);
+                    this.addData(rawDTPs);
                     aggTableToMetrics.put(MeasurementConstants.TAB_DATA, rawDTPs);
                     // 1 hour
                     List<DataPoint> hourlyData = new ArrayList<DataPoint>();
@@ -140,7 +140,7 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
                         double val = 10*(i+1);
                         hourlyData.add(new DataPoint(msmt.getId(), new HighLowMetricValue(val,val+5,val-5,beginHourly+(i*HOUR_IN_MILLI))));
                     }
-                    this.dataManager.addData(hourlyData, MeasurementConstants.TAB_DATA_1H);
+                    this.addData(hourlyData, MeasurementConstants.TAB_DATA_1H);
                     aggTableToMetrics.put(MeasurementConstants.TAB_DATA_1H, hourlyData);
                     // six hours
                     List<DataPoint> sixHourlyData = new ArrayList<DataPoint>();
@@ -151,7 +151,7 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
                         double val = 100*(i+1);
                         sixHourlyData.add(new DataPoint(msmt.getId(), new HighLowMetricValue(val,val+5,val-5,beginSixHourly+(i*SIX_HOURS_IN_MILLI))));
                     }
-                    this.dataManager.addData(sixHourlyData, MeasurementConstants.TAB_DATA_6H);
+                    this.addData(sixHourlyData, MeasurementConstants.TAB_DATA_6H);
                     aggTableToMetrics.put(MeasurementConstants.TAB_DATA_6H, sixHourlyData);
                     // day
                     List<DataPoint> dailyData = new ArrayList<DataPoint>();
@@ -162,7 +162,7 @@ public class MeasurementServiceTest extends RestTestCaseBase<MeasurementService,
                         double val = 1000*(i+1);
                         dailyData.add(new DataPoint(msmt.getId(), new HighLowMetricValue(val,val+5,val-5,beginDaily+(i*DAY_IN_MILLI))));
                     }
-                    this.dataManager.addData(dailyData, MeasurementConstants.TAB_DATA_1D);
+                    this.addData(dailyData, MeasurementConstants.TAB_DATA_1D);
                     aggTableToMetrics.put(MeasurementConstants.TAB_DATA_1D, dailyData);
 
                     hqMetrics.put(msmt, aggTableToMetrics);
