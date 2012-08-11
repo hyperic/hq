@@ -80,17 +80,6 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         this.errorHandler = errorHandler;
     }
     
-    protected long[] getTimeFrame(final String begin, final String end) throws ParseException, TimeframeBoundriesException {
-        final DateTimeFormatter dateFormat = ISODateTimeFormat.dateTimeParser() ;
-        long[] timeFrame = new long[2];
-        timeFrame[0] = dateFormat.parseMillis(begin) ; 
-        timeFrame[1] = dateFormat.parseMillis(end) ;
-        if (timeFrame[0]>=timeFrame[1] || timeFrame[1]>Calendar.getInstance().getTimeInMillis()) {
-            throw new TimeframeBoundriesException("Begin= " +begin +", End=" +end);
-        }
-        return timeFrame;
-    }
-    
     protected List<Measurement> getMeasurements(final String rscId, final List<MeasurementTemplate> tmps, final AuthzSubject authzSubject) throws PermissionException {
         // get measurements
         Map<Integer, List<Integer>> resIdsToTmpIds = new HashMap<Integer, List<Integer>>();
@@ -112,22 +101,23 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     }
     
     public MeasurementResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest hqMsmtReq, 
-            final String rscId, final String begin, final String end) 
+            final String rscId, final Date begin, final Date end) 
             throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException, TimeframeSizeException {
 
         MeasurementResponse res = new MeasurementResponse();
         if (hqMsmtReq==null || rscId==null || "".equals(rscId) 
                 || hqMsmtReq==null || hqMsmtReq.getMeasurementTemplateNames()==null || hqMsmtReq.getMeasurementTemplateNames().size()==0 
-                || begin==null || end==null || begin.length()<=0 || end.length()<=0) {
+                || begin==null || end==null) {
             throw new UnsupportedOperationException("Resource ID= " +rscId
                             + hqMsmtReq!=null?", Measurements Names= "+ hqMsmtReq.getMeasurementTemplateNames():""
                             + ", Message Body= " + hqMsmtReq
                             + ", Begin= " + begin
                             + ", End= " + end);
         }
+        if (begin.after(end) || end.after(Calendar.getInstance().getTime())) {
+            throw new TimeframeBoundriesException("Begin= " +begin +", End=" +end);
+        }
         AuthzSubject authzSubject = apiMessageContext.getAuthzSubject();
-        long[] timeFrame = getTimeFrame(begin, end);
-        long beginMilli = timeFrame[0], endMilli = timeFrame[1]; 
 
         // extract all input measurement templates
         List<String> tmpNames = hqMsmtReq.getMeasurementTemplateNames();
@@ -140,7 +130,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         // get metrics
         for (Measurement hqMsmt : hqMsmts) {
             org.hyperic.hq.api.model.measurements.Measurement msmt = this.mapper.toMeasurement(hqMsmt);
-            List<HighLowMetricValue> hqMetrics = this.dataMgr.getHistoricalData(hqMsmt, beginMilli, endMilli, true, MAX_DTPS);
+            List<HighLowMetricValue> hqMetrics = this.dataMgr.getHistoricalData(hqMsmt, begin.getTime(), end.getTime(), true, MAX_DTPS);
             if (hqMetrics!=null && hqMetrics.size()!=0) {
                 List<org.hyperic.hq.api.model.measurements.Metric> metrics = this.mapper.toMetrics(hqMetrics);
                 msmt.setMetrics(metrics);
@@ -151,16 +141,17 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
      }
     
     public ResourceMeasurementBatchResponse getAggregatedMetricData(ApiMessageContext apiMessageContext,
-            ResourceMeasurementRequests hqMsmtReqs, String begin, String end)
+            ResourceMeasurementRequests hqMsmtReqs, Date begin, Date end)
             throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException {
         ResourceMeasurementBatchResponse res = new ResourceMeasurementBatchResponse(this.errorHandler);
-        if (hqMsmtReqs==null || hqMsmtReqs.getMeasurementRequests()==null || hqMsmtReqs.getMeasurementRequests().size()==0 || begin==null || end==null || begin.length()<=0 || end.length()<=0) {
+        if (hqMsmtReqs==null || hqMsmtReqs.getMeasurementRequests()==null || hqMsmtReqs.getMeasurementRequests().size()==0 || begin==null || end==null) {
             throw new UnsupportedOperationException("the request is missing some essential details");
         }
-        AuthzSubject authzSubject = apiMessageContext.getAuthzSubject();
-        long[] timeFrame = getTimeFrame(begin, end);
-        long beginMilli = timeFrame[0], endMilli = timeFrame[1];
+        if (begin.after(end) || end.after(Calendar.getInstance().getTime())) {
+            throw new TimeframeBoundriesException("Begin= " +begin +", End=" +end);
+        }
         
+        AuthzSubject authzSubject = apiMessageContext.getAuthzSubject();
         // extract all input measurement templates
         for (ResourceMeasurementRequest hqMsmtReq : hqMsmtReqs.getMeasurementRequests()) {
             String rscId = hqMsmtReq.getRscId();
@@ -180,7 +171,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             for (Measurement msmt : hqMsmts) {
                 msmtIdToMsmt.put(msmt.getId(), msmt);
             }
-            Map<Integer, double[]> msmtNamesToAgg = this.dataMgr.getAggregateDataAndAvailUpByMetric(hqMsmts, beginMilli, endMilli);
+            Map<Integer, double[]> msmtNamesToAgg = this.dataMgr.getAggregateDataAndAvailUpByMetric(hqMsmts, begin.getTime(), end.getTime());
             
             ResourceMeasurementResponse msmtRes = new ResourceMeasurementResponse(rscId);
             for (Map.Entry<Integer, double[]> msmtNameToAggEntry : msmtNamesToAgg.entrySet()) {

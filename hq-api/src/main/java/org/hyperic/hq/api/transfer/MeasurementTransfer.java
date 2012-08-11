@@ -1,6 +1,7 @@
 package org.hyperic.hq.api.transfer;
 
 import java.text.ParseException;
+import java.util.Date;
 
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
@@ -33,9 +34,9 @@ public interface MeasurementTransfer {
 	 * @throws IllegalArgumentException 
 	 */
     public MeasurementResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest measurementRequest,
-			final String rscId, final String begin, final String end) throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException, TimeframeSizeException;
+			final String rscId, final Date begin, final Date end) throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException, TimeframeSizeException;
     
     public ResourceMeasurementBatchResponse getAggregatedMetricData(ApiMessageContext apiMessageContext, final ResourceMeasurementRequests hqMsmtReqs, 
-            final String begin, final String end) 
+            final Date begin, final Date end) 
             throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException;
 }

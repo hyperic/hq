@@ -31,8 +31,8 @@ public interface MeasurementService {
 	@Path("/metrics/{rscId}")
 	MeasurementResponse getMetrics(final MeasurementRequest measurementRequest,
 	        @PathParam("rscId") final String rscId,
-	        @QueryParam("begin") final String begin,
-			@QueryParam("end") final String end) 
+	        @QueryParam("begin") final Date begin,
+			@QueryParam("end") final Date end) 
 			        throws PermissionException, SessionNotFoundException, SessionTimeoutException, Throwable;
 	
     /**
@@ -49,7 +49,7 @@ public interface MeasurementService {
 	@POST
     @Path("/metrics/aggregation")
     public ResourceMeasurementBatchResponse getAggregatedMetricData(final ResourceMeasurementRequests request, 
-            @QueryParam("begin") final String begin, 
-            @QueryParam("end") final String end) 
+            @QueryParam("begin") final Date begin, 
+            @QueryParam("end") final Date end) 
             throws ParseException, PermissionException, SessionNotFoundException, SessionTimeoutException;
 }

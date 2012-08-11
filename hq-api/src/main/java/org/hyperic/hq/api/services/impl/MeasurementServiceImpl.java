@@ -18,6 +18,7 @@ import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.text.ParseException;
+import java.util.Date;
 
 public class MeasurementServiceImpl extends RestApiService implements MeasurementService {
     @Autowired
@@ -26,11 +27,10 @@ public class MeasurementServiceImpl extends RestApiService implements Measuremen
     private ExceptionToErrorCodeMapper errorHandler ; 
     
 	public MeasurementResponse getMetrics(final MeasurementRequest measurementRequest,
-			final String rscId, final String begin, final String end)
+			final String rscId, final Date begin, final Date end)
 			        throws Throwable {
 	    try {
 	        try {
-//	        String begin = begin_.toString();
 	        ApiMessageContext apiMessageContext = newApiMessageContext();
 	        return measurementTransfer.getMetrics(apiMessageContext, measurementRequest, rscId, begin, end);
 	        
@@ -40,8 +40,6 @@ public class MeasurementServiceImpl extends RestApiService implements Measuremen
 	        }
         } catch (UnsupportedOperationException e) {
             throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.BAD_MEASUREMENT_REQ, e.getMessage());
-        } catch (ParseException e) {
-            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.WRONG_DATE_FORMAT, e.getMessage());
         } catch (ObjectNotFoundException e) {
             String missingObj = e.getEntityName();
             if (MeasurementTemplate.class.getName().equals(missingObj)) {
@@ -56,7 +54,7 @@ public class MeasurementServiceImpl extends RestApiService implements Measuremen
         }
     }
 
-    public ResourceMeasurementBatchResponse getAggregatedMetricData(ResourceMeasurementRequests hqMsmtReqs, String begin, String end)
+    public ResourceMeasurementBatchResponse getAggregatedMetricData(ResourceMeasurementRequests hqMsmtReqs, Date begin, Date end)
             throws ParseException, PermissionException, SessionNotFoundException, SessionTimeoutException {
         try {
             ApiMessageContext apiMessageContext = newApiMessageContext();
