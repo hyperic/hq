@@ -259,6 +259,53 @@ public class DataManagerImpl implements DataManager {
         addData(pts, overwrite);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void addData(List<DataPoint> data, String aggTable) throws SQLException {
+        Connection conn = safeGetConnection();
+        try {
+            try {
+                insertDataWithOneInsert(data, aggTable, conn);
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+            }
+        } finally {
+            DBUtil.closeConnection(LOG_CTX, conn);
+        }
+    }
+         
+    private void insertDataWithOneInsert(List<DataPoint> dpts, String table, Connection conn) {
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            StringBuilder values = new StringBuilder();
+            for (Iterator<DataPoint> i = dpts.iterator(); i.hasNext();) {
+                DataPoint pt = i.next();
+                Integer metricId = pt.getMeasurementId();
+                HighLowMetricValue metricVal = (HighLowMetricValue) pt.getMetricValue();
+                BigDecimal val = new BigDecimal(metricVal.getValue());
+                BigDecimal highVal = new BigDecimal(metricVal.getHighValue());
+                BigDecimal lowVal = new BigDecimal(metricVal.getLowValue());
+                values.append("(").append(metricId.intValue()).append(", ").append(
+                        metricVal.getTimestamp()).append(", ").append(
+                                getDecimalInRange(val, metricId)).append(", ").append(
+                                        getDecimalInRange(lowVal, metricId)).append(", ").append(
+                                                getDecimalInRange(highVal, metricId)).append("),");
+            }
+            String sql = "insert into " + table + " (measurement_id, timestamp, value, minvalue, maxvalue)" + 
+                    " values " + values.substring(0, values.length() - 1);
+            stmt = conn.createStatement();
+            stmt.executeUpdate(sql);
+        } catch (SQLException e) {
+            // If there is a SQLException, then none of the data points
+            // should be inserted. Roll back the txn.
+        } finally {
+            DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
+        }
+    }
+    
     /**
      * Write metric data points to the DB with transaction
      * 
@@ -921,7 +968,7 @@ public class DataManagerImpl implements DataManager {
      * @throws TimeframeSizeException 
      * @throws TimeframeBoundriesException 
      */
-    protected String getDataTable(long begin, long end, Measurement msmt, int maxDTPs) throws IllegalArgumentException, TimeframeSizeException, TimeframeBoundriesException {
+    protected String getDataTable(long begin, long end, Measurement msmt, int maxDTPs) throws TimeframeSizeException, TimeframeBoundriesException {
         long tf = end - begin;  // the time frame
         long maxInterval = tf / maxDTPs; // the max interval for which maxDTPs DTPs still fit in the time frame
         long msmtInterval = msmt.getInterval();
@@ -1042,7 +1089,7 @@ public class DataManagerImpl implements DataManager {
 
     @Transactional(readOnly = true)
     public List<HighLowMetricValue> getHistoricalData(Measurement m, long begin, long end,
-                                                          boolean prependAvailUnknowns, int maxDTPs) throws IllegalArgumentException, TimeframeSizeException, TimeframeBoundriesException {
+                                                          boolean prependAvailUnknowns, int maxDTPs) throws TimeframeSizeException, TimeframeBoundriesException {
         if (m.getTemplate().isAvailability()) {
             return availabilityManager.getHistoricalAvailData(m, begin, end, PageControl.PAGE_ALL, prependAvailUnknowns);
         } else {
@@ -1161,7 +1208,7 @@ public class DataManagerImpl implements DataManager {
         }
     }
 
-    private List<HighLowMetricValue> getNonAvailabilityMetricData(final Measurement m, long begin, long end, int maxDTPs) throws IllegalArgumentException, TimeframeSizeException, TimeframeBoundriesException {
+    private List<HighLowMetricValue> getNonAvailabilityMetricData(final Measurement m, long begin, long end, int maxDTPs) throws TimeframeSizeException, TimeframeBoundriesException {
         checkTimeArguments(begin, end);
         begin = TimingVoodoo.roundDownTime(begin, MINUTE);
         end = TimingVoodoo.roundDownTime(end, MINUTE);
@@ -1303,7 +1350,27 @@ public class DataManagerImpl implements DataManager {
             MeasurementConstants.COLL_TYPE_DYNAMIC, false, PageControl.PAGE_ALL);
         return getAggData(pts);
     }
+    
+    @Transactional(readOnly = true)
+    public Map<Integer, double[]> getAggregateDataAndAvailUpByMetric(final List<Measurement> measurements,
+            final long begin, final long end) {
+        List<Integer> avids = new ArrayList<Integer>();
+        List<Integer> mids = new ArrayList<Integer>();
+        for (Measurement meas : measurements) {
 
+            MeasurementTemplate t = meas.getTemplate();
+            if (t.isAvailability()) {
+                avids.add(meas.getId());
+            } else {
+                mids.add(meas.getId());
+            }
+        }
+        Map<Integer, double[]> rtn = getAggDataByMetric(mids.toArray(new Integer[0]),begin, end, false);
+        rtn.putAll(availabilityManager.getAggregateDataAndAvailUpByMetric(avids,begin, end));
+        return rtn;
+    }
+
+    
     /**
      * Fetch the list of historical data points, grouped by template, given a
      * begin and end time range. Does not return an entry for templates with no
@@ -1363,6 +1430,11 @@ public class DataManagerImpl implements DataManager {
         return rtn;
     }
 
+    /**
+     * @param measurements      source measurements list
+     * @param availIds          measurements from the source list of type availability
+     * @param measIdsByTempl    measurements from the source list which are not of type availability, sorted as per their type
+     */
     private final void setMeasurementObjects(final List<Measurement> measurements,
                                              final List<Integer> availIds,
                                              final Map<Integer, List<Measurement>> measIdsByTempl) {

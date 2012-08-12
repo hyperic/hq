@@ -1,6 +1,8 @@
 package org.hyperic.hq.api.services;
 
 import java.text.ParseException;
+import java.util.Calendar;
+import java.util.Date;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -31,7 +33,7 @@ public interface MeasurementService {
 	        @PathParam("rscId") final String rscId,
 	        @QueryParam("begin") final String begin,
 			@QueryParam("end") final String end) 
-			        throws PermissionException, SessionNotFoundException, SessionTimeoutException;
+			        throws PermissionException, SessionNotFoundException, SessionTimeoutException, Throwable;
 	
     /**
      * 

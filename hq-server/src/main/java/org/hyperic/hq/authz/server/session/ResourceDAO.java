@@ -55,6 +55,7 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
+import org.hyperic.util.pager.PageControl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -218,8 +219,19 @@ public class ResourceDAO
     }
 
     @SuppressWarnings("unchecked")
-    public Collection<Resource> findByOwner(AuthzSubject owner, boolean orderName) {
-        String sql = "from Resource where owner.id = ?" + (orderName ? " order by name" : "");
+    public Collection<Resource> findByOwner(AuthzSubject owner, int sortName) {
+        String sql = "from Resource where owner.id = ?";
+        switch (sortName) {
+            case PageControl.SORT_ASC:
+                sql = sql + " order by name asc";
+                break;
+            case PageControl.SORT_DESC:
+                sql = sql + " order by name desc";
+                break;
+            case PageControl.SORT_UNSORTED:
+                break;
+            default:
+        }
         return getSession().createQuery(sql).setInteger(0, owner.getId().intValue()).list();
     }
 
