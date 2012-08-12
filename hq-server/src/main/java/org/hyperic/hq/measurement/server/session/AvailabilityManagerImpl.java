@@ -129,7 +129,6 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
 
     private AvailabilityDataDAO availabilityDataDAO;
 
-    //private Set<Integer> measurementIDsMonitoredByServer;
     private AvailabilityFallbackCheckQue fallbackCheckQue;
     private MeasurementDAO measurementDAO;
     private MessagePublisher messagePublisher;
@@ -137,14 +136,6 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     private AvailabilityCache availabilityCache;
     private ConcurrentStatsCollector concurrentStatsCollector;
     private AgentDAO agentDAO;
-<<<<<<< HEAD
-    
-=======
-
-    public boolean isDevDebug() {
-		return false;
-	}
->>>>>>> c880b6eecfd7413dc5dc9ae56cc788b19620f091
     
     @Autowired
     public AvailabilityManagerImpl(AuthzSubjectManager authzSubjectManager, ResourceManager resourceManager,
