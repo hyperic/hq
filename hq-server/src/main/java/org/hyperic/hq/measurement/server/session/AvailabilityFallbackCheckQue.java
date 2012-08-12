@@ -24,9 +24,6 @@ public class AvailabilityFallbackCheckQue {
     private Map<Integer,Long> platformIdToLastUpdateTimestamp; 
 
     
-    private void logDebug(String message) {
-    	log.debug("aaa==========:" + message);
-    }
     
     // -----------------------------------------------------------------------------------
     // -----------------------------------------------------------------------------------
@@ -63,16 +60,13 @@ public class AvailabilityFallbackCheckQue {
      * @return
      */
     public synchronized boolean addToQue(Integer platformId, ResourceDataPoint dataPoint) {
-    	logDebug("addToQue: start " + platformId+ ", curQueSize: " + getSize());
+    	log.debug("addToQue: start " + platformId+ ", curQueSize: " + getSize());
     	if (this.currentPlatformsInQue.containsKey(platformId)) {
-    		logDebug("addToQue: platformsRecheckQue " + platformsRecheckQue.toString());
-    		logDebug("addToQue: platformsRecheckInProgress " + this.platformsRecheckInProgress.toString());
     		return false;
     	}
     	this.platformsRecheckQue.add(dataPoint);
     	this.currentPlatformsInQue.put(platformId, dataPoint);
     	this.measurementIdToPlatformId.put(dataPoint.getMeasurementId(), platformId);
-    	logDebug("addToQue: added");
     	return true;
     }
     
@@ -82,7 +76,6 @@ public class AvailabilityFallbackCheckQue {
      * @return
      */
     public synchronized int addToQue(Map<Integer, ResourceDataPoint> platformsToAdd) {
-    	logDebug("addToQue: list");
     	int res = 0;
     	for (Integer platformId : platformsToAdd.keySet()) {
     		boolean added = addToQue(platformId, platformsToAdd.get(platformId));
@@ -97,13 +90,12 @@ public class AvailabilityFallbackCheckQue {
      * @return
      */
 	public synchronized ResourceDataPoint poll() {
-    	logDebug("poll: start, que size: " + getSize());
+    	log.debug("poll: start, que size: " + getSize());
 		ResourceDataPoint res = this.platformsRecheckQue.poll();
 		if (res != null) {
 			Integer platformId = res.getResource().getId();
 			this.platformsRecheckInProgress.add(platformId);
 		}
-    	logDebug("poll: end, que size: " + getSize());
 		return res;
 	}
 
@@ -116,7 +108,6 @@ public class AvailabilityFallbackCheckQue {
 	 */
 	public synchronized Collection<DataPoint> beforeDataUpdate(Collection<DataPoint> dataPoints, boolean isUpdateFromServer) {
 		
-    	logDebug("beforeDataUpdate: start, dataPoints size: " + dataPoints.size());
 		Long curTimeStamp = new Long(getCurTimestamp());
 		Collection<DataPoint> res = new ArrayList<DataPoint>();
 		for (DataPoint dataPoint : dataPoints) {
@@ -162,7 +153,8 @@ public class AvailabilityFallbackCheckQue {
 			
 		}
 
-    	logDebug("beforeDataUpdate: end, res size: " + res.size());
+		if (isUpdateFromServer)
+			log.debug("beforeDataUpdate from Server: updating: " + res.size() + " out of " + dataPoints.size());
 		return res;
 	}
 	
@@ -176,7 +168,7 @@ public class AvailabilityFallbackCheckQue {
 
     
     private synchronized boolean removeFromQueBeforeUpdateFromAgent(Integer platformId) {
-    	logDebug("removeFromQueBeforeUpdateFromAgent: start " + platformId+ ", curQueSize: " + getSize());
+    	log.debug("removeFromQueBeforeUpdateFromAgent: start " + platformId+ ", curQueSize: " + getSize());
 		if (this.platformsRecheckInProgress.contains(platformId)) {
 			this.platformsPendingQueRemoval.add(platformId);
 			return true;

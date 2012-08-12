@@ -138,9 +138,6 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     private ConcurrentStatsCollector concurrentStatsCollector;
     private AgentDAO agentDAO;
     
-	public boolean isDevDebug() {
-		return false;
-	}
     
     @Autowired
     public AvailabilityManagerImpl(AuthzSubjectManager authzSubjectManager, ResourceManager resourceManager, 
@@ -809,10 +806,6 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         addData(availDataPoints, sendData, false);
     }
     
-    private void logDebug(String message) {
-    	if (isDevDebug())
-    		_log.info("aaa==========:" + message);
-    }
     
     /**
      * Process Availability data.
@@ -843,16 +836,11 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             try {
                 availabilityCache.beginTran();
                 updateCache(availPoints, updateList, outOfOrderAvail);
-                logDebug("addData: after updateCache: availPoints:" + availPoints.size() + " updateList: " + updateList.size() + " outOfOrderAvail:" + outOfOrderAvail.size());
                 currAvails = createCurrAvails(outOfOrderAvail, updateList); // get current DB Availability state for the measurements.
-                logDebug("addData: after createCurrAvails: availPoints:" + availPoints.size() + " updateList: " + updateList.size() + " outOfOrderAvail:" + outOfOrderAvail.size());
                 state = captureCurrAvailState(currAvails); // this method is called for logging.
                 updateStates(updateList, currAvails, createMap, removeMap);
-                logDebug("addData: after updateStates: availPoints:" + availPoints.size() + " currAvails: " + currAvails.size() + " createMap:" + createMap.size() + " removeMap:" + removeMap.size());
                 updateOutOfOrderState(outOfOrderAvail, currAvails, createMap, removeMap);
-                logDebug("addData: after updateOutOfOrderState: availPoints:" + availPoints.size() + " currAvails: " + currAvails.size() + " createMap:" + createMap.size() + " removeMap:" + removeMap.size());
                 flushCreateAndRemoves(createMap, removeMap);
-                logDebug("addData: after flushCreateAndRemoves");
                 logErrorInfo(state, availPoints, currAvails);
                 availabilityCache.commitTran();
             } catch (Throwable e) {
@@ -911,7 +899,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             id.setMeasurement(rle.getMeasurement());
             id.setStartime(rle.getStartime());
             availabilityDataDAO.create(rle.getMeasurement(), rle.getStartime(), rle.getEndtime(), rle.getAvailVal());
-            logDebug("added: Availability "+rle.getAvailVal() + " starttime " + rle.getStartime() + " endtime " + rle.getEndtime());
+            _log.debug("added: Availability "+rle.getAvailVal() + " starttime " + rle.getStartime() + " endtime " + rle.getEndtime());
         }
         if (debug) {
             watch.markTimeEnd("create");

@@ -47,18 +47,9 @@ public class AvailabilityFallbackChecker {
 	private AvailabilityManager availabilityManager;
 	private AvailabilityCache availabilityCache;
 	private ResourceManager resourceManager;
-	//AvailabilityDataDAO availabilityDao;
 	private long curTimeStamp = 0;
 
 	
-    private void logDebug(String message) {
-    	if (availabilityManager.isDevDebug())
-    		log.info("aaa==========:" + message);
-    	else
-    		log.debug(message);
-    }
-    
-    
 
 	public AvailabilityFallbackChecker(AvailabilityManager availabilityManager, AvailabilityCache availabilityCache, ResourceManager resourceManager) {
 		this.availabilityManager = availabilityManager;
@@ -80,15 +71,12 @@ public class AvailabilityFallbackChecker {
 		for (ResourceDataPoint availabilityDataPoint : availabilityDataPoints) {
 			ResourceDataPoint platformAvailPoint = checkPlatformAvailability(availabilityDataPoint);
 			resPlatforms.add(platformAvailPoint);
-			logDebug("checkAvailability: " + platformAvailPoint.getValue());
-			//addPlatformDescendants(platformAvailPoint, res);
 		}
-		log.info("checkAvailability: found " + resPlatforms.size() + " Platforms.");
+		log.info("checkAvailability: found " + resPlatforms.size() + " platforms.");
 		Collection<DataPoint> res = addStatusOfPlatformsDescendants(resPlatforms);
 		log.info("checkAvailability: found " + res.size() + " platforms & descendants.");
 		//res.addAll(availabilityDataPoints);
 		storeUpdates(res);
-		logDebug("checkAvailability: end");
 	}
 
     public Object getLock() {
@@ -101,9 +89,6 @@ public class AvailabilityFallbackChecker {
 	// check if agent, and if so - mark it as down.
 	private boolean isHQAgent(Measurement meas) {
 		try {
-			// Need to re-attach the Resource, since session may be closed.
-			//Session session = SessionFactoryUtils.getSession(availabilityDao.getFactory(), true);
-			
 			Resource measResource = meas.getResource();
 			measResource = resourceManager.getResourceById(measResource.getId());
 			Resource prototype = measResource.getPrototype();
@@ -116,7 +101,8 @@ public class AvailabilityFallbackChecker {
 				return true;
 			}
 		} catch (Exception e) {
-			logDebug(e.toString());
+			log.warn(e.toString());
+			log.warn("IsHQAgent: returning false.");
 			return false;
 		} 
 		return false;
@@ -130,7 +116,6 @@ public class AvailabilityFallbackChecker {
 	}
 
 	private ResourceDataPoint checkPlatformAvailability(ResourceDataPoint availabilityDataPoint) {
-		logDebug("checkPlatformAvailability");
 		ResourceDataPoint res = getPlatformStatusFromVC(availabilityDataPoint);
 		if (res != null)
 			return res;
@@ -142,14 +127,13 @@ public class AvailabilityFallbackChecker {
 
 
 	private ResourceDataPoint getPlatformStatusByPing(ResourceDataPoint availabilityDataPoint) {
-		logDebug("getPlatformStatusByPing" );
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 
 	private ResourceDataPoint getPlatformStatusFromVC(ResourceDataPoint availabilityDataPoint) {
-		logDebug("getPlatformStatusFromVC" );
+		log.debug("getPlatformStatusFromVC" );
 		Integer platformId = availabilityDataPoint.getResource().getId();
 		List<Integer> resourceIds = new ArrayList<Integer>();
 		resourceIds.add(platformId);
@@ -199,7 +183,7 @@ public class AvailabilityFallbackChecker {
 
 	@Transactional
 	private Collection<DataPoint> addStatusOfPlatformsDescendants(Collection<ResourceDataPoint> checkedPlatforms) {
-		logDebug("addStatusOfPlatformsDescendants: start" );
+		log.debug("addStatusOfPlatformsDescendants: start" );
 		final Collection<DataPoint> res = new ArrayList<DataPoint>();
 		final List<Integer> resourceIds = new ArrayList<Integer>();
 		for (ResourceDataPoint rDataPoint : checkedPlatforms) {
@@ -240,7 +224,7 @@ public class AvailabilityFallbackChecker {
 				res.add(point);
 			}
 		}
-		logDebug("addStatusOfPlatformsDescendants: end, res size: " + res.size() );
+		log.debug("addStatusOfPlatformsDescendants: end, res size: " + res.size() );
 		return res;
 	}
 	
