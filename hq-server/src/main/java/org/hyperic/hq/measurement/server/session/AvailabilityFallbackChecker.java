@@ -261,7 +261,7 @@ public class AvailabilityFallbackChecker {
 					// TODO: Shouldn't platform be marked as UP?
 					continue;
 				}
-				final MetricValue val = new MetricValue(curStatus, rdp.getTimestamp());
+				final MetricValue val = new MetricValue(curStatus, backfillTime);
 				final MeasDataPoint point = new MeasDataPoint(meas.getId(), val, true);
 				res.add(point);
 			}
