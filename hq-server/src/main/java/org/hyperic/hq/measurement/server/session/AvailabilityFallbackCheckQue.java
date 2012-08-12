@@ -12,31 +12,64 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 
-
+/**
+ * An object that manages a que of Platform IDs for platforms for which fallback availability check needs to be done.
+ * Every X seconds, a FallbackChecker polls N platform IDs, checks for their availability, and re-adds them to the Que
+ * 
+ * <BR><B><U>Que flow:</U></B>
+ * <BR><B>addToQue</B> - Platform ID is added to the platformsRecheckQue, if it's not yet there.
+ * <BR><B>poll</B> - PlatformID moves from platformsRecheckQue to platformsRecheckInProgress member.
+ * <BR><B>beforeDataUpdate</B> - before availability data is about to be stored in the DB/Cache, the que is updated:
+ * <BR>	- if this is an update from the server: 
+ * <BR>		If PlatformID exists in platformsPendingQueRemoval - it is removed from all the members/
+ * <BR>	Otherwise: PlatformID is moved back from platformsRecheckInProgress into platformsRecheckQue 
+ * 			to be rechecked after the next interval.
+ * 	<BR>- if this is an update from the agent: 
+ * 	<BR>	if currently PlatformID is not processed (it is not in platformsRecheckInProgress) - it is removed from all Que members.
+ * 	<BR> 	Otherwise: PlatformID is added to platformsPendingQueRemoval, and will be cleaned once the recheck process ends.
+ * 
+ * @author amalia
+ *
+ */
 public class AvailabilityFallbackCheckQue {
 
+	
     private final Log log = LogFactory.getLog(AvailabilityFallbackCheckQue.class);
+    
+    // a que holding the platforms pending recheck
     private ConcurrentLinkedQueue<ResourceDataPoint> platformsRecheckQue;
+    
+    // Map:PlatformID->latest availability ResourceDataPoint>, for quick-access of platformsRecheckQue items. 
     private Map<Integer, ResourceDataPoint> currentPlatformsInQue;
+
+    // Set of Platform IDs, for platforms whose status is currently checked by AvailabilityFallbackChecker.
     private Set<Integer> platformsRecheckInProgress;
+    
+    // Set of Platform IDs, for platforms currently rechecked, which agent information was sent.
     private Set<Integer> platformsPendingQueRemoval;
+    
+    // Map: MeasurementID->PlatformID for quick-access
     private Map<Integer,Integer> measurementIdToPlatformId;
-    private Map<Integer,Long> platformIdToLastUpdateTimestamp; 
 
     
     
     // -----------------------------------------------------------------------------------
     // -----------------------------------------------------------------------------------
 
+    /**
+     * Default CTor
+     */
     public AvailabilityFallbackCheckQue() {
 		this.platformsRecheckQue = new ConcurrentLinkedQueue<ResourceDataPoint>();
 		this.currentPlatformsInQue = new HashMap<Integer, ResourceDataPoint>();
 		this.platformsRecheckInProgress = new HashSet<Integer>();
 		this.platformsPendingQueRemoval = new HashSet<Integer>();
 		this.measurementIdToPlatformId = new HashMap<Integer,Integer>();
-		this.platformIdToLastUpdateTimestamp = new HashMap<Integer,Long>();
     }
     
+    /**
+     * @return the number of Platforms pending availability status check
+     */
     public synchronized int getSize(){
     	return this.platformsRecheckQue.size();
     }
@@ -44,20 +77,12 @@ public class AvailabilityFallbackCheckQue {
     // -----------------------------------------------------------------------------------
     // -----------------------------------------------------------------------------------
     
-    /**
-     * result may be null, in case the last update was done by the agent.
-     * @param platformId
-     * @return
-     */
-    public Long getLastUpdateTimeByServer(Integer platformId) {
-    	return this.platformIdToLastUpdateTimestamp.get(platformId);
-    }
     
     /**
-     * 
-     * @param platformId
-     * @param dataPoint
-     * @return
+     * Add a single platform to the rechecks que.
+     * @param platformId - the platform to be checked.
+     * @param dataPoint - the latest status associated with the platform
+     * @return true, if added. false, if the platform is already in the que and will not be re-added.
      */
     public synchronized boolean addToQue(Integer platformId, ResourceDataPoint dataPoint) {
     	log.debug("addToQue: start " + platformId+ ", curQueSize: " + getSize());
@@ -71,9 +96,9 @@ public class AvailabilityFallbackCheckQue {
     }
     
     /**
-     * 
-     * @param platformsToAdd
-     * @return
+     * Adds a collection of platforms to the rechecks que. Platforms that already exist in the que will not be re-added.
+     * @param platformsToAdd - map:PlatformID->latest status associated with the platform
+     * @return the number of platforms actually added.
      */
     public synchronized int addToQue(Map<Integer, ResourceDataPoint> platformsToAdd) {
     	int res = 0;
@@ -86,8 +111,8 @@ public class AvailabilityFallbackCheckQue {
     }
     
     /**
-     * 
-     * @return
+     * Poll a platform to check availability for,
+     * @return the next ResourceDataPoint in the que. The ResourceDataPoint is the latest status of the checked platform. Return null if the que is empty.
      */
 	public synchronized ResourceDataPoint poll() {
     	log.debug("poll: start, que size: " + getSize());
@@ -101,14 +126,28 @@ public class AvailabilityFallbackCheckQue {
 
 
 	/**
-	 * 
-	 * @param dataPoints
-	 * @param isUpdateFromServer
-	 * @return
+	 * A method to be called before storing availability status updates.
+	 * <BR> This method updates the que and filters the given dataPoints list, so that agent updates will always override server calculations.
+	 * <BR> In case the update is from the agent:
+	 * <BR> 	- the returned list is identical to the input list.
+	 * <BR> 	- all platforms that are about to be updated are removed from the que (or added to the PendingRemoval list, if check is in progress).
+	 * <BR> In case the update is from the server:
+	 * <BR> 	- if the platform are in the PendingRemoval list - they are removed completely from the Que, and not inserted into the result.
+	 * <BR> 	- Otherwise - they are added into the result, and platforms are re-inserted into the recheckQue.
+	 * <BR> <B> Notes: </B>
+	 * <BR> - Case 1: agent updated platform status which recheck was done. In this case, the platform's descendants will not be added into the dataPoints
+	 * input since the checker will not add descendants with updated availability status. In case it will: the descendant status will remain as "UNKNOWN" until 
+	 * the next agent status update (half-an-interval or so).
+	 * <BR>	- Case 2: Over-checking: A platform is checked and then re-inserted to the que. 
+	 * <BR> In case of threads working on the same que, we may get over-checking, instead of checking every 2 minutes or so.
+	 * <BR> If we start working with several threads we need to use 2 queues intermittently - all threads poll from Que1 until the que is empty, 
+	 * every checked platform is inserted into Que2. In the next checks-round - poll from Que2 and insert into Que1.
+	 * @param dataPoints - a collection of availability datapoints about to be added.
+	 * @param isUpdateFromServer - true, if the server fallback checks asked for the updated, false if the agent updated with the status.
+	 * @return a filtered collection of datapoints, the ones that should be updated in the DB/cache
 	 */
 	public synchronized Collection<DataPoint> beforeDataUpdate(Collection<DataPoint> dataPoints, boolean isUpdateFromServer) {
 		
-		Long curTimeStamp = new Long(getCurTimestamp());
 		Collection<DataPoint> res = new ArrayList<DataPoint>();
 		for (DataPoint dataPoint : dataPoints) {
 			
@@ -132,7 +171,6 @@ public class AvailabilityFallbackCheckQue {
 	    	    	ResourceDataPoint platformDataPoint = this.currentPlatformsInQue.get(platformId);
 					this.platformsRecheckQue.remove(platformDataPoint);
 					this.measurementIdToPlatformId.remove(measurementId);
-					this.platformIdToLastUpdateTimestamp.remove(platformId);
 					this.currentPlatformsInQue.remove(platformId);
 				}
 				else {
@@ -141,7 +179,6 @@ public class AvailabilityFallbackCheckQue {
 					ResourceDataPoint pointToAddToQue = new ResourceDataPoint(queDataPoint.getResource(), dataPoint);
 					this.currentPlatformsInQue.remove(platformId);
 					addToQue(platformId, pointToAddToQue);
-					this.platformIdToLastUpdateTimestamp.put(platformId, curTimeStamp);
 				}	
 			}
 			
@@ -161,9 +198,6 @@ public class AvailabilityFallbackCheckQue {
     // -----------------------------------------------------------------------------------
     // -----------------------------------------------------------------------------------
 
-    private long getCurTimestamp() {
-        return System.currentTimeMillis();
-    }
 
 
     
@@ -177,12 +211,12 @@ public class AvailabilityFallbackCheckQue {
 
 		ResourceDataPoint platformDataPoint = this.currentPlatformsInQue.get(platformId);
     	if (platformDataPoint == null) {
+    		// this point is not in the que.
     		return false;
     	}
     	//else 
 		this.platformsRecheckQue.remove(platformDataPoint);
 		this.currentPlatformsInQue.remove(platformId); 
-		this.platformIdToLastUpdateTimestamp.remove(platformId);
 		Integer measId = platformDataPoint.getMeasurementId();
 		this.measurementIdToPlatformId.remove(measId);
 		

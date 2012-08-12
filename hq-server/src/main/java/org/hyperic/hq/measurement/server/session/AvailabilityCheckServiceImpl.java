@@ -27,7 +27,6 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -179,11 +178,6 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
         backfill(System.currentTimeMillis(), false);
     }
 
-    public void backfill(long timeInMillis) {
-        // since method is used for unittests no need to check if alert triggers
-        // have initialized
-        backfill(timeInMillis, true);
-    }
 
     public void testBackfill(long current) {
     	if (this.checkersExecturor != null)

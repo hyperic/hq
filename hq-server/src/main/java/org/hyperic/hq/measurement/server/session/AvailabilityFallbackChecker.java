@@ -20,22 +20,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 /**
- * Run(List<DataPoint<platformId,curTimeStamp,availabilityStatus>)
-For each given Platform:
--	Check for VC info. If exists:
-o	If associated Platform is up, set DataPoint's status to UP_PENDING_CHECK.
-o	If associated Platform is down, set DataPoint's status to DOWN_PENDING_CHECK. 
-o	If associated Platform is marked as _PENDING_RECHECK, copy its status.
-o	Update DataPoint's timestamp.
--	If VC info does not exist, try Ping-ing:
-o	If ping succeeds, set DataPoint's status to UP_PENDING_RECHECK.
-o	If Platform is down, set DataPoint's status to DOWN_PENDING_RECHECK.
-o	Update DataPoint's timestamp.
--	If availability status had changed from the input given, modify platform's descendants' status, and add their DataPoints to the given List:
-o	If new status is DOWN_PENDING, add a DataPoint for each descendant: 
-<id, timestamp,DOWN_PENDING_RECHECK>.
-o	If new status is UP_PENDING, add a DataPoint for each descendant: <id,timestamp,UNKNOWN>.
-
+ * Availability status checker for platforms which availability status data was not received for over 2 intervals.
+ * <BR><B>Details:</B>
+ * <BR> The checker receives a collection of DataPoints (latest availability status) for platforms that need rechecking.
+ * <BR> It checks if there exists VC associations for the platform (if this platform status is given by a VM agent while
+ * there also exists a VCented agent monitoring it). 
+ * If so - update the status according to the status given by the VCenter agent.
+ * <BR> If VC information exists and the Platform is UP - all its servers/services status is set as UNKNOWN.
+ * <BR> If VC information does not exist, or is DOWN - all its servers/services status is set as DOWN.
+ * <BR> Agent status is marked as DOWN in any case.
  * @author amalia
  *
  */
@@ -47,10 +40,14 @@ public class AvailabilityFallbackChecker {
 	private AvailabilityManager availabilityManager;
 	private AvailabilityCache availabilityCache;
 	private ResourceManager resourceManager;
+	
+	// For testing purposes, in case we need to perform checks with a constant timestamp.
+	// if curTimeStamp is 0, we check for the actual current time. 
 	private long curTimeStamp = 0;
 
 	
-
+	// --------------------------------------------------------------------------------------------------------
+	// --------------------------------------------------------------------------------------------------------
 	public AvailabilityFallbackChecker(AvailabilityManager availabilityManager, AvailabilityCache availabilityCache, ResourceManager resourceManager) {
 		this.availabilityManager = availabilityManager;
 		this.availabilityCache = availabilityCache;
@@ -58,6 +55,16 @@ public class AvailabilityFallbackChecker {
 	}
 	
 
+	// --------------------------------------------------------------------------------------------------------
+	// --------------------------------------------------------------------------------------------------------
+	
+	/**
+	 * Check platforms' availability with constant time stamp all through the check. Update DB/Cache accordingly.
+	 * This means that if we use Ping checks (that may take several seconds), the timestamp will remain the same.
+	 * Platforms' servers/services statuses may be updated as well.
+	 * @param availabilityDataPoints - latest availability status for Platforms
+	 * @param curTimeStamp - timestamp to use through the checks
+	 */
 	public void checkAvailability(Collection<ResourceDataPoint> availabilityDataPoints, long curTimeStamp) {
 		this.curTimeStamp = curTimeStamp;
 		checkAvailability(availabilityDataPoints);
@@ -65,6 +72,11 @@ public class AvailabilityFallbackChecker {
 	}
 
 	
+	/**
+	 * Check platforms' availability. Update DB/Cache accordingly.
+	 * Platforms' servers/services statuses may be updated as well.
+	 * @param availabilityDataPoints
+	 */
 	public void checkAvailability(Collection<ResourceDataPoint> availabilityDataPoints) {
 		log.info("checkAvailability: start");
 		Collection<ResourceDataPoint> resPlatforms = new ArrayList<ResourceDataPoint>();
@@ -75,7 +87,6 @@ public class AvailabilityFallbackChecker {
 		log.info("checkAvailability: found " + resPlatforms.size() + " platforms.");
 		Collection<DataPoint> res = addStatusOfPlatformsDescendants(resPlatforms);
 		log.info("checkAvailability: found " + res.size() + " platforms & descendants.");
-		//res.addAll(availabilityDataPoints);
 		storeUpdates(res);
 	}
 
@@ -85,8 +96,11 @@ public class AvailabilityFallbackChecker {
 
 
     
-    
-	// check if agent, and if so - mark it as down.
+    /**
+     * check if the given Measurement belongs to an HQ Agent, and if so - mark it as down.
+     * @param meas - Measurement of a checked server/service.
+     * @return true if this is an HQAgent, false otherwise.
+     */
 	private boolean isHQAgent(Measurement meas) {
 		try {
 			Resource measResource = meas.getResource();
@@ -110,11 +124,20 @@ public class AvailabilityFallbackChecker {
 	}
 
 
+	/**
+	 * Store updates using availabilityManager
+	 * @param availabilityDataPoints - calculated availability statuses 
+	 */
 	private void storeUpdates(Collection<DataPoint> availabilityDataPoints) {
 		List<DataPoint> availDataPoints = new ArrayList<DataPoint>(availabilityDataPoints);
 		this.availabilityManager.addData(availDataPoints, true, true);
 	}
 
+	/**
+	 * Check availability for a single platform
+	 * @param availabilityDataPoint - latest availability status
+	 * @return new availability status to update
+	 */
 	private ResourceDataPoint checkPlatformAvailability(ResourceDataPoint availabilityDataPoint) {
 		ResourceDataPoint res = getPlatformStatusFromVC(availabilityDataPoint);
 		if (res != null)
@@ -126,12 +149,24 @@ public class AvailabilityFallbackChecker {
 	}
 
 
+	/**
+	 * <B>Currently unimplemented. Exists for future usage.</B>
+	 * @param availabilityDataPoint
+	 * @return new availability status to update, if any status could be calculated
+	 */
+	@Deprecated
 	private ResourceDataPoint getPlatformStatusByPing(ResourceDataPoint availabilityDataPoint) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 
+	/**
+	 * Check for availability status from VC information, if exists.
+	 * VC information exists if this platform is monitored by a VM agent, and there also exists a VCenter agent that monitors this platform.
+	 * @param availabilityDataPoint - latest availability status
+	 * @return new availability status to update, if exists. Null otherwise.
+	 */
 	private ResourceDataPoint getPlatformStatusFromVC(ResourceDataPoint availabilityDataPoint) {
 		log.debug("getPlatformStatusFromVC" );
 		Integer platformId = availabilityDataPoint.getResource().getId();
@@ -181,6 +216,12 @@ public class AvailabilityFallbackChecker {
 	}
 
 
+	/**
+	 * Given a list of platforms' data points, return a collection of datapoints of platforms' servers an services,
+	 * with their appropriate status.
+	 * @param checkedPlatforms - new calculated availability status of platforms.
+	 * @return collection of statuses of the platforms' servers an services.
+	 */
 	@Transactional
 	private Collection<DataPoint> addStatusOfPlatformsDescendants(Collection<ResourceDataPoint> checkedPlatforms) {
 		log.debug("addStatusOfPlatformsDescendants: start" );
@@ -216,10 +257,11 @@ public class AvailabilityFallbackChecker {
 				final long curTimeStamp = getCurTimestamp();
 				final long backfillTime = getBackfillTime(curTimeStamp, meas);
 				if (backfillTime > curTimeStamp) {
-					// TODO this means that the resource was updated during the last interval. Shouldn't platform be marked as UP?
+					// the resource was updated during the last interval. we do not want to update it.
+					// TODO: Shouldn't platform be marked as UP?
 					continue;
 				}
-				final MetricValue val = new MetricValue(curStatus, backfillTime);
+				final MetricValue val = new MetricValue(curStatus, rdp.getTimestamp());
 				final MeasDataPoint point = new MeasDataPoint(meas.getId(), val, true);
 				res.add(point);
 			}
@@ -228,6 +270,12 @@ public class AvailabilityFallbackChecker {
 		return res;
 	}
 	
+	/**
+	 * get the time of the first interval that was not updated.
+	 * @param current - current time stamp
+	 * @param meas - measurement to check for
+	 * @return the time of the first interval that was not updated.
+	 */
 	private long getBackfillTime(long current, Measurement meas) {
 		final long end = getEndWindow(current, meas);
 		final DataPoint defaultPt = new DataPoint(meas.getId()
@@ -245,7 +293,11 @@ public class AvailabilityFallbackChecker {
 
 
 	
-	
+	/**
+	 * if curTimeStamp is 0, return the real current time.
+	 * Otherwise - return curTimeStamp set by the calling method.
+	 * @return time
+	 */
     private long getCurTimestamp() {
     	if (this.curTimeStamp != 0)
     		return this.curTimeStamp;
