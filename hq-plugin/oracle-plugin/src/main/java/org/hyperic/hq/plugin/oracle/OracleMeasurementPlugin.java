@@ -51,6 +51,15 @@ import org.hyperic.util.jdbc.DBUtil;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.product.MetricInvalidException;
+import org.hyperic.hq.product.MetricValue;
+import org.hyperic.sigar.ProcState;
+import org.hyperic.sigar.Sigar;
+import org.hyperic.sigar.SigarException;
+import org.hyperic.sigar.SigarProxy;
+import org.hyperic.sigar.SigarProxyCache;
+import org.hyperic.sigar.ptql.ProcessQuery;
+import org.hyperic.sigar.ptql.ProcessQueryFactory;
 
 
 public class OracleMeasurementPlugin
@@ -82,6 +91,8 @@ public class OracleMeasurementPlugin
         "SELECT * FROM DBA_TABLESPACES WHERE TABLESPACE_NAME=";
     private static final String SEGMENT_QUERY = "select SEGMENT_NAME" +
         " FROM USER_SEGMENTS WHERE SEGMENT_NAME=";
+    private Sigar sigar;
+    private SigarProxy sigarProxy;
 
     protected void getDriver()
         throws ClassNotFoundException {
@@ -607,5 +618,69 @@ public class OracleMeasurementPlugin
         } finally {
             DBUtil.closeJDBCObjects(getLog(), null, ps, rs);
         }
+    }
+
+    /*
+     * copied from SystemMeasurementPlugin.java to support 
+     * ChildProcesses metrics from process-metrics.xml
+     */
+    @Override
+    public MetricValue getValue(Metric metric) throws PluginException, MetricUnreachableException, MetricInvalidException, MetricNotFoundException {
+        String domain = metric.getDomainName();
+        Properties props = metric.getObjectProperties();
+        String type = props.getProperty("Type");
+        boolean isFsUsage = type.endsWith("FileSystemUsage");
+
+        if (domain.equals("sigar.ext") && type.equals("ChildProcesses")) {
+            String arg = props.getProperty("Arg");
+            return new MetricValue(getChildProcessCount(arg));
+        }
+
+        return super.getValue(metric);
+    }
+
+    private double getChildProcessCount(String arg)
+            throws MetricNotFoundException {
+
+        try {
+            Sigar s = getSigar();
+            long processIds[] = s.getProcList();
+            ProcessQuery query = ProcessQueryFactory.getInstance().getQuery(arg);
+            long parentPid = query.findProcess(s);
+
+            double count = 0;
+            for (long pid : processIds) {
+                ProcState state;
+                try {
+                    state = s.getProcState(pid);
+                    if (parentPid == state.getPpid()) {
+                        count++;
+                    }
+                } catch (SigarException e) {
+                    //ok, Process likely went away
+                }
+            }
+            return count;
+        } catch (Exception e) {
+            throw new MetricNotFoundException(e.getMessage(), e);
+        }
+    }
+
+    protected Sigar getSigar() throws PluginException {
+        if (this.sigar != null) {
+            return this.sigar;
+        }
+        try {
+            this.sigar = new Sigar();
+            this.sigarProxy = SigarProxyCache.newInstance(sigar);
+        } catch (UnsatisfiedLinkError le) {
+            //XXX ok for now; sigar is not loaded in the server
+            //getValue will fail in the agent in sigar was not properly
+            //installed.
+            getLog().warn("unable to load sigar: " + le.getMessage());
+            return null;
+        }
+
+        return this.sigar;
     }
 }
