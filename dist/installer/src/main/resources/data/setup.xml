@@ -235,9 +235,6 @@ __ll__
       <istrue value="${server.pgsql.available}" />
     	
       <then>
-      	<else>
-      	  	<echo message="The value of property foo is not bar" />
-      	    	 </else>
         <input message="Press the Enter key to exit setup."/>
       </then>
     </if>
