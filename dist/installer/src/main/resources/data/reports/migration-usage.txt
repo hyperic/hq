@@ -30,4 +30,4 @@ Options:
     * -Dsetup.file=<path>
    
    * generic arguments: 
-     * -Dquite=<true|false> (optional, defaults to false)
+     * -Dquiet=<true|false> (optional, defaults to false)
