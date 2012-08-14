@@ -359,16 +359,16 @@
 		<!-- override the current target server's schema version with that of the target server's -->
 		<var name="force.cam.schema.version" value="${CAM_SCHEMA_VERSION}" />
 	
-		<pause message="Upgrading database to version ${force.cam.schema.version}" quite="${quite}"/>
+		<pause message="Upgrading database to version ${force.cam.schema.version}" quiet="${quiet}"/>
 		<!--<antcall target="replace-dbservice-values" /> -->
 		<antcall target="dbsetup" /> 
 
-		<pause message="Importing tables" quite="${quite}"/>
+		<pause message="Importing tables" quiet="${quiet}"/>
 		<importer tablesRefs="${import-tables-refs-string}" disabled="false" />
 
 		<var name="force.cam.schema.version" value="LATEST" />
 		
-		<pause message="Upgrading database to version ${force.cam.schema.version}" quite="${quite}"/>
+		<pause message="Upgrading database to version ${force.cam.schema.version}" quiet="${quiet}"/>
 		<antcall target="upgrade-db" />
 		
 		<!-- Output the import summary message --> 
@@ -474,7 +474,7 @@
 			<param name="hqserver.install.path" value="${source.hqserver.install.path}" />
 		</antcallback>
 		
-		<pause message="Finished export" prompt=", press any key to continue with the import..." quite="${quite}"/>
+		<pause message="Finished export" prompt=", press any key to continue with the import..." quiet="${quiet}"/>
 		
 		<!-- now call the import target -->
 		<antcallback target="hq-import" return="CAM_SCHEMA_VERSION,import.summary"> 
