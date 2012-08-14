@@ -35,7 +35,6 @@ public interface AvailabilityCheckService {
      * Forces a backfill to start immediately with timeInMillis as the "current time."
      * Only used for integration tests
      */
-    void backfill(long timeInMillis);
     void testBackfill(long timeInMillis);
 
 }

@@ -618,26 +618,28 @@ public class ResourceManagerImpl implements ResourceManager {
         final Pattern pattern = Pattern.compile(searchFor, Pattern.CASE_INSENSITIVE);
         final int pagesize = pc.getPagesize();
         final int startIndex = pc.getPagenum() * pc.getPagesize();
-        final Set<Resource> resources = pm.findViewableResources(subject, types, true, new IntegerConverter<Resource>() {
-            int returned = 0;
-            int index = 0;
-            public Resource convert(Integer id) {
-                if (pc != null && returned > pagesize) {
-                    return null;
-                }
-                final Resource resource = resourceDAO.get(id);
-                if (resource == null || resource.isInAsyncDeleteState()) {
-                    return null;
-                }
-                if (pattern.matcher(resource.getName()).find()) {
-                    if (index++ >= startIndex) {
-                        returned++;
-                        return resource;
+        final Set<Resource> resources = pm.findViewableResources(subject, types, pc.getSortorder(),
+            new IntegerConverter<Resource>() {
+                int returned = 0;
+                int index = 0;
+                public Resource convert(Integer id) {
+                    if (pc != null && returned > pagesize) {
+                        return null;
                     }
+                    final Resource resource = resourceDAO.get(id);
+                    if (resource == null || resource.isInAsyncDeleteState()) {
+                        return null;
+                    }
+                    if (pattern.matcher(resource.getName()).find()) {
+                        if (index++ >= startIndex) {
+                            returned++;
+                            return resource;
+                        }
+                    }
+                    return null;
                 }
-                return null;
             }
-        });
+        );
         final Pager pager = Pager.getDefaultPager();
         final List<Resource> paged = pager.seek(resources, pc);
         PageList<Resource> rtn = new PageList<Resource>();
@@ -831,7 +833,7 @@ public class ResourceManagerImpl implements ResourceManager {
      */
     @Transactional(readOnly = true)
     public Collection<Resource> findResourceByOwner(AuthzSubject owner) {
-        return resourceDAO.findByOwner(owner, false);
+        return resourceDAO.findByOwner(owner, PageControl.SORT_UNSORTED);
     }
 
     /**

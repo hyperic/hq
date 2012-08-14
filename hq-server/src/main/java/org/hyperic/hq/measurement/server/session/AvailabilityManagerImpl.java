@@ -129,7 +129,6 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
 
     private AvailabilityDataDAO availabilityDataDAO;
 
-    //private Set<Integer> measurementIDsMonitoredByServer;
     private AvailabilityFallbackCheckQue fallbackCheckQue;
     private MeasurementDAO measurementDAO;
     private MessagePublisher messagePublisher;
@@ -137,10 +136,6 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     private AvailabilityCache availabilityCache;
     private ConcurrentStatsCollector concurrentStatsCollector;
     private AgentDAO agentDAO;
-
-    public boolean isDevDebug() {
-		return false;
-	}
     
     @Autowired
     public AvailabilityManagerImpl(AuthzSubjectManager authzSubjectManager, ResourceManager resourceManager,
@@ -798,9 +793,29 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     }
 
     /**
-     * @param includes
-     *            List<Integer> of mids. If includes is null then all unavail
-     *            entities will be returned.
+     * @return {@link Map} of {@link Integer} representing {@link Resource}Id to {@link DownMetricValue}
+     */
+    @Transactional(readOnly = true)
+    public Map<Integer, DownMetricValue> getUnavailResMap() {
+        final Map<Integer, DownMetricValue> rtn = new HashMap<Integer, DownMetricValue>();
+        final List<AvailabilityDataRLE> unavails = availabilityDataDAO.getDownMeasurements(null);
+        for (final AvailabilityDataRLE rle : unavails) {
+            final Measurement meas = rle.getMeasurement();
+            final Resource resource = meas.getResource();
+            if (resource == null || resource.isInAsyncDeleteState()) {
+                continue;
+            }
+            final long timestamp = rle.getStartime();
+            final Integer mid = meas.getId();
+            final MetricValue val = new MetricValue(AVAIL_DOWN, timestamp);
+            rtn.put(resource.getId(), new DownMetricValue(meas.getEntityId(), mid, val));
+        }
+        return rtn;
+    }
+
+    /**
+     * @param includes List<Integer> of mids. If includes is null then all
+     *        unavail entities will be returned.
      * 
      */
     @Transactional(readOnly = true)
@@ -853,14 +868,9 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         addData(availDataPoints, sendData, false);
     }
     
-    private void logDebug(String message) {
-    	if (isDevDebug())
-    		_log.info("aaa==========:" + message);
-    }
     
     /**
      * Process Availability data.
-<<<<<<< HEAD
      * For each measurement Id (for each resource's availability):
      * If Availability Value is the same as in the DB (AvailabilityDataRLE), only its timestamp is updated in the availabilityCache.
      * Otherwise (availability status changed) - update the availabilityCache and the DB record.
@@ -868,7 +878,6 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      * @param sendData Indicates whether to send the data to event handlers. The
      *        default behavior is true. If false, the calling method should call
      *        sendDataToEventHandlers directly afterwards.
-=======
      * 
      * @param availPoints
      *            List of DataPoints
@@ -876,7 +885,6 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      *            Indicates whether to send the data to event handlers. The
      *            default behavior is true. If false, the calling method should
      *            call sendDataToEventHandlers directly afterwards.
->>>>>>> getMetricsAPI-tests
      * 
      * 
      */
@@ -897,16 +905,11 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             try {
                 availabilityCache.beginTran();
                 updateCache(availPoints, updateList, outOfOrderAvail);
-                logDebug("addData: after updateCache: availPoints:" + availPoints.size() + " updateList: " + updateList.size() + " outOfOrderAvail:" + outOfOrderAvail.size());
                 currAvails = createCurrAvails(outOfOrderAvail, updateList); // get current DB Availability state for the measurements.
-                logDebug("addData: after createCurrAvails: availPoints:" + availPoints.size() + " updateList: " + updateList.size() + " outOfOrderAvail:" + outOfOrderAvail.size());
                 state = captureCurrAvailState(currAvails); // this method is called for logging.
                 updateStates(updateList, currAvails, createMap, removeMap);
-                logDebug("addData: after updateStates: availPoints:" + availPoints.size() + " currAvails: " + currAvails.size() + " createMap:" + createMap.size() + " removeMap:" + removeMap.size());
                 updateOutOfOrderState(outOfOrderAvail, currAvails, createMap, removeMap);
-                logDebug("addData: after updateOutOfOrderState: availPoints:" + availPoints.size() + " currAvails: " + currAvails.size() + " createMap:" + createMap.size() + " removeMap:" + removeMap.size());
                 flushCreateAndRemoves(createMap, removeMap);
-                logDebug("addData: after flushCreateAndRemoves");
                 logErrorInfo(state, availPoints, currAvails);
                 availabilityCache.commitTran();
             } catch (Throwable e) {
@@ -964,7 +967,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             id.setMeasurement(rle.getMeasurement());
             id.setStartime(rle.getStartime());
             availabilityDataDAO.create(rle.getMeasurement(), rle.getStartime(), rle.getEndtime(), rle.getAvailVal());
-            logDebug("added: Availability "+rle.getAvailVal() + " starttime " + rle.getStartime() + " endtime " + rle.getEndtime());
+            _log.debug("added: Availability "+rle.getAvailVal() + " starttime " + rle.getStartime() + " endtime " + rle.getEndtime());
         }
         if (debug) {
             watch.markTimeEnd("create");

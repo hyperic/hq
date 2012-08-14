@@ -95,12 +95,6 @@ public class BackfillPointsServiceImpl implements BackfillPointsService {
     }
 
     
-    private void logDebug(String message) {
-    	if (availabilityManager.isDevDebug())
-    		log.info("aaa==========:" + message);
-    	else
-    		log.debug(message);
-    }
 
     @PostConstruct
     public void initStats() {
@@ -108,11 +102,10 @@ public class BackfillPointsServiceImpl implements BackfillPointsService {
     }
 
     public Map<Integer, ResourceDataPoint> getBackfillPlatformPoints(long current) {
-    	logDebug("getBackfillPlatformPoints: start");
         Map<Integer, ResourceDataPoint> downPlatforms = getDownPlatforms(current);
-    	logDebug("getBackfillPlatformPoints: found " + downPlatforms.size() + " downPlatforms");
+    	log.debug("getBackfillPlatformPoints: found " + downPlatforms.size() + " downPlatforms");
         removeRestartingAgents(downPlatforms);
-    	logDebug("getBackfillPlatformPoints: after removeRestartingAgents: " + downPlatforms.size() + " downPlatforms");
+        log.debug("getBackfillPlatformPoints: after removeRestartingAgents: " + downPlatforms.size() + " downPlatforms");
         if (downPlatforms != null) {
             concurrentStatsCollector.addStat(downPlatforms.size(), AVAIL_BACKFILLER_NUMPLATFORMS);
         }
@@ -188,7 +181,6 @@ public class BackfillPointsServiceImpl implements BackfillPointsService {
     private Map<Integer, ResourceDataPoint> getDownPlatforms(long timeInMillis) {
         final boolean debug = log.isDebugEnabled();
         final List<Measurement> platformResources = availabilityManager.getPlatformResources();
-        logDebug("getDownPlatforms: got " + platformResources.size() + " platformResources");
         final long now = TimingVoodoo.roundDownTime(timeInMillis, MINUTE);
         final String nowTimestamp = TimeUtil.toString(now);
         final Map<Integer, ResourceDataPoint> rtn =
