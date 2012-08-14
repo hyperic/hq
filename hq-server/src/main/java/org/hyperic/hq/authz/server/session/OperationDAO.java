@@ -29,10 +29,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import org.hibernate.SessionFactory;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -76,6 +78,18 @@ public class OperationDAO
 
         return (Operation) getSession().createQuery(sql).setParameter(0, type).setString(1, name)
             .setCacheable(true).setCacheRegion("Operation.findByTypeAndName").uniqueResult();
+    }
+
+    @SuppressWarnings("unchecked")
+    public Collection<Integer> findViewableOperationIds(Collection<ResourceType> resourceTypes) {
+        String sql = "from Operation where resourceType in (:types) and name like '+view+%'";
+        sql = sql.replace("+view+", AuthzConstants.VIEW_PREFIX);
+        final List<Operation> list = getSession().createQuery(sql).setParameterList("types", resourceTypes).list();
+        final List<Integer> rtn = new ArrayList<Integer>(list.size());
+        for (Operation o : list) {
+            rtn.add(o.getId());
+        }
+        return rtn;
     }
 
     @SuppressWarnings("unchecked")

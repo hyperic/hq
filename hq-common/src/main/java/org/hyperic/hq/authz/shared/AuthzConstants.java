@@ -52,9 +52,10 @@ public final class AuthzConstants {
 
     // Appdef Operations
 
+    public static final String VIEW_PREFIX = "view";
     // Platform Operations
     public static final String platformOpCreatePlatform = "createPlatform";
-    public static final String platformOpViewPlatform = "viewPlatform";
+    public static final String platformOpViewPlatform = VIEW_PREFIX + "Platform";
     public static final String platformOpModifyPlatform = "modifyPlatform";
     public static final String platformOpRemovePlatform = "removePlatform";
     public static final String platformOpAddServer = "addServer";
@@ -64,7 +65,7 @@ public final class AuthzConstants {
 
     // Server Operations
     public static final String serverOpCreateServer = "createServer";
-    public static final String serverOpViewServer = "viewServer";
+    public static final String serverOpViewServer = VIEW_PREFIX + "Server";
     public static final String serverOpModifyServer = "modifyServer";
     public static final String serverOpRemoveServer = "removeServer";
     public static final String serverOpAddService = "addService";
@@ -74,7 +75,7 @@ public final class AuthzConstants {
 
     // Service Operations
     public static final String serviceOpCreateService = "createService";
-    public static final String serviceOpViewService = "viewService";
+    public static final String serviceOpViewService = VIEW_PREFIX + "Service";
     public static final String serviceOpModifyService = "modifyService";
     public static final String serviceOpRemoveService = "removeService";
     public static final String serviceOpMonitorService = "monitorService";
@@ -83,7 +84,7 @@ public final class AuthzConstants {
 
     // Application Operations
     public static final String appOpCreateApplication = "createApplication";
-    public static final String appOpViewApplication = "viewApplication";
+    public static final String appOpViewApplication = VIEW_PREFIX + "Application";
     public static final String appOpModifyApplication = "modifyApplication";
     public static final String appOpRemoveApplication = "removeApplication";
     public static final String appOpMonitorApplication = "monitorApplication";
@@ -92,7 +93,7 @@ public final class AuthzConstants {
 
     // Group Operations
     public static final String groupOpCreateResourceGroup = "createResourceGroup";
-    public static final String groupOpViewResourceGroup = "viewResourceGroup";
+    public static final String groupOpViewResourceGroup = VIEW_PREFIX + "ResourceGroup";
     public static final String groupOpModifyResourceGroup = "modifyResourceGroup";
     public static final String groupOpRemoveResourceGroup = "removeResourceGroup";
     public static final String groupOpAddRole = "addRole";
@@ -164,7 +165,7 @@ public final class AuthzConstants {
     public static final String typeOpAddOperation = "addOperation";
     public static final String typeOpRemoveOperation = "removeOperation";
 
-    public static final String subjectOpViewSubject = "viewSubject";
+    public static final String subjectOpViewSubject = VIEW_PREFIX + "Subject";
     public static final String subjectOpModifySubject = "modifySubject";
     public static final String subjectOpRemoveSubject = "removeSubject";
     public static final String subjectOpCreateSubject = "createSubject";
@@ -172,10 +173,10 @@ public final class AuthzConstants {
     public static final String roleOpCreateRole = "createRole";
     public static final String roleOpModifyRole = "modifyRole";
     public static final String roleOpRemoveRole = "removeRole";
-    public static final String roleOpViewRole = "viewRole";
+    public static final String roleOpViewRole = VIEW_PREFIX + "Role";
 
     public static final String escOpCreateEscalation = "createEscalation";
-    public static final String escOpViewEscalation = "viewEscalation";
+    public static final String escOpViewEscalation = VIEW_PREFIX + "Escalation";
     public static final String escOpModifyEscalation = "modifyEscalation";
     public static final String escOpRemoveEscalation = "removeEscalation";
 
