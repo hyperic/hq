@@ -10,26 +10,24 @@
 		<relativePath>../hyperic-hq-agent-parent/pom.xml</relativePath>
 	</parent>
 
-	<artifactId>hyperic-hq-agent-x86-linux</artifactId>
-	<name>Hyperic HQ Distribution - Hyperic hq Agent x86-linux</name>
+	<artifactId>hyperic-hq-agent-x86-64-win</artifactId>
+	<name>Hyperic HQ Distribution - Hyperic hq Agent x86-64-win</name>
 	<packaging>pom</packaging>
 
-
-    			<build>
-					<plugins>
-						<plugin>
-							<artifactId>maven-assembly-plugin</artifactId>
-						</plugin>
-					</plugins>
-				</build>
-
+	<build>
+	  <plugins>
+	      <plugin>
+		      <artifactId>maven-assembly-plugin</artifactId>
+	      </plugin>
+	  </plugins>
+	</build>
 	<dependencies> 
-		<dependency>
-							<groupId>org.hyperic.jre</groupId>
-							<artifactId>x86-linux</artifactId>
-							<version>1.6_33</version>
-							<type>tar.gz</type>
-						</dependency>
+	    <dependency>
+		<groupId>org.hyperic.jre</groupId>
+		<artifactId>x86_64-win</artifactId>
+		<version>1.6_33</version>
+		<type>zip</type>
+	    </dependency>
 	</dependencies>
 
 </project> 

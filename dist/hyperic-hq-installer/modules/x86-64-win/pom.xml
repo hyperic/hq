@@ -10,37 +10,37 @@
 		<relativePath>../hyperic-hq-installer-parent/pom.xml</relativePath>
 	</parent>
 
-	<artifactId>hyperic-hq-installer-x86-linux</artifactId>
+	<artifactId>hyperic-hq-installer-x86-64-win</artifactId>
 	<packaging>pom</packaging>
-	<name>Hyperic HQ Distribution - Hyperic HQ Installer x86-linux</name>
+	<name>Hyperic HQ Distribution - Hyperic HQ Installer x86-64-win</name>
 	
 	<dependencies>	
 		<dependency>
 			<groupId>postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>8.2.5</version>
-			<classifier>x86-linux</classifier>
+			<version>9.1.4</version>
+			<classifier>x86-win32</classifier>
 			<type>zip</type>
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.jre</groupId>
-			<artifactId>x86-linux</artifactId>
+			<artifactId>x86_64-win</artifactId>
 			<version>1.6_33</version>
-			<type>tar.gz</type>
+			<type>exe</type>
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq.dist.hyperic-hq-agent</groupId>
-			<artifactId>hyperic-hq-agent-x86-linux</artifactId>
+			<artifactId>hyperic-hq-agent-x86-64-win</artifactId>
 			<version>${project.version}</version>
-			<type>tar.gz</type>
+			<type>zip</type>
 		</dependency>
 	</dependencies>
 	
 	<properties> 
-		<jre.classifier>x86-linux</jre.classifier>
-		<agent.classifier>x86-linux</agent.classifier> 
-		<postgres.classifier>x86-linux</postgres.classifier> 
-		<packaging.type>tar.gz</packaging.type>
+		<jre.classifier>x86_64-win</jre.classifier>
+		<agent.classifier>x86-64-win</agent.classifier> 
+		<postgres.classifier>x86-win32</postgres.classifier> 
+		<packaging.type>zip</packaging.type>
 	</properties>
 
 	<build>
