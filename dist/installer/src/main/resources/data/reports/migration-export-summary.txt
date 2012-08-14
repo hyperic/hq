@@ -1,0 +1,18 @@
+
+-------------------------------------------------------
+Export Summary: 
+-------------------------------------------------------
+- Export Archive: ${staging.dir}/../hq-migration-export-${CAM_SERVER_VERSION}.tgz
+- Total number of exported records per table breakdown: database '${source.database.url}': 
+  
+${exporter.table.stats}
+  
+- Exported the following Hyperic Server artifacts from ${hqserver.install.path} : 
+  - Server Configurations               - conf/hq-server.conf
+  - Keystore                            - conf/hyperic.keystore 
+  - Keystore backup file                - conf/hyperic.keystore.backup.DO.NOT.DELETE
+  - Logging Configurations              - conf/log4.xml
+  - Additional Logging Configurations   - conf/server-log4.xml
+  - Cache Configurations                - hq-engine/hq-server/webapps/ROOT/WEB-INF/classes/ehcache.xml
+  - HQU plugins                         - hq-engine/hq-server/webapps/ROOT/hqu
+  

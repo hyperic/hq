@@ -1,0 +1,21 @@
+
+-------------------------------------------------------
+Import Summary: 
+-------------------------------------------------------
+- Dropped database ${target.database.url}
+- Created the Hyperic schema 
+- Populated with default values 
+- Upgraded the database to version ${CAM_SCHEMA_VERSION}
+- Total number of imported records per table breakdown: 
+
+${importer.table.stats}
+  
+- Upgraded the database to version ${CAM_SCHEMA_VERSION}
+- Merged/Overriden the following Hyperic Server artifacts under ${hqserver.install.path} : 
+  - Server Configurations               - conf/hq-server.conf
+  - Keystore                            - conf/hyperic.keystore 
+  - Keystore backup file                - conf/hyperic.keystore.backup.DO.NOT.DELETE
+  - Logging Configurations              - conf/log4.xml
+  - Additional Logging Configurations   - conf/server-log4.xml
+  - Cache Configurations                - hq-engine/hq-server/webapps/ROOT/WEB-INF/classes/ehcache.xml
+  - HQU plugins                         - hq-engine/hq-server/webapps/ROOT/hqu
