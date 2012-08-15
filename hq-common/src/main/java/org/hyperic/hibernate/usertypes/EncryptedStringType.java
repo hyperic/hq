@@ -25,19 +25,20 @@
 package org.hyperic.hibernate.usertypes;
 
 import java.io.Serializable;
-import java.lang.reflect.Method;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.usertype.ParameterizedType;
 import org.hibernate.usertype.UserType;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.util.security.SecurityUtil;
 import org.jasypt.encryption.pbe.PBEStringEncryptor;
+import org.jasypt.exceptions.EncryptionOperationNotPossibleException;
 import org.jasypt.hibernate.type.AbstractEncryptedAsStringType;
 
 /**
@@ -46,6 +47,7 @@ import org.jasypt.hibernate.type.AbstractEncryptedAsStringType;
  */
 public class EncryptedStringType implements UserType, ParameterizedType {
 
+    private static final Log log = LogFactory.getLog(EncryptedStringType.class);
 	private static final int nullableSqlType = Hibernate.STRING.sqlType() ; 
 	protected PBEStringEncryptor encryptor ; 
 	
@@ -213,6 +215,7 @@ public class EncryptedStringType implements UserType, ParameterizedType {
 		 * <b>Note:</b> decrypted value is cached on first decryption for subsequent get requests.   
 		 */
 		public final String get() { 
+                    try {
 			if(!this.isDecrypted) { 
 				this.isDecrypted = true ; 
 				if(SecurityUtil.isMarkedEncrypted(value)) {  
@@ -220,6 +223,10 @@ public class EncryptedStringType implements UserType, ParameterizedType {
 				}//EO if not clear text as it is 
 			}//EO else if not yet decrypted 
 			return this.value ; 
+                    } catch (EncryptionOperationNotPossibleException e) {
+                        log.warn("could not decrypt value=" + value);
+                        throw e;
+                    }
 		}//EOM
 		
 		@Override
