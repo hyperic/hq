@@ -797,12 +797,12 @@ public class MeasurementBossImpl implements MeasurementBoss {
         throws SessionTimeoutException, SessionNotFoundException, PermissionException {
         final AuthzSubject subject = sessionManager.getSubject(sessionId);
 
-        List<Measurement> measurements = new ArrayList<Measurement>(tids.length);
+        List<Integer> measurements = new ArrayList<Integer>(tids.length);
         long interval = 0;
         for (int i = 0; i < tids.length; i++) {
             try {
                 Measurement m = measurementManager.findMeasurement(subject, tids[i], aeid);
-                measurements.add(m);
+                measurements.add(m.getId());
                 interval = Math.max(interval, m.getInterval());
             } catch (MeasurementNotFoundException e) {
                 measurements.add(null);
@@ -820,20 +820,17 @@ public class MeasurementBossImpl implements MeasurementBoss {
      * 
      */
     @Transactional(readOnly = true)
-    public MetricValue[] getLastMetricValue(int sessionId, List<Measurement> measurements,
-                                            long interval) {
-        MetricValue[] ret = new MetricValue[measurements.size()];
+    public MetricValue[] getLastMetricValue(int sessionId, List<Integer> measurementIds, long interval) {
+        MetricValue[] ret = new MetricValue[measurementIds.size()];
         long after = System.currentTimeMillis() - (3 * interval);
-        Map<Integer, MetricValue> data = dataManager.getLastDataPoints(measurements, after);
-
+        Map<Integer, MetricValue> data = dataManager.getLastDataPoints(measurementIds, after);
         int i=0;
-        for (final Measurement m : measurements) {
-            if (m != null && data.containsKey(m.getId())) {
-                ret[i] = data.get(m.getId());
+        for (final Integer measId : measurementIds) {
+            if (measId != null && data.containsKey(measId)) {
+                ret[i] = data.get(measId);
             }
             i++;
         }
-
         return ret;
     }
 

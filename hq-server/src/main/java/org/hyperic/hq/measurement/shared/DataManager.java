@@ -160,15 +160,15 @@ public interface DataManager {
 
     /**
      * Fetch the most recent data point for particular Measurements.
-     * @param measurements The List of Measurements to query. In the list of
-     *        Measurements null values are allowed as placeholders.
+     * @param measurements The List of MeasurementIds to query. In the list of
+     *        MeasurementIds null values are allowed as placeholders.
      * @param timestamp Only use data points with collection times greater than
      *        the given timestamp.
      * @return A Map of measurement ids to MetricValues. TODO: We should change
      *         this method to now allow NULL values. This is legacy and only
      *         used by the Metric viewer and Availabilty Summary portlets.
      */
-    public Map<Integer, MetricValue> getLastDataPoints(List<Measurement> measurements, long timestamp);
+    public Map<Integer, MetricValue> getLastDataPoints(List<Integer> measurements, long timestamp);
 
     /**
      * Get data points from cache only
