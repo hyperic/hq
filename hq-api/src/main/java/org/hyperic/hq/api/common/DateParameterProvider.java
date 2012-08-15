@@ -11,8 +11,15 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 
+/**
+ * Supports the passing of a date in a Date object format through rest API
+ * The date passed should be compliant with the ISO-8601 time format, otherwise an exception would be thrown.
+ * 
+ * @author yakarn
+ *
+ */
 @Provider
-public class CalendarProvider implements ParameterHandler<Date> {
+public class DateParameterProvider implements ParameterHandler<Date> {
     @Autowired
     private ExceptionToErrorCodeMapper errorHandler ; 
  
