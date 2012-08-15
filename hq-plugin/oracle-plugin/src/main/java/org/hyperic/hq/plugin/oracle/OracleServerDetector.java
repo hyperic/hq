@@ -282,11 +282,13 @@ public class OracleServerDetector
                         // the path below should exist off of the ORACLE_HOME
                         String oracleExePath = oraHome + File.separator + "bin" + File.separator + "oracle";
                         ServerResource oracleServer = getOracleServer(oracleExePath);
-                        // This will automatically add the ORACLE_SID from the oratab file to the jdbcUrl.
-                        ConfigResponse productConfig = oracleServer.getProductConfig();
-                        productConfig.setValue("jdbcUrl", "jdbc:oracle:thin:@localhost:1521:" + oraSid);
-                        oracleServer.setProductConfig(productConfig);
-                        servers.add(oracleServer);
+                        if (oracleServer != null) {
+                            // This will automatically add the ORACLE_SID from the oratab file to the jdbcUrl.
+                            ConfigResponse productConfig = oracleServer.getProductConfig();
+                            productConfig.setValue("jdbcUrl", "jdbc:oracle:thin:@localhost:1521:" + oraSid);
+                            oracleServer.setProductConfig(productConfig);
+                            servers.add(oracleServer);
+                        }
                     }
                 }
             }
