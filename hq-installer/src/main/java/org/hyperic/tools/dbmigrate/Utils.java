@@ -44,11 +44,11 @@ public class Utils{
       dbDrivers.put("MySQL", "com.mysql.jdbc.Driver");
   }//EO static block
   
-  public static final void close(final Object[] closeables){
+  public static final void close(final Object...closeables){
     close(NOOP_INSTRUCTION_FLAG, closeables);
   }//EOM 
 
-  public static final void close(final int specialInstructionsMask, final Object[] closeables) {
+  public static final void close(final int specialInstructionsMask, final Object...closeables) {
     for (Object closeable : closeables) {
       if (closeables == null)
         continue;
@@ -165,7 +165,8 @@ public class Utils{
 
   public static final Connection getPostgresConnection() throws Throwable {
     Class.forName("org.postgresql.Driver");
-    return DriverManager.getConnection("jdbc:postgresql://10.23.200.18:5432/guytest1?protocolVersion=2", "hqadmin", "hqadmin");
+    //return DriverManager.getConnection("jdbc:postgresql://10.23.200.18:5432/guytest1?protocolVersion=2", "hqadmin", "hqadmin");
+    return DriverManager.getConnection("jdbc:postgresql://localhost:5432/hqdb?protocolVersion=2", "hqadmin", "hqadmin");
   }//EOM 
   
   public static final Connection getLocalPostgresConnection() throws Throwable {
