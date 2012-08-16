@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -33,6 +34,13 @@ import org.apache.commons.logging.LogFactory;
  */
 public class AvailabilityFallbackCheckQue {
 
+	
+	// TODO: following code review:
+	// minimize checks here since these are synchronized updates of availability data.
+	// HowTo? Remove the need for platformsRecheckInProgress: Add LastTimeUpdate to the ResourceDataPoint. This is the lastTimeStamp that we know
+	// of when starting to calculate availability for a Platform. before availMgr updates data,  
+	// where it checks for timestamps mismatches, it can check if the the LastTimeUpdate is before the actual last timestamp in the cache, and if so -
+	// remove the platform from the que, and not update it.
 	
     private final Log log = LogFactory.getLog(AvailabilityFallbackCheckQue.class);
     
@@ -106,7 +114,7 @@ public class AvailabilityFallbackCheckQue {
     		boolean added = addToQue(platformId, platformsToAdd.get(platformId));
     		res += added ? 1 : 0;
 		}
-    	log.info("addToQue: added "+res);
+    	log.debug("addToQue: added "+res);
     	return res;
     }
     
@@ -198,9 +206,81 @@ public class AvailabilityFallbackCheckQue {
     // -----------------------------------------------------------------------------------
     // -----------------------------------------------------------------------------------
 
+	// return platform Id
+	private synchronized Integer removeFromCurrentPlatformsInQue(ResourceDataPoint dp) {
+		Integer platformId = null;
+		 for (Entry<Integer, ResourceDataPoint> entry : currentPlatformsInQue.entrySet()) {
+             if (dp.equals(entry.getValue())) {
+            	 platformId = entry.getKey();
+                 break;
+             }
+		 }
 
+	     if (platformId != null) {
+	    	 currentPlatformsInQue.remove(platformId);
+	     }
+	     return platformId;
+	}
+	
+	// return measurement Id
+	private synchronized Integer removeFromMeasIdToPlatId(Integer platformId) {
+		Integer measId = null;
+		 for (Entry<Integer, Integer> entry : measurementIdToPlatformId.entrySet()) {
+             if (platformId.equals(entry.getValue())) {
+            	 measId = entry.getKey();
+                 break;
+             }
+		 }
 
+	     if (measId != null) {
+	    	 measurementIdToPlatformId.remove(measId);
+	     }
+	     return measId;
+	}
+	
+	
+	public synchronized int cleanQueFromNonExistant() {
+		int res = 0;
+		Collection<ResourceDataPoint> pointsToDel = new ArrayList<ResourceDataPoint>();
+		for (ResourceDataPoint dp : this.platformsRecheckQue) {
+			if ((dp.getResource() == null) || (dp.getResource().isInAsyncDeleteState()) ) {
+				res++;
+				pointsToDel.add(dp);
+				Integer platformId = removeFromCurrentPlatformsInQue(dp);
+				if (platformId != null)
+					removeFromMeasIdToPlatId(platformId);
+			}			
+		}
+		platformsRecheckQue.removeAll(pointsToDel);
+		return res;
+	}
+
+	public synchronized int removeFromQue(Collection<Integer> platformResourceIds) {
+		int res = 0;
+		for (Integer platformId : platformResourceIds) {
+	    	log.debug("removeFromQueBeforeUpdateFromAgent: start " + platformId+ ", curQueSize: " + getSize());
+			if (this.platformsRecheckInProgress.contains(platformId)) {
+				this.platformsPendingQueRemoval.add(platformId);
+				continue;
+			}
+			
+
+			ResourceDataPoint platformDataPoint = this.currentPlatformsInQue.get(platformId);
+	    	if (platformDataPoint == null) {
+	    		// this point is not in the que.
+	    		continue;
+	    	}
+	    	//else 
+			this.platformsRecheckQue.remove(platformDataPoint);
+			this.currentPlatformsInQue.remove(platformId); 
+			Integer measId = platformDataPoint.getMeasurementId();
+			this.measurementIdToPlatformId.remove(measId);
+			res++;
+		}
+		return res;
+	}
     
+	
     private synchronized boolean removeFromQueBeforeUpdateFromAgent(Integer platformId) {
     	log.debug("removeFromQueBeforeUpdateFromAgent: start " + platformId+ ", curQueSize: " + getSize());
 		if (this.platformsRecheckInProgress.contains(platformId)) {

@@ -26,22 +26,16 @@
 package org.hyperic.hq.measurement.server.session;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
@@ -63,11 +57,6 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
 	
     private final Log log = LogFactory.getLog(AvailabilityCheckServiceImpl.class);
     private static final String AVAIL_BACKFILLER_TIME = ConcurrentStatsCollector.AVAIL_BACKFILLER_TIME;
-    private static final String PROP_NUMWORKERS = "AVAIL_FALLBACK_CHECKERS";
-    private static final String PROP_BATCHSIZE = "AVAIL_FALLBACK_BATCHSIZE";
-	private final int FALLBACK_CHECK_DELAY_SECONDS = 120;
-	private final int DEFAULT_NUM_FALLBACK_CHECKERS = 1;
-	private final boolean MANAGE_FALLBACK_CHECK_WITH_THREADS = false;
 
     
     private long startTime = 0;
@@ -79,12 +68,7 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
     private AvailabilityManager availabilityManager;
     private AvailabilityCache availabilityCache;
     private BackfillPointsService backfillPointsService;
-    private ServerConfigManager serverConfigManager;
 
-    private List<AvailabilityPlatformFallbackCheckThread> fallbackCheckThreads;
-    private List<AvailabilityFallbackChecker> fallbackCheckers;
-	private int numOfFallbackCheckers, maxBatchFallbackCheck;
-	private ScheduledThreadPoolExecutor checkersExecturor;
 	private AvailabilityFallbackCheckQue checkQue;
 	private AvailabilityFallbackChecker fallbackChecker = null;
 	private ResourceManager resourceManager;
@@ -95,106 +79,35 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
                                         AvailabilityManager availabilityManager,
                                         AvailabilityCache availabilityCache,
                                         BackfillPointsService backfillPointsService,
-                                        ServerConfigManager serverConfigManager,
                                         ResourceManager resourceManager) {
         this.concurrentStatsCollector = concurrentStatsCollector;
         this.availabilityCache = availabilityCache;
         this.availabilityManager = availabilityManager;
         this.backfillPointsService = backfillPointsService;
-        this.serverConfigManager = serverConfigManager;
         this.resourceManager = resourceManager;
-        setup();
-    }
-
-    
-    
-    private void setup() {
         this.checkQue = availabilityManager.getFallbackCheckQue();
-        Properties cfg = new Properties();
-
-        try {
-            cfg = serverConfigManager.getConfig();
-        } catch (Exception e) {
-            log.warn("Error getting server config", e);
-        }
-
-        int maxBatch = 1000;
-
-        int numWorkers = 2;
-        try {
-            maxBatch = Integer.parseInt(cfg.getProperty(PROP_BATCHSIZE, "1000"));
-        } catch (NumberFormatException e) {
-            String msg = "Error retrieving max batch size for aggregate" +
-                         " inserter, using default of " + maxBatch;
-            log.warn(msg);
-        }
-        this.maxBatchFallbackCheck = maxBatch;
-
-        try {
-            numWorkers = Integer.parseInt(cfg.getProperty(PROP_NUMWORKERS, "1"));
-            numWorkers = (numWorkers == 0) ? DEFAULT_NUM_FALLBACK_CHECKERS : numWorkers;
-        } catch (NumberFormatException e) {
-            String msg = "Error retrieving number of aggregate inserters," + " using default of " +
-                         numWorkers;
-            log.warn(msg);
-        }
-        this.numOfFallbackCheckers = numWorkers;
-
-
-        log.info("Creating AvailabilityCheckServiceImpl with maxBatch=" + maxBatch + " numWorkers=" + numWorkers);
-        createFallbackCheckers();
     }
 
     
-	private void createFallbackCheckers() {
-    	//TODO the current threads are not managed properly.
-    	// should use the same timer as the backfill, and use an ExecutorPool with expanding Threads and Callable checkers instead
-    	
-    	if (!MANAGE_FALLBACK_CHECK_WITH_THREADS) 
-    		return;
-    	
-    	log.info("createFallbackCheckers: creating " + this.numOfFallbackCheckers + " fallback checkers.");
-    	this.checkersExecturor = new ScheduledThreadPoolExecutor(numOfFallbackCheckers);
-    	this.fallbackCheckThreads = new ArrayList<AvailabilityPlatformFallbackCheckThread>();
-    	this.fallbackCheckers = new ArrayList<AvailabilityFallbackChecker>();
-        for (int i=0; i<numOfFallbackCheckers; ++i) {
-        	AvailabilityFallbackChecker checker = new AvailabilityFallbackChecker(availabilityManager, availabilityCache, resourceManager);
-        	this.fallbackCheckers.add(checker);
-        	AvailabilityPlatformFallbackCheckThread checkThread = new AvailabilityPlatformFallbackCheckThread(checker);
-            fallbackCheckThreads.add(checkThread);
-            checkersExecturor.scheduleWithFixedDelay(checkThread, FALLBACK_CHECK_DELAY_SECONDS+i, FALLBACK_CHECK_DELAY_SECONDS, TimeUnit.SECONDS);        	
-        }
-   	}
+    
 
-
-
+    
 
     @PostConstruct
     public void initStats() {
         concurrentStatsCollector.register(AVAIL_BACKFILLER_TIME);
     }
 
-    public void backfill() {
-        backfill(System.currentTimeMillis(), false);
+    public void backfillPlatformAvailability() {
+    	backfillPlatformAvailability(System.currentTimeMillis(), false);
     }
 
 
     public void testBackfill(long current) {
-    	if (this.checkersExecturor != null)
-    		this.checkersExecturor.shutdown();
-    	checkPlatformsAvailabilityNoThreads(current, true);
+    	backfillPlatformAvailability(current, true);
     }
     
-    private void backfill(long current, boolean forceStart) {
-    	if (this.MANAGE_FALLBACK_CHECK_WITH_THREADS) {
-    		checkPlatformsAvailabilityUsingThreads(current,forceStart);
-    	}
-    	else {
-    		checkPlatformsAvailabilityNoThreads(current, forceStart);
-    	}
-    }
-
-    private void checkPlatformsAvailabilityNoThreads(long current, boolean forceStart) {
+    public void backfillPlatformAvailability(long current, boolean forceStart) {
         long start = now();
         Map<Integer, ResourceDataPoint> backfillPoints = null;
         try {
@@ -224,7 +137,7 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
                     backfillPoints = backfillPointsService.getBackfillPlatformPoints(current);
                 }
                 if (backfillPoints.size() > 0)
-                	log.info("checkPlatformsAvailabilityNoThreads: got " + backfillPoints.size() + " platforms to check. Adding to que.");
+                	log.info("backfillPlatformAvailability: got " + backfillPoints.size() + " platforms to check. Adding to que.");
                 checkQue.addToQue(backfillPoints);
                 List<ResourceDataPoint> availabilityDataPoints = pollWorkList();
                 if (fallbackChecker == null)
@@ -245,66 +158,18 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
     
     
     private List<ResourceDataPoint> pollWorkList() {
+    	checkQue.cleanQueFromNonExistant();
     	List<ResourceDataPoint> dataPointList = new ArrayList<ResourceDataPoint>();
-        final int batchSize = getBatchSize();
-        int i = 0;
-        int currSize = 0;
-        for (i = 0; i < batchSize && currSize < batchSize; i++) {
-            ResourceDataPoint dp = checkQue.poll();
-            if (dp == null) {
-                break;
-            }
+        ResourceDataPoint dp = checkQue.poll();
+        while (dp != null) {
             dataPointList.add(dp);
-            currSize++;
+            dp = checkQue.poll();
         }
        	log.debug("setWorkList: current dataPointList size: " + dataPointList.size());
        	return dataPointList;
     }
 
     
-    private void checkPlatformsAvailabilityUsingThreads(long current, boolean forceStart) {
-        long start = now();
-        Map<Integer, ResourceDataPoint> backfillPoints = null;
-        try {
-            // Don't start backfilling immediately
-            if (!forceStart && !canStart(current)) {
-            	log.info("not starting availability check");
-                return;
-            }
-            synchronized (IS_RUNNING_LOCK) {
-                if (isRunning) {
-                    log.warn("Availability Check Service is already running, bailing out");
-                    return;
-                } else {
-                    isRunning = true;
-                }
-            }
-            try {
-                // PLEASE NOTE: This synchronized block directly affects the
-                // throughput of the availability metrics, while this lock is
-                // active no availability metric will be inserted. This is to
-                // ensure the backfilled points will not be inserted after the
-                // associated AVAIL_UP value from the agent.
-                // The code must be extremely efficient or else it will have
-                // a big impact on the performance of availability insertion.
-                synchronized (availabilityCache) {
-                    backfillPoints = backfillPointsService.getBackfillPlatformPoints(current);
-                	log.debug("checkPlatformsAvailabilityUsingThreads: got " + backfillPoints.size() + " platforms to check. Adding to que.");
-                    checkQue.addToQue(backfillPoints);
-                }
-                // send data to event handlers outside of synchronized block
-                //availabilityManager.sendDataToEventHandlers(backfillPoints);
-            } finally {
-                synchronized (IS_RUNNING_LOCK) {
-                    isRunning = false;
-                }
-            }
-        } catch (Exception e) {
-            throw new SystemException(e);
-        } finally {
-            concurrentStatsCollector.addStat(now() - start, AVAIL_BACKFILLER_TIME);
-        }
-    }
 
     private long now() {
         return System.currentTimeMillis();
@@ -354,100 +219,4 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
         return currentQueueSize;
     }
     
-    private int getBatchSize() {
-    	return this.maxBatchFallbackCheck;
-    }
-    
-    
-    /**
-     * 
-     * @author amalia
-     *
-     */
-    private class AvailabilityPlatformFallbackCheckThread implements Runnable {
-        private final ArrayList<ResourceDataPoint> dataPointList;
-        private final AvailabilityFallbackChecker _executor;
-        private final Calendar _cal = Calendar.getInstance();
-        
-        
-
-        AvailabilityPlatformFallbackCheckThread(AvailabilityFallbackChecker checker) {
-            this.dataPointList = new ArrayList<ResourceDataPoint>(getBatchSize());
-            this._executor = checker;
-            long now = now();
-            _cal.setTimeInMillis(now);
-        }
-
-
-        private void setWorkList() {
-        	dataPointList.clear();
-            final int batchSize = getBatchSize();
-            //final boolean debug = log.isDebugEnabled();
-            int i = 0;
-            int currSize = 0;
-            for (i = 0; i < batchSize && currSize < batchSize; i++) {
-                ResourceDataPoint dp = checkQue.poll();
-                if (dp == null) {
-                    break;
-                }
-                dataPointList.add(dp);
-                currSize++;
-            }
-           	log.info("setWorkList: current dataPointList size: " + dataPointList.size());
-        }
-
-        /**
-         * @return List<Long> list of insertTimes
-         */
-        private void calcData() throws InterruptedException {
-            final int batchSize = getBatchSize();
-            final boolean debug = log.isDebugEnabled();
-            for (int i = 0; i < dataPointList.size(); i += batchSize) {
-                long start = now();
-                int end = Math.min(i + batchSize, dataPointList.size());
-                List<ResourceDataPoint> list = dataPointList.subList(i, end);
-                _executor.checkAvailability(list);
-                	
-                long insertTime = now() - start;
-                if (debug) 
-                	logDebug(insertTime, list.size(), dataPointList.size()-end);
-            }
-        }
-
-        private void logDebug(long insertTime, int points, int remaining) {
-            String name = Thread.currentThread().getName();
-            log.debug("[" + name + "] calculated " + points + " points, worker has " + remaining +
-                       " points remaining");
-        }
-
-        
-        public void run() {
-            try {
-                final Object lock = _executor.getLock();
-                synchronized (lock) {
-                    while (true) {
-                        setWorkList();
-                        if (this.dataPointList.size() == 0) {
-                            break;
-                        }
-                        calcData();
-                    }
-                }
-            } catch (Error e) {
-                log.fatal("Fatal error while processing", e);
-                throw e;
-            } catch (Throwable e) {
-                log.warn("Error while processing data", e);
-            }
-        }
-
-    }
-
-    
-    @PreDestroy
-    public void destroy() {
-    	if (this.checkersExecturor != null)
-    		this.checkersExecturor.shutdown();
-    }
-    
-}
+ }

@@ -68,7 +68,7 @@ public class HAServiceImpl implements HAService {
             if (backfillTask == null) {
                 MethodInvokingRunnable backfill = new MethodInvokingRunnable();
                 backfill.setTargetObject(availabilityCheckService);
-                backfill.setTargetMethod("backfill");
+                backfill.setTargetMethod("backfillPlatformAvailability");
                 try {
                     backfill.prepare();
                     backfillTask = scheduler.scheduleAtFixedRate(backfill, 120000);

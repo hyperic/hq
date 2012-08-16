@@ -15,7 +15,6 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.product.MetricValue;
-import org.springframework.transaction.annotation.Transactional;
 
 
 
@@ -33,6 +32,11 @@ import org.springframework.transaction.annotation.Transactional;
  *
  */
 public class AvailabilityFallbackChecker {
+	
+	
+	//TODO: (Code review comments)
+	// Handle the case of 2 very different intervals. If the VM interval is 1 min, and the VC interval is 1 hr? Perhaps should limit the availability status validity to 5(?) times the VM interval.
+	
 	
     private final Log log = LogFactory.getLog(AvailabilityFallbackChecker.class);
     private final Object lock = new Object();
@@ -78,15 +82,17 @@ public class AvailabilityFallbackChecker {
 	 * @param availabilityDataPoints
 	 */
 	public void checkAvailability(Collection<ResourceDataPoint> availabilityDataPoints) {
-		log.info("checkAvailability: start");
+		if ((availabilityDataPoints == null) || (availabilityDataPoints.isEmpty()) )
+				return;
+		log.debug("checkAvailability: start");
 		Collection<ResourceDataPoint> resPlatforms = new ArrayList<ResourceDataPoint>();
 		for (ResourceDataPoint availabilityDataPoint : availabilityDataPoints) {
 			ResourceDataPoint platformAvailPoint = checkPlatformAvailability(availabilityDataPoint);
 			resPlatforms.add(platformAvailPoint);
 		}
-		log.info("checkAvailability: found " + resPlatforms.size() + " platforms.");
+		log.info("checkAvailability: checking " + resPlatforms.size() + " platforms.");
 		Collection<DataPoint> res = addStatusOfPlatformsDescendants(resPlatforms);
-		log.info("checkAvailability: found " + res.size() + " platforms & descendants.");
+		log.info("checkAvailability: updating " + res.size() + " platforms & descendants.");
 		storeUpdates(res);
 	}
 
@@ -104,6 +110,7 @@ public class AvailabilityFallbackChecker {
 	private boolean isHQAgent(Measurement meas) {
 		try {
 			Resource measResource = meas.getResource();
+			//TODO remove the following line, and recheck
 			measResource = resourceManager.getResourceById(measResource.getId());
 			Resource prototype = measResource.getPrototype();
 			if (prototype == null)
@@ -111,7 +118,7 @@ public class AvailabilityFallbackChecker {
 			
 			String prototypeName = prototype.getName();
 			if (prototypeName.equals(AppdefEntityConstants.HQ_AGENT_PROTOTYPE_NAME)) {
-				log.info("isHQHagent:  Found: " + measResource.getId());
+				log.debug("isHQHagent:  Found: " + measResource.getId());
 				return true;
 			}
 		} catch (Exception e) {
@@ -222,7 +229,6 @@ public class AvailabilityFallbackChecker {
 	 * @param checkedPlatforms - new calculated availability status of platforms.
 	 * @return collection of statuses of the platforms' servers an services.
 	 */
-	@Transactional
 	private Collection<DataPoint> addStatusOfPlatformsDescendants(Collection<ResourceDataPoint> checkedPlatforms) {
 		log.debug("addStatusOfPlatformsDescendants: start" );
 		final Collection<DataPoint> res = new ArrayList<DataPoint>();
