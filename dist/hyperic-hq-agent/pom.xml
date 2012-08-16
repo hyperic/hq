@@ -75,6 +75,7 @@
 		      <module>modules/ppc-aix</module>
 		      <module>modules/sparc-solaris</module>
 		      <module>modules/win32</module> 
+		      <module>modules/x86-64-win</module> 
 		      <module>modules/x86-linux</module> 
 		      <module>modules/x86-64-linux</module>   
 		</modules> 

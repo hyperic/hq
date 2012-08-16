@@ -1944,36 +1944,37 @@ public class DataManagerImpl implements DataManager {
      * 
      */
     @Transactional(readOnly = true)
-    public Map<Integer, MetricValue> getLastDataPoints(List<Measurement> measurements,
-                                                       long timestamp) {
-        List<Integer> availIds = new ArrayList<Integer>(measurements.size());
-        List<Integer> measurementIds = new ArrayList<Integer>(measurements.size());
-
-        for (Measurement m : measurements) {
-            if (m == null) {
-                // XXX: See above.
+    public Map<Integer, MetricValue> getLastDataPoints(List<Integer> mids, long timestamp) {
+        final List<Integer> availIds = new ArrayList<Integer>(mids.size());
+        final List<Integer> measurementIds = new ArrayList<Integer>(mids.size());
+        for (Integer measId : mids) {
+            if (measId == null) {
+                // See above.
                 measurementIds.add(null);
+                continue;
+            }
+            final Measurement m = measurementDAO.get(measId);
+            if (m == null) {
+                // See above.
+                measurementIds.add(null);
+                continue;
             } else if (m.getTemplate().isAvailability()) {
                 availIds.add(m.getId());
             } else {
-                measurementIds.add(m.getId());
+                measurementIds.add(measId);
             }
         }
-
-        Integer[] avIds = availIds.toArray(new Integer[0]);
-
+        final Integer[] avIds = availIds.toArray(new Integer[0]);
         final StopWatch watch = new StopWatch();
         final boolean debug = log.isDebugEnabled();
         if (debug) watch.markTimeBegin("getLastDataPts");
-        Map<Integer, MetricValue> data = getLastDataPts(measurementIds, timestamp);
+        final Map<Integer, MetricValue> data = getLastDataPts(measurementIds, timestamp);
         if (debug) watch.markTimeEnd("getLastDataPts");
-
         if (availIds.size() > 0) {
             if (debug) watch.markTimeBegin("getLastAvail");
             data.putAll(availabilityManager.getLastAvail(avIds));
             if (debug) watch.markTimeEnd("getLastAvail");
         }
-
         if (debug) log.debug(watch);
         return data;
     }
