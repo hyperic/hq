@@ -25,7 +25,7 @@
 package org.hyperic.hq.events.server.session;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,10 +36,8 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.hibernate.PageInfo;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.EdgePermCheck;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.dao.HibernateDAO;
@@ -297,39 +295,25 @@ public class AlertDAO
          * @return
          */
         @SuppressWarnings("unchecked")
-        public Map<Integer,Alert> findLastByResource(AuthzSubject subject,
-                                      Resource r,
-                                      boolean includeDescendants,
-                                      boolean fixed) {
-            EdgePermCheck wherePermCheck =
-                permissionManager.makePermCheckHql("rez", includeDescendants);
-                    
-            String hql = 
-                new StringBuilder()
-                        .append("select a ")
-                        .append("from Alert a ")
-                        .append("join a.alertDefinition ad ")
-                        .append("join ad.resource rez ")
-                        .append(wherePermCheck.toString())
-                        .append("and ad.deleted = false ")
-                        .append("and a.fixed = :fixed ")
-                        .append("order by a.ctime ")
-                        .toString();
-            
-            Query q = createQuery(hql).setBoolean("fixed", fixed);
-            
-            List<Alert> alerts = wherePermCheck
-                            .addQueryParameters(q, subject, r, 0, 
-                                    Arrays.asList(AuthzConstants.VIEW_ALERTS_OPS))
-                            .list();
-                    
-            Map<Integer,Alert> lastAlerts = new HashMap<Integer,Alert>(alerts.size());
-            for (Alert a  : alerts ) {
-                // since it is ordered by ctime in ascending order, the
-                // last alert will eventually be put into the map
+        public Map<Integer,Alert> findLastByResource(Collection<Resource> resources, boolean fixed) {
+            final String hql = new StringBuilder(256)
+                .append("select max(a.ctime), a ")
+                .append("from Alert a ")
+                .append("join a.alertDefinition ad ")
+                .append("where ad.resource in (:resources) ")
+                .append("and ad.deleted = false ")
+                .append("and a.fixed = :fixed ")
+                .append("group by a")
+                .toString();
+            final List<Object[]> alerts = createQuery(hql)
+                .setBoolean("fixed", fixed)
+                .setParameterList("resources", resources)
+                .list();
+            final Map<Integer,Alert> lastAlerts = new HashMap<Integer,Alert>();
+            for (final Object[] o : alerts ) {
+                final Alert a = (Alert) o[1];
                 lastAlerts.put(a.getAlertDefinition().getId(), a);
             }
-     
             return lastAlerts;
         }
 
