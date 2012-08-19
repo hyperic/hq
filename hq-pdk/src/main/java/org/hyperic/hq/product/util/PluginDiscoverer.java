@@ -75,6 +75,7 @@ import org.hyperic.util.file.FileUtil;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.util.AutoApproveConfig;
 
 public class PluginDiscoverer implements ScanListener {
 
@@ -98,7 +99,16 @@ public class PluginDiscoverer implements ScanListener {
         this.log = LogFactory.getLog(PluginDiscoverer.class);
         this.pm = pd.apm;
         this.platformConfig = getPlatformConfig();
-        this.scanManager = new ScanManager(this, this.log, this.pm, null, null);
+        
+        String aacPath = System.getProperty("autoapproveconfig.path", "config");
+        AutoApproveConfig aac = null;
+        
+        try{
+            aac = new AutoApproveConfig(aacPath);
+        } catch(IllegalArgumentException ex){
+        }
+        
+        this.scanManager = new ScanManager(this, this.log, this.pm, null, aac);
 
         this.scanManager.startup();
 

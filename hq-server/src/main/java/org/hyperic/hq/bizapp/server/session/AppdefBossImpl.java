@@ -29,6 +29,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -39,6 +40,7 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import org.apache.commons.logging.Log;
@@ -131,7 +133,6 @@ import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.GroupCreationException;
 import org.hyperic.hq.authz.shared.IntegerConverter;
-import org.hyperic.hq.authz.shared.MixedGroupType;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
@@ -151,27 +152,16 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.events.shared.MaintenanceEventManager;
-import org.hyperic.hq.grouping.Critter;
-import org.hyperic.hq.grouping.CritterList;
-import org.hyperic.hq.grouping.CritterTranslationContext;
 import org.hyperic.hq.grouping.CritterTranslator;
-import org.hyperic.hq.grouping.critters.AvailabilityCritterType;
-import org.hyperic.hq.grouping.critters.CompatGroupTypeCritterType;
-import org.hyperic.hq.grouping.critters.GroupMembershipCritterType;
-import org.hyperic.hq.grouping.critters.MixedGroupTypeCritterType;
-import org.hyperic.hq.grouping.critters.OwnedCritterType;
-import org.hyperic.hq.grouping.critters.ProtoCritterType;
-import org.hyperic.hq.grouping.critters.ResourceNameCritterType;
-import org.hyperic.hq.grouping.critters.ResourceTypeCritterType;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.measurement.ext.DownMetricValue;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
-import org.hyperic.hq.measurement.shared.AvailabilityType;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.TrackerManager;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
+import org.hyperic.hq.util.Reference;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
@@ -2497,163 +2487,154 @@ public class AppdefBossImpl implements AppdefBoss {
         return new PageList<AppdefResourceValue>(finalList, adjustedSize);
     }
 
-    /**
-     * Perform a search for resources from the resource hub
-     * 
-     */
     @Transactional(readOnly = true)
     public PageList<AppdefResourceValue> search(int sessionId, int appdefTypeId, String searchFor,
                                                 AppdefEntityTypeID appdefResType, Integer groupId,
-                                                int[] groupSubType, boolean matchAny,
-                                                boolean matchOwn, boolean matchUnavail,
-                                                PageControl pc) throws PermissionException,
-        SessionException, PatternSyntaxException {
-        int grpEntId = APPDEF_GROUP_TYPE_UNDEFINED;
+                                                int[] groupSubType, boolean matchAny, boolean matchOwn,
+                                                boolean matchUnavail, PageControl pc)
+    throws PermissionException, SessionException, PatternSyntaxException {
+        final AuthzSubject subj = sessionManager.getSubject(sessionId);
+        final Set<Integer> groupSubTypeSet = getSet(groupSubType);
+        final Collection<ResourceType> types = Collections.singletonList(getResourceType(groupSubTypeSet, appdefTypeId));
+        final Reference<Integer> totalSetSize = new Reference<Integer>(0);
+        final IntegerConverter<AppdefResourceValue> converter =
+            getIntegerConverter(subj, appdefTypeId, searchFor, appdefResType, groupId, groupSubTypeSet, matchAny,
+                                matchOwn, matchUnavail, pc, totalSetSize);
+        final Comparator<AppdefResourceValue> comparator = getNameComparator(pc.getSortorder());
+        final Set<AppdefResourceValue> resources =
+            permissionManager.findViewableResources(subj, types, pc.getSortorder(), converter, comparator);
+        final PageList<AppdefResourceValue> rtn = new PageList<AppdefResourceValue>(resources, totalSetSize.get());
+        return rtn;
+    }
 
-        if (appdefTypeId == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
-            grpEntId = (appdefResType == null) ? AppdefEntityConstants.APPDEF_TYPE_GROUP
-                                              : appdefResType.getType();
-        }
-        AppdefEntityID grpId = (groupId == null) ? null : AppdefEntityID.newGroupID(groupId);
-
-        if (groupSubType != null) {
-            appdefTypeId = AppdefEntityConstants.APPDEF_TYPE_GROUP;
-        }
-
-        AuthzSubject subject = sessionManager.getSubject(sessionId);
-        PageList<AppdefResourceValue> res = new PageList<AppdefResourceValue>();
-
-       
-        CritterTranslationContext ctx = new CritterTranslationContext(subject);
-        CritterList cList = getCritterList(subject, matchAny, appdefResType, searchFor, grpId,
-            grpEntId, groupSubType, appdefTypeId, matchOwn, matchUnavail);
-        // TODO: G
-        PageList<Resource> children = critterTranslator.translate(ctx, cList, pc);
-        res.ensureCapacity(children.size());
-        res.setTotalSize(children.getTotalSize());
-        for (Resource child : children) {
-            try {
-                AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(child);
-                AppdefEntityValue arv = new AppdefEntityValue(aeid, subject);
-                if (aeid.isGroup()) {
-                    res.add(arv.getAppdefGroupValue());
-                } else {
-                    AppdefResource resource = arv.getResourcePOJO();
-                    res.add(resource.getAppdefResourceValue());
+    private IntegerConverter<AppdefResourceValue> getIntegerConverter(final AuthzSubject subj, 
+                                                                      final int appdefTypeId, String searchFor,
+                                                                      final AppdefEntityTypeID appdefResType,
+                                                                      final Integer groupId,
+                                                                      final Set<Integer> groupSubType,
+                                                                      final boolean matchAny, final boolean matchOwn,
+                                                                      final boolean matchUnavail,
+                                                                      final PageControl pc,
+                                                                      final Reference<Integer> totalSetSize) {
+        final Map<Integer, DownMetricValue> unavails = matchUnavail ? availabilityManager.getUnavailResMap() : null;
+        final Pattern pattern = (searchFor != null) ? Pattern.compile(searchFor, Pattern.CASE_INSENSITIVE) : null;
+        final int pagesize = (pc != null) ? pc.getPagesize() : Integer.MAX_VALUE;
+        final int startIndex = (pc != null) ? pc.getPagenum() * pc.getPagesize() : 0;
+        final Integer subjectId = subj.getId();
+        final Integer protoId =
+            (appdefResType != null) ? resourceManager.findResourcePrototype(appdefResType).getId() : null;
+        final boolean noSelections = pattern == null && appdefResType == null && groupId == null &&
+                                     groupSubType == null && !matchOwn && !matchUnavail;
+        final boolean isGroup = (appdefTypeId == AppdefEntityConstants.APPDEF_TYPE_GROUP) ||
+                                (groupSubType != null && !groupSubType.isEmpty());
+        final Set<Resource> groupMembers = getGroupMembers(groupId);
+        final IntegerConverter<AppdefResourceValue> rtn = new IntegerConverter<AppdefResourceValue>() {
+            int returned = 0;
+            int index = 0;
+            int resProtoId;
+            public AppdefResourceValue convert(Integer id) {
+                final Resource resource = resourceManager.getResourceById(id);
+                if (resource == null || resource.isInAsyncDeleteState()) {
+                    return null;
                 }
-            } catch (AppdefEntityNotFoundException e) {
-                log.warn(e.getMessage(), e);
+                if (isGroup) {
+                    final ResourceGroup group = resourceGroupManager.getGroupById(resource.getInstanceId());
+                    Integer groupType = group.getGroupType();
+                    if (group == null) {
+                        return null;
+                    } else if (matchAny && isMixedGroup(groupType)) {
+                        // do nothing
+                    } else if (!groupSubType.contains(groupType)) {
+                        return null;
+                    }
+                    final Resource grpPrototype = group.getResourcePrototype();
+                    // mixed groups don't have a prototype
+                    resProtoId = (grpPrototype == null) ? Integer.MIN_VALUE : grpPrototype.getId();
+                } else {
+                    resProtoId = resource.getPrototype().getId();
+                }
+                if (noSelections || matchAny && matchedAny(resource) || matchedAll(resource)) {
+                    totalSetSize.set(totalSetSize.get()+1);
+                    if (pc == null || (index++ >= startIndex && returned < pagesize)) {
+                        returned++;
+	                    return AppdefResourceValue.convertToAppdefResourceValue(resource);
+                    }
+                }
+                return null;
+            }
+            private boolean isMixedGroup(Integer groupType) {
+                return groupType == AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS ||
+                       groupType == AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP ||
+                       groupType == AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP;
+            }
+            private boolean matchedAll(Resource resource) {
+                return (pattern == null || pattern.matcher(resource.getName()).find()) &&
+                       (!matchUnavail   || unavails.containsKey(resource.getId()))     &&
+                       (groupId == null || groupMembers.contains(resource))            &&
+                       (protoId == null || protoId.equals(resProtoId))                 &&
+                       (!matchOwn       || resource.getOwner().getId().equals(subjectId));
+            }
+            private boolean matchedAny(Resource resource) {
+                return (pattern != null && pattern.matcher(resource.getName()).find()) ||
+                       (matchUnavail    && unavails.containsKey(resource.getId()))     ||
+                       (groupId != null && groupMembers.contains(resource))            ||
+                       (protoId != null && protoId.equals(resProtoId))                 ||
+                       (matchOwn        && resource.getOwner().getId().equals(subjectId));
+            }
+        };
+        return rtn;
+    }
+
+    private Set<Resource> getGroupMembers(Integer groupId) {
+        Set<Resource> rtn = Collections.emptySet();
+        if (groupId != null) {
+            final ResourceGroup group = resourceGroupManager.getGroupById(groupId);
+            final List<Resource> members = resourceGroupManager.getMembers(group);
+            rtn = new HashSet<Resource>(members);
+        }
+        return rtn;
+    }
+
+    private Comparator<AppdefResourceValue> getNameComparator(final int sortOrder) {
+        return new Comparator<AppdefResourceValue>() {
+            public int compare(AppdefResourceValue o1, AppdefResourceValue o2) {
+                if (sortOrder == PageControl.SORT_ASC) {
+                    return o1.getName().toLowerCase().compareTo(o2.getName().toLowerCase());
+                } else {
+                    return o2.getName().toLowerCase().compareTo(o1.getName().toLowerCase());
+                }
+            }
+        };
+    }
+
+    private Set<Integer> getSet(int[] groupSubType) {
+        Set<Integer> rtn = Collections.emptySet();
+        if (groupSubType != null) {
+            rtn = new HashSet<Integer>();
+            for (int type : groupSubType) {
+                rtn.add(type);
             }
         }
-        return res;
+        return rtn;
     }
 
-    private CritterList getCritterList(AuthzSubject subj, boolean matchAny,
-                                       AppdefEntityTypeID appdefResType, String resourceName,
-                                       AppdefEntityID grpId, int grpEntId, int[] groupTypes,
-                                       int appdefTypeId, boolean matchOwn, boolean matchUnavail)
-        throws PatternSyntaxException {
-        Critter tmp;
-        Resource proto = (appdefResType != null) ? resourceManager
-            .findResourcePrototype(appdefResType) : null;
-        boolean isGroup = (groupTypes == null) ? false : true;
-        List<Critter> critters = new ArrayList<Critter>();
-        if (isGroup) {
-            critters.add(getGrpTypeCritter(groupTypes, proto));
-            if (null != (tmp = getResourceTypeCritter(grpEntId, null))) {
-                critters.add(tmp);
-            } else if (null != (tmp = getResourceTypeCritter(appdefTypeId, null))) {
-                critters.add(tmp);
-            }
-        } else {
-            if (null != (tmp = getProtoCritter(appdefResType, proto))) {
-                critters.add(tmp);
-            }
-            // HPD-476 want to hide vm images from browse resources when viewing
-            // all
-            Resource protoToExclude = resourceManager
-                .findResourcePrototypeByName(AuthzConstants.platformPrototypeVmwareVsphereVm);
-            Integer excludeId = (protoToExclude == null) ? null : protoToExclude.getId();
-            if (proto != null && excludeId != null && excludeId.equals(proto.getId())) {
-                excludeId = null;
-            }
-            if (null != (tmp = getResourceTypeCritter(appdefTypeId, excludeId))) {
-                critters.add(tmp);
-            }
+    private ResourceType getResourceType(Set<Integer> groupSubTypeSet, int appdefTypeId) {
+        if (groupSubTypeSet != null && !groupSubTypeSet.isEmpty()) {
+            return resourceManager.getResourceTypeById(AuthzConstants.authzGroup);
         }
-        if (null != (tmp = getResourceNameCritter(resourceName))) {
-            critters.add(tmp);
+        switch (appdefTypeId) {
+            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                return resourceManager.getResourceTypeById(AuthzConstants.authzPlatform);
+            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                return resourceManager.getResourceTypeById(AuthzConstants.authzServer);
+            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                return resourceManager.getResourceTypeById(AuthzConstants.authzService);
+            case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+                return resourceManager.getResourceTypeById(AuthzConstants.authzApplication);
+            case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+                return resourceManager.getResourceTypeById(AuthzConstants.authzGroup);
         }
-        if (null != (tmp = getGrpMemCritter(grpId))) {
-            critters.add(tmp);
-        }
-        if (matchOwn) {
-            critters.add(getOwnCritter(subj));
-        }
-        if (matchUnavail) {
-            critters.add(getUnavailCritter());
-        }
-        return new CritterList(critters, matchAny);
-    }
-
-    private Critter getGrpTypeCritter(int[] groupTypes, Resource proto) {
-        if (groupTypes.length == 0 || groupTypes[0] == APPDEF_GROUP_TYPE_UNDEFINED) {
-            return null;
-        }
-        if (AppdefEntityConstants.isGroupCompat(groupTypes[0])) {
-            CompatGroupTypeCritterType critter = new CompatGroupTypeCritterType();
-            return critter.newInstance(proto);
-        } else {
-            MixedGroupType type = MixedGroupType.findByCode(groupTypes);
-            MixedGroupTypeCritterType critter = new MixedGroupTypeCritterType();
-            return critter.newInstance(type);
-        }
-    }
-
-    private Critter getProtoCritter(AppdefEntityTypeID appdefResType, Resource proto) {
-        if (appdefResType != null && proto != null) {
-            ProtoCritterType protoType = new ProtoCritterType();
-            return protoType.newInstance(proto);
-        }
-        return null;
-    }
-
-    private Critter getGrpMemCritter(AppdefEntityID grpId) {
-        if (grpId != null) {
-
-            ResourceGroup group = resourceGroupManager.findResourceGroupById(grpId.getId());
-            GroupMembershipCritterType groupMemType = new GroupMembershipCritterType();
-            return groupMemType.newInstance(group);
-        }
-        return null;
-    }
-
-    private Critter getResourceTypeCritter(int appdefTypeId, Integer protoToExclude) {
-        if (appdefTypeId == APPDEF_GROUP_TYPE_UNDEFINED || appdefTypeId == APPDEF_TYPE_UNDEFINED ||
-            appdefTypeId == APPDEF_RES_TYPE_UNDEFINED) {
-            return null;
-        }
-        String resTypeName = AppdefUtil.appdefTypeIdToAuthzTypeStr(appdefTypeId);
-        ResourceTypeCritterType type = new ResourceTypeCritterType();
-        return type.newInstance(resTypeName, protoToExclude);
-    }
-
-    private Critter getResourceNameCritter(String resourceName) throws PatternSyntaxException {
-        if (resourceName != null) {
-            ResourceNameCritterType resNameCritterType = new ResourceNameCritterType();
-            return resNameCritterType.newInstance(resourceName);
-        }
-        return null;
-    }
-
-    private Critter getOwnCritter(AuthzSubject subj) {
-        OwnedCritterType ct = new OwnedCritterType();
-        return ct.newInstance(subj);
-    }
-
-    private Critter getUnavailCritter() {
-        AvailabilityCritterType ct = new AvailabilityCritterType();
-        return ct.newInstance(AvailabilityType.AVAIL_DOWN);
+        throw new SystemException("appdefTypeId=" + appdefTypeId + " is invalid");
     }
 
     /**

@@ -234,10 +234,10 @@ public interface MeasurementBoss {
 
     /**
      * Get the last metric data for the array of measurement ids.
-     * @param measurements The List of Measurements to get metrics for
+     * @param measurements The List of MeasurementIds to get metrics for
      * @param interval The allowable time in ms to go back looking for data.
      */
-    public MetricValue[] getLastMetricValue(int sessionId, List<Measurement> measurements, long interval);
+    public MetricValue[] getLastMetricValue(int sessionId, List<Integer> measurementIds, long interval);
 
     /**
      * Get the last indicator metric values

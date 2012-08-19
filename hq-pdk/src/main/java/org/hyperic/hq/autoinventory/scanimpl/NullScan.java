@@ -88,8 +88,10 @@ public class NullScan extends ScanMethodBase {
                             xsrv = (AIServerValue) ((ServerResource) server).getResource();
                         }
 
-                        if (_autoApproveConfig.isAutoApproved(xsrv.getServerTypeName())) {
-                            xsrv.setAutoApprove(true);
+                        if(_autoApproveConfig!=null) { // don't needed
+                            if (_autoApproveConfig.isAutoApproved(xsrv.getServerTypeName())) {
+                                xsrv.setAutoApprove(true);
+                            }
                         }
                     }
 

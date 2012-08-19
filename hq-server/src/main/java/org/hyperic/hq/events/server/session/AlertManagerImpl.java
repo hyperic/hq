@@ -29,8 +29,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -45,10 +47,14 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceEdge;
+import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.session.SubjectDeleteRequestedEvent;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.util.MessagePublisher;
 import org.hyperic.hq.escalation.server.session.Escalatable;
@@ -112,7 +118,9 @@ public class AlertManagerImpl implements AlertManager,
 
     private AlertRegulator alertRegulator;
     private ConcurrentStatsCollector concurrentStatsCollector;
-    
+
+    private PermissionManager permissionManager;
+
     @Autowired
     public AlertManagerImpl(AlertPermissionManager alertPermissionManager,
                             AlertDefinitionDAO alertDefDao, AlertActionLogDAO alertActionLogDAO,
@@ -121,7 +129,9 @@ public class AlertManagerImpl implements AlertManager,
                             AlertDefinitionManager alertDefinitionManager,
                             AuthzSubjectManager authzSubjectManager,
                             EscalationManager escalationManager, MessagePublisher messagePublisher,
-                            AlertRegulator alertRegulator, ConcurrentStatsCollector concurrentStatsCollector) {
+                            AlertRegulator alertRegulator, ConcurrentStatsCollector concurrentStatsCollector,
+                            PermissionManager permissionManager) {
+        this.permissionManager = permissionManager;
         this.alertPermissionManager = alertPermissionManager;
         this.alertDefDao = alertDefDao;
         this.alertActionLogDAO = alertActionLogDAO;
@@ -296,34 +306,55 @@ public class AlertManagerImpl implements AlertManager,
     }
     
     
-        /**
-         * Find the last alerts for the given resource
-         *
-         * 
-         */
+    /**
+     * Find the last alerts for the given resource
+     */
     @Transactional(readOnly=true)
-    public Map<Integer,Alert> findLastByResource(AuthzSubject subj, 
-                                      Resource r,
-                                      boolean includeDescendants,
-                                      boolean fixed) {
-            
-            StopWatch watch = new StopWatch();
-            Map<Integer,Alert> unfixedAlerts = null;
-            try {
-                unfixedAlerts = 
-                    alertDAO.findLastByResource(subj, r, includeDescendants, fixed);
-            } catch (Exception e) {
-                unfixedAlerts = new HashMap<Integer,Alert>(0,1);
-                log.error("Error finding the last alerts for resource id="  + r.getId(), e);
-            } finally {
-                if (log.isDebugEnabled()) {
-                    log.debug("findLastByResource: "  + watch);
+    public Map<Integer,Alert> findLastByResource(AuthzSubject subj,  Resource r, boolean includeDescendants,
+                                                 boolean fixed) {
+            final StopWatch watch = new StopWatch();
+            final boolean debug = log.isDebugEnabled();
+            final List<ResourceType> types = new ArrayList<ResourceType>();
+            types.add(resourceManager.findResourceTypeById(AuthzConstants.authzPlatform));
+            types.add(resourceManager.findResourceTypeById(AuthzConstants.authzServer));
+            types.add(resourceManager.findResourceTypeById(AuthzConstants.authzService));
+            types.add(resourceManager.findResourceTypeById(AuthzConstants.authzGroup));
+            final Set<Integer> viewable = permissionManager.findViewableResources(subj, types);
+            final Collection<Resource> resources = new HashSet<Resource>();
+            resources.add(r);
+            setDescendants(r, includeDescendants, resources, debug, watch);
+            final Map<Integer,Alert> unfixedAlerts = alertDAO.findLastByResource(resources, fixed);
+            for (final Iterator<Entry<Integer, Alert>> it=unfixedAlerts.entrySet().iterator(); it.hasNext(); ) {
+                final Entry<Integer, Alert> entry = it.next();
+                final Integer alertDefId = entry.getKey();
+                final AlertDefinition def = alertDefDao.get(alertDefId);
+                if (def == null) {
+                    continue;
+                }
+                final Resource resource = def.getResource();
+                if (resource == null || resource.isInAsyncDeleteState()) {
+                    continue;
+                }
+                if (!viewable.contains(resource.getId())) {
+                    it.remove();
                 }
             }
-            
+            if (debug) log.debug("findLastByResource: "  + watch);
             return unfixedAlerts;
     }
 
+    private void setDescendants(Resource r, boolean includeDescendants, Collection<Resource> resources,
+                                boolean debug, StopWatch watch) {
+        if (includeDescendants) {
+            if (debug) watch.markTimeBegin("findDescendantEdges");
+            final Collection<ResourceEdge> edges =
+                resourceManager.findDescendantResourceEdges(r, resourceManager.getContainmentRelation());
+            for (final ResourceEdge edge : edges) {
+                resources.add(edge.getTo());
+            }
+            if (debug) watch.markTimeEnd("findDescendantEdges");
+        }
+    }
 
     /**
      * Find the last alert by definition ID

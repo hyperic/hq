@@ -27,9 +27,9 @@ package org.hyperic.hq.authz.shared;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.hibernate.Query;
@@ -37,6 +37,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefResourcePermissions;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Operation;
@@ -850,16 +851,37 @@ public abstract class PermissionManager {
     }
 
     /**
-     * This method is should save some processing since it gives the ability to easily process the resultset
-     * inline to the loop method and has the ability to filter out unwanted resources by returning null from convert()
+     * This method saves processing since it gives the ability to easily intercept the resultset during
+     * the while(rs.next()) loop and has the ability to filter out unwanted resources by returning null from convert()
      * @param converter converts the returned {@link Set} into any type specified by the converter.  If the call to
      * convert() returns null, the value will not be returned in the resulting {@link Set}.
-     * @return {@link Set} of objects determined by the generic type of the specified {@link IntegerConverter}
+     * @return {@link Set} of objects, type is determined by the generic type of the specified {@link IntegerConverter}
      */
     public abstract <T> Set<T> findViewableResources(AuthzSubject subj, Collection<ResourceType> resourceTypes,
                                                      IntegerConverter<T> converter);
 
+    /**
+     * This method saves processing since it gives the ability to easily intercept the resultset during
+     * the while(rs.next()) loop and has the ability to filter out unwanted resources by returning null from convert()
+     * @param converter converts the returned {@link Set} into any type specified by the converter.  If the call to
+     * convert() returns null, the value will not be returned in the resulting {@link Set}.
+     * @param sortName one of {@link PageControl} SORT_ASC, SORT_DESC, SORT_UNSORTED, sorts on {@link Resource} name
+     * @return {@link Set} of objects, type is determined by the generic type of the specified {@link IntegerConverter}
+     */
     public abstract <T> Set<T> findViewableResources(AuthzSubject subject, Collection<ResourceType> types,
-                                                     boolean orderName, IntegerConverter<T> integerConverter);
+                                                     int sortName, IntegerConverter<T> integerConverter);
+
+    /**
+     * This method saves processing since it gives the ability to easily intercept the resultset during
+     * the while(rs.next()) loop and has the ability to filter out unwanted resources by returning null from convert()
+     * @param converter converts the returned {@link Set} into any type specified by the converter.  If the call to
+     * convert() returns null, the value will not be returned in the resulting {@link Set}.
+     * @param sortName one of {@link PageControl} SORT_ASC, SORT_DESC, SORT_UNSORTED, sorts on {@link Resource} name
+     * @param comparator extra sorting that may be applied to the returned {@link Set}
+     * @return {@link Set} of objects, type is determined by the generic type of the specified {@link IntegerConverter}
+     */
+    public abstract <T> Set<T> findViewableResources(AuthzSubject subject, Collection<ResourceType> types,
+                                                     int sortName, IntegerConverter<T> converter,
+                                                     Comparator<T> comparator);
 
 }

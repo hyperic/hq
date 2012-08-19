@@ -566,7 +566,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      */
     @Transactional(readOnly = true)
     public int getNumMembers(ResourceGroup g) {
-        return getMembers(g).size();
+        return resourceGroupDAO.getNumMembers(g);
     }
     
     @Transactional(readOnly = true)

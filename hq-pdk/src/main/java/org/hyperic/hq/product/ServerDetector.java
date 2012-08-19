@@ -1016,10 +1016,12 @@ public abstract class ServerDetector
         AIServerValue aiServerValue = (AIServerValue) server.getResource();
         String resourceName = aiServerValue.getServerTypeName();
 
-        Properties autoApproveProps = autoApproveConfig.getPropertiesForResource(resourceName);
-        for (Object keyRef : autoApproveProps.keySet()) {
-            String key = (String) keyRef;
-            config.setValue(key, autoApproveProps.getProperty(key));
+        if(autoApproveConfig!=null){ // don't needed
+            Properties autoApproveProps = autoApproveConfig.getPropertiesForResource(resourceName);
+            for (Object keyRef : autoApproveProps.keySet()) {
+                String key = (String) keyRef;
+                config.setValue(key, autoApproveProps.getProperty(key));
+            }
         }
 
         server.setProductConfig(config);

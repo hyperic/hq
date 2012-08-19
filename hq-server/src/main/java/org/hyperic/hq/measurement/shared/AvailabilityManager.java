@@ -46,7 +46,6 @@ import org.hyperic.util.pager.PageList;
  * Local interface for AvailabilityManager.
  */
 public interface AvailabilityManager {
-	public boolean isDevDebug();
 
     public Measurement getAvailMeasurement(Resource resource);
 
@@ -164,5 +163,7 @@ public interface AvailabilityManager {
     public AvailabilityFallbackCheckQue getFallbackCheckQue();
 
     public Map<Integer, double[]> getAggregateDataAndAvailUpByMetric(final List<Integer> avIds, long begin, long end);
+
+    public Map<Integer, DownMetricValue> getUnavailResMap();
 
 }

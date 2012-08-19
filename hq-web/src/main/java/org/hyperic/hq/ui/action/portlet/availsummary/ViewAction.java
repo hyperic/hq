@@ -150,7 +150,7 @@ public class ViewAction
         int sessionId = user.getSessionId().intValue();
 
         CacheEntry[] ents = new CacheEntry[arrayIds.length];
-        List<Measurement> measurements = new ArrayList<Measurement>(arrayIds.length);
+        List<Integer> measurements = new ArrayList<Integer>(arrayIds.length);
         Map<String, AvailSummary> res = new HashMap<String, AvailSummary>();
         long interval = 0;
         ArrayList<String> toRemove = new ArrayList<String>();
@@ -163,7 +163,7 @@ public class ViewAction
             }
 
             if (ents[i] != null && ents[i].getMeasurement() != null) {
-                measurements.add(i, ents[i].getMeasurement());
+                measurements.add(i, ents[i].getMeasurement().getId());
                 if (ents[i].getMeasurement().getInterval() > interval) {
                     interval = ents[i].getMeasurement().getInterval();
                 }
