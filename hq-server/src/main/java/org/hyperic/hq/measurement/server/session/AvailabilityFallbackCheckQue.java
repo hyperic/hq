@@ -252,6 +252,8 @@ public class AvailabilityFallbackCheckQue {
 			}			
 		}
 		platformsRecheckQue.removeAll(pointsToDel);
+		if (res != 0)
+			log.debug("cleanQueFromNonExistant: removing " + res + " platforms.");
 		return res;
 	}
 

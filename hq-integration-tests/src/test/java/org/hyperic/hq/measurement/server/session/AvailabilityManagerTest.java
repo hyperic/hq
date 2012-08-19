@@ -252,8 +252,9 @@ public class AvailabilityManagerTest {
             return;
         }
         synchronized (availabilityCache) {
-            log.error("Cache info -> " + availabilityCache.get(id).getTimestamp() + ", " +
-                       availabilityCache.get(id).getValue());
+        	if (availabilityCache.get(id) != null)
+	            log.error("Cache info -> " + availabilityCache.get(id).getTimestamp() + ", " +
+	                       availabilityCache.get(id).getValue());
         }
     }
 
@@ -486,20 +487,7 @@ public class AvailabilityManagerTest {
     }
 
     private void setupAvailabilityTable() throws Exception {
-        availabilityCache.clear();
-        dao.getSession().clear();
-        boolean descending = false;
-        long start = 0l;
-        long end = AvailabilityDataRLE.getLastTimestamp();
-        Integer[] mids = new Integer[1];
-        mids[0] = PLAT_MEAS_ID;
-        List<AvailabilityDataRLE> avails = dao.getHistoricalAvails(mids, start, end, descending);
-        for (AvailabilityDataRLE avail : avails) {
-            dao.remove(avail);
-        }
-        dao.getSession().flush();
-        log.info("deleted " + avails.size() + " rows from " + AVAIL_TAB +
-                  " with measurement Id = " + PLAT_MEAS_ID);
+    	setupAvailabilityTable(PLAT_MEAS_ID);
     }
 
     private void setupAvailabilityTable(Integer measId) throws Exception {
@@ -516,7 +504,7 @@ public class AvailabilityManagerTest {
         }
         dao.getSession().flush();
         log.info("deleted " + avails.size() + " rows from " + AVAIL_TAB +
-                  " with measurement Id = " + PLAT_MEAS_ID);
+                  " with measurement Id = " + measId);
     }
 
     private boolean isAvailDataRLEValid(Integer measId, DataPoint lastPt,
@@ -564,7 +552,7 @@ public class AvailabilityManagerTest {
     }
 
     private DataPoint addData(Integer measId, MetricValue mVal) {
-        log.info("adding timestamp=" + mVal.getTimestamp() + ", value=" + mVal.getValue());
+        log.info("adding measId="+ measId + ", timestamp=" + mVal.getTimestamp() + ", value=" + mVal.getValue());
         list.clear();
         DataPoint pt = new DataPoint(measId, mVal);
         list.add(pt);
@@ -578,4 +566,87 @@ public class AvailabilityManagerTest {
         return System.currentTimeMillis();
     }
 
+    
+    @Test
+    public void testVCFallback() throws Exception {
+    	dbPopulator.setSchemaFile("/data/availabilityVCTests.xml.gz");
+    	dbPopulator.restoreDatabase();
+    
+
+    	testVCFallback(MeasurementConstants.AVAIL_UP, MeasurementConstants.AVAIL_UNKNOWN);
+    	testVCFallback(MeasurementConstants.AVAIL_DOWN, MeasurementConstants.AVAIL_DOWN);
+    }
+
+    	
+   /*
+    * Actions:
+    * - add VC_PLATFORM_RESOURCE_MEAS_ID status - the given statusByVc
+    * - add old UP status for the VM monitored platform
+    * - run Backfill, that should:
+    * 	a. update VM-Platform with  statusByVc
+    * 	b. update a server/service on the VM with  expectedServerStatus (Unknown/Down)
+    * 	c. update the VM's HQ Agent server with status DOWN.
+    * - verify the above statuses have been updated.
+    */
+   public void testVCFallback(double statusByVc, double expectedServerStatus) throws Exception {
+    	
+        // Last data in DB: 11297, 1344754260000, 9223372036854775807, 1.0
+    	final Integer VM_PLATFORM_RESOURCE_MEAS_ID = 10370; // platform resource id: 11083
+    	final Integer VC_PLATFORM_RESOURCE_MEAS_ID = 11297; // platform resource id: 11131
+    	final Integer VM_SOME_SERVER_MEAS_ID = 10496; // Resource id: 11095
+    	final Integer VM_HQ_AGENT_MEAS_ID = 10595; // Resource id: 11087
+    	long now = now();
+    	
+    	// clear previous data, if exists.
+    	setupAvailabilityTable(VM_PLATFORM_RESOURCE_MEAS_ID);
+    	setupAvailabilityTable(VM_HQ_AGENT_MEAS_ID);
+    	setupAvailabilityTable(VM_SOME_SERVER_MEAS_ID);
+    	
+    	
+    	// set initial availability data - current for VC platform, old for VM platform and servers/services
+    	addData(VC_PLATFORM_RESOURCE_MEAS_ID, new MetricValue(statusByVc, now));
+    	
+    	Measurement vmMeas = mMan.getMeasurement(VM_PLATFORM_RESOURCE_MEAS_ID);
+        long interval = vmMeas.getInterval();
+        long oldTimeStamp = now-(30*interval);
+    	addData(VM_PLATFORM_RESOURCE_MEAS_ID, new MetricValue(MeasurementConstants.AVAIL_UP, oldTimeStamp));
+    	addData(VM_HQ_AGENT_MEAS_ID, new MetricValue(MeasurementConstants.AVAIL_UP, oldTimeStamp));
+    	addData(VM_SOME_SERVER_MEAS_ID, new MetricValue(MeasurementConstants.AVAIL_UP, oldTimeStamp));
+    	
+    	// run backfill
+    	backfill(now);
+    	
+    	// validate statuses
+        long baseTime = TimingVoodoo.roundDownTime(now, 600000);
+        long endTime = now + (interval * 20); 
+        
+        // check VM Platform status
+        int numOfExpectedStatuses = 1;
+        if (statusByVc != MeasurementConstants.AVAIL_UP)
+        	numOfExpectedStatuses = 2;
+        checkStatus(vmMeas, numOfExpectedStatuses, statusByVc, "Checking VM Platform status:", baseTime, endTime);
+
+    
+        // check VM Platform Server status
+    	Measurement vmServerMeas = mMan.getMeasurement(VM_SOME_SERVER_MEAS_ID);
+        checkStatus(vmServerMeas, 2, expectedServerStatus, "Checking server's status:", baseTime, endTime);
+
+
+        // check VM HQAgent status
+    	Measurement vmHqAgentMeas = mMan.getMeasurement(VM_HQ_AGENT_MEAS_ID);
+        checkStatus(vmHqAgentMeas, 2, MeasurementConstants.AVAIL_DOWN, "Checking HQ agent status:", baseTime, endTime);
+        
+        CacheManager.getInstance().clearAll();
+    }
+    
+    
+    private void checkStatus(Measurement meas, int expectedNumStatuses, double expectedStatus, String assertionMessage, long startTime, long endTime) {
+        List<AvailabilityDataRLE> avails = aMan.getHistoricalAvailData(meas.getResource(), startTime, endTime);
+        int availsSize = avails.size();
+        if (availsSize != expectedNumStatuses)
+        	dumpAvailsToLogger(avails);
+        Assert.assertEquals(expectedNumStatuses, expectedNumStatuses);
+        AvailabilityDataRLE lastAvail = avails.get(availsSize-1);
+        Assert.assertEquals(assertionMessage, new Double(expectedStatus), new Double(lastAvail.getAvailVal()));
+    }
 }
