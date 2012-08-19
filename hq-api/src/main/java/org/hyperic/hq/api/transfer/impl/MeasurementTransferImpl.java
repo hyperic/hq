@@ -142,7 +142,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     
     public ResourceMeasurementBatchResponse getAggregatedMetricData(ApiMessageContext apiMessageContext,
             ResourceMeasurementRequests hqMsmtReqs, Date begin, Date end)
-            throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException {
+            throws PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException {
         ResourceMeasurementBatchResponse res = new ResourceMeasurementBatchResponse(this.errorHandler);
         if (hqMsmtReqs==null || hqMsmtReqs.getMeasurementRequests()==null || hqMsmtReqs.getMeasurementRequests().size()==0 || begin==null || end==null) {
             throw new UnsupportedOperationException("the request is missing some essential details");

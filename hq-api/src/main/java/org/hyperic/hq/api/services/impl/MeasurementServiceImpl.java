@@ -31,26 +31,25 @@ public class MeasurementServiceImpl extends RestApiService implements Measuremen
 			        throws Throwable {
 	    try {
 	        try {
-	        ApiMessageContext apiMessageContext = newApiMessageContext();
-	        return measurementTransfer.getMetrics(apiMessageContext, measurementRequest, rscId, begin, end);
-	        
+	            ApiMessageContext apiMessageContext = newApiMessageContext();
+	            return measurementTransfer.getMetrics(apiMessageContext, measurementRequest, rscId, begin, end);
 	        } catch (Throwable t) {
 	            errorHandler.log(t);
 	            throw t;
 	        }
         } catch (UnsupportedOperationException e) {
-            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.BAD_MEASUREMENT_REQ, e.getMessage());
+            throw errorHandler.newWebApplicationException(e, Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.BAD_MEASUREMENT_REQ);
         } catch (ObjectNotFoundException e) {
             String missingObj = e.getEntityName();
             if (MeasurementTemplate.class.getName().equals(missingObj)) {
-                throw errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.TEMPLATE_NOT_FOUND, e.getIdentifier());
+                throw errorHandler.newWebApplicationException(e, Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.TEMPLATE_NOT_FOUND, e.getIdentifier());
             }
             if (Measurement.class.getName().equals(missingObj)) {
-                throw errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.MEASUREMENT_NOT_FOUND, e.getIdentifier());
+                throw errorHandler.newWebApplicationException(e, Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.MEASUREMENT_NOT_FOUND, e.getIdentifier());
             }
-            throw errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID, e.getIdentifier());
+            throw errorHandler.newWebApplicationException(e, Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID, e.getIdentifier());
         } catch (IllegalArgumentException e) {
-            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.WRONG_DATE_VALUES, e.getMessage());
+            throw errorHandler.newWebApplicationException(e, Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.WRONG_DATE_VALUES);
         }
     }
 
@@ -59,10 +58,8 @@ public class MeasurementServiceImpl extends RestApiService implements Measuremen
         try {
             ApiMessageContext apiMessageContext = newApiMessageContext();
             return measurementTransfer.getAggregatedMetricData(apiMessageContext, hqMsmtReqs, begin, end);
-        } catch (ParseException e) {
-            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.WRONG_DATE_FORMAT, "cannot parse the begin/end time frame arguments\n",e.getMessage());
         } catch (TimeframeBoundriesException e) {
-            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.WRONG_DATE_VALUES, e.getMessage());
+            throw errorHandler.newWebApplicationException(e, Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.WRONG_DATE_VALUES);
         }
     }
 }
