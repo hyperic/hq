@@ -38,5 +38,5 @@ public interface MeasurementTransfer {
     
     public ResourceMeasurementBatchResponse getAggregatedMetricData(ApiMessageContext apiMessageContext, final ResourceMeasurementRequests hqMsmtReqs, 
             final Date begin, final Date end) 
-            throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException;
+            throws PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException;
 }
