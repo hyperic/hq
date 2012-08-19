@@ -48,7 +48,7 @@ import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.product.MetricValue;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
+//import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,14 +89,6 @@ public class AvailabilityManagerTest {
     public AvailabilityManagerTest() {
     }
 
-    @Before
-    public void initializeData() throws Exception {
-        //populate DB here so it will be rolled back with rest of test transaction
-        //can use DBPopulator or just create test data programatically
-        //TODO may not need to load all this data for every test - move this
-        //into only test methods that need it?
-        dbPopulator.restoreDatabase();
-    }
     
     @After
     public void after() {
@@ -104,8 +96,19 @@ public class AvailabilityManagerTest {
         CacheManager.getInstance().clearAll();
     }
 
+    
+    private void beforeTest() throws Exception {
+        //populate DB here so it will be rolled back with rest of test transaction
+        //can use DBPopulator or just create test data programatically
+        //TODO may not need to load all this data for every test - move this
+        //into only test methods that need it?
+        dbPopulator.restoreDatabase();
+        setupAvailabilityTable();
+    }
+    
     @Test
-    public void testFindLastAvail() {
+    public void testFindLastAvail() throws Exception {
+        dbPopulator.restoreDatabase();
         List<AvailabilityDataRLE> rle = dao.findLastAvail(Collections.singletonList(10100));
         Assert.assertTrue("rle value is incorrect",
             rle.get(0).getAvailVal() == MeasurementConstants.AVAIL_UP);
@@ -114,7 +117,9 @@ public class AvailabilityManagerTest {
 
     @Test
     public void testCatchup() throws Exception {
-        // need to invoke backfiller once so that its initial time is set
+    	beforeTest();
+
+    	// need to invoke backfiller once so that its initial time is set
         // so that it can start when invoked the next time
         testCatchup(PLAT_MEAS_ID);
         testCatchup(SERVICE_MEAS_ID);
@@ -129,7 +134,7 @@ public class AvailabilityManagerTest {
      */
     @Test
     public void testInsertIntoMiddle() throws Exception {
-        setupAvailabilityTable();
+    	beforeTest();
         int INCRTIME = 240000;
         long baseTime = TimingVoodoo.roundDownTime(now(), 60000);
         long tmpTime = baseTime;
@@ -148,6 +153,7 @@ public class AvailabilityManagerTest {
 
     @Test
     public void testOverlap() throws Exception {
+    	beforeTest();
         List<DataPoint> list = new ArrayList<DataPoint>();
         long now = now();
         long baseTime = TimingVoodoo.roundDownTime(now, 60000);
@@ -161,7 +167,7 @@ public class AvailabilityManagerTest {
 
     @Test
     public void stressTest2() throws Exception {
-        setupAvailabilityTable();
+    	beforeTest();
         ArrayList<DataPoint> list = new ArrayList<DataPoint>();
         long now = now();
         long baseTime = TimingVoodoo.roundDownTime(now, 60000);
@@ -185,7 +191,7 @@ public class AvailabilityManagerTest {
 
     @Test
     public void stressTest1() throws Exception {
-        setupAvailabilityTable();
+    	beforeTest();
         long now = now();
         long baseTime = TimingVoodoo.roundDownTime(now, 60000);
         long incrTime = 60000;
@@ -202,7 +208,7 @@ public class AvailabilityManagerTest {
     }
 
     private void testCatchup(Integer measId) throws Exception {
-        setupAvailabilityTable();
+    	setupAvailabilityTable();
         Measurement meas = mMan.getMeasurement(measId);
         long interval = meas.getInterval();
         long now = now();
@@ -285,11 +291,12 @@ public class AvailabilityManagerTest {
 
     @Test
     public void testAvailabilityStatusWhenNtwkDwn() throws Exception {
+    	beforeTest();
         testAvailabilityForPlatform(PLAT_MEAS_ID);
     }
 
     private void testAvailabilityForPlatform(Integer measId) throws Exception {
-        setupAvailabilityTable();
+        setupAvailabilityTable(measId);
         Measurement meas = mMan.getMeasurement(measId);
         long interval = meas.getInterval();
         long now = now();
@@ -348,11 +355,11 @@ public class AvailabilityManagerTest {
         // Following method will verify that when the platform is down it's
         // associated resources will be marked down by the backfiller
         // after waiting for one interval from the last cache update time
-        testAvailabilityForService(SERVICE_MEAS_ID);
+    	beforeTest();
+    	testAvailabilityForService(SERVICE_MEAS_ID);
     }
 
     private void testAvailabilityForService(Integer measId) throws Exception {
-        setupAvailabilityTable();
         setupAvailabilityTable(measId);
         Measurement meas = mMan.getMeasurement(measId);
         long interval = meas.getInterval();
@@ -410,7 +417,7 @@ public class AvailabilityManagerTest {
      */
     @Test
     public void testNonOneorZeroDupPtInsertAtBegin() throws Exception {
-        setupAvailabilityTable();
+    	beforeTest();
         long INCRTIME = 60000;
         long baseTime = now();
         baseTime = TimingVoodoo.roundDownTime(baseTime, 60000);
@@ -432,7 +439,7 @@ public class AvailabilityManagerTest {
      */
     @Test
     public void testPrependWithDupValue() throws Exception {
-        setupAvailabilityTable();
+    	beforeTest();
         long baseTime = now();
         baseTime = TimingVoodoo.roundDownTime(baseTime, 60000);
         long tmpTime = baseTime;
@@ -453,7 +460,7 @@ public class AvailabilityManagerTest {
      */
     @Test
     public void testPrepend() throws Exception {
-        setupAvailabilityTable();
+    	beforeTest();
         long baseTime = now();
         baseTime = TimingVoodoo.roundDownTime(baseTime, 60000);
         long tmpTime = baseTime;
