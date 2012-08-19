@@ -636,7 +636,6 @@ public class AvailabilityManagerTest {
     	Measurement vmHqAgentMeas = mMan.getMeasurement(VM_HQ_AGENT_MEAS_ID);
         checkStatus(vmHqAgentMeas, 2, MeasurementConstants.AVAIL_DOWN, "Checking HQ agent status:", baseTime, endTime);
         
-        CacheManager.getInstance().clearAll();
     }
     
     
