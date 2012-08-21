@@ -94,7 +94,7 @@ class MetricCategory {
      *
      * @return a Map of the passed Measurements onto MetricValues
      */
-    static Map getLastDataPoints(Collection c, long timeWindow) {
+    static Map getLastDataPoints(Collection<Measurement> c, long timeWindow) {
         def idToMetric = [:]
         
         int i = 0;
@@ -103,7 +103,7 @@ class MetricCategory {
             idToMetric[m.id] = m
         }
         
-        def vals = dataMan.getLastDataPoints(c, timeWindow)
+        def vals = dataMan.getLastDataPoints(c.collect { m -> m.id }, timeWindow)
         def res  = [:]
         c.each { m ->
             res[m] = vals[m.id]
