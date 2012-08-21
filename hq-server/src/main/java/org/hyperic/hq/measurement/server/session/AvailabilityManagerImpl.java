@@ -911,6 +911,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
                 updateStates(updateList, currAvails, createMap, removeMap);
                 updateOutOfOrderState(outOfOrderAvail, currAvails, createMap, removeMap);
                 flushCreateAndRemoves(createMap, removeMap);
+                checkAvailabilityState(availPoints);
                 logErrorInfo(state, availPoints, currAvails);
                 availabilityCache.commitTran();
             } catch (Throwable e) {
@@ -1471,38 +1472,6 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         if (availPoints.size() == 0) {
             return;
         }
-        // The following code (until the creation of the StopWatch) is a fix for
-        // Jira issue [HHQ-5524].
-        // There is a strange scenario where the cache holds an availability
-        // metric with 'available' value while
-        // in the database the same availability metric value is 'not available'
-        // (in the HQ_AVAIL_DATA_RLE table).
-        // In that case we need to clear the availability cache because it is
-        // out of sync with the database.
-        // It is very hard to understand what causes this issue but it happens a
-        // lot in scale environments.
-        // If we don't clear the cache the resource which this availability
-        // metric belongs to will appear to be 'down' while it is not,
-        // clearing the cache causes the metric to be updated in the database to
-        // the correct value.
-        List<Integer> includes = new ArrayList<Integer>(availPoints.size());
-        for (DataPoint point : availPoints) {
-        	includes.add(point.getMeasurementId());
-        }
-        // Find out which of the availPoints is marked as 'not available' in the
-        // database and check
-        // if the same point is marked as 'available' in the cache -> cache is
-        // out of sync!
-        List<AvailabilityDataRLE> downList = availabilityDataDAO.getDownMeasurements(includes);
-        for (AvailabilityDataRLE data : downList) {
-            DataPoint stateInCache = availabilityCache.get(data.getMeasurement().getId());
-            if (null != stateInCache && (stateInCache.getValue() != MeasurementConstants.AVAIL_DOWN)) {
-                log.info("The state of the Availability cache is out of sync with the database for measurement id '"
-                        + data.getMeasurement().getId() + "' , clearing this metric from the Availability cache");
-                availabilityCache.remove(data.getMeasurement().getId());
-                continue;
-            }
-        }
         final StopWatch watch = new StopWatch();
         final boolean debug = log.isDebugEnabled();
         for (DataPoint pt : availPoints) {
@@ -1544,6 +1513,41 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
                     + "}");
         }
     }
+
+	private void checkAvailabilityState(List<DataPoint> availPoints) {
+		// The following code (until the creation of the StopWatch) is a fix for
+        // Jira issue [HHQ-5524].
+        // There is a strange scenario where the cache holds an availability
+        // metric with 'available' value while
+        // in the database the same availability metric value is 'not available'
+        // (in the HQ_AVAIL_DATA_RLE table).
+        // In that case we need to clear the availability cache because it is
+        // out of sync with the database.
+        // It is very hard to understand what causes this issue but it happens a
+        // lot in scale environments.
+        // If we don't clear the cache the resource which this availability
+        // metric belongs to will appear to be 'down' while it is not,
+        // clearing the cache causes the metric to be updated in the database to
+        // the correct value.
+        List<Integer> includes = new ArrayList<Integer>(availPoints.size());
+        for (DataPoint point : availPoints) {
+        	includes.add(point.getMeasurementId());
+        }
+        // Find out which of the availPoints is marked as 'not available' in the
+        // database and check
+        // if the same point is marked as 'available' in the cache -> cache is
+        // out of sync!
+        List<AvailabilityDataRLE> downList = availabilityDataDAO.getDownMeasurements(includes);
+        for (AvailabilityDataRLE data : downList) {
+            DataPoint stateInCache = availabilityCache.get(data.getMeasurement().getId());
+            if (null != stateInCache && (stateInCache.getValue() != MeasurementConstants.AVAIL_DOWN)) {
+                log.info("The state of the Availability cache is out of sync with the database for measurement id '"
+                        + data.getMeasurement().getId() + "' , clearing this metric from the Availability cache");
+                availabilityCache.remove(data.getMeasurement().getId());
+                continue;
+            }
+        }
+	}
 
     private void sendDataToEventHandlers(List<DataPoint> data) {
         final StopWatch watch = new StopWatch();
