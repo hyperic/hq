@@ -120,7 +120,8 @@ public class EncryptedStringType implements UserType, ParameterizedType {
         if(object == null) return null ; 
         else if (object instanceof LazyDecryptableValue) { 
             return (object == null ? null : ((LazyDecryptableValue)object).get()) ;
-        }else return object.toString() ; 
+        }else 
+            return object.toString() ; 
     }//EOM 
     
     /**
@@ -167,7 +168,31 @@ public class EncryptedStringType implements UserType, ParameterizedType {
             String strValue = this.convertToString(value) ; 
             
             if(!SecurityUtil.isMarkedEncrypted(strValue)) { 
+                // [HHQ-5592] MAYA temporarily save the cleartext value
+                // for debugging purposes only
+                String originalValue = strValue;
+                if (log.isDebugEnabled()) {
+                    log.debug("value before encryption=" + originalValue);
+                }
                 strValue = this.encryptor.encrypt(strValue) ; 
+
+                if (log.isDebugEnabled()) {
+                    log.debug("value after encryption=" + strValue);
+                }                
+                // MAYA Note: this might throw an exception,
+                // if encryption was defective
+                try {
+                    String decryptedValue = this.encryptor.decrypt(strValue);
+                    if (!originalValue.equals(decryptedValue)) {
+                        StringBuilder logMessageBuilder = new StringBuilder("original value={");
+                        logMessageBuilder.append(originalValue).append("} differs from the decrypted value={")
+                                .append(decryptedValue).append("}");
+                        log.error(logMessageBuilder.toString());
+                    } // EO if original and decrypted values differ
+                } catch (EncryptionOperationNotPossibleException e) {
+                    log.warn("could not decrypt value=" + value);
+                    throw e;
+                } // EO catch  EncryptionOperationNotPossibleException           
                 
             }//EO if value was not already encrypted 
              
@@ -189,19 +214,20 @@ public class EncryptedStringType implements UserType, ParameterizedType {
         
         private String value ; 
         private boolean isDecrypted ; 
-        private PBEStringEncryptor encryptor ; 
+        private PBEStringEncryptor encryptor ;     
         
         /**
          * Used by client code to create new encrypted values 
          * @param clearTextValue Whose encryption would be deferred to the flush opetaion  
          */
         public LazyDecryptableValue(final String clearTextValue) {
-            this.value = clearTextValue ; 
+            this.value = clearTextValue ;
             this.isDecrypted = true ; 
         }//EOM
         
+
         /**
-         * Used by hibernate during object dehydration. 
+         * Used by hibernate during object hydration. 
          * @param encryptor {@link PBEStringEncryptor} delegate with which to decrypt the value. 
          * @param encryptedValue 
          */
@@ -216,10 +242,18 @@ public class EncryptedStringType implements UserType, ParameterizedType {
          */
         public final String get() { 
                     try {
-            if(!this.isDecrypted) { 
+            if(!this.isDecrypted) {
                 this.isDecrypted = true ; 
                 if(SecurityUtil.isMarkedEncrypted(value)) {  
+                    if (log.isDebugEnabled()) {
+                        log.debug("value before decryption=" + value);
+                    }
                     this.value = this.encryptor.decrypt(this.value) ; 
+                    if (log.isDebugEnabled()) {
+                        log.debug("value after decryption=" + this.value);
+                    }                    
+                } else {
+                    log.warn("LazyDecryptableValue is supposed to be encrypted, but is not marked encrypted=" + this.value);
                 }//EO if not clear text as it is 
             }//EO else if not yet decrypted 
             return this.value ; 
