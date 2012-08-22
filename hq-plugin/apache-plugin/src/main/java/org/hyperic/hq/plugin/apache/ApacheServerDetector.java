@@ -418,7 +418,7 @@ public class ApacheServerDetector
                       " does not exist, discovering as type: " +
                       TYPE_HTTPD);
             try {
-                productConfig = populatePorts(new long[] {binary.pid}, new ConfigResponse());
+                productConfig = DetectionUtil.populatePorts(getSigar(),new long[] {binary.pid}, new ConfigResponse());
             } catch (SigarException e) {
                 log.error(e);
                 throw new PluginException(e);
