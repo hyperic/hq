@@ -39,7 +39,6 @@ public class AvailabilityFallbackChecker {
 	
 	
     private final Log log = LogFactory.getLog(AvailabilityFallbackChecker.class);
-    private final Object lock = new Object();
 
 	private AvailabilityManager availabilityManager;
 	private AvailabilityCache availabilityCache;
@@ -82,12 +81,14 @@ public class AvailabilityFallbackChecker {
 	 * @param availabilityDataPoints
 	 */
 	public void checkAvailability(Collection<ResourceDataPoint> availabilityDataPoints) {
-		if ((availabilityDataPoints == null) || (availabilityDataPoints.isEmpty()) )
-				return;
+		if ((availabilityDataPoints == null) || (availabilityDataPoints.isEmpty()) ) {
+			return;			
+		}
 		log.debug("checkAvailability: start");
 		Collection<ResourceDataPoint> resPlatforms = new ArrayList<ResourceDataPoint>();
 		for (ResourceDataPoint availabilityDataPoint : availabilityDataPoints) {
 			ResourceDataPoint platformAvailPoint = checkPlatformAvailability(availabilityDataPoint);
+			//log.info("checkAvailability-Platform: " + availabilityDataPoint.getResource().getId() + " value: " + availabilityDataPoint.getValue());
 			resPlatforms.add(platformAvailPoint);
 		}
 		log.info("checkAvailability: checking " + resPlatforms.size() + " platforms.");
@@ -95,11 +96,6 @@ public class AvailabilityFallbackChecker {
 		log.info("checkAvailability: updating " + res.size() + " platforms & descendants.");
 		storeUpdates(res);
 	}
-
-    public Object getLock() {
-        return lock;
-    }
-
 
     
     /**
@@ -113,17 +109,22 @@ public class AvailabilityFallbackChecker {
 			//TODO remove the following line, and recheck
 			measResource = resourceManager.getResourceById(measResource.getId());
 			Resource prototype = measResource.getPrototype();
-			if (prototype == null)
-				return false;
+			if (prototype == null) {
+				return false;				
+			}
+		
 			
 			String prototypeName = prototype.getName();
 			if (prototypeName.equals(AppdefEntityConstants.HQ_AGENT_PROTOTYPE_NAME)) {
-				log.debug("isHQHagent:  Found: " + measResource.getId());
+				if (log.isDebugEnabled()) {
+					log.debug("isHQHagent:  Found: " + measResource.getId());					
+				}
 				return true;
 			}
 		} catch (Exception e) {
-			log.warn(e.toString());
-			log.warn("IsHQAgent: returning false.");
+			// Do not want to fail the entire functionality if there is a problem here.
+			// Assuming this is not an HQ Agent and continuing.
+			log.error("IsHQAgent: Exception thrown. Returning false", e);
 			return false;
 		} 
 		return false;
@@ -147,25 +148,17 @@ public class AvailabilityFallbackChecker {
 	 */
 	private ResourceDataPoint checkPlatformAvailability(ResourceDataPoint availabilityDataPoint) {
 		ResourceDataPoint res = getPlatformStatusFromVC(availabilityDataPoint);
-		if (res != null)
-			return res;
-		res = getPlatformStatusByPing(availabilityDataPoint);
-		if (res != null)
-			return res;
+		if (res != null) {
+			return res;			
+		}
+		// If we want to add a check using ping:
+		//res = getPlatformStatusByPing(availabilityDataPoint);
+		//if (res != null)
+		//	return res;
 		return availabilityDataPoint;
 	}
 
 
-	/**
-	 * <B>Currently unimplemented. Exists for future usage.</B>
-	 * @param availabilityDataPoint
-	 * @return new availability status to update, if any status could be calculated
-	 */
-	@Deprecated
-	private ResourceDataPoint getPlatformStatusByPing(ResourceDataPoint availabilityDataPoint) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 
 	/**
@@ -175,8 +168,10 @@ public class AvailabilityFallbackChecker {
 	 * @return new availability status to update, if exists. Null otherwise.
 	 */
 	private ResourceDataPoint getPlatformStatusFromVC(ResourceDataPoint availabilityDataPoint) {
-		log.debug("getPlatformStatusFromVC" );
 		Integer platformId = availabilityDataPoint.getResource().getId();
+		if (log.isDebugEnabled()) {
+			log.debug("getPlatformStatusFromVC: platformId" + platformId);			
+		}
 		List<Integer> resourceIds = new ArrayList<Integer>();
 		resourceIds.add(platformId);
 		final Map<Integer, List<Measurement>> virtualParent = availabilityManager.getAvailMeasurementParent(
@@ -186,8 +181,7 @@ public class AvailabilityFallbackChecker {
 		}
 		// else - there should be a single measurement of the related VM Instance:
 		List<Measurement> resourceEdgeVirtualRelations = virtualParent.get(platformId);
-		if ((resourceEdgeVirtualRelations == null) | (resourceEdgeVirtualRelations.isEmpty()) )
-		{
+		if ((resourceEdgeVirtualRelations == null) | (resourceEdgeVirtualRelations.isEmpty()) ) {
 			return null;
 		}
 		if (resourceEdgeVirtualRelations.size() != 1) {
@@ -199,13 +193,16 @@ public class AvailabilityFallbackChecker {
 		long endTimeStamp = getEndWindow(getCurTimestamp(), vmParentMeasurement);
         final DataPoint defaultParentDataPoint = new DataPoint(vmParentMeasurement.getId().intValue(), MeasurementConstants.AVAIL_NULL, endTimeStamp);
         final DataPoint lastParentDataPoint = availabilityCache.get(vmParentMeasurement.getId(), defaultParentDataPoint);
-        if (lastParentDataPoint == null)
-        	return null;
+        if (lastParentDataPoint == null) {
+        	return null;        	
+        }
+        
         double parentStatus = lastParentDataPoint.getValue();
         if ((parentStatus == MeasurementConstants.AVAIL_UP) || (parentStatus == MeasurementConstants.AVAIL_DOWN)) {
         	DataPoint newDataPoint = new DataPoint(availabilityDataPoint.getMeasurementId(), lastParentDataPoint.getMetricValue());
         	ResourceDataPoint resPoint = new ResourceDataPoint(availabilityDataPoint.getResource(), newDataPoint);
-    		log.info("getPlatformStatusFromVC: found parent measurement: " + lastParentDataPoint.getMeasurementId() + "; adding point: " + resPoint.toString());
+    		log.info("getPlatformStatusFromVC: found parent measurement: " + lastParentDataPoint.getMeasurementId() + 
+    				"; adding point: " + resPoint.toString());
         	return resPoint;
         }
 
@@ -213,12 +210,15 @@ public class AvailabilityFallbackChecker {
 	}
 	
 	private boolean isEmptyMap(Map<Integer, List<Measurement>> rHierarchy) {
-		if (rHierarchy == null)
-			return true;
-		if (rHierarchy.size() ==0)
-			return true;
-		if (rHierarchy.isEmpty())
-			return true;
+		if (rHierarchy == null) {
+			return true;			
+		}
+		if (rHierarchy.size() ==0) {
+			return true;			
+		}
+		if (rHierarchy.isEmpty()) {
+			return true;			
+		}
 		return false;
 	}
 
@@ -257,8 +257,9 @@ public class AvailabilityFallbackChecker {
 					continue;
 				}
 				double curStatus = assocStatus;
-				if (isHQAgent(meas))
-					curStatus = MeasurementConstants.AVAIL_DOWN;
+				if (isHQAgent(meas)) {
+					curStatus = MeasurementConstants.AVAIL_DOWN;					
+				}
 				
 				final long curTimeStamp = getCurTimestamp();
 				final long backfillTime = getBackfillTime(curTimeStamp, meas);
@@ -272,7 +273,9 @@ public class AvailabilityFallbackChecker {
 				res.add(point);
 			}
 		}
-		log.debug("addStatusOfPlatformsDescendants: end, res size: " + res.size() );
+		if (log.isDebugEnabled()) {
+			log.debug("addStatusOfPlatformsDescendants: end, res size: " + res.size() );			
+		}
 		return res;
 	}
 	
@@ -284,10 +287,8 @@ public class AvailabilityFallbackChecker {
 	 */
 	private long getBackfillTime(long current, Measurement meas) {
 		final long end = getEndWindow(current, meas);
-		final DataPoint defaultPt = new DataPoint(meas.getId()
-				.intValue(), MeasurementConstants.AVAIL_NULL, end);
-		final DataPoint lastPt = availabilityCache.get(meas.getId(),
-				defaultPt);
+		final DataPoint defaultPt = new DataPoint(meas.getId().intValue(), MeasurementConstants.AVAIL_NULL, end);
+		final DataPoint lastPt = availabilityCache.get(meas.getId(),defaultPt);
 		final long backfillTime = lastPt.getTimestamp() + meas.getInterval();
 		return backfillTime;
 	}
@@ -305,8 +306,9 @@ public class AvailabilityFallbackChecker {
 	 * @return time
 	 */
     private long getCurTimestamp() {
-    	if (this.curTimeStamp != 0)
-    		return this.curTimeStamp;
+    	if (this.curTimeStamp != 0) {
+    		return this.curTimeStamp;    		
+    	}
         return System.currentTimeMillis();
     }
 
