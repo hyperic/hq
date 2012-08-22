@@ -95,6 +95,8 @@ public abstract class Collector implements Runnable {
 
     public static final String ATTR_RESPONSE_CODE = "ResponseCode";
     
+    public static final String LISTEN_PORTS = "listen.ports";
+
     static Log log =
         LogFactory.getLog(Collector.class.getName());
 

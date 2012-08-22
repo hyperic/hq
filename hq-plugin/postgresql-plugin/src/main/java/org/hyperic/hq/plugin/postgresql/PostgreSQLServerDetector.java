@@ -37,18 +37,25 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.plugin.system.NetConnectionData;
+import org.hyperic.hq.plugin.system.NetstatData;
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
+import org.hyperic.sigar.SigarException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.jdbc.DBUtil;
 
@@ -101,7 +108,12 @@ public class PostgreSQLServerDetector extends ServerDetector implements AutoServ
                     ConfigResponse cprop = new ConfigResponse();
                     cprop.setValue("version", version);
                     setCustomProperties(server, cprop);
-                    setProductConfig(server, prepareConfig(pgData, args));
+                    try {
+                        setProductConfig(server, populatePorts(pids,prepareConfig(pgData, args)));
+                    } catch (SigarException e) {
+                        log.error(e);
+                        throw new PluginException(e);
+                    }
                     String basename = getPlatformName() + " " + getTypeInfo().getName();
                     server.setName(prepareName(basename + " " + (isHQ ? PostgreSQL.HQ_SERVER_NAME : PostgreSQL.SERVER_NAME), server.getProductConfig(), null));
                     servers.add(server);
@@ -369,6 +381,8 @@ public class PostgreSQLServerDetector extends ServerDetector implements AutoServ
                 cf.setValue(PostgreSQL.PROP_PORT, port);
             }
         }
+        
+        
         return cf;
     }
 

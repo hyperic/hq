@@ -710,7 +710,10 @@
     <!-- override default url.path -->
     <property name="path" value="/server-status"/>
 
-    <config include="url"/>
+    <config include="url">
+      <option name="listen.ports"
+              description="Listening Ports"/>
+    </config>
 
     <properties>
        <property name="version"
@@ -826,6 +829,8 @@ ExtendedStatus On
               description="Apache ServerName"/>
       <option name="server.port"
               description="Apache ServerPort"/>
+      <option name="listen.ports"
+              description="Listening Ports"/>
     </config>
     <config include="snmp" type="measurement">
       <!-- override default port -->
