@@ -34,8 +34,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
@@ -358,14 +361,10 @@ public class AvailabilityDataDAO
     }
 
     @SuppressWarnings("unchecked")
-    Map<Integer,Double> findAggregateAvailabilityUp(final List<Integer> mids, final long start, final long end) throws SQLException {
+    Map<Integer,Long> findAggregateAvailabilityUp(final List<Integer> mids, final long start, final long end) throws SQLException {
         if (mids==null || mids.size() == 0) {
             return null;
         }
-//        StringBuilder midsStrBuilder = new StringBuilder();
-//        for (Integer mid : mids) {
-//            midsStrBuilder.append(',').append(mid);
-//        }
         String relevantMidsCondStr = "rle.MEASUREMENT_ID in (?)";// + midsStrBuilder.append(')').substring(1);
         String sqlBaseAvailInWin = new StringBuilder()
         .append("SELECT rle.MEASUREMENT_ID, SUM(rle.endtime - rle.startime)")
@@ -407,27 +406,92 @@ public class AvailabilityDataDAO
         ResultSet rs = null;
         try {
             conn = dbUtil.getConnection();
-            Map<Integer,Double> msmtToAllAvailSumTimeInWin = executeBatchQuery(conn,sqlAllAvailInWin);
-            Map<Integer,List<Double[]>> msmtToAllAvailInWinEdge = executeBatchQuery(conn,sqlAllAvailAtWinEdges);
-            Map<Integer,Double> msmtToAllAvailSumTime = sumTimeInWin(msmtToAllAvailSumTimeInWin,msmtToAllAvailInWinEdge,start,end);
+            IAvailExtractionStrategy midWinStrtg = new MidWinAvailExtractionStrategy();
+            IAvailExtractionStrategy winEdgeStrtg = new WinEdgeAvailExtractionStrategy(start, end);
+            Map<Integer,Long> msmtToAllAvailSumTimeInWin = executeBatchAvailQuery(conn,sqlAllAvailInWin,mids,batchSize,midWinStrtg);
+            Map<Integer,Long> msmtToAllAvailInWinEdge = executeBatchAvailQuery(conn,sqlAllAvailAtWinEdges,mids,batchSize,winEdgeStrtg);
+            Map<Integer,Long> msmtToAllAvailSumTime = merge(msmtToAllAvailSumTimeInWin,msmtToAllAvailInWinEdge);
             
-            Map<Integer,Double> msmtToAvailUpSumTimeInWin = executeBatchQuery(conn,sqlAvailUpInWin);
-            Map<Integer,List<Double[]>> msmtToAvailUpAvailInWinEdge = executeBatchQuery(conn,sqlAvailUpAtWinEdges);
-            Map<Integer,Double> msmtToAvailUpSumTime = sumTimeInWin(msmtToAvailUpSumTimeInWin,msmtToAvailUpAvailInWinEdge,start,end);
+            Map<Integer,Long> msmtToAvailUpSumTimeInWin = executeBatchAvailQuery(conn,sqlAvailUpInWin,mids,batchSize,midWinStrtg);
+            Map<Integer,Long> msmtToAvailUpAvailInWinEdge = executeBatchAvailQuery(conn,sqlAvailUpAtWinEdges,mids,batchSize,winEdgeStrtg);
+            Map<Integer,Long> msmtToAvailUpSumTime = merge(msmtToAvailUpSumTimeInWin,msmtToAvailUpAvailInWinEdge);
             
-            Map<Integer,Double> msmtToAvailAvg = calcAvg(msmtToAllAvailSumTime,msmtToAvailUpSumTime);
+            Map<Integer,Long> msmtToAvailAvg = calcAvg(msmtToAllAvailSumTime,msmtToAvailUpSumTime);
             return msmtToAvailAvg;
         } finally {
             DBUtil.closeConnection(AvailabilityDataDAO.class.getName(),conn);
         }
     }
-           
-    Map<Integer,<T>> executeBatchQuery() {
-        return null;
+    
+    protected static interface IAvailExtractionStrategy {
+        public Long extract(ResultSet rs) throws SQLException;
     }
-            
-            
-            
+    protected static class MidWinAvailExtractionStrategy implements IAvailExtractionStrategy {
+        public Long extract(ResultSet rs) throws SQLException {
+            return rs.getLong(2);
+        }
+    }
+    protected static class WinEdgeAvailExtractionStrategy implements IAvailExtractionStrategy {
+        protected long timeFrameStart;
+        protected long timeFrameEnd;
+        public WinEdgeAvailExtractionStrategy(long timeFrameStart, long timeFrameEnd) {
+            this.timeFrameStart= timeFrameStart;
+            this.timeFrameEnd = timeFrameEnd;
+        }
+        public Long extract(ResultSet rs) throws SQLException {
+            long availSectionStart = rs.getLong(2);
+            long availSectionEnd = rs.getLong(3);
+            return Math.min(availSectionEnd, this.timeFrameEnd) - Math.max(availSectionStart, this.timeFrameStart);
+        }
+    }
+    protected Map<Integer,Long> executeBatchAvailQuery(Connection conn, final String sql, final List<Integer> mids, final int batchSize, IAvailExtractionStrategy extractStrtg) throws SQLException {
+        final int size = mids.size();
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        Map<Integer,Long> rtn = new HashMap<Integer, Long>();
+        try {
+            stmt = conn.prepareStatement(sql);
+            for (int i=0; i<size; i+=batchSize) {
+                final int last = Math.min(i+batchSize, size);
+                StringBuilder midsSublistStrBuilder = new StringBuilder();
+                Iterator<Integer> midsItr = mids.subList(i, last).iterator();
+                while (midsItr.hasNext()) {
+                    midsSublistStrBuilder.append(',').append(midsItr.next());
+                }
+                stmt.setString(1, midsSublistStrBuilder.substring(1));
+                rs = stmt.executeQuery();
+                while (rs.next()) {
+                    Integer availId = rs.getInt(1);
+                    Long accumulatedTime = rtn.get(availId);
+                    rtn.put(availId, extractStrtg.extract(rs)+(accumulatedTime!=null?accumulatedTime:0));
+                }            
+            }
+        } finally {
+            DBUtil.closeStatement(AvailabilityDataDAO.class.getName(), stmt);
+            DBUtil.closeResultSet(AvailabilityDataDAO.class.getName(), rs);
+        }
+        return rtn;
+    }
+    protected Map<Integer,Long> merge(Map<Integer,Long> map1, Map<Integer,Long> map2) {
+        Map<Integer,Long> rtn = new HashMap<Integer,Long>();
+        Set<Integer> globalKeys = new HashSet<Integer>();
+        globalKeys.addAll(map1.keySet());
+        globalKeys.addAll(map2.keySet());
+        for (Integer key : globalKeys) {
+            Long map1Val = map1.get(key); 
+            Long map2Val = map2.get(key); 
+            rtn.put(key,(map1Val!=null?map1Val:0)+(map2Val!=null?map2Val:0));
+        }
+        return rtn;
+    }
+    protected Map<Integer, Long> calcAvg(Map<Integer,Long> allAvail, Map<Integer,Long> availUp) {
+        Map<Integer,Long> rtn = new HashMap<Integer,Long>();
+        for (Integer availId : allAvail.keySet()) {
+            Long availUpTime = availUp.get(availId);
+            rtn.put(availId, availUpTime!=null?(availUpTime/allAvail.get(availId)):0);
+        }
+        return rtn;
+    }
 //            stmtAllAvailInTimeframe = conn.prepareStatement(sqlAllAvailInTimeframe);
 //            
 //            stmtAvailUpInTimeframe = conn.prepareStatement(sqlAvailUpInTimeframe);
