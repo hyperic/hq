@@ -53,6 +53,7 @@ import org.hyperic.hq.bizapp.server.session.LatherDispatcher;
 import org.hyperic.hq.bizapp.shared.lather.AiPlatformLatherValue;
 import org.hyperic.hq.bizapp.shared.lather.CommandInfo;
 import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.measurement.server.session.DataInserterException;
 import org.hyperic.lather.LatherContext;
 import org.hyperic.lather.LatherRemoteException;
 import org.hyperic.lather.LatherValue;
@@ -306,8 +307,15 @@ public class LatherServlet extends HttpServlet {
                 issueSuccessResponse(this.resp, this.xcoder, res);
             
             } catch(Exception e) {
-                log.error("error while invoking LatherDispatcher from ip=" + ctx.getCallerIP() +
-                        ", method=" + method + ": " + e, e);
+                if (e instanceof DataInserterException) {
+                    // no need to log a full stack trace for this issue, the agent will resend the metric payload at
+                    // some point.
+                    log.warn(e);
+                    log.debug(e,e);
+                } else {
+                    log.error("error while invoking LatherDispatcher from ip=" + ctx.getCallerIP() +
+                              ", method=" + method + ": " + e, e);
+                }
                 try {
                     issueErrorResponse(resp, e.toString());
                 } catch(IOException ioe){
