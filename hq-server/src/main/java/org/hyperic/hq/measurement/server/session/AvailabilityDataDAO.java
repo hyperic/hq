@@ -25,6 +25,10 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -39,12 +43,19 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.hibernate.type.IntegerType;
+import org.hyperic.cm.versioncontrol.util.PairOfLong;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.measurement.shared.HighLowMetricValue;
+import org.hyperic.util.jdbc.DBUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
+import java.sql.Connection;
+
 
 @Repository
 public class AvailabilityDataDAO
@@ -70,9 +81,12 @@ public class AvailabilityDataDAO
                                              + "- greatest(rle.availabilityDataId.startime,:startime)";
     private static final String TOTAL_UPTIME = "(" + TOTAL_TIME + ") * rle.availVal";
 
+    private final DBUtil dbUtil;
+
     @Autowired
-    public AvailabilityDataDAO(SessionFactory f) {
+    public AvailabilityDataDAO(SessionFactory f, DBUtil dbUtil) {
         super(AvailabilityDataRLE.class, f);
+        this.dbUtil = dbUtil;
     }
 
     @SuppressWarnings("unchecked")
@@ -127,7 +141,7 @@ public class AvailabilityDataDAO
             " WHERE availabilityDataId.measurement = :meas").append(
             " AND availabilityDataId.startime = :startime").toString();
         List<AvailabilityDataRLE> list = getSession().createQuery(sql).setLong("startime",
-            state.getTimestamp()).setInteger("meas", state.getMetricId().intValue()).list();
+            state.getTimestamp()).setInteger("meas", state.getMeasurementId().intValue()).list();
         if (list.isEmpty()) {
             return null;
         }
@@ -141,7 +155,7 @@ public class AvailabilityDataDAO
             " AND availabilityDataId.startime > :startime").append(" ORDER BY startime asc")
             .toString();
         return getSession().createQuery(sql).setLong("startime", state.getTimestamp()).setInteger(
-            "meas", state.getMetricId().intValue()).list();
+            "meas", state.getMeasurementId().intValue()).list();
     }
 
     @SuppressWarnings("unchecked")
@@ -151,7 +165,7 @@ public class AvailabilityDataDAO
             " AND availabilityDataId.startime > :startime").append(" ORDER BY startime asc")
             .toString();
         List<AvailabilityDataRLE> list = getSession().createQuery(sql).setLong("startime",
-            state.getTimestamp()).setInteger("meas", state.getMetricId().intValue()).setMaxResults(
+            state.getTimestamp()).setInteger("meas", state.getMeasurementId().intValue()).setMaxResults(
             1).list();
         if (list.isEmpty()) {
             return null;
@@ -171,7 +185,7 @@ public class AvailabilityDataDAO
             " AND availabilityDataId.startime < :startime").append(" ORDER BY startime desc")
             .toString();
         List<AvailabilityDataRLE> list = getSession().createQuery(sql).setLong("startime",
-            state.getTimestamp()).setInteger("meas", state.getMetricId().intValue()).setMaxResults(
+            state.getTimestamp()).setInteger("meas", state.getMeasurementId().intValue()).setMaxResults(
             1).list();
         if (list.isEmpty()) {
             return null;
@@ -344,34 +358,104 @@ public class AvailabilityDataDAO
     }
 
     @SuppressWarnings("unchecked")
-    List<Object[]> findAggregateAvailabilityUp(final List<Integer> mids, final long start, final long end) {
+    Map<Integer,Double> findAggregateAvailabilityUp(final List<Integer> mids, final long start, final long end) throws SQLException {
         if (mids==null || mids.size() == 0) {
             return null;
         }
-        String sql = new StringBuilder()
-            .append("SELECT m, sum(").append(TOTAL_TIME).append(")")
-            .append(" FROM Measurement m JOIN m.availabilityData rle")
-            .append(" WHERE m in (:mids) AND rle.endtime > :startime AND rle.availabilityDataId.startime < :endtime AND rle.availVal = " + MeasurementConstants.AVAIL_UP)
-            .append(" GROUP BY m.id, m._version_, m.instanceId, m.template, m.mtime,m.enabled, m.interval, m.formula,m.resource")
-            .append(" ORDER BY rle.endtime")
-            .toString();
+//        StringBuilder midsStrBuilder = new StringBuilder();
+//        for (Integer mid : mids) {
+//            midsStrBuilder.append(',').append(mid);
+//        }
+        String relevantMidsCondStr = "rle.MEASUREMENT_ID in (?)";// + midsStrBuilder.append(')').substring(1);
+        String sqlBaseAvailInWin = new StringBuilder()
+        .append("SELECT rle.MEASUREMENT_ID, SUM(rle.endtime - rle.startime)")
+        .append(" FROM HQ_AVAIL_DATA_RLE rle")
+        .append(" WHERE ").append(relevantMidsCondStr)
+        .append(" AND rle.startime >= ").append(start)
+        .append(" AND rle.endtime <= ").append(end).toString();
+        String sqlAllAvailInWin = new StringBuilder()
+        .append(sqlBaseAvailInWin)
+        .append(" GROUP BY rle.MEASUREMENT_ID")
+        .toString();
+        String sqlAllAvailAtWinEdges = new StringBuilder()
+        .append("SELECT rle.MEASUREMENT_ID, rle.startime, rle.endtime")
+        .append(" FROM HQ_AVAIL_DATA_RLE rle")
+        .append(" WHERE ").append(relevantMidsCondStr)
+        .append(" AND ((rle.startime < ").append(start).append(" AND rle.endtime > ").append(start).append(")")
+        .append(" OR (rle.startime < ").append(end).append(" AND rle.endtime > ").append(end).append("))")
+        .toString();
+        String sqlAvailUpInWin = new StringBuilder()
+        .append(sqlBaseAvailInWin)
+        .append(" AND rle.availVal = " + MeasurementConstants.AVAIL_UP)
+        .append(" GROUP BY rle.MEASUREMENT_ID")
+        .toString();
+        String sqlAvailUpAtWinEdges = new StringBuilder()
+        .append(sqlAllAvailAtWinEdges)
+        .append(" AND rle.availVal = " + MeasurementConstants.AVAIL_UP)
+        .toString();
+        
         final int size = mids.size();
         final HQDialect dialect = getHQDialect();
         final int batchSize = dialect.getMaxExpressions() < 0 ? Integer.MAX_VALUE : dialect.getMaxExpressions();
         final List<Object[]> rtn = new ArrayList<Object[]>(size);
-        for (int i=0; i<size; i+=batchSize) {
-            final int last = Math.min(i+batchSize, size);
-            final List<Integer> sublist = mids.subList(i, last);
-            rtn.addAll(getSession()
-                        .createQuery(sql)
-                         .setLong("startime", start)
-                       .setLong("endtime", end)
-                         .setParameterList("mids", sublist, new IntegerType())
-                       .list());
-        }
-        return rtn;
-    }
 
+        Connection conn = null;
+        PreparedStatement stmtAllAvailInWin = null;
+        PreparedStatement stmtAvailUpInWin = null;
+        PreparedStatement stmtAllAvailAtWinEdges = null;
+        PreparedStatement stmtAvailUpAtWinEdges = null;
+        ResultSet rs = null;
+        try {
+            conn = dbUtil.getConnection();
+            Map<Integer,Double> msmtToAllAvailSumTimeInWin = executeBatchQuery(conn,sqlAllAvailInWin);
+            Map<Integer,List<Double[]>> msmtToAllAvailInWinEdge = executeBatchQuery(conn,sqlAllAvailAtWinEdges);
+            Map<Integer,Double> msmtToAllAvailSumTime = sumTimeInWin(msmtToAllAvailSumTimeInWin,msmtToAllAvailInWinEdge,start,end);
+            
+            Map<Integer,Double> msmtToAvailUpSumTimeInWin = executeBatchQuery(conn,sqlAvailUpInWin);
+            Map<Integer,List<Double[]>> msmtToAvailUpAvailInWinEdge = executeBatchQuery(conn,sqlAvailUpAtWinEdges);
+            Map<Integer,Double> msmtToAvailUpSumTime = sumTimeInWin(msmtToAvailUpSumTimeInWin,msmtToAvailUpAvailInWinEdge,start,end);
+            
+            Map<Integer,Double> msmtToAvailAvg = calcAvg(msmtToAllAvailSumTime,msmtToAvailUpSumTime);
+            return msmtToAvailAvg;
+        } finally {
+            DBUtil.closeConnection(AvailabilityDataDAO.class.getName(),conn);
+        }
+    }
+           
+    Map<Integer,<T>> executeBatchQuery() {
+        return null;
+    }
+            
+            
+            
+//            stmtAllAvailInTimeframe = conn.prepareStatement(sqlAllAvailInTimeframe);
+//            
+//            stmtAvailUpInTimeframe = conn.prepareStatement(sqlAvailUpInTimeframe);
+//            stmtAllAvailAtTimeframeEdges = conn.prepareStatement(sqlAllAvailAtTimeframeEdges);
+//            stmtAvailAtTimeframeEdges = conn.prepareStatement(sqlAvailAtTimeframeEdges);
+//            
+//            rs = stmt.executeQuery(sql);
+//            
+//            while (rs.next()) {
+//                final double val = rs.getDouble(valCol);
+//                final long timestamp = rs.getLong(timestampCol);
+//                rtn.add(new HighLowMetricValue(val, timestamp));
+//            }
+//
+//        for (int i=0; i<size; i+=batchSize) {
+//            final int last = Math.min(i+batchSize, size);
+//            final List<Integer> sublist = mids.subList(i, last);
+//            rtn.addAll(conn
+//                        .createQuery(sql)
+//                         .setLong("startime", start)
+//                       .setLong("endtime", end)
+//                         .setParameterList("mids", sublist, new IntegerType())
+//                       .list());
+//        }
+//        return rtn;
+//    }
+
+    
     /**
      * @return List of Object[]. [0] = measurement template id, [1] =
      *         min(availVal), [2] = max(availVal), [3] = avg(availVal) [4] = mid
