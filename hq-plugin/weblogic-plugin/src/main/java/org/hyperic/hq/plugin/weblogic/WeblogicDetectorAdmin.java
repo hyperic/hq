@@ -4,7 +4,6 @@
  */
 package org.hyperic.hq.plugin.weblogic;
 
-import java.io.File;
 import org.hyperic.hq.product.ServerResource;
 
 /**
@@ -27,8 +26,6 @@ public class WeblogicDetectorAdmin extends WeblogicDetector {
 
     @Override
     void setIdentifier(ServerResource server, String name) {
-        // [HHQ-5593] id is now is diferent than install path
-        File f = new File(server.getInstallPath());
-        server.setIdentifier(f.getParentFile().getParent());
+        server.setIdentifier(server.getInstallPath());
     }
 }
