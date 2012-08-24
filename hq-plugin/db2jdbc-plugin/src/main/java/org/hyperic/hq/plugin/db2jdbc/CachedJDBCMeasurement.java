@@ -37,6 +37,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
+import org.hyperic.hq.product.ConnectionManager;
 import org.hyperic.hq.product.JDBCMeasurementPlugin;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricNotFoundException;
@@ -103,45 +104,8 @@ public abstract class CachedJDBCMeasurement extends JDBCMeasurementPlugin {
         PreparedStatement ps = null;
         ResultSet rs = null;
 
-        PreparedStatement tps = null;
         try {
-            conn = getCachedConnection(url, user, pass);
-            tps = conn.prepareStatement("select 1 from sysibm.sysdummy1");
-            tps.execute();
-            getLog().debug("** cn - " + url + user + pass + " - " + conn);
-        } catch (SQLException e) {
-            PreparedStatement tps2 = null;
-            try {
-                getLog().debug("conection closed '" + e.getMessage() + "'... reconectinig (" + url + ")");
-                removeCachedConnection(url, user, pass);
-                conn = getCachedConnection(url, user, pass);
-                tps2 = conn.prepareStatement("select 1 from sysibm.sysdummy1");
-                tps2.execute();
-            } catch (SQLException ex) {
-                removeCachedConnection(url, user, pass);
-                throw new MetricNotFoundException(ex.getMessage());
-            } finally {
-                if (tps2 != null) {
-                    try {
-                        tps2.close();
-                    } catch (SQLException ex) {
-                        removeCachedConnection(url, user, pass);
-                        throw new MetricNotFoundException(ex.getMessage());
-                    }
-                }
-            }
-        } finally {
-            if (tps != null) {
-                try {
-                    tps.close();
-                } catch (SQLException ex) {
-                    removeCachedConnection(url, user, pass);
-                    throw new MetricNotFoundException(ex.getMessage());
-                }
-            }
-        }
-
-        try {
+            conn = ConnectionManager.getConnection(url, user, pass);
             ps = conn.prepareStatement(query);
             long startTime = System.currentTimeMillis();
 
@@ -157,10 +121,10 @@ public abstract class CachedJDBCMeasurement extends JDBCMeasurementPlugin {
             res.putAll(processResulSet(rs, metric));
         } catch (SQLException ex) {
             getLog().error("Error fetching metrics", ex);
-            removeCachedConnection(url, user, pass);
+            ConnectionManager.resetPool(url, user, pass);
             throw new MetricNotFoundException(ex.getMessage());
         } finally {
-            DBUtil.closeJDBCObjects(getLog(), null, ps, rs);
+            DBUtil.closeJDBCObjects(getLog(), conn, ps, rs);
         }
         return res;
     }
