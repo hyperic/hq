@@ -359,15 +359,6 @@ public class MySqlStatsMeasurementPlugin
         return queryCache;
     }
     
-    protected Connection getCachedConnection(Metric metric) throws SQLException {
-        Connection conn = super.getCachedConnection(metric);
-        final boolean autocommit = conn.getAutoCommit();
-        if (!autocommit) {
-            conn.setAutoCommit(true);
-        }
-        return conn;
-    }
-
     /**
      * Used to validate connection to db based on user defined config props.
      * Therefore need to throw MetricUnreachableException
@@ -418,39 +409,18 @@ public class MySqlStatsMeasurementPlugin
         return new MetricValue(MeasurementConstants.AVAIL_DOWN);
     }
 
-    protected Connection getConnection(String url, String user, String password)
-        throws SQLException {
-        try {
-            password = (password == null) ? "" : password;
-            password = (password.matches("^\\s*$")) ? "" : password;
-            Driver driver = (Driver)Class.forName(_driver).newInstance();
-            final Properties props = new Properties();
-            props.put("user", user);
-            props.put("password", password);
-            return driver.connect(getJdbcUrl(url), props);
-        } catch (InstantiationException e) {
-            throw new SQLException(e.getMessage());
-        } catch (IllegalAccessException e) {
-            throw new SQLException(e.getMessage());
-        } catch (ClassNotFoundException e) {
-            throw new SQLException(e.getMessage());
-        }
+    @Override
+    public String getPassword(Metric jdsn) {
+        String password = super.getPassword(jdsn);
+        password = (password == null) ? "" : password;
+        password = (password.matches("^\\s*$")) ? "" : password;
+        return password;
     }
 
-    private String getJdbcUrl(String url) {
-        if (url == null) {
-            return url;
-        }
-        else if (url.indexOf('?') > 0) {
-            return url + "&socketTimeout=" + TIMEOUT_VALUE + "&connectTimeout="
-                    + TIMEOUT_VALUE + "&autoReconnect=true";
-        }
-        else {
-            return url + "?socketTimeout=" + TIMEOUT_VALUE + "&connectTimeout="
-                    + TIMEOUT_VALUE + "&autoReconnect=true";
-        }
-    }
-
+     /**
+     * investicate the timeouts.
+     */
+   
     // This is legacy before config props were specified in hq-plugin.xml,
     // not needed
     protected String getDefaultURL() {

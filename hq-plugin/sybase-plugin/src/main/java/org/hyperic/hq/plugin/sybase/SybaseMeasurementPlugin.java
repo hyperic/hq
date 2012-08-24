@@ -85,21 +85,20 @@ public class SybaseMeasurementPlugin
         Class.forName(JDBC_DRIVER);
     }
 
-    protected Connection getConnection(String url,
-                                       String user,
-                                       String password)
-        throws SQLException
-    {
-        String pass = (password == null) ? "" : password;
+    @Override
+    public String getPassword(Metric jdsn) {
+        String pass = super.getPassword(jdsn);
+        pass = (pass == null) ? "" : pass;
         pass = (pass.matches("^\\s*$")) ? "" : pass;
-        java.util.Properties props = new java.util.Properties();
-        props.put("CHARSET_CONVERTER_CLASS",
-            "com.sybase.jdbc3.utils.TruncationConverter");
-        props.put("user", user);
-        props.put("password", pass);
-        return DriverManager.getConnection(url, props);
+        return pass;
     }
 
+    /**
+     * todo: invetigate if
+     * props.put("CHARSET_CONVERTER_CLASS",pass"com.sybase.jdbc3.utils.TruncationConverter");
+     * is needed?
+     */
+ 
     protected String getDefaultURL() {
         return DEFAULT_URL;
     }
@@ -256,6 +255,7 @@ public class SybaseMeasurementPlugin
         return query;
     }
 
+    @Override
     public MetricValue getValue(Metric metric)
             throws PluginException,
             MetricUnreachableException,

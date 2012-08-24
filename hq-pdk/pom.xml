@@ -83,7 +83,13 @@
 			<groupId>org.apache.ant</groupId>
 			<artifactId>ant</artifactId>
 			<scope>test</scope>
-		</dependency>	
+		</dependency>
+	 <dependency>
+	  <groupId>com.jolbox</groupId>
+	  <artifactId>bonecp</artifactId>
+	  <version>0.7.1.RELEASE</version>
+	  <type>jar</type>
+	 </dependency>
 	</dependencies>
 
 	<build>

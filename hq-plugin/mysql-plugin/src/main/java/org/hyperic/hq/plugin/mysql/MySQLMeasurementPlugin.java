@@ -34,6 +34,7 @@ import java.sql.SQLException;
 
 import java.util.HashMap;
 import java.util.Properties;
+import org.hyperic.hq.product.ConnectionManager;
 
 import org.hyperic.hq.product.JDBCMeasurementPlugin;
 import org.hyperic.hq.product.Metric;
@@ -72,11 +73,10 @@ public class MySQLMeasurementPlugin
         Class.forName(JDBC_DRIVER);
     }
 
-    protected Connection getConnection(String url,
-                                       String user,
-                                       String password)
-        throws SQLException {
-        return DriverManager.getConnection(getJdbcUrl(url), user, password);
+    @Override
+    public String getURL(Metric jdsn) {
+        String url = super.getURL(jdsn);
+        return getJdbcUrl(url);
     }
 
     // convenience method used to set timeout properties for JDBC connection
@@ -120,6 +120,7 @@ public class MySQLMeasurementPlugin
      * is being collected.  Server metrics are always in the second column,
      * table metrics come from a lookup map.
      */
+    @Override
     protected int getColumn(Metric metric)
     {
         String queryVal = metric.getAttributeName();
@@ -131,6 +132,7 @@ public class MySQLMeasurementPlugin
         return COL_INVALID;     // Force parent to call getColumnName()
     }
     
+    @Override
     protected String getColumnName(Metric metric) {
         return metric.getAttributeName();
     }
@@ -148,6 +150,7 @@ public class MySQLMeasurementPlugin
             attr.equals("AvgCardinality");
     }
 
+    @Override
     public MetricValue getValue(Metric metric)
         throws PluginException,
                MetricUnreachableException,
@@ -222,6 +225,7 @@ public class MySQLMeasurementPlugin
         return STATUSQUERY + "'" + queryVal + "'";
     }
 
+    @Override
     public ConfigSchema getConfigSchema(TypeInfo info, ConfigResponse config)
     {
         // Override JDBCMeasurementPlugin.
@@ -234,6 +238,7 @@ public class MySQLMeasurementPlugin
      * measurement plugin so that we can iterate the results looking for
      * the index in question.
      */
+    @Override
     protected double getQueryValue(Metric jdsn)
         throws MetricNotFoundException, PluginException,
                MetricUnreachableException
@@ -273,7 +278,7 @@ public class MySQLMeasurementPlugin
         double totalRows = 0;
 
         try {
-            conn = getCachedConnection(url, user, pass);
+            conn = ConnectionManager.getConnection(url, user, pass);
             //XXX cache prepared statements
             ps = conn.prepareStatement(query);
             rs = ps.executeQuery();
@@ -306,14 +311,14 @@ public class MySQLMeasurementPlugin
             }
         } catch (SQLException e) {
             // Remove this connection from the cache.
-            removeCachedConnection(url, user, pass);
+            ConnectionManager.resetPool(url, user, pass);
             
             String msg = "Query failed for " + attr +
                 ": " + e.getMessage();
 
             throw new MetricNotFoundException(msg, e);
         } finally {
-            DBUtil.closeJDBCObjects(getLog(), null, ps, rs);
+            DBUtil.closeJDBCObjects(getLog(), conn, ps, rs);
         }
     }
 }

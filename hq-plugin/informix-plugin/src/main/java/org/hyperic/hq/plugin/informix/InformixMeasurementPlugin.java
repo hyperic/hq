@@ -73,12 +73,6 @@ public class InformixMeasurementPlugin extends JDBCMeasurementPlugin
         Class.forName(JDBC_DRIVER);
     }
 
-    protected Connection getConnection(String url, String user, String password)
-        throws SQLException
-    {
-        return DriverManager.getConnection(url, user, password);
-    }
-
     protected String getDefaultURL()
     {
         return "jdbc:informix-sqli://localhost:3500/sysmaster:informixserver=test_shm";
