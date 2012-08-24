@@ -196,15 +196,8 @@ public abstract class WeblogicDetector extends ServerDetector implements AutoSer
             getLog().debug(getName() + " config: " + productConfig);
         }
 
+        String installpath = getCanonicalPath(installDir.getPath());
         List servers = new ArrayList();
-        
-        String installpath = getCanonicalPath(installDir.getPath() + File.separator + "servers" + File.separator + srvConfig.name);
-        log.debug("[discoverServer] installDir=" + installDir);
-        log.debug("[discoverServer] installpath=" + installpath);
-        if (!new File(installpath).exists()) {
-            installpath = getCanonicalPath(installDir.getPath());
-        }
-
         ServerResource server = createServerResource(installpath);
 
         String name = getTypeInfo().getName()
@@ -215,7 +208,6 @@ public abstract class WeblogicDetector extends ServerDetector implements AutoSer
 
         server.setName(name);
         setIdentifier(server,name);
-        log.debug("[discoverServer] identifier=" + server.getIdentifier());
 
         setProductConfig(server, productConfig);
         setControlConfig(server, controlConfig);
