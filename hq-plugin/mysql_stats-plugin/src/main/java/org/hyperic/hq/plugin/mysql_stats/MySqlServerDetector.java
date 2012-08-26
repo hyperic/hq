@@ -44,15 +44,18 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.AutoServerDetector;
+import org.hyperic.hq.product.DetectionUtil;
 import org.hyperic.hq.product.JDBCMeasurementPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
+import org.hyperic.sigar.SigarException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.exec.Execute;
 import org.hyperic.util.exec.PumpStreamHandler;
 import org.hyperic.util.jdbc.DBUtil;
+import org.jboss.remoting.detection.util.DetectorUtil;
 
 public class MySqlServerDetector
     extends ServerDetector
@@ -102,7 +105,7 @@ public class MySqlServerDetector
             String[] args = (paths.size() == 1) ?
                 new String[0] :
                 getProcArgs(pid.longValue());
-            List found = getServerList(dir, args);
+            List found = getServerList(dir, args,pid);
             if (!found.isEmpty())
                 servers.addAll(found);
         }
@@ -299,7 +302,7 @@ public class MySqlServerDetector
         return servers;
     }
 
-    private List getServerList(String path, String[] args)
+    private List getServerList(String path, String[] args, long pid)
         throws PluginException
     {
         List servers = new ArrayList();
@@ -323,6 +326,14 @@ public class MySqlServerDetector
         server.setCustomProperties(cprop);
         ConfigResponse productConfig = new ConfigResponse();
         productConfig.setValue("process.query", _validQuery + getPtqlArgs(args));
+        try {
+            DetectionUtil.populatePorts(getSigar(), new long[] { pid}, productConfig);
+        } catch (SigarException e) {
+            _log.error(e);
+            throw new PluginException(e);
+        }
+        
+        
         setProductConfig(server, productConfig);
         // sets a default Measurement Config property with no values
         setMeasurementConfig(server, new ConfigResponse());

@@ -51,6 +51,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.system.NetConnectionData;
 import org.hyperic.hq.plugin.system.NetstatData;
 import org.hyperic.hq.product.AutoServerDetector;
+import org.hyperic.hq.product.DetectionUtil;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
@@ -109,7 +110,8 @@ public class PostgreSQLServerDetector extends ServerDetector implements AutoServ
                     cprop.setValue("version", version);
                     setCustomProperties(server, cprop);
                     try {
-                        setProductConfig(server, populatePorts(pids,prepareConfig(pgData, args)));
+                        setProductConfig(server, DetectionUtil.populatePorts(getSigar(),new long[] {pids[i]},prepareConfig(pgData, args)));
+                        setProductConfig(server, prepareConfig(pgData, args));
                     } catch (SigarException e) {
                         log.error(e);
                         throw new PluginException(e);

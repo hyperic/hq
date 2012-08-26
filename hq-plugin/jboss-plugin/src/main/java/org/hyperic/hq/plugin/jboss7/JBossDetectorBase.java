@@ -45,9 +45,11 @@ import org.hyperic.hq.plugin.jboss7.objects.Deployment;
 import org.hyperic.hq.plugin.jboss7.objects.WebSubsystem;
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.DaemonDetector;
+import org.hyperic.hq.product.DetectionUtil;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
+import org.hyperic.sigar.SigarException;
 import org.hyperic.util.config.ConfigResponse;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -89,7 +91,12 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
                 }
                 ServerResource server = createServerResource(installPath);
                 server.setIdentifier(AIID);
-                setProductConfig(server, getServerProductConfig(args));
+                try {
+                    setProductConfig(server, DetectionUtil.populatePorts(getSigar(), new long[] {pid}, getServerProductConfig(args)));
+                } catch (SigarException e) {
+                    log.error(e);
+                    throw new PluginException(e);
+                }
                 server.setName(prepareServerName(server.getProductConfig()));
                 servers.add(server);
             }

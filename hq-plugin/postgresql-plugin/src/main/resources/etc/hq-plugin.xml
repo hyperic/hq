@@ -519,6 +519,8 @@
             <option name="postgresql.pgdata" description="pgdata Full path"/>
             <option name="postgresql.table.regex" description="Autodiscover Tables Regular Expresion" default="ALL"/>
             <option name="postgresql.index.regex" description="Autodiscover Indexes Regular Expresion" default="OFF"/>
+      <option name="listen.ports"
+              description="Listening Ports"/>
         </config>
         <config type ="measurement">
         </config>

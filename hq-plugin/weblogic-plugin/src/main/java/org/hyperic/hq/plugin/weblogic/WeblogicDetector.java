@@ -38,6 +38,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.weblogic.jmx.ApplicationQuery;
 
 import org.hyperic.hq.product.AutoServerDetector;
+import org.hyperic.hq.product.DetectionUtil;
 import org.hyperic.hq.product.ServerControlPlugin;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
@@ -89,23 +90,27 @@ public abstract class WeblogicDetector extends ServerDetector implements AutoSer
     public List getServerResources(ConfigResponse platformConfig) throws PluginException {
         getLog().debug("[getServerResources] platformConfig=" + platformConfig);
         List servers = new ArrayList();
-        List<WLSProc> procs = getServerProcessList();
+        List<WLSProcWithPid> procs = getServerProcessList();
         List s;
 
-        for (WLSProc proc : procs) {
+        for (WLSProcWithPid proc : procs) {
             try {
                 s = discoverServer(proc);
                 if (s != null) {
                     servers.addAll(s);
                 }
+            } catch (SigarException e) {
+                getLog().debug(e.getMessage(), e);
+                throw new PluginException(e);
             } catch (PluginException ex) {
                 getLog().debug(ex.getMessage(), ex);
+                throw ex;
             }
         }
         return servers;
     }
 
-    private List discoverServer(WLSProc proc) throws PluginException {
+    private List discoverServer(WLSProcWithPid proc) throws PluginException, SigarException {
 
         getLog().debug("Looking at: " + proc.getPath());
 
@@ -191,7 +196,7 @@ public abstract class WeblogicDetector extends ServerDetector implements AutoSer
                 hasCreds = false;
             }
         }
-
+        DetectionUtil.populatePorts(getSigar(), new long[] {proc.getPid()}, productConfig);
         if (getLog().isDebugEnabled()) {
             getLog().debug(getName() + " config: " + productConfig);
         }
@@ -208,7 +213,7 @@ public abstract class WeblogicDetector extends ServerDetector implements AutoSer
 
         server.setName(name);
         setIdentifier(server,name);
-
+        
         setProductConfig(server, productConfig);
         setControlConfig(server, controlConfig);
         //force user to configure by not setting measurement config
@@ -237,8 +242,8 @@ public abstract class WeblogicDetector extends ServerDetector implements AutoSer
         }
     }
 
-    private List<WLSProc> getServerProcessList() {
-        ArrayList<WLSProc> servers = new ArrayList();
+    private List<WLSProcWithPid> getServerProcessList() {
+        ArrayList<WLSProcWithPid> servers = new ArrayList<WLSProcWithPid>();
 
         long[] pids = getPids(PTQL_QUERY);
 
@@ -273,7 +278,7 @@ public abstract class WeblogicDetector extends ServerDetector implements AutoSer
 
                 getLog().debug("[" + pids[i] + "] cwd = '" + cwd + "' name = '" + name + "'");
                 if (cwd != null) {
-                    servers.add(new WLSProc(cwd, name));
+                    servers.add(new WLSProcWithPid(cwd, name,pids[i]));
                 }
             } else {
                 getLog().debug("[" + pids[i] + "] is not valid");
@@ -472,5 +477,23 @@ public abstract class WeblogicDetector extends ServerDetector implements AutoSer
         public void setName(String name) {
             this.name = name;
         }
+    }
+    
+    protected class WLSProcWithPid extends WLSProc {
+        public WLSProcWithPid(String path, String name, long pid) {
+            super(path, name);
+            this.pid = pid;
+        }
+
+        public long getPid() {
+            return pid;
+        }
+
+        public void setPid(long pid) {
+            this.pid = pid;
+        }
+
+        protected long pid;
+        
     }
 }
