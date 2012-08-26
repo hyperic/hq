@@ -43,6 +43,7 @@ import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.ConfigFileTrackPlugin;
 import org.hyperic.hq.product.DaemonDetector;
+import org.hyperic.hq.product.DetectionUtil;
 import org.hyperic.hq.product.FileServerDetector;
 import org.hyperic.hq.product.LogFileTrackPlugin;
 import org.hyperic.hq.product.PluginException;
@@ -52,6 +53,7 @@ import org.hyperic.hq.product.ServiceResource;
 import org.hyperic.hq.product.Win32ControlPlugin;
 
 import org.hyperic.sigar.OperatingSystem;
+import org.hyperic.sigar.SigarException;
 import org.hyperic.snmp.SNMPClient;
 import org.hyperic.snmp.SNMPException;
 
@@ -369,7 +371,12 @@ public class ApacheServerDetector
                           server.getName());
             }
             metricConfig = getSnmpConfig(snmpConfig);
-            productConfig = getProductConfig(metricConfig);
+            try {
+                productConfig  = DetectionUtil.populatePorts(getSigar(),new long[] {binary.pid}, getProductConfig(metricConfig));
+            } catch (SigarException e) {
+                log.error(e);
+                throw new PluginException(e);
+            }
 
             if (binary.conf == null) {
                 String cfgPath = installpath;
@@ -410,7 +417,12 @@ public class ApacheServerDetector
             log.debug(snmpConfig +
                       " does not exist, discovering as type: " +
                       TYPE_HTTPD);
-            productConfig = new ConfigResponse();
+            try {
+                productConfig = DetectionUtil.populatePorts(getSigar(),new long[] {binary.pid}, new ConfigResponse());
+            } catch (SigarException e) {
+                log.error(e);
+                throw new PluginException(e);
+            }
 
             //meant for command-line testing: -Dhttpd.url=http://localhost:8080/
             if (configureURL(getManagerProperty("httpd.url"), productConfig)) {
@@ -551,7 +563,7 @@ public class ApacheServerDetector
         config.setProperty(Collector.PROP_PORT, server.port);
         config.setProperty(PROP_SERVER_NAME, server.name);
         config.setProperty(PROP_SERVER_PORT, server.port);
-
+        config.setProperty("aaa", "bbb");
         log.debug("Configured server via snmp: " + server);
 
         return new ConfigResponse(config);
