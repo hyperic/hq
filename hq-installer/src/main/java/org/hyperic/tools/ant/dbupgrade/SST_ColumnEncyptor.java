@@ -48,7 +48,6 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -61,7 +60,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
-import org.hyperic.hibernate.dialect.MySQL5InnoDBDialect;
+import org.hyperic.tools.ant.utils.DatabaseType;
 import org.hyperic.util.security.SecurityUtil;
 import org.jasypt.encryption.pbe.PBEStringEncryptor;
 
@@ -74,10 +73,12 @@ public class SST_ColumnEncyptor extends SchemaSpecTask{
     private String columnsClause;
     private String updateColumnsClause ; 
     private int batchSize ; 
+    private int iNoOfchunks ; 
     private PBEStringEncryptor encryptor;
     private DatabaseType enumDatabaseType ; 
      
     private static AtomicInteger pages ;
+    private static AtomicInteger totalnoOfRecords = new AtomicInteger(0) ;
     private static final int DEFUALT_BATCH_SIZE = 1000 ;  
     
     public SST_ColumnEncyptor(){
@@ -196,7 +197,7 @@ public class SST_ColumnEncyptor extends SchemaSpecTask{
             //if the table is empty abort. 
             if(iNoOfExistingRecords == 0) return ;
             //calculate the number of partitions taking into account the remainder...
-            final int iNoOfchunks =  (iNoOfExistingRecords+this.batchSize-1)/this.batchSize ;
+            this.iNoOfchunks =  (iNoOfExistingRecords+this.batchSize-1)/this.batchSize ;
             
             this.log("[SST_ColumnEncryptor.execute()]: No of records: " + iNoOfExistingRecords + " No of chunks: " + iNoOfchunks, Project.MSG_WARN);
             
@@ -254,7 +255,7 @@ public class SST_ColumnEncyptor extends SchemaSpecTask{
                 workerResponse.get() ; 
             }//EO while there are more worker responses 
 
-            this.log("[SST_ColumnEncryptor.execute()]: after all workers are finished overall time in millis: " + (System.currentTimeMillis()-before));
+            this.log("[SST_ColumnEncryptor.execute()]: after all workers are finished encrypting " + totalnoOfRecords.get() + " records in an overall time in millis: " + (System.currentTimeMillis()-before));
             
         }catch(Throwable t) {
             //must keep record of the exception as more can occur during the finally block 
@@ -324,7 +325,7 @@ public class SST_ColumnEncyptor extends SchemaSpecTask{
          */
         public String call() throws Exception { 
             
-            final String msgPrefix = "[Encryptor Worker ("+Thread.currentThread().getName()+")]:" ;
+            final String msgPrefix = "[Encryptor Worker ("+Thread.currentThread().getName()+")]: " ;
             
             ResultSet rs = null ;
             PreparedStatement selectStatement = null, updateStatement = null ; 
@@ -335,6 +336,7 @@ public class SST_ColumnEncyptor extends SchemaSpecTask{
 
             int iCurrentPageNumber = 0 ; 
             final int iBatchSize = SST_ColumnEncyptor.this.batchSize ; 
+            final int iNoOfChunks = SST_ColumnEncyptor.this.iNoOfchunks ; 
             String colVal = null ; 
             
             try{ 
@@ -351,7 +353,7 @@ public class SST_ColumnEncyptor extends SchemaSpecTask{
                         long beforeSelect = System.currentTimeMillis() ; 
                        
                         selectStatement = this.conn.prepareStatement(this.selectStatement) ;
-                        enumDatabaseType.bindPageInfo(selectStatement, iCurrentPageNumber, iBatchSize) ; 
+                        enumDatabaseType.bindPageInfo(selectStatement, iCurrentPageNumber, iBatchSize, iNoOfChunks) ; 
                         rs = selectStatement.executeQuery() ; 
                         rs.setFetchSize(iBatchSize) ;
                         
@@ -414,8 +416,10 @@ public class SST_ColumnEncyptor extends SchemaSpecTask{
                         updateStatement.close() ;
                                 
                         total += (System.currentTimeMillis()-before) ;
-                                
-                        log(msgPrefix +  (total) + " select: " + afterSelect + " batch update: " + afterBatch + " commit time: " + afterCommit + " execute Batch: " + afterExecuteBatch + " loop: " + afterLoop ) ;
+                        
+                        totalnoOfRecords.addAndGet(iLength) ; 
+                        
+                        log(msgPrefix +  "Batch No: " + iCurrentPageNumber + " No of Records: " + iLength + " Total millis: " + (total)  + " select: " + afterSelect + " batch update: " + afterBatch + " commit time: " + afterCommit + " execute Batch: " + afterExecuteBatch + " loop: " + afterLoop ) ;
                     }catch(Throwable t) {
                         //must keep record of the exception as more can occur during the finally block
                         thrownExcpetion = new NestedBuildException(msgPrefix, t) ; 
@@ -532,121 +536,13 @@ public class SST_ColumnEncyptor extends SchemaSpecTask{
     }//EO inner class NestedBuildException 
     
     
-    /**
-     * DataBase product based strategy dealing the sql syntax nuances of each of the products.<br> 
-     * <br>
-     * Enum member is mapped to the {@link DatabaseMetaData#getDatabaseProductName()} so that<br> 
-     * <code>valueOf()</code> could be used as a command pattern.<br>
-     * <br>
-     * <b>Note:</b> Could not use the Dialect as the queries are much more specialized as well as<br>
-     * the fact that the {@link MySQL5InnoDBDialect#getLimitString(String, int, int)}'s offset<br>
-     * starts from 1 not 0 (misses the first record). 
-     *  
-     */
-    private enum DatabaseType { 
-        
-        MySQL{ 
-            
-             @Override
-             public final String generatePagedQuery(final String tableName, 
-                                     final String columnsClause, final String pkColumnName) {
-                 return String.format("SELECT %s, %s from %s limit ?,?", pkColumnName, columnsClause, 
-                         tableName) ; 
-             }//EOM 
-             
-             @Override
-             public final PreparedStatement bindPageInfo(final PreparedStatement ps, 
-                                 final int iPageNumber, final int iPageSize) throws SQLException{
-                 int iOffset = (iPageNumber == 0 ? 0 : (iPageNumber*iPageSize)) ;
-                 ps.setInt(1, iOffset) ; 
-                 ps.setInt(2, iPageSize) ; 
-                 return ps ; 
-             }//EOM
-
-        },//EO MySQL  
-        Oracle{ 
-            @Override
-            public final String generatePagedQuery(final String tableName, 
-                                final String columnsClause, final String pkColumnName) {
-                
-                return String.format("select %s, %s from %s where %s in " +
-                        "(select %s from (select %s, rownum rn from %s) where rn > ? and rn <= ?)", 
-                        pkColumnName, 
-                        columnsClause, 
-                        tableName, 
-                        pkColumnName, 
-                        pkColumnName, 
-                        pkColumnName, 
-                        tableName) ;
-            }//EOM 
-            
-            @Override
-            public final String generateUpdateQuery(final String tableName, final String columnsClause, 
-                    final String pkColumnName) { 
-                return super.generateUpdateQuery(tableName, columnsClause, pkColumnName) ;
-            }//EOM
-            
-            @Override
-            public final PreparedStatement bindPageInfo(final PreparedStatement ps, 
-                                    final int iPageNumber, final int iPageSize) 
-                                                                       throws SQLException{
-                final int iOffset = (iPageNumber == 0 ? 0 : (iPageNumber*iPageSize)) ;
-                ps.setInt(1, iOffset) ; 
-                ps.setInt(2, (iOffset+iPageSize) ) ; 
-                return ps ; 
-            }//EOM 
-        },//EO Oracle
-        PostgreSQL{
-            @Override
-            public final String generatePagedQuery(final String tableName, 
-                                    final String columnsClause, final String pkColumnName) {
-                return String.format("SELECT %s, %s from %s offset ? limit ?", pkColumnName, columnsClause, 
-                        tableName) ; 
-            }//EOM 
-            
-            @Override
-            public final PreparedStatement bindPageInfo(final PreparedStatement ps, 
-                                    final int iPageNumber, final int iPageSize) 
-                                                                        throws SQLException{
-                return MySQL.bindPageInfo(ps, iPageNumber, iPageSize) ; 
-            }//EOM 
-        };//EO Postgres 
-        
-        /**
-         * Binds the pagination parameters into the preparedStatement. 
-         * @param ps 
-         * @param iPageNumber current page number (partition) 
-         * @param iPageSize batchSize 
-         * @return the ps formal argument 
-         * @throws SQLException
-         */
-        public abstract PreparedStatement bindPageInfo(final PreparedStatement ps, 
-                            final int iPageNumber, final int iPageSize) throws SQLException ;
-        
-        /**
-         * Constructs a select query with the following format: 
-         * select [pkColumn], [columns clause] from [tableName] [pagination clause]
-         * 
-         * @param tableName
-         * @param columnsClause comma delimited string 
-         * @param pkColumnName 
-         * @return select query as per the above description. 
-         */
-        public abstract String generatePagedQuery(final String tableName, final String columnsClause, 
-                final String pkColumnName) ;  
-        
-        /**
-         * Constructs an update statement with the following format:
-         * update [tablename] set [col=?..] where [pk] = ?
-         * @param tableName
-         * @param columnsClause
-         * @param pkColumnName
-         * @return update statement with the above description 
-         */
-        public String generateUpdateQuery(final String tableName, final String columnsClause, 
-                final String pkColumnName) { 
-            return String.format("update %s set %s where %s = ?", tableName, columnsClause, pkColumnName) ; 
-        }//EOM 
-    }//EO enum DatabaseType 
+    
+    
+    public static void main(String[] args) throws Throwable {
+        final int iNoOfExistingRecords = 950000 ; 
+        final int iBatchSize = 10000 ; 
+        final int iNoOfchunks =  (iNoOfExistingRecords+iBatchSize-1)/iBatchSize ;
+        System.out.println(iNoOfchunks);
+    }//EOM 
 
 }//EOC 

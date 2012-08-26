@@ -26,6 +26,7 @@
 package org.hyperic.tools.ant.installer;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -36,13 +37,12 @@ import org.apache.tools.ant.BuildEvent;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.BuildLogger;
 import org.apache.tools.ant.Project;
-
+import org.hyperic.tools.ant.BasicLogger;
 import org.hyperic.util.JDK;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.EarlyExitException;
 import org.hyperic.util.file.FileUtil;
 import org.hyperic.util.file.WritableFile;
-import org.hyperic.tools.ant.BasicLogger;
 
 public class InstallerLogger implements BuildLogger {
 
@@ -52,8 +52,9 @@ public class InstallerLogger implements BuildLogger {
     public static final String PROP_LOGFILE = "install.log";
     public static final String PROP_NOWRAP  = "install.nowrap";
     public static final String PROP_LOGFILE_PATH = "install.log.path";
+    public static final String PROP_TITLE = "install.title" ; 
     
-    public static final String PREFIX = "^^^";
+    public static String PREFIX = "^^^" ; 
     public static final String[] MESSAGE_HANDLERS
         = { "org.hyperic.tools.ant.installer.MsgInfo",
             "org.hyperic.tools.ant.installer.MsgError",
@@ -62,6 +63,8 @@ public class InstallerLogger implements BuildLogger {
             "org.hyperic.tools.ant.installer.MsgProgress" };
     public static final String DEBUG_HANDLER 
         = "org.hyperic.tools.ant.installer.MsgDebug";
+    
+    private static final String DEFAULT_TITLE = "Installer" ; 
     
     protected Map messageHandlers = null;
     
@@ -73,11 +76,13 @@ public class InstallerLogger implements BuildLogger {
     protected InstallerMessageHandler currentHandler = null;
     protected Project project = null;
     protected WritableFile logfile = null;
-    protected FileWriter logfileStream = null;
+    protected PrintStream logfileStream = null;
     
     /** Time of the start of the build */
     private long startTime = System.currentTimeMillis();
     private boolean isNoWrapMode;
+    
+    private String title ; 
     
     public InstallerLogger () {
         // Initialize -nowrap to true on windows, false otherwise
@@ -132,7 +137,7 @@ public class InstallerLogger implements BuildLogger {
         }
         
         registerMessageHandler(DEBUG_HANDLER);
-        BasicLogger basicLogger = new BasicLogger();
+        BasicLogger basicLogger = this.newDelegateLogger() ; 
 
         // Make sure raw log is in the same dir as regular log
         logfile = new WritableFile(logfile.getParentFile(),
@@ -151,7 +156,13 @@ public class InstallerLogger implements BuildLogger {
         } else {
             err.println("Error setting input handler: project is null!");
         }
+        
+        PREFIX = getPrefix() ;
     }
+    
+    protected BasicLogger newDelegateLogger() { 
+        return new BasicLogger();
+    }//EOM 
     
     /** Does nothing - this logger doesn't care about levels */
     public void setMessageOutputLevel(int level) {}
@@ -219,7 +230,8 @@ public class InstallerLogger implements BuildLogger {
             }
 
             try {
-                logfileStream = new FileWriter(logfile.getAbsolutePath(), true);
+                //logfileStream = new FileWriter(logfile.getAbsolutePath(), true);
+                logfileStream = new PrintStream(new FileOutputStream(logfile.getAbsolutePath()), true);
                 // set JVM property so we can pick it up from ant
                 System.setProperty(PROP_LOGFILE_PATH, logfile.getAbsolutePath());
             } catch ( IOException ioe ) {
@@ -227,8 +239,15 @@ public class InstallerLogger implements BuildLogger {
                             + logfileName + ": " + ioe);
                 ioe.printStackTrace(err);
             }
+            
+            this.title = this.getProperty(PROP_TITLE) ; 
+            if(this.title == null) this.title = DEFAULT_TITLE ; 
             printStartMessageToLog();
         }
+    }
+    
+    protected String getPrefix() { 
+        return PREFIX ;
     }
     
     /** Closes the logfile */
@@ -270,7 +289,7 @@ public class InstallerLogger implements BuildLogger {
         if ( logfileStream != null ) {
             try {
                 logfileStream.close();
-            } catch ( IOException ioe ) {
+            } catch ( Exception ioe ) {
                 err.println("ERROR: could not close install.log: "
                             + logfile.getAbsolutePath() + ": " + ioe);
                 ioe.printStackTrace(err);
@@ -387,10 +406,10 @@ public class InstallerLogger implements BuildLogger {
     protected void logToFile ( String message ) {
         if ( logfileStream != null ) {
             try {
-                logfileStream.write(message);
-                logfileStream.write(LINE_SEP);
+                logfileStream.append(message);
+                logfileStream.append(LINE_SEP);
                 logfileStream.flush();
-            } catch ( IOException ioe ) {
+            } catch ( Exception ioe ) {
                 err.println("ERROR: could not write to log: " + ioe);
             }
         }
@@ -399,7 +418,7 @@ public class InstallerLogger implements BuildLogger {
     protected void printStartMessageToLog () {
         logToFile("====================================="
                   + "====================================");
-        logToFile("Installer Started");
+        logToFile(this.title + " Started");
         logToFile("Current Date/Time: " + (new java.util.Date()).toString());
         logToFile("====================================="
                   + "====================================");
@@ -409,7 +428,8 @@ public class InstallerLogger implements BuildLogger {
         long duration = System.currentTimeMillis() - startTime;
         logToFile("====================================="
                   + "====================================");
-        logToFile("Installer Completed");
+        logToFile(this.title + " Completed");
+        logToFile("Current Date/Time: " + (new java.util.Date()).toString());
         logToFile("Total Runtime: " + StringUtil.formatDuration(duration));
         logToFile("====================================="
                   + "====================================");
@@ -439,4 +459,5 @@ public class InstallerLogger implements BuildLogger {
         }
         return msg;
     }
+    
 }

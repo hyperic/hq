@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.hyperic.hq.dist.installer</groupId>
+		<artifactId>modules</artifactId>
+		<version>5.0</version>
+		<relativePath>../../pom.xml</relativePath>
+	</parent>
+
+	<groupId>org.hyperic.hq.dist</groupId>
+	<artifactId>installer</artifactId>
+	<packaging>pom</packaging>
+	<name>Hyperic HQ Distribution - Hyperic HQ Installer</name>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<finalName>installer</finalName>
+					<appendAssemblyId>false</appendAssemblyId>
+					<descriptors>
+						<descriptor>src/main/assembly/assembly.xml</descriptor>
+					</descriptors>
+				</configuration>
+			</plugin> 
+		</plugins>
+	</build>
+
+	 
+	<dependencies>
+		<dependency>
+			<groupId>org.hyperic.hq.dist.installer</groupId>
+			<artifactId>hq-migration</artifactId>
+			<version>${project.version}</version>
+			<type>zip</type>
+		</dependency>
+	</dependencies>
+	
+</project>

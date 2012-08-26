@@ -1,0 +1,33 @@
+
+HQ Migration Usage: hq-migrate.sh/hq-migrate.bat [COMMAND] [OPTIONS]...
+
+Commands: 
+
+ * hq-export
+ * hq-import
+ * one-step-migration
+
+Options:
+ 
+  * hq-export: 
+    * -Dstaging.dir=<path>
+    * -Dhqserver.install.path=<path>
+    or 
+    * -Dsetup.file=<path>
+  
+  * hq-import 
+  	* -Dexport.archive.path=<path>
+    * -Dstaging.dir=<path> (optional, defaults to <HQ_MIGRATE_HOME>/tmp/export-data) 
+    * -Dhqserver.install.path=<path>
+    or 
+    * -Dsetup.file=<path>
+   
+  * one-step-migration:
+    * -Dsource.hqserver.install.path=<path>
+    * -Dtarget.hqserver.install.path=<path>
+    * -Dstaging.dir=<path>
+    or 
+    * -Dsetup.file=<path>
+   
+   * generic arguments: 
+     * -Dquiet=<true|false> (optional, defaults to false)

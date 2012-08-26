@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assembly>
+	<id>installer-assembly</id>
+	<formats>
+		<format>tar.gz</format>
+	</formats>
+
+	<includeBaseDirectory>true</includeBaseDirectory> 
+
+    <componentDescriptors>
+    	<componentDescriptor>../../src/main/assembly/base-component.xml</componentDescriptor>
+    </componentDescriptors>
+    
+    <fileSets>
+		<fileSet>
+			<directory>../../target/generated-resources/lib</directory>
+			<outputDirectory>/lib</outputDirectory>
+			<filtered>false</filtered>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
+			<excludes> 
+				<exclude>lib/libraries.properties</exclude>
+				<exclude>README</exclude>
+			</excludes>
+		</fileSet>
+
+	</fileSets>
+
+    <dependencySets>
+		<dependencySet>
+			<useProjectArtifact>false</useProjectArtifact>
+			<useTransitiveDependencies>false</useTransitiveDependencies>
+			<unpack>false</unpack>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
+			<includes>
+				<include>org.hyperic.hq.dist.installer:hq-migration</include>
+			</includes>
+			<outputDirectory>/bin</outputDirectory>
+		</dependencySet>
+	</dependencySets>
+	
+</assembly>

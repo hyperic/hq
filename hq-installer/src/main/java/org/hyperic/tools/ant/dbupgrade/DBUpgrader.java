@@ -53,7 +53,7 @@ import org.jasypt.properties.PropertyValueEncryptionUtils;
 public class DBUpgrader extends Task {
 
     public static final String ctx = DBUpgrader.class.getName();
-
+    private static final String INITIAL_SCHEMA_VERSION = "@@@CAM_SCHEMA_VERSION@@@" ; 
     
 
     private final List   _schemaSpecs = new ArrayList();
@@ -245,7 +245,7 @@ public class DBUpgrader extends Task {
 
             // If this was a "upgrade to latest", then ensure that
             // the schema version gets set correctly.
-            if ( _targetSchemaVersion.getIsLatest() ) {
+            if ((this._targetSchemaVersion.getIsLatest()) || (this._startSchemaVersionStr.equals(INITIAL_SCHEMA_VERSION))) {
                 updateSchemaVersion(c, realTargetSchemaVersion);
                 c.commit();
             }
@@ -358,7 +358,8 @@ public class DBUpgrader extends Task {
             if ( rs.next() ) {
                 versionString = rs.getString(1);
             } else {
-                throw new BuildException("Schema version not found!");
+                //throw new BuildException("Schema version not found!");
+                versionString = INITIAL_SCHEMA_VERSION  ;
             }
             if ( rs.next() ) {
                 throw new BuildException("Multiple matches found for "

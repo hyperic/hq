@@ -575,9 +575,20 @@ ${errMsg}
                 failonerror="false"/>
     
     <!-- Copy the existing config -->
-    <serverConfigUpgrade existing="${server.upgradedir}/conf/hq-server.conf" 
-        new="${server.product.dir}/conf/hq-server.conf" upgradeDir="${server.upgradedir}"/>
-        
+  	<if> 
+  		<not> 
+  		  <isset property="migration.context" />
+  		</not> 
+	 	<then> 
+	 	    <serverConfigUpgrade existing="${server.upgradedir}/conf/hq-server.conf" 
+	 	        new="${server.product.dir}/conf/hq-server.conf" upgradeDir="${server.upgradedir}"/>
+	 	</then> 
+	 	<else> 
+	 		<properties-merge baseFile="${server.upgradedir}/conf/hq-server.conf" overrideFile="${server.product.dir}/conf/hq-server.conf" outputFile="${server.product.dir}/conf/hq-server.conf">  
+		  		<propertiesMergeFilter refid="${hq-server.conf.filter.refid}" />
+		    </properties-merge> 
+	 	</else> 
+    </if>
     
     <!-- Copy the existing license file, if there is one -->
     <!-- Disable copying of license.xml file for 4.6 upgrade bc it's now different, post 4.6 upgrades should
@@ -730,7 +741,7 @@ ${errMsg}
                    compression="gzip"/>
   </target>
 
-  <target name="setup-server">
+  <target name="setup-server" unless="migration.context">
     <!-- The server distro will unzip to a server-${version} dir, but the tar.gz may have build stamp in name -->
     <foreach param="server.bundle" target="unpack-server">
         <param name="server.installdir" value="${server.installdir}"/>

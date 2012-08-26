@@ -27,6 +27,10 @@
 		<echo>^^^DEBUG: Loading taskdefs...</echo>
 		<taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="alljars" />
 		<taskdef resource="org/hyperic/tools/ant/ant-tools.properties" classpathref="alljars" />
+		
+		<typedef name="properties-merge-filter" classname="org.hyperic.tools.ant.PropertiesMergerTask$Filter" classpathref="alljars" />
+		<typedef name="tables" classname="org.hyperic.tools.dbmigrate.TableProcessor$TablesContainer" classpathref="alljars" />
+		
 		<echo>^^^DEBUG: Taskdefs loaded</echo>
 	</target>
 
@@ -72,16 +76,20 @@
 	</target>
 
 	<target name="upgrade-db" depends="init-taskdefs,hibernate-prep">
+		<condition property="force.cam.schema.version" value="${force.cam.schema.version}" else="LATEST"> 
+			<isset property="force.cam.schema.version" />
+		</condition> 
+
 		<ant antfile="${install.dir}/data/db-upgrade.xml" target="upgrade" inheritAll="true" inheritRefs="true">
 			<property name="jdbc.url" value="${server.database-url}" />
 			<property name="jdbc.user" value="${server.database-user}" />
 			<property name="jdbc.password" value="${server.database-password}" />
 			<property name="typemap.file" value="${install.dir}/data/common-dbsetup-typemap.xml" />
-			<property name="schema.target" value="LATEST" />
+			<property name="schema.target" value="${force.cam.schema.version}" />
 			<property name="server.upgradedir" value="${server.upgradedir}" />
 		</ant>
 
-		<serverConfigPropsUpgrade jdbcUrl="${server.database-url}" jdbcUser="${server.database-user}" jdbcPassword="${server.database-password}" encryptionKey="${server.encryption-key}" propKey="CAM_SERVER_VERSION" propValue="${version}" />
+		<serverConfigPropsUpgrade jdbcUrl="${server.database-url}" jdbcUser="${server.database-user}" jdbcPassword="${server.database-password}" encryptionKey="${server.encryption-key}" propKey="CAM_SERVER_VERSION" propValue="5.0" />
 
 		<antcall target="set-multicast-props" />
 	</target>
@@ -103,6 +111,7 @@
 		<dbsetup-cat debug="true" destfile="${data.dir}/data.xml" name="data.xml" notice="Copyright (C) 2004-2010, Hyperic, Inc., All Rights Reserved." order="${dbsetup-subsystems}">
 			<fileset dir="${install.dir}/data/sql">
 				<include name="*-data.xml" />
+				<exclude name="${dbsetup-combine-exclusion-filter}" />
 			</fileset>
 		</dbsetup-cat>
 	</target>

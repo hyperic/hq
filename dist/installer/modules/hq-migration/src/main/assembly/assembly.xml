@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assembly>
+	<id>hq-migration-assembly</id>
+	<formats>
+		<format>zip</format>
+	</formats>
+
+	<includeBaseDirectory>true</includeBaseDirectory> 
+
+	<componentDescriptors>
+    	<componentDescriptor>../../src/main/assembly/base-component.xml</componentDescriptor>
+    </componentDescriptors>
+
+    <fileSets>
+		<fileSet>
+			<directory>../../target/generated-resources/lib</directory>
+			<outputDirectory>/lib</outputDirectory>
+			<filtered>false</filtered>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
+			<includes>
+				<include>*sigar*</include>
+				<include>ant.jar</include>
+				<include>ant-1.7.1.jar</include>
+				<include>ant-antlr.jar</include>
+				<include>ant-contrib*.jar</include>
+<!-- 				<include>ant-launcher.jar</include> --> 
+				<include>ant-launcher*.jar</include>
+				<include>ant-nodeps.jar</include>
+				<include>commons-collections*.jar</include>
+				<include>commons-logging*.jar</include>
+				<include>dom4j*.jar</include>
+				<include>freemarker*.jar</include>
+				<include>groovy-all*.jar</include>
+				<include>hibernate*.jar</include> 
+<!--				<include>hibenate-tools*.jar</include> -->
+				<include>hq-common*.jar</include>
+				<include>hq-installer*.jar</include>
+				<include>hq-server*.jar</include> 
+				<include>hq-util*.jar</include>
+				<include>jasypt*.jar</include>
+				<include>json*.jar</include> 
+				<include>log4j*.jar</include>
+				<include>mysql*.jar</include>
+				<include>oro*.jar</include>
+				<include>postgres*.jar</include>
+				<include>spring-beans*.jar</include>
+				<include>spring-context*.jar</include>
+				<include>spring-core*.jar</include>
+				<include></include>
+				<include></include>
+			</includes>
+		</fileSet>
+
+	</fileSets>
+
+
+</assembly>

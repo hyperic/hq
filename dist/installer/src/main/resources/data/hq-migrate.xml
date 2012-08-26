@@ -1,0 +1,500 @@
+<?xml version="1.0"?>
+<!--
+
+    NOTE: This copyright does *not* cover user programs that use HQ
+    program services by normal system calls through the application
+    program interfaces provided as part of the Hyperic Plug-in Development
+    Kit or the Hyperic Client Development Kit - this is merely considered
+    normal use of the program, and does *not* fall under the heading of
+     "derived work".
+
+     Copyright (C) [2009-2012], VMware, Inc.
+     This file is part of HQ.
+
+     HQ is free software; you can redistribute it and/or modify
+     it under the terms version 2 of the GNU General Public License as
+     published by the Free Software Foundation. This program is distributed
+     in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+     even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+     PARTICULAR PURPOSE. See the GNU General Public License for more
+     details.
+
+     You should have received a copy of the GNU General Public License
+     along with this program; if not, write to the Free Software
+     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+     USA.
+-->
+<project name="HQ-Migration" default="usage" basedir=".">
+
+	<import file="setup-db-common.xml" />
+	
+	<target name="load-setup-properties" depends="init-taskdefs" if="setup.file"
+		description="Initializes the Ant environment from the file defines in the ${setup.file}">
+		<if> 
+			<bool> 
+				<isset property="setup.file" />
+			</bool> 
+			<then> 
+				<echo message="Attempting to load setup properties file: '${setup.file}' - will ignore all other propreties " />
+				<loadproperties srcFile="${setup.file}" />
+			</then> 
+			<!--<else> 
+				<echo message="Parsing commandline arguments" />
+			 	<cmd-args cmdArgs="${cmdArgs}" argDel=" " keyValDel="=" argIdentifier="-D" /> 
+			</else> -->
+		</if>
+	</target>
+	
+	<target name="configure-staging-dirctory"> 
+		<if> 
+			<not> 
+				<isset property="staging.dir" /> 
+			</not>
+			<then>
+				<var name="staging.dir" value="${install.dir}/tmp/export-data" />
+				<echo message="Property: 'staging.dir' was not provided, defaulting to '${staging.dir}'" /> 				
+			</then> 
+			<else> 
+				<!-- ensure that the staging directory is suffixed by export-data so that there is an additional safety level -->
+				<propertyregex property="staging.dir"
+		              input="${staging.dir}"
+		              regexp="(.+?)([/\\]export-data){0,1}([/\\]){0,1}$"
+		              select="\1/export-data"
+		              casesensitive="false"
+					  override="true"
+							  global="true"/>
+			</else> 
+		</if>
+		
+		<property name="server.artifacts.dir" value="${staging.dir}/source-artifacts" />
+		<property name="db.data.dir" value="${staging.dir}/data" />
+		
+		<echo message="Purging the data and source-artifacts staging dirctories" />
+		<delete includeemptydirs="true" failonerror="false">
+    		<fileset dir="${server.artifacts.dir}" includes="**/**" defaultexcludes="false"/>
+			<fileset dir="${db.data.dir}" includes="**/**" defaultexcludes="false"/>
+		</delete>
+
+		<mkdir dir="${server.artifacts.dir}" />
+		<mkdir dir="${db.data.dir}" />
+	</target> 
+	
+	<target name="init" depends="load-setup-properties,configure-staging-dirctory" description="Initializes the Ant environment">
+		<echo message="Attempting to load hq-server.conf file from: ${hqserver.install.path}/conf/hq-server.conf" />
+		
+		<var name="hq.server.conf.file" value="${hqserver.install.path}/conf/hq-server.conf" />
+		<var file="${hq.server.conf.file}" />
+		
+		<!-- Decrypt the database password -->
+		<env-setup />
+		
+		<!-- cache the os family type for future reference -->
+		<condition property="windows-os" value="true" else="false">
+	      <os family="windows"/>
+	    </condition>
+		 
+		<!--Configure the export/import table dataset based on the -DconfigOnly=true commandline argument (defaults to all) -->
+		<tables id="config.tables">
+			<table name="EAM_ACTION" />
+			<table name="EAM_AGENT" />
+			<table name="EAM_AGENT_PLUGIN_STATUS" />
+			<table name="EAM_AGENT_TYPE" />
+			<table name="EAM_AIQ_IP" />
+			<table name="EAM_AIQ_PLATFORM" />
+			<table name="EAM_AIQ_SERVER" />
+			<table name="EAM_AIQ_SERVICE" />
+			<table name="EAM_ALERT" />
+			<table name="EAM_ALERT_ACTION_LOG" />
+			<table name="EAM_ALERT_CONDITION" />
+			<table name="EAM_ALERT_CONDITION_LOG" />
+			<table name="EAM_ALERT_DEFINITION" />
+			<table name="EAM_ALERT_DEF_STATE" />
+			<table name="EAM_APPLICATION" />
+			<table name="EAM_APPLICATION_TYPE" />
+			<table name="EAM_APP_SERVICE" />
+			<table name="EAM_APP_TYPE_SERVICE_TYPE_MAP" />
+			<table name="EAM_AUTOINV_SCHEDULE" />
+			<table name="EAM_CALENDAR" />
+			<table name="EAM_CALENDAR_ENT" />
+			<table name="EAM_CALENDAR_WEEK" />
+			<table name="EAM_CONFIG_PROPS" />
+			<table name="EAM_CONFIG_RESPONSE" />
+			<table name="EAM_CONTROL_HISTORY" />
+			<table name="EAM_CONTROL_SCHEDULE" />
+			<table name="EAM_CPROP" />
+			<table name="EAM_CPROP_KEY" />
+			<table name="EAM_CRISPO" />
+			<table name="EAM_CRISPO_ARRAY" />
+			<table name="EAM_CRISPO_OPT" />
+			<table name="EAM_CRITERIA" />
+			<table name="EAM_DASH_CONFIG" />
+			<table name="EAM_ERROR_CODE" />
+			<table name="EAM_ESCALATION" />
+			<table name="EAM_ESCALATION_ACTION" />
+			<table name="EAM_ESCALATION_STATE" />
+			<table name="EAM_EXEC_STRATEGIES" />
+			<table name="EAM_EXEC_STRATEGY_TYPES" />
+			<table name="EAM_GALERT_ACTION_LOG" />
+			<table name="EAM_GALERT_DEFS" />
+			<table name="EAM_GALERT_LOGS" />
+			<table name="EAM_GTRIGGERS" />
+			<table name="EAM_GTRIGGER_TYPES" />
+			<table name="EAM_IP" />
+			<table name="EAM_KEYSTORE" />
+			<table name="EAM_MEASUREMENT" />
+			<table name="EAM_MEASUREMENT_TEMPL" />
+			<table name="EAM_METRIC_PROB" />
+			<table name="EAM_MONITORABLE_TYPE" />
+			<table name="EAM_NUMBERS" />
+			<table name="EAM_OPERATION" />
+			<table name="EAM_PLATFORM" />
+			<table name="EAM_PLATFORM_SERVER_TYPE_MAP" />
+			<table name="EAM_PLATFORM_TYPE" />
+			<table name="EAM_PLUGIN" />
+			<table name="EAM_PRINCIPAL" />
+			<table name="EAM_REGISTERED_TRIGGER" />
+			<table name="EAM_RESOURCE" />
+			<table name="EAM_RESOURCE_EDGE" />
+			<table name="EAM_RESOURCE_GROUP" />
+			<table name="EAM_RESOURCE_RELATION" />
+			<table name="EAM_RESOURCE_TYPE" />
+			<table name="EAM_RES_GRP_RES_MAP" />
+			<table name="EAM_ROLE" />
+			<table name="EAM_ROLE_CALENDAR" />
+			<table name="EAM_ROLE_OPERATION_MAP" />
+			<table name="EAM_ROLE_RESOURCE_GROUP_MAP" />
+			<table name="EAM_SERVER" />
+			<table name="EAM_SERVER_TYPE" />
+			<table name="EAM_SERVICE" />
+			<table name="EAM_SERVICE_DEP_MAP" />
+			<table name="EAM_SERVICE_REQUEST" />
+			<table name="EAM_SERVICE_TYPE" />
+			<table name="EAM_SRN" />
+			<table name="EAM_STAT_ERRORS" />
+			<table name="EAM_SUBJECT" />
+			<table name="EAM_SUBJECT_ROLE_MAP" />
+			<table name="EAM_UI_ATTACHMENT" />
+			<table name="EAM_UI_ATTACH_ADMIN" />
+			<table name="EAM_UI_ATTACH_MAST" />
+			<table name="EAM_UI_ATTACH_RSRC" />
+			<table name="EAM_UI_PLUGIN" />
+			<table name="EAM_UI_VIEW" />
+			<table name="EAM_UI_VIEW_ADMIN" />
+			<table name="EAM_UI_VIEW_MASTHEAD" />
+			<table name="EAM_UI_VIEW_RESOURCE" />
+			<table name="EAM_UPDATE_STATUS" />
+			<table name="EAM_VIRTUAL" />
+		</tables>
+		
+		<tables id="data.tables"> 
+			<table name="EAM_MEASUREMENT_BL"/>
+			<table name="EAM_MEASUREMENT_CAT" />
+			<bigTable name="EAM_MEASUREMENT_DATA_1D" noOfPartitions="10" partitionColumn="MEASUREMENT_ID" truncate="false"/>
+			<bigTable name="EAM_MEASUREMENT_DATA_1H" noOfPartitions="10" partitionColumn="MEASUREMENT_ID" truncate="false"/>
+			<bigTable name="EAM_MEASUREMENT_DATA_6H" noOfPartitions="10" partitionColumn="MEASUREMENT_ID" truncate="false"/>
+			<bigTable name="HQ_AVAIL_DATA_RLE" noOfPartitions="10" partitionColumn="MEASUREMENT_ID" 	truncate="false"/>
+			<bigTable name="HQ_METRIC_DATA_0D_0S" noOfPartitions="10" partitionColumn="MEASUREMENT_ID" truncate="false"/>
+			<bigTable name="HQ_METRIC_DATA_0D_1S" noOfPartitions="10" partitionColumn="MEASUREMENT_ID" truncate="false"/>
+			<bigTable name="HQ_METRIC_DATA_1D_0S" noOfPartitions="10" partitionColumn="MEASUREMENT_ID" truncate="false"/>
+			<bigTable name="HQ_METRIC_DATA_1D_1S" noOfPartitions="10" partitionColumn="MEASUREMENT_ID" truncate="false"/>
+			<bigTable name="HQ_METRIC_DATA_2D_0S" noOfPartitions="10" partitionColumn="MEASUREMENT_ID" truncate="false"/>
+			<bigTable name="HQ_METRIC_DATA_2D_1S" noOfPartitions="10" partitionColumn="MEASUREMENT_ID" truncate="false"/>
+			<bigTable name="HQ_METRIC_DATA_3D_0S" noOfPartitions="10" partitionColumn="MEASUREMENT_ID" truncate="false"/>
+			<bigTable name="HQ_METRIC_DATA_3D_1S" noOfPartitions="10" partitionColumn="MEASUREMENT_ID" truncate="false"/>
+			<bigTable name="HQ_METRIC_DATA_4D_0S" noOfPartitions="10" partitionColumn="MEASUREMENT_ID" truncate="false"/>
+			<bigTable name="HQ_METRIC_DATA_4D_1S" noOfPartitions="10" partitionColumn="MEASUREMENT_ID" truncate="false"/>
+			<bigTable name="HQ_METRIC_DATA_5D_0S" noOfPartitions="10" partitionColumn="MEASUREMENT_ID" truncate="false"/>
+			<bigTable name="HQ_METRIC_DATA_5D_1S" noOfPartitions="10" partitionColumn="MEASUREMENT_ID" truncate="false"/>
+			<bigTable name="HQ_METRIC_DATA_6D_0S" noOfPartitions="10" partitionColumn="MEASUREMENT_ID" truncate="false"/>
+			<bigTable name="HQ_METRIC_DATA_6D_1S" noOfPartitions="10" partitionColumn="MEASUREMENT_ID" truncate="false"/>
+			<bigTable name="HQ_METRIC_DATA_7D_0S" noOfPartitions="10" partitionColumn="MEASUREMENT_ID" truncate="false"/>
+			<bigTable name="HQ_METRIC_DATA_7D_1S" noOfPartitions="10" partitionColumn="MEASUREMENT_ID" truncate="false"/>
+			<bigTable name="HQ_METRIC_DATA_8D_0S" noOfPartitions="10" partitionColumn="MEASUREMENT_ID" truncate="false"/>
+			<bigTable name="HQ_METRIC_DATA_8D_1S" noOfPartitions="10" partitionColumn="MEASUREMENT_ID" truncate="false"/>
+			<table name="HQ_METRIC_DATA_COMPAT" />
+			<table name="EAM_EVENT_LOG" />
+			<table name="EAM_AUTOINV_HISTORY" />
+			<table name="EAM_AUDIT" />
+			<table name="EAM_GALERT_AUX_LOGS" />
+			<table name="EAM_REQUEST_STAT" />
+			<table name="EAM_METRIC_AUX_LOGS" />
+			<table name="EAM_RESOURCE_AUX_LOGS" />
+		</tables>
+		<!--<property name="config.tables" value="EAM_ACTION,EAM_AGENT,EAM_AGENT_PLUGIN_STATUS,EAM_AGENT_TYPE,EAM_AIQ_IP,EAM_AIQ_PLATFORM,EAM_AIQ_SERVER,EAM_AIQ_SERVICE,EAM_ALERT,EAM_ALERT_ACTION_LOG,EAM_ALERT_CONDITION,EAM_ALERT_CONDITION_LOG,EAM_ALERT_DEFINITION,EAM_ALERT_DEF_STATE,EAM_APPLICATION,EAM_APPLICATION_TYPE,EAM_APP_SERVICE,EAM_APP_TYPE_SERVICE_TYPE_MAP,EAM_AUTOINV_SCHEDULE,EAM_CALENDAR,EAM_CALENDAR_ENT,EAM_CALENDAR_WEEK,EAM_CONFIG_PROPS,EAM_CONFIG_RESPONSE,EAM_CONTROL_HISTORY,EAM_CONTROL_SCHEDULE,EAM_CPROP,EAM_CPROP_KEY,EAM_CRISPO,EAM_CRISPO_ARRAY,EAM_CRISPO_OPT,EAM_CRITERIA,EAM_DASH_CONFIG,EAM_ERROR_CODE,EAM_ESCALATION,EAM_ESCALATION_ACTION,EAM_ESCALATION_STATE,EAM_EXEC_STRATEGIES,EAM_EXEC_STRATEGY_TYPES,EAM_GALERT_ACTION_LOG,EAM_GALERT_DEFS,EAM_GALERT_LOGS,EAM_GTRIGGERS,EAM_GTRIGGER_TYPES,EAM_IP,EAM_KEYSTORE,EAM_MEASUREMENT,EAM_MEASUREMENT_TEMPL,EAM_METRIC_PROB,EAM_MONITORABLE_TYPE,EAM_NUMBERS,EAM_OPERATION,EAM_PLATFORM,EAM_PLATFORM_SERVER_TYPE_MAP,EAM_PLATFORM_TYPE,EAM_PLUGIN,EAM_PRINCIPAL,EAM_REGISTERED_TRIGGER,EAM_RESOURCE,EAM_RESOURCE_EDGE,EAM_RESOURCE_GROUP,EAM_RESOURCE_RELATION,EAM_RESOURCE_TYPE,EAM_RES_GRP_RES_MAP,EAM_ROLE,EAM_ROLE_CALENDAR,EAM_ROLE_OPERATION_MAP,EAM_ROLE_RESOURCE_GROUP_MAP,EAM_SERVER,EAM_SERVER_TYPE,EAM_SERVICE,EAM_SERVICE_DEP_MAP,EAM_SERVICE_REQUEST,EAM_SERVICE_TYPE,EAM_SRN,EAM_STAT_ERRORS,EAM_SUBJECT,EAM_SUBJECT_ROLE_MAP,EAM_UI_ATTACHMENT,EAM_UI_ATTACH_ADMIN,EAM_UI_ATTACH_MAST,EAM_UI_ATTACH_RSRC,EAM_UI_PLUGIN,EAM_UI_VIEW,EAM_UI_VIEW_ADMIN,EAM_UI_VIEW_MASTHEAD,EAM_UI_VIEW_RESOURCE,EAM_UPDATE_STATUS,EAM_VIRTUAL" />  
+		<property name="data.tables" value="EAM_MEASUREMENT_BL,EAM_MEASUREMENT_CAT,EAM_MEASUREMENT_DATA_1D,EAM_MEASUREMENT_DATA_1H,EAM_MEASUREMENT_DATA_6H,HQ_AVAIL_DATA_RLE,HQ_METRIC_DATA_0D_0S,HQ_METRIC_DATA_0D_1S,HQ_METRIC_DATA_1D_0S,HQ_METRIC_DATA_1D_1S,HQ_METRIC_DATA_2D_0S,HQ_METRIC_DATA_2D_1S,HQ_METRIC_DATA_3D_0S,HQ_METRIC_DATA_3D_1S,HQ_METRIC_DATA_4D_0S,HQ_METRIC_DATA_4D_1S,HQ_METRIC_DATA_5D_0S,HQ_METRIC_DATA_5D_1S,HQ_METRIC_DATA_6D_0S,HQ_METRIC_DATA_6D_1S,HQ_METRIC_DATA_7D_0S,HQ_METRIC_DATA_7D_1S,HQ_METRIC_DATA_8D_0S,HQ_METRIC_DATA_8D_1S,HQ_METRIC_DATA_COMPAT,EAM_EVENT_LOG,EAM_AUTOINV_HISTORY,EAM_AUDIT,EAM_GALERT_AUX_LOGS,EAM_REQUEST_STAT,EAM_METRIC_AUX_LOGS,EAM_RESOURCE_AUX_LOGS" />-->
+
+		
+		<if>
+			<bool>
+				<isset property="configOnly" />
+			</bool>
+			<then> 
+				<property name="export-tables-refs-string" value="config.tables" />
+			</then> 
+			<else> 
+				<property name="export-tables-refs-string" value="config.tables,data.tables" />
+			</else> 
+		</if> 
+		
+		<property name="import-tables-refs-string" value="${export-tables-refs-string}" />
+	</target> 
+
+	<!-- Import logic: 
+		- [init]:           		Load the target server's hq-server.conf into the ant environment 
+		- [init#env-setup]: 		Use the server.encryption-key property to decrypt the server.database-password property and override the latter in the ant env 
+		  				   		    with the decrypted value. 
+		- [hq-import]:   		Assign the database related properties loaded from the target server's hq-server.conf to the hq-migration database related properties. 
+		  			        		(properties redundancy is intentional so that the migration flow does not affect the create & upgrade logic) 
+		- [hq-import]:   		Unzip the export.archive.path into the ${install.dir}/../tmp/export-data 
+		- [hq-import]:  			Load the source server's hq-server.conf into the ant env thus overriding all correlated properties from the previous load of the 
+						  		    target server's hq-server.conf
+		- [hq-import]:  		    Override the installer's database related properties with the target server ones stored in the hq-migration db related properties 
+		- [hq-import]:  		    Generate a new hibernate cfg.xml file which instructs the hibernate engine to extract the mapping from the source server's hq-server.jar 
+						   		    rather than the target server's one so that the source's schema would be created first   
+		- [hq-import]:  			Execute the setup-db-common.xml#dbsetup target which shall perform the following tasks:
+						  		    - Create a new database with the source server's schema (derived from the source's hq-server.jar by hibernate). 
+						  		    - Populate the database with with default data excluding the content of the common-data.xml (EAM_CONFIG_PROPS) as it would be imported in whole 
+						   		    from the source server's database.
+						   	   		(filter is controlled by the 'dbsetup-combine-exclusion-filter' property defining a comma delimited file names to exclude from data population) 
+						   			 - Upgrade the database by executing the db-upgrade.xml target to the version of the source server's db version 
+						     		 (controlled by the 'force.cam.schema.version' property) 
+		- [hq-import]:   		 Exeucte the importer task which shall import all tables defined in the 'export-tables-refs-string' property into the target server's database.
+								     Note: The importer shall use the table name as the directory name for the exported table data files to load and import. 
+									 Note: Table data files are available under the '${install.dir}/../tmp/export-data/data' path ('staging.dir' property).
+									 Note: it is important to import the source server's EAM_CONFIG_PROPS table 
+		- [hq-import]:  			 Modify the 'force.cam.schema.version' property value to 'LATEST' and execute the setup-db-common.xml#upgrade-db which shall execute 
+									 the db-upgrade.xml target to bring the database to the target server's db version. 
+		- [import-server-artifcats]: Execute the setup.xml#server-upgrade target which shall perform the following tasks on the target server installation: 
+									 - Backup the hq-server.conf appending timestamp to the name.
+									 - Merge the source and target servers' hq-server.conf into the target server's <install.home>/conf/hq-server.conf. 
+									   The logic shall use the 'hq-server.conf.filter' filter for overriding policy (the propertiesMergeFilter element is defined in this file 
+									   and is referenced by the setup.xml#server-upgrade hq-server.conf.filter.refid
+									   Expected result: source server's conf baseline overriden with the target server's database proeprties (including the server.encryption-key)
+									   and all of the latter's proeprties which are not present in the former's one.
+	--> 
+	<target name="hq-import" unless="using.builtin.db" depends="init">
+		<!-- cache the target's database properties -->
+		<var name="target.database.url" value="${server.database-url}" />
+		<var name="target.database.username" value="${server.database-user}" />
+		<var name="target.database.type" value="${server.database}" />
+		<var name="target.database.driver" value="${server.database-driver}" />
+		
+		<!-- exclude the common-data.xml file from the db-setup so that the eam_config_props tables would not be overrwriten -->
+		<property name="dbsetup-combine-exclusion-filter" value="common-data.xml" /> 
+		
+		<echo message="Extracting archive '${export.archive.path}' to ${staging.dir}" />
+		<!-- untar the export.archive file to the ${staging.dir}/export-data folder -->
+		<untar src="${export.archive.path}" dest="${staging.dir}" compression="gzip"/>
+		
+		<!-- determine whether the unzip was successful (ant bug for large zip files) -->  
+		<if> 
+			<not> 
+				<available file="${db.data.dir}" />
+			</not> 
+			<then> 
+				<input message="Archive extraction had failed. Please untar the ${export.archive.path} file into ${staging.dir} manually and press any key to continue..." />
+			</then> 
+		</if> 
+
+		<!-- override the properties with the sources properties (old) -->
+		<!--<property name="server.artifacts.dir" value="${staging.dir}/source-artifacts" />-->
+		<var file="${server.artifacts.dir}/conf/hq-server.conf" />
+
+		<!-- restore the source server's database properties which have been overwriten with the target server ones -->
+		<var name="server.database-url" value="${target.database.url}" />
+		<var name="server.database-user" value="${target.database.username}" />
+		<var name="server.database" value="${target.database.type}" />
+		<var name="server.database-driver" value="${target.database.driver}" />
+
+		<echo>Target server.database-url ${server.database-url}</echo>
+		<echo>Target server.database-user ${server.database-user}</echo>
+		<echo>Target server.database ${server.database}</echo>
+		<echo>Target server.database-driver ${server.database-driver}</echo>
+		<echo>Target CAM_SCHEMA_VERSION ${CAM_SCHEMA_VERSION}</echo>
+		<echo>Target CAM_SERVER_VERSION ${CAM_SERVER_VERSION}</echo>
+
+		<!--initialize the importer's database properties -->
+		<property name="target.database.url" value="${server.database-url}" />
+		<property name="target.database.username" value="${server.database-user}" />
+		<property name="target.database.password" value="${server.database-password}" />
+		<property name="target.database.type" value="${server.database}" />
+		<property name="target.database.driver" value="${server.database-driver}" />
+
+		<!-- Create a Hibernate configuration file containing instructions to use the mapping metadata found in the 
+			target server's hq-server.jar -->  
+		<echo message="Creating hibernate.cfg.xml in ${server.artifacts.dir}/conf for source hbm.xml mappings" />
+		<property name="hibernate.configurations.file" value="${server.artifacts.dir}/conf/source-hibernate.cfg.xml" />
+		<echo file="${hibernate.configurations.file}"><![CDATA[<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+"-//Hibernate/Hibernate Configuration DTD//EN"
+"http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+<session-factory>
+      <mapping jar="${server.artifacts.dir}/lib/hq-server-${CAM_SERVER_VERSION}.jar"/>
+</session-factory>
+</hibernate-configuration>]]></echo>	
+		
+		<!-- ensure that the target server is stopped --> 
+		<echo message="Attempting to shutdown the server at ${hqserver.install.path}" />
+		<if>
+			<equals arg1="${windows-os}" arg2="false"/> 
+			<then> 
+				<exec executable="/bin/bash">
+					<arg value="${hqserver.install.path}/bin/hq-server.sh"/>
+					<arg value="stop"/>
+				</exec> 
+			</then> 
+			<else> 
+				<exec executable="cmd">
+					<arg value="/c" />
+					<arg value="${hqserver.install.path}/bin/hq-server.bat" />
+					<arg value="stop"/>
+				</exec>			
+			</else> 
+		</if> 
+
+		<!-- override the current target server's schema version with that of the target server's -->
+		<var name="force.cam.schema.version" value="${CAM_SCHEMA_VERSION}" />
+	
+		<pause message="Upgrading database to version ${force.cam.schema.version}" quiet="${quiet}"/>
+		<!--<antcall target="replace-dbservice-values" /> -->
+		<antcall target="dbsetup" /> 
+
+		<pause message="Importing tables" quiet="${quiet}"/>
+		<importer tablesRefs="${import-tables-refs-string}" disabled="false" />
+
+		<var name="force.cam.schema.version" value="LATEST" />
+		
+		<pause message="Upgrading database to version ${force.cam.schema.version}" quiet="${quiet}"/>
+		<antcall target="upgrade-db" />
+		
+		<!-- Output the import summary message --> 
+		<echofile file="${install.dir}/data/reports/migration-import-summary.txt" property="import.summary" />
+		<!-- load the target server's build version -->
+		<property file="${install.dir}/data/version.properties"/>
+		
+		<antcall target="summary-report"> 
+			<param name="SOURCE_SERVER_VERSION" value="${CAM_SERVER_VERSION}" />
+			<param name="SOURCE_DB_VERSION" value="${CAM_SCHEMA_VERSION}" />
+			<param name="TARGET_SERVER_VERSION" value="${version}" />
+			<param name="TARGET_DB_VERSION" value="LATEST" />
+		</antcall>
+	</target>
+	
+	<target name="import-server-artifcats" depends="hq-import">
+  		<propertiesMergeFilter id="hq-server.conf.filter" includeNew="true"> 
+  		    <include name="server.database" />
+  			<include name="server.database-driver" />
+  			<include name="server.database-url" />
+  			<include name="server.database-user" />
+  			<include name="server.database-password" />
+  			<include name="server.quartzDelegate" />
+  			<include name="server.hibernate.dialect" />
+  			<include name="server.connection-validation" />   
+  		</propertiesMergeFilter>  
+		
+		<ant antfile="setup.xml" target="server-upgrade"> 
+			<property name="migration.context" value="true" />
+			<property name="setup.upgrade" value="true" />
+			<property name="server.upgradedir" value="${server.artifacts.dir}" />
+			<property name="server.product.dir" value="${hqserver.install.path}"/>
+			<property name="hq-server.conf.filter.refid" value="hq-server.conf.filter"  />
+		</ant>
+	</target>
+
+	<target name="hq-export" depends="init,export-server-artifacts">
+
+		<property name="source.database.url" value="${server.database-url}" />
+		<property name="source.database.username" value="${server.database-user}" />
+		<property name="source.database.password" value="${server.database-password}" />
+		<property name="source.database.type" value="${server.database}" />
+		<property name="source.database.driver" value="${server.database-driver}" />
+
+		<echo message="Exporting tables..." />
+		<exporter tablesRefs="${export-tables-refs-string}"  disabled="false" maxRecordsPerTable="-1" batchsize="1000">
+		</exporter> 
+		<!--<exporter tables="EAM_CONFIG_RESPONSE" disabled="false" batchsize="10" maxRecordsPerTable="-1"/>-->
+		
+		<mkdir dir="${staging.dir}" />
+		<echo message="Archiving ${staging.dir} to '${staging.dir}/../hq-migration-export-${CAM_SERVER_VERSION}.tgz' (this might take a few minutes)" />
+		<tar destFile="${staging.dir}/../hq-migration-export-${CAM_SERVER_VERSION}.tgz" baseDir="${staging.dir}" compression="gzip" />
+		
+		<echofile file="${install.dir}/data/reports/migration-export-summary.txt" property="export.summary" />
+				
+		<antcall target="summary-report"> 
+			<param name="SOURCE_SERVER_VERSION" value="${CAM_SERVER_VERSION}" />
+			<param name="SOURCE_DB_VERSION" value="${CAM_SCHEMA_VERSION}" />
+		</antcall>
+	</target>
+
+	<target name="export-server-artifacts" description="Copies target server artifacts to the staging directory">
+		
+		<echo message="Exporting Source server's artifacts to ${server.artifacts.dir}" />
+	
+		<echo message="Exporting lib/hq-server.jar" /> 
+		<copy todir="${server.artifacts.dir}/lib">
+			<fileset dir="${hqserver.install.path}/lib">
+		      <include name="hq-server*.jar"/>
+		    </fileset>
+		</copy>
+		
+		<echo message="Exporting hq-server.conf, keystore, server-log4j.xml and log4j.xml" />
+		<copy todir="${server.artifacts.dir}/conf"> 
+			<fileset dir="${hqserver.install.path}/conf"> 
+				<include name="hq-server.conf"/>
+				<include name="hyperic.keystore*"/>
+				<include name="log4j.xml"/>
+				<include name="server-log4j.xml"/>
+			</fileset>
+		</copy>
+	
+		<echo message="Exporting ehcache.xml" />
+		<copy todir="${server.artifacts.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/classes" file="${hqserver.install.path}/hq-engine/hq-server/webapps/ROOT/WEB-INF/classes/ehcache.xml" />
+		
+		<echo message="Exporting Existing HQU plugins" /> 
+		<copydir src="${hqserver.install.path}/hq-engine/hq-server/webapps/ROOT/hqu" dest="${server.artifacts.dir}//hq-engine/hq-server/webapps/ROOT/hqu" />
+				
+	</target> 
+	
+	<target name="one-step-migration" depends="load-setup-properties"> 
+		<echo message="Source HQ server install path: ${source.hqserver.install.path}" />
+		<echo message="Target HQ server install path: ${target.hqserver.install.path}" />
+		
+		<!-- set the staging dir if not provided (property element does not override) --> 
+		<property name="staging.dir" value="${install.dir}/tmp/export-data" />
+		<echo message="Staging dir: ${staging.dir}" />
+		
+		<!-- first call the export target -->
+		<antcallback target="hq-export" return="CAM_SERVER_VERSION,export.summary" >
+			<param name="embedded.execution" value="true" />
+			<param name="hqserver.install.path" value="${source.hqserver.install.path}" />
+		</antcallback>
+		
+		<pause message="Finished export" prompt=", press any key to continue with the import..." quiet="${quiet}"/>
+		
+		<!-- now call the import target -->
+		<antcallback target="hq-import" return="CAM_SCHEMA_VERSION,import.summary"> 
+			<param name="embedded.execution" value="true" />
+			<param name="hqserver.install.path" value="${target.hqserver.install.path}" />
+			<param name="export.archive.path" value="${staging.dir}/hq-migration-export-${CAM_SERVER_VERSION}.tgz" />
+		</antcallback>
+		
+		<antcall target="summary-report"> 
+			<param name="SOURCE_SERVER_VERSION" value="${CAM_SERVER_VERSION}" />
+			<param name="SOURCE_DB_VERSION" value="${CAM_SCHEMA_VERSION}" />
+			<param name="TARGET_SERVER_VERSION" value="LATEST" />
+			<param name="TARGET_DB_VERSION" value="LATEST" />
+		</antcall>
+	</target> 
+	
+	<target name="summary-report" unless="embedded.execution">
+		<echofile file="${install.dir}/data/reports/migration-summary.txt" trim="true"/> 
+	</target> 
+	
+	<target name="usage" depends="init-taskdefs">
+		<echofile file="${install.dir}/data/reports/migration-usage.txt" property="migration.usage" />
+		<echo message="${migration.usage}"/>
+	</target>
+
+</project>

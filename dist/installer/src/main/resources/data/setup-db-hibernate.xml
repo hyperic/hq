@@ -66,6 +66,10 @@
 	<property name="hq.schema.statement.delimiter" value=";"/>
 	<property name="hq.schema.export" value="true"/>
 
+	<condition property="hibernate.configurations.file" value="${hibernate.configurations.file}" else="${install.dir}/data/hibernate.cfg.xml"> 
+	   <isset property="hibernate.configurations.file" />
+    </condition>
+
     <echoproperties destfile="${hibernate-properties-gen}" format="text">
       <propertyset>
         <propertyref name="hibernate.dialect"/>
@@ -89,13 +93,13 @@
     <delete failonerror="false" file="${build.dir}/sql/hibernate.sql" />
     <mkdir dir="${build.dir}/sql" />
   </target>
-
+	
   <target name="hibernate-schema-create" depends="hibernate-prep,hibernate-schema-create-init">
     <hibernatetool>
       <classpath>
         <path refid="alljars"/>
       </classpath>
-      <configuration propertyFile="${hibernate-properties-gen}" configurationfile="${install.dir}/data/hibernate.cfg.xml" />
+      <configuration propertyFile="${hibernate-properties-gen}" configurationfile="${hibernate.configurations.file}" />
   
       <hbm2ddl
           destdir="${build.dir}/sql"
@@ -104,7 +108,7 @@
           create="true"
           update="false"
           format="true"
-          console="false"
+          console="true"
           export="true"
           delimiter=";"
           haltonerror="true"
@@ -120,7 +124,7 @@
     	  <classpath>
 			<path refid="alljars"/>
 	      </classpath>
-	      <configuration propertyFile="${hibernate-properties-gen}" configurationfile="${install.dir}/data/hibernate.cfg.xml">
+	      <configuration propertyFile="${hibernate-properties-gen}" configurationfile="${hibernate.configurations.file}">
       </configuration>
 
       <hbm2ddl
@@ -130,7 +134,7 @@
           create="false"
           update="false"
           format="true"
-          console="false"
+          console="true"
           export="true"
           delimiter=";"
           />
@@ -140,4 +144,3 @@
   <target name="hibernate-setup" depends="hibernate-schema-drop,hibernate-schema-create" />
 
   <target name="hibernate-drop" depends="hibernate-schema-drop" />
-
