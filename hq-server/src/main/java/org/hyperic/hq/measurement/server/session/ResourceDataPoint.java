@@ -31,7 +31,7 @@ public class ResourceDataPoint extends DataPoint {
     private Resource _resource;
     
     public ResourceDataPoint(Resource resource, DataPoint point) {
-        super(point.getMetricId().intValue(), point.getValue(),
+        super(point.getMeasurementId().intValue(), point.getValue(),
             point.getTimestamp());
         _resource = resource;
     }

@@ -248,6 +248,11 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         return resourceGroupDAO.findById(id);
     }
 
+    @Transactional(readOnly = true)
+    public ResourceGroup getResourceGroupById(Integer id) {
+        return resourceGroupDAO.get(id);
+    }
+
     /**
      * Find the role that has the given name.
      * @param whoami user requesting to find the group
@@ -513,7 +518,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      * 
      */
     @Transactional(readOnly = true)
-    public Collection<Resource> getMembers(ResourceGroup g) {
+    public List<Resource> getMembers(ResourceGroup g) {
         return resourceGroupDAO.getMembers(g);
     }
 
@@ -561,7 +566,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      */
     @Transactional(readOnly = true)
     public int getNumMembers(ResourceGroup g) {
-        return getMembers(g).size();
+        return resourceGroupDAO.getNumMembers(g);
     }
     
     @Transactional(readOnly = true)

@@ -149,6 +149,8 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 	private MeasurementProcessor measurementProcessor;
     @Autowired
 	private AvailabilityManager availabilityManager;
+    @Autowired
+    private MeasurementInserterHolder measurementInserterHolder;
 
     // TODO: Resolve circular dependency with ProductManager
     private MeasurementPluginManager getMeasurementPluginManager() throws Exception {
@@ -486,7 +488,16 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
             if (availMeasurement != null) {
                 MetricValue val = new MetricValue(MeasurementConstants.AVAIL_DOWN);
-                availabilityManager.addData(availMeasurement, val);
+                List<DataPoint> l = new ArrayList<DataPoint>(1);
+                l.add(new DataPoint(availMeasurement, val));
+                DataInserter inserter = measurementInserterHolder.getAvailDataInserter();
+                synchronized (inserter.getLock()) {
+                	try {
+                		inserter.insertMetrics(l);
+                	} catch (Exception exp) {
+                		log.warn("Problem inserting new availability data for measurement '" + availMeasurement + "'", exp);
+                	}
+                }
             }
         }
     }

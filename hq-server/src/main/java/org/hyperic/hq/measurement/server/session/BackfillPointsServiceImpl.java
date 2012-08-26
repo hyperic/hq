@@ -25,7 +25,6 @@
  */
 package org.hyperic.hq.measurement.server.session;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,7 +42,6 @@ import org.hyperic.hq.appdef.server.session.AgentDAO;
 import org.hyperic.hq.appdef.server.session.AgentPluginSyncRestartThrottle;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
@@ -62,6 +60,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author jhickey
  * 
  */
+@SuppressWarnings("restriction")
 @Transactional(readOnly = true)
 @Service
 public class BackfillPointsServiceImpl implements BackfillPointsService {
@@ -95,19 +94,25 @@ public class BackfillPointsServiceImpl implements BackfillPointsService {
         this.concurrentStatsCollector = concurrentStatsCollector;
     }
 
+    
+
     @PostConstruct
     public void initStats() {
         concurrentStatsCollector.register(AVAIL_BACKFILLER_NUMPLATFORMS);
     }
 
-    public Map<Integer, DataPoint> getBackfillPoints(long current) {
+    public Map<Integer, ResourceDataPoint> getBackfillPlatformPoints(long current) {
         Map<Integer, ResourceDataPoint> downPlatforms = getDownPlatforms(current);
+    	log.debug("getBackfillPlatformPoints: found " + downPlatforms.size() + " downPlatforms");
         removeRestartingAgents(downPlatforms);
+        log.debug("getBackfillPlatformPoints: after removeRestartingAgents: " + downPlatforms.size() + " downPlatforms");
         if (downPlatforms != null) {
             concurrentStatsCollector.addStat(downPlatforms.size(), AVAIL_BACKFILLER_NUMPLATFORMS);
         }
-        return getBackfillPts(downPlatforms, current);
+        return downPlatforms;
     }
+
+    
 
     private void removeRestartingAgents(Map<Integer, ResourceDataPoint> backfillData) {
         if (backfillData.isEmpty()) {
@@ -251,61 +256,6 @@ public class BackfillPointsServiceImpl implements BackfillPointsService {
     private long getEndWindow(long current, Measurement meas) {
         return TimingVoodoo.roundDownTime((current - meas.getInterval()), meas.getInterval());
     }
-
-    private Map<Integer, DataPoint> getBackfillPts(Map<Integer, ResourceDataPoint> downPlatforms,
-                                                   long current) {
-        final boolean debug = log.isDebugEnabled();
-        final Map<Integer, DataPoint> rtn = new HashMap<Integer, DataPoint>();
-        final List<Integer> resourceIds = new ArrayList<Integer>(downPlatforms.keySet());
-        final Map<Integer, List<Measurement>> rHierarchy =
-            availabilityManager.getAvailMeasurementChildren(
-                resourceIds, AuthzConstants.ResourceEdgeContainmentRelation);
-        for (ResourceDataPoint rdp : downPlatforms.values()) {
-            final Resource platform = rdp.getResource();
-            if (debug) {
-                log.debug(new StringBuilder(256).append("platform name=").append(platform.getName())
-                                                .append(", resourceid=").append(platform.getId())
-                                                .append(", measurementid=").append(rdp.getMetricId())
-                                                .append(" is being marked ").append(rdp.getValue())
-                                                .append(" with timestamp = ")
-                                                .append(TimeUtil.toString(rdp.getTimestamp()))
-                                                .toString());
-            }
-            rtn.put(platform.getId(), rdp);
-            if (rdp.getValue() != AVAIL_DOWN) {
-                // platform may be paused, so skip pausing its children
-                continue;
-            }
-            final List<Measurement> associatedResources = rHierarchy.get(platform.getId());
-            if (associatedResources == null) {
-                continue;
-            }
-            if (debug) {
-                log.debug("platform [resource id " + platform.getId() + "] has " +
-                          associatedResources.size() + " associated resources");
-            }
-            for (Measurement meas : associatedResources) {
-                if (!meas.isEnabled()) {
-                    continue;
-                }
-                final long end = getEndWindow(current, meas);
-                final DataPoint defaultPt = new DataPoint(meas.getId().intValue(), AVAIL_NULL, end);
-                final DataPoint lastPt = availabilityCache.get(meas.getId(), defaultPt);
-                final long backfillTime = lastPt.getTimestamp() + meas.getInterval();
-                if (backfillTime > current) {
-                    continue;
-                }
-                if (debug) {
-                    log.debug("measurement id " + meas.getId() + " is being marked down, time=" +
-                              backfillTime);
-                }
-                final MetricValue val = new MetricValue(AVAIL_DOWN, backfillTime);
-                final MeasDataPoint point = new MeasDataPoint(meas.getId(), val, meas.getTemplate()
-                    .isAvailability());
-                rtn.put(meas.getResource().getId(), point);
-            }
-        }
-        return rtn;
-    }
+    
 
 }

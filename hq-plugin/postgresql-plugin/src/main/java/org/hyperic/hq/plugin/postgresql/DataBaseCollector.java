@@ -69,7 +69,13 @@ public class DataBaseCollector extends Collector {
         + "FROM pg_locks l "
         + "JOIN pg_database d ON (d.oid=l.database) "
         + "WHERE l.granted=false "
-        + "GROUP BY 2"
+        + "GROUP BY 2",
+        "SELECT "
+        + "datname, "
+        + "count(current_query) AS idle_backends "
+        + "FROM pg_stat_activity "
+        + "WHERE current_query = '<IDLE>' "
+        + "GROUP BY 1;"
     };
     private String posibleNULLMetrics[] = {"granted_locks", "awaited_locks"};
 
@@ -118,6 +124,16 @@ public class DataBaseCollector extends Collector {
             double c = Double.parseDouble((String) getResult().getValues().get(db + ".connections"));
             double m = Double.parseDouble((String) getResult().getValues().get(db + ".max_connections"));
             setValue(db + ".connections_usage", c / m);
+
+            double blksRead = Double.parseDouble((String) getResult().getValues().get(db + ".blks_read"));
+            double blksHit = Double.parseDouble((String) getResult().getValues().get(db + ".blks_hit"));
+            double blksHitP = (blksRead + blksHit) > 0 ? (blksHit / (blksRead + blksHit)) : 0;
+            double tupAltered = Double.parseDouble((String) getResult().getValues().get(db + ".tup_inserted"))
+                    + Double.parseDouble((String) getResult().getValues().get(db + ".tup_updated"))
+                    + Double.parseDouble((String) getResult().getValues().get(db + ".tup_deleted"));
+            setValue(db + ".blks_hit_p", blksHitP);
+            setValue(db + ".tup_altered", tupAltered);
+
             for (int j = 0; j < posibleNULLMetrics.length; j++) {
                 String metric = posibleNULLMetrics[j];
                 if (getResult().getValues().get(db + "." + metric) == null) {

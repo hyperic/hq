@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -609,17 +610,58 @@ public class ResourceManagerImpl implements ResourceManager {
      * 
      */
     @Transactional(readOnly = true)
-    public PageList<Resource> findViewables(AuthzSubject subject, String searchFor, PageControl pc) {
-        PermissionManager pm = PermissionManagerFactory.getInstance();
-        List<Integer> resIds = pm.findViewableResources(subject, searchFor, pc);
-        Pager pager = Pager.getDefaultPager();
-        List<Integer> paged = pager.seek(resIds, pc);
-        PageList<Resource> resources = new PageList<Resource>();
-        for (Integer id : paged) {
-            resources.add(resourceDAO.findById(id));
+    public PageList<Resource> findViewables(AuthzSubject subject, String searchFor, final PageControl pc) {
+        final StopWatch watch = new StopWatch();
+        final PermissionManager pm = PermissionManagerFactory.getInstance();
+        final Collection<ResourceType> types = getPSSAGResourceTypes();
+        searchFor = (searchFor.startsWith("*")) ? "." + searchFor : searchFor;
+        final Pattern pattern = Pattern.compile(searchFor, Pattern.CASE_INSENSITIVE);
+        final int pagesize = pc.getPagesize();
+        final int startIndex = pc.getPagenum() * pc.getPagesize();
+        final Set<Resource> resources = pm.findViewableResources(subject, types, pc.getSortorder(),
+            new IntegerConverter<Resource>() {
+                int returned = 0;
+                int index = 0;
+                public Resource convert(Integer id) {
+                    if (pc != null && returned > pagesize) {
+                        return null;
+                    }
+                    final Resource resource = resourceDAO.get(id);
+                    if (resource == null || resource.isInAsyncDeleteState()) {
+                        return null;
+                    }
+                    if (pattern.matcher(resource.getName()).find()) {
+                        if (index++ >= startIndex) {
+                            returned++;
+                            return resource;
+                        }
+                    }
+                    return null;
+                }
+            }
+        );
+        final Pager pager = Pager.getDefaultPager();
+        final List<Resource> paged = pager.seek(resources, pc);
+        PageList<Resource> rtn = new PageList<Resource>();
+        for (Resource r : paged) {
+            rtn.add(r);
         }
-        resources.setTotalSize(resIds.size());
-        return resources;
+        rtn.setTotalSize(resources.size());
+        if (log.isDebugEnabled()) log.debug("time to search for " + searchFor + ": " + watch);
+        return rtn;
+    }
+    
+    /**
+     * Get Platform, Server, Service, Application and Group ResourceTypes
+     */
+    private Collection<ResourceType> getPSSAGResourceTypes() {
+        final Collection<ResourceType> types = new ArrayList<ResourceType>(5);
+        types.add(findResourceTypeById(AuthzConstants.authzPlatform));
+        types.add(findResourceTypeById(AuthzConstants.authzServer));
+        types.add(findResourceTypeById(AuthzConstants.authzService));
+        types.add(findResourceTypeById(AuthzConstants.authzGroup));
+        types.add(findResourceTypeById(AuthzConstants.authzApplication));
+        return types;
     }
 
     @Transactional(readOnly = true)
@@ -791,7 +833,7 @@ public class ResourceManagerImpl implements ResourceManager {
      */
     @Transactional(readOnly = true)
     public Collection<Resource> findResourceByOwner(AuthzSubject owner) {
-        return resourceDAO.findByOwner(owner);
+        return resourceDAO.findByOwner(owner, PageControl.SORT_UNSORTED);
     }
 
     /**
@@ -871,7 +913,7 @@ public class ResourceManagerImpl implements ResourceManager {
         if (debug) watch.markTimeEnd("permissionManager.findViewableResources");
 
         if (debug) watch.markTimeBegin("resourceGroupManager.getMembers");
-        final Collection<Resource> resources = resourceGroupManager.getMembers(group);
+        final List<Resource> resources = resourceGroupManager.getMembers(group);
         if (debug) watch.markTimeEnd("resourceGroupManager.getMembers");
         if (resources.isEmpty()) {
             return Collections.emptyList();

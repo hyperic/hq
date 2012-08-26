@@ -106,7 +106,7 @@ public interface TemplateManager {
      */
     public Integer[] findTemplateIds(String type);
 
-    public /*Map<String,List<MeasurementTemplate>>*/List<MeasurementTemplate> findTemplatesByName(List<String> tmpNames);
+    public List<MeasurementTemplate> findTemplatesByName(List<String> tmpNames);
 
     /**
      * Update the default interval for a list of meas. templates

@@ -28,6 +28,7 @@ package org.hyperic.hq.security;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -84,7 +85,7 @@ public class InternalAuthenticationProvider implements AuthenticationProvider {
                     "Unable to read server configuration to determine authentication type", e);
             }
             for (HQAuthenticationProvider authProvider : hqAuthenticationProviders) {
-                if (authProvider.supports(serverConfig)) {
+                if (authProvider.supports(serverConfig, authentication.getDetails())) {
                     try {
                         result = authProvider.authenticate(username, password);
                     }catch (UserDisabledException e) {

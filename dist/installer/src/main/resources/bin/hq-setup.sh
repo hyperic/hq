@@ -37,9 +37,9 @@ machine=`uname -m`
 case "$platform" in
     Linux )
         if [ "${machine}" = "x86_64" ]; then
-            JRE_NAME=amd64-linux-1.6_30.tar.gz
+            JRE_NAME=amd64-linux-1.6_33.tar.gz
         else
-            JRE_NAME=x86-linux-1.6_30.tar.gz
+            JRE_NAME=x86-linux-1.6_33.tar.gz
         fi
         ;;
     SunOS )

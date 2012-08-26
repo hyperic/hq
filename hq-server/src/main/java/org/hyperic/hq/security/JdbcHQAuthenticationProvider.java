@@ -28,6 +28,7 @@ package org.hyperic.hq.security;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -62,7 +63,7 @@ public class JdbcHQAuthenticationProvider implements HQAuthenticationProvider {
     private PrincipalDAO principalDao;
     private AuthzSubjectManager authzSubjectManager;
     private PasswordEncoder passwordEncoder;
-
+    
     @Autowired
     public JdbcHQAuthenticationProvider(PrincipalDAO principalDao,
                                         AuthzSubjectManager authzSubjectManager,
@@ -125,8 +126,14 @@ public class JdbcHQAuthenticationProvider implements HQAuthenticationProvider {
         return new UsernamePasswordAuthenticationToken(username, password, grantedAuthorities);
     }
 
-    public boolean supports(Properties serverConfigProps) {
-        // We always support authentication through our internal data store
+    public boolean supports(Properties serverConfigProps, Object authDetails) {
+    	if ((null == authDetails) || (!(authDetails instanceof HQAuthenticationDetails))) {
+    		return true;
+    	}
+    	HQAuthenticationDetails hqAuthDetails = (HQAuthenticationDetails)authDetails;
+    	if (hqAuthDetails.isUsingExternalAuth()) {
+    		return false;
+    	}
         return true;
     }
 

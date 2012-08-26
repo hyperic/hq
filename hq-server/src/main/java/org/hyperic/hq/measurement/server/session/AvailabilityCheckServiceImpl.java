@@ -26,7 +26,6 @@
 package org.hyperic.hq.measurement.server.session;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -35,6 +34,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
@@ -43,15 +43,22 @@ import org.hyperic.util.stats.StatCollector;
 import org.hyperic.util.stats.StatUnreachableException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+
 
 /**
- * This job is responsible for filling in missing availabilty metric values.
+ * This job is responsible for filling in missing availability metric values.
  */
+@SuppressWarnings("restriction")
 @Service("availabilityCheckService")
+@Transactional
 public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
+	
     private final Log log = LogFactory.getLog(AvailabilityCheckServiceImpl.class);
     private static final String AVAIL_BACKFILLER_TIME = ConcurrentStatsCollector.AVAIL_BACKFILLER_TIME;
 
+    
     private long startTime = 0;
     private long wait = 5 * MeasurementConstants.MINUTE;
     private final Object IS_RUNNING_LOCK = new Object();
@@ -62,44 +69,51 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
     private AvailabilityCache availabilityCache;
     private BackfillPointsService backfillPointsService;
 
+	private AvailabilityFallbackCheckQue checkQue;
+	private AvailabilityFallbackChecker fallbackChecker = null;
+	private ResourceManager resourceManager;
+    
+
     @Autowired
     public AvailabilityCheckServiceImpl(ConcurrentStatsCollector concurrentStatsCollector,
                                         AvailabilityManager availabilityManager,
                                         AvailabilityCache availabilityCache,
-                                        BackfillPointsService backfillPointsService) {
+                                        BackfillPointsService backfillPointsService,
+                                        ResourceManager resourceManager) {
         this.concurrentStatsCollector = concurrentStatsCollector;
         this.availabilityCache = availabilityCache;
         this.availabilityManager = availabilityManager;
         this.backfillPointsService = backfillPointsService;
+        this.resourceManager = resourceManager;
+        this.checkQue = availabilityManager.getFallbackCheckQue();
     }
+
+    
+    
+
+    
 
     @PostConstruct
     public void initStats() {
         concurrentStatsCollector.register(AVAIL_BACKFILLER_TIME);
     }
 
-    public void backfill() {
-        backfill(System.currentTimeMillis(), false);
+    public void backfillPlatformAvailability() {
+    	backfillPlatformAvailability(System.currentTimeMillis(), false);
     }
 
-    public void backfill(long timeInMillis) {
-        // since method is used for unittests no need to check if alert triggers
-        // have initialized
-        backfill(timeInMillis, true);
-    }
 
-    private void backfill(long current, boolean forceStart) {
+    public void testBackfill(long current) {
+    	backfillPlatformAvailability(current, true);
+    }
+    
+    public void backfillPlatformAvailability(long current, boolean forceStart) {
         long start = now();
-        Map<Integer, DataPoint> backfillPoints = null;
+        Map<Integer, ResourceDataPoint> backfillPoints = null;
         try {
-            final boolean debug = log.isDebugEnabled();
-            if (debug) {
-                Date lDate = new Date(current);
-                log.debug("Availability Check Service started executing: " + lDate);
-            }
-            // Don't start backfilling immediately
+           // Don't start backfilling immediately
             if (!forceStart && !canStart(current)) {
-                log.info("not starting availability check");
+            	log.info("not starting availability check");
                 return;
             }
             synchronized (IS_RUNNING_LOCK) {
@@ -119,11 +133,16 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
                 // The code must be extremely efficient or else it will have
                 // a big impact on the performance of availability insertion.
                 synchronized (availabilityCache) {
-                    backfillPoints = backfillPointsService.getBackfillPoints(current);
-                    backfillAvails(backfillPoints);
+                	log.info("starting availability check");
+                    backfillPoints = backfillPointsService.getBackfillPlatformPoints(current);
                 }
-                // send data to event handlers outside of synchronized block
-                availabilityManager.sendDataToEventHandlers(backfillPoints);
+                if (backfillPoints.size() > 0)
+                	log.info("backfillPlatformAvailability: got " + backfillPoints.size() + " platforms to check. Adding to que.");
+                checkQue.addToQue(backfillPoints);
+                List<ResourceDataPoint> availabilityDataPoints = pollWorkList();
+                if (fallbackChecker == null)
+                	fallbackChecker = new AvailabilityFallbackChecker(availabilityManager, availabilityCache, resourceManager);
+                fallbackChecker.checkAvailability(availabilityDataPoints, current);
             } finally {
                 synchronized (IS_RUNNING_LOCK) {
                     isRunning = false;
@@ -134,30 +153,23 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
         } finally {
             concurrentStatsCollector.addStat(now() - start, AVAIL_BACKFILLER_TIME);
         }
+    	
+    }
+    
+    
+    private List<ResourceDataPoint> pollWorkList() {
+    	checkQue.cleanQueFromNonExistant();
+    	List<ResourceDataPoint> dataPointList = new ArrayList<ResourceDataPoint>();
+        ResourceDataPoint dp = checkQue.poll();
+        while (dp != null) {
+            dataPointList.add(dp);
+            dp = checkQue.poll();
+        }
+       	log.debug("setWorkList: current dataPointList size: " + dataPointList.size());
+       	return dataPointList;
     }
 
-    /**
-     * Since this method is called from the synchronized block in backfill()
-     * please see the associated NOTE.
-     */
-    private void backfillAvails(Map<Integer, DataPoint> backfillData) {
-        if (backfillData.isEmpty()) {
-            return;
-        }
-        final List<DataPoint> backfillPoints = new ArrayList<DataPoint>(backfillData.values());
-        final boolean debug = log.isDebugEnabled();
-        final int batchSize = 500;
-        for (int i=0; i < backfillPoints.size(); i+=batchSize) {
-            if (debug) {
-                log.debug("backfilling " + batchSize + " datapoints, " + (backfillPoints.size() - i) +
-                          " remaining");
-            }
-            int end = Math.min(i + batchSize, backfillPoints.size());
-            // use this method signature to not send data to event handlers from here.
-            // send it outside the synchronized cache block from the calling method
-            availabilityManager.addData(backfillPoints.subList(i, end), false);
-        }
-    }
+    
 
     private long now() {
         return System.currentTimeMillis();
@@ -206,4 +218,5 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
 
         return currentQueueSize;
     }
-}
+    
+ }

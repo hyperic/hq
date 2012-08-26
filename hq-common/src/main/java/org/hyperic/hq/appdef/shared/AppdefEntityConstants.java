@@ -27,6 +27,8 @@ package org.hyperic.hq.appdef.shared;
 
 
 public final class AppdefEntityConstants {
+	
+	public static final String HQ_AGENT_PROTOTYPE_NAME = "HQ Agent"; 
 
     public static final int APPDEF_TYPE_PRIVATEGROUP = 0;
     public static final int APPDEF_TYPE_PLATFORM    = 1;

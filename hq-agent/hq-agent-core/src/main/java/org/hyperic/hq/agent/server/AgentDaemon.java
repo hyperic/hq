@@ -65,6 +65,7 @@ import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginInfo;
 import org.hyperic.hq.product.PluginManager;
+import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ProductPluginManager;
 import org.hyperic.util.PluginLoader;
 import org.hyperic.util.security.SecurityUtil;
@@ -433,8 +434,10 @@ public class AgentDaemon
         // and checked on each agent invocation.  This determines if this agent
         // installation has been copied from another machine without removing 
         // the data directory.
-        String currentHost =
-            GenericPlugin.getPlatformName();
+        // [HHQ-5547] Overriding property is fetched here directly because it's not yet initialized in GenericPlugin
+        String platformName = config.getBootProperties().getProperty(ProductPlugin.PROP_PLATFORM_NAME);
+        String currentHost = (null != platformName ? platformName :
+            GenericPlugin.getPlatformName());
 
         String storedHost = this.storageProvider.getValue(PROP_HOSTNAME);
         if (storedHost == null || storedHost.length() == 0) {

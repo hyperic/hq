@@ -97,6 +97,7 @@
 	<bean id="basicAuthenticationFilter" class="org.springframework.security.web.authentication.www.BasicAuthenticationFilter">
 		<property name="authenticationManager" ref="authenticationManager" />
 		<property name="authenticationEntryPoint" ref="basicAuthenticationEntryPoint" />
+		<property name="authenticationDetailsSource" ref="hqAuthenticationDetailsSource"/>
 	</bean>
 
 	<bean id="basicAuthenticationEntryPoint" class="org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint">
@@ -124,9 +125,12 @@
 	<!-- For form-based authentication -->
 	<bean id="httpSessionRequestCache" class="org.springframework.security.web.savedrequest.HttpSessionRequestCache" />
 	
+	<bean id="hqAuthenticationDetailsSource" class="org.hyperic.hq.ui.security.HQAuthenticationDetailsSource" />
+		
 	<bean id="formBasedAuthenticationFilter" class="org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter">
 		<property name="authenticationManager" ref="authenticationManager" />
 		<property name="sessionAuthenticationStrategy" ref="UISessionInitializationStrategy" />
+		<property name="authenticationDetailsSource" ref="hqAuthenticationDetailsSource"/>
 		<property name="authenticationSuccessHandler">
 			<bean class="org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler">
 				<property name="defaultTargetUrl" value="/Dashboard.do" />

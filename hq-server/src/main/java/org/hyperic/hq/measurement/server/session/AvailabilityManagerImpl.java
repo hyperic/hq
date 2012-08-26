@@ -92,12 +92,13 @@ import org.springframework.transaction.annotation.Transactional;
  * to retrieve Availability Data RLE points
  * 
  */
+@SuppressWarnings("restriction")
 @Service
 @Transactional
 public class AvailabilityManagerImpl implements AvailabilityManager {
 
-    private final Log _log = LogFactory.getLog(AvailabilityManagerImpl.class);
-    private final Log _traceLog = LogFactory.getLog(AvailabilityManagerImpl.class.getName() + "Trace");
+    private final Log log = LogFactory.getLog(AvailabilityManagerImpl.class);
+    private final Log traceLog = LogFactory.getLog(AvailabilityManagerImpl.class.getName() + "Trace");
     private static final double AVAIL_NULL = MeasurementConstants.AVAIL_NULL;
     private static final double AVAIL_DOWN = MeasurementConstants.AVAIL_DOWN;
     private static final double AVAIL_UNKNOWN = MeasurementConstants.AVAIL_UNKNOWN;
@@ -121,13 +122,14 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     private MeasurementManager measurementManager;
 
     private ResourceGroupManager groupManager;
-    
+
     private ResourceManager resourceManager;
 
     private MessagePublisher messenger;
 
     private AvailabilityDataDAO availabilityDataDAO;
 
+    private AvailabilityFallbackCheckQue fallbackCheckQue;
     private MeasurementDAO measurementDAO;
     private MessagePublisher messagePublisher;
     private RegisteredTriggers registeredTriggers;
@@ -136,14 +138,12 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     private AgentDAO agentDAO;
     
     @Autowired
-    public AvailabilityManagerImpl(AuthzSubjectManager authzSubjectManager, ResourceManager resourceManager, 
-    							   ResourceGroupManager groupManager, MessagePublisher messenger,
-                                   AvailabilityDataDAO availabilityDataDAO, MeasurementDAO measurementDAO,
-                                   MessagePublisher messagePublisher, RegisteredTriggers registeredTriggers,
-                                   AvailabilityCache availabilityCache, AgentDAO agentDAO,
-                                   ConcurrentStatsCollector concurrentStatsCollector) {
-    	this.authzSubjectManager = authzSubjectManager;
-    	this.resourceManager = resourceManager;
+    public AvailabilityManagerImpl(AuthzSubjectManager authzSubjectManager, ResourceManager resourceManager,
+            ResourceGroupManager groupManager, MessagePublisher messenger, AvailabilityDataDAO availabilityDataDAO,
+            MeasurementDAO measurementDAO, MessagePublisher messagePublisher, RegisteredTriggers registeredTriggers,
+            AvailabilityCache availabilityCache, AgentDAO agentDAO, ConcurrentStatsCollector concurrentStatsCollector) {
+        this.authzSubjectManager = authzSubjectManager;
+        this.resourceManager = resourceManager;
         this.groupManager = groupManager;
         this.messenger = messenger;
         this.availabilityDataDAO = availabilityDataDAO;
@@ -153,13 +153,15 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         this.availabilityCache = availabilityCache;
         this.concurrentStatsCollector = concurrentStatsCollector;
         this.agentDAO = agentDAO;
+        //this.measurementIDsMonitoredByServer = new HashSet<Integer>();
+        this.fallbackCheckQue = new AvailabilityFallbackCheckQue();
     }
 
     @PostConstruct
     public void initStatsCollector() {
-    	concurrentStatsCollector.register(ConcurrentStatsCollector.AVAIL_MANAGER_METRICS_INSERTED);
+        concurrentStatsCollector.register(ConcurrentStatsCollector.AVAIL_MANAGER_METRICS_INSERTED);
     }
-    
+
     // To break AvailabilityManager - MeasurementManager circular dependency
     // TODO: Check why we need this when we have
     // MeasurementManagerImpl.setCircularDependencies()?
@@ -184,6 +186,12 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         return measurementDAO.findAvailMeasurementsByInstances(AppdefEntityConstants.APPDEF_TYPE_PLATFORM, null);
     }
 
+    
+    public AvailabilityFallbackCheckQue getFallbackCheckQue() {
+    	return this.fallbackCheckQue;
+    }
+    
+    
     /**
      * @return Down time in ms for the Resource availability
      * 
@@ -193,28 +201,31 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     public long getDowntime(Resource resource, long rangeBegin, long rangeEnd) throws MeasurementNotFoundException {
         Measurement meas = measurementDAO.findAvailMeasurement(resource);
         if (meas == null) {
-            throw new MeasurementNotFoundException("Availability measurement " + "not found for resource " +
-                                                   resource.getId());
+            throw new MeasurementNotFoundException("Availability measurement " + "not found for resource "
+                    + resource.getId());
         }
-        List<AvailabilityDataRLE> availInfo = availabilityDataDAO.getHistoricalAvails(meas, rangeBegin, rangeEnd, false);
+        List<AvailabilityDataRLE> availInfo = availabilityDataDAO
+                .getHistoricalAvails(meas, rangeBegin, rangeEnd, false);
         long rtn = 0l;
         for (AvailabilityDataRLE avail : availInfo) {
             if (avail.getAvailVal() != AVAIL_DOWN) {
                 continue;
             }
             long dataDownEndTime = avail.getEndtime();
-            
+
             if (dataDownEndTime == MAX_AVAIL_TIMESTAMP) {
                 dataDownEndTime = System.currentTimeMillis();
-            } 
-            if (dataDownEndTime > rangeEnd){
-                // use range end if the data down end time is greater than the end range.
+            }
+            if (dataDownEndTime > rangeEnd) {
+                // use range end if the data down end time is greater than the
+                // end range.
                 dataDownEndTime = rangeEnd;
             }
             long dataDownStartTime = avail.getStartime();
-            // Make sure the start of the down time is not earlier then the begin time
-            if (dataDownStartTime < rangeBegin){
-            	dataDownStartTime = rangeBegin;
+            // Make sure the start of the down time is not earlier then the
+            // begin time
+            if (dataDownStartTime < rangeBegin) {
+                dataDownStartTime = rangeBegin;
             }
             rtn += (dataDownEndTime - dataDownStartTime);
         }
@@ -252,9 +263,8 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      */
     @Transactional(readOnly = true)
     public Map<Integer, List<Measurement>> getAvailMeasurementChildren(List<Integer> resourceIds,
-                                                                       String resourceRelationType) {
-        final List<Object[]> objects =
-            measurementDAO.findRelatedAvailMeasurements(resourceIds, resourceRelationType);
+            String resourceRelationType) {
+        final List<Object[]> objects = measurementDAO.findRelatedAvailMeasurements(resourceIds, resourceRelationType);
         return convertAvailMeasurementListToMap(objects);
     }
 
@@ -276,7 +286,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      */
     @Transactional(readOnly = true)
     public Map<Integer, List<Measurement>> getAvailMeasurementParent(List<Integer> resourceIds,
-                                                                     String resourceRelationType) {
+            String resourceRelationType) {
         final List<Object[]> objects = measurementDAO.findParentAvailMeasurements(resourceIds, resourceRelationType);
         return convertAvailMeasurementListToMap(objects);
     }
@@ -286,6 +296,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         for (Object[] o : objects) {
             final Integer rId = (Integer) o[0];
             final Measurement m = (Measurement) o[1];
+            
             List<Measurement> tmp;
             if (null == (tmp = rtn.get(rId))) {
                 tmp = new ArrayList<Measurement>();
@@ -297,49 +308,51 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     }
 
     /**
-     * Get Availability measurements (disabled) in scheduled downtime. 
+     * Get Availability measurements (disabled) in scheduled downtime.
      */
-    @Transactional(readOnly = true) 
+    @Transactional(readOnly = true)
     public Map<Integer, Measurement> getAvailMeasurementsInDowntime(Collection<AppdefEntityID> eids) {
         Map<Integer, Measurement> measMap = new HashMap<Integer, Measurement>();
-        
-        try {
-    		AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
 
-            // TODO: Resolve circular dependency and autowire MaintenanceEventManager
-            List<MaintenanceEvent> events = PermissionManagerFactory.getInstance()
-                .getMaintenanceEventManager().getMaintenanceEvents(overlord, 
-                		MaintenanceEvent.STATE_RUNNING);
+        try {
+            AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
+
+            // TODO: Resolve circular dependency and autowire
+            // MaintenanceEventManager
+            List<MaintenanceEvent> events = PermissionManagerFactory.getInstance().getMaintenanceEventManager()
+                    .getMaintenanceEvents(overlord, MaintenanceEvent.STATE_RUNNING);
 
             for (MaintenanceEvent event : events) {
-            	AppdefEntityID entityId = event.getAppdefEntityID();
-            	Collection<Resource> resources = null;
-            	
-            	if (entityId.isGroup()) {
-            		ResourceGroup group = groupManager.findResourceGroupById(entityId.getId());
-            		resources = groupManager.getMembers(group);
-            	} else {
-            		Resource resource = resourceManager.findResource(entityId);
-            		resources = Collections.singletonList(resource);
-            	}
+                AppdefEntityID entityId = event.getAppdefEntityID();
+                Collection<Resource> resources = null;
+
+                if (entityId.isGroup()) {
+                    ResourceGroup group = groupManager.findResourceGroupById(entityId.getId());
+                    resources = groupManager.getMembers(group);
+                } else {
+                    Resource resource = resourceManager.findResource(entityId);
+                    resources = Collections.singletonList(resource);
+                }
 
                 for (Resource resource : resources) {
-                    List<Measurement> measurements = getAvailMeasurementChildren(
-                        resource, AuthzConstants.ResourceEdgeContainmentRelation);
+                    List<Measurement> measurements = getAvailMeasurementChildren(resource,
+                            AuthzConstants.ResourceEdgeContainmentRelation);
 
                     measurements.add(getAvailMeasurement(resource));
 
                     if (!measurements.isEmpty()) {
                         for (Measurement m : measurements) {
-                        	if (m == null) {
-                        		// measurement could be null if resource has not been configured
-                        		continue;
-                        	}
+                            if (m == null) {
+                                // measurement could be null if resource has not
+                                // been configured
+                                continue;
+                            }
                             Resource r = m.getResource();
                             if (r == null || r.isInAsyncDeleteState()) {
                                 continue;
                             }
-                            // availability measurement in scheduled downtime are disabled
+                            // availability measurement in scheduled downtime
+                            // are disabled
                             if (!m.isEnabled() && eids.contains(AppdefUtil.newAppdefEntityId(r))) {
                                 measMap.put(r.getId(), m);
                             }
@@ -348,12 +361,12 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
                 }
             }
         } catch (Exception e) {
-            _log.error("Could not find availability measurements in downtime: " + e.getMessage(), e);
+            log.error("Could not find availability measurements in downtime: " + e.getMessage(), e);
         }
 
         return measMap;
     }
-    
+
     /**
      * TODO: Can this method be combined with the one that takes an array?
      * 
@@ -361,7 +374,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      */
     @Transactional(readOnly = true)
     public PageList<HighLowMetricValue> getHistoricalAvailData(Measurement m, long begin, long end, PageControl pc,
-                                                               boolean prependUnknowns) {
+            boolean prependUnknowns) {
         List<AvailabilityDataRLE> availInfo = availabilityDataDAO.getHistoricalAvails(m, begin, end, pc.isDescending());
         return getPageList(availInfo, begin, end, m.getInterval(), prependUnknowns);
     }
@@ -369,31 +382,39 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     /**
      * Fetches historical availability encapsulating the specified time range
      * for each measurement id in mids;
-     * @param mids measurement ids
-     * @param begin time range start
-     * @param end time range end
-     * @param interval interval of each time range window
-     * @param pc page control
-     * @param prependUnknowns determines whether to prepend AVAIL_UNKNOWN if the
-     *        corresponding time window is not accounted for in the database.
-     *        Since availability is contiguous this will not occur unless the
-     *        time range precedes the first availability point.
+     * 
+     * @param mids
+     *            measurement ids
+     * @param begin
+     *            time range start
+     * @param end
+     *            time range end
+     * @param interval
+     *            interval of each time range window
+     * @param pc
+     *            page control
+     * @param prependUnknowns
+     *            determines whether to prepend AVAIL_UNKNOWN if the
+     *            corresponding time window is not accounted for in the
+     *            database. Since availability is contiguous this will not occur
+     *            unless the time range precedes the first availability point.
      * @see org.hyperic.hq.measurement.MeasurementConstants#AVAIL_UNKNOWN
      * 
      */
     @Transactional(readOnly = true)
     public PageList<HighLowMetricValue> getHistoricalAvailData(Integer[] mids, long begin, long end, long interval,
-                                                               PageControl pc, boolean prependUnknowns) {
+            PageControl pc, boolean prependUnknowns) {
         if (mids.length == 0) {
             return new PageList<HighLowMetricValue>();
         }
-        List<AvailabilityDataRLE> availInfo = availabilityDataDAO.getHistoricalAvails(mids, begin, end, pc
-            .isDescending());
+        List<AvailabilityDataRLE> availInfo = availabilityDataDAO.getHistoricalAvails(mids, begin, end,
+                pc.isDescending());
         return getPageList(availInfo, begin, end, interval, prependUnknowns);
     }
 
     /**
      * Get the list of Raw RLE objects for a resource
+     * 
      * @return List<AvailabilityDataRLE>
      * 
      */
@@ -409,7 +430,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     }
 
     private PageList<HighLowMetricValue> getPageList(List<AvailabilityDataRLE> availInfo, long begin, long end,
-                                                     long interval, boolean prependUnknowns) {
+            long interval, boolean prependUnknowns) {
         PageList<HighLowMetricValue> rtn = new PageList<HighLowMetricValue>();
         begin += interval;
         for (Iterator<AvailabilityDataRLE> it = availInfo.iterator(); it.hasNext();) {
@@ -436,9 +457,9 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
                     } else {
                         endtime = availEndtime;
                         int measId = rle.getMeasurement().getId().intValue();
-                        String msg = "Measurement, " + measId + ", for interval " + begin + " - " + end +
-                                     " did not return a value for range " + curr + " - " + (curr + interval);
-                        _log.warn(msg);
+                        String msg = "Measurement, " + measId + ", for interval " + begin + " - " + end
+                                + " did not return a value for range " + curr + " - " + (curr + interval);
+                        log.warn(msg);
                     }
                 }
                 endtime = availEndtime;
@@ -515,7 +536,8 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         } else if (avails.size() == 2) {
             AvailabilityDataRLE rle = null;
             // HHQ-5244
-            // If there are only two RLEs then averaging them doesn't make sense as it can make
+            // If there are only two RLEs then averaging them doesn't make sense
+            // as it can make
             // a value of 0 show up as .5 for an interval
             // The following logic makes sure that the actual value is provided
             if (avails.get(0).getEndtime() < timestamp && avails.get(1).getStartime() >= timestamp) {
@@ -524,7 +546,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
                 rle = avails.get(1);
             }
             return new HighLowMetricValue(rle.getAvailVal(), timestamp);
-         }
+        }
 
         double value = 0;
         for (AvailabilityDataRLE rle : avails) {
@@ -559,6 +581,34 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     public Map<Integer, double[]> getAggregateDataByTemplate(Integer[] mids, long begin, long end) {
         List<Object[]> avails = availabilityDataDAO.findAggregateAvailability(mids, begin, end);
         return getAggData(avails, true);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Integer, double[]> getAggregateDataAndAvailUpByMetric(final List<Integer> mids, long begin, long end) {
+        List<Object[]> avails = availabilityDataDAO.findAggregateAvailabilityUp(mids, begin, end);
+        Map<Integer, double[]> msmtToAvg = new HashMap<Integer, double[]>();
+        long timeFrame = end - begin;
+        Set<Integer> unavailMsmtsIds = new HashSet<Integer>(mids);
+        if (null != avails) {
+            for (Object[] objs : avails) {
+                Measurement msmt = (Measurement) objs[0];
+                if (!unavailMsmtsIds.remove(msmt.getId())) {
+                    throw new RuntimeException("unknown availability measurement returned while querying for availability data");
+                }
+                Integer key = msmt.getId();
+                double[] data = new double[IND_TOTAL_TIME + 1];
+                data[IND_AVG] = ((Double)objs[1]).doubleValue() / timeFrame;
+                msmtToAvg.put(key, data);
+            }
+        }
+        
+        // resources which were not up in the time frame, wouldn't be returned, and have to be initialized
+        final double[] availDownData = new double[IND_TOTAL_TIME + 1];
+        for (Integer unavailMsmtId : unavailMsmtsIds) {
+            msmtToAvg.put(unavailMsmtId, availDownData);
+        }
+        return msmtToAvg;
+
     }
 
     /**
@@ -603,7 +653,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
 
             // Expect data to be sorted by end time, so that the last value
             // returned is the final count and the last value
-            data[IND_CFG_COUNT] += (objs[4] == null) ? 0 : ((java.lang.Number)objs[4]).doubleValue();
+            data[IND_CFG_COUNT] += (objs[4] == null) ? 0 : ((java.lang.Number) objs[4]).doubleValue();
             data[IND_LAST_TIME] = ((Double) objs[2]).doubleValue();
 
             data[IND_UP_TIME] += ((Double) objs[5]).doubleValue();
@@ -618,19 +668,21 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     }
 
     /**
-     * @param resources Collection may be of type {@link Resource},
-     *        {@link AppdefEntityId}, {@link AppdefEntityValue},
-     *        {@link AppdefResourceValue} or {@link Integer}
-     * @param measCache Map<Integer, List> optional arg (may be null) to supply
-     *       measurement id(s) of ResourceIds. Integer => Resource.getId().  If a
-     *       measurement is not specified in the measCache parameter it will be added
-     *       to the map
+     * @param resources
+     *            Collection may be of type {@link Resource},
+     *            {@link AppdefEntityId}, {@link AppdefEntityValue},
+     *            {@link AppdefResourceValue} or {@link Integer}
+     * @param measCache
+     *            Map<Integer, List> optional arg (may be null) to supply
+     *            measurement id(s) of ResourceIds. Integer => Resource.getId().
+     *            If a measurement is not specified in the measCache parameter
+     *            it will be added to the map
      * @return Map<Integer, MetricValue> Integer => Measurement.getId()
      * 
      */
     @Transactional(readOnly = true)
     public Map<Integer, MetricValue> getLastAvail(Collection<? extends Object> resources,
-                                                  Map<Integer, List<Measurement>> measCache) {
+            Map<Integer, List<Measurement>> measCache) {
         final Set<Integer> midsToGet = new HashSet<Integer>(resources.size());
         final List<Resource> resToGet = new ArrayList<Resource>(resources.size());
         for (Object o : resources) {
@@ -658,7 +710,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
                 }
             } catch (ObjectNotFoundException e) {
                 // resource is in async delete state, ignore
-                _log.debug("resource not found from object=" + o ,e);
+                log.debug("resource not found from object=" + o, e);
                 continue;
             }
             if (measCache != null) {
@@ -671,13 +723,13 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             for (Measurement m : measurements) {
                 // populate the Map if value doesn't exist
                 if (measCache != null) {
-                    List<Measurement> measids =  measCache.get(m.getResource().getId());
+                    List<Measurement> measids = measCache.get(m.getResource().getId());
                     if (measids == null) {
                         measids = new ArrayList<Measurement>();
                         measids.add(m);
                         measCache.put(m.getResource().getId(), measids);
                     }
-                   
+
                 }
                 midsToGet.add(m.getId());
             }
@@ -727,7 +779,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         for (AvailabilityDataRLE avail : list) {
             final Integer mid = avail.getMeasurement().getId();
             final AvailabilityMetricValue mVal = new AvailabilityMetricValue(avail.getAvailVal(), avail.getStartime(),
-                avail.getApproxEndtime());
+                    avail.getApproxEndtime());
             rtn.put(mid, mVal);
         }
         // fill in missing measurements
@@ -737,6 +789,27 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
                 final MetricValue mVal = new MetricValue(AVAIL_UNKNOWN, now);
                 rtn.put(mid, mVal);
             }
+        }
+        return rtn;
+    }
+
+    /**
+     * @return {@link Map} of {@link Integer} representing {@link Resource}Id to {@link DownMetricValue}
+     */
+    @Transactional(readOnly = true)
+    public Map<Integer, DownMetricValue> getUnavailResMap() {
+        final Map<Integer, DownMetricValue> rtn = new HashMap<Integer, DownMetricValue>();
+        final List<AvailabilityDataRLE> unavails = availabilityDataDAO.getDownMeasurements(null);
+        for (final AvailabilityDataRLE rle : unavails) {
+            final Measurement meas = rle.getMeasurement();
+            final Resource resource = meas.getResource();
+            if (resource == null || resource.isInAsyncDeleteState()) {
+                continue;
+            }
+            final long timestamp = rle.getStartime();
+            final Integer mid = meas.getId();
+            final MetricValue val = new MetricValue(AVAIL_DOWN, timestamp);
+            rtn.put(resource.getId(), new DownMetricValue(meas.getEntityId(), mid, val));
         }
         return rtn;
     }
@@ -767,6 +840,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
 
     /**
      * Add a single Availablility Data point.
+     * 
      * @mid The Measurement id
      * @mval The MetricValue to store.
      * 
@@ -781,28 +855,47 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      * Process Availability data. The default behavior is to send the data
      * points to the event handlers.
      * 
-     * @param availPoints List of DataPoints
+     * @param availPoints
+     *            List of DataPoints
      * 
      * 
      */
     public void addData(List<DataPoint> availPoints) {
-        addData(availPoints, true);
+        addData(availPoints, true, false);
     }
 
+    
+    public void addData(List<DataPoint> availDataPoints, boolean sendData) {
+        addData(availDataPoints, sendData, false);
+    }
+    
+    
     /**
      * Process Availability data.
-     * 
+     * For each measurement Id (for each resource's availability):
+     * If Availability Value is the same as in the DB (AvailabilityDataRLE), only its timestamp is updated in the availabilityCache.
+     * Otherwise (availability status changed) - update the availabilityCache and the DB record.
      * @param availPoints List of DataPoints
      * @param sendData Indicates whether to send the data to event handlers. The
      *        default behavior is true. If false, the calling method should call
      *        sendDataToEventHandlers directly afterwards.
      * 
+     * @param availPoints
+     *            List of DataPoints
+     * @param sendData
+     *            Indicates whether to send the data to event handlers. The
+     *            default behavior is true. If false, the calling method should
+     *            call sendDataToEventHandlers directly afterwards.
+     * 
      * 
      */
-    public void addData(List<DataPoint> availPoints, boolean sendData) {
-        if (availPoints == null || availPoints.size() == 0) {
+    public void addData(List<DataPoint> availDataPoints, boolean sendData, boolean addedByServer) {
+        if (availDataPoints == null || availDataPoints.size() == 0) {
             return;
         }
+        Collection<DataPoint> pointsToUpdate = this.fallbackCheckQue.beforeDataUpdate(availDataPoints, addedByServer);
+        List<DataPoint> availPoints =  new ArrayList<DataPoint>(pointsToUpdate);
+        
         List<DataPoint> updateList = new ArrayList<DataPoint>(availPoints.size());
         List<DataPoint> outOfOrderAvail = new ArrayList<DataPoint>(availPoints.size());
         Map<DataPoint, AvailabilityDataRLE> createMap = new HashMap<DataPoint, AvailabilityDataRLE>();
@@ -813,35 +906,37 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             try {
                 availabilityCache.beginTran();
                 updateCache(availPoints, updateList, outOfOrderAvail);
-                currAvails = createCurrAvails(outOfOrderAvail, updateList);
-                state = captureCurrAvailState(currAvails);
+                currAvails = createCurrAvails(outOfOrderAvail, updateList); // get current DB Availability state for the measurements.
+                state = captureCurrAvailState(currAvails); // this method is called for logging.
                 updateStates(updateList, currAvails, createMap, removeMap);
                 updateOutOfOrderState(outOfOrderAvail, currAvails, createMap, removeMap);
                 flushCreateAndRemoves(createMap, removeMap);
+                checkAvailabilityState(availPoints);
                 logErrorInfo(state, availPoints, currAvails);
                 availabilityCache.commitTran();
             } catch (Throwable e) {
                 logErrorInfo(state, availPoints, currAvails);
-                _log.error(e.getMessage(), e);
+                log.error(e.getMessage(), e);
                 availabilityCache.rollbackTran();
                 throw new SystemException(e);
             }
-            
+
         }
-        
+
         concurrentStatsCollector.addStat(availPoints.size(), AVAIL_MANAGER_METRICS_INSERTED);
-        
+
         if (sendData) {
             sendDataToEventHandlers(availPoints);
         }
     }
 
-    private void flushCreateAndRemoves(Map<DataPoint, AvailabilityDataRLE> createMap,
+	private void flushCreateAndRemoves(Map<DataPoint, AvailabilityDataRLE> createMap,
                                        Map<DataPoint, AvailabilityDataRLE> removeMap) {
         final StopWatch watch = new StopWatch();
-        final boolean debug = _log.isDebugEnabled();
-              
-        if (debug) watch.markTimeBegin("remove");
+        final boolean debug = log.isDebugEnabled();
+
+        if (debug)
+            watch.markTimeBegin("remove");
         for (Map.Entry<DataPoint, AvailabilityDataRLE> entry : removeMap.entrySet()) {
             AvailabilityDataRLE rle = (AvailabilityDataRLE) entry.getValue();
             // if we call remove() on an object which is already in the session
@@ -867,26 +962,25 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             watch.markTimeEnd("flush");
             watch.markTimeBegin("create");
         }
-        
+
         for (Map.Entry<DataPoint, AvailabilityDataRLE> entry : createMap.entrySet()) {
             AvailabilityDataRLE rle = (AvailabilityDataRLE) entry.getValue();
             AvailabilityDataId id = new AvailabilityDataId();
             id.setMeasurement(rle.getMeasurement());
             id.setStartime(rle.getStartime());
             availabilityDataDAO.create(rle.getMeasurement(), rle.getStartime(), rle.getEndtime(), rle.getAvailVal());
+            log.debug("added: Availability "+rle.getAvailVal() + " starttime " + rle.getStartime() + " endtime " + rle.getEndtime());
         }
         if (debug) {
             watch.markTimeEnd("create");
-            _log.debug("AvailabilityInserter flushCreateAndRemoves: " + watch
-                + ", points {remove=" + removeMap.size()
-                + ", create=" + createMap.size()
-                + "}");
-        }  
+            log.debug("AvailabilityInserter flushCreateAndRemoves: " + watch + ", points {remove=" + removeMap.size()
+                    + ", create=" + createMap.size() + "}");
+        }
     }
 
     private void logErrorInfo(final Map<Integer, StringBuilder> oldState, final List<DataPoint> availPoints,
-                              Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails) {
-        if (!_traceLog.isDebugEnabled()) {
+            Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails) {
+        if (!traceLog.isDebugEnabled()) {
             return;
         }
         Integer mid;
@@ -896,14 +990,21 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             logStates(availPoints, mid);
             logAvailState(currState, mid);
         } else {
-            _traceLog.debug("RLE Data is valid");
+            traceLog.debug("RLE Data is valid");
         }
     }
 
     @SuppressWarnings("unchecked")
+    /**
+     * get AvailabilityDataRLEs for the given DataPoints' Measurement IDs, with endData within the last 7 days.
+     * If several AvailabilityDataRLEs exist for the same Measurement, they are listed in ascending order.
+     * @param outOfOrderAvail
+     * @param updateList
+     * @return
+     */
     private Map<Integer, TreeSet<AvailabilityDataRLE>> createCurrAvails(final List<DataPoint> outOfOrderAvail,
-                                                                        final List<DataPoint> updateList) {
-        Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails =  null;
+            final List<DataPoint> updateList) {
+        Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails = null;
         final StopWatch watch = new StopWatch();
         try {
             if (outOfOrderAvail.size() == 0 && updateList.size() == 0) {
@@ -914,23 +1015,28 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             mids.addAll(getMidsWithinAllowedDataWindow(outOfOrderAvail, now));
             if (mids.size() <= 0) {
                 currAvails = Collections.EMPTY_MAP;
-    
+
             }
             Integer[] mIds = (Integer[]) mids.toArray(new Integer[0]);
             currAvails = availabilityDataDAO.getHistoricalAvailMap(mIds, now - MAX_DATA_BACKLOG_TIME, false);
             return currAvails;
         } finally {
-            if (_log.isDebugEnabled()) {
-                _log.debug("AvailabilityInserter setCurrAvails: " + watch
-                    + ", size=" + currAvails.size());
+            if (log.isDebugEnabled()) {
+                log.debug("AvailabilityInserter setCurrAvails: " + watch + ", size=" + currAvails.size());
             }
         }
     }
 
+    /**
+     * allow only data given in the last MAX_DATA_BACKLOG_TIME ms
+     * @param states - metric data list.
+     * @param now - "current" timestamp
+     * @return set of measurement IDs for measurements with "current" DataPoint (MetricData).
+     */
     private HashSet<Integer> getMidsWithinAllowedDataWindow(final List<DataPoint> states, final long now) {
         HashSet<Integer> mids = new HashSet<Integer>();
-        int i = 0;
-        for (Iterator<DataPoint> it = states.iterator(); it.hasNext(); i++) {
+        //int i = 0;
+        for (Iterator<DataPoint> it = states.iterator(); it.hasNext(); ) {
             DataPoint pt = it.next();
             long timestamp = pt.getTimestamp();
             // only allow data for the last MAX_DATA_BACKLOG_TIME ms
@@ -939,11 +1045,11 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             if ((now - timestamp) > MAX_DATA_BACKLOG_TIME) {
                 it.remove();
                 long days = (now - timestamp) / MeasurementConstants.DAY;
-                _log.warn(" Avail measurement came in " + days + " days " + " late, dropping: timestamp=" + timestamp +
-                          " measId=" + pt.getMetricId() + " value=" + pt.getMetricValue());
+                log.warn(" Avail measurement came in " + days + " days " + " late, dropping: timestamp=" + timestamp +
+                          " measId=" + pt.getMeasurementId() + " value=" + pt.getMetricValue());
                 continue;
             }
-            Integer mId = pt.getMetricId();
+            Integer mId = pt.getMeasurementId();
             if (!mids.contains(mId)) {
                 mids.add(mId);
             }
@@ -952,13 +1058,12 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     }
 
     private void updateDup(DataPoint state, AvailabilityDataRLE dup,
-                           Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails,
-                           Map<DataPoint, AvailabilityDataRLE> createMap, Map<DataPoint, AvailabilityDataRLE> removeMap)
-        throws BadAvailStateException {
+            Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails, Map<DataPoint, AvailabilityDataRLE> createMap,
+            Map<DataPoint, AvailabilityDataRLE> removeMap) throws BadAvailStateException {
         if (dup.getAvailVal() == state.getValue()) {
             // nothing to do
         } else if (dup.getAvailVal() != AVAIL_DOWN) {
-            String msg = "New DataPoint and current DB value for " + "MeasurementId " + state.getMetricId() +
+            String msg = "New DataPoint and current DB value for " + "MeasurementId " + state.getMeasurementId() +
                          " / timestamp " + state.getTimestamp() + " have conflicting states.  " +
                          "Since a non-zero rle value cannot be overridden, no update." + "\ncurrent rle value -> " +
                          dup +
@@ -978,16 +1083,14 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      * specifically for a point which collides with a RLE on its startime
      */
     private void insertPointOnBoundry(AvailabilityDataRLE avail, long newStartime, DataPoint pt,
-                                      Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails,
-                                      Map<DataPoint, AvailabilityDataRLE> createMap,
-                                      Map<DataPoint, AvailabilityDataRLE> removeMap) throws BadAvailStateException {
+            Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails, Map<DataPoint, AvailabilityDataRLE> createMap,
+            Map<DataPoint, AvailabilityDataRLE> removeMap) throws BadAvailStateException {
         if (newStartime <= avail.getStartime()) {
             return;
         }
         Measurement meas = avail.getMeasurement();
         if (avail.getEndtime() == MAX_AVAIL_TIMESTAMP) {
-          
-            DataPoint tmp = availabilityCache.get(pt.getMetricId());
+            DataPoint tmp = availabilityCache.get(pt.getMeasurementId());
             if (tmp == null || pt.getTimestamp() >= tmp.getTimestamp()) {
                 updateAvailVal(avail, pt.getValue(), currAvails, createMap, removeMap);
             } else {
@@ -1000,7 +1103,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         } else if (newStartime == avail.getEndtime()) {
             AvailabilityDataRLE after = findAvailAfter(pt, currAvails);
             if (after == null) {
-                throw new BadAvailStateException("Availability measurement_id=" + pt.getMetricId() +
+                throw new BadAvailStateException("Availability measurement_id=" + pt.getMeasurementId() +
                                                  " does not have a availability point after timestamp " +
                                                  pt.getTimestamp());
             }
@@ -1039,7 +1142,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     }
 
     private AvailabilityDataRLE findAvail(DataPoint state, Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails) {
-        Integer mId = state.getMetricId();
+        Integer mId = state.getMeasurementId();
         Collection<AvailabilityDataRLE> rles = currAvails.get(mId);
         long start = state.getTimestamp();
         for (AvailabilityDataRLE rle : rles) {
@@ -1051,7 +1154,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     }
 
     private AvailabilityDataRLE findAvailAfter(DataPoint state, Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails) {
-        final Integer mId = state.getMetricId();
+        final Integer mId = state.getMeasurementId();
         final TreeSet<AvailabilityDataRLE> rles = currAvails.get(mId);
         final long start = state.getTimestamp();
         final AvailabilityDataRLE tmp = new AvailabilityDataRLE();
@@ -1065,7 +1168,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     }
 
     private AvailabilityDataRLE findAvailBefore(DataPoint state, Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails) {
-        Integer mId = state.getMetricId();
+        Integer mId = state.getMeasurementId();
         TreeSet<AvailabilityDataRLE> rles = currAvails.get(mId);
         long start = state.getTimestamp();
         AvailabilityDataRLE tmp = new AvailabilityDataRLE();
@@ -1079,8 +1182,8 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     }
 
     private void merge(DataPoint state, Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails,
-                       Map<DataPoint, AvailabilityDataRLE> createMap, Map<DataPoint, AvailabilityDataRLE> removeMap)
-        throws BadAvailStateException {
+            Map<DataPoint, AvailabilityDataRLE> createMap, Map<DataPoint, AvailabilityDataRLE> removeMap)
+            throws BadAvailStateException {
         AvailabilityDataRLE dup = findAvail(state, currAvails);
         if (dup != null) {
             updateDup(state, dup, currAvails, createMap, removeMap);
@@ -1090,7 +1193,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         AvailabilityDataRLE after = findAvailAfter(state, currAvails);
         if (before == null && after == null) {
             // this shouldn't happen here
-            Measurement meas = getMeasurement(state.getMetricId());
+            Measurement meas = getMeasurement(state.getMeasurementId());
             create(meas, state.getTimestamp(), state.getValue(), currAvails, createMap);
         } else if (before == null) {
             if (after.getAvailVal() != state.getValue()) {
@@ -1107,11 +1210,10 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     }
 
     private void insertAvail(AvailabilityDataRLE before, AvailabilityDataRLE after, DataPoint state,
-                             Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails,
-                             Map<DataPoint, AvailabilityDataRLE> createMap,
-                             Map<DataPoint, AvailabilityDataRLE> removeMap) {
+            Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails, Map<DataPoint, AvailabilityDataRLE> createMap,
+            Map<DataPoint, AvailabilityDataRLE> removeMap) {
         if (state.getValue() != after.getAvailVal() && state.getValue() != before.getAvailVal()) {
-            Measurement meas = getMeasurement(state.getMetricId());
+            Measurement meas = getMeasurement(state.getMeasurementId());
             long pivotTime = state.getTimestamp() + meas.getInterval();
             create(meas, state.getTimestamp(), pivotTime, state.getValue(), currAvails, createMap);
             updateEndtime(before, state.getTimestamp());
@@ -1124,18 +1226,17 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         } else if (state.getValue() == after.getAvailVal() && state.getValue() == before.getAvailVal()) {
             // this should never happen or else there is something wrong
             // in the code
-            String msg = "AvailabilityData [" + before + "] and [" + after +
-                         "] have the same values.  This should not be the case.  " + "Cleaning up";
-            _log.warn(msg);
+            String msg = "AvailabilityData [" + before + "] and [" + after
+                    + "] have the same values.  This should not be the case.  " + "Cleaning up";
+            log.warn(msg);
             updateEndtime(before, after.getEndtime());
             removeAvail(after, currAvails, createMap, removeMap);
         }
     }
 
     private boolean prependState(DataPoint state, AvailabilityDataRLE avail,
-                                 Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails,
-                                 Map<DataPoint, AvailabilityDataRLE> createMap,
-                                 Map<DataPoint, AvailabilityDataRLE> removeMap) {
+            Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails, Map<DataPoint, AvailabilityDataRLE> createMap,
+            Map<DataPoint, AvailabilityDataRLE> removeMap) {
         AvailabilityDataRLE before = findAvailBefore(state, currAvails);
         Measurement meas = avail.getMeasurement();
         if (before != null && before.getAvailVal() == state.getValue()) {
@@ -1152,9 +1253,8 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     }
 
     private void updateAvailVal(AvailabilityDataRLE avail, double val,
-                                Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails,
-                                Map<DataPoint, AvailabilityDataRLE> createMap,
-                                Map<DataPoint, AvailabilityDataRLE> removeMap) {
+            Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails, Map<DataPoint, AvailabilityDataRLE> createMap,
+            Map<DataPoint, AvailabilityDataRLE> removeMap) {
         Measurement meas = avail.getMeasurement();
         DataPoint state = new DataPoint(meas.getId().intValue(), val, avail.getStartime());
         AvailabilityDataRLE before = findAvailBefore(state, currAvails);
@@ -1172,9 +1272,8 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     }
 
     private AvailabilityDataRLE updateStartime(AvailabilityDataRLE avail, long start,
-                                               Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails,
-                                               Map<DataPoint, AvailabilityDataRLE> createMap,
-                                               Map<DataPoint, AvailabilityDataRLE> removeMap) {
+            Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails, Map<DataPoint, AvailabilityDataRLE> createMap,
+            Map<DataPoint, AvailabilityDataRLE> removeMap) {
         // this should not be the case here, but want to make sure and
         // avoid HibernateUniqueKeyExceptions :(
         AvailabilityDataRLE tmp;
@@ -1189,8 +1288,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     }
 
     private void removeAvail(AvailabilityDataRLE avail, Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails,
-                             Map<DataPoint, AvailabilityDataRLE> createMap,
-                             Map<DataPoint, AvailabilityDataRLE> removeMap) {
+            Map<DataPoint, AvailabilityDataRLE> createMap, Map<DataPoint, AvailabilityDataRLE> removeMap) {
         long start = avail.getStartime();
         Integer mId = avail.getMeasurement().getId();
         TreeSet<AvailabilityDataRLE> rles = currAvails.get(mId);
@@ -1202,7 +1300,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     }
 
     private AvailabilityDataRLE getLastAvail(DataPoint state, Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails) {
-        Integer mId = state.getMetricId();
+        Integer mId = state.getMeasurementId();
         TreeSet<AvailabilityDataRLE> rles = currAvails.get(mId);
         if (rles.size() == 0) {
             return null;
@@ -1211,8 +1309,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     }
 
     private AvailabilityDataRLE create(Measurement meas, long start, long end, double val,
-                                       Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails,
-                                       Map<DataPoint, AvailabilityDataRLE> createMap) {
+            Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails, Map<DataPoint, AvailabilityDataRLE> createMap) {
         AvailabilityDataRLE rtn = _createAvail(meas, start, end, val);
         createMap.put(new DataPoint(meas.getId().intValue(), val, start), rtn);
         Integer mId = meas.getId();
@@ -1231,8 +1328,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     }
 
     private AvailabilityDataRLE create(Measurement meas, long start, double val,
-                                       Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails,
-                                       Map<DataPoint, AvailabilityDataRLE> createMap) {
+            Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails, Map<DataPoint, AvailabilityDataRLE> createMap) {
         AvailabilityDataRLE rtn = _createAvail(meas, start, MAX_AVAIL_TIMESTAMP, val);
         createMap.put(new DataPoint(meas.getId().intValue(), val, start), rtn);
         Integer mId = meas.getId();
@@ -1244,13 +1340,13 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     }
 
     private boolean updateState(DataPoint state, Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails,
-                                Map<DataPoint, AvailabilityDataRLE> createMap,
-                                Map<DataPoint, AvailabilityDataRLE> removeMap) throws BadAvailStateException {
+            Map<DataPoint, AvailabilityDataRLE> createMap, Map<DataPoint, AvailabilityDataRLE> removeMap)
+            throws BadAvailStateException {
         AvailabilityDataRLE avail = getLastAvail(state, currAvails);
-        final boolean debug = _log.isDebugEnabled();
+        final boolean debug = log.isDebugEnabled();
         long begin = -1;
         if (avail == null) {
-            Measurement meas = getMeasurement(state.getMetricId());
+            Measurement meas = getMeasurement(state.getMeasurementId());
             create(meas, state.getTimestamp(), state.getValue(), currAvails, createMap);
             return true;
         } else if (state.getTimestamp() < avail.getStartime()) {
@@ -1260,7 +1356,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             merge(state, currAvails, createMap, removeMap);
             if (debug) {
                 long now = System.currentTimeMillis();
-                _log.debug("updateState.merge() -> " + (now - begin) + " ms");
+                log.debug("updateState.merge() -> " + (now - begin) + " ms");
             }
             return false;
         } else if (state.getTimestamp() == avail.getStartime() && state.getValue() != avail.getAvailVal()) {
@@ -1270,67 +1366,81 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             updateDup(state, avail, currAvails, createMap, removeMap);
             if (debug) {
                 long now = System.currentTimeMillis();
-                _log.debug("updateState.updateDup() -> " + (now - begin) + " ms");
+                log.debug("updateState.updateDup() -> " + (now - begin) + " ms");
             }
             return true;
         } else if (state.getValue() == avail.getAvailVal()) {
             if (debug) {
-                _log.debug("no update state == avail " + state + " == " + avail);
+                log.debug("no update state == avail " + state + " == " + avail);
             }
             return true;
         }
         if (debug) {
-            _log.debug("updating endtime on avail -> " + avail + ", updating to state -> " + state);
+            log.debug("updating endtime on avail -> " + avail + ", updating to state -> " + state);
         }
         updateEndtime(avail, state.getTimestamp());
         create(avail.getMeasurement(), state.getTimestamp(), state.getValue(), currAvails, createMap);
         return true;
     }
 
+    
+    /**
+     * update DB and availabilityCache with the changes marked in list states.
+     * Create/Remove is not actually done here - should call flushCreateAndRemove for the createMap and removeMap.
+     * @param states - States to update.
+     * @param currAvails - current DB state for measurement IDs.
+     * @param createMap - in/out param. filled with new AvailabilityDataRLEs
+     * @param removeMap - in/out param. filled with AvailabilityDataRLEs to remove.
+     */
     private void updateStates(List<DataPoint> states, Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails,
-                              Map<DataPoint, AvailabilityDataRLE> createMap,
-                              Map<DataPoint, AvailabilityDataRLE> removeMap) {
-       
+            Map<DataPoint, AvailabilityDataRLE> createMap, Map<DataPoint, AvailabilityDataRLE> removeMap) {
+
         if (states.size() == 0) {
             return;
         }
         // as a performance optimization, fetch all the last avails
         // at once, rather than one at a time in updateState()
         final StopWatch watch = new StopWatch();
-        final boolean debug = _log.isDebugEnabled();
+        final boolean debug = log.isDebugEnabled();
         int numUpdates = 0;
         for (DataPoint state : states) {
             try {
                 // need to check again since there could be multiple
                 // states with the same id in the list
-                DataPoint currState = availabilityCache.get(state.getMetricId());
+                DataPoint currState = availabilityCache.get(state.getMeasurementId());
                 if (currState != null && currState.getValue() == state.getValue()) {
                     continue;
                 }
                 boolean updateCache = updateState(state, currAvails, createMap, removeMap);
                 if (debug) {
-                    _log.debug("state " + state + " was updated, cache updated: " + updateCache);
+                    log.debug("state " + state + " was updated, cache updated: " + updateCache);
                 }
                 if (updateCache) {
-                    availabilityCache.put(state.getMetricId(), state);
+                    availabilityCache.put(state.getMeasurementId(), state);
                     numUpdates++;
                 }
             } catch (BadAvailStateException e) {
-                _log.warn(e.getMessage());
+                log.warn(e.getMessage());
             }
         }
         if (debug) {
-            _log.debug("AvailabilityInserter updateStates: " + watch
-                + ", points {total=" + states.size()
-                + ", updateCache=" + numUpdates
-                + "}");
+            log.debug("AvailabilityInserter updateStates: " + watch + ", points {total=" + states.size()
+                    + ", updateCache=" + numUpdates + "}");
         }
     }
 
+    /**
+     * update DB with the changes marked in list states.
+     * do not update the cache here, the timestamp is out of order.
+     * Create/Remove is not actually done here - should call flushCreateAndRemove for the createMap and removeMap.
+     * @param outOfOrderAvail - States that are not synched with the cache.
+     * @param currAvails - current DB state for measurement IDs.
+     * @param createMap - in/out param. filled with new AvailabilityDataRLEs
+     * @param removeMap - in/out param. filled with AvailabilityDataRLEs to remove.
+     */
     private void updateOutOfOrderState(List<DataPoint> outOfOrderAvail,
-                                       Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails,
-                                       Map<DataPoint, AvailabilityDataRLE> createMap,
-                                       Map<DataPoint, AvailabilityDataRLE> removeMap) {
+            Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails, Map<DataPoint, AvailabilityDataRLE> createMap,
+            Map<DataPoint, AvailabilityDataRLE> removeMap) {
         if (outOfOrderAvail.size() == 0) {
             return;
         }
@@ -1342,98 +1452,122 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
                 merge(state, currAvails, createMap, removeMap);
             } catch (BadAvailStateException e) {
                 numBadAvailState++;
-                _log.warn(e.getMessage());
+                log.warn(e.getMessage());
             }
         }
-        if (_log.isDebugEnabled()) {
-            _log.debug("AvailabilityInserter updateOutOfOrderState: " + watch
-                + ", points {total=" + outOfOrderAvail.size()
-                + ", badAvailState=" + numBadAvailState
-                + "}");
+        if (log.isDebugEnabled()) {
+            log.debug("AvailabilityInserter updateOutOfOrderState: " + watch + ", points {total="
+                    + outOfOrderAvail.size() + ", badAvailState=" + numBadAvailState + "}");
         }
     }
 
+    /**
+     * update the cache with states that are equal to current state and have a newer timestamp.
+     * return 2 lists for updating - updateList and outOfOrderAvail.
+     * @param availPoints - DataPoint list that represents availability status of resources.
+     * @return updateList - Old and new states have different values and cache needs to be updated.
+     * @return outOfOrderAvail - Old metric has a newer timestamp
+     */
     private void updateCache(List<DataPoint> availPoints, List<DataPoint> updateList, List<DataPoint> outOfOrderAvail) {
         if (availPoints.size() == 0) {
             return;
         }
-        //The following code (until the creation of the StopWatch) is a fix for Jira issue [HHQ-5524].
-        //There is a strange scenario where the cache holds an availability metric with 'available' value while
-        //in the database the same availability metric value is 'not available' (in the HQ_AVAIL_DATA_RLE table).
-        //In that case we need to clear the availability cache because it is out of sync with the database.
-        //It is very hard to understand what causes this issue but it happens a lot in scale environments. 
-        //If we don't clear the cache the resource which this availability metric belongs to will appear to be 'down' while it is not, 
-        //clearing the cache causes the metric to be updated in the database to the correct value.
-        List<Integer> includes = new ArrayList<Integer>(availPoints.size());
-        for (DataPoint point : availPoints) {
-        	includes.add(point.getMetricId());
-        }
-        //Find out which of the availPoints is marked as 'not available' in the database and check
-        //if the same point is marked as 'available' in the cache -> cache is out of sync!
-        List<AvailabilityDataRLE> downList = availabilityDataDAO.getDownMeasurements(includes);
-        for (AvailabilityDataRLE data : downList) {
-        	DataPoint stateInCache = availabilityCache.get(data.getMeasurement().getId());
-        	if (null != stateInCache && (stateInCache.getValue() != MeasurementConstants.AVAIL_DOWN)) {
-        		_log.info("The state of the Availability cache is out of sync with the database for measurement id '" 
-        				+ data.getMeasurement().getId() + "' , clearing this metric from the Availability cache");
-        		availabilityCache.remove(data.getMeasurement().getId());
-        		continue;
-        	}
-        }
         final StopWatch watch = new StopWatch();
-        final boolean debug = _log.isDebugEnabled();
+        final boolean debug = log.isDebugEnabled();
         for (DataPoint pt : availPoints) {
-            int id = pt.getMetricId().intValue();
+            Integer meas_id = pt.getMeasurementId();
             MetricValue mval = pt.getMetricValue();
             double val = mval.getValue();
             long timestamp = mval.getTimestamp();
-            DataPoint newState = new DataPoint(id, val, timestamp);
-            DataPoint oldState = availabilityCache.get(new Integer(id));
+            DataPoint newState = new DataPoint(pt);
+            DataPoint oldState = availabilityCache.get(meas_id);
             // we do not want to update the state if it changes
             // instead change it when the db is changed in order
             // to ensure the state of memory to db
             // ONLY update memory state here if there is no change
+            
+            // check if the "new" state is actually older than the state saved in the cache
+            // if so - OUT_OF_ORDER
             if (oldState != null && timestamp < oldState.getTimestamp()) {
                 outOfOrderAvail.add(newState);
-            } else if (oldState == null || oldState.getValue() == AVAIL_NULL || oldState.getValue() != val) {
+            }
+            // else - check if the new old state is null or has a different value than the cache.
+            // if so - UPDATE
+            else if (oldState == null || oldState.getValue() == AVAIL_NULL || oldState.getValue() != val) {
                 updateList.add(newState);
                 if (debug) {
-                    String msg = "value of state[" + newState + "] differs from" + " current value[" +
-                                 ((oldState != null) ? oldState.toString() : "old state does not exist") + "]";
-                    _log.debug(msg);
+                    String msg = "value of state[" + newState + "] differs from" + " current value["
+                            + ((oldState != null) ? oldState.toString() : "old state does not exist") + "]";
+                    log.debug(msg);
                 }
-            } else {
-                availabilityCache.put(new Integer(id), newState);
+            }
+            // else - old state exists and with the same value, only a different timestamp. updating the cache.
+            else {
+                availabilityCache.put(meas_id, newState);
             }
         }
         if (debug) {
-            _log.debug("AvailabilityInserter updateCache: " + watch
-                + ", points {total=" + availPoints.size()
-                + ", outOfOrder=" + outOfOrderAvail.size()
-                + ", updateToDb=" + updateList.size()
-                + ", updateCacheTimestamp="
-                + (availPoints.size() - outOfOrderAvail.size() - updateList.size())
-                + "}");
+            log.debug("AvailabilityInserter updateCache: " + watch + ", points {total=" + availPoints.size()
+                    + ", outOfOrder=" + outOfOrderAvail.size() + ", updateToDb=" + updateList.size()
+                    + ", updateCacheTimestamp=" + (availPoints.size() - outOfOrderAvail.size() - updateList.size())
+                    + "}");
         }
     }
 
+	private void checkAvailabilityState(List<DataPoint> availPoints) {
+		// The following code (until the creation of the StopWatch) is a fix for
+        // Jira issue [HHQ-5524].
+        // There is a strange scenario where the cache holds an availability
+        // metric with 'available' value while
+        // in the database the same availability metric value is 'not available'
+        // (in the HQ_AVAIL_DATA_RLE table).
+        // In that case we need to clear the availability cache because it is
+        // out of sync with the database.
+        // It is very hard to understand what causes this issue but it happens a
+        // lot in scale environments.
+        // If we don't clear the cache the resource which this availability
+        // metric belongs to will appear to be 'down' while it is not,
+        // clearing the cache causes the metric to be updated in the database to
+        // the correct value.
+        List<Integer> includes = new ArrayList<Integer>(availPoints.size());
+        for (DataPoint point : availPoints) {
+        	includes.add(point.getMeasurementId());
+        }
+        // Find out which of the availPoints is marked as 'not available' in the
+        // database and check
+        // if the same point is marked as 'available' in the cache -> cache is
+        // out of sync!
+        List<AvailabilityDataRLE> downList = availabilityDataDAO.getDownMeasurements(includes);
+        for (AvailabilityDataRLE data : downList) {
+            DataPoint stateInCache = availabilityCache.get(data.getMeasurement().getId());
+            if (null != stateInCache && (stateInCache.getValue() != MeasurementConstants.AVAIL_DOWN)) {
+                log.info("The state of the Availability cache is out of sync with the database for measurement id '"
+                        + data.getMeasurement().getId() + "' , clearing this metric from the Availability cache");
+                availabilityCache.remove(data.getMeasurement().getId());
+                continue;
+            }
+        }
+	}
+
     private void sendDataToEventHandlers(List<DataPoint> data) {
         final StopWatch watch = new StopWatch();
-        final boolean debug = _log.isDebugEnabled();
+        final boolean debug = log.isDebugEnabled();
         int maxCapacity = data.size();
         ArrayList<MeasurementEvent> events = new ArrayList<MeasurementEvent>(maxCapacity);
         Map<Integer, MeasurementEvent> downEvents = new HashMap<Integer, MeasurementEvent>(maxCapacity);
         List<MeasurementZevent> zevents = new ArrayList<MeasurementZevent>(maxCapacity);
         boolean allEventsInteresting = Boolean.getBoolean(ALL_EVENTS_INTERESTING_PROP);
-        if (debug) watch.markTimeBegin("isTriggerInterested");
+        if (debug)
+            watch.markTimeBegin("isTriggerInterested");
         for (DataPoint dp : data) {
-            Integer metricId = dp.getMetricId();
+            Integer metricId = dp.getMeasurementId();
             MetricValue val = dp.getMetricValue();
             MeasurementEvent event = new MeasurementEvent(metricId, val);
             if (registeredTriggers.isTriggerInterested(event) || allEventsInteresting) {
                 measurementManager.buildMeasurementEvent(event);
                 if (event.getValue().getValue() == AVAIL_DOWN) {
-                    Resource r = resourceManager.findResource(event.getResource());
+                    AppdefEntityID eventResourceAEID = event.getResource();
+                    Resource r = (null == eventResourceAEID ? null : resourceManager.findResource(eventResourceAEID));
                     if (r != null && !r.isInAsyncDeleteState()) {
                         downEvents.put(r.getId(), event);
                     }
@@ -1443,14 +1577,17 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             }
             zevents.add(new MeasurementZevent(metricId.intValue(), val));
         }
-        if (debug) watch.markTimeEnd("isTriggerInterested");
+        if (debug)
+            watch.markTimeEnd("isTriggerInterested");
         if (!downEvents.isEmpty()) {
-            if (debug) watch.markTimeBegin("suppressMeasurementEvents");
+            if (debug)
+                watch.markTimeBegin("suppressMeasurementEvents");
             // Determine whether the measurement events can
             // be suppressed as part of hierarchical alerting
-            PermissionManagerFactory.getInstance().getHierarchicalAlertingManager().suppressMeasurementEvents(
-                downEvents, true);
-            if (debug) watch.markTimeEnd("suppressMeasurementEvents");
+            PermissionManagerFactory.getInstance().getHierarchicalAlertingManager()
+                    .suppressMeasurementEvents(downEvents, true);
+            if (debug)
+                watch.markTimeEnd("suppressMeasurementEvents");
             if (!downEvents.isEmpty()) {
                 events.addAll(downEvents.values());
             }
@@ -1464,12 +1601,9 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             ZeventManager.getInstance().enqueueEventsAfterCommit(zevents);
         }
         if (debug) {
-            _log.debug("AvailabilityInserter sendDataToEventHandlers: " + watch
-                + ", points {total=" + maxCapacity
-                + ", downEvents=" + downEvents.size()
-                + ", eventsToPublish=" + events.size()
-                + ", zeventsToEnqueue=" + zevents.size()
-                + "}");
+            log.debug("AvailabilityInserter sendDataToEventHandlers: " + watch + ", points {total=" + maxCapacity
+                    + ", downEvents=" + downEvents.size() + ", eventsToPublish=" + events.size()
+                    + ", zeventsToEnqueue=" + zevents.size() + "}");
         }
     }
 
@@ -1487,7 +1621,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         boolean allEventsInteresting = Boolean.getBoolean(ALL_EVENTS_INTERESTING_PROP);
         for (Integer resourceIdKey : data.keySet()) {
             DataPoint dp = data.get(resourceIdKey);
-            Integer metricId = dp.getMetricId();
+            Integer metricId = dp.getMeasurementId();
             MetricValue val = dp.getMetricValue();
             MeasurementEvent event = new MeasurementEvent(metricId, val);
             if (registeredTriggers.isTriggerInterested(event) || allEventsInteresting) {
@@ -1499,10 +1633,10 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         if (!events.isEmpty()) {
             // Determine whether the measurement events can
             // be suppressed as part of hierarchical alerting
-            PermissionManagerFactory.getInstance().getHierarchicalAlertingManager().suppressMeasurementEvents(events,
-                false);
-            messagePublisher.publishMessage(EventConstants.EVENTS_TOPIC, new ArrayList<MeasurementEvent>(events
-                .values()));
+            PermissionManagerFactory.getInstance().getHierarchicalAlertingManager()
+                    .suppressMeasurementEvents(events, false);
+            messagePublisher.publishMessage(EventConstants.EVENTS_TOPIC,
+                    new ArrayList<MeasurementEvent>(events.values()));
         }
         if (!zevents.isEmpty()) {
             ZeventManager.getInstance().enqueueEventsAfterCommit(zevents);
@@ -1514,7 +1648,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     }
 
     private Map<Integer, StringBuilder> captureCurrAvailState(Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails) {
-        if (!_traceLog.isDebugEnabled()) {
+        if (!traceLog.isDebugEnabled()) {
             return null;
         }
         Map<Integer, StringBuilder> rtn = new HashMap<Integer, StringBuilder>();
@@ -1523,8 +1657,8 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             Collection<AvailabilityDataRLE> rles = entry.getValue();
             StringBuilder buf = new StringBuilder("\n");
             for (AvailabilityDataRLE rle : rles) {
-                buf.append(mid).append(" | ").append(rle.getStartime()).append(" | ").append(rle.getEndtime()).append(
-                    " | ").append(rle.getAvailVal()).append("\n");
+                buf.append(mid).append(" | ").append(rle.getStartime()).append(" | ").append(rle.getEndtime())
+                        .append(" | ").append(rle.getAvailVal()).append("\n");
             }
             rtn.put(mid, buf);
         }
@@ -1533,23 +1667,23 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
 
     private void logAvailState(Map<Integer, StringBuilder> availState, Integer mid) {
         StringBuilder buf = (StringBuilder) availState.get(mid);
-        _traceLog.debug(buf.toString());
+        traceLog.debug(buf.toString());
     }
 
     private void logStates(List<DataPoint> states, Integer mid) {
         StringBuilder log = new StringBuilder("\n");
         for (DataPoint pt : states) {
-            if (!pt.getMetricId().equals(mid)) {
+            if (!pt.getMeasurementId().equals(mid)) {
                 continue;
             }
-            log.append(pt.getMetricId()).append(" | ").append(pt.getTimestamp()).append(" | ").append(
+            log.append(pt.getMeasurementId()).append(" | ").append(pt.getTimestamp()).append(" | ").append(
                 pt.getMetricValue()).append("\n");
         }
-        _traceLog.debug(log.toString());
+        traceLog.debug(log.toString());
     }
 
     private Integer isAvailDataRLEValid(Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails) {
-    
+
         synchronized (availabilityCache) {
             for (Map.Entry<Integer, TreeSet<AvailabilityDataRLE>> entry : currAvails.entrySet()) {
                 Integer mId = entry.getKey();
@@ -1568,7 +1702,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         for (AvailabilityDataRLE avail : avails) {
             Long endtime = new Long(avail.getEndtime());
             if (endtimes.contains(endtime)) {
-                _log.error("list for MID=" + measId + " contains two or more of the same endtime=" + endtime);
+                log.error("list for MID=" + measId + " contains two or more of the same endtime=" + endtime);
                 return false;
             }
             endtimes.add(endtime);
@@ -1577,33 +1711,30 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
                 continue;
             }
             if (last.getAvailVal() == avail.getAvailVal()) {
-                _log.error("consecutive availpoints have the same value, " +
-                    "first={" + last + "}, last={" + avail + "}");
+                log.error("consecutive availpoints have the same value, " + "first={" + last + "}, last={" + avail
+                        + "}");
                 return false;
             } else if (last.getEndtime() != avail.getStartime()) {
-                _log.error("there are gaps in the availability table" +
-                   "first={" + last + "}, last={" + avail + "}");
+                log.error("there are gaps in the availability table" + "first={" + last + "}, last={" + avail + "}");
                 return false;
             } else if (last.getStartime() > avail.getStartime()) {
-                _log.error("startime availability is out of order" +
-                   "first={" + last + "}, last={" + avail + "}");
+                log.error("startime availability is out of order" + "first={" + last + "}, last={" + avail + "}");
                 return false;
             } else if (last.getEndtime() > avail.getEndtime()) {
-                _log.error("endtime availability is out of order" +
-                   "first={" + last + "}, last={" + avail + "}");
+                log.error("endtime availability is out of order" + "first={" + last + "}, last={" + avail + "}");
                 return false;
             }
             last = avail;
         }
-       
+
         if (((DataPoint) availabilityCache.get(measId)).getValue() != lastPt.getValue()) {
-            _log.error("last avail data point does not match cache");
+            log.error("last avail data point does not match cache");
             return false;
         }
         return true;
     }
-    
-    @Transactional(readOnly=true)
+
+    @Transactional(readOnly = true)
     public boolean platformIsAvailable(int agentId) {
         final Agent agent = agentDAO.get(agentId);
         if (agent == null) {

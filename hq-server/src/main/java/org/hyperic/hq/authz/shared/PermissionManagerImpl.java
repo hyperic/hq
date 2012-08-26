@@ -32,9 +32,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -45,6 +47,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDAO;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.session.Role;
@@ -64,8 +67,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component("permissionManager")
-public class PermissionManagerImpl
-    extends PermissionManager {
+public class PermissionManagerImpl extends PermissionManager {
     private static final Log _log = LogFactory.getLog(PermissionManagerImpl.class.getName());
 
     private final String _falseToken;
@@ -95,9 +97,7 @@ public class PermissionManagerImpl
                                                   + "WHERE PROTO_ID = 0 AND SORT_NAME LIKE UPPER(?))) ";
 
     private Connection getConnection() throws SQLException {
-
         return dbUtil.getConnection();
-
     }
 
     @Autowired
@@ -446,7 +446,7 @@ public class PermissionManagerImpl
         }
         final ResourceDAO resourceDAO = getResourceDAO();
         final Collection<Resource> resources = (subj.getId().equals(1)) ?
-            resourceDAO.findAll() : resourceDAO.findByOwner(subj);
+            resourceDAO.findAll() : resourceDAO.findByOwner(subj, PageControl.SORT_UNSORTED);
         final List<AppdefEntityID> rtn = new ArrayList<AppdefEntityID>(resources.size());
         final Set<Integer> typeIds = new HashSet<Integer>();
         for (final ResourceType type : resourceTypes) {
@@ -473,14 +473,25 @@ public class PermissionManagerImpl
 
     public <T> Set<T> findViewableResources(AuthzSubject subj, Collection<ResourceType> resourceTypes,
                                             IntegerConverter<T> converter) {
+        return findViewableResources(subj, resourceTypes, PageControl.SORT_UNSORTED, converter);
+    }
+
+    public <T> Set<T> findViewableResources(AuthzSubject subj, Collection<ResourceType> resourceTypes,
+                                            int sortName, IntegerConverter<T> converter) {
+        return findViewableResources(subj, resourceTypes, sortName, converter, null);
+    }
+
+    public <T> Set<T> findViewableResources(AuthzSubject subj, Collection<ResourceType> resourceTypes,
+                                            int sortName, IntegerConverter<T> converter,
+                                            Comparator<T> comparator) {
         if (resourceTypes.isEmpty()) {
             return Collections.emptySet();
         }
         final ResourceDAO resourceDAO = getResourceDAO();
         final Collection<Resource> resources = (subj.getId().equals(1)) ?
-            resourceDAO.findAll() : resourceDAO.findByOwner(subj);
-        final Set<T> rtn = new HashSet<T>();
+            resourceDAO.findAllOrderByName() : resourceDAO.findByOwner(subj, sortName);
         final Set<Integer> typeIds = new HashSet<Integer>();
+        final Set<T> rtn = (comparator != null) ? new TreeSet<T>(comparator) : new HashSet<T>();
         for (final ResourceType type : resourceTypes) {
             typeIds.add(type.getId());
         }
@@ -496,6 +507,41 @@ public class PermissionManagerImpl
                     rtn.add(val);
                 }
             }
+        }
+        return rtn;
+    }
+
+    public TypeCounts findViewableInstanceCounts(AuthzSubject subj, Collection<ResourceType> types) {
+        final TypeCounts rtn = new TypeCounts();
+        if (types.isEmpty()) {
+            return rtn;
+        }
+        final ResourceDAO resourceDAO = getResourceDAO();
+        final Collection<Resource> resources = (subj.getId().equals(1)) ?
+            resourceDAO.findAll() : resourceDAO.findByOwner(subj, PageControl.SORT_UNSORTED);
+        final Set<Integer> typeIds = new HashSet<Integer>();
+        for (final ResourceType type : types) {
+            typeIds.add(type.getId());
+        }
+        ResourceGroupManager resourceGroupManager = Bootstrap.getBean(ResourceGroupManager.class);
+        for (final Resource r : resources) {
+            if (r == null || r.isInAsyncDeleteState() || r.isSystem() || !typeIds.contains(r.getResourceType().getId())) {
+                continue;
+            }
+            final int protoType = r.getPrototype().getId();
+            final AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(r);
+            int appdefType = -1;
+            if (r.getResourceType().getId().equals(AuthzConstants.authzGroup)) {
+                ResourceGroup group = resourceGroupManager.getResourceGroupById(r.getInstanceId());
+                if (group == null) {
+                    continue;
+                }
+                appdefType = group.getGroupType();
+            } else {
+                appdefType = aeid.getType();
+            }
+            rtn.incrementAppdefTypeCount(appdefType);
+            rtn.incrementProtoTypeCount(appdefType, protoType);
         }
         return rtn;
     }

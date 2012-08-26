@@ -35,6 +35,8 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.ext.DownMetricValue;
 import org.hyperic.hq.measurement.server.session.AvailabilityDataRLE;
+import org.hyperic.hq.measurement.server.session.AvailabilityFallbackCheckQue;
+import org.hyperic.hq.measurement.server.session.DataInserter;
 import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.product.MetricValue;
@@ -123,6 +125,9 @@ public interface AvailabilityManager {
      * Add a single Availablility Data point.
      * @mid The Measurement id
      * @mval The MetricValue to store.
+     * 
+     * DO NOT CALL THIS DIRECTLY, IT SHOULD BE CALLED VIA measurementInserterHolder.getAvailDataInserter().insertMetrics()
+     * in a synchronized block on measurementInserterHolder.getAvailDataInserter()
      */
     public void addData(Integer mid, MetricValue mval);
 
@@ -130,6 +135,15 @@ public interface AvailabilityManager {
      * Process Availability data. The default behavior is to send the data
      * points to the event handlers.
      * @param availPoints List of DataPoints
+     * DO NOT CALL THIS DIRECTLY, IT SHOULD BE CALLED VIA measurementInserterHolder.getAvailDataInserter().insertMetrics()
+     * in a synchronized block on measurementInserterHolder.getAvailDataInserter(), for example - 
+     * DataInserter inserter = measurementInserterHolder.getAvailDataInserter();
+     *  synchronized (inserter.getLock()) {
+     *           	try {
+     *           		inserter.insertMetrics(list);
+     *           	} catch (Exception exp) {
+     *           	}
+     *           }
      */
     public void addData(List<DataPoint> availPoints);
 
@@ -139,9 +153,36 @@ public interface AvailabilityManager {
      * @param sendData Indicates whether to send the data to event handlers. The
      *        default behavior is true. If false, the calling method should call
      *        sendDataToEventHandlers directly afterwards.
+     *        
+     * DO NOT CALL THIS DIRECTLY, IT SHOULD BE CALLED VIA measurementInserterHolder.getAvailDataInserter().insertMetrics()
+     * in a synchronized block on measurementInserterHolder.getAvailDataInserter(), for example - 
+     * DataInserter inserter = measurementInserterHolder.getAvailDataInserter();
+     *  synchronized (inserter.getLock()) {
+     *           	try {
+     *           		inserter.insertMetrics(list);
+     *           	} catch (Exception exp) {
+     *           	}
+     *           }
      */
     public void addData(List<DataPoint> availPoints, boolean sendData);
+    /**
+     * @param availDataPoints
+     * @param sendData
+     * @param addedByServer
+     * 
+     * DO NOT CALL THIS DIRECTLY, IT SHOULD BE CALLED VIA measurementInserterHolder.getAvailDataInserter().insertMetrics()
+     * in a synchronized block on measurementInserterHolder.getAvailDataInserter(), for example - 
+     * DataInserter inserter = measurementInserterHolder.getAvailDataInserter();
+     *  synchronized (inserter.getLock()) {
+     *           	try {
+     *           		inserter.insertMetrics(list);
+     *           	} catch (Exception exp) {
+     *           	}
+     *           }
+     */
+    public void addData(List<DataPoint> availDataPoints, boolean sendData, boolean addedByServer);
 
+    
     /**
      * This method should only be called by the AvailabilityCheckService and is
      * used to filter availability data points based on hierarchical alerting
@@ -156,5 +197,11 @@ public interface AvailabilityManager {
      * @see PlatformDetector#isSupportedPlatform()
      */
     public boolean platformIsAvailable(int agentId);
+
+    public AvailabilityFallbackCheckQue getFallbackCheckQue();
+
+    public Map<Integer, double[]> getAggregateDataAndAvailUpByMetric(final List<Integer> avIds, long begin, long end);
+
+    public Map<Integer, DownMetricValue> getUnavailResMap();
 
 }

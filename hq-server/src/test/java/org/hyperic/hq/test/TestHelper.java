@@ -24,6 +24,7 @@
  */
 package org.hyperic.hq.test;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -74,10 +75,10 @@ import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
+import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.DataManager;
-import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ServerTypeInfo;
@@ -88,6 +89,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.hyperic.hq.measurement.shared.TemplateManager;
 
 public class TestHelper {
 
@@ -129,6 +131,9 @@ public class TestHelper {
     
     @Autowired
     protected DataManager dataManager;
+
+    @Autowired
+    protected TemplateManager tmpMgr;
     
     
     protected TransactionTemplate newTxTemplate(final int propagationType) { 
@@ -320,7 +325,7 @@ public class TestHelper {
 		return application;
 	}
 
-	protected List<Measurement> createMeasurements(AppdefResource rsc, List<MeasurementTemplate> tmps, long interval)  
+	protected List<Measurement> createMeasurements(AppdefResource rsc, List<MeasurementTemplate> tmps, long interval, ConfigResponse cr)  
             throws AppdefEntityNotFoundException, ConfigFetchException, PermissionException, EncodingException,
             MeasurementCreateException, TemplateNotFoundException {
 	    
@@ -328,27 +333,27 @@ public class TestHelper {
 	    for (int i = 0; i < intervals.length; i++) {
             intervals[i]=interval;
         }
-	    return createMeasurements(rsc, tmps, intervals);
+	    return createMeasurements(rsc, tmps, intervals, cr);
 	}
 
-	protected List<Measurement> createMeasurements(AppdefResource rsc, List<MeasurementTemplate> tmps, long[] intervals) 
+	protected List<Measurement> createMeasurements(AppdefResource rsc, List<MeasurementTemplate> tmps, long[] intervals, ConfigResponse cr) 
 	        throws AppdefEntityNotFoundException, ConfigFetchException, PermissionException, EncodingException,
 	        MeasurementCreateException, TemplateNotFoundException {
 	    
 	    AuthzSubject subject = authzSubjectManager.getOverlordPojo();
-	    ConfigResponse mergedCR = 
-	            this.configManager.getMergedConfigResponse(subject,
-	                    ProductPlugin.TYPE_MEASUREMENT, rsc.getEntityId(), true);
         Integer[] tids = new Integer[tmps.size()];
 	    int i = 0;
         for (MeasurementTemplate tmp : tmps) {
 	        tids[i++] = tmp.getId();
         }
-	    return this.msmtManager.createMeasurements(subject, rsc.getEntityId(), tids, intervals, mergedCR);
+	    return this.msmtManager.createMeasurements(subject, rsc.getEntityId(), tids, intervals, cr);
 	}
 	
-//	protected List<HighLowMetricValue> createMetrics(Map<Measurement, Map<String, List>>) {
-//	    dataManager
-//	    return null;
-//	}
+    public void addData(List<DataPoint> data, String aggTable) throws Exception {
+        this.dataManager.addData(data, aggTable, this.sessionFactory.getCurrentSession().connection());
+    }
+    
+    public void addData(List<DataPoint> data) {
+        this.dataManager.addData(data, this.sessionFactory.getCurrentSession().connection());
+    }
 }// EOC

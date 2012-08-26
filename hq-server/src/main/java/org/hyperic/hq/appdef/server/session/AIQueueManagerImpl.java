@@ -578,8 +578,8 @@ public class AIQueueManagerImpl implements AIQueueManager {
             for (i = 0; i < serverList.size(); i++) {
                 final Integer id = (Integer) serverList.get(i);
                 if (id == null) {
-                    log.error("processQueue: " + aiplatform.getName() +
-                              " has a Server with ID=null");
+                    String name = aiplatform == null ? "" : aiplatform.getName();
+                    log.error("processQueue: " + name + " has a Server with ID=null");
                     continue;
                 }
                 final AIServer aiserver = aIServerDAO.get(id);

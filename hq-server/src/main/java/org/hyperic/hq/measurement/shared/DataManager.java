@@ -25,17 +25,21 @@
  */
 package org.hyperic.hq.measurement.shared;
 
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.hyperic.hq.common.TimeframeBoundriesException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.server.session.Measurement;
+import org.hyperic.hq.measurement.server.session.TimeframeSizeException;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import java.sql.Connection;
 
 /**
  * Local interface for DataManager.
@@ -57,6 +61,8 @@ public interface DataManager {
      */
     public boolean addData(List<DataPoint> data);
 
+    public boolean addData(List<DataPoint> data, Connection conn);
+
     /**
      * Write metric datapoints to the DB without transaction
      * @param data a list of {@link DataPoint}s
@@ -69,6 +75,7 @@ public interface DataManager {
      */
     public void addData(List<DataPoint> data, boolean overwrite);
 
+    public void addData(List<DataPoint> data, String aggTable, Connection conn) throws Exception;
 
     /**
      * Fetch the list of historical data points given a begin and end time
@@ -86,7 +93,7 @@ public interface DataManager {
     public PageList<HighLowMetricValue> getHistoricalData(Measurement m, long begin, long end, PageControl pc,
                                                           boolean prependAvailUnknowns);
 
-    public List<HighLowMetricValue> getHistoricalData(Measurement m, long begin, long end, boolean prependAvailUnknowns, int maxDtps);
+    public List<HighLowMetricValue> getHistoricalData(Measurement m, long begin, long end, boolean prependAvailUnknowns, int maxDtps) throws IllegalArgumentException, TimeframeSizeException, TimeframeBoundriesException;
 
     /**
      * Fetch the list of historical data points given a begin and end time
@@ -156,15 +163,15 @@ public interface DataManager {
 
     /**
      * Fetch the most recent data point for particular Measurements.
-     * @param measurements The List of Measurements to query. In the list of
-     *        Measurements null values are allowed as placeholders.
+     * @param measurements The List of MeasurementIds to query. In the list of
+     *        MeasurementIds null values are allowed as placeholders.
      * @param timestamp Only use data points with collection times greater than
      *        the given timestamp.
      * @return A Map of measurement ids to MetricValues. TODO: We should change
      *         this method to now allow NULL values. This is legacy and only
      *         used by the Metric viewer and Availabilty Summary portlets.
      */
-    public Map<Integer, MetricValue> getLastDataPoints(List<Measurement> measurements, long timestamp);
+    public Map<Integer, MetricValue> getLastDataPoints(List<Integer> measurements, long timestamp);
 
     /**
      * Get data points from cache only
@@ -222,5 +229,8 @@ public interface DataManager {
      * 
      */
     public Collection<HighLowMetricValue> getRawData(Measurement m, long begin, long end, AtomicLong publishedInterval);
+
+    public Map<Integer, double[]> getAggregateDataAndAvailUpByMetric(final List<Measurement> hqMsmts, long beginMilli,
+            long endMilli);
 
 }

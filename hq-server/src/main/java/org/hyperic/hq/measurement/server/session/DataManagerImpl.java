@@ -55,6 +55,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.common.ProductProperties;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.TimeframeBoundriesException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.common.util.MessagePublisher;
@@ -258,6 +259,58 @@ public class DataManagerImpl implements DataManager {
         addData(pts, overwrite);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void addData(List<DataPoint> data, String aggTable, Connection conn) throws Exception {
+        try {
+            insertDataWithOneInsert(data, aggTable, conn);
+            conn.commit();
+        } catch (Exception e) {
+            conn.rollback();
+            throw e;
+        } finally {
+            DBUtil.closeConnection(LOG_CTX, conn);
+        }
+    }
+         
+    private void insertDataWithOneInsert(List<DataPoint> dpts, String table, Connection conn) {
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            StringBuilder values = new StringBuilder();
+            for (Iterator<DataPoint> i = dpts.iterator(); i.hasNext();) {
+                DataPoint pt = i.next();
+                Integer metricId = pt.getMeasurementId();
+                HighLowMetricValue metricVal = (HighLowMetricValue) pt.getMetricValue();
+                BigDecimal val = new BigDecimal(metricVal.getValue());
+                BigDecimal highVal = new BigDecimal(metricVal.getHighValue());
+                BigDecimal lowVal = new BigDecimal(metricVal.getLowValue());
+                values.append("(").append(metricId.intValue()).append(", ").append(
+                        metricVal.getTimestamp()).append(", ").append(
+                                getDecimalInRange(val, metricId)).append(", ").append(
+                                        getDecimalInRange(lowVal, metricId)).append(", ").append(
+                                                getDecimalInRange(highVal, metricId)).append("),");
+            }
+            String sql = "insert into " + table + " (measurement_id, timestamp, value, minvalue, maxvalue)" + 
+                    " values " + values.substring(0, values.length() - 1);
+            stmt = conn.createStatement();
+            stmt.executeUpdate(sql);
+        } catch (SQLException e) {
+            // If there is a SQLException, then none of the data points
+            // should be inserted. Roll back the txn.
+        } finally {
+            DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
+        }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public boolean addData(List<DataPoint> data) {
+        return this._addData(data,safeGetConnection());
+    }
+    
+    public boolean addData(List<DataPoint> data, Connection conn) {
+        return this._addData(data,safeGetConnection());
+    }
+    
     /**
      * Write metric data points to the DB with transaction
      * 
@@ -267,8 +320,7 @@ public class DataManagerImpl implements DataManager {
      * 
      * 
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public boolean addData(List<DataPoint> data) {
+    protected boolean _addData(List<DataPoint> data, Connection conn) {
         if (shouldAbortDataInsertion(data)) {
             return true;
         }
@@ -281,7 +333,6 @@ public class DataManagerImpl implements DataManager {
         boolean succeeded = false;
         final boolean debug = log.isDebugEnabled();
 
-        Connection conn = safeGetConnection();
         if (conn == null) {
             return false;
         }
@@ -527,7 +578,7 @@ public class DataManagerImpl implements DataManager {
         Analyzer analyzer = getAnalyzer();
         if (analyzer != null) {
             for (DataPoint dp : data) {
-                analyzer.analyzeMetricValue(dp.getMetricId(), dp.getMetricValue());
+                analyzer.analyzeMetricValue(dp.getMeasurementId(), dp.getMetricValue());
             }
         }
     }
@@ -545,7 +596,7 @@ public class DataManagerImpl implements DataManager {
 
         for (DataPoint dp : data) {
 
-            Integer metricId = dp.getMetricId();
+            Integer metricId = dp.getMeasurementId();
             MetricValue val = dp.getMetricValue();
             MeasurementEvent event = new MeasurementEvent(metricId, val);
 
@@ -641,7 +692,7 @@ public class DataManagerImpl implements DataManager {
                 final StringBuilder values = new StringBuilder(dptsSize*15);
                 int rows = 0;
                 for (final DataPoint pt : dpts) {
-                    final Integer metricId = pt.getMetricId();
+                    final Integer metricId = pt.getMeasurementId();
                     final MetricValue val = pt.getMetricValue();
                     final BigDecimal bigDec = new BigDecimal(val.getValue());
                     rows++;
@@ -783,7 +834,7 @@ public class DataManagerImpl implements DataManager {
                 }
                 for (Iterator<DataPoint> i = dpts.iterator(); i.hasNext();) {
                     DataPoint pt = i.next();
-                    Integer metricId = pt.getMetricId();
+                    Integer metricId = pt.getMeasurementId();
                     MetricValue val = pt.getMetricValue();
                     BigDecimal bigDec;
                     bigDec = new BigDecimal(val.getValue());
@@ -850,7 +901,7 @@ public class DataManagerImpl implements DataManager {
 
                 for (Iterator<DataPoint> i = dpts.iterator(); i.hasNext();) {
                     DataPoint pt = i.next();
-                    Integer metricId = pt.getMetricId();
+                    Integer metricId = pt.getMeasurementId();
                     MetricValue val = pt.getMetricValue();
                     BigDecimal bigDec;
                     bigDec = new BigDecimal(val.getValue());
@@ -917,18 +968,20 @@ public class DataManagerImpl implements DataManager {
      *  find the aggregation table with the greatest interval which is smaller than the requested time frame
      *  and which the time frame doesn't cover a range which is even partially after its purge has been done
      *  and in which no more than maxDTPs fit in the requested time frame
+     * @throws TimeframeSizeException 
+     * @throws TimeframeBoundriesException 
      */
-    protected String getDataTable(long begin, long end, Measurement msmt, int maxDTPs) throws IllegalArgumentException {
+    protected String getDataTable(long begin, long end, Measurement msmt, int maxDTPs) throws TimeframeSizeException, TimeframeBoundriesException {
         long tf = end - begin;  // the time frame
         long maxInterval = tf / maxDTPs; // the max interval for which maxDTPs DTPs still fit in the time frame
         long msmtInterval = msmt.getInterval();
         if (tf<msmtInterval) { 
             MeasurementTemplate tmp = msmt.getTemplate();
-            throw new IllegalArgumentException("requested time frame is of size " + tf + " milliseconds, which is smaller than the time interval of the measurement " + tmp!=null?tmp.getName():"" + " which is " + msmtInterval + " milliseconds");
+            throw new TimeframeSizeException("requested time frame is of size " + tf + " milliseconds, which is smaller than the time interval of the measurement " + tmp!=null?tmp.getName():"" + " which is " + msmtInterval + " milliseconds");
         }
         long now = System.currentTimeMillis();
         if (end>now || end<begin) { 
-            throw new IllegalArgumentException("illegal time frame boundries");
+            throw new TimeframeBoundriesException("illegal time frame boundries");
         }
         if (!confDefaultsLoaded) {
             loadConfigDefaults();
@@ -938,21 +991,21 @@ public class DataManagerImpl implements DataManager {
         }
         if (tf<HOUR_IN_MILLI) { 
             MeasurementTemplate tmp = msmt.getTemplate();
-            throw new IllegalArgumentException("requested time frame is of size " + tf + " milliseconds, which is smaller than the hourly aggregated time interval of the measurement " + tmp!=null?tmp.getName():"");
+            throw new TimeframeSizeException("requested time frame is of size " + tf + " milliseconds, which is smaller than the hourly aggregated time interval of the measurement " + tmp!=null?tmp.getName():"");
         }
         if (HOUR_IN_MILLI>=maxInterval && begin>=now-DataManagerImpl.this.purge1h) {
             return MeasurementConstants.TAB_DATA_1H;
         }
         if (tf<SIX_HOURS_IN_MILLI) { 
             MeasurementTemplate tmp = msmt.getTemplate();
-            throw new IllegalArgumentException("requested time frame is of size " + tf + " milliseconds, which is smaller than the 6-hourly aggregated time interval of the measurement " + tmp!=null?tmp.getName():"");
+            throw new TimeframeSizeException("requested time frame is of size " + tf + " milliseconds, which is smaller than the 6-hourly aggregated time interval of the measurement " + tmp!=null?tmp.getName():"");
         }
         if (SIX_HOURS_IN_MILLI>=maxInterval && begin>=now-DataManagerImpl.this.purge6h) {
             return MeasurementConstants.TAB_DATA_6H;
         }
         if (tf<DAY_IN_MILLI) { 
             MeasurementTemplate tmp = msmt.getTemplate();
-            throw new IllegalArgumentException("requested time frame is of size " + tf + " milliseconds, which is smaller than the daily aggregated time interval of the measurement " + tmp!=null?tmp.getName():"");
+            throw new TimeframeSizeException("requested time frame is of size " + tf + " milliseconds, which is smaller than the daily aggregated time interval of the measurement " + tmp!=null?tmp.getName():"");
         }
         // return daily aggregated data even if the time frame is beyond the purge time or contains more than 400 DTPs
         return MeasurementConstants.TAB_DATA_1D;
@@ -1039,7 +1092,7 @@ public class DataManagerImpl implements DataManager {
 
     @Transactional(readOnly = true)
     public List<HighLowMetricValue> getHistoricalData(Measurement m, long begin, long end,
-                                                          boolean prependAvailUnknowns, int maxDTPs) {
+                                                          boolean prependAvailUnknowns, int maxDTPs) throws TimeframeSizeException, TimeframeBoundriesException {
         if (m.getTemplate().isAvailability()) {
             return availabilityManager.getHistoricalAvailData(m, begin, end, PageControl.PAGE_ALL, prependAvailUnknowns);
         } else {
@@ -1158,7 +1211,7 @@ public class DataManagerImpl implements DataManager {
         }
     }
 
-    private List<HighLowMetricValue> getNonAvailabilityMetricData(final Measurement m, long begin, long end, int maxDTPs) {
+    private List<HighLowMetricValue> getNonAvailabilityMetricData(final Measurement m, long begin, long end, int maxDTPs) throws TimeframeSizeException, TimeframeBoundriesException {
         checkTimeArguments(begin, end);
         begin = TimingVoodoo.roundDownTime(begin, MINUTE);
         end = TimingVoodoo.roundDownTime(end, MINUTE);
@@ -1300,7 +1353,27 @@ public class DataManagerImpl implements DataManager {
             MeasurementConstants.COLL_TYPE_DYNAMIC, false, PageControl.PAGE_ALL);
         return getAggData(pts);
     }
+    
+    @Transactional(readOnly = true)
+    public Map<Integer, double[]> getAggregateDataAndAvailUpByMetric(final List<Measurement> measurements,
+            final long begin, final long end) {
+        List<Integer> avids = new ArrayList<Integer>();
+        List<Integer> mids = new ArrayList<Integer>();
+        for (Measurement meas : measurements) {
 
+            MeasurementTemplate t = meas.getTemplate();
+            if (t.isAvailability()) {
+                avids.add(meas.getId());
+            } else {
+                mids.add(meas.getId());
+            }
+        }
+        Map<Integer, double[]> rtn = getAggDataByMetric(mids.toArray(new Integer[0]),begin, end, false);
+        rtn.putAll(availabilityManager.getAggregateDataAndAvailUpByMetric(avids,begin, end));
+        return rtn;
+    }
+
+    
     /**
      * Fetch the list of historical data points, grouped by template, given a
      * begin and end time range. Does not return an entry for templates with no
@@ -1360,6 +1433,11 @@ public class DataManagerImpl implements DataManager {
         return rtn;
     }
 
+    /**
+     * @param measurements      source measurements list
+     * @param availIds          measurements from the source list of type availability
+     * @param measIdsByTempl    measurements from the source list which are not of type availability, sorted as per their type
+     */
     private final void setMeasurementObjects(final List<Measurement> measurements,
                                              final List<Integer> availIds,
                                              final Map<Integer, List<Measurement>> measIdsByTempl) {
@@ -1869,36 +1947,37 @@ public class DataManagerImpl implements DataManager {
      * 
      */
     @Transactional(readOnly = true)
-    public Map<Integer, MetricValue> getLastDataPoints(List<Measurement> measurements,
-                                                       long timestamp) {
-        List<Integer> availIds = new ArrayList<Integer>(measurements.size());
-        List<Integer> measurementIds = new ArrayList<Integer>(measurements.size());
-
-        for (Measurement m : measurements) {
-            if (m == null) {
-                // XXX: See above.
+    public Map<Integer, MetricValue> getLastDataPoints(List<Integer> mids, long timestamp) {
+        final List<Integer> availIds = new ArrayList<Integer>(mids.size());
+        final List<Integer> measurementIds = new ArrayList<Integer>(mids.size());
+        for (Integer measId : mids) {
+            if (measId == null) {
+                // See above.
                 measurementIds.add(null);
+                continue;
+            }
+            final Measurement m = measurementDAO.get(measId);
+            if (m == null) {
+                // See above.
+                measurementIds.add(null);
+                continue;
             } else if (m.getTemplate().isAvailability()) {
                 availIds.add(m.getId());
             } else {
-                measurementIds.add(m.getId());
+                measurementIds.add(measId);
             }
         }
-
-        Integer[] avIds = availIds.toArray(new Integer[0]);
-
+        final Integer[] avIds = availIds.toArray(new Integer[0]);
         final StopWatch watch = new StopWatch();
         final boolean debug = log.isDebugEnabled();
         if (debug) watch.markTimeBegin("getLastDataPts");
-        Map<Integer, MetricValue> data = getLastDataPts(measurementIds, timestamp);
+        final Map<Integer, MetricValue> data = getLastDataPts(measurementIds, timestamp);
         if (debug) watch.markTimeEnd("getLastDataPts");
-
         if (availIds.size() > 0) {
             if (debug) watch.markTimeBegin("getLastAvail");
             data.putAll(availabilityManager.getLastAvail(avIds));
             if (debug) watch.markTimeEnd("getLastAvail");
         }
-
         if (debug) log.debug(watch);
         return data;
     }

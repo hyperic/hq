@@ -56,6 +56,7 @@ import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.security.HQAuthenticationDetails;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.util.config.ConfigResponse;
@@ -69,7 +70,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class BaseSessionInitializationStrategy implements SessionAuthenticationStrategy {
-    private static final String LDAP_PREFIX = "LDAP\\";
 	private static Log log = LogFactory.getLog(BaseSessionInitializationStrategy.class.getName());
     private SessionManager sessionManager;
     private AuthzSubjectManager authzSubjectManager;
@@ -99,12 +99,19 @@ public class BaseSessionInitializationStrategy implements SessionAuthenticationS
         if (debug) log.debug("Initializing UI session parameters...");
         boolean updateRoles = false;
         String username = authentication.getName();
-        //If the user logged in with his LDAP credentials we want to add a LDAP\ prefix to
-        //his user name and we also want to update his roles
-        if (null != authentication.getPrincipal() && 
-        		authentication.getPrincipal().getClass().getName().contains("Ldap")) {
-        	username = LDAP_PREFIX + username;
-        	updateRoles = true;
+        
+        //If this is an organization authentication (ldap\kerberos) we will add a 'org\' prefix to the
+        //user name so we will know it's an organization user
+        if (null != authentication.getDetails() && (authentication.getDetails() instanceof HQAuthenticationDetails)) {
+        	HQAuthenticationDetails authDetails = (HQAuthenticationDetails) authentication.getDetails();
+        	if (authDetails.isUsingExternalAuth()) {
+        		username = HQConstants.ORG_AUTH_PREFIX + username;
+        		//If this is a Ldap user we will update his roles
+        		 if (null != authentication.getPrincipal() && 
+        	        		authentication.getPrincipal().getClass().getName().contains("Ldap")) {
+        	        	updateRoles = true;
+        		 }
+        	}
         }
         try {
         	// The following is logic taken from the old HQ Authentication Filter
@@ -132,7 +139,7 @@ public class BaseSessionInitializationStrategy implements SessionAuthenticationS
                     	Collection<RoleValue> roles = roleManager.getRoles(subj, PageControl.PAGE_ALL);
                     	for (RoleValue role : roles) {
                     		String roleName = role.getName().toLowerCase();
-							if (roleName.startsWith(LDAP_PREFIX.toLowerCase())) {
+							if (roleName.startsWith(HQConstants.ORG_AUTH_PREFIX)) {
                     			roleManager.removeSubjects(authzSubjectManager.getOverlordPojo(), role.getId(), 
                     					new Integer[] {subj.getId()});
                     		}
@@ -147,10 +154,10 @@ public class BaseSessionInitializationStrategy implements SessionAuthenticationS
                             }
                             for(Role role: roles) {
                             	String roleName = role.getName().toLowerCase();
-								String ldapPrefix = LDAP_PREFIX.toLowerCase();
 								String ldapRoleName = "";
-								if (roleName.startsWith(ldapPrefix)) {
-                            		ldapRoleName = roleName.substring(roleName.indexOf(ldapPrefix)+5).trim();
+								if (roleName.startsWith(HQConstants.ORG_AUTH_PREFIX)) {
+                            		ldapRoleName = roleName.substring(roleName.indexOf(HQConstants.ORG_AUTH_PREFIX) + 
+                            				HQConstants.ORG_AUTH_PREFIX.length()).trim();
                             	}
                                 if((("ROLE_" + role.getName()).equalsIgnoreCase(authority.getAuthority())) || 
                                 		(("ROLE_" + ldapRoleName).equalsIgnoreCase(authority.getAuthority()))) {

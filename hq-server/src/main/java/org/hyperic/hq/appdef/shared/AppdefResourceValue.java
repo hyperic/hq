@@ -41,6 +41,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.context.Bootstrap;
 
 /**
@@ -276,11 +277,17 @@ public abstract class AppdefResourceValue
             return getServiceManager().getServiceById(resource.getInstanceId()).getAppdefResourceValue();
         } else if (type == AuthzConstants.authzApplication) {
             return getApplicationManager().getApplicationById(resource.getInstanceId()).getAppdefResourceValue();
+        } else if (type == AuthzConstants.authzGroup) {
+            return getGroupManager().getGroupById(resource.getInstanceId()).getAppdefResourceValue();
         } else {
           //HHQ- Guys return null so that appdef types unsupported by the authorization mechanizm would be 
           //filters by the permissionManagear. 
           return null ;
         }
+    }
+
+    private static ResourceGroupManager getGroupManager() {
+        return Bootstrap.getBean(ResourceGroupManager.class);
     }
 
     private static ApplicationManager getApplicationManager() {

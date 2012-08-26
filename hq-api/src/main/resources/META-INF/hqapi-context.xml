@@ -48,6 +48,9 @@
 		<!-- <property name="schemaHandler" ref="schemaHolder"/> -->
 	</bean>
 
+	<bean id="timeProvider" class="org.hyperic.hq.api.common.DateParameterProvider">
+	</bean>
+
 	 <bean name="restApiLogger" class="org.apache.commons.logging.LogFactory" 
       factory-method="getLog" >
        <constructor-arg type="java.lang.String" value="org.hyperic.hq.api.rest" />
@@ -124,6 +127,7 @@
         <jaxrs:providers>
             <ref bean="jaxbProvider" />
 			<ref bean="jsonProvider" />
+			<ref bean="timeProvider" />
         </jaxrs:providers>
         <jaxrs:features>
             <cxf:logging />

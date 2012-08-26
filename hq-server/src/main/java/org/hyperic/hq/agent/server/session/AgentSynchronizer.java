@@ -57,6 +57,8 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
+import org.hyperic.util.stats.StatCollector;
+import org.hyperic.util.stats.StatUnreachableException;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -135,9 +137,20 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
             executor.scheduleWithFixedDelay(worker, i+1, NUM_WORKERS, TimeUnit.SECONDS);
         }
         concurrentStatsCollector.register(ConcurrentStatsCollector.AGENT_SYNC_JOB_QUEUE_ADDS);
+        concurrentStatsCollector.register(new StatCollector() {
+            public long getVal() throws StatUnreachableException {
+                synchronized (agentJobs) {
+                    return agentJobs.size();
+                }
+            }
+            public String getId() {
+                return ConcurrentStatsCollector.AGENT_SYNCHRONIZER_QUEUE_SIZE;
+            }
+        });
     }
     
     public void addAgentJob(AgentDataTransferJob agentJob) {
+        if (log.isDebugEnabled()) log.debug("adding job=" + agentJob);
         synchronized (agentJobs) {
             agentJobs.add(new StatefulAgentDataTransferJob(agentJob));
         }

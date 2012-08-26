@@ -169,7 +169,7 @@ public class ViewAction
         AppdefEntityTypeID typeId = new AppdefEntityTypeID(resource);
         AppdefResourceTypeValue typeVal = appdefBoss.findResourceTypeById(sessionId, typeId);
         CacheData[] data = new CacheData[arrayIds.length];
-        List<Measurement> measurements = new ArrayList<Measurement>(arrayIds.length);
+        List<Integer> measurements = new ArrayList<Integer>(arrayIds.length);
         long interval = 0;
         ArrayList<String> toRemove = new ArrayList<String>();
         for (int i = 0; i < arrayIds.length; i++) {
@@ -180,7 +180,7 @@ public class ViewAction
                 toRemove.add(id.getAppdefKey());
             }
             if (data[i] != null && data[i].getMeasurement() != null) {
-                measurements.add(i, data[i].getMeasurement());
+                measurements.add(i, data[i].getMeasurement().getId());
                 if (data[i].getMeasurement().getInterval() > interval) {
                     interval = data[i].getMeasurement().getInterval();
                 }
