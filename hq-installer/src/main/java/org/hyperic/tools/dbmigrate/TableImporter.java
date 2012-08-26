@@ -142,6 +142,7 @@ public class TableImporter extends TableProcessor<Worker> {
                     conn = getConnection(project.getProperties());
                     
                     stmt = conn.createStatement();
+                    stmt.setQueryTimeout(this.queryTimeoutSecs)  ;
                     stmt.executeQuery((new StringBuilder()).append("select fmigrationPostConfigure('").
                                                             append(this.tablesList.toString()).append("')").toString());
                 }catch(Throwable t2) {
