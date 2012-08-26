@@ -62,7 +62,6 @@
 		<dependency>
   			<groupId>postgresql</groupId>
   			<artifactId>postgresql</artifactId>
-  			<scope>runtime</scope>
 			<version>${postgresql.server.driver.version}</version>
 		</dependency>
 		<dependency>

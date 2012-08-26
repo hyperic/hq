@@ -36,9 +36,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import org.hyperic.util.MultiRuntimeException;
 
-import com.sun.xml.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
+import org.hyperic.util.MultiRuntimeException;
 
 public class Forker {
 
@@ -147,7 +146,7 @@ public class Forker {
 
     @SuppressWarnings({"rawtypes"})
     public static class ForkContext<V, T extends Callable<V[]>> extends HashMap<Object,Object> {
-
+ 
         private static final long serialVersionUID = -1221616165268097942L;
         
         private BlockingDeque<V> sink;

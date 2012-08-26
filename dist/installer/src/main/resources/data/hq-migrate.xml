@@ -347,7 +347,9 @@
 			</then> 
 			<else> 
 				<exec executable="cmd">
-					<arg value="/c ${hqserver.install.path}/bin/hq-server.bat stop"/>
+					<arg value="/c" />
+					<arg value="${hqserver.install.path}/bin/hq-server.bat" />
+					<arg value="stop"/>
 				</exec>			
 			</else> 
 		</if> 
@@ -413,8 +415,7 @@
 		<exporter tablesRefs="${export-tables-refs-string}"  disabled="false" maxRecordsPerTable="-1" batchsize="1000">
 		</exporter> 
 		<!--<exporter tables="EAM_CONFIG_RESPONSE" disabled="false" batchsize="10" maxRecordsPerTable="-1"/>-->
-
-		<!-- todo might not need--> 
+		
 		<mkdir dir="${staging.dir}" />
 		<echo message="Archiving ${staging.dir} to '${staging.dir}/../hq-migration-export-${CAM_SERVER_VERSION}.tgz' (this might take a few minutes)" />
 		<tar destFile="${staging.dir}/../hq-migration-export-${CAM_SERVER_VERSION}.tgz" baseDir="${staging.dir}" compression="gzip" />

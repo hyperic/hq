@@ -25,7 +25,7 @@ if [[ ! $JAVA_HOME ]] ; then
 	done
 	   
 	if [[ ! -d "$JAVA_HOME" ]]; then
-		JAVA_HOME=`which java`; 
+		JAVA_HOME=$(readlink -f `which java`); 
 	fi
 	
 	if [[ ! -d "$JAVA_HOME" ]]; then
