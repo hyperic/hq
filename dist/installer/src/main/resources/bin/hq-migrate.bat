@@ -60,9 +60,9 @@ set JAVA_HOME=!JAVA_HOME!
 
 echo "Using JAVA_HOME: %JAVA_HOME%" 
 
-set ANT_OPTS="-Djava.net.preferIPv4Stack=true" 
+set ANT_OPTS="-Djava.net.preferIPv4Stack=true -Dinstall.title=HQ-Migration" 
 set ANT_ARGS="" 
-call %ANT_HOME%\bin\ant -debug -Dinstall.dir=%INSTALL_DIR% -Dinstall.mode=postgresql -Dinstall.profile=large -logger org.hyperic.tools.ant.installer.InstallerLogger -f %INSTALL_DIR%\data\hq-migrate.xml %*
+call %ANT_HOME%\bin\ant -debug -Dinstall.dir=%INSTALL_DIR% -Dinstall.mode=postgresql -Dinstall.profile=large -logger org.hyperic.tools.dbmigrate.Logger -f %INSTALL_DIR%\data\hq-migrate.xml %*
 goto :EOF 
 
 :JAVA_HOME_UNDEFINED

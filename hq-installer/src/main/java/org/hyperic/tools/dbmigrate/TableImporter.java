@@ -1,3 +1,4 @@
+//TODO: work on the pre build action (db function + thefiguring out which table should be truncated and whose indices should be dropped 
 package org.hyperic.tools.dbmigrate;
 
 import static org.hyperic.tools.dbmigrate.Utils.COMMIT_INSTRUCTION_FLAG;
@@ -6,13 +7,22 @@ import static org.hyperic.tools.dbmigrate.Utils.ROLLBACK_INSTRUCTION_FLAG;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.Serializable;
+import java.io.StreamCorruptedException;
+import java.math.BigDecimal;
+import java.nio.ByteBuffer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.concurrent.BlockingDeque;
@@ -23,16 +33,21 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.tools.ant.Project;
+import org.apache.tools.ant.util.FileUtils;
 import org.hyperic.tools.dbmigrate.Forker.ForkContext;
 import org.hyperic.tools.dbmigrate.Forker.ForkWorker;
+import org.hyperic.tools.dbmigrate.TableExporter.UTFNullHandlerOOS;
 import org.hyperic.tools.dbmigrate.TableImporter.Worker;
 import org.hyperic.tools.dbmigrate.TableProcessor.Table;
 import org.hyperic.util.MultiRuntimeException;
 
+
 public class TableImporter extends TableProcessor<Worker> {
 	
-	private StringBuilder tablesClause;
-	private final String POST_MIGRATE_ACTIONS_FILE_RELATIVE_PATH = "/sql/migration-post-configure.sql";
+	private StringBuilder preImportActionsInstructions;
+	private StringBuilder tablesList ; 
+	private final String MIGRATION_FUNCTIONS_DIR = "/sql/migrationScripts/" ; 
+	private final String IMPORT_SCRIPTS_FILE = MIGRATION_FUNCTIONS_DIR+ "import-scripts.sql" ; 
 
 	public TableImporter() {}//EOM 
 
@@ -40,43 +55,50 @@ public class TableImporter extends TableProcessor<Worker> {
 	protected final void addTableToSink(final LinkedBlockingDeque<Table> sink, final Table table) {
 	    super.addTableToSink(sink, table);
 	    
-	    if(this.tablesClause == null) this.tablesClause = new StringBuilder(table.name) ;  
-	    this.tablesClause.append(",").append(table.name) ; 
+	    if(this.tablesList == null) { 
+	        this.preImportActionsInstructions = new StringBuilder() ;  
+	        this.tablesList = new StringBuilder() ; 
+	    }//EO if not yet initailized 
+	    else { 
+	        this.tablesList.append(",") ;
+	        this.preImportActionsInstructions.append(",") ;
+	    }//EO else if already initialized 
+	    
+	    this.tablesList.append(table.name) ; 
+	    this.preImportActionsInstructions.append(table.name).append("~").append( table.shouldTruncate ? "1" : "0" ).
+	      append("~").append(table instanceof BigTable ? "1" : "0") ; 
+	    
 	}//EOM 
 	
 	@Override
-	protected final void beforeFork(final ForkContext<Table, Worker> context, final LinkedBlockingDeque<Table> sink) throws Throwable {
-		MultiRuntimeException thrown = null;
+    protected final void beforeFork(final ForkContext<Table, Worker> context, final LinkedBlockingDeque<Table> sink) throws Throwable {
+        MultiRuntimeException thrown = null;
 
-		Connection conn = null;
-		Statement stmt = null;
-		try {
-			final Project project = getProject();
-			conn = getConnection(project.getProperties(), false);
-			stmt = conn.createStatement();
-			
-			log("About to 'TRUNCATE CASCADE'") ; 
-			
-			String tableName = null ; 
-			for (Table table : this.tablesContainer.tables.values()) {
-			    if(!table.shouldTruncate) continue ;
-			    tableName = table.name ; 
-				log("Adding table truncation statement for table " + tableName + " to batch");
-				stmt.addBatch("truncate table " + tableName + " CASCADE");
-			}//EO while there are more tables 
+        Connection conn = null;
+        Statement stmt = null;
+        try {
+            final Project project = getProject();
+            conn = this.getConnection(project.getProperties(), false);
+            
+            log("About to perform tables truncation, trigger disablement and indices drop with instructions: " + this.preImportActionsInstructions) ; 
 
-			log("Executing table truncation statements batch...");
-			stmt.executeBatch();
-		} catch (Throwable t) {
-			thrown = new MultiRuntimeException(t);
-		} finally {
-			Utils.close(thrown != null ? ROLLBACK_INSTRUCTION_FLAG : COMMIT_INSTRUCTION_FLAG, new Object[] { stmt, conn });
-			log("TRUNCATE CASCADE was sucessful.");
-
-			if (thrown != null) throw thrown;
-		}//EO catch block 
-	}//EOM
-
+            final File importScriptsFile = new File(project.getBaseDir(), IMPORT_SCRIPTS_FILE) ; 
+            final String importFunctions = Utils.getFileContent(importScriptsFile) ;
+            stmt = conn.createStatement();
+            stmt.execute(importFunctions) ;  
+                       
+            stmt.executeQuery("select fmigrationPreConfigure('" + this.preImportActionsInstructions.toString() + "')") ; 
+        } catch (Throwable t) {
+            thrown = new MultiRuntimeException(t);
+        } finally {
+            Utils.close(thrown != null ? ROLLBACK_INSTRUCTION_FLAG : COMMIT_INSTRUCTION_FLAG, new Object[] { stmt, conn });
+            
+            if (thrown != null) throw thrown;
+            else log("Pre import actions were sucessful.");
+        }//EO catch block 
+    }//EOM
+	
+	
 	@Override
 	protected final void afterFork(final ForkContext<Table,Worker> context, final List<Future<Table[]>> workersResponses,
 	        final LinkedBlockingDeque<Table> sink) throws Throwable {
@@ -95,17 +117,9 @@ public class TableImporter extends TableProcessor<Worker> {
                     final Project project = getProject();
                     conn = getConnection(project.getProperties());
                     
-                    final File postMigrateActionsFile = new File(project.getBaseDir(), POST_MIGRATE_ACTIONS_FILE_RELATIVE_PATH);
-                    fis = new FileInputStream(postMigrateActionsFile);
-                    
-                    final byte arrBytes[] = new byte[fis.available()];
-                    fis.read(arrBytes);
-                    final String fmigrationPostConfigureFuction = new String(arrBytes);
-                  
                     stmt = conn.createStatement();
-                    stmt.execute(fmigrationPostConfigureFuction);
                     stmt.executeQuery((new StringBuilder()).append("select fmigrationPostConfigure('").
-                                                            append(this.tablesClause).append("');").toString());
+                                                            append(this.tablesList.toString()).append("')").toString());
                 }catch(Throwable t2) {
                     Utils.printStackTrace(t2);
                     thrown = MultiRuntimeException.newMultiRuntimeException(thrown, t2);
@@ -157,9 +171,9 @@ public class TableImporter extends TableProcessor<Worker> {
 
     public final class Worker extends ForkWorker<Table> {
         private final File outputDir;
-
+        
         Worker(final CountDownLatch countdownSemaphore, final Connection conn, final BlockingDeque<Table> sink, final File outputDir){ 
-            super(countdownSemaphore, conn, sink);
+            super(countdownSemaphore, conn, sink, Table.class);
             this.outputDir = outputDir;
         }//EOM 
 
@@ -181,7 +195,7 @@ public class TableImporter extends TableProcessor<Worker> {
             try {
                 final FileInputStream fis = new FileInputStream(batchMetadata.batchFile);
                 final GZIPInputStream zis = new GZIPInputStream(fis) ; 
-                ois = new ObjectInputStream(zis);
+                ois = new UTFNullHandlerOIS(zis);
                 //ois = new ObjectInputStream(fis);
                 int recordCount = 0;
 
@@ -200,12 +214,9 @@ public class TableImporter extends TableProcessor<Worker> {
                 while(true) { 
                     
                     for (int i = 1; i <= columnCount; i++) {
-                        try{ 
-                            oValue = ois.readObject() ;
-                        }catch(EOFException eofe) { 
-                            eofe.printStackTrace() ; 
-                            throw eofe ; 
-                        }
+                        
+                        oValue = ois.readUnshared();  
+                        
                         if(oValue == Utils.EOF_PLACEHOLDER) break ; 
                         
                         columnStrategies[(i - 1)].bindStatementParam(i, oValue, insertPs, columnTypes[(i - 1)]);
@@ -217,31 +228,14 @@ public class TableImporter extends TableProcessor<Worker> {
                     
                     insertPs.addBatch();
 
-                    if (recordCount % PROTECTIVE_BATCH_SIZE == 0) {
+                    if (recordCount % batchSize == 0) {
                         insertPs.executeBatch();
                         this.conn.commit();
                         log(logMsgPrefix + "Imported " + recordCount + " records so far from file " + shortFileName);
                     }//EO while the batchsize threshold was reached 
                 }//EO while there are more records to read 
                
-                /*while (fis.available() > 0) {
-                    recordCount++;
-
-                    for (int i = 1; i <= columnCount; i++) {
-                        columnStrategies[(i - 1)].bindStatementParam(i, ois,
-                                insertPs, columnTypes[(i - 1)]);
-                    }//EO while there are more columns 
-
-                    insertPs.addBatch();
-
-                    if (recordCount % PROTECTIVE_BATCH_SIZE == 0) {
-                        insertPs.executeBatch();
-                        this.conn.commit();
-                        log(logMsgPrefix + "Imported " + recordCount + " records so far from file " + shortFileName);
-                    }//EO while the batchsize threshold was reached 
-                }//EO while there are more bytes available in the file 
-*/
-                if (recordCount % PROTECTIVE_BATCH_SIZE != 0) {
+                if (recordCount % batchSize != 0) {
                     insertPs.executeBatch();
                     this.conn.commit();
                 }//EO while there are more bytes available in the file 
@@ -259,7 +253,7 @@ public class TableImporter extends TableProcessor<Worker> {
           TableBatchMetadata singleBatchMetadata = null;
           final String tableName = table.name ; 
           try{
-            Utils.executeUpdate(this.conn, "ALTER TABLE " + tableName + " DISABLE TRIGGER ALL");
+            //Utils.executeUpdate(this.conn, "ALTER TABLE " + tableName + " DISABLE TRIGGER ALL");
     
             selectPs = this.conn.prepareStatement("SELECT * FROM " + tableName);
             selectPs.executeQuery();
@@ -278,7 +272,7 @@ public class TableImporter extends TableProcessor<Worker> {
                 log("No import data was found for table " + tableName) ; 
                 return singleBatchMetadata ; 
             }//EO else if there are no files for the given table 
-            
+             
             final int iNoOfBatches = batchFiles.length;
             log("Partitioning the import of table " + tableName + " into " + iNoOfBatches + " units") ; 
             
@@ -295,8 +289,8 @@ public class TableImporter extends TableProcessor<Worker> {
               }//EO while there are more batches 
             }//EO else if more then one batch 
     
-          }finally{
-            Utils.close(new Object[] { selectPs });
+          }finally{ 
+            Utils.close(new Object[] { selectPs }); 
           }//EO catch block 
     
           return singleBatchMetadata;
@@ -319,7 +313,7 @@ public class TableImporter extends TableProcessor<Worker> {
                 statementBuilder.append(rsmd.getColumnName(i));
                 bindingParamsBuilder.append("?");
                 if (i < iColumnCount) {
-                    statementBuilder.append(",");
+                    statementBuilder.append(","); 
                     bindingParamsBuilder.append(",");
                 }//EO if last iteration 
             }//EO while there are more columns 
@@ -327,6 +321,31 @@ public class TableImporter extends TableProcessor<Worker> {
             return statementBuilder.append(") values (").append(bindingParamsBuilder.toString()).append(")").toString(); 
         }//EOM 
     }//EO inner class Worker 
+    
+    public static final class UTFNullHandlerOIS extends ObjectInputStream { 
+        
+        public UTFNullHandlerOIS(final InputStream in) throws IOException{ super(in) ; }//EOM 
+        
+        @Override
+        public Object readUnshared() throws IOException, ClassNotFoundException {
+            byte tc = this.readByte() ;
+            if(tc == TC_NULL) return null ;
+            else if(tc == TC_MAX) return Utils.EOF_PLACEHOLDER ;
+            else if(tc == TC_STRING) return super.readUTF() ; 
+            else if(tc == TC_OBJECT) return super.readUnshared();
+            else throw new StreamCorruptedException("telling byte " + tc + " is unrecognized") ;
+        }//EOM 
+        
+        @Override
+        public String readUTF() throws IOException {
+            try{ 
+                return (String) this.readUnshared() ;
+            }catch(ClassNotFoundException cnfe) { 
+                throw new IOException(cnfe) ; 
+            }//EO catch block 
+        }//EOM 
+        
+    }//EOM 
 	
 	//*****************************************************************************************************
 	//DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG  
@@ -345,8 +364,10 @@ public class TableImporter extends TableProcessor<Worker> {
 	}//EOM 
 
 	public static void main(String[] args) throws Throwable {
-	    
-	    testReadfromFile() ; 
+	    testToCharVsCharArray() ; 
+	    //testWriteObjectVsUTF() ;
+	 //   writeToFileWithInitialPlaceHolder() ;
+	    //testReadfromFile() ; 
 	    if(true) return ; 
 	    
 	    
@@ -355,6 +376,83 @@ public class TableImporter extends TableProcessor<Worker> {
 	    testTable(table) ; 
 	    testTable(batch) ;
 	}//EOM
+	
+	public static final void testToCharVsCharArray() throws Throwable { 
+	    
+	    final int  iLength = 1000 ; 
+	    final StringBuilder builder = new StringBuilder(iLength) ; 
+	    for(int i=0; i < iLength; i++) { 
+	        builder.append(i % 100 == 0 ? '\'' : "a") ;
+	    }//EO while  
+	    
+	    final String str = builder.toString() ; 
+	    
+	    final int inoIfIterations = 6000000 ; 
+	    long total = 0 ; 
+	    long before = 0 ; 
+	    
+	    /*for(int j=0; j < inoIfIterations; j++) { 
+	        
+	        before = System.currentTimeMillis() ;
+	        
+    	    final char[] arr = str.toCharArray() ; 
+    	    for(int i=0; i < iLength; i++) { 
+    	        if(arr[i] == '\\' || arr[i] == '\'') {} ;  
+    	    }//EO while 
+    	    total += (System.currentTimeMillis()-before) ;
+    	    
+	    }//EO while more iterations 
+	    
+	    System.out.println("char array " + total);
+	    */
+	    StringBuilder sb = new StringBuilder(iLength);
+	    char chr  ; 
+	    total = 0 ;  
+	    
+        for(int j=0; j < inoIfIterations; j++) {
+            before = System.currentTimeMillis() ;
+            sb = new StringBuilder() ; 
+            
+            for(int i=0; i < iLength; i++) {
+                chr = str.charAt(i) ; 
+                if(chr == '\\' || chr == '\'') {
+                    sb.append(chr);
+                } ;  
+                sb.append(chr);
+            }//EO while
+            total += (System.currentTimeMillis()-before) ;
+        }//EO while there are more iterations 
+       
+        System.out.println("append " + total);
+        
+        total = 0 ; 
+        int lastIndex = 0 ; 
+        for(int j=0; j < inoIfIterations; j++) {
+            before = System.currentTimeMillis() ;
+            sb = new StringBuilder(iLength) ; 
+            lastIndex = 0 ; 
+            
+            for(int i=0; i < iLength; i++) {
+                
+                chr = str.charAt(i) ; 
+                if(chr == '\\' || chr == '\'') {
+                    sb.append(str.substring(lastIndex, i)).append(chr) ; 
+                  //  System.out.println(lastIndex + " : " + i);
+                    lastIndex = i ; 
+                } ;  
+               
+            }//EO while
+            if(sb.length() == 0) sb.append(str) ;
+            else sb.append(str.substring(lastIndex, iLength)) ;
+            
+            total += (System.currentTimeMillis()-before) ;
+            
+            //System.out.println(sb + " " + sb.length()) ;
+        }//EO while there are more iterations 
+       
+        System.out.println("substring at " + total);
+	    
+	}//EOM 
 	
 	public static final void testTable(final Table table) { 
 	    System.out.println("in Table " + table.getClass());
@@ -385,42 +483,308 @@ public class TableImporter extends TableProcessor<Worker> {
 	}//EOM 
 	
 	private static final void testReadfromFile() throws Throwable { 
-	    final String fileName = "/work/workspaces/master-complete/hq/dist/installer/modules/hq-migration/target/hq-migration-5.0/tmp/export-data/data/EAM_RESOURCE_EDGE/EAM_RESOURCE_EDGE_0_1.out" ; 
+	    final String fileName = "/work/workspaces/master-complete/hq/dist/installer/modules/hq-migration/target/hq-migration-5.0/tmp/export-data/data/HQ_METRIC_DATA_0D_1S" ; 
 	    
-	    final FileInputStream fis = new FileInputStream(new File(fileName)) ; 
-	    final GZIPInputStream gis = new GZIPInputStream(fis) ; 
-	    final ObjectInputStream ois = new ObjectInputStream(gis) ;
-	   
+	    final File parentDir = new File(fileName) ; 
+	    final File[] batchFiles = parentDir.listFiles() ; 
+	    
+	    String tableName = "HQ_METRIC_DATA_0D_1S" ; 
+	    Thread t = null ; 
+	    for(int i=0; i < 5; i++) { 
+	        t = new Thread(new TestWorker(batchFiles[i], tableName), "Worker_" + i) ;
+	        t.start() ;
+	        t.join() ; 
+	    }//EO while there are more files 
+	    
+	}//EOM 
+	
+	private static final class TestWorker implements Runnable { 
+	    
+	    private final File file ;
+	    private final String tableName ; 
+	    
+	    TestWorker(final File file, final String tableName ) { 
+	        this.file = file ;
+	        this.tableName = tableName ; 
+	    }//EOM 
+	    
+	    public final void run() { 
+	        
+	        ObjectInputStream ois = null ; 
+	        Connection conn = null ; 
+	        ResultSet rs = null ; 
+	        Statement stmt = null  ;
+	        PreparedStatement insertPs = null ; 
+	        boolean commit = true ;
+	        try{ 
+	            final FileInputStream fis = new FileInputStream(this.file) ; 
+	            final GZIPInputStream gis = new GZIPInputStream(fis) ; 
+	            ois = new ObjectInputStream(gis) ;
+	            
+	            conn = Utils.getPostgresConnection() ; 
+	           
+	            Utils.executeUpdate(conn, "TRUNCATE TABLE " + tableName) ;
+	            Utils.executeUpdate(conn, "ALTER TABLE " + tableName + " DISABLE TRIGGER ALL");
+	            
+	            stmt = conn.createStatement() ; 
+	            rs = stmt.executeQuery("select * from " + this.tableName) ;
+	            final ResultSetMetaData rsmd = rs.getMetaData() ; 
+	            
+	            final int columnCount = rsmd.getColumnCount();
+	            final DBDataType[] columnStrategies = new DBDataType[columnCount];
+	            final int[] columnTypes = new int[columnCount];
+	            final String insertSql = new TableImporter().new Worker(null,null,null,null).createInsertStatement(rsmd, tableName, columnStrategies, columnTypes);
+	            Utils.close(Utils.NOOP_INSTRUCTION_FLAG, new Object[]{rs, stmt}) ; 
+
+	            conn.setAutoCommit(false) ;
+	            insertPs = conn.prepareStatement(insertSql);
+	            
+	            Object oValue = null ; 
+	            int count = 1 ; 
+	            int columnType = -1 ; 
+	            while(true) { 
+	                
+	                for (int i = 1; i <= columnCount; i++) {
+	                    try{ 
+	                        oValue = ois.readObject() ;
+	                        
+	                        if(oValue == Utils.EOF_PLACEHOLDER) break ;
+	                        columnType =  columnTypes[i-1] ; 
+	                        
+	                        switch(columnType) { 
+	                        case Types.BIGINT : { 
+	                            insertPs.setLong(i, (Long)oValue) ; 
+	                        }break;
+	                        case Types.NUMERIC : { 
+	                            insertPs.setBigDecimal(i, (BigDecimal)oValue) ; 
+	                        }break; 
+	                        case Types.INTEGER: { 
+                                insertPs.setInt(i, (Integer)oValue) ; 
+                            }break; 
+	                        default :{ 
+	                            insertPs.setObject(i, oValue, columnType); 
+	                        }
+	                        }//EO switch
+                   
+	                        //insertPs.setObject(i , oValue, columnType) ;
+	                        
+	                       // System.out.println("count " + count + " value " + oValue + " type " + oValue.getClass() + " db type " + columnTypes[i-1]); 
+	                        
+	                    }catch(EOFException eofe) { 
+	                        eofe.printStackTrace() ; 
+	                        throw eofe ; 
+	                    }
+	                    
+	                }//EO while there are more columns
+	                
+	                if(oValue == Utils.EOF_PLACEHOLDER) break ;
+	                
+	                count++ ; 
+	                
+	                insertPs.addBatch() ; 
+	            }
+	            
+	            //insertPs.executeBatch() ; 
+	        }catch(Throwable t) { 
+	            t.printStackTrace() ; 
+	            commit = false ; 
+	            throw new RuntimeException(t); 
+	        }finally{ 
+	            try{ 
+	                ois.close() ;
+	            }catch(Throwable t) {
+	                t.printStackTrace() ; 
+	                throw new RuntimeException(t) ; 
+	            }//eO inner catch block
+	            
+	            Utils.close((!commit ? Utils.ROLLBACK_INSTRUCTION_FLAG : Utils.COMMIT_INSTRUCTION_FLAG), new Object[]{conn}) ; 
+	        }//EO catch block 
+        }//EOM 
+	    
+	}//EOM
+	
+	
+	private static final void testWriteObjectVsUTF() throws Throwable { 
+	    
+	   /* class OOS extends ObjectOutputStream { 
+	        private OutputStream out ; 
+	        
+            public OOS(OutputStream out) throws IOException{ 
+                super(out) ;
+                this.out = out ; 
+            }//EOM 
+            
+            @Override
+            public Object replaceObject(Object obj) throws IOException {
+                return super.replaceObject(obj);
+            }//EOM
+            
+            @Override
+            public void writeUTF(String str) throws IOException {
+              if(str == null) this.writeByte(TC_NULL) ; 
+              else { 
+                  this.writeByte(TC_STRING) ;
+                  super.writeUTF(str) ;
+              }
+            }//EOM
+        };
+        
+        class OIS extends ObjectInputStream { 
+            
+            public OIS(InputStream in) throws IOException{ 
+                super(in) ;
+            }//EOM 
+            
+            public final Object readNextObject() throws IOException { 
+                byte tc = this.readByte() ;
+                if(tc == TC_NULL) return null ; 
+                else if(tc == TC_MAX) return Utils.EOF_PLACEHOLDER ;  
+                else return super.readUTF();
+            }//EOM 
+            
+            @Override
+            public String readUTF() throws IOException {
+                byte tc = this.readByte() ;
+                if(tc == TC_NULL) return null ; 
+                else if(tc == TC_MAX) throw new IOException() ;  
+                else return super.readUTF();
+            }//EOM 
+        };*/
+        
+        final String fileName = "/tmp/oosTest.ser" ; 
+        final File file = new File(fileName) ; 
+        file.delete() ; 
+        file.createNewFile() ; 
+        final FileOutputStream fos = new FileOutputStream(fileName) ; 
+        final int iLength = 1000000 ; 
+        ObjectOutputStream oos = null ; 
+        try{
+            
+            oos = new UTFNullHandlerOOS(fos) ; 
+            
+            final String value = "value_" ; 
+            
+            long before = System.currentTimeMillis() ;  
+            
+            for(int i=0; i < iLength; i++) { 
+                if(i % 100 == 0) oos.writeUTF(null) ; 
+                else oos.writeUTF(value + i) ; 
+                
+            }//EO While there are more elements to write
+            System.out.println("Write took: " + (System.currentTimeMillis()-before)) ; 
+            
+            oos.writeByte(ObjectOutputStream.TC_MAX) ; 
+            
+        }catch(Throwable t) { 
+            t.printStackTrace() ; 
+        }finally{ 
+            Utils.close(oos) ; 
+        }//EO catch block 
+        
+        final FileInputStream fis = new FileInputStream(fileName) ;
+        
+        ObjectInputStream ois = null ; 
+        try{ 
+            ois = new UTFNullHandlerOIS(fis);
+            
+            long before = System.currentTimeMillis() ;  
+           
+            Object value = null ; 
+            String sVal = null ; 
+            while(true) {
+                value = ois.readUnshared() ;
+                
+                if(value == Utils.EOF_PLACEHOLDER) { 
+                    System.out.println("EOF");
+                    break ; 
+                }//EO if EOF 
+                else sVal = (String) value ; 
+                
+            }//EO While there are more elements to write
+            
+            System.out.println("read took: " + (System.currentTimeMillis()-before)) ; 
+            
+          //  final IntContainer container1 =  (IntContainer)  ois.readObject() ; 
+          //  System.out.println(container1.count);
+            
+        }catch(Throwable t) { 
+            t.printStackTrace() ; 
+        }finally{ 
+            Utils.close(oos) ; 
+        }//EO catch block 
+    }//EOM  
+	
+	
+	private static final void writeToFileWithInitialPlaceHolder() throws Throwable { 
+	    
+	    class OOS extends ObjectOutputStream { 
+	        public OOS(OutputStream out) throws IOException{ super(out) ; this.enableReplaceObject(true) ; }//EOM 
+	        
+            @Override
+            public Object replaceObject(Object obj) throws IOException {
+                return super.replaceObject(obj);
+            }//EOM
+            
+            @Override
+            public void writeUTF(String str) throws IOException {
+                if(str == null) this.writeObject(str) ; 
+                else super.writeUTF(str) ;
+            }
+	    };
+	    
+	    final String fileName = "/tmp/oosTest.ser" ; 
+	    final FileOutputStream fos = new FileOutputStream(fileName) ; 
+	    fos.getChannel().position(4) ; 
+	    OOS oos = null ; 
 	    try{ 
-    	    Object oValue = null ; 
-    	    final int columnCount = 6; 
-    	    int count = 1 ; 
-    	    while(true) { 
-    	        
-    	        for (int i = 1; i <= columnCount; i++) {
-                    try{ 
-                        oValue = ois.readObject() ;
-                        
-                        System.out.println("count " + count + " value " + oValue); 
-                        
-                    }catch(EOFException eofe) { 
-                        eofe.printStackTrace() ; 
-                        throw eofe ; 
-                    }
-                    if(oValue == Utils.EOF_PLACEHOLDER) break ; 
-                    
-                }//EO while there are more columns
-    	        
-    	        if(oValue == Utils.EOF_PLACEHOLDER) break ;
-    	        
-    	        count++ ; 
-    	        
-    	        
-    	    }
+	        oos = new OOS(fos) ;
+	        final IntContainer container = new IntContainer() ; 
+	        container.count = 1 ; 
+	        oos.writeObject(container) ;
+	        container.count = 20 ; 
+	        
+	        oos.flush() ; 
+	        fos.getChannel().position(0) ;
+	        byte[] bytes = java.nio.ByteBuffer.allocate(4).putInt(1001).array();
+
+	        fos.write(bytes) ; 
+	        
+	        
+	    }catch(Throwable t) { 
+	        t.printStackTrace() ; 
 	    }finally{ 
-	        ois.close() ;
+	        Utils.close(oos) ; 
 	    }//EO catch block 
-	}
+	    
+	    final FileInputStream fis = new FileInputStream(fileName) ;
+	    final byte[] count = new byte[4] ; 
+	    fis.read(count) ; 
+	    final ByteBuffer bb = ByteBuffer.wrap(count) ; 
+	    //bb.order(ByteOrder.LITTLE_ENDIAN);
+	    
+	    System.out.println(bb.getInt()) ;  
+	    ObjectInputStream ois = null ; 
+	    try{ 
+	        ois = new ObjectInputStream(fis);
+            final IntContainer container =  (IntContainer)  ois.readObject() ; 
+            System.out.println(container.count);
+            
+            System.out.println(ois.readObject());
+            
+          //  final IntContainer container1 =  (IntContainer)  ois.readObject() ; 
+          //  System.out.println(container1.count);
+            
+        }catch(Throwable t) { 
+            t.printStackTrace() ; 
+        }finally{ 
+            Utils.close(oos) ; 
+        }//EO catch block 
+	}//EOM 
+	
+	private static final class IntContainer implements Serializable{ 
+	    int count ; 
+	}//EOM 
+	
 
 	private static final void decode(final InputStream is) throws Throwable {
 		if (is == null)

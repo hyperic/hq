@@ -10,27 +10,53 @@
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
-	<groupId>org.hyperic.hq.dist</groupId>
-	<artifactId>installer</artifactId>
+	<groupId>org.hyperic.hq.dist.installer</groupId>
+	<artifactId>modules</artifactId>
 	<packaging>pom</packaging>
-	<name>Hyperic HQ Distribution - Hyperic HQ Installer</name>
+	<name>Hyperic HQ Distribution - Hyperic HQ Installer Modules</name>
 
 
 	<build>
 		<plugins>
-			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<configuration>
-					<finalName>installer</finalName>
-					<appendAssemblyId>false</appendAssemblyId>
-					<descriptors>
-						<descriptor>src/main/assembly/assembly.xml</descriptor>
-					</descriptors>
-				</configuration>
-			</plugin>
+			 <plugin>
+		        <groupId>org.apache.maven.plugins</groupId>
+		        <artifactId>maven-dependency-plugin</artifactId>
+		        <executions>
+		          <execution>
+		            <id>unpack-hqInstaller-and-ant</id>
+		            <phase>package</phase>
+		            <goals>
+		              <goal>unpack-dependencies</goal>
+		            </goals>
+		            <configuration>
+		              <includeGroupIds>org.apache.ant,org.hyperic.hq</includeGroupIds> 
+		              <outputDirectory>../../target/generated-resources</outputDirectory>
+		              <excludeTransitive>true</excludeTransitive>
+		              <excludes>**/*pom*</excludes>
+		            </configuration>
+		          </execution>
+		          <execution>
+		            <id>unpack-sigar</id>
+		            <phase>package</phase>
+		            <goals>
+		              <goal>unpack-dependencies</goal>
+		            </goals>
+		            <configuration>
+		              <includeGroupIds>org.hyperic</includeGroupIds> 
+		              <excludeTransitive>true</excludeTransitive>
+		              <outputDirectory>../../target/generated-resources/lib</outputDirectory>
+		            </configuration>
+		          </execution>
+		        </executions>
+		      </plugin>
+
 		</plugins>
 	</build>
 
+	<modules> 
+		<module>modules/installer</module> 
+		<module>modules/hq-migration</module> 
+	</modules> 
 
 	<dependencies>
 		<dependency>

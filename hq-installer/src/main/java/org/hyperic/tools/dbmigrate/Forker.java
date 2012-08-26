@@ -13,6 +13,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import org.hyperic.util.MultiRuntimeException;
 
+import com.sun.xml.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
+
 public class Forker {
 
     public static final <V, T extends Callable<V[]>> List<Future<V[]>> fork(final int bufferSize, final int maxWorkers,
@@ -49,11 +51,13 @@ public class Forker {
         protected final Connection conn;
         private final CountDownLatch countdownSemaphore;
         protected BlockingDeque<V> sink;
+        private Class<V> entityType ; 
 
-        protected ForkWorker(final CountDownLatch countdownSemaphore, Connection conn, BlockingDeque<V> sink) {
+        protected ForkWorker(final CountDownLatch countdownSemaphore, Connection conn, BlockingDeque<V> sink, final Class<V> clsEntityType) {
             this.countdownSemaphore = countdownSemaphore;
             this.conn = conn;
             this.sink = sink;
+            this.entityType = clsEntityType ; 
         }//EOM
 
         protected abstract void callInner(final V entity) throws Throwable;
@@ -62,6 +66,7 @@ public class Forker {
         public V[] call() throws Exception {
             final List<V> processedEntities = new ArrayList<V>();
             MultiRuntimeException thrown = null;
+            
             try{
                 V entity = null;
                 Throwable innerException = null;
@@ -70,6 +75,7 @@ public class Forker {
                     try {
                         processedEntities.add(entity);
                         callInner(entity);
+                        
                     }catch (Throwable t2) {
                         Utils.printStackTrace(t2);
                         innerException = t2;
@@ -103,7 +109,8 @@ public class Forker {
                 if (thrown != null) throw thrown;
             }//EO catch block 
 
-            return (V[]) processedEntities.toArray();
+            final V[] arrResponse = (V[]) java.lang.reflect.Array.newInstance(this.entityType, processedEntities.size()) ; 
+            return processedEntities.toArray(arrResponse);
         }//EOM 
 
         protected final void rollbackEntity(final Object entity, final Throwable t) { /*NOOP*/}//EOM

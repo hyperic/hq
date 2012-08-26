@@ -3,6 +3,7 @@ package org.hyperic.tools.dbmigrate;
 import java.io.PrintStream;
 
 import org.apache.tools.ant.BuildEvent;
+import org.apache.tools.ant.BuildLogger;
 import org.apache.tools.ant.DefaultLogger;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.listener.AnsiColorLogger;
@@ -11,13 +12,13 @@ import org.hyperic.tools.ant.installer.InstallerLogger;
 
 public class Logger extends InstallerLogger{
 
-    private HQAnsiColorLogger delegateConsoleLogger ;
+    private PrintLoggerInterface delegateConsoleLogger ;
     private DefaultLogger delegateStandardFileLogger ; 
     private int outputLevel ; 
 
     public Logger() { 
         super() ;
-        this.delegateConsoleLogger = new HQAnsiColorLogger() ; 
+        this.delegateConsoleLogger = (System.getProperty("os.name").indexOf("Win") == -1? new HQAnsiColorLogger() : new HQDefaultLogger()) ;  
     }//EOM
     
     @Override
@@ -102,66 +103,31 @@ public class Logger extends InstallerLogger{
         };//EO BasicLogger
     }//EOM 
     
-    private class HQAnsiColorLogger extends AnsiColorLogger { 
+    private interface PrintLoggerInterface extends BuildLogger{ 
+        void printMessage(String message) ; 
+    }//EOM 
+    
+    private class HQAnsiColorLogger extends AnsiColorLogger implements PrintLoggerInterface{ 
         
         public void printMessage(String message) {
             super.printMessage(message, this.out, Project.MSG_WARN);
         }//EOM 
         
+        
     }//EO inner class HQAnsiColorLogger
     
-   /* private class ProxyFilesLogger implements BuildLogger{
+    private class HQDefaultLogger extends DefaultLogger implements PrintLoggerInterface{ 
+    
+       public void printMessage(String message) {
+        super.printMessage(message, this.out, Project.MSG_WARN);
+      }//EOM 
         
-        private List<BuildLogger> delegates = new ArrayList<BuildLogger>() ;
-
-        public final void buildStarted(BuildEvent event) {
-            for(BuildLogger delegate : this.delegates) { 
-                delegate.buildStarted(event) ; 
-            }//EO while there are more logger delegates 
-        }//EOM 
-
-        public final void buildFinished(final BuildEvent event) {
-            for(BuildLogger delegate : this.delegates) { 
-                delegate.buildFinished(event) ; 
-            }//EO while there are more logger delegates 
-        }//EOM
-
-        public final void targetStarted(final BuildEvent event) {
-            for(BuildLogger delegate : this.delegates) { 
-                delegate.targetStarted(event) ; 
-            }//EO while there are more logger delegates 
-        }//EOM
-
-        public final void targetFinished(final BuildEvent event) {
-            for(BuildLogger delegate : this.delegates) { 
-                delegate.targetFinished(event) ; 
-            }//EO while there are more logger delegates 
-        }//EOM
-
-        public final void taskStarted(final BuildEvent event) {
-            for(BuildLogger delegate : this.delegates) { 
-                delegate.taskStarted(event) ; 
-            }//EO while there are more logger delegates 
-        }//EOM
-
-        public final void taskFinished(final BuildEvent event) {
-            for(BuildLogger delegate : this.delegates) { 
-                delegate.taskFinished(event) ; 
-            }//EO while there are more logger delegates 
-        }//EOM
-
-        public final void messageLogged(final BuildEvent event) {
-            for(BuildLogger delegate : this.delegates) { 
-                delegate.messageLogged(event) ; 
-            }//EO while there are more logger delegates 
-        }//EOM
-
-        public final void setMessageOutputLevel(final int level) { throw new UnsupportedOperationException() ; }//EOM 
-        public final void setOutputPrintStream(final PrintStream output) { throw new UnsupportedOperationException() ; }//EOM
-        public final void setEmacsMode(final boolean emacsMode) { throw new UnsupportedOperationException() ; }//EOM
-        public final void setErrorPrintStream(final PrintStream err) { throw new UnsupportedOperationException() ; }//EOM
         
-    }//EO class ProxyFilesLogger 
-    */
+    }//EO inner class HQAnsiColorLogger
+    
+   public static void main(String[] args) throws Throwable {
+       System.out.println(System.getProperty("os.name") ) ;        
+   }//EOM 
+   
     
 }//EOC 

@@ -1,7 +1,9 @@
 package org.hyperic.tools.dbmigrate;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Connection;
@@ -150,6 +152,22 @@ public class Utils{
       }//EO if there were files 
       dir.delete();
     }//EO if the directory exists  
+  }//EOM 
+  
+  public static final String getFileContent(final File file) throws IOException{ 
+      FileInputStream fis = null ;
+      String content = null ; 
+      try{ 
+          fis = new FileInputStream(file);
+          
+          final byte arrBytes[] = new byte[fis.available()];
+          fis.read(arrBytes);
+          content = new String(arrBytes);
+      }finally{ 
+          close(fis) ; 
+      }//EO catch block 
+      
+      return content ; 
   }//EOM 
   
   public static enum FileContentType { EOF ; }//EOM 

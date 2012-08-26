@@ -3,7 +3,9 @@ package org.hyperic.tools.dbmigrate;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -138,7 +140,7 @@ public class TableExporter extends TableProcessor<Worker> {
         private final File outputDir;
         
         Worker(final CountDownLatch countdownSemaphore, final Connection conn, final BlockingDeque<Table> sink, final File outputDir) {
-            super(countdownSemaphore, conn, sink);
+            super(countdownSemaphore, conn, sink, Table.class);
             this.outputDir = outputDir;
         }//EOM 
         
@@ -209,7 +211,8 @@ public class TableExporter extends TableProcessor<Worker> {
                     recordCountMsgPart = "No Records where exported" ; 
                 }else { 
                     recordCountMsgPart = "Finished exporting " + recordCount + " records" ;
-                    ous.writeObject(Utils.EOF_PLACEHOLDER) ; 
+//                    ous.writeObject(Utils.EOF_PLACEHOLDER) ; 
+                    ous.write(ObjectOutputStream.TC_MAX) ;
                 }//EO if records were exported to file 
                 
                 final int totalNumberOfRecordsSofar = table.noOfProcessedRecords.addAndGet(recordCount) ;
@@ -223,7 +226,8 @@ public class TableExporter extends TableProcessor<Worker> {
         private final ObjectOutputStream newOutputFile(final String tableName, final int batchNo, final int partitionNumber, 
                         final File parentDir, final ObjectOutputStream existingOus) throws Throwable {
             if(existingOus != null) {
-                existingOus.writeObject(Utils.EOF_PLACEHOLDER) ;
+                //existingOus.writeObject(Utils.EOF_PLACEHOLDER) ;
+                existingOus.write(ObjectOutputStream.TC_MAX) ;
                 existingOus.flush();
                 existingOus.close();
             }//EO if existing output stream exists 
@@ -231,7 +235,7 @@ public class TableExporter extends TableProcessor<Worker> {
             final File outputFile = new File(parentDir, tableName + "_" + partitionNumber + "_" + batchNo + ".out");
             final FileOutputStream fos = new FileOutputStream(outputFile);
             final GZIPOutputStream gzos = new GZIPOutputStream(fos) ; 
-            return new ObjectOutputStream(gzos);
+            return new UTFNullHandlerOOS(gzos);
             //return new ObjectOutputStream(fos);
         }//EOM 
 
@@ -242,6 +246,30 @@ public class TableExporter extends TableProcessor<Worker> {
         }//EOM 
     }//EO inner class Worker
     
+    
+    public static final class UTFNullHandlerOOS extends ObjectOutputStream { 
+        
+        public UTFNullHandlerOOS(final OutputStream out) throws IOException{ super(out) ; }//EOM 
+        
+        @Override
+        public final void writeUnshared(final Object obj) throws IOException{ 
+            this.writeByte(TC_OBJECT) ; 
+            //super.writeUnshared(obj) ; 
+            super.writeObject(obj) ;
+        }//EOM 
+        
+        @Override
+        public final void writeUTF(final String str) throws IOException {
+            if(str == null) { 
+                this.writeByte(TC_NULL) ;
+            }else { 
+                this.writeByte(TC_STRING) ; 
+                super.writeUTF(str);
+            }//EO else if not null 
+        }//EOM 
+        
+    }//EO inner class UTFNullHandlerOOS
+     
     //*****************************************************************************************************
     //DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG  
     //*****************************************************************************************************
@@ -253,7 +281,9 @@ public class TableExporter extends TableProcessor<Worker> {
         try
         {
             //String tablesClause = "EAM_CONFIG_RESPONSE,EAM_MEASUREMENT,EAM_MEASUREMENT_BL,EAM_SERVICE,EAM_SERVER,EAM_PLATFORM,EAM_AGENT";
-            File file = new File("/work/workspaces/master-complete/hq/dist/installer/src/main/resources/data/sql/migration-post-configure.sql");
+            File file = new File("/work/workspaces/master-complete/hq/dist/installer/src/main/resources/data/sql/migrationScripts/import-scripts.sql");
+            //File file = new File("/work/workspaces/master-complete/hq/dist/installer/src/main/resources/data/sql/migrationScripts/migration-pre-configure.sql");
+            
             FileInputStream fis = new FileInputStream(file);
             byte arrBytes[] = new byte[fis.available()];
             fis.read(arrBytes);
@@ -265,7 +295,9 @@ public class TableExporter extends TableProcessor<Worker> {
             conn.commit();
             stmt = conn.createStatement();
             stmt.execute(sql);
-            stmt.executeQuery("select fmigrationPostConfigure('EAM_CONFIG_RESPONSE,EAM_MEASUREMENT,EAM_MEASUREMENT_BL,EAM_SERVICE,EAM_SERVER,EAM_PLATFORM,EAM_AGENT');");
+            //stmt.executeQuery("select fmigrationPostConfigure('EAM_CONFIG_RESPONSE,EAM_MEASUREMENT,EAM_MEASUREMENT_BL,EAM_SERVICE,EAM_SERVER,EAM_PLATFORM,EAM_AGENT');");
+            
+            //stmt.executeQuery("select fToggleIndices('EAM_CONFIG_RESPONSE,EAM_MEASUREMENT,EAM_MEASUREMENT_BL,EAM_SERVICE,EAM_SERVER,EAM_PLATFORM,EAM_AGENT',true);");
             conn.commit();
             System.out.println("CREATED FUNCTION");
         }catch(Throwable t) {

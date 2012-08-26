@@ -63,10 +63,6 @@
 		              casesensitive="false"
 					  override="true"
 							  global="true"/>
-				
-				<delete includeemptydirs="true" failonerror="false">
-		    		<fileset dir="${server.artifacts.dir}" includes="**/**" defaultexcludes="false"/>
-				</delete>		
 			</else> 
 		</if>
 		

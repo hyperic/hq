@@ -1,11 +1,13 @@
 package org.hyperic.tools.dbmigrate;
 
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.postgresql.core.Oid;
 
 public enum DBDataType {
     
@@ -13,18 +15,9 @@ public enum DBDataType {
         
         public final void serialize(final ObjectOutputStream ous, final ResultSet rs, final int columnIndex) throws Exception{
             byte blobContent[] = rs.getBytes(columnIndex);
-            ous.writeObject(blobContent);
+            ous.writeUnshared(blobContent);
         }//EOM 
-
-        /*public final void bindStatementParam(final int columnIndex, final ObjectInputStream ois, final PreparedStatement ps, 
-                final int iSqlDataType) throws Throwable  {
-            
-            final byte blobContent[] = (byte[])(byte[])ois.readObject();
-            if(blobContent == null) ps.setNull(columnIndex, 2004);
-            else ps.setBytes(columnIndex, blobContent);
-            
-        }//EOM 
-*/        
+        
         @Override
         public final void bindStatementParam(final int columnIndex, final Object oValue, final PreparedStatement ps, final int iSqlDataType) throws Throwable  {
             
@@ -35,9 +28,43 @@ public enum DBDataType {
         }//EOM
         
     }, //EO BLOB
-    VARCHAR(new int[] { 12 }){
-    }, //EO VARCAHR
-    DEFAULT{
+    INTEGER(new int[]{Types.INTEGER},Oid.INT4) { 
+        
+    },//EO INTEGER
+    TINYINT(new int[]{Types.TINYINT, Types.SMALLINT},Oid.INT2) { 
+        
+    },//EO TINYINT
+    BIGINT(new int[]{Types.BIGINT},Oid.INT8) { 
+        
+    },//EO BIGINT
+    REAL(new int[]{Types.REAL},Oid.FLOAT4) { 
+        
+    },//REAL
+    DOUBLE(new int[]{Types.DOUBLE, Types.FLOAT},Oid.FLOAT8) { 
+    },//DOUBLE
+    DECIMAL(new int[]{Types.DECIMAL, Types.NUMERIC},Oid.NUMERIC) { 
+         
+    },//EO DECIMAL
+    CHAR(new int[]{Types.CHAR},Oid.BPCHAR) { 
+         
+    },//EO CHAR
+    VARCHAR(new int[]{Types.VARCHAR, Types.LONGVARCHAR},Oid.VARCHAR) { 
+        @Override
+        protected void bindStatementParamInner(final int columnIndex, final Object oValue, final PreparedStatement ps, final int iSqlDataType) throws Throwable {
+            ps.setString(columnIndex, (String)oValue) ;
+        }//EOM
+    },//EO VARCHAR
+    BIT(new int[]{Types.BIT},Oid.BOOL){ 
+        @Override
+        protected void bindStatementParamInner(final int columnIndex, final Object oValue, final PreparedStatement ps, final int iSqlDataType) throws Throwable {
+            ((org.postgresql.jdbc2.AbstractJdbc2Statement)ps).bindString(columnIndex, (String)oValue, this.oidDataType) ;
+        }//EOM
+    },//EO BIT
+    DEFAULT(){
+        @Override
+        protected void bindStatementParamInner(final int columnIndex, final Object oValue, final PreparedStatement ps, final int iSqlDataType) throws Throwable {
+            ps.setObject(columnIndex, oValue, iSqlDataType) ;
+        }//EOM 
     };//EO DEFAULT 
 
     private static final Map<Integer, DBDataType> mapReverseValues;
@@ -53,30 +80,31 @@ public enum DBDataType {
     }//EO static block 
     
     private int[] sqlDataTypes;
+    protected int oidDataType ; 
 
     private DBDataType() {}//EOM 
 
     private DBDataType(int[] dataTypes) {
         this.sqlDataTypes = dataTypes;
     }//EOM 
+    
+    private DBDataType(int[] dataTypes, int oidDataType) {
+        this(dataTypes);
+        this.oidDataType = oidDataType ;
+    }//EOM 
 
     public void serialize(final ObjectOutputStream ous, final ResultSet rs, final int columnIndex) throws Exception {
-        ous.writeObject(rs.getObject(columnIndex));
+        //ous.writeObject(rs.getObject(columnIndex));
+        ous.writeUTF(rs.getString(columnIndex));
     }//EOM 
 
-    /*public void bindStatementParam(final int columnIndex, final ObjectInputStream ois, final PreparedStatement ps, 
-            final int iSqlDataType) throws Throwable {
-        
-        final Object oValue = ois.readObject();
+    public void bindStatementParam(final int columnIndex, final Object oValue, final PreparedStatement ps, final int iSqlDataType) throws Throwable {
         if (oValue == null) ps.setNull(columnIndex, iSqlDataType);
-        else ps.setObject(columnIndex, oValue, iSqlDataType);
-    }//EOM 
-*/
+        else this.bindStatementParamInner(columnIndex, oValue, ps, iSqlDataType) ; 
+    }//EOM
     
-    public void bindStatementParam(final int columnIndex, final Object oValue, final PreparedStatement ps, 
-            final int iSqlDataType) throws Throwable {
-        if (oValue == null) ps.setNull(columnIndex, iSqlDataType);
-        else ps.setObject(columnIndex, oValue, iSqlDataType);
+    protected void bindStatementParamInner(final int columnIndex, final Object oValue, final PreparedStatement ps, final int iSqlDataType) throws Throwable {
+        ((org.postgresql.jdbc2.AbstractJdbc2Statement)ps).bindLiteral(columnIndex, (String)oValue, this.oidDataType) ;
     }//EOM
     
     public static final DBDataType reverseValueOf(final int iSqlDataType) {
