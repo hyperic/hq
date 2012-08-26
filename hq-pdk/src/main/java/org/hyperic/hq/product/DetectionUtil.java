@@ -16,22 +16,6 @@ import edu.emory.mathcs.backport.java.util.Collections;
 
 public class DetectionUtil {
     
-//  protected static ConfigResponse populatePorts(String query, ConfigResponse cf) throws SigarException {
-//      return populatePorts(new String[] {query}, cf);
-//  }
-  
-//  @SuppressWarnings("unchecked")
-//  protected static ConfigResponse populatePorts(String[] queries, ConfigResponse cf) throws SigarException {
-//      // accumulate all products pids
-//      Set<Long> pidsSet = new HashSet<Long>();
-//      for (String query : queries) {
-//          long[] pidsArr = getPids(query);
-//          if (pidsArr!=null && pidsArr.length>0) {
-//              for (long l : pidsArr) {
-//                  pidsSet.add(l);
-//              }
-//          }
-//      }
   @SuppressWarnings("unchecked")
   public static ConfigResponse populatePorts(SigarProxy sigar, long[] pids, ConfigResponse cf) throws SigarException {
       NetstatData data = new NetstatData();
