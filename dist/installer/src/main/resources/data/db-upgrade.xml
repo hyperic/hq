@@ -11776,6 +11776,39 @@ has already been defined.
         <schema-addColumn table="EAM_AIQ_PLATFORM" column="AUTO_APPROVE" columnType="BOOLEAN" nullable="NOT NULL" default="FALSE"/>
         <schema-addColumn table="EAM_AIQ_SERVER" column="AUTO_APPROVE" columnType="BOOLEAN" nullable="NOT NULL" default="FALSE"/>
     </schemaSpec>
+	
+    <schemaSpec version="3.215">
+        <schema-directSQL>
+	    	<statement targetDB="postgresql">
+    		<!-- availInWin(avail section begin,avail section end,timeframe begin,timeframe end,avail sectioin val,accept only avail up) -->
+    			create or replace function availInWin(bigint,bigint,bigint,bigint,double precision,boolean) returns bigint as $$
+    			declare
+	    		b bigint;
+    			e bigint;
+    			begin
+    			IF $6 AND $5&#60;&#62;1
+	    		THEN
+    			return 0;
+    			END IF;
+    			IF $1>$3
+	    		THEN
+    			b:=$1;
+    			ELSE
+    			b:=$3;
+	    		END IF;
+    			IF $2>$4
+    			THEN
+    			e:=$4;
+	    		ELSE
+    			e:=$2;
+    			END IF;
+    			return e-b;
+	    		end;
+    			$$ language plpgsql;
+	   		</statement>	 
+    	</schema-directSQL>
+    </schemaSpec>
+
 
 </dbupgrade>
 </target>

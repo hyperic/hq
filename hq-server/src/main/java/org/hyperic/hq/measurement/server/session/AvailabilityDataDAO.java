@@ -360,84 +360,27 @@ public class AvailabilityDataDAO
         if (mids==null || mids.size() == 0) {
             return null;
         }
-        String relevantMidsCondStr = "rle.MEASUREMENT_ID in (?)";
-        String sqlBaseAvailInWin = new StringBuilder()
-        .append("SELECT rle.MEASUREMENT_ID, SUM(rle.endtime - rle.startime)")
+        String sql = new StringBuilder()
+        .append("SELECT rle.MEASUREMENT_ID,")
+        .append(" SUM(availInWin(rle.startime,rle.endtime,").append(start).append(',').append(end).append(",rle.availval,TRUE)),")
+        .append(" SUM(availInWin(rle.startime,rle.endtime,").append(start).append(',').append(end).append(",rle.availval,FALSE))")
         .append(" FROM HQ_AVAIL_DATA_RLE rle")
-        .append(" WHERE ").append(relevantMidsCondStr)
-        .append(" AND rle.startime >= ").append(start)
-        .append(" AND rle.endtime <= ").append(end).toString();
-        String sqlAllAvailInWin = new StringBuilder()
-        .append(sqlBaseAvailInWin)
+        .append(" WHERE rle.MEASUREMENT_ID in (?)")
+        .append(" AND rle.endtime >= ").append(start)
+        .append(" AND rle.startime <= ").append(end)
         .append(" GROUP BY rle.MEASUREMENT_ID")
-        .toString();
-        String sqlAllAvailAtWinEdges = new StringBuilder()
-        .append("SELECT rle.MEASUREMENT_ID, rle.startime, rle.endtime")
-        .append(" FROM HQ_AVAIL_DATA_RLE rle")
-        .append(" WHERE ").append(relevantMidsCondStr)
-        .append(" AND ((rle.startime < ").append(start).append(" AND rle.endtime > ").append(start).append(")")
-        .append(" OR (rle.startime < ").append(end).append(" AND rle.endtime > ").append(end).append("))")
-        .toString();
-        String sqlAvailUpInWin = new StringBuilder()
-        .append(sqlBaseAvailInWin)
-        .append(" AND rle.availVal = " + MeasurementConstants.AVAIL_UP)
-        .append(" GROUP BY rle.MEASUREMENT_ID")
-        .toString();
-        String sqlAvailUpAtWinEdges = new StringBuilder()
-        .append(sqlAllAvailAtWinEdges)
-        .append(" AND rle.availVal = " + MeasurementConstants.AVAIL_UP)
         .toString();
         
         final HQDialect dialect = getHQDialect();
         final int batchSize = dialect.getMaxExpressions() < 0 ? Integer.MAX_VALUE : dialect.getMaxExpressions();
 
         Connection conn = null;
-        try {
-            conn = dbUtil.getConnection();
-            IAvailExtractionStrategy midWinStrtg = new MidWinAvailExtractionStrategy();
-            IAvailExtractionStrategy winEdgeStrtg = new WinEdgeAvailExtractionStrategy(start, end);
-            Map<Integer,Long> msmtToAllAvailSumTimeInWin = executeBatchAvailQuery(conn,sqlAllAvailInWin,mids,batchSize,midWinStrtg);
-            Map<Integer,Long> msmtToAllAvailInWinEdge = executeBatchAvailQuery(conn,sqlAllAvailAtWinEdges,mids,batchSize,winEdgeStrtg);
-            Map<Integer,Long> msmtToAllAvailSumTime = merge(msmtToAllAvailSumTimeInWin,msmtToAllAvailInWinEdge);
-            
-            Map<Integer,Long> msmtToAvailUpSumTimeInWin = executeBatchAvailQuery(conn,sqlAvailUpInWin,mids,batchSize,midWinStrtg);
-            Map<Integer,Long> msmtToAvailUpAvailInWinEdge = executeBatchAvailQuery(conn,sqlAvailUpAtWinEdges,mids,batchSize,winEdgeStrtg);
-            Map<Integer,Long> msmtToAvailUpSumTime = merge(msmtToAvailUpSumTimeInWin,msmtToAvailUpAvailInWinEdge);
-            
-            Map<Integer,Double> msmtToAvailAvg = calcAvg(msmtToAllAvailSumTime,msmtToAvailUpSumTime);
-            return msmtToAvailAvg;
-        } finally {
-            DBUtil.closeConnection(AvailabilityDataDAO.class.getName(),conn);
-        }
-    }
-    
-    protected static interface IAvailExtractionStrategy {
-        public Long extract(ResultSet rs) throws SQLException;
-    }
-    protected static class MidWinAvailExtractionStrategy implements IAvailExtractionStrategy {
-        public Long extract(ResultSet rs) throws SQLException {
-            return rs.getLong(2);
-        }
-    }
-    protected static class WinEdgeAvailExtractionStrategy implements IAvailExtractionStrategy {
-        protected long timeFrameStart;
-        protected long timeFrameEnd;
-        public WinEdgeAvailExtractionStrategy(long timeFrameStart, long timeFrameEnd) {
-            this.timeFrameStart= timeFrameStart;
-            this.timeFrameEnd = timeFrameEnd;
-        }
-        public Long extract(ResultSet rs) throws SQLException {
-            long availSectionStart = rs.getLong(2);
-            long availSectionEnd = rs.getLong(3);
-            return Math.min(availSectionEnd, this.timeFrameEnd) - Math.max(availSectionStart, this.timeFrameStart);
-        }
-    }
-    protected Map<Integer,Long> executeBatchAvailQuery(Connection conn, final String sql, final List<Integer> mids, final int batchSize, IAvailExtractionStrategy extractStrtg) throws SQLException {
-        final int size = mids.size();
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        Map<Integer,Long> rtn = new HashMap<Integer, Long>();
+        final int size = mids.size();
         try {
+            conn = dbUtil.getConnection();
+            Map<Integer,Double> rtn = new HashMap<Integer, Double>();
             stmt = conn.prepareStatement(sql);
             for (int i=0; i<size; i+=batchSize) {
                 final int last = Math.min(i+batchSize, size);
@@ -450,37 +393,14 @@ public class AvailabilityDataDAO
                 rs = stmt.executeQuery();
                 while (rs.next()) {
                     Integer availId = rs.getInt(1);
-                    Long accumulatedTime = rtn.get(availId);
-                    rtn.put(availId, extractStrtg.extract(rs)+(accumulatedTime!=null?accumulatedTime:0));
+                    rtn.put(availId, ((double) rs.getLong(2))/rs.getLong(3));
                 }            
             }
+            return rtn;
         } finally {
-            DBUtil.closeStatement(AvailabilityDataDAO.class.getName(), stmt);
-            DBUtil.closeResultSet(AvailabilityDataDAO.class.getName(), rs);
+            DBUtil.closeJDBCObjects(AvailabilityDataDAO.class.getName(), conn,stmt,rs);
         }
-        return rtn;
     }
-    protected Map<Integer,Long> merge(Map<Integer,Long> map1, Map<Integer,Long> map2) {
-        Map<Integer,Long> rtn = new HashMap<Integer,Long>();
-        Set<Integer> globalKeys = new HashSet<Integer>();
-        globalKeys.addAll(map1.keySet());
-        globalKeys.addAll(map2.keySet());
-        for (Integer key : globalKeys) {
-            Long map1Val = map1.get(key); 
-            Long map2Val = map2.get(key); 
-            rtn.put(key,(map1Val!=null?map1Val:0)+(map2Val!=null?map2Val:0));
-        }
-        return rtn;
-    }
-    protected Map<Integer, Double> calcAvg(Map<Integer,Long> allAvail, Map<Integer,Long> availUp) {
-        Map<Integer,Double> rtn = new HashMap<Integer,Double>();
-        for (Integer availId : allAvail.keySet()) {
-            Long availUpTime = availUp.get(availId);
-            rtn.put(availId, availUpTime!=null?((double)availUpTime/allAvail.get(availId)):0);
-        }
-        return rtn;
-    }
-
     
     /**
      * @return List of Object[]. [0] = measurement template id, [1] =
