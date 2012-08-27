@@ -25,11 +25,35 @@
 
 package org.hyperic.hq.plugin.alfresco;
 
+import java.util.HashMap;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.ResultSetMetaData;
+
+import org.hyperic.hq.product.JDBCMeasurementPlugin;
+import org.hyperic.hq.product.Metric;
+import org.hyperic.hq.product.TypeInfo;
+import org.hyperic.hq.product.MetricUnreachableException;
+import org.hyperic.hq.product.MetricInvalidException;
+import org.hyperic.hq.product.MetricNotFoundException;
+import org.hyperic.hq.product.MetricValue;
+import org.hyperic.hq.product.PluginException;
+
+import org.hyperic.sigar.Sigar;
+import org.hyperic.sigar.DirUsage;
+
+import org.hyperic.util.jdbc.DBUtil;
+import org.hyperic.util.StringUtil;
+import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.ConfigSchema;
+import org.hyperic.util.config.SchemaBuilder;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.product.JDBCMeasurementPlugin;
-import org.hyperic.hq.product.Metric;
 
 public class AlfrescoMeasurementPlugin 
     extends JDBCMeasurementPlugin
@@ -71,12 +95,14 @@ public class AlfrescoMeasurementPlugin
         return DEFAULT_URL;
     }
 
-    @Override
-    public String getPassword(Metric jdsn) {
-        String pass = super.getPassword(jdsn);
-        pass = (pass == null) ? "" : pass;
+    protected Connection getConnection(String url,
+                                       String user,
+                                       String password)
+        throws SQLException
+    {
+        String pass = (password == null) ? "" : password;
         pass = (pass.matches("^\\s*$")) ? "" : pass;
-        return pass;
+        return DriverManager.getConnection(url, user, pass);
     }
 
     /**

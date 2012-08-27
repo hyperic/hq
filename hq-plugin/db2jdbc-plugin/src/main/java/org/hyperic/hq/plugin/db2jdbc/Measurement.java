@@ -70,6 +70,11 @@ public class Measurement extends CachedJDBCMeasurement {
         }
     }
 
+    protected Connection getConnection(String url, String user, String pass) throws SQLException {
+        getLog().debug("[getConnection] url='" + url + "' user='" + user + "' pass='******'");
+        return DriverManager.getConnection(url, user, pass);
+    }
+
     Map processResulSet(ResultSet rs, Metric metric) throws MetricNotFoundException {
         Map res = new HashMap();
         String prefix = "";

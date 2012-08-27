@@ -26,6 +26,7 @@
 package org.hyperic.hq.plugin.sqlquery;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -35,7 +36,6 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.product.ConnectionManager;
 import org.hyperic.hq.product.JDBCMeasurementPlugin;
 import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.Metric;
@@ -73,7 +73,6 @@ public class SQLQueryMeasurementPlugin
     private static Map loadedDrivers = new HashMap();
     private static Map availableDrivers;
     
-    @Override
     public void init(PluginManager manager)
         throws PluginException {
 
@@ -90,7 +89,6 @@ public class SQLQueryMeasurementPlugin
         }
     }
 
-    @Override
     public String translate(String template, ConfigResponse config) {
         if (this.isProxy) {
             if (!template.endsWith(this.config)) {
@@ -102,7 +100,6 @@ public class SQLQueryMeasurementPlugin
 
     //<config> defined in plugin.xml..
     //overriding jdbcDriver w/ *.class from plugin.properties
-    @Override
     public ConfigSchema getConfigSchema(TypeInfo info, ConfigResponse config) {
         ConfigSchema schema = super.getConfigSchema(info, config);
         ConfigOption defopt =
@@ -193,7 +190,6 @@ public class SQLQueryMeasurementPlugin
         }
     }
 
-    @Override
     public String getHelp(TypeInfo info, Map props) {
         StringBuffer help = new StringBuffer();
         Map drivers = getAvailableDrivers();
@@ -241,16 +237,88 @@ public class SQLQueryMeasurementPlugin
     private static boolean loadDriver(Properties props) {
         return loadDriver(props.getProperty(PROP_DRIVER));
     }
-        
-    /**
-     * todo: invastigate if the time out are needed and how implement it with pools.
-     */
-    static Connection getConnection(Properties props) throws SQLException {
+
+    static Connection getConnection(Properties props)
+        throws SQLException {
+
         loadDriver(props);
-        String url = props.getProperty(PROP_URL);
-        String user = props.getProperty(PROP_USER);
-        String pass = props.getProperty(PROP_PASSWORD);
-        return ConnectionManager.getConnection(url, user, pass);
+
+        String
+            url = props.getProperty(PROP_URL),
+            user = props.getProperty(PROP_USER),
+            pass = props.getProperty(PROP_PASSWORD);
+
+        return getTimedOutConnection(url, user, pass);
+    }
+    
+    protected Connection getConnection(String url,
+                                       String user,
+                                       String password)
+        throws SQLException {
+        return getTimedOutConnection(url, user, password);
+    }
+
+    static Connection getTimedOutConnection(String url, String user, String password) throws SQLException {
+        // set the timeout property in a DB-specific way
+        // currently only Oracle and MySQL support timeout parameters in the JDBC connection
+        if (isOracleUrl(url)) {
+            // pass in timeout property for Oracle
+            Properties info = getOracleJDBCConnectionProperties(user, password);
+            return DriverManager.getConnection(url, info);    
+        }
+        else if (isMySqlUrl(url)) {
+            // pass in timeout in URL for MySQL
+            url = getMySqlUrl(url);
+        }
+        return DriverManager.getConnection(url, user, password);
+    }
+    
+    static boolean isOracleUrl(String url) {
+        return url != null && url.toLowerCase().startsWith(ORACLE_JDBC_URL);
+    }
+    
+    static boolean isMySqlUrl(String url) {
+        return url != null && url.toLowerCase().startsWith(MYSQL_JDBC_URL);
+    }
+    
+    // convenience method used to set timeout properties for MySql
+    // JDBC connection by appending a url timeout parameter
+    private static String getMySqlUrl(String url) {
+        if (url == null) {
+            return url;
+        }
+        else if (url.indexOf('?') > 0) {
+            return url + "&socketTimeout=" + TIMEOUT_VALUE + "&connectTimeout="
+                    + TIMEOUT_VALUE;
+        }
+        else {
+            return url + "?socketTimeout=" + TIMEOUT_VALUE + "&connectTimeout="
+                    + TIMEOUT_VALUE;
+        }
+    }
+    
+    /**
+     * Utility method that returns an instance of Properties containing the
+     * given user and password keys along with the default timeout. The
+     * Properties instance returned can be passed in as the info argument to
+     * DriverManager.getConnection(url, info) when acquiring Oracle connections
+     * 
+     * @param user the username for the JDBC connection
+     * @param password the password for the JDBC connection
+     * @return an instance of Properties containing the user and password JDBC
+     *         Connection properties
+     */
+    public static Properties getOracleJDBCConnectionProperties(String user,
+            String password) {
+        Properties info = new Properties();
+        if (user != null) {
+            info.put(PROP_ORACLE_USER, user);
+        }
+        if (password != null) {
+            info.put(PROP_ORACLE_PASSWORD, password);
+        }
+        info.put(PROP_ORACLE_READ_TIMEOUT, new Integer(TIMEOUT_VALUE));
+        return info;
     }
     
     protected String getDefaultURL() {
@@ -270,7 +338,6 @@ public class SQLQueryMeasurementPlugin
         return query;
     }
 
-    @Override
     public MetricValue getValue(Metric metric)
         throws PluginException,
                MetricUnreachableException,

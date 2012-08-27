@@ -30,13 +30,18 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.SchemaBuilder;
+
 import org.hyperic.util.jdbc.DBUtil;
 
 /**
@@ -56,6 +61,8 @@ public abstract class JDBCMeasurementPlugin extends MeasurementPlugin {
     
     private static final String USER_KEY = "user";
     private static final String PASSWORD_KEY = "password";
+
+    private static HashMap connectionCache = new HashMap();
     
     public static final int COL_INVALID = 0;
 
@@ -73,7 +80,6 @@ public abstract class JDBCMeasurementPlugin extends MeasurementPlugin {
      * These values will be used to obtain a connection from 
      * DriverManager.getConnection.
      */
-    @Override
     public ConfigSchema getConfigSchema(TypeInfo info, ConfigResponse config)
     {
         ConfigSchema schema = super.getConfigSchema(info, config);
@@ -93,7 +99,6 @@ public abstract class JDBCMeasurementPlugin extends MeasurementPlugin {
      * Verifies that JDBC driver returned by the getDriver() method
      * can be loaded by the plugin.
      */
-    @Override
     public void init(PluginManager manager)
         throws PluginException
     {
@@ -102,24 +107,52 @@ public abstract class JDBCMeasurementPlugin extends MeasurementPlugin {
         try {
             getDriver();
         } catch (ClassNotFoundException e) {
-            getLog().error(e,e);
+            //driver is not loaded server-side
+            //if the above fails client-side queries will fail with
+            //"No suitable driver" so its okay to swallow this exception
+            //throw new PluginException(e.getMessage(), e);
         }
     }
 
     /**
      * Close any cached connections.
      */
-    @Override
-    public void shutdown() throws PluginException
+    public void shutdown()
+        throws PluginException
     {
         super.shutdown();
-        ConnectionManager.shutdown();
+        
+        int nExceptions = 0;
+        SQLException lastException = null;
+        synchronized (connectionCache) {
+
+        	Iterator it = connectionCache.entrySet().iterator();
+        	while(it.hasNext()) {
+        		Map.Entry entry = (Map.Entry)it.next();
+        		Connection conn = (Connection)entry.getValue();
+        		if (conn != null) {
+        			try {
+        				conn.close();
+        			} catch (SQLException e) {
+        				nExceptions++;
+        				lastException = e;
+        			}
+        		}
+        	}
+
+        	connectionCache.clear();
+        }
+        
+        if (nExceptions > 0 && lastException != null) {
+        	throw new PluginException(nExceptions +
+        							  " exception(s), last message was "
+        							  + lastException.getMessage(), lastException);
+        }
     }
 
     /**
      * Dispatches to getQueryValue()
      */
-    @Override
     public MetricValue getValue(Metric metric)
         throws PluginException,
                MetricUnreachableException,
@@ -148,11 +181,11 @@ public abstract class JDBCMeasurementPlugin extends MeasurementPlugin {
     /**
      * The plugin must preform the DriverManager.getConnection so its
      * ClassLoader is used to find the driver.
-     * @deprecated 
      */
-    protected final Connection getConnection(String url, String user, String password) throws SQLException {
-        return null;
-    }
+    protected abstract Connection getConnection(String url,
+                                                String user,
+                                                String password)
+        throws SQLException;
 
     protected abstract String getDefaultURL();
 
@@ -169,27 +202,43 @@ public abstract class JDBCMeasurementPlugin extends MeasurementPlugin {
         return "";
     }
 
-    /**
-     * @deprecated 
-     */
-    protected final Connection getCachedConnection(Metric metric) throws SQLException {
-        return null;
+    protected Connection getCachedConnection(Metric metric)
+        throws SQLException
+    {
+        Properties props = metric.getProperties();
+        String url  = props.getProperty(PROP_URL),
+               user = props.getProperty(PROP_USER),
+               pass = props.getProperty(PROP_PASSWORD);
+        return getCachedConnection(url, user, pass);
     }
     
-    /**
-     * @deprecated 
-     */
-    protected final Connection getCachedConnection(String url, String user, String pass) throws SQLException {
+    protected Connection getCachedConnection(String url, String user,
+                                             String pass)
+        throws SQLException
+    {
+        String cacheKey = url + user + pass;
+        Connection conn = null;
+        
+        synchronized (connectionCache) {
+        	conn = (Connection)connectionCache.get(cacheKey);
 
-        return null;
+        	if (conn == null) {
+        		conn = getConnection(url, user, pass);
+        		connectionCache.put(cacheKey, conn);
+        	}
+        }
+        
+        return conn;
     }
 
-    /**
-     * @deprecated 
-     */
-    protected final void removeCachedConnection(String url, String user, String pass) {
+    protected void removeCachedConnection(String url, String user,
+                                          String pass)
+    {
+        synchronized(connectionCache) {
+            connectionCache.remove(url + user + pass);
+        }
     }
-    
+
     /**
      * Do the database query returned by the getQuery() method
      * and return the result.  A cached connection will be used
@@ -200,21 +249,6 @@ public abstract class JDBCMeasurementPlugin extends MeasurementPlugin {
         throws MetricNotFoundException, PluginException,
                MetricUnreachableException {
         return getQueryValue(jdsn, false);
-    }
-    
-    public String getURL(Metric jdsn) {
-        Properties props = jdsn.getProperties();
-        return props.getProperty(PROP_URL);
-    }
-
-    public String getUser(Metric jdsn) {
-        Properties props = jdsn.getProperties();
-        return props.getProperty(PROP_USER);
-    }
-
-    public String getPassword(Metric jdsn) {
-        Properties props = jdsn.getProperties();
-        return props.getProperty(PROP_PASSWORD);
     }
 
     protected double getQueryValue(Metric jdsn, boolean logSql)
@@ -233,17 +267,18 @@ public abstract class JDBCMeasurementPlugin extends MeasurementPlugin {
 
         //ignore case to allow the stanard case "Availability"
         boolean isAvail = attr.equalsIgnoreCase(AVAIL_ATTR);
-        
-        String url = getURL(jdsn);
-        String user = getUser(jdsn);
-        String pass = getPassword(jdsn);
+        Properties props = jdsn.getProperties();
+        String
+            url = props.getProperty(PROP_URL),
+            user = props.getProperty(PROP_USER),
+            pass = props.getProperty(PROP_PASSWORD);
 
         Connection conn = null;
         Statement stmt = null;
         ResultSet rs = null;
 
         try {
-            conn = ConnectionManager.getConnection(url, user, pass);
+            conn = getCachedConnection(url, user, pass);
             stmt = conn.createStatement();
             stmt.execute(query);
 
@@ -277,7 +312,7 @@ public abstract class JDBCMeasurementPlugin extends MeasurementPlugin {
             }
 
             // Remove this connection from the cache.
-            ConnectionManager.resetPool(url, user, pass);
+            removeCachedConnection(url, user, pass);
 
             String msg = "Query failed for " + attr +
                 ", while attempting to issue query " + query +
@@ -286,21 +321,19 @@ public abstract class JDBCMeasurementPlugin extends MeasurementPlugin {
             //XXX these two are oracle specific.
             // Catch divide by 0 errors and return 0
             if(e.getErrorCode() == DBUtil.ORACLE_ERROR_DIVIDE_BY_ZERO ||
-               e.getErrorCode() == DBUtil.POSTGRES_ERROR_DIVIDE_BY_ZERO) {
+               e.getErrorCode() == DBUtil.POSTGRES_ERROR_DIVIDE_BY_ZERO)
                 return 0;
-            }
             if(e.getErrorCode() == DBUtil.ORACLE_ERROR_NOT_AVAILABLE    ||
                e.getErrorCode() == DBUtil.POSTGRES_CONNECTION_EXCEPTION ||
                e.getErrorCode() == DBUtil.POSTGRES_CONNECTION_FAILURE   ||
                e.getErrorCode() == DBUtil.POSTGRES_UNABLE_TO_CONNECT    ||
                e.getErrorCode() == DBUtil.MYSQL_LOCAL_CONN_ERROR        ||
-               e.getErrorCode() == DBUtil.MYSQL_REMOTE_CONN_ERROR) {
+               e.getErrorCode() == DBUtil.MYSQL_REMOTE_CONN_ERROR)
                 throw new MetricUnreachableException(msg, e);
-            }
                 
             throw new MetricNotFoundException(msg, e);
         } finally {
-            DBUtil.closeJDBCObjects(getLog(), conn, stmt, rs);
+            DBUtil.closeJDBCObjects(getLog(), null, stmt, rs);
         }
     }
     

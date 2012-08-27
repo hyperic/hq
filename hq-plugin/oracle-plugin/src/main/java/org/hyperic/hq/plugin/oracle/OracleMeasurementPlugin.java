@@ -26,6 +26,7 @@
 package org.hyperic.hq.plugin.oracle;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -45,11 +46,11 @@ import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
+import org.hyperic.util.config.SchemaBuilder;
 import org.hyperic.util.jdbc.DBUtil;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.product.ConnectionManager;
 
 
 public class OracleMeasurementPlugin
@@ -57,6 +58,10 @@ public class OracleMeasurementPlugin
 
     private static String logCtx = OracleMeasurementPlugin.class.getName();
     private static Log _log = LogFactory.getLog(logCtx);
+
+    public static final String PROP_URL      = "jdbcUrl";
+    public static final String PROP_USER     = "jdbcUser";
+    public static final String PROP_PASSWORD = "jdbcPassword";
 
     static final String JDBC_DRIVER = "oracle.jdbc.driver.OracleDriver";
 
@@ -81,6 +86,15 @@ public class OracleMeasurementPlugin
     protected void getDriver()
         throws ClassNotFoundException {
         Class.forName(JDBC_DRIVER);
+    }
+
+    protected Connection getConnection(String url,
+                                       String user,
+                                       String password)
+        throws SQLException {
+        Properties info = getJDBCConnectionProperties(user, password);
+        info.put(READ_TIMEOUT_KEY, READ_TIMEOUT_VALUE);
+        return DriverManager.getConnection(url, info);    
     }
 
     protected String getDefaultURL() {
@@ -395,9 +409,8 @@ public class OracleMeasurementPlugin
         String tablespace = metric.getObjectProperty(PROP_TABLESPACE);
         String sql = (String)ora10Queries.get(metric.getAttributeName());
         sql = StringUtil.replace(sql, "%segment%", segment);
-        Connection conn = null;
         try {
-            conn = ConnectionManager.getConnection(getURL(metric), getUser(metric), getPassword(metric));
+            Connection conn = getCachedConnection(metric);
             if (OracleControlPlugin.isTable(conn, segment, tablespace)) {
                 sql = StringUtil.replace(sql, "%tablename%", "all_tables");
                 sql = StringUtil.replace(sql, "%identifier%", "table_name");
@@ -408,8 +421,6 @@ public class OracleMeasurementPlugin
             }
         } catch (SQLException e) {
             _log.error(e.getMessage(), e);
-        } finally {
-            DBUtil.closeJDBCObjects(_log, conn, null, null);
         }
         return sql;
     }
@@ -476,7 +487,7 @@ public class OracleMeasurementPlugin
         ResultSet rs = null;
         try
         {
-            conn = ConnectionManager.getConnection(getURL(metric), getUser(metric), getPassword(metric));
+            conn = getCachedConnection(metric);
             stmt = conn.createStatement();
             String sql = "select lower(contents) as contents" +
                          " FROM dba_tablespaces " +
@@ -490,7 +501,8 @@ public class OracleMeasurementPlugin
             // not sure what we can do if this happens, so just log the error
             _log.error(e.getMessage(), e);
         } finally {
-            DBUtil.closeJDBCObjects(getLog(), conn, stmt, rs);
+            // don't close the conn, since it is shared
+            DBUtil.closeJDBCObjects(getLog(), null, stmt, rs);
         }
         // assume non-temporary tablespace in general
         return false; 
@@ -503,7 +515,7 @@ public class OracleMeasurementPlugin
         ResultSet rs = null;
         try
         {
-            conn = ConnectionManager.getConnection(getURL(metric), getUser(metric), getPassword(metric));
+            conn = getCachedConnection(metric);
             stmt = conn.createStatement();
             String sql = "select lower(status) as status" +
                          " FROM dba_tablespaces " +
@@ -517,7 +529,8 @@ public class OracleMeasurementPlugin
             // not sure what we can do if this happens, so just log the error
             _log.error(e.getMessage(), e);
         } finally {
-            DBUtil.closeJDBCObjects(getLog(), conn, stmt, rs);
+            // don't close the conn, since it is shared
+            DBUtil.closeJDBCObjects(getLog(), null, stmt, rs);
         }
         // we don't want to collect any metrics if the tablespace does not exist
         return true;
@@ -561,7 +574,7 @@ public class OracleMeasurementPlugin
         ResultSet rs = null;
 
         try {
-            conn = ConnectionManager.getConnection(getURL(metric), getUser(metric), getPassword(metric));
+            conn = getCachedConnection(url, user, pass);
             String query = SEGMENT_QUERY + "'" + segment + "'";
             ps = conn.prepareStatement(query);
             rs = ps.executeQuery();
@@ -578,7 +591,8 @@ public class OracleMeasurementPlugin
                 return MeasurementConstants.AVAIL_DOWN;
             }
 
-            ConnectionManager.resetPool(getURL(metric), getUser(metric), getPassword(metric));
+            // Remove this connection from the cache.
+            removeCachedConnection(url, user, pass);
 
             String msg = "Query failed for " + alias +
                 ": " + e.getMessage();
@@ -591,7 +605,7 @@ public class OracleMeasurementPlugin
                 
             throw new MetricNotFoundException(msg, e);
         } finally {
-            DBUtil.closeJDBCObjects(getLog(), conn, ps, rs);
+            DBUtil.closeJDBCObjects(getLog(), null, ps, rs);
         }
     }
 }

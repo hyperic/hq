@@ -24,6 +24,13 @@
  */
 package org.hyperic.hq.plugin.postgresql;
 
+import java.io.File;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.JDBCMeasurementPlugin;
 import org.hyperic.hq.product.Metric;
@@ -43,6 +50,11 @@ public abstract class ResourceMeasurement extends JDBCMeasurementPlugin {
     @Override
     protected final void getDriver() throws ClassNotFoundException {
         Class.forName(JDBC_DRIVER);
+    }
+
+    @Override
+    protected final Connection getConnection(String url, String user, String password) throws SQLException {
+        return DriverManager.getConnection(url, user, password);
     }
 
     @Override
