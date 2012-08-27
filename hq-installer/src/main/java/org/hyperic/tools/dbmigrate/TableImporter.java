@@ -142,9 +142,10 @@ public class TableImporter extends TableProcessor<Worker> {
                     conn = getConnection(project.getProperties());
                     
                     stmt = conn.createStatement();
-                    stmt.setQueryTimeout(this.queryTimeoutSecs)  ;
+                    stmt.execute("set statement_timeout to 0") ;
                     stmt.executeQuery((new StringBuilder()).append("select fmigrationPostConfigure('").
                                                             append(this.tablesList.toString()).append("')").toString());
+                    stmt.execute("reset statement_timeout") ;
                 }catch(Throwable t2) {
                     Utils.printStackTrace(t2);
                     thrown = MultiRuntimeException.newMultiRuntimeException(thrown, t2);
@@ -278,7 +279,6 @@ public class TableImporter extends TableProcessor<Worker> {
           TableBatchMetadata singleBatchMetadata = null;
           final String tableName = table.name ; 
           try{
-            //Utils.executeUpdate(this.conn, "ALTER TABLE " + tableName + " DISABLE TRIGGER ALL");
     
             selectPs = this.conn.prepareStatement("SELECT * FROM " + tableName);
             selectPs.executeQuery();
@@ -389,7 +389,11 @@ public class TableImporter extends TableProcessor<Worker> {
 	}//EOM 
 
 	public static void main(String[] args) throws Throwable {
-	    testToCharVsCharArray() ; 
+	   
+	     //testOracleFetchSize() ;  
+	    
+	    testPostgresQueryTimeout() ; 
+	    //testToCharVsCharArray() ;
 	    //testWriteObjectVsUTF() ;
 	 //   writeToFileWithInitialPlaceHolder() ;
 	    //testReadfromFile() ; 
@@ -401,6 +405,21 @@ public class TableImporter extends TableProcessor<Worker> {
 	    testTable(table) ; 
 	    testTable(batch) ;
 	}//EOM
+	
+	private static final void testOracleFetchSize() throws Throwable { 
+	    final Connection conn = Utils.getOracleCOnnection() ; 
+	    PreparedStatement stmt = null ; 
+	    try{ 
+	         stmt = conn.prepareStatement("select 1 from dual") ; 
+	         stmt.setFetchSize(1000) ; 
+	         stmt.executeQuery() ; 
+	        
+	    }catch(Throwable t) { 
+	        t.printStackTrace() ; 
+	    }finally{ 
+	        Utils.close(stmt, conn ) ; 
+	    }//EO catch blcok 
+	}//EOM 
 	
 	public static final void testToCharVsCharArray() throws Throwable { 
 	    
@@ -627,6 +646,30 @@ public class TableImporter extends TableProcessor<Worker> {
         }//EOM 
 	    
 	}//EOM
+	
+	private static final void testPostgresQueryTimeout() throws Throwable { 
+	    final Connection conn = Utils.getPostgresConnection() ;
+	    conn.setAutoCommit(false) ; 
+	    Statement stmt = null ; 
+	    System.out.println("started");
+        final long before = System.currentTimeMillis() ;
+	    try{ 
+	         
+	        final String sql = "select fmigrationPostConfigure('EAM_SERVICE_TYPE,EAM_SERVER_TYPE,EAM_METRIC_PROB,HQ_METRIC_DATA_4D_1S,EAM_CONTROL_SCHEDULE,HQ_METRIC_DATA_0D_1S,EAM_GALERT_DEFS,EAM_RESOURCE_EDGE,EAM_DASH_CONFIG,EAM_MEASUREMENT_BL,EAM_AIQ_PLATFORM,EAM_SERVICE_DEP_MAP,EAM_AUTOINV_HISTORY,EAM_VIRTUAL,EAM_AUDIT,EAM_ESCALATION,HQ_METRIC_DATA_4D_0S,EAM_MEASUREMENT_DATA_1D,EAM_CONTROL_HISTORY,HQ_METRIC_DATA_0D_0S,EAM_MEASUREMENT,EAM_UPDATE_STATUS,EAM_IP,EAM_MEASUREMENT_DATA_1H,EAM_OPERATION,EAM_CRITERIA,EAM_REGISTERED_TRIGGER,EAM_UI_ATTACH_MAST,EAM_SUBJECT_ROLE_MAP,HQ_METRIC_DATA_8D_0S,EAM_AIQ_IP,EAM_ROLE_OPERATION_MAP,EAM_UI_ATTACH_RSRC,HQ_METRIC_DATA_5D_0S,EAM_PLATFORM_SERVER_TYPE_MAP,EAM_UI_VIEW_RESOURCE,EAM_ALERT_ACTION_LOG,EAM_CALENDAR,EAM_RES_GRP_RES_MAP,EAM_SERVICE_REQUEST,HQ_AVAIL_DATA_RLE,EAM_APP_SERVICE,EAM_UI_ATTACH_ADMIN,EAM_ALERT_CONDITION,EAM_ALERT,EAM_SUBJECT,HQ_METRIC_DATA_8D_1S,EAM_METRIC_AUX_LOGS,EAM_SERVICE,EAM_UI_VIEW_MASTHEAD,EAM_EVENT_LOG,EAM_APPLICATION_TYPE,EAM_CALENDAR_ENT,HQ_METRIC_DATA_5D_1S,EAM_CRISPO_ARRAY,EAM_PRINCIPAL,EAM_RESOURCE_GROUP,EAM_ROLE,EAM_ROLE_CALENDAR,HQ_METRIC_DATA_7D_0S,EAM_NUMBERS,EAM_GALERT_ACTION_LOG,EAM_CRISPO_OPT,EAM_SRN,EAM_UI_PLUGIN,EAM_RESOURCE_TYPE,EAM_AGENT_TYPE,HQ_METRIC_DATA_7D_1S,EAM_ESCALATION_ACTION,EAM_CPROP,EAM_MEASUREMENT_CAT,EAM_CPROP_KEY,EAM_RESOURCE_AUX_LOGS,EAM_ERROR_CODE,EAM_EXEC_STRATEGIES,EAM_AGENT,EAM_AGENT_PLUGIN_STATUS,EAM_CRISPO,EAM_ALERT_DEF_STATE,EAM_GALERT_AUX_LOGS,EAM_PLATFORM,EAM_UI_ATTACHMENT,EAM_PLATFORM_TYPE,EAM_ALERT_CONDITION_LOG,HQ_METRIC_DATA_2D_1S,EAM_GTRIGGER_TYPES,EAM_RESOURCE,HQ_METRIC_DATA_6D_1S,EAM_APP_TYPE_SERVICE_TYPE_MAP,EAM_UI_VIEW,EAM_UI_VIEW_ADMIN,EAM_CONFIG_PROPS,EAM_APPLICATION,EAM_AUTOINV_SCHEDULE,EAM_AIQ_SERVICE,HQ_METRIC_DATA_3D_0S,EAM_SERVER,EAM_CALENDAR_WEEK,HQ_METRIC_DATA_COMPAT,EAM_MEASUREMENT_TEMPL,EAM_ACTION,EAM_MEASUREMENT_DATA_6H,HQ_METRIC_DATA_1D_1S,EAM_ROLE_RESOURCE_GROUP_MAP,HQ_METRIC_DATA_2D_0S,EAM_EXEC_STRATEGY_TYPES,HQ_METRIC_DATA_6D_0S,EAM_GALERT_LOGS,EAM_GTRIGGERS,EAM_ESCALATION_STATE,EAM_RESOURCE_RELATION,EAM_MONITORABLE_TYPE,HQ_METRIC_DATA_3D_1S,EAM_AIQ_SERVER,EAM_PLUGIN,EAM_STAT_ERRORS,EAM_REQUEST_STAT,EAM_KEYSTORE,EAM_ALERT_DEFINITION,EAM_CONFIG_RESPONSE,HQ_METRIC_DATA_1D_0S')" ; 
+	        stmt = conn.createStatement();
+	        stmt.execute("set statement_timeout to 0") ;
+	        stmt.executeQuery(sql) ;
+	        stmt.execute("reset statement_timeout") ;
+	        System.out.println("Success " + (System.currentTimeMillis()-before));
+	    }catch(Throwable t) { 
+	        System.out.println("failiure " + (System.currentTimeMillis()-before));
+	        t.printStackTrace() ; 
+	    }finally{ 
+	        Utils.close(Utils.ROLLBACK_INSTRUCTION_FLAG, new Object[]{stmt, conn}) ;  
+	    }//EO catch blcok
+	    
+	    System.out.println("End");
+	}//EOM 
 	
 	
 	private static final void testWriteObjectVsUTF() throws Throwable { 

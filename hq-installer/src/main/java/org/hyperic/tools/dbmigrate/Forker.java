@@ -117,7 +117,6 @@ public class Forker {
                             MultiRuntimeException.newMultiRuntimeException(thrown, t2);
                         }//EO inner catch block
 
-                        if (this.countdownSemaphore != null) this.countdownSemaphore.countDown();
                     }//EO catch block 
                 }//EO while there are more entities 
             } catch (Throwable t1) {
@@ -130,6 +129,8 @@ public class Forker {
                     MultiRuntimeException.newMultiRuntimeException(thrown, t1);
                 }//EO inner catch block 
  
+                if (this.countdownSemaphore != null) this.countdownSemaphore.countDown();
+                
                 if (thrown != null) throw thrown;
             }//EO catch block 
 

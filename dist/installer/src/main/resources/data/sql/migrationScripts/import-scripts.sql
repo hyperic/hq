@@ -144,6 +144,8 @@ begin
 			raise notice 'An Error Had occured while dropping for tables %: % %', dropIndicesList, SQLERRM, SQLSTATE;
 		end ; 
 	end if ; 
+	
+	SET synchronous_commit TO off ;  
      
 end;
 $$
@@ -160,6 +162,8 @@ declare
   updateSequenceQuery text;
   tableName text ; 
 begin
+	
+	SET statement_timeout to 0 ; 
 	
     foreach tableName in ARRAY string_to_array($1, ',') 
     loop 
@@ -194,6 +198,9 @@ begin
 	END LOOP; 
 	
 	perform fToggleIndices('', true) ;
+	
+	SET synchronous_commit TO ON ;
+	RESET statement_timeout ; 
 
 end;
 $$

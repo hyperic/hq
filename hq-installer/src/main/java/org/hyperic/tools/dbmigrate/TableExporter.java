@@ -182,8 +182,10 @@ public class TableExporter extends TableProcessor<Worker> {
                 
                 if(table instanceof BigTable) { 
                     final BigTable bigTable = (BigTable) table ; 
-                    sql = new StringBuilder(sql).append(tableName).append(" WHERE ").append(bigTable.partitionColumn).
-                            append(" % ").append(bigTable.noOfPartitions).append(" = ").append(bigTable.partitionNumber).toString() ;  
+                    final StringBuilder statementBuilder = new StringBuilder(sql).append(tableName).append(" WHERE ") ; 
+                   
+                    sql = enumDatabaseType.appendModuloClause(bigTable.partitionColumn,bigTable.noOfPartitions, statementBuilder).
+                            append(" = ").append(bigTable.partitionNumber).toString() ;
                     
                     partitionNo = bigTable.partitionNumber ; 
                 }else{ 
@@ -243,6 +245,9 @@ public class TableExporter extends TableProcessor<Worker> {
                 final int totalNumberOfRecordsSofar = table.noOfProcessedRecords.addAndGet(recordCount) ;
                 TableExporter.this.log(traceMsgPrefix + recordCountMsgPart +  
                         " for this partition Total records exported so far: " + totalNumberOfRecordsSofar) ;
+            }catch(Throwable t){ 
+                t.printStackTrace() ; 
+                throw t ; 
             }finally {
               Utils.close(new Object[] { ous, rs, stmt });
             }//EO catch block 
