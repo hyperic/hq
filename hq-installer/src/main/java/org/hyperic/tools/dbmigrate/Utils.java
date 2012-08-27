@@ -69,6 +69,7 @@ public class Utils{
   static{
       dbDrivers.put("PostgreSQL", "org.postgresql.Driver");
       dbDrivers.put("MySQL", "com.mysql.jdbc.Driver");
+      dbDrivers.put("Oracle9i", "oracle.jdbc.driver.OracleDriver");
   }//EO static block
   
   public static final void close(final Object...closeables){
@@ -209,7 +210,13 @@ public class Utils{
   public static final Connection getPostgresConnection() throws Throwable {
     Class.forName("org.postgresql.Driver");
     //return DriverManager.getConnection("jdbc:postgresql://10.23.200.18:5432/guytest1?protocolVersion=2", "hqadmin", "hqadmin");
-    return DriverManager.getConnection("jdbc:postgresql://localhost:5432/hqdb?protocolVersion=2", "hqadmin", "hqadmin");
+//    return DriverManager.getConnection("jdbc:postgresql://localhost:5432/hqdb?protocolVersion=2", "hqadmin", "hqadmin");
+    return DriverManager.getConnection("jdbc:postgresql://10.23.20.159:5432/HQ?protocolVersion=2", "hqadmin", "hqadmin");
+  }//EOM 
+  
+  public static final Connection getOracleCOnnection() throws Throwable { 
+      Class.forName("oracle.jdbc.driver.OracleDriver") ;
+      return DriverManager.getConnection("jdbc:oracle:thin:@10.148.199.71:1521:nlayers", "hqadmin", "hqadmin") ; 
   }//EOM 
   
   public static final Connection getLocalPostgresConnection() throws Throwable {
