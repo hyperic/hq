@@ -390,8 +390,6 @@ public class TableImporter extends TableProcessor<Worker> {
 
 	public static void main(String[] args) throws Throwable {
 	   
-	     //testOracleFetchSize() ;  
-	    
 	    testPostgresQueryTimeout() ; 
 	    //testToCharVsCharArray() ;
 	    //testWriteObjectVsUTF() ;
@@ -406,20 +404,6 @@ public class TableImporter extends TableProcessor<Worker> {
 	    testTable(batch) ;
 	}//EOM
 	
-	private static final void testOracleFetchSize() throws Throwable { 
-	    final Connection conn = Utils.getOracleCOnnection() ; 
-	    PreparedStatement stmt = null ; 
-	    try{ 
-	         stmt = conn.prepareStatement("select 1 from dual") ; 
-	         stmt.setFetchSize(1000) ; 
-	         stmt.executeQuery() ; 
-	        
-	    }catch(Throwable t) { 
-	        t.printStackTrace() ; 
-	    }finally{ 
-	        Utils.close(stmt, conn ) ; 
-	    }//EO catch blcok 
-	}//EOM 
 	
 	public static final void testToCharVsCharArray() throws Throwable { 
 	    
@@ -662,7 +646,7 @@ public class TableImporter extends TableProcessor<Worker> {
 	        stmt.execute("reset statement_timeout") ;
 	        System.out.println("Success " + (System.currentTimeMillis()-before));
 	    }catch(Throwable t) { 
-	        System.out.println("failiure " + (System.currentTimeMillis()-before));
+	        System.out.println("failure " + (System.currentTimeMillis()-before));
 	        t.printStackTrace() ; 
 	    }finally{ 
 	        Utils.close(Utils.ROLLBACK_INSTRUCTION_FLAG, new Object[]{stmt, conn}) ;  
