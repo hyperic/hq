@@ -50,6 +50,7 @@ import java.sql.Types;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -57,9 +58,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.tools.ant.Project;
-import org.apache.tools.ant.util.FileUtils;
 import org.hyperic.tools.dbmigrate.Forker.ForkContext;
 import org.hyperic.tools.dbmigrate.Forker.ForkWorker;
+import org.hyperic.tools.dbmigrate.Forker.WorkerFactory;
 import org.hyperic.tools.dbmigrate.TableExporter.UTFNullHandlerOOS;
 import org.hyperic.tools.dbmigrate.TableImporter.Worker;
 import org.hyperic.tools.dbmigrate.TableProcessor.Table;
@@ -124,9 +125,11 @@ public class TableImporter extends TableProcessor<Worker> {
 	
 	
 	@Override
-	protected final void afterFork(final ForkContext<Table,Worker> context, final List<Future<Table[]>> workersResponses,
-	        final LinkedBlockingDeque<Table> sink) throws Throwable {
-	        
+	/*protected final void afterFork(final ForkContext<Table,Worker> context, final List<Future<Table[]>> workersResponses,
+	        final LinkedBlockingDeque<Table> sink) throws Throwable {*/
+	protected final <Y, Z extends Callable<Y[]>> void afterFork(final ForkContext<Y, Z> context,
+            final List<Future<Y[]>> workersResponses, final LinkedBlockingDeque<Y> sink) throws Throwable {      
+	    
 	    MultiRuntimeException thrown = null;
 	    try{
 	       super.afterFork(context, workersResponses, sink);
@@ -134,30 +137,71 @@ public class TableImporter extends TableProcessor<Worker> {
 	        thrown = new MultiRuntimeException(t);
 	    }finally{
 	        if(!isDisabled){
+	            final Project project = getProject();
+	            
+	            final LinkedBlockingDeque<IndexRestorationTask> indexRestorationTasksSink = new LinkedBlockingDeque<IndexRestorationTask>() ;
                 Connection conn = null;
                 FileInputStream fis = null;
                 Statement stmt = null;
+                ResultSet rs = null ; 
                 try{
-                    final Project project = getProject();
                     conn = getConnection(project.getProperties());
                     
                     stmt = conn.createStatement();
-                    stmt.execute("set statement_timeout to 0") ;
-                    stmt.executeQuery((new StringBuilder()).append("select fmigrationPostConfigure('").
+                    //stmt.execute("set statement_timeout to 0") ;
+                    rs = stmt.executeQuery((new StringBuilder()).append("select * from fmigrationPostConfigure('").
                                                             append(this.tablesList.toString()).append("')").toString());
-                    stmt.execute("reset statement_timeout") ;
+                    //stmt.execute("reset statement_timeout") ;
+                    
+                    while(rs.next()) { 
+                        indexRestorationTasksSink.add(new IndexRestorationTask(rs.getString(1), rs.getString(3), rs.getString(2))) ; 
+                    }//EO while there are more indices to restore 
                 }catch(Throwable t2) {
                     Utils.printStackTrace(t2);
                     thrown = MultiRuntimeException.newMultiRuntimeException(thrown, t2);
                 }finally{
-                    Utils.close(new Object[] { conn, fis });
+                    Utils.close(new Object[] { rs, stmt, conn, fis });
                 }//EO catch block 
+                
+                //if there are index restoration tasks fork to perform them in parallel 
+                this.restoreIndices(indexRestorationTasksSink) ; 
+                
             }//EO if not disabled 
             
 	        if(thrown != null) throw thrown ; 
 	    }//EO catch block 
 	}//EOM
 
+	private final void restoreIndices(final LinkedBlockingDeque<IndexRestorationTask> indexRestorationTasksSink) throws Throwable { 
+	    final int iNoOfIndexRestorationTasks = indexRestorationTasksSink.size() ; 
+        if(iNoOfIndexRestorationTasks > 0) {
+           
+            @SuppressWarnings("rawtypes")
+            final Hashtable env = this.getProject().getProperties() ;
+            
+            final WorkerFactory<IndexRestorationTask,IndexRestorationWorker> indexRestorationTasksWorkerFactory = 
+                    new WorkerFactory<IndexRestorationTask,IndexRestorationWorker>() {
+                        public final IndexRestorationWorker newWorker(
+                                final ForkContext<IndexRestorationTask,IndexRestorationWorker> paramForkContext) throws Throwable {
+                            
+                            final Connection conn = getConnection(env, false/*autoCommit*/);
+                            return new IndexRestorationWorker(paramForkContext.getSemaphore(), conn, paramForkContext.getSink()) ; 
+                        }//EOM 
+                
+            };//EO anonymous class 
+           
+            //replace the worker factory with a new one creating an indexrestorationTaskWorker 
+            final ForkContext<IndexRestorationTask,IndexRestorationWorker> indexRestorationContext = 
+                    new ForkContext<IndexRestorationTask, IndexRestorationWorker>(
+                            indexRestorationTasksSink, indexRestorationTasksWorkerFactory, env) ; 
+            
+            final List<Future<IndexRestorationTask[]>> indexRestorationTaskResponses = 
+                    Forker.fork(iNoOfIndexRestorationTasks, 5/*maxWorkers*/, indexRestorationContext) ;
+            
+            super.afterFork(indexRestorationContext, indexRestorationTaskResponses, indexRestorationTasksSink) ; 
+        }//EO if there were index restoration tasks to perform 
+	}//EOM 
+	
 	@Override
 	@SuppressWarnings("rawtypes")
 	protected final Connection getConnection(final Hashtable env) throws Throwable {
@@ -194,6 +238,39 @@ public class TableImporter extends TableProcessor<Worker> {
                     copyConstructor.columnTypes, batchFile, copyConstructor.noOfProcessedRecords);
         }//EOM 
     }//EO inner class TableBatchMetadata 
+	
+	private static final class IndexRestorationTask  {
+	    private String indexCreationStatement ; 
+	    private String tableName ; 
+	    private String indexName ; 
+	    
+	    IndexRestorationTask(final String indexName, final String tableName, final String indexCreationStatement) { 
+	        this.indexName = indexName; 
+	        this.tableName = tableName ; 
+	        this.indexCreationStatement = indexCreationStatement ; 
+	    }//EOM 
+	}//EO inner class IndexRestorationTask
+	
+	public final class IndexRestorationWorker extends ForkWorker<IndexRestorationTask> { 
+	    
+	    IndexRestorationWorker(final CountDownLatch countdownSemaphore, final Connection conn, final BlockingDeque<IndexRestorationTask> sink) {  
+            super(countdownSemaphore, conn, sink, IndexRestorationTask.class);
+        }//EOM  
+
+        @Override
+        protected final void callInner(final IndexRestorationTask entity) throws Throwable {
+           Statement stmt = null ; 
+           
+           log("[IndexRestorationWorker[" + entity.indexName + "; " + entity.tableName + "]: executing statement " + entity.indexCreationStatement) ;  
+            try{ 
+                stmt =  this.conn.createStatement() ; 
+                stmt.execute("set statement_timeout to 0;\n" + entity.indexCreationStatement + "\n;reset statement_timeout;") ; 
+            }finally{ 
+                Utils.close(new Object[] { stmt }); 
+              }//EO catch block 
+        }//EOM 
+	    
+	}//EO inner class IndexRestorationWorker
 
     public final class Worker extends ForkWorker<Table> {
         private final File outputDir;
@@ -389,8 +466,8 @@ public class TableImporter extends TableProcessor<Worker> {
 	}//EOM 
 
 	public static void main(String[] args) throws Throwable {
-	   
-	    testPostgresQueryTimeout() ; 
+	    testResultsetfromFunction() ; 
+	   // testPostgresQueryTimeout() ; 
 	    //testToCharVsCharArray() ;
 	    //testWriteObjectVsUTF() ;
 	 //   writeToFileWithInitialPlaceHolder() ;
@@ -509,6 +586,24 @@ public class TableImporter extends TableProcessor<Worker> {
 			Utils.close(new Object[] { rs, ps });
 		}//EO catch block 
 	}//EOM 
+	
+	private static final void testResultsetfromFunction() throws Throwable { 
+	    final Connection conn = Utils.getPostgresConnection() ;
+	    conn.setAutoCommit(false) ; 
+	    Statement stmt = null ; 
+	    ResultSet rs = null ; 
+	    try{ 
+	        stmt = conn.createStatement() ; 
+	        rs = stmt.executeQuery("select * from test1()") ;
+	        while(rs.next()) { 
+	            System.out.println(rs.getString(1) + "|" + rs.getString(2) + "|" + rs.getString(3));
+	        }//EO while there are more records
+	    }catch(Throwable t) { 
+	        t.printStackTrace() ; 
+	    } finally {
+            Utils.close(Utils.ROLLBACK_INSTRUCTION_FLAG, new Object[] { rs, stmt, conn });
+        }//EO catch block 
+	}//eOM 
 	
 	private static final void testReadfromFile() throws Throwable { 
 	    final String fileName = "/work/workspaces/master-complete/hq/dist/installer/modules/hq-migration/target/hq-migration-5.0/tmp/export-data/data/HQ_METRIC_DATA_0D_1S" ; 
@@ -765,6 +860,8 @@ public class TableImporter extends TableProcessor<Worker> {
             Utils.close(oos) ; 
         }//EO catch block 
     }//EOM  
+	
+	
 	
 	
 	private static final void writeToFileWithInitialPlaceHolder() throws Throwable { 

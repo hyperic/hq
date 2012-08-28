@@ -1,5 +1,8 @@
+create table if not exists public.HQ_DROPPED_INDICES(INDEX_NAME text, INDEX_STATEMENT text, TABLE_NAME text, INDISPRIMARY bool) ;
+truncate table HQ_DROPPED_INDICES ; 
+		
 create or replace function public.fToggleIndices(text, bool) 
-returns void as $$ 
+returns setof HQ_DROPPED_INDICES as $$ 
 declare 
 	tablesClause text ;  
 	dropIndexStatement text ;
@@ -14,12 +17,6 @@ begin
 	  	for oRecord in select * from HQ_DROPPED_INDICES 
 		loop 
 			begin
-				/*if oRecord.INDISPRIMARY then 
-					createIndexStatement := 'alter table ' || oRecord.TABLE_NAME || ' add ' || oRecord.INDEX_STATEMENT ; 
-				else 
-					createIndexStatement :=  oRecord.INDEX_STATEMENT ; 					
-				end if ; */
-				
 				createIndexStatement :=  oRecord.INDEX_STATEMENT ;
 				
 				raise notice 'Recreating index ''%'' for table ''%'' with statement ''%''', oRecord.INDEX_NAME, oRecord.TABLE_NAME, createIndexStatement ;
@@ -31,8 +28,6 @@ begin
 		end loop ; 
 	else
 		raise notice 'dropping indices for tables: %', $1  ;
-		drop table if exists HQ_DROPPED_INDICES ; 
-		create table public.HQ_DROPPED_INDICES(INDEX_NAME text, INDEX_STATEMENT text, TABLE_NAME text, INDISPRIMARY bool) ;
 		
 		execute 'insert into HQ_DROPPED_INDICES 
 		SELECT c2.relname, (case when i.indisprimary = ''t'' then ''alter table '' || c.relname || '' add '' || pg_get_constraintdef(const.oid) else pg_catalog.pg_get_indexdef(i.indexrelid, 0, true) end), c.relname, i.indisprimary
@@ -64,6 +59,7 @@ begin
 		
 	end if; 
 	
+	return query select * from HQ_DROPPED_INDICES ;
 end ;
 $$ 
 language 'plpgsql' volatile 
@@ -155,7 +151,7 @@ cost 10 ;
 
 
 CREATE OR REPLACE FUNCTION public.fmigrationPostConfigure(text)
-RETURNS void as $$
+RETURNS setof HQ_DROPPED_INDICES as $$
 declare 
   oRecord RECORD; 
   oMaxValRecord RECORD; 
@@ -197,10 +193,12 @@ begin
         end; 
 	END LOOP; 
 	
-	perform fToggleIndices('', true) ;
+	--perform fToggleIndices('', true) ;
 	
 	SET synchronous_commit TO ON ;
-	RESET statement_timeout ; 
+	RESET statement_timeout ;
+	
+	return query select * from HQ_DROPPED_INDICES ;
 
 end;
 $$

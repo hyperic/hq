@@ -155,7 +155,6 @@ public abstract class TableProcessor<T extends Callable<TableProcessor.Table[]>>
 
         final LinkedBlockingDeque<Table> sink = new LinkedBlockingDeque<Table>();
         
-        //for (int i = 0; i < noOfTables; i++) {
         for(Table table: this.tablesContainer.tables.values()) { 
             this.addTableToSink(sink, table) ;
         }//EO while there are more tables to add
@@ -180,6 +179,7 @@ public abstract class TableProcessor<T extends Callable<TableProcessor.Table[]>>
         }//EO else if there were more than 1 table
 
         this.afterFork(context, workersResponses, sink);
+        this.generateSummaryReport() ; 
         
         this.log("Overall Processing took: " + StringUtil.formatDuration(System.currentTimeMillis()-before) ) ; 
     
@@ -193,9 +193,9 @@ public abstract class TableProcessor<T extends Callable<TableProcessor.Table[]>>
   }//EOM 
 
   protected void beforeFork(final ForkContext<Table, T> context, final LinkedBlockingDeque<Table> sink) throws Throwable { /*NOOP*/ }//EOM 
-
-  protected void afterFork(final ForkContext<Table, T> context, final List<Future<Table[]>> workersResponses, final LinkedBlockingDeque<Table> sink) throws Throwable {
-    for (Future<Table[]> workerResponse : workersResponses) {
+ 
+  protected <Y ,Z extends Callable<Y[]>> void afterFork(final ForkContext<Y,Z> context, final List<Future<Y[]>> workersResponses, final LinkedBlockingDeque<Y> sink) throws Throwable {
+    for (Future<Y[]> workerResponse : workersResponses) {
         try{
             workerResponse.get();
         } catch (Throwable t) {
@@ -203,28 +203,28 @@ public abstract class TableProcessor<T extends Callable<TableProcessor.Table[]>>
         }//EO catch block 
     }//EO while there are more responses 
 
-    for(Table entity : sink) { 
+    for(Y entity : sink) { 
       log(getClass().getName() + ": Some failure had occured as the following entity was not processed: " + entity, Project.MSG_ERR); 
     }//EO while there are more unprocessed entities 
-    
+  }//EOM 
+  
+  private final void generateSummaryReport() { 
     //store the records per table stats in an env variable using the following format <task name>_RECS_PER_TABLE_STATS_ENV_VAR_SUFFIX
-    
-    
-    final StringBuilder summaryBuilder = new StringBuilder() ;
-    
-    int paddingThreshold = 32;
-    
-    for(Table table : this.tablesContainer.tables.values()) { 
-        
-        summaryBuilder.append(" - ").append(table.name).append(":") ; 
-        for(int i=table.name.length(); i < paddingThreshold; i++) { 
-            summaryBuilder.append(" ") ; 
-        }//EO while there are more padding to add 
-        
-        summaryBuilder.append("\t").append(table.noOfProcessedRecords).append("\n") ; 
-    }//EO while there are more tables                           
-    
-    this.getProject().setProperty(this.getTaskName() + RECS_PER_TABLE_STATS_ENV_VAR_SUFFIX, summaryBuilder.toString()) ;
+      final StringBuilder summaryBuilder = new StringBuilder() ;
+      
+      int paddingThreshold = 32;
+      
+      for(Table table : this.tablesContainer.tables.values()) { 
+          
+          summaryBuilder.append(" - ").append(table.name).append(":") ; 
+          for(int i=table.name.length(); i < paddingThreshold; i++) { 
+              summaryBuilder.append(" ") ; 
+          }//EO while there are more padding to add 
+          
+          summaryBuilder.append("\t").append(table.noOfProcessedRecords).append("\n") ; 
+      }//EO while there are more tables                           
+      
+      this.getProject().setProperty(this.getTaskName() + RECS_PER_TABLE_STATS_ENV_VAR_SUFFIX, summaryBuilder.toString()) ;
   }//EOM 
   
   protected void clearResources(final File stagingDir) { /*NOOP*/ }//EOM 

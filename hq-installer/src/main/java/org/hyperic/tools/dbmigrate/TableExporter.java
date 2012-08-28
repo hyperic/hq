@@ -38,6 +38,7 @@ import java.sql.Statement;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -80,11 +81,14 @@ public class TableExporter extends TableProcessor<Worker> {
     protected Connection getConnection(final Hashtable env) throws Throwable {
         return Utils.getSourceConnection(env);
     }//EOM 
-
+    
+    
     @Override
-    protected final void afterFork(final ForkContext<Table,Worker> context, final List<Future<Table[]>> workersResponses, 
-                final LinkedBlockingDeque<Table> sink) throws Throwable {
-       
+    /*protected final void afterFork(final ForkContext<Table,Worker> context, final List<Future<Table[]>> workersResponses, 
+                final LinkedBlockingDeque<Table> sink) throws Throwable {*/
+    protected final <Y, Z extends Callable<Y[]>> void afterFork(final ForkContext<Y, Z> context,
+            final List<Future<Y[]>> workersResponses, final LinkedBlockingDeque<Y> sink) throws Throwable {      
+        
         MultiRuntimeException thrown = null;
         
         try{
