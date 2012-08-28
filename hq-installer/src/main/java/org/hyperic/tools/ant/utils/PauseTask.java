@@ -37,7 +37,7 @@ public class PauseTask extends Input{
         this.prompt = prompt ; 
     }//EOM 
     
-    public final void setQuite(final boolean isQuiteMode) { 
+    public final void setQuiet(final boolean isQuiteMode) { 
         this.isQuietMode = isQuiteMode ; 
     }//EOM 
     

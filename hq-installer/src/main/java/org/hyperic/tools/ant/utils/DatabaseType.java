@@ -94,6 +94,13 @@ public enum DatabaseType {
             ps.setInt(2, (iOffset+iPageSize) ) ; 
             return ps ; 
         }//EOM 
+        
+        @Override
+        public final StringBuilder appendModuloClause(final String columnName, final int modolu, final StringBuilder stmtBuilder) {
+            return stmtBuilder.append("mod(").append(columnName).append(",").append(modolu).append(")") ; 
+        }//EOM 
+        
+        
     },//EO Oracle
     PostgreSQL{
         @Override
@@ -115,8 +122,8 @@ public enum DatabaseType {
         
         @Override
         public final void setFetchSize(final int batchSize, final boolean isBigTable, final Statement stmt) throws SQLException{ 
-            stmt.setFetchSize(batchSize) ; 
-        }//EOM 
+            stmt.setFetchSize((isBigTable ? Integer.MIN_VALUE : batchSize)) ; 
+        }//EOM
         
     };//EO Postgres 
     
@@ -157,7 +164,11 @@ public enum DatabaseType {
     }//EOM 
     
     public void setFetchSize(final int batchSize, final boolean isBigTable, final Statement stmt) throws SQLException{ 
-        stmt.setFetchSize((isBigTable ? Integer.MIN_VALUE : batchSize)) ; 
-    }//EOM
+        stmt.setFetchSize(batchSize) ; 
+    }//EOM 
+    
+    public StringBuilder appendModuloClause(final String columnName, final int modolu, final StringBuilder stmtBuilder) { 
+        return stmtBuilder.append(columnName).append(" % ").append(modolu) ; 
+    }//EOM 
     
 }//EO enum DatabaseType

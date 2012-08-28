@@ -38,6 +38,7 @@ import java.sql.Statement;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -80,11 +81,14 @@ public class TableExporter extends TableProcessor<Worker> {
     protected Connection getConnection(final Hashtable env) throws Throwable {
         return Utils.getSourceConnection(env);
     }//EOM 
-
+    
+    
     @Override
-    protected final void afterFork(final ForkContext<Table,Worker> context, final List<Future<Table[]>> workersResponses, 
-                final LinkedBlockingDeque<Table> sink) throws Throwable {
-       
+    /*protected final void afterFork(final ForkContext<Table,Worker> context, final List<Future<Table[]>> workersResponses, 
+                final LinkedBlockingDeque<Table> sink) throws Throwable {*/
+    protected final <Y, Z extends Callable<Y[]>> void afterFork(final ForkContext<Y, Z> context,
+            final List<Future<Y[]>> workersResponses, final LinkedBlockingDeque<Y> sink) throws Throwable {      
+        
         MultiRuntimeException thrown = null;
         
         try{
@@ -182,8 +186,10 @@ public class TableExporter extends TableProcessor<Worker> {
                 
                 if(table instanceof BigTable) { 
                     final BigTable bigTable = (BigTable) table ; 
-                    sql = new StringBuilder(sql).append(tableName).append(" WHERE ").append(bigTable.partitionColumn).
-                            append(" % ").append(bigTable.noOfPartitions).append(" = ").append(bigTable.partitionNumber).toString() ;  
+                    final StringBuilder statementBuilder = new StringBuilder(sql).append(tableName).append(" WHERE ") ; 
+                   
+                    sql = enumDatabaseType.appendModuloClause(bigTable.partitionColumn,bigTable.noOfPartitions, statementBuilder).
+                            append(" = ").append(bigTable.partitionNumber).toString() ;
                     
                     partitionNo = bigTable.partitionNumber ; 
                 }else{ 
@@ -243,6 +249,9 @@ public class TableExporter extends TableProcessor<Worker> {
                 final int totalNumberOfRecordsSofar = table.noOfProcessedRecords.addAndGet(recordCount) ;
                 TableExporter.this.log(traceMsgPrefix + recordCountMsgPart +  
                         " for this partition Total records exported so far: " + totalNumberOfRecordsSofar) ;
+            }catch(Throwable t){ 
+                t.printStackTrace() ; 
+                throw t ; 
             }finally {
               Utils.close(new Object[] { ous, rs, stmt });
             }//EO catch block 
