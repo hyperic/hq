@@ -291,6 +291,17 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         return convertAvailMeasurementListToMap(objects);
     }
 
+    /**
+     * 
+     */
+    @Transactional(readOnly = true)
+    public Map<Integer, List<Measurement>> getAvailMeasurementDirectParent(List<Integer> resourceIds,
+            String resourceRelationType) {
+        final List<Object[]> objects = measurementDAO.findDirectParentAvailMeasurements(resourceIds, resourceRelationType);
+        return convertAvailMeasurementListToMap(objects);
+    }
+
+
     private Map<Integer, List<Measurement>> convertAvailMeasurementListToMap(List<Object[]> objects) {
         final Map<Integer, List<Measurement>> rtn = new HashMap<Integer, List<Measurement>>(objects.size());
         for (Object[] o : objects) {

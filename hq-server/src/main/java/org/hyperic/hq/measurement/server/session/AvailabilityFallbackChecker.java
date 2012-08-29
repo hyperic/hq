@@ -87,8 +87,9 @@ public class AvailabilityFallbackChecker {
 		log.debug("checkAvailability: start");
 		Collection<ResourceDataPoint> resPlatforms = new ArrayList<ResourceDataPoint>();
 		for (ResourceDataPoint availabilityDataPoint : availabilityDataPoints) {
-			ResourceDataPoint platformAvailPoint = checkPlatformAvailability(availabilityDataPoint);
 			//log.info("checkAvailability-Platform: " + availabilityDataPoint.getResource().getId() + " value: " + availabilityDataPoint.getValue());
+			ResourceDataPoint platformAvailPoint = checkPlatformAvailability(availabilityDataPoint);
+			//log.info("checkAvailability-Platform: " + platformAvailPoint.getResource().getId() + " value: " + platformAvailPoint.getValue());
 			resPlatforms.add(platformAvailPoint);
 		}
 		log.info("checkAvailability: checking " + resPlatforms.size() + " platforms.");
@@ -106,6 +107,7 @@ public class AvailabilityFallbackChecker {
 	private boolean isHQAgent(Measurement meas) {
 		try {
 			Resource measResource = meas.getResource();
+			//log.debug("isHQHagent? " + measResource.getName());
 			//TODO remove the following line, and recheck
 			measResource = resourceManager.getResourceById(measResource.getId());
 			Resource prototype = measResource.getPrototype();
@@ -155,7 +157,12 @@ public class AvailabilityFallbackChecker {
 		//res = getPlatformStatusByPing(availabilityDataPoint);
 		//if (res != null)
 		//	return res;
-		return availabilityDataPoint;
+		res = availabilityDataPoint;
+		if (availabilityDataPoint.getMetricValue().getValue() != MeasurementConstants.AVAIL_DOWN) {
+			DataPoint resDP = new DataPoint(availabilityDataPoint.getMeasurementId(), MeasurementConstants.AVAIL_DOWN, getCurTimestamp());
+			res = new ResourceDataPoint(availabilityDataPoint.getResource(), resDP);			
+		}
+		return res;
 	}
 
 
@@ -174,7 +181,7 @@ public class AvailabilityFallbackChecker {
 		}
 		List<Integer> resourceIds = new ArrayList<Integer>();
 		resourceIds.add(platformId);
-		final Map<Integer, List<Measurement>> virtualParent = availabilityManager.getAvailMeasurementParent(
+		final Map<Integer, List<Measurement>> virtualParent = availabilityManager.getAvailMeasurementDirectParent(
 				resourceIds, AuthzConstants.ResourceEdgeVirtualRelation);
 		if (isEmptyMap(virtualParent)) {
 			return null;
@@ -182,6 +189,7 @@ public class AvailabilityFallbackChecker {
 		// else - there should be a single measurement of the related VM Instance:
 		List<Measurement> resourceEdgeVirtualRelations = virtualParent.get(platformId);
 		if ((resourceEdgeVirtualRelations == null) | (resourceEdgeVirtualRelations.isEmpty()) ) {
+			//log.info("getPlatfromStatusFromVC: Platform " + platformId + " got no virtual parents. Ignoring.");
 			return null;
 		}
 		if (resourceEdgeVirtualRelations.size() != 1) {
