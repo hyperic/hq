@@ -115,6 +115,11 @@ public class SrnManagerImpl implements SRNManager {
         return System.currentTimeMillis();
     }
 
+    @Transactional(readOnly=true)
+    public void scheduleInBackground(Collection<AppdefEntityID> aeids, boolean overrideRestrictions) {
+        reschedule(aeids, false, true, overrideRestrictions);
+    }
+
     @Transactional(readOnly=false)
     public void scheduleInBackground(Collection<AppdefEntityID> aeids, boolean incrementSrns,
                                      boolean overrideRestrictions) {
