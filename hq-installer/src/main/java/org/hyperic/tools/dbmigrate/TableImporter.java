@@ -55,6 +55,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.tools.ant.Project;
@@ -73,9 +76,16 @@ public class TableImporter extends TableProcessor<Worker> {
 	private StringBuilder tablesList ; 
 	private final String MIGRATION_FUNCTIONS_DIR = "/sql/migrationScripts/" ; 
 	private final String IMPORT_SCRIPTS_FILE = MIGRATION_FUNCTIONS_DIR+ "import-scripts.sql" ; 
+	
+	private int noOfReindexers = 3 ; 
 
 	public TableImporter() {}//EOM 
-
+	
+	
+	public final void setNoOfReindexers(final int iNoOfReindexers) {
+	    this.noOfReindexers = iNoOfReindexers ; 
+	}//EOM 
+	
 	@Override
 	protected final void addTableToSink(final LinkedBlockingDeque<Table> sink, final Table table) {
 	    super.addTableToSink(sink, table);
@@ -123,10 +133,7 @@ public class TableImporter extends TableProcessor<Worker> {
         }//EO catch block 
     }//EOM
 	
-	
 	@Override
-	/*protected final void afterFork(final ForkContext<Table,Worker> context, final List<Future<Table[]>> workersResponses,
-	        final LinkedBlockingDeque<Table> sink) throws Throwable {*/
 	protected final <Y, Z extends Callable<Y[]>> void afterFork(final ForkContext<Y, Z> context,
             final List<Future<Y[]>> workersResponses, final LinkedBlockingDeque<Y> sink) throws Throwable {      
 	    
@@ -152,9 +159,19 @@ public class TableImporter extends TableProcessor<Worker> {
                     rs = stmt.executeQuery((new StringBuilder()).append("select * from fmigrationPostConfigure('").
                                                             append(this.tablesList.toString()).append("')").toString());
                     //stmt.execute("reset statement_timeout") ;
-                    
+                    String tableName = null ;
+                    Table tableRef = null ; 
                     while(rs.next()) { 
-                        indexRestorationTasksSink.add(new IndexRestorationTask(rs.getString(1), rs.getString(3), rs.getString(2))) ; 
+                        tableName = rs.getString(3) ; 
+                        tableRef = this.tablesContainer.tables.get(tableName.toUpperCase()) ; 
+                        
+                        //TODO: for debug - remove !!!!!
+                      //  if("eam_measurement_data_1h,hq_metric_data_7d_0s,hq_metric_data_7d_1s,hq_metric_data_8d_0s,hq_metric_data_8d_0s".indexOf(tableName) != -1) { 
+                      //      tableRef.noOfProcessedRecords.set(120000000) ; 
+                     //   }
+                      //TODO: for debug - remove !!!!! -end 
+                        
+                        indexRestorationTasksSink.add(new IndexRestorationTask(rs.getString(1), tableName, rs.getString(2), tableRef)) ; 
                     }//EO while there are more indices to restore 
                 }catch(Throwable t2) {
                     Utils.printStackTrace(t2);
@@ -175,6 +192,8 @@ public class TableImporter extends TableProcessor<Worker> {
 	private final void restoreIndices(final LinkedBlockingDeque<IndexRestorationTask> indexRestorationTasksSink) throws Throwable { 
 	    final int iNoOfIndexRestorationTasks = indexRestorationTasksSink.size() ; 
         if(iNoOfIndexRestorationTasks > 0) {
+            
+            final String BIG_TABLE_PAUSE_LOCK_KEY = "btplk" ; 
            
             @SuppressWarnings("rawtypes")
             final Hashtable env = this.getProject().getProperties() ;
@@ -184,8 +203,9 @@ public class TableImporter extends TableProcessor<Worker> {
                         public final IndexRestorationWorker newWorker(
                                 final ForkContext<IndexRestorationTask,IndexRestorationWorker> paramForkContext) throws Throwable {
                             
+                            final ReadWriteLock bigTablePauseLock = (ReadWriteLock) paramForkContext.get(BIG_TABLE_PAUSE_LOCK_KEY)  ;
                             final Connection conn = getConnection(env, false/*autoCommit*/);
-                            return new IndexRestorationWorker(paramForkContext.getSemaphore(), conn, paramForkContext.getSink()) ; 
+                            return new IndexRestorationWorker(paramForkContext.getSemaphore(), conn, paramForkContext.getSink(), bigTablePauseLock) ; 
                         }//EOM 
                 
             };//EO anonymous class 
@@ -195,8 +215,13 @@ public class TableImporter extends TableProcessor<Worker> {
                     new ForkContext<IndexRestorationTask, IndexRestorationWorker>(
                             indexRestorationTasksSink, indexRestorationTasksWorkerFactory, env) ; 
             
+            final ReadWriteLock bigTablePauseLock = new ReentrantReadWriteLock() ; 
+            indexRestorationContext.put(BIG_TABLE_PAUSE_LOCK_KEY, bigTablePauseLock) ; 
+            
             final List<Future<IndexRestorationTask[]>> indexRestorationTaskResponses = 
-                    Forker.fork(iNoOfIndexRestorationTasks, 5/*maxWorkers*/, indexRestorationContext) ;
+                    Forker.fork(iNoOfIndexRestorationTasks, this.noOfReindexers/*maxWorkers*/, indexRestorationContext) ;
+            
+            this.log("About to restore " + iNoOfIndexRestorationTasks + " primary keys and unique indices using " + 5 + " threads") ; 
             
             super.afterFork(indexRestorationContext, indexRestorationTaskResponses, indexRestorationTasksSink) ; 
         }//EO if there were index restoration tasks to perform 
@@ -243,31 +268,73 @@ public class TableImporter extends TableProcessor<Worker> {
 	    private String indexCreationStatement ; 
 	    private String tableName ; 
 	    private String indexName ; 
+	    private Table tableMetadata ; 
 	    
-	    IndexRestorationTask(final String indexName, final String tableName, final String indexCreationStatement) { 
+	    IndexRestorationTask(final String indexName, final String tableName, final String indexCreationStatement, final Table tableRef) { 
 	        this.indexName = indexName; 
 	        this.tableName = tableName ; 
-	        this.indexCreationStatement = indexCreationStatement ; 
+	        this.indexCreationStatement = indexCreationStatement ;
+	        this.tableMetadata = tableRef ; 
 	    }//EOM 
+
+        @Override
+        public final String toString() {
+            return "IndexRestorationTask [indexCreationStatement=" + indexCreationStatement + ", tableName="
+                    + tableName + ", indexName=" + indexName + "]";
+        }//EOM 
+	    
 	}//EO inner class IndexRestorationTask
 	
 	public final class IndexRestorationWorker extends ForkWorker<IndexRestorationTask> { 
 	    
-	    IndexRestorationWorker(final CountDownLatch countdownSemaphore, final Connection conn, final BlockingDeque<IndexRestorationTask> sink) {  
+	    private final Lock smallTableLock ; 
+	    private final Lock bigTableLock ; 
+	    private static final int BIG_TABLE_THRESHOLD = 50000000 ; 
+	    
+	    IndexRestorationWorker(final CountDownLatch countdownSemaphore, final Connection conn, final BlockingDeque<IndexRestorationTask> sink, final ReadWriteLock bigTablePauseLock) {  
             super(countdownSemaphore, conn, sink, IndexRestorationTask.class);
+            this.smallTableLock = bigTablePauseLock.readLock() ; 
+            this.bigTableLock = bigTablePauseLock.writeLock() ; 
         }//EOM  
 
         @Override
         protected final void callInner(final IndexRestorationTask entity) throws Throwable {
            Statement stmt = null ; 
            
-           log("[IndexRestorationWorker[" + entity.indexName + "; " + entity.tableName + "]: executing statement " + entity.indexCreationStatement) ;  
-            try{ 
-                stmt =  this.conn.createStatement() ; 
-                stmt.execute("set statement_timeout to 0;\n" + entity.indexCreationStatement + "\n;reset statement_timeout;") ; 
-            }finally{ 
-                Utils.close(new Object[] { stmt }); 
-              }//EO catch block 
+           final int noOfRecords = entity.tableMetadata.noOfProcessedRecords.get() ;  
+           String msgSuffix = " lock for entity " + entity + ", no of Records " + noOfRecords ; 
+           
+           Lock currentLock = null ; 
+           try{ 
+               /*
+                if(noOfRecords > BIG_TABLE_THRESHOLD) { 
+                   log("Attempting to Acquire bigtable (writer)" + msgSuffix) ; 
+                   currentLock = this.bigTableLock ; 
+                   this.bigTableLock.lock() ;
+                   log("exited bigtable (writer)" + msgSuffix) ; 
+               }else {
+                   log("Attempting to Acquire smalltable (reader)" + msgSuffix) ;
+                   currentLock = this.smallTableLock ; 
+                   this.smallTableLock.lock() ;
+                   log("exited smalltable (reader)" + msgSuffix) ; 
+               }//EO else if small table 
+               */               
+               final String logMsg = "[IndexRestorationWorker[" + entity.indexName + "; " + entity.tableName + "; records "+ noOfRecords + "]: executing statement " + entity.indexCreationStatement ; 
+               log(logMsg) ;  
+    
+               final long before = System.currentTimeMillis() ; 
+                try{ 
+                    stmt =  this.conn.createStatement() ; 
+                    stmt.execute("set statement_timeout to 0") ;
+                    stmt.execute(entity.indexCreationStatement) ; 
+                    stmt.execute("reset statement_timeout") ; 
+                }finally{
+                    Utils.close(new Object[] { stmt }); 
+                    log(logMsg + " took: " + (System.currentTimeMillis() - before)) ;  
+                  }//EO catch block 
+           }finally{ 
+               //currentLock.unlock() ; 
+           }//EO catch block 
         }//EOM 
 	    
 	}//EO inner class IndexRestorationWorker
@@ -466,7 +533,8 @@ public class TableImporter extends TableProcessor<Worker> {
 	}//EOM 
 
 	public static void main(String[] args) throws Throwable {
-	    testResultsetfromFunction() ; 
+	    testStringComparison() ; 
+	    //testResultsetfromFunction() ; 
 	   // testPostgresQueryTimeout() ; 
 	    //testToCharVsCharArray() ;
 	    //testWriteObjectVsUTF() ;
@@ -481,6 +549,38 @@ public class TableImporter extends TableProcessor<Worker> {
 	    testTable(batch) ;
 	}//EOM
 	
+	private static final void testStringComparison() throws Throwable { 
+	    
+	    final String s = "BEGIN" ; 
+	    final int iHashCode = s.hashCode() ; 
+	    
+	    System.out.println("BEGIN".intern() == s);
+	    
+	    int iterations = 1000000 ; 
+	    for(int i=0;i< iterations; i++) ; 
+	    
+	    long before = System.currentTimeMillis() ; 
+	    
+	    boolean equals = false ; 
+	    int hashcode = 0 ; 
+	    for(int i=0;i< iterations; i++) { 
+	        
+	        equals = "BEGIN".equals(s) ; 
+	        
+	    }//EO while
+	    
+	    System.out.println(" equals Took: " + (System.currentTimeMillis()-before)) ;
+	    
+	    before = System.currentTimeMillis() ;
+	    for(int i=0;i< iterations; i++) { 
+            
+	        equals = "BEGIN".hashCode() ==  iHashCode; 
+            
+        }//EO while
+	    
+	    System.out.println(" hashcode Took: " + (System.currentTimeMillis()-before)) ; 
+	     
+	}//EOM 
 	
 	public static final void testToCharVsCharArray() throws Throwable { 
 	    

@@ -1,6 +1,8 @@
 create table if not exists public.HQ_DROPPED_INDICES(INDEX_NAME text, INDEX_STATEMENT text, TABLE_NAME text, INDISPRIMARY bool) ;
 truncate table HQ_DROPPED_INDICES ; 
 		
+drop function if exists fToggleIndices(text, bool);
+
 create or replace function public.fToggleIndices(text, bool) 
 returns setof HQ_DROPPED_INDICES as $$ 
 declare 
@@ -74,6 +76,8 @@ cost 10;
  *   - append table name to disableIndicesList  if instruction = 1   
  *   - invoke the indices toggler passing the disableIndicesList
  */
+drop function if exists fmigrationPreConfigure(text) ; 
+
 CREATE OR REPLACE FUNCTION public.fmigrationPreConfigure(text) 
 returns void as $$ 
 declare 
@@ -149,6 +153,7 @@ language 'plpgsql' VOLATILE
 SECURITY DEFINER 
 cost 10 ;
 
+drop function if exists fmigrationPostConfigure(text) ;
 
 CREATE OR REPLACE FUNCTION public.fmigrationPostConfigure(text)
 RETURNS setof HQ_DROPPED_INDICES as $$

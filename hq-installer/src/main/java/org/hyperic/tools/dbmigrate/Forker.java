@@ -39,8 +39,24 @@ import java.util.concurrent.Future;
 
 import org.hyperic.util.MultiRuntimeException;
 
+/**
+ * 
+ * Map reduce service class which spawns configurable amount for worker threads to share the load of a task buffer<br> 
+ * and awaits for all workers to finish prior to returning to the caller. 
+ * 
+ * The class delegates the worker instance creation to the {@link WorkerFactory} formal argument instance. 
+ */
 public class Forker {
 
+    /**
+     * Spawns configurable amount of worker threads and awaits until all workers are finished prior to returning to the caller 
+     * @param bufferSize - number of elements in the task buffer. Used to configure the number of workers as if the value is<br>
+     *                     smaller than the value of the maxWorkers, the number of workers spawned would be the bufferSize.
+     * @param maxWorkers
+     * @param context
+     * @return
+     * @throws Throwable
+     */
     public static final <V, T extends Callable<V[]>> List<Future<V[]>> fork(final int bufferSize, final int maxWorkers,
             final ForkContext<V, T> context) throws Throwable {
 
@@ -94,14 +110,16 @@ public class Forker {
             try{
                 V entity = null;
                 Throwable innerException = null;
-
+                final String errorMsg = "[" + this.getClass().getName() + "] : an Error had occured while processing entity: " ; 
+                
                 while ((entity = this.sink.poll()) != null){
                     try {
                         processedEntities.add(entity);
                         callInner(entity);
                         
                     }catch (Throwable t2) {
-                        Utils.printStackTrace(t2);
+                           
+                        Utils.printStackTrace(t2, errorMsg + entity);
                         innerException = t2;
                     }finally {
                         try {
@@ -113,7 +131,7 @@ public class Forker {
                                 this.conn.rollback();
                             }//EO else if there was an error 
                         }catch (Throwable t2) {
-                            Utils.printStackTrace(t2);
+                            Utils.printStackTrace(t2, errorMsg + entity);
                             MultiRuntimeException.newMultiRuntimeException(thrown, t2);
                         }//EO inner catch block
 

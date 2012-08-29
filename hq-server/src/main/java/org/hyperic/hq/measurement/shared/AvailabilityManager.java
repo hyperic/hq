@@ -67,6 +67,9 @@ public interface AvailabilityManager {
     public Map<Integer, List<Measurement>> getAvailMeasurementParent(List<Integer> resourceIds,
                                                                      String resourceRelationType);
 
+    public Map<Integer, List<Measurement>> getAvailMeasurementDirectParent(List<Integer> resourceIds,
+            String resourceRelationType);
+
     /**
      * Get Availability measurements (disabled) in scheduled downtime. 
      */
