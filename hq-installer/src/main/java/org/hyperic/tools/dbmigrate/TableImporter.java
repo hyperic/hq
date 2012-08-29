@@ -53,6 +53,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.concurrent.BlockingDeque;
@@ -74,9 +75,6 @@ import org.hyperic.tools.dbmigrate.TableExporter.UTFNullHandlerOOS;
 import org.hyperic.tools.dbmigrate.TableImporter.Worker;
 import org.hyperic.tools.dbmigrate.TableProcessor.Table;
 import org.hyperic.util.MultiRuntimeException;
-
-import edu.emory.mathcs.backport.java.util.Arrays;
-
 
 public class TableImporter extends TableProcessor<Worker> {
 	
