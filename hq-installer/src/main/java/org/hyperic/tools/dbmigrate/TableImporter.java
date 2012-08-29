@@ -28,10 +28,14 @@ package org.hyperic.tools.dbmigrate;
 import static org.hyperic.tools.dbmigrate.Utils.COMMIT_INSTRUCTION_FLAG;
 import static org.hyperic.tools.dbmigrate.Utils.ROLLBACK_INSTRUCTION_FLAG;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -39,6 +43,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.StreamCorruptedException;
+import java.io.Writer;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.sql.Connection;
@@ -47,6 +52,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.concurrent.BlockingDeque;
@@ -68,6 +74,8 @@ import org.hyperic.tools.dbmigrate.TableExporter.UTFNullHandlerOOS;
 import org.hyperic.tools.dbmigrate.TableImporter.Worker;
 import org.hyperic.tools.dbmigrate.TableProcessor.Table;
 import org.hyperic.util.MultiRuntimeException;
+
+import edu.emory.mathcs.backport.java.util.Arrays;
 
 
 public class TableImporter extends TableProcessor<Worker> {
@@ -122,14 +130,17 @@ public class TableImporter extends TableProcessor<Worker> {
             stmt = conn.createStatement();
             stmt.execute(importFunctions) ;  
                        
-            stmt.executeQuery("select fmigrationPreConfigure('" + this.preImportActionsInstructions.toString() + "')") ; 
+            stmt.executeQuery("select fmigrationPreConfigure('" + this.preImportActionsInstructions.toString() + "')") ;
+            
         } catch (Throwable t) {
             thrown = new MultiRuntimeException(t);
         } finally {
             Utils.close(thrown != null ? ROLLBACK_INSTRUCTION_FLAG : COMMIT_INSTRUCTION_FLAG, new Object[] { stmt, conn });
             
             if (thrown != null) throw thrown;
-            else log("Pre import actions were sucessful.");
+            else { 
+                log("Pre import actions were sucessful.");
+            }//EO else if success 
         }//EO catch block 
     }//EOM
 	
@@ -155,23 +166,27 @@ public class TableImporter extends TableProcessor<Worker> {
                     conn = getConnection(project.getProperties());
                     
                     stmt = conn.createStatement();
-                    //stmt.execute("set statement_timeout to 0") ;
                     rs = stmt.executeQuery((new StringBuilder()).append("select * from fmigrationPostConfigure('").
                                                             append(this.tablesList.toString()).append("')").toString());
-                    //stmt.execute("reset statement_timeout") ;
-                    String tableName = null ;
+
+                    String tableName = null, lastTableName = null, indexCreationStatement = null, indexName =null ; 
                     Table tableRef = null ; 
-                    while(rs.next()) { 
-                        tableName = rs.getString(3) ; 
-                        tableRef = this.tablesContainer.tables.get(tableName.toUpperCase()) ; 
+                    IndexRestorationTask indexRestorationTask = null ;
+                    
+                    while(rs.next()) {
+                        indexName = rs.getString(1) ; 
+                        indexCreationStatement = rs.getString(2) ;
+                        tableName = rs.getString(3) ;
                         
-                        //TODO: for debug - remove !!!!!
-                      //  if("eam_measurement_data_1h,hq_metric_data_7d_0s,hq_metric_data_7d_1s,hq_metric_data_8d_0s,hq_metric_data_8d_0s".indexOf(tableName) != -1) { 
-                      //      tableRef.noOfProcessedRecords.set(120000000) ; 
-                     //   }
-                      //TODO: for debug - remove !!!!! -end 
+                        if(!tableName.equals(lastTableName)) {
+                            tableRef = this.tablesContainer.tables.get(tableName.toUpperCase()) ;
+                            indexRestorationTask = new IndexRestorationTask(tableName, tableRef) ; 
+                            indexRestorationTasksSink.add(indexRestorationTask) ;
+                            lastTableName =  tableName ; 
+                        }//EO if new table 
                         
-                        indexRestorationTasksSink.add(new IndexRestorationTask(rs.getString(1), tableName, rs.getString(2), tableRef)) ; 
+                        indexRestorationTask.addIndex(indexName, indexCreationStatement) ; 
+                           
                     }//EO while there are more indices to restore 
                 }catch(Throwable t2) {
                     Utils.printStackTrace(t2);
@@ -265,24 +280,42 @@ public class TableImporter extends TableProcessor<Worker> {
     }//EO inner class TableBatchMetadata 
 	
 	private static final class IndexRestorationTask  {
-	    private String indexCreationStatement ; 
+	    private List<IndexDetails> indexCreationStatementList ; 
 	    private String tableName ; 
-	    private String indexName ; 
 	    private Table tableMetadata ; 
 	    
-	    IndexRestorationTask(final String indexName, final String tableName, final String indexCreationStatement, final Table tableRef) { 
-	        this.indexName = indexName; 
+	    IndexRestorationTask(final String tableName, final Table tableRef) { 
 	        this.tableName = tableName ; 
-	        this.indexCreationStatement = indexCreationStatement ;
+	        this.indexCreationStatementList = new ArrayList<IndexDetails>() ; 
 	        this.tableMetadata = tableRef ; 
 	    }//EOM 
+	    
+	    void addIndex(final String indexName, final String creationStatement) { 
+	        this.indexCreationStatementList.add(new IndexDetails(indexName, creationStatement)) ; 
+	    }//EOM
 
         @Override
         public final String toString() {
-            return "IndexRestorationTask [indexCreationStatement=" + indexCreationStatement + ", tableName="
-                    + tableName + ", indexName=" + indexName + "]";
+            return "IndexRestorationTask [indexCreationStatement=" + indexCreationStatementList + ", tableName="
+                    + tableName + "]";
         }//EOM 
 	    
+        private static final class IndexDetails { 
+            String indexName ; 
+            String creationStatement ;  
+           
+            public IndexDetails(final String indexName, final String creationStatement) { 
+                this.indexName = indexName ; 
+                this.creationStatement = creationStatement ; 
+            }//EOM 
+            
+            @Override
+            public final String toString() {
+                return "[indexName=" + indexName + ", creationStatement=" + creationStatement + "]";
+            }//EOM 
+            
+        }//EO inner class IndexDetails 
+        
 	}//EO inner class IndexRestorationTask
 	
 	public final class IndexRestorationWorker extends ForkWorker<IndexRestorationTask> { 
@@ -306,7 +339,7 @@ public class TableImporter extends TableProcessor<Worker> {
            
            Lock currentLock = null ; 
            try{ 
-               /*
+               
                 if(noOfRecords > BIG_TABLE_THRESHOLD) { 
                    log("Attempting to Acquire bigtable (writer)" + msgSuffix) ; 
                    currentLock = this.bigTableLock ; 
@@ -318,22 +351,26 @@ public class TableImporter extends TableProcessor<Worker> {
                    this.smallTableLock.lock() ;
                    log("exited smalltable (reader)" + msgSuffix) ; 
                }//EO else if small table 
-               */               
-               final String logMsg = "[IndexRestorationWorker[" + entity.indexName + "; " + entity.tableName + "; records "+ noOfRecords + "]: executing statement " + entity.indexCreationStatement ; 
+                             
+               final String logMsg = "[IndexRestorationWorker[" + entity.tableName + "; records "+ noOfRecords + "]: executing statements "  + entity.indexCreationStatementList ;   
+               
                log(logMsg) ;  
-    
+        
                final long before = System.currentTimeMillis() ; 
-                try{ 
-                    stmt =  this.conn.createStatement() ; 
-                    stmt.execute("set statement_timeout to 0") ;
-                    stmt.execute(entity.indexCreationStatement) ; 
-                    stmt.execute("reset statement_timeout") ; 
+               try{ 
+                   stmt =  enumDatabaseType.createBatchStatementWithTimeout(this.conn, 0) ;
+                   
+                   for(org.hyperic.tools.dbmigrate.TableImporter.IndexRestorationTask.IndexDetails indexDetails : entity.indexCreationStatementList) {
+                       stmt.addBatch(indexDetails.creationStatement) ;
+                   }//EO while there are more statements
+                        
+                  stmt.executeBatch() ; 
                 }finally{
                     Utils.close(new Object[] { stmt }); 
                     log(logMsg + " took: " + (System.currentTimeMillis() - before)) ;  
                   }//EO catch block 
            }finally{ 
-               //currentLock.unlock() ; 
+               currentLock.unlock() ; 
            }//EO catch block 
         }//EOM 
 	    
@@ -345,8 +382,11 @@ public class TableImporter extends TableProcessor<Worker> {
         Worker(final CountDownLatch countdownSemaphore, final Connection conn, final BlockingDeque<Table> sink, final File outputDir){ 
             super(countdownSemaphore, conn, sink, Table.class);
             this.outputDir = outputDir;
-        }//EOM 
-
+            
+            //execute database specific logic to optimize the bulk import performance (see postgres database type)  
+            enumDatabaseType.optimizeForBulkImport(this.conn) ; 
+        }//EOM
+        
         protected final void callInner(Table entity) throws Throwable {
             if((entity.getClass() != TableBatchMetadata.class)) {
                 final TableBatchMetadata synchronousBatch = this.distributeBatches(((Table)entity));
@@ -366,7 +406,6 @@ public class TableImporter extends TableProcessor<Worker> {
                 final FileInputStream fis = new FileInputStream(batchMetadata.batchFile);
                 final GZIPInputStream zis = new GZIPInputStream(fis) ; 
                 ois = new UTFNullHandlerOIS(zis);
-                //ois = new ObjectInputStream(fis);
                 int recordCount = 0;
 
                 final int columnCount = batchMetadata.columnCount;
@@ -533,7 +572,8 @@ public class TableImporter extends TableProcessor<Worker> {
 	}//EOM 
 
 	public static void main(String[] args) throws Throwable {
-	    testStringComparison() ; 
+	    testReadFromCSV() ;
+	    ///testStringComparison() ; 
 	    //testResultsetfromFunction() ; 
 	   // testPostgresQueryTimeout() ; 
 	    //testToCharVsCharArray() ;
@@ -959,10 +999,118 @@ public class TableImporter extends TableProcessor<Worker> {
         }finally{ 
             Utils.close(oos) ; 
         }//EO catch block 
-    }//EOM  
+    }//EOM
 	
 	
-	
+	private static final void testReadFromCSV() throws Throwable { 
+	    
+	    final String fileName = "/tmp/EAM_CONFIG_PROPS.csv" ;  
+	    final File file = new File(fileName) ; 
+	    
+	    final BufferedReader reader = new BufferedReader(new FileReader(file)) ; 
+	    
+	    final List<String[]> rows = new ArrayList<String[]>() ; 
+	    try{ 
+	        char chrQuotes = '"' ; 
+	        char delimiter = ',' ; 
+	        boolean isInStringContext = false ; 
+	        
+	        int r ;
+	        char chr  ; 
+	        String[] arrRow = new String[7]  ; 
+	        StringBuilder stringConstrcutor = new StringBuilder() ; 
+	        int currentIndex = 0 ; 
+	        while((r = reader.read()) != -1) {
+	            
+	           chr = (char) r ;
+	           
+	           if(chr == '\n') { 
+	               arrRow[currentIndex] = stringConstrcutor.toString() ;
+	               System.out.println(Arrays.toString(arrRow));
+	               rows.add(arrRow) ; 
+	               arrRow = new String[7] ; 
+	               stringConstrcutor.setLength(0) ;
+	               currentIndex = 0 ; 
+	           }else if(chr == chrQuotes) { 
+	               if(isInStringContext) { 
+	                   isInStringContext = false ; 
+	               }else{  
+	                   isInStringContext = true ; 
+	               }//EO else if open quotes 
+	           }else if(chr == delimiter && !isInStringContext) { 
+	               arrRow[currentIndex++] = stringConstrcutor.toString() ; 
+	               stringConstrcutor.setLength(0) ; 
+	           }//EO else if delimiter 
+	           else { 
+	               stringConstrcutor.append(chr) ; 
+	           }//EO else if string constructor 
+	        }//EO while there are more lines 
+	           
+        }catch(Throwable t) { 
+            t.printStackTrace() ; 
+        }finally{ 
+            reader.close() ; 
+        }//EO catch block
+	    
+	    
+	    final Connection conn = Utils.getPostgresConnection() ;
+        conn.setAutoCommit(false) ; 
+        Statement stmt = null ; 
+        ResultSet rs = null ;
+        Writer writer = null ; 
+        final String otuputFile = "/tmp/EAM_CONFIG_RESPONSE.csvout" ; 
+        final File outputfile = new File(otuputFile) ;
+        try{ 
+            stmt = conn.createStatement() ; 
+            rs = stmt.executeQuery("select * from eam_config_props") ;
+            final ResultSetMetaData rsmd = rs.getMetaData() ; 
+            final int noOfColumns = rsmd.getColumnCount() ; 
+            
+            writer = new BufferedWriter(new FileWriter(outputfile)) ;
+            int iFlushThreshold = 10 ;
+            String DELIMITER = "~" ; 
+            String LINE_SEPARATOR = "\n" ; 
+            		
+            int iNoOfRecords = 0 ; 
+            String value = null ; 
+            while(rs.next()) { 
+                for(int i=0; i < noOfColumns; i++) {
+                    value = rs.getString(i+1) ; 
+                    writer.write(value == null ? "" : value) ;
+                    if(i < noOfColumns-1) writer.write(DELIMITER) ; 
+                }//EO while there are more columns
+                writer.write(LINE_SEPARATOR) ; 
+                if(iNoOfRecords++ % iFlushThreshold == 0) writer.flush() ; 
+            }//EO while there are more records
+        }catch(Throwable t) { 
+            t.printStackTrace() ; 
+        } finally {
+            Utils.close(Utils.ROLLBACK_INSTRUCTION_FLAG, new Object[] { rs, stmt, conn });
+        }//EO catch block
+	    	    
+	    //Writer writer = new BufferedWriter(new FileWriter(outputfile)) ;
+	  /*  try{ 
+	        int iFlushThreshold = 10 ;
+	        
+	        final int iNoOfRows = rows.size() ;
+	        String[] row = null ; 
+	        for(int j=0; j < iNoOfRows; j++) {
+	            row = rows.get(j) ; 
+	            
+	            for(int i=0; i< row.length; i++) { 
+	                writer.write(row[i]) ; 
+	                if(i < row.length-1) writer.write("~") ;
+	            }//EO while there are more rows
+	            writer.write("\n") ;
+	            if(j % iFlushThreshold == 10) writer.flush() ; 
+	        }//EO while there are more rows 
+	    }catch(Throwable t) { 
+	        t.printStackTrace() ; 
+	    }finally{ 
+	        writer.flush() ; 
+	        writer.close() ; 
+	    }//EO catch block 
+*/	}//EOM 
 	
 	private static final void writeToFileWithInitialPlaceHolder() throws Throwable { 
 	    

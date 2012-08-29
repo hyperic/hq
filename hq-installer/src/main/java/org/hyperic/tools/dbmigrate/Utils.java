@@ -40,6 +40,10 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 
+/**
+ * Misc utils file containing global constants, database and file related utility methods.
+ * @author guy
+ */
 @SuppressWarnings("rawtypes")
 public class Utils{
     
@@ -72,10 +76,37 @@ public class Utils{
       dbDrivers.put("Oracle9i", "oracle.jdbc.driver.OracleDriver");
   }//EO static block
   
+  /**
+   * Closes all formal argument objects with no special operations.<br/> 
+   * Supported types:<br/>  
+   * - {@link Connection}<br/>
+   * - {@link PreparedStatement}<br/>
+   * - {@link OutputStream}<br/>
+   * - {@link InputStream}<br/>
+   * <p> 
+   * <b>Note:</b> Exceptions are silenced.
+   * </p>
+   * @param closeables list of closeables
+   */
   public static final void close(final Object...closeables){
     close(NOOP_INSTRUCTION_FLAG, closeables);
   }//EOM 
 
+  /**
+   * Closes all formal argument objects with no special operations.<br/> 
+   * Supported types:<br/>  
+   * - {@link Connection}<br/>
+   *   - Special Instructions:<br/> 
+   *     - {@value #COMMIT_INSTRUCTION_FLAG}<br/>
+   *     - {@value #ROLLBACK_INSTRUCTION_FLAG}<br/>
+   * - {@link PreparedStatement}<br/>
+   * - {@link OutputStream}<br/>
+   * - {@link InputStream}<br/>
+   * <p> 
+   * <b>Note:</b> Exceptions are silenced.
+   * </p>
+   * @param closeables list of closeables
+   */
   public static final void close(final int specialInstructionsMask, final Object...closeables) {
     for (Object closeable : closeables) {
       if (closeables == null)
@@ -109,6 +140,12 @@ public class Utils{
     }//EO while there are more closeables 
   }//EOM 
 
+  /**
+   * Executes a jdbc update statement and disposes of the resources 
+   * @param conn Connection 
+   * @param sqlStatmeent Statement to execute 
+   * @throws Throwable
+   */
   public static final void executeUpdate(final Connection conn, final String sqlStatmeent) throws Throwable {
     PreparedStatement ps = null;
     try {
@@ -119,10 +156,19 @@ public class Utils{
     }//EO catch block 
   }//EOM 
 
+  /**
+   * @param exception to print 
+   */
   public static final void printStackTrace(final Throwable exception) {
       printStackTrace(exception, null) ; 
   }//EOM 
   
+  /**
+   * Prints the exception to the {@link System#err} stream with an optional prefixMessage<br/> 
+   * <b>Note:</b> If {@link SQLException}, prints all its linked exceptions as well.  
+   * @param exception to print 
+   * @param prefixMessage optional message to output to {@link System#err} stream  
+   */
   public static final void printStackTrace(final Throwable exception, final String prefixMessage) {
     if(prefixMessage != null) System.err.println(prefixMessage) ; 
     if ((exception instanceof SQLException)) {
@@ -136,19 +182,50 @@ public class Utils{
     }//EO if instanceof SQLException 
   }//EOM 
 
+  /**
+   * @param url
+   * @param username
+   * @param password
+   * @param driverClass
+   * @return Connection
+   * @throws Throwable
+   */
   public static final Connection getConnection(final String url, final String username, final String password, final String driverClass) throws Throwable {
     Class.forName(driverClass);
     return DriverManager.getConnection(url, username, password);
   }//EOM 
 
+  /**
+   * Specialized getConnection() which uses the environment attributes for the source DB to initialize the connection 
+   * @param env ANT's env.
+   * @return Connection
+   * @throws Throwable
+   */
   public static final Connection getSourceConnection(final Hashtable env) throws Throwable {
     return getConnection(SOURCE_DB_URL_KEY, SOURCE_DB_USERNAME_KEY, SOURCE_DB_PASSWORD_KEY, SOURCE_DB_TYPE_KEY, SOURCE_DB_DRIVER_KEY, env);
   }//EOM 
 
+  /**
+   * Specialized getConnection() which uses the environment attributes for the target DB to initialize the connection 
+   * @param env ANT's env.
+   * @return Connection
+   * @throws Throwable
+   */
   public static final Connection getDestinationConnection(Hashtable env) throws Throwable {
     return getConnection(TARGET_DB_URL_KEY, TARGET_DB_USERNAME_KEY, TARGET_DB_PASSWORD_KEY, TARGET_DB_TYPE_KEY, TARGET_DB_DRIVER_KEY, env);
   }//EOM 
 
+  /**
+   * G
+   * @param urlKey
+   * @param usernameKey
+   * @param passwordKey
+   * @param dbTypeKey
+   * @param driverClassKey
+   * @param env
+   * @return
+   * @throws Throwable
+   */
   public static final Connection getConnection(final String urlKey, final String usernameKey, final String passwordKey, 
           final String dbTypeKey, final String driverClassKey, final Hashtable env) throws Throwable {
     
@@ -164,11 +241,22 @@ public class Utils{
     return getConnection(dbUrl, username, password, driver);
   }//EOM 
 
+  /**
+   * Extracts a property from the env formal argument stored against the key and if null returns the defaultVal value 
+   * @param key property to extract 
+   * @param defaultVal value to return in case the property was not found. 
+   * @param env properties environment 
+   * @return property value or defaultVal if the former was not found.
+   */
   public static final String getEnvProperty(final String key, final String defaultVal, final Hashtable env) {
     final String value = (String)env.get(key);
     return value == null ? defaultVal : value;
   }//EOM 
 
+  /**
+   * Recursively deletes a given directory including all subdirectories and files and itself  
+   * @param dir
+   */
   public static final void deleteDirectory(final File dir) {
     if (dir.exists()) {
       final File[] files = dir.listFiles();
@@ -185,6 +273,12 @@ public class Utils{
     }//EO if the directory exists  
   }//EOM 
   
+  /**
+   * Fully reads the given file content and returns it (to be used be small files only).
+   * @param file 
+   * @return full content of the file 
+   * @throws IOException
+   */
   public static final String getFileContent(final File file) throws IOException{ 
       FileInputStream fis = null ;
       String content = null ; 

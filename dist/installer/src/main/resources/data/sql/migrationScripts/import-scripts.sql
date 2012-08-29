@@ -61,7 +61,7 @@ begin
 		
 	end if; 
 	
-	return query select * from HQ_DROPPED_INDICES ;
+	return query select * from HQ_DROPPED_INDICES order by table_name;
 end ;
 $$ 
 language 'plpgsql' volatile 
@@ -203,7 +203,7 @@ begin
 	SET synchronous_commit TO ON ;
 	RESET statement_timeout ;
 	
-	return query select * from HQ_DROPPED_INDICES ;
+	return query select * from HQ_DROPPED_INDICES order by table_name;
 
 end;
 $$

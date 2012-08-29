@@ -38,6 +38,13 @@ import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 
+/**
+ * Loads the complete content of a file.<br/>
+ * If the property member was defined store the content is the property else 
+ * logs the content using {@link Project#MSG_WARN} level.
+ * @author guy
+ *
+ */
 public class LoadFileContentTask extends Task{
     
     private static final String MATCH_REGEX = "\\$\\{(.*?)\\}" ;
@@ -47,17 +54,25 @@ public class LoadFileContentTask extends Task{
     private String property ; 
     private boolean trim ; 
     
-    public LoadFileContentTask() {
-    }//EOM 
+    public LoadFileContentTask() {}//EOM 
     
+    /**
+     * @param trim if true shall trim all whitespaces from beginning and end of the content 
+     */
     public final void setTrim(final boolean trim) { 
         this.trim = trim ; 
     }//EOM 
     
+    /**
+     * @param propertyName property name to store the content in
+     */
     public final void setProperty(final String propertyName) { 
         this.property = propertyName ;  
     }//EOM 
     
+    /**
+     * @param file source file from which to load the content 
+     */
     public final void setFile(final String file) { 
         this.file = file ;
     }//EOM

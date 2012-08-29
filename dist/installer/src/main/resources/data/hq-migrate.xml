@@ -86,7 +86,7 @@
 				<equals arg1="${scale}" arg2="true" />
 			</and> 
 			<then>
-				<property name="no.importer.workers" value="50" />
+				<property name="no.importer.workers" value="70" />
 				<property name="no.importer.reindexers" value="5" />
 				<property name="no.importer.batchSize" value="7000" />
 				

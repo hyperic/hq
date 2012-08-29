@@ -24,12 +24,14 @@
  */
 package org.hyperic.tools.ant.utils;
 
+import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.hyperic.hibernate.dialect.MySQL5InnoDBDialect;
+import org.hyperic.tools.dbmigrate.Utils;
 
 /**
  * DataBase product based strategy dealing the sql syntax nuances of each of the products.<br> 
@@ -106,8 +108,7 @@ public enum DatabaseType {
         @Override
         public final String generatePagedQuery(final String tableName, 
                                 final String columnsClause, final String pkColumnName) {
-            /*return String.format("SELECT %s, %s from %s order by %s offset ? limit ?", pkColumnName, columnsClause,
-                    tableName, pkColumnName) ;*/
+            
             return String.format("SELECT %s, %s FROM %s where id %% ? = ?", pkColumnName, columnsClause, tableName) ; 
         }//EOM 
         
@@ -120,10 +121,48 @@ public enum DatabaseType {
             return ps ; 
         }//EOM 
         
+        /**
+         * configures the statement's fetch size 
+         * @param fetchSize used for the fetch size if not a big table  
+         * @param isBigTable if true sets {@link Integer#MIN_VALUE} as a special indication to stream the content so as not to overwehlm the heap 
+         * @param stmt statement to configure 
+         * @throws SQLException
+         */
         @Override
-        public final void setFetchSize(final int batchSize, final boolean isBigTable, final Statement stmt) throws SQLException{ 
-            stmt.setFetchSize((isBigTable ? Integer.MIN_VALUE : batchSize)) ; 
+        public final void setFetchSize(final int fetchSize, final boolean isBigTable, final Statement stmt) throws SQLException{ 
+            stmt.setFetchSize((isBigTable ? Integer.MIN_VALUE : fetchSize)) ; 
         }//EOM
+        
+        /**
+         * Sets the commit mode to async so as to circumvent the WAL mechanism 
+         */
+        @Override
+        public final void optimizeForBulkImport(final Connection conn) {
+            boolean commit = true ;
+            PreparedStatement ps = null ; 
+            try{ 
+                ps = conn.prepareStatement("set synchronous_commit to off") ;
+                ps.execute() ; 
+            }catch(Throwable t) { 
+                commit = false ; 
+                throw (t instanceof RuntimeException ? (RuntimeException)t : new RuntimeException(t)) ; 
+            }finally{ 
+                Utils.close((!commit ? Utils.ROLLBACK_INSTRUCTION_FLAG : Utils.COMMIT_INSTRUCTION_FLAG), new Object[]{ps}) ;
+            }//EO catch block
+        }//EOM 
+        
+        /**
+         * Creates a batch statement and sets the query timeout in the only fashion known to postgres: a plsql query.<b/>
+         * <b>Note:</b> Client code must invoke the stmt.executeBatch() on the statement
+         * @param conn 
+         * @param timeoutSecs query timeout in secs (0 for no limit) 
+         */
+        @Override
+        public Statement createBatchStatementWithTimeout(Connection conn, int timeoutSecs) throws Throwable {
+            final Statement stmt = super.createBatchStatementWithTimeout(conn, timeoutSecs);
+            stmt.addBatch("set local statement_timeout to 0") ;
+            return stmt ;
+        }//EOM 
         
     };//EO Postgres 
     
@@ -163,12 +202,49 @@ public enum DatabaseType {
         return String.format("update %s set %s where %s = ?", tableName, columnsClause, pkColumnName) ; 
     }//EOM 
     
-    public void setFetchSize(final int batchSize, final boolean isBigTable, final Statement stmt) throws SQLException{ 
-        stmt.setFetchSize(batchSize) ; 
+    /**
+     * configures the statement's fetch size 
+     * @param fetchSize used for the fetch size 
+     * @param isBigTable unused in the default implementation see {@link DatabaseType#PostgreSQL#setFetchSize(int, boolean, Statement)} for usage 
+     * @param stmt statement to configure 
+     * @throws SQLException
+     */
+    public void setFetchSize(final int fetchSize, final boolean isBigTable, final Statement stmt) throws SQLException{ 
+        stmt.setFetchSize(fetchSize) ; 
     }//EOM 
     
+    /**
+     * Constructs a modolu clause in the following format <column name> % <<modolu>> and appends it to to stmtBuilder 
+     * @param columnName 
+     * @param modolu
+     * @param stmtBuilder
+     * @return the stmtBuilder
+     */
     public StringBuilder appendModuloClause(final String columnName, final int modolu, final StringBuilder stmtBuilder) { 
         return stmtBuilder.append(columnName).append(" % ").append(modolu) ; 
     }//EOM 
+    
+    /**
+     * Template method for database specific optimization techniques (see {@link DatabaseType#PostgreSQL} for example) 
+     * @param conn
+     */
+    public void optimizeForBulkImport(final Connection conn) { /*noop*/ }//EOM  
+    
+    /**
+     * Creates a batch statement and configures it for timeout<br/> 
+     * <b>Note:</b> Client code must invoke the stmt.executeBatch() on the statement 
+     *
+     * @param conn
+     * @param timeoutSecs query Timeout in secs 
+     * @return the statment 
+     * @throws Throwable
+     */
+    public Statement createBatchStatementWithTimeout(final Connection conn, final int timeoutSecs) throws Throwable{   
+        final Statement stmt = conn.createStatement() ;
+        stmt.setQueryTimeout(timeoutSecs) ;
+        return stmt ; 
+    }//EOM 
+    
+    
     
 }//EO enum DatabaseType

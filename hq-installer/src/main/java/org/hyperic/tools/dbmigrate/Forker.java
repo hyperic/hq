@@ -41,20 +41,21 @@ import org.hyperic.util.MultiRuntimeException;
 
 /**
  * 
- * Map reduce service class which spawns configurable amount for worker threads to share the load of a task buffer<br> 
+ * Map reduce service class which spawns configurable amount for worker threads to share the load of a task buffer<br/> 
  * and awaits for all workers to finish prior to returning to the caller. 
- * 
- * The class delegates the worker instance creation to the {@link WorkerFactory} formal argument instance. 
+ * <p>
+ * The class delegates the worker instance creation to the {@link WorkerFactory} formal argument instance.
+ * </p> 
  */
 public class Forker {
 
     /**
      * Spawns configurable amount of worker threads and awaits until all workers are finished prior to returning to the caller 
-     * @param bufferSize - number of elements in the task buffer. Used to configure the number of workers as if the value is<br>
+     * @param bufferSize - number of elements in the task buffer. Used to configure the number of workers as if the value is<br/>
      *                     smaller than the value of the maxWorkers, the number of workers spawned would be the bufferSize.
-     * @param maxWorkers
-     * @param context
-     * @return
+     * @param maxWorkers number of threads to initialize unless bigger than the buffer size. 
+     * @param context {@link ForkContext} instance containing the {@link WorkerFactory} and the workers' sink 
+     * @return a list of {@link Future} each containing an array of entities processed by the 
      * @throws Throwable
      */
     public static final <V, T extends Callable<V[]>> List<Future<V[]>> fork(final int bufferSize, final int maxWorkers,
@@ -87,6 +88,12 @@ public class Forker {
         }//EO catch block
     }// EOM
 
+    /**
+     * Base worker class handling the task polling, error handler and connection closure 
+     * @author guy
+     *
+     * @param <V>
+     */
     public static abstract class ForkWorker<V> implements Callable<V[]> {
         protected final Connection conn;
         private final CountDownLatch countdownSemaphore;
@@ -111,12 +118,13 @@ public class Forker {
                 V entity = null;
                 Throwable innerException = null;
                 final String errorMsg = "[" + this.getClass().getName() + "] : an Error had occured while processing entity: " ; 
-                
-                while ((entity = this.sink.poll()) != null){
+                boolean hadPolledFirst = false ; 
+                while ((entity = (hadPolledFirst ? this.sink.pollLast() : this.sink.poll())) != null){
                     try {
                         processedEntities.add(entity);
                         callInner(entity);
                         
+                        hadPolledFirst = !hadPolledFirst  ;
                     }catch (Throwable t2) {
                            
                         Utils.printStackTrace(t2, errorMsg + entity);

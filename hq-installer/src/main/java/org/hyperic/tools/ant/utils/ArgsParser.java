@@ -32,6 +32,28 @@ import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 
+/**
+ * Commandline arguments parser supports the following formats:</b> 
+ * <p>
+ * -D<<key>>=<<value> ...<br/> 
+ * -flag ...<br/>
+ * --flag ...<br/>
+ * </p> 
+ * <br/>
+ * <h1><b>Example:</b></h1>
+ *  
+ * <p>
+ * -Dserver.database-url=jdbc:mysql://localhost:3306/hqdb -Dserver.database-driver=com.mysql.jdbc.Driver -Dserver.database=MySQL -Dserver.database-user=hqadmin -Dserver.database-password=hqadmin -Dserver.admin.username=hqadmin -Dserver.admin.password=hqadmin  
+                -Dexport -Dstaging.dir=/work/temp/hq-migration/export-workspace/staging-area -Dhqserver.install.path=/work/temp/hq-migration/servers/server-4.6.5.2.BUILD-SNAPSHOT-EE 
+                -Dimport -Dexport.archive.path=/work/temp/hq-migration/export-workspace/hq-migration-4.6.5.1.zip -Dhqserver.install.path=/work/temp/hq-migration/servers/server-5.0-EE  
+                -Dpath=\"C:\\Program Files\\dir1\\dir2\\file=.txt\" ;
+ * </p>
+ * <br/>
+ * <p> 
+ * All arguments are added to the project's environment.
+ * <p/> 
+ *  
+ */
 public class ArgsParser extends Task{
 
     private final String SPLIT_REGEX = "((?<=%1$2s)|(?=%1$2s))" ;
@@ -40,18 +62,30 @@ public class ArgsParser extends Task{
     private String keyValDelimiter ;
     private String argIndentifier ; 
     
+    /**
+     * @param interArgDelimiter Example: -Dkey=value[interArgDel]-Dkey=value  
+     */
     public final void setArgDel(final String interArgDelimiter) { 
         this.interArgDelimiter = interArgDelimiter ; 
     }//EOM 
     
+    /**
+     * @param argIndentifier Argument prefix. for instance the '-D' in -Dkey=value
+     */
     public final void setArgIdentifier(final String argIndentifier) { 
         this.argIndentifier = argIndentifier ; 
     }//EOM
     
+    /**
+     * @param keyValDelimiter Example: -Dkey[keyValDel]value -Dkey[keyValDel]value  
+     */
     public final void setKeyValDel(final String keyValDelimiter) { 
         this.keyValDelimiter = keyValDelimiter ; 
     }//EOM 
     
+    /**
+     * @param cmdArgs arguments to parse
+     */
     public final void setCMDArgs(final String cmdArgs) { 
         this.cmdArgs = cmdArgs ;  
     }//EOM 

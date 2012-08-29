@@ -39,6 +39,11 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Merged between two properties files with precedence and filtering whilst keeping the original's comments.
+ * @author guy
+ *
+ */
 public class PropertiesMerger extends Properties{
 
     private static Method saveConvertMethod ;
@@ -117,7 +122,6 @@ public class PropertiesMerger extends Properties{
             fis1 = new ByteArrayInputStream(arrFileContent) ; 
             this.load(fis1);
             
-          //  System.out.println(properties.fileContent);
         }catch(Throwable t) { 
             throw (t instanceof IOException ? (IOException)t : new IOException(t)) ; 
         }finally{ 
@@ -198,7 +202,5 @@ public class PropertiesMerger extends Properties{
         final Matcher matcher = pattern.matcher(input) ; 
         System.out.println(matcher.replaceAll("server.java.opts=new value")) ;  
         
-        
-        //System.out.println("server.database-password=ENC(ZsbvmndZgX3mclWtDCjX7g==)".replaceAll("([()])", "\\\\$1")) ; 
     }//EOM 
 }//EOC 

@@ -28,15 +28,26 @@ package org.hyperic.tools.ant.utils;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.taskdefs.Input;
 
+/**
+ * Pauses the build and awaits for the user to presses on any key to continue<br/>
+ * if the isQuietMode is set to true, the pause is skipped (nice to have to nohup/intetractive mode toggling)
+ * 
+ */
 public class PauseTask extends Input{
     private String prompt = ", Press Return key to continue..." ;
     private String message ; 
     private boolean isQuietMode ; 
     
+    /**
+     * @param prompt custom user prompt to display while waiting 
+     */
     public final void setPrompt(final String prompt) { 
         this.prompt = prompt ; 
     }//EOM 
     
+    /**
+     * @param isQuiteMode if true the task shall pause until the user presses on any key, else if false skips the pause 
+     */
     public final void setQuiet(final boolean isQuiteMode) { 
         this.isQuietMode = isQuiteMode ; 
     }//EOM 
