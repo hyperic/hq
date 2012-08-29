@@ -241,26 +241,30 @@ public class EncryptedStringType implements UserType, ParameterizedType {
          * <b>Note:</b> decrypted value is cached on first decryption for subsequent get requests.   
          */
         public final String get() { 
-                    try {
-            if(!this.isDecrypted) {
-                this.isDecrypted = true ; 
-                if(SecurityUtil.isMarkedEncrypted(value)) {  
-                    if (log.isDebugEnabled()) {
-                        log.debug("value before decryption=" + value);
-                    }
-                    this.value = this.encryptor.decrypt(this.value) ; 
-                    if (log.isDebugEnabled()) {
-                        log.debug("value after decryption=" + this.value);
-                    }                    
-                } else {
-                    log.warn("LazyDecryptableValue is supposed to be encrypted, but is not marked encrypted=" + this.value);
-                }//EO if not clear text as it is 
-            }//EO else if not yet decrypted 
-            return this.value ; 
-                    } catch (EncryptionOperationNotPossibleException e) {
-                        log.warn("could not decrypt value=" + value);
-                        throw e;
-                    }
+            final boolean debug = log.isDebugEnabled();
+            try {
+                if(!this.isDecrypted) {
+                    this.isDecrypted = true ; 
+                    if(SecurityUtil.isMarkedEncrypted(value)) {  
+                        if (debug) {
+                            log.debug("value before decryption=" + value);
+                        }
+                        this.value = this.encryptor.decrypt(this.value) ; 
+                        if (debug) {
+                            log.debug("value after decryption=" + this.value);
+                        }                    
+                    } else {
+                        if (debug) {
+                            log.debug("LazyDecryptableValue is supposed to be encrypted, but is not marked encrypted=" +
+                                      this.value);
+                        }
+                    }//EO if not clear text as it is 
+                }//EO else if not yet decrypted 
+                return this.value ; 
+            } catch (EncryptionOperationNotPossibleException e) {
+                log.warn("could not decrypt value=" + value);
+                throw e;
+            }
         }//EOM
         
         @Override
