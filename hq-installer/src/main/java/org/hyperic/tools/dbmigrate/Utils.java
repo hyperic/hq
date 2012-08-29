@@ -120,6 +120,11 @@ public class Utils{
   }//EOM 
 
   public static final void printStackTrace(final Throwable exception) {
+      printStackTrace(exception, null) ; 
+  }//EOM 
+  
+  public static final void printStackTrace(final Throwable exception, final String prefixMessage) {
+    if(prefixMessage != null) System.err.println(prefixMessage) ; 
     if ((exception instanceof SQLException)) {
       SQLException sqle = (SQLException)exception;
       Throwable t = null;
@@ -206,12 +211,13 @@ public class Utils{
     Class.forName("com.mysql.jdbc.Driver");
     return DriverManager.getConnection("jdbc:mysql://localhost:3306/guytest1", "hqadmin", "hqadmin");
   }//EOM 
-
+  
   public static final Connection getPostgresConnection() throws Throwable {
     Class.forName("org.postgresql.Driver");
     //return DriverManager.getConnection("jdbc:postgresql://10.23.200.18:5432/guytest1?protocolVersion=2", "hqadmin", "hqadmin");
 //    return DriverManager.getConnection("jdbc:postgresql://localhost:5432/hqdb?protocolVersion=2", "hqadmin", "hqadmin");
-    return DriverManager.getConnection("jdbc:postgresql://10.23.20.159:5432/HQ?protocolVersion=2", "hqadmin", "hqadmin");
+    //return DriverManager.getConnection("jdbc:postgresql://10.23.20.159:5432/HQ?protocolVersion=2", "hqadmin", "hqadmin");
+    return DriverManager.getConnection("jdbc:postgresql://10.23.24.101:5432/HQ?protocolVersion=2", "hqadmin", "hqadmin");
   }//EOM 
   
   public static final Connection getOracleCOnnection() throws Throwable { 

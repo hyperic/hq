@@ -133,7 +133,7 @@ public abstract class TableProcessor<T extends Callable<TableProcessor.Table[]>>
       this.queryTimeoutSecs = iQueryTimeoutSecs ; 
   }//EOM 
 
-  public final void execute() throws BuildException  {
+  public void execute() throws BuildException  {
     if (this.isDisabled) return;
     
     try {
