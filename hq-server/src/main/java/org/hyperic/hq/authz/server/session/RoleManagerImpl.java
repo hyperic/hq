@@ -1339,6 +1339,21 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
 
         return plist;
     }
+    
+    @Transactional(readOnly=true)
+    public Collection<Role> getRoles(AuthzSubject subj) {
+        subj = authzSubjectDAO.get(subj.getId());
+        final Collection<Role> roles = subj.getRoles();
+        final Collection<Role> rtn = new ArrayList<Role>(roles.size());
+        for (final Role role : roles) {
+            final Role r = roleDAO.get(role.getId());
+            if (r == null) {
+                continue;
+            }
+            rtn.add(r);
+        }
+        return rtn;
+    }
 
     /**
      * Add subjects to this role.
