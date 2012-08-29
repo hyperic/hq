@@ -25,6 +25,7 @@
  */
 package org.hyperic.hq.measurement.shared;
 
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -203,7 +204,7 @@ public interface AvailabilityManager {
 
     public AvailabilityFallbackCheckQue getFallbackCheckQue();
 
-    public Map<Integer, double[]> getAggregateDataAndAvailUpByMetric(final List<Integer> avIds, long begin, long end);
+    public Map<Integer, double[]> getAggregateDataAndAvailUpByMetric(final List<Integer> avIds, long begin, long end) throws SQLException;
 
     public Map<Integer, DownMetricValue> getUnavailResMap();
 

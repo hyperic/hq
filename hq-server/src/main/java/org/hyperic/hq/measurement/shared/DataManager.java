@@ -220,7 +220,7 @@ public interface DataManager {
      *         not apply, therefore one {@link MetricValue} will be returned per
      *         interval.
      * 
-     * @param publishedInterval {@link AtomicLong} interval, in millis, of the
+     * @param publishedInterval {@link AtomicLong} interval, in millis, of the 
      *        dataset which is returned from the api. For example for queries
      *        that are a month long HQ will use a daily rollup table to retrieve
      *        the data from. In this case publishedInterval would be set with an
@@ -231,6 +231,6 @@ public interface DataManager {
     public Collection<HighLowMetricValue> getRawData(Measurement m, long begin, long end, AtomicLong publishedInterval);
 
     public Map<Integer, double[]> getAggregateDataAndAvailUpByMetric(final List<Measurement> hqMsmts, long beginMilli,
-            long endMilli);
+            long endMilli) throws SQLException;
 
 }
