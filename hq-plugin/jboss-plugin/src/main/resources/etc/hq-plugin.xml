@@ -645,6 +645,8 @@
         <option name="j2ee.application"
             description="J2EE Application"
             default=""/>
+      <option name="listen.ports"
+              description="Listening Ports" optional="true"/>
     </config>
 
     <server name="JBoss"
@@ -663,6 +665,8 @@
               type="secret"
               optional="true"
               description="Password"/>
+      <option name="listen.ports"
+              description="Listening Ports" optional="true"/>
         </config>
 
         <config type="control">
@@ -964,6 +968,8 @@
                 <option name="cluster"
                 description="Cluster Name"
                 default="DefaultCluster"/>
+  			     <option name="listen.ports"
+            	  description="Listening Ports" optional="true"/>
             </config>
         </service>
     </server>
@@ -1111,6 +1117,8 @@
               type="secret"
               optional="true"
               description="Password"/>
+      <option name="listen.ports"
+              description="Listening Ports" optional="true"/>
         </config>
 
         <config type="control">
@@ -1690,6 +1698,8 @@
             <option name="jboss7.user" description="Username" default="guest"/>
             <option name="jboss7.pass" description="Password" default="guest" type="secret"/>
             <option name="jboss7.host" description="Host Name"/>
+       <option name="listen.ports"
+              description="Listening Ports" optional="true"/>
         </config>
         <help>
             <![CDATA[
@@ -1754,6 +1764,8 @@
             <option name="jboss7.https" description="Use SSL" default="false" type="boolean"/>
             <option name="jboss7.user" description="Username" default="guest"/>
             <option name="jboss7.pass" description="Password" default="guest" type="secret"/>
+      <option name="listen.ports"
+              description="Listening Ports" optional="true"/>
         </config>
         <plugin type="config_track" class="org.hyperic.hq.product.FileChangeTrackPlugin">
             <monitored>
@@ -1876,6 +1888,8 @@
             <option name="jboss7.pass" description="Password" default="guest" type="secret"/>
             <option name="jboss7.host" description="Host Name"/>
             <option name="jboss7.server" description="Server Name"/>
+      <option name="listen.ports"
+              description="Listening Ports" optional="true"/>
         </config>
         <help>
             <![CDATA[
