@@ -1356,7 +1356,7 @@ public class DataManagerImpl implements DataManager {
     
     @Transactional(readOnly = true)
     public Map<Integer, double[]> getAggregateDataAndAvailUpByMetric(final List<Measurement> measurements,
-            final long begin, final long end) {
+            final long begin, final long end) throws SQLException {
         List<Integer> avids = new ArrayList<Integer>();
         List<Integer> mids = new ArrayList<Integer>();
         for (Measurement meas : measurements) {

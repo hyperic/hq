@@ -27,6 +27,7 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -290,6 +291,17 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         final List<Object[]> objects = measurementDAO.findParentAvailMeasurements(resourceIds, resourceRelationType);
         return convertAvailMeasurementListToMap(objects);
     }
+
+    /**
+     * 
+     */
+    @Transactional(readOnly = true)
+    public Map<Integer, List<Measurement>> getAvailMeasurementDirectParent(List<Integer> resourceIds,
+            String resourceRelationType) {
+        final List<Object[]> objects = measurementDAO.findDirectParentAvailMeasurements(resourceIds, resourceRelationType);
+        return convertAvailMeasurementListToMap(objects);
+    }
+
 
     private Map<Integer, List<Measurement>> convertAvailMeasurementListToMap(List<Object[]> objects) {
         final Map<Integer, List<Measurement>> rtn = new HashMap<Integer, List<Measurement>>(objects.size());
@@ -584,21 +596,21 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     }
 
     @Transactional(readOnly = true)
-    public Map<Integer, double[]> getAggregateDataAndAvailUpByMetric(final List<Integer> mids, long begin, long end) {
-        List<Object[]> avails = availabilityDataDAO.findAggregateAvailabilityUp(mids, begin, end);
+    public Map<Integer, double[]> getAggregateDataAndAvailUpByMetric(final List<Integer> mids, long begin, long end) throws SQLException {
+        Map<Integer,Double> avails = availabilityDataDAO.findAggregateAvailabilityUp(mids, begin, end);
         Map<Integer, double[]> msmtToAvg = new HashMap<Integer, double[]>();
         long timeFrame = end - begin;
         Set<Integer> unavailMsmtsIds = new HashSet<Integer>(mids);
         if (null != avails) {
-            for (Object[] objs : avails) {
-                Measurement msmt = (Measurement) objs[0];
-                if (!unavailMsmtsIds.remove(msmt.getId())) {
+            for (Map.Entry<Integer, Double> availIdToAvg : avails.entrySet()) {
+                Integer availId = availIdToAvg.getKey();
+                if (!unavailMsmtsIds.remove(availId)) {
                     throw new RuntimeException("unknown availability measurement returned while querying for availability data");
                 }
-                Integer key = msmt.getId();
+                Double availAvg = availIdToAvg.getValue();
                 double[] data = new double[IND_TOTAL_TIME + 1];
-                data[IND_AVG] = ((Double)objs[1]).doubleValue() / timeFrame;
-                msmtToAvg.put(key, data);
+                data[IND_AVG] = availAvg.doubleValue();
+                msmtToAvg.put(availId, data);
             }
         }
         
