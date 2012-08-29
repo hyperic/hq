@@ -111,7 +111,6 @@ public class PostgreSQLServerDetector extends ServerDetector implements AutoServ
                     setCustomProperties(server, cprop);
                     try {
                         setProductConfig(server, DetectionUtil.populatePorts(getSigar(),new long[] {pids[i]},prepareConfig(pgData, args)));
-                        setProductConfig(server, prepareConfig(pgData, args));
                     } catch (SigarException e) {
                         log.error(e);
                         throw new PluginException(e);

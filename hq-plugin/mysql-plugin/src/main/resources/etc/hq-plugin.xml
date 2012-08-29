@@ -1195,7 +1195,7 @@
               optional="true"
               description="JDBC Password"/>
       <option name="listen.ports"
-              description="Listening Ports"/>
+              description="Listening Ports" optional="true"/>
     </config>
   </server>
 
@@ -1214,7 +1214,7 @@
       <option name="jdbcPassword" type="secret"
               description="JDBC Password"/>
       <option name="listen.ports"
-              description="Listening Ports"/>
+              description="Listening Ports" optional="true"/>
     </config>
 
     <metrics include="mysql-3"/>
@@ -1278,7 +1278,7 @@
       <option name="jdbcPassword" type="secret"
               description="JDBC Password"/>
        <option name="listen.ports"
-              description="Listening Ports"/>
+              description="Listening Ports" optional="true"/>
     </config>
   </server>
 
@@ -1302,7 +1302,7 @@
       <option name="jdbcPassword" type="secret"
               description="JDBC Password"/>
       <option name="listen.ports"
-              description="Listening Ports"/>
+              description="Listening Ports" optional="true"/>
     </config>
   
     <!-- Define table service -->
