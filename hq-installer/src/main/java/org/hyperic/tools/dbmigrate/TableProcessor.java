@@ -318,9 +318,18 @@ public abstract class TableProcessor<T extends Callable<TableProcessor.Table[]>>
     return newWorkerInner(context, conn, outputDir);
   }//EOM 
  
+  /**
+   * Template method for creating new table type entities processing workers 
+   * @param context {@link ForkContext} instance which contains the staging directory, the sink and other customized parameter
+   * @param conn
+   * @param parentDir
+   * @return new {@link ForkWorker} instance
+   */
   protected abstract T newWorkerInner(final Forker.ForkContext<Table,T> forkContext, final Connection conn, File parentDir);
   
-  
+  /**
+   * Standalone ant elemenet which contains table definitions 
+   */
   public static final class TablesContainer extends DataType { 
       protected final Map<String,Table> tables = new HashMap<String,Table>() ;
       
@@ -334,6 +343,9 @@ public abstract class TableProcessor<T extends Callable<TableProcessor.Table[]>>
       
   }//EO inner class BigTablesContainer
   
+  /**
+   * Table Metadata definition bean 
+   */
   public static class Table{ 
       
       protected String name ; 
@@ -350,6 +362,10 @@ public abstract class TableProcessor<T extends Callable<TableProcessor.Table[]>>
           this.name = name;  
       }//EOM 
       
+      /**
+       * Applicable for imports only. 
+       * @param shouldTruncate the corresponding table would be truncated if true 
+       */
       public final void setTruncate(final boolean shouldTruncate) { 
           this.shouldTruncate = shouldTruncate ; 
       }//EOM 
@@ -365,6 +381,9 @@ public abstract class TableProcessor<T extends Callable<TableProcessor.Table[]>>
       
   }//EO inner class Table
   
+  /**
+   * Partitionable table 
+   */
   public static final class BigTable extends Table{ 
       
       protected int noOfPartitions ; 
@@ -381,10 +400,19 @@ public abstract class TableProcessor<T extends Callable<TableProcessor.Table[]>>
           this.noOfProcessedRecords = noOfProcessedRecords ;
       }//EOM 
       
+      /**
+       * Applicable for export only 
+       * @param noOfPartitions determines the level of concurrency of proecssing the corresponding table 
+       * the value would be used in conjunction with a modulu operator to produce a partitions  
+       */
       public final void setNoOfPartitions(final int noOfPartitions) { 
           this.noOfPartitions = noOfPartitions ; 
       }//EOM 
       
+      /**
+       * Applicable for export only and used in conjunction with the numberOfPartitions 
+       * @param partitionColumn
+       */
       public final void setPartitionColumn(final String partitionColumn) { 
           this.partitionColumn = partitionColumn ; 
       }//EOM 

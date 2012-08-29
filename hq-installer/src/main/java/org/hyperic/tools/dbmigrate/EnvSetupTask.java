@@ -32,11 +32,20 @@ import org.apache.tools.ant.Task;
 import org.hyperic.util.security.MarkedStringEncryptor;
 import org.hyperic.util.security.SecurityUtil;
 
+/**
+ * Responsible for decrypting the database password and re-storing against the {@value EnvSetupTask#SERVER_DB_PASSWORD_KEY} key 
+ * @author guy
+ *
+ */
 public class EnvSetupTask extends Task{
     
     private static final String SERVER_DB_PASSWORD_KEY = "server.database-password";
     private static final String DECRYPTION_KEY_KEY = "server.encryption-key";
 
+    /**
+     * Uses the {@value EnvSetupTask#DECRYPTION_KEY_KEY} property value to decrypt the server password and re-set it into the 
+     *  {@value EnvSetupTask#SERVER_DB_PASSWORD_KEY} property 
+     */
     public void execute() throws BuildException {
         final Project proj = getProject();
       

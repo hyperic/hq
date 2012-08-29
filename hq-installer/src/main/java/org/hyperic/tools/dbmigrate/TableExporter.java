@@ -51,10 +51,17 @@ import org.hyperic.tools.dbmigrate.TableExporter.Worker;
 import org.hyperic.tools.dbmigrate.TableProcessor.Table;
 import org.hyperic.util.MultiRuntimeException;
 
+/**
+ * Database Exporter, streaming tables into files in serialization format concurrently 
+ */
 public class TableExporter extends TableProcessor<Worker> {
     
     private static final String HQ_SERVER_CONF_RELATIVE_PATH = "/source-artifacts/conf/hq-server.conf";
     
+    /**
+     * If the table is an instance of {@link BigTable}, the instance is clone for as many partitions defined in 
+     * the {@link BigTable#noOfPartitions} value and added to the sink
+     */
     @Override
     protected final void addTableToSink(final LinkedBlockingDeque<Table> sink, final Table table) {
         
@@ -70,6 +77,9 @@ public class TableExporter extends TableProcessor<Worker> {
         
     }//EOM 
     
+    /**
+     * Ensures that the data directory is empty prior to the export to avoid stale data from previous runs 
+     */
     @Override
     protected final void clearResources(final File stagingDir) { 
         final File dataDir = new File(stagingDir, DATA_RELATIVE_DIR);
@@ -82,10 +92,11 @@ public class TableExporter extends TableProcessor<Worker> {
         return Utils.getSourceConnection(env);
     }//EOM 
     
-    
+    /**
+     * Extracts the values of {@link Utils#DB_SCHEMA_VERSION_KEY} and  {@link Utils#HQ_BUILD_VERSION_KEY} from EAM_CONFIG_PROPS and 
+     * injects them into the hq-server.conf file) 
+     */
     @Override
-    /*protected final void afterFork(final ForkContext<Table,Worker> context, final List<Future<Table[]>> workersResponses, 
-                final LinkedBlockingDeque<Table> sink) throws Throwable {*/
     protected final <Y, Z extends Callable<Y[]>> void afterFork(final ForkContext<Y, Z> context,
             final List<Future<Y[]>> workersResponses, final LinkedBlockingDeque<Y> sink) throws Throwable {      
         
@@ -163,7 +174,10 @@ public class TableExporter extends TableProcessor<Worker> {
     protected final Worker newWorkerInner(final ForkContext<Table,Worker> context, final Connection conn, final File stagingDir) {
         return new Worker(context.getSemaphore(), conn, context.getSink(), stagingDir);
     }//EOM 
-
+    
+    /**
+     * {@link Table} entities exporter 
+     */
     public final class Worker extends ForkWorker<Table> {
 
         private final File outputDir;

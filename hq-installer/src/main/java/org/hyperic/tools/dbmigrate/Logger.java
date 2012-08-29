@@ -35,6 +35,12 @@ import org.apache.tools.ant.listener.AnsiColorLogger;
 import org.hyperic.tools.ant.BasicLogger;
 import org.hyperic.tools.ant.installer.InstallerLogger;
 
+/**
+ * Proxy logger delegating to: 
+ * - {@link PrintLoggerInterface} instance responsible for console output (OS dependent). 
+ * - Tee file logger echoing the console output 
+ * - Debug file logger logging in a an explicit debug level 
+ */
 public class Logger extends InstallerLogger{
 
     private PrintLoggerInterface delegateConsoleLogger ;
@@ -112,8 +118,6 @@ public class Logger extends InstallerLogger{
         
     }//EOM 
     
-    
-    
     @Override
     protected final BasicLogger newDelegateLogger() {
         
@@ -150,9 +154,5 @@ public class Logger extends InstallerLogger{
         
     }//EO inner class HQAnsiColorLogger
     
-   public static void main(String[] args) throws Throwable {
-       System.out.println(System.getProperty("os.name") ) ;        
-   }//EOM 
-   
     
 }//EOC 
