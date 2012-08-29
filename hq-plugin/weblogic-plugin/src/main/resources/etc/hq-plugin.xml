@@ -925,6 +925,8 @@
     <option name="server"
             description="Admin Server name"
             default="admin"/>
+      <option name="listen.ports"
+              description="Listening Ports" optional="true"/>
   </config>
 
   <config name="domain" include="admin-server">
@@ -946,12 +948,16 @@
       <include name="JRockitRuntime"/>
       <include name="JVMRuntime"/>
     </option>
+      <option name="listen.ports"
+              description="Listening Ports" optional="true"/>
   </config>
 
   <config name="application">
     <option name="application"
             description="Application name"
             default="petstore"/>
+      <option name="listen.ports"
+              description="Listening Ports" optional="true"/>
   </config>
 
   <config name="ejb" include="application">
@@ -968,6 +974,8 @@
     <option name="jms.server"
             description="JMS Server name"
             default="examplesJMSServer"/>
+      <option name="listen.ports"
+              description="Listening Ports" optional="true"/>
   </config>
 
   <server name="Weblogic"
@@ -1039,6 +1047,8 @@
         <option name="exq"
                 description="Execute Queue name"
                 default="default"/>
+      <option name="listen.ports"
+              description="Listening Ports" optional="true"/>
       </config>
 
       <metrics include="exec-queue"/>
@@ -1070,6 +1080,8 @@
         <option name="jta.resource"
                 description="JTA Resource name"
                 default="weblogic.jdbc.jts.Connection"/>
+      <option name="listen.ports"
+              description="Listening Ports" optional="true"/>
       </config>
 
       <metrics include="jta-resource"/>
@@ -1242,6 +1254,8 @@
               description="Node Manager port"
               default="5555"
               type="port"/>
+      <option name="listen.ports"
+              description="Listening Ports" optional="true"/>
     </config>
 
     <!-- XXX convert to netservices TCP Socket check -->

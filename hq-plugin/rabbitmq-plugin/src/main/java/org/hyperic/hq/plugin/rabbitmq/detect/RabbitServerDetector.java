@@ -49,6 +49,7 @@ import org.hyperic.hq.plugin.rabbitmq.core.*;
 import org.hyperic.hq.plugin.rabbitmq.manage.RabbitTransientResourceManager;
 import org.hyperic.hq.plugin.rabbitmq.manage.TransientResourceManager;
 import org.hyperic.hq.product.*;
+import org.hyperic.sigar.SigarException;
 import org.hyperic.util.config.ConfigResponse;
 
 /**
@@ -82,7 +83,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
                 final String nodeArgs[] = getProcArgs(nodePid);
                 final String nodePath = getNodePath(nodeArgs);
                 final String nodeName = getServerName(nodeArgs);
-
+                
                 if (nodePath != null && !nodes.contains(nodePath)) {
                     nodes.add(nodePath);
 
@@ -269,7 +270,12 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
             }
         }
         conf.setValue(DetectorConstants.SERVER_NAME, nodeName);
-
+        try {
+			DetectionUtil.populatePorts(getSigar(), new long[] {nodePid}, conf);
+		} catch (SigarException e) {
+			logger.warn("Cannot get ports for node '" + nodePid + "'", e);
+		}
+        
         logger.debug("ProductConfig[" + conf + "]");
 
 //        ConfigResponse custom = createCustomConfig(nodeName, nodePath, nodePid, nodeArgs);

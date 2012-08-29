@@ -45,10 +45,12 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.AutoServerDetector;
+import org.hyperic.hq.product.DetectionUtil;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
+import org.hyperic.sigar.SigarException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.jdbc.DBUtil;
 
@@ -101,7 +103,12 @@ public class PostgreSQLServerDetector extends ServerDetector implements AutoServ
                     ConfigResponse cprop = new ConfigResponse();
                     cprop.setValue("version", version);
                     setCustomProperties(server, cprop);
-                    setProductConfig(server, prepareConfig(pgData, args));
+                    try {
+                        setProductConfig(server, DetectionUtil.populatePorts(getSigar(),new long[] {pids[i]},prepareConfig(pgData, args)));
+                    } catch (SigarException e) {
+                        log.error(e);
+                        throw new PluginException(e);
+                    }
                     String basename = getPlatformName() + " " + getTypeInfo().getName();
                     server.setName(prepareName(basename + " " + (isHQ ? PostgreSQL.HQ_SERVER_NAME : PostgreSQL.SERVER_NAME), server.getProductConfig(), null));
                     servers.add(server);

@@ -712,7 +712,7 @@
 
     <config include="url">
       <option name="listen.ports"
-              description="Listening Ports"/>
+              description="Listening Ports" optional="true"/>
     </config>
 
     <properties>
@@ -830,7 +830,7 @@ ExtendedStatus On
       <option name="server.port"
               description="Apache ServerPort"/>
       <option name="listen.ports"
-              description="Listening Ports"/>
+              description="Listening Ports" optional="true"/>
     </config>
     <config include="snmp" type="measurement">
       <!-- override default port -->

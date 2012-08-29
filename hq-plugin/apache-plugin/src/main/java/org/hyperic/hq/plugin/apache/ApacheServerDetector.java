@@ -563,7 +563,6 @@ public class ApacheServerDetector
         config.setProperty(Collector.PROP_PORT, server.port);
         config.setProperty(PROP_SERVER_NAME, server.name);
         config.setProperty(PROP_SERVER_PORT, server.port);
-        config.setProperty("aaa", "bbb");
         log.debug("Configured server via snmp: " + server);
 
         return new ConfigResponse(config);

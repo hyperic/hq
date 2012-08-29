@@ -97,6 +97,7 @@
             <option name="password" description="Password" default="guest" type="secret"/>
             <option name="nodurable" description="Discover Nondurable Objects" type="boolean" default="false"/>
             <option name="autosync" description="Auto-Delete Unavailable Objects" type="boolean" default="false"/>
+            <option name="listen.ports" description="Listening Ports" optional="true"/>
         </config>
 
         <properties>
