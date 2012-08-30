@@ -63,6 +63,18 @@ public enum DatabaseType {
              ps.setInt(2, iPageSize) ; 
              return ps ; 
          }//EOM
+         
+         /**
+          * configures the statement's fetch size 
+          * @param fetchSize used for the fetch size if not a big table  
+          * @param isBigTable if true sets {@link Integer#MIN_VALUE} as a special indication to stream the content so as not to overwehlm the heap 
+          * @param stmt statement to configure 
+          * @throws SQLException
+          */
+         @Override
+         public final void setFetchSize(final int fetchSize, final boolean isBigTable, final Statement stmt) throws SQLException{ 
+             stmt.setFetchSize((isBigTable ? Integer.MIN_VALUE : fetchSize)) ; 
+         }//EOM
 
     },//EO MySQL  
     Oracle{ 
