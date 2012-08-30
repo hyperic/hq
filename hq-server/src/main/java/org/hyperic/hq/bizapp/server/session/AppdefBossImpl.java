@@ -228,7 +228,6 @@ public class AppdefBossImpl implements AppdefBoss {
     private CritterTranslator critterTranslator; 
 
     protected Log log = LogFactory.getLog(AppdefBossImpl.class.getName());
-    protected boolean debug = log.isDebugEnabled();
     protected final int APPDEF_TYPE_UNDEFINED = -1;
     protected final int APPDEF_RES_TYPE_UNDEFINED = -1;
     protected final int APPDEF_GROUP_TYPE_UNDEFINED = -1;
@@ -2497,9 +2496,16 @@ public class AppdefBossImpl implements AppdefBoss {
         final Set<Integer> groupSubTypeSet = getSet(groupSubType);
         final Collection<ResourceType> types = Collections.singletonList(getResourceType(groupSubTypeSet, appdefTypeId));
         final Reference<Integer> totalSetSize = new Reference<Integer>(0);
+        final Resource proto = (appdefResType != null) ? resourceManager.findResourcePrototype(appdefResType) : null;
+        final Resource protoToExclude =
+            resourceManager.findResourcePrototypeByName(AuthzConstants.platformPrototypeVmwareVsphereVm);
+        Integer excludeId = (protoToExclude == null) ? null : protoToExclude.getId();
+        if (proto != null && excludeId != null && excludeId.equals(proto.getId())) {
+            excludeId = null;
+        }
         final IntegerConverter<AppdefResourceValue> converter =
             getIntegerConverter(subj, appdefTypeId, searchFor, appdefResType, groupId, groupSubTypeSet, matchAny,
-                                matchOwn, matchUnavail, pc, totalSetSize);
+                                matchOwn, matchUnavail, pc, totalSetSize, excludeId);
         final Comparator<AppdefResourceValue> comparator = getNameComparator(pc.getSortorder());
         final Set<AppdefResourceValue> resources =
             permissionManager.findViewableResources(subj, types, pc.getSortorder(), converter, comparator);
@@ -2515,7 +2521,8 @@ public class AppdefBossImpl implements AppdefBoss {
                                                                       final boolean matchAny, final boolean matchOwn,
                                                                       final boolean matchUnavail,
                                                                       final PageControl pc,
-                                                                      final Reference<Integer> totalSetSize) {
+                                                                      final Reference<Integer> totalSetSize,
+                                                                      final Integer excludeId) {
         final Map<Integer, DownMetricValue> unavails = matchUnavail ? availabilityManager.getUnavailResMap() : null;
         final Pattern pattern = (searchFor != null) ? Pattern.compile(searchFor, Pattern.CASE_INSENSITIVE) : null;
         final int pagesize = (pc != null) ? pc.getPagesize() : Integer.MAX_VALUE;
@@ -2532,6 +2539,7 @@ public class AppdefBossImpl implements AppdefBoss {
             int returned = 0;
             int index = 0;
             int resProtoId;
+            @SuppressWarnings("deprecation")
             public AppdefResourceValue convert(Integer id) {
                 final Resource resource = resourceManager.getResourceById(id);
                 if (resource == null || resource.isInAsyncDeleteState()) {
@@ -2556,8 +2564,11 @@ public class AppdefBossImpl implements AppdefBoss {
                 if (noSelections || matchAny && matchedAny(resource) || matchedAll(resource)) {
                     totalSetSize.set(totalSetSize.get()+1);
                     if (pc == null || (index++ >= startIndex && returned < pagesize)) {
-                        returned++;
-	                    return AppdefResourceValue.convertToAppdefResourceValue(resource);
+                        final AppdefResourceValue rtn = AppdefResourceValue.convertToAppdefResourceValue(resource);
+                        if (rtn != null) {
+                            returned++;
+                        }
+                        return rtn;
                     }
                 }
                 return null;
@@ -2568,6 +2579,9 @@ public class AppdefBossImpl implements AppdefBoss {
                        groupType == AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP;
             }
             private boolean matchedAll(Resource resource) {
+                if (excludeId != null && excludeId.equals(resProtoId)) {
+                    return false;
+                }
                 return (pattern == null || pattern.matcher(resource.getName()).find()) &&
                        (!matchUnavail   || unavails.containsKey(resource.getId()))     &&
                        (groupId == null || groupMembers.contains(resource))            &&
@@ -2575,6 +2589,9 @@ public class AppdefBossImpl implements AppdefBoss {
                        (!matchOwn       || resource.getOwner().getId().equals(subjectId));
             }
             private boolean matchedAny(Resource resource) {
+                if (excludeId != null && excludeId.equals(resProtoId)) {
+                    return false;
+                }
                 return (pattern != null && pattern.matcher(resource.getName()).find()) ||
                        (matchUnavail    && unavails.containsKey(resource.getId()))     ||
                        (groupId != null && groupMembers.contains(resource))            ||

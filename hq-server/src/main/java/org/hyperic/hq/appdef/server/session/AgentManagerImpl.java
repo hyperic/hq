@@ -263,7 +263,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         throws AgentNotFoundException, PermissionException {
 
         Agent agt = getAgentInternal(agentToken);
-        Collection<Platform> plats = platformDao.findByAgent(agt);
+        Collection<Platform> plats = agt.getPlatforms();
         if (plats.size() == 0) {
             return new ResourceTree();
         }

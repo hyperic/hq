@@ -428,6 +428,9 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable {
         //duplicating some code from MeasurementPluginManager
         //so we can do Metric.setId
         int ix = template.indexOf(":");
+        if (ix < 0) {
+            return tmpl;
+        }
         tmpl.plugin = template.substring(0, ix);
         String metric = template.substring(ix+1, template.length());
         tmpl.metric = Metric.parse(metric);

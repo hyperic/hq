@@ -460,4 +460,6 @@ public interface RoleManager {
      */
     public Collection<Operation> findAllOperations();
 
+    public Collection<Role> getRoles(AuthzSubject subj);
+
 }

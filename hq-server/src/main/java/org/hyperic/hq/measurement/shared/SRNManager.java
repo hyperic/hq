@@ -66,22 +66,31 @@ public interface SRNManager {
      * from the {@link AgentScheduleSynchronizer}
      * @param aeids {@link Collection} of {@link AppdefEntityId} to schedule
      * @param incrementSrns increment associated Srns
-     * @param {@link Boolean} overrideRestrictions - false means adhere to the 1 hour restriction if an srn is updated
-     * it cannot be updated again for this time period.
+     * @param overrideRestrictions {@link Boolean} - false means adhere to the 1 hour restriction if an srn is updated
+     * it cannot be updated again for this time period and therefore an agent should not be scheduled either.
      */
     public void schedule(Collection<AppdefEntityID> aeids, boolean incrementSrns, boolean overrideRestrictions);
 
     /**
-     * Reschedules aeids passed into the method.  If they do not have any associated measurements the agent will be
+     * Reschedule the aeids passed into the method.  If they do not have any associated measurements the agent will be
      * completely unscheduled for the associated resource.
      * @param aeids {@link Collection} of {@link AppdefEntityID}s to schedule in a background queue.  If
      * the associated aeids don't have any meaurements they will be unscheduled
      * @param incrementSrns increment associated Srns
-     * @param {@link Boolean} overrideRestrictions - false means adhere to the 1 hour restriction if an srn is updated
+     * @param overrideRestrictions {@link Boolean} - false means adhere to the 1 hour restriction if an srn is updated
      * it cannot be updated again for this time period and therefore an agent should not be scheduled either.
      */
     public void scheduleInBackground(Collection<AppdefEntityID> aeids, boolean incrementSrns,
                                      boolean overrideRestrictions);
+
+    /**
+     * Reschedule enabled measurements associated with the aeids.  Will not increment the associated SRNs
+     * @param aeids {@link Collection} of {@link AppdefEntityID}s to schedule in a background queue.  If
+     * the associated aeids don't have any meaurements they will be unscheduled
+     * @param overrideRestrictions {@link Boolean} - false means adhere to the 1 hour restriction if an srn is updated
+     * it cannot be updated again for this time period and therefore an agent should not be scheduled either.
+     */
+    public void scheduleInBackground(Collection<AppdefEntityID> aeids, boolean overrideRestrictions);
     
     /** Only used for integration tests! */
     public void setZeventManager(ZeventManager zeventManagerMock);
@@ -92,8 +101,8 @@ public interface SRNManager {
     /**
      * Reschedules if the SRN match the ScheduleRevNum associated with the AppdefEntityID in the db
      * @param {@link Collection} The associated {@link SRN}s will be rescheduled if they are out of sync or missing
-     * @param {@link Boolean} overrideRestrictions - false means adhere to the 1 hour restriction if an srn is updated
-     * it cannot be updated again for this time period.
+     * @param overrideRestrictions {@link Boolean} - false means adhere to the 1 hour restriction if an srn is updated
+     * it cannot be updated again for this time period and therefore an agent should not be scheduled either.
      */
     public void rescheduleOutOfSyncSrns(Collection<SRN> srns, boolean overrideRestrictions);
 
