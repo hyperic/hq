@@ -301,6 +301,8 @@
 		<!-- cache the target's database properties -->
 		<var name="target.database.url" value="${server.database-url}" />
 		<var name="target.database.username" value="${server.database-user}" />
+		<var name="target.server.encryption-key" value="${server.encryption-key}" />
+		<var name="target.database.password" value="${server.database-password}" />
 		<var name="target.database.type" value="${server.database}" />
 		<var name="target.database.driver" value="${server.database-driver}" />
 		
@@ -330,6 +332,8 @@
 		<var name="server.database-user" value="${target.database.username}" />
 		<var name="server.database" value="${target.database.type}" />
 		<var name="server.database-driver" value="${target.database.driver}" />
+		<var name="server.encryption-key" value="${target.server.encryption-key}" />
+		<var name="server.database-password" value="${target.database.password}" />
 
 		<echo>Target server.database-url ${server.database-url}</echo>
 		<echo>Target server.database-user ${server.database-user}</echo>
@@ -339,11 +343,11 @@
 		<echo>Target CAM_SERVER_VERSION ${CAM_SERVER_VERSION}</echo>
 
 		<!--initialize the importer's database properties -->
-		<property name="target.database.url" value="${server.database-url}" />
+		<!--<property name="target.database.url" value="${server.database-url}" />
 		<property name="target.database.username" value="${server.database-user}" />
 		<property name="target.database.password" value="${server.database-password}" />
 		<property name="target.database.type" value="${server.database}" />
-		<property name="target.database.driver" value="${server.database-driver}" />
+		<property name="target.database.driver" value="${server.database-driver}" /> -->
 
 		<!-- Create a Hibernate configuration file containing instructions to use the mapping metadata found in the 
 			target server's hq-server.jar -->  
