@@ -34,6 +34,7 @@ public class WebSphereProcess {
     private String node;
     private String server;
     private String cell;
+    private long pid;
 
     public WebSphereProcess() {
     }
@@ -157,6 +158,14 @@ public class WebSphereProcess {
         return profile+getCell()+" "+getNode()+" "+getServer();
         //return node+" "+server;
     }
+
+	public long getPid() {
+		return pid;
+	}
+
+	public void setPid(long pid) {
+		this.pid = pid;
+	}
 
 
 
