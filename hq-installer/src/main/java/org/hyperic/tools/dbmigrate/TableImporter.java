@@ -76,6 +76,11 @@ import org.hyperic.tools.dbmigrate.TableImporter.Worker;
 import org.hyperic.tools.dbmigrate.TableProcessor.Table;
 import org.hyperic.util.MultiRuntimeException;
 
+/**
+ * Streams serialized data from file(s) concurrently into a target database (optimized for postgres)  
+ * @author guy
+ *
+ */
 public class TableImporter extends TableProcessor<Worker> {
 	
 	private StringBuilder preImportActionsInstructions;
@@ -83,15 +88,25 @@ public class TableImporter extends TableProcessor<Worker> {
 	private final String MIGRATION_FUNCTIONS_DIR = "/sql/migrationScripts/" ; 
 	private final String IMPORT_SCRIPTS_FILE = MIGRATION_FUNCTIONS_DIR+ "import-scripts.sql" ; 
 	
-	private int noOfReindexers = 3 ; 
+	private int noOfReindexers = 3 ; //no of workers handling the index recreations
 
 	public TableImporter() {}//EOM 
 	
-	
+	/**
+	 * @param iNoOfReindexers No of Workers handling the index recreations
+	 */
 	public final void setNoOfReindexers(final int iNoOfReindexers) {
 	    this.noOfReindexers = iNoOfReindexers ; 
 	}//EOM 
 	
+	/**
+	 * Caches an additional pre-import comma delimited instructions list with the following format:<br/>
+	 *     <<tableName>~<<0|1 truncation instruction>><~<0|1 index removal  instruction>><br/>
+	 * and an additonal comma delimited table list for the post-import actions.
+	 *      
+	 * @param sink  
+	 * @param table current table to add to the sink 
+	 */
 	@Override
 	protected final void addTableToSink(final LinkedBlockingDeque<Table> sink, final Table table) {
 	    super.addTableToSink(sink, table);
@@ -111,6 +126,10 @@ public class TableImporter extends TableProcessor<Worker> {
 	    
 	}//EOM 
 	
+	/**
+	 * @param {@link ForkContext} 
+	 * @param sink
+	 */
 	@Override
     protected final void beforeFork(final ForkContext<Table, Worker> context, final LinkedBlockingDeque<Table> sink) throws Throwable {
         MultiRuntimeException thrown = null;
@@ -570,9 +589,9 @@ public class TableImporter extends TableProcessor<Worker> {
 	}//EOM 
 
 	public static void main(String[] args) throws Throwable {
-	    testReadFromCSV() ;
+	    //testReadFromCSV() ;
 	    ///testStringComparison() ; 
-	    //testResultsetfromFunction() ; 
+	    testPostgresfetchSize() ; 
 	   // testPostgresQueryTimeout() ; 
 	    //testToCharVsCharArray() ;
 	    //testWriteObjectVsUTF() ;
@@ -725,14 +744,15 @@ public class TableImporter extends TableProcessor<Worker> {
 		}//EO catch block 
 	}//EOM 
 	
-	private static final void testResultsetfromFunction() throws Throwable { 
+	private static final void testPostgresfetchSize() throws Throwable { 
 	    final Connection conn = Utils.getPostgresConnection() ;
 	    conn.setAutoCommit(false) ; 
 	    Statement stmt = null ; 
 	    ResultSet rs = null ; 
 	    try{ 
-	        stmt = conn.createStatement() ; 
-	        rs = stmt.executeQuery("select * from test1()") ;
+	        stmt = conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY) ;
+	        stmt.setFetchSize(Integer.MIN_VALUE) ;
+	        rs = stmt.executeQuery("select * from EAM_CONFIG_PROPS") ;
 	        while(rs.next()) { 
 	            System.out.println(rs.getString(1) + "|" + rs.getString(2) + "|" + rs.getString(3));
 	        }//EO while there are more records
