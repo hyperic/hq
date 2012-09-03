@@ -55,9 +55,6 @@ import org.hyperic.tools.dbmigrate.TableExporter.Worker;
 import org.hyperic.tools.dbmigrate.TableProcessor.Table;
 import org.hyperic.util.MultiRuntimeException;
 
-import edu.emory.mathcs.backport.java.util.LinkedList;
-
-import bsh.This;
 
 /**
  * Database Exporter, streaming tables into files in serialization format concurrently 
