@@ -201,9 +201,9 @@ public class TableExporter extends TableProcessor<Worker> {
         Worker(final CountDownLatch countdownSemaphore, final Connection conn, final BlockingDeque<Table> sink, final File outputDir) {
             super(countdownSemaphore, conn, sink, Table.class);
             this.outputDir = outputDir;
-            try{ 
-                this.conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED) ;
-                this.conn.setReadOnly(true) ; 
+         
+            try{
+                enumDatabaseType.optimizeForBulkExport(this.conn) ; 
             }catch(Throwable t) { 
                 throw (t instanceof RuntimeException ? (RuntimeException) t : new RuntimeException(t)) ; 
             }//EO catch block 

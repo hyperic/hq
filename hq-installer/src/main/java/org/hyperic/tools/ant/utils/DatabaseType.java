@@ -75,6 +75,12 @@ public enum DatabaseType {
          public final void setFetchSize(final int fetchSize, final boolean isBigTable, final Statement stmt) throws SQLException{ 
              stmt.setFetchSize((isBigTable ? Integer.MIN_VALUE : fetchSize)) ; 
          }//EOM
+         
+         @Override
+        public final void optimizeForBulkExport(final Connection conn) throws Throwable {
+            super.optimizeForBulkExport(conn);
+            conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED) ;
+        }//EOM 
 
     },//EO MySQL  
     Oracle{ 
@@ -230,6 +236,10 @@ public enum DatabaseType {
      * @param conn
      */
     public void optimizeForBulkImport(final Connection conn) { /*noop*/ }//EOM  
+    
+    public void optimizeForBulkExport(final Connection conn) throws Throwable{ 
+        conn.setReadOnly(true) ; 
+    }//EOM 
     
     /**
      * Creates a batch statement and configures it for timeout<br/> 
