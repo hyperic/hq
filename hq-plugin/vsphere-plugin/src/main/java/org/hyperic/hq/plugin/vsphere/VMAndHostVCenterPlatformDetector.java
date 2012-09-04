@@ -498,23 +498,24 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
     //according to the DB schema, an IP can't be empty.
     //also according to one of unique indexes, IP can't be duplicate per VM.
     //in this function we loop over the VM list and fixing the IP list if needed.
-    //The function build a new IPs list with only valid IPs. 
+    //per vm, The function build a valid IPs list. 
     //the new list won't have duplications or empty IP address.
     //(same for 2 MAC with no IP address which will cause duplicate 'N/A').
-    //this list will replace the current list.
+    //this list will replace the current IP list.
     private void removeDuplicationsFromIPList(List<Resource> vms) {
         
-        List<Ip> validIPs = null; 
+        List<Ip> validIPs = null;
+        List<String> ipAddresses = null;//list of IP addresses for duplications check.
         //go over the VMs
         for(Resource vm : vms){
             
             List<Ip> IPs = vm.getIp();//get the vm IPs list
             if (IPs != null && IPs.size() > 0 ) {
-                validIPs = new ArrayList<Ip>();//init the new list
+                validIPs = new ArrayList<Ip>();//init the validIPs list
+                ipAddresses = new ArrayList<String>();                
             }
             else continue;//no IPs for this vm.
             
-            List<String> ipAddresses = new ArrayList<String>();
             for (Ip currIp : IPs) {
                 if (!ipAddresses.contains(currIp.getAddress())
                     && !currIp.getAddress().isEmpty()){
