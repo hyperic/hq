@@ -590,42 +590,5 @@ public class TableExporter extends TableProcessor<Worker> {
         
     }//EO inner class UTFNullHandlerOOS
      
-    //*****************************************************************************************************
-    //DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG  
-    //*****************************************************************************************************
-    
-    public static void main(String args[]) throws Throwable {
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        try
-        {
-            //String tablesClause = "EAM_CONFIG_RESPONSE,EAM_MEASUREMENT,EAM_MEASUREMENT_BL,EAM_SERVICE,EAM_SERVER,EAM_PLATFORM,EAM_AGENT";
-            File file = new File("/work/workspaces/master-complete/hq/dist/installer/src/main/resources/data/sql/migrationScripts/import-scripts.sql");
-            
-            FileInputStream fis = new FileInputStream(file);
-            byte arrBytes[] = new byte[fis.available()];
-            fis.read(arrBytes);
-            String sql = new String(arrBytes);
-            System.out.println((new StringBuilder()).append("sql:\n").append(sql).toString());
-            fis.close();
-            conn = Utils.getPostgresConnection();
-            conn.setAutoCommit(false);
-            conn.commit();
-            stmt = conn.createStatement();
-            stmt.execute(sql);
-            //stmt.executeQuery("select fmigrationPostConfigure('EAM_CONFIG_RESPONSE,EAM_MEASUREMENT,EAM_MEASUREMENT_BL,EAM_SERVICE,EAM_SERVER,EAM_PLATFORM,EAM_AGENT');");
-            
-            //stmt.executeQuery("select fToggleIndices('EAM_CONFIG_RESPONSE,EAM_MEASUREMENT,EAM_MEASUREMENT_BL,EAM_SERVICE,EAM_SERVER,EAM_PLATFORM,EAM_AGENT',true);");
-            conn.commit();
-            System.out.println("CREATED FUNCTION");
-        }catch(Throwable t) {
-            Utils.printStackTrace(t);
-            t.printStackTrace();
-        }finally {
-            Utils.close(new Object[] { rs, stmt, conn });
-        }//EO catch block 
-    }//EOM 
-    
     
 }//EO class 

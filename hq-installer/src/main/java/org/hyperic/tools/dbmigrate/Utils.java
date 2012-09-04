@@ -297,44 +297,5 @@ public class Utils{
   
   public static enum FileContentType { EOF ; }//EOM 
 
-  //*****************************************************************************************************
-  //DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG  
-  //*****************************************************************************************************
-  
-  public static final Connection getMySqlConnection() throws Throwable {
-    Class.forName("com.mysql.jdbc.Driver");
-    return DriverManager.getConnection("jdbc:mysql://localhost:3306/guytest1", "hqadmin", "hqadmin");
-  }//EOM 
-  
-  public static final Connection getPostgresConnection() throws Throwable {
-    Class.forName("org.postgresql.Driver");
-    //return DriverManager.getConnection("jdbc:postgresql://10.23.200.18:5432/guytest1?protocolVersion=2", "hqadmin", "hqadmin");
-//    return DriverManager.getConnection("jdbc:postgresql://localhost:5432/hqdb?protocolVersion=2", "hqadmin", "hqadmin");
-    //return DriverManager.getConnection("jdbc:postgresql://10.23.20.159:5432/HQ?protocolVersion=2", "hqadmin", "hqadmin");
-    return DriverManager.getConnection("jdbc:postgresql://10.23.24.101:5432/HQ?protocolVersion=2", "hqadmin", "hqadmin");
-  }//EOM 
-  
-  public static final Connection getOracleCOnnection() throws Throwable { 
-      Class.forName("oracle.jdbc.driver.OracleDriver") ;
-      return DriverManager.getConnection("jdbc:oracle:thin:@10.148.199.71:1521:nlayers", "hqadmin", "hqadmin") ; 
-  }//EOM 
-  
-  public static final Connection getLocalPostgresConnection() throws Throwable {
-      Class.forName("org.postgresql.Driver");
-      return DriverManager.getConnection("jdbc:postgresql://localhost:5432/hqdb?protocolVersion=2", "hqadmin", "hqadmin");
-    }//EOM 
-
-  public static void main(String[] args) throws Throwable { 
-    try{
-        
-      final File file = new File("/work/temp/dbmigration/staging-confs/testbed.conf");
-      final FileOutputStream fos = new FileOutputStream(file, true);
-      fos.write("#Schema build version hq.db.schema.vesion=3.211".getBytes());
-      fos.flush();
-      fos.close();
-    } catch (Throwable t) {
-      t.printStackTrace();
-    }//EO catch block 
-  }//EOM 
    
 }//EOM 
