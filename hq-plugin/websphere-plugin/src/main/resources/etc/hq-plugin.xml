@@ -503,6 +503,10 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
     </help>
 
     <config name="connector">
+       
+        <option name="listen.ports" description="Listening Ports"
+            optional="true" />
+
         <option name="admin.port"
             description="SOAP Connector Port"
             default="8880"/>
@@ -590,7 +594,7 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
     <server name="WebSphere"
           version="6.0"
           description="Application Server">
-
+        
         <property name="UNIQUE_FILE"
               value="properties/version/WAS.product"/>
 
@@ -731,7 +735,6 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
 			</monitored>
 		</plugin>
 		<property name="DEFAULT_CONFIG_TRACK_ENABLE" value="false" />
-		
     </server>
 
     <server name="WebSphere"

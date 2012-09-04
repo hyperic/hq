@@ -12,6 +12,8 @@ Options:
   * hq-export: 
     * -Dstaging.dir=<path>
     * -Dhqserver.install.path=<path>
+    * -Dquiet=<true|false> (optional, defaults to false)
+    * -Dscale=true (optional, default to false)
     or 
     * -Dsetup.file=<path>
   
@@ -28,6 +30,3 @@ Options:
     * -Dstaging.dir=<path>
     or 
     * -Dsetup.file=<path>
-   
-   * generic arguments: 
-     * -Dquiet=<true|false> (optional, defaults to false)

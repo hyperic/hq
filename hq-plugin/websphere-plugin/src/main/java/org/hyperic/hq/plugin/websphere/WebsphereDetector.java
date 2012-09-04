@@ -44,6 +44,7 @@ import org.hyperic.util.config.ConfigResponse;
 
 import org.hyperic.hq.plugin.websphere.jmx.WebsphereRuntimeDiscoverer;
 import org.hyperic.hq.product.AutoServerDetector;
+import org.hyperic.hq.product.DetectionUtil;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerControlPlugin;
 import org.hyperic.hq.product.RegistryServerDetector;
@@ -51,6 +52,7 @@ import org.hyperic.hq.product.FileServerDetector;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
 
+import org.hyperic.sigar.SigarException;
 import org.hyperic.sigar.win32.RegistryKey;
 
 public class WebsphereDetector
@@ -271,7 +273,8 @@ public class WebsphereDetector
         for (int i=0; i<pids.length; i++) {
             String[] args = getProcArgs(pids[i]);
             WebSphereProcess process = new WebSphereProcess();
-
+            process.setPid(pids[i]);
+            	
             // next-to-last arg should be node name
             int ai=args.length;
             if(args[ai - 1].trim().equals("")) ai--; // some times the las arg is a " "
@@ -414,6 +417,12 @@ public class WebsphereDetector
         ConfigResponse productConfig =
             new ConfigResponse(getProductConfig(proc));
 
+        try {
+			DetectionUtil.populatePorts(getSigar(), new long[] {proc.getPid()}, productConfig);
+		} catch (SigarException e) {
+			log.warn("Error getting listening ports for '" + proc.getPid() + "' ", e);
+		}
+        
         if (WebsphereProductPlugin.isOSGi()) {
             String prop = WebsphereProductPlugin.PROP_INSTALL_ROOT;
             String root =

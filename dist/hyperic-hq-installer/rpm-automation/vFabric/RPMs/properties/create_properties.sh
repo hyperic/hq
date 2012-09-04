@@ -5,7 +5,6 @@
 # prefix, an issue of installation dir vs final configured dir where HQ is run
 INSTALLER_DIR=$1
 
-
 VF_HQ_SERVER_PROPS=/etc/vmware/vfabric/hyperic/vfabric_hyperic_server.properties
 TMP_HQ_SERVER_PROPS=/tmp/vfabric_hyperic_server.properties
 HQ_SERVER_PROPERTIES=install_ee.properties

@@ -53,7 +53,7 @@ Setting up a database:
         	server.admin.password=hqadmin
     - Install the Schema
     	To install the schema:
-        	$ cd dist/installer
+        	$ cd dist/installer/modules/installer
         	$ mvn assembly:directory
         	$ ant dbsetup
         

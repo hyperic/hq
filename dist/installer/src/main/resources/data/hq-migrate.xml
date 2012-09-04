@@ -90,7 +90,7 @@
 				<property name="no.importer.reindexers" value="5" />
 				<property name="no.importer.batchSize" value="7000" />
 				
-				<property name="no.exporter.workers" value="45" />
+				<property name="no.exporter.workers" value="12" />
 				<property name="no.exporter.batchSize" value="50000" />
 			</then> 
 			<else>
