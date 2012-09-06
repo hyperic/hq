@@ -371,12 +371,9 @@ public class ApacheServerDetector
                           server.getName());
             }
             metricConfig = getSnmpConfig(snmpConfig);
-            try {
-                productConfig  = DetectionUtil.populatePorts(getSigar(),new long[] {binary.pid}, getProductConfig(metricConfig));
-            } catch (SigarException e) {
-                log.error(e);
-                throw new PluginException(e);
-            }
+
+            productConfig = getProductConfig(metricConfig);
+            DetectionUtil.populateListeningPorts(binary.pid , productConfig , true);         
 
             if (binary.conf == null) {
                 String cfgPath = installpath;
@@ -414,25 +411,22 @@ public class ApacheServerDetector
             return true;
         }
         else if (this.discoverModStatus) {
-            log.debug(snmpConfig +
-                      " does not exist, discovering as type: " +
-                      TYPE_HTTPD);
-            try {
-                productConfig = DetectionUtil.populatePorts(getSigar(),new long[] {binary.pid}, new ConfigResponse());
-            } catch (SigarException e) {
-                log.error(e);
-                throw new PluginException(e);
-            }
+        	log.debug(snmpConfig +
+        			" does not exist, discovering as type: " +
+        			TYPE_HTTPD);
 
-            //meant for command-line testing: -Dhttpd.url=http://localhost:8080/
-            if (configureURL(getManagerProperty("httpd.url"), productConfig)) {
-                server.setMeasurementConfig();
-            }
-            else if (configureURL(binary, productConfig)){
-                server.setMeasurementConfig();
-                if (binary.conf != null) {
-                    //ServerRoot location overrides compiled in HTTPD_ROOT
-                    ConfigResponse srControlConfig = getControlConfig(binary.root);
+        	productConfig = new ConfigResponse();
+        	DetectionUtil.populateListeningPorts(binary.pid , productConfig, true);
+
+        	//meant for command-line testing: -Dhttpd.url=http://localhost:8080/
+        	if (configureURL(getManagerProperty("httpd.url"), productConfig)) {
+        		server.setMeasurementConfig();
+        	}
+        	else if (configureURL(binary, productConfig)){
+        		server.setMeasurementConfig();
+        		if (binary.conf != null) {
+        			//ServerRoot location overrides compiled in HTTPD_ROOT
+        			ConfigResponse srControlConfig = getControlConfig(binary.root);
                     if (srControlConfig != null) {
                         controlConfig = srControlConfig;
                     }
