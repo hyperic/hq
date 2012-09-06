@@ -32,8 +32,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
-import java.util.Enumeration;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -53,6 +54,7 @@ public class PropertiesMerger extends Properties{
     private boolean isLoaded ; 
     private String baseFileContent ; 
     private final PropertiesMergerFilter filter ; 
+    private Collection<String> pruneProperties ; 
     
     static { 
         try{
@@ -85,6 +87,10 @@ public class PropertiesMerger extends Properties{
     
     public final void setBaseFile(final String path) throws IOException{ 
         this.load(path) ; 
+    }//EOM
+    
+    public final void setPrunePropertiesList(final Collection<String> pruneProperties)  {
+        this.pruneProperties = pruneProperties; 
     }//EOM 
     
     public final void setOverrideFile(final String path) throws IOException{
@@ -170,6 +176,8 @@ public class PropertiesMerger extends Properties{
                 
             }//EO while there are more entries ;
             
+            this.pruneProperties() ; 
+            
             final File outputFile = new File(this.outputFilePath) ; 
             outputFile.delete() ; 
             fos = new FileOutputStream(outputFile)  ; 
@@ -183,6 +191,25 @@ public class PropertiesMerger extends Properties{
                  fos.close() ; 
              }//EO if bw was initialized 
         }//EO catch block 
+    }//EOM 
+    
+    private final void pruneProperties() throws Throwable { 
+        if(this.pruneProperties == null) return ; 
+        
+        String value = null ; 
+        Matcher matcher = null ; 
+        Pattern pattern = null  ;
+        for(String property : this.pruneProperties) { 
+            if(this.containsKey(property)) { 
+                value = (String) this.get(property) ;
+                
+                value = (value == null ? "" : value.replaceAll("([():+])", "\\\\$1").replaceAll("\\s+", "(\\\\s*.*\\\\s*)")) ;  
+                pattern = Pattern.compile(property+"\\s*=(\\s*.*\\s*)"+ value, Pattern.MULTILINE) ;
+                //pattern = Pattern.compile(key+"\\s*=.*\n", Pattern.MULTILINE) ;
+                matcher = pattern.matcher(this.baseFileContent) ; 
+                this.baseFileContent = matcher.replaceAll("") ;
+            }//EO if property exists 
+        }//EO while there are more properties 
     }//EOM 
     
     public static interface PropertiesMergerFilter { 
