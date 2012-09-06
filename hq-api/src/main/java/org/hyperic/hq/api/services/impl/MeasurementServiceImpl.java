@@ -17,6 +17,8 @@ import org.hyperic.hq.common.TimeframeBoundriesException;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Date;
 
@@ -56,7 +58,7 @@ public class MeasurementServiceImpl extends RestApiService implements Measuremen
     }
 
     public ResourceMeasurementBatchResponse getAggregatedMetricData(ResourceMeasurementRequests hqMsmtReqs, Date begin, Date end)
-            throws ParseException, PermissionException, SessionNotFoundException, SessionTimeoutException {
+            throws ParseException, PermissionException, SessionNotFoundException, SessionTimeoutException, ObjectNotFoundException, UnsupportedOperationException, SQLException {
         try {
             ApiMessageContext apiMessageContext = newApiMessageContext();
             return measurementTransfer.getAggregatedMetricData(apiMessageContext, hqMsmtReqs, begin, end);

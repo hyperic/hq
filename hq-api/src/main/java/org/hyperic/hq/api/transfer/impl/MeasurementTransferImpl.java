@@ -90,7 +90,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         for (MeasurementTemplate tmp : tmps) {
             tmpIds.add(tmp.getId());
         }
-        resIdsToTmpIds.put(new Integer(rscId), tmpIds);
+        resIdsToTmpIds.put(Integer.valueOf(rscId), tmpIds);
         Map<Resource, List<Measurement>> rscTohqMsmts = null;
         rscTohqMsmts = this.measurementMgr.findMeasurements(authzSubject, resIdsToTmpIds);
         if (rscTohqMsmts==null || rscTohqMsmts.size()==0 || rscTohqMsmts.values().isEmpty()) {
@@ -181,10 +181,10 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
                 List<String> rscIds = tmpNameToRscs.get(tmp.getName());
                 if (rscIds==null) { continue;   }
                 for (String rscId : rscIds) {
-                    if (!resIdsToTmpIds.containsKey(rscId)) {
-                        resIdsToTmpIds.put(new Integer(rscId), new ArrayList<Integer>());
+                    if (!resIdsToTmpIds.containsKey(Integer.valueOf(rscId))) {
+                        resIdsToTmpIds.put(Integer.valueOf(rscId), new ArrayList<Integer>());
                     }
-                    resIdsToTmpIds.get(new Integer(rscId)).add(tmp.getId());
+                    resIdsToTmpIds.get(Integer.valueOf(rscId)).add(tmp.getId());
                 }
             }
             // mark resources for which no measurements were found
@@ -192,7 +192,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
                 // by now we know that all reqs are with valid rscs, o/w we wouldn't get here
                 String rscId = hqMsmtReq.getRscId();
                 // if the requested rsc is not in the map of rscs for which at least one template was found, mark it as a failed rsc
-                if (!resIdsToTmpIds.keySet().contains(rscId)) {
+                if (!resIdsToTmpIds.keySet().contains(Integer.valueOf(rscId))) {
                     res.addFailedResource(rscId,ExceptionToErrorCodeMapper.ErrorCode.TEMPLATE_NOT_FOUND.getErrorCode(),null,new Object[] {});
                 }
             }
