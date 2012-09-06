@@ -416,14 +416,10 @@ public class WebsphereDetector
 
         ConfigResponse productConfig =
             new ConfigResponse(getProductConfig(proc));
-
-        try {
-			DetectionUtil.populatePorts(getSigar(), new long[] {proc.getPid()}, productConfig);
-		} catch (SigarException e) {
-			log.warn("Error getting listening ports for '" + proc.getPid() + "' ", e);
-		}
         
-        if (WebsphereProductPlugin.isOSGi()) {
+		DetectionUtil.populateListeningPorts(proc.getPid(), productConfig, true);
+        
+		if (WebsphereProductPlugin.isOSGi()) {
             String prop = WebsphereProductPlugin.PROP_INSTALL_ROOT;
             String root =
                 System.getProperty(prop, getTypeProperty(prop));

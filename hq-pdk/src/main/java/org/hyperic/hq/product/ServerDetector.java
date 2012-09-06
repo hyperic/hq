@@ -1023,7 +1023,7 @@ public abstract class ServerDetector
                 config.setValue(key, autoApproveProps.getProperty(key));
             }
         }
-
+        
         server.setProductConfig(config);
     }
     

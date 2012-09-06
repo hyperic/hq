@@ -398,6 +398,9 @@
 		<pause message="Upgrading database to version ${force.cam.schema.version}" quiet="${quiet}"/>
 		<antcall target="upgrade-db" />
 		
+		<pause message="Importing Server artifacts" quiet="${quiet}"/>
+		<antcall target="import-server-artifcats" />
+		
 		<!-- Output the import summary message --> 
 		<echofile file="${install.dir}/data/reports/migration-import-summary.txt" property="import.summary" />
 		<!-- load the target server's build version -->
@@ -411,8 +414,8 @@
 		</antcall>
 	</target>
 	
-	<target name="import-server-artifcats" depends="hq-import">
-  		<propertiesMergeFilter id="hq-server.conf.filter" includeNew="true"> 
+	<target name="import-server-artifcats">
+  		<properties-merge-filter id="hq-server.conf.filter" includeNew="true"> 
   		    <include name="server.database" />
   			<include name="server.database-driver" />
   			<include name="server.database-url" />
@@ -421,9 +424,12 @@
   			<include name="server.quartzDelegate" />
   			<include name="server.hibernate.dialect" />
   			<include name="server.connection-validation" />   
-  		</propertiesMergeFilter>  
+  			<prune name="CAM_SERVER_VERSION" />
+  			<prune name="CAM_SCHEMA_VERSION" />
+  		</properties-merge-filter>  
 		
 		<ant antfile="setup.xml" target="server-upgrade"> 
+			<reference refid="hq-server.conf.filter" />
 			<property name="migration.context" value="true" />
 			<property name="setup.upgrade" value="true" />
 			<property name="server.upgradedir" value="${server.artifacts.dir}" />

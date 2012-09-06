@@ -478,6 +478,8 @@ fi
       <option name="process.ptql"
               description="PTQL which describes the processes to monitor"
               default="State.Name.eq=oracle,Args.0.sw=ora_"/>
+      <option name="listen.ports" description="Listening Ports" 
+              optional="true"/>
     </config>
 
     <properties>

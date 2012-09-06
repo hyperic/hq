@@ -35,6 +35,8 @@ import org.apache.tools.ant.types.DataType;
 import org.hyperic.tools.ant.utils.PropertiesMerger;
 import org.hyperic.tools.ant.utils.PropertiesMerger.PropertiesMergerFilter;
 
+import edu.emory.mathcs.backport.java.util.Arrays;
+
 public class PropertiesMergerTask extends Task {
 
     private String baseFile ; 
@@ -59,22 +61,24 @@ public class PropertiesMergerTask extends Task {
         this.filter = filter ; 
     }//EOM 
     
+    @SuppressWarnings("unchecked")
     @Override
     public final void execute() throws BuildException {
         try{ 
             final PropertiesMerger merger = new PropertiesMerger(this.outputFile, this.filter) ;
             merger.setBaseFile(this.baseFile) ; 
-            merger.setOverrideFile(this.overrideFile) ; 
+            merger.setOverrideFile(this.overrideFile) ;
+            if(this.filter.prunes != null) merger.setPrunePropertiesList(this.filter.prunes) ; 
             merger.merge() ; 
         }catch(Throwable t) { 
             throw new BuildException(t) ; 
         }//EO catch block 
     }//EOM 
     
-    
     public static final class Filter extends DataType implements PropertiesMergerFilter{ 
         private Set<String> includes ;
         private Set<String> excludes;
+        private Set<String> prunes ; 
         private boolean shouldIncludeNewProperties = true ; 
         
         
@@ -87,6 +91,11 @@ public class PropertiesMergerTask extends Task {
             if(this.excludes == null) this.excludes = new HashSet<String>() ;
             this.excludes.add(excludeFilter.name) ; 
         }//EOM 
+        
+        public void addConfiguredPrune(final PruneFilter pruneFilter) {
+            if(this.prunes == null) this.prunes = new HashSet<String>() ;
+            this.prunes.add(pruneFilter.name) ; 
+        }//EOM
         
         public void setIncludeNew(final boolean shouldIncludeNewProperties) { 
             this.shouldIncludeNewProperties = shouldIncludeNewProperties ; 
@@ -119,6 +128,8 @@ public class PropertiesMergerTask extends Task {
     }//EO inner class IncludesFilter
     
     public static final class ExcludesFilter extends IncludesFilter {}//EO inner class IncludesFilter
+    
+    public static final class PruneFilter extends IncludesFilter {}//EO inner class PruneFilter 
 
     public static void main(String[] args) throws Throwable {
         

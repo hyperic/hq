@@ -85,7 +85,8 @@ public class ConcurrentStatsCollector extends AbstractStatsCollector {
                                AGENT_PLUGIN_SYNC_RESTARTS = "AGENT_PLUGIN_SYNC_RESTARTS",
                                LATHER_RUN_COMMAND_TIME = "LATHER_RUN_COMMAND_TIME",
                                AGENT_SYNCHRONIZER_QUEUE_SIZE = "AGENT_SYNCHRONIZER_QUEUE_SIZE",
-                               LATHER_REMOTE_EXCEPTION = "LATHER_REMOTE_EXCEPTION";
+                               LATHER_REMOTE_EXCEPTION = "LATHER_REMOTE_EXCEPTION",
+                               ZEVENT_REGISTERED_BUFFER_SIZE = "ZEVENT_REGISTERED_BUFFER_SIZE";
     private TaskScheduler taskScheduler;
 
     @Override

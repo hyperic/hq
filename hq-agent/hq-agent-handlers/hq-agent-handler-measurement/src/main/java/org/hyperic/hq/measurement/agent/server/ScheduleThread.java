@@ -338,6 +338,9 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable {
             ScheduledMeasurement meas = (ScheduledMeasurement) item.getObj();
             //For plugin/Collector awareness
             ParsedTemplate tmpl = getParsedTemplate(meas);
+            if (tmpl == null || tmpl.metric == null) {
+                continue;
+            }
             tmpl.metric.setInterval(-1);
         }
     }
@@ -439,9 +442,15 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable {
 
     private ParsedTemplate toParsedTemplate(ScheduledMeasurement meas) {
         AppdefEntityID aid = meas.getEntity();
+        if (aid == null) {
+            return null;
+        }
         int id = aid.getID();
         int type = aid.getType();
         ParsedTemplate tmpl = getParsedTemplate(meas);
+        if (tmpl == null || tmpl.metric == null) {
+            return null;
+        }
         tmpl.metric.setId(type, id);
         tmpl.metric.setCategory(meas.getCategory());
         tmpl.metric.setInterval(meas.getInterval());
@@ -657,6 +666,10 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable {
         for (int i=0; i<items.size() && (!shouldDie.get()); i++) {
             ScheduledMeasurement meas = (ScheduledMeasurement)items.get(i);
             ParsedTemplate tmpl = toParsedTemplate(meas);
+            if (tmpl == null) {
+                log.warn("template for meas id=" + meas.getDerivedID() + " is null");
+                continue;
+            }
             ThreadPoolExecutor executor;
             String plugin;
             synchronized (executors) {
