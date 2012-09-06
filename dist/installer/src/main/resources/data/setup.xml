@@ -570,20 +570,24 @@ ${errMsg}
         <format property="current.time" pattern="yyyy-MM-dd.hhmm"/>
     </tstamp>
 
-    <copy file="${server.upgradedir}/conf/hq-server.conf"
-                tofile="${server.product.dir}/conf/hq-server-${current.time}.conf"
-                failonerror="false"/>
-    
     <!-- Copy the existing config -->
   	<if> 
   		<not> 
   		  <isset property="migration.context" />
   		</not> 
 	 	<then> 
+	 		<copy file="${server.upgradedir}/conf/hq-server.conf"
+	 		                tofile="${server.product.dir}/conf/hq-server-${current.time}.conf"
+	 		                failonerror="false"/>
+	 		
 	 	    <serverConfigUpgrade existing="${server.upgradedir}/conf/hq-server.conf" 
 	 	        new="${server.product.dir}/conf/hq-server.conf" upgradeDir="${server.upgradedir}"/>
 	 	</then> 
-	 	<else> 
+	 	<else>
+	 		<copy file="${server.product.dir}/conf/hq-server.conf"
+	 		                tofile="${server.product.dir}/conf/hq-server-${current.time}.conf"
+	 		                failonerror="false"/>
+	 		
 	 		<properties-merge baseFile="${server.upgradedir}/conf/hq-server.conf" overrideFile="${server.product.dir}/conf/hq-server.conf" outputFile="${server.product.dir}/conf/hq-server.conf">  
 		  		<propertiesMergeFilter refid="${hq-server.conf.filter.refid}" />
 		    </properties-merge> 

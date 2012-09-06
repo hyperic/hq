@@ -111,7 +111,8 @@
 		<var file="${hq.server.conf.file}" />
 		
 		<!-- Decrypt the database password -->
-		<env-setup />
+		<decrypt-property name="server.database-password" encKey="${server.encryption-key}"/>
+		<!--<env-setup /> -->
 		
 		<!-- cache the os family type for future reference -->
 		<condition property="windows-os" value="true" else="false">
@@ -301,7 +302,7 @@
 		<!-- cache the target's database properties -->
 		<var name="target.database.url" value="${server.database-url}" />
 		<var name="target.database.username" value="${server.database-user}" />
-		<var name="target.server.encryption-key" value="${server.encryption-key}" />
+		<!--<var name="target.server.encryption-key" value="${server.encryption-key}" /> --> 
 		<var name="target.database.password" value="${server.database-password}" />
 		<var name="target.database.type" value="${server.database}" />
 		<var name="target.database.driver" value="${server.database-driver}" />
@@ -332,7 +333,7 @@
 		<var name="server.database-user" value="${target.database.username}" />
 		<var name="server.database" value="${target.database.type}" />
 		<var name="server.database-driver" value="${target.database.driver}" />
-		<var name="server.encryption-key" value="${target.server.encryption-key}" />
+		<!--<var name="server.encryption-key" value="${target.server.encryption-key}" /> -->
 		<var name="server.database-password" value="${target.database.password}" />
 
 		<echo>Target server.database-url ${server.database-url}</echo>
@@ -415,17 +416,25 @@
 	</target>
 	
 	<target name="import-server-artifcats">
+		<!-- re-encrypt the password value using the source's key -->
+		<encrypt-property name="server.database-password" encKey="${server.encryption-key}"/>
+		 
+		<!-- 
+			prune = remove property from output
+			include = override with value from override file 
+			include+environment = override with value from environment 
+		-->  
   		<properties-merge-filter id="hq-server.conf.filter" includeNew="true"> 
   		    <include name="server.database" />
   			<include name="server.database-driver" />
   			<include name="server.database-url" />
   			<include name="server.database-user" />
-  			<include name="server.database-password" />
   			<include name="server.quartzDelegate" />
   			<include name="server.hibernate.dialect" />
   			<include name="server.connection-validation" />   
   			<prune name="CAM_SERVER_VERSION" />
   			<prune name="CAM_SCHEMA_VERSION" />
+  			<include name="server.database-password" environment="true" />
   		</properties-merge-filter>  
 		
 		<ant antfile="setup.xml" target="server-upgrade"> 
