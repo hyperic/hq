@@ -37,6 +37,8 @@ public class MeasurementServiceImpl extends RestApiService implements Measuremen
 	            errorHandler.log(t);
 	            throw t;
 	        }
+        } catch (TimeframeBoundriesException e) {
+            throw errorHandler.newWebApplicationException(e, Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.WRONG_DATE_VALUES);
         } catch (UnsupportedOperationException e) {
             throw errorHandler.newWebApplicationException(e, Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.BAD_MEASUREMENT_REQ);
         } catch (ObjectNotFoundException e) {

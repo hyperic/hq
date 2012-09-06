@@ -149,12 +149,18 @@ public class Forker {
                 Utils.printStackTrace(t1);
                 MultiRuntimeException.newMultiRuntimeException(thrown, t1);
             } finally {
-                try {
+                /*try {
                     Utils.close(thrown != null ? Utils.ROLLBACK_INSTRUCTION_FLAG : Utils.NOOP_INSTRUCTION_FLAG, new Object[] { this.conn });
                 } catch (Throwable t1) {
                     MultiRuntimeException.newMultiRuntimeException(thrown, t1);
                 }//EO inner catch block 
- 
+*/                
+                try {
+                    this.dispose(thrown) ;
+                } catch (Throwable t1) {
+                    MultiRuntimeException.newMultiRuntimeException(thrown, t1);
+                }//EO inner catch block 
+                
                 if (this.countdownSemaphore != null) this.countdownSemaphore.countDown();
                 
                 if (thrown != null) throw thrown;
@@ -163,8 +169,16 @@ public class Forker {
             final V[] arrResponse = (V[]) java.lang.reflect.Array.newInstance(this.entityType, processedEntities.size()) ; 
             return processedEntities.toArray(arrResponse);
         }//EOM 
+        
+        protected void dispose(final MultiRuntimeException thrown) throws Throwable { 
+            try {
+                Utils.close(thrown != null ? Utils.ROLLBACK_INSTRUCTION_FLAG : Utils.NOOP_INSTRUCTION_FLAG, new Object[] { this.conn });
+            } catch (Throwable t1) {
+                MultiRuntimeException.newMultiRuntimeException(thrown, t1);
+            }//EO inner catch block 
+        }//EOM 
 
-        protected final void rollbackEntity(final Object entity, final Throwable t) { /*NOOP*/}//EOM
+        protected void rollbackEntity(final V entity, final Throwable t) { /*NOOP*/}//EOM
     }//EOM 
 
     public static abstract interface WorkerFactory<V, T extends Callable<V[]>> {

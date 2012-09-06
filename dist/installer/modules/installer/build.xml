@@ -5,6 +5,6 @@
 	<property file="${user.home}/.hq/build.properties" />
 	<property name="install.dir" value="${basedir}/target/installer/installer"/>
 	
-	<import file="${basedir}/src/main/resources/data/setup-db-common.xml" /> 
+	<import file="${install.dir}/data/setup-db-common.xml" /> 
 	
 </project>

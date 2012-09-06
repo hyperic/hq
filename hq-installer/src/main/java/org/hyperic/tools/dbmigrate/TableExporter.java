@@ -37,19 +37,24 @@ import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.tools.ant.Project;
+import org.apache.tools.ant.Task;
 import org.hyperic.tools.dbmigrate.Forker.ForkContext;
 import org.hyperic.tools.dbmigrate.Forker.ForkWorker;
 import org.hyperic.tools.dbmigrate.TableExporter.Worker;
 import org.hyperic.tools.dbmigrate.TableProcessor.Table;
 import org.hyperic.util.MultiRuntimeException;
+
 
 /**
  * Database Exporter, streaming tables into files in serialization format concurrently 
@@ -176,28 +181,52 @@ public class TableExporter extends TableProcessor<Worker> {
     }//EOM 
     
     /**
-     * {@link Table} entities exporter 
+     * {@link Table} entities exporter asynchronously streaming content into files concurrently.
      */
     public final class Worker extends ForkWorker<Table> {
 
         private final File outputDir;
+        private FileStreamer fileStreamer ; 
         
+        /**
+         * Configures the connection with the readonly flag and sets the transaction level to {@link Connection#TRANSACTION_READ_UNCOMMITTED}
+         * @param countdownSemaphore
+         * @param conn
+         * @param sink
+         * @param outputDir
+         */
         Worker(final CountDownLatch countdownSemaphore, final Connection conn, final BlockingDeque<Table> sink, final File outputDir) {
             super(countdownSemaphore, conn, sink, Table.class);
             this.outputDir = outputDir;
+         
+            try{
+                enumDatabaseType.optimizeForBulkExport(this.conn) ; 
+            }catch(Throwable t) { 
+                throw (t instanceof RuntimeException ? (RuntimeException) t : new RuntimeException(t)) ; 
+            }//EO catch block 
+             
+            this.fileStreamer = new FileStreamer(TableExporter.this) ; 
         }//EOM 
         
+        /**
+         * Exports the content of the table as defined in its metadata.<br/> 
+         * If table is an instance of the {@link BigTable} then this thread would export only a partition of the former
+         * as defined by the {@link BigTable}. 
+         * Values read from the resultset are piped into the Filestreamer's buffer to be written into file asynchronously. 
+         */
         @Override
         protected final void callInner(final Table table) throws Throwable {
             
+            String traceMsgPrefix = null ; 
             Statement stmt = null;
             ResultSet rs = null;
-            ObjectOutputStream ous = null;
             try{
                 String tableName = table.name ; 
                 String sql = "SELECT * FROM "  ;
                 int partitionNo = 0 ; 
                 
+                //if a big table add the partitioning clause so as to select only the records pertaining to the 
+                //current modulo remainder 
                 if(table instanceof BigTable) { 
                     final BigTable bigTable = (BigTable) table ; 
                     final StringBuilder statementBuilder = new StringBuilder(sql).append(tableName).append(" WHERE ") ; 
@@ -212,100 +241,343 @@ public class TableExporter extends TableProcessor<Worker> {
                 
                 final File tableParentDir = new File(this.outputDir, tableName);
                 
-                final String traceMsgPrefix = "----------------- [Table["+tableName+"];Partition["+partitionNo+"]]: " ;
+                traceMsgPrefix = "----------------- [Table["+tableName+"];Partition["+partitionNo+"]]: " ;
                 final String loopTraceMsgSuffix = " records so far." ;
-                TableExporter.this.log(traceMsgPrefix + "Commencing the export into " + tableParentDir) ; 
+                TableExporter.this.log(traceMsgPrefix + "Commencing the export into " + tableParentDir) ;
+                //change the filestreamer's name to help with debugging (the writer migtht display the name while writing to 
+                //the previous file if the file system is slow on writing). 
+                this.fileStreamer.setName(traceMsgPrefix) ; 
                 
                 stmt = this.conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY) ; 
               
-                //TODO: write comment for databaseversion support for the fetch size 
+                //delegate the fetch size setting to the current database strategy  
                 enumDatabaseType.setFetchSize(batchSize, (table instanceof BigTable)/*bigTable*/, stmt) ;                 
                 stmt.setQueryTimeout(queryTimeoutSecs) ; 
                 rs = stmt.executeQuery(sql) ; 
               
                 final ResultSetMetaData rsmd = rs.getMetaData();
                 final int columnCount = rsmd.getColumnCount();
-
+                
                 final DBDataType[] columns = new DBDataType[columnCount];
 
                 int recordCount = 0;
                 int batchCounter = 0;
+                Throwable fileStreamerException = null ; 
                 
                 while (rs.next()) {
+                    //if the Filestreamer had registered an exception,
+                    //clear the exception and throw it which will abort the current table export 
+                    if(this.fileStreamer.exception != null) { 
+                        fileStreamerException = this.fileStreamer.exception ; 
+                        this.fileStreamer.exception = null ; 
+                        throw fileStreamerException ;   
+                    }//EO if the file streamer had an exception 
                     
                     //create the table parent directory if not yet created 
                     if(recordCount == 0 && !tableParentDir.exists()) tableParentDir.mkdir();
                     
                     if (recordCount == maxRecordsPerTable) break;
                     
+                    //flush and close the current file (if not th first one) and create a new one 
+                    //if the batch size threshold was reached 
                     if (recordCount % batchSize == 0) {
                         TableExporter.this.log(traceMsgPrefix + "exported " + recordCount + loopTraceMsgSuffix ) ;   
-                        ous = newOutputFile(tableName, batchCounter++, partitionNo, tableParentDir, ous);
+                        //inject a new configuration instruction to the async buffer.
+                        this.fileStreamer.newFile(tableParentDir, tableName + "_" + partitionNo + "_" + batchCounter++ + ".out");
                     }//EO if batch threshold was reached 
 
+                    //stream the data from the resultset into the file using the DBDataType strategy corersponding to the 
+                    //datatype 
                     for (int i = 0; i < columnCount; i++) {
                       if (columns[i] == null) columns[i] = DBDataType.reverseValueOf(rsmd.getColumnType(i + 1));
-                      columns[i].serialize(ous, rs, i + 1);
+                      //deposit the value into the async buffer and return
+                      columns[i].serialize(this.fileStreamer, rs, i + 1);
+                      
                     }//EO while there are more columns 
 
                     recordCount++;
                 }//EO while there are more records 
                 
+                //flush and close the last file if exists
                 String recordCountMsgPart = null ; 
                 if(recordCount == 0) { 
                     recordCountMsgPart = "No Records where exported" ; 
                 }else { 
                     recordCountMsgPart = "Finished exporting " + recordCount + " records" ;
-//                    ous.writeObject(Utils.EOF_PLACEHOLDER) ; 
-                    ous.write(ObjectOutputStream.TC_MAX) ;
+                    //inject the end of file instruction to the buffer 
+                    this.fileStreamer.EOF() ; 
                 }//EO if records were exported to file 
                 
                 final int totalNumberOfRecordsSofar = table.noOfProcessedRecords.addAndGet(recordCount) ;
                 TableExporter.this.log(traceMsgPrefix + recordCountMsgPart +  
                         " for this partition Total records exported so far: " + totalNumberOfRecordsSofar) ;
             }catch(Throwable t){ 
-                t.printStackTrace() ; 
+                Utils.printStackTrace(t, traceMsgPrefix) ;
                 throw t ; 
             }finally {
-              Utils.close(new Object[] { ous, rs, stmt });
+              Utils.close(new Object[] { rs, stmt });
             }//EO catch block 
         }//EOM 
 
-        private final ObjectOutputStream newOutputFile(final String tableName, final int batchNo, final int partitionNumber, 
-                        final File parentDir, final ObjectOutputStream existingOus) throws Throwable {
+        /**
+         * Deletes the content of the corresponding directory as no data is better than partial 
+         * Moreover, disposes of the filestreamer's current file pointers.
+         * @param tableName
+         * @param reason
+         */
+        @Override
+        protected final void rollbackEntity(final Table table, final Throwable reason) {
+            log("Failed to export table " + table.name + ", will disacrd all export data for it; Reason: " + reason, Project.MSG_ERR);
+            this.fileStreamer.EOF() ; 
+            final File tableDir = new File(outputDir, table.name);
+            Utils.deleteDirectory(tableDir);
+        }//EOM 
+        
+        @Override
+        protected void dispose(MultiRuntimeException thrown) throws Throwable {
+            try{
+                //inject the end of stream instruction to the streamer and wait for the FileStreamer 
+                //to wait
+                this.fileStreamer.close() ; 
+            }catch(Throwable t) { 
+                MultiRuntimeException.newMultiRuntimeException(thrown, t);
+            }//EO catch block 
+            super.dispose(thrown);
+        }//EOM 
+         
+    }//EO inner class Worker
+    
+    /**
+     * Asynchronous file writer reading values from an unbounded buffer and writes them to file. 
+     */
+    private static class FileStreamer extends Thread implements FileStream{ 
+        
+        private BlockingOnEmptyConcurrentLinkedQueue<Object> fileStreamingSink ; 
+        private boolean isTerminated ; 
+        private Task logger ; 
+        
+        /**
+         * Indicates that the next queue item is a File to which to commenced writing 
+         */
+        final static Byte NEW_CONFIGURATION_INSTR = (byte)0x7A; 
+        /**
+         * End-Of-Stream: Indicates that there would be no more values to write.  
+         */
+        final static Byte EOS_INSTR = (byte)0x7B ; 
+        /**
+         * End-Of-File: indicates that the current stream should be flushed and closed 
+         */
+        final static Byte EOF_INSTR = ObjectOutputStream.TC_MAX ;
+        /**
+         * Represents a null of type string (null value is used to indicate an empty queue)  
+         */
+        final static Object NULL_STRING = new Object() ;
+        /**
+         * Represents a null of type object (null value is used to indicate an empty queue) 
+         */
+        final static Object NULL_OBJECT = ObjectOutputStream.TC_NULL ;   
+
+        /**
+         * A global exception buffer which would be polled by the reader thread 
+         */
+        private Throwable exception; 
+        
+        /**
+         * Starts the this instance as a deamon thread.
+         * @param logger 
+         */
+        public FileStreamer(final Task logger) { 
+            this.logger = logger ; 
+            this.fileStreamingSink = new BlockingOnEmptyConcurrentLinkedQueue<Object>() ; // new ArrayBlockingQueue<Object>(1000000) ;
+            this.setDaemon(true) ; 
+            this.start() ; 
+        }//EOM
+        
+        /**
+         * adds the {@link This#NEW_CONFIGURATION_INSTR} instruction flag to the buffer followed by the new file 
+         * @param parentDir 
+         * @param fileName
+         */
+        final void newFile(final File parentDir, final String fileName) { 
+            this.fileStreamingSink.add(NEW_CONFIGURATION_INSTR) ;
+            this.fileStreamingSink.add(new File(parentDir, fileName)) ; 
+        }//EOM 
+        
+        /**
+         * Adds the object to the buffer. if null the value is replaced by the {@link this#NULL_OBJECT}  
+         */
+        public final void write(final Object object) throws IOException{ 
+            this.fileStreamingSink.add(object == null ? NULL_OBJECT : object) ; 
+        }//EOM
+        
+        /**
+         * Adds the value to the buffer. if null the value is replaced by the {@link this#NULL_STRING}  
+         */
+        public final void writeUTF(final String value) throws IOException { 
+            this.fileStreamingSink.add(value == null ? NULL_STRING : value) ; 
+        }//EOM 
+        
+        /**
+         * Adds an {@link this#EOF_INSTR} to the buffer 
+         */
+        final void EOF() { 
+            this.fileStreamingSink.add(EOF_INSTR)  ;
+        }//EOM 
+        
+        /**
+         * Adds an {@link this#EOS_INSTR} to the buffer and waits until the FileStreamer thread dies 
+         * @throws Throwable
+         */
+        final void close() throws Throwable{ 
+            this.fileStreamingSink.add(EOS_INSTR) ; 
+            this.join() ; 
+            if(this.exception != null) throw this.exception ; 
+        }//EOM 
+        
+        @Override
+        public void run() {
+            
+            logger.log(this.getName() + "  File streamer starting") ; 
+
+            ObjectOutputStream ous = null;
+            try{ 
+                Object ovalue = null ; 
+                File outputFile = null ; 
+                while(!this.isTerminated) { 
+                    
+                    //the poll will wait if the buffer is empty 
+                    ovalue = this.fileStreamingSink.poll() ;
+                    
+                   //if the end of the file or the stream is received, close the file and exit the loop
+                    if(ovalue == EOS_INSTR || ovalue == EOF_INSTR) { 
+                        this.EOF(ous) ;
+                        ous = null ;
+                        if(ovalue == EOS_INSTR) this.isTerminated = true ;
+                    //if the new configuration instructions is received poll for the next 
+                    //queue item (file), close the current file resources and create a new one 
+                    }else if (ovalue == NEW_CONFIGURATION_INSTR) { 
+                       outputFile = (File) this.fileStreamingSink.poll() ; 
+                       ous = this.newOutputFile(outputFile, ous) ; 
+                    }else { 
+                        //replace null_string and null_object with null values 
+                        if(ovalue == NULL_STRING) ous.writeUTF(null) ; 
+                        else if(ovalue instanceof String) { 
+                            ous.writeUTF((String)ovalue) ; 
+                        }else{ 
+                            if(ovalue == NULL_OBJECT) ovalue = null ;
+                            ous.writeUnshared(ovalue) ; 
+                        }//EO else if not string 
+                    }//EO if actual value 
+                    
+                }//EO while not terminated 
+                
+                logger.log(this.getName() + "File streamer finished succesfully") ; 
+            }catch(Throwable t) { 
+                Utils.printStackTrace(t, this.getName() + "An Exception Had occured during streaming to file") ; 
+                this.exception = t ; 
+                this.isTerminated = true ; 
+            }finally{ 
+                Utils.close(ous) ; 
+            }//EO catch block 
+            
+        }//EOM 
+        
+        private final void EOF(final ObjectOutputStream existingOus) throws Throwable{ 
             if(existingOus != null) {
-                //existingOus.writeObject(Utils.EOF_PLACEHOLDER) ;
+                //write the EOF marker 
                 existingOus.write(ObjectOutputStream.TC_MAX) ;
                 existingOus.flush();
                 existingOus.close();
+            }//EO if existingOus != null 
+        }//EOM 
+        
+        private final ObjectOutputStream newOutputFile(final File newFile, final ObjectOutputStream existingOus) throws Throwable {
+           
+            if(existingOus != null) {
+                this.EOF(existingOus) ; 
             }//EO if existing output stream exists 
             
-            final File outputFile = new File(parentDir, tableName + "_" + partitionNumber + "_" + batchNo + ".out");
-            final FileOutputStream fos = new FileOutputStream(outputFile);
+            final FileOutputStream fos = new FileOutputStream(newFile);
             final GZIPOutputStream gzos = new GZIPOutputStream(fos) ; 
             return new UTFNullHandlerOOS(gzos);
             //return new ObjectOutputStream(fos);
         }//EOM 
-
-        protected final void rollbackEntity(final String tableName, final Throwable reason) {
-            log("Failed to export table " + tableName + ", will disacrd all export data for it; Reason: " + reason, Project.MSG_ERR);
-            final File tableDir = new File(outputDir, tableName);
-            Utils.deleteDirectory(tableDir);
+        
+    }//EO inner class FileStreamer ;
+    
+    /**
+     * unbounded {@link LinkedList} with wait on empty get policy 
+     * @param <E> element type 
+     */
+    public static final class BlockingOnEmptyConcurrentLinkedQueue<E> extends ConcurrentLinkedQueue<E> { 
+        
+        private static final long serialVersionUID = -810967439001112955L;
+        
+        AtomicInteger count = new AtomicInteger() ; 
+        final Object lock = new Object() ;
+        
+        /**
+         * Adds the item into the tail of the queue and increments the count.<br/>
+         * If the count prior to the insertion was 0 assume that a consumer is waiting and notify it. 
+         */
+        @Override
+        public boolean offer(E e) {
+            final int currCount = count.getAndIncrement() ;  
+            final boolean returnVal = super.offer(e) ; 
+            if(currCount == 0) {
+                synchronized(this.lock) { 
+                    this.lock.notifyAll() ;
+                }//EO sync
+            }//EO if empty 
+            return returnVal  ;
         }//EOM 
-    }//EO inner class Worker
+        
+        /**
+         * Removes the next element from the head of the queue and decremenet the count.<br/>
+         * If there are no elements in the queue (poll == null) wait for the notification of the next insertion operation.  
+         */
+        @Override
+        public E poll() {
+            E value = null ; 
+            
+            while( (value = super.poll()) == null) { 
+                try {
+                    synchronized(this.lock) { 
+                        this.lock.wait(1000) ;
+                    }
+                }catch(InterruptedException e) {
+                    e.printStackTrace();
+                }//EO catch block 
+            }// while no value
+
+            count.decrementAndGet() ; 
+            return value ; 
+        }//EOM 
+    }//inner class BlockingOnConcurrentLinkedQueue
     
-    
+    /**
+     * Specialized {@link ObjectOutputStream} supporting null UTF strings 
+     */
     public static final class UTFNullHandlerOOS extends ObjectOutputStream { 
         
         public UTFNullHandlerOOS(final OutputStream out) throws IOException{ super(out) ; }//EOM 
-        
+
+        /**
+         * Method to be used for any object other than string (e.g. blob byte[]) 
+         */
         @Override
-        public final void writeUnshared(final Object obj) throws IOException{ 
+        public final void writeUnshared(final Object obj) throws IOException{
+            //must prefix with the marked object for symmetry as the input handler always reads a single instruction 
+            //byte prior to the actual value 
             this.writeByte(TC_OBJECT) ; 
-            //super.writeUnshared(obj) ; 
             super.writeObject(obj) ;
         }//EOM 
         
+        /**
+         * Writes the UTF string to string replacing marking nulls with TC_NULL instruction byte. 
+         * String values are prefixed by TC_STRING instruction byte 
+         * @param str - string to read, might be null 
+         */
         @Override
         public final void writeUTF(final String str) throws IOException {
             if(str == null) { 
@@ -318,42 +590,5 @@ public class TableExporter extends TableProcessor<Worker> {
         
     }//EO inner class UTFNullHandlerOOS
      
-    //*****************************************************************************************************
-    //DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG  
-    //*****************************************************************************************************
-    
-    public static void main(String args[]) throws Throwable {
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        try
-        {
-            //String tablesClause = "EAM_CONFIG_RESPONSE,EAM_MEASUREMENT,EAM_MEASUREMENT_BL,EAM_SERVICE,EAM_SERVER,EAM_PLATFORM,EAM_AGENT";
-            File file = new File("/work/workspaces/master-complete/hq/dist/installer/src/main/resources/data/sql/migrationScripts/import-scripts.sql");
-            //File file = new File("/work/workspaces/master-complete/hq/dist/installer/src/main/resources/data/sql/migrationScripts/migration-pre-configure.sql");
-            
-            FileInputStream fis = new FileInputStream(file);
-            byte arrBytes[] = new byte[fis.available()];
-            fis.read(arrBytes);
-            String sql = new String(arrBytes);
-            System.out.println((new StringBuilder()).append("sql:\n").append(sql).toString());
-            fis.close();
-            conn = Utils.getPostgresConnection();
-            conn.setAutoCommit(false);
-            conn.commit();
-            stmt = conn.createStatement();
-            stmt.execute(sql);
-            //stmt.executeQuery("select fmigrationPostConfigure('EAM_CONFIG_RESPONSE,EAM_MEASUREMENT,EAM_MEASUREMENT_BL,EAM_SERVICE,EAM_SERVER,EAM_PLATFORM,EAM_AGENT');");
-            
-            //stmt.executeQuery("select fToggleIndices('EAM_CONFIG_RESPONSE,EAM_MEASUREMENT,EAM_MEASUREMENT_BL,EAM_SERVICE,EAM_SERVER,EAM_PLATFORM,EAM_AGENT',true);");
-            conn.commit();
-            System.out.println("CREATED FUNCTION");
-        }catch(Throwable t) {
-            Utils.printStackTrace(t);
-            t.printStackTrace();
-        }finally {
-            Utils.close(new Object[] { rs, stmt, conn });
-        }//EO catch block 
-    }//EOM 
     
 }//EO class 

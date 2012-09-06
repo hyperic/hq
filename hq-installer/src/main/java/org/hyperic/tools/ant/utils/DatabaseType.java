@@ -63,6 +63,24 @@ public enum DatabaseType {
              ps.setInt(2, iPageSize) ; 
              return ps ; 
          }//EOM
+         
+         /**
+          * configures the statement's fetch size 
+          * @param fetchSize used for the fetch size if not a big table  
+          * @param isBigTable if true sets {@link Integer#MIN_VALUE} as a special indication to stream the content so as not to overwehlm the heap 
+          * @param stmt statement to configure 
+          * @throws SQLException
+          */
+         @Override
+         public final void setFetchSize(final int fetchSize, final boolean isBigTable, final Statement stmt) throws SQLException{ 
+             stmt.setFetchSize((isBigTable ? Integer.MIN_VALUE : fetchSize)) ; 
+         }//EOM
+         
+         @Override
+        public final void optimizeForBulkExport(final Connection conn) throws Throwable {
+            super.optimizeForBulkExport(conn);
+            conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED) ;
+        }//EOM 
 
     },//EO MySQL  
     Oracle{ 
@@ -121,17 +139,6 @@ public enum DatabaseType {
             return ps ; 
         }//EOM 
         
-        /**
-         * configures the statement's fetch size 
-         * @param fetchSize used for the fetch size if not a big table  
-         * @param isBigTable if true sets {@link Integer#MIN_VALUE} as a special indication to stream the content so as not to overwehlm the heap 
-         * @param stmt statement to configure 
-         * @throws SQLException
-         */
-        @Override
-        public final void setFetchSize(final int fetchSize, final boolean isBigTable, final Statement stmt) throws SQLException{ 
-            stmt.setFetchSize((isBigTable ? Integer.MIN_VALUE : fetchSize)) ; 
-        }//EOM
         
         /**
          * Sets the commit mode to async so as to circumvent the WAL mechanism 
@@ -205,7 +212,7 @@ public enum DatabaseType {
     /**
      * configures the statement's fetch size 
      * @param fetchSize used for the fetch size 
-     * @param isBigTable unused in the default implementation see {@link DatabaseType#PostgreSQL#setFetchSize(int, boolean, Statement)} for usage 
+     * @param isBigTable unused in the default implementation see {@link DatabaseType#MySQL#setFetchSize(int, boolean, Statement)} for usage 
      * @param stmt statement to configure 
      * @throws SQLException
      */
@@ -229,6 +236,10 @@ public enum DatabaseType {
      * @param conn
      */
     public void optimizeForBulkImport(final Connection conn) { /*noop*/ }//EOM  
+    
+    public void optimizeForBulkExport(final Connection conn) throws Throwable{ 
+        conn.setReadOnly(true) ; 
+    }//EOM 
     
     /**
      * Creates a batch statement and configures it for timeout<br/> 

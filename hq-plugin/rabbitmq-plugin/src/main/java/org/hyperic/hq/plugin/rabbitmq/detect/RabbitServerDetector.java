@@ -270,11 +270,8 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
             }
         }
         conf.setValue(DetectorConstants.SERVER_NAME, nodeName);
-        try {
-			DetectionUtil.populatePorts(getSigar(), new long[] {nodePid}, conf);
-		} catch (SigarException e) {
-			logger.warn("Cannot get ports for node '" + nodePid + "'", e);
-		}
+		
+        DetectionUtil.populateListeningPorts(nodePid , conf, true);
         
         logger.debug("ProductConfig[" + conf + "]");
 

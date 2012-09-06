@@ -62,30 +62,6 @@ public class MultiRuntimeException extends RuntimeException {
       this.printStackTrace(ps, StreamHandlerInterface.printStreamStrategy) ;
   }//EOM 
 
-  /*public final void printStackTrace(final PrintStream ps) {
-    synchronized (ps) {
-      super.printStackTrace(ps);
-
-      for (Throwable nested : this.nestedExceptions) {
-        ps.println("--- Nested Exception ---");
-        printStackTrace(ps, nested);
-      }//EO while there are more nested exceptions
-    }//EO sync block 
-  }//EOM 
-
-  private final void printStackTrace(final PrintStream ps, final Throwable exception) {
-    if ((exception instanceof SQLException)){
-      SQLException sqle = (SQLException)exception;
-      Throwable t = null;
-      do {
-        t = sqle;
-        t.printStackTrace(ps);
-      }while (((sqle = sqle.getNextException()) != null) && (sqle != t));
-    } else {
-      exception.printStackTrace(ps);
-    }//EO else if not sqlexception
-  }//EOM 
-*/  
   public final void printSelfStacktrace(final PrintStream ps) { super.printStackTrace(ps) ; }//EOM
   public final void printSelfStacktrace(final PrintWriter pw) { super.printStackTrace(pw) ; }//EOM 
   
