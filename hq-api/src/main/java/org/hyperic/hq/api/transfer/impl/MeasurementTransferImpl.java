@@ -25,13 +25,16 @@
  */
 package org.hyperic.hq.api.transfer.impl;
 
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
@@ -62,11 +65,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class MeasurementTransferImpl implements MeasurementTransfer {
     private static final int MAX_DTPS = 400;
-	
+
     private MeasurementManager measurementMgr;
     private TemplateManager tmpltMgr;
-	private DataManager dataMgr; 
-	private MeasurementMapper mapper;
+    private DataManager dataMgr; 
+    private MeasurementMapper mapper;
     private ExceptionToErrorCodeMapper errorHandler ;
 
     @Autowired
@@ -79,7 +82,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         this.dataMgr = dataMgr;
         this.errorHandler = errorHandler;
     }
-    
+
     protected List<Measurement> getMeasurements(final String rscId, final List<MeasurementTemplate> tmps, final AuthzSubject authzSubject) throws PermissionException {
         // get measurements
         Map<Integer, List<Integer>> resIdsToTmpIds = new HashMap<Integer, List<Integer>>();
@@ -99,17 +102,17 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         }
         return hqMsmts;
     }
-    
+
     public MeasurementResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest hqMsmtReq, 
             final String rscId, final Date begin, final Date end) 
-            throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException, TimeframeSizeException {
+                    throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException, TimeframeSizeException {
 
         MeasurementResponse res = new MeasurementResponse();
         if (hqMsmtReq==null || rscId==null || "".equals(rscId) 
                 || hqMsmtReq==null || hqMsmtReq.getMeasurementTemplateNames()==null || hqMsmtReq.getMeasurementTemplateNames().size()==0 
                 || begin==null || end==null) {
             throw new UnsupportedOperationException("Resource ID= " +rscId
-                            + hqMsmtReq!=null?", Measurements Names= "+ hqMsmtReq.getMeasurementTemplateNames():""
+                    + hqMsmtReq!=null?", Measurements Names= "+ hqMsmtReq.getMeasurementTemplateNames():""
                             + ", Message Body= " + hqMsmtReq
                             + ", Begin= " + begin
                             + ", End= " + end);
@@ -138,44 +141,92 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             res.add(msmt);
         }
         return res;
-     }
-    
+    }
+
     public ResourceMeasurementBatchResponse getAggregatedMetricData(ApiMessageContext apiMessageContext,
-            ResourceMeasurementRequests hqMsmtReqs, Date begin, Date end)
-            throws PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException {
-        ResourceMeasurementBatchResponse res = new ResourceMeasurementBatchResponse(this.errorHandler);
-        if (hqMsmtReqs==null || hqMsmtReqs.getMeasurementRequests()==null || hqMsmtReqs.getMeasurementRequests().size()==0 || begin==null || end==null) {
-            throw new UnsupportedOperationException("the request is missing some essential details");
-        }
-        if (begin.after(end) || end.after(Calendar.getInstance().getTime())) {
-            throw new TimeframeBoundriesException("Begin= " +begin +", End=" +end);
-        }
-        
-        AuthzSubject authzSubject = apiMessageContext.getAuthzSubject();
-        // extract all input measurement templates
-        for (ResourceMeasurementRequest hqMsmtReq : hqMsmtReqs.getMeasurementRequests()) {
-            String rscId = hqMsmtReq.getRscId();
-            try {
-            if (rscId==null || "".equals(rscId)) {
-                throw new ObjectNotFoundException("no resource ID supplied",Resource.class.getName());
+            ResourceMeasurementRequests hqMsmtReqs, Date begin, Date end) throws TimeframeBoundriesException, PermissionException, SQLException, UnsupportedOperationException, ObjectNotFoundException {
+            ResourceMeasurementBatchResponse res = new ResourceMeasurementBatchResponse(this.errorHandler);
+            if (hqMsmtReqs==null || hqMsmtReqs.getMeasurementRequests()==null || hqMsmtReqs.getMeasurementRequests().size()==0 || begin==null || end==null) {
+                throw new UnsupportedOperationException("the request is missing some essential details");
             }
-            List<String> tmpNames = hqMsmtReq.getMeasurementTemplateNames();
-            List<MeasurementTemplate> tmps = this.tmpltMgr.findTemplatesByName(tmpNames);
-            if (tmps==null || tmps.size()==0) {
-                res.addFailedResource(rscId,ExceptionToErrorCodeMapper.ErrorCode.TEMPLATE_NOT_FOUND.getErrorCode(),null,new Object[] {});
-                continue;
+            if (begin.after(end) || end.after(Calendar.getInstance().getTime())) {
+                throw new TimeframeBoundriesException("Begin= " +begin +", End=" +end);
             }
-            List<Measurement> hqMsmts = getMeasurements(rscId, tmps,authzSubject);
+
+            AuthzSubject authzSubject = apiMessageContext.getAuthzSubject();
+            // extract all input measurement templates
+            Map<String,List<String>> tmpNameToRscs = new HashMap<String,List<String>>();
+            for (ResourceMeasurementRequest hqMsmtReq : hqMsmtReqs.getMeasurementRequests()) {
+                String rscId = hqMsmtReq.getRscId();
+                try {
+                    if (rscId==null || "".equals(rscId)) {
+                        throw new ObjectNotFoundException("no resource ID supplied",Resource.class.getName());
+                    }
+                    List<String> tmpNames = hqMsmtReq.getMeasurementTemplateNames();
+                    for (String tmpName : tmpNames) {
+                        if (!tmpNameToRscs.containsKey(tmpName)) {
+                            tmpNameToRscs.put(tmpName, new ArrayList<String>());
+                        }
+                        tmpNameToRscs.get(tmpName).add(rscId);
+                    }
+                }catch(Throwable t) { 
+                    this.errorHandler.log(t) ; 
+                    res.addFailedResource(t,rscId, null , null) ;
+                }
+            }                
+            // extract tmp Ids per rsc        
+            List<MeasurementTemplate> tmps = this.tmpltMgr.findTemplatesByName(new ArrayList<String>(tmpNameToRscs.keySet()));
+            Map<Integer, List<Integer>> resIdsToTmpIds = new HashMap<Integer, List<Integer>>();
+            for (MeasurementTemplate tmp : tmps) {
+                List<String> rscIds = tmpNameToRscs.get(tmp.getName());
+                if (rscIds==null) { continue;   }
+                for (String rscId : rscIds) {
+                    if (!resIdsToTmpIds.containsKey(rscId)) {
+                        resIdsToTmpIds.put(new Integer(rscId), new ArrayList<Integer>());
+                    }
+                    resIdsToTmpIds.get(new Integer(rscId)).add(tmp.getId());
+                }
+            }
+            // mark resources for which no measurements were found
+            for (ResourceMeasurementRequest hqMsmtReq : hqMsmtReqs.getMeasurementRequests()) {
+                // by now we know that all reqs are with valid rscs, o/w we wouldn't get here
+                String rscId = hqMsmtReq.getRscId();
+                // if the requested rsc is not in the map of rscs for which at least one template was found, mark it as a failed rsc
+                if (!resIdsToTmpIds.keySet().contains(rscId)) {
+                    res.addFailedResource(rscId,ExceptionToErrorCodeMapper.ErrorCode.TEMPLATE_NOT_FOUND.getErrorCode(),null,new Object[] {});
+                }
+            }
+
+            Map<Resource, List<Measurement>> rscToHqMsmts = this.measurementMgr.findMeasurements(authzSubject, resIdsToTmpIds);
+            if (rscToHqMsmts==null || rscToHqMsmts.size()==0 || rscToHqMsmts.values().isEmpty()) {
+                throw new ObjectNotFoundException(tmps.toString(), Measurement.class.getName());
+            }
+            // validate that all rscs have msmts, and map msmt names to rscs
+            Map<Integer,Resource> msmtIdToRsc = new HashMap<Integer,Resource>();
+            Set<Measurement> allMsmts = new HashSet<Measurement>();
+            for (Map.Entry<Resource,List<Measurement>> rscToHqMsmtsEntry : rscToHqMsmts.entrySet()) {
+                Resource rsc = rscToHqMsmtsEntry.getKey();
+                List<Measurement> msmts = rscToHqMsmtsEntry.getValue();
+                if (msmts==null || msmts.size()==0) {
+                    res.addFailedResource(String.valueOf(rsc.getId()),ExceptionToErrorCodeMapper.ErrorCode.TEMPLATE_NOT_FOUND.getErrorCode(),null,new Object[] {});
+                } else {
+                    for (Measurement msmt : msmts) {
+                        msmtIdToRsc.put(msmt.getId(),rsc);
+                    }
+                    allMsmts.addAll(msmts);
+                }
+            }
             // sort msmts as per their IDs
             Map<Integer,Measurement> msmtIdToMsmt = new HashMap<Integer,Measurement>();
-            for (Measurement msmt : hqMsmts) {
+            for (Measurement msmt : allMsmts) {
                 msmtIdToMsmt.put(msmt.getId(), msmt);
             }
-            Map<Integer, double[]> msmtNamesToAgg = this.dataMgr.getAggregateDataAndAvailUpByMetric(hqMsmts, begin.getTime(), end.getTime());
-            
-            ResourceMeasurementResponse msmtRes = new ResourceMeasurementResponse(rscId);
+            Map<Integer, double[]> msmtNamesToAgg = this.dataMgr.getAggregateDataAndAvailUpByMetric(new ArrayList<Measurement>(allMsmts), begin.getTime(), end.getTime());
+            Map<Integer,ResourceMeasurementResponse> rscIdToRes = new HashMap<Integer,ResourceMeasurementResponse>();
+
             for (Map.Entry<Integer, double[]> msmtNameToAggEntry : msmtNamesToAgg.entrySet()) {
                 Integer msmtId = msmtNameToAggEntry.getKey();
+                Resource rsc = msmtIdToRsc.get(msmtId);
                 double[] agg = msmtNameToAggEntry.getValue();
                 // no val for that msmt
                 if (agg==null || agg.length<=MeasurementConstants.IND_AVG) {
@@ -188,14 +239,15 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
                     continue;
                 }
                 org.hyperic.hq.api.model.measurements.Measurement msmt = this.mapper.toMeasurement(hqMsmt,avg);
-                msmtRes.add(msmt);
+
+                if (!rscIdToRes.containsKey(rsc.getId())) {
+                    rscIdToRes.put(rsc.getId(), new ResourceMeasurementResponse(String.valueOf(rsc.getId())));
+                }
+                rscIdToRes.get(rsc.getId()).add(msmt);
             }
-            res.addResponse(msmtRes);
-            }catch(Throwable t) { 
-                this.errorHandler.log(t) ; 
-                res.addFailedResource(t,rscId, null , null) ;
+            for (ResourceMeasurementResponse rscRes : rscIdToRes.values()) {
+                res.addResponse(rscRes);
             }
-        }
-        return res;
+            return res;
     }
 }
