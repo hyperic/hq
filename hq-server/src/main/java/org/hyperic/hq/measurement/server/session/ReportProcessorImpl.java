@@ -450,6 +450,7 @@ public class ReportProcessorImpl implements ReportProcessor {
     }
 
     private class PlatformAvailZeventListener implements ZeventListener<PlatformAvailZevent> {
+        private final Set<Integer> blacklistedResources = new HashSet<Integer>();
         public void processEvents(List<PlatformAvailZevent> events) {
             final DataInserter a = measurementInserterManager.getAvailDataInserter();
             final boolean debug = log.isDebugEnabled();
@@ -461,10 +462,12 @@ public class ReportProcessorImpl implements ReportProcessor {
                 }
                 final Resource r = resourceManager.getResourceById(rid);
                 if (r == null || r.isInAsyncDeleteState()) {
+                    blacklistedResources.add(rid);
                     continue;
                 }
                 final Measurement m = measurementManager.getAvailabilityMeasurement(r);
                 if (m == null) {
+                    blacklistedResources.add(rid);
                     continue;
                 }
                 final long now = TimingVoodoo.roundDownTime(now(), m.getInterval());
@@ -503,17 +506,29 @@ public class ReportProcessorImpl implements ReportProcessor {
     }
     
     private class SrnCheckerZeventListener implements ZeventListener<SrnCheckerZevent> {
+        private static final long ONE_HOUR = MeasurementConstants.HOUR;
+        private final Map<AppdefEntityID, Long> lastCheck = new HashMap<AppdefEntityID, Long>();
         public void processEvents(List<SrnCheckerZevent> events) {
             for (final SrnCheckerZevent z : events) {
                 final Collection<AppdefEntityID> list = new ArrayList<AppdefEntityID>();
                 final Collection<SRN> srns = Arrays.asList(z.getSrnList());
+                final long now = now();
                 for (final SRN srn : srns) {
-                    list.add(srn.getEntity());
+                    final AppdefEntityID aeid = srn.getEntity();
+                    final long last = getLastCheck(aeid);
+                    if ((last + ONE_HOUR) < now) {
+                        list.add(aeid);
+                        lastCheck.put(aeid, now);
+                    }
                 }
                 agentScheduleSynchronizer.unschedule(z.getAgentToken(), z.getToUnschedule());
                 agentScheduleSynchronizer.unscheduleNonEntities(z.getAgentToken(), list);
                 srnManager.rescheduleOutOfSyncSrns(srns, false);
             }
+        }
+        private long getLastCheck(AppdefEntityID aeid) {
+            final Long last = lastCheck.get(aeid);
+            return (last == null) ? 0l : last;
         }
     }
 

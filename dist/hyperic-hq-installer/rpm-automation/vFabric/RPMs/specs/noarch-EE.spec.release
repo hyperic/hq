@@ -5,7 +5,7 @@
 %define HQ_Component_Release   	1
 
 %define HQ_User			hyperic
-%define HQ_Group		hyperic
+%define HQ_Group		vfabric
 %define HQ_User_Home		/opt/hyperic
  %define __spec_install_post /usr/lib/rpm/brp-compress
     %define __os_install_post /usr/lib/rpm/brp-compress
@@ -29,8 +29,6 @@ Prefix:		%{HQ_User_Home}
 Url: 		http://www.vmware.com/products/vfabric-hyperic/
 BuildArch:	noarch
 
-Requires:	vfabric-eula >= 5.1
-
 %description
 
 Agent for the vFabric Hyperic HQ systems management system.
@@ -42,29 +40,6 @@ Agent for the vFabric Hyperic HQ systems management system.
 %setup -T -D -b 0 -n %{HQ_Component_Name}-%{HQ_Component_Version}
 
 %pre
-
-eula_file="/etc/vmware/vfabric/accept-vfabric5.1-eula.txt"
-eula_file_text="I_ACCEPT_EULA_LOCATED_AT"
-eula_url="http://www.vmware.com/download/eula/vfabric_app-platform_eula.html"
-
-if [ ! -f "$eula_file" ]
-then
-   echo
-   echo "Cancelling install."
-   echo "vFabric EULA acceptance file, $eula_file, not found."
-   echo "Please install or reinstall vfabric-eula RPM file."
-   exit 1
-fi
-
-if [ `grep -c "${eula_file_text}=${eula_url}" "$eula_file"` -eq "0" ]
-then
-   echo
-   echo "Cancelling install."
-   echo "Invalid vFabric EULA acceptance file, $eula_file."
-   echo "Please install or reinstall vfabric-eula RPM file."
-   exit 1
-fi
-
 
 # If hq-agent is already installed and running (whether installed by RPM
 # or not), then kill it, but remember that it was running.

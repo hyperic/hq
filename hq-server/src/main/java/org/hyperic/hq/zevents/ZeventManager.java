@@ -51,6 +51,8 @@ import org.hyperic.hq.common.DiagnosticsLogger;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.util.PrintfFormat;
+import org.hyperic.util.stats.StatCollector;
+import org.hyperic.util.stats.StatUnreachableException;
 import org.hyperic.util.thread.LoggingThreadGroup;
 import org.hyperic.util.thread.ThreadGroupFactory;
 import org.hyperic.util.thread.ThreadWatchdog;
@@ -170,6 +172,14 @@ public class ZeventManager implements ZeventEnqueuer {
 
         diagnosticsLogger.addDiagnosticObject(myDiag);
         concurrentStatsCollector.register(ConcurrentStatsCollector.ZEVENT_QUEUE_SIZE);
+        concurrentStatsCollector.register(new StatCollector() {
+            public long getVal() throws StatUnreachableException {
+                return getTotalRegisteredBufferSize();
+            }
+            public String getId() {
+                return ConcurrentStatsCollector.ZEVENT_REGISTERED_BUFFER_SIZE;
+            }
+        });
     }
 
     public long getQueueSize() {
@@ -636,7 +646,6 @@ public class ZeventManager implements ZeventEnqueuer {
 
             synchronized (_registeredBuffers) {
                 PrintfFormat fmt = new PrintfFormat("    %-30s size=%d\n");
-
                 res.append("\nZevent Registered Buffers:\n");
                 for (Entry<Queue<?>, TimingListenerWrapper<Zevent>> ent : _registeredBuffers.entrySet()) {
                     Queue<?> q = ent.getKey();
@@ -653,6 +662,17 @@ public class ZeventManager implements ZeventEnqueuer {
             }
 
             return res.toString();
+        }
+    }
+    
+    private long getTotalRegisteredBufferSize() {
+        synchronized (_registeredBuffers) {
+            long rtn = 0;
+            for (Entry<Queue<?>, TimingListenerWrapper<Zevent>> ent : _registeredBuffers.entrySet()) {
+                TimingListenerWrapper<Zevent> targ = ent.getValue();
+                rtn += targ.getNumEvents();
+            }
+            return rtn;
         }
     }
 

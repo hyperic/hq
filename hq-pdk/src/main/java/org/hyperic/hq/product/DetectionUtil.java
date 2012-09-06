@@ -27,23 +27,16 @@ package org.hyperic.hq.product;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.StringTokenizer;
 
-import org.hyperic.hq.plugin.system.NetConnectionData;
-import org.hyperic.hq.plugin.system.NetstatData;
-import org.hyperic.sigar.SigarException;
-import org.hyperic.sigar.SigarProxy;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.util.config.ConfigResponse;
 
-import edu.emory.mathcs.backport.java.util.Collections;
-
 public class DetectionUtil {
+    private static Log log =
+            LogFactory.getLog(DetectionUtil.class.getName());
 	private static final String OS_TYPE;
 	private static final boolean IS_WINDOWS;  
 	private static final boolean IS_UNIX;
@@ -55,112 +48,230 @@ public class DetectionUtil {
 				|| OS_TYPE.contains("sunos")
 				|| OS_TYPE.contains("mac os x");
 	}
-
-	@SuppressWarnings("unchecked")
-	public static ConfigResponse populatePorts(SigarProxy sigar, long[] pids, ConfigResponse cf) throws SigarException {
-		if (IS_WINDOWS) {
-			populatePortsOnWinPlatform(pids, cf);
-			return cf;
-		}
-		NetstatData data = new NetstatData();
-		data.setFlags("lnp");
-		data.populate(sigar);
-		List<String> listeningPortsList = new ArrayList<String>();
-		List<NetConnectionData> netConnsData = data.getConnections();
-		Map<Long,NetConnectionData> pidToNetConnData = new HashMap<Long,NetConnectionData>();
-		for (NetConnectionData netConnData : netConnsData) {
-			pidToNetConnData.put(netConnData.getProcessPid(), netConnData);
-		}
-		// handle existing prediscovered ports
-		
-		String existingListeningPortsStr = cf.getValue(Collector.LISTEN_PORTS);
-		List<String> existingListeningPorts=null;
-		if (existingListeningPortsStr!=null && existingListeningPortsStr.length()>0) {
-			existingListeningPorts = Collections.list(new StringTokenizer(existingListeningPortsStr, ","));
-		}
-		// scan for ports which belongs to this products' processes
-		for (Long pid : pids) {
-			NetConnectionData netConnData = pidToNetConnData.get(pid);
-			if (netConnData!=null) { // if this process of this product has a listening port
-				String listeningPort = netConnData.getLocalPort();
-				// skip already prediscovered ports
-				if (existingListeningPorts==null || existingListeningPorts.size()==0 || !existingListeningPorts.contains(listeningPort)) {
-					listeningPortsList.add(listeningPort);
-				}
-			}
-		}
-		// build a sorted string of list of ports and insert it to the config response
-		if (listeningPortsList.size()>0) {
-			if (existingListeningPorts!=null && existingListeningPorts.size()>0) {
-				listeningPortsList.addAll(existingListeningPorts);
-			}
-			Collections.sort(listeningPortsList);
-			StringBuilder portsStr = new StringBuilder();
-			for (String port : listeningPortsList) {
-				portsStr.append(',').append(port);
-			}
-			cf.setValue(Collector.LISTEN_PORTS, portsStr.substring(1));
-		}
-		return cf;
-	}
-
-	private static void populatePortsOnWinPlatform(long[] pids, ConfigResponse cf) {
-		Set<String> listeningPortsList = new HashSet<String>();
-		//get the ports for all the pids
-		for (long id : pids) {
-			Set<String> port = getLiseningPortByPidOnWindows(String.valueOf(id));
-			if (null != port) {
-				listeningPortsList.addAll(port);
-			}
-		}
-		if (listeningPortsList.size()>0) {
-			StringBuilder portsStr = new StringBuilder();
-			for (String port : listeningPortsList) {
-				portsStr.append(',').append(port);
-			}
-			cf.setValue(Collector.LISTEN_PORTS, portsStr.substring(1));
-		}
-	}
 	
 	/**
-	 * @param pid
-	 * @return A set of the ports the given pid listens on
+	 * This method finds all the ports the provided pid listens on and adds them as a list
+	 * to the provided ConfigResponse instance
+	 * @param pid - the process id for which we want to get the listening ports
+	 * @param cf - usually the product config
+	 * @param recursive - if true the population of the listening port will use all the child processes of the pid
 	 */
-	public static Set<String> getLiseningPortByPidOnWindows(String pid) {
-		if (!IS_WINDOWS) {
-			return null;
+	public static void populateListeningPorts(long pid, ConfigResponse cf, boolean recursive){
+		Set<Long> pids = new HashSet<Long>();
+		pids.add(pid);
+		if (recursive) {
+			pids.addAll(getAllChildPid(pid));
 		}
- 		String cmd = "netstat -ano";
+		populateListeningPorts(pids, cf);
+	}
+
+	/**
+	 * This method finds all the ports the provided pids are listening on and adds them as a list
+	 * to the provided ConfigResponse instance
+	 * @param pids - the ids of the processes we want to get the listening ports for
+	 * @param cf - usually the product config
+	 */
+	public static void populateListeningPorts(Set<Long> pids, ConfigResponse cf){
+		if (pids.isEmpty()) {
+			return;
+		}
+		if (IS_WINDOWS) {
+			populatePortsOnWindows(pids, cf);
+		}
+		else if (IS_UNIX) {
+			populatePortsOnUnix(pids, cf);
+		}
+	}
+
+	/**
+	 * This method finds the listening ports for the provided pids on
+	 * Unix platform by using lsof 
+	 * @param pids
+	 * @param cf
+	 */
+	private static void populatePortsOnUnix(Set<Long> pids, ConfigResponse cf) {
+		//build a string of all the provided pids
+		StringBuilder pidsStr = new StringBuilder();
+		for (Long pid : pids) {
+			pidsStr.append(',').append(pid);
+		}
+		
+		//build the lsof command with the provided pids
+		String cmd = "lsof -p " + pidsStr.substring(1) + " -P";
 		Set<String> ports = new HashSet<String>();
 		String line;
 		try {
-		    // Run netstat
+		    // Run lsof
 		    Process process = Runtime.getRuntime().exec(cmd);
 		    BufferedReader input = new BufferedReader(new InputStreamReader(process
 					.getInputStream()));
 
-			//Find the port by the pid
+			//Go over the results and find the listening ports
 			while ((line = input.readLine()) != null) {
-				if (!(line.trim().startsWith("TCP") || line.startsWith("UDP")) 
-						|| !line.contains("LISTENING") || !line.trim().endsWith(pid)) {
+				if (!line.trim().contains("(LISTEN)")) {
 					continue;
 				}
-				line = line.replaceAll("[::", "").trim();
-				line = line.substring(line.indexOf(":") + 1);
-				line = line.substring(0, line.indexOf(" "));
-				line = line.trim();
-				try {
-					Integer.valueOf(line);
-					ports.add(line);
+				try{
+					//parse the line so we will get the port number
+					line = line.substring(line.lastIndexOf(":") + 1).trim();
+					line = line.substring(0, line.indexOf(" ")).trim();
+					//check that we got a number and if true add it to the ports set
+					if (isNumber(line)) {
+						ports.add(line);
+					}
 				}
 				catch (Exception e) {
-				}			
+					continue;
+				}
 			}
 			input.close();
 		} catch (Exception e) {
-		  
+		  log.warn("Error populating ports for '" + pidsStr + "' ", e);
 		}
-		return ports;
+		updatePortsInConfigResponse(cf, ports);
+	}
+
+	private static void populatePortsOnWindows(Set<Long> pids, ConfigResponse cf) {
+		String cmd = "netstat -ano";
+		//build a string of all the provided pids
+		StringBuilder pidsStr = new StringBuilder();
+		for (Long pid : pids) {
+			pidsStr.append(',').append(pid);
+		}
+		Set<String> ports = new HashSet<String>();	
+		String line;
+		try {
+			// Run netstat
+			Process process = Runtime.getRuntime().exec(cmd);
+			BufferedReader input = new BufferedReader(new InputStreamReader(process
+					.getInputStream()));
+	
+			while ((line = input.readLine()) != null) {
+				if (!(line.trim().startsWith("TCP") || line.startsWith("UDP")) 
+						|| !line.contains("LISTENING")) {
+					continue;
+				}
+				try{
+					//check that the pid that listens on this port is one of the provided pids
+					long pid = Long.valueOf(line.trim().substring(line.trim().lastIndexOf(" ")).trim());
+					if (!pids.contains(pid)) {
+						continue;
+					}
+					//get the port number
+					if (line.contains("[::")) {
+						line = line.replaceAll("[::", "").trim();
+					}
+					line = line.substring(line.indexOf(":") + 1);
+					line = line.substring(0, line.indexOf(" "));
+					line = line.trim();
+					if (isNumber(line)) {
+						ports.add(line);
+					}
+				}
+				catch (Exception e) {
+					continue;
+				}
+			}
+			input.close();
+		} catch (Exception e) {
+			log.warn("Error populating ports for '" + pidsStr + "' ", e);
+		}
+
+		updatePortsInConfigResponse(cf, ports);
+	}
+
+	/**
+	 * This method updates the ConfigResponse with the listening ports (if there are any)
+	 * @param cf
+	 * @param ports
+	 */
+	private static void updatePortsInConfigResponse(ConfigResponse cf, Set<String> ports) {
+		if (!ports.isEmpty()) {
+			StringBuilder portsStr = new StringBuilder();
+			for (String port : ports) {
+				portsStr.append(',').append(port);
+			}
+			cf.setValue(Collector.LISTEN_PORTS, portsStr.substring(1));
+		}
 	}
 	
+	
+	
+	/**
+	 * This method finds all the childs of the provided process
+	 * @param parentPid
+	 */
+	public static Set<Long> getAllChildPid(long parentPid) {
+		Set<Long> childPids = new HashSet<Long>();
+
+		if (IS_UNIX) {
+			String cmd = "ps -o pid --no-headers --ppid " + String.valueOf(parentPid);
+			String line;
+			try {
+				Process process = Runtime.getRuntime().exec(cmd);
+				BufferedReader input = new BufferedReader(new InputStreamReader(process
+						.getInputStream()));
+				while ((line = input.readLine()) != null) {
+					if (!line.isEmpty()) {
+						Long childPid = Long.valueOf(line.trim());
+						childPids.addAll(getAllChildPid(childPid));
+						childPids.add(childPid);
+					}
+				}
+				input.close();
+			} catch (Exception e) {
+
+			}
+		}
+		else if (IS_WINDOWS) {
+			final String cmd = "wmic process get processid,parentprocessid";
+			String line;
+			try {
+			    Process process = Runtime.getRuntime().exec(cmd);
+			    BufferedReader input = new BufferedReader(new InputStreamReader(process
+						.getInputStream()));
+				long lPpid = -1;
+				String sPpid = "";
+				String sCpid = "";
+				long lCpid = -1;
+				while ((line = input.readLine()) != null) {
+					try {
+						line = line.trim();
+						sPpid = line.substring(0, line.indexOf(" "));
+						lPpid = Long.valueOf(sPpid);
+						if (parentPid == lPpid) {
+							sCpid = line.substring(line.indexOf(" ")).trim();
+							lCpid = Long.valueOf(sCpid);
+							childPids.addAll(getAllChildPid(lCpid));
+							childPids.add(lCpid);
+						}
+						else {
+							continue;
+						}
+					}
+					catch (Exception e) {
+						continue;
+					}					
+				}
+	
+				input.close();
+			} catch (Exception e) {
+			}
+		}
+		return childPids;
+	}
+	
+	/**
+	 * Returns true if the provided string is a number (not a float number)
+	 */
+	private static boolean isNumber(String value) {
+		try {
+			Long.valueOf(value);
+			return true;
+		}
+		catch (Exception e) {
+			return false;
+		}
+	}
+
 }

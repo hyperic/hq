@@ -307,7 +307,8 @@ public class LatherServlet extends HttpServlet {
                 issueSuccessResponse(this.resp, this.xcoder, res);
             
             } catch(Exception e) {
-                if (e instanceof DataInserterException) {
+                Throwable cause = e.getCause();
+                if (e instanceof DataInserterException || (cause != null && cause instanceof DataInserterException)) {
                     // no need to log a full stack trace for this issue, the agent will resend the metric payload at
                     // some point.
                     log.warn(e);

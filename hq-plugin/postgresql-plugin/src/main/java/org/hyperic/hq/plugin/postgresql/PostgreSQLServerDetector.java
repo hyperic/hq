@@ -98,22 +98,19 @@ public class PostgreSQLServerDetector extends ServerDetector implements AutoServ
                 }
 
                 if (correctVersion) {
-                    ServerResource server = createServerResource(exe);
-                    server.setIdentifier(server.getIdentifier() + "$" + pgData);
-                    ConfigResponse cprop = new ConfigResponse();
-                    cprop.setValue("version", version);
-                    setCustomProperties(server, cprop);
-                    try {
-                        setProductConfig(server, DetectionUtil.populatePorts(getSigar(),new long[] {pids[i]},prepareConfig(pgData, args)));
-                    } catch (SigarException e) {
-                        log.error(e);
-                        throw new PluginException(e);
-                    }
-                    String basename = getPlatformName() + " " + getTypeInfo().getName();
-                    server.setName(prepareName(basename + " " + (isHQ ? PostgreSQL.HQ_SERVER_NAME : PostgreSQL.SERVER_NAME), server.getProductConfig(), null));
-                    servers.add(server);
+                	ServerResource server = createServerResource(exe);
+                	server.setIdentifier(server.getIdentifier() + "$" + pgData);
+                	ConfigResponse cprop = new ConfigResponse();
+                	cprop.setValue("version", version);
+                	setCustomProperties(server, cprop);
+                	ConfigResponse productConfig = prepareConfig(pgData, args);
+                	DetectionUtil.populateListeningPorts(pids[i] , productConfig , true);
+                	setProductConfig(server, productConfig);                   
+                	String basename = getPlatformName() + " " + getTypeInfo().getName();
+                	server.setName(prepareName(basename + " " + (isHQ ? PostgreSQL.HQ_SERVER_NAME : PostgreSQL.SERVER_NAME), server.getProductConfig(), null));
+                	servers.add(server);
                 } else {
-                    log.debug("[getServerProcessList] pid='" + pids[i] + "' Is not a '" + getTypeInfo().getName() + "'");
+                	log.debug("[getServerProcessList] pid='" + pids[i] + "' Is not a '" + getTypeInfo().getName() + "'");
                 }
             }
         }

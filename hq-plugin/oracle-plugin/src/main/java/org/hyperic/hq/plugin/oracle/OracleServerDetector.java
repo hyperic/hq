@@ -38,11 +38,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.hyperic.hq.product.AutoServerDetector;
+import org.hyperic.hq.product.DetectionUtil;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.FileServerDetector;
 import org.hyperic.hq.product.ProductPlugin;
@@ -50,6 +54,7 @@ import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
 
+import org.hyperic.sigar.SigarException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.jdbc.DBUtil;
 
@@ -62,8 +67,10 @@ public class OracleServerDetector
                AutoServerDetector {
 
     private transient Log log =  LogFactory.getLog("OracleServerDetector");
-
+        
     private static final String PTQL_QUERY = "State.Name.eq=oracle";
+    
+    private static final String TNS_PTQL_QUERY = "State.Name.eq=tnslsnr";
 
     private static final String PROP_PROC_PTQL = "process.ptql";
     
@@ -101,17 +108,17 @@ public class OracleServerDetector
     // Server custom props
     static final String VERSION_QUERY = 
         "SELECT * FROM V$VERSION";
-
+    
     /**
      * Utility function to query the process table for Oracle
      */
     private List getServerProcessList() {
         ArrayList servers = new ArrayList();
-
+ 
         long[] pids = getPids(PTQL_QUERY);
-
+              
         for (int i=0; i<pids.length; i++) {
-            String exe = getProcExe(pids[i]);
+        	String exe = getProcExe(pids[i]);
 
             if (exe == null) {
                 continue;
@@ -126,7 +133,7 @@ public class OracleServerDetector
             if (!servers.contains(binary.getAbsolutePath()))
                 servers.add(binary.getAbsolutePath());
         }
-
+        
         return servers;
     }
 
@@ -224,6 +231,7 @@ public class OracleServerDetector
             ConfigResponse cprop = new ConfigResponse();
             cprop.setValue("version", version);
             oracleServer.setCustomProperties(cprop);
+			setListeningPorts(productConfig);
             setProductConfig(oracleServer, productConfig);
             if (configureProperties(productConfig)) {
                 oracleServer.setMeasurementConfig();
@@ -237,6 +245,17 @@ public class OracleServerDetector
         System.setProperty("oracle.net.tns_admin", tnsDir);
 
         return oracleServer;
+    }
+
+    private void setListeningPorts(ConfigResponse productConfig) {		
+    	Set<Long> allPids = new HashSet<Long>();
+    	for (long pid : getPids(PTQL_QUERY)) {
+    		allPids.add(pid);
+    	}
+    	for (long pid : getPids(TNS_PTQL_QUERY)) {
+    		allPids.add(pid);
+    	}
+    	DetectionUtil.populateListeningPorts(allPids, productConfig);
     }
 
     // Auto-scan.. Does process scan first, falls back to oratab
@@ -285,6 +304,7 @@ public class OracleServerDetector
                         // This will automatically add the ORACLE_SID from the oratab file to the jdbcUrl.
                         ConfigResponse productConfig = oracleServer.getProductConfig();
                         productConfig.setValue("jdbcUrl", "jdbc:oracle:thin:@localhost:1521:" + oraSid);
+                        setListeningPorts(productConfig);
                         oracleServer.setProductConfig(productConfig);
                         servers.add(oracleServer);
                     }

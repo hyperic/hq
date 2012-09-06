@@ -1,12 +1,12 @@
 %define HQ_Component_Name       hyperic-hq-agent
 %define HQ_Component_Version    @hq.version@
-%define HQ_Component_Build	@hq.os.build@-noJRE
+%define HQ_Component_Build	noJRE
 %define HQ_Component_Release    1
 %define HQ_Component_Build_Type @hq.build.type@
 
 %define HQ_User			hyperic
-%define HQ_Group		hyperic
-%define HQ_User_Home		/opt/hyperic
+%define HQ_Group		vfabric
+%define HQ_User_Home		/opt/vmware/hyperic
 
 AutoReqProv:    no
 
@@ -18,7 +18,7 @@ Name:           %{HQ_Component_Name}
 Version:        %{HQ_Component_Version}
 Release:        %{HQ_Component_Release}
 Summary:        %{HQ_Component_Name}
-Source0:        %{HQ_Component_Name}-%{HQ_Component_Version}.%{HQ_Component_Build}.tar.gz
+Source0:        %{HQ_Component_Name}-%{HQ_Component_Version}-%{HQ_Component_Build}.tar.gz
 Vendor:		Hyperic, Inc.
 License:        GPLv2
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root
@@ -36,7 +36,7 @@ Agent for the Hyperic HQ systems management system.
 
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
 
-%setup -T -D -b 0 -n %{HQ_Component_Name}-%{HQ_Component_Version}.%{HQ_Component_Build_Type}
+%setup -T -D -b 0 -n %{HQ_Component_Name}-%{HQ_Component_Version}
 
 %pre
 
@@ -89,7 +89,7 @@ chkconfig --del %{HQ_Component_Name}
 %{__install} -d -m 755 $RPM_BUILD_ROOT/%{prefix}/hq-plugins
 %{__install} -m 755 rcfiles/hyperic-hq-agent.init.rh $RPM_BUILD_ROOT/etc/init.d/hyperic-hq-agent
 
-%{__rm} -rf background.bat hq-agent.exe rcfiles/ rpm.spec bundles/agent-%{HQ_Component_Version}.%{HQ_Component_Build_Type}/pdk/lib/sigar-x86-winnt.lib wrapper/sbin/wrapper-linux-ppc-64 wrapper/sbin/wrapper-hpux-parisc-64 wrapper/sbin/wrapper-solaris-sparc-32 wrapper/sbin/wrapper-solaris-sparc-64
+%{__rm} -rf background.bat hq-agent.exe rcfiles/ rpm.spec bundles/agent-%{HQ_Component_Version}/pdk/lib/sigar-x86-winnt.lib wrapper/sbin/wrapper-linux-ppc-64 wrapper/sbin/wrapper-hpux-parisc-64 wrapper/sbin/wrapper-solaris-sparc-32 wrapper/sbin/wrapper-solaris-sparc-64
 %{__mv} -f * $RPM_BUILD_ROOT/%{prefix}/%{HQ_Component_Name}
 
 #echo "Place custom plug-ins in this directory." > $RPM_BUILD_ROOT/%{prefix}/hq-plugins/README
@@ -149,43 +149,3 @@ exit 0
 %{prefix}/%{HQ_Component_Name}
 %config %{prefix}/%{HQ_Component_Name}/conf/*
 %config %{prefix}/hq-plugins
-
-%changelog
-* Wed Mar 17 2010 Hyperic Support <support@hyperic.com> 4.3.0
-* Fri Mar 12 2010 Hyperic Support <support@hyperic.com> 4.3.0
-* Fri Mar 12 2010 Hyperic Support <support@hyperic.com> 4.3.0
-* Thu Mar 11 2010 Hyperic Support <support@hyperic.com> 4.3.0
-* Thu Mar 11 2010 Hyperic Support <support@hyperic.com> 4.3.0
-* Tue Mar  9 2010 Hyperic Support <support@hyperic.com> 4.3.0
-* Tue Mar  9 2010 Hyperic Support <support@hyperic.com> 4.3.0
-* Tue Mar  9 2010 Hyperic Support <support@hyperic.com> 4.3.0
-* Tue Mar  9 2010 Hyperic Support <support@hyperic.com> 4.3.0
-* Fri Mar  5 2010 Hyperic Support <support@hyperic.com> 4.3.0
-* Fri Mar  5 2010 Hyperic Support <support@hyperic.com> 4.3.0
-* Fri Mar  5 2010 Hyperic Support <support@hyperic.com> 4.3.0
-* Fri Mar  5 2010 Hyperic Support <support@hyperic.com> 4.3.0
-* Fri Mar  5 2010 Hyperic Support <support@hyperic.com> 4.3.0
-* Sat Jan 23 2010 Hyperic Support <support@hyperic.com> 4.2.0.4
-* Fri Jan 15 2010 Hyperic Support <support@hyperic.com> 4.2.0.3
-* Tue Dec  8 2009 Hyperic Support <support@hyperic.com> 4.2.0.2
-* Thu Nov 19 2009 Hyperic Support <support@hyperic.com> 4.2.0.1
-* Thu Nov  5 2009 Hyperic Support <support@hyperic.com> 4.2.0
-* Thu Jun 25 2009 Hyperic Support <support@hyperic.com> 4.1.2
-* Thu Jun 11 2009 Hyperic Support <support@hyperic.com> 4.1.3
-* Wed Jun 10 2009 Hyperic Support <support@hyperic.com> 4.1.3
-* Tue Jun  9 2009 Hyperic Support <support@hyperic.com> 4.1.3
-* Thu May  7 2009 Hyperic Support <support@hyperic.com> 4.1.2
-* Mon Apr  6 2009 Hyperic Support <support@hyperic.com> 4.1.1
-* Fri Mar  6 2009 Hyperic Support <support@hyperic.com> 4.1.0
-* Thu Feb 26 2009 Hyperic Support <support@hyperic.com> 4.0.3
-* Thu Jan 29 2009 Hyperic Support <support@hyperic.com> 4.0.3
-* Fri Nov  7 2008 Hyperic Support <support@hyperic.com> 4.0.1
-* Tue Oct 28 2008 Hyperic Support <support@hyperic.com> 4.0.0
-* Sat Aug 30 2008 Hyperic Support <support@hyperic.com> 3.2.5
-* Mon Jul  7 2008 Hyperic Support <support@hyperic.com> 3.2.4
-* Mon Jun 30 2008 Hyperic Support <support@hyperic.com> 3.2.4
-* Thu Apr 17 2008 Hyperic Support <support@hyperic.com> 3.2.3-noJRE-1
-* Thu Feb 28 2008 Hyperic Support <support@hyperic.com> 3.2.1-noJRE-1
-* Thu Feb 21 2008 Hyperic Support <support@hyperic.com> 3.2.0-noJRE-2
-* Wed Jan 29 2008 Hyperic Support <support@hyperic.com> 3.2.0-noJRE-1
-- Initial release.

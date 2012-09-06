@@ -11,9 +11,7 @@
        Milestone builds are simply neither of those two cases.  -->
 
   <target name="determine-build-type">
-    <ac:if>
-      <equals arg1="${hq.build.type}" arg2="" />
-      <ac:then>
+   
         <echo message="Doing a release build...." />
 
         <property name="build.type.release" value="true" />
@@ -37,55 +35,6 @@
 <!--        
 <property name="hq.ee.base.installer.url" value="http://10.0.0.104/raid/release/shipped/hq/stagingRepo/release/com/hyperic/hq/dist/${hq.ee.base.name}-installer/${hq.version}/" />
         -->
-
-      </ac:then>
-      <ac:else>
-        <ac:if>
-          <contains string="${hq.build.type}" substring="SNAPSHOT" />
-          <ac:then>
-            <echo message="Doing a snapshot build...." />
-
-            <property name="hq.os.agent.base.name.suffix" value="${hq.version}.${hq.os.build.agent}" />
-            <property name="hq.os.installer.base.name.suffix" value="${hq.version}.${hq.os.build.installer}" />
-            <property name="hq.ee.agent.base.name.suffix" value="${hq.version}.${hq.ee.build.agent}" />
-            <property name="hq.ee.installer.base.name.suffix" value="${hq.version}.${hq.ee.build.installer}" />
-            <property name="hq.build.subfolder.suffix" value="${hq.version}.${hq.build.type}" />
-
-            <property name="hq.os.base.agent.url" value="http://maven.hyperic.org/snapshot/org/hyperic/hq/dist/hyperic-hq-agent/${hq.version}.${hq.build.type}/" />
-            <property name="hq.ee.base.agent.url" value="http://private.maven.hyperic.com/snapshot/com/hyperic/hq/dist/hyperic-hqee-agent/${hq.version}.${hq.build.type}/" />
-
-            <property name="hq.os.base.installer.url" value="http://maven.hyperic.org/snapshot/org/hyperic/hq/dist/hyperic-hq-installer/${hq.version}.${hq.build.type}/" />
-            <property name="hq.ee.base.installer.url" value="http://private.maven.hyperic.com/snapshot/com/hyperic/hq/dist/hyperic-hqee-installer/${hq.version}.${hq.build.type}/" />
-
-          </ac:then>
-          <ac:else>
-            <echo message="Doing a milestone build...." />
-
-            <property name="hq.os.agent.base.name.suffix" value="${hq.version}.${hq.os.build.agent}" />
-            <property name="hq.os.installer.base.name.suffix" value="${hq.version}.${hq.os.build.installer}" />
-            <property name="hq.ee.agent.base.name.suffix" value="${hq.version}.${hq.ee.build.agent}" />
-            <property name="hq.ee.installer.base.name.suffix" value="${hq.version}.${hq.ee.build.installer}" />
-            <property name="hq.build.subfolder.suffix" value="${hq.version}.${hq.build.type}" />
-
-            <!-- 2011.05.18 BHester: Added milestone pull from maven, builds are no longer on 10.0.0.104 -->
-            <property name="hq.os.base.agent.url" value="http://maven.hyperic.org/milestone/org/hyperic/hq/dist/hyperic-hq-agent/${hq.version}.${hq.build.type}/" />
-            <property name="hq.ee.base.agent.url" value="http://private.maven.hyperic.com/milestone/com/hyperic/hq/dist/hyperic-hqee-agent/${hq.version}.${hq.build.type}/" />
-
-            <property name="hq.os.base.installer.url" value="http://maven.hyperic.org/milestone/org/hyperic/hq/dist/hyperic-hq-installer/${hq.version}.${hq.build.type}/" />
-            <property name="hq.ee.base.installer.url" value="http://private.maven.hyperic.com/milestone/com/hyperic/hq/dist/hyperic-hqee-installer/${hq.version}.${hq.build.type}/" />
-
-            <!--
-            <property name="hq.os.base.agent.url" value="http://10.0.0.104/raid/release/shipped/hq/stagingRepo/org/hyperic/hq/dist/${hq.os.base.name}-agent/${hq.version}.${hq.build.type}/" />
-            <property name="hq.ee.base.agent.url" value="http://10.0.0.104/raid/release/shipped/hq/stagingRepo/com/hyperic/hq/dist/${hq.ee.base.name}-agent/${hq.version}.${hq.build.type}/" />
-
-            <property name="hq.os.base.installer.url" value="http://10.0.0.104/raid/release/shipped/hq/stagingRepo/org/hyperic/hq/dist/${hq.os.base.name}-installer/${hq.version}.${hq.build.type}/" />
-            <property name="hq.ee.base.installer.url" value="http://10.0.0.104/raid/release/shipped/hq/stagingRepo/com/hyperic/hq/dist/${hq.ee.base.name}-installer/${hq.version}.${hq.build.type}/" />
-            -->
-
-          </ac:else>
-        </ac:if>
-      </ac:else>
-    </ac:if>
     <property file="${basedir}/build3.properties"/>
   </target>
 

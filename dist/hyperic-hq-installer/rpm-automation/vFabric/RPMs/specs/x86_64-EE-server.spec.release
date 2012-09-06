@@ -5,20 +5,19 @@
 %define HQ_Component_Release   	1 
 
 %define HQ_User			hyperic
-%define HQ_Group		hyperic
+%define HQ_Group		vfabric
 %define HQ_User_Home		/opt/hyperic
 
 %define HQ_SERVER_PROPERTIES_FILE	vfabric_hyperic_server.properties
 %define HQ_SERVER_PROPERTIES_DIR	/etc/vmware/vfabric/hyperic
- %define __spec_install_post /usr/lib/rpm/brp-compress
-    %define __os_install_post /usr/lib/rpm/brp-compress
+%define __spec_install_post /usr/lib/rpm/brp-compress
+%define __os_install_post /usr/lib/rpm/brp-compress
 
 
 AutoReqProv:    no
 
 # Requires Sun's Java, which must currently be downloaded directly from Sun
 # at http://java.sun.com.
-Requires:	vfabric-eula >= 5.1, expect
 
 Name:           vfabric-hyperic-server
 Version:        %{HQ_Component_Version}.%{HQ_Component_Edition}
@@ -46,28 +45,6 @@ Server for the vFabric Hyperic HQ systems management system.
 %setup -T -b 0 -n %{HQ_Component_Name}-%{HQ_Component_Version}
 
 %pre
-
-eula_file="/etc/vmware/vfabric/accept-vfabric5.1-eula.txt"
-eula_file_text="I_ACCEPT_EULA_LOCATED_AT"
-eula_url="http://www.vmware.com/download/eula/vfabric_app-platform_eula.html"
-
-if [ ! -f "$eula_file" ]
-then
-   echo
-   echo "Cancelling install."
-   echo "vFabric EULA acceptance file, $eula_file, not found."
-   echo "Please install or reinstall vfabric-eula RPM file."
-   exit 1
-fi
-
-if [ `grep -c "${eula_file_text}=${eula_url}" "$eula_file"` -eq "0" ]
-then
-   echo
-   echo "Cancelling install."
-   echo "Invalid vFabric EULA acceptance file, $eula_file."
-   echo "Please install or reinstall vfabric-eula RPM file."
-   exit 1
-fi
 
 # If hq-server is already installed and running (whether installed by RPM
 # or not), then kill it, but remember that it was running.
@@ -134,6 +111,11 @@ chkconfig --del hyperic-hq-server
 # Setup the HQ Server using the Hyperic installer process
 #
 echo "Installing the Hyperic server, this could take a few minutes"
+
+if [[ ! -f %{HQ_SERVER_PROPERTIES_DIR} ]]; then
+       mkdir -p %{HQ_SERVER_PROPERTIES_DIR} > /dev/null 2>&1
+fi
+
 if [ -d /opt/hyperic/server-current ] && cd /opt/hyperic/server-current; then
    cd %{prefix}/%{HQ_Component_Name}
    printf "export HQ_SERVER_INSTALL_PATH=%{prefix}\n" >> /etc/bashrc
