@@ -25,7 +25,10 @@
  */
 package org.hyperic.tools.ant;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -59,34 +62,51 @@ public class PropertiesMergerTask extends Task {
         this.filter = filter ; 
     }//EOM 
     
+    @SuppressWarnings("unchecked")
     @Override
     public final void execute() throws BuildException {
         try{ 
             final PropertiesMerger merger = new PropertiesMerger(this.outputFile, this.filter) ;
             merger.setBaseFile(this.baseFile) ; 
-            merger.setOverrideFile(this.overrideFile) ; 
+            merger.setOverrideFile(this.overrideFile) ;
+            if(this.filter.prunes != null) merger.setPrunePropertiesList(this.filter.prunes) ; 
+            if(this.filter.environmentValues != null) merger.setOverridePropertyValues(this.filter.environmentValues) ; 
             merger.merge() ; 
         }catch(Throwable t) { 
             throw new BuildException(t) ; 
         }//EO catch block 
     }//EOM 
     
-    
     public static final class Filter extends DataType implements PropertiesMergerFilter{ 
         private Set<String> includes ;
         private Set<String> excludes;
+        private Set<String> prunes ; 
+        private Map<String,String> environmentValues ; 
         private boolean shouldIncludeNewProperties = true ; 
-        
         
         public void addConfiguredInclude(final IncludesFilter includeFilter) { 
             if(this.includes  == null) this.includes = new HashSet<String>() ;
-            this.includes.add(includeFilter.name) ;
+            
+            final String propertyName = includeFilter.name ; 
+            if(!includeFilter.environment) this.includes.add(propertyName) ; 
+            else { 
+                final String envValue = this.getProject().getProperty(propertyName) ; 
+                if(envValue != null) { 
+                    if(this.environmentValues == null) this.environmentValues = new HashMap<String,String>() ; 
+                    this.environmentValues.put(propertyName, envValue) ;
+                }//EO if the property value was not null 
+            }//EO else if environment property 
         }//EOM 
         
         public void addConfiguredExclude(final ExcludesFilter excludeFilter) {
             if(this.excludes == null) this.excludes = new HashSet<String>() ;
             this.excludes.add(excludeFilter.name) ; 
         }//EOM 
+        
+        public void addConfiguredPrune(final PruneFilter pruneFilter) {
+            if(this.prunes == null) this.prunes = new HashSet<String>() ;
+            this.prunes.add(pruneFilter.name) ; 
+        }//EOM
         
         public void setIncludeNew(final boolean shouldIncludeNewProperties) { 
             this.shouldIncludeNewProperties = shouldIncludeNewProperties ; 
@@ -113,12 +133,20 @@ public class PropertiesMergerTask extends Task {
     
     public static class IncludesFilter { 
         protected String name ; 
+        protected boolean environment ; 
+        
         public final void setName(final String name) { 
             this.name = name ; 
+        }//EOM 
+        
+        public final void setEnvironment(final boolean environment) { 
+            this.environment = environment; 
         }//EOM 
     }//EO inner class IncludesFilter
     
     public static final class ExcludesFilter extends IncludesFilter {}//EO inner class IncludesFilter
+    
+    public static final class PruneFilter extends IncludesFilter {}//EO inner class PruneFilter 
 
     public static void main(String[] args) throws Throwable {
         
