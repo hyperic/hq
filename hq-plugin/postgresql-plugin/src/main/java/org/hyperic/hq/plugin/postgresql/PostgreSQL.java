@@ -47,12 +47,12 @@ public class PostgreSQL {
     protected static final String PROP_TIMEOUT = "postgresql.timeout";
     // localhost:5432
     protected static final String SERVER_NAME = System.getProperty("postgresql.server.name.format", "${" + PROP_HOST + "}:${" + PROP_PORT + "}");
-    // localhost:5432 database
+    // DataBase localhost:5432 database
     protected static final String DB_NAME = System.getProperty("postgresql.database.name.format", "DataBase ${" + PROP_DB + "}");
-    // localhost:5432 database.schema.table
+    // Table localhost:5432 database.schema.table
     protected static final String TABLE_NAME = System.getProperty("postgresql.table.name.format", "Table ${" + PROP_DB + "}.${" + PROP_SCHEMA + "}.${" + PROP_TABLE + "}");
-    // localhost:5432 database.schema.index
-    protected static final String INDEX_NAME = System.getProperty("postgresql.schema.name.format", "Index ${" + PROP_DB + "}.${" + PROP_SCHEMA + "}.${" + PROP_INDEX + "}");
+    // Index localhost:5432 database.schema.index
+    protected static final String INDEX_NAME = System.getProperty("postgresql.index.format", "Index ${" + PROP_DB + "}.${" + PROP_SCHEMA + "}.${" + PROP_INDEX + "}");
     // HQ special names
     protected static final String HQ_SERVER_NAME = "";
     protected static final String HQ_DB_NAME = "DataBase ${" + PROP_DB + "}";
