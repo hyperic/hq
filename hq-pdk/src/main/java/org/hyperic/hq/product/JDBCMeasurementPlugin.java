@@ -25,13 +25,12 @@
 
 package org.hyperic.hq.product;
 
-import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
+import java.security.MessageDigest;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -43,15 +42,12 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.SchemaBuilder;
-
 import org.hyperic.util.jdbc.DBUtil;
 
 /**
@@ -91,14 +87,14 @@ public abstract class JDBCMeasurementPlugin extends MeasurementPlugin {
         poolsShrinkTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                log.info("[poolsShrink] run");
+                log.debug("[poolsShrink] run");
                 Set<Entry<String, Queue>> pools = connectionPools.entrySet();
                 Iterator<Entry<String, Queue>> it = pools.iterator();
                 while (it.hasNext()) {
                     Entry<String, Queue> entry = it.next();
                     Queue<Connection> pool = entry.getValue();
                     if (pool.size() > 1) {
-                        log.info("[poolsShrink] '"+entry.getKey()+"' pool.size()=" + pool.size());
+                        log.debug("[poolsShrink] '"+entry.getKey()+"' pool.size()=" + pool.size());
                         while (pool.size() > 1) {
                             Connection conn = pool.poll();
                             DBUtil.closeJDBCObjects(log, conn, null, null);
@@ -232,8 +228,23 @@ public abstract class JDBCMeasurementPlugin extends MeasurementPlugin {
         return getCachedConnection(url, user, pass);
     }
     
+    private static String calculateKey(String url, String user, String pass) {
+        if (pass == null) {
+            pass = "";
+        }
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] thedigest = md.digest(pass.getBytes("UTF-8"));
+            pass = new String(thedigest, "UTF-8");
+        } catch (Exception ex) {
+            log.debug(ex, ex);
+        }
+        String cacheKey = url + ":" + pass + "@" + user;
+        return cacheKey;
+    }
+
     protected Connection getCachedConnection(String url, String user, String pass) throws SQLException {
-        String cacheKey = url + user + pass;
+        String cacheKey = calculateKey(url, user, pass);
         Connection conn;
         Queue<Connection> pool;
 
@@ -242,7 +253,7 @@ public abstract class JDBCMeasurementPlugin extends MeasurementPlugin {
             if (pool == null) {
                 pool = new ConcurrentLinkedQueue<Connection>();
                 connectionPools.put(cacheKey, pool);
-                log.debug("[getCC] Pool for '"+user+"@"+url+"' created");
+                log.debug("[getCC] Pool for '" + cacheKey + "' created");
             }
         }
 
@@ -254,39 +265,39 @@ public abstract class JDBCMeasurementPlugin extends MeasurementPlugin {
                 log.error(ex, ex);
             }
         }
-        
+
         if (conn == null) {
             conn = getConnection(url, user, pass);
-            log.info("[getCC] Connection for '"+user+"@"+url+"' created (pool.size="+pool.size()+")");
+            log.debug("[getCC] Connection for '" + cacheKey + "' created (pool.size=" + pool.size() + ")");
         }
-        log.debug("[getCC] Connection for '"+user+"@"+url+"' used (pool.size="+pool.size()+")");
+        log.debug("[getCC] Connection for '" + cacheKey + "' used (pool.size=" + pool.size() + ")");
         return conn;
     }
 
     protected void removeCachedConnection(String url, String user, String pass) {
-        String cacheKey = url + user + pass;
+        String cacheKey = calculateKey(url, user, pass);
         Queue<Connection> pool = connectionPools.get(cacheKey);
         if (pool != null) {
             Connection conn;
             while ((conn = pool.poll()) != null) {
                 DBUtil.closeJDBCObjects(log, conn, null, null);
-                log.debug("[remCC] Connection for '" + user + "@" + url + "' closed (pool.size=" + pool.size() + ")");
+                log.debug("[remCC] Connection for '" + cacheKey + "' closed (pool.size=" + pool.size() + ")");
             }
             connectionPools.remove(cacheKey);
         } else {
-            log.debug("[remCC] Pool for '" + user + "@" + url + "' not found");
+            log.debug("[remCC] Pool for '" + cacheKey + "' not found");
         }
     }
 
     protected void returnCachedConnection(String url, String user, String pass, Connection conn) {
-        String cacheKey = url + user + pass;
+        String cacheKey = calculateKey(url, user, pass);
         Queue<Connection> pool = connectionPools.get(cacheKey);
         if (pool != null) {
             pool.add(conn);
-            log.debug("[retCC] Connection for '" + user + "@" + url + "' returned (pool.size=" + pool.size() + ")");
+            log.debug("[retCC] Connection for '" + cacheKey + "' returned (pool.size=" + pool.size() + ")");
         } else {
             DBUtil.closeJDBCObjects(log, conn, null, null);
-            log.debug("[retCC] Pool for '" + user + "@" + url + "' not found, closing connection");
+            log.debug("[retCC] Pool for '" + cacheKey + "' not found, closing connection");
         }
     }
 
