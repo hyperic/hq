@@ -27,16 +27,30 @@ package org.hyperic.hq.product;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.plugin.system.NetConnectionData;
+import org.hyperic.hq.plugin.system.NetstatData;
+import org.hyperic.sigar.Sigar;
+import org.hyperic.sigar.SigarException;
+import org.hyperic.sigar.SigarProxy;
+import org.hyperic.sigar.SigarProxyCache;
 import org.hyperic.util.config.ConfigResponse;
 
 public class DetectionUtil {
     private static Log log =
             LogFactory.getLog(DetectionUtil.class.getName());
+    private static Sigar sigarImpl = null;
+    private static SigarProxy sigar = null;
 	private static final String OS_TYPE;
 	private static final boolean IS_WINDOWS;  
 	private static final boolean IS_UNIX;
@@ -85,37 +99,46 @@ public class DetectionUtil {
 
 	/**
 	 * This method finds the listening ports for the provided pids on
-	 * Unix platform by using lsof 
+	 * Unix platform by using netstat 
 	 * @param pids
 	 * @param cf
 	 */
 	private static void populatePortsOnUnix(Set<Long> pids, ConfigResponse cf) {
+
+		String cmd = "netstat -lnptu";
 		//build a string of all the provided pids
 		StringBuilder pidsStr = new StringBuilder();
 		for (Long pid : pids) {
 			pidsStr.append(',').append(pid);
 		}
-		
-		//build the lsof command with the provided pids
-		String cmd = "lsof -p " + pidsStr.substring(1) + " -P";
-		Set<String> ports = new HashSet<String>();
+		Set<String> ports = new HashSet<String>();	
 		String line;
 		try {
-		    // Run lsof
-		    Process process = Runtime.getRuntime().exec(cmd);
-		    BufferedReader input = new BufferedReader(new InputStreamReader(process
+			// Run netstat
+			Process process = Runtime.getRuntime().exec(cmd);
+			BufferedReader input = new BufferedReader(new InputStreamReader(process
 					.getInputStream()));
-
-			//Go over the results and find the listening ports
+	
 			while ((line = input.readLine()) != null) {
-				if (!line.trim().contains("(LISTEN)")) {
+				if (!line.contains("LISTEN")) {
 					continue;
 				}
 				try{
-					//parse the line so we will get the port number
-					line = line.substring(line.lastIndexOf(":") + 1).trim();
-					line = line.substring(0, line.indexOf(" ")).trim();
-					//check that we got a number and if true add it to the ports set
+					line = line.trim();
+					String pid = line.substring(line.lastIndexOf(" "));
+					pid = pid.trim();
+					pid = pid.substring(0, pid.indexOf("/"));
+					//check that the pid that listens on this port is one of the provided pids
+					if (!pids.contains(Long.valueOf(pid))) {
+						continue;
+					}
+					//get the port number
+					if (line.contains(":::")) {
+						line = line.replaceAll(":::", ":").trim();
+					}
+					line = line.substring(line.indexOf(":") + 1);
+					line = line.substring(0, line.indexOf(" "));
+					line = line.trim();
 					if (isNumber(line)) {
 						ports.add(line);
 					}
@@ -126,9 +149,11 @@ public class DetectionUtil {
 			}
 			input.close();
 		} catch (Exception e) {
-		  log.warn("Error populating ports for '" + pidsStr + "' ", e);
+			log.warn("Error populating ports for '" + pidsStr + "' ", e);
 		}
+
 		updatePortsInConfigResponse(cf, ports);
+	
 	}
 
 	private static void populatePortsOnWindows(Set<Long> pids, ConfigResponse cf) {
@@ -212,8 +237,9 @@ public class DetectionUtil {
 				BufferedReader input = new BufferedReader(new InputStreamReader(process
 						.getInputStream()));
 				while ((line = input.readLine()) != null) {
-					if (!line.isEmpty()) {
-						Long childPid = Long.valueOf(line.trim());
+					line = line.trim();
+					if (!line.isEmpty() && isNumber(line)) {
+						Long childPid = Long.valueOf(line);
 						childPids.addAll(getAllChildPid(childPid));
 						childPids.add(childPid);
 					}
@@ -273,5 +299,14 @@ public class DetectionUtil {
 			return false;
 		}
 	}
-
+	
+	protected static SigarProxy getSigar() {
+        if (sigar == null) {
+            int timeout = 10 * 60 * 1000; //10 minutes
+            sigarImpl = new Sigar();
+            sigar = SigarProxyCache.newInstance(sigarImpl, timeout);
+        }
+        return sigar;
+    }
+	
 }
