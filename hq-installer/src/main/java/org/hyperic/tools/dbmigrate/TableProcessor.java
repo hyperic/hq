@@ -351,6 +351,7 @@ public abstract class TableProcessor<T extends Callable<TableProcessor.Table[]>>
       protected String name ; 
       protected AtomicInteger noOfProcessedRecords ; 
       protected boolean shouldTruncate ;
+      protected StringBuilder columnsClause ; 
       
       public Table(){
           this.noOfProcessedRecords = new AtomicInteger()  ;
@@ -373,6 +374,13 @@ public abstract class TableProcessor<T extends Callable<TableProcessor.Table[]>>
       public final void setName(final String tableName) { 
           this.name = tableName.toUpperCase().trim() ; 
       }//EOM
+      
+      /**
+       * @return new StringBuilder if the the first invocation of this method else null (might return more than one reference but this is acceptable) 
+       */
+      public StringBuilder getColumnNamesBuilder() { 
+          return (this.columnsClause == null ? (this.columnsClause = new StringBuilder()) : null) ; 
+      }//EOM 
 
     @Override
     public String toString() {
@@ -389,15 +397,18 @@ public abstract class TableProcessor<T extends Callable<TableProcessor.Table[]>>
       protected int noOfPartitions ; 
       protected String partitionColumn ; 
       protected int partitionNumber = -1 ;  
+      private BigTable origRef ; 
       
       public BigTable(){}//EOM 
       
-      BigTable(final String name, final String partitionColumn, final int noOfPartitions, final int partitionNumber, final AtomicInteger noOfProcessedRecords) { 
+      BigTable(final String name, final String partitionColumn, final int noOfPartitions, final int partitionNumber, final AtomicInteger noOfProcessedRecords, 
+              final BigTable origRef) { 
           super(name) ; 
           this.noOfPartitions = noOfPartitions ; 
           this.partitionColumn = partitionColumn ; 
           this.partitionNumber = partitionNumber ; 
           this.noOfProcessedRecords = noOfProcessedRecords ;
+          this.origRef = origRef ; 
       }//EOM 
       
       /**
@@ -418,7 +429,13 @@ public abstract class TableProcessor<T extends Callable<TableProcessor.Table[]>>
       }//EOM 
       
       public final BigTable clone(final int partitionNumber) { 
-          return new BigTable(this.name, this.partitionColumn, this.noOfPartitions, partitionNumber, this.noOfProcessedRecords) ; 
+          return new BigTable(this.name, this.partitionColumn, this.noOfPartitions, partitionNumber, this.noOfProcessedRecords, this) ; 
+      }//EOM 
+      
+      @Override
+      public final StringBuilder getColumnNamesBuilder() {
+          final BigTable ref = (this.origRef == null ? this : this.origRef) ; 
+          return (ref.columnsClause == null ? (ref.columnsClause = new StringBuilder()) : null) ;
       }//EOM 
 
       @Override
