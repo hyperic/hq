@@ -10,9 +10,8 @@ Commands:
 Options:
  
   * hq-export: 
-    * -Dstaging.dir=<path>
+    * -Dstaging.dir=<path> (optional, defaults to <HQ_MIGRATE_HOME>/tmp/export-data) 
     * -Dhqserver.install.path=<path>
-    * -Dquiet=<true|false> (optional, defaults to false)
     * -Dscale=true (optional, default to false)
     or 
     * -Dsetup.file=<path>
@@ -20,6 +19,7 @@ Options:
   * hq-import 
   	* -Dexport.archive.path=<path>
     * -Dstaging.dir=<path> (optional, defaults to <HQ_MIGRATE_HOME>/tmp/export-data) 
+    * -Dquiet=<true|false> (optional, defaults to false)
     * -Dhqserver.install.path=<path>
     or 
     * -Dsetup.file=<path>
