@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
+import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIServerExtValue;
 import org.hyperic.hq.appdef.shared.AIServerValue;
@@ -104,7 +105,7 @@ public class PluginDiscoverer implements ScanListener {
         AutoApproveConfig aac = null;
         
         try{
-            aac = new AutoApproveConfig(aacPath);
+            aac = new AutoApproveConfig(aacPath, AgentConfig.DEFAULT_PROP_ENC_KEY_FILE);
         } catch(IllegalArgumentException ex){
         }
         

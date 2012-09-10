@@ -31,10 +31,18 @@ import org.hyperic.util.security.SecurityUtil;
 
 import java.io.*;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class PropertyUtil {
 
     private static final Log LOG = LogFactory.getLog(PropertyUtil.class);
+
+    /**
+     * A regular expression pattern that is used for splitting properties lines into three parts: key, ':' or '=', and
+     * value. This pattern is used for rewriting properties file (when values need to be encrypted.
+     */
+    private static final Pattern PROPERTY_LINE_PATTERN = Pattern.compile("([^=:]*)([=|:])(.*)");
 
     /**
      * Expand variable references in property values.
@@ -131,127 +139,114 @@ public class PropertyUtil {
             encryptedEntriesToStore.put(entryToStore.getKey(), encryptedVal);
         }
 
-        storeProperties(file,encryptedEntriesToStore);
+        _storeProperties(file,encryptedEntriesToStore);
     }
 
-    public static void storeProperties(String propFilePath, Map<String,String> newEntries)
-            throws PropertyUtilException {
+    /**
+     * Saves the provided map of keys and values into the properties file specified by <code>propFilePath</code>.
+     * Values of properties that already exist int the file are overwritten. New values are placed near the end of the
+     * file.
+     *
+     * @param propFilePath the path (absolute/relative) to the properties file to edit.
+     * @param props the properties to add/update.
+     */
+    public static void storeProperties(String propFilePath, Map<String, String> props) throws PropertyUtilException {
 
-        List<String> lineData = new ArrayList<String>();
-        Map<String,String> tmdEntries = new HashMap<String,String>(newEntries);
-        BufferedReader reader = null;
-        try {
-            reader = new BufferedReader(new InputStreamReader(new FileInputStream(propFilePath), "ISO-8859-1"));
-            String line;
-
-            while ((line = reader.readLine()) != null) {
-                char c = 0;
-                int pos = 0;
-                while (pos < line.length() && Character.isWhitespace(c = line.charAt(pos))) {pos++;}
-                if ((line.length() - pos) == 0 || line.charAt(pos) == '#' || line.charAt(pos) == '!') {
-                    lineData.add(line);
-                    continue;
-                }
-                int start = pos;
-                boolean needsEscape = line.indexOf('\\', pos) != -1;
-                StringBuilder key = needsEscape ? new StringBuilder() : null;
-                while ( pos < line.length()
-                        && ! Character.isWhitespace(c = line.charAt(pos++))
-                        && c != '=' && c != ':') {
-                    if (needsEscape && c == '\\') {
-                        if (pos == line.length()) {
-                            line = reader.readLine();
-                            if (line == null) {line = "";}
-                            pos = 0;
-                            while ( pos < line.length() && Character.isWhitespace(c = line.charAt(pos))) {pos++;}
-                        } else {
-                            c = line.charAt(pos++);
-                            key.append(c);
-                        }
-                    } else if (needsEscape) {
-                        key.append(c);
-                    }
-                }
-
-                boolean isDelim = (c == ':' || c == '=');
-                String keyString;
-                if (needsEscape) {
-                    keyString = key.toString();
-                } else if (isDelim || Character.isWhitespace(c)) {
-                    keyString = line.substring(start, pos - 1);
-                } else {
-                    keyString = line.substring(start, pos);
-                }
-                while ( pos < line.length() && Character.isWhitespace(c = line.charAt(pos))){
-                    pos++;
-                }
-
-                if (! isDelim && (c == ':' || c == '=')) {
-                    pos++;
-                    while (pos < line.length() && Character.isWhitespace(line.charAt(pos))) {
-                        pos++;
-                    }
-                }
-                if (!needsEscape) {
-                    String val;
-                    if ((val = tmdEntries.remove(keyString)) == null) {
-                        val = line.substring(pos);
-                    }
-                    lineData.add(keyString + "=" + val);
-                    continue;
-                }
-
-                StringBuilder element = new StringBuilder(line.length() - pos);
-                while (pos < line.length()) {
-                    c = line.charAt(pos++);
-                    if (c == '\\') {
-                        if (pos == line.length()) {
-                            line = reader.readLine();
-                            if (line == null) {break;}
-                            pos = 0;
-                            while ( pos < line.length() && Character.isWhitespace(line.charAt(pos))) {pos++;}
-                            element.ensureCapacity(line.length() - pos + element.length());
-                        } else {
-                            c = line.charAt(pos++);
-                            element.append(c);
-                            break;
-                        }
-                    } else {
-                        element.append(c);
-                    }
-                }
-                String val;
-                if ((val = tmdEntries.remove(keyString)) == null) {
-                    val = line.substring(pos);
-                }
-                lineData.add(keyString + "=" + val);
-            }
-            for (Map.Entry<String,String> entry : tmdEntries.entrySet()) {
-                lineData.add(entry.getKey() + "=" + entry.getValue());
-            }
-        } catch(Exception exc) {
-            throw new PropertyUtilException(exc);
-        } finally {
-            if (reader!=null) {
-                try {
-                    reader.close();
-                } catch (IOException ignore) {
-                    LOG.trace(ignore);
-                }
-            }
+        Map<String,String> duplicatedEntriesToStore = new HashMap<String,String>();
+        for (Map.Entry<String, String> entryToStore : props.entrySet()) {
+            duplicatedEntriesToStore.put(entryToStore.getKey(), entryToStore.getValue());
         }
 
+        _storeProperties(propFilePath, duplicatedEntriesToStore);
+    }
+
+    /**
+     * Saves the provided map of keys and values into the properties file specified by <code>propFilePath</code>.
+     * Values of properties that already exist int the file are overwritten. New values are placed near the end of the
+     * file.
+     *
+     * @param propFilePath the path (absolute/relative) to the properties file to edit.
+     * @param props the properties to add/update.
+     */
+    private static void _storeProperties(String propFilePath, Map<String, String> props) throws PropertyUtilException {
+        // If the provided properties map is null or empty then exit the method.
+        if (props == null || props.size() < 1) {
+            return;
+        }
+
+        // Used for writing the properties file back to the disk.
         PrintWriter writer = null;
+        // Used for reading the properties file from the disk.
+        FileReader reader = null;
+
         try {
+            // Create new reader
+            reader = new FileReader(propFilePath);
+            // Wrap the reader with a buffer so we can walk through the file line by line.
+            BufferedReader bufferedReader = new BufferedReader(reader);
+
+            // The list of lines that will be written to disk.
+            List<String> newLines = new ArrayList<String>();
+
+            // Read the lines from the file and replace values.
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                newLines.add(processLine(line, props));
+            }// EO while.
+
+            // Iterate values that are left in the provided map and add them to the file.
+            for (String key : props.keySet()) {
+                newLines.add(key + " = " + props.get(key));
+            }
+
             writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(propFilePath), "ISO-8859-1"));
-            for (String aLineData : lineData) {
+            for (String aLineData : newLines) {
                 writer.println(aLineData);
             }
-            writer.flush ();
-        } catch(Exception exc) {
+            writer.flush();
+        } catch (IOException exc) {
+            String message = "Failed to store properties into the file: " + propFilePath;
+            LOG.error(message, exc);
             throw new PropertyUtilException(exc);
         } finally {
-            if (writer!=null) {writer.close();}
+            if (reader != null) { try { reader.close(); } catch (IOException ignore) { /* ignore */ } }
+            if (writer != null) { writer.close(); }
+        } // EO try-catch
+    } // EOM
+
+    /**
+     * Splits the provided properties line into key, ':' or '=', and value and checks the props map for a new value for
+     * the extracted key. If there is a new value then the property line is reassembled using the new value; Otherwise
+     * the line is returned as is.
+     *
+     * @param line the property line to process.
+     * @param props the properties map in which a new value for the property might reside.
+     * @return the final (modified or same) property line to write in the properties file.
+     */
+    private static String processLine(String line, Map<String, String> props) {
+        // The result line.
+        String result;
+
+        // User the regex pattern to split the line.
+        Matcher matcher = PROPERTY_LINE_PATTERN.matcher(line);
+        // If a match is found then replace it value if there's a matching key in the provided map.
+        if (matcher.find()) {
+            // Extract the key (strip the escape characters).
+            String key = matcher.group(1).trim().replaceAll("\\\\", "");
+            // Try removing the entry from the map.
+            String value = props.remove(key);
+            if (value == null) {
+                // No matching found. Add the line as is.
+                result = line;
+            } else {
+                // Found a match -- replace the value.
+                result = matcher.group(1) + matcher.group(2) + value;
+            }
+        } else {
+            // No match found. Add the line as is.
+            result = line;
         }
-    }
+
+        return result;
+    }// EOM
 }
