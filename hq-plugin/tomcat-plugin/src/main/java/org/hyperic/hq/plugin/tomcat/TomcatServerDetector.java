@@ -289,18 +289,13 @@ public class TomcatServerDetector
     }
 
     @Override
-    protected void setProductConfig(ServerResource server, ConfigResponse config, long pid) throws PluginException {
-        try {
-            DetectionUtil.populatePorts(getSigar(), new long[] {pid}, config);
-        } catch (SigarException e) {
-            log.error(e);
-            throw new PluginException(e);
-        }
+    protected void setProductConfig(ServerResource server, ConfigResponse config, long pid) {
+        DetectionUtil.populateListeningPorts(pid, config,true);
         super.setProductConfig(server, config);
     }
     
     @Override
-    protected ServerResource getServerResource(MxProcess process) throws PluginException {
+    protected ServerResource getServerResource(MxProcess process) {
         ServerResource server = super.getServerResource(process);
         String catalinaBase = server.getInstallPath();
         

@@ -48,6 +48,7 @@ import org.hyperic.hq.plugin.jboss.jmx.ServerQuery;
 import org.hyperic.hq.plugin.jboss.jmx.ServiceQuery;
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.DaemonDetector;
+import org.hyperic.hq.product.DetectionUtil;
 import org.hyperic.hq.product.FileServerDetector;
 import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.Log4JLogTrackPlugin;
@@ -513,6 +514,9 @@ public class JBossDetector
         server.setConnectProperties(new String[]{
                     Context.PROVIDER_URL
                 });
+        if (pid>0) {
+            DetectionUtil.populateListeningPorts(pid, _config, true);
+        }
 
         server.setProductConfig(_config);
         server.setMeasurementConfig(metricConfig);
