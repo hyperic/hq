@@ -38,8 +38,8 @@ import org.hyperic.hq.hqu.rendit.RequestInvocationBindings
  * define its own controller dispatcher.
  */
 class DefaultControllerDispatcher {
-	static resource
-    	final lock = new Object()
+	
+	private static final Object LOCK = new Object()
 
     def initialize() {
        
@@ -72,7 +72,7 @@ class DefaultControllerDispatcher {
         classLoader.addURL(appDir.toURL())
         classLoader.addURL(etcDir.toURL())
 		def controller = null
-		synchronized(lock) {
+		synchronized(LOCK) {
 			controller = Class.forName(controllerName, true, 
                                        classLoader).newInstance()
         }

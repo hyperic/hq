@@ -31,6 +31,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Reader;
+import java.io.Writer;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -49,6 +51,7 @@ public class Utils{
     
   public static final String STAGING_DIR = "staging.dir";
   public static final String SERVER_INSTALL_DIR = "hqserver.install.path";
+  public static final String TABLE_METADATA_FILE_SUFFIX = ".metadata" ; 
   public static final int DEFAULT_PAGE_SIZE = 1000;
   public static final String FILE_EXT = ".out";
   public static final Object EOF_PLACEHOLDER = FileContentType.EOF;
@@ -126,6 +129,12 @@ public class Utils{
             ((PreparedStatement)closeable).close();
         } else if ((closeable instanceof ResultSet)) { 
             ((ResultSet)closeable).close();
+        } else if ((closeable instanceof Writer)) {
+            final Writer writer = (Writer) closeable ; 
+            writer.flush() ; 
+            writer.close() ; 
+        } else if ((closeable instanceof Reader)) { 
+            ((Reader)closeable).close();
         } else if ((closeable instanceof OutputStream)) {
           final OutputStream os = (OutputStream)closeable;
           os.flush();

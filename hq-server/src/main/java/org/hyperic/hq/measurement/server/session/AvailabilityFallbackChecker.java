@@ -2,6 +2,7 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -47,6 +48,8 @@ public class AvailabilityFallbackChecker {
 	// For testing purposes, in case we need to perform checks with a constant timestamp.
 	// if curTimeStamp is 0, we check for the actual current time. 
 	private long curTimeStamp = 0;
+	
+	private final int MAX_UPDATES_PER_BATCH = 5000;
 
 	
 	// --------------------------------------------------------------------------------------------------------
@@ -70,7 +73,7 @@ public class AvailabilityFallbackChecker {
 	 */
 	public void checkAvailability(Collection<ResourceDataPoint> availabilityDataPoints, long curTimeStamp) {
 		this.curTimeStamp = curTimeStamp;
-		checkAvailability(availabilityDataPoints);
+		checkAvailabilityInChunks(availabilityDataPoints);
 		this.curTimeStamp = 0;		
 	}
 
@@ -98,7 +101,47 @@ public class AvailabilityFallbackChecker {
 		storeUpdates(res);
 	}
 
+
+	
+	/**
+	 * This method is written in order to solve issue: HHQ-5619:
+	 * Backfiller causes StackOverflow when trying to update 73000 resources' availability.
+	 * The reason for the Stackoverflow is a Hibernate 3.2 bug in which queries above 9000-10000 IDs fail with NodeTraverse StackOverflow.
+	 * TODO: This method should be removed once Hibernate is upgraded.
+	 * 
+	 *  This method is the same as CheckAvailability, only the update is done in chunks of upto MAX_UPDATES_PER_BATCH.
+	 *  The updates are divided into clusters, a cluster per Platform and its Servers and Services.
+	 *  We merge several Platform Clusters into a single Chunk, so its size does not exceed MAX_UPDATES_PER_BATCH.
+	 *  Each such chunk is updated separately.
+	 *  
+	 * Check platforms' availability. Update DB/Cache accordingly.
+	 * Platforms' servers/services statuses may be updated as well.
+	 * @param availabilityDataPoints
+	 */
+	public void checkAvailabilityInChunks(Collection<ResourceDataPoint> availabilityDataPoints) {
+		if ((availabilityDataPoints == null) || (availabilityDataPoints.isEmpty()) ) {
+			return;			
+		}
+		log.debug("checkAvailability: start");
+		Collection<ResourceDataPoint> resPlatforms = new ArrayList<ResourceDataPoint>();
+		for (ResourceDataPoint availabilityDataPoint : availabilityDataPoints) {
+			//log.info("checkAvailability-Platform: " + availabilityDataPoint.getResource().getId() + " value: " + availabilityDataPoint.getValue());
+			ResourceDataPoint platformAvailPoint = checkPlatformAvailability(availabilityDataPoint);
+			//log.info("checkAvailability-Platform: " + platformAvailPoint.getResource().getId() + " value: " + platformAvailPoint.getValue());
+			resPlatforms.add(platformAvailPoint);
+		}
+		log.info("checkAvailability: checking " + resPlatforms.size() + " platforms.");
+		Map<Integer, Collection<DataPoint>> res = addStatusOfPlatformsDescendantsByPlatformId(resPlatforms);
+		Collection<Collection<DataPoint>> resChunks = orderChunksBeforeUpdates(res);
+		for (Collection<DataPoint> resChunk : resChunks) {
+			log.info("checkAvailability: updating chunk with " + resChunk.size() + " platforms & descendants.");
+			storeUpdates(resChunk);			
+		}
+	}
+
     
+
+	
     /**
      * check if the given Measurement belongs to an HQ Agent, and if so - mark it as down.
      * @param meas - Measurement of a checked server/service.
@@ -228,6 +271,89 @@ public class AvailabilityFallbackChecker {
 			return true;			
 		}
 		return false;
+	}
+
+	
+	private Collection<Collection<DataPoint>> orderChunksBeforeUpdates(Map<Integer,Collection<DataPoint>> dataPoints) {
+		Collection<Collection<DataPoint>> res = new ArrayList<Collection<DataPoint>>();
+		Collection<Collection<DataPoint>> initialChunks = dataPoints.values();
+		Collection<DataPoint> curChunk = new ArrayList<DataPoint>();
+		for (Collection<DataPoint> iterChunk : initialChunks) {
+
+			if ((curChunk.size() + iterChunk.size()) > MAX_UPDATES_PER_BATCH) {
+				// add the last curChunk
+				res.add(curChunk);
+				
+				// create a new chunk with the iterated chunk
+				curChunk = new ArrayList<DataPoint>();
+			}
+			curChunk.addAll(iterChunk);
+		}
+		if (curChunk.size() > 0) {
+			res.add(curChunk);
+		}
+		
+		return res;
+	}
+	
+	
+	/**
+	 * Given a list of platforms' data points, return a collection of datapoints of platforms' servers an services,
+	 * with their appropriate status.
+	 * @param checkedPlatforms - new calculated availability status of platforms.
+	 * @return collection of statuses of the platforms' servers an services.
+	 */
+	private Map<Integer,Collection<DataPoint>> addStatusOfPlatformsDescendantsByPlatformId(Collection<ResourceDataPoint> checkedPlatforms) {
+		log.debug("addStatusOfPlatformsDescendants: start" );
+		Map<Integer,Collection<DataPoint>> res = new HashMap<Integer,Collection<DataPoint>>();
+		final List<Integer> resourceIds = new ArrayList<Integer>();
+		for (ResourceDataPoint rDataPoint : checkedPlatforms) {
+			resourceIds.add(rDataPoint.getResource().getId());
+		}
+		final Map<Integer, List<Measurement>> rHierarchy = availabilityManager.getAvailMeasurementChildren(
+				resourceIds, AuthzConstants.ResourceEdgeContainmentRelation);
+		for (ResourceDataPoint rdp : checkedPlatforms) {
+			final Resource platform = rdp.getResource();
+			Collection<DataPoint> resourceDataPoints = new ArrayList<DataPoint>();
+			
+			resourceDataPoints.add(rdp);
+			final List<Measurement> associatedResources = rHierarchy.get(platform.getId());
+			if (associatedResources == null) {
+				continue;
+			}
+
+			double assocStatus = MeasurementConstants.AVAIL_DOWN;
+			if (rdp.getMetricValue().getValue() == MeasurementConstants.AVAIL_UP) {
+				assocStatus = MeasurementConstants.AVAIL_UNKNOWN;
+			}
+			
+			for (Measurement meas : associatedResources) {
+
+				if (!meas.isEnabled()) {
+					continue;
+				}
+				double curStatus = assocStatus;
+				if (isHQAgent(meas)) {
+					curStatus = MeasurementConstants.AVAIL_DOWN;					
+				}
+				
+				final long curTimeStamp = getCurTimestamp();
+				final long backfillTime = getBackfillTime(curTimeStamp, meas);
+				if (backfillTime > curTimeStamp) {
+					// the resource was updated during the last interval. we do not want to update it.
+					// TODO: Shouldn't platform be marked as UP?
+					continue;
+				}
+				final MetricValue val = new MetricValue(curStatus, backfillTime);
+				final MeasDataPoint point = new MeasDataPoint(meas.getId(), val, true);
+				resourceDataPoints.add(point);
+			}
+			res.put(platform.getId(), resourceDataPoints);
+		}
+		if (log.isDebugEnabled()) {
+			log.debug("addStatusOfPlatformsDescendants: end, res size: " + res.size() );			
+		}
+		return res;
 	}
 
 

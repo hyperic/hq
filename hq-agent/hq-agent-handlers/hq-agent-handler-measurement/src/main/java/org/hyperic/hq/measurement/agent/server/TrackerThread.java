@@ -221,6 +221,7 @@ class TrackerThread implements Runnable {
         if (!sendReportToServer(dListName, report)) {
             // If there is an error sending to the server, try again later.
             moreEventsToProcess = false;
+            numEventsProcessed = 0;
         }
 
         removeProcessedEventsFromStorage(dListName, numEventsProcessed);

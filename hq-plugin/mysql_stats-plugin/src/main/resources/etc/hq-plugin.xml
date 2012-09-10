@@ -72,6 +72,8 @@
         <option name="tableRegex"
                 optional="true"
                 description="Regex of tables to monitor (blank for none)"/>
+        <option name="listen.ports" description="Listening Ports" optional="true"/>
+                
     </config>
 
     <config name="repl_slave_config">

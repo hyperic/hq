@@ -24,7 +24,11 @@ if "%JAVA_HOME%" == "" (
 	set next= 
   
 	FOR %%J IN (%*) DO (
-		if "%%J" == "-Dhqserver.install.path" (
+		if "%%J" == "usage" (
+			goto USAGE
+		else if "%%J" == "help" (
+			goto USAGE
+		)else if "%%J" == "-Dhqserver.install.path" (
 			set next=hqserver.install.path
 		)else if "!next!" == "hqserver.install.path" ( 
 		   set JAVA_HOME=%%J\jre
@@ -54,6 +58,10 @@ if "%JAVA_HOME%" == "" (
 		)
 	) 
 )
+	   
+:USAGE 
+type %INSTALL_DIR%\data\reports\migration-usage.txt 
+goto :EOF 
 	   
 :JAVA_HOME_FOUND
 set JAVA_HOME=!JAVA_HOME!
