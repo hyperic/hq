@@ -58,7 +58,6 @@ public class AlertConditionLog
     }
     
     protected void setValue(String value) {
-        if(value != null) value = value.replace('\0', '\n') ; 
         _value = value;
     }
 
