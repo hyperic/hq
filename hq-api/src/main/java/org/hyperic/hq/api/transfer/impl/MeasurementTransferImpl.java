@@ -62,6 +62,7 @@ import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 public class MeasurementTransferImpl implements MeasurementTransfer {
     private static final int MAX_DTPS = 400;
@@ -143,6 +144,9 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         return res;
     }
 
+    
+    // check if same hibernate session for all / o/w add transactional in method def
+    @Transactional(readOnly = true)
     public ResourceMeasurementBatchResponse getAggregatedMetricData(ApiMessageContext apiMessageContext,
             ResourceMeasurementRequests hqMsmtReqs, Date begin, Date end) throws TimeframeBoundriesException, PermissionException, SQLException, UnsupportedOperationException, ObjectNotFoundException {
             ResourceMeasurementBatchResponse res = new ResourceMeasurementBatchResponse(this.errorHandler);
@@ -156,44 +160,49 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             AuthzSubject authzSubject = apiMessageContext.getAuthzSubject();
             // extract all input measurement templates
             Map<String,List<String>> tmpNameToRscs = new HashMap<String,List<String>>();
+            List<String> tmpNames = null;
+            String rscId = null;
             for (ResourceMeasurementRequest hqMsmtReq : hqMsmtReqs.getMeasurementRequests()) {
-                String rscId = hqMsmtReq.getRscId();
-                try {
-                    if (rscId==null || "".equals(rscId)) {
-                        throw new ObjectNotFoundException("no resource ID supplied",Resource.class.getName());
+                rscId = hqMsmtReq.getRscId();
+                if (rscId==null || "".equals(rscId)) {
+                    throw new ObjectNotFoundException("no resource ID supplied",Resource.class.getName());
+                }
+                tmpNames = hqMsmtReq.getMeasurementTemplateNames();
+                for (String tmpName : tmpNames) {
+                    List<String> rscs = tmpNameToRscs.get(tmpName);
+                    if (rscs==null) {
+                        rscs = new ArrayList<String>(); 
+                        tmpNameToRscs.put(tmpName, rscs);
                     }
-                    List<String> tmpNames = hqMsmtReq.getMeasurementTemplateNames();
-                    for (String tmpName : tmpNames) {
-                        if (!tmpNameToRscs.containsKey(tmpName)) {
-                            tmpNameToRscs.put(tmpName, new ArrayList<String>());
-                        }
-                        tmpNameToRscs.get(tmpName).add(rscId);
-                    }
-                }catch(Throwable t) { 
-                    this.errorHandler.log(t) ; 
-                    res.addFailedResource(t,rscId, null , null) ;
+                    rscs.add(rscId);
                 }
             }                
             // extract tmp Ids per rsc        
-            List<MeasurementTemplate> tmps = this.tmpltMgr.findTemplatesByName(new ArrayList<String>(tmpNameToRscs.keySet()));
+            List<MeasurementTemplate> tmps = this.tmpltMgr.findTemplatesByName(new ArrayList<String>(tmpNameToRscs.keySet())); // maybe change findTempl() to get set and save loop of arraylist creation
             Map<Integer, List<Integer>> resIdsToTmpIds = new HashMap<Integer, List<Integer>>();
+            List<String> rscIds = null;
             for (MeasurementTemplate tmp : tmps) {
-                List<String> rscIds = tmpNameToRscs.get(tmp.getName());
+                rscIds = tmpNameToRscs.get(tmp.getName());
                 if (rscIds==null) { continue;   }
-                for (String rscId : rscIds) {
-                    if (!resIdsToTmpIds.containsKey(Integer.valueOf(rscId))) {
-                        resIdsToTmpIds.put(Integer.valueOf(rscId), new ArrayList<Integer>());
+                for (String _rscId : rscIds) {
+                    Integer rscIdInt = Integer.valueOf(_rscId);
+                    List<Integer> tmpIds = resIdsToTmpIds.get(rscIdInt);
+                    if (tmpIds==null) { // conversion to integer in one place / change rsc id to integer in req obj
+                        tmpIds = new ArrayList<Integer>(); 
+                        resIdsToTmpIds.put(rscIdInt,tmpIds );
                     }
-                    resIdsToTmpIds.get(Integer.valueOf(rscId)).add(tmp.getId());
+                    tmpIds.add(tmp.getId());
                 }
             }
             // mark resources for which no measurements were found
+            final String TEMPLATE_NOT_FOUND_ERR_CODE = ExceptionToErrorCodeMapper.ErrorCode.TEMPLATE_NOT_FOUND.getErrorCode();
+            rscId = null;
             for (ResourceMeasurementRequest hqMsmtReq : hqMsmtReqs.getMeasurementRequests()) {
                 // by now we know that all reqs are with valid rscs, o/w we wouldn't get here
-                String rscId = hqMsmtReq.getRscId();
+                rscId = hqMsmtReq.getRscId();
                 // if the requested rsc is not in the map of rscs for which at least one template was found, mark it as a failed rsc
                 if (!resIdsToTmpIds.keySet().contains(Integer.valueOf(rscId))) {
-                    res.addFailedResource(rscId,ExceptionToErrorCodeMapper.ErrorCode.TEMPLATE_NOT_FOUND.getErrorCode(),null,new Object[] {});
+                    res.addFailedResource(rscId,TEMPLATE_NOT_FOUND_ERR_CODE,null,new Object[] {}); // save error code as final out of the loop
                 }
             }
 
@@ -204,11 +213,12 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             // validate that all rscs have msmts, and map msmt names to rscs
             Map<Integer,Resource> msmtIdToRsc = new HashMap<Integer,Resource>();
             Set<Measurement> allMsmts = new HashSet<Measurement>();
+            List<Measurement> msmts = null;
             for (Map.Entry<Resource,List<Measurement>> rscToHqMsmtsEntry : rscToHqMsmts.entrySet()) {
                 Resource rsc = rscToHqMsmtsEntry.getKey();
-                List<Measurement> msmts = rscToHqMsmtsEntry.getValue();
+                msmts = rscToHqMsmtsEntry.getValue();
                 if (msmts==null || msmts.size()==0) {
-                    res.addFailedResource(String.valueOf(rsc.getId()),ExceptionToErrorCodeMapper.ErrorCode.TEMPLATE_NOT_FOUND.getErrorCode(),null,new Object[] {});
+                    res.addFailedResource(String.valueOf(rsc.getId()),TEMPLATE_NOT_FOUND_ERR_CODE,null,new Object[] {});
                 } else {
                     for (Measurement msmt : msmts) {
                         msmtIdToRsc.put(msmt.getId(),rsc);
@@ -223,10 +233,10 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             }
             Map<Integer, double[]> msmtNamesToAgg = this.dataMgr.getAggregateDataAndAvailUpByMetric(new ArrayList<Measurement>(allMsmts), begin.getTime(), end.getTime());
             Map<Integer,ResourceMeasurementResponse> rscIdToRes = new HashMap<Integer,ResourceMeasurementResponse>();
-
+            Resource rsc = null;
             for (Map.Entry<Integer, double[]> msmtNameToAggEntry : msmtNamesToAgg.entrySet()) {
                 Integer msmtId = msmtNameToAggEntry.getKey();
-                Resource rsc = msmtIdToRsc.get(msmtId);
+                rsc = msmtIdToRsc.get(msmtId);
                 double[] agg = msmtNameToAggEntry.getValue();
                 // no val for that msmt
                 if (agg==null || agg.length<=MeasurementConstants.IND_AVG) {
@@ -239,14 +249,14 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
                     continue;
                 }
                 org.hyperic.hq.api.model.measurements.Measurement msmt = this.mapper.toMeasurement(hqMsmt,avg);
-
-                if (!rscIdToRes.containsKey(rsc.getId())) {
-                    rscIdToRes.put(rsc.getId(), new ResourceMeasurementResponse(String.valueOf(rsc.getId())));
+                
+                ResourceMeasurementResponse rscRes =  rscIdToRes.get(rsc.getId());
+                if (rscRes==null) {
+                    rscRes = new ResourceMeasurementResponse(String.valueOf(rsc.getId()));
+                    rscIdToRes.put(rsc.getId(), rscRes);
+                    res.addResponse(rscRes);
                 }
-                rscIdToRes.get(rsc.getId()).add(msmt);
-            }
-            for (ResourceMeasurementResponse rscRes : rscIdToRes.values()) {
-                res.addResponse(rscRes);
+                rscRes.add(msmt);
             }
             return res;
     }

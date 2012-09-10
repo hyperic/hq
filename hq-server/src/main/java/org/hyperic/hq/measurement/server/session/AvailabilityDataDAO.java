@@ -25,14 +25,13 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -97,6 +96,7 @@ public class AvailabilityDataDAO
         List<AvailabilityDataRLE> rtn = new ArrayList<AvailabilityDataRLE>(mids.size());
         if (mids.isEmpty()) {
             return rtn;
+            // check if sa
         }
         String hql = new StringBuilder().append("from AvailabilityDataRLE").append(
             " WHERE endtime > :endtime").append(" AND availabilityDataId.measurement in (:ids)")
@@ -413,46 +413,49 @@ public class AvailabilityDataDAO
             Map<Integer,Double> msmtToAvailAvg = calcAvg(msmtToAllAvailSumTime,msmtToAvailUpSumTime);
             return msmtToAvailAvg;
         } finally {
-            DBUtil.closeConnection(AvailabilityDataDAO.class.getName(),conn);
+            DBUtil.closeConnection(logCtx,conn);
         }
     }
     
     protected static interface IAvailExtractionStrategy {
-        public Long extract(ResultSet rs) throws SQLException;
+        public long extract(ResultSet rs) throws SQLException;
     }
     protected static class MidWinAvailExtractionStrategy implements IAvailExtractionStrategy {
-        public Long extract(ResultSet rs) throws SQLException {
+        public long extract(ResultSet rs) throws SQLException {
             return rs.getLong(2);
         }
     }
     protected static class WinEdgeAvailExtractionStrategy implements IAvailExtractionStrategy {
-        protected long timeFrameStart;
-        protected long timeFrameEnd;
+        protected final long timeFrameStart;
+        protected final long timeFrameEnd;
         public WinEdgeAvailExtractionStrategy(long timeFrameStart, long timeFrameEnd) {
             this.timeFrameStart= timeFrameStart;
             this.timeFrameEnd = timeFrameEnd;
         }
-        public Long extract(ResultSet rs) throws SQLException {
+        public long extract(ResultSet rs) throws SQLException {
             long availSectionStart = rs.getLong(2);
             long availSectionEnd = rs.getLong(3);
             return Math.min(availSectionEnd, this.timeFrameEnd) - Math.max(availSectionStart, this.timeFrameStart);
         }
     }
     protected Map<Integer,Long> executeAvailQuery(Connection conn, final String sql, final int batchSize, IAvailExtractionStrategy extractStrtg) throws SQLException {
-        PreparedStatement stmt = null;
+        Statement stmt = null;
         ResultSet rs = null;
         Map<Integer,Long> rtn = new HashMap<Integer, Long>();
         try {
-            stmt = conn.prepareStatement(sql);
-            rs = stmt.executeQuery();
+            stmt = conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY);
+            rs = stmt.executeQuery(sql);
+            rs.setFetchSize(batchSize);
+            Long accumulatedTime;
+            int availId;
             while (rs.next()) {
-                Integer availId = rs.getInt(1);
-                Long accumulatedTime = rtn.get(availId);
-                rtn.put(availId, extractStrtg.extract(rs)+(accumulatedTime!=null?accumulatedTime:0));
+                availId = rs.getInt(1);
+                accumulatedTime = rtn.get(Integer.valueOf(availId));
+                rtn.put(availId, Long.valueOf(extractStrtg.extract(rs)+accumulatedTime.longValue()));
             }            
         } finally {
-            DBUtil.closeStatement(AvailabilityDataDAO.class.getName(), stmt);
-            DBUtil.closeResultSet(AvailabilityDataDAO.class.getName(), rs);
+            DBUtil.closeResultSet(logCtx, rs);
+            DBUtil.closeStatement(logCtx, stmt);
         }
         return rtn;
     }
@@ -470,8 +473,9 @@ public class AvailabilityDataDAO
     }
     protected Map<Integer, Double> calcAvg(Map<Integer,Long> allAvail, Map<Integer,Long> availUp) {
         Map<Integer,Double> rtn = new HashMap<Integer,Double>();
+        Long availUpTime = null;
         for (Integer availId : allAvail.keySet()) {
-            Long availUpTime = availUp.get(availId);
+            availUpTime = availUp.get(availId);
             rtn.put(availId, availUpTime!=null?((double)availUpTime/allAvail.get(availId)):0);
         }
         return rtn;
