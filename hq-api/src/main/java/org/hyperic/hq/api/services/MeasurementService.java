@@ -1,5 +1,6 @@
 package org.hyperic.hq.api.services;
 
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
@@ -15,6 +16,7 @@ import javax.ws.rs.core.MediaType;
 import org.apache.cxf.jaxrs.model.wadl.Description;
 import org.apache.cxf.jaxrs.model.wadl.Descriptions;
 import org.apache.cxf.jaxrs.model.wadl.DocTarget;
+import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementBatchResponse;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequest;
@@ -57,5 +59,5 @@ public interface MeasurementService {
     public ResourceMeasurementBatchResponse getAggregatedMetricData(final ResourceMeasurementRequests request, 
             @QueryParam("begin") final Date begin, 
             @QueryParam("end") final Date end) 
-            throws ParseException, PermissionException, SessionNotFoundException, SessionTimeoutException;
+            throws ParseException, PermissionException, SessionNotFoundException, SessionTimeoutException, ObjectNotFoundException, UnsupportedOperationException, SQLException;
 }
