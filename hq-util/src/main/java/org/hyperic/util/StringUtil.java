@@ -733,5 +733,9 @@ public class StringUtil {
         	character = iterator.next();
         }
         return result.toString();        
-    }    
+    }
+
+    public static boolean isNullOrEmpty(String str) {
+        return str == null || str.trim().length() == 0;
+    }
 }

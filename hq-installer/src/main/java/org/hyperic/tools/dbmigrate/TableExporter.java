@@ -25,9 +25,10 @@
  */
 package org.hyperic.tools.dbmigrate;
 
+import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
@@ -36,8 +37,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -164,6 +165,8 @@ public class TableExporter extends TableProcessor<Worker> {
                     }//EO if there were missing properties
                     
                     this.log("-----------------  Finished embedding versions into hq-server.conf") ; 
+                   
+                    this.generateTableMetadataFiles((File)context.get(Utils.STAGING_DIR)); 
                     
                 }catch(Throwable t2) {
                     thrown = MultiRuntimeException.newMultiRuntimeException(thrown, t2);
@@ -174,6 +177,33 @@ public class TableExporter extends TableProcessor<Worker> {
             
             if(thrown != null) throw thrown;
         }//EO catch block  
+    }//EOM 
+    
+    private final void generateTableMetadataFiles(final File dataDir) throws Throwable { 
+        this.log("-----------------  Commencing table metadata file generaetion sequence") ;
+       
+        BufferedWriter fr = null ;
+        int noOfProcessedRecords = 0 ; 
+        
+        for(Table table : this.tablesContainer.tables.values()) {
+            //only generate file if there were generated records 
+            if( (noOfProcessedRecords = table.noOfProcessedRecords.get()) == 0) continue ; 
+            
+            fr = new BufferedWriter(new FileWriter(new File(dataDir, table.name + File.separator + table.name + Utils.TABLE_METADATA_FILE_SUFFIX))) ; 
+            try{ 
+                fr.write(table.columnsClause.toString()) ;
+                fr.newLine() ; 
+                fr.write(""+noOfProcessedRecords) ;  
+            }catch(Throwable t) { 
+                this.log("Error generating metadata file for table: " + table.name) ; 
+                throw t ; 
+            }finally{
+                
+                Utils.close(fr) ; 
+            }//EO catch block 
+        }//EO while there are more tables
+        
+        this.log("-----------------  Finished table metadata file generaetion sequence") ;
     }//EOM 
 
     protected final Worker newWorkerInner(final ForkContext<Table,Worker> context, final Connection conn, final File stagingDir) {
@@ -258,6 +288,9 @@ public class TableExporter extends TableProcessor<Worker> {
                 final ResultSetMetaData rsmd = rs.getMetaData();
                 final int columnCount = rsmd.getColumnCount();
                 
+                final StringBuilder columnsClauseBuilder = table.getColumnNamesBuilder() ;  
+                final boolean shouldGenerateColumnsClause  = (columnsClauseBuilder != null)  ;  
+                
                 final DBDataType[] columns = new DBDataType[columnCount];
 
                 int recordCount = 0;
@@ -289,7 +322,14 @@ public class TableExporter extends TableProcessor<Worker> {
                     //stream the data from the resultset into the file using the DBDataType strategy corersponding to the 
                     //datatype 
                     for (int i = 0; i < columnCount; i++) {
-                      if (columns[i] == null) columns[i] = DBDataType.reverseValueOf(rsmd.getColumnType(i + 1));
+                      if (columns[i] == null) { 
+                          columns[i] = DBDataType.reverseValueOf(rsmd.getColumnType(i + 1));
+                         
+                          if(shouldGenerateColumnsClause) { 
+                              columnsClauseBuilder.append(rsmd.getColumnName(i + 1)); 
+                              if(i < columnCount-1) columnsClauseBuilder.append(",") ; 
+                          }//EO if should generate the columns header 
+                      }//EO if metadata was not yet initialized 
                       //deposit the value into the async buffer and return
                       columns[i].serialize(this.fileStreamer, rs, i + 1);
                       
