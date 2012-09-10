@@ -373,7 +373,11 @@ public class MxServerDetector
         return isInstallTypeVersion(dir);
     }
     
-    protected  ServerResource getServerResource(MxProcess process) {
+    protected void setProductConfig(ServerResource server, ConfigResponse config, long pid) throws PluginException {
+        super.setProductConfig(server, config);
+    }
+    
+    protected  ServerResource getServerResource(MxProcess process) throws PluginException {
         String dir = process.getInstallPath();
         //set process.query using the same query used to find the process,
         //with PROC_HOME_DIR (if defined) expanded to match dir
@@ -409,7 +413,7 @@ public class MxServerDetector
 		}
 
         // default anything not auto-configured
-        setProductConfig(server, config);
+        setProductConfig(server, config,process.getPid());
         discoverServerConfig(server, process.getPid());
 
         server.setMeasurementConfig();

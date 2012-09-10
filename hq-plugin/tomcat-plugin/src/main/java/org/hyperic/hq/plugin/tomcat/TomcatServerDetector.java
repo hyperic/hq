@@ -32,6 +32,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.product.DetectionUtil;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.SigarMeasurementPlugin;
@@ -39,6 +40,7 @@ import org.hyperic.hq.product.Win32ControlPlugin;
 import org.hyperic.hq.product.jmx.MxServerDetector;
 import org.hyperic.hq.product.jmx.MxUtil;
 import org.hyperic.hq.product.pluginxml.PluginData;
+import org.hyperic.sigar.SigarException;
 import org.hyperic.sigar.win32.RegistryKey;
 import org.hyperic.sigar.win32.Win32Exception;
 import org.hyperic.util.config.ConfigResponse;
@@ -287,7 +289,18 @@ public class TomcatServerDetector
     }
 
     @Override
-    protected ServerResource getServerResource(MxProcess process) {
+    protected void setProductConfig(ServerResource server, ConfigResponse config, long pid) throws PluginException {
+        try {
+            DetectionUtil.populatePorts(getSigar(), new long[] {pid}, config);
+        } catch (SigarException e) {
+            log.error(e);
+            throw new PluginException(e);
+        }
+        super.setProductConfig(server, config);
+    }
+    
+    @Override
+    protected ServerResource getServerResource(MxProcess process) throws PluginException {
         ServerResource server = super.getServerResource(process);
         String catalinaBase = server.getInstallPath();
         
