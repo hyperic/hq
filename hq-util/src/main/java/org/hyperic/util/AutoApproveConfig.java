@@ -26,11 +26,14 @@ package org.hyperic.util;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.util.security.SecurityUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * Holds the configuration for auto-discovered resources auto-approval.
@@ -55,29 +58,43 @@ public class AutoApproveConfig {
     /**
      * Loaded from the properties file.
      */
-    private final Properties autoApproveProps;
+    private Properties autoApproveProps = null;
 
     /**
      * Creates a new auto-approve configuration instance, providing the name of the agent's configuration folder where
      * the auto-approve properties file may exist.
      *
      * @param agentConfigDirName the name of the folder where the agent keeps it configuration files.
+     * @param encryptionKeyFileName the name of the file where the encryption key is held.
      * @throws IllegalArgumentException if the provided configuration directory isn't valid.
      */
-    public AutoApproveConfig(String agentConfigDirName) {
-        // make sure the provided directory name isn't null nor empty.
-        if (agentConfigDirName == null || agentConfigDirName.trim().length() == 0) {
-            String msg = "Invalid agent configuration directory name";
-            LOG.error(msg);
-            throw new IllegalArgumentException(msg);
+    public AutoApproveConfig(String agentConfigDirName, String encryptionKeyFileName) {
+        // make sure the provided directory name isn't null/empty.
+        if (StringUtil.isNullOrEmpty(agentConfigDirName)) {
+            LOG.error("Invalid agent configuration directory name - auto configuration of resources is skipped");
+            return;
+        }
+
+        // make sure the provided encryption key file name isn't null/empty.
+        if (StringUtil.isNullOrEmpty(encryptionKeyFileName)) {
+            LOG.error("Invalid encryption key file name - auto configuration of resources is skipped");
+            return;
         }
 
         // reference the configuration directory and make sure it exists.
         File agentConfigDir = new File(agentConfigDirName);
         if (!agentConfigDir.exists()) {
-            String msg = "Agent configuration directory doesn't exist: " + agentConfigDirName;
-            LOG.error(msg);
-            throw new IllegalArgumentException(msg);
+            LOG.error("Agent configuration directory doesn't exist: " +
+                    agentConfigDir.getAbsolutePath() + "- auto configuration of resources is skipped");
+            return;
+        }
+
+        // reference the encryption key file and make sure it exists.
+        File encryptionKeyFile = new File(encryptionKeyFileName);
+        if (!encryptionKeyFile.exists()) {
+            LOG.error("Encryption key file doesn't exist: " +
+                    encryptionKeyFile.getAbsolutePath() + "- auto configuration of resources is skipped");
+            return;
         }
 
         // reference the auto-approve properties file (if exists).
@@ -85,15 +102,23 @@ public class AutoApproveConfig {
 
         // if the file exists then load it.
         if (autoApprovePropsFile.exists()) {
-            this.autoApproveProps = new Properties();
-            Properties tmpProps = loadAutoApproveProps(autoApprovePropsFile);
-            for (Object keyRef : tmpProps.keySet()) {
-                String key = (String) keyRef;
-                this.autoApproveProps.put(key, tmpProps.getProperty(key));
+            // The path to the encryption key file.
+            String encryptionKeyFilePath = encryptionKeyFile.getAbsolutePath();
+            // The encryption key.
+            String encryptionKey;
+            try {
+                encryptionKey = PropertyEncryptionUtil.getPropertyEncryptionKey(encryptionKeyFilePath);
+            } catch (PropertyUtilException e) {
+                LOG.error("Failed to read the properties encryption key - auto configuration of resources is skipped");
+                return;
             }
+
+            this.autoApproveProps = loadAutoApproveProps(autoApprovePropsFile, encryptionKey);
             LOG.info("Resources auto-approval configuration loaded");
+
+            // Make sure all properties are encrypted
+            ensurePropertiesEncryption(autoApprovePropsFile, encryptionKeyFilePath);
         } else {
-            this.autoApproveProps = null;
             LOG.info("Resources auto-approval configuration not provided");
         }
     } // EO Constructor(String)
@@ -155,16 +180,52 @@ public class AutoApproveConfig {
      * @param autoApprovePropsFile the properties file to load.
      * @return a new <code>Properties</code> instance or null of the reading the file fails.
      */
-    private Properties loadAutoApproveProps(File autoApprovePropsFile) {
+    private Properties loadAutoApproveProps(File autoApprovePropsFile, String encryptionKey) {
         try {
+            // Load the properties from the files system.
             Properties result = new Properties();
             result.load(new FileInputStream(autoApprovePropsFile));
+
+            // Iterate the properties and decrypt if necessary.
+            for (Object key : result.keySet()) {
+                // Get the next property.
+                String keyStr = (String) key;
+                String prop = result.getProperty(keyStr);
+                // If the property is encrypted -- decrypt and replace it.
+                if (SecurityUtil.isMarkedEncrypted(prop)) {
+                    String decryptedProp = SecurityUtil.decrypt(
+                            SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM, encryptionKey, prop);
+                    result.setProperty(keyStr, decryptedProp);
+                }
+            }
             return result;
         } catch (IOException exc) {
             LOG.error("failed to load the properties file", exc);
         }
 
         return null;
+    } // EOM
+
+    /**
+     * Make sure that all the properties in the auto-approve properties file are encrypted.
+     *
+     * @param autoApprovePropsFile the properties file to encrypt.
+     * @param encryptionKeyFilePath the path to the encryption key file.
+     */
+    private void ensurePropertiesEncryption(File autoApprovePropsFile, String encryptionKeyFilePath) {
+        // Create od Strings keys set
+        Set<String> encSet = new HashSet<String>(this.autoApproveProps.size());
+        for (Object key : autoApproveProps.keySet()) {
+            encSet.add((String) key);
+        }
+
+        // Encrypt.
+        try {
+            PropertyEncryptionUtil.ensurePropertiesEncryption(
+                    autoApprovePropsFile.getAbsolutePath(), encryptionKeyFilePath, encSet);
+        } catch (PropertyUtilException exc) {
+            LOG.info("Failed to ensure the encryption of auto-approve properties: " + exc.getMessage());
+        }
     } // EOM
 
 }
