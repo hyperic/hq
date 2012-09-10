@@ -145,7 +145,6 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     }
 
     
-    // check if same hibernate session for all / o/w add transactional in method def
     @Transactional(readOnly = true)
     public ResourceMeasurementBatchResponse getAggregatedMetricData(ApiMessageContext apiMessageContext,
             ResourceMeasurementRequests hqMsmtReqs, Date begin, Date end) throws TimeframeBoundriesException, PermissionException, SQLException, UnsupportedOperationException, ObjectNotFoundException {
