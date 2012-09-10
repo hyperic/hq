@@ -139,7 +139,7 @@ public class PropertyUtil {
             encryptedEntriesToStore.put(entryToStore.getKey(), encryptedVal);
         }
 
-        storeProperties(file,encryptedEntriesToStore);
+        _storeProperties(file,encryptedEntriesToStore);
     }
 
     /**
@@ -151,6 +151,24 @@ public class PropertyUtil {
      * @param props the properties to add/update.
      */
     public static void storeProperties(String propFilePath, Map<String, String> props) throws PropertyUtilException {
+
+        Map<String,String> duplicatedEntriesToStore = new HashMap<String,String>();
+        for (Map.Entry<String, String> entryToStore : props.entrySet()) {
+            duplicatedEntriesToStore.put(entryToStore.getKey(), entryToStore.getValue());
+        }
+
+        _storeProperties(propFilePath, duplicatedEntriesToStore);
+    }
+
+    /**
+     * Saves the provided map of keys and values into the properties file specified by <code>propFilePath</code>.
+     * Values of properties that already exist int the file are overwritten. New values are placed near the end of the
+     * file.
+     *
+     * @param propFilePath the path (absolute/relative) to the properties file to edit.
+     * @param props the properties to add/update.
+     */
+    private static void _storeProperties(String propFilePath, Map<String, String> props) throws PropertyUtilException {
         // If the provided properties map is null or empty then exit the method.
         if (props == null || props.size() < 1) {
             return;
