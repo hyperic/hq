@@ -402,12 +402,12 @@ public class AvailabilityDataDAO
             conn = dbUtil.getConnection();
             IAvailExtractionStrategy midWinStrtg = new MidWinAvailExtractionStrategy();
             IAvailExtractionStrategy winEdgeStrtg = new WinEdgeAvailExtractionStrategy(start, end);
-            Map<Integer,Long> msmtToAllAvailSumTimeInWin = executeBatchAvailQuery(conn,sqlAllAvailInWin,batchSize,midWinStrtg);
-            Map<Integer,Long> msmtToAllAvailInWinEdge = executeBatchAvailQuery(conn,sqlAllAvailAtWinEdges,batchSize,winEdgeStrtg);
+            Map<Integer,Long> msmtToAllAvailSumTimeInWin = executeAvailQuery(conn,sqlAllAvailInWin,batchSize,midWinStrtg);
+            Map<Integer,Long> msmtToAllAvailInWinEdge = executeAvailQuery(conn,sqlAllAvailAtWinEdges,batchSize,winEdgeStrtg);
             Map<Integer,Long> msmtToAllAvailSumTime = merge(msmtToAllAvailSumTimeInWin,msmtToAllAvailInWinEdge);
             
-            Map<Integer,Long> msmtToAvailUpSumTimeInWin = executeBatchAvailQuery(conn,sqlAvailUpInWin,batchSize,midWinStrtg);
-            Map<Integer,Long> msmtToAvailUpAvailInWinEdge = executeBatchAvailQuery(conn,sqlAvailUpAtWinEdges,batchSize,winEdgeStrtg);
+            Map<Integer,Long> msmtToAvailUpSumTimeInWin = executeAvailQuery(conn,sqlAvailUpInWin,batchSize,midWinStrtg);
+            Map<Integer,Long> msmtToAvailUpAvailInWinEdge = executeAvailQuery(conn,sqlAvailUpAtWinEdges,batchSize,winEdgeStrtg);
             Map<Integer,Long> msmtToAvailUpSumTime = merge(msmtToAvailUpSumTimeInWin,msmtToAvailUpAvailInWinEdge);
            
             Map<Integer,Double> msmtToAvailAvg = calcAvg(msmtToAllAvailSumTime,msmtToAvailUpSumTime);
@@ -438,18 +438,18 @@ public class AvailabilityDataDAO
             return Math.min(availSectionEnd, this.timeFrameEnd) - Math.max(availSectionStart, this.timeFrameStart);
         }
     }
-    protected Map<Integer,Long> executeBatchAvailQuery(Connection conn, final String sql, final int batchSize, IAvailExtractionStrategy extractStrtg) throws SQLException {
+    protected Map<Integer,Long> executeAvailQuery(Connection conn, final String sql, final int batchSize, IAvailExtractionStrategy extractStrtg) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         Map<Integer,Long> rtn = new HashMap<Integer, Long>();
         try {
             stmt = conn.prepareStatement(sql);
-                rs = stmt.executeQuery();
-                while (rs.next()) {
-                    Integer availId = rs.getInt(1);
-                    Long accumulatedTime = rtn.get(availId);
-                    rtn.put(availId, extractStrtg.extract(rs)+(accumulatedTime!=null?accumulatedTime:0));
-                }            
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                Integer availId = rs.getInt(1);
+                Long accumulatedTime = rtn.get(availId);
+                rtn.put(availId, extractStrtg.extract(rs)+(accumulatedTime!=null?accumulatedTime:0));
+            }            
         } finally {
             DBUtil.closeStatement(AvailabilityDataDAO.class.getName(), stmt);
             DBUtil.closeResultSet(AvailabilityDataDAO.class.getName(), rs);
