@@ -39,7 +39,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
@@ -254,7 +253,11 @@ public class PostgreSQLServerDetector extends ServerDetector implements AutoServ
             ConfigResponse cfg = props.get(i);
             for (Iterator<String> it = cfg.getKeys().iterator(); it.hasNext();) {
                 String key = it.next();
-                res = res.replace("${" + key + "}", cfg.getValue(key));
+                String val = cfg.getValue(key);
+                if (val == null) {
+                    val = "";
+                }
+                res = res.replace("${" + key + "}", val);
             }
         }
         return res.trim();
@@ -292,7 +295,7 @@ public class PostgreSQLServerDetector extends ServerDetector implements AutoServ
         BufferedReader br = new BufferedReader(new InputStreamReader(stream));
         StringBuilder sb = new StringBuilder();
         try {
-            String line = null;
+            String line;
             while ((line = br.readLine()) != null) {
                 sb.append(line).append("\n");
             }

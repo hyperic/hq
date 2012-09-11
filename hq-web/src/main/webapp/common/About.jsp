@@ -69,7 +69,7 @@
   </tr>
   <tr>
     <td valign="top" class="DisplayContent"><fmt:message key="about.MoreInfo.Label"/><br>
-    <html:link href="http://support.hyperic.com" onclick="window.close();window.open('http://support.hyperic.com');"><fmt:message key="about.MoreInfo.LinkSupport"/></html:link><br>
+    <html:link href="https://www.vmware.com/support/pubs/vfabric-hyperic" onclick="window.close();window.open('https://www.vmware.com/support/pubs/vfabric-hyperic');"><fmt:message key="about.MoreInfo.LinkSupport"/></html:link><br>
     <html:link href="http://forums.hyperic.org"  onclick="window.close();window.open('http://forums.hyperic.org');"><fmt:message key="about.MoreInfo.LinkForums"/></html:link><br>
     &nbsp;</td>
     <td valign="bottom" align="right" class="DisplayContent"><html:img page="/images/dash_movecontent_del-on.gif" onclick="window.close()"/></td>

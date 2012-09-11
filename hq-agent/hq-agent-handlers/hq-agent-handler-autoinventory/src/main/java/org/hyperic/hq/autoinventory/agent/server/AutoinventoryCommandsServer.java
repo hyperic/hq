@@ -27,10 +27,7 @@ package org.hyperic.hq.autoinventory.agent.server;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.agent.AgentAPIInfo;
-import org.hyperic.hq.agent.AgentAssertionException;
-import org.hyperic.hq.agent.AgentRemoteException;
-import org.hyperic.hq.agent.AgentRemoteValue;
+import org.hyperic.hq.agent.*;
 import org.hyperic.hq.agent.server.*;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIServerValue;
@@ -114,7 +111,8 @@ public class AutoinventoryCommandsServer implements AgentServerHandler, AgentNot
         }
 
         // Read the auto-approve configuration.
-        _autoApproveConfig = new AutoApproveConfig(_agent.getBootConfig().getConfDirName());
+        _autoApproveConfig = new AutoApproveConfig(
+                _agent.getBootConfig().getConfDirName(), AgentConfig.DEFAULT_PROP_ENC_KEY_FILE);
 
         AutoinventoryPluginManager pluginManager;
 

@@ -91,6 +91,19 @@ public class PropertiesMerger extends Properties{
     
     public final void setPrunePropertiesList(final Collection<String> pruneProperties)  {
         this.pruneProperties = pruneProperties; 
+    }//EOM
+    
+    public final void setOverridePropertyValues(final Map<String,String> mapOverrideValues) { 
+        if(mapOverrideValues == null) return ; 
+        
+        String key = null, value = null, previousValue = null ;  
+        for(Map.Entry<String,String> entry : mapOverrideValues.entrySet()) {
+            key = (String) entry.getKey(); 
+            value = (String) entry.getValue() ;
+            
+            previousValue = (String) this.getProperty(key) ; 
+            if(this.isLoaded && !value.equals(previousValue)) this.delta.put(key.toString(), new String[] { value, previousValue}) ;
+        }//EO while there are more override property values 
     }//EOM 
     
     public final void setOverrideFile(final String path) throws IOException{

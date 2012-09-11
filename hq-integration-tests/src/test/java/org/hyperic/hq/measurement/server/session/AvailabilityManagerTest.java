@@ -244,6 +244,13 @@ public class AvailabilityManagerTest {
         }
         Assert.assertTrue(avails.size() == 1);
     }
+    
+    
+    
+    private void dumpAvailsToLogger(List<AvailabilityDataRLE> avails, long startTime, long endTime) {
+        log.error("Between times: " + startTime + "->" + endTime);
+        dumpAvailsToLogger(avails);    
+    }
 
     private void dumpAvailsToLogger(List<AvailabilityDataRLE> avails) {
         Integer id = null;
@@ -624,7 +631,7 @@ public class AvailabilityManagerTest {
     	backfill(now);
     	
     	// validate statuses
-        long baseTime = TimingVoodoo.roundDownTime(now, 600000);
+        long baseTime = oldTimeStamp-interval; //TimingVoodoo.roundDownTime(now, 600000);
         long endTime = now + (interval * 20); 
         
         // check VM Platform status
@@ -650,8 +657,8 @@ public class AvailabilityManagerTest {
         List<AvailabilityDataRLE> avails = aMan.getHistoricalAvailData(meas.getResource(), startTime, endTime);
         int availsSize = avails.size();
         if (availsSize != expectedNumStatuses)
-        	dumpAvailsToLogger(avails);
-        Assert.assertEquals(expectedNumStatuses, expectedNumStatuses);
+        	dumpAvailsToLogger(avails, startTime, endTime);
+        Assert.assertEquals(expectedNumStatuses, availsSize);
         AvailabilityDataRLE lastAvail = avails.get(availsSize-1);
         Assert.assertEquals(assertionMessage, new Double(expectedStatus), new Double(lastAvail.getAvailVal()));
     }
