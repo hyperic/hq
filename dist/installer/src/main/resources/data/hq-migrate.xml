@@ -132,9 +132,7 @@
 			<table name="EAM_ALERT" />
 			<table name="EAM_ALERT_ACTION_LOG" />
 			<table name="EAM_ALERT_CONDITION" />
-			<table name="EAM_ALERT_CONDITION_LOG"> 
-				<column name="VALUE" valueHandler="STRING_NULL_CHAR_REPLACER" />
-			</table> 
+			<table name="EAM_ALERT_CONDITION_LOG" />
 			<table name="EAM_ALERT_DEFINITION" />
 			<table name="EAM_ALERT_DEF_STATE" />
 			<table name="EAM_APPLICATION" />

@@ -292,9 +292,7 @@ public class TableExporter extends TableProcessor<Worker> {
                 final boolean shouldGenerateColumnsClause  = (columnsClauseBuilder != null)  ;  
                 
                 final DBDataType[] columns = new DBDataType[columnCount];
-                final ValueHandlerType[] valueHandlers = new ValueHandlerType[columnCount] ; 
 
-                String columnName = null ;
                 int recordCount = 0;
                 int batchCounter = 0;
                 Throwable fileStreamerException = null ; 
@@ -327,17 +325,13 @@ public class TableExporter extends TableProcessor<Worker> {
                       if (columns[i] == null) { 
                           columns[i] = DBDataType.reverseValueOf(rsmd.getColumnType(i + 1));
                          
-                          columnName = rsmd.getColumnName(i + 1) ; 
-                          valueHandlers[i] = table.getValueHandler(columnName) ; 
-                          
                           if(shouldGenerateColumnsClause) { 
-                              columnsClauseBuilder.append(columnName); 
+                              columnsClauseBuilder.append(rsmd.getColumnName(i + 1)); 
                               if(i < columnCount-1) columnsClauseBuilder.append(",") ; 
                           }//EO if should generate the columns header 
                       }//EO if metadata was not yet initialized 
                       //deposit the value into the async buffer and return
-                      
-                      columns[i].serialize(this.fileStreamer, rs, i + 1, valueHandlers[i]);
+                      columns[i].serialize(this.fileStreamer, rs, i + 1);
                       
                     }//EO while there are more columns 
 

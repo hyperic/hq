@@ -352,7 +352,6 @@ public abstract class TableProcessor<T extends Callable<TableProcessor.Table[]>>
       protected AtomicInteger noOfProcessedRecords ; 
       protected boolean shouldTruncate ;
       protected StringBuilder columnsClause ; 
-      private Map<String,ValueHandlerType> valueHandlers ; 
       
       public Table(){
           this.noOfProcessedRecords = new AtomicInteger()  ;
@@ -362,15 +361,6 @@ public abstract class TableProcessor<T extends Callable<TableProcessor.Table[]>>
       Table(final String name) {
           this() ;
           this.name = name;  
-      }//EOM 
-      
-      public final void addConfiguredColumn(final Column column) { 
-          if(this.valueHandlers == null) this.valueHandlers = new HashMap<String,ValueHandlerType>() ; 
-          this.valueHandlers.put(column.name, column.valueHandler) ;
-      }//EOM 
-      
-      public final ValueHandlerType getValueHandler(final String columnName) { 
-          return (this.valueHandlers == null ? null : this.valueHandlers.get(columnName)) ; 
       }//EOM 
       
       /**
@@ -398,20 +388,6 @@ public abstract class TableProcessor<T extends Callable<TableProcessor.Table[]>>
     }//EOM 
       
   }//EO inner class Table
-  
-  public static final class Column { 
-      String name ;
-      ValueHandlerType valueHandler ;   
-      
-      public final void setName(final String name) { 
-          this.name = name ; 
-      }//EOm 
-      
-      public final void setValueHandler(final String valueHandler) { 
-          this.valueHandler = ValueHandlerType.valueOf(valueHandler) ; 
-      }//EOM 
-      
-  }//EOM 
   
   /**
    * Partitionable table 
