@@ -196,24 +196,30 @@ public abstract class WeblogicDetector extends ServerDetector implements AutoSer
                 hasCreds = false;
             }
         }
-        DetectionUtil.populatePorts(getSigar(), new long[] {proc.getPid()}, productConfig);
+        DetectionUtil.populateListeningPorts(proc.getPid(), productConfig, true);
         if (getLog().isDebugEnabled()) {
             getLog().debug(getName() + " config: " + productConfig);
         }
 
-        String installpath = getCanonicalPath(installDir.getPath());
+        String installpath = getCanonicalPath(installDir.getPath() + File.separator + "servers" + File.separator + srvConfig.name);
+        log.debug("[discoverServer] installDir=" + installDir);
+        log.debug("[discoverServer] installpath=" + installpath);
+        if (!new File(installpath).exists()) {
+            installpath = getCanonicalPath(installDir.getPath());
+        }
+
         List servers = new ArrayList();
         ServerResource server = createServerResource(installpath);
 
         String name = getTypeInfo().getName()
                 + " " + srvConfig.domain + " " + srvConfig.name;
 		if (WeblogicProductPlugin.usePlatformName && WeblogicProductPlugin.NEW_DISCOVERY) {
-			name = getPlatformName() + " " + name;
+		    name = getPlatformName() + " " + name;
 		}
 
         server.setName(name);
-        if(WeblogicProductPlugin.NEW_DISCOVERY)
-            server.setIdentifier(name);
+        setIdentifier(server,name);
+        log.debug("[discoverServer] identifier=" + server.getIdentifier());
         
         setProductConfig(server, productConfig);
         setControlConfig(server, controlConfig);
@@ -438,6 +444,8 @@ public abstract class WeblogicDetector extends ServerDetector implements AutoSer
 
         return aiservice;
     }
+
+    abstract void setIdentifier(ServerResource server, String name);
 
     public class WLSProc {
 
