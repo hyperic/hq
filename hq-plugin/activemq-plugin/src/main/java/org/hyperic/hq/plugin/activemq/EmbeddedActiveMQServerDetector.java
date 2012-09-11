@@ -171,7 +171,7 @@ public class EmbeddedActiveMQServerDetector
     }
 
     @Override
-    protected ServerResource getServerResource(MxProcess process) throws PluginException {
+    protected ServerResource getServerResource(MxProcess process) {
         ServerResource server = super.getServerResource(process);
         String catalinaBase = server.getInstallPath();
 
