@@ -107,8 +107,8 @@ begin
      	 	execute stmt ;
      	 	--raise notice 'alter statment %', stmt;
      	  
-     	 	exception when others then 
-		 	raise notice 'An Error Had occured while Disabling triggers for table %: % %', tableName, SQLERRM, SQLSTATE;
+     	 	--exception when others then 
+		 	--raise notice 'An Error Had occured while Disabling triggers for table %: % %', tableName, SQLERRM, SQLSTATE;
 		  end ;
 		  
 		  if instructions[2] = '1' then 

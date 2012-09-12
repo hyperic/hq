@@ -162,11 +162,15 @@ public class PropertiesMerger extends Properties{
         if(this.delta.isEmpty()) return ; 
         
         FileOutputStream fos = null ;
-        String key = null, value = null, oldValue = null ; 
+        String key = null, value = null, oldValue = null, escapedOldValue = null;  
         Pattern pattern = null ; 
         Matcher matcher = null ;
         String[] arrValues = null; 
-        try{ 
+        try{  
+            final String REGEX_ESCAPE_CHARS_REGEX = "([()+\\\\])" ; 
+            final String REGEX_ESCAPE_CHARS_REPLACEMENT = "\\\\$1" ; 
+            final String WHITESPACSES_REGEX = "(?<!^)\\s+(?!$)" ; 
+            final String WHITESPACES_REPLACEMENT = "(\\\\s*.*\\\\s*)" ;
             
             for(Map.Entry<String,String[]> entry : this.delta.entrySet()) { 
                 
@@ -178,7 +182,23 @@ public class PropertiesMerger extends Properties{
                 if(arrValues[1] == null) { 
                     this.baseFileContent = this.baseFileContent + "\n" + key +  "=" + value ;   
                 }else { 
-                    oldValue = arrValues[1].replaceAll("([():+])", "\\\\$1").replaceAll("\\s+", "(\\\\s*.*\\\\s*)") ; 
+                    //first escape all characters with special meaning then replace all whitespaces which do not appear  
+                    //at the beginning or end of the input with multi line whilespace regex
+                    //additionally add a replacement alternative if the tuple whereby the properties file reserved chars are escaped 
+                    //(viable scenario with auto generated property files)
+                    //eventually the replacement regex will follow the format of: <key= value|escaped value>
+                    escapedOldValue = (String) saveConvertMethod.invoke(this, arrValues[1], false/*escapeSpace*/, true /*escUnicode*/);
+                    
+                    //oldValue = arrValues[1].replaceAll("([()+\\\\])", "\\\\$1").replaceAll("(?<!^)\\s+(?!$)", "(\\\\s*.*\\\\s*)") ;
+                    oldValue = arrValues[1].replaceAll(REGEX_ESCAPE_CHARS_REGEX, REGEX_ESCAPE_CHARS_REPLACEMENT).replaceAll(WHITESPACSES_REGEX, WHITESPACES_REPLACEMENT) ;
+                    
+//                    oldValue = "(?:" + oldValue + "|" +  escapedOldValue.replaceAll("([()+\\\\])", "\\\\$1").replaceAll("(?<!^)\\s+(?!$)", "(\\\\s*.*\\\\s*)") + ")" ;
+                    escapedOldValue = escapedOldValue.replaceAll(REGEX_ESCAPE_CHARS_REGEX, REGEX_ESCAPE_CHARS_REPLACEMENT).replaceAll(WHITESPACSES_REGEX, WHITESPACES_REPLACEMENT) ;
+                    
+                    if(!oldValue.equals(escapedOldValue)) { 
+                        oldValue = "(?:" + oldValue + "|" +  escapedOldValue + ")" ; 
+                    }//EO if escape value has different representation 
+                    
                     pattern = Pattern.compile(key+"\\s*=(\\s*.*\\s*)"+ oldValue , Pattern.MULTILINE) ;
                     //pattern = Pattern.compile(key+"\\s*=.*\n", Pattern.MULTILINE) ;
                     matcher = pattern.matcher(this.baseFileContent) ; 
@@ -233,14 +253,33 @@ public class PropertiesMerger extends Properties{
     
     public static void main(String[] args) throws Throwable {
         //String regex = "server.database-password=ENC(ZsbvmndZgX3mclWtDCjX7g==) 2ndline" ;
-        final String input = "\nserver.java.opts=-Djava.awt.headless=true -XX:MaxPermSize=192m -Xmx512m -Xms512m -XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC\n" ; 
-        //final String input = "\n" + "-XX:+HeapDumpOnOutOfMemoryError" + "\n" ;
-        String regex = input ; 
+        final String input = "#server.database-url=jdbc\\:mysql\\://10.131.9.171\\:3306/HQ\n" +
+"#server.encryption-key=password\n" +
+"#server.database-user=hqadmin\n" +
+"#server.database-password=ENC(ZH4ttiFMPh4tc4kR+F/wFA\\=\\=)\n" +
+"server.database-url=jdbc\\:mysql\\://10.131.9.171\\:3306/FC\n" +
+"server.encryption-key=mickymouse\n" +
+"server.database-user=firstcit\n" +
+"server.database-password=ENC(JN0nmlpNxvjZYotfEgew9MOXG2CXm8wz)\n" +
+"\n" +
+"CAM_SERVER_VERSION=4.6.0.1\n" +
+"CAM_SCHEMA_VERSION=3.210" ; 
         
-        regex = regex.replaceAll("([():+])", "\\\\$1") ;
-        final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE) ; 
+        //final String input = "\n" + "-XX:+HeapDumpOnOutOfMemoryError" + "\n" ;
+        //String regex = "server.database-driver\\s*=(\\s*.*\\s*)com.mysql.jdbc.Driver " ; //(\\s*.*\\s*)" ;
+        String regex1 = "server.database-url=jdbc\\:mysql\\://10.131.9.171\\:3306/FC" ;
+        String regex = "server.database-url=jdbc:mysql://10.131.9.171:3306/FC" ;
+        //System.out.println("server.database-url=jdbc\\:mysql\\://10.131.9.171\\:3306/FC" );
+        regex = regex.replaceAll("([()+\\\\])", "\\\\$1").replaceAll("(?<!^)\\s+(?!$)", "(\\\\s*.*\\\\s*)") ;
+        regex = regex + "|" + regex1.replaceAll("([()+\\\\])", "\\\\$1").replaceAll("(?<!^)\\s+(?!$)", "(\\\\s*.*\\\\s*)") ;
+        System.out.println(regex);
+        System.out.println();
+         final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE) ; 
         final Matcher matcher = pattern.matcher(input) ; 
-        System.out.println(matcher.replaceAll("server.java.opts=new value")) ;  
+       System.out.println(matcher.replaceAll("server.database-url=this.is.the.url")) ;  
+       
+       
+     
         
     }//EOM 
 }//EOC 
