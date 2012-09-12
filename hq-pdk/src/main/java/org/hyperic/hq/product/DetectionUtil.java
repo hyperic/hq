@@ -27,21 +27,14 @@ package org.hyperic.hq.product;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.system.NetConnectionData;
-import org.hyperic.hq.plugin.system.NetstatData;
 import org.hyperic.sigar.Sigar;
-import org.hyperic.sigar.SigarException;
 import org.hyperic.sigar.SigarProxy;
 import org.hyperic.sigar.SigarProxyCache;
 import org.hyperic.util.config.ConfigResponse;
@@ -133,11 +126,10 @@ public class DetectionUtil {
 						continue;
 					}
 					//get the port number
-					if (line.contains(":::")) {
-						line = line.replaceAll(":::", ":").trim();
-					}
-					line = line.substring(line.indexOf(":") + 1);
+					line = line.substring(line.indexOf(":"));
 					line = line.substring(0, line.indexOf(" "));
+                    line = line.substring(line.lastIndexOf(":") + 1);
+
 					line = line.trim();
 					if (isNumber(line)) {
 						ports.add(line);
@@ -308,5 +300,10 @@ public class DetectionUtil {
         }
         return sigar;
     }
-	
+
+	public static void main(String[] args) {
+	    Pattern p = Pattern.compile("a*b");
+	    Matcher m = p.matcher("aaaaab");
+	    boolean b = m.matches();
+    }
 }
