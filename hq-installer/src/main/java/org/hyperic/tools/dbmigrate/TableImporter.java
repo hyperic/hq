@@ -151,6 +151,7 @@ public class TableImporter extends TableProcessor<Worker> {
             stmt.executeQuery("select fmigrationPreConfigure('" + this.preImportActionsInstructions.toString() + "')") ;
             
         } catch (Throwable t) {
+            System.err.println("An error had occured while loading the scripts file or executing the fmigrationPreConfigure scripts.") ;
             thrown = new MultiRuntimeException(t);
         } finally {
             Utils.close(thrown != null ? ROLLBACK_INSTRUCTION_FLAG : COMMIT_INSTRUCTION_FLAG, new Object[] { stmt, conn });
