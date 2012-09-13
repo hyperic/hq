@@ -669,8 +669,7 @@ public class ZeventManager implements ZeventEnqueuer {
         synchronized (_registeredBuffers) {
             long rtn = 0;
             for (Entry<Queue<?>, TimingListenerWrapper<Zevent>> ent : _registeredBuffers.entrySet()) {
-                TimingListenerWrapper<Zevent> targ = ent.getValue();
-                rtn += targ.getNumEvents();
+                rtn += ent.getKey().size();
             }
             return rtn;
         }

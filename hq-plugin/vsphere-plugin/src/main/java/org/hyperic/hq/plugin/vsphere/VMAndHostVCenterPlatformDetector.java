@@ -31,6 +31,7 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -47,6 +48,7 @@ import org.hyperic.hq.hqapi1.XmlUtil;
 import org.hyperic.hq.hqapi1.types.Agent;
 import org.hyperic.hq.hqapi1.types.AgentResponse;
 import org.hyperic.hq.hqapi1.types.AgentsResponse;
+import org.hyperic.hq.hqapi1.types.Ip;
 import org.hyperic.hq.hqapi1.types.Resource;
 import org.hyperic.hq.hqapi1.types.ResourceConfig;
 import org.hyperic.hq.hqapi1.types.ResourceEdge;
@@ -477,6 +479,58 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
 
         return resources;
     }
+    
+
+    //the sync operation get XML with VMs.
+    //if there is a problem in one of them, which breaks the DB schema, 
+    //the sync will failed and all VMs that appeared in the XML below the invalid VM won't appear.
+    //fix:
+    //cleanVMsListBeforSync will go over the list before the sync.
+    //if there is an invalid VM machines they will be fixed/removed.
+    private void cleanVMsListBeforSync(List<Resource> vms) {
+           
+        removeDuplicationsFromIPList(vms);
+
+        //TODO: implement if there is a problem about a VM, which can't be fixed     
+        //removeInvalidVMs(vms);        
+    }
+    
+    //according to the DB schema, an IP can't be empty.
+    //also according to one of unique indexes, IP can't be duplicate per VM.
+    //in this function we loop over the VM list and fixing the IP list if needed.
+    //per vm, The function build a valid IPs list. 
+    //the new list won't have duplications or empty IP address.
+    //(same for 2 MAC with no IP address which will cause duplicate 'N/A').
+    //this list will replace the current IP list.
+    private void removeDuplicationsFromIPList(List<Resource> vms) {
+        
+        List<Ip> validIPs = null;
+        List<String> ipAddresses = null;//list of IP addresses for duplications check.
+        //go over the VMs
+        for(Resource vm : vms){
+            
+            List<Ip> IPs = vm.getIp();//get the vm IPs list
+            if (IPs != null && IPs.size() > 0 ) {
+                validIPs = new ArrayList<Ip>();//init the validIPs list
+                ipAddresses = new ArrayList<String>();                
+            }
+            else continue;//no IPs for this vm.
+            
+            for (Ip currIp : IPs) {
+                if (!ipAddresses.contains(currIp.getAddress())
+                    && !currIp.getAddress().isEmpty()){
+                    validIPs.add(currIp);
+                    ipAddresses.add(currIp.getAddress());
+                }                
+            }//for IPs
+            
+            //replace the vm IP list with the valid list 
+            IPs.clear();
+            IPs.addAll(validIPs);
+        }//for vms
+        
+    }//removeDuplicationsFromIPList
+
 
     public void discoverPlatforms(Properties props, HQApi hqApi, VSphereUtil vim)
         throws IOException, PluginException {
@@ -497,64 +551,65 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
         }
         
    
-        	if (debug) watch.markTimeBegin("getAgent");
-            Agent agent = getAgent(hqApi, props);
-            if (debug) watch.markTimeEnd("getAgent");
-            
-            if (debug) watch.markTimeBegin("discoverHosts");
-            List<Resource> hosts = discoverHosts(agent,hqApi, vim, props);
-            if (debug) watch.markTimeEnd("discoverHosts");
-          
-            List<Resource> vms = new ArrayList<Resource>();
-            Map<String, List<Resource>> vcHostVms = new HashMap<String, List<Resource>>();
-            
-            
-            for (Resource r : hosts) {
-                VSphereHostResource h = (VSphereHostResource) r;
-                vms.addAll(h.getVirtualMachines());
-               
-                String esxHost = getEsxHost(r);
-                if (esxHost != null) {
-                    vcHostVms.put(esxHost, h.getVirtualMachines());
-                }
-            }
-            
-            if (isDump) {
-                dump(vms);
-                dump(hosts);
-            }
-            else {
-                ResourceApi api = hqApi.getResourceApi();
-                StatusResponse response;
+        if (debug) watch.markTimeBegin("getAgent");
+        Agent agent = getAgent(hqApi, props);
+        if (debug) watch.markTimeEnd("getAgent");
 
-                if (debug) watch.markTimeBegin("syncVms");
-                response = api.syncResources(vms);
-                if (debug) watch.markTimeEnd("syncVms");
-                assertSuccess(response, "sync " + vms.size() + " VMs", false);
+        if (debug) watch.markTimeBegin("discoverHosts");
+        List<Resource> hosts = discoverHosts(agent,hqApi, vim, props);
+        if (debug) watch.markTimeEnd("discoverHosts");
 
-                if (debug) watch.markTimeBegin("syncHosts");
-                response = api.syncResources(hosts);
-                if (debug) watch.markTimeEnd("syncHosts");
-                assertSuccess(response, "sync " + hosts.size() + " Hosts", false);
-                
-                Map<String, Resource> existingHosts = new HashMap<String, Resource>();
-                Map<String, List<Resource>> existingHostVms = new HashMap<String, List<Resource>>();
-                
-                if (debug) watch.markTimeBegin("syncResourceEdges");
-                syncResourceEdges(existingHosts,existingHostVms, props,hqApi);
-                if (debug) watch.markTimeEnd("syncResourceEdges");
-                
-                if (debug) watch.markTimeBegin("removePlatformsFromInventory");
-                removePlatformsFromInventory(vcHostVms, existingHosts, existingHostVms,vim,hqApi);
-                if (debug) watch.markTimeEnd("removePlatformsFromInventory");
+        List<Resource> vms = new ArrayList<Resource>();
+        Map<String, List<Resource>> vcHostVms = new HashMap<String, List<Resource>>();
+
+
+        for (Resource r : hosts) {
+            VSphereHostResource h = (VSphereHostResource) r;
+            vms.addAll(h.getVirtualMachines());
+
+            String esxHost = getEsxHost(r);
+            if (esxHost != null) {
+                vcHostVms.put(esxHost, h.getVirtualMachines());
             }
-            
-            if (debug) {
-            	log.debug("discoverPlatforms: time=" + watch);
-            }
+        }
         
+        if (isDump) {
+            dump(vms);
+            dump(hosts);
+        }
+        else {
+            ResourceApi api = hqApi.getResourceApi();
+            StatusResponse response;
+
+            cleanVMsListBeforSync(vms);    
+            if (debug) watch.markTimeBegin("syncVms");
+            response = api.syncResources(vms);
+            if (debug) watch.markTimeEnd("syncVms");
+            assertSuccess(response, "sync " + vms.size() + " VMs", false);
+
+            if (debug) watch.markTimeBegin("syncHosts");
+            response = api.syncResources(hosts);
+            if (debug) watch.markTimeEnd("syncHosts");
+            assertSuccess(response, "sync " + hosts.size() + " Hosts", false);
+
+            Map<String, Resource> existingHosts = new HashMap<String, Resource>();
+            Map<String, List<Resource>> existingHostVms = new HashMap<String, List<Resource>>();
+
+            if (debug) watch.markTimeBegin("syncResourceEdges");
+            syncResourceEdges(existingHosts,existingHostVms, props,hqApi);
+            if (debug) watch.markTimeEnd("syncResourceEdges");
+
+            if (debug) watch.markTimeBegin("removePlatformsFromInventory");
+            removePlatformsFromInventory(vcHostVms, existingHosts, existingHostVms,vim,hqApi);
+            if (debug) watch.markTimeEnd("removePlatformsFromInventory");
+        }
+
+        if (debug) {
+            log.debug("discoverPlatforms: time=" + watch);
+        }        
     }
-     
+    
+
     private void syncResourceEdges(Map<String, Resource> existingHosts, Map<String, List<Resource>> existingHostVms, Properties props, HQApi hqApi ) 
         throws IOException, PluginException {
 

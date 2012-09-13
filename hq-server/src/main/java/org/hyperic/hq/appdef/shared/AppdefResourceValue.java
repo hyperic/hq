@@ -33,9 +33,13 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
+import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.ApplicationType;
+import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformType;
+import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerType;
+import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -268,22 +272,65 @@ public abstract class AppdefResourceValue
      */
     @Deprecated
     public static AppdefResourceValue convertToAppdefResourceValue(Resource resource) {
+        if (resource == null) {
+            return null;
+        }
         final int type = resource.getResourceType().getId();
         if (type == AuthzConstants.authzPlatform) {
-            return getPlatformManager().getPlatformById(resource.getInstanceId()).getAppdefResourceValue();
+            return getPlatformById(resource);
         } else if (type == AuthzConstants.authzServer) {
-            return getServerManager().getServerById(resource.getInstanceId()).getAppdefResourceValue();
+            return getServerById(resource);
         } else if (type == AuthzConstants.authzService) {
-            return getServiceManager().getServiceById(resource.getInstanceId()).getAppdefResourceValue();
+            return getServiceById(resource);
         } else if (type == AuthzConstants.authzApplication) {
-            return getApplicationManager().getApplicationById(resource.getInstanceId()).getAppdefResourceValue();
+            return getApplicationById(resource);
         } else if (type == AuthzConstants.authzGroup) {
-            return getGroupManager().getGroupById(resource.getInstanceId()).getAppdefResourceValue();
+            return getGroupById(resource);
         } else {
-          //HHQ- Guys return null so that appdef types unsupported by the authorization mechanizm would be 
-          //filters by the permissionManagear. 
-          return null ;
+            //HHQ- Guys return null so that appdef types unsupported by the authorization mechanizm would be 
+            //filters by the permissionManagear. 
+            return null ;
         }
+    }
+
+    private static AppdefResourceValue getGroupById(Resource r) {
+        final ResourceGroup group = getGroupManager().getGroupById(r.getInstanceId());
+        if (group == null) {
+            return null;
+        }
+        return group.getAppdefResourceValue();
+    }
+
+    private static AppdefResourceValue getApplicationById(Resource r) {
+        final Application application = getApplicationManager().getApplicationById(r.getInstanceId());
+        if (application == null) {
+            return null;
+        }
+        return application.getAppdefResourceValue();
+    }
+    
+    private static AppdefResourceValue getServiceById(Resource r) {
+        final Service service = getServiceManager().getServiceById(r.getInstanceId());
+        if (service == null) {
+            return null;
+        }
+        return service.getAppdefResourceValue();
+    }
+    
+    private static AppdefResourceValue getServerById(Resource r) {
+        final Server server = getServerManager().getServerById(r.getInstanceId());
+        if (server == null) {
+            return null;
+        }
+        return server.getAppdefResourceValue();
+    }
+    
+    private static AppdefResourceValue getPlatformById(Resource r) {
+        final Platform platform = getPlatformManager().getPlatformById(r.getInstanceId());
+        if (platform == null) {
+            return null;
+        }
+        return platform.getAppdefResourceValue();
     }
 
     private static ResourceGroupManager getGroupManager() {
