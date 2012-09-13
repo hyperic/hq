@@ -684,6 +684,8 @@ public class DataManagerImpl implements DataManager {
         final Map<String, Set<DataPoint>> buckets = MeasRangeObj.getInstance().bucketDataEliminateDups(data);
         final boolean debug = log.isDebugEnabled();
         String sql = "";
+        final HQDialect dialect = measurementDAO.getHQDialect();
+        final boolean supportsAsyncCommit = dialect.supportsAsyncCommit();
         try {
             for (Entry<String, Set<DataPoint>> entry : buckets.entrySet()) {
                 final String table = entry.getKey();
@@ -705,7 +707,13 @@ public class DataManagerImpl implements DataManager {
                 }
                 sql = "insert into " + table + " (timestamp, measurement_id, value) values " + values;
                 stmt = conn.createStatement();
+                if (supportsAsyncCommit) {
+                    stmt.execute(dialect.getSetAsyncCommitStmt(false));
+                }
                 final int rowsUpdated = stmt.executeUpdate(sql);
+                if (supportsAsyncCommit) {
+                    stmt.execute(dialect.getSetAsyncCommitStmt(true));
+                }
                 stmt.close();
                 stmt = null;
                 if (debug) {
@@ -832,6 +840,7 @@ public class DataManagerImpl implements DataManager {
                            .append(" (measurement_id, timestamp, value) VALUES (?, ?, ?)")
                            .toString());
                 }
+                // TODO need to set synchronous commit to off
                 for (Iterator<DataPoint> i = dpts.iterator(); i.hasNext();) {
                     DataPoint pt = i.next();
                     Integer metricId = pt.getMeasurementId();
@@ -895,10 +904,9 @@ public class DataManagerImpl implements DataManager {
             List<DataPoint> dpts = entry.getValue();
 
             try {
-                stmt = conn
-                    .prepareStatement("UPDATE " + table +
-                                      " SET value = ? WHERE timestamp = ? AND measurement_id = ?");
-
+                // TODO need to set synchronous commit to off
+                stmt = conn.prepareStatement("UPDATE " + table + 
+                                             " SET value = ? WHERE timestamp = ? AND measurement_id = ?");
                 for (Iterator<DataPoint> i = dpts.iterator(); i.hasNext();) {
                     DataPoint pt = i.next();
                     Integer metricId = pt.getMeasurementId();
