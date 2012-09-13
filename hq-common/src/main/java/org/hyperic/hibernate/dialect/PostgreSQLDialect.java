@@ -213,4 +213,12 @@ implements HQDialect {
     public boolean analyzeDb() {
         return false;
     }	
+    
+    public boolean supportsAsyncCommit() {
+        return true;
+    }
+    
+    public String getSetAsyncCommitStmt(boolean on) {
+        return "set synchronous_commit to " + (on ? "on" : "off");
+    }
 }

@@ -255,4 +255,12 @@ public class Oracle9Dialect
     public boolean analyzeDb() {
         return true;
     }
+
+    public boolean supportsAsyncCommit() {
+        return false;
+    }
+
+    public String getSetAsyncCommitStmt(boolean on) {
+        return null;
+    }
 }

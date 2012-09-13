@@ -130,4 +130,8 @@ public interface HQDialect
      * @return true if HQ should analyze the database type, false if it should not
      */
     public boolean analyzeDb();
+
+    public boolean supportsAsyncCommit();
+
+    public String getSetAsyncCommitStmt(boolean on);
 }

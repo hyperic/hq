@@ -429,4 +429,12 @@ public class MySQL5InnoDBDialect
     public boolean analyzeDb() {
         return true;
     }
+
+    public boolean supportsAsyncCommit() {
+        return false;
+    }
+
+    public String getSetAsyncCommitStmt(boolean on) {
+        return null;
+    }
 }

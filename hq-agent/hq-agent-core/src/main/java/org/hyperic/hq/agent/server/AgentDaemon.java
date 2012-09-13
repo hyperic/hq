@@ -705,8 +705,17 @@ public class AgentDaemon
 
     private void scanLegacyCustomDir(String startDir) {
         File dir = new File(startDir).getAbsoluteFile();
+        String fs = File.separator;
         while (dir != null) {
-            File customDir = new File(dir, "hq-plugins");
+            File customDir = null;
+            try {
+                customDir = new File(dir, "hq-plugins");
+            } catch (NullPointerException e) {
+                logger.warn("cannot scan custom plugin dir " + dir + fs + "hq-plugins, please note the plugins in this " +
+                		    "directory will not be supported anymore instead they must to be managed via the " +
+                            "HQ Server Plugin Manager UI.");
+                continue;
+            }
             if (customDir.exists() && customDir.isDirectory()) {
                 File[] files = customDir.listFiles();
                 for (File file : files) {

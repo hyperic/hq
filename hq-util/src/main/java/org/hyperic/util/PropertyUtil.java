@@ -151,7 +151,6 @@ public class PropertyUtil {
      * @param props the properties to add/update.
      */
     public static void storeProperties(String propFilePath, Map<String, String> props) throws PropertyUtilException {
-
         Map<String,String> duplicatedEntriesToStore = new HashMap<String,String>();
         for (Map.Entry<String, String> entryToStore : props.entrySet()) {
             duplicatedEntriesToStore.put(entryToStore.getKey(), entryToStore.getValue());

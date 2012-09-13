@@ -69,7 +69,7 @@
 		<property name="server.artifacts.dir" value="${staging.dir}/source-artifacts" />
 		<property name="db.data.dir" value="${staging.dir}/data" />
 		
-		<echo message="Purging the data and source-artifacts staging dirctories" />
+		<echo message="Purging the data and source-artifacts staging directories" />
 		<delete includeemptydirs="true" failonerror="false">
     		<fileset dir="${server.artifacts.dir}" includes="**/**" defaultexcludes="false"/>
 			<fileset dir="${db.data.dir}" includes="**/**" defaultexcludes="false"/>
@@ -91,7 +91,7 @@
 				<property name="no.importer.batchSize" value="7000" />
 				
 				<property name="no.exporter.workers" value="12" />
-				<property name="no.exporter.batchSize" value="50000" />
+				<property name="no.exporter.batchSize" value="10000" />
 			</then> 
 			<else>
 				<property name="no.importer.workers" value="5" />
@@ -303,11 +303,15 @@
 	<target name="hq-import" unless="using.builtin.db" depends="init">
 		<!-- cache the target's database properties -->
 		<var name="target.database.url" value="${server.database-url}" />
-		<var name="target.database.username" value="${server.database-user}" />
-		<!--<var name="target.server.encryption-key" value="${server.encryption-key}" /> --> 
-		<var name="target.database.password" value="${server.database-password}" />
 		<var name="target.database.type" value="${server.database}" />
 		<var name="target.database.driver" value="${server.database-driver}" />
+		
+		<!-- cache the source's db credentials -->  
+		<property name="temp.database.username" value="${server.database-user}" />
+		<property name="temp.database.password" value="${server.database-password}" />
+		<!-- only assigns the value if not provided through commandline  -->
+		<property name="target.database.username" value="${server.database-user}" />
+		<property name="target.database.password" value="${server.database-password}" />
 		
 		<!-- exclude the common-data.xml file from the db-setup so that the eam_config_props tables would not be overrwriten -->
 		<property name="dbsetup-combine-exclusion-filter" value="common-data.xml" /> 
@@ -332,11 +336,10 @@
 
 		<!-- restore the source server's database properties which have been overwriten with the target server ones -->
 		<var name="server.database-url" value="${target.database.url}" />
-		<var name="server.database-user" value="${target.database.username}" />
+		<var name="server.database-user" value="${temp.database.username}" />
 		<var name="server.database" value="${target.database.type}" />
 		<var name="server.database-driver" value="${target.database.driver}" />
-		<!--<var name="server.encryption-key" value="${target.server.encryption-key}" /> -->
-		<var name="server.database-password" value="${target.database.password}" />
+		<var name="server.database-password" value="${temp.database.password}" />
 
 		<echo>Target server.database-url ${server.database-url}</echo>
 		<echo>Target server.database-user ${server.database-user}</echo>
@@ -344,13 +347,6 @@
 		<echo>Target server.database-driver ${server.database-driver}</echo>
 		<echo>Target CAM_SCHEMA_VERSION ${CAM_SCHEMA_VERSION}</echo>
 		<echo>Target CAM_SERVER_VERSION ${CAM_SERVER_VERSION}</echo>
-
-		<!--initialize the importer's database properties -->
-		<!--<property name="target.database.url" value="${server.database-url}" />
-		<property name="target.database.username" value="${server.database-user}" />
-		<property name="target.database.password" value="${server.database-password}" />
-		<property name="target.database.type" value="${server.database}" />
-		<property name="target.database.driver" value="${server.database-driver}" /> -->
 
 		<!-- Create a Hibernate configuration file containing instructions to use the mapping metadata found in the 
 			target server's hq-server.jar -->  
@@ -367,24 +363,8 @@
 </session-factory>
 </hibernate-configuration>]]></echo>	
 		
-		<!-- ensure that the target server is stopped --> 
-		<echo message="Attempting to shutdown the server at ${hqserver.install.path}" />
-		<if>
-			<equals arg1="${windows-os}" arg2="false"/> 
-			<then> 
-				<exec executable="/bin/bash">
-					<arg value="${hqserver.install.path}/bin/hq-server.sh"/>
-					<arg value="stop"/>
-				</exec> 
-			</then> 
-			<else> 
-				<exec executable="cmd">
-					<arg value="/c" />
-					<arg value="${hqserver.install.path}/bin/hq-server.bat" />
-					<arg value="stop"/>
-				</exec>			
-			</else> 
-		</if> 
+		<!-- ensure that the target server is stopped -->
+		<antcall target="server-shutdown" />
 
 		<!-- override the current target server's schema version with that of the target server's -->
 		<var name="force.cam.schema.version" value="${CAM_SCHEMA_VERSION}" />
@@ -456,6 +436,9 @@
 		<property name="source.database.password" value="${server.database-password}" />
 		<property name="source.database.type" value="${server.database}" />
 		<property name="source.database.driver" value="${server.database-driver}" />
+		
+		<!-- ensure that the source server is stopped -->
+		<antcall target="server-shutdown" />
 
 		<echo message="Exporting tables..." /> 
 		<exporter tablesRefs="${export-tables-refs-string}"  disabled="false" maxRecordsPerTable="-1" noOfWorkers="${no.exporter.workers}" batchsize="${no.exporter.batchSize}">
@@ -536,6 +519,26 @@
 			<param name="TARGET_SERVER_VERSION" value="LATEST" />
 			<param name="TARGET_DB_VERSION" value="LATEST" />
 		</antcall>
+	</target> 
+	
+	<target name="server-shutdown"> 
+		<echo message="Attempting to shutdown the server at ${hqserver.install.path}" />
+		<if>
+			<equals arg1="${windows-os}" arg2="false"/> 
+			<then> 
+				<exec executable="/bin/bash">
+					<arg value="${hqserver.install.path}/bin/hq-server.sh"/>
+					<arg value="stop"/>
+				</exec> 
+			</then> 
+			<else> 
+				<exec executable="cmd">
+					<arg value="/c" />
+					<arg value="${hqserver.install.path}/bin/hq-server.bat" />
+					<arg value="stop"/>
+				</exec>			
+			</else> 
+		</if> 
 	</target> 
 	
 	<target name="summary-report" unless="embedded.execution">

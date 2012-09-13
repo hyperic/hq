@@ -443,7 +443,7 @@ public class AvailabilityDataDAO
         ResultSet rs = null;
         Map<Integer,Long> rtn = new HashMap<Integer, Long>();
         try {
-            stmt = conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY);
+            stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             rs = stmt.executeQuery(sql);
             rs.setFetchSize(batchSize);
             Long accumulatedTime;
@@ -451,7 +451,7 @@ public class AvailabilityDataDAO
             while (rs.next()) {
                 availId = rs.getInt(1);
                 accumulatedTime = rtn.get(Integer.valueOf(availId));
-                rtn.put(availId, Long.valueOf(extractStrtg.extract(rs)+accumulatedTime.longValue()));
+                rtn.put(availId, Long.valueOf(extractStrtg.extract(rs)+(accumulatedTime!=null?accumulatedTime.longValue():0)));
             }            
         } finally {
             DBUtil.closeResultSet(logCtx, rs);

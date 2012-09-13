@@ -508,25 +508,35 @@ public class ReportProcessorImpl implements ReportProcessor {
     private class SrnCheckerZeventListener implements ZeventListener<SrnCheckerZevent> {
         private static final long ONE_HOUR = MeasurementConstants.HOUR;
         private final Map<AppdefEntityID, Long> lastCheck = new HashMap<AppdefEntityID, Long>();
+        private final Map<AppdefEntityID, Long> lastUnscheduleCheck = new HashMap<AppdefEntityID, Long>();
         public void processEvents(List<SrnCheckerZevent> events) {
             for (final SrnCheckerZevent z : events) {
                 final Collection<AppdefEntityID> list = new ArrayList<AppdefEntityID>();
-                final Collection<SRN> srns = Arrays.asList(z.getSrnList());
+                final Collection<SRN> srns = new ArrayList<SRN>();
                 final long now = now();
-                for (final SRN srn : srns) {
+                for (final SRN srn : z.getSrnList()) {
                     final AppdefEntityID aeid = srn.getEntity();
-                    final long last = getLastCheck(aeid);
+                    final long last = getLastCheck(aeid, lastCheck);
                     if ((last + ONE_HOUR) < now) {
                         list.add(aeid);
+                        srns.add(srn);
                         lastCheck.put(aeid, now);
                     }
                 }
-                agentScheduleSynchronizer.unschedule(z.getAgentToken(), z.getToUnschedule());
+                final Collection<AppdefEntityID> toUnschedule = new ArrayList<AppdefEntityID>();
+                for (final AppdefEntityID aeid : z.getToUnschedule()) {
+                    final long last = getLastCheck(aeid, lastUnscheduleCheck);
+                    if ((last + ONE_HOUR) < now) {
+                        list.add(aeid);
+                        lastUnscheduleCheck.put(aeid, now);
+                    }
+                }
+                agentScheduleSynchronizer.unschedule(z.getAgentToken(), toUnschedule);
                 agentScheduleSynchronizer.unscheduleNonEntities(z.getAgentToken(), list);
                 srnManager.rescheduleOutOfSyncSrns(srns, false);
             }
         }
-        private long getLastCheck(AppdefEntityID aeid) {
+        private long getLastCheck(AppdefEntityID aeid, Map<AppdefEntityID, Long> lastCheck) {
             final Long last = lastCheck.get(aeid);
             return (last == null) ? 0l : last;
         }

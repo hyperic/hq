@@ -373,6 +373,10 @@ public class MxServerDetector
         return isInstallTypeVersion(dir);
     }
     
+    protected void setProductConfig(ServerResource server, ConfigResponse config, long pid) {
+        super.setProductConfig(server, config);
+    }
+    
     protected  ServerResource getServerResource(MxProcess process) {
         String dir = process.getInstallPath();
         //set process.query using the same query used to find the process,
@@ -409,7 +413,7 @@ public class MxServerDetector
 		}
 
         // default anything not auto-configured
-        setProductConfig(server, config);
+        setProductConfig(server, config,process.getPid());
         discoverServerConfig(server, process.getPid());
 
         server.setMeasurementConfig();
