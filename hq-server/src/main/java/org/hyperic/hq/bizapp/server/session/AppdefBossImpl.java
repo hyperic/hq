@@ -101,6 +101,7 @@ import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ResourcesCleanupZevent;
+import org.hyperic.hq.appdef.shared.ServerLightValue;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
@@ -868,9 +869,7 @@ public class AppdefBossImpl implements AppdefBoss {
      */
     @Transactional(readOnly = true)
     public AppdefResourceValue findById(int sessionId, AppdefEntityID entityId)
-        throws AppdefEntityNotFoundException, PermissionException, SessionTimeoutException,
-        SessionNotFoundException {
-        // get the user
+    throws AppdefEntityNotFoundException, PermissionException, SessionTimeoutException, SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return findById(subject, entityId);
     }
@@ -886,24 +885,27 @@ public class AppdefBossImpl implements AppdefBoss {
      * return value is upcasted.
      */
     private AppdefResourceValue findById(AuthzSubject subject, AppdefEntityID entityId)
-        throws AppdefEntityNotFoundException, PermissionException, SessionTimeoutException,
-        SessionNotFoundException {
+    throws AppdefEntityNotFoundException, PermissionException, SessionTimeoutException, SessionNotFoundException {
         AppdefEntityValue aeval = new AppdefEntityValue(entityId, subject);
         AppdefResourceValue retVal = aeval.getResourceValue();
-
         if (retVal == null) {
-            throw new IllegalArgumentException(entityId.getType() +
-                                               " is not a valid appdef entity type");
+            throw new IllegalArgumentException(entityId.getType() + " is not a valid appdef entity type");
         }
-
         if (entityId.isServer()) {
             ServerValue server = (ServerValue) retVal;
-            retVal.setHostName(server.getPlatform().getName());
+            Platform platform = server.getPlatform();
+            if (platform == null) {
+                return null;
+            }
+            retVal.setHostName(platform.getName());
         } else if (entityId.isService()) {
             ServiceValue service = (ServiceValue) retVal;
-            retVal.setHostName(service.getServer().getName());
+            ServerLightValue server = service.getServer();
+            if (server == null) {
+                return null;
+            }
+            retVal.setHostName(server.getName());
         }
-
         return retVal;
     }
 

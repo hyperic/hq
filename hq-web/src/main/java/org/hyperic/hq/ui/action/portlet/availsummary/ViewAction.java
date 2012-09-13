@@ -182,6 +182,9 @@ public class ViewAction
             if (ent != null && val != null) {
                 if (ent.getType() == null) {
                     AppdefResourceValue resVal = appdefBoss.findById(sessionId, arrayIds[i]);
+                    if (resVal == null) {
+                        continue;
+                    }
                     ent.setType(resVal.getAppdefResourceTypeValue());
                 }
 
