@@ -16,6 +16,8 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.product.MetricValue;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 
 
@@ -32,6 +34,7 @@ import org.hyperic.hq.product.MetricValue;
  * @author amalia
  *
  */
+@Component
 public class AvailabilityFallbackChecker {
 	
 	
@@ -54,6 +57,7 @@ public class AvailabilityFallbackChecker {
 	
 	// --------------------------------------------------------------------------------------------------------
 	// --------------------------------------------------------------------------------------------------------
+	@Autowired
 	public AvailabilityFallbackChecker(AvailabilityManager availabilityManager, AvailabilityCache availabilityCache, ResourceManager resourceManager) {
 		this.availabilityManager = availabilityManager;
 		this.availabilityCache = availabilityCache;
