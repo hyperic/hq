@@ -400,10 +400,10 @@ input[type="text"] {
 }
 
 #unsyncAgentsSummaryPanel .oldSummaryListDiv, .curSummaryListDiv{
-    height: 150px;
-    overflow-x:auto;
-    overflow-y:auto;
+    height: 200px;
     border: 1px solid gray;
+    overflow-x: auto;
+    overflow-y: auto;
 }
 
 
@@ -413,7 +413,6 @@ input[type="text"] {
     list-style: none;
     background-color: #fff;
     max-height: 400px;
-    overflow: auto;
 }
 
 #unsyncAgentsSummaryPanel .gridheader {
