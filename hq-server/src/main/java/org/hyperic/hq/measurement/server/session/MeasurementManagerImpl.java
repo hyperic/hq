@@ -41,6 +41,7 @@ import javax.annotation.PreDestroy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
+import org.hibernate.UnresolvableObjectException;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
@@ -551,7 +552,76 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         }
         return rtn;
     }
-
+    private List<Measurement> findTemplatesForInstance(final Resource rsc, final Integer[] tids, Map<Integer, Exception> failedResources) {
+        List<Measurement> msmts = null;
+        try {
+            msmts = measurementDAO.findByTemplatesForInstance(tids, rsc);
+            if (msmts==null || msmts.isEmpty()) {
+                log.error("no measurement templates with the following ids can be assigned to resource " + rsc.getName() + ":\n" + tids);
+                failedResources.put(rsc.getId(), null);
+            }
+        } catch (UnresolvableObjectException e) {
+            // don't fail the whole group for a wrong resource IDs
+            log.error(e);
+            if (failedResources!=null) {
+                failedResources.put(rsc.getId(),e);
+            }
+        }
+        return msmts;
+    }
+    
+    /**
+     * similar to findMeasurements with the same parameters, with the difference that this one wont fail the whole process on resources which does not exists.
+     * It would just not return them. The same goes for measurement names which does not exist.
+     */
+    @Transactional(readOnly = true)
+    public Map<Resource, List<Measurement>> findBulkMeasurements(AuthzSubject subject,
+                                                                 Map<Integer, List<Integer>> resIdsToTemplIds,
+                                                                 Map<Integer, Exception> failedResources)
+                                                                         throws PermissionException {
+        Map<Resource, List<Measurement>> rtn = new HashMap<Resource, List<Measurement>>();
+        Resource resource = null;
+        for (Map.Entry<Integer, List<Integer>> entry : resIdsToTemplIds.entrySet()) {
+            Integer rscId = null;
+            try {
+                rscId = entry.getKey();
+                resource = resourceManager.findResourceById(rscId);
+                List<Integer> templs = entry.getValue();
+                if (templs==null || templs.isEmpty()) { continue; }
+                
+                Integer[] tids = new Integer[templs.size()];
+                templs.toArray(tids);
+                
+                Integer resTypeId = resource.getResourceType().getId();
+                if (resTypeId.equals(AuthzConstants.authzGroup)) {
+                    ResourceGroup grp = resourceGroupManager.findResourceGroupById(subject, resource.getInstanceId());
+                    Collection<Resource> mems = resourceGroupManager.getMembers(grp);
+                    List<Measurement> msmts = null;
+                    for (Resource member : mems) {
+                        msmts = findTemplatesForInstance(member, tids, failedResources);
+                        if (msmts!=null && !msmts.isEmpty()) {
+                            rtn.put(member, msmts);
+                        }
+                    }
+                } else {
+                    List<Measurement> msmts = findTemplatesForInstance(resource, tids, failedResources);
+                    if (msmts!=null && !msmts.isEmpty()) {
+                        rtn.put(resource, msmts);
+                    }
+                }
+            } catch (UnresolvableObjectException e) {
+                // don't fail the whole request for wrong resource IDs
+                log.error(e);
+                if (failedResources!=null) {
+                    failedResources.put(rscId,e);
+                }
+                resource = null;
+                continue;
+            }
+        }
+        return rtn;
+    }
+    
     /**
      * Find the Measurement corresponding to the given MeasurementTemplate id
      * and instance id.

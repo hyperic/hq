@@ -127,6 +127,12 @@ public interface MeasurementManager {
                                                              Map<Integer, List<Integer>> resIdsToTemplIds)
         throws PermissionException;
 
+    public Map<Resource, List<Measurement>> findBulkMeasurements(
+            AuthzSubject subject,
+            Map<Integer, List<Integer>> resIdsToTemplIds,
+            Map<Integer, Exception> failedResources)
+                    throws PermissionException;
+    
     /**
      * Find the Measurement corresponding to the given MeasurementTemplate id
      * and instance id.

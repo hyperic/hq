@@ -175,20 +175,20 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
                     }
                     rscs.add(rscId);
                 }
-            }                
-            // extract tmp Ids per rsc        
-            List<MeasurementTemplate> tmps = this.tmpltMgr.findTemplatesByName(new ArrayList<String>(tmpNameToRscs.keySet())); // maybe change findTempl() to get set and save loop of arraylist creation
-            Map<Integer, List<Integer>> resIdsToTmpIds = new HashMap<Integer, List<Integer>>();
+            }
+            // extract tmp Ids per rsc
+            List<MeasurementTemplate> tmps = this.tmpltMgr.findTemplatesByName(new ArrayList<String>(tmpNameToRscs.keySet()));
+            Map<Integer, List<Integer>> rscIdsToTmpIds = new HashMap<Integer, List<Integer>>(); // will contain all the resources for which at least one of the templates requested for them exists
             List<String> rscIds = null;
             for (MeasurementTemplate tmp : tmps) {
                 rscIds = tmpNameToRscs.get(tmp.getName());
                 if (rscIds==null) { continue;   }
                 for (String _rscId : rscIds) {
                     Integer rscIdInt = Integer.valueOf(_rscId);
-                    List<Integer> tmpIds = resIdsToTmpIds.get(rscIdInt);
-                    if (tmpIds==null) { // conversion to integer in one place / change rsc id to integer in req obj
+                    List<Integer> tmpIds = rscIdsToTmpIds.get(rscIdInt);
+                    if (tmpIds==null) {
                         tmpIds = new ArrayList<Integer>(); 
-                        resIdsToTmpIds.put(rscIdInt,tmpIds );
+                        rscIdsToTmpIds.put(rscIdInt,tmpIds );
                     }
                     tmpIds.add(tmp.getId());
                 }
@@ -200,14 +200,24 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
                 // by now we know that all reqs are with valid rscs, o/w we wouldn't get here
                 rscId = hqMsmtReq.getRscId();
                 // if the requested rsc is not in the map of rscs for which at least one template was found, mark it as a failed rsc
-                if (!resIdsToTmpIds.keySet().contains(Integer.valueOf(rscId))) {
-                    res.addFailedResource(rscId,TEMPLATE_NOT_FOUND_ERR_CODE,null,new Object[] {}); // save error code as final out of the loop
+                if (!rscIdsToTmpIds.keySet().contains(Integer.valueOf(rscId))) {
+                    res.addFailedResource(rscId,TEMPLATE_NOT_FOUND_ERR_CODE,null,new Object[] {});
                 }
             }
-
-            Map<Resource, List<Measurement>> rscToHqMsmts = this.measurementMgr.findMeasurements(authzSubject, resIdsToTmpIds);
-            if (rscToHqMsmts==null || rscToHqMsmts.size()==0 || rscToHqMsmts.values().isEmpty()) {
+            Map<Integer,Exception> failedRscs = new HashMap<Integer,Exception>();
+            Map<Resource, List<Measurement>> rscToHqMsmts = this.measurementMgr.findBulkMeasurements(authzSubject, rscIdsToTmpIds, failedRscs);
+            if (rscToHqMsmts==null) {
                 throw new ObjectNotFoundException(tmps.toString(), Measurement.class.getName());
+            }
+            final String MEASUREMENT_NOT_FOUND = ExceptionToErrorCodeMapper.ErrorCode.MEASUREMENT_NOT_FOUND.getErrorCode();
+            for (Map.Entry<Integer,Exception> failedRscEntry : failedRscs.entrySet()) {
+                Integer failedRscId = failedRscEntry.getKey();
+                Exception e = failedRscEntry.getValue();
+                if (e==null) {
+                    res.addFailedResource(String.valueOf(failedRscId),MEASUREMENT_NOT_FOUND,null,new Object[] {});
+                } else {
+                    res.addFailedResource(String.valueOf(failedRscId),e.getMessage(),null, new Object[] {});
+                }
             }
             // validate that all rscs have msmts, and map msmt names to rscs
             Map<Integer,Resource> msmtIdToRsc = new HashMap<Integer,Resource>();
@@ -230,13 +240,14 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             for (Measurement msmt : allMsmts) {
                 msmtIdToMsmt.put(msmt.getId(), msmt);
             }
-            Map<Integer, double[]> msmtNamesToAgg = this.dataMgr.getAggregateDataAndAvailUpByMetric(new ArrayList<Measurement>(allMsmts), begin.getTime(), end.getTime());
+            
+            Map<Integer, double[]> msmtIdToAgg = this.dataMgr.getAggregateDataAndAvailUpByMetric(new ArrayList<Measurement>(allMsmts), begin.getTime(), end.getTime());
             Map<Integer,ResourceMeasurementResponse> rscIdToRes = new HashMap<Integer,ResourceMeasurementResponse>();
             Resource rsc = null;
-            for (Map.Entry<Integer, double[]> msmtNameToAggEntry : msmtNamesToAgg.entrySet()) {
-                Integer msmtId = msmtNameToAggEntry.getKey();
+            for (Map.Entry<Integer, double[]> msmtIdToAggEntry : msmtIdToAgg.entrySet()) {
+                Integer msmtId = msmtIdToAggEntry.getKey();
                 rsc = msmtIdToRsc.get(msmtId);
-                double[] agg = msmtNameToAggEntry.getValue();
+                double[] agg = msmtIdToAggEntry.getValue();
                 // no val for that msmt
                 if (agg==null || agg.length<=MeasurementConstants.IND_AVG) {
                     continue;

@@ -297,6 +297,7 @@ public class DataManagerImpl implements DataManager {
         } catch (SQLException e) {
             // If there is a SQLException, then none of the data points
             // should be inserted. Roll back the txn.
+            log.error("an unexpected SQL exception has occured inserting datapoints to the " + table + " table:\n",e);
         } finally {
             DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
         }

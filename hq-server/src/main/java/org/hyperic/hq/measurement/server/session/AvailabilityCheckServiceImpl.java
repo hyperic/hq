@@ -34,7 +34,6 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
@@ -65,13 +64,13 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
     private final AtomicBoolean hasStarted = new AtomicBoolean(false);
     private boolean isRunning = false;
     private ConcurrentStatsCollector concurrentStatsCollector;
-    private AvailabilityManager availabilityManager;
+    //private AvailabilityManager availabilityManager;
     private AvailabilityCache availabilityCache;
     private BackfillPointsService backfillPointsService;
 
 	private AvailabilityFallbackCheckQue checkQue;
-	private AvailabilityFallbackChecker fallbackChecker = null;
-	private ResourceManager resourceManager;
+	private AvailabilityFallbackChecker fallbackChecker;
+	//private ResourceManager resourceManager;
     
 
     @Autowired
@@ -79,13 +78,15 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
                                         AvailabilityManager availabilityManager,
                                         AvailabilityCache availabilityCache,
                                         BackfillPointsService backfillPointsService,
-                                        ResourceManager resourceManager) {
+                                        //ResourceManager resourceManager,
+                                        AvailabilityFallbackChecker fallbackChecker) {
         this.concurrentStatsCollector = concurrentStatsCollector;
         this.availabilityCache = availabilityCache;
-        this.availabilityManager = availabilityManager;
+        //this.availabilityManager = availabilityManager;
         this.backfillPointsService = backfillPointsService;
-        this.resourceManager = resourceManager;
+        //this.resourceManager = resourceManager;
         this.checkQue = availabilityManager.getFallbackCheckQue();
+        this.fallbackChecker = fallbackChecker;
     }
 
     
@@ -140,8 +141,8 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
                 	log.info("backfillPlatformAvailability: got " + backfillPoints.size() + " platforms to check. Adding to que.");
                 checkQue.addToQue(backfillPoints);
                 List<ResourceDataPoint> availabilityDataPoints = pollWorkList();
-                if (fallbackChecker == null)
-                	fallbackChecker = new AvailabilityFallbackChecker(availabilityManager, availabilityCache, resourceManager);
+                //if (fallbackChecker == null)
+                //	fallbackChecker = new AvailabilityFallbackChecker(availabilityManager, availabilityCache, resourceManager);
                 fallbackChecker.checkAvailability(availabilityDataPoints, current);
             } finally {
                 synchronized (IS_RUNNING_LOCK) {
