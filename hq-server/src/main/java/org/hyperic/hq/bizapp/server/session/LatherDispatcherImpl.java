@@ -92,6 +92,7 @@ import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.security.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @org.springframework.stereotype.Service
@@ -243,8 +244,62 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         } catch (PermissionException exc) {
             return new RegisterAgent_result("Permission denied");
         }
+        Collection<Integer> ids = new ArrayList<Integer>();
 
-        String agentIP = args.getAgentIP();
+        RegisterAgent_result result = registerAgent(args, ids);
+
+        /**
+         * Reschedule all metrics on a platform when it is started for the first
+         * time. This allows the schedule to be updated immediately on either
+         * agent updates, or if the user removes the agent data directory.
+         */
+        if (!ids.isEmpty()) {
+            try {
+                List<ResourceRefreshZevent> zevents = new ArrayList<ResourceRefreshZevent>();
+                ResourceRefreshZevent zevent;
+                AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
+                for (Integer id : ids) {
+
+                    Platform platform = platformManager.findPlatformById(id);
+
+                    zevent = new ResourceRefreshZevent(overlord, platform.getEntityId());
+                    zevents.add(zevent);
+
+                    Collection<Server> servers = platform.getServers();
+                    for (Server server : servers) {
+
+                        zevent = new ResourceRefreshZevent(overlord, server.getEntityId());
+                        zevents.add(zevent);
+
+                        Collection<Service> services = server.getServices();
+                        for (Service service : services) {
+
+                            zevent = new ResourceRefreshZevent(overlord, service.getEntityId());
+                            zevents.add(zevent);
+                        }
+                    }
+                }
+
+                zeventManager.enqueueEvents(zevents);
+
+            } catch (Exception e) {
+                // Not fatal, the metrics will eventually be rescheduled...
+                log.error("Unable to refresh agent schedule", e);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Registers the agent according to the provided RegisterAgent_args under a new transaction
+     * @param args - the RegisterAgent_args
+     * @param ids - if the is an existing agent, this collection will contain the ids of
+     * the platforms monitored by this agent after this method execution.
+     * @return - RegisterAgent_result
+     */
+    @Transactional(propagation=Propagation.REQUIRES_NEW)
+	private RegisterAgent_result registerAgent(RegisterAgent_args args, Collection<Integer> ids) {
+		String agentIP = args.getAgentIP();
         int port = args.getAgentPort();
         String version = args.getVersion();
         boolean isNewTransportAgent = args.isNewTransportAgent();
@@ -274,7 +329,6 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         // Check the to see if the agent already exists.
         // Lookup the agent by agent token (if it exists). Otherwise, use the
         // agent IP and port.
-        Collection<Integer> ids = null;
         try {
             Agent origAgent;
 
@@ -285,8 +339,8 @@ public class LatherDispatcherImpl implements LatherDispatcher {
             }
 
             try {
-                ids = platformManager.getPlatformPksByAgentToken(authzSubjectManager
-                    .getOverlordPojo(), origAgent.getAgentToken());
+                ids.addAll(platformManager.getPlatformPksByAgentToken(authzSubjectManager
+                    .getOverlordPojo(), origAgent.getAgentToken()));
             } catch (Exception e) {
                 // No platforms found, no a big deal
             }
@@ -337,48 +391,8 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         }
 
         RegisterAgent_result result = new RegisterAgent_result("token:" + agentToken);
-
-        /**
-         * Reschedule all metrics on a platform when it is started for the first
-         * time. This allows the schedule to be updated immediately on either
-         * agent updates, or if the user removes the agent data directory.
-         */
-        if (ids != null) {
-            try {
-                List<ResourceRefreshZevent> zevents = new ArrayList<ResourceRefreshZevent>();
-                ResourceRefreshZevent zevent;
-                AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
-                for (Integer id : ids) {
-
-                    Platform platform = platformManager.findPlatformById(id);
-
-                    zevent = new ResourceRefreshZevent(overlord, platform.getEntityId());
-                    zevents.add(zevent);
-
-                    Collection<Server> servers = platform.getServers();
-                    for (Server server : servers) {
-
-                        zevent = new ResourceRefreshZevent(overlord, server.getEntityId());
-                        zevents.add(zevent);
-
-                        Collection<Service> services = server.getServices();
-                        for (Service service : services) {
-
-                            zevent = new ResourceRefreshZevent(overlord, service.getEntityId());
-                            zevents.add(zevent);
-                        }
-                    }
-                }
-
-                zeventManager.enqueueEvents(zevents);
-
-            } catch (Exception e) {
-                // Not fatal, the metrics will eventually be rescheduled...
-                log.error("Unable to refresh agent schedule", e);
-            }
-        }
-        return result;
-    }
+		return result;
+	}
 
     /**
      * Update an Agent's setup information. When an agent's 'setup' is called
