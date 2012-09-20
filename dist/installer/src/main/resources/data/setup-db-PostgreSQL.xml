@@ -168,8 +168,9 @@
 	  	 <chmod dir="${server.hqdb.dir}/data" perm="700"/>
 	  </target>
 
-	  <target name="changeDataFolderPermWin" if="isWin32">
-	  	 <chmod dir="${server.hqdb.dir}/data" perm="777"/>
+	  <target name="changeDataFolderPermWin" if="isWin32">	  	          
+	  	<exec Command="icacls &quot;${server.hqdb.dir}/data&quot; /grant &quot;everyone&quot;:(OI)(CI)M"/>
+	  	<exec Command="icacls &quot;${server.hqdb.dir}/../logs&quot; /grant &quot;everyone&quot;:(OI)(CI)M"/>
 	  </target>
 	
   <target name="copy-pg" if="server.pgsql.available">
