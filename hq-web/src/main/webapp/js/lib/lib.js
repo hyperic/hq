@@ -4301,7 +4301,7 @@ hyperic.clone_resource_dialog = function(args) {
 
     that.fetchData = function() {
         hqDojo.xhrGet( {
-            url: baseUrl + "/targets",
+            url: baseUrl,
             preventCache: true,
             headers: { "Content-Type": "application/json"},
             handleAs: 'json',
