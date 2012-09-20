@@ -40,7 +40,7 @@ public class AgentStartupCallback {
     
     private final Log _log = LogFactory.getLog(AgentStartupCallback.class);  
     
-    private final Socket _startupSock;
+    private Socket _startupSock;
     
     /**
      * Creates an instance.
@@ -54,19 +54,40 @@ public class AgentStartupCallback {
         int sPort = config.getNotifyUpPort();
 
         if (sPort != -1) {
-            try {
-                _startupSock = new Socket("127.0.0.1", sPort);
-            } catch(IOException exc){
-                _log.error("Failed to connect to startup port ("+sPort+")", exc);
-                
-                throw new IOException("Failed to connect to startup " +
-                                      "port (" + sPort + "): " +
-                                      exc.getMessage());
-            }            
+        	connectToPort(sPort);
         } else {
             _log.debug("Agent startup callback is disabled");
             _startupSock = null;
         }
+    }
+    
+    
+    private void connectToPort(int sPort) throws IOException {
+    	
+    	final int minute = 60000;
+    	int nextAttemptGap = (int)(0.5 * minute); // start with half a minute
+    	int maxAttemptGap = 30*60000; // wait no more then half an hour
+    	IOException exceptionToThrow = null;
+    	
+    	while (nextAttemptGap <= maxAttemptGap) {
+	        try {
+	            _startupSock = new Socket("127.0.0.1", sPort);
+	            return;
+	        } catch(IOException exc){
+	        	exceptionToThrow = exc;
+	            _log.error("Failed to connect to startup port ("+sPort+")", exc);
+	        }   
+	        try {
+	        	_log.info("Waiting " + ((double)nextAttemptGap/minute) + " minutes before retrying connection to Server port.");
+				Thread.sleep(nextAttemptGap);
+			} catch (InterruptedException e) {
+	            _log.error("Failed to wait for next connection to startup port ("+sPort+")", e);
+			}
+	        nextAttemptGap *= 2;
+    	}
+        throw new IOException("Failed to connect to startup " +
+                "port (" + sPort + "): " +
+                exceptionToThrow.getMessage());
     }
     
     /**
