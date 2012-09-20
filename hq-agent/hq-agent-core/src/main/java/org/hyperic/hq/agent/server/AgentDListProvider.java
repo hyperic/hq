@@ -406,7 +406,7 @@ public class AgentDListProvider implements AgentStorageProvider {
                 if (this.encryptor==null) {
                     this.encryptor = createEncryptor();
                 }
-                while(nEnts-- != 0) {
+                while(nEnts-- != 0) { 
                     String key = dIs.readUTF(),
                             val = dIs.readUTF();
                     String decryptedKey = SecurityUtil.encrypt(this.encryptor, key);
