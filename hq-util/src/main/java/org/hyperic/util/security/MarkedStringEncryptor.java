@@ -70,7 +70,7 @@ public class MarkedStringEncryptor implements PBEStringEncryptor, InitializingBe
     public String encrypt(String message) {
         logger.debug("encrypting: " + message);
         if (SecurityUtil.isMarkedEncrypted(message)) {
-            logger.error("the following dsn is already encrypted: '" + message + "'");
+            logger.error("the following data is already encrypted: '" + message + "'");
             return message;
         }
         return SecurityUtil.mark(this.encryptor.encrypt(message));
@@ -79,7 +79,7 @@ public class MarkedStringEncryptor implements PBEStringEncryptor, InitializingBe
     public String decrypt(String encryptedMessage) {
         logger.debug("decrypting: " + encryptedMessage);
         if (!SecurityUtil.isMarkedEncrypted(encryptedMessage)) {
-            logger.error("the following un-encrypted dsn exists: '" + encryptedMessage + "'");
+            logger.error("the following un-encrypted data exists: '" + encryptedMessage + "'");
             return encryptedMessage;
         }
         return this.encryptor.decrypt(SecurityUtil.unmark(encryptedMessage));
