@@ -134,7 +134,6 @@ extends BaseConfig {
 	public static final String Q_SERVER_KEYSTORE_PASSWORD = "What is the password to your java keystore?";
 	private static final String SERVER_DATABASE_UPGRADE_CHOICE = "server.database.upgrade.choice";
 	public static final String Q_PROFILE = 	"What is the installation profile?";
-	public static final String Q_BROKER_ADDRESS = 	"What is the broker address for CAF communication?";
 
 	// convenience constants
 	private static final String nl = System.getProperty("line.separator");
@@ -546,16 +545,8 @@ extends BaseConfig {
 			break;    
 
 		case 14:
-			
-			schema.addOption(new HiddenConfigOption("server.caf.clientId", UUID.randomUUID().toString()));
 			if(isEEInstall) {
 				schema.addOption(new HiddenConfigOption("accept.eula",YesNoConfigOption.NO));
-				//TODO: we remove this question for now until the CAF feature is completed
-				//schema.addOption(new StringConfigOption("server.caf.brokerAddress", Q_BROKER_ADDRESS, "localhost"));
-				schema.addOption(new HiddenConfigOption("server.caf.brokerAddress","localhost"));
-			}
-			else {
-				schema.addOption(new HiddenConfigOption("server.caf.brokerAddress","localhost"));
 			}
 			break;
 		default:

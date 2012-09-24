@@ -11754,9 +11754,6 @@ has already been defined.
        </schema-directSQL>  
     </schemaSpec>	
 	
-	<schemaSpec version="3.211">
-	    <schema-addColumn table="EAM_AGENT" column="CAF_PME_ID" columnType="VARCHAR2"/>
-	</schemaSpec>
 	<!-- ensures that the EAM_MEASUREMENT.DSN column is encrypted --> 
 	<schemaSpec version="3.212">
 	      <column-encryptor table="EAM_MEASUREMENT" columns="DSN" pkColumn="ID" /> 
