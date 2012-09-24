@@ -84,21 +84,12 @@ public class EditPasswordAction
 
         log.trace("Editing user's password.");
 
-        boolean admin = false;
-
-        for (Operation operation : authzBoss.getAllOperations(sessionId)) {
-            if (admin = AuthzConstants.subjectOpModifySubject.equals(operation.getName())) {
-                break;
-            }
-        }
-
-        if (!admin) {
-            try {
-                authBoss.authenticate(user.getName(), pForm.getCurrentPassword());
-            } catch (Exception e) {
-                RequestUtils.setError(request, "admin.user.error.WrongPassword", "currentPassword");
-                return returnFailure(request, mapping, Constants.USER_PARAM, pForm.getId());
-            }
+      
+        try {
+            authBoss.authenticate(RequestUtils.getWebUser(request).getName(), pForm.getCurrentPassword());
+        } catch (Exception e) {
+            RequestUtils.setError(request, "admin.user.error.WrongPassword", "currentPassword");
+            return returnFailure(request, mapping, Constants.USER_PARAM, pForm.getId());
         }
         authBoss.changePassword(sessionId.intValue(), user.getName(), pForm.getNewPassword());
 
