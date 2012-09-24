@@ -1117,7 +1117,7 @@
               type="secret"
               optional="true"
               description="Password"/>
-      <option name="listen.ports"
+      		<option name="listen.ports"
               description="Listening Ports" optional="true"/>
         </config>
 
@@ -1683,7 +1683,8 @@
         <plugin type="autoinventory" class="org.hyperic.hq.plugin.jboss7.JBossHostControllerDetector"/>
         <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
         <plugin type="collector" class="org.hyperic.hq.plugin.jboss7.JBossHostControllerCollector"/>
-
+        <plugin type="control" class="JBossServerControlPlugin"/>
+        
         <plugin type="config_track" class="org.hyperic.hq.product.FileChangeTrackPlugin">
             <monitored>
                 <folder path="configuration" recursive="false" filter=".*\.xml|.*\.properties"/>
@@ -1698,9 +1699,11 @@
             <option name="jboss7.user" description="Username" default="guest"/>
             <option name="jboss7.pass" description="Password" default="guest" type="secret"/>
             <option name="jboss7.host" description="Host Name"/>
-       <option name="listen.ports"
-              description="Listening Ports" optional="true"/>
+       		<option name="listen.ports" description="Listening Ports" optional="true"/>
         </config>
+        
+        <actions include="runGarbageCollector"/>
+        
         <help>
             <![CDATA[
                   <p>
@@ -1764,8 +1767,7 @@
             <option name="jboss7.https" description="Use SSL" default="false" type="boolean"/>
             <option name="jboss7.user" description="Username" default="guest"/>
             <option name="jboss7.pass" description="Password" default="guest" type="secret"/>
-      <option name="listen.ports"
-              description="Listening Ports" optional="true"/>
+      		<option name="listen.ports" description="Listening Ports" optional="true"/>
         </config>
         <plugin type="config_track" class="org.hyperic.hq.product.FileChangeTrackPlugin">
             <monitored>
