@@ -61,7 +61,7 @@
   	<tr>
   		<td valign="top" class="DisplayContent" colspan="2"><fmt:message
   			key="about.MoreInfo.Label" /><br />
-  		<html:link href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">
+  		<html:link href="https://www.vmware.com/support/pubs/vfabric-hyperic.html" target='_blank'>
   			<fmt:message key="about.MoreInfo.LinkSupport" />
   		</html:link><br />
   		<html:link href="http://forums.hyperic.org" target="about">
