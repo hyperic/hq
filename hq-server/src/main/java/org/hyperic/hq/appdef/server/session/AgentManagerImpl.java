@@ -442,18 +442,6 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         agent.setModifiedTime(new Long(System.currentTimeMillis()));
         return agent;
     }
-    
-    /**
-     * Update an existing agent by setting his caf id
-     * @param agentToken
-     * @param cafId
-     * @throws AgentNotFoundException
-     */
-    public void updateAgentCafId(String agentToken, String cafId) throws AgentNotFoundException{
-    	 Agent agent = this.getAgentInternal(agentToken);
-    	 agent.setCafId(cafId);
-    	 agent.setModifiedTime(new Long(System.currentTimeMillis()));
-    }
 
     /**
      * Update an existing Agent given the old agent token. The auth token will
@@ -538,14 +526,6 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         return agentDao.findByIP(ip);
     }
     
-   
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.appdef.shared.AgentManager#findAgentsByCafId(java.lang.String)
-     */
-    @Transactional(readOnly = true)
-    public Agent findAgentsByCafId(String cafId) {
-        return agentDao.findByCafId(cafId);
-    }
 
     /**
      * Update an existing agent's IP and port based on an agent token. The type

@@ -120,13 +120,6 @@ public class AgentDAO extends HibernateDAO<Agent> {
             .uniqueResult();
     }
     
-
-    public Agent findByCafId(String cafId) {
-        String sql = "from Agent where cafId=?";
-        return (Agent) getSession().createQuery(sql).setString(0, cafId)
-            .uniqueResult();
-    }
-
     private Agent findByAgentToken(String token, Session session) {
         return (Agent) session.createCriteria(Agent.class)
                               .add(Restrictions.eq("agentToken", token))
