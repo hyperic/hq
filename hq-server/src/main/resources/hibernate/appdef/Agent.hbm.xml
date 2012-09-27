@@ -79,10 +79,6 @@
       <column name="PLUGIN_INVENTORY_CHECKSUM" length="128"/>
     </property>
     
-    <property name="cafId" type="string">
-      <column name="CAF_PME_ID" length="128"/>
-    </property>
-
     <property name="lastPluginInventoryCheckin" type="long">
       <column name="LAST_PLUGIN_INVENTORY_CHECKIN" not-null="true" default="0"/>
     </property>

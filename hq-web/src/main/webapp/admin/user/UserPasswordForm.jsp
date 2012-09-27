@@ -51,24 +51,16 @@
    <fmt:message key="common.label.Password"/>
    </td>
    <td width="60%" class="BlockContent">
-    <c:if test="${not empty userId}">  
+       <c:if test="${not empty userId}">  
       <tiles:importAttribute name="administrator"/>
       <html:hidden property="id" value="${param.u}"/>
       <html:hidden property="u" value="${param.u}"/>         
-      <c:choose>
-        <c:when test="${administrator eq true}">        
-          <html:hidden property="currentPassword" value="${param.u}"/>
-        </c:when>      
-        <c:when test="${administrator eq false}">  
-          <fmt:message key="admin.user.changePassword.EnterCurrent"/><br>
+          <fmt:message key="admin.user.changePassword.EnterYourCurrent"/><br>
           <input type="password" size="31" maxlength="40" name="currentPassword" tabindex="3"><br>
-             <logic:messagesPresent property="confirmPassword">
-       -<html:errors property="confirmPassword"/><br>
-      </logic:messagesPresent>
-        </c:when>
-      </c:choose>
-    </c:if>
-       
+              <logic:messagesPresent property="confirmPassword">
+               -<html:errors property="confirmPassword"/><br>
+              </logic:messagesPresent>
+       </c:if>
     <fmt:message key="admin.user.changePassword.EnterNew"/><br>
     <input type="password" size="31" maxlength="40" name="newPassword" tabindex="4"><br>
         <c:if test="${passwordMessagesPresent}">

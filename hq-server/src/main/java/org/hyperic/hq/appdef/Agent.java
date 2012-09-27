@@ -43,7 +43,6 @@ public class Agent extends AppdefBean {
     private Collection _pluginStatuses;
     private long lastPluginInventoryCheckin;
     private String pluginInventoryChecksum;
-    private String cafId;
 
     public Agent() {
     }
@@ -208,13 +207,5 @@ public class Agent extends AppdefBean {
     public void setPluginInventoryChecksum(String pluginInventoryChecksum) {
         this.pluginInventoryChecksum = pluginInventoryChecksum;
     }
-
-	public String getCafId() {
-		return cafId;
-	}
-
-	public void setCafId(String cafId) {
-		this.cafId = cafId;
-	}
 
 }

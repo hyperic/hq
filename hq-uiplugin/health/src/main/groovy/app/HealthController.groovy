@@ -69,7 +69,6 @@ class HealthController
         new PrintfFormat("%-25s %-15s %-5s %-9s %-17s %-13s %-16s %-10s %s")
     private cpropMan = Bootstrap.getBean(CPropManager.class)
 	private measurementMan = Bootstrap.getBean(MeasurementManager.class)
-    private def totalCacheInBytes = 0
 
     HealthController() {
         onlyAllowSuperUsers()
@@ -212,7 +211,6 @@ class HealthController
         def hitsCol   = new CacheColumn('hits',   'Hits',   true)
         def missCol   = new CacheColumn('misses', 'Misses', true)
         def limitCol  = new CacheColumn('limit', 'Limit', true)
-        def memUsgCol = new CacheColumn('memoryUsage', 'Memory Usage (KB)', true)
         
         def globalId = 0
         [
@@ -239,9 +237,6 @@ class HealthController
                 [field:  limitCol,
                  width:  '10%',
                  label:  {"${it.limit}"}],
-                [field:  memUsgCol,
-                 width:  '10%',
-                 label:  {"${it.memoryUsage}"}],
             ],
         ]
     }
@@ -270,28 +265,16 @@ class HealthController
         List<Map<String,Object>> healths = new ArrayList<Map<String,Object>>(caches.size());
         for (Cache cacheName : caches ) {
             def cache = manager.getCache(cacheName)
-            def memoryUsage = cache.calculateInMemorySize()
-            totalCacheInBytes += memoryUsage
             CacheConfiguration config = cache.getCacheConfiguration()
             def limit = config.getMaxElementsInMemory()
             Map<String,Object> health = new HashMap<String,Object>();
             health.put("region", cache.getName());
             health.put("limit", limit)
-            health.put("memoryUsage", formatMemoryUsage(memoryUsage))
             health.put("size", new Integer(cache.getSize()));
             health.put("hits", new Integer(cache.getHitCount()));
             health.put("misses", new Integer(cache.getMissCountNotFound()));
             healths.add(health);
         }
-        // Adding a row for the total memory
-        Map<String,Object> health = new HashMap<String,Object>()
-        health.put("region", "*Total Memory Usage*");
-        health.put("size", 0);
-        health.put("hits", 0);
-        health.put("misses", 0);
-        health.put("limit", 0);
-        health.put("memoryUsage", formatMemoryUsage(totalCacheInBytes))
-        healths.add(health)
         return healths;
     }
 
@@ -394,10 +377,6 @@ class HealthController
     
     def cacheData(params) {
         DojoUtil.processTableRequest(cacheSchema, params)
-    }
-    
-    def totalCacheSizeInBytes(params) {
-        DojoUtil.processTableRequest(totalCacheInBytes, params)
     }
 
     private formatBytes(b) {
