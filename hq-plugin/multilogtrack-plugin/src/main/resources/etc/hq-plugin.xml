@@ -1,0 +1,189 @@
+<?xml version="1.0"?>
+
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004-2012], VMWare, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
+
+<plugin name="multilogtrack" package="org.hyperic.hq.plugin.multilogtrack">
+
+  <config name="logtrackconfig">
+    <option name="basedir"
+            description="Base Scan Directory"/>
+    <option name="logfilepattern"
+            description="Log File Pattern(s) (comma separated)"/>
+    <option name="includepattern"
+            description="Log File Include RegEx"/>
+    <option name="excludepattern"
+            optional="true"
+            description="Log File Exclude RegEx"/>
+    <option name="includepattern_2"
+            description="Secondary Log File Include RegEx"
+            optional="true"/>
+    <option name="excludepattern_2"
+            optional="true"
+            description="Secondary Log File Exclude RegEx"/>
+  </config>
+
+  <server name="MultiLogTracker"
+          version="1.0">
+
+    <plugin type="autoinventory"
+            class="MultiLogTrackServerDetector"/>
+    <plugin type="measurement"
+            class="MultiLogTrackMeasurementPlugin"/>
+    <plugin type="log_track"
+            class="MultiLogTrackPlugin"/>
+    <config include="logtrackconfig"/>
+
+    <filter name="template"
+            value="${domain}:logfilepattern=%logfilepattern%,basedir=%basedir%,override_file_checks=%override_file_checks%:${alias}"/>
+    <metric name="Availability"
+            indicator="true"/>
+    <metric name="Number Of Log Files"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="Number Of Captured Logs Per Interval"
+            alias="NumCapturedLogs"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="Secondary Number Of Captured Logs Per Interval"
+            alias="SecondaryNumCapturedLogs"
+            category="UTILIZATION"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="Weighted Differential Number Of Captured Logs Per Interval"
+            alias="DiffNumCapturedLogs"
+            category="UTILIZATION"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+
+    <service name="LogFileTracker">
+        <plugin type="measurement"
+                class="LogTrackMeasurementPlugin"/>
+        <plugin type="log_track"
+                class="MultiLogTrackPlugin"/>
+        <filter name="template"
+                value="${domain}:logfile=%logfile%:${alias}"/>
+        <metric name="Availability"
+                indicator="true"/>
+        <metric name="Log File Size"
+                category="UTILIZATION"
+                indicator="true"
+                collectionType="dynamic"
+                units="b"/>
+        <metric name="Number Of Captured Logs Per Interval"
+                alias="NumCapturedLogs"
+                category="UTILIZATION"
+                indicator="false"
+                collectionType="dynamic"
+                units="none"/>
+        <config>
+          <option name="logfile"
+                  description="Log File to tail"/>
+          <option name="includepattern"
+                  description="Log File Include RegEx"/>
+          <option name="excludepattern"
+                  optional="true"
+                  description="Log File Exclude RegEx"/>
+          <option name="includepattern_2"
+                  optional="true"
+                  description="Secondary Log File Include RegEx"/>
+          <option name="excludepattern_2"
+                  optional="true"
+                  description="Secondary Log File Exclude RegEx"/>
+        </config>
+    </service>
+
+  </server>
+
+  <help name="multilogtracker">
+    <![CDATA[
+      <p>
+      <h1>Multi Log Tracker ${product.version} Help Section</h1>
+      </p>
+      <p>
+      The Multi Log Tracker ${product.version} plugin monitors and tails several log files
+      using the Apache ant Directory Scanner
+      </p>
+      <p>
+        <ul>
+          <li><strong>basedir</strong> - Base directory to scan per the logfilepattern option.  This directory must exist and be readable by the agent user.  No wildcards go into this field.</li>
+          <li><strong>logfilepattern</strong> - Comma separated list of file patterns to scan.  Uses the apache ant Directory Scanner, see examples below.</li>
+          <li><strong>includepattern</strong> - Regular expression that matches against each line of the tailed output.  This option is not case sensitive.  Any matching line will be sent to the HQ Server.  For more information on java regular expresssion see <a href='http://docs.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html'>Java Regular Expressions</a>.</li>
+          <li><strong>excludepattern</strong> - Regular expression that will be excluded from all pattern matching.  This option is not case sensitive.  Any matching line will not be sent to the HQ Server and will override the includepattern.  For more information on java regular expresssion see <a href='http://docs.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html'>Java Regular Expressions</a>.</li>
+          <li><strong>includepattern_2</strong> - A second, optional, include pattern.
+          <li><strong>excludepattern_2</strong> - A second, optional, exclude pattern which offsets includepattern_2.
+          <li><strong>enable_only_metrics</strong> - Do not send logs to the HQ Server, only collect metrics.
+          <li><strong>override_file_checks</strong> - By default if files do not match the file pattern then validation will fail.  This option overrides that behavior.
+        </ul>
+      </p>
+      <p>
+     <h3>Purpose of the "Weighted Differential Number Of Captured Logs Per Interval" metric - If a log has a situation where one would like to have an alert / recovery alert on two separate patterns, use the includepattern for the alert condition and the includepattern_2 for the recovery condition.  The metric will set a value > 0 on the associated metric if the last pattern to match is the alert condition, or includepattern, in the interval.  All metrics must have the same collection interval for this to function properly.
+      </p>
+      <p>
+     <h3>Examples of the logfilepattern option:</h3>
+      </p>
+      <p>
+     <strong>**\*.class</strong> - matches all .class files/dirs in a directory tree.
+      <br>
+     <strong>test\a??.java</strong> - matches all files/dirs which start with an 'a', then two more characters and then ".java", in a directory called test.
+      <br>
+     <strong>**</strong> - matches everything in a directory tree.
+      <br>
+     <strong>**\test\**\XYZ*</strong> - matches all files/dirs which start with "XYZ" and where there is a parent directory called test (e.g. "abc\test\def\ghi\XYZ123").
+      </p>
+      <p>
+     <h3>Concrete Example of the options working together:</h3>
+      </p>
+      <p>
+     <br>
+     <strong>Matches any file in any subdirectory of /var/log that match the name messages* or *log</strong>
+     <br>
+     basedir=<strong>/var/log</strong>
+     <br>
+     logfilepattern=<strong>**/messsages*,**/*log</strong>
+     <br>
+     includepattern=<strong>error|warn|too many threads running</strong>
+     <br>
+     Files which match this combination of options:
+     <br>
+     /var/log/messages
+     <br>
+     /var/log/cron.log
+     <br>
+     /var/log/yum.log
+      </p>
+    ]]>
+  </help>
+  <help name="MultiLogTracker 1.0" include="multilogtracker"/>
+
+</plugin>
+
