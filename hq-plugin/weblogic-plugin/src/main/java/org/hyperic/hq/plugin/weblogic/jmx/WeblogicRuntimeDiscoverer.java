@@ -454,7 +454,7 @@ public class WeblogicRuntimeDiscoverer implements RuntimeDiscoverer, PrivilegedA
 		}
 		if (!server.isAdmin()) {
 			ConfigResponse productConfig = new ConfigResponse(server.getResourceConfig());
-			String listeningPorts = server.getListenPort();
+			String listeningPorts = server.getAttribute(BaseServerQuery.ATTR_LISTEN_PORT);
 			if (listeningPorts!=null && !listeningPorts.equals("")) {
 			    productConfig.setValue(Collector.LISTEN_PORTS, listeningPorts);
 			}
