@@ -12,6 +12,7 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.AutoServerDetector;
+import org.hyperic.hq.product.DetectionUtil;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
@@ -57,6 +58,7 @@ public class WeblogicDetectorNodeManager extends ServerDetector implements AutoS
                     ConfigResponse cf = new ConfigResponse();
                     cf.setValue("nodemgr.address", host);
                     cf.setValue("nodemgr.port", port);
+                    DetectionUtil.populateListeningPorts(pid, cf, true);
                     setProductConfig(server, cf);
 
                     servers.add(server);
