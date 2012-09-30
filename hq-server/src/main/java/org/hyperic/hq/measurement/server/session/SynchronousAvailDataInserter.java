@@ -59,4 +59,9 @@ public class SynchronousAvailDataInserter implements DataInserter {
         insertMetrics(metricData);
     }
 
+    public void insertMetricsFromServer(List<DataPoint> availData)
+            throws InterruptedException, DataInserterException {
+        availabilityManager.addData(availData, true, true);
+    }
+
 }
