@@ -64,6 +64,10 @@ public class MeasurementDAO
         " upper(t.alias) = '" + MeasurementConstants.CAT_AVAILABILITY.toUpperCase() + "' ";
     private final AgentDAO agentDao;
     private final DBUtil dbUtil;
+    
+    @Autowired
+    private org.jasypt.hibernate.encryptor.HibernatePBEStringEncryptor hibernateStringEncryptor ; 
+    
     protected final Log logger = LogFactory.getLog(this.getClass().getName());
     private final static  int ENCRYPT_UPDATE_TIMEOUT = 54000;
     private final static  int ENCRYPT_UPDATE_CHUNK_SIZE = 500;
