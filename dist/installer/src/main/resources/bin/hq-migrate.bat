@@ -26,7 +26,7 @@ if "%JAVA_HOME%" == "" (
 	FOR %%J IN (%*) DO (
 		if "%%J" == "usage" (
 			goto USAGE
-		else if "%%J" == "help" (
+		)else if "%%J" == "help" (
 			goto USAGE
 		)else if "%%J" == "-Dhqserver.install.path" (
 			set next=hqserver.install.path
@@ -58,7 +58,11 @@ if "%JAVA_HOME%" == "" (
 		)
 	) 
 )
-	   
+	
+if "%JAVA_HOME%" == "" ( 
+ goto JAVA_HOME_UNDEFINED
+) 	 
+  
 :USAGE 
 type %INSTALL_DIR%\data\reports\migration-usage.txt 
 goto :EOF 
