@@ -25,9 +25,9 @@
  */
 package org.hyperic.tools.dbmigrate;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -143,6 +143,9 @@ public class Utils{
           final InputStream is = (InputStream)closeable;
           is.close();
         }//EO else if inputstream
+        else if ((closeable instanceof Closeable)) { 
+            ((Closeable)closeable).close() ; 
+        }//EO else if Closeable
       } catch (Throwable t) {
         printStackTrace(t);
       }//EO catch block 

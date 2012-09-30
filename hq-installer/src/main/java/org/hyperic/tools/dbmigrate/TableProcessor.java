@@ -26,18 +26,19 @@
 package org.hyperic.tools.dbmigrate;
 
 import java.io.File;
+import java.io.ObjectOutputStream;
 import java.sql.Connection;
+import java.util.AbstractQueue;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.rmi.CORBA.ValueHandler;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
@@ -47,6 +48,7 @@ import org.hyperic.tools.ant.utils.DatabaseType;
 import org.hyperic.tools.dbmigrate.Forker.ForkContext;
 import org.hyperic.tools.dbmigrate.Forker.ForkWorker;
 import org.hyperic.tools.dbmigrate.Forker.WorkerFactory;
+import org.hyperic.util.MultiRuntimeException;
 import org.hyperic.util.StringUtil;
 import org.springframework.scheduling.annotation.AsyncResult;
 
@@ -64,6 +66,8 @@ public abstract class TableProcessor<T extends Callable<TableProcessor.Table[]>>
   protected static final int DEFAULT_QUERY_TIMEOUT_SECS = 2000 ; //seconds 
   protected static final int PROTECTIVE_BATCH_SIZE = 1000;
   private static final int MAX_WORKERS = 5;
+  protected static final String COLUMNS_KEY = "columns" ; 
+  protected static final String TOTAL_REC_NO_KEY = "total.records" ; 
   
   protected int maxRecordsPerTable = -1; //defaults to -1 (all) 
   protected boolean isDisabled; // defaults to false 
@@ -355,9 +359,11 @@ public abstract class TableProcessor<T extends Callable<TableProcessor.Table[]>>
       protected boolean shouldTruncate ;
       protected StringBuilder columnsClause ; 
       private Map<String,ValueHandlerType> valueHandlers ; 
+      protected Map<String,Object> recordsPerFile ; 
       
       public Table(){
           this.noOfProcessedRecords = new AtomicInteger()  ;
+          this.recordsPerFile = new ConcurrentHashMap<String,Object>() ;
           this.shouldTruncate = true ; 
       }//EOM 
 
@@ -385,6 +391,10 @@ public abstract class TableProcessor<T extends Callable<TableProcessor.Table[]>>
       
       public final void setName(final String tableName) { 
           this.name = tableName.toUpperCase().trim() ; 
+      }//EOM
+      
+      public void addRecordPerFile(final String fileName, final int noOfRecords) { 
+          this.recordsPerFile.put(fileName, noOfRecords) ; 
       }//EOM
       
       /**
@@ -459,6 +469,12 @@ public abstract class TableProcessor<T extends Callable<TableProcessor.Table[]>>
       }//EOM 
       
       @Override
+      public final void addRecordPerFile(final String fileName, final int noOfRecords) { 
+          if(this.origRef == null) super.addRecordPerFile(fileName, noOfRecords) ;   
+          else this.origRef.addRecordPerFile(fileName, noOfRecords) ;  
+      }//EOM
+      
+      @Override
       public final StringBuilder getColumnNamesBuilder() {
           final BigTable ref = (this.origRef == null ? this : this.origRef) ; 
           return (ref.columnsClause == null ? (ref.columnsClause = new StringBuilder()) : null) ;
@@ -473,5 +489,104 @@ public abstract class TableProcessor<T extends Callable<TableProcessor.Table[]>>
       }//EOM
       
   }//EO inner class BigTable
+  
+ 
+  
+  /**
+   * Asynchronous file streamer performing read/write operations and pushing the results onto a sink for clients consuption. 
+   */
+  protected static abstract class FileStreamer<T extends FileStreamerContext, V extends AbstractQueue<Object>> extends Thread { 
+      
+      /**
+       * Represents a null of type object (null value is used to indicate an empty queue) 
+       */
+      protected final static Object NULL_OBJECT = ObjectOutputStream.TC_NULL ;
+      
+      protected V fileStreamingSink ; 
+      protected boolean isTerminated = true ; 
+      protected Task logger ; 
+
+      /**
+       * A global exception buffer which would be polled by the reader thread 
+       */
+      public Throwable exception; 
+      
+      /**
+       * Starts the this instance as a deamon thread.
+       * @param logger 
+       */
+      public FileStreamer(final Task logger) { 
+          this.logger = logger ; 
+          this.fileStreamingSink = this.newSink();
+          this.setDaemon(true) ; 
+          this.start() ; 
+      }//EOM
+      
+      protected abstract V newSink() ; 
+      protected abstract T newFileStreamerContext() throws Throwable; 
+      protected abstract void streamOneEntity(T context) throws Throwable ;
+      protected abstract void dispose(final T context)  ;
+      
+      /**
+       * Waits until the FileStreamer thread dies throwing exception if one was registered 
+       * @throws Throwable
+       */
+      void close() throws Throwable{ 
+          MultiRuntimeException thrown = null ; 
+          //wait for three minutes and if nothing happens interrupt and exit 
+          try{ 
+              this.join(180000) ;
+          }catch(Throwable t) { 
+              Utils.printStackTrace(t) ; 
+              thrown = MultiRuntimeException.newMultiRuntimeException(null, t) ; 
+          }//EO catch block 
+          
+          try{ 
+              if(this.isAlive()) { 
+                  this.logger.log("------- Error closing FileStreamer " + this.getName() + 
+                          ": still alive after 120 seconds. Workaround: Terminating the thread and exiting", Project.MSG_ERR) ;
+                  this.interrupt() ; 
+              }//EO if the thread was still alive after the join
+          }catch(Throwable t) { 
+              Utils.printStackTrace(t) ; 
+              thrown = MultiRuntimeException.newMultiRuntimeException(thrown, t) ; 
+          }//EO catch block 
+          
+          if(this.exception != null) { 
+              thrown = MultiRuntimeException.newMultiRuntimeException(thrown, this.exception) ;
+          }//EO if an exception was recorded 
+          
+          if(thrown != null) throw thrown ; 
+      }//EOM 
+      
+      public void run() { 
+          
+          this.isTerminated = false ; 
+
+          logger.log(this.getName() + "  File streamer starting") ; 
+          T ctx = null ;
+          try{ 
+              ctx = newFileStreamerContext() ; 
+              while(!this.isTerminated) { 
+                  this.streamOneEntity(ctx) ; 
+              }//EO while not terminated 
+              
+              logger.log(this.getName() + " File streamer finished succesfully") ; 
+          }catch(Throwable t) { 
+              Utils.printStackTrace(t, this.getName() + " An Exception Had occured during file streaming") ; 
+              this.exception = t ;
+          }finally{ 
+              this.isTerminated = true ; 
+              this.dispose(ctx) ; 
+          }//EO catch block 
+          
+      }//EOM 
+      
+      
+  }//EO inner class FileStreamer ;
+  
+  protected static class FileStreamerContext extends HashMap<Object,Object> { 
+      
+  }//EO inner class FileStreamerContext 
   
 }//EOC

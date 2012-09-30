@@ -38,7 +38,7 @@ public enum DBDataType {
     BLOB(new int[] { 2004, -2, -3, -4 }) { 
         
         @Override
-        public final void serialize(final FileStream ous, final ResultSet rs, final int columnIndex, final ValueHandlerType valueHandler) throws Exception{
+        public final void serialize(final FileOutputStream ous, final ResultSet rs, final int columnIndex, final ValueHandlerType valueHandler) throws Exception{
             byte blobContent[] = rs.getBytes(columnIndex);
             ous.write(blobContent);
         }//EOM 
@@ -118,7 +118,7 @@ public enum DBDataType {
         this.oidDataType = oidDataType ;
     }//EOM 
 
-    public void serialize(final FileStream ous, final ResultSet rs, final int columnIndex, final ValueHandlerType valueHandler) throws Exception {
+    public void serialize(final FileOutputStream ous, final ResultSet rs, final int columnIndex, final ValueHandlerType valueHandler) throws Exception {
         String value = rs.getString(columnIndex) ; 
         if(value != null && valueHandler != null) value = valueHandler.handleValue(value) ; 
         ous.writeUTF(value) ; 
