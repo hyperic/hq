@@ -39,6 +39,8 @@ import java.sql.Statement;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -55,7 +57,6 @@ import org.hyperic.tools.dbmigrate.Forker.ForkWorker;
 import org.hyperic.tools.dbmigrate.TableExporter.Worker;
 import org.hyperic.tools.dbmigrate.TableProcessor.Table;
 import org.hyperic.util.MultiRuntimeException;
-
 
 /**
  * Database Exporter, streaming tables into files in serialization format concurrently 
@@ -184,21 +185,33 @@ public class TableExporter extends TableProcessor<Worker> {
        
         BufferedWriter fr = null ;
         int noOfProcessedRecords = 0 ; 
-        
+        Properties properties = null ; 
         for(Table table : this.tablesContainer.tables.values()) {
             //only generate file if there were generated records 
             if( (noOfProcessedRecords = table.noOfProcessedRecords.get()) == 0) continue ; 
             
-            fr = new BufferedWriter(new FileWriter(new File(dataDir, table.name + File.separator + table.name + Utils.TABLE_METADATA_FILE_SUFFIX))) ; 
+            properties = new Properties() ; 
+            properties.setProperty(TOTAL_REC_NO_KEY, noOfProcessedRecords+"") ; 
+            properties.setProperty(COLUMNS_KEY, table.columnsClause.toString()) ;
+            
+            if(table.recordsPerFile != null) { 
+                for(Map.Entry<String,Object> entry : table.recordsPerFile.entrySet()) { 
+                    properties.setProperty(entry.getKey(), "" + entry.getValue()) ;  
+                }//EO while there are more records per file stats 
+            }//EO if there are records per table stats 
+            
             try{ 
-                fr.write(table.columnsClause.toString()) ;
-                fr.newLine() ; 
-                fr.write(""+noOfProcessedRecords) ;  
+              
+                fr = new BufferedWriter(new FileWriter(
+                        new File(dataDir, table.name + File.separator + table.name + Utils.TABLE_METADATA_FILE_SUFFIX)
+                        )
+                ) ;  
+                properties.store(fr, null/*comments*/) ; 
+                
             }catch(Throwable t) { 
                 this.log("Error generating metadata file for table: " + table.name) ; 
                 throw t ; 
             }finally{
-                
                 Utils.close(fr) ; 
             }//EO catch block 
         }//EO while there are more tables
@@ -216,7 +229,7 @@ public class TableExporter extends TableProcessor<Worker> {
     public final class Worker extends ForkWorker<Table> {
 
         private final File outputDir;
-        private FileStreamer fileStreamer ; 
+        private FileOutputStreamer fileStreamer ; 
         
         /**
          * Configures the connection with the readonly flag and sets the transaction level to {@link Connection#TRANSACTION_READ_UNCOMMITTED}
@@ -235,7 +248,7 @@ public class TableExporter extends TableProcessor<Worker> {
                 throw (t instanceof RuntimeException ? (RuntimeException) t : new RuntimeException(t)) ; 
             }//EO catch block 
              
-            this.fileStreamer = new FileStreamer(TableExporter.this) ; 
+            this.fileStreamer = new FileOutputStreamer(TableExporter.this) ; 
         }//EOM 
         
         /**
@@ -294,9 +307,8 @@ public class TableExporter extends TableProcessor<Worker> {
                 final DBDataType[] columns = new DBDataType[columnCount];
                 final ValueHandlerType[] valueHandlers = new ValueHandlerType[columnCount] ; 
 
-                String columnName = null ;
-                int recordCount = 0;
-                int batchCounter = 0;
+                String columnName = null, currentFileName = null ; 
+                int recordCount = 0, batchCounter = 0, perBatchRecordCount = 0 ; 
                 Throwable fileStreamerException = null ; 
                 
                 while (rs.next()) {
@@ -313,12 +325,20 @@ public class TableExporter extends TableProcessor<Worker> {
                     
                     if (recordCount == maxRecordsPerTable) break;
                     
-                    //flush and close the current file (if not th first one) and create a new one 
+                    //flush and close the current file (if not the first one) and create a new one 
                     //if the batch size threshold was reached 
                     if (recordCount % batchSize == 0) {
-                        TableExporter.this.log(traceMsgPrefix + "exported " + recordCount + loopTraceMsgSuffix ) ;   
+                        TableExporter.this.log(traceMsgPrefix + "exported " + recordCount + loopTraceMsgSuffix ) ; 
+                        
+                        //store the statistics for the last file 
+                        if(perBatchRecordCount > 0) table.addRecordPerFile(currentFileName, perBatchRecordCount) ;
+                        
                         //inject a new configuration instruction to the async buffer.
-                        this.fileStreamer.newFile(tableParentDir, tableName + "_" + partitionNo + "_" + batchCounter++ + ".out");
+                        currentFileName = tableName + "_" + partitionNo + "_" + batchCounter++ + ".out" ; 
+                        this.fileStreamer.newFile(tableParentDir, currentFileName);
+                         
+                        //reset the counter for the next batch 
+                        perBatchRecordCount = 0 ; 
                     }//EO if batch threshold was reached 
 
                     //stream the data from the resultset into the file using the DBDataType strategy corersponding to the 
@@ -342,6 +362,7 @@ public class TableExporter extends TableProcessor<Worker> {
                     }//EO while there are more columns 
 
                     recordCount++;
+                    perBatchRecordCount++ ; 
                 }//EO while there are more records 
                 
                 //flush and close the last file if exists
@@ -352,6 +373,8 @@ public class TableExporter extends TableProcessor<Worker> {
                     recordCountMsgPart = "Finished exporting " + recordCount + " records" ;
                     //inject the end of file instruction to the buffer 
                     this.fileStreamer.EOF() ; 
+                    //store the statistics for the last file 
+                    table.addRecordPerFile(currentFileName, perBatchRecordCount) ; 
                 }//EO if records were exported to file 
                 
                 final int totalNumberOfRecordsSofar = table.noOfProcessedRecords.addAndGet(recordCount) ;
@@ -396,11 +419,8 @@ public class TableExporter extends TableProcessor<Worker> {
     /**
      * Asynchronous file writer reading values from an unbounded buffer and writes them to file. 
      */
-    private static class FileStreamer extends Thread implements FileStream{ 
-        
-        private BlockingOnEmptyConcurrentLinkedQueue<Object> fileStreamingSink ; 
-        private boolean isTerminated ; 
-        private Task logger ; 
+    private static class FileOutputStreamer extends FileStreamer<FileOutputStreamerContext,BlockingOnEmptyConcurrentLinkedQueue<Object>> 
+                                    implements org.hyperic.tools.dbmigrate.FileOutputStream{
         
         /**
          * Indicates that the next queue item is a File to which to commenced writing 
@@ -418,26 +438,19 @@ public class TableExporter extends TableProcessor<Worker> {
          * Represents a null of type string (null value is used to indicate an empty queue)  
          */
         final static Object NULL_STRING = new Object() ;
-        /**
-         * Represents a null of type object (null value is used to indicate an empty queue) 
-         */
-        final static Object NULL_OBJECT = ObjectOutputStream.TC_NULL ;   
-
-        /**
-         * A global exception buffer which would be polled by the reader thread 
-         */
-        private Throwable exception; 
         
         /**
-         * Starts the this instance as a deamon thread.
+         * Starts the this instance as a daemon thread.
          * @param logger 
          */
-        public FileStreamer(final Task logger) { 
-            this.logger = logger ; 
-            this.fileStreamingSink = new BlockingOnEmptyConcurrentLinkedQueue<Object>() ; // new ArrayBlockingQueue<Object>(1000000) ;
-            this.setDaemon(true) ; 
-            this.start() ; 
+        public FileOutputStreamer(final Task logger) { 
+            super(logger) ; 
         }//EOM
+        
+        @Override
+        protected BlockingOnEmptyConcurrentLinkedQueue<Object> newSink() {
+            return new BlockingOnEmptyConcurrentLinkedQueue<Object>() ; 
+        }//EOM 
         
         /**
          * adds the {@link This#NEW_CONFIGURATION_INSTR} instruction flag to the buffer followed by the new file 
@@ -474,6 +487,117 @@ public class TableExporter extends TableProcessor<Worker> {
          * Adds an {@link this#EOS_INSTR} to the buffer and waits until the FileStreamer thread dies 
          * @throws Throwable
          */
+        @Override
+        final void close() throws Throwable{ 
+            this.fileStreamingSink.add(EOS_INSTR) ;
+            super.close(); 
+        }//EOM
+        
+        @Override
+        protected final FileOutputStreamerContext newFileStreamerContext() {
+            return new FileOutputStreamerContext() ; 
+        }//EOM 
+        
+        @Override
+        protected final void dispose(final FileOutputStreamerContext context) {
+            Utils.close(context.ous) ; 
+        }//EOM 
+        
+        @Override
+        protected final void streamOneEntity(final FileOutputStreamerContext context) throws Throwable {
+            ObjectOutputStream ous = context.ous ;  
+            Object ovalue = this.fileStreamingSink.poll() ;
+                    
+            //if the end of the file or the stream is received, close the file and exit the loop
+            if(ovalue == EOS_INSTR || ovalue == EOF_INSTR) { 
+                this.EOF(ous) ;
+                context.ous = ous = null ;
+                if(ovalue == EOS_INSTR) this.isTerminated = true ;
+                //if the new configuration instructions is received poll for the next 
+                //queue item (file), close the current file resources and create a new one 
+            }else if (ovalue == NEW_CONFIGURATION_INSTR) { 
+                final File outputFile = (File) this.fileStreamingSink.poll() ; 
+                context.ous = ous = this.newOutputFile(outputFile, ous) ; 
+            }else { 
+                //replace null_string and null_object with null values 
+                if(ovalue == NULL_STRING) ous.writeUTF(null) ; 
+                else if(ovalue instanceof String) { 
+                    ous.writeUTF((String)ovalue) ; 
+                }else{ 
+                    if(ovalue == NULL_OBJECT) ovalue = null ;
+                    ous.writeUnshared(ovalue) ; 
+                }//EO else if not string 
+            }//EO if actual value 
+        }//EOM 
+        
+        private final void EOF(final ObjectOutputStream existingOus) throws Throwable{ 
+            if(existingOus != null) {
+                //write the EOF marker 
+                existingOus.write(ObjectOutputStream.TC_MAX) ;
+                existingOus.flush();
+                existingOus.close();
+            }//EO if existingOus != null 
+        }//EOM 
+        
+        private final ObjectOutputStream newOutputFile(final File newFile, final ObjectOutputStream existingOus) throws Throwable {
+           
+            if(existingOus != null) {
+                this.EOF(existingOus) ; 
+            }//EO if existing output stream exists 
+            
+            final FileOutputStream fos = new FileOutputStream(newFile);
+            final GZIPOutputStream gzos = new GZIPOutputStream(fos) ; 
+            return new UTFNullHandlerOOS(gzos);
+            //return new ObjectOutputStream(fos);
+        }//EOM 
+        
+    }//EO inner class FileOutputStreamer
+    
+    public static final class FileOutputStreamerContext extends FileStreamerContext { 
+        ObjectOutputStream ous ; 
+    }//EO inner inner class FileStreamerContext
+    
+    /**
+     * Asynchronous file writer reading values from an unbounded buffer and writes them to file. 
+     
+    private static class OldFileStreamer extends Thread implements org.hyperic.tools.dbmigrate.FileOutputStream{ 
+        
+        private BlockingOnEmptyConcurrentLinkedQueue<Object> fileStreamingSink ; 
+        private boolean isTerminated ; 
+        private Task logger ; 
+        
+        final static Byte NEW_CONFIGURATION_INSTR = (byte)0x7A; 
+        final static Byte EOS_INSTR = (byte)0x7B ; 
+        final static Byte EOF_INSTR = ObjectOutputStream.TC_MAX ;
+        final static Object NULL_STRING = new Object() ;
+        final static Object NULL_OBJECT = ObjectOutputStream.TC_NULL ;   
+
+        private Throwable exception; 
+        
+        public FileStreamer(final Task logger) { 
+            this.logger = logger ; 
+            this.fileStreamingSink = new BlockingOnEmptyConcurrentLinkedQueue<Object>() ; // new ArrayBlockingQueue<Object>(1000000) ;
+            this.setDaemon(true) ; 
+            this.start() ; 
+        }//EOM
+        
+        final void newFile(final File parentDir, final String fileName) { 
+            this.fileStreamingSink.add(NEW_CONFIGURATION_INSTR) ;
+            this.fileStreamingSink.add(new File(parentDir, fileName)) ; 
+        }//EOM 
+        
+        public final void write(final Object object) throws IOException{ 
+            this.fileStreamingSink.add(object == null ? NULL_OBJECT : object) ; 
+        }//EOM
+        
+        public final void writeUTF(final String value) throws IOException { 
+            this.fileStreamingSink.add(value == null ? NULL_STRING : value) ; 
+        }//EOM 
+        
+        final void EOF() { 
+            this.fileStreamingSink.add(EOF_INSTR)  ;
+        }//EOM 
+        
         final void close() throws Throwable{ 
             this.fileStreamingSink.add(EOS_INSTR) ; 
             this.join() ; 
@@ -550,6 +674,7 @@ public class TableExporter extends TableProcessor<Worker> {
         }//EOM 
         
     }//EO inner class FileStreamer ;
+    */ 
     
     /**
      * unbounded {@link LinkedList} with wait on empty get policy 

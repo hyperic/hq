@@ -51,6 +51,7 @@ import org.hyperic.hq.plugin.weblogic.WeblogicDetector;
 import org.hyperic.hq.plugin.weblogic.WeblogicMetric;
 import org.hyperic.hq.plugin.weblogic.WeblogicProductPlugin;
 import org.hyperic.hq.plugin.weblogic.WeblogicUtil;
+import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginUpdater;
@@ -453,6 +454,10 @@ public class WeblogicRuntimeDiscoverer implements RuntimeDiscoverer, PrivilegedA
 		}
 		if (!server.isAdmin()) {
 			ConfigResponse productConfig = new ConfigResponse(server.getResourceConfig());
+			String listeningPorts = server.getAttribute(BaseServerQuery.ATTR_LISTEN_PORT);
+			if (listeningPorts!=null && !listeningPorts.equals("")) {
+			    productConfig.setValue(Collector.LISTEN_PORTS, listeningPorts);
+			}
 			ConfigResponse metricConfig = new ConfigResponse();
 			ConfigResponse cprops = new ConfigResponse(server.getCustomProperties());
 

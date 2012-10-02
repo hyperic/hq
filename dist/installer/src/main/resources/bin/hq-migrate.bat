@@ -1,4 +1,4 @@
-@echo off 
+@echo off
 REM 
 REM HQ migration 
 REM
@@ -26,7 +26,7 @@ if "%JAVA_HOME%" == "" (
 	FOR %%J IN (%*) DO (
 		if "%%J" == "usage" (
 			goto USAGE
-		else if "%%J" == "help" (
+		)else if "%%J" == "help" (
 			goto USAGE
 		)else if "%%J" == "-Dhqserver.install.path" (
 			set next=hqserver.install.path
@@ -35,7 +35,6 @@ if "%JAVA_HOME%" == "" (
 		   
 		   REM verify that the hyperic jre home directory exists 
 		   if not exist "!JAVA_HOME!" ( 
-		   	   echo "JAVA_HOME was undefined and Hyperic server's JRE does not exist, aborting!"
 		   	   goto JAVA_HOME_UNDEFINED 
 		   )else ( 
 		       goto JAVA_HOME_FOUND  
@@ -58,7 +57,13 @@ if "%JAVA_HOME%" == "" (
 		)
 	) 
 )
-	   
+	
+if "%JAVA_HOME%" == "" ( 
+ goto JAVA_HOME_UNDEFINED
+)else ( 
+ goto JAVA_HOME_FOUND
+)
+  
 :USAGE 
 type %INSTALL_DIR%\data\reports\migration-usage.txt 
 goto :EOF 
@@ -77,5 +82,3 @@ goto :EOF
 echo "JAVA_HOME was undefined and Hyperic server's JRE does not exist, aborting!"
 
 :EOF 
-
-

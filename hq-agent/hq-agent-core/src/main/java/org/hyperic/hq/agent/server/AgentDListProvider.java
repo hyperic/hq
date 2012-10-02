@@ -56,9 +56,9 @@ import org.hyperic.hq.agent.db.DiskList;
 import org.hyperic.util.file.FileUtil;
 import org.hyperic.util.security.KeystoreConfig;
 import org.hyperic.util.security.KeystoreManager;
-import org.hyperic.util.security.MarkedStringEncryptor;
 import org.hyperic.util.security.SecurityUtil;
-import org.jasypt.encryption.StringEncryptor;
+import org.jasypt.encryption.pbe.PooledPBEStringEncryptor;
+import org.jasypt.properties.PropertyValueEncryptionUtils;
 
 public class AgentDListProvider implements AgentStorageProvider {
     private static final int RECSIZE  = 4000;
@@ -84,7 +84,7 @@ public class AgentDListProvider implements AgentStorageProvider {
     private long      chkSize = CHKSIZE;
     private int       chkPerc = CHKPERC;
 
-    private StringEncryptor encryptor = null;
+    private PooledPBEStringEncryptor encryptor = null;
     
     public AgentDListProvider(){
         this.log     = LogFactory.getLog(AgentDListProvider.class);
@@ -92,6 +92,14 @@ public class AgentDListProvider implements AgentStorageProvider {
         this.lists   = null;
     }
 
+    protected PooledPBEStringEncryptor createEncryptor() throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, IOException {
+        PooledPBEStringEncryptor encryptor = new PooledPBEStringEncryptor();
+        encryptor.setPoolSize(1);
+        encryptor.setAlgorithm(SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM);
+        encryptor.setPassword(getKeyvalsPass());
+        return encryptor; 
+    }
+    
     /**
      * Get a description of this storage provider.
      *
@@ -247,7 +255,7 @@ public class AgentDListProvider implements AgentStorageProvider {
             bOs = new BufferedOutputStream(fOs);
             dOs = new DataOutputStream(bOs);
             if (this.encryptor==null) {
-                this.encryptor = new MarkedStringEncryptor(SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM,getKeyvalsPass());
+                this.encryptor = createEncryptor();
             }
             synchronized(this.keyVals){
                 dOs.writeLong(this.keyVals.size());
@@ -257,9 +265,11 @@ public class AgentDListProvider implements AgentStorageProvider {
                         )
                 {
                     Map.Entry ent = (Map.Entry)i.next();
+                    String key = (String)ent.getKey(),
+                            value = (String)ent.getValue();
 
-                    String encryptedKey = SecurityUtil.encrypt(this.encryptor, (String)ent.getKey());
-                    String encryptedVal =  SecurityUtil.encrypt(this.encryptor, (String)ent.getValue());
+                    String encryptedKey = SecurityUtil.encrypt(this.encryptor, key);
+                    String encryptedVal =  SecurityUtil.encrypt(this.encryptor, value);
 
                     dOs.writeUTF(encryptedKey);
                     dOs.writeUTF(encryptedVal);
@@ -363,13 +373,15 @@ public class AgentDListProvider implements AgentStorageProvider {
             nEnts = dIs.readLong();
 
             if (this.encryptor==null) {
-                this.encryptor = new MarkedStringEncryptor(SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM,getKeyvalsPass());
+                this.encryptor = createEncryptor();
             }
             while(nEnts-- != 0){
                 String key = dIs.readUTF();
                 String val = dIs.readUTF();
-                String decryptedKey = SecurityUtil.isMarkedEncrypted(key)?SecurityUtil.decrypt(encryptor, key):key;
-                String decryptedVal = SecurityUtil.isMarkedEncrypted(val)?SecurityUtil.decrypt(encryptor, val):val;
+                
+                String decryptedKey = PropertyValueEncryptionUtils.isEncryptedValue(key)?SecurityUtil.decrypt(encryptor, key):key;
+                String decryptedVal = PropertyValueEncryptionUtils.isEncryptedValue(val)?SecurityUtil.decrypt(encryptor, val):val;
+
                 this.keyVals.put(decryptedKey, decryptedVal);
             }
         } catch(FileNotFoundException exc){
@@ -377,7 +389,7 @@ public class AgentDListProvider implements AgentStorageProvider {
         } catch (GeneralSecurityException e) {
             this.log.error(e.getMessage());
             throw new AgentStorageException(e.getMessage());
- 	} catch(IOException exc){
+        } catch(IOException exc){
             this.log.error("Error reading " + this.keyValFile + " loading " +
                     "last known good version");
 
@@ -392,22 +404,27 @@ public class AgentDListProvider implements AgentStorageProvider {
 
                 nEnts = dIs.readLong();
                 if (this.encryptor==null) {
-                    this.encryptor = new MarkedStringEncryptor(SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM,getKeyvalsPass());
+                    this.encryptor = createEncryptor();
                 }
-                while(nEnts-- != 0) {
-                    String denryptedKey = SecurityUtil.encrypt(this.encryptor, dIs.readUTF());
-                    String decryptedVal = SecurityUtil.encrypt(this.encryptor, dIs.readUTF());
-                    this.keyVals.put(denryptedKey, decryptedVal);
+                while(nEnts-- != 0) { 
+                    String key = dIs.readUTF(),
+                            val = dIs.readUTF();
+                    String decryptedKey = SecurityUtil.encrypt(this.encryptor, key);
+                    String decryptedVal = SecurityUtil.encrypt(this.encryptor, val);
+                    this.keyVals.put(decryptedKey, decryptedVal);
                 }
             } catch (FileNotFoundException e) {
+                this.log.error(e.getMessage());
                 // Already checked this before, shouldn't happen
             } catch (IOException e) {
+                this.log.error(e.getMessage());
                 // Throw original error
                 throw new AgentStorageException("Error reading " + 
                         this.keyValFile + ": " +
                         e.getMessage());
             
             } catch(GeneralSecurityException e){
+                this.log.error(e.getMessage());
                 // Throw original error
                 throw new AgentStorageException(e.getMessage());
             }

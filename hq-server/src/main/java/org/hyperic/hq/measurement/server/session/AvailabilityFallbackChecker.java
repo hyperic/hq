@@ -47,6 +47,7 @@ public class AvailabilityFallbackChecker {
 	private AvailabilityManager availabilityManager;
 	private AvailabilityCache availabilityCache;
 	private ResourceManager resourceManager;
+	private MeasurementInserterHolder measurementInserterHolder; // in order to retrieve AvailabilityDataInserter
 	
 	// For testing purposes, in case we need to perform checks with a constant timestamp.
 	// if curTimeStamp is 0, we check for the actual current time. 
@@ -58,10 +59,12 @@ public class AvailabilityFallbackChecker {
 	// --------------------------------------------------------------------------------------------------------
 	// --------------------------------------------------------------------------------------------------------
 	@Autowired
-	public AvailabilityFallbackChecker(AvailabilityManager availabilityManager, AvailabilityCache availabilityCache, ResourceManager resourceManager) {
+	public AvailabilityFallbackChecker(AvailabilityManager availabilityManager, AvailabilityCache availabilityCache, ResourceManager resourceManager,
+			MeasurementInserterHolder measurementInserterHolder) {
 		this.availabilityManager = availabilityManager;
 		this.availabilityCache = availabilityCache;
 		this.resourceManager = resourceManager;
+		this.measurementInserterHolder = measurementInserterHolder;
 	}
 	
 
@@ -185,9 +188,25 @@ public class AvailabilityFallbackChecker {
 	 * Store updates using availabilityManager
 	 * @param availabilityDataPoints - calculated availability statuses 
 	 */
-	private void storeUpdates(Collection<DataPoint> availabilityDataPoints) {
+	private void storeUpdates(Collection<DataPoint> availabilityDataPoints)  {
 		List<DataPoint> availDataPoints = new ArrayList<DataPoint>(availabilityDataPoints);
-		this.availabilityManager.addData(availDataPoints, true, true);
+		
+		if (availabilityDataPoints == null) {
+			//log.info("storeUpdates: no updates");
+			return;
+		}
+	
+		//log.info("storeUpdates: storing " + availabilityDataPoints.size() + " data points");
+    	DataInserter inserter = measurementInserterHolder.getAvailDataInserter();
+		try {
+			inserter.insertMetricsFromServer(availDataPoints);
+		} catch (InterruptedException e) {
+			log.warn("storeUpdates: Data insertion failed. Using addData mechanism instead. ", e);
+			this.availabilityManager.addData(availDataPoints, true, true);
+		} catch (DataInserterException e) {
+			log.warn("storeUpdates: Data insertion failed. Using addData mechanism instead. ", e);
+			this.availabilityManager.addData(availDataPoints, true, true);
+		}
 	}
 
 	/**

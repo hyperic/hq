@@ -65,4 +65,10 @@ public class SynchronousDataInserter
         throws InterruptedException, DataInserterException {
         insertMetrics(metricData);
     }
+
+
+	public void insertMetricsFromServer(List<DataPoint> metricData)
+			throws InterruptedException, DataInserterException {
+        insertMetrics(metricData);
+	}
 }
