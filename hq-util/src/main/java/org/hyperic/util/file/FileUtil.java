@@ -49,6 +49,7 @@ import org.hyperic.util.ArrayUtil;
 import org.hyperic.util.collection.IntHashMap;
 
 public class FileUtil {
+
     private static IntHashMap invalidChars = null;
 
     private FileUtil(){}
@@ -345,42 +346,20 @@ public class FileUtil {
         }
     }
     
-    /**
-     * Give read permissions to the file's owner only.
-     *
-     * @param file
-     * @throws  SecurityException
-     *          If a security manager exists and its <code>{@link
-     *          java.lang.SecurityManager#checkWrite(java.lang.String)}</code>
-     *          method denies write access to the file
-     */    
-    public static void setReadableByOwnerOnly(File file) {
-        // Remove all read permissions
-        boolean isOwnerOnly = false;
-        file.setReadable(false, isOwnerOnly);
+    public static void setReadWriteOnlyByOwner(File file) throws IOException {
 
-        // Add owner-only read permission
-        file.setReadable(true);
+    	String path = file.getAbsolutePath();
+
+    	//For Windows the permissions are inherited from the folder
+    	//and the permissions for the 'conf' folder is correct
+    	if (System.getProperty("os.name").toLowerCase().contains("win")) {
+    		return;
+    	}
+    	//Unix type systems
+    	else {
+    		Runtime.getRuntime().exec("chmod 600 " + path);
+    	}
     }
-
-    /**
-     * Give write permissions to the file's owner only.
-     *
-     * @param file
-     * @throws  SecurityException
-     *          If a security manager exists and its <code>{@link
-     *          java.lang.SecurityManager#checkWrite(java.lang.String)}</code>
-     *          method denies write access to the file
-     */    
-    public static void setWritableByOwnerOnly(File file) {
-        // Remove all write permissions
-        boolean isOwnerOnly = false;
-        file.setWritable(false, isOwnerOnly);
-
-        // Add owner-only write permission
-        file.setWritable(true);
-    }
-
 
     /**
      * Chop the last element off a path.  For example, if you pass in
