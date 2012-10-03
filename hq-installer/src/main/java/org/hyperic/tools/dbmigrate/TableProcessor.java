@@ -533,13 +533,17 @@ public abstract class TableProcessor<T extends Callable<TableProcessor.Table[]>>
        */
       void close() throws Throwable{ 
           MultiRuntimeException thrown = null ; 
-          //wait for three minutes and if nothing happens interrupt and exit 
+          //wait for 2 minutes and if nothing happens interrupt and exit 
+          final String msgPrefix = "[" + Thread.currentThread().getName() + "[" + Thread.currentThread().getId() + ".Close()]]: " ; 
           try{ 
-              this.join(180000) ;
+              this.logger.log(msgPrefix+ "before joining") ;
+              this.join(120000) ;
           }catch(Throwable t) { 
               Utils.printStackTrace(t) ; 
               thrown = MultiRuntimeException.newMultiRuntimeException(null, t) ; 
-          }//EO catch block 
+          }//EO catch block
+          
+          this.logger.log(msgPrefix+ "after join, isAlive=" + (this.isAlive())) ;
           
           try{ 
               if(this.isAlive()) { 
@@ -561,12 +565,11 @@ public abstract class TableProcessor<T extends Callable<TableProcessor.Table[]>>
       
       public void run() { 
           
-          this.isTerminated = false ; 
-
           logger.log(this.getName() + "  File streamer starting") ; 
           T ctx = null ;
           try{ 
-              ctx = newFileStreamerContext() ; 
+              ctx = newFileStreamerContext() ;
+              this.isTerminated = false ;
               while(!this.isTerminated) { 
                   this.streamOneEntity(ctx) ; 
               }//EO while not terminated 
