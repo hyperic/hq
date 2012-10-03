@@ -11773,6 +11773,12 @@ has already been defined.
         <schema-addColumn table="EAM_AIQ_PLATFORM" column="AUTO_APPROVE" columnType="BOOLEAN" nullable="NOT NULL" default="FALSE"/>
         <schema-addColumn table="EAM_AIQ_SERVER" column="AUTO_APPROVE" columnType="BOOLEAN" nullable="NOT NULL" default="FALSE"/>
     </schemaSpec>
+	
+	<schemaSpec version="3.215">
+	 	<schema-directSQL>  
+	 		<statement>alter table eam_keystore alter column cert_chain type varchar(10000)</statement> 
+	 	</schema-directSQL>
+	</schemaSpec>
 
 </dbupgrade>
 </target>
