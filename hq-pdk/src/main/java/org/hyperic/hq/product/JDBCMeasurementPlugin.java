@@ -42,7 +42,7 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.util.config.ConfigResponse;
@@ -68,9 +68,10 @@ public abstract class JDBCMeasurementPlugin extends MeasurementPlugin {
     
     private static final String USER_KEY = "user";
     private static final String PASSWORD_KEY = "password";
-
     
     public static final int COL_INVALID = 0;
+
+    private static long FIVE_MINUTES_MILLIS = 5 * 60 * 1000;
 
     protected String _sqlLog;
     
@@ -80,7 +81,7 @@ public abstract class JDBCMeasurementPlugin extends MeasurementPlugin {
                     _valMap = new HashMap();
 
     private int _numRows;
-
+    
     private final static HashMap<String,Queue> connectionPools = new HashMap<String, Queue>();
     private final static Timer poolsShrinkTimer = new Timer("JDBCMeasurementPlugin.poolsShrink");
     static {
@@ -102,7 +103,7 @@ public abstract class JDBCMeasurementPlugin extends MeasurementPlugin {
                     }
                 }
             }
-        }, TimeUnit.MINUTES.toMillis(5), TimeUnit.MINUTES.toMillis(5));
+        }, FIVE_MINUTES_MILLIS, FIVE_MINUTES_MILLIS);
     }
     
     /**

@@ -103,7 +103,7 @@ public class KeystoreManager {
 	                
 	            password = filePassword.toCharArray();
 	            createInternalKeystore(keystoreConfig);	            
-	            FileUtil.setReadableByOwnerOnly(file);	            
+	            FileUtil.setReadWriteOnlyByOwner(file);          
 	        }
 	            
 	        // ...keystore exist, so init the file input stream...

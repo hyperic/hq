@@ -203,8 +203,7 @@ public class PropertyEncryptionUtil {
             
             // set read/write permissions to be given to the owner only
             File encKeyFile = new File(fileName);
-            FileUtil.setReadableByOwnerOnly(encKeyFile);
-            FileUtil.setWritableByOwnerOnly(encKeyFile);
+            FileUtil.setReadWriteOnlyByOwner(encKeyFile);
         } catch (Exception exc) {
             throw new PropertyUtilException(exc);
         }
