@@ -986,35 +986,37 @@ public class DataManagerImpl implements DataManager {
         long msmtInterval = msmt.getInterval();
         if (tf<msmtInterval) { 
             MeasurementTemplate tmp = msmt.getTemplate();
-            throw new TimeframeSizeException("requested time frame is of size " + tf + " milliseconds, which is smaller than the time interval of the measurement " + tmp!=null?tmp.getName():"" + " which is " + msmtInterval + " milliseconds");
+            throw new TimeframeSizeException("The requested time frame is of size " + tf + " milliseconds, which is smaller than the time interval of the measurement" + tmp!=null?" "+tmp.getName():"" + " which is " + msmtInterval + " milliseconds");
         }
         long now = System.currentTimeMillis();
-        if (end>now || end<begin) { 
-            throw new TimeframeBoundriesException("illegal time frame boundries");
+        if (end>now || end<begin) {
+            throw new TimeframeBoundriesException("The requested time frame"
+                    + (end>now?" ends in the future":(end<begin?" and":""))
+                    + (end<begin?" ends before it starts":""));
         }
         if (!confDefaultsLoaded) {
             loadConfigDefaults();
         }
-        if (msmtInterval>=maxInterval && begin>=now-DataManagerImpl.this.purgeRaw/* usesMetricUnion(begin, end, false)*/) {
+        if (msmtInterval>=maxInterval && begin>=now-DataManagerImpl.this.purgeRaw) {
             return MeasurementUnionStatementBuilder.getUnionStatement(begin, end, msmt.getId().intValue(), measurementDAO.getHQDialect());
         }
-        if (tf<HOUR_IN_MILLI) { 
+        if (tf<HOUR_IN_MILLI) {
             MeasurementTemplate tmp = msmt.getTemplate();
-            throw new TimeframeSizeException("requested time frame is of size " + tf + " milliseconds, which is smaller than the hourly aggregated time interval of the measurement " + tmp!=null?tmp.getName():"");
+            throw new TimeframeSizeException("The requested time frame is of size " + tf + " milliseconds, which is smaller than the hourly aggregated time interval of the measurement " + tmp!=null?tmp.getName():"");
         }
         if (HOUR_IN_MILLI>=maxInterval && begin>=now-DataManagerImpl.this.purge1h) {
             return MeasurementConstants.TAB_DATA_1H;
         }
         if (tf<SIX_HOURS_IN_MILLI) { 
             MeasurementTemplate tmp = msmt.getTemplate();
-            throw new TimeframeSizeException("requested time frame is of size " + tf + " milliseconds, which is smaller than the 6-hourly aggregated time interval of the measurement " + tmp!=null?tmp.getName():"");
+            throw new TimeframeSizeException("The requested time frame is of size " + tf + " milliseconds, which is smaller than the 6-hourly aggregated time interval of the measurement " + tmp!=null?tmp.getName():"");
         }
         if (SIX_HOURS_IN_MILLI>=maxInterval && begin>=now-DataManagerImpl.this.purge6h) {
             return MeasurementConstants.TAB_DATA_6H;
         }
         if (tf<DAY_IN_MILLI) { 
             MeasurementTemplate tmp = msmt.getTemplate();
-            throw new TimeframeSizeException("requested time frame is of size " + tf + " milliseconds, which is smaller than the daily aggregated time interval of the measurement " + tmp!=null?tmp.getName():"");
+            throw new TimeframeSizeException("The requested time frame is of size " + tf + " milliseconds, which is smaller than the daily aggregated time interval of the measurement " + tmp!=null?tmp.getName():"");
         }
         // return daily aggregated data even if the time frame is beyond the purge time or contains more than 400 DTPs
         return MeasurementConstants.TAB_DATA_1D;

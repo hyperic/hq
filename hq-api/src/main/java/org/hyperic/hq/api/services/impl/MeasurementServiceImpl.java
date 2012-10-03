@@ -40,20 +40,18 @@ public class MeasurementServiceImpl extends RestApiService implements Measuremen
 	            throw t;
 	        }
         } catch (TimeframeBoundriesException e) {
-            throw errorHandler.newWebApplicationException(e, Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.WRONG_DATE_VALUES);
+            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.WRONG_DATE_VALUES, e.getMessage());
         } catch (UnsupportedOperationException e) {
-            throw errorHandler.newWebApplicationException(e, Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.BAD_MEASUREMENT_REQ);
+            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.BAD_MEASUREMENT_REQ, e.getMessage());
         } catch (ObjectNotFoundException e) {
             String missingObj = e.getEntityName();
             if (MeasurementTemplate.class.getName().equals(missingObj)) {
-                throw errorHandler.newWebApplicationException(e, Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.TEMPLATE_NOT_FOUND, e.getIdentifier());
+                throw errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.TEMPLATE_NOT_FOUND, e.getIdentifier());
             }
             if (Measurement.class.getName().equals(missingObj)) {
-                throw errorHandler.newWebApplicationException(e, Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.MEASUREMENT_NOT_FOUND, e.getIdentifier());
+                throw errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.MEASUREMENT_NOT_FOUND, e.getIdentifier());
             }
-            throw errorHandler.newWebApplicationException(e, Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID, e.getIdentifier());
-        } catch (IllegalArgumentException e) {
-            throw errorHandler.newWebApplicationException(e, Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.WRONG_DATE_VALUES);
+            throw errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID, e.getIdentifier());
         }
     }
 
@@ -63,7 +61,7 @@ public class MeasurementServiceImpl extends RestApiService implements Measuremen
             ApiMessageContext apiMessageContext = newApiMessageContext();
             return measurementTransfer.getAggregatedMetricData(apiMessageContext, hqMsmtReqs, begin, end);
         } catch (TimeframeBoundriesException e) {
-            throw errorHandler.newWebApplicationException(e, Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.WRONG_DATE_VALUES);
+            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.WRONG_DATE_VALUES);
         }
     }
 }
