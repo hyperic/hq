@@ -26,6 +26,7 @@
 package org.hyperic.hq.product;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashSet;
 import java.util.Set;
@@ -106,10 +107,11 @@ public class DetectionUtil {
 		}
 		Set<String> ports = new HashSet<String>();	
 		String line;
+		BufferedReader input = null;
 		try {
 			// Run netstat
 			Process process = Runtime.getRuntime().exec(cmd);
-			BufferedReader input = new BufferedReader(new InputStreamReader(process
+			input = new BufferedReader(new InputStreamReader(process
 					.getInputStream()));
 	
 			while ((line = input.readLine()) != null) {
@@ -136,14 +138,21 @@ public class DetectionUtil {
 					}
 				}
 				catch (Exception e) {
-					continue;
+				    log.error(e);
+				    continue;
 				}
 			}
-			input.close();
 		} catch (Exception e) {
 			log.warn("Error populating ports for '" + pidsStr + "' ", e);
+		} finally {
+            if (input!=null) {
+                try {
+                   input.close();
+               } catch (IOException e) {
+                   log.error(e);
+               }
+           } 
 		}
-
 		updatePortsInConfigResponse(cf, ports);
 	
 	}
@@ -157,10 +166,11 @@ public class DetectionUtil {
 		}
 		Set<String> ports = new HashSet<String>();	
 		String line;
+		BufferedReader input = null;
 		try {
 			// Run netstat
 			Process process = Runtime.getRuntime().exec(cmd);
-			BufferedReader input = new BufferedReader(new InputStreamReader(process
+			input = new BufferedReader(new InputStreamReader(process
 					.getInputStream()));
 	
 			while ((line = input.readLine()) != null) {
@@ -186,14 +196,21 @@ public class DetectionUtil {
 					}
 				}
 				catch (Exception e) {
+				    log.error(e);
 					continue;
 				}
 			}
-			input.close();
 		} catch (Exception e) {
 			log.warn("Error populating ports for '" + pidsStr + "' ", e);
+		} finally {
+            if (input!=null) {
+                try {
+                   input.close();
+               } catch (IOException e) {
+                   log.error(e);
+               }
+           }
 		}
-
 		updatePortsInConfigResponse(cf, ports);
 	}
 
@@ -224,9 +241,10 @@ public class DetectionUtil {
 		if (IS_UNIX) {
 			String cmd = "ps -o pid --no-headers --ppid " + String.valueOf(parentPid);
 			String line;
+			BufferedReader input=null;
 			try {
 				Process process = Runtime.getRuntime().exec(cmd);
-				BufferedReader input = new BufferedReader(new InputStreamReader(process
+				input = new BufferedReader(new InputStreamReader(process
 						.getInputStream()));
 				while ((line = input.readLine()) != null) {
 					line = line.trim();
@@ -236,17 +254,25 @@ public class DetectionUtil {
 						childPids.add(childPid);
 					}
 				}
-				input.close();
 			} catch (Exception e) {
-
-			}
+                log.error(e);
+			} finally {
+                if (input!=null) {
+                    try {
+                       input.close();
+                   } catch (IOException e) {
+                       log.error(e);
+                   }
+               }
+           }
 		}
 		else if (IS_WINDOWS) {
 			final String cmd = "wmic process get processid,parentprocessid";
 			String line;
+			BufferedReader input = null;
 			try {
 			    Process process = Runtime.getRuntime().exec(cmd);
-			    BufferedReader input = new BufferedReader(new InputStreamReader(process
+			    input = new BufferedReader(new InputStreamReader(process
 						.getInputStream()));
 				long lPpid = -1;
 				String sPpid = "";
@@ -268,12 +294,21 @@ public class DetectionUtil {
 						}
 					}
 					catch (Exception e) {
+                        log.error(e);
 						continue;
 					}					
 				}
 	
-				input.close();
 			} catch (Exception e) {
+                log.error(e);
+			} finally {
+			    if (input!=null) {
+		             try {
+                        input.close();
+                    } catch (IOException e) {
+                        log.error(e);
+                    }
+			    }
 			}
 		}
 		return childPids;
@@ -288,6 +323,7 @@ public class DetectionUtil {
 			return true;
 		}
 		catch (Exception e) {
+            log.error(e);
 			return false;
 		}
 	}
@@ -299,11 +335,5 @@ public class DetectionUtil {
             sigar = SigarProxyCache.newInstance(sigarImpl, timeout);
         }
         return sigar;
-    }
-
-	public static void main(String[] args) {
-	    Pattern p = Pattern.compile("a*b");
-	    Matcher m = p.matcher("aaaaab");
-	    boolean b = m.matches();
     }
 }
