@@ -53,5 +53,17 @@ public interface DataInserter {
     public void insertMetrics(List<DataPoint> metricData, boolean isPriority)
         throws InterruptedException, DataInserterException;
 
+    
+    
+    /**
+     * Insert metric data calculated by the Server into the DB, possibly blocking.  This may or may not
+     * be implemented by the inherited class.
+     * 
+     * @param metricData a list of {@link DataPoint}s
+     */
+    public void insertMetricsFromServer(List<DataPoint> metricData)
+        throws InterruptedException, DataInserterException;
+
+    
     public Object getLock();
 }

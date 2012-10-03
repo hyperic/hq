@@ -85,6 +85,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -486,6 +487,7 @@ public class ControlManagerImpl implements ControlManager {
     /**
      * Receive status information about a previous control action
      */
+    @Transactional(propagation=Propagation.REQUIRES_NEW)
     public void sendCommandResult(int id, int result, long startTime, long endTime, String message) {
         String status;
         if (result == 0) {

@@ -230,7 +230,7 @@ public class DetectionUtil {
 						.getInputStream()));
 				while ((line = input.readLine()) != null) {
 					line = line.trim();
-					if (!line.isEmpty() && isNumber(line)) {
+					if (!line.equals("") && isNumber(line)) {
 						Long childPid = Long.valueOf(line);
 						childPids.addAll(getAllChildPid(childPid));
 						childPids.add(childPid);

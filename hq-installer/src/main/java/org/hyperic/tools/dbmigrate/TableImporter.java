@@ -368,7 +368,7 @@ public class TableImporter extends TableProcessor<Worker> {
                    log("Attempting to Acquire bigtable (writer)" + msgSuffix) ; 
                    currentLock = this.bigTableLock ; 
                    this.bigTableLock.lock() ;
-                   log("exited bigtable (writer)" + msgSuffix) ; 
+                   log("-----> exited bigtable (writer)" + msgSuffix) ; 
                }else {
                    log("Attempting to Acquire smalltable (reader)" + msgSuffix) ;
                    currentLock = this.smallTableLock ; 
@@ -706,10 +706,12 @@ public class TableImporter extends TableProcessor<Worker> {
                     this.logger.log(this.toStringRepresentation + " newFile() --> after waiting for previous operation to finish") ;
                 }//EO if some file is still being processed 
                 else if(this.isTerminated) { 
-                    this.logger.log(toStringPrefix + "newFile() --> waiting for thread to start") ;
-                    this.wait() ; 
-                    this.logger.log(toStringPrefix + "newFile() --> thread started, configuring first file") ;
-                }
+                    while(this.isTerminated) { 
+                        this.logger.log(toStringPrefix + "newFile() --> waiting for thread to start") ;
+                        this.wait(500) ; 
+                        if(!this.isTerminated) this.logger.log(toStringPrefix + "newFile() --> thread started, configuring first file") ;
+                    }//EO while terminated
+                }//EO else if terminated
             }//EO sync block 
             
             final String inputFileName = inputFile.getName() ; 
@@ -730,6 +732,7 @@ public class TableImporter extends TableProcessor<Worker> {
                     this.notify() ;
                 }//EO synchronized block
             }catch(Throwable t) { 
+                Utils.printStackTrace(t, "context=" + (this.context == null ? "null" : this.context)) ; 
                 Utils.close(fis, zis, this.context.ois) ; 
                 throw t ; 
             }//EO catch block 
@@ -767,16 +770,26 @@ public class TableImporter extends TableProcessor<Worker> {
             
             //invoke the interrupt on this instance in case its hung waiting for new files 
             try{ 
+                synchronized(this) { 
+                    this.notifyAll() ;
+                }//EO sync block 
+                
+                this.logger.log(this.toStringRepresentation + ".close() --> about to interrupt") ; 
+                
                 this.interrupt() ;
             }catch(Throwable t) { 
                 thrown = MultiRuntimeException.newMultiRuntimeException(null, t) ; 
             }//EO catch block 
+            
+            this.logger.log(this.toStringRepresentation + ".close() --> after interrupt") ;
             
             try{ 
                 super.close(); 
             }catch(Throwable t) { 
                 thrown = MultiRuntimeException.newMultiRuntimeException(thrown, t) ; 
             }//EO catch block 
+            
+            this.logger.log(this.toStringRepresentation + " at the end of the close()") ; 
             
             if(thrown != null) throw thrown ; 
         }//EOM 
@@ -805,6 +818,7 @@ public class TableImporter extends TableProcessor<Worker> {
             this.context = new FileInputStreamerContext() ;
             //wait until the first file was configured before returning 
             synchronized (this) {
+                this.isTerminated = false ; 
                 this.notify() ; 
                 this.wait() ;
                 this.logger.log(this.toString() + " Commencing the processing of the first file") ; 
