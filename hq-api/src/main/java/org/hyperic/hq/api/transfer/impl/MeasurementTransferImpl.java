@@ -109,20 +109,15 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
                     throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException, TimeframeSizeException {
 
         MeasurementResponse res = new MeasurementResponse();
-        if (hqMsmtReq==null || rscId==null || "".equals(rscId) 
-                || hqMsmtReq==null || hqMsmtReq.getMeasurementTemplateNames()==null || hqMsmtReq.getMeasurementTemplateNames().size()==0 
-                || begin==null || end==null) {
-            throw new UnsupportedOperationException("Resource ID= " +rscId
-                    + hqMsmtReq!=null?", Measurements Names= "+ hqMsmtReq.getMeasurementTemplateNames():""
-                            + ", Message Body= " + hqMsmtReq
-                            + ", Begin= " + begin
-                            + ", End= " + end);
+        if (hqMsmtReq==null || hqMsmtReq.getMeasurementTemplateNames()==null || hqMsmtReq.getMeasurementTemplateNames().size()==0) {
+            throw new UnsupportedOperationException("message body is missing or corrupted"); 
         }
-        if (begin.after(end) || end.after(Calendar.getInstance().getTime())) {
-            throw new TimeframeBoundriesException("Begin= " +begin +", End=" +end);
+        validateTimeFrame(begin,end);
+        if (rscId==null || "".equals(rscId)) {
+            throw new UnsupportedOperationException("The request URL is missing the resource ID");
         }
+        
         AuthzSubject authzSubject = apiMessageContext.getAuthzSubject();
-
         // extract all input measurement templates
         List<String> tmpNames = hqMsmtReq.getMeasurementTemplateNames();
         List<MeasurementTemplate> tmps = this.tmpltMgr.findTemplatesByName(tmpNames);
@@ -143,19 +138,40 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         }
         return res;
     }
-
+    protected void validateTimeFrame(Date begin, Date end) throws TimeframeBoundriesException {
+        StringBuilder errorMsg = new StringBuilder();
+        if (begin==null) {
+            errorMsg.append("The request URL is missing the time frame begining");
+        }
+        if (end==null) {
+            if (errorMsg.length()>0) {
+                errorMsg.append(" and end");
+            } else {
+                errorMsg.append("The request URL is missing the time frame end");
+            }
+        }
+        if (errorMsg.length()>0) {
+            throw new TimeframeBoundriesException(errorMsg.toString());
+        }
+        if (begin.after(end)) {
+                errorMsg.append("Time frame end time is before its start time");
+        }
+        if (end.after(Calendar.getInstance().getTime())) {
+            errorMsg.append("Time frame ends in the future");
+        }
+        if (errorMsg.length()>0) {
+            throw new TimeframeBoundriesException(errorMsg.toString());
+        }
+    }
     
     @Transactional(readOnly = true)
     public ResourceMeasurementBatchResponse getAggregatedMetricData(ApiMessageContext apiMessageContext,
             ResourceMeasurementRequests hqMsmtReqs, Date begin, Date end) throws TimeframeBoundriesException, PermissionException, SQLException, UnsupportedOperationException, ObjectNotFoundException {
             ResourceMeasurementBatchResponse res = new ResourceMeasurementBatchResponse(this.errorHandler);
-            if (hqMsmtReqs==null || hqMsmtReqs.getMeasurementRequests()==null || hqMsmtReqs.getMeasurementRequests().size()==0 || begin==null || end==null) {
-                throw new UnsupportedOperationException("the request is missing some essential details");
+            if (hqMsmtReqs==null || hqMsmtReqs.getMeasurementRequests()==null || hqMsmtReqs.getMeasurementRequests().size()==0) {
+                throw new UnsupportedOperationException("message body is missing or corrupted"); 
             }
-            if (begin.after(end) || end.after(Calendar.getInstance().getTime())) {
-                throw new TimeframeBoundriesException("Begin= " +begin +", End=" +end);
-            }
-
+            validateTimeFrame(begin,end);
             AuthzSubject authzSubject = apiMessageContext.getAuthzSubject();
             // extract all input measurement templates
             Map<String,List<String>> tmpNameToRscs = new HashMap<String,List<String>>();

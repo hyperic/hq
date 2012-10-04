@@ -16,6 +16,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.TimeframeBoundriesException;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.measurement.server.session.TimeframeSizeException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.sql.SQLException;
@@ -39,6 +40,8 @@ public class MeasurementServiceImpl extends RestApiService implements Measuremen
 	            errorHandler.log(t);
 	            throw t;
 	        }
+        } catch (TimeframeSizeException e) {
+            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.WRONG_DATE_VALUES, e.getMessage());
         } catch (TimeframeBoundriesException e) {
             throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.WRONG_DATE_VALUES, e.getMessage());
         } catch (UnsupportedOperationException e) {
