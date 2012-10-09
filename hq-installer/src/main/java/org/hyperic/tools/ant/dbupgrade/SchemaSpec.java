@@ -40,6 +40,7 @@ public class SchemaSpec extends Task implements TaskContainer, Comparable {
 
     private DBUpgrader owner = null;
     private String versionString = null;
+    private boolean alwaysExecute ; 
     private SchemaVersion version = null;
     private List schemaSpecTasks = new ArrayList();
     private Connection conn = null;
@@ -52,6 +53,11 @@ public class SchemaSpec extends Task implements TaskContainer, Comparable {
     public void setVersion (String v) {
         versionString = v;
     }
+    
+    public final void setAlwaysExecute(final boolean alwaysExecute) { 
+        this.alwaysExecute = alwaysExecute ; 
+    }//EOM 
+    
     public SchemaVersion getVersion () throws BuildException { 
         if (version == null ) {
             if ( versionString == null )
@@ -65,6 +71,8 @@ public class SchemaSpec extends Task implements TaskContainer, Comparable {
         }
         return version;
     }
+    
+    public final boolean shouldAlwaysExecute() { return this.alwaysExecute ; }//EOM
 
     public void initialize ( Connection conn,
                              DBUpgrader upgrader ) {

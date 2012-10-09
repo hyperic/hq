@@ -27,11 +27,16 @@ package org.hyperic.tools.ant.dbupgrade;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.Project;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
 
@@ -40,8 +45,14 @@ import org.hyperic.util.jdbc.DBUtil;
  */
 public class SST_Insert extends SchemaSpecTask {
 
+    private static final String MATCH_REGEX = "\\$\\{(.*?)\\}" ;
+    private static final Pattern MATCH_PATTERN = Pattern.compile(MATCH_REGEX, Pattern.MULTILINE)  ;
+    
     private String table = null;
     private String insertCmd = null;
+    private boolean completeStmt ;
+    private boolean shouldCommit ; 
+    private String bindingParams = null ;
     private String desc = null;
     private boolean dupFail = true;
 
@@ -62,6 +73,19 @@ public class SST_Insert extends SchemaSpecTask {
     public void setInsertCmd(String ic) {
         insertCmd = ic;
     }
+    
+    public final void setCompleteStmt(final String completeStmt)  { 
+        this.insertCmd = completeStmt ;
+        this.completeStmt = true ; 
+    }//EOM 
+    
+    public final void setBindingParams(final String bindingParams) { 
+        this.bindingParams = bindingParams ; 
+    }//EOM 
+    
+    public final void setCommit(final boolean shouldCommit) { 
+        this.shouldCommit = shouldCommit; 
+    }//EOM 
 
     public void setDupFail(String df) {
         dupFail = Boolean.getBoolean(df);
@@ -74,19 +98,26 @@ public class SST_Insert extends SchemaSpecTask {
         Connection c = getConnection();
         PreparedStatement ps = null;
 
-        String insertSql = "INSERT INTO " + table + " " + insertCmd;
+        //either generate the insert statement or use the complete one 
+        String insertSql = (this.completeStmt ? this.insertCmd : ("INSERT INTO " + table + " " + insertCmd) ) ; 
         
         try {
-            insertSql = StringUtil.replace(insertSql, "%%TRUE%%", 
-                                           DBUtil.getBooleanValue(true, c));
-            insertSql = StringUtil.replace(insertSql, "%%FALSE%%", 
-                                           DBUtil.getBooleanValue(false, c));
-
-            ps = c.prepareStatement(insertSql);
+            if(this.bindingParams != null) { 
+                ps = this.prepareStatementWithBindingParams(c, insertSql) ; 
+            }else {
+                
+                insertSql = StringUtil.replace(insertSql, "%%TRUE%%", 
+                        DBUtil.getBooleanValue(true, c));
+                insertSql = StringUtil.replace(insertSql, "%%FALSE%%", 
+                           DBUtil.getBooleanValue(false, c));
+                ps = c.prepareStatement(insertSql);
+            }//EO else if no binding params 
+            
             String buf = ((desc == null) ? "" : ">>>>> " + desc + "\n") +
                          ">>>>> Inserting into " + table + " " + insertCmd;
             log(buf);
             ps.executeUpdate();
+            if(this.shouldCommit) this._conn.commit() ; 
         } catch (SQLException e) {
             if (dupFail ||
                 e.getMessage().toLowerCase().indexOf("constraint") == -1) {
@@ -102,7 +133,7 @@ public class SST_Insert extends SchemaSpecTask {
                             ex);
                 }
             }
-        } catch ( Exception e ) {
+        } catch ( Throwable e ) {
             throw new BuildException("Error inserting data into " + table 
                                      + ": " + e, e);
         } finally {
@@ -118,4 +149,36 @@ public class SST_Insert extends SchemaSpecTask {
             throw new BuildException("SchemaSpec: update: No " +
                                      "'insertCmd' attribute specified.");
     }
+    
+    
+    private final PreparedStatement prepareStatementWithBindingParams(final Connection conn, String insertSql) throws Throwable { 
+        
+        final PreparedStatement ps = conn.prepareStatement(insertSql) ; 
+       
+        final Project project = this.getProject() ; 
+         
+        String propertyName = null, bindingParam = null ; 
+        Matcher matcher = null ; 
+        
+        final String[] arrBindingParams = this.bindingParams.split(",") ; 
+        final int length = arrBindingParams.length ; 
+        
+        //replace all ${<property_name} place holders with their actual respective values from the ant environment
+        //Note: This is a safenet, the actual replacement should be performed by ant during the db-upgrade.xml
+        //target initialization 
+        for(int i=0; i < length; i++) { 
+            bindingParam = arrBindingParams[i] ; 
+            matcher = MATCH_PATTERN.matcher(bindingParam) ;
+            if(matcher.find()) { 
+                propertyName = matcher.group(1) ; 
+                bindingParam = project.getProperty(propertyName) ; 
+            }//EO if place holder
+            
+            ps.setObject(i+1, bindingParam) ; 
+                
+        }//EO while there are more binding params
+        
+        return ps ; 
+    }//EOM 
+    
 }

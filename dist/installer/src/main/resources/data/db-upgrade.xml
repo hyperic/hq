@@ -42,6 +42,10 @@ has already been defined.
    typeMap="${typemap.file}"
    targetSchemaVersion="${schema.target}">
 
+  <schemaSpec version="1.0" alwaysExecute="true">
+  	<integrity-validator encryption="EAM_MEASUREMENT.DSN" />
+  </schemaSpec>
+	
   <schemaSpec version="1.1">
     <schema-update table="EAM_MEASUREMENT"
                    column="dsn"
@@ -11779,7 +11783,18 @@ has already been defined.
 	 		<statement>alter table eam_keystore alter column cert_chain type varchar(10000)</statement> 
 	 	</schema-directSQL>
 	</schemaSpec>
-
+	
+	<schemaSpec version="3.216" alwaysExecute="true">
+	 	<schema-directSQL>  
+	 		<statement>create table if not exists EAM_ENCRYPTION_KEYS (encryption_key varchar(2000) not null, creation_date timestamp primary key default now()) </statement>
+	 	</schema-directSQL>
+		
+		<schema-insert table="EAM_ENCRYPTION_KEYS" 
+			completeStmt="insert into eam_encryption_keys (encryption_key)  select ? where not exists ( select * from eam_encryption_keys where encryption_key = ? and creation_date = (select max(creation_date) from eam_encryption_keys))"
+			bindingParams="${server.encryption-key},${server.encryption-key}"
+			commit="true"/>
+	</schemaSpec>
+	
 </dbupgrade>
 </target>
 </project>
