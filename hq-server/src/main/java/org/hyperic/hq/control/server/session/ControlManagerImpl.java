@@ -487,7 +487,6 @@ public class ControlManagerImpl implements ControlManager {
     /**
      * Receive status information about a previous control action
      */
-    @Transactional(propagation=Propagation.REQUIRES_NEW)
     public void sendCommandResult(int id, int result, long startTime, long endTime, String message) {
         String status;
         if (result == 0) {
