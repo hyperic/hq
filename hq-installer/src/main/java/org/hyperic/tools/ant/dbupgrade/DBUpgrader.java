@@ -220,16 +220,22 @@ public class DBUpgrader extends Task {
             for ( i=0; i<size; i++ ) {
                 ss = (SchemaSpec) _schemaSpecs.get(i);
                 toVersion = ss.getVersion();
-                if ( !shouldExecSpecVersion(toVersion) ) continue;
-                log("Upgrading " + fromVersion + " -> " + toVersion);
+                if ( !shouldExecSpecVersion(toVersion, ss) ) continue;
+                
                 try {
                     markSchemaModificationInProgress(c, fromVersion, toVersion);
                     ss.initialize(c, this);
                     ss.execute();
-                    updateSchemaVersion(c, toVersion.toString());
-                    c.commit();
-                    fromVersion = toVersion;
-                    log("Upgraded " + fromVersion + " -> " + toVersion + " OK");
+                    
+                    //only update the database if the current schema spec's version is bigger than the start version
+                    //(could happen when the alwaysExecute flag is set to true for a given schemaScpec element) 
+                    if(_startSchemaVersion.compareTo(toVersion) < 0) {
+                        log("Upgrading " + fromVersion + " -> " + toVersion);
+                        updateSchemaVersion(c, toVersion.toString());
+                        c.commit();
+                        fromVersion = toVersion;
+                        log("Upgraded " + fromVersion + " -> " + toVersion + " OK");
+                    }//EO if the current schema spec was smaller than the target's one   
 
                 } catch ( Exception e ) {
                     try {
@@ -250,8 +256,7 @@ public class DBUpgrader extends Task {
                 c.commit();
             }
 
-            log("DATABASE SUCCESSFULLY UPGRADED TO "
-                + realTargetSchemaVersion);
+            log("DATABASE SUCCESSFULLY UPGRADED TO " + realTargetSchemaVersion);
 
         } catch (SQLException e) {
             throw new BuildException("DBUpgrader: sql error: " + e, e);
@@ -261,9 +266,9 @@ public class DBUpgrader extends Task {
         }
     }
 
-    protected boolean shouldExecSpecVersion (SchemaVersion version) {
-        return version.getIsLatest() ||
-            version.between(_startSchemaVersion, _targetSchemaVersion);
+    protected boolean shouldExecSpecVersion (SchemaVersion version, final SchemaSpec schemaSpec) {
+        return (version.getIsLatest() || version.between(_startSchemaVersion, _targetSchemaVersion) || 
+                schemaSpec.shouldAlwaysExecute()) ; 
     }
 
     void validateAttributes () throws BuildException {
