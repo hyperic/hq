@@ -479,57 +479,21 @@ public class TemplateManagerImpl implements TemplateManager {
     /**
      * Set the measurement templates to be "designated" for a monitorable type.
      */
-    public void setDesignatedTemplates(Integer[] desigIds,boolean designated) {
+    public void setDesignatedTemplates(String mType, Integer[] desigIds) {
 
-        // If there are no ids, then just return
-        if (desigIds == null) {
-            return;
-        }
-
-        // For each of the ids,
-        for (Integer id : desigIds) {
-            // If id is null, skip it
-            if (id == null) {
-                continue;
-            }
-            
-            // Find the matching template
-            MeasurementTemplate mt = measurementTemplateDAO.get(id);
-    
-            // If it can't be found,
-            if (mt == null) {
-                log.warn(String.format("Could not find measurement template with id %d. Skipping.",id));
-                // Then just skip to the next one
-                continue;
-            }
-
-            // If it's an availability template
-            if (mt.isAvailability()) {
-                // Cannot change designated status for availability, just skip
-                // it
-                if (log.isTraceEnabled()) {
-                    log.trace(String.format(
-                        "Measurement template with id %d is an availability template. Skipping.",
-                        id));
-                }
-                continue;
-            }
-
-            // If the required status is different than the current one,
-            if (mt.isDesignate() != designated) {
-                // Change it
-                if (log.isTraceEnabled()) {
-                    log.trace(String.format(
-                        "Setting designated state of template with id %d to %b", id, designated));
-                }
-                mt.setDesignate(designated);
-            } else {
-                if (log.isTraceEnabled()) {
-                    log.trace(String.format(
-                        "Designated state of template with id %d is already %b. Not changing", id,
-                        designated));
-                }
-            }
+    	List<MeasurementTemplate> derivedTemplates = measurementTemplateDAO.findDerivedByMonitorableType(mType);
+    	HashSet<Integer> designates = new HashSet<Integer>();
+    	designates.addAll(Arrays.asList(desigIds));
+    	
+    	for (MeasurementTemplate template : derivedTemplates) {
+    		
+    		// Never turn off Availability as an indicator
+    		if (template.isAvailability())
+    			continue;
+    		
+    		boolean designated = designates.contains(template.getId());
+    		if (designated != template.isDesignate())
+    			template.setDesignate(designated);
         }
     }
 }
