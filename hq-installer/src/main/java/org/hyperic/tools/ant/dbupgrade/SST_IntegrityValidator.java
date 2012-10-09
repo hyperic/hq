@@ -9,7 +9,6 @@ import java.util.Map;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
-import org.hyperic.tools.dbmigrate.Tests;
 import org.hyperic.tools.dbmigrate.Utils;
 import org.hyperic.util.jdbc.DBUtil;
 import org.jasypt.encryption.pbe.PBEStringEncryptor;
@@ -105,43 +104,6 @@ public class SST_IntegrityValidator extends SchemaSpecTask {
         }finally{ 
             DBUtil.closeJDBCObjects(this._ctx, null/*connection*/, stmt, rs) ; 
         }//EO catch block 
-        
-    }//EOM 
-    
-    public static void main(String[] args) throws Throwable {
-        
-        final Map<String,String> properties = new HashMap<String,String>() ; 
-        properties.put("server.encryption-key", "password1") ; 
-        
-        final Project project = new Project() { 
-            public String getProperty(String propertyName) {
-                return properties.get(propertyName) ; 
-            }//EOM 
-            
-        };//EOM 
-        
-        final SST_IntegrityValidator validator = new SST_IntegrityValidator() { 
-            public void log(String msg) {
-                System.out.println(msg);
-            }//EOM 
-            
-            public void log(String msg, int msgLevel) { 
-                this.log(msg) ; 
-            }//EOM 
-        }; 
-        
-        validator.setProject(project) ; 
-        
-        final Connection conn = Tests.getLocalPostgresConnection() ; 
-        final DBUpgrader upgrader = new DBUpgrader() ; 
-        upgrader.setProject(project) ;
-        upgrader.setEncryptionKey(project.getProperty("server.encryption-key")) ; 
-        
-      //  injectValues(conn, upgrader) ;  
-        
-        validator.setEncryption("ENC_TEST.COL2,ENC_TEST1.COL2") ;
-        validator.initialize(conn, upgrader) ; 
-        validator.execute() ; 
         
     }//EOM 
     
