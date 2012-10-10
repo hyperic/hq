@@ -138,7 +138,7 @@ public class HQServer {
 
         try {
             upgradeDB();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error("Error running database upgrade routine: " + e, e);
             return ShutdownType.AbnormalStop.exitCode() ;
         }
@@ -219,19 +219,19 @@ public class HQServer {
         return isSuccessful ; 
     }
 
-    int upgradeDB() {
+    int upgradeDB() throws Throwable{
         String logConfigFileUrl;
         try {
             logConfigFileUrl = new File(serverHome + "/conf/log4j.xml").toURI().toURL().toString();
         } catch (MalformedURLException e) {
             log.error("Unable to determine URL for logging config file " + serverHome +
                       "/conf/log4j.xml.  Cause: " + e, e);
-            return 1;
+            throw e ; 
         }
 
         String javaHome = System.getProperty("java.home");
          
-        return processManager.executeProcess(
+        final int returnCode =  processManager.executeProcess(
             new String[] { javaHome + "/bin/java",
                           "-cp",
                           serverHome + "/lib/ant-launcher-1.7.1.jar",
@@ -248,6 +248,10 @@ public class HQServer {
                           "-buildfile",
                           serverHome + "/data/db-upgrade.xml",
                           "upgrade" }, serverHome, true, HQServer.DB_UPGRADE_PROCESS_TIMEOUT);
+        
+        if(returnCode == 1) { 
+            throw new IllegalStateException("An Error had occured during an attempt to upgrade the database aborting (process exeuction returned a 1 return code)") ; 
+        }else return returnCode ; 
     }
 
     public static void main(String[] args) {
