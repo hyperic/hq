@@ -3,34 +3,77 @@ HQ Migration Usage: hq-migrate.sh/hq-migrate.bat [COMMAND] [OPTIONS]...
 
 Commands: 
 
- * hq-export
- * hq-import
- * one-step-migration
+  hq-export          - export data from source Hyperic Server and database to archive.
+  hq-import          - import data from exported archive to target 5.0 Hyperic Server 
+                       and database.
+  one-step-migration - export from source Hyperic deployment to target Hyperic deployment
+                       in a single step, from machine with local or file mount access 
+                       to both environments.
+  usage              - outputs this help to shell
 
-Options:
- 
-  * hq-export: 
-    * -Dstaging.dir=<path> (optional, defaults to <HQ_MIGRATE_HOME>/tmp/export-data) 
-    * -Dhqserver.install.path=<path>
-    * -Dscale=true (optional, default to false)
-    or 
-    * -Dsetup.file=<path>
+hq-export options:
+
+  -Dhqserver.install.path=<path>  - [Required if] -Dsetup.file not supplied. 
+                                    Full path (or path relative to the root of the unpacked 
+                                    migration package, hq-migration-5.0) to source Hyperic 
+                                    Server installation directory.
+  -Dstaging.dir=<path>            - [Optional] Working directory for manipulating export data. 
+                                    Default: migration_home/tmp/export-data.
+  -Dscale=true                    - [Optional] Indicates that the scale of the Hyperic 
+                                    environment is "large" and that the migration process
+                                    would optimize it self accordingly. 
+  -Dsetup.file=<path>             - [Required if] -Dhqserver.install.path not supplied. 
+                                    Path to file that contains export command options 
+                                    in name=value pairs.                   
+
+hq-import options:
+
+  -Dexport.archive.path=<path>       - [Required] Full path (or the path relative to the root
+                                       of the unpacked migration package, hq-migration-5.0) 
+                                       to the archive to import to 5.0 installation.
+  -Dhqserver.install.path=<path>     - [Required if] -Dsetup.file not supplied. 
+                                       Full path (or path relative to the root of the unpacked 
+                                       migration package, hq-migration-5.0) to target Hyperic 
+                                       Server installation directory.
+  -Dstaging.dir=<path>               - [Optional] Working directory for manipulating import data. 
+                                       Default: migration_home/tmp/export-data.
+  -Dquiet=<true|false>               - [Optional] Prevents the import process from pausing 
+                                       periodically to allow user to continue or stop the process. 
+                                       Default: false.
+  -Dscale=true                       - [Optional] Indicates that the scale of the Hyperic 
+                                       environment is "large" and that the migration process 
+                                       would optimize it self accordingly.
+  -Dtarget.database.username=<name>  - [Optional] Super user name 
+                                       overriding the hq-server.conf#server.database-user.
+  -Dtarget.database.password=<psswd> - [Optional] Super user password 
+                                       overriding the hq-server.conf#server.database-password.
+  -Dsetup.file=<path>                - [Required if] -Dhqserver.install.path not supplied. 
+                                       Path to file that contains import command options 
+                                       in name=value pairs.
   
-  * hq-import 
-  	* -Dhqserver.install.path=<path>
-  	* -Dexport.archive.path=<path>
-    * -Dstaging.dir=<path> (optional, defaults to <HQ_MIGRATE_HOME>/tmp/export-data) 
-    * -Dquiet=<true|false> (optional, defaults to false)
-    * -Dscale=true (optional, default to false)
-    * -Dtarget.database.username=<super user name> (optional, override of the hq-server.conf#server.database-user)    
-    * -Dtarget.database.password=<super user password> (optional, override of the hq-server.conf#server.database-password)
-    or 
-    * -Dsetup.file=<path>
-   
-  * one-step-migration:
-    * -Dsource.hqserver.install.path=<path>
-    * -Dtarget.hqserver.install.path=<path>
-    * -Dstaging.dir=<path>
-    * -Dscale=true (optional, default to false)
-    or 
-    * -Dsetup.file=<path>
+one-step-migration:
+
+  -Dsource.hqserver.install.path=<path>  - [Required if] -Dsetup.file not supplied. 
+                                           Full path (or path relative to the root of the unpacked
+                                           migration package, hq-migration-5.0) to source Hyperic 
+                                           Server installation directory.
+  -Dtarget.hqserver.install.path=<path>  - [Required if] -Dsetup.file not supplied. 
+                                           Full path Full path (or path relative to the root 
+                                           of the unpacked migration package, hq-migration-5.0) 
+                                           to target Hyperic Server installation directory.
+  -Dstaging.dir=<path>                   - [Required if] -Dsetup.file not supplied. 
+                                           Default: migration_home/tmp/export-data
+  -Dscale=true                           - [Optional] Indicates that the scale of the Hyperic 
+                                           environment is "large" and that the migration process 
+                                           would optimize it self accordingly.
+  -Dquiet=<true|false>                   - [Optional] Prevents the import process from pausing 
+                                           periodically to allow user to continue or stop the process. 
+                                           Default: false.
+  -Dtarget.database.username=<name>      - [Optional] Super user name 
+                                           overriding the hq-server.conf#server.database-user.    
+  -Dtarget.database.password=<psswd>     - [Optional] Super user password 
+                                           overriding the hq-server.conf#server.database-password.
+  -Dsetup.file=<path>                    - [Required if] -Dhqserver.install.path not supplied. 
+                                           Path to file that contains import command options 
+                                           in name=value pairs.
+
