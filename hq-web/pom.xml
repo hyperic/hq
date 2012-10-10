@@ -640,8 +640,11 @@
         <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-frontend-jaxrs</artifactId>
-            <version>${cxf.version}</version>
         </dependency>
+        <dependency> 
+			<groupId>com.vmware.wsdl</groupId>
+		    <artifactId>vmware_wsdl4j</artifactId>
+		</dependency>
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
             <artifactId>jackson-core-asl</artifactId>
