@@ -1,0 +1,944 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : Exchange 2010 IMAP4 service</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : Exchange 2010 IMAP4 service
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Aug 07, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <h3><a name="Exchange2010IMAP4service-Exchange2010IMAP4service"></a>Exchange 2010 IMAP4 service</h3>
+<p><b>Log Track Supported:</b> Yes<br/>
+<b>Config Track Supported:</b> No<br/>
+<b>Custom Properties Supported:</b> None<br/>
+<b>Supported Control Actions:</b> None<br/>
+<b>Supported Metrics:</b> </p>
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'>Name</th>
+<th class='confluenceTh'>Alias</th>
+<th class='confluenceTh'>Units</th>
+<th class='confluenceTh'>Category</th>
+<th class='confluenceTh'>Default On</th>
+<th class='confluenceTh'>Default Interval</th>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">APPEND Total</font></td>
+<td class='confluenceTd'><font color="gray">APPENDTotal</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">APPEND Total per Minute</font></td>
+<td class='confluenceTd'><font color="gray">APPENDTotal1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">APPEND Failures</font></td>
+<td class='confluenceTd'><font color="gray">APPENDFailures</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">APPEND Failures per Minute</font></td>
+<td class='confluenceTd'><font color="gray">APPENDFailures1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">AUTHENTICATE Total</font></td>
+<td class='confluenceTd'><font color="gray">AUTHENTICATETotal</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">AUTHENTICATE Total per Minute</font></td>
+<td class='confluenceTd'><font color="gray">AUTHENTICATETotal1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">AUTHENTICATE Failures</font></td>
+<td class='confluenceTd'><font color="gray">AUTHENTICATEFailures</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">AUTHENTICATE Failures per Minute</font></td>
+<td class='confluenceTd'><font color="gray">AUTHENTICATEFailures1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">CAPABILITY Total</font></td>
+<td class='confluenceTd'><font color="gray">CAPABILITYTotal</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">CAPABILITY Total per Minute</font></td>
+<td class='confluenceTd'><font color="gray">CAPABILITYTotal1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">CAPABILITY Failures</font></td>
+<td class='confluenceTd'><font color="gray">CAPABILITYFailures</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">CAPABILITY Failures per Minute</font></td>
+<td class='confluenceTd'><font color="gray">CAPABILITYFailures1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">CHECK Total</font></td>
+<td class='confluenceTd'><font color="gray">CHECKTotal</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">CHECK Total per Minute</font></td>
+<td class='confluenceTd'><font color="gray">CHECKTotal1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">CHECK Failures</font></td>
+<td class='confluenceTd'><font color="gray">CHECKFailures</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">CHECK Failures per Minute</font></td>
+<td class='confluenceTd'><font color="gray">CHECKFailures1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">CLOSE Total</font></td>
+<td class='confluenceTd'><font color="gray">CLOSETotal</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">CLOSE Total per Minute</font></td>
+<td class='confluenceTd'><font color="gray">CLOSETotal1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">CLOSE Failures</font></td>
+<td class='confluenceTd'><font color="gray">CLOSEFailures</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">CLOSE Failures per Minute</font></td>
+<td class='confluenceTd'><font color="gray">CLOSEFailures1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">COPY Total</font></td>
+<td class='confluenceTd'><font color="gray">COPYTotal</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">COPY Total per Minute</font></td>
+<td class='confluenceTd'><font color="gray">COPYTotal1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">COPY Failures</font></td>
+<td class='confluenceTd'><font color="gray">COPYFailures</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">COPY Failures per Minute</font></td>
+<td class='confluenceTd'><font color="gray">COPYFailures1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">CREATE Total</font></td>
+<td class='confluenceTd'><font color="gray">CREATETotal</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">CREATE Total per Minute</font></td>
+<td class='confluenceTd'><font color="gray">CREATETotal1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">CREATE Failures</font></td>
+<td class='confluenceTd'><font color="gray">CREATEFailures</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">CREATE Failures per Minute</font></td>
+<td class='confluenceTd'><font color="gray">CREATEFailures1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">DELETE Total</font></td>
+<td class='confluenceTd'><font color="gray">DELETETotal</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">DELETE Total per Minute</font></td>
+<td class='confluenceTd'><font color="gray">DELETETotal1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">DELETE Failures</font></td>
+<td class='confluenceTd'><font color="gray">DELETEFailures</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">DELETE Failures per Minute</font></td>
+<td class='confluenceTd'><font color="gray">DELETEFailures1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">EXAMINE Total</font></td>
+<td class='confluenceTd'><font color="gray">EXAMINETotal</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">EXAMINE Total per Minute</font></td>
+<td class='confluenceTd'><font color="gray">EXAMINETotal1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">EXAMINE Failures</font></td>
+<td class='confluenceTd'><font color="gray">EXAMINEFailures</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">EXAMINE Failures per Minute</font></td>
+<td class='confluenceTd'><font color="gray">EXAMINEFailures1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">EXPUNGE Total</font></td>
+<td class='confluenceTd'><font color="gray">EXPUNGETotal</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">EXPUNGE Total per Minute</font></td>
+<td class='confluenceTd'><font color="gray">EXPUNGETotal1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">EXPUNGE Failures</font></td>
+<td class='confluenceTd'><font color="gray">EXPUNGEFailures</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">EXPUNGE Failures per Minute</font></td>
+<td class='confluenceTd'><font color="gray">EXPUNGEFailures1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">FETCH Total</font></td>
+<td class='confluenceTd'><font color="gray">FETCHTotal</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">FETCH Total per Minute</font></td>
+<td class='confluenceTd'><font color="gray">FETCHTotal1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">FETCH Failures</font></td>
+<td class='confluenceTd'><font color="gray">FETCHFailures</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">FETCH Failures per Minute</font></td>
+<td class='confluenceTd'><font color="gray">FETCHFailures1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">LIST Total</font></td>
+<td class='confluenceTd'><font color="gray">LISTTotal</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">LIST Total per Minute</font></td>
+<td class='confluenceTd'><font color="gray">LISTTotal1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">LIST Failures</font></td>
+<td class='confluenceTd'><font color="gray">LISTFailures</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">LIST Failures per Minute</font></td>
+<td class='confluenceTd'><font color="gray">LISTFailures1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">LOGIN Total</font></td>
+<td class='confluenceTd'><font color="gray">LOGINTotal</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">LOGIN Total per Minute</font></td>
+<td class='confluenceTd'><font color="navy">LOGINTotal1m</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">LOGIN Failures</font></td>
+<td class='confluenceTd'><font color="gray">LOGINFailures</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">LOGIN Failures per Minute</font></td>
+<td class='confluenceTd'><font color="gray">LOGINFailures1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">LOGOUT Total</font></td>
+<td class='confluenceTd'><font color="gray">LOGOUTTotal</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">LOGOUT Total per Minute</font></td>
+<td class='confluenceTd'><font color="gray">LOGOUTTotal1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">LOGOUT Failures</font></td>
+<td class='confluenceTd'><font color="gray">LOGOUTFailures</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">LOGOUT Failures per Minute</font></td>
+<td class='confluenceTd'><font color="gray">LOGOUTFailures1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">LSUB Total</font></td>
+<td class='confluenceTd'><font color="gray">LSUBTotal</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">LSUB Total per Minute</font></td>
+<td class='confluenceTd'><font color="gray">LSUBTotal1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">LSUB Failures</font></td>
+<td class='confluenceTd'><font color="gray">LSUBFailures</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">LSUB Failures per Minute</font></td>
+<td class='confluenceTd'><font color="gray">LSUBFailures1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">NOOP Total</font></td>
+<td class='confluenceTd'><font color="gray">NOOPTotal</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">NOOP Total per Minute</font></td>
+<td class='confluenceTd'><font color="gray">NOOPTotal1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">NOOP Failures</font></td>
+<td class='confluenceTd'><font color="gray">NOOPFailures</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">NOOP Failures per Minute</font></td>
+<td class='confluenceTd'><font color="gray">NOOPFailures1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">RENAME Total</font></td>
+<td class='confluenceTd'><font color="gray">RENAMETotal</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">RENAME Total per Minute</font></td>
+<td class='confluenceTd'><font color="gray">RENAMETotal1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">RENAME Failures</font></td>
+<td class='confluenceTd'><font color="gray">RENAMEFailures</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">RENAME Failures per Minute</font></td>
+<td class='confluenceTd'><font color="gray">RENAMEFailures1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">SEARCH Total</font></td>
+<td class='confluenceTd'><font color="gray">SEARCHTotal</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">SEARCH Total per Minute</font></td>
+<td class='confluenceTd'><font color="gray">SEARCHTotal1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">SEARCH Failures</font></td>
+<td class='confluenceTd'><font color="gray">SEARCHFailures</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">SEARCH Failures per Minute</font></td>
+<td class='confluenceTd'><font color="gray">SEARCHFailures1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">SELECT Total</font></td>
+<td class='confluenceTd'><font color="gray">SELECTTotal</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">SELECT Total per Minute</font></td>
+<td class='confluenceTd'><font color="gray">SELECTTotal1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">SELECT Failures</font></td>
+<td class='confluenceTd'><font color="gray">SELECTFailures</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">SELECT Failures per Minute</font></td>
+<td class='confluenceTd'><font color="gray">SELECTFailures1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">STATUS Total</font></td>
+<td class='confluenceTd'><font color="gray">STATUSTotal</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">STATUS Total per Minute</font></td>
+<td class='confluenceTd'><font color="navy">STATUSTotal1m</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">STATUS Failures</font></td>
+<td class='confluenceTd'><font color="gray">STATUSFailures</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">STATUS Failures per Minute</font></td>
+<td class='confluenceTd'><font color="gray">STATUSFailures1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">STORE Total</font></td>
+<td class='confluenceTd'><font color="gray">STORETotal</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">STORE Total per Minute</font></td>
+<td class='confluenceTd'><font color="gray">STORETotal1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">STORE Failures</font></td>
+<td class='confluenceTd'><font color="gray">STOREFailures</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">STORE Failures per Minute</font></td>
+<td class='confluenceTd'><font color="gray">STOREFailures1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">SUBSCRIBE Total</font></td>
+<td class='confluenceTd'><font color="gray">SUBSCRIBETotal</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">SUBSCRIBE Total per Minute</font></td>
+<td class='confluenceTd'><font color="gray">SUBSCRIBETotal1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">SUBSCRIBE Failures</font></td>
+<td class='confluenceTd'><font color="gray">SUBSCRIBEFailures</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">SUBSCRIBE Failures per Minute</font></td>
+<td class='confluenceTd'><font color="gray">SUBSCRIBEFailures1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">UNSUBSCRIBE Total</font></td>
+<td class='confluenceTd'><font color="gray">UNSUBSCRIBETotal</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">UNSUBSCRIBE Total per Minute</font></td>
+<td class='confluenceTd'><font color="gray">UNSUBSCRIBETotal1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">UNSUBSCRIBE Failures</font></td>
+<td class='confluenceTd'><font color="gray">UNSUBSCRIBEFailures</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">UNSUBSCRIBE Failures per Minute</font></td>
+<td class='confluenceTd'><font color="gray">UNSUBSCRIBEFailures1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">IDLE Total</font></td>
+<td class='confluenceTd'><font color="gray">IDLETotal</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">IDLE Total per Minute</font></td>
+<td class='confluenceTd'><font color="gray">IDLETotal1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">IDLE Failures</font></td>
+<td class='confluenceTd'><font color="gray">IDLEFailures</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">IDLE Failures per Minute</font></td>
+<td class='confluenceTd'><font color="gray">IDLEFailures1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">NAMESPACE Total</font></td>
+<td class='confluenceTd'><font color="gray">NAMESPACETotal</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">NAMESPACE Total per Minute</font></td>
+<td class='confluenceTd'><font color="gray">NAMESPACETotal1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">NAMESPACE Failures</font></td>
+<td class='confluenceTd'><font color="gray">NAMESPACEFailures</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">NAMESPACE Failures per Minute</font></td>
+<td class='confluenceTd'><font color="gray">NAMESPACEFailures1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Invalid Commands</font></td>
+<td class='confluenceTd'><font color="gray">InvalidCommands</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Invalid Commands per Minute</font></td>
+<td class='confluenceTd'><font color="navy">InvalidCommands1m</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Connections Failed</font></td>
+<td class='confluenceTd'><font color="gray">ConnectionsFailed</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Connections Failed per Minute</font></td>
+<td class='confluenceTd'><font color="gray">ConnectionsFailed1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Connections Rejected</font></td>
+<td class='confluenceTd'><font color="gray">ConnectionsRejected</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Connections Rejected per Minute</font></td>
+<td class='confluenceTd'><font color="gray">ConnectionsRejected1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Availability</font></td>
+<td class='confluenceTd'><font color="navy">Availability</font></td>
+<td class='confluenceTd'><font color="navy">percentage</font></td>
+<td class='confluenceTd'><font color="navy">AVAILABILITY</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Connections Total</font></td>
+<td class='confluenceTd'><font color="gray">ConnectionsTotal</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Connections Total per Minute</font></td>
+<td class='confluenceTd'><font color="gray">ConnectionsTotal1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Connections Current</font></td>
+<td class='confluenceTd'><font color="navy">ConnectionsCurrent</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+</tr>
+</tbody></table>
+</div>
+
+
+<p><b>Configuration help:</b> </p>
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

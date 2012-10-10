@@ -1,0 +1,386 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : Upgrade Hyperic Server and Database</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : Upgrade Hyperic Server and Database
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Sep 28, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1348862657763 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1348862657763 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1348862657763 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1348862657763'>
+<ul>
+    <li><a href='#UpgradeHypericServerandDatabase-Aboutthe5.0Upgrade'>About the 5.0 Upgrade</a></li>
+<ul>
+    <li><a href='#UpgradeHypericServerandDatabase-Prerequisites'>Prerequisites</a></li>
+    <li><a href='#UpgradeHypericServerandDatabase-UpgradeProcessOverview'>Upgrade Process Overview</a></li>
+</ul>
+    <li><a href='#UpgradeHypericServerandDatabase-MigrationProcedure'>Migration Procedure</a></li>
+<ul>
+    <li><a href='#UpgradeHypericServerandDatabase-Step1%3AInstallvFabricHyperic5.0ServerandvPostgreSQL'>Step 1: Install vFabric Hyperic 5.0 Server and vPostgreSQL</a></li>
+    <li><a href='#UpgradeHypericServerandDatabase-Step2%3AExportExistingDatabaseandServerConfiguration'>Step 2: Export Existing Database and Server Configuration</a></li>
+    <li><a href='#UpgradeHypericServerandDatabase-Step3%3AImportServerConfigurationandDatabase'>Step 3: Import Server Configuration and Database</a></li>
+</ul>
+    <li><a href='#UpgradeHypericServerandDatabase-MigrationDefaultsandOptions'>Migration Defaults and Options</a></li>
+<ul>
+    <li><a href='#UpgradeHypericServerandDatabase-SummaryofRequiredandOptionalCommandArguments'>Summary of Required and Optional Command Arguments</a></li>
+    <li><a href='#UpgradeHypericServerandDatabase-CommandArgumentDefinitions'>Command Argument Definitions</a></li>
+    <li><a href='#UpgradeHypericServerandDatabase-OptionalMigrationExecutionParameters'>Optional Migration Execution Parameters</a></li>
+</ul>
+</ul></div>
+
+
+<blockquote><p><b>About this page...</b><br/>
+This page has instructions for upgrading the Hyperic Server and database to 5.0.</p></blockquote>
+
+<h1><a name="UpgradeHypericServerandDatabase-Aboutthe5.0Upgrade"></a>About the 5.0 Upgrade</h1>
+
+<p>This page has instructions for upgrading Hyperic Server 4.5 and later to 5.0 and migrating the Hyperic database to vPostgreSQL 9.1.3. &nbsp;</p>
+
+<p><b>Note</b>:&nbsp;If you wish to upgrade a 4.2, 4.3, or 4.4 Hyperic Server and database to 5.0, you must first upgrade the Hyperic Server to 4.5. Download locations:</p>
+
+<ul>
+	<li>vFabric Hyperic 4.5 &#8212; <a href="http://downloads.vmware.com/d/info/datacenter_downloads/vmware_vfabric_hyperic/4_5">http://downloads.vmware.com/d/info/datacenter_downloads/vmware_vfabric_hyperic/4_5</a></li>
+</ul>
+
+
+<ul>
+	<li>Hyperic HQ 4.5 &#8212; <a href="http://sourceforge.net/projects/hyperic-hq/files/Hyperic%204.5/">http://sourceforge.net/projects/hyperic-hq/files/Hyperic%204.5/</a></li>
+</ul>
+
+
+
+
+<p>The database migration supports export from Hyperic databases running on:</p>
+<ul>
+	<li>PostgreSQL 8.2.5 and 8.3</li>
+	<li>MySQL 5.0.x and 5.1.x</li>
+	<li>Oracle 10g and 11g</li>
+</ul>
+
+
+<p>The Hyperic 5.0 installer contains a&nbsp;migration package for performing the upgrade. The migration package,&nbsp;<tt>hq-migrate-5.0.zip</tt>&nbsp;is in&nbsp;<tt>InstallerHome/installer/bin</tt>. It contains a migration script,&nbsp;<tt>hq-migrate/bin/hq-migrate.sh</tt>&nbsp;(or .bat).&nbsp;</p>
+
+<p>By default, the migration utility exports your monitoring configuration (alert definitions, resource groups, escalation schemes, and so on) and metric data. If desired, you can run the script with an option that causes only the monitoring configuration data to be exported.</p>
+
+<h2><a name="UpgradeHypericServerandDatabase-Prerequisites"></a>Prerequisites</h2>
+
+<p>You run the migration utility on both the vFabric Hyperic 4.5 (or later) host and the vFabric 5.0 host. Each system must have:</p>
+
+<ul>
+	<li>64-bit Java 1.6 JRE</li>
+</ul>
+
+
+<ul>
+	<li>6 to 7 GB of free disk space
+	<ul>
+		<li>The migration process creates a directory structure on the 4.x host for the exported data, and archives the directory tree. The target host also requires the free disk space, as you will copy the export archive to that platform and unpack it there.</li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul>
+	<li>For large deployments, 8GB of RAM.</li>
+</ul>
+
+
+<p>Download </p>
+
+<h2><a name="UpgradeHypericServerandDatabase-UpgradeProcessOverview"></a>Upgrade Process Overview</h2>
+
+<p>The upgrade process consists of these steps:</p>
+<ol>
+	<li><a href="#UpgradeHypericServerandDatabase-step1">Install Hyperic 5.0 and vPostgreSQL</a></li>
+	<li><a href="#UpgradeHypericServerandDatabase-step2">Export Data from Hyperic 4.x</a></li>
+	<li><a href="#UpgradeHypericServerandDatabase-step3">Import Data to Hyperic 5.0</a></li>
+</ol>
+
+
+<h1><a name="UpgradeHypericServerandDatabase-MigrationProcedure"></a>Migration Procedure</h1>
+
+<p>Before performing the migration procedure, review <a href="#UpgradeHypericServerandDatabase-MigrationDefaultsandOptions">Migration Defaults and Options</a> below, which describes migration behavior, required and optional command options, and default settings.</p>
+
+<h2><a name="UpgradeHypericServerandDatabase-Step1%3AInstallvFabricHyperic5.0ServerandvPostgreSQL"></a>Step 1: Install vFabric Hyperic 5.0 Server and vPostgreSQL</h2>
+
+<p>In this step, you install the Hyperic 5.0 Server and database.</p>
+
+<p>If you plan to run the components in VMs, follow the instructions on <a href="Install Hyperic vApp.html" title="Install Hyperic vApp">Install Hyperic vApp</a>.</p>
+
+<p>Otherwise, following the instructions on <a href="Set Up Hyperic Database.html" title="Set Up Hyperic Database">Set Up Hyperic Database</a> and then run the Hyperic installer in <tt>&#45;full</tt> mode, following the instructions on <a href="Run Hyperic Installer.html" title="Run Hyperic Installer">Run Hyperic Installer</a>.</p>
+
+<p>After installing the database and Hyperic Server, proceed to Step 2.</p>
+
+<p><a name="UpgradeHypericServerandDatabase-step2"></a></p>
+
+<h2><a name="UpgradeHypericServerandDatabase-Step2%3AExportExistingDatabaseandServerConfiguration"></a>Step 2: Export Existing Database and Server Configuration</h2>
+
+<ol>
+	<li>Shut down the 4.5 (or later) Hyperic Server</li>
+	<li>Copy the migration package, hq-migration-5.0.zip from the Hyperic 5.0 installer to the 4.x Hyperic Server host.
+	<ul>
+		<li>The package is located in the <tt>installer/bin</tt> directory of the 5.0 installer home directory.</li>
+	</ul>
+	</li>
+	<li>On the Hyperic 4.x host, unpack <tt>hq-migration-5.0.zip</tt>.
+	<ul>
+		<li>The expanded package has this directory structure:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">hq-migration-5.0
+     logs
+     lib
+     data
+     bin</pre>
+		</div>
+</div></div></li>
+	</ul>
+	</li>
+	<li>To export all configuration and metric data, run the following command in a command shell:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">./hq-migrate.sh hq-export -Dhqserver.install.path=PathToServerHome</pre>
+		</div>
+</div></div>
+	<ul>
+		<li>where <tt>PathToServerHome</tt> is the full path to the Hyperic Server installation directory.</li>
+		<li>if you want to export configuration data only, not metric data, add -<tt>DconfigOnly=true</tt> to the command line.</li>
+		<li>The script reads your pre-5.0 Hyperic Server's <tt>hq-server.conf</tt> file, connects to your existing Hyperic database, exports the database, and creates a tarball with key artifacts and the database dump, in <tt>hq-migration-export-HqVersion.tgz</tt> where <tt>HqVersion</tt></li>
+	</ul>
+	</li>
+</ol>
+
+
+<p><a name="UpgradeHypericServerandDatabase-step3"></a></p>
+
+<h2><a name="UpgradeHypericServerandDatabase-Step3%3AImportServerConfigurationandDatabase"></a>Step 3: Import Server Configuration and Database</h2>
+
+<ol>
+	<li>Copy the export tarball to the the Hyperic 5.0 Server host, or make it available to the machine on which the 5.0 server is installed. In the latter case, expect some network latency overhead.</li>
+	<li>Run the migration script with the import option.
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">./hq-migrate.sh hq-import -Dhqserver.install.path=PathToServerHome -Dexport.archive.path=PathToExportArchive</pre>
+		</div>
+</div></div>
+	<ul>
+		<li>replacing <tt>PathToServerHome</tt> and <tt>PathToExportArchive</tt> appropriately.</li>
+	</ul>
+	</li>
+</ol>
+
+
+<h1><a name="UpgradeHypericServerandDatabase-MigrationDefaultsandOptions"></a>Migration Defaults and Options</h1>
+
+<h2><a name="UpgradeHypericServerandDatabase-SummaryofRequiredandOptionalCommandArguments"></a>Summary of Required and Optional Command Arguments</h2>
+
+<p>This table documents lists the required and optional arguments for each <tt>hq-migrate.sh</tt> (or <tt>.bat</tt>) command. (See the table in the following section for argument definitions and defaults.)</p>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Command </th>
+<th class='confluenceTh'> Required </th>
+<th class='confluenceTh'> Optional </th>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>hq-export</tt> </td>
+<td class='confluenceTd'> <tt>hqserver.install.path</tt> <br class="atl-forced-newline" />  <tt>staging.dir</tt> </td>
+<td class='confluenceTd'> <tt>configOnly</tt> <br class="atl-forced-newline" />
+<tt>setup.file</tt> <br class="atl-forced-newline" />
+<tt>scale</tt> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>hq-import</tt> </td>
+<td class='confluenceTd'> <tt>export.archive.path</tt> <br class="atl-forced-newline" />
+<tt>hqserver.install.path</tt> </td>
+<td class='confluenceTd'> <tt>staging.dir</tt> <br class="atl-forced-newline" />
+<tt>setup.file</tt> <br class="atl-forced-newline" />
+<tt>target.database.user</tt> <br class="atl-forced-newline" />
+<tt>target.database.password</tt> <br class="atl-forced-newline" />
+<tt>quiet</tt> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>one-step-migration</tt> </td>
+<td class='confluenceTd'> <tt>source.hqserver.install.path</tt> <br class="atl-forced-newline" />
+ <tt>target.hqserver.install.path</tt><br class="atl-forced-newline" />
+ <tt>staging.dir</tt> </td>
+<td class='confluenceTd'> <tt>setup.file</tt> </td>
+</tr>
+</tbody></table>
+</div>
+
+
+<h2><a name="UpgradeHypericServerandDatabase-CommandArgumentDefinitions"></a>Command Argument Definitions</h2>
+
+<p>This table defines the arguments supported by <tt>hq-migrate.sh</tt> (or <tt>.bat</tt>) commands.</p>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Argument </th>
+<th class='confluenceTh'> Description </th>
+<th class='confluenceTh'> Default Behavior </th>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>configOnly</tt> </td>
+<td class='confluenceTd'> This optional <tt>hq-export</tt> argument causes export of monitoring configuration settings (resource groups, alert definitions, escalations, and in vFabric Hyperic, roles) only. </td>
+<td class='confluenceTd'> Both metrics and configuration setting are exported. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>export.archive.path</tt> </td>
+<td class='confluenceTd'> This required <tt>hq-import</tt> argument points to the archive that contains the data exported from your Hyperic 4.x installation. <br class="atl-forced-newline" />
+<br class="atl-forced-newline" />
+Specify the full path to the archive, or the path relative to the root of the unpacked migration package, <tt>hq-migration-5.0</tt>. </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>hqserver.install.path</tt> </td>
+<td class='confluenceTd'> This required <tt>hq-export</tt> and <tt>hq-import</tt> argument points to the Hyperic Server that is the target of the export or import operation. <br class="atl-forced-newline" />
+<br class="atl-forced-newline" />
+Specify the full path to the Hyperic Server installation directory, or the path relative to the root of the unpacked migration package, <tt>hq-migration-5.0</tt>. </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>quiet</tt> </td>
+<td class='confluenceTd'> This optional argument applies to the <tt>hq-import</tt> command only. <br class="atl-forced-newline" />
+<br class="atl-forced-newline" />
+It causes the import process to run without pauses. </td>
+<td class='confluenceTd'> If not specified, there is a pause after each major task in the process is completed. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>scale</tt> </td>
+<td class='confluenceTd'> This optional <tt>hq-export</tt> argument indicates that the scale of the Hyperic environment environment is "large", causing the Hyperic Server and database to be configured accordingly. <br class="atl-forced-newline" />
+<br class="atl-forced-newline" />
+For more information about sizing profiles, see <a href="About Sizing Profiles in vFabric Hyperic.html" title="About Sizing Profiles in vFabric Hyperic">About Sizing Profiles in vFabric Hyperic</a>. </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>setup.file</tt> </td>
+<td class='confluenceTd'> This optional argument is supported by all three migration commands. If you choose to configure the migration process in a properties file, instead of at the command line, use this property to specify the file location. </td>
+<td class='confluenceTd'> If you do not use a properties file you must supply command options at the command line. <br class="atl-forced-newline" />
+<b>Command arguments specified at the command line must be prefixed with</b> <tt><b>&#45;D</b></tt><b>.</b> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>source.hqserver.install.path</tt> </td>
+<td class='confluenceTd'> This required <tt>one-step-migration</tt> command argument points to the 4.x Hyperic Server installation directory. </td>
+<td class='confluenceTd'> none </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>staging.dir</tt> </td>
+<td class='confluenceTd'> This optional <tt>hq-export</tt> and <tt>hq-import</tt> argument specifies the directory that the migration utility will use as a working directory for manipulating export and import data. <br class="atl-forced-newline" />
+<br class="atl-forced-newline" />
+The directory name may include the string <tt>export-data</tt>; if it does not, the export procedure will append the string to the name you specify. If the path specified does not exist at the time of export, it will be created. </td>
+<td class='confluenceTd'> By default the staging directory is <tt>migration_home/tmp/export-data</tt>. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>target.hqserver.install.path</tt> </td>
+<td class='confluenceTd'> This required <tt>one-step-migration</tt> command argument points to the 5.0 Hyperic Server installation directory. </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>target.database.password</tt> </td>
+<td class='confluenceTd'> This <tt>hq-import</tt> command option is required if the database user in <tt>server.conf</tt> is not a super user. <br class="atl-forced-newline" />
+<br class="atl-forced-newline" />
+The import will fail if is the user account running it is not defined as a superuser. </td>
+<td class='confluenceTd'> By default, the database password defined in <tt>server.conf</tt> is used. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>target.database.user</tt> </td>
+<td class='confluenceTd'> This <tt>hq-import</tt> command option is required if the database user in <tt>server.conf</tt> is not a super user. </td>
+<td class='confluenceTd'> By default, the database user defined in <tt>server.conf</tt> is used. </td>
+</tr>
+</tbody></table>
+</div>
+
+
+<h2><a name="UpgradeHypericServerandDatabase-OptionalMigrationExecutionParameters"></a>Optional Migration Execution Parameters</h2>
+
+<p>It is possible to configure certain export execution parameters in the <tt>migrate.xml</tt> file, in the <tt>/data</tt> directory in the root of the migration utility directory tree. The export execution parameters are defined in the table below.</p>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Parameter </th>
+<th class='confluenceTh'> Description </th>
+<th class='confluenceTh'> Default </th>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>batchsize</tt> </td>
+<td class='confluenceTd'> Controls how many rows are exported per batch. </td>
+<td class='confluenceTd'> Depends on whether or not the <tt>scale</tt> argument is specified: <br class="atl-forced-newline" />
+<ul>
+	<li>if <tt>scale=true</tt> not specified, batch size is 5,000. <br class="atl-forced-newline" /></li>
+	<li>if <tt>scale=true</tt> is specified, batch size is 10,000.</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'> {{queryTimeoutSecs} </td>
+<td class='confluenceTd'> How long before a query times out </td>
+<td class='confluenceTd'> 2,000 seconds </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>noOfWorkers</tt> </td>
+<td class='confluenceTd'> Number of export threads </td>
+<td class='confluenceTd'> Depends on whether or not the <tt>scale</tt> argument is specified: <br class="atl-forced-newline" />
+<ul>
+	<li>if <tt>scale=true</tt> not specified, 5 <br class="atl-forced-newline" /></li>
+	<li>if <tt>scale=true</tt> is specified, batch size is 12.</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>disabled</tt> </td>
+<td class='confluenceTd'> For troubleshooting. </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>noOfPartitions</tt> </td>
+<td class='confluenceTd'> The export process partitions some data tables so that instead of a single thread exporting all records serially, multiple threads export different chunks of a table in parallel. This behavior is configured for selected tables in <tt>migrate.xml</tt> with the <tt>noOfPartitions</tt> parameter. </td>
+<td class='confluenceTd'> See <tt>migrate.xml</tt> for default values. </td>
+</tr>
+</tbody></table>
+</div>
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:06</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

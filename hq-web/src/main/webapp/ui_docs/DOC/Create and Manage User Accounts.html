@@ -8,7 +8,7 @@
 
     <body>
 <b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
- - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic Documentation Home (Online)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
  -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
  <p>
  <p>
@@ -21,7 +21,7 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Sep 28, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
@@ -30,11 +30,11 @@
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1325699691851 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1325699691851 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1325699691851 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1348866632642 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1348866632642 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1348866632642 li {margin-left: 0px;padding-left: 0px;}
 
-/*]] >*/</style><div class='rbtoc1325699691851'>
+/*]]>*/</style><div class='rbtoc1348866632642'>
 <ul>
     <li><a href='#CreateandManageUserAccounts-CreateaNewUserAccount'>Create a New User Account</a></li>
 <ul>
@@ -51,8 +51,7 @@ div.rbtoc1325699691851 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 </ul></div>
 
-
-
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>If you use external authentication...</b><br />If Hyperic is configured to use your enterprise directory for user authentication, you do not have to manually create user accounts. Hyperic will automatically create an account for users that are externally authenticated by your LDAP, Active Directory, or Kerberos system. See the requirements on <a href="Create and Manage Roles in vFabric Hyperic.html" title="Create and Manage Roles in vFabric Hyperic">Create and Manage Roles in vFabric Hyperic</a>.</td></tr></table></div> 
 
 
 
@@ -99,6 +98,8 @@ div.rbtoc1325699691851 li {margin-left: 0px;padding-left: 0px;}
 
 
 <p>In vFabric Hyperic, the roles to which a user is assigned govern which resources the user may access, and the operations the user can perform on those resources. Each role in vFabric Hyperic defines a permission matrix; users with a role may exercise the permissions it grants, on the resources in groups assigned to the role.</p>
+
+
 
 <p>To assign roles to a user:</p>
 
@@ -187,19 +188,36 @@ The <b>List Users</b> page lists the following information for each user account
 
 <h2><a name="CreateandManageUserAccounts-ChangePassword"></a>Change Password</h2>
 
+<p>The <b>Change Password</b> page allows you to change a user's account password. </p>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Requirements for changing passwords</b><br />In vFabric Hyperic, only a user with a role that grants "Full" or "Read/Write" permissions to user accounts may change another user's password.
+
+<p>You must enter your current password in order to change an account password, whether the account is yours, or another user's.</p></td></tr></table></div> 
+
+<p>To change the password for a Hyperic account: </p>
 <ol>
-	<li>Click <b>Change</b> in the password field on the <em>UserName</em> page.
+	<li>Click the <b>Administration</b> tab in the Hyperic user interface.</li>
+	<li>Click <b>List Users</b> in the "Authentication/Authorization" section.
 	<ul>
-		<li>The <b>Change Password</b> page appears.<br/>
-<span class="image-wrap" style=""><img src="attachments/79660206/79921691.png" width="800px" style="border: 0px solid black"/></span></li>
+		<li>The <b>List Users</b> page appears.</li>
 	</ul>
 	</li>
-	<li>If you are do not have the <tt>SuperUser</tt> role, the page prompts you to supply the previous password.</li>
-	<li>Enter a password in the <b>Enter New Password</b> field.</li>
-	<li>Enter a password again in the <b>Confirm New Password</b> field.</li>
+	<li>Click the link in the "UserName" column for the user whose password you wish to change.</li>
+	<li>In the "General Properties" section of the page that appears, click the <b>Change...</b> link in the "Password" field
+	<ul>
+		<li>The <b>Change Password</b> page appears.<br/>
+<span class="image-wrap" style=""><img src="attachments/79660206/79921691.png" width="800px" style="border: 0px solid black"/></span> </li>
+	</ul>
+	</li>
+	<li>Enter your password in the <b>Enter Your Current Password</b> field.
+	<ul>
+		<li>The password entered must be the password of the user making the change, not the password of the user whose password is being changed.</li>
+	</ul>
+	</li>
+	<li>Enter the new password for the selected account in the <b>New Password</b> field.</li>
+	<li>Re-enter the password in the <b>Confirm New Password</b> field.</li>
 	<li>Click <b>OK</b>.</li>
 </ol>
-
 
 
 <h2><a name="CreateandManageUserAccounts-EditAccountSettings"></a>Edit Account Settings</h2>
@@ -263,7 +281,7 @@ The <b>List Users</b> page lists the following information for each user account
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 10, 2012 14:23</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:06</font></td>
 		    </tr>
 	    </table>
     </body>

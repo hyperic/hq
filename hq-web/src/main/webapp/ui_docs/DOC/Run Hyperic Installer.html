@@ -8,7 +8,7 @@
 
     <body>
 <b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
- - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic Documentation Home (Online)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
  -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
  <p>
  <p>
@@ -21,15 +21,15 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Feb 22, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Sep 25, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1329946451808 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1329946451808 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1329946451808 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1348605149948 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1348605149948 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1348605149948 li {margin-left: 0px;padding-left: 0px;}
 
-/*]] >*/</style><div class='rbtoc1329946451808'>
+/*]]>*/</style><div class='rbtoc1348605149948'>
 <ul>
     <li><a href='#RunHypericInstaller-ObtainHypericInstaller'>Obtain Hyperic Installer</a></li>
     <li><a href='#RunHypericInstaller-AbouttheSetupScript'>About the Setup Script</a></li>
@@ -48,17 +48,17 @@ div.rbtoc1329946451808 li {margin-left: 0px;padding-left: 0px;}
 
 <h1><a name="RunHypericInstaller-AbouttheSetupScript"></a>About the Setup Script</h1>
 
-<p>The setup script, <tt>setup.bat</tt> for Windows or, <tt>setup.sh</tt> for Unix-like environments, is in the Hyperic installation package. You can use to install the Hyperic Server, the Hyperic Agent, or both.</p>
+<p>The setup script &#8212; <tt>setup.bat</tt> for Windows, <tt>setup.sh</tt> for Unix-like environments &#8212; is in the Hyperic installation package. You can use the setup script to install the Hyperic Server, the Hyperic Agent, or both.</p>
 
 <p>When you run the setup script, you can supply a qualifier that sets the installation mode.</p>
 
 <ul>
-	<li>none &#8212; Run the setup script with no qualifier to perform a quick install. Selected components will be installed with default values for most configuration options. If you install the Hyperic Server, it will be configured to use its built-in PostgreSQL database. A quick install is useful when you evaluate Hyperic.</li>
+	<li>none &#8212; Run the setup script with no qualifier to perform a quick install. Selected components will be installed with default values for most configuration options. If you install the Hyperic Server, it will be configured to use its built-in vPostgreSQL database. A quick install is useful when you evaluate Hyperic.</li>
 </ul>
 
 
 <ul>
-	<li><tt>&#45;full</tt> &#8212; In "full" mode, the installer dialog will prompt for all setup configuration options. Use this option if you plan to configure the Hyperic Server to use an SSL keystore that you manage yourself, rather than a Hyperic-generated keystore.</li>
+	<li><tt>&#45;full</tt> &#8212; In "full" mode, the installer dialog will prompt for all setup configuration options. Use this option if you plan to use an external database or to configure the Hyperic Server to use an SSL keystore that you manage yourself, rather than a Hyperic-generated keystore. For best security and best "configurability", run the installer in "full" mode.</li>
 </ul>
 
 
@@ -73,31 +73,20 @@ div.rbtoc1329946451808 li {margin-left: 0px;padding-left: 0px;}
 
 
 <ul>
-	<li><tt>&#45;oracle</tt> &#8212; Quick install mode for Oracle; installer will prompt you for database connection information and use defaults for other configuration settings.</li>
-</ul>
-
-
-<ul>
-	<li><tt>&#45;mysql</tt> &#8212; Quick install mode for MySQL; installer will prompt you for database connection information and use defaults for everything else.</li>
-</ul>
-
-
-<ul>
 	<li><tt>&#45;updateScale</tt> &#8212; In vFabric Hyperic 4.6.5 and later, run the installer with this option to change the sizing profile for the Hyperic Server. For information about sizing profiles, see <a href="About Sizing Profiles in vFabric Hyperic.html" title="About Sizing Profiles in vFabric Hyperic">About Sizing Profiles in vFabric Hyperic</a>. For information about changing the sizing profile for vFabric Hyperic Server, see <a href="Change vFabric Hyperic Server Sizing Profile.html" title="Change vFabric Hyperic Server Sizing Profile">Change vFabric Hyperic Server Sizing Profile</a>.</li>
 </ul>
 
 
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Configuration Options for Database-Specific Quick Installs</b><br />When you do a database-specific quick install (<tt>&#45;postgresql</tt>, <tt>&#45;oracle</tt>, or <tt>&#45;mysql</tt>) the installer <b>does not</b>:
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Configuration Options for Quick Installs</b><br />When you do a quick install by running the installer with no qualifier or with the <tt>&#45;postgresql</tt> qualifier, the installer <b>does not</b>:
 <ul>
 	<li>Prompt for the ports on which the Hyperic Server listens for agent and user interface requests &#8212; the default ports are automatically configured.</li>
 	<li>Allow you to specify the location and password for a user-managed server keystore &#8212; instead, the Hyperic Server will use a Hyperic-managed keystore.</li>
-	<li>Allow you to select a different database type.</li>
 </ul>
 </td></tr></table></div>
 
 <h1><a name="RunHypericInstaller-RuntheSetupScript"></a>Run the Setup Script</h1>
 
-<p>This section describes the dialog that the installation script presents if you run it in <tt>&#45;full</tt> mode. If you us a different mode,  some of the prompts described below will not appear &#8212; default values will be applied to those options.</p>
+<p>This section describes the dialog that the installation script presents if you run it in <tt>&#45;full</tt> mode. If you us a different mode,  some of the prompts described below will not appear &#8212; default values for most configuration options will apply.</p>
 
 <ol>
 	<li>Create a directory for the Hyperic installation.
@@ -150,7 +139,7 @@ div.rbtoc1329946451808 li {margin-left: 0px;padding-left: 0px;}
 	</li>
 	<li><b><em>HQ server installation path [default '.....']:</em></b>
 	<ul>
-		<li>Accept the default, or enter a directory location. You must have write access the location.</li>
+		<li>Accept the default, or enter a directory location. The account you are running under must have write access the directory location.</li>
 	</ul>
 	</li>
 	<li><b><em>What port should the HQ server's web-based GUI listen on for http communication? [default '7080']</em></b><em>:</em>
@@ -186,7 +175,7 @@ div.rbtoc1329946451808 li {margin-left: 0px;padding-left: 0px;}
 		<li>The URL used to access the Hyperic Server. This value is used in alert notification emails. This value can be changed on the <b>Administration</b> page in the Hyperic Portal.</li>
 	</ul>
 	</li>
-	<li><b><em>Enter the fully qualified domain name of the SMTP server that Hyperic will use to send email messages  [default FQDN.local]</em></b>
+	<li><b><em>Enter the fully qualified domain name of the SMTP server that Hyperic will use to send email messages [default FQDN.local]</em></b>
 	<ul>
 		<li>If the installer does not find a local SMTP server, and you do not specify one, Hyperic cannot send alert notifications. Other alert functionality is unaffected.</li>
 		<li>You can configure Hyperic for an external SMTP server after installing Hyperic Server. See <a href="Configuring Hyperic Server for SMTP Server.html" title="Configuring Hyperic Server for SMTP Server">Configuring Hyperic Server for SMTP Server</a>.</li>
@@ -209,38 +198,52 @@ div.rbtoc1329946451808 li {margin-left: 0px;padding-left: 0px;}
 	</li>
 	<li><b><em>What backend database should the HQ server use? [default '1']:</em></b><b><em>Choices:</em></b><br/>
 <b><em>1: HQ Built-in Database</em></b><br/>
-<b><em>2: Oracle 10g/11g</em></b><br/>
-<b><em>3: PostgreSQL</em></b><br/>
-<b><em>4: MySQL Enterprise / Community Server 5.x</em></b>
+<b><em>2: PostgreSQL</em></b>
 	<ul>
-		<li>Select the database you wish to use and:
-		<ul>
-			<li>If you entered "1", proceed to step 16.</li>
-			<li>If you entered "2", "3", or "4", proceed to step 17.</li>
-		</ul>
-		</li>
+		<li>Enter "1" if you wish to use the built-in vPostgres database, and proceed to step 16.</li>
+		<li>Enter "2" if you wish to use an external PostgreSQL database (which must already be set up) and proceed to step 17.</li>
 	</ul>
 	</li>
-	<li><b>What port should HQ's built-in database use? [default '9432']:</b></li>
-	<li>Dialog for external database:
+	<li><b>What port should HQ's built-in database use? [default '9432']:</b>
 	<ol>
-		<li><b><em>Enter the JDBC connection URL.</em></b>
+		<li>Accept the default, or enter a different port number.</li>
+		<li>Proceed to step 20.</li>
+	</ol>
+	</li>
+	<li>The following dialog appears if you are configuring the Hyperic Server for an external vPostgreSQL database:
+	<ol>
+		<li><b><em>Enter the vPostgres DB hostname [default 'localhost].</em></b>
 		<ul>
-			<li>The prompt supplies a default URL, which assumes the external database is on localhost.</li>
-			<li>Supply a URL in the form shown, editing as appropriate to identify the connection details, such as host and name.</li>
+			<li>Accept the default, or enter another hostname.</li>
 		</ul>
 		</li>
-		<li><b><em>Enter the username to use to connect to the database:</em></b>
+		<li><b><em>Enter the vPostgres DB port [default '5432']:</em></b>
 		<ul>
-			<li>Enter the database username that was set up when the Hyperic database was created.</li>
+			<li>Accept the default, or enter another (unused) port.</li>
 		</ul>
 		</li>
-		<li><b><em>Enter the password to use to connect to the database:</em></b>
+		<li><b><em>Enter vPostgres DB name [default: 'HQ']:</em></b>
 		<ul>
-			<li>Enter the database password that was set up when the Hyperic database was created.</li>
+			<li>Accept the default, or enter another name for the Hyperic database.</li>
+		</ul>
+		</li>
+		<li><b><em>Override the JDBC connection URL for the PostgreSQL database [default 'jdbc:postgresql://localhost:5432/HQ?protocolVersion=2']:</em></b>
+		<ul>
+			<li>.</li>
 		</ul>
 		</li>
 	</ol>
+	</li>
+	<li><b><em>Enter the username to use to connect to the database:</em></b>
+	<ul>
+		<li>Enter a username.</li>
+	</ul>
+	</li>
+	<li><b><em>Enter the password to use to connect to the database:</em></b>
+	<ul>
+		<li>Enter a password.</li>
+		<li>The installer will not echo the password but will prompt for it twice.</li>
+	</ul>
 	</li>
 	<li><b><em>Would you like to use an auto generated encryption key to encrypt the database password? [default '1']</em></b>
 	<ul>
@@ -249,7 +252,7 @@ div.rbtoc1329946451808 li {margin-left: 0px;padding-left: 0px;}
 	</li>
 	<li><b><em>What should the username be for the initial admin user? [default 'hqadmin']:</em></b>
 	<ul>
-		<li>Accept the default, or enter a different username.</li>
+		<li>Accept the default, or enter another username.</li>
 	</ul>
 	</li>
 	<li><b><em>What should the password be for the initial admin user?:</em></b>
@@ -257,14 +260,10 @@ div.rbtoc1329946451808 li {margin-left: 0px;padding-left: 0px;}
 		<li>The installer will not echo the password but will prompt for it twice.</li>
 	</ul>
 	</li>
-	<li><b><em>What should the email address be for the initial admin user? [default...]</em></b>
-	<ul>
-		<li>Accept the default, or enter a different email address.</li>
-	</ul>
-	</li>
+	<li><b><em>What should the email address be for the initial admin user? [default 'hqadmin@eng.vmware.com']:</em></b></li>
 	<li>If the installer detects a database from a previous Hyperic installation, it will prompt you to:
 	<ul>
-		<li><b>1: Upgrade the HQ server database</b> &#8212; Choose this option to preserve your existing Hyperic data, then follow the instructions in <a href="Upgrade Hyperic Server.html" title="Upgrade Hyperic Server">Upgrade Hyperic Server</a>.</li>
+		<li><b>1: Upgrade the HQ server database</b> &#8212; Choose this option to preserve your existing Hyperic data, then follow the instructions in <a href="Upgrade Hyperic Server and Database.html" title="Upgrade Hyperic Server and Database">Upgrade Hyperic Server and Database</a>.</li>
 		<li><b>2: Overwrite the HQ server database</b> &#8212; This option erases all of the data in your Hyperic database. If you do not want to preserve the contents of the database, it would be quicker to drop and recreate the database prior to installing Hyperic Server.</li>
 		<li><b>3: Exit the installer</b></li>
 	</ul>
@@ -289,7 +288,7 @@ div.rbtoc1329946451808 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 10, 2012 14:22</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:06</font></td>
 		    </tr>
 	    </table>
     </body>
