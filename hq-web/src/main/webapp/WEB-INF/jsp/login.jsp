@@ -44,7 +44,7 @@ if (ldapInUse || (realm != null && realm.length() != 0 && kdc != null && kdc.len
 				<label for="j_password"><fmt:message
 						key="login.field.password" /></label> <input style="width: 75%;"
 					id="passwordInput" type="password" id="j_password"
-					name="j_password" />
+					name="j_password" autocomplete="off" />
 			</div>
 
 			<div>
