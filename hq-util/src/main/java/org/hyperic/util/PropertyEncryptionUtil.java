@@ -69,10 +69,12 @@ public class PropertyEncryptionUtil {
         }
 
         String encryptionKey;
+        FileInputStream fis = null;
         try {
             // Read the properties file
             Properties props = new Properties();
-            props.load(new FileInputStream(encryptionKeyFile));
+            fis = new FileInputStream(encryptionKeyFile);
+            props.load(fis);
 
             // Get the encrypted key.
             String encryptedKey = props.getProperty(ENCRYPTION_KEY_PROP);
@@ -88,6 +90,8 @@ public class PropertyEncryptionUtil {
             throw new PropertyUtilException(exc);
         } catch (IOException exc) {
             throw new PropertyUtilException(exc);
+        } finally {
+            if (fis != null) try { fis.close(); } catch (IOException ignore) { ignore.printStackTrace(); }
         }
 
         // Return the key.
@@ -189,6 +193,7 @@ public class PropertyEncryptionUtil {
         }
 
         String encryptionKey;
+        FileOutputStream fos = null;
         try {
             // Create the encryption key.
             encryptionKey = SecurityUtil.generateRandomToken();
@@ -198,14 +203,17 @@ public class PropertyEncryptionUtil {
             // Store the key
             Properties props = new Properties();
             props.put(ENCRYPTION_KEY_PROP, encryptedKey);
-            
-            props.store(new FileOutputStream(fileName), null);
+
+            fos = new FileOutputStream(fileName);
+            props.store(fos, null);
             
             // set read/write permissions to be given to the owner only
             File encKeyFile = new File(fileName);
             FileUtil.setReadWriteOnlyByOwner(encKeyFile);
         } catch (Exception exc) {
             throw new PropertyUtilException(exc);
+        } finally {
+            if (fos != null) try { fos.close(); } catch (IOException ignore) { ignore.printStackTrace(); }
         }
 
         // Return the key

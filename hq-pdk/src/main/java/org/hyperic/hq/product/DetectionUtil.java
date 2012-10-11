@@ -138,7 +138,6 @@ public class DetectionUtil {
 					}
 				}
 				catch (Exception e) {
-				    log.error(e);
 				    continue;
 				}
 			}
@@ -196,7 +195,6 @@ public class DetectionUtil {
 					}
 				}
 				catch (Exception e) {
-				    log.error(e);
 					continue;
 				}
 			}
@@ -255,7 +253,6 @@ public class DetectionUtil {
 					}
 				}
 			} catch (Exception e) {
-                log.error(e);
 			} finally {
                 if (input!=null) {
                     try {
@@ -294,7 +291,6 @@ public class DetectionUtil {
 						}
 					}
 					catch (Exception e) {
-                        log.error(e);
 						continue;
 					}					
 				}
