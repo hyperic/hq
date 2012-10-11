@@ -220,7 +220,8 @@ public class TableExporter extends TableProcessor<Worker> {
     }//EOM 
 
     protected final Worker newWorkerInner(final ForkContext<Table,Worker> context, final Connection conn, final File stagingDir) {
-        return new Worker(context.getSemaphore(), conn, context.getSink(), stagingDir);
+        return new Worker(context.getSemaphore(), conn, context.getSink(),
+                context.getAccumulatedErrorsSink(), stagingDir);
     }//EOM 
     
     /**
@@ -238,8 +239,9 @@ public class TableExporter extends TableProcessor<Worker> {
          * @param sink
          * @param outputDir
          */
-        Worker(final CountDownLatch countdownSemaphore, final Connection conn, final BlockingDeque<Table> sink, final File outputDir) {
-            super(countdownSemaphore, conn, sink, Table.class);
+        Worker(final CountDownLatch countdownSemaphore, final Connection conn, final BlockingDeque<Table> sink, 
+                final MultiRuntimeException accumulatedErrors, final File outputDir) {
+            super(countdownSemaphore, conn, sink, Table.class, accumulatedErrors);
             this.outputDir = outputDir;
          
             try{

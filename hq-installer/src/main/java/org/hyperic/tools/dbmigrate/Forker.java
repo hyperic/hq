@@ -97,14 +97,18 @@ public class Forker {
     public static abstract class ForkWorker<V> implements Callable<V[]> {
         protected final Connection conn;
         private final CountDownLatch countdownSemaphore;
-        protected BlockingDeque<V> sink;
         private Class<V> entityType ; 
+        protected BlockingDeque<V> sink;
+        protected MultiRuntimeException accumulatedErrors ;  
 
-        protected ForkWorker(final CountDownLatch countdownSemaphore, Connection conn, BlockingDeque<V> sink, final Class<V> clsEntityType) {
+        protected ForkWorker(final CountDownLatch countdownSemaphore, 
+                Connection conn, BlockingDeque<V> sink, 
+                final Class<V> clsEntityType, final MultiRuntimeException accumulatedErrors) {
             this.countdownSemaphore = countdownSemaphore;
             this.conn = conn;
             this.sink = sink;
             this.entityType = clsEntityType ; 
+            this.accumulatedErrors = accumulatedErrors ; 
         }//EOM
 
         protected abstract void callInner(final V entity) throws Throwable;
@@ -126,8 +130,9 @@ public class Forker {
                         
                         hadPolledFirst = !hadPolledFirst  ;
                     }catch (Throwable t2) {
-                           
-                        Utils.printStackTrace(t2, errorMsg + entity);
+                        final String msg = errorMsg + entity ; 
+                        this.reportError(t2, msg) ;    
+                        Utils.printStackTrace(t2, msg);
                         innerException = t2;
                     }finally {
                         try {
@@ -170,6 +175,10 @@ public class Forker {
             return processedEntities.toArray(arrResponse);
         }//EOM 
         
+        protected synchronized void reportError(final Throwable throwable, final String errorMsg) { 
+            this.accumulatedErrors.addThrowable(throwable, errorMsg) ;
+        }//EOM 
+        
         protected void dispose(final MultiRuntimeException thrown) throws Throwable { 
             try {
                 Utils.close(thrown != null ? Utils.ROLLBACK_INSTRUCTION_FLAG : Utils.NOOP_INSTRUCTION_FLAG, new Object[] { this.conn });
@@ -193,12 +202,14 @@ public class Forker {
         private BlockingDeque<V> sink;
         private Forker.WorkerFactory<V, T> workerFactory;
         private CountDownLatch inverseSemaphore;
+        private MultiRuntimeException accumulatedErrors ; 
         private Hashtable env;
 
         public ForkContext(BlockingDeque<V> sink, Forker.WorkerFactory<V, T> workerFactory, Hashtable env) {
             this.sink = sink;
             this.workerFactory = workerFactory;
             this.env = env;
+            this.accumulatedErrors = new MultiRuntimeException() ; 
         }//EOM
 
         public final Hashtable getEnv() {
@@ -212,6 +223,10 @@ public class Forker {
         public final BlockingDeque<V> getSink() {
             return this.sink;
         }//EOM
+        
+        public final MultiRuntimeException getAccumulatedErrorsSink() { 
+            return this.accumulatedErrors ; 
+        }//EOM 
     }//EO inner class ForkContext
     
 }//EOC

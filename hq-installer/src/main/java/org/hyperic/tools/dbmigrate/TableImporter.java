@@ -240,7 +240,8 @@ public class TableImporter extends TableProcessor<Worker> {
                             
                             final ReadWriteLock bigTablePauseLock = (ReadWriteLock) paramForkContext.get(BIG_TABLE_PAUSE_LOCK_KEY)  ;
                             final Connection conn = getConnection(env, false/*autoCommit*/);
-                            return new IndexRestorationWorker(paramForkContext.getSemaphore(), conn, paramForkContext.getSink(), bigTablePauseLock) ; 
+                            return new IndexRestorationWorker(paramForkContext.getSemaphore(), conn, paramForkContext.getSink(), 
+                                        paramForkContext.getAccumulatedErrorsSink(), bigTablePauseLock) ; 
                         }//EOM 
                 
             };//EO anonymous class 
@@ -270,7 +271,8 @@ public class TableImporter extends TableProcessor<Worker> {
 
 	@Override
 	protected final Worker newWorkerInner(final ForkContext<Table, Worker> context, final Connection conn, final File stagingDir) {
-		return new Worker(context.getSemaphore(), conn, context.getSink(), stagingDir);
+		return new Worker(context.getSemaphore(), conn, context.getSink(), 
+		        context.getAccumulatedErrorsSink(), stagingDir);
 	}//EOM 
 	
 	private static final class TableBatchMetadata extends Table{
@@ -348,8 +350,9 @@ public class TableImporter extends TableProcessor<Worker> {
 	    private final Lock bigTableLock ; 
 	    private static final int BIG_TABLE_THRESHOLD = 50000000 ; 
 	    
-	    IndexRestorationWorker(final CountDownLatch countdownSemaphore, final Connection conn, final BlockingDeque<IndexRestorationTask> sink, final ReadWriteLock bigTablePauseLock) {  
-            super(countdownSemaphore, conn, sink, IndexRestorationTask.class);
+	    IndexRestorationWorker(final CountDownLatch countdownSemaphore, final Connection conn, final BlockingDeque<IndexRestorationTask> sink, 
+	            final MultiRuntimeException accumulatedErrors, final ReadWriteLock bigTablePauseLock) {  
+            super(countdownSemaphore, conn, sink, IndexRestorationTask.class, accumulatedErrors);
             this.smallTableLock = bigTablePauseLock.readLock() ; 
             this.bigTableLock = bigTablePauseLock.writeLock() ; 
         }//EOM  
@@ -404,8 +407,9 @@ public class TableImporter extends TableProcessor<Worker> {
         private final File outputDir;
         private final FileInputStreamer fileInputStreamer ; 
         
-        Worker(final CountDownLatch countdownSemaphore, final Connection conn, final BlockingDeque<Table> sink, final File outputDir){ 
-            super(countdownSemaphore, conn, sink, Table.class);
+        Worker(final CountDownLatch countdownSemaphore, final Connection conn, final BlockingDeque<Table> sink, final MultiRuntimeException accumulatedErrors, 
+                final File outputDir){ 
+            super(countdownSemaphore, conn, sink, Table.class, accumulatedErrors);
             this.outputDir = outputDir;
             
             //execute database specific logic to optimize the bulk import performance (see postgres database type)  
