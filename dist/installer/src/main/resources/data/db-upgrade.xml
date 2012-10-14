@@ -11768,7 +11768,7 @@ has already been defined.
     <!--add org\ prefix to the existing organization user's name and sort name, this SQL statement is for vPostger since it's the only supported 
     	database in Hyperic 5.0 (organization users are users we authenticate with the organization ldap/kerberos -->
 		        <statement>
-		       	    update EAM_SUBJECT set SORT_NAME = 'org\\' || SORT_NAME, NAME = 'org\\' || NAME where NAME not in (Select PRINCIPAL from EAM_PRINCIPAL) and EAM_SUBJECT.SORT_NAME IS NOT NULL 
+		       	    update EAM_SUBJECT set SORT_NAME = 'org\' || SORT_NAME, NAME = 'org\' || NAME where NAME not in (Select PRINCIPAL from EAM_PRINCIPAL) and EAM_SUBJECT.SORT_NAME IS NOT NULL 
 		       	</statement>	 
 		       </schema-directSQL>  
 		    </schemaSpec>
