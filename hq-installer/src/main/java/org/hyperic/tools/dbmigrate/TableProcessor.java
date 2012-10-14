@@ -68,6 +68,7 @@ public abstract class TableProcessor<T extends Callable<TableProcessor.Table[]>>
   private static final int MAX_WORKERS = 5;
   protected static final String COLUMNS_KEY = "columns" ; 
   protected static final String TOTAL_REC_NO_KEY = "total.records" ; 
+  private static final String ERROR_SUMMARY_PROPERTY_KEY = "errors.summary" ; 
   
   protected int maxRecordsPerTable = -1; //defaults to -1 (all) 
   protected boolean isDisabled; // defaults to false 
@@ -222,7 +223,7 @@ public abstract class TableProcessor<T extends Callable<TableProcessor.Table[]>>
         //perform validations and exception checking on the workerResponses 
         this.afterFork(context, workersResponses, sink);
         //create a processing summary report and store in an environment variable for future reference 
-        this.generateSummaryReport() ; 
+        this.generateSummaryReport(context.getAccumulatedErrorsSink()) ; 
         
         this.log("Overall Processing took: " + StringUtil.formatDuration(System.currentTimeMillis()-before) ) ; 
     
@@ -275,7 +276,7 @@ public abstract class TableProcessor<T extends Callable<TableProcessor.Table[]>>
   /**
    * Stores the table : no of processed records tuples as a string against the '<<taskName>>.table.stats' key for future reference
    */
-  private final void generateSummaryReport() { 
+  private final void generateSummaryReport(final MultiRuntimeException accumulatedErrorsSink) { 
     //store the records per table stats in an env variable using the following format <task name>_RECS_PER_TABLE_STATS_ENV_VAR_SUFFIX
       final StringBuilder summaryBuilder = new StringBuilder() ;
       
@@ -289,9 +290,22 @@ public abstract class TableProcessor<T extends Callable<TableProcessor.Table[]>>
           }//EO while there are more padding to add 
           
           summaryBuilder.append("\t").append(table.noOfProcessedRecords).append("\n") ; 
-      }//EO while there are more tables                           
+      }//EO while there are more tables                     
       
-      this.getProject().setProperty(this.getTaskName() + RECS_PER_TABLE_STATS_ENV_VAR_SUFFIX, summaryBuilder.toString()) ;
+      final Project project = this.getProject() ; 
+
+      //now create an error report taking into account that a partial one already exists and that 
+      //no errors were reported 
+      if(!accumulatedErrorsSink.isEmpty()) { 
+            String errorsSummary = project.getUserProperty(ERROR_SUMMARY_PROPERTY_KEY) ;
+            errorsSummary = (errorsSummary == null ? 
+                    "\nThe following Error(s) have Occured during the migration:\n\n" : ""
+                    ) + accumulatedErrorsSink.toCompleteString()  + "\n\n>>>>>>>> For full stack traces inspect the logs." ; 
+            
+            project.setProperty(ERROR_SUMMARY_PROPERTY_KEY, errorsSummary) ;
+      }//EO if errors were reported 
+      
+      project.setProperty(this.getTaskName() + RECS_PER_TABLE_STATS_ENV_VAR_SUFFIX, summaryBuilder.toString()) ;
   }//EOM 
   
   /**

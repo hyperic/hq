@@ -542,6 +542,14 @@
 	</target> 
 	
 	<target name="summary-report" unless="embedded.execution">
+		<if> 
+			<not> 
+				<isset property="errors.summary" />
+			</not>
+			<then> 
+				<property name="errors.summary" value=" No Errors were Raised." />
+			</then>
+		</if> 
 		<echofile file="${install.dir}/data/reports/migration-summary.txt" trim="true"/> 
 	</target> 
 	
