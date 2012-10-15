@@ -197,16 +197,17 @@ public class AvailabilityFallbackChecker {
 		}
 	
 		//log.info("storeUpdates: storing " + availabilityDataPoints.size() + " data points");
-    	DataInserter inserter = measurementInserterHolder.getAvailDataInserter();
-		try {
-			inserter.insertMetricsFromServer(availDataPoints);
-		} catch (InterruptedException e) {
-			log.warn("storeUpdates: Data insertion failed. Using addData mechanism instead. ", e);
-			this.availabilityManager.addData(availDataPoints, true, true);
-		} catch (DataInserterException e) {
-			log.warn("storeUpdates: Data insertion failed. Using addData mechanism instead. ", e);
-			this.availabilityManager.addData(availDataPoints, true, true);
-		}
+		this.availabilityManager.addData(availDataPoints, true, true);
+//    	DataInserter inserter = measurementInserterHolder.getAvailDataInserter();
+//		try {
+//			inserter.insertMetricsFromServer(availDataPoints);
+//		} catch (InterruptedException e) {
+//			log.warn("storeUpdates: Data insertion failed. Using addData mechanism instead. ", e);
+//			this.availabilityManager.addData(availDataPoints, true, true);
+//		} catch (DataInserterException e) {
+//			log.warn("storeUpdates: Data insertion failed. Using addData mechanism instead. ", e);
+//			this.availabilityManager.addData(availDataPoints, true, true);
+//		}
 	}
 
 	/**

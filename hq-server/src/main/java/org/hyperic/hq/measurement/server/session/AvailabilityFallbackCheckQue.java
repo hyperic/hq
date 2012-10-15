@@ -75,6 +75,15 @@ public class AvailabilityFallbackCheckQue {
 		this.measurementIdToPlatformId = new HashMap<Integer,Integer>();
     }
     
+    public void clearQue() {
+       	log.info("Clearing availability check queues.");
+    	this.platformsRecheckQue.clear();
+    	this.currentPlatformsInQue.clear();
+    	this.platformsRecheckInProgress.clear();
+    	this.platformsPendingQueRemoval.clear();
+    	this.measurementIdToPlatformId.clear();
+    }
+    
     /**
      * @return the number of Platforms pending availability status check
      */
@@ -95,6 +104,8 @@ public class AvailabilityFallbackCheckQue {
     public synchronized boolean addToQue(Integer platformId, ResourceDataPoint dataPoint) {
     	log.debug("addToQue: start " + platformId+ ", curQueSize: " + getSize());
     	if (this.currentPlatformsInQue.containsKey(platformId)) {
+    		// in case there was an agent update in the middle, we do not want to remove it from the recheck que.
+    		//this.platformsPendingQueRemoval.remove(platformId);
     		return false;
     	}
     	this.platformsRecheckQue.add(dataPoint);
