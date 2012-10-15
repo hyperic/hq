@@ -585,6 +585,24 @@
 			  <artifactId>juli</artifactId>
 			  <version>${tomcat-juli.version}</version>
 			</dependency>
+			
+			<dependency>
+				<groupId>org.apache.cxf</groupId>
+				<artifactId>cxf-rt-frontend-jaxrs</artifactId>
+				<version>${cxf.version}</version>
+				<exclusions>
+			     <exclusion>
+			       <groupId>wsdl4j</groupId>
+			       <artifactId>wsdl4j</artifactId>
+			     </exclusion>
+			   </exclusions>
+			</dependency>
+			<dependency> 
+				<groupId>com.vmware.wsdl</groupId>
+			    <artifactId>vmware_wsdl4j</artifactId>
+			    <version>1.6.2</version>
+			</dependency>
+			
 			<dependency>
 				<groupId>ant-contrib</groupId>
 				<artifactId>ant-contrib</artifactId>

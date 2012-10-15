@@ -217,7 +217,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
                 rscId = hqMsmtReq.getRscId();
                 // if the requested rsc is not in the map of rscs for which at least one template was found, mark it as a failed rsc
                 if (!rscIdsToTmpIds.keySet().contains(Integer.valueOf(rscId))) {
-                    res.addFailedResource(rscId,TEMPLATE_NOT_FOUND_ERR_CODE,null,new Object[] {});
+                    res.addFailedResource(rscId,TEMPLATE_NOT_FOUND_ERR_CODE,null,new Object[] {""});
                 }
             }
             Map<Integer,Exception> failedRscs = new HashMap<Integer,Exception>();
@@ -230,9 +230,9 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
                 Integer failedRscId = failedRscEntry.getKey();
                 Exception e = failedRscEntry.getValue();
                 if (e==null) {
-                    res.addFailedResource(String.valueOf(failedRscId),MEASUREMENT_NOT_FOUND,null,new Object[] {});
+                    res.addFailedResource(String.valueOf(failedRscId),MEASUREMENT_NOT_FOUND,null,new Object[] {""});
                 } else {
-                    res.addFailedResource(String.valueOf(failedRscId),e.getMessage(),null, new Object[] {});
+                    res.addFailedResource(String.valueOf(failedRscId),e.getMessage(),null, new Object[] {""});
                 }
             }
             // validate that all rscs have msmts, and map msmt names to rscs
@@ -243,7 +243,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
                 Resource rsc = rscToHqMsmtsEntry.getKey();
                 msmts = rscToHqMsmtsEntry.getValue();
                 if (msmts==null || msmts.size()==0) {
-                    res.addFailedResource(String.valueOf(rsc.getId()),TEMPLATE_NOT_FOUND_ERR_CODE,null,new Object[] {});
+                    res.addFailedResource(String.valueOf(rsc.getId()),TEMPLATE_NOT_FOUND_ERR_CODE,null,new Object[] {""});
                 } else {
                     for (Measurement msmt : msmts) {
                         msmtIdToRsc.put(msmt.getId(),rsc);

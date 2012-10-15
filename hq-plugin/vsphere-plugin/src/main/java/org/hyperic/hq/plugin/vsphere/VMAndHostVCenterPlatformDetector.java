@@ -581,17 +581,29 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
             ResourceApi api = hqApi.getResourceApi();
             StatusResponse response;
 
+            if (debug) watch.markTimeBegin("syncHosts");
+            response = api.syncResources(hosts);
+            if (debug) watch.markTimeEnd("syncHosts");
+            assertSuccess(response, "sync " + hosts.size() + " Hosts", false);
+
+
             cleanVMsListBeforSync(vms);    
             if (debug) watch.markTimeBegin("syncVms");
             response = api.syncResources(vms);
             if (debug) watch.markTimeEnd("syncVms");
             assertSuccess(response, "sync " + vms.size() + " VMs", false);
 
-            if (debug) watch.markTimeBegin("syncHosts");
-            response = api.syncResources(hosts);
-            if (debug) watch.markTimeEnd("syncHosts");
-            assertSuccess(response, "sync " + hosts.size() + " Hosts", false);
-
+            if (!ResponseStatus.SUCCESS.equals(response.getStatus())) {
+              log.info("Trying to sync one VM at a time");
+              ArrayList<Resource> vmList = new ArrayList<Resource>();
+              for (Resource vm : vms) {
+                  vmList.clear();
+                  vmList.add(vm);
+                  response = api.syncResources(vmList);
+                  assertSuccess(response, "sync " + vm.getName() + " VM ", false);
+              }
+            }
+            
             Map<String, Resource> existingHosts = new HashMap<String, Resource>();
             Map<String, List<Resource>> existingHostVms = new HashMap<String, List<Resource>>();
 

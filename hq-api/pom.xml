@@ -21,11 +21,14 @@
             <groupId>org.hyperic.hq</groupId>
             <artifactId>hq-server</artifactId>
             <version>${project.version}</version>
-        </dependency>        	
+        </dependency>   
+    	<dependency> 
+			<groupId>com.vmware.wsdl</groupId>
+		    <artifactId>vmware_wsdl4j</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.cxf</groupId>
 			<artifactId>cxf-rt-frontend-jaxrs</artifactId>
-			<version>${cxf.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.codehaus.jackson</groupId>

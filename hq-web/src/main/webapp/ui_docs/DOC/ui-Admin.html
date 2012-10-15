@@ -8,7 +8,7 @@
 
     <body>
 <b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
- - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic Documentation Home (Online)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
  -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
  <p>
  <p>
@@ -21,25 +21,27 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Aug 08, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1325699393362 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1325699393362 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1325699393362 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1344444152174 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1344444152174 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1344444152174 li {margin-left: 0px;padding-left: 0px;}
 
-/*]] >*/</style><div class='rbtoc1325699393362'>
+/*]]>*/</style><div class='rbtoc1344444152174'>
 <ul>
     <li><a href='#ui-Admin-AdministrationPage'> Administration Page</a></li>
 <ul>
     <li><a href='#ui-Admin-Authentication%2FAuthorization'>Authentication/Authorization</a></li>
     <li><a href='#ui-Admin-HQServerSettings'>HQ Server Settings</a></li>
     <li><a href='#ui-Admin-Plugins'>Plugins</a></li>
-    <li><a href='#ui-Admin-HQLicenseInformation'>HQ License Information</a></li>
+    <li><a href='#ui-Admin-vFabricHypericLicenseInformation'>vFabric Hyperic License Information</a></li>
+    <li><a href='#ui-Admin-vCenterOperationsManagementSuiteLicenseInformation'>vCenter Operations Management Suite License Information</a></li>
+    <li><a href='#ui-Admin-LicensesUsageStatus'>Licenses Usage Status</a></li>
 </ul>
 </ul></div>
 
@@ -112,22 +114,60 @@ HQ has a number of built-in HQU plugins. Users can also develop and deploy custo
 
 
 <ul>
-	<li><b>tc Server Command-Line Interface</b> - A command-line tool, available with tc Server for use with vFabric Hyperic, for performing tc Server configuration and application deployment tasks. For more information, see <a href="ui-tcserverclient.html" title="ui-tcserverclient">ui-Admin.tcServerCLI</a>.</li>
+	<li><b>tc Server Command-Line Interface</b> - A command-line tool, available with tc Server for use with vFabric Hyperic, for performing tc Server configuration and application deployment tasks. For more information, see <a href="ui-tcserverclient.html" title="ui-tcserverclient">ui-Admin.tcServerCLI</a>.<br/>
+<a name="ui-Admin-SuiteLicense"></a></li>
 </ul>
 
 
-<h2><a name="ui-Admin-HQLicenseInformation"></a>HQ License Information</h2>
+<h2><a name="ui-Admin-vFabricHypericLicenseInformation"></a>vFabric Hyperic License Information</h2>
 
-<p>This section lists the license information for the HQ server:</p>
+<p>This section appears if you have configured a vFabric Suite license, or you are running with the default Hyperic evaluation license. The following data is displayed:</p>
+
 <ul>
-	<li><b>Expires</b> &#8212;  The date the license expires.</li>
-	<li><b>Platform Limit</b> &#8212;  The number of platforms the license allows HQ to manage.</li>
-	<li><b>Current Platform Count</b> &#8212; The number of platforms that are currently managed by HQ.
-	<ul>
-		<li>Typically, a single agent consumes a single license. If an agent manages a vSphere vCenter instance, it consumes a license for the platform that hosts vCenter, a license for each vSphere vHost administered by the vCenter instance, and —-- if an agent is installed in each VM &#8212; a license for each vSphere VM on each vHost.</li>
-	</ul>
-	</li>
+	<li><b>Expires</b> &#8212; When the license will expire. For a configured license, the value "Never" indicates that the license is perpetual. For the default evaluation license, "Never" is displayed until you import at least one platform into inventory, at which point the date two months after the first platform was imported appears.</li>
 </ul>
+
+
+<ul>
+	<li><b>Platform Limit</b> &#8212; The maximum number of platforms the license entitles you to manage. "None" indicates that you can managed an unlimited number of platforms. If you are running with the default evaluation license, the limit is 60 platforms.</li>
+</ul>
+
+
+<p><a name="ui-Admin-VcopsLicense"></a></p>
+<h2><a name="ui-Admin-vCenterOperationsManagementSuiteLicenseInformation"></a>vCenter Operations Management Suite License Information</h2>
+
+<p>This section appears if you have configured a vCenter Operations Management Suite (VCOPs) license.The following data is displayed:</p>
+
+<ul>
+	<li><b>Expires</b> &#8212; When the license will expire. "Never" indicates that the license is perpetual.</li>
+</ul>
+
+
+<ul>
+	<li><b>Platform Limit</b> &#8212; The maximum umber of platforms the license entitles you to manage. "None" indicates that you can managed an unlimited number of platforms.</li>
+</ul>
+
+
+<p><a name="ui-Admin-LicenseUsage"></a></p>
+
+<h2><a name="ui-Admin-LicensesUsageStatus"></a>Licenses Usage Status</h2>
+
+<p>In this section, the value of <b>PLatform Count</b> indicates how many platforms Hyperic is currently managing out of the total number of platforms that your licenses (including both vFabric and VCOPs licenses if you have both) entitle you to manage. For example:</p>
+
+<ul>
+	<li>1/500 indicates that you have one platform under management, and are licensed to manage 500 platforms.</li>
+</ul>
+
+
+<ul>
+	<li>1/UNLIMITED indicates you have one platform under management, and are licensed to manage an unlimited number platforms.</li>
+</ul>
+
+
+<ul>
+	<li>50/0 indicates that you have 50 platforms under management, and that your license is expired.</li>
+</ul>
+
 
 
 				    
@@ -139,7 +179,7 @@ HQ has a number of built-in HQU plugins. Users can also develop and deploy custo
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 10, 2012 14:24</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:07</font></td>
 		    </tr>
 	    </table>
     </body>

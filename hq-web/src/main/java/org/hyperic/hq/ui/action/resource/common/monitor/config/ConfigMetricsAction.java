@@ -120,7 +120,7 @@ public class ConfigMetricsAction
             measurementBoss.updateMeasurements(sessionId, appdefId, midsToUpdate, interval);
         } else {
             if (mForm.isIndSelected()) {
-                measurementBoss.updateIndicatorMetrics(sessionId, midsToUpdate);
+                measurementBoss.updateIndicatorMetrics(sessionId, aetid, midsToUpdate);
                 confirmation = "resource.common.monitor.visibility.config.IndicatorMetrics.Confirmation";
             } else {
                 final Runnable runner = new Runnable() {

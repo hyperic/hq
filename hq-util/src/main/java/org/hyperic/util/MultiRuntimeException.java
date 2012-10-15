@@ -9,53 +9,85 @@ import java.util.List;
 public class MultiRuntimeException extends RuntimeException {
     
   private static final long serialVersionUID = -7173670617853595611L;
-  private static final String NESTED_EXCEPTION_MSG_PREFIX = "--- Nested Exception ---" ;
+  private static final String NESTED_EXCEPTION_MSG_PREFIX = "--- Next Exception ---" ;
+  private static final String CONTEXT_PREFIX = "[Context]: " ;
   
-  private final List<Throwable> nestedExceptions;
+  private final List<ExceptionWrapper> nestedExceptions;
 
+  public MultiRuntimeException() {
+      super() ;
+      this.nestedExceptions = new ArrayList<ExceptionWrapper>();
+  }//EOM 
+  
   public MultiRuntimeException(final Throwable t) {
-    this.nestedExceptions = new ArrayList<Throwable>();
-    this.nestedExceptions.add(t);
+    this() ; 
+    this.addThrowable(t) ; 
   }//EOM 
 
   public MultiRuntimeException(final String message, final Throwable t) {
     super(message);
-    this.nestedExceptions = new ArrayList<Throwable>();
-    this.nestedExceptions.add(t);
+    this.nestedExceptions = new ArrayList<ExceptionWrapper>();
+    this.addThrowable(t) ; 
   }//EOM 
 
   public final MultiRuntimeException addThrowable(Throwable t) {
-    this.nestedExceptions.add(t);
-    return this;
+    return this.addThrowable(t, null) ; 
+  }//EOM 
+  
+  public final MultiRuntimeException addThrowable(Throwable t, final String message) {
+      this.nestedExceptions.add(new ExceptionWrapper(t, message));
+      return this;
+    }//EOM 
+  
+  public final boolean isEmpty() { 
+      return (this.nestedExceptions == null || nestedExceptions.isEmpty()) ; 
   }//EOM 
 
   public String getMessage() {
       final String msg = super.getMessage() ; 
       final String origMsg = (msg == null ? "" : msg)  + "\n";
-      final StringBuilder builder = new StringBuilder(origMsg).append(this.nestedExceptions.size()).append(" Excpetion(s) have occured:");
+      final StringBuilder builder = new StringBuilder(origMsg).append(this.nestedExceptions.size()).append(" Exception(s) have occured:\n");
       return builder.toString() ; 
   }//EOM 
   
-  public String getCompleteMessage() {
-    final StringBuilder builder = new StringBuilder(this.getMessage()) ; 
-    for (Throwable nested : this.nestedExceptions) {
-      builder.append("\n--- Nested Exception ---\n").append(this.getMessage(nested));
-    }//EO while there are more nested exceptions
+  public String getCompleteMessage(final MessageType enumMessageType) {
+    final StringBuilder builder = new StringBuilder() ;
+    enumMessageType.appendMessage(this, builder) ; 
+    
+    final int iLength = this.nestedExceptions.size() ; 
+    for(int i=0; i < iLength; i++) { 
+        this.getMessage(enumMessageType, this.nestedExceptions.get(i), builder);
+        if(i < iLength-1) builder.append("\n--- Next Exception ---\n") ;  
+    }//EO while there are more exceptions 
+
     return builder.toString();
   }//EOM 
 
-  private final String getMessage(final Throwable exception) {
+  public String toCompleteString() {
+      return this.getCompleteMessage(ToString) ;
+  }//EOM 
+  
+  private final StringBuilder getMessage(final MessageType enumMessageType, final ExceptionWrapper wrapper, final StringBuilder builder) {
+    final Throwable exception = wrapper.t  ; 
+    if(wrapper.message != null) builder.append(CONTEXT_PREFIX).append(wrapper.message).append("\n") ; 
+    
     if ((exception instanceof SQLException)) {
-      final StringBuilder builder = new StringBuilder();
 
       SQLException sqle = (SQLException)exception;
       Throwable t = null;
       do {
         t = sqle;
-        builder.append("\n---Next SQL Exception---\n").append(t.getMessage());
-      }while (((sqle = sqle.getNextException()) != null) && (sqle != t));
-      return builder.toString();
-    }return exception.getMessage();
+        enumMessageType.appendMessage(t, builder) ;
+                 
+        if(((sqle = sqle.getNextException()) != null) && (sqle != t)) builder.append("\n---Next SQL Exception---\n") ; 
+        else break ; 
+      }while (true);
+      
+    }else { 
+        enumMessageType.appendMessage(exception, builder) ;
+    }//EO else if new SQLException
+    
+    return builder ;
   }//EOM 
   
   public final void printStackTrace(final PrintStream ps) {
@@ -70,10 +102,15 @@ public class MultiRuntimeException extends RuntimeException {
           
           strategy.printParentStackTrace(visitor, this) ; 
           
-          for (Throwable exception : this.nestedExceptions) {
+          Throwable exception = null ; 
+
+          for (ExceptionWrapper wrapper : this.nestedExceptions) {
               
               strategy.println(visitor, NESTED_EXCEPTION_MSG_PREFIX) ; 
           
+              if(wrapper.message != null) strategy.println(visitor, CONTEXT_PREFIX + wrapper.message) ; 
+              exception = wrapper.t  ; 
+               
               if ((exception instanceof SQLException)){
                   SQLException sqle = (SQLException)exception;
                   Throwable t = null;
@@ -112,6 +149,7 @@ public class MultiRuntimeException extends RuntimeException {
       
       void printParentStackTrace(final T visitor, final MultiRuntimeException mre) ; 
       void println(final T visitor, final String line) ;
+      void print(final T visitor, final String line) ;
       void printStackTrace(final T visitor, final Throwable throwable) ; 
   }//EOI StreamHandlerInterface
   
@@ -119,6 +157,10 @@ public class MultiRuntimeException extends RuntimeException {
 
       public final void println(final PrintStream visitor, final String line) {
           visitor.println(line) ; 
+      }//EOM
+      
+      public final void print(final PrintStream visitor, final String line) {
+          visitor.print(line) ; 
       }//EOM
       
       public final void printStackTrace(final PrintStream visitor, final Throwable throwable) {
@@ -137,6 +179,10 @@ public class MultiRuntimeException extends RuntimeException {
           visitor.println(line) ; 
       }//EOM 
       
+      public final void print(final PrintWriter visitor, final String line) {
+          visitor.print(line) ; 
+      }//EOM 
+      
       public final void printStackTrace(final PrintWriter visitor, final Throwable throwable) {
           throwable.printStackTrace(visitor) ; 
       }//EOM 
@@ -147,9 +193,66 @@ public class MultiRuntimeException extends RuntimeException {
       
   }//EO inner class PrintWriterHandler
   
+  private interface MessageType { 
+      StringBuilder appendMessage(final Throwable t, final StringBuilder messageBuilder) ;
+  }//EO inner interface MessageType 
   
-  public static void main(String[] args) throws Throwable {
-      test1() ; 
+  final MessageType ToString = new MessageType(){ 
+      public final StringBuilder appendMessage(final Throwable t, final StringBuilder messageBuilder) {
+          return messageBuilder.append((t instanceof MultiRuntimeException ? 
+                 MultiRuntimeException.super.toString() : 
+                   t.toString())) ;
+      }//EOM 
+  };//EO inner class ToString
+  
+  static final MessageType getMessage = new MessageType(){ 
+      public final StringBuilder appendMessage(final Throwable t, final StringBuilder messageBuilder) {
+          return messageBuilder.append(t.getMessage()) ; 
+      }//EOM 
+  };//EO inner class getMessage
+  
+  private static final class ExceptionWrapper { 
+      private Throwable t; 
+      private String message ; 
+      
+      public ExceptionWrapper(final Throwable t, final String message) { 
+          this.t = t ; 
+          this.message = message ; 
+      }//EOM 
+  }//EO inner class ExceptionWrapper
+  
+  
+  /*public static void main(String[] args) throws Throwable {
+      final StringWriter sw = new StringWriter() ; 
+      final PrintWriter writer = new PrintWriter(sw) ; 
+      try{ 
+          test1() ;
+      }catch(Throwable t) { 
+          System.out.println("--------------------------------------------------------------------");
+          System.out.println("toString");
+          System.out.println("--------------------------------------------------------------------");
+          System.out.println(((MultiRuntimeException)t).toString());
+          
+          System.out.println("--------------------------------------------------------------------");
+          System.out.println("toCompleteString");
+          System.out.println("--------------------------------------------------------------------");
+          System.out.println(((MultiRuntimeException)t).toCompleteString());
+          
+          System.out.println("--------------------------------------------------------------------");
+          System.out.println("getMessage");
+          System.out.println("--------------------------------------------------------------------");
+          System.out.println(((MultiRuntimeException)t).getCompleteMessage(getMessage));
+          
+          System.out.println("--------------------------------------------------------------------");
+          System.out.println("printStackTrace");
+          System.out.println("--------------------------------------------------------------------");
+          t.printStackTrace(writer) ;
+          System.out.println(sw.toString());
+          
+          
+          Thread.currentThread().sleep(300) ; 
+          t.printStackTrace() ; 
+      }//EO catch block 
   }//EOM 
   
   static void test1() { test2() ; }//EOM  
@@ -158,7 +261,14 @@ public class MultiRuntimeException extends RuntimeException {
   static void test4() { 
       final Exception exception = new Exception("this is the exception") ; 
       MultiRuntimeException mre = MultiRuntimeException.newMultiRuntimeException(null, exception) ;
-      throw mre ;
+
+      final SQLException sqle = new SQLException("second") ; 
+      sqle.setNextException(new SQLException("second-nested")); 
+      
+      mre.addThrowable(sqle) ;
+      mre.addThrowable(new IllegalStateException("third"), "this is the message 3") ;
+      mre.addThrowable(new EncryptionOperationNotPossibleException("fourth"), "this is the message 4") ;
+      throw mre ; 
   }//EOM
-  
+*/  
 }//EOC 

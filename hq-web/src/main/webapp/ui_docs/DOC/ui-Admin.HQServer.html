@@ -8,7 +8,7 @@
 
     <body>
 <b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
- - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic Documentation Home (Online)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
  -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
  <p>
  <p>
@@ -21,7 +21,7 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Sep 26, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
@@ -31,11 +31,11 @@
 <p>The <b>HQ Server Settings</b> page allows a Hyperic user with Super User role to configure a variety of Hyperic Server behaviors. Most changes take effect upon Hyperic Server restart.</p>
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1325699397719 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1325699397719 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1325699397719 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1348693145629 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1348693145629 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1348693145629 li {margin-left: 0px;padding-left: 0px;}
 
-/*]] >*/</style><div class='rbtoc1325699397719'>
+/*]]>*/</style><div class='rbtoc1348693145629'>
 <ul>
     <li><a href='#ui-Admin.HQServer-HQEmailConfigurationProperties'>HQ Email Configuration Properties</a></li>
     <li><a href='#ui-Admin.HQServer-HQAnnouncementProperties'>HQ Announcement Properties</a></li>
@@ -46,7 +46,7 @@ div.rbtoc1325699397719 li {margin-left: 0px;padding-left: 0px;}
     <li><a href='#ui-Admin.HQServer-LDAPConfigurationProperties'>LDAP Configuration Properties</a></li>
 <ul>
     <li><a href='#ui-Admin.HQServer-LDAPAuthenticationinvFabricHyperic'>LDAP Authentication in vFabric Hyperic</a></li>
-    <li><a href='#ui-Admin.HQServer-ConfigureLDAPAuthenticationandRoleAssignment'>Configure LDAP Authentication and Role Assignment</a></li>
+    <li><a href='#ui-Admin.HQServer-ConfigureLDAPAuthentication'>Configure LDAP Authentication</a></li>
 </ul>
     <li><a href='#ui-Admin.HQServer-KerberosConfigurationProperties'>Kerberos Configuration Properties</a></li>
     <li><a href='#ui-Admin.HQServer-SNMPServerConfigurationProperties'>SNMP Server Configuration Properties</a></li>
@@ -212,22 +212,14 @@ Base URL forms the prefix of an URL to any HQ appends the remainder of the URL t
 </div>
 
 
-<h1><a name="ui-Admin.HQServer-LDAPConfigurationProperties"></a>LDAP Configuration Properties</h1>
 <p><a name="ui-Admin.HQServer-ldap"></a></p>
+<h1><a name="ui-Admin.HQServer-LDAPConfigurationProperties"></a>LDAP Configuration Properties</h1>
+
+<p>For information about LDAP groups, vFabric Hyperic roles, and how to streamline authentication setup, see <a href="User Accounts and Roles in Hyperic.html" title="User Accounts and Roles in Hyperic">User Accounts and Roles in Hyperic</a> and <a href="Create and Manage Roles in vFabric Hyperic.html" title="Create and Manage Roles in vFabric Hyperic">Create and Manage Roles in vFabric Hyperic</a>.</p>
 <p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
 
 
-<h2><a name="ui-Admin.HQServer-LDAPAuthenticationinvFabricHyperic"></a>LDAP Authentication in vFabric Hyperic</h2>
-
-<p>This page describes vFabric Hyperic's features for accessing user authentication and group membership data from an external LDAP or Active Directory system. </p>
-
-<p>You can configure vFabric Hyperic to use data from an external authentication directory system to authenticate a Hyperic user at first logon, and to automatically assign Hyperic roles to the new user. This enables an LDAP user to log onto Hyperic with an LDAP username and password. The first time a user logs on to Hyperic with LDAP credentials, Hyperic prompts the user to supply his or her name, email address, and other information required to set up the user's Hyperic account.</p>
-
-<p>As with any vFabric user, a user authenticated via LDAP must be assigned one or more Hyperic roles, which define the user's permission matrix and access to inventory resources.</p>
-
-<p>In Hyperic 4.6, when you configure LDAP authentication, you can also configure Hyperic to assign the user to each Hyperic role whose name matches the name of an LDAP group to which the user is assigned. Otherwise, you must manually assign roles to the new user, as described in <a href="Create and Manage Roles in vFabric Hyperic.html" title="Create and Manage Roles in vFabric Hyperic">Create and Manage Roles in vFabric Hyperic</a>.</p>
-
-<h2><a name="ui-Admin.HQServer-ConfigureLDAPAuthenticationandRoleAssignment"></a>Configure LDAP Authentication and Role Assignment </h2>
+<h2><a name="ui-Admin.HQServer-ConfigureLDAPAuthentication"></a>Configure LDAP Authentication </h2>
 
 <p>To configure Hyperic Server to use LDAP authentication for new users and to assign user roles based on LDAP group membership:</p>
 
@@ -301,6 +293,8 @@ Base URL forms the prefix of an URL to any HQ appends the remainder of the URL t
 <h1><a name="ui-Admin.HQServer-KerberosConfigurationProperties"></a>Kerberos Configuration Properties</h1>
 <p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
 
+
+<p>For information about LDAP groups, vFabric Hyperic roles, and how to streamline authentication setup, see <a href="User Accounts and Roles in Hyperic.html" title="User Accounts and Roles in Hyperic">User Accounts and Roles in Hyperic</a> and <a href="Create and Manage Roles in vFabric Hyperic.html" title="Create and Manage Roles in vFabric Hyperic">Create and Manage Roles in vFabric Hyperic</a>.</p>
 
 
 <p>In HQ Enterprise, these properties configure HQ to use Kerberos authentication.</p>
@@ -504,7 +498,7 @@ Base URL forms the prefix of an URL to any HQ appends the remainder of the URL t
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 10, 2012 14:24</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:07</font></td>
 		    </tr>
 	    </table>
     </body>

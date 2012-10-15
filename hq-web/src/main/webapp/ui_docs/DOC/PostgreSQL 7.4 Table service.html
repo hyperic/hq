@@ -8,7 +8,7 @@
 
     <body>
 <b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
- - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic Documentation Home (Online)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
  -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
  <p>
  <p>
@@ -21,7 +21,7 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Aug 07, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <h3><a name="PostgreSQL7.4Tableservice-PostgreSQL7.4Tableservice"></a>PostgreSQL 7.4 Table service</h3>
@@ -50,7 +50,7 @@
 </tr>
 <tr>
 <td class='confluenceTd'><font color="gray">Sequential Scans</font></td>
-<td class='confluenceTd'><font color="gray">SequentialScans</font></td>
+<td class='confluenceTd'><font color="gray">seq_scan</font></td>
 <td class='confluenceTd'><font color="gray">none</font></td>
 <td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
 <td class='confluenceTd'><font color="gray">false</font></td>
@@ -58,7 +58,7 @@
 </tr>
 <tr>
 <td class='confluenceTd'><font color="navy">Sequential Scans per Minute</font></td>
-<td class='confluenceTd'><font color="navy">SequentialScans1m</font></td>
+<td class='confluenceTd'><font color="navy">seq_scan1m</font></td>
 <td class='confluenceTd'><font color="navy">none</font></td>
 <td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
 <td class='confluenceTd'><font color="navy">true</font></td>
@@ -66,7 +66,7 @@
 </tr>
 <tr>
 <td class='confluenceTd'><font color="gray">Index Scans</font></td>
-<td class='confluenceTd'><font color="gray">IndexScans</font></td>
+<td class='confluenceTd'><font color="gray">idx_scan</font></td>
 <td class='confluenceTd'><font color="gray">none</font></td>
 <td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
 <td class='confluenceTd'><font color="gray">false</font></td>
@@ -74,7 +74,7 @@
 </tr>
 <tr>
 <td class='confluenceTd'><font color="gray">Index Scans per Minute</font></td>
-<td class='confluenceTd'><font color="gray">IndexScans1m</font></td>
+<td class='confluenceTd'><font color="gray">idx_scan1m</font></td>
 <td class='confluenceTd'><font color="gray">none</font></td>
 <td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
 <td class='confluenceTd'><font color="gray">false</font></td>
@@ -82,7 +82,7 @@
 </tr>
 <tr>
 <td class='confluenceTd'><font color="gray">Sequential Scan Rows Read</font></td>
-<td class='confluenceTd'><font color="gray">SeqScanRowsRead</font></td>
+<td class='confluenceTd'><font color="gray">seq_tup_read</font></td>
 <td class='confluenceTd'><font color="gray">none</font></td>
 <td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
 <td class='confluenceTd'><font color="gray">false</font></td>
@@ -90,7 +90,7 @@
 </tr>
 <tr>
 <td class='confluenceTd'><font color="gray">Sequential Scan Rows Read per Minute</font></td>
-<td class='confluenceTd'><font color="gray">SeqScanRowsRead1m</font></td>
+<td class='confluenceTd'><font color="gray">seq_tup_read1m</font></td>
 <td class='confluenceTd'><font color="gray">none</font></td>
 <td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
 <td class='confluenceTd'><font color="gray">false</font></td>
@@ -98,7 +98,7 @@
 </tr>
 <tr>
 <td class='confluenceTd'><font color="gray">Index Scan Rows Read</font></td>
-<td class='confluenceTd'><font color="gray">IdxScanRowsRead</font></td>
+<td class='confluenceTd'><font color="gray">idx_tup_fetch</font></td>
 <td class='confluenceTd'><font color="gray">none</font></td>
 <td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
 <td class='confluenceTd'><font color="gray">false</font></td>
@@ -106,9 +106,57 @@
 </tr>
 <tr>
 <td class='confluenceTd'><font color="gray">Index Scan Rows Read per Minute</font></td>
-<td class='confluenceTd'><font color="gray">IdxScanRowsRead1m</font></td>
+<td class='confluenceTd'><font color="gray">idx_tup_fetch1m</font></td>
 <td class='confluenceTd'><font color="gray">none</font></td>
 <td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Number Of Row Inserts</font></td>
+<td class='confluenceTd'><font color="gray">n_tup_ins</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Number Of Row Inserts per Minute</font></td>
+<td class='confluenceTd'><font color="navy">n_tup_ins1m</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Number Of Row Updates</font></td>
+<td class='confluenceTd'><font color="gray">n_tup_upd</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Number Of Row Updates per Minute</font></td>
+<td class='confluenceTd'><font color="gray">n_tup_upd1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Number Of Row Deletes</font></td>
+<td class='confluenceTd'><font color="gray">n_tup_del</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Number Of Row Deletes per Minute</font></td>
+<td class='confluenceTd'><font color="gray">n_tup_del1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">THROUGHPUT</font></td>
 <td class='confluenceTd'><font color="gray">false</font></td>
 <td class='confluenceTd'><font color="gray">10 min</font></td>
 </tr>
@@ -129,54 +177,6 @@
 <td class='confluenceTd'><font color="navy">5 min</font></td>
 </tr>
 <tr>
-<td class='confluenceTd'><font color="gray">Number Of Row Inserts</font></td>
-<td class='confluenceTd'><font color="gray">NumRowInserts</font></td>
-<td class='confluenceTd'><font color="gray">none</font></td>
-<td class='confluenceTd'><font color="gray">THROUGHPUT</font></td>
-<td class='confluenceTd'><font color="gray">false</font></td>
-<td class='confluenceTd'><font color="gray">10 min</font></td>
-</tr>
-<tr>
-<td class='confluenceTd'><font color="navy">Number Of Row Inserts per Minute</font></td>
-<td class='confluenceTd'><font color="navy">NumRowInserts1m</font></td>
-<td class='confluenceTd'><font color="navy">none</font></td>
-<td class='confluenceTd'><font color="navy">THROUGHPUT</font></td>
-<td class='confluenceTd'><font color="navy">true</font></td>
-<td class='confluenceTd'><font color="navy">10 min</font></td>
-</tr>
-<tr>
-<td class='confluenceTd'><font color="gray">Number Of Row Updates</font></td>
-<td class='confluenceTd'><font color="gray">NumRowUpdates</font></td>
-<td class='confluenceTd'><font color="gray">none</font></td>
-<td class='confluenceTd'><font color="gray">THROUGHPUT</font></td>
-<td class='confluenceTd'><font color="gray">false</font></td>
-<td class='confluenceTd'><font color="gray">10 min</font></td>
-</tr>
-<tr>
-<td class='confluenceTd'><font color="gray">Number Of Row Updates per Minute</font></td>
-<td class='confluenceTd'><font color="gray">NumRowUpdates1m</font></td>
-<td class='confluenceTd'><font color="gray">none</font></td>
-<td class='confluenceTd'><font color="gray">THROUGHPUT</font></td>
-<td class='confluenceTd'><font color="gray">false</font></td>
-<td class='confluenceTd'><font color="gray">10 min</font></td>
-</tr>
-<tr>
-<td class='confluenceTd'><font color="gray">Number Of Row Deletes</font></td>
-<td class='confluenceTd'><font color="gray">NumRowDeletes</font></td>
-<td class='confluenceTd'><font color="gray">none</font></td>
-<td class='confluenceTd'><font color="gray">THROUGHPUT</font></td>
-<td class='confluenceTd'><font color="gray">false</font></td>
-<td class='confluenceTd'><font color="gray">10 min</font></td>
-</tr>
-<tr>
-<td class='confluenceTd'><font color="gray">Number Of Row Deletes per Minute</font></td>
-<td class='confluenceTd'><font color="gray">NumRowDeletes1m</font></td>
-<td class='confluenceTd'><font color="gray">none</font></td>
-<td class='confluenceTd'><font color="gray">THROUGHPUT</font></td>
-<td class='confluenceTd'><font color="gray">false</font></td>
-<td class='confluenceTd'><font color="gray">10 min</font></td>
-</tr>
-<tr>
 </tr>
 </tbody></table>
 </div>
@@ -193,7 +193,7 @@
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 10, 2012 14:23</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:07</font></td>
 		    </tr>
 	    </table>
     </body>
