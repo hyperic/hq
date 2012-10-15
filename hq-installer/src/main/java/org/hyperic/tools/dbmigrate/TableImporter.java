@@ -218,6 +218,20 @@ public class TableImporter extends TableProcessor<Worker> {
                 //if there are index restoration tasks fork to perform them in parallel 
                 this.restoreIndices(indexRestorationTasksSink) ; 
                 
+                try{ 
+                    //get a new connection after the restoration 
+                    conn = getConnection(project.getProperties());
+                    
+                    stmt = conn.createStatement();
+                    log("About to drop the HQ_DROPPED_INDICES table") ; 
+                    stmt.executeUpdate("drop table hq_dropped_indices cascade") ; 
+                }catch(Throwable t3) {
+                    Utils.printStackTrace(t3);
+                    thrown = MultiRuntimeException.newMultiRuntimeException(thrown, t3);
+                }finally{
+                    Utils.close(new Object[] { stmt, conn });
+                }//EO catch block 
+                
             }//EO if not disabled 
             
 	        if(thrown != null) throw thrown ; 

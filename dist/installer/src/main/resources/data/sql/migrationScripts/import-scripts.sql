@@ -1,5 +1,4 @@
-drop table HQ_DROPPED_INDICES cascade ; 
-create table public.HQ_DROPPED_INDICES(INDEX_NAME text, INDEX_STATEMENT text, TABLE_NAME text, INDISPRIMARY bool) ;
+create table if not exists public.HQ_DROPPED_INDICES(INDEX_NAME text, INDEX_STATEMENT text, TABLE_NAME text, INDISPRIMARY bool) ;
 grant all on HQ_DROPPED_INDICES to public ; 
 
 drop function if exists fToggleIndices(text, bool);
