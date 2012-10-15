@@ -152,7 +152,10 @@ public class MxUtil {
     private static MetricUnreachableException unreachable(Properties props,
                                                           Exception e) {
         String msg =
-            "Can't connect to MBeanServer [" + props + "]: " + e;
+        	"Can't connect to MBeanServer url [" + props.getProperty(PROP_JMX_URL) + "] "
+            	+ "port [" + props.getProperty(PROP_JMX_PORT) + "] "
+            	+ "username [" + props.getProperty(PROP_JMX_USERNAME) + "]: " 
+            	+ e;
         return new MetricUnreachableException(msg, e);
     }
 
