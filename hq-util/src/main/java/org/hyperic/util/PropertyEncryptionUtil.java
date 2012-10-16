@@ -201,7 +201,12 @@ public class PropertyEncryptionUtil {
         unlock();
     } // EOM
 
-    private static boolean lock() {
+    /**
+     * Prevents from other threads to change to properties file.
+     *
+     * @return true if lock was successful; false otherwise.
+     */
+    static boolean lock() {
         String msg = "Trying to create a props encryption lock file";
         LOG.info(msg);
         System.out.println(msg);
@@ -214,7 +219,12 @@ public class PropertyEncryptionUtil {
         }
     }
 
-    private static boolean unlock() {
+    /**
+     * Remove the lock.
+     *
+     * @return true if the lock was successfully removed; false otherwise.
+     */
+    static boolean unlock() {
         String msg = "Deleting the props encryption lock file";
         LOG.info(msg);
         System.out.println(msg);
