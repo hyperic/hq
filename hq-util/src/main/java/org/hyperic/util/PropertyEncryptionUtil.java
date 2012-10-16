@@ -49,7 +49,7 @@ public class PropertyEncryptionUtil {
 
     private static final String ENCRYPTION_KEY_PROP = "k";
 
-    private static final String LOCK_FILE_NAME = "/tmp/agent.encrypt.lock";
+    private static final String LOCK_FILE_NAME = System.getProperty("java.io.tmpdir") + "/agent.encrypt.lock";
 
     /**
      * Read the properties encryption key from a file.
@@ -207,7 +207,7 @@ public class PropertyEncryptionUtil {
      * @return true if lock was successful; false otherwise.
      */
     static boolean lock() {
-        String msg = "Trying to create a props encryption lock file";
+        String msg = "Trying to create a props encryption lock file: " + LOCK_FILE_NAME;
         LOG.info(msg);
         System.out.println(msg);
 
@@ -225,7 +225,7 @@ public class PropertyEncryptionUtil {
      * @return true if the lock was successfully removed; false otherwise.
      */
     static boolean unlock() {
-        String msg = "Deleting the props encryption lock file";
+        String msg = "Deleting the props encryption lock file: " + LOCK_FILE_NAME;
         LOG.info(msg);
         System.out.println(msg);
         File lockFile = new File(LOCK_FILE_NAME);
