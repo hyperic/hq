@@ -198,7 +198,8 @@ begin
         end; 
 	END LOOP; 
 	
-	--perform fToggleIndices('', true) ;
+	drop function if exists fToggleIndices(text, bool) cascade ; 
+	drop function if exists fmigrationPreConfigure(text) cascade ;  
 	
 	SET synchronous_commit TO ON ;
 	RESET statement_timeout ;
