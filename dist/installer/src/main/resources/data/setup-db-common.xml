@@ -89,7 +89,7 @@
 			<property name="server.upgradedir" value="${server.upgradedir}" />
 		</ant>
 
-		<serverConfigPropsUpgrade jdbcUrl="${server.database-url}" jdbcUser="${server.database-user}" jdbcPassword="${server.database-password}" encryptionKey="${server.encryption-key}" propKey="CAM_SERVER_VERSION" propValue="5.0" />
+		<serverConfigPropsUpgrade jdbcUrl="${server.database-url}" jdbcUser="${server.database-user}" jdbcPassword="${server.database-password}" encryptionKey="${server.encryption-key}" propKey="CAM_SERVER_VERSION" propValue="${version}" />
 
 		<antcall target="set-multicast-props" />
 	</target>

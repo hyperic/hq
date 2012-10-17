@@ -150,6 +150,7 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
                 }
             }
         } catch (Exception e) {
+        	//checkQue.clearQue();
             throw new SystemException(e);
         } finally {
             concurrentStatsCollector.addStat(now() - start, AVAIL_BACKFILLER_TIME);

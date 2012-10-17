@@ -3191,54 +3191,72 @@ public class MeasurementBossImpl implements MeasurementBoss {
         watch.markTimeEnd("getLastAvail");
         for (Resource res : members) {
 
-            AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(res);
-            ResourceDisplaySummary summary = new ResourceDisplaySummary();
+            AppdefEntityID aeid = null ; 
+            try {
+                aeid = AppdefUtil.newAppdefEntityId(res);
+                ResourceDisplaySummary summary = new ResourceDisplaySummary();
 
-            // Set the resource
-            AppdefResourceValue parent = null;
-            switch (aeid.getType()) {
-                case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                    watch.markTimeBegin("get platform from server");
-                    Server server = serverManager.findServerById(aeid.getId());
-                    parent = server.getPlatform().getPlatformValue();
-                    watch.markTimeEnd("get platform from server");
-                case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                    watch.markTimeBegin("Set Resource Display for PSS Type");
-                    setResourceDisplaySummaryValueForCategories(subject, res, summary, cats,
-                        measCache, availCache);
-                    summary.setMonitorable(Boolean.TRUE);
-                    watch.markTimeEnd("Set Resource Display for PSS Type");
-                    break;
-                case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-                case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-                    watch.markTimeBegin("Group Type");
-                    summary.setMonitorable(Boolean.TRUE);
-                    // Set the availability now
-                    summary.setAvailability(new Double(getAvailability(subject, aeid, measCache,
-                        availCache)));
+                // Set the resource
+                AppdefResourceValue parent = null;
+                switch (aeid.getType()) {
+                    case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                        watch.markTimeBegin("get platform from server");
+                        Server server = serverManager.findServerById(aeid.getId());
+                        final Resource serverResource = server.getResource() ;  
+                        
+                        //[HQ-4052] Guys 16.10.2012 - platform might be null due to async. delete operation in progress 
+                        if(serverResource != null && serverResource.isInAsyncDeleteState()) { 
+                            this.log.warn("findGroupCurrentHealth() -->  skipping server " + server + " as server is in deletion process.") ;
+                            continue ; 
+                        }//EO if server async. delete operation was in progress
+                        
+                        parent = server.getPlatform().getPlatformValue();
+                        watch.markTimeEnd("get platform from server");
+                    case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                    case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                        watch.markTimeBegin("Set Resource Display for PSS Type");
+                        setResourceDisplaySummaryValueForCategories(subject, res, summary, cats,
+                            measCache, availCache);
+                        summary.setMonitorable(Boolean.TRUE);
+                        watch.markTimeEnd("Set Resource Display for PSS Type");
+                        break;
+                    case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+                    case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+                        watch.markTimeBegin("Group Type");
+                        summary.setMonitorable(Boolean.TRUE);
+                        // Set the availability now
+                        summary.setAvailability(new Double(getAvailability(subject, aeid, measCache,
+                            availCache)));
 
-                    try {
-                        // Get the availability template
-                        MeasurementTemplate tmpl = getAvailabilityMetricTemplate(subject, aeid,
-                            measCache);
-                        summary.setAvailTempl(tmpl.getId());
-                    } catch (MeasurementNotFoundException e) {
-                        // No availability metric, don't set it
-                    }
-                    watch.markTimeEnd("Group Type");
-                    break;
-                default:
-                    throw new InvalidAppdefTypeException(
-                        "entity type is not monitorable, id type: " + aeid.getType());
-            }
-            setResourceDisplaySummary(summary, res, aeid, parent);
-            summaries.add(summary);
-        }
+                        try {
+                            // Get the availability template
+                            MeasurementTemplate tmpl = getAvailabilityMetricTemplate(subject, aeid,
+                                measCache);
+                            summary.setAvailTempl(tmpl.getId());
+                        } catch (MeasurementNotFoundException e) {
+                            // No availability metric, don't set it
+                        }
+                        watch.markTimeEnd("Group Type");
+                        break;
+                    default:
+                        throw new InvalidAppdefTypeException(
+                            "entity type is not monitorable, id type: " + aeid.getType());
+                }
+                setResourceDisplaySummary(summary, res, aeid, parent);
+                summaries.add(summary);
+            
+            }catch(Throwable  t) {
+                this.log.error("Failure to add resource "+ (aeid == null ? "unknown" : aeid) +" to display summary, skipping resource") ;  
+                this.log.error(this, t) ; 
+            }//EO catch block
+            
+        }//EO while there are more resourcees 
+        
         if (log.isDebugEnabled()) {
             log.debug("getGroupCurrentHealth: " + watch);
         }
         summaries.setTotalSize(summaries.size());
+        
         return summaries;
     }
 

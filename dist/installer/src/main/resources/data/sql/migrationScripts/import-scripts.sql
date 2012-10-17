@@ -1,6 +1,6 @@
 create table if not exists public.HQ_DROPPED_INDICES(INDEX_NAME text, INDEX_STATEMENT text, TABLE_NAME text, INDISPRIMARY bool) ;
-truncate table HQ_DROPPED_INDICES ; 
-		
+grant all on HQ_DROPPED_INDICES to public ; 
+
 drop function if exists fToggleIndices(text, bool);
 
 create or replace function public.fToggleIndices(text, bool) 
@@ -198,7 +198,8 @@ begin
         end; 
 	END LOOP; 
 	
-	--perform fToggleIndices('', true) ;
+	drop function if exists fToggleIndices(text, bool) cascade ; 
+	drop function if exists fmigrationPreConfigure(text) cascade ;  
 	
 	SET synchronous_commit TO ON ;
 	RESET statement_timeout ;

@@ -413,7 +413,7 @@
   			<include name="server.database-user" />
   			<include name="server.quartzDelegate" />
   			<include name="server.hibernate.dialect" />
-  			<include name="server.connection-validation" />   
+  			<include name="server.connection-validation-sql" />  
   			<prune name="CAM_SERVER_VERSION" />
   			<prune name="CAM_SCHEMA_VERSION" />
   			<include name="server.database-password" environment="true" />
