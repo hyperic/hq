@@ -22,20 +22,36 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
 package org.hyperic.hq.plugin.dotnet;
 
-import org.hyperic.hq.product.Metric;
-import org.hyperic.hq.product.Win32MeasurementPlugin;
+import org.hyperic.hq.product.*;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 
 public class DotNetMeasurementPlugin
-    extends Win32MeasurementPlugin {
+        extends Win32MeasurementPlugin {
 
     private static final String DATA_DOMAIN = ".NET CLR Data";
     private static final String DATA_PREFIX = "SqlClient: ";
     private static final String RUNTIME_NAME = "_Global_";
+
+    @Override
+    public MetricValue getValue(Metric metric) throws PluginException, MetricNotFoundException, MetricUnreachableException {
+        MetricValue val = null;
+        try {
+            val = super.getValue(metric);
+            if (metric.isAvail()) {
+                val = new MetricValue(Metric.AVAIL_UP);
+            }
+        } catch (MetricNotFoundException ex) {
+            if (metric.isAvail()) {
+                val = new MetricValue(Metric.AVAIL_DOWN);
+            } else {
+                throw ex;
+            }
+        }
+        return val;
+    }
 
     protected String getAttributeName(Metric metric) {
         //avoiding Metric parse errors on ':' in DATA_PREFIX.
@@ -52,11 +68,11 @@ public class DotNetMeasurementPlugin
 
         //undo escape for plugin linter
         template = StringUtil.replace(template,
-                                      "__percent__", "%");
+                "__percent__", "%");
 
         return StringUtil.replace(template,
-                                  "${" + prop + "}", 
-                                  config.getValue(prop,
-                                                  RUNTIME_NAME));
+                "${" + prop + "}",
+                config.getValue(prop,
+                RUNTIME_NAME));
     }
 }
