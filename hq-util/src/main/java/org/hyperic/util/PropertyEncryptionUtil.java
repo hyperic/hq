@@ -108,7 +108,6 @@ public class PropertyEncryptionUtil {
 
         // Wait while another thread is executing this process.
         while (!lock()) {
-            System.out.println("Properties encryption is in process by another thread, waiting.");
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException ignore) { /* ignore */ }
@@ -180,8 +179,6 @@ public class PropertyEncryptionUtil {
      * @return true if lock was successful; false otherwise.
      */
     static boolean lock() {
-        System.out.println("Trying to create a props encryption lock file: " + LOCK_FILE_NAME);
-
         File lockFile = new File(LOCK_FILE_NAME);
         try {
             return lockFile.createNewFile();
@@ -196,7 +193,6 @@ public class PropertyEncryptionUtil {
      * @return true if the lock was successfully removed; false otherwise.
      */
     static boolean unlock() {
-        System.out.println("Deleting the props encryption lock file: " + LOCK_FILE_NAME);
         File lockFile = new File(LOCK_FILE_NAME);
         return lockFile.delete();
     }
