@@ -25,8 +25,6 @@
  */
 package org.hyperic.util;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hyperic.util.file.FileUtil;
 import org.hyperic.util.security.SecurityUtil;
 
@@ -37,8 +35,6 @@ import java.util.*;
  * A set of utilities to use when encrypting/decryption properties.
  */
 public class PropertyEncryptionUtil {
-
-    private final static Log LOG = LogFactory.getLog(PropertyEncryptionUtil.class.getName());
 
     /**
      * When encrypting properties, the encryption key is saved as a serialized object to the disk. However, since an
@@ -63,9 +59,7 @@ public class PropertyEncryptionUtil {
 
         // Validate the file-name
         if (fileName == null || fileName.trim().length() < 1) {
-            String msg = "Illegal Argument: fileName [" + fileName + "]";
-            LOG.error(msg);
-            throw new PropertyUtilException(msg);
+            throw new PropertyUtilException("Illegal Argument: fileName [" + fileName + "]");
         }
 
         // Create a new file instance.
@@ -73,9 +67,7 @@ public class PropertyEncryptionUtil {
 
         // Make sure that the file exists.
         if (!encryptionKeyFile.exists()) {
-            String msg = "The encryption key file [" + fileName + "] doesn't exist";
-            LOG.error(msg);
-            throw new PropertyUtilException(msg);
+            throw new PropertyUtilException("The encryption key file [" + fileName + "] doesn't exist");
         }
 
         String encryptionKey;
@@ -92,12 +84,9 @@ public class PropertyEncryptionUtil {
                 encryptionKey = SecurityUtil.decrypt(
                         SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM, KEY_ENCRYPTION_KEY, encryptedKey);
             } else {
-                String msg = "Invalid properties encryption key";
-                LOG.error(msg);
-                throw new PropertyUtilException(msg);
+                throw new PropertyUtilException("Invalid properties encryption key");
             }
         } catch (Exception exc) {
-            LOG.error(exc.getMessage());
             throw new PropertyUtilException(exc);
         }
 
@@ -119,34 +108,19 @@ public class PropertyEncryptionUtil {
 
         // Wait while another thread is executing this process.
         while (!lock()) {
-            String msg = "Properties encryption is in process by another thread, waiting.";
-            LOG.info(msg);
-            System.out.println(msg);
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException ignore) { /* ignore */ }
         }
 
-        String msg = "Properties file [" + propsFileName + "] is locked";
-        LOG.info(msg); // Goes to the log file
-        System.out.println(msg); // Goes to agent.startup.log file
-
-        msg = "Encrypting the properties file: " + propsFileName;
-        LOG.info(msg);
-        System.out.println(msg);
-
         // Make sure that the properties file exists.
         if (propsFileName == null || propsFileName.trim().length() < 1) {
-            msg = "Illegal Argument: propsFileName [" + propsFileName + "]";
-            LOG.error(msg);
-            throw new PropertyUtilException(msg);
+            throw new PropertyUtilException("Illegal Argument: propsFileName [" + propsFileName + "]");
         }
 
         // Make sure that the encryption key name is valid.
         if (encryptionKeyFileName == null || encryptionKeyFileName.trim().length() < 1) {
-            msg = "Illegal Argument: encryptionKeyFileName [" + encryptionKeyFileName + "]";
-            LOG.error(msg);
-            throw new PropertyUtilException(msg);
+            throw new PropertyUtilException("Illegal Argument: encryptionKeyFileName [" + encryptionKeyFileName + "]");
         }
 
         // If there's nothing to secure then return
@@ -174,9 +148,7 @@ public class PropertyEncryptionUtil {
         } else {
             if (alreadyEncrypted) {
                 // The encryption key is new, but the properties are already encrypted.
-                msg = "The properties are already encrypted, but the encryption key is missing";
-                LOG.error(msg);
-                throw new PropertyUtilException(msg);
+                throw new PropertyUtilException("The properties are already encrypted, but the encryption key is missing");
             }
             encryptionKey = createAndStorePropertyEncryptionKey(encryptionKeyFileName);
         }
@@ -207,10 +179,6 @@ public class PropertyEncryptionUtil {
      * @return true if lock was successful; false otherwise.
      */
     static boolean lock() {
-        String msg = "Trying to create a props encryption lock file: " + LOCK_FILE_NAME;
-        LOG.info(msg);
-        System.out.println(msg);
-
         File lockFile = new File(LOCK_FILE_NAME);
         try {
             return lockFile.createNewFile();
@@ -225,21 +193,8 @@ public class PropertyEncryptionUtil {
      * @return true if the lock was successfully removed; false otherwise.
      */
     static boolean unlock() {
-        String msg = "Deleting the props encryption lock file: " + LOCK_FILE_NAME;
-        LOG.info(msg);
-        System.out.println(msg);
         File lockFile = new File(LOCK_FILE_NAME);
-        boolean res = lockFile.delete();
-        if (res) {
-            msg = "Props encryption lock file deleted successfully";
-            LOG.info(msg);
-        } else {
-            msg = "Failed to delete the props encryption lock file";
-            LOG.error(msg);
-        }
-        System.out.println(msg);
-
-        return res;
+        return lockFile.delete();
     }
 
     /**
