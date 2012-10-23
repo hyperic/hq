@@ -167,7 +167,7 @@ public class PropertiesMerger extends Properties{
         Matcher matcher = null ;
         String[] arrValues = null; 
         try{  
-            final String REGEX_ESCAPE_CHARS_REGEX = "([()+\\\\])" ; 
+            final String REGEX_ESCAPE_CHARS_REGEX = "([?()+\\\\])" ; 
             final String REGEX_ESCAPE_CHARS_REPLACEMENT = "\\\\$1" ; 
             final String WHITESPACSES_REGEX = "(?<!^)\\s+(?!$)" ; 
             final String WHITESPACES_REPLACEMENT = "(\\\\s*.*\\\\s*)" ;
@@ -189,10 +189,8 @@ public class PropertiesMerger extends Properties{
                     //eventually the replacement regex will follow the format of: <key= value|escaped value>
                     escapedOldValue = (String) saveConvertMethod.invoke(this, arrValues[1], false/*escapeSpace*/, true /*escUnicode*/);
                     
-                    //oldValue = arrValues[1].replaceAll("([()+\\\\])", "\\\\$1").replaceAll("(?<!^)\\s+(?!$)", "(\\\\s*.*\\\\s*)") ;
                     oldValue = arrValues[1].replaceAll(REGEX_ESCAPE_CHARS_REGEX, REGEX_ESCAPE_CHARS_REPLACEMENT).replaceAll(WHITESPACSES_REGEX, WHITESPACES_REPLACEMENT) ;
                     
-//                    oldValue = "(?:" + oldValue + "|" +  escapedOldValue.replaceAll("([()+\\\\])", "\\\\$1").replaceAll("(?<!^)\\s+(?!$)", "(\\\\s*.*\\\\s*)") + ")" ;
                     escapedOldValue = escapedOldValue.replaceAll(REGEX_ESCAPE_CHARS_REGEX, REGEX_ESCAPE_CHARS_REPLACEMENT).replaceAll(WHITESPACSES_REGEX, WHITESPACES_REPLACEMENT) ;
                     
                     if(!oldValue.equals(escapedOldValue)) { 
@@ -257,7 +255,7 @@ public class PropertiesMerger extends Properties{
 "#server.encryption-key=password\n" +
 "#server.database-user=hqadmin\n" +
 "#server.database-password=ENC(ZH4ttiFMPh4tc4kR+F/wFA\\=\\=)\n" +
-"server.database-url=jdbc\\:mysql\\://10.131.9.171\\:3306/FC\n" +
+"server.database-url=jdbc:postgresql://127.0.0.1:9432/hqdb?protocolVersion=2\n" + 
 "server.encryption-key=mickymouse\n" +
 "server.database-user=firstcit\n" +
 "server.database-password=ENC(JN0nmlpNxvjZYotfEgew9MOXG2CXm8wz)\n" +
@@ -265,18 +263,21 @@ public class PropertiesMerger extends Properties{
 "CAM_SERVER_VERSION=4.6.0.1\n" +
 "CAM_SCHEMA_VERSION=3.210" ; 
         
-        //final String input = "\n" + "-XX:+HeapDumpOnOutOfMemoryError" + "\n" ;
-        //String regex = "server.database-driver\\s*=(\\s*.*\\s*)com.mysql.jdbc.Driver " ; //(\\s*.*\\s*)" ;
-        String regex1 = "server.database-url=jdbc\\:mysql\\://10.131.9.171\\:3306/FC" ;
-        String regex = "server.database-url=jdbc:mysql://10.131.9.171:3306/FC" ;
-        //System.out.println("server.database-url=jdbc\\:mysql\\://10.131.9.171\\:3306/FC" );
+        final String regex = "server.database-url\\s*=(\\s*.*\\s*)(?:jdbc:postgresql://127.0.0.1:9432/hqdb?protocolVersion=2|jdbc\\:postgresql\\://127.0.0.1\\:9432/hqdb\\?protocolVersion\\=2)" ;
+        final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE) ; 
+        final Matcher matcher = pattern.matcher(input) ; 
+        System.out.println(matcher.replaceAll("server.database-url=this.is.the.url")) ;
+        
+       
+      /*  String regex1 = "server.database-url=jdbc\\:mysql\\://10.131.9.171\\:3306/FC" ;
+        String regex2 = "server.database-url=jdbc:mysql://10.131.9.171:3306/FC" ;
         regex = regex.replaceAll("([()+\\\\])", "\\\\$1").replaceAll("(?<!^)\\s+(?!$)", "(\\\\s*.*\\\\s*)") ;
         regex = regex + "|" + regex1.replaceAll("([()+\\\\])", "\\\\$1").replaceAll("(?<!^)\\s+(?!$)", "(\\\\s*.*\\\\s*)") ;
         System.out.println(regex);
         System.out.println();
          final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE) ; 
         final Matcher matcher = pattern.matcher(input) ; 
-       System.out.println(matcher.replaceAll("server.database-url=this.is.the.url")) ;  
+        System.out.println(matcher.replaceAll("server.database-url=this.is.the.url")) ;  */
        
        
      
