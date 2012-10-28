@@ -1,7 +1,9 @@
 <?xml version="1.0"?>
 
 <project name="setup" default="all" basedir=".">
-  <property name="oss.license.file" value="${install.dir}/../open_source_licenses.txt"/>    
+  <property name="oss.license.file" value="${install.dir}/../LICENSE.txt"/>    
+  <property name="oss.gpl.license.file" value="${install.dir}/../COPYING.txt"/>    
+  <property name="oss.ee.license.file" value="${install.dir}/../open_source_licenses.txt"/>    
 
   <!-- true for text based installs -->
   <available property="server.pgsql.available"
@@ -945,7 +947,9 @@ ${errMsg}
     
   <!--- Copy the license file for the open source software to a designated directory -->
   <target name="copy-oss-license-file">
-     <copy file="${oss.license.file}" todir="${oss.license.to.dir}"/>
+     <copy file="${oss.license.file}" todir="${oss.license.to.dir}" failonerror="false"/>
+     <copy file="${oss.gpl.license.file}" todir="${oss.license.to.dir}" failonerror="false"/>
+     <copy file="${oss.ee.license.file}" todir="${oss.license.to.dir}" failonerror="false"/>
   </target>
 
   <target name="chmod-exec">
