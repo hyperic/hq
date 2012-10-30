@@ -1,0 +1,550 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : Server Configuration Reference</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : Server Configuration Reference
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <h2><a name="ServerConfigurationReference-HypericEmailConfigurationProperties"></a>Hyperic Email Configuration Properties</h2>
+
+<p>These properties configure how Hyperic composes and sends notification emails.</p>
+
+<ul>
+	<li>"CAM_BASE_URL" - Corresponds to the <b>Base URL</b> property configurable in the <b>Email Properties</b> section of the <b>HQ Server Settings</b> page. See the definition below.</li>
+	<li>"CAM_EMAIL_SENDER" - Corresponds to the <b>From Email</b> property configurable in the <b>Email Properties</b> section of the <b>HQ Server Settings</b> page. See the definition below.</li>
+</ul>
+
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>HQ Server email configuration properties are used to form notifications that HQ &nbsp;sends for a fired alert. &nbsp;
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<td class='confluenceTd'> Base URL </td>
+<td class='confluenceTd'> The address:port where HQ Server listens for web application requests. The initial value of <b>Base URL</b> is the web application listen port configured when HQ Server was installed, for example: <br class="atl-forced-newline" /> 
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>http://Ms-MacBook-Pro-15.local:7080</pre>
+</div></div>
+<p> <br class="atl-forced-newline" /> 
+Base URL forms the prefix of an URL to any HQ appends the remainder of the URL that points to the <b>Alert Detail</b> page for the fired alert. For example: <br class="atl-forced-newline" /> </p>
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>http://Ms-MacBook-Pro-15.local:7080/alerts/Alerts.do?mode=viewAlert&amp;eid=5:10611&amp;a=16431</pre>
+</div></div>
+<p> <br class="atl-forced-newline" /> </p></td>
+</tr>
+<tr>
+<td class='confluenceTd'> From Email Address </td>
+<td class='confluenceTd'> The email address listed as the sender of the alert emails. For example: <br class="atl-forced-newline" />   
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>hq@demo2.hyperic.net</pre>
+</div></div>
+<p> </p></td>
+</tr>
+</tbody></table>
+</div>
+</td></tr></table></div>
+
+<ul>
+	<li>"CAM_SMTP_HOST" - Domain name of the host of the mail server used for sending Hyperic email notifications. This property is not configurable in the <b>HQ Server Settings</b> page - its original value is configured during Hyperic Server installation.</li>
+</ul>
+
+
+
+<h2><a name="ServerConfigurationReference-DataManagerConfigurationProperties"></a>Data Manager Configuration Properties</h2>
+
+<p>These properties control Hyperic Server's metric, alert, and event data management.</p>
+
+<p>Most of these properties correspond to properties displayed in the <b>Data Manager Properties</b> section of the <b>HQ Server Settings</b> page.</p>
+<ul>
+	<li>"DATA_REINDEX_NIGHTLY" - See &nbsp;<b>Reindex Metric Data Tables Nightly</b>&nbsp;&nbsp;in the table below. &nbsp;Supply value as "true" or "false"</li>
+	<li>"EVENT_LOG_PURGE" &#45;&nbsp;See&nbsp;<b>Delete Events and Logs Older Than</b>&nbsp;in the table below. Supply value in milliseconds, for example,"2678400000" for 31 days.</li>
+	<li>"ALERT_PURGE" - See&nbsp;<b>Delete Alerts Older Than</b>&nbsp;in the table below. Supply value in milliseconds, for example,"2678400000" for 31 days."</li>
+</ul>
+
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>These properties control how HQ condenses and purges the contents of the HQ database. Regardless of these settings HQ will retain two years of compressed metric history, but you can control how long detailed metric data is retained. Retaining fewer days of detailed metric data and deleting alerts and other events on a timely basis can improve HQ performance.
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<td class='confluenceTd'> <b>Option</b> </td>
+<td class='confluenceTd'> <b>Description</b> </td>
+<td class='confluenceTd'> <b>Notes</b> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Run Database Maintenance Every</b> <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Controls how frequently HQ compresses and archives detailed metric data that is older than the age specified by the following property.&nbsp; <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> By default, HQ does database maintenance every hour. <br class="atl-forced-newline" />
+<br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Delete Detailed Metric Data Older Than</b> </td>
+<td class='confluenceTd'> Controls how many days of detailed metric data HQ retains before compressing it into hourly averages with highs and lows and archiving those values. </td>
+<td class='confluenceTd'> The default setting is 2 days. HQ does not support a value greater than 7 days. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Reindex Metric Data Tables Nightly</b> </td>
+<td class='confluenceTd'> Controls whether HQ reindexes metric data tables every night. If configured to re-index nightly, HQ re-indexes the tables around midnight. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Delete Alerts Older Than</b> </td>
+<td class='confluenceTd'> Controls how long HQ stores alert event data. </td>
+<td class='confluenceTd'> The default value is 31 days. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Delete Events and Logs Older Than</b> </td>
+<td class='confluenceTd'> Controls how long HQ stores other HQ event and log data. </td>
+<td class='confluenceTd'> The default value is 31 days. </td>
+</tr>
+</tbody></table>
+</div>
+
+
+<p><b>Note</b>: You must restart the Hyperic Server for data management changes to take effect.</p></td></tr></table></div>
+
+<h2><a name="ServerConfigurationReference-GlobalAlertProperties"></a>Global Alert Properties</h2>
+
+<p>These properties are global controls over alert processing. For more information, see <a href="Manage Alert and Notification Volume.html" title="Manage Alert and Notification Volume">Manage Alert and Notification Volume</a>.</p>
+
+<p>The properties correspond to the properties displayed in the <b>Global Alert Properties</b> section of the <b>HQ Server Settings</b> page.</p>
+
+<ul>
+	<li>"HQ_ALERTS_ENABLED"" - See the definition for <b>Alerts</b> below.</li>
+	<li>"HQ_ALERT_NOTIFICATIONS_ENABLED"&nbsp;&#45; See the definition for <b>Alert Notifications</b> below.</li>
+	<li>"HQ_HIERARCHICAL_ALERTING_ENABLED" - See the definition for <b>Hierarchical Alerting</b> below.</li>
+</ul>
+
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>These properties enable immediate and global control of alert processing.
+<ul>
+	<li><b>Alerts</b> &#8212; Disable or enable all alert definitions for all resources immediately. Disabling stops any alerts from firing; notifications defined in escalations that are currently in progress will be completed.</li>
+</ul>
+
+
+<ul>
+	<li><b>Alert Notifications</b> &#8212; Disable or enable alert notifications for all resources immediately. Disabling stops all notifications, include those for alerts with escalations currently in progress.</li>
+</ul>
+
+
+<ul>
+	<li><b>Hierarchical Alerting</b> <font color="red">*</font> &#8212; In vFabric Hyperic, this setting controls whether alerts are evaluated using the hierarchical alerting method. When hierarchical alerting is enabled, before firing an alert for a resource, Hyperic considers the availability and alert status of the resource's parent. The purpose of hierarchical alerting is to avoid firing alerts for every resource affected by a single root cause. For more information, see <a href="Manage Alert and Notification Volume.html#ManageAlertandNotificationVolume-hierarchical">Hierarchical Alerting Prevents a Cascade of Alerts in Resource Hierarchies</a>.</li>
+</ul>
+
+
+<p><b>Note:</b> You can extend the effect of hierarchical alerting in vFabric Hyperic by configuring the relationship between a network device or virtual host and the platforms that depend on it using the <b>Network and Host Dependency Manager</b> available in the "Plugins" section of the <b>Administration</b> tab. For more information see <a href="Manage Alert and Notification Volume.html#ManageAlertandNotificationVolume-ConfigureNetworkHostDependenciesforHierarchicalAlerting">Configure Network Host Dependencies for Hierarchical Alerting</a>.</p></td></tr></table></div>
+
+<h2><a name="ServerConfigurationReference-NotificationThrottlingConfigurationProperties"></a>Notification Throttling Configuration Properties</h2>
+<p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+
+
+<p>These properties are global controls over alert processing. For more information, see <a href="Manage Alert and Notification Volume.html" title="Manage Alert and Notification Volume">Manage Alert and Notification Volume</a>.</p>
+
+<p>These properties correspond to the properties displayed in the <b>Notification Throttling Configuration Properties</b> section of the <b>HQ Server Settings</b> page.</p>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<td class='confluenceTd'> <b>Server Property</b> </td>
+<td class='confluenceTd'> <b>Description</b> </td>
+<td class='confluenceTd'> <b>Example Value</b> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> "HQ_ALERT_THRESHOLD" </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> "0" </td>
+</tr>
+<tr>
+<td class='confluenceTd'> "HQ_ALERT_THRESHOLD_EMAILS" </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> "" </td>
+</tr>
+</tbody></table>
+</div>
+
+
+<h2><a name="ServerConfigurationReference-AutomaticBaselineConfigurationProperties"></a>Automatic Baseline Configuration Properties</h2>
+<p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+
+
+
+<p>These properties correspond to the properties displayed in the <b>Automatic Baseline Configuration Properties</b> section of the <b>HQ Server Settings</b> page.</p>
+
+<ul>
+	<li>"CAM_BASELINE_DATASET" - See <b>Baseline Dataset</b>&nbsp;in the table below. Supply value in milliseconds, for example, "604800000" for 7 day</li>
+	<li>"CAM_BASELINE_FREQUENCY" - See&nbsp;<b>Baseline Frequency</b>&nbsp;in the table below. Supply value in milliseconds, for example,&nbsp;"259200000" for three days.</li>
+	<li>"CAM_BASELINE_MINSET"  "40" - See <b>Baseline Minimum Data Points</b> in the table below.</li>
+</ul>
+
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>In vFabric Hyperic, these properties control the baselining process. Changing the data set used to calculate baselines can affect baseline accuracy.
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<td class='confluenceTd'> <b>S</b><b>erver Setting</b> </td>
+<td class='confluenceTd'> <b>Description</b> </td>
+<td class='confluenceTd'> <b>Default</b> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Baseline Frequency</b> </td>
+<td class='confluenceTd'> The frequency with which Hyperic calculates a baseline for each metric. </td>
+<td class='confluenceTd'> 3 days </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Baseline Dataset</b> </td>
+<td class='confluenceTd'> The time range of metric data used in calculating the baseline. </td>
+<td class='confluenceTd'> 7 days </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Baseline Minimum Data Points</b> </td>
+<td class='confluenceTd'> The minimum number of data points used in calculating a baseline. </td>
+<td class='confluenceTd'> 40 </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Track Out-of-Bounds Metrics</b> </td>
+<td class='confluenceTd'> Controls whether or not Hyperic tracks out-of-bounds metrics &#8212; measurements that are greater than expected high range for a metric, or less than the expected low range for a metric. </td>
+<td class='confluenceTd'> off </td>
+</tr>
+</tbody></table>
+</div>
+</td></tr></table></div>
+
+<h2><a name="ServerConfigurationReference-LDAPConfigurationProperties"></a>LDAP Configuration Properties </h2>
+<p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+
+
+
+<p>Most of the LDAP properties correspond to properties displayed in the <b>LDAP Configuration Properties</b> section of the &nbsp;<b>HQ Server Settings</b> page.</p>
+
+<ul>
+	<li>"CAM_LDAP_BASE_DN" - See definition of <b>Search Base</b> below.</li>
+	<li>"CAM_LDAP_BIND_DN" - See definition of <b>Username</b> below.</li>
+	<li>"CAM_LDAP_BIND_PW" - See definition of <b>Password</b> below.</li>
+	<li>"CAM_LDAP_FILTER" - See definition of <b>Search Filter</b> below.</li>
+	<li>"CAM_LDAP_LOGIN_PROPERTY" - See definition of <b>Login Property</b> below.</li>
+	<li>"CAM_LDAP_NAMING_PROVIDER_URL  - See definition of <b>URL</b> below.</li>
+	<li>"CAM_LDAP_PROTOCOL" - See definition of <b>SSL</b> below.</li>
+</ul>
+
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><div class="error"><span class="error">Unable to render {include}</span> Couldn't find a page to include called: LdapProps</div></td></tr></table></div>
+
+<h2><a name="ServerConfigurationReference-KerberosConfigurationProperties"></a>Kerberos Configuration Properties</h2>
+<p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+
+
+<p>These properties correspond to the properties displayed in the <b>Keberos Properties</b> section of the <b>HQ Server Settings</b> page.</p>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<td class='confluenceTd'> <b>Server Property</b> </td>
+<td class='confluenceTd'> <b>Description</b> </td>
+<td class='confluenceTd'> <b>Example Value</b> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> "KERBEROS_DEBUG" </td>
+<td class='confluenceTd'> Enables debug logging </td>
+<td class='confluenceTd'> "true" or "false" </td>
+</tr>
+<tr>
+<td class='confluenceTd'> "KERBEROS_KDC" </td>
+<td class='confluenceTd'> KDC </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> "KERBEROS_REALM" </td>
+<td class='confluenceTd'> Identifies the Kerberos Realm </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+</tbody></table>
+</div>
+
+
+<h2><a name="ServerConfigurationReference-SNMPProperties"></a>SNMP Properties</h2>
+
+<p>These properties correspond to the properties displayed in the <b>SNMP Properties</b> section of the <b>HQ Server Settings</b> page. For definitions and usage see the section for the appropriate SNMP version below.</p>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<td class='confluenceTd'> <b>Server Property</b> </td>
+<td class='confluenceTd'> <b>Corresponds To</b> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> "SNMP_AGENT_ADDRESS" </td>
+<td class='confluenceTd'> Agent Address <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> "SNMP_AUTH_PASSPHRASE" </td>
+<td class='confluenceTd'> Authentication Passphrase. <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> "SNMP_AUTH_PROTOCOL" </td>
+<td class='confluenceTd'> Authentication Protocol <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> "SNMP_COMMUNITY" </td>
+<td class='confluenceTd'> Community </td>
+</tr>
+<tr>
+<td class='confluenceTd'> "SNMP_CONTEXT_NAME" </td>
+<td class='confluenceTd'> Context Name <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> "SNMP_ENGINE_ID" </td>
+<td class='confluenceTd'> Context Engine ID </td>
+</tr>
+<tr>
+<td class='confluenceTd'> "SNMP_DEFAULT_NOTIFICATION_MECHANISM" <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> "SNMP_ENTERPRISE_OID" </td>
+<td class='confluenceTd'> Enterprise OID </td>
+</tr>
+<tr>
+<td class='confluenceTd'> "SNMP_GENERIC_ID" </td>
+<td class='confluenceTd'> Generic ID </td>
+</tr>
+<tr>
+<td class='confluenceTd'> "SNMP_PRIVACY_PROTOCOL" </td>
+<td class='confluenceTd'> Privacy Protocol <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> "SNMP_PRIV_PASSPHRASE" </td>
+<td class='confluenceTd'> Privacy Passphrase <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> "SNMP_SECURITY_NAME" </td>
+<td class='confluenceTd'> Security Name <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> "SNMP_SPECIFIC_ID" </td>
+<td class='confluenceTd'> Specific ID </td>
+</tr>
+<tr>
+<td class='confluenceTd'> "SNMP_TRAP_OID" </td>
+<td class='confluenceTd'> SNMP Trap OID <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> "SNMP_VERSION" </td>
+<td class='confluenceTd'> SNMP Protocol Version <br class="atl-forced-newline" />
+<br class="atl-forced-newline" /> </td>
+</tr>
+</tbody></table>
+</div>
+
+
+<h3><a name="ServerConfigurationReference-ConfigureHQServerforSNMPv1"></a>Configure HQ Server for SNMP v1</h3>
+
+<p>Select "v1" from the&nbsp; <b>SNMP Protocol Version</b> pulldown and supply values for the properties defined in the table below.</p>
+
+<p>The table below defines the properties for configuring HQ Server for SNMP V1 communications with an NMS.</p>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Configuration Option </th>
+<th class='confluenceTh'> Description </th>
+<th class='confluenceTh'> Allowable Values <br class="atl-forced-newline" /> </th>
+</tr>
+<tr>
+<td class='confluenceTd'> SNMP Trap OID </td>
+<td class='confluenceTd'> The OID of the notification to be sent. Supplies the value of <tt>snmpTrapOID.0</tt> &#45; the second varbind in a trap or inform that HQ Server generates. (The first varbind is <tt>SysUpTime.0</tt>.) <br class="atl-forced-newline" />
+<br class="atl-forced-newline" />
+<br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Default Notification Mechanism <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Your selection governs the notification type that will appear as the default notification type option in the "Notification Mechanism" pulldown list that is presented in configuration dialogs when user configures an SNMP notification as an alert action, or as a step in an escalation. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> For v1 of the SNMP protocol, choose V1 Trap. This is the only trap type you can generate for SNMP v1. <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Enterprise OID <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Enterprise OID. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Community </td>
+<td class='confluenceTd'> The community name to be sent with the trap. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Generic ID <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Single digit identifier of the trap type. </td>
+<td class='confluenceTd'> 0 - coldStart <br class="atl-forced-newline" />
+1 - warmStart <br class="atl-forced-newline" />
+2 - linkDown <br class="atl-forced-newline" />
+3 - linkUp <br class="atl-forced-newline" />
+4 - authenticationFailure <br class="atl-forced-newline" />
+5 - egpNeighborLoss <br class="atl-forced-newline" />
+6 - enterpriseSpecific </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Specific ID <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> The specific trap code for an enterprise-specific trap (when <b>Generic ID</b> is set to to 6). <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Agent Address <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Address of the managed object that generates the trap. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+</tbody></table>
+</div>
+
+
+<h3><a name="ServerConfigurationReference-ConfigureHQServerforSNMPv2c"></a>Configure HQ Server for SNMP v2c</h3>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Configuration Option </th>
+<th class='confluenceTh'> Description </th>
+<th class='confluenceTh'> Allowable Values </th>
+</tr>
+<tr>
+<td class='confluenceTd'> SNMP Trap OID </td>
+<td class='confluenceTd'> The OID of the notification to be sent. Supplies the value of <tt>snmpTrapOID.0</tt> &#45; the second varbind in a trap or inform that HQ Server generates. (The first varbind is <tt>SysUpTime.0</tt>.) </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Default Notification Mechanism <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Specifies the default notification type that will appear in configuration dialogs when an authorized user configures an SNMP notification as an alert action, or as a step in an escalation. This choice simply defines the default option - the user configuring an alert action or escalation can choose a different message type. </td>
+<td class='confluenceTd'><ul>
+	<li>V1 Trap</li>
+	<li>V2c Trap</li>
+	<li>Inform <br class="atl-forced-newline" /></li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Community </td>
+<td class='confluenceTd'> The community name to be sent with the trap. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+</tbody></table>
+</div>
+
+
+
+<h3><a name="ServerConfigurationReference-ConfigureHQServerforSNMPv3"></a>Configure HQ Server for SNMP v3</h3>
+
+
+<p>This section lists the properties for enabling HQ Enterprise to sent SNMP notifications to an NMS. When HQ is so enabled, you can use SNMP notifications in alert definitions - as alert actions and escalation steps.</p>
+
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Configuration Option </th>
+<th class='confluenceTh'> Description </th>
+<th class='confluenceTh'> Allowable Values </th>
+</tr>
+<tr>
+<td class='confluenceTd'> SNMP Trap OID </td>
+<td class='confluenceTd'> The OID of the notification to be sent. Supplies the value of <tt>snmpTrapOID.0</tt> &#45; the second varbind in a trap or inform that HQ Server generates. (The first varbind is <tt>SysUpTime.0</tt>.) </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Default Notification Mechanism <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Specifies the default notification type that will appear in configuration dialogs when an authorized user configures an SNMP notification as an alert action, or as a step in an escalation. This choice simply defines the default option - the user configuring an alert action or escalation can choose a different message type. </td>
+<td class='confluenceTd'><ul>
+	<li>V1 Trap</li>
+	<li>V2c Trap</li>
+	<li>Inform <br class="atl-forced-newline" /></li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Security Name </td>
+<td class='confluenceTd'> The username HQ's SNMP agent should use when sending notifications to the NMS.&nbsp; <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Required. <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Local Engine ID </td>
+<td class='confluenceTd'> ID of HQ's SNMP agent; this value appears automatically, and is not user-configurable. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Auth Protocol </td>
+<td class='confluenceTd'> The SNMP authentication protocol HQ Server should use for communications with the NMS. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'><ul>
+	<li>none</li>
+	<li>MD5</li>
+	<li>SHA</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Auth Passphrase <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> The SNMP authorization passphrase configured for use when communication with the NMS.&nbsp; <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Privacy Protocol </td>
+<td class='confluenceTd'> The SNMP Privacy Protocol HQ Server should use for&nbsp; communication with the NMS. </td>
+<td class='confluenceTd'><ul>
+	<li>none</li>
+	<li>DES</li>
+	<li>3DES</li>
+	<li>AES-128,</li>
+	<li>AES-192</li>
+	<li>AES-256</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Privacy Passphrase </td>
+<td class='confluenceTd'> The SNMP privacy passphrase configured for use when communication with the NMS. </td>
+<td class='confluenceTd'> <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Context Engine ID </td>
+<td class='confluenceTd'> The EngineID of the NMS. This, along with Context Name, identifies the SNMP context for accessing management data. </td>
+<td class='confluenceTd'> Required for v1 and v2c traps.&nbsp; Do not supply for Inform. <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Context Name <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> The name of the SNMP context that provides access to management information on the NMS.&nbsp; A context is identified by the Context Name and Context Engine ID. </td>
+<td class='confluenceTd'> <br class="atl-forced-newline" /> </td>
+</tr>
+</tbody></table>
+</div>
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

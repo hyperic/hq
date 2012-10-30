@@ -1,0 +1,154 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : View Status of all Hyperic Agents</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : View Status of all Hyperic Agents
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jul 31, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+
+
+<p>The page has information about the <b>Agents</b> tab of the <b>HQ Health</b> page &#8212; a screenshot, and definitions of the health data for an agent.</p>
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1343769810251 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1343769810251 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1343769810251 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1343769810251'>
+<ul>
+    <li><a href='#ViewStatusofallHypericAgents-AgentsTabinHQHealth'>Agents Tab in HQ Health</a></li>
+    <li><a href='#ViewStatusofallHypericAgents-HealthDataforanAgent'>Health Data for an Agent</a></li>
+</ul></div>
+
+<p>For information about using <b>HQ Health</b> to troubleshoot problems, see <a href="Troubleshoot Agent and Server Problems.html" title="Troubleshoot Agent and Server Problems">Troubleshoot Agent and Server Problems</a>.</p>
+
+
+
+
+<h1><a name="ViewStatusofallHypericAgents-AgentsTabinHQHealth"></a>Agents Tab in HQ Health</h1>
+
+<p>The <b>Agents</b> tab of the <b>HQ Health</b> page &#8212; shown in the screenshot below &#8212; shows the status of all of the Hyperic Agents that are registered with the Hyperic Server.</p>
+
+<p>To navigate to <b>HQ Health</b>, click the link for it in the <b>Plugins</b> section of the <b>Administration</b> page.</p>
+
+<p><span class="image-wrap" style=""><img src="attachments/79660206/79921669.png" width="900" style="border: 0px solid black"/></span></p>
+
+
+
+<h1><a name="ViewStatusofallHypericAgents-HealthDataforanAgent"></a>Health Data for an Agent</h1>
+
+<p>The table below defines the information on the <b>Agents</b> tab of <b>HQ Health</b>,</p>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Field </th>
+<th class='confluenceTh'> Description </th>
+<th class='confluenceTh'> Notes </th>
+</tr>
+<tr>
+<td class='confluenceTd'> FQDN <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Fully-qualified domain name of the platform where the agent runs. </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Address <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> IP address of the platform where the agent runs. </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Port <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Port where the agent listens for communication with the Hyperic Server. <br class="atl-forced-newline" />
+<br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> If you configure unidirectional agent - server communications, the agent initiates all communications with the Hyperic Server. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Version <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Agent version number. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Although an agent might work successfully with an Hyperic Server of a later version, it is strongly recommended that you run the same version of the agent and server. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Build # </td>
+<td class='confluenceTd'> Agent build number </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Bundle Version </td>
+<td class='confluenceTd'> Agent bundle version </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Creation Time </td>
+<td class='confluenceTd'> The date/time that the Hyperic Agent was first started up. </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> &#35; Platforms </td>
+<td class='confluenceTd'> Number of platforms the agent manages. </td>
+<td class='confluenceTd'> Typically, an agent manages one platform - the platform where it runs. Exceptions include: <br class="atl-forced-newline" />
+<ul>
+	<li>If the agent manages a vSphere vCenter instance, the number of platforms shown is the number of VMs the vCenter server manages.</li>
+	<li>If the agent manages remote network devices or network host platform types.</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'> &#35; Metrics </td>
+<td class='confluenceTd'> The number of resource metrics the agent collects. This is the total number of metrics that are configured for collection across all resources the agent monitors. </td>
+<td class='confluenceTd'> If one agent bears an inordinate metric load, you may be able to distribute it more evenly. See the "Overloaded Agent" section of <a href="Troubleshoot Agent and Server Problems.html" title="Troubleshoot Agent and Server Problems">Troubleshoot Agent and Server Problems</a>. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Time Offset (ms) </td>
+<td class='confluenceTd'> The difference in system clock time between the agent and the Hyperic Server. </td>
+<td class='confluenceTd'> A time offset can cause incorrect availability reporting. See the "Out-of-Sync Agent and Server Clocks" section of <a href="Troubleshoot Agent and Server Problems.html" title="Troubleshoot Agent and Server Problems">Troubleshoot Agent and Server Problems</a>. <br class="atl-forced-newline" />
+<br class="atl-forced-newline" />
+A question mark in this column indicates that the Hyperic Server is unable to contact the agent.  </td>
+</tr>
+<tr>
+<td class='confluenceTd'> License Count </td>
+<td class='confluenceTd'> The number of platform licenses consumed by the agent. </td>
+<td class='confluenceTd'> Typically, a single agent consumes a single license. <br class="atl-forced-newline" />
+<br class="atl-forced-newline" />
+If an agent&nbsp;manages a vSphere vCenter instance,&nbsp;it consumes a license for the platform that hosts vCenter, a license for each vSphere vHost administered by the vCenter instance, and &#8212; if an agent is installed in each VM&nbsp;---&nbsp;a license for each vSphere VM on each vHost. </td>
+</tr>
+</tbody></table>
+</div>
+
+
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:06</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

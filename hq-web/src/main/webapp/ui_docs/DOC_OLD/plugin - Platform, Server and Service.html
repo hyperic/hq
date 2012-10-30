@@ -1,0 +1,192 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : plugin - Platform, Server and Service</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : plugin - Platform, Server and Service
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Feb 15, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1329337038815 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1329337038815 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1329337038815 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1329337038815'>
+<ul>
+    <li><a href='#plugin-Platform%2CServerandService-ElementOverview'>Element Overview</a></li>
+    <li><a href='#plugin-Platform%2CServerandService-ParentElements'>Parent Elements</a></li>
+    <li><a href='#plugin-Platform%2CServerandService-ElementStructure'>Element Structure</a></li>
+    <li><a href='#plugin-Platform%2CServerandService-ChildAttributesandElements'>Child Attributes and Elements</a></li>
+    <li><a href='#plugin-Platform%2CServerandService-Examples'>Examples</a></li>
+<ul>
+    <li><a href='#plugin-Platform%2CServerandService-pluginelementsforaservertype'>plugin elements for a server type</a></li>
+    <li><a href='#plugin-Platform%2CServerandService-configtrackPluginElement'>config_track Plugin Element</a></li>
+</ul>
+</ul></div>
+
+<h1><a name="plugin-Platform%2CServerandService-ElementOverview"></a>Element Overview</h1>
+
+<p>A <tt>&lt;plugin&gt;</tt> element element declares a management function &#8212; such as metric collection or log tracking &#8212; that the plugin performs for a resource type, and the class performs that function.</p>
+
+<h1><a name="plugin-Platform%2CServerandService-ParentElements"></a>Parent Elements</h1>
+
+<ul>
+	<li><tt>&lt;server&gt;</tt> &#45; A <tt>&lt;plugin&gt;</tt> element in a <tt>&lt;server&gt;</tt> element specifies a function the plugin performs for that server type.</li>
+</ul>
+
+
+<ul>
+	<li><tt>&lt;service&gt;</tt> &#45; A <tt>&lt;plugin&gt;</tt> element in a <tt>&lt;service&gt;</tt> element specifies a function the plugin performs for that service type.</li>
+</ul>
+
+
+<h1><a name="plugin-Platform%2CServerandService-ElementStructure"></a>Element Structure</h1>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">&lt;plugin&gt;
+    type
+    platform
+    class
+    &lt;monitored&gt;
+          &lt;folder&gt;</pre>
+		</div>
+</div></div>
+
+<h1><a name="plugin-Platform%2CServerandService-ChildAttributesandElements"></a>Child Attributes and Elements</h1>
+
+<ul>
+	<li><tt>type</tt> &#8212; This required attribute specifies a plugin function. Allowable values:
+	<ul>
+		<li>collector &#8212; obtain metrics for a remote resource on the network - for example an HTTP, FTP, or DNS service.</li>
+		<li>log_track &#8212; tracks messages written to resource log files.</li>
+		<li>config_track &#8212; tracks changes made to resource configuration files.</li>
+		<li>control &#8212; performs supported control actions on a resource, for example, shutdown, restart, run garbage collection, and so on. When <tt>type</tt> is set to "control", an <tt>&lt;action&gt;</tt> element must exist, as a sibling of the <tt>&lt;plugin&gt;</tt> element. The <tt>&lt;action&gt;</tt> element specifies the supported control actions. For more information, see <tt><a href="actions.html" title="actions">actions</a></tt>.</li>
+		<li>measurement &#8212; collect metrics for a resource</li>
+		<li>autoinventory &#8212; discover new resource instances or changes to existing resource data.</li>
+		<li>livedata &#8212; Obtain live system data and metrics, for instance CPU information and utilization, network interface configuration and metrics, and so on.</li>
+		<li>responsetime &#8212; No longer used. This value will not prevent a plugin from loading but it is not supported.</li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul>
+	<li><tt>platform</tt> &#8212; Optionally, specifies the platform type that supports the plugin function.  In Hyperic plugins, <tt>platform</tt> is most typically used to specify that a plugin of type <tt>control</tt> applies to the "Win32" platform type.</li>
+	<li><tt>class</tt> &#45; Specifies the class that will perform the function, which could be a class in the plugin JAR, or a support class in <tt>org.hyperic.hq.product</tt>. Required for <tt>&lt;plugin&gt;</tt> elements within a <tt>&lt;server&gt;</tt> element. If the <tt>class</tt> attribute is omitted from a <tt>&lt;plugin&gt;</tt> element within a <tt>&lt;service&gt;</tt> element, its value is inherited from the class specified in the parent <tt>&lt;server&gt;</tt> element's <tt>&lt;plugin&gt;</tt> element.</li>
+</ul>
+
+
+<ul>
+	<li><tt>&lt;monitored&gt;</tt> &#8212; This element is required in plugins of type <tt>config_track</tt>, when the <tt>class</tt> is <tt>org.hyperic.hq.product.FileChangeTrackPlugin</tt>, to specify the files to track. A <tt>&lt;monitored&gt;</tt> element must contain one or more:
+	<ul>
+		<li><tt>&lt;folder&gt;</tt> elements, which contain the following attributes:
+		<ul>
+			<li>path &#8212; specifies a directory path, absolute or relative to the managed server's discovered installation directory</li>
+			<li>recursive &#8212; specifies whether or not to track files in directories below the one specified by <tt>path</tt></li>
+			<li>filter &#8212; a regular expression that specifies the files to track in the directory or directory tree.</li>
+		</ul>
+		</li>
+	</ul>
+	</li>
+</ul>
+
+
+<h1><a name="plugin-Platform%2CServerandService-Examples"></a>Examples</h1>
+
+
+<h2><a name="plugin-Platform%2CServerandService-pluginelementsforaservertype"></a>plugin elements for a server type</h2>
+
+<p>This <tt>&lt;server&gt;</tt> element excerpted from HQ'x xen-plugin contains four <tt>&lt;plugin&gt;</tt> elements. The <tt>&lt;plugin&gt;</tt> element  whose type is "measurement" specifies a plugin support class. The other <tt>&lt;plugin&gt;</tt> elements specify classes within the plugin.</p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">&lt;server name="Xen VM"&gt;
+  &lt;config include="server.uuid"/&gt;
+  &lt;properties&gt;
+    &lt;property name="os" description="OS"/&gt;
+  &lt;/properties&gt;
+  &lt;plugin type="autoinventory"
+          class="org.hyperic.hq.plugin.xen.XenVmDetector"/&gt;
+  &lt;plugin type="measurement"
+          class="org.hyperic.hq.product.MeasurementPlugin"/&gt;
+  &lt;plugin type="collector"
+          class="org.hyperic.hq.plugin.xen.XenVmCollector"/&gt;
+  &lt;plugin type="control"
+          class="org.hyperic.hq.plugin.xen.XenVmControlPlugin"/&gt;
+  &lt;actions include="start,shutdown,forceShutdown,suspend,resume,reboot,forceReboot"/&gt;</pre>
+		</div>
+</div></div>
+
+<p><a name="plugin-Platform%2CServerandService-configtrack"></a></p>
+<h2><a name="plugin-Platform%2CServerandService-configtrackPluginElement"></a>config_track Plugin Element</h2>
+<p>This excerpt from the Tomcat plugin causes Hyperic to track (when configuration tracking is enabled for a resource):</p>
+<ul>
+	<li>In the <tt>TomcatHome/conf</tt> directory and any directories below it, any files that end with the string <tt>xml</tt>, <tt>properties</tt>, or <tt>policy</tt> extension.</li>
+	<li>In the <tt>TomcatHome/bin</tt> directory, any files that end with the string <tt>bat</tt>, <tt>xml</tt>, or <tt>sh</tt>.</li>
+	<li>In the <tt>TomcatHome/lib</tt> directory, any files that end with the string <tt>jar</tt>.</li>
+	<li>In the <tt>TomcatHome/webapps</tt> directory and any directories below it, any files that end with the string <tt>properties</tt> or <tt>xml</tt>, or have the <tt>.jar</tt>, <tt>.dll</tt>, <tt>.class</tt>, <tt>.jsp</tt>, <tt>.phpl</tt>, <tt>.pl</tt>, <tt>.js</tt>, <tt>.py</tt>, <tt>.pyc</tt>, or <tt>.cgi</tt> extension.</li>
+</ul>
+
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">&lt;plugin type="config_track"
+     class="org.hyperic.hq.product.FileChangeTrackPlugin"
+     &lt;monitored&gt;
+          &lt;folder path="conf" recursive="true" filter=".*.properties|.*.xml|.*.policy"/&gt;
+          &lt;folder path="bin" recursive="false" filter=".*.bat|.*.xml|.*.sh"/&gt;
+          &lt;folder path="lib" recursive="false" filter=".*.jar"/&gt;
+          &lt;folder path="webapps" recursive="true" filter=".*.properties|.*.xml|.*\.jar|.*\.dll|.*\.class|.*\.jsp|.*\.php|.*\.pl|.*\.js|.*\.py|.*\.pyc|.*\.cgi"/&gt;
+     &lt;/monitored&gt;
+&lt;/plugin&gt;</pre>
+		</div>
+</div></div>
+
+<p>The excerpt shown above is represented  as an expression in the <b>Configuration Files</b> field on the <b>Configuration Properties</b> page for a resource in the Hyperic user interface. The expression is formed from the values of <tt>conf</tt>, <tt>recursive</tt>, and <tt>filter</tt> attributes in each <tt>&lt;folder&gt;</tt> element: </p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">conf;true;.*.properties|.*.xml|.*.policy;,bin;false;.*.bat|.*.xml|.*.sh;,
+lib;false;.*.jar;,webapps;true;.*.properties|.*.xml|.*\.jar|.*\.dll|.*\.class
+|.*\.jsp|.*\.php|.*\.pl|.*\.js|.*\.py|.*\.pyc|.*\.cgi;</pre>
+		</div>
+</div></div>
+
+<p>For information about the format of the <b>Configuration Files</b> expression, see <a href="Set Up Configuration Tracking for a Resource.html#SetUpConfigurationTrackingforaResource-config">Set Up 4.6.5 Configuration Tracking for a Server</a>.</p>
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:08</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

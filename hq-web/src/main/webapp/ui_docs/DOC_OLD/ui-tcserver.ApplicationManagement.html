@@ -1,0 +1,189 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : ui-tcserver.ApplicationManagement</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : ui-tcserver.ApplicationManagement
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Mar 15, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p>This page describes page the tc Server Application Management view in the VMware vFabric™ Hyperic® user interface enabled by the tc Server user interface plugin. This page is present in the Hyperic user interface only if have the plugin.</p>
+
+
+<h2><a name="ui-tcserver.ApplicationManagement-tcRuntimeApplicationManagement"></a>tc Runtime Application Management</h2>
+
+<p>The <b>Application Management</b> page, available when a tc Runtime instance or a group of tc Runtime instances is selected, enables an authorized user to manage applications deployed that server instance or group.</p>
+
+<p>The HQ super-user can use all the tc Runtime Application Management features of the HQ UI.&nbsp; If,  however, you log on to the HQ UI as a non-super-user, then that user  must have certain permissions to be able to use the tc Runtime features.&nbsp; See <a href="ui-tcserver.ServerConfiguration.html#ui-tcserver.ServerConfiguration-permissions">User Permissions Required to Use the tc Runtime Features</a> for details.</p>
+<div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>An HQ Group is not a Cluster</b></div><div class="panelContent">
+<p>An HQ <em>group</em> is not equivalent or similar to a tc Runtime cluster.</p>
+<ul>
+	<li>An HQ group is a set of other managed resources. An authorized user can create a group and assign resources to it. A group whose members are all of the same resource type is referred to as a <em>compatible group</em>. You can manage and monitor the resources in a compatible group at the group level. Grouping tc Runtime instances allows you manage applications across multiple tc Runtime instances.</li>
+</ul>
+
+
+<ul>
+	<li>A tc Runtime cluster enables session replication. Clustering behavior is defined in a tc Runtime instance's <tt>server.xml</tt> file.</li>
+</ul>
+</div></div>
+
+<h2><a name="ui-tcserver.ApplicationManagement-NavigatingtoatcRuntimeInstanceOrGroup"></a>Navigating to a tc Runtime Instance Or Group</h2>
+
+<p>To navigate to the Application Management page of a tc Runtime instance or group.</p>
+<ol>
+	<li>Click <b>Resources &gt; Browse</b> at the top of the HQ Dashboard.
+	<ul>
+		<li>To browse to a server instance:
+		<ul>
+			<li>Click <b>Servers</b> to view a list of of the servers to which you have access.&nbsp; tc Runtime instances have the server type "SpringSource tc Runtime 6.0". Apache Tomcat server instances have the server type "Tomcat X.X".</li>
+		</ul>
+		</li>
+		<li>To browse to a group of servers:
+		<ul>
+			<li>Click <b>Compatible Groups/Clusters</b> to view a list all the compatible groups to which you have access. Groups of tc Runtime have the type "SpringSource tc Runtime 6.0".</li>
+		</ul>
+		</li>
+	</ul>
+	</li>
+	<li>In the table, click the name of the tc Runtime instance or group to which you want to navigate.</li>
+	<li>Click <b>Views &gt; Application Management</b>.</li>
+</ol>
+
+
+<h2><a name="ui-tcserver.ApplicationManagement-CreatingtcRuntimeGroups"></a>Creating tc Runtime Groups</h2>
+
+<p>Grouping tc Runtime instances eases the process of managing server instances and applications. For example, you can deploy an application to group of tc Runtime with a single command, instead of deploying to each instance individually. To create a group of tc Runtime instances:</p>
+
+<ol>
+	<li>Click <b>Resources &gt; Browse</b> at the top of the HQ Dashboard.</li>
+	<li>Click <b>Servers</b> to list servers in inventory to which you have access. (Note: Only server instances that have been auto-discovered by HQ and added to inventory appear). tc Runtime instances have the server type "SpringSource tc Runtime 6.0". Apache Tomcat server instances have the server type "Tomcat X.X".</li>
+	<li>Check the box to the left of each tc Runtime instance you want to include in the new group.</li>
+	<li>Click <b>Group</b>.</li>
+	<li>Enter a name for the group (required) and a description and location as desired.</li>
+	<li>Click <b>OK</b>.</li>
+</ol>
+
+
+<h2><a name="ui-tcserver.ApplicationManagement-ListingApplications"></a>Listing Applications</h2>
+
+<p>Navigate to the <b>Application Management</b> page for a server instance or group. Deployed applications are listed in the <b>Deployed Applications</b> section of the page. For a group, the table lists all applications deployed to all servers in the group. The table shows:</p>
+<ul>
+	<li><b>Status</b> &#45; The state of the application - either "Running" or "Stopped".&nbsp; For a group of servers:
+	<ul>
+		<li>"Running" or "Stopped" indicates that <em>all</em> instances of the application on all servers in the group have that state.</li>
+		<li>A numeric value indicates the number of servers upon which the application's state is "Running".</li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul>
+	<li><b>Sessions</b> &#45; The number of current active sessions for the application.</li>
+</ul>
+
+
+<p>NOTE: Only applications on running tc Runtime instances appear.&nbsp; HQ returns an error for application hosts that are not running.</p>
+
+<h2><a name="ui-tcserver.ApplicationManagement-DeployingApplications"></a>Deploying Applications</h2>
+
+<p>Deploying an application is the process of uploading it to tc Runtime and making it available to users. You can deploy an application to a single tc Runtime instance or to a group of tc Runtime instances. If you deploy to a group, the application will be deployed to each of tc Runtime instance in that group, enabling users to run the application from any of the tc Runtime instances in the group.</p>
+
+<p>You can deploy an application from a WAR file located:</p>
+<ul>
+	<li>on your local file system (on the the same machine as the browser you are using to connect to HQ's web user interface), or&nbsp;</li>
+	<li>on the computer on which the tc Runtime resource is running.</li>
+</ul>
+
+
+<p>Whether the WAR file is local or remote, you can either enter a new context path (string that uniquely identifies the Web application in the URL used to invoke it), or use the default value, which is the name of the WAR file, without the".war" extension.</p>
+<ol>
+	<li>Navigate to the <b>Application Management</b> page for a tc Runtime instance or group.</li>
+	<li>Depending on the location of the WAR file for the application, either:
+	<ul>
+		<li>Click <b>Browse</b> in the <b>Deploy Application From Local Machine</b> section to browse to the file's location.</li>
+		<li>Enter the full path to the WAR file on the computer hosting the tc Runtime resource in the <b>Deploy Application from Server Machine</b> section.</li>
+	</ul>
+	</li>
+	<li>As desired, enter a context path in the <b>Context path</b> text box.</li>
+	<li>Optionally check the <b>Use cold deployment strategy</b> if you want the  tc Runtime instance to shutdown, deploy the  application, and then  start up again. By default (if box is unchecked),  the tc Runtime  instance hot-deploys the application, which means it does  not shutdown  then restart but simply deploys the application while the  instance is  still running. Use the cold deployment strategy if you want  to avoid  common hot deployment errors, such as running out of PermGen  space. The  PermGen space holds the metadata about classes that have been   loaded/created in the JVM.</li>
+	<li>Click <b>Upload and Deploy</b> or <b>Deploy</b>, whichever is appropriate.</li>
+	<li>See the top "Results of the last operation" section for details about the result of deploying the application. When you deploy an application to tc Runtime, the application is started.</li>
+</ol>
+
+
+<h2><a name="ui-tcserver.ApplicationManagement-UndeployingApplications"></a>Undeploying Applications</h2>
+
+<p>Undeploying an application removes it from the tc Runtime instance or group. If you want to temporarily prevent users from access an application, stop it rather than undeploy it. See <a href="#ui-tcserver.ApplicationManagement-StoppingApplications">Stopping Applications</a>.</p>
+<ol>
+	<li>Navigate to the application management page of a tc Runtime instance or group.</li>
+	<li>In the <b>Deployed Applications</b> section, check the box to the far-left of the application(s) you want to undeploy.</li>
+	<li>Click <b>Undeploy</b>. HQ removes the application from the list of deployed applications.</li>
+	<li>See the top "Results of the last operation" section for details about the results of undeploying the application.</li>
+</ol>
+
+
+<h2><a name="ui-tcserver.ApplicationManagement-StartingApplications"></a>Starting Applications</h2>
+
+<p>Starting an application makes it available to users. You must have previously deployed the application to be able to start it.</p>
+<ol>
+	<li>Navigate to the application management page of a tc Runtime instance or group.</li>
+	<li>In the <b>Deployed Applications</b> section, check the box to the far-left of the application(s) you want to start.</li>
+	<li>Click <b>Start</b>. The status of the application changes to "Running".</li>
+	<li>See the top "Results of the last operation" section for details about the result of starting the application.</li>
+</ol>
+
+
+<h2><a name="ui-tcserver.ApplicationManagement-StoppingApplications"></a>Stopping Applications</h2>
+
+<p>Stopping an application makes it unavailable to users.</p>
+<ol>
+	<li>Navigate to the application management page of a tc Runtime instance or group.</li>
+	<li>In the <b>Deployed Applications</b> section, check the box to the far-left of the application(s) you want to stop.</li>
+	<li>Click <b>Stop</b>. The status of the application changes to "Stopped".</li>
+	<li>See the top "Results of the last operation" section for details about the result of stopping the application.</li>
+</ol>
+
+
+<h2><a name="ui-tcserver.ApplicationManagement-ReloadingApplications"></a>Reloading Applications</h2>
+
+<p>When you reload an existing application, it shuts itself down and then reloads itself. For additional details, see <a href="http://tomcat.apache.org/tomcat-6.0-doc/manager-howto.html#Reload%20An%20Existing%20Application">Reload an Existing Application</a> on the Apache Tomcat 6.0 Web site.</p>
+
+<ol>
+	<li>Navigate to the application management page of a tc Runtime instance or group.</li>
+	<li>In the <b>Deployed Applications</b> section, check the box to the far-left of the application(s) you want to reload.</li>
+	<li>Click <b>Reload</b>. The status of the application changes to "Running."</li>
+	<li>See the top "Results of the last operation" section for details about the result of reloading the application.</li>
+</ol>
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

@@ -1,0 +1,377 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : HQApi Command-Line Tools</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : HQApi Command-Line Tools
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325699140485 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699140485 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699140485 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1325699140485'>
+<ul>
+    <li><a href='#HQApiCommand-LineTools-CommandLineToolsOverview'>Command-Line Tools Overview</a></li>
+    <li><a href='#HQApiCommand-LineTools-InvokingCommandLineTools'>Invoking Command-Line Tools</a></li>
+    <li><a href='#HQApiCommand-LineTools-CommonSubcommands'>Common Subcommands</a></li>
+<ul>
+    <li><a href='#HQApiCommand-LineTools-list'>list</a></li>
+    <li><a href='#HQApiCommand-LineTools-sync'>sync</a></li>
+    <li><a href='#HQApiCommand-LineTools-delete'>delete</a></li>
+</ul>
+    <li><a href='#HQApiCommand-LineTools-RequiredCommandQualifiersandHowtoSupplyThem'>Required Command Qualifiers and How to Supply Them</a></li>
+<ul>
+    <li><a href='#HQApiCommand-LineTools-DefineaConnectionPropertiesFile'>Define a Connection Properties File</a></li>
+    <li><a href='#HQApiCommand-LineTools-EncryptHypericPassword'>Encrypt Hyperic Password</a></li>
+    <li><a href='#HQApiCommand-LineTools-SupplyPropertiesFilePathonCommandLine'>Supply Properties File Path on Command Line</a></li>
+</ul>
+    <li><a href='#HQApiCommand-LineTools-TipsandRemindersforCLITools'>Tips and Reminders for CLI Tools</a></li>
+<ul>
+    <li><a href='#HQApiCommand-LineTools-SyncwithCaution'>Sync with Caution</a></li>
+    <li><a href='#HQApiCommand-LineTools-HowtoFindaResourceID'>How to Find a Resource ID</a></li>
+</ul>
+</ul></div>
+
+
+
+<h1><a name="HQApiCommand-LineTools-CommandLineToolsOverview"></a>Command-Line Tools Overview</h1>
+
+<p>This table lists the command-line tools:</p>
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<td class='confluenceTd'> <b>Tool</b> </td>
+<td class='confluenceTd'> <b>Functionality</b> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <a href="HQApi agent command.html" title="HQApi agent command">agent</a> </td>
+<td class='confluenceTd'> List the agents registered with the HQ Server. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <a href="HQApi alertdefinition command.html" title="HQApi alertdefinition command">alertdefinition</a> </td>
+<td class='confluenceTd'> List, update, create, and delete resource and resource type alert definitions. An alert definition specifies the alert details and the resource or resource type to which it is assigned. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <a href="HQApi alert command.html" title="HQApi alert command">alert</a> </td>
+<td class='confluenceTd'> List information for fired alerts, fix an alert,acknowledge an alert in escalation, or delete an alert. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <a href="HQApi application command.html" title="HQApi application command">applications</a></td>
+<td class='confluenceTd'> Create, list, and update applications configured in HQ. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <a href="HQApi autodiscovery command.html" title="HQApi autodiscovery command">autodiscovery</a> </td>
+<td class='confluenceTd'> List the platforms in the autodiscovery queue and approve them for import to inventory. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <a href="HQApi control command.html" title="HQApi control command">control</a> </td>
+<td class='confluenceTd'> List supported control actions for a resource, list control action history for a resource, and perform issue a control action to a resource. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <a href="HQApi dependency command.html" title="HQApi dependency command">dependency</a><font color="red">&#42;</font> </td>
+<td class='confluenceTd'> List and manage dependency relationships between network or virtual hosts and platforms. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <a href="HQApi escalation command.html" title="HQApi escalation command">escalation</a> </td>
+<td class='confluenceTd'> List and update Escalations. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <a href="HQApi event command.html" title="HQApi event command">event</a> </td>
+<td class='confluenceTd'> List information about events &#8211; alerts, resource control actions, log events, or configuration events &#8211; that have been logged for a resource, or for all resources. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <a href="HQApi groovyshell command.html" title="HQApi groovyshell command">groovyshell</a> </td>
+<td class='confluenceTd'> Run Groovy scripts from the command shell.  </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <a href="HQApi group command.html" title="HQApi group command">group</a> </td>
+<td class='confluenceTd'> List resource group definitions, create or update groups, and delete groups. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <a href="HQApi maintenance command.html" title="HQApi maintenance command">maintenance</a><font color="red">&#42;</font> </td>
+<td class='confluenceTd'> Specify downtime periods for a resource or group, during which alerts on the resource(s) will not fire. Supported in vFabric Hyperic only. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <a href="HQApi metric command.html" title="HQApi metric command">metric</a> </td>
+<td class='confluenceTd'> List and update the metric collection configuration for individual resources. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <a href="HQApi metricData command.html" title="HQApi metricData command">metricData</a> </td>
+<td class='confluenceTd'> List the measurements for a particular metric for a particular resource. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <a href="HQApi metricTemplate command.html" title="HQApi metricTemplate command">metricTemplate</a> </td>
+<td class='confluenceTd'> Output metric collection configuration for a specified resource type. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <a href="HQApi resource command.html" title="HQApi resource command">resource</a> </td>
+<td class='confluenceTd'> Output resource data, create or update resources, and delete resources. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <a href="HQApi resourceprototype command.html" title="HQApi resourceprototype command">resourceprototype</a> </td>
+<td class='confluenceTd'> Return the internal HQ ID and the name for resource types. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <a href="HQApi role command.html" title="HQApi role command">role</a><font color="red">&#42;</font> </td>
+<td class='confluenceTd'> List, update, and create non-system roles. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <a href="HQApi serverConfig command.html" title="HQApi serverConfig command">serverConfig</a> </td>
+<td class='confluenceTd'> List and update selected HQ Server configuration properties, </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <a href="HQApi user command.html" title="HQApi user command">user</a> </td>
+<td class='confluenceTd'> List, update, and create users. </td>
+</tr>
+</tbody></table>
+</div>
+
+
+
+
+<h1><a name="HQApiCommand-LineTools-InvokingCommandLineTools"></a>Invoking Command-Line Tools</h1>
+
+<p>To invoke the command-line tools from shell, you run the <tt>hqapi.sh</tt> script in the /bin directory of the client download, supplying the name of the tool you want to run.  All commands have the following syntax:</p>
+
+<p><tt>./bin/hqapi.sh &lt;top-level-command&gt; &lt;sub-command&gt; &lt;options&gt;</tt></p>
+
+<p>where:</p>
+<ul>
+	<li><tt>&lt;top-level-command&gt;</tt> is the command-line tool name, for instance <b>agent</b> or <b>resource</b>.</li>
+</ul>
+
+
+<ul>
+	<li><tt>&lt;sub-command&gt;</tt> is a supported command option, for instance <b>list</b>, <b>sync</b>, or <b>delete</b>.</li>
+</ul>
+
+
+<ul>
+	<li><tt>&lt;options&gt;</tt> are one or more supported command qualifiers Supported options vary by command and subcommand, for example <b>resource list</b> supports the <b>&#45;-prototype</b> qualifier. See documentation for each command-line tool for supported command qualifiers.</li>
+</ul>
+
+
+<p>This command returns a list of resources whose type is "MacOSX".</p>
+
+<p><tt>./bin/hqapi.sh resource list &#45;-prototype="MacOSX"</tt></p>
+
+<p>In the case of an error, the reason for the error will be printed to stderr and the process will exit with a negative return code.</p>
+
+<p>A full listing of supported options can be obtained by passing the <b>&#45;h</b> flag to any command.</p>
+
+
+<h1><a name="HQApiCommand-LineTools-CommonSubcommands"></a>Common Subcommands</h1>
+
+<p>Each command-line tool has one or more command options.  The most common are described below.</p>
+
+<h2><a name="HQApiCommand-LineTools-list"></a>list</h2>
+
+<p><b>list</b> returns an XML object that describes one or more instances of the type of object you're working with - for instance, agents, resources, or roles. You can write the XML output to a file, and pipe it to the sync command to update the corresponding data in the HQ database.  For example:</p>
+
+<p><tt>./bin/hqapi.sh resource list &#45;-prototype="HTTP" &gt; http-resources.xml</tt></p>
+
+<h2><a name="HQApiCommand-LineTools-sync"></a>sync</h2>
+
+<p><b>sync</b> takes a valid XML object that describes items in HQ - for instance, platforms, servers, or services - and updates the HQ database accordingly.</p>
+
+<p>For some command-line tools, <b>sync</b> can create new items in HQ; for others, <b>sync</b> only updates items that already exist in HQ.</p>
+
+<p><b>Note:</b> When you use <b>sync</b> to create a new item, do not specify the <tt>id</tt> attribute for the new item.</p>
+
+<p>To update an item, typically you write the XML object to a file using the <b>list</b> option, edit the contents as desired, and then use <b>sync</b> to update attributes for an existing item in HQ.
+<br class="atl-forced-newline" /></p>
+
+<p>By default, <b>sync</b> reads the XML over stdin. For example:</p>
+
+<p><tt>cat http-resources.xml &#124; ./bin/hqapi.sh resource sync</tt></p>
+
+<p>As desired, you can specify  the location of the file with the <b>&#45;-file</b> command qualifier.</p>
+
+<p><tt>./bin/hqapi.sh resource sync  &#45;-file=http-resources.xml</tt></p>
+
+<h2><a name="HQApiCommand-LineTools-delete"></a>delete</h2>
+
+<p><b>delete</b> removes an item from the HQ database. The <b>delete</b> option supports only "one-at-a-time" deletions.  You supply the name or ID of the item to delete.</p>
+
+<h1><a name="HQApiCommand-LineTools-RequiredCommandQualifiersandHowtoSupplyThem"></a>Required Command Qualifiers and How to Supply Them</h1>
+
+<p>For each command line tool there is a set of required and optional command qualifiers.</p>
+
+<p>The optional qualifiers usually set the scope of a command, for example, tell it to list a single resource instead of all the resources on a platform. Scoping qualifiers vary by command and are documented in the each command's reference documentation.</p>
+
+<p>The qualifiers that every command requires are the parameters that specify how to connect to the HQ Server:</p>
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<td class='confluenceTd'> <b>&#45;-host</b> </td>
+<td class='confluenceTd'> HQ server hostname </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>&#45;-port</b> </td>
+<td class='confluenceTd'> HQ server port </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>&#45;-user</b> </td>
+<td class='confluenceTd'> user to connect as </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>&#45;-password</b> </td>
+<td class='confluenceTd'> password for the given user </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>&#45;-secure</b> </td>
+<td class='confluenceTd'> Flag to indicate if SSL should be used. </td>
+</tr>
+</tbody></table>
+</div>
+
+
+<p>The optional qualifiers that every command supports are:</p>
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<td class='confluenceTd'> <b>&#45;-properties</b> </td>
+<td class='confluenceTd'> Supplies the path to a properties file that sets the values of the server connection settings listed above. Not necessary if you define the properties in the default location &#8212; <tt>&#126;/.hq/client.properties</tt> &#8212; as described below in <a href="#HQApiCommand-LineTools-DefineaConnectionPropertiesFile">Define a Connection Properties File</a></td>
+</tr>
+</tbody></table>
+</div>
+
+
+<h2><a name="HQApiCommand-LineTools-DefineaConnectionPropertiesFile"></a>Define a Connection Properties File</h2>
+
+<p>To avoid specifying the connection parameters each time you run a command, you can specify them in:</p>
+<ul>
+	<li><tt>hqapi1-client-n.n.n/conf/client.properties</tt> &#8212; The APIs honor this directory first.</li>
+	<li><tt>&#126;/.hq/client.properties</tt> &#8212; Create the directory if it does not exist. Under Windows, you can create the <tt>.hq</tt> directory from a DOS shell. Use the <b>mkdir</b> command to create .hq under your home home directory.</li>
+</ul>
+
+
+
+<p>For example:</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">host=localhost
+port=7443
+secure=true
+user=hqadmin
+password=hqadmin</pre>
+		</div>
+</div></div>
+
+<p>or if you have encrypted the Hyperic password, as described below in <a href="#HQApiCommand-LineTools-EncryptHypericPassword">Encrypt Hyperic Password</a>.</p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">host=localhost
+port=7443
+secure=true
+user=hqadmin
+encryptedPassword=ENC(5EJNmq7JLKcIkTVlcahLrg==)
+encryptionKey=popcorns</pre>
+		</div>
+</div></div>
+<h2><a name="HQApiCommand-LineTools-EncryptHypericPassword"></a>Encrypt Hyperic Password</h2>
+
+<p><tt>client.properties</tt> supports encrypted passwords.</p>
+
+<p>Use the <tt>hqapi1-client-n.n.n/hq-encrypt-password.sh</tt>, or under Windows <tt>hqapi1-client-n.n.n/hq-encrypt-password.bat</tt> to encrypt your password. You enter your password twice, and they supply an encryption key. For example:</p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">$ sh bin/hq-encrypt-password.sh
+Enter password:********
+Re-Enter password:********
+Encryption Key: popcorns
+The encrypted password is ENC(5EJNmq7JLKcIkTVlcahLrg==)</pre>
+		</div>
+</div></div>
+
+<p>Define the encrypted password and encryption key in <tt>client.properties</tt>, as described in the previous section.</p>
+
+<h2><a name="HQApiCommand-LineTools-SupplyPropertiesFilePathonCommandLine"></a>Supply Properties File Path on Command Line</h2>
+
+<p>The APIs look for server connection properties in <tt>hqapi1-client-n.n.n/conf</tt>, and if not found there, in <tt>&#126;/.hq/client.properties</tt>. </p>
+
+<p>If you want to put <tt>client.properties</tt> in a different location, you can do so, and then supply the path to the file on the command line, using the <tt>--properties</tt> command qualifier. </p>
+
+<h1><a name="HQApiCommand-LineTools-TipsandRemindersforCLITools"></a>Tips and Reminders for CLI Tools</h1>
+
+<h2><a name="HQApiCommand-LineTools-SyncwithCaution"></a>Sync with Caution</h2>
+
+<p>There is no un-do command for updates you make with the API command line tools. Carefully review the XML you supply to a command line tool's <b>sync</b> method.</p>
+
+<h2><a name="HQApiCommand-LineTools-HowtoFindaResourceID"></a>How to Find a Resource ID</h2>
+<p><a name="HQApiCommand-LineTools-FindID"></a><br/>
+When you run an HQ API command that operates on a particular resource you must identify the resource by its internal HQ ID.  To obtain the ID for a resource, you can run the <b>resource list</b> command to find it. The <b>resource list</b> command returns inventory and configuration properties for one or more resources. For example, this command:</p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">sh bin/hqapi.sh resource list --platform=vion.intranet.hc.net</pre>
+		</div>
+</div></div>
+
+<p>returns the results shown below; the third line defines the internal HQ ID for the resource: <tt>Resource id="27054"</tt></p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">&lt;ResourcesResponse&gt;
+    &lt;Status&gt;Success&lt;/Status&gt;
+    &lt;Resource id="27054" name="vion.intranet.hc.net" description="CentOS 5.2" location=""&gt;
+        &lt;ResourcePrototype id="10120" name="Linux"/&gt;
+        &lt;Agent id="12423" address="10.0.0.161" port="-1" version="4.3.0-EE" unidirectional="true"/&gt;
+        &lt;Ip address="127.0.0.1" mac="00:00:00:00:00:00" netmask="255.0.0.0"/&gt;
+        &lt;Ip address="10.0.0.131" mac="00:50:56:8F:19:24" netmask="255.255.255.0"/&gt;
+        &lt;ResourceInfo key="fqdn" value="vion.intranet.hc.net"/&gt;
+    &lt;/Resource&gt;
+&lt;/ResourcesResponse&gt;</pre>
+		</div>
+</div></div>
+
+<p>You can use <b>resource list</b> to query by:</p>
+
+<ul>
+	<li>resource name - regex for resource name</li>
+	<li>platform name - to get properties for it and optionally, its child resources.</li>
+	<li>resource type - by query by platform name and get properties for it, and optionally, the resources running on it.</li>
+</ul>
+
+
+
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

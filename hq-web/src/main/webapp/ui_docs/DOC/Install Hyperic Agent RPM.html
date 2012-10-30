@@ -21,30 +21,29 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on May 10, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Oct 25, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1336680548764 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1336680548764 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1336680548764 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1351195091884 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1351195091884 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1351195091884 li {margin-left: 0px;padding-left: 0px;}
 
-/*]] >*/</style><div class='rbtoc1336680548764'>
+/*]]>*/</style><div class='rbtoc1351195091884'>
 <ul>
-    <li><a href='#InstallHypericAgentRPM-AboutHypericServerRPM'>About Hyperic Server RPM</a></li>
-    <li><a href='#InstallHypericAgentRPM-Step1InstallvFabricRepositoryRPM'>Step 1 - Install vFabric Repository RPM</a></li>
-    <li><a href='#InstallHypericAgentRPM-Step2InstallAgentRPM'>Step 2 - Install Agent RPM</a></li>
+    <li><a href='#InstallHypericAgentRPM-AboutHypericAgentRPM'>About Hyperic Agent RPM</a></li>
+    <li><a href='#InstallHypericAgentRPM-InstallAgentRPM'>Install Agent RPM</a></li>
     <li><a href='#InstallHypericAgentRPM-ConfigureandStartHypericAgent'>Configure and Start Hyperic Agent</a></li>
-</ul></div> 
-<blockquote>
-<p><b>About this page...</b> </p>
+</ul></div>
+<blockquote><p><b>About this page...</b></p>
 
-<p>This page has instructions for installing Hyperic Agent 4.6 from an RPM from the VMware YUM repository. </p>
+<p>This page has instructions for installing Hyperic Agent from an RPM.</p>
 
-<p>Before running the installer, see <a href="http://support.hyperic.com/display/465/Hyperic+Installation+and+Startup+Process" title="Hyperic Installation and Startup Process">Hyperic Installation and Startup Process</a> for information about where agent installation fits in the implementation process. </p></blockquote> 
-<h1><a name="InstallHypericAgentRPM-AboutHypericServerRPM"></a>About Hyperic Server RPM </h1>
+<p>Before running the installer, see <a href="Hyperic Installation and Startup Process.html" title="Hyperic Installation and Startup Process">Hyperic Installation and Startup Process</a> for information about where agent installation fits in the implementation process.</p></blockquote>
 
-<p>The name of the vFabric Hyperic Agent RPM package is <tt>vfabric-hyperic-agent.noarch</tt>. Note that the agent in the RPM does not include a JRE. Agent hosts must have the J2RE virtual package installed. A Sun 1.6 JRE is required. The RPM: </p>
+<h1><a name="InstallHypericAgentRPM-AboutHypericAgentRPM"></a>About Hyperic Agent RPM</h1>
+
+<p>The name of the vFabric Hyperic Agent RPM package is <tt>vFabric-hyperic-agent-5.x.y.EE-1.noarch.rpm</tt>. Note that the agent in the RPM does not include a JRE. Agent hosts must have the J2RE virtual package installed. A Sun 1.6 JRE is required. The RPM:</p>
 
 <ul>
 	<li>Creates the user and group named "hyperic" if they do not exist.</li>
@@ -55,75 +54,16 @@ div.rbtoc1336680548764 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 
 
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="/images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Open firewall port on Hyperic Agent, if necessary</b><br />If <tt>iptables</tt> (a host-based firewall tool typically enabled by default on Redhat and Fedora installations) is configured, you may need to open up the Hyperic Agent's listen port for communication from the Hyperic Server, using a command similar to: 
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Open firewall port on Hyperic Agent, if necessary</b><br />If <tt>iptables</tt> (a host-based firewall tool typically enabled by default on Redhat and Fedora installations) is configured, you may need to open up the Hyperic Agent's listen port for communication from the Hyperic Server, using a command similar to:<br/>
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
 		<pre class="theme: Confluence; brush: java; gutter: false">`/sbin/iptables -ARH-Firewall-1-INPUT -p tcp --dport 2144 -j ACCEPT`</pre>
 		</div>
-</div></div> 
-<p>If SELinux is enabled, dditional configuration may be required.</p></td></tr></table></div> 
+</div></div>If SELinux is enabled, dditional configuration may be required.</td></tr></table></div>
 
-<h1><a name="InstallHypericAgentRPM-Step1InstallvFabricRepositoryRPM"></a>Step 1 - Install vFabric Repository RPM </h1>
-<p>IIn this step you install the vFabric Repository RPM on the RHEL VM where you will install the Hyperic Server. This RPM allows you to browse the vFabric repository. </p>
+<h1><a name="InstallHypericAgentRPM-InstallAgentRPM"></a>Install Agent RPM</h1>
 
-
-<p>vFabric RPM repositories are located on <tt>repo.vmware.com</tt>: </p>
-
-<ul>
-	<li>vfabric-5-repo &#8212; vFabric component RPMs that are certified for vFabric Platform 5.</li>
-	<li>vfabric-5.1-repo-5.1-1 &#8212; vFabric component RPMs that are certified for vFabric Suite 5.1.</li>
-	<li>vfabric-all-repo &#8212; vFabric component RPMs for customers who have not bought a vFabric 5 Standard or Advanced license, and more recently released versions of vFabric components that may not necessarily be certified to work with those of vFabric 5 or vFabric 5.1.</li>
-</ul>
-
-
-<p>If you have a vFabric Standard or Advanced license, plan to install only RPMs that are certified for vFabric 5 or 5.1, then install <tt>vfabric-5-repo-5-2</tt> or <tt>vfabric-5.1-repo-5.1-1</tt>, as appropriate. If you do not have a vFabric Standard or Advanced license, or want to install components that are yet certified for vFabric 5 or vFabric 5.1, install <tt>vfabric-all-repo</tt>. </p>
-
-<p><b>Procedure</b> </p>
-<ol>
-	<li>Log in to the RHEL VM as the <tt>root</tt> user (or as a user with <tt>sudo</tt> privileges).</li>
-	<li>Open a terminal window.</li>
-	<li>Install the desired repository RPMs. Note that the URLs of the RPMs vary depending on whether the version of RHEL you use.
-	<ul>
-		<li>For RHEL 5:
-<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
-<script type="syntaxhighlighter" class="theme: Confluence; brush: java; gutter: false"><![CDATA[rpm -Uvh http://repo.vmware.com/pub/rhel5/vfabric/5/vfabric-5-repo-5-2.noarch.rpm 
-\\ to install the vFabric 5 repository RPM 
-rpm -Uvh http://repo.vmware.com/pub/rhel5/vfabric/5.1/vfabric-5.1-repo-5.1-1.noarch.rpm 
-\\ to install the vFabric 5.1 repository RPM 
-rpm -Uvh http://repo.vmware.com/pub/rhel5/vfabric-all/vfabric-all-repo-1-1.noarch.rpm 
-\\ to install the "all-repo" repository RPM]]></script>
-</div></div> </li>
-		<li>For RHEL 6:
-<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
-<script type="syntaxhighlighter" class="theme: Confluence; brush: java; gutter: false"><![CDATA[rpm -Uvh http://repo.vmware.com/pub/rhel6/vfabric/5.1/vfabric-5.1-repo-5.1-1.noarch.rpm \\ to install the vFabric 5 repository RPM 
-rpm -Uvh http://repo.vmware.com/pub/rhel6/vfabric-all/vfabric-all-repo-1-1.noarch.rpm \\ to install the "all-repo" repository RPM]]></script>
-</div></div> </li>
-	</ul>
-	</li>
-</ol>
-
-
-<div class='panelMacro'><table class='noteMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/warning.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>Use <tt>sudo</tt> to run the preceding commands if you are not logged in as <tt>root</tt>.</td></tr></table></div> 
-
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Searching the RPM repository</b><br />You can use the <tt>yum search vfabric</tt> command to list of vFabric components that you can install from the VMware repository. For example: 
-<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
-<script type="syntaxhighlighter" class="theme: Confluence; brush: java; gutter: false"><![CDATA[yum search vfabric 
-... 
-======================================== Matched: vfabric ========================================= 
-vfabric-eula.noarch : VMware vFabric 5.1 End User License Agreement 
-vfabric-gemfire.noarch : VMware vFabric GemFire 
-vfabric-hyperic-agent.noarch : VMware vFabric Hyperic Agent 
-vfabric-hyperic-server.x86_64 : VMware vFabric Hyperic Server 
-vfabric-insight-agent.noarch : com.springsource.insight.dist.vfabric:agent-rpm 
-vfabric-insight-dashboard.noarch : com.springsource.insight.dist.vfabric:dashboard-rpm 
-vfabric-rabbitmq-java-client-bin.noarch : The RabbitMQ Java Client Library 
-vfabric-rabbitmq-server.x86_64 : The RabbitMQ server 
-vfabric-sqlfire.noarch : VMware vFabric SQLFire 
-vfabric-tc-server-standard.noarch : VMware vFabric tc Server Standard 
-vfabric-web-server.x86_64 : VMware vFabric Web Server]]></script>
-</div></div></td></tr></table></div> 
-<h1><a name="InstallHypericAgentRPM-Step2InstallAgentRPM"></a>Step 2 - Install Agent RPM </h1>
-<p>To install and configure the Hyperic Agent from a downloaded RPM: </p>
+<p>To install and configure the Hyperic Agent from a downloaded RPM:</p>
 
 <ol>
 	<li>On the platform the agent will manage, use yum to install the agent
@@ -131,15 +71,15 @@ vfabric-web-server.x86_64 : VMware vFabric Web Server]]></script>
 <div id="root">
 		<pre class="theme: Confluence; brush: java; gutter: false">yum install vfabric-hyperic-agent</pre>
 		</div>
-</div></div> </li>
+</div></div></li>
 	<li>If you have not already done so, install a JDK or JRE on the platform.</li>
 	<li>As the root user, edit the <tt>/etc/init.d/hyperic-hqee-agent</tt> file, setting the <tt>HQ_JAVA_HOME</tt> to home directory of the JDK or JRE you want the agent to use.</li>
 </ol>
 
 
-<h1><a name="InstallHypericAgentRPM-ConfigureandStartHypericAgent"></a>Configure and Start Hyperic Agent </h1>
+<h1><a name="InstallHypericAgentRPM-ConfigureandStartHypericAgent"></a>Configure and Start Hyperic Agent</h1>
 
-<p>Follow the instructions for configuring and starting the agent, starting with the <a href="http://support.hyperic.com/display/465/Hyperic+Installation+and+Startup+Process#HypericInstallationandStartupProcess-PropFile">Configure Hyperic Agent in properties file</a> step of <a href="http://support.hyperic.com/display/465/Hyperic+Installation+and+Startup+Process" title="Hyperic Installation and Startup Process">Hyperic Installation and Startup Process</a>. </p>
+<p>Follow the instructions for configuring and starting the agent, starting with the <a href="Hyperic Installation and Startup Process.html#HypericInstallationandStartupProcess-PropFile">Configure Hyperic Agent in properties file</a> step of <a href="Hyperic Installation and Startup Process.html" title="Hyperic Installation and Startup Process">Hyperic Installation and Startup Process</a>. </p>
 
 				    					    <br/>
                         <div class="tabletitle">
@@ -162,7 +102,7 @@ vfabric-web-server.x86_64 : VMware vFabric Web Server]]></script>
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:06</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 29, 2012 13:00</font></td>
 		    </tr>
 	    </table>
     </body>

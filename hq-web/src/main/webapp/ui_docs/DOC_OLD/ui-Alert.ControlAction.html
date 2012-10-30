@@ -1,0 +1,103 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : ui-Alert.ControlAction</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : ui-Alert.ControlAction
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+ 
+
+<h1><a name="ui-Alert.ControlAction-ConfigureaControlActionasanAlertAction"></a>Configure a Control Action as an Alert Action </h1>
+
+<p>In vFabric Hyperic, you can configure an alert to fire a supported resource control action either on the resource that fired the alert or on another resource on the same platform. You can assign either a built-in or a custom control action to an alert definition. For more information, see <a href="Resource Control in Hyperic.html" title="Resource Control in Hyperic">Resource Control in Hyperic</a>. </p>
+
+<ol>
+	<li>Navigate to the alert definition.</li>
+	<li>Click <b>Edit</b> in the "Control Action" section of the alert definition page.
+	<ul>
+		<li>The <b>Control Action</b> page appears.<br/>
+<span class="image-wrap" style=""><img src="attachments/79660206/79921694.png" width="750px" style="border: 0px solid black"/></span> </li>
+	</ul>
+	</li>
+	<li>The <b>Resource Type</b> pulldown lists the resource types with supported control actions that exist on the current platform. These include:
+	<ul>
+		<li>Resource types whose managing resource plugins implement control actions.</li>
+		<li>The service type "FileServer Service", if any instances of that type exist on the platform.
+		<ul>
+			<li>A custom control action is configured as a "FileServer Service" platform service. The configuration process is described in <p><a href="Configure a Custom Control Action.html" title="Configure a Custom Control Action">Configure a Custom Control Action</a>.</p> </li>
+		</ul>
+		</li>
+	</ul>
+	</li>
+	<li>Select the target resource type from the <b>Resource Type</b> pulldown. (Select "File Service" if you want to assign a custom control action to the alert.)
+	<ul>
+		<li>After you select a resource type, the <b>Resource Name</b> pulldown will contain a list of the resource instances of that type that run on the current platform.</li>
+	</ul>
+	</li>
+	<li>Select resource from <b>Resource Name</b> pulldown &#8212; this will be the target of the control action, or if the selected type is "FileServer File", the custom control action to be run.</li>
+	<li>The <b>Control Type</b> pulldown lists the commands available for the selected resource. Select the command you want to run when the alert fires.
+	<ul>
+		<li>For a custom control action configured as a FileServer File service, the only command available is "run".</li>
+	</ul>
+	</li>
+	<li>Click <b>OK</b>.</li>
+</ol>
+
+
+<p>To remove the Control Action from the alert definition, edit the alert definition, select "None" from the <b>Control Type</b> pulldown, and click <b>OK</b>.</p>
+
+				    					    <br/>
+                        <div class="tabletitle">
+                            <a name="attachments">
+                                <h2>Attachments:</h2>
+                            </a>
+                        </div>
+
+                        <div class="greybox" align="left">
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79659927/79921272.png">tbb_delete.png</a> (image/png)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79659927/79921271.png">dash-button_go-arrow.png</a> (image/png)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79659927/79921270.png">tbb_new.png</a> (image/png)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79659927/79921269.gif">fb_ok.gif</a> (image/gif)
+                                <br/>
+                                                    </div>
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

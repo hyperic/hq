@@ -1,0 +1,340 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : Hyperic Installation and Startup Process</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : Hyperic Installation and Startup Process
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Oct 01, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <style type='text/css'>/*<![CDATA[*/
+div.rbtoc1349110861338 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1349110861338 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1349110861338 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1349110861338'>
+<ul>
+    <li><a href='#HypericInstallationandStartupProcess-Step1ObtainHypericInstaller'>Step 1 - Obtain Hyperic Installer</a></li>
+    <li><a href='#HypericInstallationandStartupProcess-Step2SetUpHypericDatabase'>Step 2 - Set Up Hyperic Database</a></li>
+    <li><a href='#HypericInstallationandStartupProcess-Step3SetUpHypericServer'>Step 3 - Set Up Hyperic Server</a></li>
+    <li><a href='#HypericInstallationandStartupProcess-Step4SetUptheHypericAgent'>Step 4 - Set Up the Hyperic Agent</a></li>
+    <li><a href='#HypericInstallationandStartupProcess-Step5NextStepsforNewInstallations'>Step 5 - Next Steps for New Installations</a></li>
+</ul></div> 
+
+<blockquote>
+<p><b>About this page...</b></p>
+
+<p>This page lists required and optional steps for a new installation of the Hyperic Server and Hyperic Agent. Steps that are not required for all installations are marked "Optional" or "As Necessary". </p>
+
+<p>For upgrade options and instruction see <a href="Hyperic Upgrade Processes.html" title="Hyperic Upgrade Processes">Hyperic Upgrade Processes</a>.</p></blockquote>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Note:</b> If you obtain vFabric Hyperic as part of vFabric Suite (previously known as "vFabric Platform"), first complete the license activation and installation procedures in <em>Getting Started with vFabric Suite</em>. Then follow procedures in this document to set up your environment for vFabric Hyperic and complete any remaining Hyperic-specific installation and configuration tasks.</td></tr></table></div> 
+
+<h1><a name="HypericInstallationandStartupProcess-Step1ObtainHypericInstaller"></a>Step 1 &#8211; Obtain Hyperic Installer</h1>
+
+<p>See <a href="Select and Download an Installer.html" title="Select and Download an Installer">Select and Download an Installer</a> for instructions.</p>
+
+<h1><a name="HypericInstallationandStartupProcess-Step2SetUpHypericDatabase"></a>Step 2 &#8211; Set Up Hyperic Database </h1>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>When to skip this step</b><br />Skip this step if you are:
+<ul>
+	<li>deploying the Hyperic virtual appliance (vApp), or</li>
+	<li>planning to use the embedded PostgreSQL database.</li>
+</ul>
+</td></tr></table></div>
+
+<p>If you will use an external PostgreSQL database, rather than use the embedded database, create the Hyperic database <em>before</em> installing Hyperic Server. In large environments, set up the Hyperic database on a dedicated platform. </p>
+
+<p>Follow the instructions on <a href="Set Up Hyperic Database.html" title="Set Up Hyperic Database">Set Up Hyperic Database</a>.</p>
+
+
+<blockquote>
+<p>For information about Hyperic database requirements and recommendations, see</p>
+<ul>
+	<li><a href="vFabric Hyperic Supported Configurations and System Requirements.html#vFabricHypericSupportedConfigurationsandSystemRequirements-Hosts">Host Machine Requirements</a></li>
+</ul>
+</blockquote> 
+
+
+
+<h1><a name="HypericInstallationandStartupProcess-Step3SetUpHypericServer"></a>Step 3 - Set Up Hyperic Server </h1>
+<p><a name="HypericInstallationandStartupProcess-SetUpServer"></a></p>
+<ol>
+	<li>Before installing the server:
+	<ul>
+		<li><b>Configure user-managed keystore for server</b> (Optional). <a name="HypericInstallationandStartupProcess-ServerKeystore"></a>
+		<ul>
+			<li>If you want the Hyperic server to use a keystore that you manage yourself for SSL communication, rather than Hyperic-generated keystores, set up a JKS format keystore for the Hyperic Server on its host and import the SSL certificate for it. Make a note of the full path to the keystore, and its password &#8212; you will supply this information when you run the Hyperic installer (in <tt>&#45;full</tt> mode).
+<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Password Requirement for Hyperic Keystores</b><br />The Hyperic Server's keystore password and private key password <b>must</b> be the same &#8212; otherwise, the Hyperic Server's internal Tomcat-based server will be unable to start. For information about why, see <a href="http://tomcat.apache.org/tomcat-6.0-doc/ssl-howto.html">http://tomcat.apache.org/tomcat-6.0-doc/ssl-howto.html</a>.</td></tr></table></div> 
+<blockquote>
+<p>For more information, see <a href="About SSL in Hyperic.html" title="About SSL in Hyperic">About SSL in Hyperic</a> </p></blockquote> </li>
+		</ul>
+		</li>
+		<li><b>Define Server HQ_JAVA_HOME</b> (As necessary). <a name="HypericInstallationandStartupProcess-ServerJre"></a>
+		<ul>
+			<li>Hyperic platform-specific server installers include a JRE; platform-independent installers do not. Depending on your environment and the installer you use, you may need to define the location of the JRE to ensure that the server can find the JRE you want it to use.</li>
+			<li>For more information, and instructions, see <a href="Configure JREs for Hyperic Components.html" title="Configure JREs for Hyperic Components">Configure JREs for Hyperic Components</a>.</li>
+		</ul>
+		</li>
+		<li><b>Make sure the Hyperic database is available.</b>
+		<ul>
+			<li>during the installation process, the Hyperic Server will test the database connection.</li>
+		</ul>
+		</li>
+	</ul>
+	</li>
+	<li><b>Install Hyperic Server.</b><br/>
+<a name="HypericInstallationandStartupProcess-InstallServer"></a>
+	<ul>
+		<li>Follow the instructions for installer you are using:
+		<ul>
+			<li><a href="Install Hyperic vApp.html" title="Install Hyperic vApp">Install Hyperic vApp</a></li>
+			<li><a href="Run Hyperic Installer.html" title="Run Hyperic Installer">Run Hyperic Installer</a></li>
+			<li><a href="Install Hyperic Server RPM.html" title="Install Hyperic Server RPM">Install Hyperic Server RPM</a></li>
+		</ul>
+		</li>
+	</ul>
+	</li>
+	<li><b>Install License</b> (vFabric Hyperic only).<br/>
+<a name="HypericInstallationandStartupProcess-license"></a>
+	<ul>
+		<li>Evaluation versions of vFabric Hyperic have a built-in, time-limited evaluation license &#8212; you should not need to install a license.</li>
+		<li>If you are installing a licensed version of vFabric Hyperic, follow the the instructions on <a href="Install or Configure Hyperic License.html" title="Install or Configure Hyperic License">Install or Configure Hyperic License</a>.</li>
+	</ul>
+	</li>
+	<li><b>Start the Hyperic Server.</b><br/>
+<a name="HypericInstallationandStartupProcess-StartServer"></a>
+	<ul>
+		<li>Follow the instructions that apply to your environment:
+		<ul>
+			<li>If you installed the Hyperic Server from the VMware yum repository to an RHEL VM, the Hyperic Server is configured to start automatically each time the VM starts up. If you installed the Hyperic Server for a downloaded RPM, following these steps to start the Hyperic Server as a daemon:
+			<ol>
+				<li>Log in to the Hyperic Server host as <tt>root</tt>.</li>
+				<li>Open a terminal window and run the <tt>/etc/init.d/hyperic-hq-server</tt> script with the <tt>start</tt> parameter:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">/etc/init.d/hyperic-hq-server start</pre>
+		</div>
+</div></div> </li>
+			</ol>
+			</li>
+			<li>On Unix-Like platforms, to start the Hyperic Server as a daemon:
+			<ol>
+				<li>Open a command shell.</li>
+				<li>Change directory to <tt>ServerHome/bin</tt>, and enter:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">hq-server.sh start</pre>
+		</div>
+</div></div> </li>
+			</ol>
+			</li>
+			<li>On Windows platforms, to install the Hyperic Server Windows service and start the service:
+			<ol>
+				<li>Open a terminal window.</li>
+				<li>Change directory to <tt>ServerHome\bin</tt> and enter:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">hq-server.bat install 
+hq-server.bat start</pre>
+		</div>
+</div></div> </li>
+			</ol>
+			</li>
+			<li>The script will display startup information on stdout, then detach and run in the background.</li>
+		</ul>
+		</li>
+	</ul>
+	</li>
+	<li><b>Verify that the Hyperic Server started successfully.</b><br/>
+<a name="HypericInstallationandStartupProcess-dashboard"></a> 
+	<ul>
+		<li>Verify that the Hyperic Server started successfully by pointing your web browser to the Hyperic user interface.</li>
+		<li>After the Hyperic Server starts up, which may take a moment or so, display the Hyperic user interface at the following URL, replacing "ServerHostName" with the server's hostname (or "localhost" from the server host). Replace "7080" with the appropriate port number if you configured the server to listen on a different port.
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">http:\\ServerHostName:7080</pre>
+		</div>
+</div></div> </li>
+		<li>The Hyperic Dashboard should appear. Note that there will not be any resources in inventory until you start a Hyperic Agent.</li>
+		<li>If the Hyperic Dashboard does not appear, check <tt>server.log</tt> and <tt>boostrap.log</tt> in <tt>ServerHome/logs/</tt> for information about server startup status.</li>
+	</ul>
+	</li>
+</ol>
+
+
+<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Sensitive Data Best Practices</b><br />In this version of Hyperic, the Hyperic installer writes some sensitive data to installation log files. After successfully installing Hyperic Server, delete <tt>InstallerHome/logs/hq-install.log</tt> and <tt>hq-install.log.verbose</tt>, or the whole the exploded installer.</td></tr></table></div>
+
+<h1><a name="HypericInstallationandStartupProcess-Step4SetUptheHypericAgent"></a>Step 4 - Set Up the Hyperic Agent </h1>
+<p><a name="HypericInstallationandStartupProcess-SetupAgent"></a></p>
+<ol>
+	<li><b>Before installing the agent, or if you have already installed the agent, before starting it for the first time:</b>
+	<ul>
+		<li><b>Configure user-managed keystore for Hyperic Agent</b> (Optional). <a name="HypericInstallationandStartupProcess-AgentKeystore"></a>
+		<ul>
+			<li>If you want the Hyperic Agent to use a keystore that you manage yourself for SSL communication, rather than a Hyperic-generated keystore, set up a JKS format keystore for the Hyperic Agent on its host and import the SSL certificate for it. Make a note of the full path to the keystore, and its password &#8212; you will configure this data in the agent's <tt>agent.properties</tt> file.
+<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Password Recommendation for Agent Keystore</b><br />The agent keystore password and the private key password must be the same.</td></tr></table></div> </li>
+		</ul>
+		</li>
+		<li><b>Import certificates for selected managed products to agent keystore</b> (Optional).
+		<ul>
+			<li>In Hyperic 4.6 and later, Hyperic plugins that connect to managed products over SSL are updated to support certificate verification. To enable management of such products by a 4.6.x agent, it may be necessary to manually import the target server's certificate into the agent keystore if the server's certificate is not trusted. Affected plugins include vSphere and Rabbit MQ. For more information, see <a href="About SSL in Hyperic.html" title="About SSL in Hyperic">About SSL in Hyperic</a>.</li>
+		</ul>
+		</li>
+		<li><b>Define Agent HQ_JAVA_HOME</b> (As necessary).
+		<ul>
+			<li>Hyperic platform-specific agent installers include a JRE; platform-independent installers do not. Depending on your environment and the installer you use, you may need to define the location of the JRE to ensure that the agent can find the JRE you want it to use. For more information, and instructions, see <a href="Configure JREs for Hyperic Components.html" title="Configure JREs for Hyperic Components">Configure JREs for Hyperic Components</a>.</li>
+		</ul>
+		</li>
+		<li><b>Open firewall port if necessary.</b>
+		<ul>
+			<li>If there is a firewall blocking incoming traffic to a platform where you will install Hyperic Agents, you must open the agent listen port (by default, 2144 for plaintext or 2443 for SSL) so that the agent will accept connections from the Hyperic Server. Note that the firewall built into Windows blocks remote connections by default; in Windows environments you <em>must</em> open the agent listen port.<br/>
+<a name="HypericInstallationandStartupProcess-InstallAgent"></a></li>
+		</ul>
+		</li>
+	</ul>
+	</li>
+	<li><b>Install the agent</b>, following the instructions for the desired installation method:
+	<ul>
+		<li><a href="Install an Agent-Only Package.html" title="Install an Agent-Only Package">Install an Agent-Only Package</a></li>
+		<li><a href="Run Hyperic Installer.html" title="Run Hyperic Installer">Run Hyperic Installer</a></li>
+		<li><a href="Install Hyperic Agent RPM.html" title="Install Hyperic Agent RPM">Install Hyperic Agent RPM</a></li>
+	</ul>
+	</li>
+	<li><b>Install database drivers for Hyperic HQ</b> .
+	<ul>
+		<li>In Hyperic HQ, the plugins packaged with the Hyperic Agent for MSSQL, Oracle, Informix, DB2, and Sybase do not include the database vendor's JDBC plugin. (The database plugins in vFabric Hyperic include the JDBC drivers.) After installing Hyperic HQ you must download and install the vendor-provided JDBC drivers for these plugins to work. Install drivers in:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">AgentHome/bundles/AgentBundle/pdk/lib/jdbc</pre>
+		</div>
+</div></div> 
+<p><a name="HypericInstallationandStartupProcess-PropFile"></a></p></li>
+	</ul>
+	</li>
+	<li><b>Configure Hyperic Agent in properties file</b> (As necessary).
+	<ul>
+		<li>You can define the properties that enable the Hyperic Agent and Hyperic Server to communicate with each other and other agent behaviors in an agent's <tt>agent.properties</tt> file prior to first startup. If you do not, you can supply the values interactively the first time you start the agent (as described in the following step.)</li>
+		<li>Note however, that some agent properties <em>cannot</em> be supplied interactively. You <em>must</em> edit <tt>agent.properties</tt> before first agent startup, as described in <a href="Set Up Agent in Properties File.html" title="Set Up Agent in Properties File">Set Up Agent in Properties File</a> if:
+		<ul>
+			<li>You want the agent to use an SSL keystore that you manage, rather than a Hyperic-generated keystore.</li>
+			<li>The agent will manage vSphere components.</li>
+			<li>The agent will connect to the Hyperic Server via a proxy server. (Supported in vFabric Hyperic only.)</li>
+		</ul>
+		</li>
+		<li>Configuring an agent in its properties file, rather than interactively, is also useful particularly when you deploy a lot of agents.<br/>
+<a name="HypericInstallationandStartupProcess-AgentStart"></a></li>
+	</ul>
+	</li>
+	<li><b>Start the Hyperic Agent for the first time.</b>
+	<ol>
+		<li>Make sure that the Hyperic Server is running.</li>
+		<li>Follow the instructions that apply to your environment:
+		<ul>
+			<li>On Unix-Like platforms, to start the Hyperic Agent as a daemon:
+			<ol>
+				<li>Open a command shell.</li>
+				<li>Change directory to <tt>AgentHome/bin</tt>, and enter:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">hq-agent.sh start</pre>
+		</div>
+</div></div> </li>
+			</ol>
+			</li>
+			<li>On Windows platforms, to set up the Hyperic Agent to run as a service and start the service:
+			<ol>
+				<li>Open a terminal window.</li>
+				<li>Change directory to <tt>ServerHome\bin</tt> and enter:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">hq-agent.bat install 
+hq-agent.bat start</pre>
+		</div>
+</div></div> </li>
+			</ol>
+			<ul>
+				<li>If you configured all required agent properties in <tt>agent.properties</tt>, the agent will start up and discover the resources on the platform. Otherwise, the agent will prompt for required properties that have not been defined. For instructions on the configuration prompts, see <a href="Set Up Agent Interactively.html" title="Set Up Agent Interactively">Set Up Agent Interactively</a>.<br/>
+<a name="HypericInstallationandStartupProcess-SslWarnings"></a>
+<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>SSL Warnings?</b><br />By default, if the agent does not trust the certificate presented by the server, the agent issues this warning: 
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">The authenticity of host 'ServerHost' can't be established. Are you sure you want to continue connecting? [default=no]:</pre>
+		</div>
+</div></div> 
+
+<p>If this warning is issued, for strongest security, press <b>Return</b> to terminate the agent configuration process. Before restarting the agent configuration process, obtain an SSL certificate for the agent, and one for the server, both signed by the same trusted CA. Then follow the instructions in <a href="Configure SSL Options.html" title="Configure SSL Options">Configure SSL Options</a>. If you enter "yes" to continue the agent configuration process, the agent displays the following warning, prompting you to confirm your choice before it imports the certificate that the server presented presented:  </p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">The server to agent communication channel is using a self-signed certificate and could not be verified 
+Are you sure you want to continue connecting? [default=no]: yes</pre>
+		</div>
+</div></div></td></tr></table></div>
+<p><a name="HypericInstallationandStartupProcess-import"></a></p></li>
+			</ul>
+			</li>
+		</ul>
+		</li>
+	</ol>
+	</li>
+	<li><b>Import discovered resources.</b>
+	<ul>
+		<li>After the Hyperic Agent starts up and runs the auto-discovery process, the resources discovered on the platform appear in the <b>Auto-Discovery</b> portlet on the Hyperic Dashboard.</li>
+		<li>Open the Hyperic user interface as described above in <a href="#HypericInstallationandStartupProcess-dashboard">View the Hyperic Dashboard</a>.</li>
+		<li>For information about aut-discovery and related instructions, see <a href="Discover and Import Resources to Inventory.html" title="Discover and Import Resources to Inventory">Discover and Import Resources to Inventory</a>.</li>
+		<li>If no resources appear in the <b>Auto-Discovery</b> portlet, check the log files (<tt>agent.log</tt>, <tt>agent.log.startup</tt>, and <tt>wrapper.log</tt>) in <tt>AgentHome/logs</tt> to make sure the agent started up successfully.</li>
+	</ul>
+	</li>
+</ol>
+
+
+<h1><a name="HypericInstallationandStartupProcess-Step5NextStepsforNewInstallations"></a>Step 5 - Next Steps for New Installations </h1>
+<p><a name="HypericInstallationandStartupProcess-NextSteps"></a></p>
+
+<p>If you are implementing a large deployment, see:</p>
+<ul>
+	<li><a href="Scaling and Tuning Hyperic Performance.html" title="Scaling and Tuning Hyperic Performance">Scaling and Tuning Hyperic Performance</a></li>
+</ul>
+
+
+<p>For information about establishing your monitoring environment see <em><a href="vFabric Hyperic Administration.html" title="vFabric Hyperic Administration">vFabric Hyperic Administration</a></em> for instructions on setting up:</p>
+<ul>
+	<li>Resource groups and applications</li>
+	<li>Users and roles in (vFabric Hyperic only)</li>
+	<li>Alerts for resources and resource types</li>
+	<li>Configurable alert notification types</li>
+	<li>Resource auto-discover options</li>
+</ul>
+
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:06</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

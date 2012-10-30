@@ -1,0 +1,486 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : ServerResource</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : ServerResource
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325699775669 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699775669 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699775669 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1325699775669'>
+<ul>
+    <li><a href='#ServerResource-Overview'>Overview</a></li>
+    <li><a href='#ServerResource-ClassHierarchy'>Class Hierarchy</a></li>
+    <li><a href='#ServerResource-ImplementingMethods'>Implementing Methods</a></li>
+<ul>
+    <li><a href='#ServerResource-setInstallPath'>setInstallPath</a></li>
+    <li><a href='#ServerResource-getInstallPath'>getInstallPath</a></li>
+    <li><a href='#ServerResource-setPlatformFqdn'>setPlatformFqdn</a></li>
+    <li><a href='#ServerResource-getPlatformFqdn'>getPlatformFqdn</a></li>
+    <li><a href='#ServerResource-addService'>addService</a></li>
+    <li><a href='#ServerResource-addServiceType'>addServiceType</a></li>
+    <li><a href='#ServerResource-setIdentifier'>setIdentifier</a></li>
+    <li><a href='#ServerResource-getIdentifier'>getIdentifier</a></li>
+    <li><a href='#ServerResource-setType'>setType</a></li>
+    <li><a href='#ServerResource-getType'>getType</a></li>
+    <li><a href='#ServerResource-setName'>setName</a></li>
+    <li><a href='#ServerResource-getName'>getName</a></li>
+    <li><a href='#ServerResource-setDescription'>setDescription</a></li>
+    <li><a href='#ServerResource-getDescription'>getDescription</a></li>
+    <li><a href='#ServerResource-setProductConfig'>setProductConfig</a></li>
+    <li><a href='#ServerResource-getProductConfig'>getProductConfig</a></li>
+    <li><a href='#ServerResource-setMeasurementConfig'>setMeasurementConfig</a></li>
+    <li><a href='#ServerResource-getMeasurementConfig'>getMeasurementConfig</a></li>
+    <li><a href='#ServerResource-setControlConfig'>setControlConfig</a></li>
+    <li><a href='#ServerResource-getControlConfig'>getControlConfig</a></li>
+    <li><a href='#ServerResource-setCustomProperties'>setCustomProperties</a></li>
+    <li><a href='#ServerResource-getCustomProperties'>getCustomProperties</a></li>
+</ul>
+</ul></div>
+
+
+
+<h1><a name="ServerResource-Overview"></a>Overview</h1>
+
+<p>The <tt>ServerResource</tt> class (<tt>org.hyperic.hq.product.ServerResource</tt>) stores resource data for a newly discovered servers during auto-discovery. <tt>ServerResource</tt> contains the data that is reported for a server in the auto-inventory report that the agent sends to the Hyperic Server.</p>
+
+<p>This class stores the following information:</p>
+<ul>
+	<li><tt>resource</tt> &#8212; This object represents the resource itself. Most <tt>ServerResource</tt> methods modify modifying <tt>resource</tt>. The default constructor creates an empty <tt>resource</tt> object.</li>
+	<li><tt>fqdn</tt> &#8212; The fully qualified domain name for a resource. <tt>fqdn</tt> is not used unless the resource is on a different platform than the Hyperic Agent that manages it.</li>
+	<li><tt>productConfig</tt> &#8212; Contains the configuration properties for a resource that are presented in the "Shared" section on a resource's <b>Inventory</b> page in the Hyperic user interface.</li>
+	<li><tt>metricConfig</tt> &#8212; Contains the configuration properties for a resource that are presented in the "Measurement" section on a resource's <b>Inventory</b> page in the Hyperic user interface.</li>
+	<li><tt>controlConfig</tt> &#8212; Contains the configuration properties for a resource that are presented in the "Control" section on a resource's <b>Inventory</b> page in the Hyperic user interface.</li>
+	<li><tt>cprops</tt> &#8212; Resource custom properties.</li>
+</ul>
+
+
+
+<h1><a name="ServerResource-ClassHierarchy"></a>Class Hierarchy</h1>
+
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>java.lang.Object
+     org.hyperic.hq.product.ServerResource
+</pre>
+</div></div>
+
+<h1><a name="ServerResource-ImplementingMethods"></a>Implementing Methods</h1>
+
+<p>This class implements following methods:</p>
+
+<h4><a name="ServerResource-setInstallPath"></a>setInstallPath</h4>
+
+<p><b>setInstallPath(String):void</b></p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">public void setInstallPath(String name)</pre>
+		</div>
+</div></div>
+<p>This method sets the resource installation path. For more information, see <a href="Resource Auto-Discovery Processes.html#ResourceAuto-DiscoveryProcesses-installpath">About Auto-Inventory IDs and InstallPath</a>.</p>
+
+<p><b>Parameters:</b><br/>
+<b>&nbsp;&nbsp; name</b> Path to a installation directory</p>
+
+<h4><a name="ServerResource-getInstallPath"></a>getInstallPath</h4>
+
+<p><b>getInstallPath():String</b></p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">public String getInstallPath()</pre>
+		</div>
+</div></div>
+<p>Returns the resource intallation path.</p>
+
+<h4><a name="ServerResource-setPlatformFqdn"></a>setPlatformFqdn</h4>
+
+<p>setPlatformFqdn(String):void</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">public void setPlatformFqdn(String name)</pre>
+		</div>
+</div></div>
+<p>Sets the resource's fully qualified domain name. This attribute should be set only if the discovered server runs on a different platform than the one where agent that performed the auto-discover runs.  For example, the Hyperic Agent that manages a WebLogic Server cluster runs on the platform where the Administration Server runs, and discovers the managed servers running on other platforms. Note that If you set this attribute, the platform you specify must exist in inventory.</p>
+
+<p><b>Parameters:</b><br/>
+<b>&nbsp;&nbsp; name</b> Name of the FQDN</p>
+
+<h4><a name="ServerResource-getPlatformFqdn"></a>getPlatformFqdn</h4>
+
+<p>getPlatformFqdn():String</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">public String getPlatformFqdn()</pre>
+		</div>
+</div></div>
+<p>Gets the resource FQDN.</p>
+
+<p><b>Returns:</b><br/>
+&nbsp;&nbsp; NULL if field has not been set.</p>
+
+<h4><a name="ServerResource-addService"></a>addService</h4>
+
+<p>addService(ServiceResource):void</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">public void addService(ServiceResource service)</pre>
+		</div>
+</div></div>
+<p>Adds new service resource to this server. For more about discovering resources see <a href="Resource Auto-Discovery Processes.html" title="Resource Auto-Discovery Processes">Resource Auto&#45;Discovery Processes</a>.</p>
+
+<p><b>Parameters:</b><br/>
+<b>&nbsp;&nbsp; service</b> New service resource to be added to this server.</p>
+
+<h4><a name="ServerResource-addServiceType"></a>addServiceType</h4>
+
+<p>addServiceType(ServiceType):void</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">public void addServiceType(ServiceType serviceType)</pre>
+		</div>
+</div></div>
+<p>Adds new service type to this server. More about discovering resource types see <a href="Auto-Discovery Overview.html" title="Auto-Discovery Overview">Auto&#45;Discovery Overview</a>.</p>
+
+<p><b>Parameters:</b><br/>
+<b>&nbsp;&nbsp; serviceType</b> New service type to be added. This type will eventually go back to server together with autoinventory report.</p>
+
+<h4><a name="ServerResource-setIdentifier"></a>setIdentifier</h4>
+
+<p>setIdentifier(String):void</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">public void setIdentifier(String name)</pre>
+		</div>
+</div></div>
+<p>Sets the autoinventory identifier (AIID) for this resource. </p>
+
+<p><b>Parameters:</b><br/>
+<b>&nbsp;&nbsp; name</b> Autoinventory identifier.</p>
+
+<h4><a name="ServerResource-getIdentifier"></a>getIdentifier</h4>
+
+<p>getIdentifier():String</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">public String getIdentifier()</pre>
+		</div>
+</div></div>
+<p>Returns the resource autoinventory identifier.</p>
+
+<h4><a name="ServerResource-setType"></a>setType</h4>
+
+<p>setType(String):void</p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">public void setType(String name)</pre>
+		</div>
+</div></div>
+<p>This method sets the resource type for the server as defined in the plugin descriptor. Pass this method the name of the resource type as defined in the plugin descriptor. For example, if the plugin descriptor specifies <tt>&lt;server name="My Server"&gt;</tt> set the resource type to <tt>My Server</tt>.</p>
+
+<p>If the <tt>&lt;server&gt;</tt> element defines the <tt>version</tt> attribute, append the value of <tt>version</tt> to the value of the <tt>name</tt> attribute to create the resource type name. For example, if the server is defined as <tt>&lt;server name="My Server" version="1.x"&gt;</tt>, set <tt>Type</tt> to <tt>"My Server 1.x"</tt>.</p>
+
+<p><b>Parameters:</b><br/>
+<b>&nbsp;&nbsp; name</b> Resource type as String.</p>
+
+<p>setType(GenericPlugin):void</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">public void setType(GenericPlugin plugin)</pre>
+		</div>
+</div></div>
+<p>This method derives the resource type to set for the server from the implementing auto-discovery plugin, as opposed to the plugin descriptor.</p>
+
+<p><b>Parameters:</b><br/>
+<b>&nbsp;&nbsp; plugin</b> The plugin handling the discovery operation.</p>
+
+
+<h4><a name="ServerResource-getType"></a>getType</h4>
+
+<p>getType():String</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">public String getType()</pre>
+		</div>
+</div></div>
+<p>Returns the current resource type name.</p>
+
+<h4><a name="ServerResource-setName"></a>setName</h4>
+
+<p>setName(String):void</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">public void setName(String name)</pre>
+		</div>
+</div></div>
+<p>Sets the name of this resource.</p>
+
+<p><b>Parameters:</b><br/>
+<b>&nbsp;&nbsp; name</b> Name of the resource.</p>
+
+<h4><a name="ServerResource-getName"></a>getName</h4>
+
+<p>getName():String</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">public String getName()</pre>
+		</div>
+</div></div>
+<p>Returns the name of the resource.</p>
+
+<h4><a name="ServerResource-setDescription"></a>setDescription</h4>
+
+<p>setDescription(String):void</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">public void setDescription(String description)</pre>
+		</div>
+</div></div>
+<p>Sets the description of this resource.</p>
+
+<p><b>Parameters:</b><br/>
+<b>&nbsp;&nbsp; description</b> Description of the resource.</p>
+
+<h4><a name="ServerResource-getDescription"></a>getDescription</h4>
+
+<p>getDescription():String</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">public String getDescription()</pre>
+		</div>
+</div></div>
+<p>Returns the description of the resource.</p>
+
+<h4><a name="ServerResource-setProductConfig"></a>setProductConfig</h4>
+
+<p>setProductConfig(ConfigResponse):void</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">public void setProductConfig(ConfigResponse config)</pre>
+		</div>
+</div></div>
+<p>Sets the shared configuration properties for the resource. The configuration is passed as a <tt>ConfigResponse</tt> object. For more information, see <a href="ConfigResponse.html" title="ConfigResponse">ConfigResponse</a>.</p>
+
+<p><b>Parameters:</b><br/>
+<b>&nbsp;&nbsp; config</b> Resource shared configuration.</p>
+
+<p>setProductConfig(Map):void</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">public void setProductConfig(Map config)</pre>
+		</div>
+</div></div>
+<p>Sets the shared configuration properties for the resource. The configuration is passed as a Map object. Internally, <tt>ConfigResponse</tt> uses Map to store its keys and values.</p>
+
+<p><b>Parameters:</b><br/>
+<b>&nbsp;&nbsp; config</b> Map of resource configuration.</p>
+
+<p>setProductConfig():void</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">public void setProductConfig()</pre>
+		</div>
+</div></div>
+<p>Sets and initializes an empty product config.</p>
+
+<h4><a name="ServerResource-getProductConfig"></a>getProductConfig</h4>
+
+<p>getProductConfig():ConfigResponse</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">public ConfigResponse getProductConfig()</pre>
+		</div>
+</div></div>
+<p>Returns the shared configuration properties for the resource.</p>
+
+<h4><a name="ServerResource-setMeasurementConfig"></a>setMeasurementConfig</h4>
+
+<p>setMeasurementConfig(ConfigResponse):void</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">public void setMeasurementConfig(ConfigResponse config)</pre>
+		</div>
+</div></div>
+<p>Sets the monitoring configuration properties for the resource. The configuration is passed as a <tt>ConfigResponse</tt> object. For more information, see <a href="ConfigResponse.html" title="ConfigResponse">ConfigResponse</a>.</p>
+
+<p><b>Parameters:</b><br/>
+<b>&nbsp;&nbsp; config</b> Resource measurement configuration.</p>
+
+<p>setMeasurementConfig(Map):void</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">public void setMeasurementConfig(Map config)</pre>
+		</div>
+</div></div>
+<p>Sets the monitoring configuration properties for the resource. The configuration is passed as a Map object. Internally, <tt>ConfigResponse</tt> uses Map to store its keys and values.</p>
+
+<p><b>Parameters:</b><br/>
+<b>&nbsp;&nbsp; config</b> Map of resource measurement configuration.</p>
+
+<p>setMeasurementConfig():void</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">public void setMeasurementConfig()</pre>
+		</div>
+</div></div>
+<p>Sets and initializes an empty measurement config.</p>
+
+<p>setMeasurementConfig(ConfigResponse, int, boolean):void</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">public void setMeasurementConfig(ConfigResponse config,
+                                 int logTrackLevel,
+                                 boolean enableConfigTrack)</pre>
+		</div>
+</div></div>
+<p>Sets the monitoring configuration properties for the resource. The configuration is passed as a Map object. Internally, <tt>ConfigResponse</tt> uses Map to store its keys and values.</p>
+
+<p>This function can be used to enable log and config tracking at the same time. LogTrackPlugin defines these log levels:</p>
+
+<p>&nbsp;&nbsp;public static final int LOGLEVEL_ANY     = &#45;1;<br/>
+&nbsp;&nbsp;public static final int LOGLEVEL_ERROR   = 3;<br/>
+&nbsp;&nbsp;public static final int LOGLEVEL_WARN    = 4;<br/>
+&nbsp;&nbsp;public static final int LOGLEVEL_INFO    = 6;<br/>
+&nbsp;&nbsp;public static final int LOGLEVEL_DEBUG   = 7;</p>
+
+
+<p><b>Parameters:</b><br/>
+<b>&nbsp;&nbsp; config</b> Resource measurement configuration.<br/>
+<b>&nbsp;&nbsp; logTrackLevel</b> Log tracking level in internal type of int.<br/>
+<b>&nbsp;&nbsp; enableConfigTrack</b> Enables config tracking if TRUE, use FALSE otherwise.</p>
+
+<h4><a name="ServerResource-getMeasurementConfig"></a>getMeasurementConfig</h4>
+
+<p>getMeasurementConfig():ConfigResponse</p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">public ConfigResponse getMeasurementConfig()</pre>
+		</div>
+</div></div>
+<p>Returns the monitoring configuration properties for the resource.</p>
+
+<h4><a name="ServerResource-setControlConfig"></a>setControlConfig</h4>
+
+<p>setControlConfig(ConfigResponse):void</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">public void setControlConfig(ConfigResponse config)</pre>
+		</div>
+</div></div>
+<p>Sets the control configuration properties for the resource. The configuration is passed as a <tt>ConfigResponse</tt> object. For more information, see <a href="ConfigResponse.html" title="ConfigResponse">ConfigResponse</a>.</p>
+
+<p><b>Parameters:</b><br/>
+<b>&nbsp;&nbsp; config</b> Resource control control configuration.</p>
+
+
+<p>setControlConfig(Map):void</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">public void setControlConfig(Map config)</pre>
+		</div>
+</div></div>
+<p>Sets the control configuration properties for the resource. The configuration is passed as a Map object. Internally, <tt>ConfigResponse</tt> uses Map to store its keys and values.</p>
+
+<p><b>Parameters:</b><br/>
+<b>&nbsp;&nbsp; config</b> Map of resource control configuration.</p>
+
+
+<p>setControlConfig():void</p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">public void setControlConfig()</pre>
+		</div>
+</div></div>
+<p>Sets and initializes an empty control config.</p>
+
+<h4><a name="ServerResource-getControlConfig"></a>getControlConfig</h4>
+
+<p>getControlConfig():ConfigResponse</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">public ConfigResponse getControlConfig()</pre>
+		</div>
+</div></div>
+<p>Returns resource control configuration.</p>
+
+
+<h4><a name="ServerResource-setCustomProperties"></a>setCustomProperties</h4>
+
+<p>setCustomProperties(ConfigResponse):void</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">public void setCustomProperties(ConfigResponse config)</pre>
+		</div>
+</div></div>
+<p>Sets custom properties for the resource. These are the resource attributes that are defined using the <tt>&lt;property&gt;</tt> elements in the plugin descriptor; such attributes may be displayed in the Hyperic user interface in at the top of the page for a resource, but they cannot be edited through the user interface. The configuration is passed as a <tt>ConfigResponse</tt> object. For more information, see <a href="ConfigResponse.html" title="ConfigResponse">ConfigResponse</a>.</p>
+
+<p><b>Parameters:</b><br/>
+<b>&nbsp;&nbsp; config</b> Resource custom properties.</p>
+
+
+<p>setCustomProperties(Map):void</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">public void setCustomProperties(Map props)</pre>
+		</div>
+</div></div>
+<p>Sets custom properties for the resource. These are the resource attributes that are defined using the <tt>&lt;property&gt;</tt> elements in the plugin descriptor; such attributes may be displayed in the Hyperic user interface in at the top of the page for a resource, but they cannot be edited through the user interface. The properties are passed using Map object. Internally, <tt>ConfigResponse</tt> uses Map to store its keys and values.</p>
+
+
+<p><b>Parameters:</b><br/>
+<b>&nbsp;&nbsp; config</b> Resource custom properties.</p>
+
+
+<h4><a name="ServerResource-getCustomProperties"></a>getCustomProperties</h4>
+
+<p>getCustomProperties():ConfigResponse</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">public ConfigResponse getCustomProperties()</pre>
+		</div>
+</div></div>
+<p>Returns custom properties for the resource. These are the resource attributes that are defined using the <tt>&lt;property&gt;</tt> elements in the plugin descriptor; such attributes may be displayed in the Hyperic user interface in at the top of the page for a resource, but they cannot be edited through the user interface.</p>
+
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:08</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

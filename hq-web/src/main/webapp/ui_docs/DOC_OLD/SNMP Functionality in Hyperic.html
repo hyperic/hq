@@ -1,0 +1,124 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : SNMP Functionality in Hyperic</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : SNMP Functionality in Hyperic
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Sep 28, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+
+<p>This page summarizes VMware vFabric™ Hyperic® SNMP-related capabilities.</p>
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1348859490505 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1348859490505 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1348859490505 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1348859490505'>
+<ul>
+    <li><a href='#SNMPFunctionalityinHyperic-SimpleSNMPAgentAvailabilityChecks'>Simple SNMP Agent Availability Checks</a></li>
+    <li><a href='#SNMPFunctionalityinHyperic-MonitorSNMPDevicesandHostswithBuiltInPlugins'>Monitor SNMP Devices and Hosts with Built-In Plugins</a></li>
+    <li><a href='#SNMPFunctionalityinHyperic-BuildVendorSpecificSNMPPlugins'>Build Vendor-Specific SNMP Plugins</a></li>
+    <li><a href='#SNMPFunctionalityinHyperic-SendSNMPNotificationsforAlerts'>Send SNMP Notifications for Alerts</a></li>
+    <li><a href='#SNMPFunctionalityinHyperic-IntegrateHypericwithOpenNMS'>Integrate Hyperic with OpenNMS</a></li>
+</ul></div>
+
+
+
+<h1><a name="SNMPFunctionalityinHyperic-SimpleSNMPAgentAvailabilityChecks"></a>Simple SNMP Agent Availability Checks</h1>
+
+<p>You can configure an Hyperic Agent to monitor the availability of a remote SNMP agent. You configure a platform service of type "SNMP" on the platform of your choice. The Hyperic Agent queries the remote SNMP service for <tt>sysUpTime</tt>, and reports the service available if a response is received.  For more information, see <a href="SNMP Platform Service.html" title="SNMP Platform Service">SNMP Platform Service</a>  in <em>vFabric Hyperic Resource Configuration and Metrics</em>.</p>
+
+<p>Like other platform services, an SNMP platform service is limited to availability monitoring. To collect throughput and utilization metrics for SNMP devices, see the following section, <a href="#SNMPFunctionalityinHyperic-MonitorSNMPDevicesandHostswithBuiltInPlugins">Monitor SNMP Devices and Hosts with Built&#45;In Plugins</a>.</p>
+
+<h1><a name="SNMPFunctionalityinHyperic-MonitorSNMPDevicesandHostswithBuiltInPlugins"></a>Monitor SNMP Devices and Hosts with Built-In Plugins</h1>
+
+<p>These are Hyperic's built-in capabilities for collecting availability, throughput, and utilization metrics for SNMP devices and hosts.</p>
+
+<ul>
+	<li>Network Device Platform Type - Hyperic has built-in support for monitoring any device that implements IF-MIB (rfc2863) <a href="http://tools.ietf.org/html/rfc2863">http://tools.ietf.org/html/rfc2863</a> and IP-MIB (rfc4293)  <a href="http://tools.ietf.org/html/rfc4293">http://tools.ietf.org/html/rfc4293</a>. You configure a platform of type "Network Device". For more information see <a href="Network Device.html" title="Network Device">Network Device</a> in <em>vFabric Hyperic Resource Configuration and Metrics</em>.</li>
+</ul>
+
+
+<ul>
+	<li>Network Host - Hyperic has built-in support for monitoring any SNMP host that implements HOST-RESOURCES-MIB (rfc2790), in addition to IF-MIB (rfc2863) and IP-MIB (rfc4293). (A <em>network host</em> is an SNMP device with storage.) You configure a platform of type "Network Host".&nbsp;</li>
+</ul>
+
+
+<ul>
+	<li>Cisco IOS - Hyperic has built-in support for monitoring Cisco IOS routers. You configure a platform of type "Cisco IOS". The Cisco IOS platform extends Network Device, adding metrics from CISCO-PROCESS-MIB and CISCO-MEMORY-POOL-MIB.&nbsp;</li>
+</ul>
+
+
+<ul>
+	<li>Cisco Pixos - Hyperic has built-in support for monitoring Cisco Pixos routers. You configure a platform of type "Cisco Pixos". The Cisco PIXOS platform extends Cisco IOS, adding metrics from CISCO-FIREWALL-MIB.&nbsp;</li>
+</ul>
+
+
+<h1><a name="SNMPFunctionalityinHyperic-BuildVendorSpecificSNMPPlugins"></a>Build Vendor-Specific SNMP Plugins</h1>
+
+<p>You can build your own plugin, leveraging Hyperic's SNMP plugin classes, to monitor specific SNMP device. Such a plugin is XML-only - development of custom plugin classes is not necessary. You write the plugin XML descriptor, point to the device MIB, and specify the inventory properties you wish to discover, and the metrics (OIDs) to collect. For more information see <a href="Write an SNMP Plugin.html" title="Write an SNMP Plugin">Write an SNMP Plugin</a> in <em>vFabric Hyperic Product Plug-in Development</em>.</p>
+
+<h1><a name="SNMPFunctionalityinHyperic-SendSNMPNotificationsforAlerts"></a>Send SNMP Notifications for Alerts</h1>
+<p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+
+
+<p>If you configure vFabric Hyperic  to send SNMP messages to your NMS, you can use SNMP notifications in alert actions or as a step in an escalation.</p>
+
+<p>You define SNMP options for HQ Server in the "SNMP Server Configuration Properties" section of the <b>Administration &gt; HQ Server Settings</b> page. The properties you define specify the SNMP protocol version for communicating with the NMS (v1, v2c, or V3), the type of notification (v1 Trap, v2c Trap, or Inform), and the properties required for the SNMP version you use. After this configuration, you can select the SNMP notification type:</p>
+
+<ul>
+	<li>As an alert action &#8212; The notification sent when the alert fires will contain three variable bindings:
+	<ul>
+		<li><tt>sysUptimeOID.0</tt> &#8212; No configuration is required for this binding.</li>
+		<li><tt>snmpTrapOID.0</tt> &#8212; This binding is configured on the <b>HQ Server</b> settings page.</li>
+		<li>A variable binding for the alert data specified in the <tt>snmp_trap.gsp</tt> alert notification template - the alert definition name and the "short reason" for firing. Note that Alert templates may be customized, as described in <a href="Tailor Alert Notification Templates.html" title="Tailor Alert Notification Templates">Tailor Alert Notification Templates</a> in <em>vFabric Hyperic Administration</em>.</li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul>
+	<li>As an escalation step &#8212; When you configure an SNMP notification as an escalation step, you can specify additional variable bindings. When the escalation step is performed, the trap will contain those variable bindings, along with <tt>SysUpTime.0</tt>, <tt>snmpTrapOID.0</tt>, and a variable binding for the alert data specified in the <tt>snmp_trap.gsp</tt> alert notification template. For more information and instructions, see <a href="Enable SNMP Trap Notifications.html" title="Enable SNMP Trap Notifications">Enable SNMP Trap Notifications</a> in <em>vFabric Hyperic Administration</em>.</li>
+</ul>
+
+
+<h1><a name="SNMPFunctionalityinHyperic-IntegrateHypericwithOpenNMS"></a>Integrate Hyperic with OpenNMS</h1>
+
+<p>You can export Hyperic platforms as OpenNMS nodes for import to OpenNMS, and send an SNMP trap to OpenNMS as an alert action. For more information see <a href="http://support.hyperic.com/display/hyperforge/HQU+OpenNMS">http://support.hyperic.com/display/hyperforge/HQU+OpenNMS</a>.</p>
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:06</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

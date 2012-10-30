@@ -1,0 +1,404 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : ui-tcserver.ServerServicesRef</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : ui-tcserver.ServerServicesRef
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <ul>
+	<li><a href="#ui-tcserver.ServerServicesRef-tcRuntimeServicesReference">tc Runtime Services Reference</a></li>
+	<li><a href="#ui-tcserver.ServerServicesRef-GeneralServiceProperties">General Service Properties</a></li>
+	<li><a href="#ui-tcserver.ServerServicesRef-ConnectorProperties">Connector Properties</a></li>
+	<li><a href="#ui-tcserver.ServerServicesRef-EngineProperties">Engine Properties</a></li>
+	<li><a href="#ui-tcserver.ServerServicesRef-ThreadDiagnostics">Thread Diagnostics</a></li>
+	<li><a href="#ui-tcserver.ServerServicesRef-HostProperties">Host Properties</a></li>
+	<li><a href="#ui-tcserver.ServerServicesRef-HTTPAccessLogging">HTTP Access Logging</a></li>
+</ul>
+
+
+<h3><a name="ui-tcserver.ServerServicesRef-tcRuntimeServicesReference"></a>tc Runtime Services Reference</h3>
+
+<p>This section defines the fields on the <b>Views &gt; Server Configuration &gt; Services</b> tab used to configure and create tc Runtime services.</p>
+
+<p>A tc Runtime service represents the combination of one or more Connector components that share a single Engine component for processing incoming requests. A tc Runtime consists of one or more services. The default tc Runtime service which is always present in newly created tc Runtime instance is called "catalina."</p>
+
+<p>See <a href="http://tomcat.apache.org/tomcat-6.0-doc/config/service.html">The Service Component</a> on the Apache Web site for more information.</p>
+
+<h3><a name="ui-tcserver.ServerServicesRef-GeneralServiceProperties"></a>General Service Properties</h3>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Field Name <br class="atl-forced-newline" /> </th>
+<th class='confluenceTh'> &nbsp;Description </th>
+</tr>
+<tr>
+<td class='confluenceTd'> Name <a name="ui-tcserver.ServerServicesRef-servicesservicename"></a></td>
+<td class='confluenceTd'> Specifies the name of this tc Runtime service. Within the scope of a tc Runtime , the service name must be unique. This is the name that appears in the tc Runtime log messages. </td>
+</tr>
+</tbody></table>
+</div>
+
+
+<h3><a name="ui-tcserver.ServerServicesRef-ConnectorProperties"></a>Connector Properties</h3>
+
+<p>Each tc Runtime service can have one or more connectors configured. Connectors are specific to a protocol, such as HTTP or AJP. See the following documentation on the Apache Web site for additional detailed information:</p>
+<ul>
+	<li><a href="http://tomcat.apache.org/tomcat-6.0-doc/config/http.html">The HTTP Connector </a></li>
+	<li><a href="http://tomcat.apache.org/tomcat-6.0-doc/config/ajp.html">The AJP Connector </a></li>
+</ul>
+
+
+<h3><a name="ui-tcserver.ServerServicesRef-General"></a>General</h3>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Field Name </th>
+<th class='confluenceTh'> Description </th>
+</tr>
+<tr>
+<td class='confluenceTd'> Protocol <a name="ui-tcserver.ServerServicesRef-servicesconnectorprotocol"></a></td>
+<td class='confluenceTd'> Specifies the protocol that handles incoming and outgoing messages for this connector. This field can have the following values:
+<ul>
+	<li><tt>org.apache.coyote.http11.Http11Protocol</tt> (same as HTTP/1.1). This is the default value. Note that if you want to use HTTPS, you do not specify "HTTPS/1.1", but rather, set the "secure" field to true.</li>
+	<li><tt>org.apache.coyote.http11.Http11NioProtocol</tt> &#45; non blocking Java connector</li>
+	<li><tt>org.apache.coyote.http11.Http11AprProtocol</tt> &#45; the APR connector.</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'> IP Address <a name="ui-tcserver.ServerServicesRef-servicesconnectoraddress"></a></td>
+<td class='confluenceTd'> For tc Runtime instances with more than one IP address, this attribute identifies a single address, upon which the listen port defined in the Port attribute will be opened for connections.&nbsp; If a specific IP address is not specified, server sockets will be created on all IP addresses associated for the server, on the port specified in the Port attribute.&nbsp; <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Port <a name="ui-tcserver.ServerServicesRef-servicesconnectorport"></a></td>
+<td class='confluenceTd'> Specifies the TCP port number on which this connector will create a server socket and await incoming connections. Your operating system allows only one server application to listen to a particular port number on a particular IP address, which means that multiple tc Runtime instances running on the same computer must have unique ports. Default value is 8080. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Accept Count <a name="ui-tcserver.ServerServicesRef-servicesconnectoracceptCount"></a></td>
+<td class='confluenceTd'> HTTP(S) Connectors only. Specifies maximum queue length for incoming connection requests when all possible request processing threads are in use. Any requests received when the queue is full will be refused. The default value is 10. <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Max Keep Alive Requests <a name="ui-tcserver.ServerServicesRef-servicesconnectormaxKeepAliveRequests"></a><br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> HTTP(S) Connectors only. Specifies the maximum number of HTTP requests that can be pipelined until the connection is closed by the server. A value of 1 disables HTTP/1.0 keep-alive, as well as HTTP/1.1 keep-alive and pipelining. A value of &#45;1 allows an unlimited amount of pipelined or keep-alive HTTP requests. The default value of this field is 100. <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Proxy Host <a name="ui-tcserver.ServerServicesRef-servicesconnectorproxyName"></a></td>
+<td class='confluenceTd'> If this connector is being used in a proxy configuration, specifies the server name that is returned from calls to <tt>request.getServerName()</tt>. See <a href="http://tomcat.apache.org/tomcat-6.0-doc/proxy-howto.html">Proxy Support HOW-TOP</a> for more information. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Proxy Port <a name="ui-tcserver.ServerServicesRef-servicesconnectorproxyPort"></a><br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> If this connector is being used in a proxy configuration, specifies the server port that is returned from calls to <tt>request.getServerPort()</tt>. See <a href="http://tomcat.apache.org/tomcat-6.0-doc/proxy-howto.html">Proxy Support HOW-TOP</a> for more information. <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Redirect Port <a name="ui-tcserver.ServerServicesRef-servicesconnectorredirectPort"></a><br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Specifies the port to which a user is redirected if they require a secure connection. If this connector supports non-SSL requests, and a request is received for which a matching requires SSL transport, tc Runtime automatically redirects the request to the port number specified here. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Scheme <a name="ui-tcserver.ServerServicesRef-servicesconnectorscheme"></a></td>
+<td class='confluenceTd'> Specifies the name of the protocol you want to have returned by calls to <tt>request.getScheme()</tt>. For example, set this field to "https" for an SSL Connector. The default value is "http". </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Connection Timeout <a name="ui-tcserver.ServerServicesRef-servicesconnectorconnectionTimeout"></a></td>
+<td class='confluenceTd'> Specifies the number of milliseconds this connector waits, after accepting a connection, for the request URI line to be presented. The default value is 60000 (i.e. 60 seconds). </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Max Threads <a name="ui-tcserver.ServerServicesRef-servicesconnectormaxThreads"></a></td>
+<td class='confluenceTd'> Specifies the maximum number of request processing threads that this connector creates, which in turn determines the maximum number of simultaneous requests that can be handled. If an executor is associated with this connector, tc Runtime ignores this attribute as the connector will execute tasks using the executor rather than an internal thread pool. The default value of this field is 40. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Request Secret Keyword <a name="ui-tcserver.ServerServicesRef-servicesconnectorrequestSecret"></a></td>
+<td class='confluenceTd'> Specifies that only requests from workers with this secret keyword will be accepted. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Use Request Secret Keyword <a name="ui-tcserver.ServerServicesRef-servicesconnectoruseRequestSecret"></a><br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Specifies whether tc Runtime should generate a random value for the Request Secret Keyword field. </td>
+</tr>
+</tbody></table>
+</div>
+
+
+<h3><a name="ui-tcserver.ServerServicesRef-Security%2FSSL"></a>Security/SSL</h3>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Field Name <br class="atl-forced-newline" /> </th>
+<th class='confluenceTh'> Description <br class="atl-forced-newline" /> </th>
+</tr>
+<tr>
+<td class='confluenceTd'> Secure <a name="ui-tcserver.ServerServicesRef-servicesconnectorsecure"></a></td>
+<td class='confluenceTd'> Specifies whether you want user calls to <tt>request.isSecure()</tt> to return true for requests received by this connector. Check this field for connectors (both SSL and non-SSL) that receive data from an SSL accelerator, like a crypto card, a SSL appliance or even a Web server. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Enable SSL <a name="ui-tcserver.ServerServicesRef-servicesconnectorSSLEnabled"></a> <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Enables SSL traffic (handshake/encryption/decription) for this connector. When enabled, be sure to also set the "scheme" and "secure" attributes so that correct values are returned to user calls to <tt>request.getScheme()</tt> and <tt>request.isSecure()</tt>. See <a href="http://tomcat.apache.org/tomcat-6.0-doc/config/http.html#SSL%20Support">SSL Support</a> for more information.&nbsp; <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Certificate Encoding Algorithm <a name="ui-tcserver.ServerServicesRef-servicesconnectoralgorithm"></a><br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Specifies the certificate encoding algorithm. The default value is the Sun implementation (SunX509). For IBM JVMs use the value IbmX509. For other vendors, consult the JVM documentation for the correct value. <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Keystore File <a name="ui-tcserver.ServerServicesRef-servicesconnectorkeystoreFile"></a><br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Specifies the pathname of the keystore file that contains the server certificate to be loaded. By default, the pathname is the file ".keystore" in the operating system home directory of the user that starts the tc Runtime instance. <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Keystore Password <a name="ui-tcserver.ServerServicesRef-servicesconnectorkeystorePass"></a><br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Specifies the password used to access the server certificate from the specified keystore file. The default value is "changeit". <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Key Alias <a name="ui-tcserver.ServerServicesRef-servicesconnectorkeyAlias"></a></td>
+<td class='confluenceTd'> Specifies the alias that tc Runtime uses when accessing the server certificate in the keystore. If not specified, tc Runtime uses the first key read in the keystore. </td>
+</tr>
+</tbody></table>
+</div>
+
+
+<h3><a name="ui-tcserver.ServerServicesRef-APRSSLSettings"></a>APR SSL Settings</h3>
+
+<p>These settings are only relevant for APR based connectors that also use SSL.</p>
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Field Name <br class="atl-forced-newline" /> </th>
+<th class='confluenceTh'> Description <br class="atl-forced-newline" /> </th>
+</tr>
+<tr>
+<td class='confluenceTd'> SSL Protocol <a name="ui-tcserver.ServerServicesRef-servicesconnectorSSLProtocol"></a><br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Specifies the protocol that tc Runtime might use to communicate with clients. Valid values are "SSLv2", "SSLv3", "TLSv1", and "SSLv2+SSLv3". Default value is "all". <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> SSL Cipher Suite <a name="ui-tcserver.ServerServicesRef-servicesconnectorSSLCipherSuite"></a><br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Specifies the ciphers that tc Runtime might use to communicate with clients. Valid values is a list of ciphers, separated by a colon. <br class="atl-forced-newline" />  <br class="atl-forced-newline" />
+Default value is "all". See the OpenSSL Web site for the list of valid ciphers.&nbsp; <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> SSL Certificate File <a name="ui-tcserver.ServerServicesRef-servicesconnectorSSLCertificateFile"></a><br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Specifies the name of the file that contains the server certificate. The format is PEM-encoded. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> SSL Certificate Key File <a name="ui-tcserver.ServerServicesRef-servicesconnectorSSLCertificateKeyFile"></a></td>
+<td class='confluenceTd'> Specifies the name of the file that contains the server private key. The format is PEM-encoded. The default value is the value of the SSL Certificate File field, which implies that both the certificate and the private key are in the same file. For security reasons, this is not recommended. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> SSL Password <a name="ui-tcserver.ServerServicesRef-servicesconnectorSSLPassword"></a><br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Specifies the password for the encrypted private key. If this field is left blank, the callback function prompts for the password. <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> SSL Verify Client  <a name="ui-tcserver.ServerServicesRef-servicesconnectorSSLVerifyClient"></a><br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Specifies whether tc Runtime should ask client for certificate. The default value is "none", which means that the client will not have the opportunity to submit a certificate. Other valid values include "optional", "require" and "optionalNoCA". <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> SSL Verify Depth <a name="ui-tcserver.ServerServicesRef-servicesconnectorSSLVerifyDepth"></a><br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Specifies the maximum verification depth for client certificates. The default value is "10".&nbsp; <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> SSL CA Certificate File <a name="ui-tcserver.ServerServicesRef-servicesconnectorSSLCACertificateFile"></a><br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Specifies the single file where you assemble the certificates of Certification Authorities (CA) for the clients that you authenticate. The file is the concatenation of the various PEM-encoded Certificate files, in order of preference. See <a href="http://httpd.apache.org/docs/2.2/mod/mod_ssl.html#sslcacertificatefile">Apache Module mod_ssl</a> for more information.&nbsp; <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> SSL CA Certificate Path <a name="ui-tcserver.ServerServicesRef-servicesconnectorSSLCACertificatePath"></a><br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Specifies the directory where you keep the Certificates of Certification Authorities (CAs) for the clients that you authenticate. These are used to verify the client certificate on Client Authentication. <br class="atl-forced-newline" />
+The files in this directory must be PEM-encoded and are accessed through hash filenames. So usually you can't just place the Certificate files there: you also have to create symbolic links named <em>hash-value</em>.N. And you should always make sure this directory contains the appropriate symbolic links. Use the Makefile which comes with mod_ssl to accomplish this task. See <a href="http://httpd.apache.org/docs/2.2/mod/mod_ssl.html#sslcacertificatepath">Apache Module mod_ssl</a> for more information. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> SSL Certificate Chain File <a name="ui-tcserver.ServerServicesRef-servicesconnectorSSLCertificateChainFile"></a></td>
+<td class='confluenceTd'> Specifies the optional all-in-one file where you can assemble the certificates of Certification Authorities (CA) which form the certificate chain of the server certificate. This starts with the issuing CA certificate of of the server certificate and can range up to the root CA certificate. Such a file is simply the concatenation of the various PEM-encoded CA Certificate files, usually in certificate chain order. See <a href="http://httpd.apache.org/docs/2.2/mod/mod_ssl.html#sslcertificatechainfile">Apache Module mod_ssl</a> for more information. <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> SSL CA Revocation File <a name="ui-tcserver.ServerServicesRef-servicesconnectorSSLCARevocationFile"></a><br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Specifies the directory where you keep the Certificate Revocation Lists (CRL) of Certification Authorities (CAs) whose clients you deal with. These are used to revoke the client certificate on Client Authentication. See <a href="http://httpd.apache.org/docs/2.2/mod/mod_ssl.html#sslcarevocationfile">Apache Module mod_ssl</a> for more information. <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> SSL CA Revocation Path <a name="ui-tcserver.ServerServicesRef-servicesconnectorSSLCARevocationPath"></a><br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Specifies the directory where you keep the Certificate Revocation Lists (CRL) of Certification Authorities (CAs) whose clients you deal with. These are used to revoke the client certificate on Client Authentication. See <a href="http://httpd.apache.org/docs/2.2/mod/mod_ssl.html#sslcarevocationpath">Apache Module mod_ssl</a> for more information. </td>
+</tr>
+</tbody></table>
+</div>
+
+
+<h3><a name="ui-tcserver.ServerServicesRef-EngineProperties"></a>Engine Properties</h3>
+
+<p>A tc Runtime engine represents the entire request processing machinery associated with a particular service. It receives and processes all requests from one or more connectors, and returns the completed response to the connector for ultimate transmission back to the client.</p>
+
+<p>Each Service must be associated with exactly one engine.</p>
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Field Name </th>
+<th class='confluenceTh'> Description <br class="atl-forced-newline" /> </th>
+</tr>
+<tr>
+<td class='confluenceTd'> Name <a name="ui-tcserver.ServerServicesRef-servicesenginename"></a></td>
+<td class='confluenceTd'> Specifies the name of this service. This is the name used in tc Runtime logging messages. Each service name must be unique within the scope of a tc Runtime instance. <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Default Host <a name="ui-tcserver.ServerServicesRef-servicesenginedefaultHost"></a></td>
+<td class='confluenceTd'> Specifies the default host name. This name corresponds to the name of a Host component that processes requests directed to host names on this server, but which are not explicitly configured for this tc Runtime instance. <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> JVM Route <a name="ui-tcserver.ServerServicesRef-servicesenginejvmRoute"></a><br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Specifies the identifier that must be used in load balancing scenarios to enable session affinity. The identifier, which must be unique across all tc Runtime instances that participate in a cluster, is appended to the generated session identifier, therefore allowing the front end proxy to always forward a particular session to the same tc Runtime instance. </td>
+</tr>
+</tbody></table>
+</div>
+
+
+<h3><a name="ui-tcserver.ServerServicesRef-ThreadDiagnostics"></a>Thread Diagnostics</h3>
+<p><a name="ui-tcserver.ServerServicesRef-thread"></a></p>
+
+<p>When you deploy and start a Web application on a tc Runtime instance, and then clients begin connecting and using the application, you might find that the clients occasionally run into problems such as slow requests or even failed requests. Although tc Runtime by default logs these errors in the log files, it is often difficult to pinpoint where exactly the error came from and how to go about fixing it. By enabling thread diagnostics, tc Runtime provides additional information to help you troubleshoot the problem.</p>
+
+<p>A <em>failed</em> request is one that simply did not execute; a <em>slow</em> request is defined as a request that takes longer than the configured threshold. The default threshold is 500 milliseconds.</p>
+
+<p>When you enable thread diagnostics, you can view the following contextual information about a slow or failed client request:</p>
+<ul>
+	<li>The time and date when the slow or failed request happened.</li>
+	<li>The exact URL invoked by the client that resulted in a slow or failed request.</li>
+	<li>The exact error returned by the request.</li>
+	<li>The database queries that were executed as part of the request and how long each one took.</li>
+	<li>Whether any database connection failed or succeeded.</li>
+	<li>Whether the database had any other connectivity problems.</li>
+	<li>Whether the database connection pool ran out of connections.</li>
+	<li>Whether any garbage collection occurred during the request, and if so, how long it took.</li>
+</ul>
+
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Field Name <br class="atl-forced-newline" /> </th>
+<th class='confluenceTh'> Description <br class="atl-forced-newline" /> </th>
+</tr>
+<tr>
+<td class='confluenceTd'> Enable Thread Diagnostics  <a name="ui-tcserver.ServerServicesRef-servicesthreadDiagnosticsenableThreadDiagnostics"></a><br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Enables the gathering of thread diagnostic information <br class="atl-forced-newline" />
+<br class="atl-forced-newline" />
+To view this information after you have enabled thread diagnostics, go to the <b>Monitor</b> tab of a particular tc Runtime instance, then click on the <b><em>servername</em></b> <b>Thread Diagnostics</b> link in the <b>Resources &gt; Services</b> window on the left. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> History <a name="ui-tcserver.ServerServicesRef-servicesthreadDiagnosticshistory"></a></td>
+<td class='confluenceTd'> Specifies the maximum number of requests that have met the threshold condition that tc Runtime keeps as historical data. The default value is 1000. You can query this historical data using JMX; it is not presented in the HQ user interface. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Threshold <a name="ui-tcserver.ServerServicesRef-servicesthreadDiagnosticsthreshold"></a></td>
+<td class='confluenceTd'> Specifies the threshold, in milliseconds, after which a client request is considered slow. The default value is 5000 milliseconds. <br class="atl-forced-newline" /> </td>
+</tr>
+</tbody></table>
+</div>
+
+
+<h3><a name="ui-tcserver.ServerServicesRef-HostProperties"></a>Host Properties</h3>
+
+<p>A tc Runtime Host represents a virtual host, which is an association of a network name for a tc Runtime (such as "www.mycompany.com" associated with the particular tc Runtime . To be effective, the network name must be registered in the Domain Name Service (DNS) server that manages the Internet domain to which you belong</p>
+
+<p>A tc Runtime engine must be associated with one or more hosts. One of the hosts must be the default host, or the one pointed to by the "Default Host" field of the Engine configuration.</p>
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Field Name <br class="atl-forced-newline" /> </th>
+<th class='confluenceTh'> Description <br class="atl-forced-newline" /> </th>
+</tr>
+<tr>
+<td class='confluenceTd'> Name  <a name="ui-tcserver.ServerServicesRef-serviceshostname"></a><br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Specifies the network name of this virtual host, as registered in your Domain Name Service (DNS) server. One of the Hosts associated within a tc Runtime engine MUST have a name that matches the "Default Host" setting for that engine. See <a href="http://tomcat.apache.org/tomcat-6.0-doc/config/host.html#Host%20Name%20Aliases">Host Name Aliases</a> for information on how to assign more than one network name to the same virtual host. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Application Base Directory  <a name="ui-tcserver.ServerServicesRef-serviceshostappBase"></a></td>
+<td class='confluenceTd'> Specifies the application base directory for this virtual host. The application base directory may contain Web applications to be deployed on this virtual host. You can specify an absolute pathname for this directory, or a pathname that is relative to the <tt>$CATALINA_BASE</tt> directory. See <a href="http://tomcat.apache.org/tomcat-6.0-doc/config/host.html#Automatic%20Application%20Deployment">Automatic Application Deployment</a> for more information on automatic recognition and deployment of Web applications. <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Auto Deploy Web Applications <a name="ui-tcserver.ServerServicesRef-serviceshostautoDeploy"></a><br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Specifies whether new Web applications that are copied to the application base directory while tc Runtime is running should be automatically deployed. See <a href="http://tomcat.apache.org/tomcat-6.0-doc/config/host.html#Automatic%20Application%20Deployment">Automatic Application Deployment</a> for more information.&nbsp; <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Deploy Applications on Startup  <a name="ui-tcserver.ServerServicesRef-serviceshostdeployOnStartup"></a><br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Specifies whether Web applications from this host should be automatically deployed when the tc Runtime instance starts up. See <a href="http://tomcat.apache.org/tomcat-6.0-doc/config/host.html#Automatic%20Application%20Deployment">Automatic Application Deployment</a> for more information. <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Unpack WARs <a name="ui-tcserver.ServerServicesRef-serviceshostunpackWARs"></a></td>
+<td class='confluenceTd'> Specifies whether tc Runtime should unpack Web applications that are copied to the application base directory as Web application archive (WAR) files into a corresponding disk directory structure. If unchecked, tc Runtime runs the Web applications directory from a WAR file. See <a href="http://tomcat.apache.org/tomcat-6.0-doc/config/host.html#Automatic%20Application%20Deployment">Automatic Application Deployment <a name="ui-tcserver.ServerServicesRef-serviceshostdeployXML"></a></a> for more information.&nbsp; <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Deploy XML <br class="atl-forced-newline" />  <a name="ui-tcserver.ServerServicesRef-serviceshostworkDir"></a></td>
+<td class='confluenceTd'> Specifies whether tc Runtime should parse the "context.xml" file embedded inside the Web application (located at /META-INF/context.xml). Security consious environments should set this to false (uncheck) to prevent applications from interacting with the container's configuration. The administrator will then be responsible for providing an external context configuration file, and put it in <tt>$CATALINA_BASE/conf/enginename/hostname/</tt>. <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Work Directory <a name="ui-tcserver.ServerServicesRef-serviceshostworkDir"></a></td>
+<td class='confluenceTd'> Specifies the pathname to a scratch directory used by applications for this Host. Each application will have its own sub directory with temporary read-write use. Configuring a Context work directory overrides use of the Host work directory configuration. This directory will be made visible to servlets in the Web application by a servlet context attribute (of type <tt>java.io.File</tt>) named <tt>javax.servlet.context.tempdir</tt> as described in the Servlet Specification. If not specified, a suitable directory underneath <tt>$CATALINA_BASE/work</tt> will be provided. <br class="atl-forced-newline" /> </td>
+</tr>
+</tbody></table>
+</div>
+
+
+<h3><a name="ui-tcserver.ServerServicesRef-HTTPAccessLogging"></a>HTTP Access Logging</h3>
+
+<p>The tc Runtime logging subsystem creates log files in the same format as those created by standard Web servers. These logs can later be analyzed by standard log analysis tools to track page hit counts, user session activity, and so on. The logging files are rolled over nightly at midnight.</p>
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Field Name <br class="atl-forced-newline" /> </th>
+<th class='confluenceTh'> Description <br class="atl-forced-newline" /> </th>
+</tr>
+<tr>
+<td class='confluenceTd'> Enable Logging <a name="ui-tcserver.ServerServicesRef-servicesloggingenableLogging"></a><br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Specifies whether you want to enable logging on this engine or virtual host. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Directory <a name="ui-tcserver.ServerServicesRef-servicesloggingdirectory"></a></td>
+<td class='confluenceTd'> Specifies the absolute or relative pathname of a directory in which tc Runtime creates the log files log files. If you specify a relative pathname, it is relative to <tt>$CATALINA_BASE</tt>. The default value is <tt>$CATALINA_BASE/logs</tt>. <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Pattern <br class="atl-forced-newline" />  <a name="ui-tcserver.ServerServicesRef-servicesloggingpattern"></a></td>
+<td class='confluenceTd'> A formatting layout identifying the various information fields from the request and response to be logged, or the word "common" or "combined" to select a standard format. See <a href="http://tomcat.apache.org/tomcat-6.0-doc/config/valve.html">the Apache Web site</a> for more information on configuring this attribute. Note that the optimized access does only support "common" and "combined" as the value for this attribute. <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> File Name Prefix  <a name="ui-tcserver.ServerServicesRef-servicesloggingprefix"></a><br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Specifies the prefix added to the start of each log file's name. The default value is "access_log." Leave the field blank if you do not want a prefix. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> File Name Suffix  <a name="ui-tcserver.ServerServicesRef-servicesloggingsuffix"></a></td>
+<td class='confluenceTd'> Specifies the suffix added to the end of each log file's name. Leave the field blank if you do not want a suffix (default behavior). <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> File Date Format <a name="ui-tcserver.ServerServicesRef-servicesloggingfileDateFormat"></a><br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Specifies a customized date format in the access log file name. The date format also specifies how often the file is rotated. For example, if you want the log files to rotate every hour, then set this value to: yyyy-MM-dd.HH </td>
+</tr>
+</tbody></table>
+</div>
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

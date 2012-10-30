@@ -1,0 +1,170 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : Metric Parameters</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : Metric Parameters
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Metric Attribute </th>
+<th class='confluenceTh'> Description </th>
+<th class='confluenceTh'> Req'd </th>
+<th class='confluenceTh'> Possible Values </th>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>name</tt> </td>
+<td class='confluenceTd'> The name that appears for the metric in the Hyperic user interface.  </td>
+<td class='confluenceTd'> Y </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> <a name="MetricParameters-alias"></a> <tt>alias</tt> </td>
+<td class='confluenceTd'> Abbreviated name of the metric, displayed in the plugin's output (name-value pairs). If not specified, <tt>alias</tt> defaults to the value of <tt>name</tt>, stripped of white space and any non-alphanumeric characters. </td>
+<td class='confluenceTd'> N </td>
+<td class='confluenceTd'> In the case of a JMX metric, <tt>alias</tt> exactly matches the name of the MBean attribute that supplies the metric value. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>category</tt> </td>
+<td class='confluenceTd'> The category of metric. <br class="atl-forced-newline" /> <br class="atl-forced-newline" />
+In the Hyperic user interface, a user can filter resource metrics by category on the <b>Metric Data</b> tab for the resource. For more information, see <a href="Resources Minitab.html#ResourcesMinitab-filter">Filter Metrics by Category and Value Type</a>. <br class="atl-forced-newline" /> <br class="atl-forced-newline" />
+Metric categories are defined in <a href="Metrics and Metric Collection.html" title="Metrics and Metric Collection">Metrics and Metric Collection</a>.</td>
+<td class='confluenceTd'> N </td>
+<td class='confluenceTd'><ul>
+	<li>AVAILABILITY &#8212; This is the default <tt>category</tt> for a metric whose <tt>name</tt> attribute is "Availability". <br class="atl-forced-newline" /></li>
+	<li>THROUGHPUT  <br class="atl-forced-newline" /></li>
+	<li>PERFORMANCE <br class="atl-forced-newline" /></li>
+	<li>UTILIZATION  &#8212; This is the default <tt>category</tt> for a metric whose, except for a metric whose <tt>name</tt> is "Availability".</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>units</tt> </td>
+<td class='confluenceTd'> The units of measurement for the metric, which affects how metric values are displayed and labelled in the Hyperic user interface. </td>
+<td class='confluenceTd'> N </td>
+<td class='confluenceTd'> <ul>
+	<li>none: Will not be formatted.</li>
+	<li>percentage</li>
+	<li>B: Bytes</li>
+	<li>KB: Kilobytes</li>
+	<li>MB: Megabytes</li>
+	<li>GB: Gigabytes</li>
+	<li>TB: Terabytes</li>
+	<li>epoch-millis: Time since January 1, 1970 in milliseconds.</li>
+	<li>epoch-seconds: Time since January 1, 1970 in seconds.</li>
+	<li>ns: Nanoseconds</li>
+	<li>mu: Microseconds</li>
+	<li>ms: Milliseconds</li>
+	<li>jiffys: Jiffies (1/100 sec)</li>
+	<li>sec: Seconds</li>
+	<li>cents: Cents (1/100 of 1 US Dollar)</li>
+</ul>
+
+
+<p>If the name attribute is Availability, defaults to percentage, otherwise defaults to none.</p> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>indicator</tt> </td>
+<td class='confluenceTd'> Whether or not the metric is an <em>indicator</em> metric in Hyperic. <br class="atl-forced-newline" /> <br class="atl-forced-newline" /> 
+Indicator metrics are charted on a resource's <b>Indicators</b> page in the Hyperic user interface. For more information, see <a href="Indicators Minitab.html#IndicatorsMinitab-indicators">Metric Charts in the Indicators Minitab</a>. </td>
+<td class='confluenceTd'> N<br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'><ul>
+	<li>true <br class="atl-forced-newline" /></li>
+	<li>false</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>collectionType</tt> </td>
+<td class='confluenceTd'> A description of how the metric's data will behave, for purposes of display in HQ. For example, the metric "Requests Served" will trend up as more and more requests are counted over time. In the Hyperic user interface, a user can filter metrics on the <b>Metric Data</b> tab by collection type &#8212; not that in the user interface collection type is referred to as "value type".  </td>
+<td class='confluenceTd'> N </td>
+<td class='confluenceTd'><ul>
+	<li>dynamic: Value may go up or down.</li>
+	<li>static: Value will not change or not graph. For example, a date stamp.</li>
+	<li>trendsup: Values will always increase. Because of that, the rate of change becomes more important, so HQ automatically creates a secondary metric: a per-minute rate measurement. If this rate metric has a defaultOn attribute set to true, the defaultOn attribute for the original metric is set to false (therefore only the rate metric will be displayed, not the original metric). To disable the automatically generated rate metric, set its rate attribute to none.</li>
+	<li>trendsdown: Value changes will always decrease.<br class="atl-forced-newline" />
+ Defaults to dynamic. </li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>template</tt>  </td>
+<td class='confluenceTd'> Expresses a request for a specific metric, for a specific resource, in a format that the Hyperic Agent understands. It identifies the resource instance, a particular metric, and where to get the metric value. A metric template takes this form: <br class="atl-forced-newline" />
+<br class="atl-forced-newline" />
+<em>Domain:Properties:Metric:Connection</em>   </td>
+<td class='confluenceTd'> N </td>
+<td class='confluenceTd'> The content of each segment of the metric template depends on how the metric is obtained - from an MBean server, SIGAR, an HQ measurement class, via SNMP, and so on. For more information, see <a href="Understanding Metric Templates.html" title="Understanding Metric Templates">Understanding Metric Templates</a>. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>defaultOn</tt> </td>
+<td class='confluenceTd'> If true, this measurement will be scheduled by default. </td>
+<td class='confluenceTd'> N </td>
+<td class='confluenceTd'> If <tt>indicator</tt> is true defaults to true. Otherwise defaults to false. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>interval</tt> </td>
+<td class='confluenceTd'> Default collection interval (in milliseconds) </td>
+<td class='confluenceTd'> N </td>
+<td class='confluenceTd'> If the name attribute is Availability, defaults are:
+<ul>
+	<li>Platforms, 1 minute</li>
+	<li>Servers, 5 minute</li>
+	<li>Services, 10 minutes <br class="atl-forced-newline" />
+Otherwise, defaults are:</li>
+	<li>collectionType dynamic, 5 minutes</li>
+	<li>collectionType trendsup,trendsdown,10 minutes</li>
+	<li>collectionType static, 30 minutes</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>rate</tt> </td>
+<td class='confluenceTd'> Specifies the time period for a rate measurement. Valid only for metrics of collectionType trendsup. </td>
+<td class='confluenceTd'> N </td>
+<td class='confluenceTd'> Possible values:
+<ul>
+	<li>1s (1 second)</li>
+	<li>1m (1 minute)</li>
+	<li>1h (1 hour)</li>
+	<li>&lt;none&gt; (disable automatically generated rate metric)</li>
+</ul>
+</td>
+</tr>
+</tbody></table>
+</div>
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:08</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

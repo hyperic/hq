@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : Charting Metric Data</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : Charting Metric Data
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325700392907 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325700392907 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325700392907 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1325700392907'>
+<ul>
+    <li><a href='#ChartingMetricData-ChartingMetricData'>Charting Metric Data</a></li>
+    <li><a href='#ChartingMetricData-ChartTypesWhatTheyAreandHowtoViewThem'>Chart Types - What They Are and How to View Them</a></li>
+    <li><a href='#ChartingMetricData-HowaChartisConstructed'>How a Chart is Constructed</a></li>
+</ul></div>
+
+<h1><a name="ChartingMetricData-ChartingMetricData"></a>Charting Metric Data</h1>
+
+<p>A metric chart is a graphical representation of the metric data that Hyperic HQ collects for each resource. Each resource type supports a different set of metric data, so charts vary by resource type also. Charts can help you see trends in resource behavior, which can in turn be helpful for capacity planning, cost analysis, and other operational decision-making.</p>
+
+<p>HQ displays all full-page metric charts on the "<a href="ui-Monitor.CurrentHealth.Chart.html" title="ui-Monitor.CurrentHealth.Chart">Metric Chart</a>" page, where you can adjust how the metric is displayed. (Indicator charts are more minimally displayed on the "<a href="ui-Monitor.CurrentHealth.html" title="ui-Monitor.CurrentHealth">Current Health</a>" screen.) Consult the help for those screens for the nitty gritty about viewing and interpreting charts.</p>
+
+<h1><a name="ChartingMetricData-ChartTypesWhatTheyAreandHowtoViewThem"></a>Chart Types - What They Are and How to View Them</h1>
+
+<p>There are three kinds of charts, and each gives you a different perspective on resource health. For any chart, you have to select the metrics to be charted: this selection occurs on the <a href="ui-Monitor.CurrentHealth.html" title="ui-Monitor.CurrentHealth">"Current Health"</a>" screen for the resource (or for the parent group if looking at multiple resources), on the <span class="image-wrap" style=""><img src="attachments/79660367/79921611.gif" style="border: 0px solid black"/></span> tab, on the <span class="image-wrap" style=""><img src="attachments/79660367/79921610.gif" style="border: 0px solid black"/></span> tab, which lists all the metrics collected for the resource being viewed. The chart of the selected metric(s) is displayed on the "<a href="ui-Monitor.CurrentHealth.Chart.html" title="ui-Monitor.CurrentHealth.Chart">Metric Chart</a>" screen.</p>
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Type </th>
+<th class='confluenceTh'> Description </th>
+</tr>
+<tr>
+<td class='confluenceTd'> Single Metric Single Resource </td>
+<td class='confluenceTd'> This chart shows a single metric for a single resource. <br class="atl-forced-newline" />
+ <b>To chart a single metric:</b>
+<ul>
+	<li>On the <span class="image-wrap" style=""><img src="attachments/79660367/79921610.gif" style="border: 0px solid black"/></span> tab, click the name of the metric or <span class="image-wrap" style=""><img src="attachments/79660367/79921607.gif" style="border: 0px solid black"/></span> next to the metric whose chart you want to see.<br class="atl-forced-newline" />
+ Another way to view the chart page for a metric for a single resource is from the <span class="image-wrap" style=""><img src="attachments/79660367/79921608.gif" style="border: 0px solid black"/></span> tab on the monitor visibility pages. If an indicator chart represents a metric for a single resource, clicking on its name will also display the full chart page for that metric and resource. </li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Multiple Metrics Single Resource </td>
+<td class='confluenceTd'> This chart shows up to a maximum of ten metrics simultaneously for a single resource, which is handy for getting an overall sense of the resource's health.<br class="atl-forced-newline" />
+ <b>To chart multiple metrics for a single resource:</b>
+<ul>
+	<li>On the <span class="image-wrap" style=""><img src="attachments/79660367/79921610.gif" style="border: 0px solid black"/></span> tab, check the names of the metrics you want to chart and click <span class="image-wrap" style=""><img src="attachments/79660367/79921605.gif" style="border: 0px solid black"/></span>.<br class="atl-forced-newline" />
+ The <span class="image-wrap" style=""><img src="attachments/79660367/79921608.gif" style="border: 0px solid black"/></span> tab also displays multiple metrics for a single resource. See the help for the "<a href="ui-Monitor.CurrentHealth.html" title="ui-Monitor.CurrentHealth">Current Health</a>" screen for an explanation. </li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Single Metric Multiple (Group) Resources </td>
+<td class='confluenceTd'> This chart shows a single metric for a maximum of ten resources, which allows you to compare the behavior of different resources. The resources must be members of a single compatible group  or of a single autogroup. <br class="atl-forced-newline" />
+<ul>
+	<li><b>To chart a single metric for multiple resources of a compatible group:</b>
+	<ol>
+		<li>On the <span class="image-wrap" style=""><img src="attachments/79660367/79921610.gif" style="border: 0px solid black"/></span> tab, click the name of the metric or <span class="image-wrap" style=""><img src="attachments/79660367/79921607.gif" style="border: 0px solid black"/></span> next to the metric whose chart you want to see.<br class="atl-forced-newline" />
+ A full-page chart is displayed with data from the first 10 resources listed on the <span class="image-wrap" style=""><img src="attachments/79660367/79921610.gif" style="border: 0px solid black"/></span> tab.</li>
+		<li>To change the set of resources displayed in the chart, on the "<a href="ui-Monitor.CurrentHealth.Chart.html" title="ui-Monitor.CurrentHealth.Chart">Metric Chart</a>" screen, check or uncheck the desired resources in "Participating Resources" and click <span class="image-wrap" style=""><img src="attachments/79660367/79921609.gif" style="border: 0px solid black"/></span><br class="atl-forced-newline" />
+ The chart will be refreshed to reflect metric data from the new set of resources.</li>
+	</ol>
+	</li>
+	<li><b>To chart a metric for multiple members of an auto group:</b>
+	<ol>
+		<li>Navigate to the parent resource that contains the auto group.</li>
+		<li>From the parent resource's "Current Health" screen, click the subtype.<br class="atl-forced-newline" />
+ The "Current Health" screen for the auto group of that subtype is displayed.</li>
+		<li>On the <span class="image-wrap" style=""><img src="attachments/79660367/79921610.gif" style="border: 0px solid black"/></span> tab, click the name of the metric or <span class="image-wrap" style=""><img src="attachments/79660367/79921607.gif" style="border: 0px solid black"/></span> next to the metric whose chart you want to see.</li>
+	</ol>
+	</li>
+</ul>
+</td>
+</tr>
+</tbody></table>
+</div>
+
+<p><b>To view the chart for an indicator metric:</b></p>
+<ul>
+	<li>Instead of the <span class="image-wrap" style=""><img src="attachments/79660367/79921610.gif" style="border: 0px solid black"/></span> tab, on the <span class="image-wrap" style=""><img src="attachments/79660367/79921608.gif" style="border: 0px solid black"/></span> tab, click the name of the indicator metric above the chart.<br/>
+A full-page chart is displayed.</li>
+</ul>
+
+
+
+<h1><a name="ChartingMetricData-HowaChartisConstructed"></a>How a Chart is Constructed</h1>
+
+<p>A metric chart by default displays only the measured metric data values over a user-selected time frame. You can also chart peak (highest observed), lowest and highest acceptable, and average values, and you can change the time frame that the chart covers. If you are charting a single metric for a single resource, you can also establish and chart baseline values. Depending on the display rangeover which you are charting the metric data and whether the metric data is cumulative (for example, throughput), the values may be averaged over time.</p>
+
+<p>For more information about reading a chart, read the help for the "<a href="ui-Monitor.CurrentHealth.Chart.html" title="ui-Monitor.CurrentHealth.Chart">Metric Chart</a>" page.</p>
+
+				    					    <br/>
+                        <div class="tabletitle">
+                            <a name="attachments">
+                                <h2>Attachments:</h2>
+                            </a>
+                        </div>
+
+                        <div class="greybox" align="left">
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79660367/79921607.gif">icon_chart.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79660367/79921608.gif">MiniTab_Indicators_on.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79660367/79921605.gif">tbb_chartselectedmetrics.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79660367/79921606.gif">fb_redraw.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79660367/79921610.gif">MiniTab_MetricData_on.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79660367/79921611.gif">tab_Monitor_on.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79660367/79921609.gif">tbb_redrawselectedonchart.gif</a> (image/gif)
+                                <br/>
+                                                    </div>
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:06</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

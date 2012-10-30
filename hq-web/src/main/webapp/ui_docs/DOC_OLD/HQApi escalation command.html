@@ -1,0 +1,356 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : HQApi escalation command</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : HQApi escalation command
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Feb 23, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1330018705893 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1330018705893 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1330018705893 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1330018705893'>
+<ul>
+    <li><a href='#HQApiescalationcommand-Functionality'>Functionality</a></li>
+    <li><a href='#HQApiescalationcommand-escalationCommandOptions'>escalation Command Options</a></li>
+<ul>
+    <li><a href='#HQApiescalationcommand-escalationlist'>escalation list</a></li>
+<ul>
+    <li><a href='#HQApiescalationcommand-escalationlistCommandQualifiers'>escalation list Command Qualifiers</a></li>
+    <li><a href='#HQApiescalationcommand-StructureofanEscalationsResponse'>Structure of an EscalationsResponse</a></li>
+    <li><a href='#HQApiescalationcommand-AttributesinanEscalationsResponse'>Attributes in an EscalationsResponse</a></li>
+</ul>
+    <li><a href='#HQApiescalationcommand-escalationsync'>escalation sync</a></li>
+</ul>
+    <li><a href='#HQApiescalationcommand-Examples'>Examples</a></li>
+<ul>
+    <li><a href='#HQApiescalationcommand-escalationlist'>escalation list</a></li>
+    <li><a href='#HQApiescalationcommand-escalationsync'>escalation sync</a></li>
+</ul>
+</ul></div>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Related Topics</b><br />This page provides information for running an HQ API from the command line. Related topics include: 
+<ul>
+	<li><a href="vFabric Hyperic Web Services API.html" title="vFabric Hyperic Web Services API">vFabric Hyperic Web Services API</a> - brief introduction to the API.</li>
+	<li><a href="HQApi Command-Line Tools.html" title="HQApi Command-Line Tools">HQApi Command&#45;Line Tools</a> - how to get started with the command line tools.</li>
+	<li><a href="HQApi Java API.html" title="HQApi Java API">HQApi Java API</a> - about accessing the APIs programmatically.</li>
+</ul>
+</td></tr></table></div> 
+
+<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>About Escalations</b><br /><ul>
+	<li><a href="Alerts and Alert Definitions.html#AlertsandAlertDefinitions-escalation">Introduction to Escalations</a> describes escalations and how they work.</li>
+	<li><a href="Configure and Manage Escalations.html" title="Configure and Manage Escalations">Configure and Manage Escalations</a> has instructions for setting up and managing escalations from the Hyperic user interface; it includes useful information about the components of an escalation.</li>
+</ul>
+</td></tr></table></div>
+
+<h1><a name="HQApiescalationcommand-Functionality"></a>Functionality</h1>
+
+<p>The <b>escalation</b> command can be used to list and update Escalations. It is useful for:</p>
+<ul>
+	<li>Reviewing all escalations defined in Hyperic.</li>
+	<li>Updating multiple escalations in a single step.</li>
+</ul>
+
+
+<h1><a name="HQApiescalationcommand-escalationCommandOptions"></a>escalation Command Options</h1>
+
+<h2><a name="HQApiescalationcommand-escalationlist"></a>escalation list</h2>
+
+<p>The <b>escalation list</b> returns an <tt>EscalationsResponse</tt> element that defines all escalations defined in Hyperic.</p>
+
+<h3><a name="HQApiescalationcommand-escalationlistCommandQualifiers"></a>escalation list Command Qualifiers</h3>
+
+<p>None.</p>
+
+<h3><a name="HQApiescalationcommand-StructureofanEscalationsResponse"></a>Structure of an EscalationsResponse</h3>
+
+<p>The <tt>EscalationsResponse</tt> returned by the <b>escalation list</b> command has this element structure.</p>
+
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>EscalationsResponse
+Escalation
+Action
+</pre>
+</div></div>
+
+<p>where there are:</p>
+
+<ul>
+	<li>1 or more <tt>Escalation</tt> elements, each with</li>
+	<li>1 or more <tt>Action</tt> elements</li>
+</ul>
+
+
+<h3><a name="HQApiescalationcommand-AttributesinanEscalationsResponse"></a>Attributes in an EscalationsResponse</h3>
+
+<p>This table defines the attributes in a <tt>EscalationsResponse</tt>.</p>
+
+<p>Note that there are three different types of <tt>Action</tt> elements, one for email, one for syslog actions, one to suppress the alert. In the <tt>Action</tt> element, the different types are distinguished by the value of the actionType attribute; that remaining attributes in the element vary by action type.</p>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Element </th>
+<th class='confluenceTh'> Attribute </th>
+<th class='confluenceTh'> Values </th>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>Escalation</tt> </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> repeat </td>
+<td class='confluenceTd'> true <br class="atl-forced-newline" />
+false </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> notifyAll </td>
+<td class='confluenceTd'> true <br class="atl-forced-newline" />
+false </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> maxPauseTime </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> pauseAllowed </td>
+<td class='confluenceTd'> true <br class="atl-forced-newline" />
+false </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> description </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> name </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> id </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>Action</tt> </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> sms </td>
+<td class='confluenceTd'> true <br class="atl-forced-newline" />
+false </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> notifyType </td>
+<td class='confluenceTd'> users - corresponds to "Notify HQ Users"&nbsp; <br class="atl-forced-newline" />
+roles - corresponds to "Notify Roles" <br class="atl-forced-newline" />
+email - corresponds to "Notify Other Recipients" </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> actionType </td>
+<td class='confluenceTd'> "EmailAction" </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> wait </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> id </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>Action</tt> </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> syslogVersion </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> syslogProduct </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> syslogMeta </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> actionType </td>
+<td class='confluenceTd'> "SyslogAction" </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> wait </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> id </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>Action</tt> </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> actionType </td>
+<td class='confluenceTd'> "NoOpAction" <br class="atl-forced-newline" />
+Corresponds to the "Suppress Alerts" action type. </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> wait </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> id </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>Action</tt> </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> actionType </td>
+<td class='confluenceTd'> "SnmpAction" <br class="atl-forced-newline" />
+Corresponds to "SNMP Notification" action type, supported if SNMP is enabled. </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> wait </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> id </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+</tbody></table>
+</div>
+
+
+
+<h2><a name="HQApiescalationcommand-escalationsync"></a>escalation sync</h2>
+
+<p>The <b>escalation sync</b> command updates escalations defined in Hyperic with the attributes defined in the <tt>EscalationsResponse</tt> element. You cannot create new escalations with <b>escalation sync</b>.</p>
+
+<p>When you add Actions to an escalation, the order in which you specify the actions is the order in which the actions will be performed.</p>
+
+<h1><a name="HQApiescalationcommand-Examples"></a>Examples</h1>
+
+<h2><a name="HQApiescalationcommand-escalationlist"></a>escalation list</h2>
+
+<p>In this example, two escalations are returned.</p>
+
+<p>The first escalation, whose name is "My Escalation", has three email actions, one to the Hyperic admin user, one to all Hyperic users with the Hyperic Super User Role role, and one to "ops@bar.com".</p>
+
+<p>The second role is Hyperic's built-in escalation, which has no actions.</p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">$ ./bin/hqapi.sh escalation list
+&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+&lt;EscalationsResponse&gt;
+&lt;Status&gt;Success&lt;/Status&gt;
+&lt;Escalation repeat="true" notifyAll="false" maxPauseTime="172800000" pauseAllowed="true"
+description="" name="My Escalation" id="10044"&gt;
+&lt;Action actionType="NoOpAction" wait="0" id="10495"/&gt;
+&lt;Action sms="false" notifyType="users" actionType="EmailAction" wait="2700000" id="10496"&gt;
+&lt;Notify name="hqadmin"/&gt;
+&lt;/Action&gt;
+&lt;Action sms="false" notifyType="roles" actionType="EmailAction" wait="300000" id="10497"&gt;
+&lt;Notify name="Super User Role"/&gt;
+&lt;/Action&gt;
+&lt;Action sms="false" notifyType="email" actionType="EmailAction" wait="3600000" id="10498"&gt;
+&lt;Notify name="ops@bar.com"/&gt;
+&lt;/Action&gt;
+&lt;Action syslogVersion="4.1" syslogProduct="Hyperic HQ" syslogMeta="Error Text" actionType="SyslogAction" wait="0" id="10573"/&gt;
+&lt;/Escalation&gt;
+
+&lt;Escalation repeat="false" notifyAll="false" maxPauseTime="300000" pauseAllowed="false"
+description="This is an Escalation Scheme created by HQ that performs no actions" name="Default Escalation" id="100"/&gt;
+&lt;Escalation repeat="false" notifyAll="false" maxPauseTime="300000" pauseAllowed="false"
+description="" name="Support Escalation - HIGH" id="10020"/&gt;
+&lt;Escalation repeat="false" notifyAll="false" maxPauseTime="300000" pauseAllowed="false"
+description="" name="Support Escalation - LOW" id="10022"/&gt;
+&lt;Escalation repeat="false" notifyAll="false" maxPauseTime="300000" pauseAllowed="false"
+description="" name="Support Escalation - MEDIUM" id="10021"/&gt;
+&lt;/EscalationsResponse&gt;
+$</pre>
+		</div>
+</div></div>
+
+<h2><a name="HQApiescalationcommand-escalationsync"></a>escalation sync</h2>
+
+<p>In this example, the first command writes the escalations in Hyperic to a file called <tt>escalations.xml</tt>. The second command pipes <tt>escalations.xml</tt> to the sync method to update the escalations in Hyperic.</p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">$ ./bin/hqapi.sh escalation list &gt; escalations.xml
+...
+...
+$ cat escalations.xml | ./bin/hqapi.sh escalation sync
+Successfully synced 5 escalations.
+bash-3.2$</pre>
+		</div>
+</div></div>
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

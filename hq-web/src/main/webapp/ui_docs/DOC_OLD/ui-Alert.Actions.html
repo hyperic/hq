@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : ui-Alert.Actions</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : ui-Alert.Actions
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325699229189 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699229189 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699229189 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1325699229189'>
+<ul>
+    <li><a href='#ui-Alert.Edit-Escalation'>Escalation</a></li>
+    <li><a href='#ui-Alert.Edit-ControlAction'>Control Action</a></li>
+    <li><a href='#ui-Alert.Edit-NotifyRoles'>Notify Roles</a></li>
+    <li><a href='#ui-Alert.Edit-NotifyHQUsers'>Notify HQ Users</a></li>
+    <li><a href='#ui-Alert.Edit-NotifyOtherRecipients'>Notify Other Recipients</a></li>
+    <li><a href='#ui-Alert.Edit-Script'>Script</a></li>
+    <li><a href='#ui-Alert.Edit-OpenNMS'>OpenNMS</a></li>
+    <li><a href='#ui-Alert.Edit-SNMPNotification'>SNMP Notification</a></li>
+</ul></div>
+<p>You assign actions to an alert definition on the <b>Alert Definition</b> page, which appears when you save a new alert definition or edit an existing alert definition.</p>
+
+<p>The <b>Alert Definition</b> page is similar to the <b>New Alert</b> page, with the addition of <b>Edit</b> controls in the "Alert Properties" and "Condition Set" sections, and tabs at the bottom of the page for defining alert actions.</p>
+
+<p>You can specify multiple actions to be performed automatically when an alert fires. The types of actions available in the <b>Alert Definition</b> page vary based on: (1) the type of resource the alert applies to, (2) your version of Hyperic, and (3) whether you've configured Hyperic for the types of actions that must be enabled before you can use them, such as escalations, OpenNMS trap actions, and in vFabric Hyperic, SNMP notifications.</p>
+
+<p>To define an alert action, select one of the tabs and supply the required information:</p>
+
+<h3><a name="ui-Alert.Actions-Escalation"></a>Escalation</h3>
+
+<p>Select an escalation from the "Escalation Scheme" pulldown; the tab refreshes and shows the escalation steps. You must define an escalation before you can assign it to an alert definition. Using an escalation that is configured to repeat until the alert is fixed is a good way to prevent redundant alerts firing for the same problem. To create an escalation, click <b>Escalation Schemes Configuration</b> on the <b>Administration</b> tab. For more information about escalations, see <a href="Configure and Manage Escalations.html" title="Configure and Manage Escalations">Configure and Manage Escalations</a>.</p>
+
+<h3><a name="ui-Alert.Actions-ControlAction"></a>Control Action</h3>
+<p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+
+<p>In vFabric Hyperic, you can define a resource control action for Hyperic to perform when the alert fires. The control action can target the current resource (the one to which the alert definition is assigned) or a different resource on the same platform, as long as the resource type has Hyperic-supported control actions. To configure a control action for the alert, select the <b>Control Action</b> tab and click <b>Edit</b>. The <b>Add Control Action</b> page appears; click the thumbnail below for a screenshot. Follow the instructions on the associated <a href="ui-Alert.ControlAction.html" title="ui-Alert.ControlAction">help page</a>. You can only assign a single control action to an alert definition. <b>Note:</b> You cannot assign a control action to a resource type alert.</p>
+
+<p><a name="ui-Alert.Actions-AlertControlAction"></a></p>
+
+<p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 608x185" href='http://support.hyperic.com/download/attachments/79660206/AddControlAction.png'><img src="attachments/thumbnails/79660206/79921878" style="border: 0px solid black"/></a></span></p>
+
+<h3><a name="ui-Alert.Actions-NotifyRoles"></a>Notify Roles</h3>
+
+<p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+
+
+<p>In vFabric Hyperic you can specify one or more roles as notification recipients. Hyperic users with a role you specify will be notified when an alert is fired.&nbsp; Click <b>Add to List</b> on the <b>Notify Roles</b> tab.&nbsp; On the roles selection page, choose the role(s) to be notified when the alert fires. The <a href="ui-Alert.Notification.html" title="ui-Alert.Notification">help page</a>&nbsp;has instructions.&nbsp;</p>
+
+<p>For information about creating roles specifically for use in notification actions, see <a href="Configure Roles for Role-Based Alert Notifications.html" title="Configure Roles for Role-Based Alert Notifications">Configure Roles for Role&#45;Based Alert Notifications</a>.</p>
+
+
+<h3><a name="ui-Alert.Actions-NotifyHQUsers"></a>Notify HQ Users</h3>
+
+<p>Click <b>Add to List</b> on  this tab to specify one or more Hyperic uses as notification recipients. On the user selection page, choose the users to be notified when the alert fires. The <a href="ui-Alert.Notification.html" title="ui-Alert.Notification">help page</a> has instructions.&nbsp;</p>
+
+<h3><a name="ui-Alert.Actions-NotifyOtherRecipients"></a>Notify Other Recipients</h3>
+
+<p>Click <b>Add to List</b> on this tab to specify non-Hyperic user email recipients for alert notifications.&nbsp; The <a href="ui-Alert.Notification.html" title="ui-Alert.Notification">help page</a> has instructions.&nbsp;</p>
+
+<h3><a name="ui-Alert.Actions-Script"></a>Script</h3>
+<p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+
+
+<p>In vFabric Hyperic, to assign a script action to the alert definition, click the <b>Script</b> tab, enter the full path to the script, and click <b>Set</b>.&nbsp; Hyperic will run the script when the alert fires. Scripts can reference alert-related Hyperic environment variables to perform custom notification logic. For information, see <a href="ui-Alert.Script.html" title="ui-Alert.Script">Define a Script Action for an Alert</a>.</p>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Script actions are synchronous</b><br />Script actions execute one at a time. Until a script action completes, additional alerts will not fire on the resource.</td></tr></table></div>
+
+<h3><a name="ui-Alert.Actions-OpenNMS"></a>OpenNMS</h3>
+
+<p>If Hyperic Server is configured for OpenNMS integration, you can use this tab to configure Hyperic to send an SNMP trap to OpenNMS when the alert fires. The notification will be generated by <tt>opennms_notify.gsp</tt> alert notification template.</p>
+
+<p>To configure an OpenNMS trap action, enter:</p>
+
+<ul>
+	<li><b>Server</b> &#45; Listen address for the OpenNMS server</li>
+	<li><b>Port</b> for the OpenNMS server.</li>
+</ul>
+
+
+<p>For more information, see <a href="http://support.hyperic.com/display/hyperforge/HQU+OpenNMS">http://support.hyperic.com/display/hyperforge/HQU+OpenNMS</a>.</p>
+
+
+<h3><a name="ui-Alert.Actions-SNMPNotification"></a>SNMP Notification</h3>
+
+<p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+
+
+
+<p>If the Hyperic Server is configured to send SNMP notifications to your NMS, you can use this tab to configure a trap notification action. See <a href="ui-Admin.HQServer.html#ui-Admin.HQServer-SNMPServerConfigurationProperties">SNMP Server Configuration Properties</a> for more information.</p>
+
+<p>The notification sent when the alert fires will contain three variable bindings:</p>
+
+<ul>
+	<li><tt>sysUptimeOID.0</tt> &#45; No configuration is required for this binding.</li>
+</ul>
+
+
+<ul>
+	<li><tt>snmpTrapOID.0</tt> &#45; This binding is configured on the <b>HQ Server</b> settings page.</li>
+</ul>
+
+
+<ul>
+	<li>A variable binding for the alert data specified in the <tt>snmp_trap.gsp</tt> alert notification template - the alert definition name and the "short reason" for firing. Note that Alert templates may be customized, as described in <a href="Tailor Alert Notification Templates.html" title="Tailor Alert Notification Templates">Tailor Alert Notification Templates</a>.</li>
+</ul>
+
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Including more variable bindings in SNMP messages</b><br />For richer capability, you can configure a SNMP notification as a step in an escalation. An SNMP notification in an escalation can be configured with additional variable bindings. For more information, see <a href="Configure and Manage Escalations.html" title="Configure and Manage Escalations">Configure and Manage Escalations</a></td></tr></table></div>
+
+<p>To configure an SNMP notification action enter:</p>
+
+<ul>
+	<li><b>IP Address</b> &#45; the address and port of the target NMS.</li>
+	<li><b>OID</b> &#45; The OID of the notification to send, which will contain the alert details specified in the <tt>snmp_trap.gsp</tt>, template.</li>
+	<li><b>Notification Mechanism</b> &#45; The type of SNMP notification to send:
+	<ul>
+		<li>v1 Trap</li>
+		<li>v2c Trap</li>
+		<li>Inform</li>
+	</ul>
+	</li>
+</ul>
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

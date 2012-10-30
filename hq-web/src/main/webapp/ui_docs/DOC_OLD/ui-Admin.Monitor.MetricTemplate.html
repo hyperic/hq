@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : ui-Admin.Monitor.MetricTemplate</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : ui-Admin.Monitor.MetricTemplate
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325699429716 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699429716 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699429716 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1325699429716'>
+<ul>
+    <li><a href='#ui-Admin.Monitor.MetricTemplate-NavigatetotheMonitoringDefaultsPageforaResourceType'>Navigate to the Monitoring Defaults Page for a Resource Type</a></li>
+    <li><a href='#ui-Admin.Monitor.MetricTemplate-EnableCollectionofaMetric'>Enable Collection of a Metric</a></li>
+    <li><a href='#ui-Admin.Monitor.MetricTemplate-DisableCollectionofaMetric'>Disable Collection of a Metric</a></li>
+    <li><a href='#ui-Admin.Monitor.MetricTemplate-ChangeaMetricCollectionInterval'>Change a Metric Collection Interval</a></li>
+    <li><a href='#ui-Admin.Monitor.MetricTemplate-SetIndicatorMetrics'>Set Indicator Metrics</a></li>
+    <li><a href='#ui-Admin.Monitor.MetricTemplate-APIsforMetricCollectionSettings'>APIs for Metric Collection Settings</a></li>
+</ul></div>
+
+
+<p>Metric collection settings for a resource type are configured on the <b>Monitoring Defaults</b> page for the resource type.</p>
+
+<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Template Changes Vs. Custom Configurations</b><br />Note that an authorized user can tailor metric collection settings on a per resource basis (on the resource's <b>Metric Data</b> minitab in the Resource Hub.) When you save changes to the metric collection settings for a resource type on the <b>Monitoring Defaults</b> page, the settings you configure will apply to <em>all</em> resources of that type in inventory.  So, any custom metric collection configuration for resources of that type will be overwritten.
+
+<p>Note however, that if a user has chosen a different set of indicator metrics for a resource instance (on the resource's <b>Indicators</b> minitab in the Resource Hub) changing the indicator metrics for a resource type on the <b>Monitoring Defaults</b> page will <em>not</em> override the user's selections.</p></td></tr></table></div>
+
+<h1><a name="ui-Admin.Monitor.MetricTemplate-NavigatetotheMonitoringDefaultsPageforaResourceType"></a>Navigate to the Monitoring Defaults Page for a Resource Type</h1>
+
+<ol>
+	<li>Click the <b>Administration</b> tab.</li>
+	<li>Click <b>Monitoring Defaults</b> in the "HQ Server Settings" section of the <b>Administration</b> tab.</li>
+	<li>Scroll to the desired resource type on the <b>Monitoring Defaults</b> page, and click <b>Edit Metric Template</b> in that row.</li>
+</ol>
+
+
+<p>The screenshot below is the <b>Monitoring Defaults</b> page for the vSphere Host resource type.</p>
+
+<p><span class="image-wrap" style=""><img src="attachments/79660206/79921790.png" width="800px" style="border: 0px solid black"/></span></p>
+
+<h1><a name="ui-Admin.Monitor.MetricTemplate-EnableCollectionofaMetric"></a>Enable Collection of a Metric</h1>
+
+<p>To enable the collection of a metric, follow the directions in <a href="#ui-Admin.Monitor.MetricTemplate-ChangeaMetricCollectionInterval">Change a Metric Collection Interval</a>. Collection of the metric is now enabled by default with the specified collection interval on every resource of this type.</p>
+
+<h1><a name="ui-Admin.Monitor.MetricTemplate-DisableCollectionofaMetric"></a>Disable Collection of a Metric</h1>
+
+<p>To disable the collection of a metric, check the metric name at the left and click <b>Disable Collection</b> at the bottom of the page.</p>
+
+<h1><a name="ui-Admin.Monitor.MetricTemplate-ChangeaMetricCollectionInterval"></a>Change a Metric Collection Interval</h1>
+
+<ol>
+	<li>Check the metric name at the left.</li>
+	<li>In <b>Collection Interval for Selected</b> at the bottom of the page, enter a time value and select a unit of time measure for the collection interval.</li>
+	<li>Click  the <b>Collection Interval for Selected</b> control at the bottom of the <b>Monitoring Defaults</b> page.</li>
+</ol>
+
+
+<h1><a name="ui-Admin.Monitor.MetricTemplate-SetIndicatorMetrics"></a>Set Indicator Metrics</h1>
+
+<p>To select the indicator metrics for a resource type (indicator metrics are the metrics that are charted on a resource's <b>Indicators</b> minitab in the Resource Hub) check the metric name at the left for each metric you wish to be an indicator, and click the <b>Set Selected Metrics as Indicators</b> control at the bottom of the <b>Monitoring Defaults</b> page.</p>
+
+<p>The metrics you configure will be the default indicators for the resource type.</p>
+
+<p>Changes to indicator metrics apply to existing resources but only for users that have not explicitly changed the default indicator page on the resources (of the specified type). If a user has changed the default indicator page for a resource, that will not be overwritten with changes made here.</p>
+
+<h1><a name="ui-Admin.Monitor.MetricTemplate-APIsforMetricCollectionSettings"></a>APIs for Metric Collection Settings</h1>
+
+<p>As an alternative to the updating updating metric collection settings from the Hyperic user interface, you can use Hyperic APIs to perform updates from the command line or from scripts to perform bulk updates:</p>
+
+<ul>
+	<li><a href="HQApi metric command.html" title="HQApi metric command">HQApi metric command</a> &#45; for listing and updating metric collection settings for an individual resource.</li>
+	<li><a href="HQApi metricTemplate command.html" title="HQApi metricTemplate command">HQApi metricTemplate command</a> &#45; for listing and updating metric collection settings for an all instances of a resource type.</li>
+</ul>
+
+
+<p>For general information, see <a href="vFabric Hyperic Web Services API.html" title="vFabric Hyperic Web Services API">vFabric Hyperic Web Services API</a>.</p>
+
+				    					    <br/>
+                        <div class="tabletitle">
+                            <a name="attachments">
+                                <h2>Attachments:</h2>
+                            </a>
+                        </div>
+
+                        <div class="greybox" align="left">
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79659977/79921330.png">dash-button_go-arrow.png</a> (image/png)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79659977/79921343.png">tbb_disablecollection.png</a> (image/png)
+                                <br/>
+                                                    </div>
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

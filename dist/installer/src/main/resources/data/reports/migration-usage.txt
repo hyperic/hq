@@ -24,7 +24,8 @@ hq-export options:
                                     would optimize it self accordingly. 
   -Dsetup.file=<path>             - [Required if] -Dhqserver.install.path not supplied. 
                                     Path to file that contains export command options 
-                                    in name=value pairs.                   
+                                    in name=value pairs.                 
+  -DconfigOnly=true               - [Optional]: Imports only configuration data.  
 
 hq-import options:
 
@@ -50,6 +51,7 @@ hq-import options:
   -Dsetup.file=<path>                - [Required if] -Dhqserver.install.path not supplied. 
                                        Path to file that contains import command options 
                                        in name=value pairs.
+  -DconfigOnly=true                  - [Optional]: Imports only configuration data.    
   
 one-step-migration:
 
@@ -76,4 +78,5 @@ one-step-migration:
   -Dsetup.file=<path>                    - [Required if] -Dhqserver.install.path not supplied. 
                                            Path to file that contains import command options 
                                            in name=value pairs.
+   -DconfigOnly=true                  - [Optional]: Imports only configuration data.                                           
 

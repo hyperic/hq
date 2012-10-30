@@ -1,0 +1,232 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : ui-Dashboard</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : ui-Dashboard
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+
+
+
+<ul>
+	<li><a href="#ui-Dashboard-HypericDashboard">Hyperic Dashboard</a></li>
+	<li><a href="#ui-Dashboard-PortletQuickFactsandLinks">Portlet Quick Facts and Links</a></li>
+	<li><a href="#ui-Dashboard-TailorDashboard">Tailor Dashboard</a></li>
+	<li><a href="#ui-Dashboard-UsingMultipleDashboardsinvFabricHyperic">Using Multiple Dashboards in vFabric Hyperic</a></li>
+</ul>
+
+
+
+<h1><a name="ui-Dashboard-HypericDashboard"></a>Hyperic Dashboard</h1>
+
+<p>The Hyperic Dashboard is the first page displayed in the Hyperic user interface when you log on.&nbsp;The dashboard contains multiple portlets, each of which presents a particular type of information, such as&nbsp;resource health, recent alerts, recently discovered resource or changes to resources, recently performed resource control actions, and so on.&nbsp;</p>
+
+<p>You can can personalize the dashboard to suit your responsibilities and preferences; you can add or remove portlets, rearrange them, and customize the contents of many of the portlets.</p>
+
+<p>In vFabric Hyperic, you can have multiple dashboards &#8212; one for each role to which you are assigned. For more information, see <a href="#ui-Dashboard-UsingMultipleDashboardsinvFabricHyperic">Using Multiple Dashboards in vFabric Hyperic</a>.</p>
+
+<p>Note also that in vFabric Hyperic, the roles you are assigned to govern what resource data appears in dashboard portlets. Portlets will contain only the resource data to which your Hyperic roles allows access. For more information, see <a href="User Accounts and Roles in Hyperic.html" title="User Accounts and Roles in Hyperic">User Accounts and Roles in Hyperic</a>.</p>
+
+<p>For a screenshot, see <a href="Hyperic Dashboard.html" title="Hyperic Dashboard">Hyperic Dashboard</a>. </p>
+
+
+
+
+
+<h1><a name="ui-Dashboard-PortletQuickFactsandLinks"></a>Portlet Quick Facts and Links</h1>
+<p><a name="ui-Dashboard-PortletFacts"></a></p>
+
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Portlet </th>
+<th class='confluenceTh'> Description </th>
+<th class='confluenceTh'> More Information and Configuration Options </th>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Autodiscover</b> </td>
+<td class='confluenceTd'> Lists new and changed resources, and allows you to add them inventory. </td>
+<td class='confluenceTd'> <a href="ui-Dashboard.AutoDiscovery.html" title="ui-Dashboard.AutoDiscovery">Auto-Discovery Portlet</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Availability Summary</b> </td>
+<td class='confluenceTd'> Displays the availablility of selected of resources, aggregated by resource type. Refreshes every minute. <br class="atl-forced-newline" />
+<br class="atl-forced-newline" />
+This portlet does not contain any resources until you configure it. </td>
+<td class='confluenceTd'> <a href="ui-Dashboard.Availability.html" title="ui-Dashboard.Availability">Availability Summary Portlet</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Control Actions</b> </td>
+<td class='confluenceTd'> Lists the control actions that Hyperic has most recently performed on any managed resource, upcoming scheduled control actions, and the most frequently performed quick control actions. </td>
+<td class='confluenceTd'> <a href="ui-Dashboard.Control.html" title="ui-Dashboard.Control">Control Actions Portlet</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Favorite Resources</b> </td>
+<td class='confluenceTd'> Lists resources that have been added to the portlet.  This portlet does not contain any resources until you configure it. </td>
+<td class='confluenceTd'> <a href="ui-Dashboard.FavoriteResources.html" title="ui-Dashboard.FavoriteResources">Favorite Resources Portlet</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Saved Charts</b> </td>
+<td class='confluenceTd'> Displays charts that have been saved to the Dashboard. In vFabric Hyperic, charts are displayed as a slideshow. </td>
+<td class='confluenceTd'> <a href="ui-Dashboard.Charts.html" title="ui-Dashboard.Charts">Saved Charts Portlet</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Recent Alerts</b> </td>
+<td class='confluenceTd'> Lists the most recently triggered alerts for a set of user-selected resources. Refreshes every minute. </td>
+<td class='confluenceTd'> <a href="ui-Dashboard.Alerts.html" title="ui-Dashboard.Alerts">Recent Alerts Portlet</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Recently Added</b> </td>
+<td class='confluenceTd'> Lists platforms recently added to inventory. </td>
+<td class='confluenceTd'> <a href="ui-Dashboard.RecentlyAdded.html" title="ui-Dashboard.RecentlyAdded">Recently Added Portlet</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Search Resources Portlet</b> </td>
+<td class='confluenceTd'> Allows you to search for resources. The search supports case-insensitive, partial-term queries and is restricted to a single inventory type. </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Summary Counts</b> </td>
+<td class='confluenceTd'> Displays a count of all the managed resource of each inventory type. In vFabric Hyperic, the resources that appear are limited to those that you have permissions to view. </td>
+<td class='confluenceTd'> <a href="ui-Dashboard.Summary.html" title="ui-Dashboard.Summary">Summary Counts</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Group Alert Summary</b><font color="red">&#42;</font> </td>
+<td class='confluenceTd'> Displays traffic light indicators for resource alerts and group alerts for selected groups. Click on the traffic light for a group alert to view a list of alerts that have fired. Click on a group name to view the group page. This portlet does not present any groups until you add them to it.  </td>
+<td class='confluenceTd'><a href="Group Alerts Summary Portlet.html" title="Group Alerts Summary Portlet">Group Alerts Summary Portlet</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Metric Viewer</b> </td>
+<td class='confluenceTd'> Shows selected metrics for selected resources. Refreshes every minute. <br class="atl-forced-newline" />
+<br class="atl-forced-newline" />
+This portlet does not contain any resources until they have been added to it. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> <a href="ui-Dashboard.Metric.html" title="ui-Dashboard.Metric">Metric Viewer Portlet</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Problem Resources</b><font color="red">&#42;</font> </td>
+<td class='confluenceTd'> Lists all resources with problem metrics, their availability, the number of alerts triggered on each, the number of times the metric has been out of bounds, and the last time the OOB metric was collected. &nbsp;<br class="atl-forced-newline" />
+ <br class="atl-forced-newline" />
+Click the resource name to view the <b>Monitor</b>&nbsp;page for it.<br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> <a href="ui-Dashboard.ProblemResources.html" title="ui-Dashboard.ProblemResources">Problem Resources Portlet</a> </td>
+</tr>
+</tbody></table>
+</div>
+
+
+
+<h1><a name="ui-Dashboard-TailorDashboard"></a>Tailor Dashboard</h1>
+<p><a name="ui-Dashboard-TailorDashboard"></a></p>
+
+<p>You can customize the dashboard in these ways:</p>
+<ul>
+	<li>Add portlets &#8212; At the bottom of each column of portlet, click <b>Add Content to this column</b> to list portlets you can add.</li>
+</ul>
+
+
+<ul>
+	<li>Remove portlets &#8212; The top right corner of each portlet has a delete icon  you can use to remove it from your Dashboard. If you remove a portlet, you can add it back later &#8212; removed portlets can be selected from the list that displays when you click <b>Add Content to this column</b>.</li>
+</ul>
+
+
+<ul>
+	<li>Change layout &#8212; You move a portlet to a different location in a column by grabbing it by the bar at the top of it and dragging it to the desired location.</li>
+</ul>
+
+
+<ul>
+	<li>Change portlet behavior &#8212; Most portlets have a gear-shaped icon in the bar at the top, which you can click to display a configuration dialog.</li>
+</ul>
+
+
+
+<h1><a name="ui-Dashboard-UsingMultipleDashboardsinvFabricHyperic"></a>Using Multiple Dashboards in vFabric Hyperic</h1>
+<p><a name="ui-Dashboard-MultipleDashboards"></a></p>
+
+<p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+
+<p>In vFabric Hyperic, you can:</p>
+
+<ul>
+	<li>Select a dashboard &#8212; Select which dashboard to view using the <b>Select a Dashboard</b> pull-down in the upper left of the page. In addition to your personal dashboard, the list will contain the role-specific dashboard for each role to which you are assigned.</li>
+</ul>
+
+
+<ul>
+	<li>Set a default dashboard &#8212; By default, your default dashboard is your personal dashboard. To change the default dashboard, select the desired dashboard, and click <b>Make Default</b> to the right of the <b>Select a Dashboard</b> pull-down &#8212; this control appears on a dashboard that is not currently your default dashboard.</li>
+</ul>
+
+
+
+
+				    					    <br/>
+                        <div class="tabletitle">
+                            <a name="attachments">
+                                <h2>Attachments:</h2>
+                            </a>
+                        </div>
+
+                        <div class="greybox" align="left">
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79660094/79921407.gif">icon_feed.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79660094/79921408.gif">icon_ack.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79660094/79921405.gif">MiniTab_MetricData_on.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79660094/79921406.png">dash-icon_edit.png</a> (image/png)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79660094/79921380.png">dash_moveContent_add.png</a> (image/png)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79660094/79921379.png">dash_icon_down.png</a> (image/png)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79660094/79921378.gif">dash-button_go-arrow.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79660094/79921377.png">dash-icon_delete.png</a> (image/png)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79660094/79921384.png">dash_icon_up.png</a> (image/png)
+                                <br/>
+                                                    </div>
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

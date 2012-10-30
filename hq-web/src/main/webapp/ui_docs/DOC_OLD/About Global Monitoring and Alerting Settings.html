@@ -1,0 +1,184 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : About Global Monitoring and Alerting Settings</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : About Global Monitoring and Alerting Settings
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325699751266 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699751266 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699751266 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1325699751266'>
+<ul>
+    <li><a href='#AboutGlobalMonitoringandAlertingSettings-ConfigureGlobalAlertProperties'>Configure Global Alert Properties</a></li>
+    <li><a href='#AboutGlobalMonitoringandAlertingSettings-ConfigureAlertNotificationThrottling'>Configure Alert Notification Throttling</a></li>
+    <li><a href='#AboutGlobalMonitoringandAlertingSettings-ConfigureAlertNotificationEmailProperties'>Configure Alert Notification Email Properties</a></li>
+    <li><a href='#AboutGlobalMonitoringandAlertingSettings-ConfigureMetricBaseliningProperties'>Configure Metric Baselining Properties</a></li>
+    <li><a href='#AboutGlobalMonitoringandAlertingSettings-ConfigureHypericVersionandSecurityAnnouncements'>Configure Hyperic Version and Security Announcements</a></li>
+</ul></div>
+
+<p>These sections describe options and settings that are defined globally for a Hyperic deployment.</p>
+
+<h1><a name="AboutGlobalMonitoringandAlertingSettings-ConfigureGlobalAlertProperties"></a>Configure Global Alert Properties</h1>
+<p>The settings in the <b>Global Alert Properties</b> section of the <b>Administration &gt; HQ Server Settings</b> page enable immediate and global control of alert processing.</p>
+<ul>
+	<li><b>Alerts</b> &#45; Disable or enable all alert definitions for all resources immediately. Disabling stops any alerts from firing; notifications defined in escalations that are currently in progress will be completed.</li>
+</ul>
+
+
+<ul>
+	<li><b>Alert Notifications</b> &#45; Disable or enable alert notifications for all resources immediately. Disabling stops all notifications, include those for alerts with escalations currently in progress.</li>
+</ul>
+
+
+<ul>
+	<li><b>Hierarchical Alerting</b> <font color="red">&#42;</font> &#45; This setting controls whether alerts are evaluated using the hierarchical alerting method. When hierarchical alerting is enabled, before firing an alert for a resource, HQ considers the availability and alert status of the resource's parent. The purpose of hierarchical alerting is to avoid firing alerts for every resource affected by a single root cause.  For more information, see <a href="Manage Alert and Notification Volume.html" title="Manage Alert and Notification Volume">Manage Alert and Notification Volume</a>.</li>
+</ul>
+
+
+<p><b>Note:</b> You can extend the effect of hierarchical alerting by configuring the relationship between a network device or virtual host and the platforms that depend on it using the <b>Network and Host Dependency Manager</b> available in the "Plugins" section of the <b>Administration</b> tab. For more information see <a href="Manage Alert and Notification Volume.html" title="Manage Alert and Notification Volume">Manage Alert and Notification Volume</a>.</p>
+
+
+<h1><a name="AboutGlobalMonitoringandAlertingSettings-ConfigureAlertNotificationThrottling"></a>Configure Alert Notification Throttling</h1>
+<p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+
+<p>You can use notification throttling to limit the number of alert email actions (notifications sent by email for a fired alert) that HQ will issue in a 15 second interval. When the threshold you specify is reached, HQ stops sending email alert notifications and instead sends a summary of alert activity every ten minutes to the recipients you specify. </p>
+
+<p>After starting to throttle, HQ re-evaluates notification volume for fired alerts every 10 minutes; when it determines that the per interval volume of individual notifications that fired alerts would generate is less than the configured threshold, HQ resumes sending individual notifications. </p>
+
+<p>In the <b>Notification Throttling Configuration Properties</b> section of the <b>Administration &gt; HQ Server Settings</b> page:  </p>
+<ol>
+	<li>Click the <b>Notification Throttling</b> ON control.</li>
+	<li>In the "Threshold" field, enter the maximum number of notifications you want sent in a 15 second interval.</li>
+	<li>Enter one or more email addresses in the "Notification Email(s) field".</li>
+</ol>
+
+
+<p>For related information, see <a href="Manage Alert and Notification Volume.html" title="Manage Alert and Notification Volume">Manage Alert and Notification Volume</a>.</p>
+
+<h1><a name="AboutGlobalMonitoringandAlertingSettings-ConfigureAlertNotificationEmailProperties"></a>Configure Alert Notification Email Properties</h1>
+<p>The settings in the <b>Email Configuration Properties</b> section of the <b>Administration &gt; HQ Server Settings</b> are used to form notifications that Hyperic sends for a fired alert.</p>
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Property </th>
+<th class='confluenceTh'> Description </th>
+</tr>
+<tr>
+<td class='confluenceTd'> Base URL </td>
+<td class='confluenceTd'> The address:port where the Hyperic Server listens for web application requests. The initial value of <b>Base URL</b> is the web application listen port configured when the Hyperic Server was installed, for example: <br class="atl-forced-newline" />  <br class="atl-forced-newline" />
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>http://Ms-MacBook-Pro-15.local:7080 </pre>
+</div></div>
+<p> <b>Base URL</b> forms the prefix of the URL to which Hyperic appends the remainder of the URL, which points to the <b>Alert Detail</b> page for the fired alert. For example:</p>
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>http://Ms-MacBook-Pro-15.local:7080/alerts/Alerts.do?mode=viewAlert&amp;eid=5:10611&amp;a=16431</pre>
+</div></div> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> From Email Address </td>
+<td class='confluenceTd'> The email address listed as the sender of the alert emails. For example: <br class="atl-forced-newline" />
+ <br class="atl-forced-newline" />  
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>hq@demo2.vmware.com</pre>
+</div></div>
+<p> </p></td>
+</tr>
+</tbody></table>
+</div>
+
+
+
+<h1><a name="AboutGlobalMonitoringandAlertingSettings-ConfigureMetricBaseliningProperties"></a>Configure Metric Baselining Properties</h1>
+<p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+
+
+<p>In vFabric Hyperic, the properties in the <b>Automatic Baseline Configuration Properties</b> section of the <b>Administration &gt; HQ Server Settings</b> page control the Hyperic baselining process and the accuracy of the baseline. </p>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Server Setting </th>
+<th class='confluenceTh'> Description </th>
+<th class='confluenceTh'> Default </th>
+</tr>
+<tr>
+<td class='confluenceTd'> Baseline Frequency </td>
+<td class='confluenceTd'> The frequency with which HQ calculates a baseline for each metric. </td>
+<td class='confluenceTd'> 3 days </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Baseline Dataset </td>
+<td class='confluenceTd'> The time range of metric data used in calculating the baseline. </td>
+<td class='confluenceTd'> 7 days </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Baseline Minimum Data Points </td>
+<td class='confluenceTd'> The minimum number of data points used in calculating a baseline. </td>
+<td class='confluenceTd'> 40 </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Track Out-of-Bounds Metrics </td>
+<td class='confluenceTd'> Controls whether or not HQ tracks OOB metrics]. </td>
+<td class='confluenceTd'> off </td>
+</tr>
+</tbody></table>
+</div>
+
+
+
+
+
+
+
+<h1><a name="AboutGlobalMonitoringandAlertingSettings-ConfigureHypericVersionandSecurityAnnouncements"></a>Configure Hyperic Version and Security Announcements</h1>
+
+<p>Hyperic sends email announcements to Hyperic administrators when a key release is upcoming, or to distribute important product information. You can configure the level of messages you wish to receive or disable receipt of Hyperic notifications with the <b>HQ Version and Security Announcements</b> property, in the <b>Announcement Properties</b> section of the <b>Administration &gt; HQ Server Settings</b> page. You can choose:</p>
+<ul>
+	<li><b>All</b></li>
+	<li><b>Major</b> &#8212; default value</li>
+	<li><b>None</b></li>
+</ul>
+
+
+
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:06</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

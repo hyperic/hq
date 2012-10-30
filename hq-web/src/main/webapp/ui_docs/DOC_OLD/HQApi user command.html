@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : HQApi user command</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : HQApi user command
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325699148064 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699148064 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699148064 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1325699148064'>
+<ul>
+    <li><a href='#HQApiusercommand-Functionality'>Functionality</a></li>
+    <li><a href='#HQApiusercommand-CommandOptions'>Command Options</a></li>
+<ul>
+    <li><a href='#HQApiusercommand-list'>list</a></li>
+<ul>
+    <li><a href='#HQApiusercommand-listcommandoutput'>list command output</a></li>
+    <li><a href='#HQApiusercommand-listCommandQualifiers'>list Command Qualifiers</a></li>
+</ul>
+    <li><a href='#HQApiusercommand-sync'>sync</a></li>
+</ul>
+    <li><a href='#HQApiusercommand-Examples'>Examples</a></li>
+<ul>
+    <li><a href='#HQApiusercommand-userlist'>user list</a></li>
+    <li><a href='#HQApiusercommand-usersync'>user sync</a></li>
+</ul>
+</ul></div>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Related Topics</b><br />This page provides information for running an HQ API from the command line. Related topics include: 
+<ul>
+	<li><a href="vFabric Hyperic Web Services API.html" title="vFabric Hyperic Web Services API">vFabric Hyperic Web Services API</a> - brief introduction to the API.</li>
+	<li><a href="HQApi Command-Line Tools.html" title="HQApi Command-Line Tools">HQApi Command&#45;Line Tools</a> - how to get started with the command line tools.</li>
+	<li><a href="HQApi Java API.html" title="HQApi Java API">HQApi Java API</a> - about accessing the APIs programmatically.</li>
+</ul>
+</td></tr></table></div> 
+
+
+
+<h1><a name="HQApiusercommand-Functionality"></a>Functionality</h1>
+
+<p>The <b>user</b> command has options to list, update, and create users.  </p>
+
+<h1><a name="HQApiusercommand-CommandOptions"></a>Command Options</h1>
+
+<h2><a name="HQApiusercommand-list"></a>list</h2>
+
+<h3><a name="HQApiusercommand-listcommandoutput"></a>list command output</h3>
+
+<p>The <b>list</b> command lists attributes for one or all HQ users. </p>
+
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>UsersResponse
+     User 
+          passwordHash
+          htmlEmail
+          active
+          phoneNumber
+          SMSAddress
+          emailAddress
+          department
+          lastName
+          firstName
+          name
+          id
+</pre>
+</div></div>
+
+<h3><a name="HQApiusercommand-listCommandQualifiers"></a>list Command Qualifiers </h3>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<td class='confluenceTd'>--id   </td>
+<td class='confluenceTd'>Only list the user with the given id  </td>
+</tr>
+<tr>
+<td class='confluenceTd'>--name   </td>
+<td class='confluenceTd'>Only list the user with the given name.  </td>
+</tr>
+</tbody></table>
+</div>
+
+
+<h2><a name="HQApiusercommand-sync"></a>sync</h2>
+
+<p>The <tt>usersResponse</tt> object that is returned by the "list" option can be edited and passed to the "sync" command create or update  users.  Any attribute that is changed in the User element will be updated in HQ.  Any additional User elements will create the User in HQ.  When creating new Users, omit the id attribute as HQ will assign the user an id automatically.</p>
+
+<h1><a name="HQApiusercommand-Examples"></a>Examples</h1>
+
+<h2><a name="HQApiusercommand-userlist"></a>user list</h2>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">$ ./bin/hqapi.sh user list
+&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+&lt;UsersResponse&gt;
+    &lt;Status&gt;Success&lt;/Status&gt;
+    &lt;User passwordHash="" htmlEmail="false" active="false" phoneNumber="415-541-4975" SMSAddress="" 
+          emailAddress="localhost" department="" lastName="User" firstName="Guest" name="guest" id="2"/&gt;
+    &lt;User passwordHash="XfLzwfNQujo/CxxaYX3OCg==" htmlEmail="false" active="true" phoneNumber="" SMSAddress="" 
+          emailAddress="localhost" department="" lastName="Administrator" firstName="HQ" name="hqadmin" id="1"/&gt;
+&lt;/UsersResponse&gt;</pre>
+		</div>
+</div></div>
+
+<h2><a name="HQApiusercommand-usersync"></a>user sync</h2>
+
+<p>The first command in this example writes the <tt>UsersResponse</tt> object to a file called "users.xml".  The second command writes the contents of "users.xml" to HQ.   </p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">$ ./bin/hqapi.sh user list &gt; users.xml
+...
+...
+$ cat users.xml | ./bin/hqapi.sh user sync
+Successfully synced 2 users.</pre>
+		</div>
+</div></div>
+
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

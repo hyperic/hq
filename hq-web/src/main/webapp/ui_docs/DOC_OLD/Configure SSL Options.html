@@ -1,0 +1,156 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : Configure SSL Options</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : Configure SSL Options
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Sep 06, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <style type='text/css'>/*<![CDATA[*/
+div.rbtoc1346953446184 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1346953446184 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1346953446184 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1346953446184'>
+<ul>
+    <li><a href='#ConfigureSSLOptions-SSLSetupforNewHypericInstallations'>SSL Setup for New Hyperic Installations</a></li>
+    <li><a href='#ConfigureSSLOptions-SSLSetupforUpgradeInstallations'>SSL Setup for Upgrade Installations</a></li>
+    <li><a href='#ConfigureSSLOptions-ManagedProductsandSSL'>Managed Products and SSL</a></li>
+    <li><a href='#ConfigureSSLOptions-ReconfigureHypericforTrustedSSLCertificates'>Reconfigure Hyperic for Trusted SSL Certificates</a></li>
+    <li><a href='#ConfigureSSLOptions-ReconfigureHypericforSelfSignedCertificates'>Reconfigure Hyperic for Self-Signed Certificates</a></li>
+</ul></div>
+
+<blockquote>
+<p><b>About this page...</b> </p>
+
+<p>This page has information about configuring Hyperic components for user-managed keystores. If you do not configure the Hyperic Server and Hyperic Agents to use keystores you establish and manage, they will generate default keystores with self-signed certificates.   </p>
+
+<p>Hyperic recommends user-managed keystores. For more information, see <a href="About SSL in Hyperic.html" title="About SSL in Hyperic">About SSL in Hyperic</a>. </p>
+
+<p>The information on this pages relates to the <a href="Hyperic Installation and Startup Process.html#HypericInstallationandStartupProcess-ServerKeystore">Configure User-Managed Keystore for Server</a> and <a href="Hyperic Installation and Startup Process.html#HypericInstallationandStartupProcess-AgentKeystore">Configure User-Managed Keystore for Agent</a> steps in the <a href="Hyperic Installation and Startup Process.html" title="Hyperic Installation and Startup Process">Hyperic Installation and Startup Process</a>.</p></blockquote>
+
+<h1><a name="ConfigureSSLOptions-SSLSetupforNewHypericInstallations"></a>SSL Setup for New Hyperic Installations</h1>
+<p><a name="ConfigureSSLOptions-New"></a><br/>
+This section summarizes the key steps in configuring a new Hyperic 4.6 deployment for user-managed keystores. To see how these steps fit into the overall installation and startup process, see <a href="Hyperic Installation and Startup Process.html" title="Hyperic Installation and Startup Process">Hyperic Installation and Startup Process</a>. </p>
+
+<ol>
+	<li>Obtain SSL certificates for the Hyperic Server and each Hyperic Agent.</li>
+	<li>Set up a JKS format keystore for the Hyperic Server on its host, import the SSL certificate for it, and note the full path to the keystore and its password. When you run the Hyperic installer in <tt>-full</tt> mode, the installer prompts for this information.</li>
+	<li>Setup a keystore for each Hyperic Agent on its host, import the SSL certificate for it, and configure its location and password in the agent's <tt>AgentHome/conf/agent.properties</tt> file, by setting the values of <tt><a href="agent.keystore.path.html" title="agent.keystore.path">agent.keystore.path</a></tt> and <tt><a href="agent.keystore.password.html" title="agent.keystore.password">agent.keystore.password</a></tt>.
+<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Password Requirement for Hyperic Keystores</b><br />The Hyperic Server's keystore password and private key password <b>must</b> be the same &#8212; otherwise, the Hyperic Server's internal Tomcat-based server will be unable to start. For information about why, see <a href="http://tomcat.apache.org/tomcat-6.0-doc/ssl-howto.html">http://tomcat.apache.org/tomcat-6.0-doc/ssl-howto.html</a>. Follow the same convention for a  Hyperic Agent keystore &#8212; set the password for the agent keystore be the same as the agent private key,</td></tr></table></div></li>
+	<li>If you plan to configure Hyperic Agents for unidirectional communication, define the keystore name using the <tt>agent.keystore.alias</tt> property.</li>
+	<li>Restart each agent after editing its properties file.</li>
+</ol>
+
+
+<h1><a name="ConfigureSSLOptions-SSLSetupforUpgradeInstallations"></a>SSL Setup for Upgrade Installations</h1>
+
+<p>Please see <a href="Hyperic Upgrade Processes.html" title="Hyperic Upgrade Processes">Hyperic Upgrade Processes</a>.</p>
+
+<h1><a name="ConfigureSSLOptions-ManagedProductsandSSL"></a>Managed Products and SSL</h1>
+<p><a name="ConfigureSSLOptions-SslPlugins"></a> </p>
+
+<p>In Hyperic 4.6, Hyperic plugins that connect to managed products over SSL are updated to support certificate verification. To enable management of such products by a 4.6 agent, it may be necessary to manually import the target server's certificate into the agent keystore if the server's certificate is not trusted. Affected plugins include: </p>
+
+<ul>
+	<li><a href="vSphere.html" title="vSphere">vSphere</a></li>
+	<li><a href="RabbitMQ.html" title="RabbitMQ">RabbitMQ</a></li>
+</ul>
+
+
+<p>Import of the managed server's certificate is necessary only if the Hyperic Agent cannot verify the certificate. If the agent's keystore contains a CA cert and the managed server's certificate has been signed by that CA, the agent will be able verify the certificate. Otherwise, you should import the certificate of the signing CA, which is preferable to simply importing the managed server's certificate. If you are not sure of all of the CAs for signed certificates, you might consider importing the certificates in your JRE cacert file, which contains certificates for a variety of common CAs. </p>
+
+<h1><a name="ConfigureSSLOptions-ReconfigureHypericforTrustedSSLCertificates"></a>Reconfigure Hyperic for Trusted SSL Certificates </h1>
+<p><a name="ConfigureSSLOptions-certs"></a> </p>
+
+<p>This section has instructions for changing Hyperic's SSL certificate configuration from default, Hyperic-generated keystores to user-managed keystores.  </p>
+
+<ol>
+	<li>Install and configure a trusted PKC12 format keystore for Hyperic Server:
+	<ol>
+		<li>Obtain an SSL certificate from your CA and install it on the Hyperic Server host.
+		<ul>
+			<li>If your certificate is not PKCS12 format, you can use the <b>openssl</b> tool to convert it. For more information, see <a href="http://community.jboss.org/wiki/sslsetup">http://community.jboss.org/wiki/sslsetup</a>.</li>
+			<li>After ensuring your certificate is in the correct format, use <b>java-keytool</b> to install it. For more information, see <a href="http://java.sun.com/j2se/1.4.2/docs/tooldocs/windows/keytool.html">http://java.sun.com/j2se/1.4.2/docs/tooldocs/windows/keytool.html</a>.</li>
+		</ul>
+		</li>
+		<li>Open <tt>ServerHome/conf/hq-server.conf</tt> in a text editor.</li>
+		<li>Set the value of <tt>accept.unverified.certificates</tt> to "false".</li>
+		<li>Define the location of your trusted keystore with the <tt>server.keystore.path</tt> property.</li>
+		<li>Define the password for your trusted keystore with the <tt>server.keystore.password</tt> property.</li>
+		<li>Save your changes.</li>
+		<li>Restart the Hyperic Server.</li>
+	</ol>
+	</li>
+	<li>For each Hyperic 4.6 Agent reporting to the Hyperic Server:
+	<ol>
+		<li>Obtain an SSL certificate from your CA and install it on the Hyperic Agent host.</li>
+		<li>Open <tt>AgentBundle/AgentHome/agent.properties</tt> in a text editor.</li>
+		<li>Set the value of <tt>agent.setup.acceptUnverifiedCertificate</tt> to "false".</li>
+		<li>Define the location of your trusted keystore with the <tt>agent.keystore.path</tt> property.</li>
+		<li>Define the password for your trusted keystore with the <tt>agent.keystore.password</tt> property.</li>
+		<li>Save your changes.</li>
+		<li>Restart the Hyperic Agent.</li>
+	</ol>
+	</li>
+</ol>
+
+
+
+<h1><a name="ConfigureSSLOptions-ReconfigureHypericforSelfSignedCertificates"></a>Reconfigure Hyperic for Self-Signed Certificates </h1>
+
+<p>This section has instructions for changing Hyperic's SSL certificate configuration from user-managed keystores to default, Hyperic-generated keystores. </p>
+
+<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Default Certs Not Recommended</b><br />For best security, do not configure Hyperic to use self-signed certificates.</td></tr></table></div>
+<ol>
+	<li>Open <tt>ServerHome/conf/hq-server.conf</tt> in a text editor.
+	<ol>
+		<li>Set the value of <tt>accept.unverified.certificates</tt> to "true".</li>
+		<li>Restart the Hyperic Server.</li>
+	</ol>
+	</li>
+	<li>For each Hyperic 4.6 Agent reporting to the Hyperic Server:
+	<ol>
+		<li>Open <tt>AgentBundle/AgentHome/agent.properties</tt> in a text editor.</li>
+		<li>Set the value of <tt>agent.setup.acceptUnverifiedCertificate</tt> to "true".</li>
+		<li>Save your changes.</li>
+		<li>Restart the Hyperic Agent.</li>
+	</ol>
+	</li>
+</ol>
+
+
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:06</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

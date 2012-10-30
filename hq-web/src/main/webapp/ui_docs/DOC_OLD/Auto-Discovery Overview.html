@@ -1,0 +1,206 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : Auto-Discovery Overview</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : Auto-Discovery Overview
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325699820176 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699820176 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699820176 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1325699820176'>
+<ul>
+    <li><a href='#Auto-DiscoveryOverview-UsingAutoDiscoverySupportClassesinPlugins'>Using Auto-Discovery Support Classes in Plugins</a></li>
+    <li><a href='#Auto-DiscoveryOverview-AutoDiscoveryClassHierarchy'>Auto-Discovery Class Hierarchy</a></li>
+    <li><a href='#Auto-DiscoveryOverview-OverviewofAutoDiscoveryClasses'>Overview of Auto-Discovery Classes</a></li>
+    <li><a href='#Auto-DiscoveryOverview-AutoDiscoveryInterfaces'>Auto-Discovery Interfaces</a></li>
+    <li><a href='#Auto-DiscoveryOverview-HowtoSpecifyAutoDiscoveryImplementationforaResourceType'>How to Specify Auto-Discovery Implementation for a Resource Type</a></li>
+    <li><a href='#Auto-DiscoveryOverview-HowtoSupplyParametersforAutoDiscoveryImplementation'>How to Supply Parameters for Auto-Discovery Implementation</a></li>
+</ul></div>
+
+<h1><a name="Auto-DiscoveryOverview-UsingAutoDiscoverySupportClassesinPlugins"></a>Using Auto-Discovery Support Classes in Plugins </h1>
+
+<p>This page is a developer's introduction to using Hyperic's built-in auto-discovery functionality in a custom plugin. As most platform types are discovered by Hyperic's <tt>system</tt> plugin; for the most part, custom plugins discover server and service types.  </p>
+
+<p>Auto-discovery rules for a resource type are defined in the XML descriptor of the plugin that manages the type. For each resource type managed by the plugin, you specify:</p>
+
+<ul>
+	<li><b>Auto-discovery implementation</b> &#8212; The auto-discovery class that performs the discovery process. For many resource types, you can reference one of Hyperic's built-in auto-discovery classes. If necessary, you can write a custom auto-discovery class that extends a Hyperic auto-discovery class. Most of Hyperic's auto-discovery implementations discover two levels of resources &#8212; servers, and the services that run in them, so typically, in which case you only specify a single implementation in the descriptor.</li>
+</ul>
+
+
+<ul>
+	<li><b>Parameters required by the implementation</b> &#8212; In addition to specifying the auto-discovery class, the plugin descriptor must define the parameters that the class requires.</li>
+</ul>
+
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Need Background Information?</b><br /><ul>
+	<li><a href="Resource Auto-Discovery Processes.html" title="Resource Auto-Discovery Processes">Resource Auto&#45;Discovery Processes</a> describes the auto-discovery process and the several auto-discovery scans types used in Hyperic.</li>
+	<li><a href="Resources, Resource Types and Inventory Types.html" title="Resources, Resource Types and Inventory Types">Resources, Resource Types and Inventory Types</a> describes the platform-server-service hierarchy. If you develop a custom plugin, you should understand how to map the target resource types to the Hyperic inventory model.</li>
+</ul>
+</td></tr></table></div>
+
+
+<h1><a name="Auto-DiscoveryOverview-AutoDiscoveryClassHierarchy"></a>Auto-Discovery Class Hierarchy</h1>
+
+<p>Hyperic's auto-discovery class hierarchy is shown below:</p>
+
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>     org.hyperic.hq.product.GenericPlugin
+          org.hyperic.hq.product.ServerDetector
+               org.hyperic.hq.product.PlatformServiceDetector
+               org.hyperic.hq.product.DaemonDetector
+                    org.hyperic.hq.product.MxServerDetector
+                         org.hyperic.hq.product.SunMxServerDetector
+                    org.hyperic.hq.productSNMPDetector
+</pre>
+</div></div>
+
+<h1><a name="Auto-DiscoveryOverview-OverviewofAutoDiscoveryClasses"></a>Overview of Auto-Discovery Classes </h1>
+
+<p>The table below describes each of the classes in the auto-discovery class hierarchy. </p>
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'>Class </th>
+<th class='confluenceTh'>Description</th>
+<th class='confluenceTh'>When to Use </th>
+</tr>
+<tr>
+<td class='confluenceTd'><tt>ServerDetector</tt> </td>
+<td class='confluenceTd'> Abstract class. <br class="atl-forced-newline" /> <br class="atl-forced-newline" /> <tt>ServerDetector</tt> is the base auto-discovery class. </td>
+<td class='confluenceTd'> <tt>ServerDetector</tt> and must be inherited, rather than used directly. It may be extended by a custom auto-discovery class. </td>
+</tr>
+<tr>
+<td class='confluenceTd'><tt>PlatformServiceDetector</tt> </td>
+<td class='confluenceTd'>Abstract class. <br class="atl-forced-newline" /> <br class="atl-forced-newline" /> Intended for use by platform types with service types, but no server types. </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'><tt>DaemonDetector</tt> </td>
+<td class='confluenceTd'>Discovers server types via a Sigar query of system process table. </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'><tt>MxServerDetector</tt> </td>
+<td class='confluenceTd'>Discovers JMX server types viq a Sigar query of system process table. Discovers JMX services by MBean query.</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'><tt>SunMxServerDetector</tt> </td>
+<td class='confluenceTd'>Detector for Sun 1.5+ JVMs with remote JMX enabled. Note, JVM resource must be explicitly configured. </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'><tt>SNMPDetector</tt> </td>
+<td class='confluenceTd'>Discovers SNMP server types viq a Sigar query of system process table. Discovers SNMP services view SNMP request.</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+</tbody></table>
+</div>
+
+
+<h1><a name="Auto-DiscoveryOverview-AutoDiscoveryInterfaces"></a>Auto-Discovery Interfaces </h1>
+
+<p>Hyperic's built-in auto-discovery classes each implement one or more of the following interfaces:</p>
+
+<ul>
+	<li><tt>org.hyperic.hq.product.AutoServerDetector</tt> &#8212; This interface is used by the default scan, which discovers servers by scanning the process table or Windows registry.</li>
+</ul>
+
+
+<ul>
+	<li><tt>org.hyperic.hq.product.FileServerDetector</tt> &#8212; This interface is used by the file system scan. Plugins specify file patterns to match in etc/hq-server-sigs.properties When a file or directory matches one of these patterns, this method will be invoked. It is up to the plugin to use the matched file or directory as a hint to find server installations.</li>
+</ul>
+
+
+<ul>
+	<li><tt>org.hyperic.hq.product.RuntimeDiscoverer</tt> &#8212; This interface is used by the run-time scan. This differs from the default and filesystem scan, which do not necessarily require the a server to be running to detect it. Classes that implement the <tt>RuntimeDiscoverer</tt> interface communicate directly with a running target server to discover resources.</li>
+</ul>
+
+
+<h1><a name="Auto-DiscoveryOverview-HowtoSpecifyAutoDiscoveryImplementationforaResourceType"></a>How to Specify Auto-Discovery Implementation for a Resource Type</h1>
+
+<p>You specify the class that performs auto-discovery for a resource type in a <tt>&lt;plugin&gt;</tt> element of type "autoinventory". For example, the following </p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">&lt;server name="Java Server Name" version ="version #"&gt;
+     ...
+
+    &lt;plugin type="autoinventory" class="org.hyperic.hq.product.jmx.MxServerDetector"/&gt;
+
+    ...
+
+&lt;/server&gt;</pre>
+		</div>
+</div></div>
+
+<h1><a name="Auto-DiscoveryOverview-HowtoSupplyParametersforAutoDiscoveryImplementation"></a>How to Supply Parameters for Auto-Discovery Implementation</h1>
+
+<p>All auto-discovery implementations discover server types by scanning the process table or Windows registry for processes that match a Sigar process query. You specify the process query in an <tt>option</tt> element named "process.query" (inside a <tt>&lt;config&gt;</tt> element) in the <tt>&lt;server&gt;</tt> element for a server type. Data that you define in an <tt>option</tt> element appear on the <b>Configuration Properties</b> page for a resource, and can be edited, as necessary. Data defined in a <tt>property</tt> element can not be edited for a resource in the Hyperic user interface.</p>
+
+<p>The parameters required to discover services vary by plugin implementation. Discovery of JMX services requires ObjectNames, discovery of SNMP services requires an OID.</p>
+
+				    					    <br/>
+                        <div class="tabletitle">
+                            <a name="attachments">
+                                <h2>Attachments:</h2>
+                            </a>
+                        </div>
+
+                        <div class="greybox" align="left">
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79659481/79921540">manual scan</a> (text/xml)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79659481/79921615.png">manual scan.png</a> (image/png)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79659481/79921614">Default Scan</a> (text/xml)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79659481/79921613.png">Default Scan.png</a> (image/png)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79659481/79921612">Runtime Scan</a> (text/xml)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79659481/79921619.png">Runtime Scan.png</a> (image/png)
+                                <br/>
+                                                    </div>
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

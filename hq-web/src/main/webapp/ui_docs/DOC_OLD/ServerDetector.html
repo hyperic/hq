@@ -1,0 +1,258 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : ServerDetector</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : ServerDetector
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325699782128 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699782128 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699782128 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1325699782128'>
+<ul>
+    <li><a href='#ServerDetector-Overview'>Overview</a></li>
+    <li><a href='#ServerDetector-ClassHierarchy'>Class Hierarchy</a></li>
+    <li><a href='#ServerDetector-ResourceProperties'>Resource Properties</a></li>
+<ul>
+    <li><a href='#ServerDetector-UsingExtraFilters'>Using Extra Filters</a></li>
+    <li><a href='#ServerDetector-UsingINSTALLPATH'>Using INSTALLPATH</a></li>
+    <li><a href='#ServerDetector-UsingAUTOINVENTORYNAME'>Using AUTOINVENTORY_NAME</a></li>
+    <li><a href='#ServerDetector-UsingINVENTORYID'>Using INVENTORY_ID</a></li>
+</ul>
+    <li><a href='#ServerDetector-ImplementingMethods'>Implementing Methods</a></li>
+<ul>
+    <li><a href='#ServerDetector-setDescription'>setDescription</a></li>
+    <li><a href='#ServerDetector-setCustomProperties'>setCustomProperties</a></li>
+    <li><a href='#ServerDetector-discoverServers'>discoverServers</a></li>
+    <li><a href='#ServerDetector-discoverServices'>discoverServices</a></li>
+    <li><a href='#ServerDetector-discoverServiceTypes'>discoverServiceTypes</a></li>
+    <li><a href='#ServerDetector-createServerResource'>createServerResource</a></li>
+</ul>
+</ul></div>
+
+<h1><a name="ServerDetector-Overview"></a>Overview</h1>
+
+<p>The <tt>ServerDetector</tt> class (<tt>org.hyperic.hq.product.ServerDetector</tt>) is the base implementation for autodiscovery. <tt>ServerDetector</tt> is a abstract class and hence cannot be directly used for auto-discovery. An auto-discovery implementation must inherit <tt>ServerDetector</tt>.</p>
+
+<h1><a name="ServerDetector-ClassHierarchy"></a>Class Hierarchy</h1>
+
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>java.lang.Object
+     org.hyperic.hq.product.GenericPlugin
+          org.hyperic.hq.product.ServerDetector
+</pre>
+</div></div>
+
+<h1><a name="ServerDetector-ResourceProperties"></a>Resource Properties</h1>
+
+<p>The table below describes the resource data that you can define in the plugin descriptor for a plugin that uses an auto-discovery implementation based on <tt>ServerDetector</tt>. Resource properties that are not user-configurable are defined in <tt>&lt;property&gt;</tt> elements in the descriptor.</p>
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Property </th>
+<th class='confluenceTh'> Description <br class="atl-forced-newline" /> </th>
+<th class='confluenceTh'> Usage <br class="atl-forced-newline" /> </th>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>INSTALLPATH</tt> </td>
+<td class='confluenceTd'> Overwrites the installation path. </td>
+<td class='confluenceTd'> Not required. <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>INSTALLPATH_MATCH</tt> </td>
+<td class='confluenceTd'>See <a href="#ServerDetector-UsingExtraFilters">Using Extra Filters</a> below. </td>
+<td class='confluenceTd'> Not required. <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>INSTALLPATH_NOMATCH</tt> </td>
+<td class='confluenceTd'>See <a href="#ServerDetector-UsingExtraFilters">Using Extra Filters</a> below. </td>
+<td class='confluenceTd'> Not required. <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>VERSION_FILE</tt> </td>
+<td class='confluenceTd'>See <a href="#ServerDetector-UsingExtraFilters">Using Extra Filters</a> below. </td>
+<td class='confluenceTd'> Not required. <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>INVENTORY_ID</tt> </td>
+<td class='confluenceTd'> Overwrites the autoinventory id (AIID). </td>
+<td class='confluenceTd'> Not required. <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>AUTOINVENTORY_NAME</tt> </td>
+<td class='confluenceTd'> Formats discovered resource name. </td>
+<td class='confluenceTd'> Not required. <br class="atl-forced-newline" /> </td>
+</tr>
+</tbody></table>
+</div>
+
+
+<h2><a name="ServerDetector-UsingExtraFilters"></a>Using Extra Filters</h2>
+
+<p><font color="#333333">Extra filters</font> <font color="#333333"><tt>INSTALLPATH_MATCH</tt></font><font color="#333333">,</font> <font color="#333333"><tt>INSTALLPATH_NOMATCH</tt></font> <font color="#333333">and</font> <font color="#333333"><tt>VERSION_FILE</tt></font> <font color="#333333">can be used to filter discovered resources based on the discovered intallpath.The filters are used in this order:</font></p>
+<ol>
+	<li>If <tt>VERSION_FILE</tt> is not found, the resource is skipped.</li>
+	<li>If <tt>INSTALLPATH_MATCH</tt> is not found from the installpath, the resource is skipped.</li>
+	<li>If <tt>INSTALLPATH_NOMATCH</tt> is found from installpath,the resource is skipped.</li>
+</ol>
+
+
+<h2><a name="ServerDetector-UsingINSTALLPATH"></a>Using INSTALLPATH</h2>
+
+<p><font color="#333333">Every server type resource must have a value for the installation path property. When you create a server instance manually from the Hyepric user interface, this property is required. For server types that are auto-discovered, installation path is resolved automatically---it is usually either the server home directory or process working directory. You can use</font> <font color="#333333"><tt>INSTALLPATH</tt></font> <font color="#333333">to overwrite a resource's discovered installation path.</font></p>
+
+<h2><a name="ServerDetector-UsingAUTOINVENTORYNAME"></a>Using AUTOINVENTORY_NAME</h2>
+
+<p><font color="#333333">You can overwrite a discovered resource name by defining a new qualifier. The format of this name is a single string containing variables (</font><font color="#333333"><tt>%variable1%</tt></font><font color="#333333">) that map to configuration options. Three types of properties are passed to formatting functions as</font> <font color="#333333"><tt>ConfigResponse</tt></font> <font color="#333333">objects: the parent resource, the resource itself, and custom resource properties.</font></p>
+<div class='panelMacro'><table class='noteMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/warning.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><tt>AUTOINVENTORY_NAME</tt> is used  only if the auto-discovery implementation calls the appropriate formatting functions---you can determine whether it does from the Javadoc for the implementation.</td></tr></table></div>
+
+<h2><a name="ServerDetector-UsingINVENTORYID"></a>Using INVENTORY_ID</h2>
+
+<p><font color="#333333">The</font> <font color="#333333"><tt>INVENTORY_ID</tt></font> <font color="#333333">property, sometimes referred to as the auto-inventory ID, is used to identify unique resources within discovered resource types. The Hyperic Server verifies whether or not a resource in an auto-discovery report is already in inventory by checking to see if a resource with that</font> <font color="#333333"><tt>INVENTORY_ID</tt></font> <font color="#333333">already exists.</font></p>
+
+<h1><a name="ServerDetector-ImplementingMethods"></a>Implementing Methods</h1>
+
+<p>The sections below describe the methods that <tt>ServerDeterctor</tt> implements.</p>
+
+<h2><a name="ServerDetector-setDescription"></a>setDescription</h2>
+
+<p><tt>setDescription(String):void</tt></p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">protected void setDescription(String description)</pre>
+		</div>
+</div></div>
+<p>This method sets the server description. It allows you to set the description outside of <tt>ServerResource</tt> object. Technically, this allows you to update the server description while discovering new services, but some rules apply. If <tt>discoverServers()</tt> discovers something or <tt>discoverServices()</tt> does not discover anything this field is ignored.</p>
+
+<p><b>Parameters:</b><br/>
+<b>&nbsp;&nbsp; description</b> Server description</p>
+
+<h2><a name="ServerDetector-setCustomProperties"></a>setCustomProperties</h2>
+
+<p><tt>setCustomProperties(ConfigResponse):void</tt></p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">protected void setCustomProperties(ConfigResponse cprops)</pre>
+		</div>
+</div></div>
+<p>This method sets the custom properties for the server. It allows you to set custom properties outside of <tt>ServerResource object</tt>. Technically, this allows you to update server custom properties while discovering new services but some rules apply. If <tt>discoverServers()</tt> discovers something or <tt>discoverServices()</tt> does not discover anything this field will be ignored.</p>
+
+<p><b>Parameters:</b><br/>
+<b>&nbsp;&nbsp; cprops</b> Server custom properties</p>
+
+<h2><a name="ServerDetector-discoverServers"></a>discoverServers</h2>
+
+<p><tt>discoverServers(ConfigResponse):List</tt></p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">protected List discoverServers(ConfigResponse config)</pre>
+		</div>
+</div></div>
+<p>This is a runtime method to discover new servers. Override this method to discover servers for the server type of the plugin instance. Most plugins will override <tt>discoverServices()</tt> rather than {{discoverServers()}.</p>
+
+<p><tt>discoverServers()} is typically used in the case that a plugin interface, {{FileServerDetector</tt> or <tt>AutoServerDetector</tt>, finds an admin server, and then <tt>discoverServers()</tt> discovers managed server nodes. Examples of this usage are found in Hyperic's  WebLogic, WebSphere, and iPlanet plugins.</p>
+
+<p>This method returns NULL if not overwritten.</p>
+
+<p><b>Parameters:</b><br/>
+<b>&nbsp;&nbsp; config</b> Parent configuration.</p>
+
+<p><b>Returns:</b><br/>
+&nbsp;&nbsp; List of type ServerResource.</p>
+
+<h2><a name="ServerDetector-discoverServices"></a>discoverServices</h2>
+
+<p><tt>discoverServices(ConfigResponse):List</tt></p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">protected List discoverServices(ConfigResponse config)</pre>
+		</div>
+</div></div>
+<p>This runtime method discovers new services. Override this method to discover services for the server type of the plugin instance.</p>
+
+<p>This method returns NULL if not overwritten.</p>
+
+<p><b>Parameters:</b><br/>
+<b>&nbsp;&nbsp; config</b> Parent configuration.</p>
+
+<p><b>Returns:</b><br/>
+&nbsp;&nbsp; List of type <tt>ServiceResource</tt>.</p>
+
+<h2><a name="ServerDetector-discoverServiceTypes"></a>discoverServiceTypes</h2>
+
+<p><tt>discoverServiceTypes(ConfigResponse):Set</tt></p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">protected Set discoverServiceTypes(ConfigResponse config)</pre>
+		</div>
+</div></div>
+<p>This runtime method discovers new service types.</p>
+
+<p>This method returns empty HashSet if not overwritten.</p>
+
+<p><b>Parameters:</b><br/>
+<b>&nbsp;&nbsp; config</b> Parent configuration.</p>
+
+<p><b>Returns:</b><br/>
+&nbsp;&nbsp; Set of <tt>ServiceType</tt> objects.</p>
+
+<h2><a name="ServerDetector-createServerResource"></a>createServerResource</h2>
+
+<p><tt>createServerResource(String):ServerResource</tt></p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">protected ServerResource createServerResource(String installpath)</pre>
+		</div>
+</div></div>
+
+<p>This is a helper method to initialize a <tt>ServerResource</tt> with default values.</p>
+
+<p><b>Parameters:</b><br/>
+<b>&nbsp;&nbsp; installpath</b> Resource installation path.</p>
+
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:08</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

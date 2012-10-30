@@ -1,0 +1,129 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : Hyperic Upgrade Processes</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : Hyperic Upgrade Processes
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Sep 06, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <style type='text/css'>/*<![CDATA[*/
+div.rbtoc1346961593327 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1346961593327 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1346961593327 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1346961593327'>
+<ul>
+    <li><a href='#HypericUpgradeProcesses-Hyperic4.6UpgradeOptions'>Hyperic 4.6 Upgrade Options</a></li>
+    <li><a href='#HypericUpgradeProcesses-UpgradeHypericServerOnly'>Upgrade Hyperic Server Only</a></li>
+    <li><a href='#HypericUpgradeProcesses-UpgradeServerandAgentwithHypericManagedKeystores'>Upgrade Server and Agent with Hyperic-Managed Keystores</a></li>
+    <li><a href='#HypericUpgradeProcesses-UpgradeServerandAgentwithUserManagedKeystores'>Upgrade Server and Agent with User-Managed Keystores</a></li>
+</ul></div>
+
+
+<blockquote>
+<p><b>About this page...</b> <br/>
+This page has process guidelines for upgrading Hyperic components to version 4.6. Instructions are provided for several upgrade strategies. Consider your deployment and your security requirements in choosing the appropriate upgrade process. See <a href="About SSL in Hyperic.html" title="About SSL in Hyperic">About SSL in Hyperic</a> for more information. </p>
+
+<p>For information about performing a new installation of Hyperic components, see <a href="Hyperic Installation and Startup Process.html" title="Hyperic Installation and Startup Process">Hyperic Installation and Startup Process</a>. </p></blockquote> 
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Server Agent Plugin Synchronization (SAPS) Requires Server <em>and</em> Agent Upgrade.</b><br />In Hyperic 4.6.5, the SAPS process will <em>not</em> synchronize plugins on agents of an earlier version. The Hyperic 4.6.5 Server can only synchronize plugins on agents running the same version as the server.  For more information about SAPS, see <a href="Plugin Deployment and Management.html" title="Plugin Deployment and Management">Plugin Deployment and Management</a>.</td></tr></table></div>
+
+<h1><a name="HypericUpgradeProcesses-Hyperic4.6UpgradeOptions"></a>Hyperic 4.6 Upgrade Options</h1>
+
+<p>The upgrade options are:</p>
+
+<ul>
+	<li>Upgrade Hyperic Server only &#8212; Hyperic Server 4.6 is backward-compatible with 4.x Hyperic Agents. You can upgrade the Hyperic Server to 4.6, and run a previous (4.x) version of the Hyperic Agent. In this case, the server will use self-signed certificates for SSL communications.</li>
+</ul>
+
+
+<ul>
+	<li>Upgrade Hyperic Server and Hyperic Agents with Hyperic-Managed Keystores &#8212; By default, the upgraded 4.6 Hyperic Server and 4.6 Hyperic Agents will use self-signed certificates for SSL communications.</li>
+</ul>
+
+
+<ul>
+	<li>Upgrade Hyperic Server and Hyperic Agent with User-Managed Keystores &#8212; For best security, you can upgrade the Hyperic Server and all agents to 4.6, and configure the components to use keystores you configure yourself and trusted certificates from a certificate authority.</li>
+</ul>
+
+
+<h1><a name="HypericUpgradeProcesses-UpgradeHypericServerOnly"></a>Upgrade Hyperic Server Only</h1>
+
+<p>To upgrade the Hyperic Server only, follow the instructions in <a href="Upgrade Hyperic Server and Database.html" title="Upgrade Hyperic Server and Database">Upgrade Hyperic Server and Database</a>.</p>
+
+<h1><a name="HypericUpgradeProcesses-UpgradeServerandAgentwithHypericManagedKeystores"></a>Upgrade Server and Agent with Hyperic-Managed Keystores</h1>
+
+<ol>
+	<li>Upgrade the Hyperic Server, following the instructions in <a href="Upgrade Hyperic Server and Database.html" title="Upgrade Hyperic Server and Database">Upgrade Hyperic Server and Database</a>.</li>
+	<li>Upgrade all agents reporting to the Hyperic Server, following the instructions in <a href="Upgrade Hyperic Agent.html" title="Upgrade Hyperic Agent">Upgrade Hyperic Agent</a>.</li>
+</ol>
+
+
+<p><a name="HypericUpgradeProcesses-UpgradeWithTrust"></a></p>
+
+<h1><a name="HypericUpgradeProcesses-UpgradeServerandAgentwithUserManagedKeystores"></a>Upgrade Server and Agent with User-Managed Keystores </h1>
+
+<ol>
+	<li>Create a SSL keystore in JKS format with certificates from your CA on the Hyperic Server host, and on each agent host.</li>
+	<li>Upgrade the Hyperic Server, following the instructions in <a href="Upgrade Hyperic Server and Database.html" title="Upgrade Hyperic Server and Database">Upgrade Hyperic Server and Database</a>.</li>
+	<li>Restart the Hyperic Server.</li>
+	<li>Upgrade all agents reporting to the Hyperic Server to 4.6, following the instructions in <a href="Upgrade Hyperic Agent.html" title="Upgrade Hyperic Agent">Upgrade Hyperic Agent</a>.
+	<ul>
+		<li>At this point, Hyperic Server and Hyperic Agents are running with self-signed certificates.</li>
+	</ul>
+	</li>
+	<li>Shut down all Hyperic Agents.</li>
+	<li>Shut down the Hyperic Server.</li>
+	<li>Configure the Hyperic Server to use the keystore you created on its host. Edit <tt>ServerHome/conf/hq-server.conf</tt>:
+	<ul>
+		<li>Define the full path to the server keystore using the <tt>server.keystore.path</tt> property.</li>
+		<li>Define the password for the server keystore using the <tt>server.keystore.password</tt> property.</li>
+		<li>Verify that the <tt>accept.unverified.certificates</tt> is set to "false".</li>
+	</ul>
+	</li>
+	<li>Configure each Hyperic Agent to use the keystore you created on its host. For each agent, edit <tt>AgentHome/conf/agent.properties</tt>:
+	<ul>
+		<li>Uncomment <tt><a href="agent.keystore.path.html" title="agent.keystore.path">agent.keystore.path</a></tt> and set it to the full path to the keystore you created on the agent host.</li>
+		<li>Uncomment <tt><a href="agent.keystore.password.html" title="agent.keystore.password">agent.keystore.password</a></tt> and set it to the password for the keystore you created on the agent host.
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>The first time you start the upgraded agent, the keystore password will be encrypted.</td></tr></table></div></li>
+		<li>If the agent is configured for unidirectional communication (<tt>agent.setup.unidirectional=yes</tt>), add <tt><a href="agent.keystore.alias.html" title="agent.keystore.alias">agent.keystore.alias</a></tt> to the properties file, and set it to the alias for the keystore's primary certificate/private key entry.</li>
+		<li>Verify that <tt>agent.setup.acceptUnverifiedCertificate</tt> is "false".</li>
+	</ul>
+	</li>
+	<li>Start the Hyperic Server.</li>
+	<li>Start all Hyperic Agents reporting to the Hyperic Server</li>
+</ol>
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:06</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

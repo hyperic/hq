@@ -1,0 +1,155 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : scan</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : scan
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Feb 22, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1329945778524 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1329945778524 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1329945778524 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1329945778524'>
+<ul>
+    <li><a href='#scan-ElementOverview'>Element Overview</a></li>
+    <li><a href='#scan-ElementStructure'>Element Structure</a></li>
+    <li><a href='#scan-ParentElements'>Parent Elements</a></li>
+    <li><a href='#scan-ChildAttributesandElements'>Child Attributes and Elements</a></li>
+    <li><a href='#scan-Examples'>Examples</a></li>
+<ul>
+    <li><a href='#scan-ScanprocesstableforApacheserversonUnixlikeoperatingsystem'>Scan process table for Apache servers on Unix-like operating system</a></li>
+    <li><a href='#scan-ScanWindowsregistryforApacheservers'>Scan Windows registry for Apache servers</a></li>
+    <li><a href='#scan-ScanUnixfilesystemforMySQLservers'>Scan Unix filesystem for MySQL servers</a></li>
+</ul>
+</ul></div>
+
+<h1><a name="scan-ElementOverview"></a>Element Overview</h1>
+
+<p>The <tt>&lt;scan&gt;</tt> element specifies where the plugin looks, and what it looks for, when scanning for new and changed server instances.</p>
+
+<p>The Hyperic Agent automatically scans for new or changed server instances upon startup, and every 15 minutes thereafter. This automatic scan, referred to as an <em>autoscan</em>, is performed differently on Unix-like and Windows systems. On Unix-like system, the autoscan process searches for a pattern in the process table. On Windows, autoscan search the system registry for a keys registered by products at installation time. Hyperic also supports another type of scan, referred to as a <em>file system</em> scan, which target the whole file system.</p>
+
+<p>Although not typical, several Hyperic plugins automatically perform a file system scan, rather than an process table, to discover new server instances on Unix-like systems.</p>
+
+<h1><a name="scan-ElementStructure"></a>Element Structure</h1>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">&lt;scan&gt;
+   registry
+   type
+   &lt;include</pre>
+		</div>
+</div></div>
+
+<h1><a name="scan-ParentElements"></a>Parent Elements</h1>
+
+<p>The <tt>&lt;scan&gt;</tt> element can be a child of:</p>
+<ul>
+	<li><tt>&lt;server&gt;</tt></li>
+</ul>
+
+
+<h1><a name="scan-ChildAttributesandElements"></a>Child Attributes and Elements</h1>
+
+<ul>
+	<li><tt>registry</tt> &#8212; For a server type running on Windows, specifies a Windows registry path expression, for the key specified by the <tt>&lt;include&gt;</tt> element.</li>
+</ul>
+
+
+<ul>
+	<li><tt>type</tt> &#8212; In Hyperic's oracle, postgresql, and mysql plugins, the <tt>type</tt> attribute is set to the value "file" to cause the automatic discovery process on Windows platforms - performed at agent startup and periodically thereafter - to scan the full file system for the pattern specified using the <tt>&lt;include&gt;</tt> element.</li>
+</ul>
+
+
+<ul>
+	<li><tt>&lt;include&gt;</tt> &#8212; specifies a pattern or, if the <tt>registry</tt> attribute is present, a Windows registry key for which to scan. Note, do not use wildcards to specify a Windows registry key &#8212; registry keys must be explicitly defined.</li>
+</ul>
+
+
+<h1><a name="scan-Examples"></a>Examples</h1>
+
+
+<h2><a name="scan-ScanprocesstableforApacheserversonUnixlikeoperatingsystem"></a>Scan process table for Apache servers on Unix-like operating system</h2>
+
+<p>This <tt>&lt;scan&gt;</tt> element specifies multiple file path expressions for which to scan.</p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">&lt;scan&gt;
+  &lt;include name="/**/bin/httpd"/&gt;
+  &lt;include name="/**/bin/httpsd"/&gt;
+  &lt;include name="/**/bin/apache"/&gt;
+  &lt;include name="/**/bin/apache2"/&gt;
+  &lt;include name="/**/sbin/httpd"/&gt;
+  &lt;include name="/**/sbin/httpsd"/&gt;
+  &lt;include name="/**/sbin/apache"/&gt;
+  &lt;include name="/**/sbin/apache2"/&gt;</pre>
+		</div>
+</div></div>
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre></pre>
+</div></div>
+
+<h2><a name="scan-ScanWindowsregistryforApacheservers"></a>Scan Windows registry for Apache servers</h2>
+
+<p>This <tt>&lt;scan&gt;</tt> element specifies a Windows registry path expression ("SOFTWARE\Apache Group\Apache\2.*") to scan, and a registry key ("ServerRoot") for which to scan.</p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">&lt;scan registry="SOFTWARE\Apache Group\Apache\2.*"&gt;
+  &lt;include name="ServerRoot"/&gt;</pre>
+		</div>
+</div></div>
+
+<h2><a name="scan-ScanUnixfilesystemforMySQLservers"></a>Scan Unix filesystem for MySQL servers</h2>
+
+<p>This <tt>&lt;scan&gt;</tt> element specifies a file path expression for which to scan the entire file system.</p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">&lt;scan type="file"&gt;
+  &lt;include name="/**/bin/safe_mysqld"/&gt;
+&lt;/scan&gt;</pre>
+		</div>
+</div></div>
+
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:08</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

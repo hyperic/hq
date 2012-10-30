@@ -1,0 +1,179 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : Microsoft SQL Server</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : Microsoft SQL Server
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Sep 07, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <style type='text/css'>/*<![CDATA[*/
+div.rbtoc1347037209864 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1347037209864 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1347037209864 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1347037209864'>
+<ul>
+    <li><a href='#MicrosoftSQLServer-MicrosoftSQLServerPluginOverview'>Microsoft SQL Server Plugin Overview</a></li>
+<ul>
+    <li><a href='#MicrosoftSQLServer-SupportedVersionsandRequirements'>Supported Versions and Requirements</a></li>
+    <li><a href='#MicrosoftSQLServer-SQLServerResourcesandtheHypericInventoryModel'>SQL Server Resources and the Hyperic Inventory Model</a></li>
+</ul>
+    <li><a href='#MicrosoftSQLServer-ConfigurationInstructions'>Configuration Instructions</a></li>
+<ul>
+    <li><a href='#MicrosoftSQLServer-Step1%3AInstallHypericAgent'>Step 1: Install Hyperic Agent</a></li>
+    <li><a href='#MicrosoftSQLServer-Step2%3AImportSQLServerresource'>Step 2: Import SQL Server resource</a></li>
+    <li><a href='#MicrosoftSQLServer-Step3%3AConfigureSQLServerinHyperic'>Step 3: Configure SQL Server in Hyperic</a></li>
+    <li><a href='#MicrosoftSQLServer-Step4%3AVerifyMetricCollection'>Step 4: Verify Metric Collection</a></li>
+</ul>
+    <li><a href='#MicrosoftSQLServer-ResourceTypesandManagementFunctions'>Resource Types and Management Functions</a></li>
+<ul>
+    <li><a href='#MicrosoftSQLServer-AutoDiscovery'>Auto-Discovery</a></li>
+    <li><a href='#MicrosoftSQLServer-Measurement'>Measurement</a></li>
+    <li><a href='#MicrosoftSQLServer-Control'>Control</a></li>
+    <li><a href='#MicrosoftSQLServer-LogTracking'>Log Tracking</a></li>
+</ul>
+    <li><a href='#MicrosoftSQLServer-SQLServerMetrics'>SQL Server Metrics</a></li>
+</ul></div> 
+
+<h1><a name="MicrosoftSQLServer-MicrosoftSQLServerPluginOverview"></a>Microsoft SQL Server Plugin Overview </h1>
+
+<h2><a name="MicrosoftSQLServer-SupportedVersionsandRequirements"></a>Supported Versions and Requirements </h2>
+
+<p>The Microsoft SQL Server plugin supports: </p>
+<ul>
+	<li>Microsoft SQL Server 2012</li>
+	<li>Microsoft SQL Server 2008 R2</li>
+	<li>Microsoft SQL Server 2008</li>
+	<li>Microsoft SQL Server 2005</li>
+	<li>Microsoft SQL Server 2005</li>
+</ul>
+
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Hyperic HQ does not have SQL Server Driver</b><br />Hyperic HQ does not include drivers for proprietary commercial databases. To manage SQL Server, you must install the vendor-provided JDBC driver in: 
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">AgentHome/bundles/AgentBundle/pdk/lib/jdbc</pre>
+		</div>
+</div></div></td></tr></table></div>
+<h2><a name="MicrosoftSQLServer-SQLServerResourcesandtheHypericInventoryModel"></a>SQL Server Resources and the Hyperic Inventory Model</h2>
+<p>The indented list below illustrates the hierarchy of Hyperic resource types that map to SQL Server.</p>
+
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">MsSQL
+     MsSQL Database</pre>
+		</div>
+</div></div> 
+
+<p>In terms of the Hyperic inventory model: </p>
+
+<ul>
+	<li>The <tt>MsSQL</tt> resource type is a "server"</li>
+	<li>The <tt>MsSQL Database</tt> resource type is a "service"; if there are multiple databases running in SQL Server, there will be multiple  <tt>MsSQL Database</tt> services below the <tt>MsSQL</tt> server instance.</li>
+</ul>
+
+
+<h1><a name="MicrosoftSQLServer-ConfigurationInstructions"></a>Configuration Instructions </h1>
+<p>This sections below have instructions for configuring Hyperic to manage SQL Server. </p>
+
+
+<h2><a name="MicrosoftSQLServer-Step1%3AInstallHypericAgent"></a>Step 1: Install Hyperic Agent </h2>
+
+<p>If you have not already done so, install a Hyperic Agent on the Microsoft SQL Server host. See <a href="Install an Agent-Only Package.html" title="Install an Agent-Only Package">Install an Agent&#45;Only Package</a> in <em>Getting Started with vFabric Hyperic</em> for instructions. </p>
+
+
+<h2><a name="MicrosoftSQLServer-Step2%3AImportSQLServerresource"></a>Step 2: Import SQL Server resource</h2>
+
+<p>After you start the Hyperic Agent, it should discover the SQL Server resource. The server should appear in the <b>Auto-Discovery</b> portlet on the Hyperic Dashboard. Import the server. </p>
+
+
+<h2><a name="MicrosoftSQLServer-Step3%3AConfigureSQLServerinHyperic"></a>Step 3: Configure SQL Server in Hyperic </h2>
+
+<ol>
+	<li>Navigate to the <b>Configuration Properties</b> page for the SQL Server instance.</li>
+	<li>Enter the username for connecting to SQL Server in the <b>mssql.user</b> field.</li>
+	<li>Enter password for connecting to SQL Server in the <b>mssql.password</b> field.</li>
+	<li>To enable log tracking, checkmark the <b>server.log_track.enable</b> box.</li>
+</ol>
+
+
+<h2><a name="MicrosoftSQLServer-Step4%3AVerifyMetricCollection"></a>Step 4: Verify Metric Collection </h2>
+
+<p>Metrics should appear on the <b>Monitor</b> tab for an SQL Server resource. </p>
+
+<h1><a name="MicrosoftSQLServer-ResourceTypesandManagementFunctions"></a>Resource Types and Management Functions </h1>
+
+<p>This section describes the management functions the PostgreSQL plugin performs for PostgreSQL components. </p>
+
+<p><a name="MicrosoftSQLServer-AutoDiscovery"></a> </p>
+
+<h2><a name="MicrosoftSQLServer-AutoDiscovery"></a>Auto-Discovery </h2>
+
+<p>TheSQL Server plugin discovers server resources by searching the Windows registry for the key <tt>SOFTWARE\Microsoft\Microsoft SQL</tt>. </p>
+
+<p><a name="MicrosoftSQLServer-Measurement"></a> </p>
+
+<h2><a name="MicrosoftSQLServer-Measurement"></a>Measurement </h2>
+
+<p>The plugin class that performs obtains most metrics is <tt>MsSQLMeasurementPlugin</tt>, which extends the <tt>Win32MeasurementPlugin</tt> support class.</p>
+
+<p>The plugin uses an SQL script to obtain the "Free Space Percentage" metric. (The script is included in the plugin XML descriptor.) Other metric values are obtained from Windows Performance Manager counters.</p>
+
+<p>For more information about the metrics reported, see <a href="#MicrosoftSQLServer-SQLServerMetrics">SQL Server Metrics</a> below.</p>
+
+<p><a name="MicrosoftSQLServer-Control"></a> </p>
+
+<h2><a name="MicrosoftSQLServer-Control"></a>Control </h2>
+
+<p>The SQL Server plugin uses the <tt>Win32ControlPlugin</tt> support class to provide three control actions for server instances:  </p>
+<ul>
+	<li>stop</li>
+	<li>start</li>
+	<li>restart</li>
+</ul>
+
+
+
+<h2><a name="MicrosoftSQLServer-LogTracking"></a>Log Tracking </h2>
+
+<p>The SQL Server plugin uses <tt>org.hyperic.hq.product.Win32EventLogTrackPlugin</tt> for log tracking. When log tracking is enabled, the plugin captures events that contain the name of the SQL Server service in Windows, which corresponds to the plugin's <b>sqlserver_name</b> configuration option, by default <tt>MSSQLSERVER</tt>.  </p>
+
+<p>For information about the default content of the log messages that Hyperic records for Windows events and how to customize the format, see the documentation for the <a href="platform.log_track.eventfmt.html" title="platform.log_track.eventfmt">platform.log&#95;track.eventfmt</a> agent property. </p>
+
+<h1><a name="MicrosoftSQLServer-SQLServerMetrics"></a>SQL Server Metrics </h1>
+
+<ul><li><a href="MsSQL 2012 server.html" title="MsSQL 2012 server">MsSQL 2012 server</a><ul><li><a href="MsSQL 2012 Database service.html" title="MsSQL 2012 Database service">MsSQL 2012 Database service</a></li></ul></li><li><a href="MsSQL 2008 R2 server.html" title="MsSQL 2008 R2 server">MsSQL 2008 R2 server</a><ul><li><a href="MsSQL 2008 R2 Database service.html" title="MsSQL 2008 R2 Database service">MsSQL 2008 R2 Database service</a></li></ul></li><li><a href="MsSQL 2008 server.html" title="MsSQL 2008 server">MsSQL 2008 server</a><ul><li><a href="MsSQL 2008 Database service.html" title="MsSQL 2008 Database service">MsSQL 2008 Database service</a></li></ul></li><li><a href="MsSQL 2005 server.html" title="MsSQL 2005 server">MsSQL 2005 server</a><ul><li><a href="MsSQL 2005 Database service.html" title="MsSQL 2005 Database service">MsSQL 2005 Database service</a></li></ul></li><li><a href="MsSQL 2000 server.html" title="MsSQL 2000 server">MsSQL 2000 server</a><ul><li><a href="MsSQL 2000 Database service.html" title="MsSQL 2000 Database service">MsSQL 2000 Database service</a></li></ul></li></ul>
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>
