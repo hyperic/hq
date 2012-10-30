@@ -1,0 +1,1080 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : HQApi alertdefinition command</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : HQApi alertdefinition command
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325699174494 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699174494 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699174494 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1325699174494'>
+<ul>
+    <li><a href='#HQApialertdefinitioncommand-alertdefinitionFunctionality'>alertdefinition Functionality</a></li>
+    <li><a href='#HQApialertdefinitioncommand-UnderstandingAlertDefinitionOptions'>Understanding Alert Definition Options</a></li>
+    <li><a href='#HQApialertdefinitioncommand-alertdefinitionCommandOptions'>alertdefinition Command Options</a></li>
+<ul>
+    <li><a href='#HQApialertdefinitioncommand-alertdefinitionlist'>alertdefinition list</a></li>
+<ul>
+    <li><a href='#HQApialertdefinitioncommand-alertdefinitionlistCommandQualifiers'>alertdefinition list Command Qualifiers</a></li>
+    <li><a href='#HQApialertdefinitioncommand-StructureofanAlertDefinitionsResponse'>Structure of an AlertDefinitionsResponse</a></li>
+    <li><a href='#HQApialertdefinitioncommand-AttributesinanAlertDefinitionsResponse'>Attributes in an AlertDefinitionsResponse</a></li>
+    <li><a href='#HQApialertdefinitioncommand-AlertConditionAttributesforDifferentConditionTypes'>AlertCondition Attributes for Different Condition Types</a></li>
+    <li><a href='#HQApialertdefinitioncommand-AlertActionConfigAttributesforDifferentActionTypes'>AlertActionConfig Attributes for Different Action Types</a></li>
+</ul>
+    <li><a href='#HQApialertdefinitioncommand-alertdefinitionsync'>alertdefinition sync</a></li>
+<ul>
+    <li><a href='#HQApialertdefinitioncommand-alertdefinitionsyncCommandQualifiers'>alertdefinition sync Command Qualifiers</a></li>
+</ul>
+    <li><a href='#HQApialertdefinitioncommand-alertdefinitiondelete'>alertdefinition delete</a></li>
+    <li><a href='#HQApialertdefinitioncommand-alertdefinitioncreate'>alertdefinition create</a></li>
+<ul>
+    <li><a href='#HQApialertdefinitioncommand-alertdefinitioncreateCommandQualifiers'>alertdefinition create Command Qualifiers</a></li>
+</ul>
+</ul>
+    <li><a href='#HQApialertdefinitioncommand-alertdefinitionCommandExamples'>alertdefinition Command Examples</a></li>
+<ul>
+    <li><a href='#HQApialertdefinitioncommand-alertdefinitionlist'>alertdefinition list</a></li>
+    <li><a href='#HQApialertdefinitioncommand-alertdefinitionlist%5CtypeAlerts'>alertdefinition list --typeAlerts</a></li>
+    <li><a href='#HQApialertdefinitioncommand-AlertConditionExamples'>AlertCondition Examples</a></li>
+    <li><a href='#HQApialertdefinitioncommand-alertdefinitionsync'>alertdefinition sync</a></li>
+    <li><a href='#HQApialertdefinitioncommand-alertdefinitiondelete'>alertdefinition delete</a></li>
+    <li><a href='#HQApialertdefinitioncommand-alertdefinitioncreatebasedonexistingalertdefinition'>alertdefinition create - based on existing alert definition</a></li>
+    <li><a href='#HQApialertdefinitioncommand-alertdefinitioncreatenewalertdefinition'>alertdefinition create - new alert definition</a></li>
+</ul>
+</ul></div>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Related Topics</b><br />This page provides information for running an HQ API from the command line. Related topics include: 
+<ul>
+	<li><a href="vFabric Hyperic Web Services API.html" title="vFabric Hyperic Web Services API">vFabric Hyperic Web Services API</a> - brief introduction to the API.</li>
+	<li><a href="HQApi Command-Line Tools.html" title="HQApi Command-Line Tools">HQApi Command&#45;Line Tools</a> - how to get started with the command line tools.</li>
+	<li><a href="HQApi Java API.html" title="HQApi Java API">HQApi Java API</a> - about accessing the APIs programmatically.</li>
+</ul>
+</td></tr></table></div> 
+
+<p><font color="blue">This page documents v5.0 of HQApi.</font></p>
+
+<h1><a name="HQApialertdefinitioncommand-alertdefinitionFunctionality"></a>alertdefinition Functionality</h1>
+
+<p>The <b>alertdefinition</b> command has options to output resource and (in vFabric Hyperic only) resource type alert definitions, create them, update them, and delete them.</p>
+
+<p>An alert definition defines the target resource or (vFabric Hyperic only) resource type, the alert conditions, and as available, (in vFabric Hyperic) the escalation associated with the alert definition. This is useful for:</p>
+<ul>
+	<li>Initial setup of alerts across a deployment.</li>
+	<li>Implement changes in alerting strategy across a deployment.</li>
+	<li>Exporting all alert definitions for import to another system.</li>
+</ul>
+
+
+<h1><a name="HQApialertdefinitioncommand-UnderstandingAlertDefinitionOptions"></a>Understanding Alert Definition Options</h1>
+
+<p>For information about alert definitions options, including condition types and action filtering, refer to <a href="Define an Alert for a Resource.html" title="Define an Alert for a Resource">Define an Alert for a Resource</a>.</p>
+
+<h1><a name="HQApialertdefinitioncommand-alertdefinitionCommandOptions"></a>alertdefinition Command Options</h1>
+
+
+<h2><a name="HQApialertdefinitioncommand-alertdefinitionlist"></a>alertdefinition list</h2>
+
+<p>The <b>alertdefinition list</b> command returns an <tt>AlertDefinitionsResponse</tt> object, which contains one or more alert definitions.</p>
+
+<h3><a name="HQApialertdefinitioncommand-alertdefinitionlistCommandQualifiers"></a>alertdefinition list Command Qualifiers</h3>
+
+<p>If you do not supply a qualifier, the <b>alertdefinition list</b> command returns all resource alert definitions, including those that were:</p>
+<ul>
+	<li>configured for a specific resource instance</li>
+	<li>(in vFabric Hyperic only) automatically created for a resource instance as a result of a resource type alert definition</li>
+</ul>
+
+
+<p>When you run the <b>alertdefinition list</b> command you can supply one or more of the following qualifiers to limit what alert definitions are returned.</p>
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Qualifier </th>
+<th class='confluenceTh'> Description </th>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-alertName regex</tt> </td>
+<td class='confluenceTd'> Where <tt>regex</tt> is a regular expression.Returns alert definitions with names that match the given regular expression. <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-alertPriority integer</tt> </td>
+<td class='confluenceTd'> If specified, only include alerts with the given priority. 3 = high, 2 = medium, 1 = low </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-children</tt> </td>
+<td class='confluenceTd'> If used with <tt>resourceId</tt>, includes children of resource. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-conditionCount integer</tt> </td>
+<td class='confluenceTd'> Where <tt>integer</tt> is an integer value. Returns alert definitions with the number of conditions specified.&nbsp; <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-conditionTypeExclude integer</tt> </td>
+<td class='confluenceTd'> If specified, exclude alert definitions which have at least one condition of the given type. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-conditionTypeInclude integer</tt> </td>
+<td class='confluenceTd'> If specified, only show alert definitions which have at least one condition of the given type. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-escalation EscName</tt> </td>
+<td class='confluenceTd'> Where <tt>EscName</tt> is the name of an escalation. Return alert definitions to which the specified escalation is assigned. <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-excludeTypeAlerts</tt> </td>
+<td class='confluenceTd'> Returns resource alerts that were configured for a specific resource instance. Resource alert definitions that (in vFabric Hyperic only) are automatically created for resource instances as a result of a resource type alert definition are <em>not</em> returned. This qualifier cannot be used in conjunction with the <tt>&#45;-typeAlerts</tt> qualifier. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-excludeTypeIds</tt> </td>
+<td class='confluenceTd'> Excludes the HQ-internal ID for alert definitions from the XML output. This qualifier is only valid used in conjunction with the <tt>&#45;-typeAlerts</tt>qualifer. Excluding the internal ID for alert definitions is useful if you want to export a list of definitions for import into another system. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-id</tt> </td>
+<td class='confluenceTd'> If specified, return the alert definition with the given ID.  </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-group GroupName</tt> </td>
+<td class='confluenceTd'> Where <tt>GroupName</tt> is the name of a group. Limits results to alert definitions for resources in a specified group. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-platform</tt> </td>
+<td class='confluenceTd'> Return all alerts on the given platform and all descendant children </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-resourceDescription</tt> </td>
+<td class='confluenceTd'> If specified, only show alert definitions belonging to a resource with a description matching in whole or part the given description. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-resourceId integer</tt> </td>
+<td class='confluenceTd'> If specified, only show alert definitions belonging to a resource </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-resourceName regex</tt> </td>
+<td class='confluenceTd'> Where <tt>regex</tt> is a regular expression. Limits results to alert definitions for resources whose name matches a specified regular expression. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-typeAlerts</tt> </td>
+<td class='confluenceTd'> Returns all resource type alert definitions. The "child" resource alert definitions that HQ automatically creates for resources of the type specified by a resource type alert definition are <em>not</em> returned. </td>
+</tr>
+</tbody></table>
+</div>
+
+
+<h3><a name="HQApialertdefinitioncommand-StructureofanAlertDefinitionsResponse"></a>Structure of an AlertDefinitionsResponse</h3>
+
+<p>The <tt>AlertDefinitionsResponse</tt> object returned by the alertdefinition list command has this element structure:</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">AlertDefinitionsResponse
+     AlertDefinition
+          Resource
+          ResourcePrototype
+          AlertCondition
+          AlertAction
+          AlertActionConfig
+          Escalation</pre>
+		</div>
+</div></div>
+
+<p>where there are:</p>
+<ul>
+	<li>1 or more <tt>alertdefinition</tt> elements, each with
+	<ul>
+		<li>either a <tt>Resource</tt> or a <tt>ResourcePrototype</tt> element</li>
+		<li>1 or more <tt>AlertCondition</tt> elements and,</li>
+		<li>optionally, 1 <tt>escalation</tt> element</li>
+		<li>optionally, 1 or more <tt>AlertAction</tt> elements, each with
+		<ul>
+			<li>1 or more <tt>AlertActionConfig</tt> elements</li>
+		</ul>
+		</li>
+	</ul>
+	</li>
+</ul>
+
+
+<p>The element structure of an <tt>alertdefinition</tt> for a resource type alert is the same as for a resource alert, except it contains a <tt>ResourcePrototype</tt> element instead of a <tt>Resource</tt> element.</p>
+
+<h3><a name="HQApialertdefinitioncommand-AttributesinanAlertDefinitionsResponse"></a>Attributes in an AlertDefinitionsResponse</h3>
+
+<p>This table defines the attributes in a <tt>AlertDefinitionsResponse</tt>.</p>
+
+<p>Note that there are eight different types of <tt>AlertCondition</tt> elements, each with a different "type" value.</p>
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Element </th>
+<th class='confluenceTh'> Attribute </th>
+<th class='confluenceTh'> Description </th>
+<th class='confluenceTh'> Values </th>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>alertdefinition</tt> </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>id</tt> <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Internal HQ ID for the alert definition. This value is assigned by HQ Server when the alert definition is created. When you create an alert definition using the API, you do not supply the value of <tt>id</tt>. When you update an existing alert definition using <tt>sync</tt>, to identify the definition to update by its <tt>id</tt>. </td>
+<td class='confluenceTd'> Numeric value, for example, "10002" <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>name</tt> </td>
+<td class='confluenceTd'> Name assigned to the alert definition by the person who created it.&nbsp; <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> "Linux Platform Availability" <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>description</tt> </td>
+<td class='confluenceTd'> Description assigned to the alert definition by the person who created it.&nbsp;&nbsp; <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>priority</tt> </td>
+<td class='confluenceTd'> Numeric value for the priority assigned to the alert definition. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> "1",&nbsp; "2", or "3" correspond to Low, Medium, and High. <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>active</tt> </td>
+<td class='confluenceTd'> Whether or not the alert definition is currently active. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> "true" or "false" </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>enabled</tt> </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> "true" or "false" </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>frequency</tt> </td>
+<td class='confluenceTd'> Use to configure the the alert definition's <b>Enable Actions(s</b>) behavior, which governs whether an alert will fire each time the condition(s) are met. For information on these options, see <a href="Define an Alert for a Resource.html#DefineanAlertforaResource-EnableActions">Enable Actions</a>.
+<ul>
+	<li>"0" - Each time the conditions are met.</li>
+	<li>"2" &#45;&nbsp;Once every &#95;&#95; times conditions are met within a time period of... <b>Note</b>:&nbsp; Use Use <tt>count</tt> and <tt>range</tt> to specify the timing values.</li>
+</ul>
+</td>
+<td class='confluenceTd'><ul>
+	<li>"0"</li>
+	<li>"2"</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>count</tt> </td>
+<td class='confluenceTd'> Use <tt>count</tt> and <tt>range</tt> to specify the timing values for an alert definition that is configured to fire "Once every &#95;&#95; times conditions are met within a time period of &#95;&#95; minutes".&nbsp; First make sure that <tt>frequency</tt> is set to "2", and then use:
+<ul>
+	<li><tt>count</tt> to specify the "once every &#95;&#95; times" value</li>
+	<li><tt>range</tt> to specify the "time period of &#95;_..." value in seconds.</li>
+</ul>
+</td>
+<td class='confluenceTd'> Non-zero integer. <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>range</tt> </td>
+<td class='confluenceTd'> Use&nbsp;<tt>range</tt> and <tt>count</tt> to configure the alert definition to fire " Once every &#95;&#95; times conditions are met within a time period of &#95;&#95; minutes".&nbsp; First make sure that <tt>frequency</tt> is set to "2", and then use:
+<ul>
+	<li><tt>count</tt> to specify the "once every &#95;&#95; times" value</li>
+	<li><tt>range</tt> to specify the "time period of &#95;&#95; ..." value in seconds.</li>
+</ul>
+</td>
+<td class='confluenceTd'> Non-zero integer. <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>willRecover</tt> </td>
+<td class='confluenceTd'> Used to configure the "Generate one alert and then disable alert definition until fixed" behavior. <br class="atl-forced-newline" />
+For information, see <a href="Define an Alert for a Resource.html#DefineanAlertforaResource-EnableActions">Enable Actions</a>.&nbsp; <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> "true" or "false" </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>controlFiltered</tt> </td>
+<td class='confluenceTd'> For a description of the behavior this attribute controls, please see <a href="Define an Alert for a Resource.html#DefineanAlertforaResource-DisregardControlActions">Disregard Control Actions for Related Alerts</a>. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> "true" or "false" </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>notifyFiltered</tt> </td>
+<td class='confluenceTd'> For a description of the behavior this attribute controls, please see <a href="Define an Alert for a Resource.html#DefineanAlertforaResource-DisregardControlActions">Disregard Control Actions for Related Alerts</a>. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> "true" or "false" </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>parent</tt> </td>
+<td class='confluenceTd'> In vFabric Hyperic, the internal ID of the parent resource type alert definition, if there is one. </td>
+<td class='confluenceTd'> Valid ID of a resource type alert definition in HQ. <br class="atl-forced-newline" />  <tt>"0"</tt> indicates no parent. </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>ctime</tt> </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>mtime</tt> </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>ResourcePrototype</tt> </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>name</tt> </td>
+<td class='confluenceTd'> The name of the resource type. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Example values:
+<ul>
+	<li>"Linux"</li>
+	<li>"Tomcat 6.0 Connector"</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>id</tt> </td>
+<td class='confluenceTd'> The internal HQ ID for a resource type. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Example value:"10329" <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>Resource</tt> </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>name</tt> </td>
+<td class='confluenceTd'> The name of a resource as it appears in the HQ user interface. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Example value: "melba HQ Tomcat 6.0 9009 Tomcat 6.0 Connector" <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>id</tt> </td>
+<td class='confluenceTd'> The internal HQ ID for a resource. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Example value: "10653" <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>AlertCondition</tt> </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> required <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Whether condition is required to trigger the alert </td>
+<td class='confluenceTd'> "true" or "false" </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>type</tt> <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Specifies the type of an alert condition:
+<ul>
+	<li>"1" - metric condition (compare to absolute value)</li>
+	<li>"2" - metric condition (compare to baseline)</li>
+	<li>"3" - control action condition</li>
+	<li>"4" - metric condition (change in value)</li>
+	<li>"5" - recovery alert condition</li>
+	<li>"6" - inventory property condition</li>
+	<li>"7" - event/log condition</li>
+	<li>"8" - config changed condition <br class="atl-forced-newline" />
+For more information about each type of alert condition, see <a href="ui-Alert.Condition.html" title="ui-Alert.Condition">condition types</a>. </li>
+</ul>
+</td>
+<td class='confluenceTd'> An integer value of 1 though 8 </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>AlertAction</tt> </td>
+<td class='confluenceTd'> <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>id</tt> <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> The internal HQ ID for the action. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>className</tt> </td>
+<td class='confluenceTd'> The name of the Hyperic class that performs the action type. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>AlertActionConfig</tt> </td>
+<td class='confluenceTd'> <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>key</tt> <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> The key of a parameter that the action type requires type of action. </td>
+<td class='confluenceTd'> For example, <tt>key="notifyType"</tt> for an email action. </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>value</tt> </td>
+<td class='confluenceTd'> The value of a parameter required to run the action. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> For example, <tt>value="users"</tt> for an email action. </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>id</tt> <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> The internal HQ ID for an escalation. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>name</tt> </td>
+<td class='confluenceTd'> The name assigned to the escalation by the user that created it. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>description</tt> </td>
+<td class='confluenceTd'> The text description for the escalation supplied by the user that created it. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+</tbody></table>
+</div>
+
+
+
+<h3><a name="HQApialertdefinitioncommand-AlertConditionAttributesforDifferentConditionTypes"></a>AlertCondition Attributes for Different Condition Types</h3>
+
+<p>This table defines the attributes in <tt>AlertCondition</tt> element for each of the eight different condition types.&nbsp; For information about each type of condition, see <a href="ui-Alert.Condition.html" title="ui-Alert.Condition">Alert Conditions</a>.</p>
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Condition Type </th>
+<th class='confluenceTh'> Attribute </th>
+<th class='confluenceTh'> Description </th>
+<th class='confluenceTh'> Value(s) </th>
+</tr>
+<tr>
+<td class='confluenceTd'> "1" - metric condition (compare to absolute value) </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>thresholdValue</tt> </td>
+<td class='confluenceTd'> The absolute value to which the actual metric value is compared. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> "100.0" </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>thresholdComparator</tt> </td>
+<td class='confluenceTd'> The operator used to compare the the actual metric value to <tt>thresholdValue</tt>&nbsp; In the UI, the operators are shown as:
+<ul>
+	<li>"greater than"</li>
+	<li>"less than"</li>
+	<li>"equal to"</li>
+	<li>"not equal to"</li>
+</ul>
+</td>
+<td class='confluenceTd'> Allowable values (which correspond to the operators listed in cell to the left):
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>&amp;gt;
+&amp;lt;
+=
+!
+</pre>
+</div></div> </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>thresholdMetric</tt> </td>
+<td class='confluenceTd'> The metric the condition is based upon. Allowable values depend on the type of resource to which the alert definition is assigned. </td>
+<td class='confluenceTd'> Example value:&nbsp;
+<ul>
+	<li>"Availability"</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'> "2" - metric condition (compare to baseline) </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>baselineType</tt> </td>
+<td class='confluenceTd'> Specifies whether the metric value is compared to
+<ul>
+	<li>"max - maximum value</li>
+	<li>"mean" - baseline value</li>
+	<li>"min" - minimum value <br class="atl-forced-newline" /></li>
+</ul>
+</td>
+<td class='confluenceTd'><ul>
+	<li>"max</li>
+	<li>"mean"</li>
+	<li>"min"</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>baselinePercentage</tt> </td>
+<td class='confluenceTd'> Specifies a threshold value, in terms of percentage of the selected baseline type (max, baseline, or min value), as specified by <tt>baselineType</tt>. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> "60.0" </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>baselineMetric</tt> </td>
+<td class='confluenceTd'> The metric the condition is based upon. Allowable values depend on the type of resource to which the alert definition is assigned. </td>
+<td class='confluenceTd'> "Free Memory" </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>baselineComparator</tt> </td>
+<td class='confluenceTd'> <br class="atl-forced-newline" />
+The operator used to compare the the actual metric value to <tt>baselinePercentage</tt>.&nbsp; In the UI, the operators are shown as:
+<ul>
+	<li>"greater than"</li>
+	<li>"less than"</li>
+	<li>"equal to"</li>
+	<li>"not equal to"</li>
+</ul>
+</td>
+<td class='confluenceTd'> Allowable values (which correspond to the operators listed in cell to the left):
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>&amp;gt;
+&amp;lt;
+=
+!
+</pre>
+</div></div> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> "3" - control action condition </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>controlAction</tt> </td>
+<td class='confluenceTd'> Specifies the control action the condition is based upon. The condition is met when the specified action has been run with the completion status specified by <tt>controlStatus</tt>. <br class="atl-forced-newline" />
+Use this condition type only for resources with supported control actions.The values you can specify for <tt>controlAction</tt> depend on the type of resource type to which the alert is assigned. </td>
+<td class='confluenceTd'> Example values include:
+<ul>
+	<li>"runGarbageCollector"</li>
+	<li>"vacuum"</li>
+	<li>"restart"</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>controlStatus</tt> </td>
+<td class='confluenceTd'> Specifies the completion status for the control action specified by <tt>controlAction</tt> that makes the condition true.&nbsp;&nbsp; <br class="atl-forced-newline" />
+Use this condition type only for resources with supported control actions.&nbsp; </td>
+<td class='confluenceTd'><ul>
+	<li>"In Progress"</li>
+	<li>"Completed"</li>
+	<li>"Failed"</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'> "4" - metric condition (change in value) </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>metricChange</tt> </td>
+<td class='confluenceTd'> The metric the condition is based upon. Allowable values depend on the type of resource to which the alert definition is assigned. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> "Active Thread Count" </td>
+</tr>
+<tr>
+<td class='confluenceTd'> "5" - recovery alert target </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>recover</tt> </td>
+<td class='confluenceTd'> In an alert definition for a recovery alert, use this condition type to identify the target alert definition, for which the current alert is a recovery alert. <br class="atl-forced-newline" />  <b>Note</b>: This is sort of a "pseudo" alert condition. From the UI perspective it is <em>not</em> a condition. In the alert definition UI, you identify the recovery alert's target by choosing it from the "Recover for..." pull-down, which displays a list of alert definitions. <br class="atl-forced-newline" />
+In addition to a condition of type="5", a recovery alert must also have an true alert condition - one that can be evaluated as "true" or "false", and is "true" when the target alert's condition is "false". <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> "Free Memory &gt; 60.0% of Baseline" </td>
+</tr>
+<tr>
+<td class='confluenceTd'> "6" - inventory property condition </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>property</tt> </td>
+<td class='confluenceTd'> Specifies the internal key for the inventory property the condition is based upon. <br class="atl-forced-newline" />
+The inventory properties you can use in an alert vary by resource type.&nbsp; <br class="atl-forced-newline" />
+When you define an alert condition in the HQ user interface, the inventory properties you can use are presented in a selector list. Note however that the property names displayed in the list are friendly names, as opposed to the internal key you must use when defining an alert condition via the API. <br class="atl-forced-newline" />  <br class="atl-forced-newline" />
+You can determine the properties for a resource type, and the internal key for each, by running the <tt>resource list</tt> command with the <tt>&#45;-verbose</tt> option for a resource of that type. The command will return a <tt>ResourceProperty</tt> element for each inventory property that you can use in alert conditions for the current type. A <tt>ResourceProperty</tt> element is a key=value pair.&nbsp; <br class="atl-forced-newline" />
+For more information, see <a href="HQApi resource command.html#HQApiresourcecommand-ListResourcesoftheSameTypeVerbosely">List Resources of the Same Type Verbosely</a><br class="atl-forced-newline" />  <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Example values: <br class="atl-forced-newline" />  <br class="atl-forced-newline" />
+<ul>
+	<li>"arch"</li>
+	<li>"cpuSpeed"</li>
+	<li>"defaultGateway"</li>
+	<li>"ip"</li>
+	<li>"primaryDNS"</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'> "7" - event/log condition </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>logMatches</tt> </td>
+<td class='confluenceTd'> Specifies a string to look for in log events. &nbsp; The condition is met when when an&nbsp; event of the severity level specified by <tt>logLevel</tt> that contains the string specified by <tt>logMatches</tt> (if a value was supplied) is logged. <br class="atl-forced-newline" />
+The target resource must have log tracking enabled. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> "any text you want" </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>logLevel</tt> </td>
+<td class='confluenceTd'> Specifies a log message severity level. The condition is met when an event of this severity level that contains the string specified by <tt>logMatches</tt> (if a value was supplied) is logged. <br class="atl-forced-newline" />
+The target resource must have log tracking enabled.&nbsp; <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'><ul>
+	<li>"ANY"</li>
+	<li>"ERR"</li>
+	<li>"WRN"</li>
+	<li>"INF"</li>
+	<li>"DBG"</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'> "8" - config changed condition </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>configMatch</tt> </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> "testfile" </td>
+</tr>
+</tbody></table>
+</div>
+
+
+<h3><a name="HQApialertdefinitioncommand-AlertActionConfigAttributesforDifferentActionTypes"></a>AlertActionConfig Attributes for Different Action Types</h3>
+
+<p>This table defines the attributes in an <tt>AlertActionConfig</tt> element for each of the different action types.  For information about each type of action, see <a href="ui-Alert.Actions.html" title="ui-Alert.Actions">Alert Actions</a>.</p>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Action Type </th>
+<th class='confluenceTh'> Class </th>
+<th class='confluenceTh'> Key </th>
+<th class='confluenceTh'> Value(s) </th>
+</tr>
+<tr>
+<td class='confluenceTd'> Email Notification </td>
+<td class='confluenceTd'> com.hyperic.hq.bizapp.server.action.email.EmailAction </td>
+<td class='confluenceTd'> <tt>notifyType</tt> </td>
+<td class='confluenceTd'><ul>
+	<li>"users" &#8212; Equivalent to selecting <b>Notify HQ Users</b> in the alert definition UI. <br class="atl-forced-newline" /></li>
+	<li>"roles" &#8212; Equivalent to selecting <b>Notify Roles</b> in the alert definition UI. <br class="atl-forced-newline" /></li>
+	<li>"email" &#8212; Equivalent to selecting <b>Notify Other Recipients</b> in the alert definition UI. <br class="atl-forced-newline" /></li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Script </td>
+<td class='confluenceTd'> com.hyperic.hq.bizapp.server.action.control.ScriptAction </td>
+<td class='confluenceTd'> <tt>script</tt> </td>
+<td class='confluenceTd'> path to script </td>
+</tr>
+<tr>
+<td class='confluenceTd'> OpenNMS action </td>
+<td class='confluenceTd'> org.hyperic.hq.bizapp.server.action.integrate.OpenNMSAction </td>
+<td class='confluenceTd'><ul>
+	<li><tt>port</tt> <br class="atl-forced-newline" /></li>
+	<li><tt>server</tt></li>
+</ul>
+</td>
+<td class='confluenceTd'><ul>
+	<li>OpenNMS listen port <br class="atl-forced-newline" /></li>
+	<li>OpenNMS listen address</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'> control action </td>
+<td class='confluenceTd'> com.hyperic.hq.bizapp.server.action.control.ControlAction </td>
+<td class='confluenceTd'><ul>
+	<li><tt>resourceId</tt> <br class="atl-forced-newline" /></li>
+	<li><tt>action</tt></li>
+</ul>
+</td>
+<td class='confluenceTd'><ul>
+	<li>Internal Hyperic ID for the resource upon which the control action will be performed <br class="atl-forced-newline" /></li>
+	<li>Action to performed. Allowable values vary by resource type.</li>
+</ul>
+</td>
+</tr>
+</tbody></table>
+</div>
+
+
+<h2><a name="HQApialertdefinitioncommand-alertdefinitionsync"></a>alertdefinition sync</h2>
+
+<p>The <b>alertdefinition sync</b> command takes an <tt>AlertDefinitionsResponse</tt> and syncs any changes back into the HQ inventory. All attributes of the <tt>alertdefinition</tt> element, new or changed <tt>AlertCondition</tt> elements, and the optional <tt>Escalation</tt> element will be updated.</p>
+
+<p>You can use the command qualifiers described in the following section to assign and remove alert actions or escalations to alert definitions in the sync.</p>
+
+<p><b>Note:&nbsp;</b> When you use <b>sync</b> to create a new item, do not specify the <tt>id</tt> attribute for the new item. See <a href="HQApi Command-Line Tools.html#HQApiCommand-LineTools-sync">sync</a> for more information. </p>
+
+<h3><a name="HQApialertdefinitioncommand-alertdefinitionsyncCommandQualifiers"></a>alertdefinition sync Command Qualifiers</h3>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Qualifier </th>
+<th class='confluenceTh'> Description </th>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-assignControlAction</tt> </td>
+<td class='confluenceTd'> If specified, assign the given Control Action to all alert definitions in this sync. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-assignEscalation</tt> </td>
+<td class='confluenceTd'> If specified, assign the given Escalation to all alert definitions in this sync. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-assignOtherNotification</tt> </td>
+<td class='confluenceTd'> If specified, assign notification to the given comma separated list of email addresses. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-assignRoleNotification</tt> </td>
+<td class='confluenceTd'> If specified, assign notification to the given comma separated list of roles. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-assignScriptAction</tt> </td>
+<td class='confluenceTd'> If specified, assign the given script action to all alert definitions in this sync. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-assignUserNotification</tt> </td>
+<td class='confluenceTd'> If specified, assign notification to the given comma separated list of users. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-batchSize &lt;Integer&gt;</tt> </td>
+<td class='confluenceTd'> Process the sync in batches of the given size. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-clearActions</tt> </td>
+<td class='confluenceTd'> If specified, clear alert actions from all alert definitions in this sync. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-clearEscalation</tt> </td>
+<td class='confluenceTd'> If specified, clear the assigned escalation from all alert definitions in this sync. </td>
+</tr>
+</tbody></table>
+</div>
+
+
+
+<h2><a name="HQApialertdefinitioncommand-alertdefinitiondelete"></a>alertdefinition delete</h2>
+
+<p>The <b>alertdefinition delete</b> command removes the specified alert definition from HQ. If you delete a resource type alert definition, its child alert definitions (which are associated with each resource of the type specified in the resource type alert defintion) are also deleted.</p>
+
+<p>The delete command requires a single <b>&#45;-id</b> argument that specifies the <tt>AlertDefinition</tt> to delete.</p>
+
+<h2><a name="HQApialertdefinitioncommand-alertdefinitioncreate"></a>alertdefinition create</h2>
+
+<h3><a name="HQApialertdefinitioncommand-alertdefinitioncreateCommandQualifiers"></a>alertdefinition create Command Qualifiers</h3>
+
+<p>When you run the <b>alertdefinition list</b> command you can supply one or more of the following qualifiers to limit what alert definitions are returned.</p>
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Qualifier </th>
+<th class='confluenceTh'> Description </th>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-assignControlAction</tt> </td>
+<td class='confluenceTd'> If specified, assign the given Control Action to all alert definitions in this create. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-assignEscalation</tt> </td>
+<td class='confluenceTd'> If specified, assign the given Escalation to all alert definitions in this create. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-assignScriptAction</tt> </td>
+<td class='confluenceTd'> If specified, assign the given script action to all alert definitions in <br class="atl-forced-newline" />
+this create. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-batchSize &lt;Integer&gt;</tt> </td>
+<td class='confluenceTd'> Process the create in batches of the given size. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-equals &lt;Double&gt;</tt> </td>
+<td class='confluenceTd'> Sets condition to if metric value = threshold. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-file</tt> </td>
+<td class='confluenceTd'> If specified, use the given file for commands that take XML input. If not specified, stdin will be used. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-greaterthan &lt;Double&gt;</tt> </td>
+<td class='confluenceTd'> Sets condition to if metric value &gt; threshold. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-group</tt> </td>
+<td class='confluenceTd'> Create only for resources in the specified group </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-lessthan &lt;Double&gt;</tt> </td>
+<td class='confluenceTd'> Sets condition to if metric value &lt; threshold. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-metric</tt> </td>
+<td class='confluenceTd'> The metric name to use. Not valid with &#45;-templateDefinition. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-name</tt> </td>
+<td class='confluenceTd'> The name of the alert definition to create. Not valid with &#45;-templateDefinition. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-notequalto &lt;Double&gt;</tt> </td>
+<td class='confluenceTd'> Sets condition to if metric value is not equal to threshold. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-priority &lt;Integer&gt;</tt> </td>
+<td class='confluenceTd'> Sets priority. 1 = low, 2 = medium (default), 3 = high </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-prototype</tt> </td>
+<td class='confluenceTd'> Specifies the prototype to find. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-recoveryequals &lt;Double&gt;</tt> </td>
+<td class='confluenceTd'> Sets the recovery alert to if metric value = threshold. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-recoverygreaterthan &lt;Double&gt;</tt> </td>
+<td class='confluenceTd'> Sets the recovery alert to if metric value &gt; threshold. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-recoverylessthan &lt;Double&gt;</tt> </td>
+<td class='confluenceTd'> Sets the recovery alert to if metric value &lt; threshold. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-recoveryname</tt> </td>
+<td class='confluenceTd'> Optionally specify name of recovery alert. If not specified then "fixed" is added to alert definition name. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-recoverynotequalto &lt;Double&gt;</tt> </td>
+<td class='confluenceTd'> Sets the recovery alert to if metric value &#33;= threshold. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-regex</tt> </td>
+<td class='confluenceTd'> Use pattern to find matching resources </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-templateDefinition &lt;Integer&gt;</tt> </td>
+<td class='confluenceTd'> The id of the alert definition to use as a template. If specified only resource type alerts will be created. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-typeAlerts</tt> </td>
+<td class='confluenceTd'> If specified only resource type alerts will be created. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-willrecover</tt> </td>
+<td class='confluenceTd'> If specified sets the willRecover flag. Equivalent to "Generate one alert and then disable alert definition until fixed". </td>
+</tr>
+</tbody></table>
+</div>
+
+
+<h1><a name="HQApialertdefinitioncommand-alertdefinitionCommandExamples"></a>alertdefinition Command Examples</h1>
+
+
+<h2><a name="HQApialertdefinitioncommand-alertdefinitionlist"></a>alertdefinition list</h2>
+
+<p>In this example, no qualifiers were supplied. All resource alert definitions are returned.</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">&lt;AlertDefinitionsResponse&gt;
+    &lt;Status&gt;Success&lt;/Status&gt;
+    &lt;AlertDefinition mtime="1313779425236" ctime="1313775515992" id="10016" name="alert1" description="" priority="2" enabled="true" active="true" frequency="2" count="6" range="1" willRecover="true" notifyFiltered="false" controlFiltered="false"&gt;
+        &lt;Resource id="10938" name="Marie-McGarrys-MacBook-Air.local"/&gt;
+        &lt;Escalation id="100" name="Default Escalation" description="This is an Escalation Scheme created by HQ that performs no actions" pauseAllowed="false" maxPauseTime="300000" notifyAll="false" repeat="false"/&gt;
+        &lt;AlertCondition required="true" type="4" metricChange="Availability"/&gt;
+        &lt;AlertAction id="10006" className="com.hyperic.hq.bizapp.server.action.email.EmailAction"&gt;
+            &lt;AlertActionConfig key="notifyType" value="users"/&gt;
+            &lt;AlertActionConfig key="names" value="hqadmin"/&gt;
+        &lt;/AlertAction&gt;
+        &lt;AlertAction id="10007" className="com.hyperic.hq.bizapp.server.action.email.EmailAction"&gt;
+            &lt;AlertActionConfig key="notifyType" value="email"/&gt;
+            &lt;AlertActionConfig key="names" value="marie@linsdall.com"/&gt;
+        &lt;/AlertAction&gt;
+        &lt;AlertAction id="10008" className="com.hyperic.hq.bizapp.server.action.control.ScriptAction"&gt;
+            &lt;AlertActionConfig key="script" value="/scripts/action.sh"/&gt;
+        &lt;/AlertAction&gt;
+        &lt;AlertAction id="10009" className="org.hyperic.hq.bizapp.server.action.integrate.OpenNMSAction"&gt;
+            &lt;AlertActionConfig key="port" value="5817"/&gt;
+            &lt;AlertActionConfig key="server" value="333.444.444.4444"/&gt;
+        &lt;/AlertAction&gt;
+        &lt;AlertAction id="10010" className="com.hyperic.hq.bizapp.server.action.control.ControlAction"&gt;
+            &lt;AlertActionConfig key="resourceId" value="10945"/&gt;
+            &lt;AlertActionConfig key="action" value="Vacuum"/&gt;
+        &lt;/AlertAction&gt;
+    &lt;/AlertDefinition&gt;
+&lt;/AlertDefinitionsResponse&gt;</pre>
+		</div>
+</div></div>
+
+<h2><a name="HQApialertdefinitioncommand-alertdefinitionlist%5CtypeAlerts"></a>alertdefinition list &#45;-typeAlerts</h2>
+
+<p>This example returns all resource type alert definitions in HQ. In this case, there is just one resource type alert definition in HQ. The resource type the alert definition applies to - "JBoss 4.2 Stateless Session EJB" - is specified in the <tt>ResourcePrototype</tt> element Y</p>
+
+<p>When you use the <tt>&#45;-typeAlerts</tt> qualifier, "child" resource alert definitions that HQ automatically creates for resources of the type specified by a resource type alert definition are <em>not</em> returned.</p>
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+&lt;AlertDefinitionsResponse&gt;
+&lt;Status&gt;Success&lt;/Status&gt;
+&lt;AlertDefinition controlFiltered="false" notifyFiltered="false" willRecover="true" range="0"
+count="0" frequency="0" enabled="true" active="true" priority="2" parent="0" description=""
+name="JbossStatelessResourceType" id="10001"&gt;
+&lt;ResourcePrototype name="JBoss 4.2 Stateless Session EJB" id="10182"/&gt;
+&lt;AlertCondition metricChange="Availability" type="4" required="true"/&gt;
+&lt;/AlertDefintionsResponse&gt;
+</pre>
+</div></div>
+<h2><a name="HQApialertdefinitioncommand-AlertConditionExamples"></a>AlertCondition Examples</h2>
+
+<p>The fragment below has an example of each type of <tt>AlertCondition</tt></p>
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>&lt;AlertCondition thresholdValue="2.0" thresholdComparator="&gt;" thresholdMetric=
+"Load Average 5 Minutes" type="1" required="true"/&gt;
+&lt;AlertCondition baselineType="mean" baselinePercentage="0.0" baselineComparator="&gt;"
+baselineMetric="Zombie Processes" type="2" required="true"/&gt;
+&lt;AlertCondition controlStatus="Completed" controlAction="start" type="3" required="true"/&gt;
+&lt;AlertCondition metricChange="Zombie Processes" type="4" required="true"/&gt;
+&lt;AlertCondition recover="Availability Down" type="5" required="true"/&gt;
+&lt;AlertCondition property="arch" type="6" required="true"/&gt;
+&lt;AlertCondition logMatches="login" logLevel="INF" type="7" required="true"/&gt;
+&lt;AlertCondition configMatch="/var/log/messages" type="8" required="true"/&gt;
+</pre>
+</div></div>
+<h2><a name="HQApialertdefinitioncommand-alertdefinitionsync"></a>alertdefinition sync</h2>
+
+<p>In this example, the contents of the typedefs.xml file are written to HQ.</p>
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>bash-3.2$ ./bin/hqapi.sh alertdefinition list \--typeAlerts &gt; typedefs.xml
+&lt;EDIT typedefs.xml&gt;
+bash-3.2$ cat typedefs.xml \| ./bin/hqapi.sh alertdefinition sync
+Successfully synced 14 alert definitions.
+bash-3.2$
+</pre>
+</div></div>
+<h2><a name="HQApialertdefinitioncommand-alertdefinitiondelete"></a>alertdefinition delete</h2>
+
+<p>In this example, the <tt>alertdefintion</tt> whose internal ID is 10045 is deleted.</p>
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>bash-3.2$ ./bin/hqapi.sh alertdefinition delete \--id=10048
+Successfully deleted alert definition id 10048
+bash-3.2$
+</pre>
+</div></div>
+
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre></pre>
+</div></div>
+
+
+<h2><a name="HQApialertdefinitioncommand-alertdefinitioncreatebasedonexistingalertdefinition"></a>alertdefinition create - based on existing alert definition</h2>
+
+<p>In this example, a new alert definition is copied from an existing definition and assigned to members of a group that have the same resource type.</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">hqapi.sh alertdefinition create --templateDefinition 10100 --group "Linux" --prototype "Linux"</pre>
+		</div>
+</div></div>
+
+<p>Where <tt>&#45;-templateDefinition 10100</tt> is the alert definition that already exists that you want to clone to all resources of type "Linux" in the group "Linux".</p>
+
+<p>You can find the alert definition id with the <tt>alertdefinition list</tt> command. The template definition must be of the same type as the target members. The group does NOT need to be a compatible group. The command  selects resources that match the prototype from the group.</p>
+
+
+<h2><a name="HQApialertdefinitioncommand-alertdefinitioncreatenewalertdefinition"></a>alertdefinition create - new alert definition</h2>
+
+<p>In this example, an new alert definition is created and assigned to members of a group that have the same resource type.</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">hqapi.sh alertdefinition create --group "Linux" --prototype "Linux" --name "My Alert" --metric Availability --lessthan 1 --recoveryequals 1</pre>
+		</div>
+</div></div>
+<p>This creates an alert definition for all Linux type resources in the group "Linux". The alert definition is named "My Alert" and the condition is set to "If Availability &lt; 100" and also a matching recovery alert for when Availability = 100%.</p>
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

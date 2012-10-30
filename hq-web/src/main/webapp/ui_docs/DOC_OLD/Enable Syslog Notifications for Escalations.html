@@ -1,0 +1,117 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : Enable Syslog Notifications for Escalations</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : Enable Syslog Notifications for Escalations
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325699651777 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699651777 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699651777 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1325699651777'>
+<ul>
+    <li><a href='#EnableSyslogNotificationsforEscalations-AboutSyslogNotificationsinAlertEscalations'>About Syslog Notifications in Alert Escalations</a></li>
+    <li><a href='#EnableSyslogNotificationsforEscalations-EnableSyslogNotifications'>Enable Syslog Notifications</a></li>
+<ul>
+    <li><a href='#EnableSyslogNotificationsforEscalations-EnabletheSyslogReceiver'>Enable the Syslog Receiver</a></li>
+    <li><a href='#EnableSyslogNotificationsforEscalations-EnableSyslogAppender'>Enable Syslog Appender</a></li>
+    <li><a href='#EnableSyslogNotificationsforEscalations-RestartHypericServer'>Restart Hyperic Server</a></li>
+</ul>
+</ul></div>
+
+
+<h1><a name="EnableSyslogNotificationsforEscalations-AboutSyslogNotificationsinAlertEscalations"></a>About Syslog Notifications in Alert Escalations</h1>
+
+<p>You can enable Hyperic to issue a syslog notification as a step in an alert escalation. The notification will log a line in the following format:</p>
+
+<p><tt>SyslogAction[ALERT_ID]: DB_1 4 META/PRODUCT/VERSION RESOURCE_NAME : ALERT_NAME - ALERT_CONDITION</tt></p>
+
+<p>where:</p>
+<ul>
+	<li><tt>ALERT_ID</tt> is a number representing the alert ID in HQ.</li>
+	<li><tt>META</tt> is the "Meta" string configured for the syslog action in the escalation.</li>
+	<li><tt>PRODUCT</tt> is the "Product" string configured for the syslog action in the escalation.</li>
+	<li><tt>VERSION</tt> = is the "Version" string configured for the syslog action in the escalation.</li>
+	<li><tt>RESOURCE_NAME</tt> identifies the resource for which the alert was fired.</li>
+	<li><tt>ALERT_NAME</tt> identifies the alert definition that fired the alert.</li>
+	<li><tt>ALERT_CONDITION</tt> is the alert condition and reported measurement that led to the alert firing, for example, "If Availability &gt; 0.0 (actual value = 1)")</li>
+</ul>
+
+
+<h1><a name="EnableSyslogNotificationsforEscalations-EnableSyslogNotifications"></a>Enable Syslog Notifications</h1>
+
+<p>You enable syslog notification in the HQ Server's <tt>server-log4j.xml</tt> file, in <tt>SERVER_HOME/conf</tt>.</p>
+
+<h2><a name="EnableSyslogNotificationsforEscalations-EnabletheSyslogReceiver"></a>Enable the Syslog Receiver</h2>
+
+<p>syslogd, the syslog receiver, must be enabled to accept remote logging, even on <tt>localhost</tt>. This can be done by passing <tt>&#45;r</tt> to syslogd at startup.</p>
+
+<h2><a name="EnableSyslogNotificationsforEscalations-EnableSyslogAppender"></a>Enable Syslog Appender</h2>
+
+<p>In the appenders section of the file, uncomment these lines and change the logger level to INFO instead of ERROR. </p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: xml; gutter: false">&lt;appender name="SYSLOG" class="org.apache.log4j.net.SyslogAppender"&gt;
+   &lt;errorHandler class="org.apache.log4j.helpers.OnlyOnceErrorHandler"/&gt;
+   &lt;param name="Facility" value="SYSLOG"/&gt;
+   &lt;param name="FacilityPrinting" value="true"/&gt;
+   &lt;param name="SyslogHost" value="localhost"/&gt;
+   &lt;layout class="org.apache.log4j.PatternLayout"&gt;
+      &lt;param name="ConversionPattern" value="%c{1}[%r]: %m%n"/&gt;
+   &lt;/layout&gt;
+&lt;/appender&gt;
+
+&lt;logger name="org.hyperic.hq.bizapp.server.action.log.SyslogAction"&gt;
+  &lt;level value="INFO" /&gt;
+  &lt;appender-ref ref="SYSLOG" /&gt;
+&lt;/logger&gt;</pre>
+		</div>
+</div></div>
+<p><b>Note:</b> If you want to configure a different Facility for the appender, note that it must be syslog-configured.</p>
+
+<p>If <tt>server-log4j.xml</tt> does not contain the lines shown above, add them in the appenders section. All appenders in the file must be grouped together.</p>
+
+<h2><a name="EnableSyslogNotificationsforEscalations-RestartHypericServer"></a>Restart Hyperic Server</h2>
+
+<p>After the Hyperic Server is restarted, syslog notification will be presented as an option when you set up an escalation. </p>
+
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:06</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

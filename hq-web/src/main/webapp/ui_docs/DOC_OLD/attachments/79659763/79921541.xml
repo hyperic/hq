@@ -1,0 +1,39 @@
+<plugin>
+  <service name="String Cache"
+           server="Sun JVM" version="1.5">
+
+    <property name="OBJECT_NAME"
+              value="Catalina:type=StringCache"/>
+
+    <property name="AUTOINVENTORY_NAME"
+              value="%platform.name% Tomcat String Cache"/>
+
+    <plugin type="autoinventory"/>
+
+    <plugin type="measurement"
+            class="org.hyperic.hq.product.jmx.MxMeasurementPlugin"/>
+
+    <plugin type="control"
+            class="org.hyperic.hq.product.jmx.MxControlPlugin"/>
+
+    <!-- reset is an MBean operation, set* are attribute setters -->
+    <actions include="reset,setcacheSize,settrainThreshold"/>
+
+    <properties>
+      <property name="cacheSize" description="Cache Size"/>
+      <property name="trainThreshold" description="TrainThreshold"/>
+    </properties>
+
+    <filter name="template"
+            value="${OBJECT_NAME}:${alias}"/>
+
+    <metric name="Availability"
+            template="${OBJECT_NAME}:Availability"
+            indicator="true"/>
+
+    <metric name="Cache Hits"
+            alias="hitCount"
+            collectionType="trendsup"
+            indicator="true"/>
+  </service>
+</plugin>

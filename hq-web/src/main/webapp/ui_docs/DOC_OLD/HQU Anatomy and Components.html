@@ -1,0 +1,175 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : HQU Anatomy and Components</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : HQU Anatomy and Components
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p>This section describes how HQU plugins fit into, and operate with, the rest of your HQ environment.</p>
+<h1><a name="HQUAnatomyandComponents-HQUDesignPattern"></a><b>HQU Design Pattern</b></h1>
+<p>Like HQ, HQU is based on a Model View Controller (MVC) design pattern. In the HQU framework, MVC  functionality is distributed in this fashion:</p>
+<ul>
+	<li>Model—The model, which represents HQ data and the rules for accessing and updating it, consists of a set of HQ Groovy APIs. The Groovy APIs provide the HQ data for the plugin's View, JSON, or XML output. Groovy APIs provide simple access to backend functionality.</li>
+	<li>View—For an HQU plugin that extends the HQ UI, the view that renders the model is one or more Groovy Server Pages (GSPs).  For an integration plugin, the view is the plugin's XML or JSON output.</li>
+	<li>Controller—The controller is a Groovy script.</li>
+</ul>
+
+
+<h1><a name="HQUAnatomyandComponents-PluginFiles"></a><b>Plugin Files</b></h1>
+<p>This table describes the required components of an HQU Plugin. </p>
+<h2><a name="HQUAnatomyandComponents-Plugin.groovy"></a><b>Plugin.groovy</b></h2>
+<p>Plugin.groovy is the class that HQ uses to interact with the plugin.  This file declares the plugin's default controller and the default action (method) to invoke when the plugin is run.  If your plugin extends the HQ Portal user interface, you define the attachment location in Plugin.groovy. </p>
+<h2><a name="HQUAnatomyandComponents-plugin.properties"></a><b>plugin.properties</b></h2>
+<p>Descriptor that HQ uses to identify the plugin. It contains the plugin name, plugin version number, and the HQ version that supports the plugin. </p>
+<h2><a name="HQUAnatomyandComponents-ControllerName%7B%7D%7B%7DController.groovy"></a><em>Controller_Name</em><b>Controller.groovy</b></h2>
+<p>The plugin controller is a Groovy script. A controller file name is the concatenation of the name you assign the controller, the string "Controller",  and the file extension .groovy.   <br/>
+The controller accepts user requests, generates the view (in .gsp, xml, or json format), and instructs the Groovy APIs and the view to perform actions in response to user input. The controller translates interactions (GET and POST HTTP requests) with the view into actions to be performed using the Groovy APIs. Based on user interactions and the outcome of the model actions, the controller responds by selecting an appropriate view.   <br/>
+A plugin developer defines the plugin behavior in this file. The plugin controller extends BaseController.groovy, which imports the Groovy helper APIs—enabling access to each helper API via its getter method.  The base controller is invoked by the dispatcher when it detects that a controller method is being requested. <br/>
+A plugin must have at least one controller, and may have multiple controllers.     </p>
+<h2><a name="HQUAnatomyandComponents-index.gsp"></a><b>index.gsp</b> </h2>
+<p>For plugins that extend the HQ Portal, this is the default plugin view—a Groovy Server Page.  It is created by the controller, and renders the the model.  Analogous to a .jsp, a .gsp contains HTML, Javascript, and Groovy control elements; it can use variables passed by the plugin controller to generate dynamic portions of the view.  Views can use HQU utility methods to generate tables and provide AJAX support. <br/>
+The view, responsible for delivery or presentation of HQ data as an HTML response to the user, takes the form of a Groovy Server Page (GSP).  A GSP contains HTML and Groovy control elements. In an integration plugin, the view would be the plugin's XML or JSON output.<br/>
+An HQU plugin may have multiple views.   </p>
+<h2><a name="HQUAnatomyandComponents-pluginname%7B%7D%7B%7Di18n.properties"></a><em>plugin_name</em><b>_i18n.properties</b> </h2>
+<p>This file contains localization strings. While not strictly required, many parts of the framework use it frequently. It is used by Controllers and Views to display localized text and provides the localized name of the plugin to be displayed at attach points.</p>
+<h1><a name="HQUAnatomyandComponents-%7B%7DPluginDirectories"></a><a name="HQUAnatomyandComponents-PluginDirectoryStructure"></a><b>Plugin Directories</b></h1>
+<p>hq<br/>
+/ui_plugins  <br/>
+/<b><em>plugin</em></b> home directory for the plugin, with same name as the plugin  <br/>
+/app plugin controller file(s)  <br/>
+/etc localization file<br/>
+/lib non-HQ Java support libraries that the plugin uses, as applicable.  JAR files in this directory will automatically be added to the plugin's classpath.<br/>
+/public Additional  HTML, images, and CSS that the plugin depends on<br/>
+/views GSPs<br/>
+/templates optional templates (*.gsp) of markup that you wish to reuse for different actions
+       <br class="atl-forced-newline" /></p>
+<h1><a name="HQUAnatomyandComponents-KeyHQUFrameworkFiles"></a><b>Key HQU Framework Files</b></h1>
+<p>HQU Framework files are found in the hq-rendit module. Some of the key files that are relevant to plugin development are shown below.</p>
+
+<p><br class="atl-forced-newline" /></p>
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'><b>File</b> </th>
+<th class='confluenceTh'><b>Purpose</b></th>
+</tr>
+<tr>
+<td class='confluenceTd'>BaseController.groovy</td>
+<td class='confluenceTd'>The base controller is invoked by the dispatcher when it detects that a controller method is being requested. BaseController imports the Groovy helper APIs, and a plugin controller extends BaseController, enabling access to each helper API via its getter method.  </td>
+</tr>
+<tr>
+<td class='confluenceTd'>DojoUtil.groovy</td>
+<td class='confluenceTd'>Provides utility methods for creating complex content which interacts with HQ.</td>
+</tr>
+<tr>
+<td class='confluenceTd'>RenderFrame.groovy</td>
+<td class='confluenceTd'>Renders output to the browser.</td>
+</tr>
+<tr>
+<td class='confluenceTd'>HQUPlugin.groovy</td>
+<td class='confluenceTd'>The plugin deployer, deals with requests from the HQ.  It can respond to queries for the plugin name, descriptions, and supported HQ versions.   </td>
+</tr>
+</tbody></table>
+</div>
+
+<h1><a name="HQUAnatomyandComponents-PluginsandtheHQPortal"></a><b>Plugins and the HQ Portal</b> </h1>
+<p>These are the places where you can make a View plugin available in the HQ Portal.  </p>
+<ul>
+	<li>Masthead menus—You can make a plugin available as an item on either the Resources or the Analyze menu.  Plugins can emit any HTML to render the menu item (meaning they can be dynamic). Views attached to the masthead display content in the area below the orange bar under the Masthead</li>
+	<li>Administration Attach Point—There is a section within the Administration tab entirely devoted to plugins. Like masthead attachments, Administration attachments are viewed under the orange bar.</li>
+	<li>Resource Attach Point—Resource attach points are special because they exist within the context of a resource. Attaching here makes sense when a plugin needs to provide particular screens for resource types (such as a custom SQL tool which interacts with your Oracle instance, or a real-time log viewer for Apache). HQ passes this context information to the plugin for easy access.</li>
+</ul>
+
+
+<h1><a name="HQUAnatomyandComponents-HQUDeployment"></a><b>HQU Deployment</b></h1>
+<p>Copy your HQU plugin to:<br/>
+ TOMCAT_HOME/webapps/ROOT/<em>hqu.</em> </p>
+
+<p>A directory watcher periodically checks this directory for new additions and removals and loads and unloads plugins as necessary. Based on the attachment method you choose, HQ will automatically create a item in the appropriate  menu, or in the View tab of a resource. </p>
+
+<h1><a name="HQUAnatomyandComponents-InvokinganHQUPluginasaWebService"></a><b>Invoking an HQU Plugin as a Web Service</b></h1>
+<p>HQU plugins can be invoked as a web service, via a regular HTTP request:</p>
+
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>curl https://hqadmin:hqadmin@localhost:7443/hqu/plugin_name/Controller_Name/Action.hqu
+</pre>
+</div></div>
+
+<p>where:</p>
+<ul>
+	<li>7443 is the port where Server listens for https traffic.</li>
+	<li>hqadmin is the HQ root user, the original HQ administrator.</li>
+	<li>hqadmin@localhost is the "From" address on alert notification emails sent from HQ. Note that most mail servers will not deliver mail without a valid domain name in the From field.</li>
+	<li><em>plugin_name</em> is the the plugin name</li>
+	<li><em>Controller_Name</em> is the controller name</li>
+	<li><em>Action</em> is the Action, or method, in the controller to invoke</li>
+</ul>
+
+
+<h1><a name="HQUAnatomyandComponents-HQURequestProcessing"></a><b>HQU Request Processing</b></h1>
+<p>The diagram below illustrates HQU plugin components in the context of a request-response cycle, given user request of a plugin that is a View attached to the masthead. 
+<br class="atl-forced-newline" />
+<span class="image-wrap" style=""><img src="attachments/79660031/79921583.png" height="307" width="639" style="border: 0px solid black"/></span></p>
+<ol>
+	<li>When user selects the plugin from a Masthead menu, an internal URL is issued:
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>http://localhost:7080/mastheadattach.do?typeID= nnnnn
+</pre>
+</div></div></li>
+	<li>HQU looks up the view, and calls the plugin controller index action:
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>http://localhost:7080/hqu/plugin_name/Controller_Name/index.hqu
+</pre>
+</div></div></li>
+	<li>The controller object is instantiated. It renders the view, index.gsp, calling the render() method provided by RenderFrame.groovy.</li>
+	<li>The view uses the HQ Groovy APIs to obtain the HQ data to present, and provides the HTTP  response to the Portal user.</li>
+</ol>
+
+
+<p>Note:  A controller object is instantiated only for the lifetime of a request. Each new request gets a new instance of the controller. Local variables within the controller only exist for the duration of the request.</p>
+
+				    					    <br/>
+                        <div class="tabletitle">
+                            <a name="attachments">
+                                <h2>Attachments:</h2>
+                            </a>
+                        </div>
+
+                        <div class="greybox" align="left">
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79660031/79921583.png">worddav12ac083c5edf57546a284ed910e213a4.png</a> (image/png)
+                                <br/>
+                                                    </div>
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:08</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

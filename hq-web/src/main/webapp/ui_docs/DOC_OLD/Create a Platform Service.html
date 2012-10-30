@@ -1,0 +1,242 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : Create a Platform Service</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : Create a Platform Service
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Mar 16, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p>This page has general instructions for creating a service in Hyperic. </p>
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1331933516446 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1331933516446 ul {margin-left: 0px;padding-left: 20px;}
+div.rbtoc1331933516446 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1331933516446'>
+<ul>
+    <li><a href='#CreateaPlatformService-WhentoManuallyCreateaPlatformService'>When to Manually Create a Platform Service</a></li>
+    <li><a href='#CreateaPlatformService-CreateaPlatformService'>Create a Platform Service</a></li>
+    <li><a href='#CreateaPlatformService-ConfigurationInstructionsforPlatformServices'>Configuration Instructions for Platform Services</a></li>
+</ul></div>
+
+<p>For information about creating a service using the HQApi see <a href="HQApi resource command.html" title="HQApi resource command">HQApi resource command</a>. </p>
+
+<h1><a name="CreateaPlatformService-WhentoManuallyCreateaPlatformService"></a>When to Manually Create a Platform Service</h1>
+
+<p>There are two types of platform services in Hyperic:</p>
+
+<ul>
+	<li>System services local to an operating system platform, such as CPUs, network interfaces, filesystems, and so on. Most local service are auto-discovered by the <tt>system</tt> plugin.</li>
+</ul>
+
+
+<ul>
+	<li>Remote services that the Hyperic Agent monitors over the network, such as HTTP, FTP, DNS, and other services using a supported protocol. Because such services are monitored by a remote agent, they cannot be auto-discovered. For network services, you manually configure platform service on the platform running the Hyperic Agent that will monitor the service.</li>
+</ul>
+
+
+
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Need to Know What a "Platform Service" Is?</b><br />See <a href="Resources, Resource Types and Inventory Types.html" title="Resources, Resource Types and Inventory Types">Resources, Resource Types and Inventory Types</a> for more information.</td></tr></table></div> 
+
+<h1><a name="CreateaPlatformService-CreateaPlatformService"></a>Create a Platform Service</h1>
+
+<ol>
+	<li>Use <b>Browse &gt; Resources &gt; Platforms</b> to navigate to the platform to which you wish to add a service.</li>
+	<li>Select <b>New Platform Service</b> from the <b>Tools</b> menu.</li>
+	<li>On the <b>New Platform Service</b> page enter:
+	<ul>
+		<li>Name - A meaningful name for the service.</li>
+		<li>Description - (optional) A description of the service</li>
+		<li>Service Type - Select the desired service type from the pull-down list.</li>
+	</ul>
+	</li>
+	<li>Click <b>OK</b> to create the new service.
+	<ul>
+		<li>The <b>Inventory</b> tab for the new service appears and prompts: "This resource has not been configured". Please set its Configuration Properties.</li>
+	</ul>
+	</li>
+	<li>Click <b>Configuration Properties</b> in the prompt.</li>
+	<li>On the <b>Configuration Properties</b> page, enter values for the required configuration properties, which are prefixed with a red asterisk, and optional properties as appropriate. For information about the configuration properties for a service type, click the link in the <b>Configuration Notes</b> column for it in the <a href="#CreateaPlatformService-ConfigurationInstructionsforPlatformServices">Configuration Instructions for Platform Services</a> table below.</li>
+</ol>
+
+
+<h1><a name="CreateaPlatformService-ConfigurationInstructionsforPlatformServices"></a>Configuration Instructions for Platform Services</h1>
+
+<p>The table below lists all supported platform service types in Hyperic. The <b>Configuration Notes</b> column for a network service or an other platform service type that require configuration has a link to a configuration properties reference for the service type. No configuration instructions are provided for auto-discovered platform services.</p>
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Service </th>
+<th class='confluenceTh'> Description </th>
+<th class='confluenceTh'> Configuration Notes </th>
+</tr>
+<tr>
+<td class='confluenceTd'> CPU </td>
+<td class='confluenceTd'>The Hyperic Agent on a platform automatically discovers CPUs on the platform. </td>
+<td class='confluenceTd'>It is not necessary to manually configure CPU monitoring. For information about metrics available for a CPU, see <a href="CPU Service.html" title="CPU Service">CPU Service</a> in <em>vFabric Hyperic Resource Configuration and Metrics</em>. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DHCP <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Use to monitor a remote Dynamic Host Configuration Protocol server. </td>
+<td class='confluenceTd'> See <a href="DHCP Platform Service.html" title="DHCP Platform Service">DHCP Platform Service</a> in <em>vFabric Hyperic Resource Configuration and Metrics</em>.</td>
+</tr>
+<tr>
+<td class='confluenceTd'> DNS </td>
+<td class='confluenceTd'> Use to monitor a remote Domain Name System server. </td>
+<td class='confluenceTd'>See <a href="DNS Platform Service.html" title="DNS Platform Service">DNS Platform Service</a> in <em>vFabric Hyperic Resource Configuration and Metrics</em>. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> FileServer Directory  </td>
+<td class='confluenceTd'>Use to monitor a directory.</td>
+<td class='confluenceTd'>See <a href="FileServer Directory Service.html" title="FileServer Directory Service">FileServer Directory Service</a> in <em>vFabric Hyperic Resource Configuration and Metrics</em>. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> FileServer File </td>
+<td class='confluenceTd'>Use to monitor a file. </td>
+<td class='confluenceTd'>See <a href="FileServer File Service.html" title="FileServer File Service">FileServer File Service</a> in <em>vFabric Hyperic Resource Configuration and Metrics</em>. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> FileServer Mount </td>
+<td class='confluenceTd'> Use to monitor a filesystem mount point and associated disks and raid arrays. <br class="atl-forced-newline" />  <br class="atl-forced-newline" />  <b>Note:</b> The Hyperic Agent auto-discovers local mount points. You only need to explicitly configure a FileServer Mount service to monitor a remote network file system (NFS). Alternatively, you can install an Hyperic Agent on the system that hosts the NFS, in which case the NFS will be auto-discovered. </td>
+<td class='confluenceTd'>See <a href="FileServer Mount Service.html" title="FileServer Mount Service">FileServer Mount Service</a> in <em>vFabric Hyperic Resource Configuration and Metrics</em>. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> FileServer Directory Tree </td>
+<td class='confluenceTd'> Use to monitor a directory and the entire tree under that directory. </td>
+<td class='confluenceTd'>See <a href="FileServer Directory Tree Service.html" title="FileServer Directory Tree Service">FileServer Directory Tree Service</a> in <em>vFabric Hyperic Resource Configuration and Metrics</em>. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HTTP </td>
+<td class='confluenceTd'> Use to monitor a particular URL. </td>
+<td class='confluenceTd'>See <a href="HTTP Platform Service.html" title="HTTP Platform Service">HTTP Platform Service</a> in <em>vFabric Hyperic Resource Configuration and Metrics</em>. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> FTP <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Use to monitor a remote File Transfer Protocol server. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>See <a href="FTP Platform Service.html" title="FTP Platform Service">FTP Platform Service</a> in <em>vFabric Hyperic Resource Configuration and Metrics</em>. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> IMAP <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Use to monitor a remote Internet Message Access Protocol server. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>See <a href="IMAP Platform Service.html" title="IMAP Platform Service">IMAP Platform Service</a> in <em>vFabric Hyperic Resource Configuration and Metrics</em>.</td>
+</tr>
+<tr>
+<td class='confluenceTd'> InetAddress Ping <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Use to ping a remote host for availability. </td>
+<td class='confluenceTd'>See <a href="InetAddress Ping Platform Service.html" title="InetAddress Ping Platform Service">InetAddress Ping Platform Service</a> in <em>vFabric Hyperic Resource Configuration and Metrics</em>. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> LDAP <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Use to monitor a remote Lightweight Directory Access Server. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>See <a href="LDAP Platform Service.html" title="LDAP Platform Service">LDAP Platform Service</a> in <em>vFabric Hyperic Resource Configuration and Metrics</em>.</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Multiprocess </td>
+<td class='confluenceTd'> Use to monitor multiple related processes. For example, to monitor the number of httpd processes running on Apache and the system resource they consume in aggregate. </td>
+<td class='confluenceTd'>See <a href="Multiprocess Service.html" title="Multiprocess Service">Multiprocess Service</a> in <em>vFabric Hyperic Resource Configuration and Metrics</em>. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> NetworkServer Interface </td>
+<td class='confluenceTd'> Use to monitor a network interface. <br class="atl-forced-newline" />  <br class="atl-forced-newline" />  <b>Note:</b> Because the Hyperic Agent auto-discovers network interfaces, manual configuration of a NetworkServer Interface is rare. </td>
+<td class='confluenceTd'>See <a href="NetworkServer Interface Service.html" title="NetworkServer Interface Service">NetworkServer Interface Service</a> in <em>vFabric Hyperic Resource Configuration and Metrics</em>. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> NTP <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Use to monitor a remote Network Time Protocol server. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>See <a href="NTP Platform Service.html" title="NTP Platform Service">NTP Platform Service</a> in <em>vFabric Hyperic Resource Configuration and Metrics</em>.</td>
+</tr>
+<tr>
+<td class='confluenceTd'> POP3 </td>
+<td class='confluenceTd'> Use to monitor a remote Post Office Protocol 3 server.&nbsp; Configure along with an SMTP service&nbsp; to monitor incoming and outgoing email services. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> See <a href="POP3 Platform Service.html" title="POP3 Platform Service">POP3 Platform Service</a> in <em>vFabric Hyperic Resource Configuration and Metrics</em>.<br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Process <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Use to monitor a process using a Hyperic SIGAR Process Table Query Language (PTQL) query. To configure, you supply the PTQL query in the form: <br class="atl-forced-newline" />  <br class="atl-forced-newline" />  <tt>Class.Attribute.</tt><br class="atl-forced-newline" />
+<tt>operator=value</tt> <br class="atl-forced-newline" />  <br class="atl-forced-newline" />
+For example, <br class="atl-forced-newline" />  <br class="atl-forced-newline" />  <tt>Pid.PidFile.eq=</tt><br class="atl-forced-newline" />
+<tt>/var/run/sshd.pid</tt> </td>
+<td class='confluenceTd'> See <a href="Process Service.html" title="Process Service">Process Service</a> in <em>vFabric Hyperic Resource Configuration and Metrics</em>.  </td>
+</tr>
+<tr>
+<td class='confluenceTd'> RPC </td>
+<td class='confluenceTd'> Use to monitor a Remote Procedure Call service. <br class="atl-forced-newline" />  <b>Note:</b> Not available on Windows platforms.&nbsp; <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>See <a href="RPC Platform Service.html" title="RPC Platform Service">RPC Platform Service</a> in <em>vFabric Hyperic Resource Configuration and Metrics</em>. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Script </td>
+<td class='confluenceTd'> Used to configure Hyperic to periodically run a script that collects a&nbsp; system or application metric. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'><a href="Script Service.html" title="Script Service">Script Service</a></td>
+</tr>
+<tr>
+<td class='confluenceTd'> SMTP </td>
+<td class='confluenceTd'> Use to monitor a remote Simple Mail Transfer Protocol server.&nbsp; Configure along with a POP3 service to monitor incoming and outgoing email services. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> See <a href="SMTP Platform Service.html" title="SMTP Platform Service">SMTP Platform Service</a> in <em>vFabric Hyperic Resource Configuration and Metrics</em>.</td>
+</tr>
+<tr>
+<td class='confluenceTd'> SNMP <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Use to monitor a remote Simple Network Management Protocol agent. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>See <a href="SNMP Platform Service.html" title="SNMP Platform Service">SNMP Platform Service</a> in <em>vFabric Hyperic Resource Configuration and Metrics</em>. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> SSH <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Use to monitor a remote SSH service. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>See <a href="SSH Platform Service.html" title="SSH Platform Service">SSH Platform Service</a> in <em>vFabric Hyperic Resource Configuration and Metrics</em>. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> TCP Socket <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Use to monitor the availability of a remote TCP socket <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> See <a href="TCP Socket Platform Service.html" title="TCP Socket Platform Service">TCP Socket Platform Service</a> in <em>vFabric Hyperic Resource Configuration and Metrics</em>. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Windows Service <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Use to monitor an application that runs as a service under Windows. </td>
+<td class='confluenceTd'> To configure it, you supply its Service Name in Windows. To determine the Service Name:
+<ol>
+	<li>Select <b>Run</b> from the Windows <b>Start</b> menu.</li>
+	<li>Type <tt>services.msc</tt> in the run dialog and click <b>OK</b>. <br class="atl-forced-newline" /></li>
+	<li>In the list of services displayed, right-click the service you wish to monitor and choose <b>Properties</b>.</li>
+	<li>Locate the Service Name on the <b>General</b> tab. <br class="atl-forced-newline" /> See <a href="Windows Service Service.html" title="Windows Service Service">Windows Service Service</a>.</li>
+</ol>
+</td>
+</tr>
+</tbody></table>
+</div>
+
+
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:06</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

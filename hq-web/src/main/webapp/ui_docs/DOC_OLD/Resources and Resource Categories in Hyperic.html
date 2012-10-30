@@ -1,0 +1,149 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : Resources and Resource Categories in Hyperic</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : Resources and Resource Categories in Hyperic
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p>Resources in the Hyperic Inventory are hierarchically related. A resource is classified as an inventory type (platform, server, service, group, or application) and as a resource type that identifies the brand of the inventory type (a Win32 platform, a JBoss 4.0 server, and so forth).</p>
+
+<p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+
+
+<ul>
+	<li><a href="#ResourcesandResourceCategoriesinHyperic-InventoryType">Inventory Type</a></li>
+	<li><a href="#ResourcesandResourceCategoriesinHyperic-ResourceType">Resource Type</a></li>
+	<li><a href="#ResourcesandResourceCategoriesinHyperic-PlatformServerServiceHierarchy">Platform Server Service Hierarchy</a></li>
+</ul>
+
+
+
+
+
+<h1><a name="ResourcesandResourceCategoriesinHyperic-InventoryType"></a>Inventory Type</h1>
+
+<p>A resource's <em>inventory type</em> is the first level of classification that Hyperic applies to resources. Inventory types serve two purposes:</p>
+
+<ul>
+	<li>Resource hierarchy. Several inventory types identify where a resource fits into a resource hierarchy. All Hyperic resources are classified as one of the following inventory types.
+	<ul>
+		<li>platform - usually corresponds to a machine running an operating system</li>
+		<li>server - a software product running on an operating system, for instance a database or application server</li>
+		<li>service - an integral component of a platform or server, for instance, a file server mount, database table, or a connection pool.</li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul>
+	<li>Grouped resources. There are two inventory types that correspond to multiple individual resources.&nbsp; You group resources for a variety of reasons:&nbsp; to monitor a set of like or related resources in aggregate; to administer or control like resources at the group level instead of individually; and, in vFabric Hyperic, for resource access control. There are two inventory types that are named sets of other resources:
+	<ul>
+		<li>group</li>
+		<li>application</li>
+	</ul>
+	</li>
+</ul>
+
+
+<p>In summary, "inventory type" classifies a resource as a platform, server, service, group, or application. The term "inventory level" refers to inventory types that fit into a hierarchical structure - platforms, servers, and services.</p>
+
+<h1><a name="ResourcesandResourceCategoriesinHyperic-ResourceType"></a>Resource Type</h1>
+
+<p>Each individual resource (every resource that is a platform, server, or service) in Hyperic inventory has a <em>resource type</em>&nbsp; that indicates what kind of platform, server, or service it is.&nbsp; For example,</p>
+<ul>
+	<li>The resource type of a Windows system (whose inventory type is "platform") is "Win32";&nbsp; the resource type of a Linux system (whose inventory type is also platform) is "Linux".&nbsp;
+	<ul>
+		<li>For clarity, Hyperic documentation refers to resource types that correspond to platforms - like "Win32" and "Linux" - as <em>platform types</em>.</li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul>
+	<li>The resource type of&nbsp; a JBoss 4.0 instance (whose inventory type is "server") is "JBoss 4.0"; the resource type of a WebLogic 9.1 instance (whose inventory type is also server) is "WebLogic 9.1".&nbsp;
+	<ul>
+		<li>For clarity, Hyperic documentation refers to resource types that correspond to servers - such as "JBoss 4.0" and "WebLogic 9.1" - as <em>server types</em>.</li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul>
+	<li>The resource type of a Jboss entity EJB (whose inventory type is "service") is "JBoss 4.0 Entity EJB"; the resource type of a WebLogic&nbsp; EJB (whose inventory type is also service) is "WebLogic 9.2 Entity EJB".
+	<ul>
+		<li>For clarity, Hyperic documentation refers to resource types that correspond to services - such as "JBoss 4.0 Entity EJB" and "WebLogic 9.1 Entity EJB" - as <em>service types</em>.</li>
+	</ul>
+	</li>
+</ul>
+
+
+<p>In summary, "resource type" classifies a resource as a particular type of platform, server, service.</p>
+
+
+<h1><a name="ResourcesandResourceCategoriesinHyperic-PlatformServerServiceHierarchy"></a>Platform Server Service Hierarchy</h1>
+
+<p>In Hyperic, platforms, servers, and servers are hierarchically related.</p>
+<ul>
+	<li>A platform is usually a machine its operating system, with a Hyperic Agent running on it. There are also platform types for virtual and network hosts.</li>
+	<li>A server is a software product that runs on a platform.</li>
+	<li>A service is an resource that is integral to, or runs upon, a platform or server.&nbsp; Whether the resource is at the platform or server level, in Hyperic it is a  "service".  Note, however that services associated with a platform are usually referred to as a <em>platform service</em>s.</li>
+</ul>
+
+
+<p>Hyperic auto-discovers most platform, server, and service types and populates the Hyperic database with key information about each discovered item, and its relationship with other resources.</p>
+
+<h2><a name="ResourcesandResourceCategoriesinHyperic-GraphicalViewofaResourceHierarchy"></a>Graphical View of a Resource Hierarchy</h2>
+
+<p>The diagram below illustrates a specific platform-server-service hierarchy. (Only a subset of the servers and services in the hierarchy are shown.) The label for each resource indicates its type. The hierarchy consists of:</p>
+<ul>
+	<li>a platform of whose type is "MacOSX"</li>
+	<li>two platform services, whose types are "File System" and "CPU"</li>
+	<li>two servers, whose types are "JBoss 4.2" and "Tomcat 6.0"</li>
+	<li>four services (that run in servers) whose types are "JMS Topic", "JMS Destination", "Webapp", and "Connector".</li>
+</ul>
+
+
+<p><span class="image-wrap" style=""><img src="attachments/79660152/79921518.png" width="450" style="border: 0px solid black"/></span></p>
+
+<h2><a name="ResourcesandResourceCategoriesinHyperic-PlatformHierarchyInHypericUserInterface"></a>Platform Hierarchy In Hyperic User Interface</h2>
+
+<p>The screenshot below is the <b>Monitor</b> tab for the platform whose hierarchy is partially illustrated in the previous section. Note that the <b>Resources</b> panel shows the currently selected resource's immediate "relatives". For the selected platform, the <b>Resources</b> panel lists the platform services and the servers that run on the platform.&nbsp;</p>
+
+<p><span class="image-wrap" style=""><img src="attachments/79660206/79921758.png" style="border: 0px solid black"/></span></p>
+
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:06</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

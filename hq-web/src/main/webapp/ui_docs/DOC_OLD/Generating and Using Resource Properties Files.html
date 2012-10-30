@@ -1,0 +1,169 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : Generating and Using Resource Properties Files</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : Generating and Using Resource Properties Files
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325699808452 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699808452 ul {list-style: disc;margin-left: 0px;}
+div.rbtoc1325699808452 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1325699808452'>
+<ul>
+    <li><a href='#GeneratingandUsingResourcePropertiesFiles-ResourcePropertiesFiles'>Resource Properties Files</a></li>
+    <li><a href='#GeneratingandUsingResourcePropertiesFiles-NamesandLocationofPropertiesFiles'>Names and Location of Properties Files</a></li>
+    <li><a href='#GeneratingandUsingResourcePropertiesFiles-ContentofPropertiesFiles'>Content of Properties Files</a></li>
+    <li><a href='#GeneratingandUsingResourcePropertiesFiles-InheritedResourceProperties'>Inherited Resource Properties</a></li>
+</ul></div>
+
+<h1><a name="GeneratingandUsingResourcePropertiesFiles-ResourcePropertiesFiles"></a>Resource Properties Files</h1>
+
+<p>Must plugin methods require the values of one or more resource properties to run. For instance, to fetch metrics for a PostgreSQL table, the <tt>metric</tt> method requires to know the URL and database user credentials for the parent PostresSQL server, and the name of the table.</p>
+<ul>
+	<li>jdbcUser</li>
+	<li>jdbcPassword</li>
+	<li>table</li>
+	<li>jdbcUrl</li>
+</ul>
+
+
+<p>Each property that a method requires for a resource type is defined in an <tt>&lt;option&gt;</tt> element in the XML descriptor for the plugin that manages it. To ease the process of testing a plugin, you can supply required properties in a file, instead of on the command line.</p>
+
+<p>When you run the <tt>discover</tt> method with the <tt>properties</tt> method argument, the agent will create a properties file for each resource instance it discovers. The properties file for a resource contains a name-value pair for each resource property required to run plugin methods.</p>
+
+<p>Configurable properties that the user must supply must be added to the properties file or supplied on the command line. For example, to check the results of tracking log messages that do not contain a particular string, you must supply the string on the command line. Specifically, you need to set the value of <b>server.log_track.exclude</b> which is null by default.</p>
+
+<p>This command supplies some command options and resource properties using the <tt>melba_HQ_jBoss_4.x.properties</tt> file (for details, see <a href="#GeneratingandUsingResourcePropertiesFiles-ContentofPropertiesFiles">Content of Properties Files</a>), and sets the value of <b>server.log_track.exclude</b> on the command line</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">java -jar java -jar AgentVersion/bundles/AgentBundle/pdk/lib/hq-pdk-shared-VERSION.jar
+-m track plugin-properties/jboss-4.2/melba_HQ_jBoss_4.x.properties
+-Dserver.log_track.exclude=just kidding</pre>
+		</div>
+</div></div>
+
+<h1><a name="GeneratingandUsingResourcePropertiesFiles-NamesandLocationofPropertiesFiles"></a>Names and Location of Properties Files</h1>
+
+<p>The <tt>discover</tt> method's <tt>properties</tt> action writes configuration data for each discovered resource in a directory tree whose root directory &#8212; <tt>plugin-properties</tt> &#8212; is in your current working directory.</p>
+
+<p><span class="image-wrap" style=""><img src="attachments/79660206/79921777.png" style="border: 0px solid black"/></span></p>
+
+<p><b>Note</b>:</p>
+<ul>
+	<li>The <tt>plugin-properties</tt> folder contains a subdirectory for each resource type discovered. The folder name is the resource type name, with spaces replaced by dashes, for example, "Tomcat-6.0-Connector"</li>
+</ul>
+
+
+<ul>
+	<li>Each resource type folder contains a file for each instance of that type discovered. The file name is the full name of the resource instance, with spaces replaced by underscore characters,for example&nbsp; "melba_HQ_Tomcat_6.0_7080_Tomcat 6.0_Connector."</li>
+</ul>
+
+
+<h1><a name="GeneratingandUsingResourcePropertiesFiles-ContentofPropertiesFiles"></a>Content of Properties Files</h1>
+
+<p>When you run the <tt>metric</tt>, <tt>control</tt>, or <tt>track</tt> method on a resource you must supply resource configuration data - either explicitly on the command line, or using the properties file for the resource.</p>
+
+<p>Use of a properties file far more convenient than defining the configuration data on the command line. The properties file also simplifies the command by defining the values that you would otherwise set with the <tt>-p</tt> and <tt>-t</tt> options.</p>
+
+<p>The discovery results saved for a JBoss 4.2 server is shown below.</p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false"># same as '-p "jboss"'
+dumper.plugin=jboss
+# same as '-t "JBoss 4.2"'
+dumper.type=JBoss 4.2
+\#melba HQ JBoss 4.x
+\#Fri Jan 22 10:38:10 PST 2010
+java.naming.provider.url=jnp://0.0.0.0:2099
+program=/Applications/HQEE42GA/server-4.2.0-EE/hq-engine/bin/run.sh
+server.log_track.files=../../../logs/server.log
+configSet=default</pre>
+		</div>
+</div></div>
+
+<p><b>Note:</b> The properties file contains:</p>
+<ul>
+	<li>The resource's resource type name and the product portion of the name of the plugin that manages it:
+	<ul>
+		<li><tt>dumper.plugin</tt> &#8212; Specifies the product portion of the plugin name; equivalent to setting the plugin name in the command line with <tt>&#45;p</tt>.</li>
+		<li><tt>dumper.type</tt> &#8212; Specifies the resource type name; equivalent to setting the resource type in the command line with <tt>-t</tt>.</li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul>
+	<li>Resource configuration data that is required to use the <tt>metric</tt>, <tt>track</tt>, or <tt>control</tt> methods on a resource - without the properties file, you must supply values for required configuration options in the command line when you run the method. The Jboss properties file above supplies values for:
+	<ul>
+		<li><tt>java.naming.provider.url</tt></li>
+		<li><tt>program</tt></li>
+		<li><tt>server.log_track.files</tt></li>
+	</ul>
+	</li>
+</ul>
+
+
+<p>In the HQ user interface, these options appear on the <b>Configuration Properties</b> page for a JBoss server that has been added to inventory. Click the thumbnail to see a screenshot.</p>
+
+<p><span class="image-wrap" style=""><img src="attachments/79660206/79921772.png" style="border: 0px solid black"/></span></p>
+
+<h1><a name="GeneratingandUsingResourcePropertiesFiles-InheritedResourceProperties"></a>Inherited Resource Properties</h1>
+
+<p>Some resource properties may be inherited from a parent resource. For example, the properties file for a JBoss 4.2 Hibernate Session Factory service, shown below, includes all of the properties discovered for its parent - a JBoss 4.2 server.</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false"># same as '-p "jboss"'
+dumper.plugin=jboss
+# same as '-t "JBoss 4.2 Hibernate Session Factory"'
+dumper.type=JBoss 4.2 Hibernate Session Factory
+#192.168.0.12 JBoss 4.2 default hq Hibernate Session Factory
+#Fri Jan 22 12:56:05 PST 2010
+java.naming.provider.url=jnp://0.0.0.0:2099
+program=/Applications/HQEE42GA/server-4.2.0-EE/hq-engine/bin/run.sh
+application=hq
+server.log_track.files=../../../logs/server.log
+configSet=default</pre>
+		</div>
+</div></div>
+<p>The only service-level property in the properties file above is <b>Application</b>.</p>
+
+<p>Click the thumbnail to see a screenshot of the service's <b>Configuration Properties</b>.</p>
+
+<p><span class="image-wrap" style=""><img src="attachments/79660206/79921776.png" style="border: 0px solid black"/></span></p>
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

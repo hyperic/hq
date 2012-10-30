@@ -1,0 +1,231 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : Tailor Alert Notification Templates</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : Tailor Alert Notification Templates
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Feb 23, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1330014296725 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1330014296725 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1330014296725 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1330014296725'>
+<ul>
+    <li><a href='#TailorAlertNotificationTemplates-GroovyServerPagesDefineNotificationContentandFormat'>Groovy Server Pages Define Notification Content and Format</a></li>
+    <li><a href='#TailorAlertNotificationTemplates-EmailNotifications'>Email Notifications</a></li>
+<ul>
+    <li><a href='#TailorAlertNotificationTemplates-EmailNotificationSubjectLine'>Email Notification Subject Line</a></li>
+    <li><a href='#TailorAlertNotificationTemplates-EmailNotificationBody'>Email Notification Body</a></li>
+    <li><a href='#TailorAlertNotificationTemplates-VariablesAvailableforNotificationTemplates'>Variables Available for Notification Templates</a></li>
+</ul>
+</ul></div>
+
+
+<h1><a name="TailorAlertNotificationTemplates-GroovyServerPagesDefineNotificationContentandFormat"></a>Groovy Server Pages Define Notification Content and Format</h1>
+
+<p>The content and format of alert notifications are governed by Groovy Server Pages in <tt>\server-n.n.n-EE\hq-engine\hq-server\webapps\ROOT\WEB-INF\alertTemplates</tt>.</p>
+<ul>
+	<li><tt>subject.gsp</tt> - defines the subject line in email notifications</li>
+	<li><tt>html_email.gsp</tt> - defines the body of an HTML email alert notification</li>
+	<li><tt>text_email.gsp</tt> - defines the body of a text email alert notification</li>
+	<li><tt>sms_email.gsp</tt> - defines the body of an SMS alert notification</li>
+	<li><tt>opennms_notify.gsp</tt> - defines an OpenNMS SNMP trap</li>
+	<li><tt>snmp_trap.gsp</tt> - defines an SNMP trap</li>
+</ul>
+
+
+<p>The following sections describe the content of each type of notification.</p>
+
+<h1><a name="TailorAlertNotificationTemplates-EmailNotifications"></a>Email Notifications</h1>
+
+<p>Recipients can be specific HQ users, all HQ users with a given role, or external recipients. Email to an HQ user is sent in the mail format specified in the user's HQ user profile.</p>
+
+<h2><a name="TailorAlertNotificationTemplates-EmailNotificationSubjectLine"></a>Email Notification Subject Line</h2>
+
+<p>The subject line of an email notification contains the string "HQ" followed by the alert priority, the alert definition name, the name of the resource for which the alert conditions were met, and the alert status.</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">[HQ] ${priority} - ${alertDef.name} ${resource.name} ${status}</pre>
+		</div>
+</div></div>
+<p>For example, this subject line:</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">[HQ]!! - High Disk Usage saint Win32 File System R:(remote/NTFS)</pre>
+		</div>
+</div></div>
+<p>notifies the recipients of a medium priority alert named "High Disk Usage" that was triggered for the resource whose name is "saint Win32 File System R:\ (remote/NTFS)".</p>
+
+<h2><a name="TailorAlertNotificationTemplates-EmailNotificationBody"></a>Email Notification Body</h2>
+
+<p>The body of the alert notification provides these details:</p>
+<ul>
+	<li>Resource name</li>
+	<li>Alert name</li>
+	<li>Alert date/time</li>
+	<li>Triggering condition, for instance, the threshold value for the alert and the actual value that triggered the alert</li>
+	<li>Alert severity</li>
+	<li>For an Alert on a individual resource, the last value of the each of the resource's indicator metrics before the alert was triggered</li>
+	<li>For group alerts, an "Additional Information" section that lists the group's specific member resources that triggered the alert and a link to a metric chart showing the triggering metric values</li>
+	<li>A link to the alert detail in the Hyperic user interface.</li>
+</ul>
+
+
+<h2><a name="TailorAlertNotificationTemplates-VariablesAvailableforNotificationTemplates"></a>Variables Available for Notification Templates</h2>
+
+<p>The table below lists the alert-related class fields you can reference as variables in the .gsp templates that govern the content of alert notifications.</p>
+
+<p>You can insert a variable of this form:</p>
+
+<p><tt>$ClassVar.FieldVar</tt></p>
+
+<p>where <tt>ClassVar</tt> is the class with the field, and <tt>FieldVar</tt> is a field for which the class contains a <tt>get()</tt> method.</p>
+
+<p>for example, this variable</p>
+
+<p><tt>${alertDef.description</tt>}</p>
+
+<p>renders the alert definition description from an AlertDefinitionInterface class.</p>
+
+<p>Append the variable for the desired field to the variable of class that provides it, with a dot (.) separator to specify the variable for a field.</p>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> For data about.... <br class="atl-forced-newline" /> </th>
+<th class='confluenceTh'> from this class.. <br class="atl-forced-newline" /> </th>
+<th class='confluenceTh'> use this class variable <br class="atl-forced-newline" /> </th>
+<th class='confluenceTh'> and a field variable.... </th>
+<th class='confluenceTh'> resulting in... </th>
+</tr>
+<tr>
+<td class='confluenceTd'> The alert definition <br class="atl-forced-newline" />
+for the fired alert <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> AlertDefinitionInterface </td>
+<td class='confluenceTd'> alertDef <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> description <br class="atl-forced-newline" />
+id <br class="atl-forced-newline" />
+name <br class="atl-forced-newline" />
+priority </td>
+<td class='confluenceTd'> alertDef.description <br class="atl-forced-newline" />
+alertDef.id <br class="atl-forced-newline" />
+alertDef.name <br class="atl-forced-newline" />
+alertDef.priority </td>
+</tr>
+<tr>
+<td class='confluenceTd'> The fired alert <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> AlertInterface </td>
+<td class='confluenceTd'> alert </td>
+<td class='confluenceTd'> id <br class="atl-forced-newline" />
+timestamp </td>
+<td class='confluenceTd'>alert.id <br class="atl-forced-newline" />
+alert.timestamp </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Alert actions <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> ActionExecutionInfo </td>
+<td class='confluenceTd'> action </td>
+<td class='confluenceTd'> longReason <br class="atl-forced-newline" />
+shortReason </td>
+<td class='confluenceTd'>action.longReason <br class="atl-forced-newline" />
+action.shortReason </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Resource that <br class="atl-forced-newline" />
+fired the alert <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Resource </td>
+<td class='confluenceTd'> resource </td>
+<td class='confluenceTd'> instanceid <br class="atl-forced-newline" />
+mtime <br class="atl-forced-newline" />
+owner <br class="atl-forced-newline" />
+prototype <br class="atl-forced-newline" />
+resourceType </td>
+<td class='confluenceTd'>resource.instanceid <br class="atl-forced-newline" />
+resource.mtime <br class="atl-forced-newline" />
+resource.owner <br class="atl-forced-newline" />
+resource.prototype <br class="atl-forced-newline" />
+resource.resourceType </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Notification <br class="atl-forced-newline" />
+recipients <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> AuthzSubject </td>
+<td class='confluenceTd'> user <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> active <br class="atl-forced-newline" />
+department <br class="atl-forced-newline" />
+emailAddress <br class="atl-forced-newline" />
+firstName <br class="atl-forced-newline" />
+fullName <br class="atl-forced-newline" />
+htmlEmail <br class="atl-forced-newline" />
+lastName <br class="atl-forced-newline" />
+phoneNumber <br class="atl-forced-newline" />
+smsAddress <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>user.active <br class="atl-forced-newline" />
+user.department <br class="atl-forced-newline" />
+user.emailAddress <br class="atl-forced-newline" />
+user.firstName <br class="atl-forced-newline" />
+user.fullName <br class="atl-forced-newline" />
+user.htmlEmail <br class="atl-forced-newline" />
+user.lastName <br class="atl-forced-newline" />
+user.phoneNumber <br class="atl-forced-newline" />
+user.smsAddress <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> status of an alert <br class="atl-forced-newline" /> 
+Note: May be used only in <tt>subject.gsp</tt>. </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> no class variable required </td>
+<td class='confluenceTd'> status </td>
+<td class='confluenceTd'>status </td>
+</tr>
+<tr>
+<td class='confluenceTd'> whether an escalation action is an SMS notfication <br class="atl-forced-newline" /> 
+Note: May be used only in <tt>subject.gsp</tt>.</td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> no class variable required<br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> IsSms </td>
+<td class='confluenceTd'>IsSms </td>
+</tr>
+</tbody></table>
+</div>
+
+
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:06</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

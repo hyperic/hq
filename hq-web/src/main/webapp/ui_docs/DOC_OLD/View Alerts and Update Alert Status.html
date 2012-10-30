@@ -1,0 +1,129 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : View Alerts and Update Alert Status</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : View Alerts and Update Alert Status
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+
+
+<p>This page describes options for displaying the status of fired alerts, marking an alert "fixed", and acknowledging an alert that has an escalation.</p>
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325700416893 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325700416893 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325700416893 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1325700416893'>
+<ul>
+    <li><a href='#ViewAlertsandUpdateAlertStatus-ListRecentAlerts'>List Recent Alerts</a></li>
+    <li><a href='#ViewAlertsandUpdateAlertStatus-ListAlertsforaResource'>List Alerts for a Resource</a></li>
+    <li><a href='#ViewAlertsandUpdateAlertStatus-ViewAlertsAcrossAllResources'>View Alerts Across All Resources</a></li>
+    <li><a href='#ViewAlertsandUpdateAlertStatus-MonitorUnfixedAlerts'>Monitor Unfixed Alerts</a></li>
+    <li><a href='#ViewAlertsandUpdateAlertStatus-ViewAlertDetail'>View Alert Detail</a></li>
+    <li><a href='#ViewAlertsandUpdateAlertStatus-AcknowledgeorFixanAlert'>Acknowledge or Fix an Alert</a></li>
+</ul></div>
+
+<h1><a name="ViewAlertsandUpdateAlertStatus-ListRecentAlerts"></a>List Recent Alerts</h1>
+
+<p>The Dashboard's <b>Recent Alerts</b> portlet displays alerts that have recently been fired. You can limit the alerts shown by affected resource, priority, and quantity. For information about the options and data presented see <a href="ui-Dashboard.Alerts.html" title="ui-Dashboard.Alerts">ui&#45;Dashboard.Alerts</a>.</p>
+
+<h1><a name="ViewAlertsandUpdateAlertStatus-ListAlertsforaResource"></a>List Alerts for a Resource</h1>
+
+<p>The <b>Alerts List</b> page for a resource lists presents key information and status about alerts that have fired for the resource. By default, alerts that have fired on the current day are listed. You can select a different day to view.</p>
+<ol>
+	<li>Browse to the resource.</li>
+	<li>Select the <b>Alert</b> tab.</li>
+</ol>
+
+
+<p>For information about the options and data presented see <a href="ui-Alert.List.html" title="ui-Alert.List">ui&#45;Alert.List</a>.</p>
+
+<h1><a name="ViewAlertsandUpdateAlertStatus-ViewAlertsAcrossAllResources"></a>View Alerts Across All Resources </h1>
+
+<p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+
+
+<p>vFabric Hyperic's <b>Alert Center</b>, available on the <b>Analyze</b> tab in the Masthead, provides system-wide and filtered views of fixed and unfixed alerts. You can include all alerts or those fired during a specified period, and filter by:</p>
+
+<ul>
+	<li>
+	<ul>
+		<li>whether the alert applies to an individual resource or a resource group</li>
+		<li>minimum priority</li>
+		<li>whether the alert is "not fixed" or "in escalation"</li>
+	</ul>
+	</li>
+</ul>
+
+
+<p>For information about the options and data presented see <a href="ui-Alert.Center.html" title="ui-Alert.Center">ui&#45;Alert.Center</a>.</p>
+
+<h1><a name="ViewAlertsandUpdateAlertStatus-MonitorUnfixedAlerts"></a>Monitor Unfixed Alerts</h1>
+<p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+
+
+
+<p>vFabric Hyperic's <b>Operations Center</b> page, available on the <b>Analyze</b> tab in the Masthead, provides system-wide and filtered views of unfixed alerts. You can filter by platform or group, and whether or not the alerts have escalations.</p>
+
+<p>For information about the options and data presented see <a href="ui-Operations.Center.html" title="ui-Operations.Center">ui&#45;Operations.Center</a>.</p>
+
+<h1><a name="ViewAlertsandUpdateAlertStatus-ViewAlertDetail"></a>View Alert Detail</h1>
+
+<p>There are several pages from which you can access the <b>Alert Detail</b> page for a fired alert:</p>
+<ul>
+	<li>Click the alert name on the <b>Alert List</b> page.</li>
+	<li>Click the alert definition name on the "Alert Center" page.<font color="red">*</font></li>
+	<li>Click the date/time for an alert in the <b>Recent Alerts</b> portlet on the Dashboard.</li>
+</ul>
+
+
+<p>For information about the options and data presented see <a href="ui-Alert.Detail.html" title="ui-Alert.Detail">ui&#45;Alert.Detail</a>.</p>
+
+<h1><a name="ViewAlertsandUpdateAlertStatus-AcknowledgeorFixanAlert"></a>Acknowledge or Fix an Alert</h1>
+
+<p>There are several pages from which you can mark an alert "Fixed", or acknowledge an alert that has an escalation:</p>
+
+<ul>
+	<li><b>Recent Alerts</b> portlet on the Dashboard&nbsp;</li>
+	<li><b>Alert List</b> page</li>
+	<li><b>Alert Detail</b> page</li>
+	<li><b>Alert Center</b> page<font color="red">*</font></li>
+</ul>
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

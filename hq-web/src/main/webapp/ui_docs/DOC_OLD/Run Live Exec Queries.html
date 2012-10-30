@@ -1,0 +1,153 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : Run Live Exec Queries</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : Run Live Exec Queries
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    
+
+<p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+
+<p>This page describes the <b>Live Exec</b> pages in the VMware vFabric™ Hyperic® user interface, available on the <b>Views</b> menu for platform types.  </p>
+
+
+<ul>
+	<li><a href="#RunLiveExecQueries-LiveExecCommands">Live Exec Commands</a></li>
+	<li><a href="#RunLiveExecQueries-RunLiveExeconaPlatformorGroupofPlatforms">Run Live Exec on a Platform or Group of Platforms</a></li>
+</ul>
+
+
+
+
+
+
+<h1><a name="RunLiveExecQueries-LiveExecCommands"></a>Live Exec Commands</h1>
+
+<p>Hyperic's <b>Live Exec</b> view allows you to run system commands on a managed platform, or a group of platforms.<br/>
+ <b>Live Exec</b> uses Hyperic's SIGAR &#8212; an API for gathering system information in real-time. The table below describes the queries you can run from <b>Live Exec</b>.</p>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Command </th>
+<th class='confluenceTh'> Data Returned </th>
+</tr>
+<tr>
+<td class='confluenceTd'> cpuinfo </td>
+<td class='confluenceTd'> All CPUs on a platform. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> cpuperc </td>
+<td class='confluenceTd'> Usage percentages on each CPU and related data. Equivalent to <tt>uptime</tt> command. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> df </td>
+<td class='confluenceTd'> All filesystems on a platform. This does not list disk-usage percentages. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> ifconfig </td>
+<td class='confluenceTd'> Network statistics on each of the platform's network interfaces </td>
+</tr>
+<tr>
+<td class='confluenceTd'> netstat </td>
+<td class='confluenceTd'> Active socket connections on the platform </td>
+</tr>
+<tr>
+<td class='confluenceTd'> top </td>
+<td class='confluenceTd'> All processes (that the Hyperic Agent can see) running on the platform.
+<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>If a process is not listed, it is most likely because the Agent does not have permission to see it.</td></tr></table></div> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> who </td>
+<td class='confluenceTd'> Logged-in users </td>
+</tr>
+</tbody></table>
+</div>
+
+
+
+<h1><a name="RunLiveExecQueries-RunLiveExeconaPlatformorGroupofPlatforms"></a>Run Live Exec on a Platform or Group of Platforms</h1>
+
+<p><a name="RunLiveExecQueries-instructions"></a></p>
+
+<p>To run <b>Live Exec</b>:</p>
+<ol>
+	<li>Navigate to a platform, or a group of platforms in the Resource Hub.</li>
+	<li>Click the resource's <b>Views</b> tab.</li>
+	<li>On the  <b>Views</b> tab, click <b>Live Exec</b>.
+	<ul>
+		<li>The <b>Live Exec</b> page appears. Available queries are listed in the left page.
+		<ul>
+			<li>If the selected resource is a group, the individual platforms in the group appear as well. You can select individual platforms within the group.</li>
+		</ul>
+		</li>
+	</ul>
+	</li>
+	<li>Select a command from the <b>Please select a query to run</b> pulldown.</li>
+	<li>Command results appear in the right side of the page.
+	<ul>
+		<li>If the resource is an individual platform, the results pane includes its name, with the name of the platform  and the selected command listed about the data table.</li>
+		<li>In the case of a group:
+		<ul>
+			<li>If a member of the group has not previously been selected, click <span class="image-wrap" style=""><img src="attachments/79660089/79921356.gif" style="border: 0px solid black"/></span> next to a specific platform now. That platform will be displayed first by default for subsequent commands.</li>
+			<li>If a member of a group is not available, <span class="image-wrap" style=""><img src="attachments/79660089/79921353.gif" style="border: 0px solid black"/></span> is displayed next to the resource, and, when it is clicked, the reason why it is unavailable is displayed at the right.</li>
+			<li>To view the real-time data for another platform in the group, click <span class="image-wrap" style=""><img src="attachments/79660089/79921356.gif" style="border: 0px solid black"/></span> next to that platform.  The platform for which data is currently being displayed is highlighted at the left.</li>
+		</ul>
+		</li>
+	</ul>
+	</li>
+</ol>
+
+
+<p> If the Hyperic  Agent cannot reach the platform, an error message is displayed.</p>
+
+
+
+
+				    					    <br/>
+                        <div class="tabletitle">
+                            <a name="attachments">
+                                <h2>Attachments:</h2>
+                            </a>
+                        </div>
+
+                        <div class="greybox" align="left">
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79660359/79921625.gif">tab_Views_on.gif</a> (image/gif)
+                                <br/>
+                                                    </div>
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : HQApi resourceprototype command</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : HQApi resourceprototype command
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325699194087 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699194087 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699194087 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1325699194087'>
+<ul>
+    <li><a href='#HQApiresourceprototypecommand-Functionality'>Functionality</a></li>
+    <li><a href='#HQApiresourceprototypecommand-resourceprototypeCommandOptions'>resourceprototype Command Options</a></li>
+<ul>
+    <li><a href='#HQApiresourceprototypecommand-resourceprototypelist'>resourceprototype list</a></li>
+<ul>
+    <li><a href='#HQApiresourceprototypecommand-AttributesinanResourcePrototypeElement'>Attributes in an ResourcePrototype Element</a></li>
+</ul>
+</ul>
+    <li><a href='#HQApiresourceprototypecommand-resourceprototypeCommandExamples'>resourceprototype Command Examples</a></li>
+<ul>
+    <li><a href='#HQApiresourceprototypecommand-resourceprototypelist%5Cexisting'>resourceprototype list --existing</a></li>
+</ul>
+</ul></div>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Related Topics</b><br />This page provides information for running an HQ API from the command line. Related topics include: 
+<ul>
+	<li><a href="vFabric Hyperic Web Services API.html" title="vFabric Hyperic Web Services API">vFabric Hyperic Web Services API</a> - brief introduction to the API.</li>
+	<li><a href="HQApi Command-Line Tools.html" title="HQApi Command-Line Tools">HQApi Command&#45;Line Tools</a> - how to get started with the command line tools.</li>
+	<li><a href="HQApi Java API.html" title="HQApi Java API">HQApi Java API</a> - about accessing the APIs programmatically.</li>
+</ul>
+</td></tr></table></div> 
+
+
+
+<h1><a name="HQApiresourceprototypecommand-Functionality"></a>Functionality</h1>
+
+<p>The <b>resourceprototype</b> command returns the internal Hyperic ID and the name for resource types. You can list all resource types supported by Hyperic, or only those resource types that exist in inventory.&nbsp;</p>
+
+<h1><a name="HQApiresourceprototypecommand-resourceprototypeCommandOptions"></a>resourceprototype Command Options</h1>
+
+<p>This section defines command options.</p>
+
+<h2><a name="HQApiresourceprototypecommand-resourceprototypelist"></a>resourceprototype list</h2>
+
+<p>The <b>resourceprototype list</b> command returns a list of resource types &#8212; all supported resource types, or if the <tt>&#45;-existing</tt> qualifier is specified, only those that exist in inventory</p>
+
+<p>Command qualifiers:</p>
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Qualifier </th>
+<th class='confluenceTh'> Description</th>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>&#45;-existing</tt> </td>
+<td class='confluenceTd'> Results will be limited to resource types that exist in inventory. </td>
+<td class='confluenceTd'> no </td>
+</tr>
+</tbody></table>
+</div>
+
+
+
+<h3><a name="HQApiresourceprototypecommand-AttributesinanResourcePrototypeElement"></a>Attributes in an ResourcePrototype Element</h3>
+
+<p>This table defines the attributes in a <tt>&lt;ResourcePrototype&gt;</tt> element.</p>
+
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Attribute </th>
+<th class='confluenceTh'> Description and Values </th>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>id</tt> </td>
+<td class='confluenceTd'> Internal Hyperic ID for the resource type. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>name</tt> </td>
+<td class='confluenceTd'> Name of the resource type. </td>
+</tr>
+</tbody></table>
+</div>
+
+
+<h1><a name="HQApiresourceprototypecommand-resourceprototypeCommandExamples"></a>resourceprototype Command Examples</h1>
+
+
+<h2><a name="HQApiresourceprototypecommand-resourceprototypelist%5Cexisting"></a>resourceprototype list &#45;-existing</h2>
+
+<p>This command returns a list of resource types in inventory.</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">sh bin/hqapi.sh resourceprototype list --existing</pre>
+		</div>
+</div></div>
+
+<p>The command results are:</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">&lt;ResourcePrototypesResponse&gt;
+    &lt;Status&gt;Success&lt;/Status&gt;
+    &lt;ResourcePrototype id="10077" name="ActiveMQ Embedded 5.3"/&gt;
+    &lt;ResourcePrototype id="10083" name="ActiveMQ Embedded 5.3 Broker"/&gt;
+    &lt;ResourcePrototype id="10105" name="ActiveMQ Embedded 5.3 Connector"/&gt;
+    &lt;ResourcePrototype id="10093" name="ActiveMQ Embedded 5.3 Topic"/&gt;
+    &lt;ResourcePrototype id="10449" name="Apache Tomcat 6.0"/&gt;
+    &lt;ResourcePrototype id="10454" name="Apache Tomcat 6.0 Cache"/&gt;
+    &lt;ResourcePrototype id="10467" name="Apache Tomcat 6.0 Global Request Processor"/&gt;
+    &lt;ResourcePrototype id="10453" name="Apache Tomcat 6.0 HQ Internals"/&gt;
+    &lt;ResourcePrototype id="10462" name="Apache Tomcat 6.0 Hibernate Session Factory"/&gt;
+    &lt;ResourcePrototype id="10460" name="Apache Tomcat 6.0 Hyperic Data Source"/&gt;
+    &lt;ResourcePrototype id="10470" name="Apache Tomcat 6.0 JSP Monitor"/&gt;
+    &lt;ResourcePrototype id="10450" name="Apache Tomcat 6.0 Servlet Monitor"/&gt;
+    &lt;ResourcePrototype id="10464" name="Apache Tomcat 6.0 Thread Pools"/&gt;
+    &lt;ResourcePrototype id="10465" name="Apache Tomcat 6.0 Web Module Stats"/&gt;
+    &lt;ResourcePrototype id="10020" name="CPU"/&gt;
+    &lt;ResourcePrototype id="10011" name="FileServer"/&gt;
+    &lt;ResourcePrototype id="10019" name="FileServer Mount"/&gt;
+    &lt;ResourcePrototype id="10209" name="HQ Agent"/&gt;
+    &lt;ResourcePrototype id="10002" name="MacOSX"/&gt;
+    &lt;ResourcePrototype id="10329" name="Net Services"/&gt;
+    &lt;ResourcePrototype id="10013" name="NetworkServer"/&gt;
+    &lt;ResourcePrototype id="10014" name="NetworkServer Interface"/&gt;
+    &lt;ResourcePrototype id="10389" name="PostgreSQL 8.2"/&gt;
+    &lt;ResourcePrototype id="10400" name="PostgreSQL 8.2 Table"/&gt;
+    &lt;ResourcePrototype id="10012" name="ProcessServer"/&gt;
+&lt;/ResourcePrototypesResponse&gt;</pre>
+		</div>
+</div></div>
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : sendmail Plugin Descriptor</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : sendmail Plugin Descriptor
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">&lt;?xml version="1.0"?&gt;
+
+&lt;!DOCTYPE plugin [
+  &lt;!ENTITY multi-process-metrics SYSTEM "/pdk/plugins/multi-process-metrics.xml"&gt;
+]&gt;
+
+&lt;!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004-2008], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ --&gt;
+
+&lt;plugin&gt;
+  &lt;!-- extracted to: pdk/work/scripts/sendmail/hq-sendmail-stat --&gt;
+  &lt;script name="hq-sendmail-stat"&gt;
+  &lt;![CDATA[
+#!/bin/sh
+
+# linux / aix
+[ -d "/var/spool/mqueue" ] &amp;&amp;
+    msgdir="/var/spool/mqueue" &amp;&amp;
+    premsgdir="/var/spool/clientmqueue"
+
+# solaris
+[ -d "/usr/spool/mqueue" ] &amp;&amp;
+    msgdir="/usr/spool/mqueue" &amp;&amp;
+    premsgdir="/usr/spool/clientmqueue"
+
+# If the mqueue dir doesn't exist, exit 1
+[ -z "$msgdir" -o ! -r "$msgdir" ] &amp;&amp;
+    exit 1
+
+# May not have permission to cd to the mqueue, make sure
+# stdout/err don't get echo'd
+cd $msgdir &gt; /dev/null 2&gt;&amp;1
+[ "$?" != "0" ] &amp;&amp;
+    exit 1
+
+# count msgs in sendmail mqueue dir.  DO NOT use find since it
+# may fail when there are lots of files 
+messfiles=`ls 2&gt;/dev/null | wc -w`
+
+premessfiles=0
+
+if [ ! -z "$premsgdir" ] &amp;&amp; [ -d "$premsgdir" ] &amp;&amp; [ -r "$premsgdir" ]
+then
+    [ `cd $premsgdir &gt; /dev/null 2&gt;&amp;1` ] &amp;&amp; [ "$?" = "0" ] &amp;&amp;
+        premessfiles=`ls 2&gt;/dev/null | wc -w`
+fi
+
+echo MessagesInQueue=$messfiles
+echo MessagesAwaitingPreprocessing=$premessfiles
+
+exit 0
+  ]]&gt;
+  &lt;/script&gt;
+
+  &lt;server name="Sendmail"
+          version="8.x"&gt;
+
+    &lt;property name="INVENTORY_ID" value="sendmail"/&gt;
+    &lt;!-- hardwire this cosmetic to universal location --&gt;
+    &lt;property name="INSTALLPATH" value="/usr/sbin/sendmail"/&gt;
+
+    &lt;config&gt;
+      &lt;option name="process.query"
+              description="Process Query"
+              default="State.Name.eq=sendmail,State.Name.Pne=$1,CredName.User.eq=root"/&gt;
+      &lt;option name="exec"
+              description="Type &amp;quot;sudo&amp;quot; To Avoid Having Agent As Root"
+              default=""/&gt;
+    &lt;/config&gt;
+
+    &lt;!--notifies the plugin to auto-discover one instance of each service--&gt;
+    &lt;property name="HAS_BUILTIN_SERVICES"
+              value="true"/&gt;
+
+    &lt;property name="PROC_QUERY"
+              value="State.Name.eq=sendmail"/&gt;
+
+    &lt;plugin type="autoinventory"
+            class="org.hyperic.hq.product.DaemonDetector"/&gt;
+
+    &lt;plugin type="measurement"
+            class="org.hyperic.hq.product.MeasurementPlugin"/&gt;
+
+    &lt;metric name="Availability"
+            alias="Availability"
+            template="sigar:Type=ProcState,Arg=%process.query%:State"
+            category="AVAILABILITY"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/&gt;
+
+    &lt;service name="Message Submission Process"&gt;
+      &lt;config&gt;
+        &lt;option name="user"
+                default="smmsp"
+                description="Sendmail Message Submission Process User"/&gt;
+
+        &lt;option name="process.query"
+                default="State.Name.eq=sendmail,CredName.User.eq=%user%"
+                description="PTQL for Sendmail Message Submission Process"/&gt;
+      &lt;/config&gt;
+
+      &lt;metric name="Availability"
+              template="sigar:Type=MultiProcCpu,Arg=%process.query%:Processes"
+              indicator="true"/&gt;
+      &amp;multi-process-metrics;
+    &lt;/service&gt;
+
+    &lt;service name="Root Daemon Process"&gt;
+      &lt;plugin type="autoinventory"/&gt;
+      &lt;config&gt;
+        &lt;option name="process.query"
+                default="State.Name.eq=sendmail,State.Name.Pne=$1,CredName.User.eq=root"
+                description="PTQL for Sendmail Root Daemon Process"/&gt;
+      &lt;/config&gt;
+      &lt;metric name="Availability"
+              template="sigar:Type=MultiProcCpu,Arg=%process.query%:Processes"
+              indicator="true"/&gt;
+      &amp;multi-process-metrics;
+    &lt;/service&gt;
+
+    &lt;!-- sendmail-stat metrics --&gt;
+    &lt;filter name="template"
+            value="exec:file=pdk/work/scripts/sendmail/hq-sendmail-stat,exec=%exec%:${alias}"/&gt;
+
+    &lt;metric name="Messages In Queue"
+            indicator="true"/&gt;
+
+    &lt;metric name="Messages Awaiting Preprocessing"
+            indicator="true"/&gt;
+
+    &lt;!-- protocol services+metrics --&gt;
+    &lt;service name="SMTP"&gt;
+      &lt;config&gt;
+        &lt;option name="port"
+                description="SMTP Post"
+                default="25"/&gt;
+        &lt;option name="hostname"
+                description="SMTP Hostname"
+                default="localhost"/&gt;
+      &lt;/config&gt;
+      &lt;filter name="template"
+              value="SMTP:hostname=%hostname%,port=%port%:${alias}"/&gt;
+      &lt;metric name="Availability"
+              indicator="true"/&gt;
+      &lt;metric name="Inbound Connections"
+              indicator="true"/&gt;
+      &lt;metric name="Outbound Connections"
+              indicator="true"/&gt;
+    &lt;/service&gt;
+  &lt;/server&gt;
+  &lt;!-- ==================== Plugin Help =========================== --&gt;
+  &lt;help name="Sendmail"&gt;
+  &lt;![CDATA[
+  &lt;p&gt;
+  &lt;h3&gt;Configure HQ for monitoring Sendmail&lt;/h3&gt;
+  &lt;/p&gt;
+  &lt;p&gt;
+  This plugin needs sudo access as root in order to access the appropriate
+  &lt;br&gt;
+  Sendmail dirs.
+  &lt;br&gt;
+  To configure sudo (in /etc/sudoers):
+  &lt;br&gt;
+  Cmnd_Alias HQ_SENDMAIL_STAT = &amp;lt;hqdir&amp;gt;/agent/pdk/work/scripts/sendmail/hq-sendmail-stat
+  &lt;br&gt;
+  &amp;lt;agentuser&amp;gt; ALL = NOPASSWD: HQ_SENDMAIL_STAT
+  &lt;/p&gt;
+  ]]&gt;
+  &lt;/help&gt;
+  &lt;help name="Sendmail 8.x" include="Sendmail"/&gt;
+&lt;/plugin&gt;</pre>
+		</div>
+</div></div>
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

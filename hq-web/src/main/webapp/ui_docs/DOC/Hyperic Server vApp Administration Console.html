@@ -1,0 +1,165 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : Hyperic Server vApp Administration Console</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : Hyperic Server vApp Administration Console
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Oct 23, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <style type='text/css'>/*<![CDATA[*/
+div.rbtoc1351027112178 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1351027112178 ul {list-style: 20px;margin-left: 0px;}
+div.rbtoc1351027112178 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1351027112178'>
+<ul>
+    <li><a href='#HypericServervAppAdministrationConsole-AboutthevAppManagementConsole'>About the vApp Management Console</a></li>
+    <li><a href='#HypericServervAppAdministrationConsole-ConnecttoHypericServervAppManagementConsole'>Connect to Hyperic Server vApp Management Console</a></li>
+    <li><a href='#HypericServervAppAdministrationConsole-ViewHypericServervAppSystemInformation'>View Hyperic Server vApp System Information</a></li>
+    <li><a href='#HypericServervAppAdministrationConsole-SetHypericServervAppTimezone'>Set Hyperic Server vApp Timezone</a></li>
+    <li><a href='#HypericServervAppAdministrationConsole-ViewHypericServervAppNetworkStatus'>View Hyperic Server vApp Network Status</a></li>
+    <li><a href='#HypericServervAppAdministrationConsole-ManageHypericvAppNetworkAddressSettings'>Manage Hyperic vApp Network Address Settings</a></li>
+    <li><a href='#HypericServervAppAdministrationConsole-ConfigureHypericvAppProxySettings'>Configure Hyperic vApp Proxy Settings</a></li>
+    <li><a href='#HypericServervAppAdministrationConsole-UpgradeHypericServervApp'>Upgrade Hyperic Server vApp</a></li>
+</ul></div>
+
+<p>This page instructions for using the web-based management console for administration of the Hyperic Server vApp.</p>
+
+<h1><a name="HypericServervAppAdministrationConsole-AboutthevAppManagementConsole"></a>About the vApp Management Console</h1>
+
+<p>The Hyperic Server vApp provides a web interface for performing common server administration tasks. The vApp console is available only when the vApp is powered on. The functions provided by the vApp console can also be performed from a command shell.</p>
+
+<h1><a name="HypericServervAppAdministrationConsole-ConnecttoHypericServervAppManagementConsole"></a>Connect to Hyperic Server vApp Management Console</h1>
+
+<p>Connect to the Hyperic Server vApp management console at this URL:</p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">https://host:5480</pre>
+		</div>
+</div></div>
+<p>where <tt>host</tt> is the IP address or DNS name of the Hyperic Server vApp host.</p>
+
+<p>Log on to the management console as <tt>root</tt>, and supply the password that was defined during deployment for the Hyperic Server admin account, <tt>hqadmin</tt> by default.</p>
+
+<h1><a name="HypericServervAppAdministrationConsole-ViewHypericServervAppSystemInformation"></a>View Hyperic Server vApp System Information</h1>
+
+<p>The <b>System &gt; Information</b> page presents the following information about the vApp:</p>
+<ul>
+	<li>Vendor</li>
+	<li>Appliance Name</li>
+	<li>Appliance Version</li>
+	<li>Hostname</li>
+	<li>OS Name</li>
+</ul>
+
+
+<p>Two command buttons appear in the <b>Actions</b> section:</p>
+
+<ul>
+	<li><b>Reboot</b> &#8212; This command restarts the vApp.</li>
+	<li><b>Shutdown</b> &#8212; This command powers down the vApp.</li>
+</ul>
+
+
+<p><span class="image-wrap" style=""><img src="attachments/79660206/80281747.png" style="border: 0px solid black"/></span></p>
+
+<h1><a name="HypericServervAppAdministrationConsole-SetHypericServervAppTimezone"></a>Set Hyperic Server vApp Timezone</h1>
+
+<p>The <b>System &gt; Timezone</b> page allows you to set the timezone.</p>
+
+<p><span class="image-wrap" style=""><img src="attachments/79660206/80281742.png" style="border: 0px solid black"/></span></p>
+
+<h1><a name="HypericServervAppAdministrationConsole-ViewHypericServervAppNetworkStatus"></a>View Hyperic Server vApp Network Status</h1>
+
+<p>The <b>Network &gt; Status</b> page presents the following network details for the vApp:</p>
+
+<ul>
+	<li>Hostname</li>
+	<li>IPv4 Gateway</li>
+	<li>Preferred DNS Server</li>
+	<li>Alternate DNS Server</li>
+</ul>
+
+
+<p>The following information is listed for each network interface on the vApp</p>
+<ul>
+	<li>Interface Name</li>
+	<li>Type &#8212; Indicates the method by which the interface obtains its IP address, for example, via DHCP, or static assignment.&nbsp;</li>
+	<li>Address &#8212; IP address of the interface.</li>
+	<li>Netmask &#8212; Subnet of the interface.</li>
+	<li>Managed by VAMI &#8212; Indicates whether the interface is under Virtual Appliance Management Infrastructure (VAMI) management.</li>
+</ul>
+
+
+
+<p><span class="image-wrap" style=""><img src="attachments/79660206/80281743.png" style="border: 0px solid black"/></span></p>
+
+<h1><a name="HypericServervAppAdministrationConsole-ManageHypericvAppNetworkAddressSettings"></a>Manage Hyperic vApp Network Address Settings</h1>
+
+<p>The <b>Network &gt; Address</b> page allows you to configure the method by which the interface obtains its IP address.</p>
+
+<p><span class="image-wrap" style=""><img src="attachments/79660206/80281746.png" style="border: 0px solid black"/></span></p>
+
+
+<h1><a name="HypericServervAppAdministrationConsole-ConfigureHypericvAppProxySettings"></a>Configure Hyperic vApp Proxy Settings</h1>
+
+<p>The <b>Network &gt; Proxy</b> page allows you to configure a proxy server for HTTP commmunications between the vApp machine and the external Internet.</p>
+
+<p>To configure a proxy server:</p>
+
+<ol>
+	<li>Check the <b>Use a proxy server</b> box.</li>
+	<li>Enter the IP address or domain name of the proxy server in the <b>HTTP Proxy Server</b> field.</li>
+	<li>Enter the port on the proxy server to connect to in the <b>HTTP Port</b> field.</li>
+	<li>If the proxy server authenticates connections, enter the username for connecting to the proxy server in the <b>Proxy Username</b> field.</li>
+	<li>If the proxy server authenticates connections, enter the password for connecting to the proxy server in the&nbsp;<b>Proxy Password</b> field.</li>
+	<li>Click <b>Save Settings</b>.</li>
+</ol>
+
+
+
+<p><span class="image-wrap" style=""><img src="attachments/79660206/80281745.png" style="border: 0px solid black"/></span></p>
+
+<p><a name="HypericServervAppAdministrationConsole-upgrade"></a></p>
+
+<h1><a name="HypericServervAppAdministrationConsole-UpgradeHypericServervApp"></a>Upgrade Hyperic Server vApp</h1>
+
+<p>The <b>Hyperic Server Upgrade</b> page allows you to upgrade a Hyperic Server vApp to a new version.</p>
+
+<p>After taking snapshots of the Hyperic Server and database VMs, enter the path to the new Hyperic installer, and click <b>upgrade</b>.</p>
+
+<p><span class="image-wrap" style=""><img src="attachments/79660206/80281744.png" style="border: 0px solid black"/></span></p>
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 29, 2012 12:59</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

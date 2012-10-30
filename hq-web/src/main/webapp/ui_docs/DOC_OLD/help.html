@@ -1,0 +1,243 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : help</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : help
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325699846745 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699846745 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699846745 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1325699846745'>
+<ul>
+    <li><a href='#help-ElementOverview'>Element Overview</a></li>
+    <li><a href='#help-Parentage'>Parentage</a></li>
+    <li><a href='#help-Contents'>Contents</a></li>
+    <li><a href='#help-Examples'>Examples</a></li>
+<ul>
+    <li><a href='#help-helpelementdefinesanamedblockofHTML'>help element defines a named block of HTML</a></li>
+    <li><a href='#help-helpelementdefineshelpforaservicetypeexplicitlyandbyreferencewithappendattribute'>help element defines help for a service type explicitly and by reference with append attribute</a></li>
+    <li><a href='#help-helpelementdefineshelpforaservicetypebyreferencewithappendandincludeattributes'>help element defines help for a service type by reference with append and include attributes</a></li>
+    <li><a href='#help-helpelementreferencesanamedblockofHTML%2Cbyvirtueofelementlocation'>help element references a named block of HTML, by virtue of element location</a></li>
+    <li><a href='#help-helpelementreferencestwonamedblocksofHTMLusingincludeandappendattributes'>help element references two named blocks of HTML using include and append attributes</a></li>
+</ul>
+</ul></div>
+
+
+<h1><a name="help-ElementOverview"></a>Element Overview</h1>
+<p>The <tt>&lt;help&gt;</tt> element is used to:</p>
+<ul>
+	<li>to define a named block of HTML, and</li>
+	<li>to associate a named <tt>&lt;help&gt;</tt> element by reference to its name with a specific resource type. The referenced help content will be included on the <b>Configuration Properties</b> page for instances of that resource type, as shown in the bottom portion of the page below.</li>
+</ul>
+
+
+<p><span class="image-wrap" style=""><img src="attachments/79659471/79921616.png" style="border: 0px solid black"/></span><br class="atl-forced-newline" /></p>
+
+<h1><a name="help-Parentage"></a>Parentage</h1>
+
+<p>The <tt>&lt;help&gt;</tt> element can be the child of:</p>
+<ul>
+	<li>&lt;plugin&gt; (root) -  In the root of a plugin a <tt>&lt;help&gt;</tt> element can:
+	<ul>
+		<li>Defines a named block of HTML that can be associated by reference with instances of the server types or service types that the plugin manages.  Note that the content defined in <tt>&lt;help&gt;</tt> element in the descriptor root will only appear as help if another  <tt>&lt;help&gt;</tt> element associates with a resource type.</li>
+		<li>Associate a named block of HTML with instances specific resource type the plugin manages.</li>
+	</ul>
+	</li>
+	<li>&lt;server&gt; or &lt;service&gt;  - Within a resource element, a <tt>&lt;help&gt;</tt> element define an unnamed block of HTML that will be presented as help on the Configuration Properties page for all instances of the resource type.</li>
+</ul>
+
+
+<h1><a name="help-Contents"></a>Contents</h1>
+
+<ul>
+	<li>name - This attribute assigns a name to the <tt>&lt;help&gt;</tt> element, by which it can be referenced to associate it with a resource type. In HQ plugins, named <tt>&lt;help&gt;</tt> element are defined in the  the root of the plugin descriptor.</li>
+</ul>
+
+
+<ul>
+	<li>HTML content - The text formatted as HTML within a <tt>&lt;help&gt;</tt> element will be presented on <b>Configuration Properties</b> page for instances of resources types the element is associated with.</li>
+</ul>
+
+
+<ul>
+	<li>include - Used to specify the name attribute of a <tt>&lt;help&gt;</tt> element to include in the <b>Configuration Properties</b> page for instances of resources types the element is associated with.  Help content pointed to by the include attribute will appear before any HTML content contained in the body of the <tt>&lt;help&gt;</tt> element.</li>
+</ul>
+
+
+<ul>
+	<li>append - Similar to the  include attribute, append is used to specify the name attribute of a <tt>&lt;help&gt;</tt> element to include in the <b>Configuration Properties</b> page for instances of resources types the element is associated with. Help content pointed to by the attribute attribute will appear after any HTML content contained in the body of the <tt>&lt;help&gt;</tt> element.</li>
+</ul>
+
+
+<h1><a name="help-Examples"></a>Examples</h1>
+
+
+<h2><a name="help-helpelementdefinesanamedblockofHTML"></a>help element defines a named block of HTML</h2>
+
+<p>This <tt>&lt;help&gt;</tt> element in the root of HQ's apache-plugin specifies a block of HTML and names it "restart-server".   Another <tt>&lt;help&gt;</tt> element in the descriptor can include this content by setting its include or append attribute to  "restart-server".  (The only functional difference between  include or append is relates to sequence in which the referenced content is presented.)</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">&lt;help name="restart-server"&gt;
+&lt;![CDATA[
+&lt;p&gt;&lt;h4&gt;Restart the Server&lt;/h4&gt;&lt;/p&gt;
+&lt;pre&gt;
+% $\{program\} restart
+&lt;/pre&gt;
+]]&gt;
+&lt;/help&gt;</pre>
+		</div>
+</div></div>
+<p>Note that because the <tt>&lt;help&gt;</tt> element is defined in the root of the plugin, it must be referenced in a resource element later in the  plugin.  Otherwise the help content will not appear on any Configuration Properties page.
+<br class="atl-forced-newline" /></p>
+
+<h2><a name="help-helpelementdefineshelpforaservicetypeexplicitlyandbyreferencewithappendattribute"></a>help element defines help for a service  type explicitly and by reference with append attribute</h2>
+
+<p>This <tt>&lt;help&gt;</tt> element in the root of HQ's apache-plugin defines the help for services whose type is "Apache 1.3 VHost".   The HTML within the body of the element will be presented first.  The content of the <tt>&lt;help&gt;</tt> element named "restart-server" will appear after the HTML defined in the body, because it is referenced with the append attribute.  (See the screen shot on the previous page.)</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">&lt;help name="Apache 1.3 VHost" append="restart-server"&gt;
+&lt;![CDATA[
+&lt;p&gt;
+&lt;h3&gt;Response Time Setup&lt;/h3&gt;
+&lt;h4&gt;Compile and install the plugin:&lt;/h4&gt;
+&lt;/p&gt;
+&lt;pre&gt;
+% tar zxf agent$\{HQVersion\}/product_connectors/rt-$\{rtVersion\}.tar.gz
+% cd rt-$\{rtVersion\}
+% ./build_apache_module.sh 1.3 $\{installpath\}/bin/apxs
+% cp apache1.3/unix/mod_rt.so $\{installpath\}/libexec
+&lt;/pre&gt;
+&lt;p&gt;&lt;h4&gt;Edit $\{installpath\}/conf/httpd.conf, adding:&lt;/h4&gt;&lt;/p&gt;
+&lt;pre&gt;
+LoadModule rt_module libexec/mod_rt.so
+RtLog logs/rt_log
+EndUserLog logs/enduser
+&lt;/pre&gt;
+&lt;p&gt;
+&lt;h4&gt;If the ClearModuleList directive is in your config file,
+you will need to add:&lt;/h4&gt;
+&lt;/p&gt;
+&lt;pre&gt;
+AddModule mod_rt.c
+&lt;/pre&gt;
+]]&gt;
+&lt;/help&gt;</pre>
+		</div>
+</div></div>
+
+<h2><a name="help-helpelementdefineshelpforaservicetypebyreferencewithappendandincludeattributes"></a>help element defines help for a service  type by reference with append and include attributes</h2>
+
+<p>This <tt>&lt;help&gt;</tt> element defines the help for services whose type is "MySQL Process 5.x".  The several bits of HTML will be ordered in this way:</p>
+<ul>
+	<li>The content of the <tt>&lt;help&gt;</tt> element named  "MySQL 5.x" will appear prior to any HTML in the body, because it is referenced using the include attribute.</li>
+	<li>The HTML included in the body of the element will appear next.</li>
+	<li>The content of the <tt>&lt;help&gt;</tt> element named  "mysql-process" will appear after any HTML in the body, because it is referenced using the append attribute.</li>
+</ul>
+
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">&lt;help name="MySQL Process 5.x" include="MySQL 5.x" append="mysql-process"/&gt;
+&lt;\!\[CDATA\[
+&lt;p&gt;&lt;h4&gt;If you want something done right&lt;/h4&gt;&lt;/p&gt;
+&lt;pre&gt;
+Do it yourself\!
+&lt;/pre&gt;
+\]\]&gt;</pre>
+		</div>
+</div></div>
+
+<h2><a name="help-helpelementreferencesanamedblockofHTML%2Cbyvirtueofelementlocation"></a>help element references a named block of HTML, by virtue of element location</h2>
+
+<p>This excerpt from the bind-plugin illustrates a different method of associating a named block of HTML to a specific version of a resource type.   In this example, the referencing <tt>&lt;help&gt;</tt> element is located in the &lt;server&gt; element that defines the  defines Bind 9.x server type.   In this usage you do not need to use the name attribute to define the resource type version explicitly.</p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">&lt;server name="Bind"
+        version="9.x"
+        platforms="Unix"&gt;
+  &lt;plugin type="measurement"
+          class="BindMeasurementPlugin"/&gt;
+  &lt;plugin type="autoinventory"
+          class="BindServerDetector"/&gt;
+  &lt;config&gt;
+    &lt;option name="rndc"
+            description="Path to rndc"
+            default="/usr/sbin/rndc"/&gt;
+    &lt;option name="named.stats"
+            description="Path to named.stats"
+            default="/var/named/named.stats"/&gt;
+    &lt;option name="process.query"
+            description="Process query for named"
+            default="State.Name.eq=named"/&gt;
+  &lt;/config&gt;
+  &lt;metrics include="process,rndc"/&gt;
+  &lt;help include="rndc"/&gt;
+&lt;/server&gt;</pre>
+		</div>
+</div></div>
+
+<h2><a name="help-helpelementreferencestwonamedblocksofHTMLusingincludeandappendattributes"></a>help element references two named blocks of HTML using include and append attributes</h2>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">&lt;help name="MySQL Process 3.x"
+      include="MySQL 3.x"
+      append="mysql-process"/&gt;</pre>
+		</div>
+</div></div>
+<p>The content in the <tt>&lt;help&gt;</tt> element named "MySQL 3.x" will precede the content in the <tt>&lt;help&gt;</tt> element named "mysql-process".</p>
+
+
+
+				    					    <br/>
+                        <div class="tabletitle">
+                            <a name="attachments">
+                                <h2>Attachments:</h2>
+                            </a>
+                        </div>
+
+                        <div class="greybox" align="left">
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79659471/79921616.png">help-1.png</a> (image/png)
+                                <br/>
+                                                    </div>
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:08</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

@@ -1,0 +1,1253 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : RabbitMQ</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : RabbitMQ
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Aug 06, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+ 
+
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1344285902477 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1344285902477 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1344285902477 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1344285902477'>
+<ul>
+    <li><a href='#RabbitMQ-RabbitMQPluginOverview'>RabbitMQ Plugin Overview</a></li>
+<ul>
+    <li><a href='#RabbitMQ-SupportedVersionsandRequirements'>Supported Versions and Requirements</a></li>
+    <li><a href='#RabbitMQ-RabbitMQResourcesandtheHypericInventoryModel'>RabbitMQ Resources and the Hyperic Inventory Model</a></li>
+    <li><a href='#RabbitMQ-SSLRequirements'>SSL Requirements</a></li>
+</ul>
+    <li><a href='#RabbitMQ-ConfigurationInstructions'>Configuration Instructions</a></li>
+<ul>
+    <li><a href='#RabbitMQ-Step1%3ARemovePreviousRabbitMQInventoryResourcesandAgentInstallation'>Step 1: Remove Previous RabbitMQ Inventory Resources and Agent Installation</a></li>
+    <li><a href='#RabbitMQ-Step2%3AInstallHypericAgent'>Step 2: Install Hyperic Agent</a></li>
+    <li><a href='#RabbitMQ-Step3%3AImportRabbitMQServer%28s%29toInventory'>Step 3: Import RabbitMQ Server(s) to Inventory</a></li>
+    <li><a href='#RabbitMQ-Step4%3ASetEventTrackingOptions'>Step 4: Set Event Tracking Options</a></li>
+    <li><a href='#RabbitMQ-Step5%3ATailorPluginMonitoringDefaults'>Step 5: Tailor Plugin Monitoring Defaults</a></li>
+    <li><a href='#RabbitMQ-Step6%3AConfigureAlertDefinitions'>Step 6: Configure Alert Definitions</a></li>
+</ul>
+    <li><a href='#RabbitMQ-ResourceTypesandManagementFunctions'>Resource Types and Management Functions</a></li>
+<ul>
+    <li><a href='#RabbitMQ-AutoDiscovery'>Auto-Discovery</a></li>
+<ul>
+    <li><a href='#RabbitMQ-RabbitMQServerProperties'>RabbitMQ Server Properties</a></li>
+    <li><a href='#RabbitMQ-RabbitMQExchangeServiceProperties'>RabbitMQ Exchange Service Properties</a></li>
+    <li><a href='#RabbitMQ-RabbitMQQueueServiceProperties'>RabbitMQ Queue Service Properties</a></li>
+    <li><a href='#RabbitMQ-RabbitMQVirtualHostServiceProperties'>RabbitMQ VirtualHost Service Properties</a></li>
+    <li><a href='#RabbitMQ-RabbitMQConnectionServiceProperties'>RabbitMQ Connection Service Properties</a></li>
+    <li><a href='#RabbitMQ-RabbitMQChannelServiceProperties'>RabbitMQ Channel Service Properties</a></li>
+</ul>
+    <li><a href='#RabbitMQ-MetricCollection'>Metric Collection</a></li>
+<ul>
+    <li><a href='#RabbitMQ-RabbitMQMetrics'>RabbitMQ Metrics</a></li>
+    <li><a href='#RabbitMQ-RabbitMQExchangeMetrics'>RabbitMQ Exchange Metrics</a></li>
+    <li><a href='#RabbitMQ-RabbitMQQueueMetrics'>RabbitMQ Queue Metrics</a></li>
+    <li><a href='#RabbitMQ-RabbitMQVirtualHostMetrics'>RabbitMQ VirtualHost Metrics</a></li>
+    <li><a href='#RabbitMQ-RabbitMQConnectionMetrics'>RabbitMQ Connection Metrics</a></li>
+    <li><a href='#RabbitMQ-RabbitMQChannelMetrics'>RabbitMQ Channel Metrics</a></li>
+</ul>
+</ul>
+</ul></div> 
+
+ 
+
+
+<h1><a name="RabbitMQ-RabbitMQPluginOverview"></a>RabbitMQ Plugin Overview </h1>
+
+<p>Hyperic's RabbitMQ plugin manages RabbitMQ brokers, the virtual hosts within a broker, and RabbitMQ exchanges, queues, connections, and channels. The plugin can discover and manage multiple RabbitMQ nodes on the same platform as the Hyperic Agent. </p>
+
+<p>The indented list below illustrates the hierarchy of Hyperic resource types that map to RabbitMQ entities. Each resource type is described below in <a href="#RabbitMQ-RabbitMQResourcesandtheHypericInventoryModel">RabbitMQ Resources and the Hyperic Inventory Model</a>. </p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">RabbitMQ 
+     RabbitMQ Exchange 
+     RabbitMQ Queue 
+     RabbitMQ VirtualHost 
+     RabbitMQ Connection 
+     RabbitMQ Channel</pre>
+		</div>
+</div></div> 
+
+<h2><a name="RabbitMQ-SupportedVersionsandRequirements"></a>Supported Versions and Requirements </h2>
+
+<p>The RabbitMQ plugin supports RabbitMQ 2.x and later running on Linux and Windows platforms, and requires v4.6 or later of the Hyperic Agent and the Hyperic Server. </p>
+
+<p>This version of the plugin requires that RabbitMQ has the <tt>rabbitmq-management</tt> plugin installed and running. For more information see <a href="http://www.rabbitmq.com/management.html">http://www.rabbitmq.com/management.html</a>. </p>
+
+
+<h2><a name="RabbitMQ-RabbitMQResourcesandtheHypericInventoryModel"></a>RabbitMQ Resources and the Hyperic Inventory Model </h2>
+
+<p>The table below lists the resource types in Hyperic&nbsp;that map to managed RabbitMQ entities. The right column indicates the inventory level for each type in the Hyperic&nbsp;inventory model. </p>
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<td class='confluenceTd'> <b>Hyperic&nbsp;Resource Type</b> </td>
+<td class='confluenceTd'> <b>Description</b> </td>
+<td class='confluenceTd'> <b>Hyperic&nbsp;Inventory Type</b> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> RabbitMQ </td>
+<td class='confluenceTd'> A RabbitMQ broker, also referred to as a node, is an implementation of an Advanced Message Queuing Protocol (AMQP) broker. It is a configurable entity that listens for messages on a TCP/IP port. <br class="atl-forced-newline" /> 
+<br class="atl-forced-newline" /> 
+A broker&nbsp;is represented in Hyperic&nbsp;as a "RabbitMQ" server.&nbsp; <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> server </td>
+</tr>
+<tr>
+<td class='confluenceTd'> RabbitMQ Exchange <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> A RabbitMQ exchange is a resource that routes messages to queues.&nbsp; <br class="atl-forced-newline" /> 
+<br class="atl-forced-newline" /> 
+An exchange is represented in Hyperic as a "RabbitMQ Exchange" service. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> service </td>
+</tr>
+<tr>
+<td class='confluenceTd'> RabbitMQ Queue </td>
+<td class='confluenceTd'> A queue is a resource that stores&nbsp;and forwards messages to message consumers . <br class="atl-forced-newline" /> 
+<br class="atl-forced-newline" /> 
+A queue is represented in Hyperic&nbsp;as a "RabbitMQ Queue" service. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> service </td>
+</tr>
+<tr>
+<td class='confluenceTd'> RabbitMQ VirtualHost </td>
+<td class='confluenceTd'> A virtual host serves as a name-spacing mechanism for queues and exchanges on a broker. A broker always has a default virtual host identified by a forward slash character ( /). Additional virtual hosts can be explicitly configured on a broker. The same&nbsp;queue (or exchange) name in two virtual hosts on denotes a different resource in each virtual host. <br class="atl-forced-newline" /> 
+<br class="atl-forced-newline" /> 
+RabbitMQ's first level of access control is enforced at the virtual host level; if a user attempts to connect to a virtual host to which he does not have credentials, the a broker rejects the connection attempt. <br class="atl-forced-newline" /> 
+<br class="atl-forced-newline" /> 
+A RabbitMQ virtual host is represented in Hyperic as a "RabbitMQ VirtualHost" service. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> service </td>
+</tr>
+<tr>
+<td class='confluenceTd'> RabbitMQ Connection </td>
+<td class='confluenceTd'> A physical connection e.g. using TCP/IP or SCTP. A connection is bound to a user. </td>
+<td class='confluenceTd'> service </td>
+</tr>
+<tr>
+<td class='confluenceTd'> RabbitMQ Channel </td>
+<td class='confluenceTd'> A logical connection that is tied to a connection. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> service </td>
+</tr>
+</tbody></table>
+</div>
+
+
+<p><b>Note:</b> For more information about the managed resource hierarchy, see <a href="Resources, Resource Types and Inventory Types.html" title="Resources, Resource Types and Inventory Types">Resources, Resource Types and Inventory Types</a>. </p>
+
+<h2><a name="RabbitMQ-SSLRequirements"></a>SSL Requirements</h2>
+<p>To communicate with RabbitMQ over SSL, you must configure a keystore for the agent and manually import the RabbitMQ server's SSL certificate into the agent keystore if the server's certificate is unverified. </p>
+
+<h1><a name="RabbitMQ-ConfigurationInstructions"></a>Configuration Instructions </h1>
+
+<p>The RabbitMQ plugin can automatically discover and monitor one or more RabbitMQ nodes and associated Rabbit services running on a platform. </p>
+
+<p>You must run the Hyperic Agent on same platform as the RabbitMQ nodes it will manage. </p>
+
+<h2><a name="RabbitMQ-Step1%3ARemovePreviousRabbitMQInventoryResourcesandAgentInstallation"></a>Step 1: Remove Previous RabbitMQ Inventory Resources and Agent Installation</h2>
+
+<p>If you use the previous version of the RabbitMQ plugin, you must remove the existing RabbitMQ resources from from inventory and perform a fresh agent install. </p>
+
+<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>If you currently use the RabbitMQ plugin released in Hyperic 4.5.0, the following requirements apply: 
+<ol>
+	<li>Remove the RabbitMQ server resource runs from inventory:
+	<ol>
+		<li>Use <b>Browse &gt; Resource &gt; Servers &gt; RabbitMQ</b> to navigate to the RabbitMQ instance.</li>
+		<li>Select <b>Delete Server</b> from the <b>Tools</b> menu.
+		<ul>
+			<li>The RabbitMQ server and service resources on the platform are removed from inventory.</li>
+		</ul>
+		</li>
+	</ol>
+	</li>
+	<li>Stop the Hyperic Agent that runs on the RabbitMQ host.</li>
+	<li>Uninstall the Hyperic Agent from the RabbitMQ host by deleting the <em>AgentHome</em> directory.</li>
+	<li>Do a fresh install of the Hyperic Agent, as described in the following step.</li>
+</ol>
+</td></tr></table></div> 
+
+<h2><a name="RabbitMQ-Step2%3AInstallHypericAgent"></a>Step 2: Install Hyperic Agent </h2>
+
+<p>If you have not already done so, install a Hyperic Agent on the RabbitMQ host. See <a href="Install an Agent-Only Package.html" title="Install an Agent-Only Package">Install an Agent&#45;Only Package</a> in <em>Getting Started with vFabric Hyperic</em> for instructions. </p>
+
+<h2><a name="RabbitMQ-Step3%3AImportRabbitMQServer%28s%29toInventory"></a>Step 3: Import RabbitMQ Server(s) to Inventory </h2>
+
+<p>The Hyperic Agent on a platform automatically discovers each RabbitMQ node running on the platform. After the RabbitMQ node(s) are discovered, the platform appears in the <b>Auto-Discovery</b> portlet of the Hyperic Dashboard, and presents the RabbitMQ nodes as new servers. </p>
+
+<p>Import the platform and the new RabbitMQ server resources. </p>
+
+<p>For more information, see <a href="Discover and Import Resources to Inventory.html" title="Discover and Import Resources to Inventory">Discover and Import Resources to Inventory</a>. </p>
+
+<h2><a name="RabbitMQ-Step4%3ASetEventTrackingOptions"></a>Step 4: Set Event Tracking Options </h2>
+
+<p>The RabbitMQ plugin supports log tracking for the RabbitMQ server resource type. </p>
+
+<p>By default, the plugin tails the standard RabbitMQ node log file, and logs an event for messages of level "ERR". </p>
+
+<p>You can disable log tracking, set a different tracking level, or track messages based on whether they include (or exclude) a specified string. You configure log tracking options on the <b>Monitoring</b> section of the <b>Configuration Properties</b> page for the RabbitMQ server. </p>
+
+<p>For more information, see <a href="Set Up Log Tracking for a Resource.html" title="Set Up Log Tracking for a Resource">Set Up Log Tracking for a Resource</a>. </p>
+
+
+<h2><a name="RabbitMQ-Step5%3ATailorPluginMonitoringDefaults"></a>Step 5: Tailor Plugin Monitoring Defaults </h2>
+
+<p>You can enable and disable metrics, select indicator metrics, and change the collection interval for a resource type on its <b>Monitoring Defaults</b> page.&nbsp; </p>
+
+<ol>
+	<li>Click the <b>Administration</b> tab.</li>
+	<li>Click <b>Monitoring Defaults</b>.</li>
+	<li>Scroll down to the desired RabbitMQ resource type and click <b>Edit Metric Template</b>.</li>
+</ol>
+
+
+<p>For more information, see&amp; <a href="Tailor Metric Collection for a Resource Type.html" title="Tailor Metric Collection for a Resource Type">Tailor Metric Collection for a Resource Type</a>. </p>
+
+<h2><a name="RabbitMQ-Step6%3AConfigureAlertDefinitions"></a>Step 6: Configure Alert Definitions </h2>
+
+<p>Create alert definitions as desired for your managed RabbitMQ components. For more information, see <a href="Define an Alert for a Resource.html" title="Define an Alert for a Resource">Define an Alert for a Resource</a>. </p>
+
+<h1><a name="RabbitMQ-ResourceTypesandManagementFunctions"></a>Resource Types and Management Functions </h1>
+
+<p>This section describes the management functions the RabbitMQ plugin performs for Rabbit MQ components. </p>
+
+<h2><a name="RabbitMQ-AutoDiscovery"></a>Auto-Discovery </h2>
+
+<p>The plugin auto-discovers the RabbitMQ Server instances on a platform by querying the process table, and then discovers the queues, exchanges, and the virtual hosts for each server instance. </p>
+
+<p>When the plugin detects that a transient service no longer exists in RabbitMQ, the plugin removes the associated Hyperic resource from inventory. Note that the RabbitMQ server must be running for the plugin to detect that previously existing services no longer exist - the plugin will not remove services while the Rabbit node is down. </p>
+
+
+<h3><a name="RabbitMQ-RabbitMQServerProperties"></a>RabbitMQ Server Properties </h3>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Property </th>
+<th class='confluenceTh'> Description </th>
+<th class='confluenceTh'> Default </th>
+</tr>
+<tr>
+<td class='confluenceTd'> resource name </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Owner </td>
+<td class='confluenceTd'> The Hyperic account under which the resource was created. </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> node </td>
+<td class='confluenceTd'>RabbitMQ node name (rabbit_X@servername) </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> addr </td>
+<td class='confluenceTd'> IP address or hostname RabbitMQ HTTP management API.</td>
+<td class='confluenceTd'>localhost </td>
+</tr>
+<tr>
+<td class='confluenceTd'> port </td>
+<td class='confluenceTd'> Listen port for the RabbitMQ HTTP management API.</td>
+<td class='confluenceTd'>55672 </td>
+</tr>
+<tr>
+<td class='confluenceTd'> username </td>
+<td class='confluenceTd'>RabbitMQ admin username </td>
+<td class='confluenceTd'> guest </td>
+</tr>
+<tr>
+<td class='confluenceTd'> password </td>
+<td class='confluenceTd'>RabbitMQ admin username </td>
+<td class='confluenceTd'> guest </td>
+</tr>
+<tr>
+<td class='confluenceTd'> nodurable</td>
+<td class='confluenceTd'>Discover non-durable objects, If checked, all nondurable objects Channels, Queue, etc.) will be auto-discovered. </td>
+<td class='confluenceTd'> false </td>
+</tr>
+<tr>
+<td class='confluenceTd'> autosycn </td>
+<td class='confluenceTd'>Auto-Delete Unavailable Objects. If checked, all unavailable objects (Channels, Queue, etc.) will be auto-delete (except for idle objects, which shows as paused.) </td>
+<td class='confluenceTd'> false </td>
+</tr>
+</tbody></table>
+</div>
+
+
+
+<h3><a name="RabbitMQ-RabbitMQExchangeServiceProperties"></a>RabbitMQ Exchange Service Properties </h3>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Property </th>
+<th class='confluenceTh'> Description </th>
+</tr>
+<tr>
+<td class='confluenceTd'> resource name </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Owner </td>
+<td class='confluenceTd'> The Hyperic user account under which the resource was created. </td>
+</tr>
+<tr>
+<td class='confluenceTd'>vhost </td>
+<td class='confluenceTd'> rabbit node-vhost name </td>
+</tr>
+<tr>
+<td class='confluenceTd'>exchange </td>
+<td class='confluenceTd'> exchange name </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Exchange Type </td>
+<td class='confluenceTd'> Values include: <br class="atl-forced-newline" /> 
+<ul>
+	<li>fanout</li>
+	<li>direct&nbsp;</li>
+	<li>topic</li>
+	<li>headers</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Durable </td>
+<td class='confluenceTd'> Whether or not the exchange (and the routing data it contains) will survive a server restart. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Auto-Delete </td>
+<td class='confluenceTd'> Whether or not the exchange is removed when all queues have stopped using it. </td>
+</tr>
+</tbody></table>
+</div>
+
+
+
+<h3><a name="RabbitMQ-RabbitMQQueueServiceProperties"></a>RabbitMQ Queue Service Properties </h3>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Property </th>
+<th class='confluenceTh'> Description </th>
+</tr>
+<tr>
+<td class='confluenceTd'> resource name </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Owner </td>
+<td class='confluenceTd'> The Hyperic account under which the resource was created. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> durable </td>
+<td class='confluenceTd'> Whether or not the queue will survive a server restart. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> vhost</td>
+<td class='confluenceTd'> rabbit node-vhost name </td>
+</tr>
+<tr>
+<td class='confluenceTd'> queue </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+</tbody></table>
+</div>
+
+
+<h3><a name="RabbitMQ-RabbitMQVirtualHostServiceProperties"></a>RabbitMQ VirtualHost Service Properties </h3>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Property </th>
+<th class='confluenceTh'> Description </th>
+</tr>
+<tr>
+<td class='confluenceTd'> resource name </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Owner </td>
+<td class='confluenceTd'> The Hyperic user account under which the resource was created. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> vhost </td>
+<td class='confluenceTd'> rabbit node-vhost name </td>
+</tr>
+<tr>
+<td class='confluenceTd'> name </td>
+<td class='confluenceTd'> Virtual Host </td>
+</tr>
+<tr>
+<td class='confluenceTd'> users</td>
+<td class='confluenceTd'> Users </td>
+</tr>
+</tbody></table>
+</div>
+
+
+
+<h3><a name="RabbitMQ-RabbitMQConnectionServiceProperties"></a>RabbitMQ Connection Service Properties </h3>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Property </th>
+<th class='confluenceTh'> Description </th>
+</tr>
+<tr>
+<td class='confluenceTd'> resource name </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Owner </td>
+<td class='confluenceTd'> The Hyperic account under which the resource was created. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> connection </td>
+<td class='confluenceTd'> connection name </td>
+</tr>
+<tr>
+<td class='confluenceTd'>authMechanism	Authentication</td>
+</tr>
+<tr>
+<td class='confluenceTd'>protocol </td>
+<td class='confluenceTd'>Protocol</td>
+</tr>
+<tr>
+<td class='confluenceTd'>user	</td>
+<td class='confluenceTd'>User</td>
+</tr>
+<tr>
+<td class='confluenceTd'>timeout</td>
+<td class='confluenceTd'>Timeout</td>
+</tr>
+<tr>
+<td class='confluenceTd'>ssl	</td>
+<td class='confluenceTd'>SSL</td>
+</tr>
+</tbody></table>
+</div>
+
+
+<h3><a name="RabbitMQ-RabbitMQChannelServiceProperties"></a>RabbitMQ Channel Service Properties </h3>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Property </th>
+<th class='confluenceTh'> Description </th>
+</tr>
+<tr>
+<td class='confluenceTd'> resource name </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Description </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Owner </td>
+<td class='confluenceTd'> The Hyperic user account under which the resource was created. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> vhost </td>
+<td class='confluenceTd'> rabbit node-vhost name </td>
+</tr>
+<tr>
+<td class='confluenceTd'> channel </td>
+<td class='confluenceTd'>channelname </td>
+</tr>
+<tr>
+<td class='confluenceTd'>user	</td>
+<td class='confluenceTd'>User</td>
+</tr>
+<tr>
+<td class='confluenceTd'>confirm </td>
+<td class='confluenceTd'>Confirm </td>
+</tr>
+<tr>
+<td class='confluenceTd'>transactional	Transactional </td>
+</tr>
+</tbody></table>
+</div>
+
+
+<h2><a name="RabbitMQ-MetricCollection"></a>Metric Collection </h2>
+
+<p>The following sections define the metrics for each RabbitMQ resource type. </p>
+
+<h3><a name="RabbitMQ-RabbitMQMetrics"></a>RabbitMQ Metrics </h3>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'>Name</th>
+<th class='confluenceTh'>Alias</th>
+<th class='confluenceTh'>Units</th>
+<th class='confluenceTh'>Category</th>
+<th class='confluenceTh'>Default On</th>
+<th class='confluenceTh'>Default Interval</th>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Availability</font></td>
+<td class='confluenceTd'><font color="navy">Availability</font></td>
+<td class='confluenceTd'><font color="navy">percentage</font></td>
+<td class='confluenceTd'><font color="navy">AVAILABILITY</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Messages</font></td>
+<td class='confluenceTd'><font color="navy">Messages</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Messages Ready</font></td>
+<td class='confluenceTd'><font color="navy">MessagesReady</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Messages Unacknowledged</font></td>
+<td class='confluenceTd'><font color="navy">MessagesUnacknowledged</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Messages Publish /s</font></td>
+<td class='confluenceTd'><font color="navy">MessagesPublish/s</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Messages Confirm /s</font></td>
+<td class='confluenceTd'><font color="navy">MessagesConfirm/s</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Messages Deliver /s</font></td>
+<td class='confluenceTd'><font color="navy">MessagesDeliver/s</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Messages Acknowledge /s</font></td>
+<td class='confluenceTd'><font color="navy">MessagesAcknowledge/s</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Messages Get /s</font></td>
+<td class='confluenceTd'><font color="navy">MessagesGet/s</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Messages Get (noack) /s</font></td>
+<td class='confluenceTd'><font color="navy">MessagesGet(noack)/s</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Messages Deliver (noack) /s</font></td>
+<td class='confluenceTd'><font color="navy">MessagesDeliver(noack)/s</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Messages Deliver+Get /s</font></td>
+<td class='confluenceTd'><font color="navy">MessagesDeliver+Get/s</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Memory watermark</font></td>
+<td class='confluenceTd'><font color="navy">Memorywatermark</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Erlang Processes used</font></td>
+<td class='confluenceTd'><font color="gray">ErlangProcessesused</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Erlang Processes % used</font></td>
+<td class='confluenceTd'><font color="navy">ErlangProcesses%used</font></td>
+<td class='confluenceTd'><font color="navy">percentage</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Process Open File Descriptors %</font></td>
+<td class='confluenceTd'><font color="navy">ProcessOpenFileDescriptors%</font></td>
+<td class='confluenceTd'><font color="navy">percentage</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Process Virtual Memory Size</font></td>
+<td class='confluenceTd'><font color="gray">ProcessVirtualMemorySize</font></td>
+<td class='confluenceTd'><font color="gray">B</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Process Resident Memory Size</font></td>
+<td class='confluenceTd'><font color="navy">ProcessResidentMemorySize</font></td>
+<td class='confluenceTd'><font color="navy">B</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Process Page Faults</font></td>
+<td class='confluenceTd'><font color="gray">ProcessPageFaults</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Process Page Faults per Minute</font></td>
+<td class='confluenceTd'><font color="gray">ProcessPageFaults1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Process Cpu System Time</font></td>
+<td class='confluenceTd'><font color="gray">ProcessCpuSystemTime</font></td>
+<td class='confluenceTd'><font color="gray">ms</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Process Cpu System Time per Minute</font></td>
+<td class='confluenceTd'><font color="gray">ProcessCpuSystemTime1m</font></td>
+<td class='confluenceTd'><font color="gray">ms</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Process Cpu User Time</font></td>
+<td class='confluenceTd'><font color="gray">ProcessCpuUserTime</font></td>
+<td class='confluenceTd'><font color="gray">ms</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Process Cpu User Time per Minute</font></td>
+<td class='confluenceTd'><font color="gray">ProcessCpuUserTime1m</font></td>
+<td class='confluenceTd'><font color="gray">ms</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Process Cpu Total Time</font></td>
+<td class='confluenceTd'><font color="gray">ProcessCpuTotalTime</font></td>
+<td class='confluenceTd'><font color="gray">ms</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Process Cpu Total Time per Minute</font></td>
+<td class='confluenceTd'><font color="gray">ProcessCpuTotalTime1m</font></td>
+<td class='confluenceTd'><font color="gray">ms</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Process Cpu Usage</font></td>
+<td class='confluenceTd'><font color="navy">ProcessCpuUsage</font></td>
+<td class='confluenceTd'><font color="navy">percentage</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Process Start Time</font></td>
+<td class='confluenceTd'><font color="gray">ProcessStartTime</font></td>
+<td class='confluenceTd'><font color="gray">epoch-millis</font></td>
+<td class='confluenceTd'><font color="gray">AVAILABILITY</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Process Open File Descriptors</font></td>
+<td class='confluenceTd'><font color="gray">ProcessOpenFileDescriptors</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Process Threads</font></td>
+<td class='confluenceTd'><font color="gray">ProcessThreads</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Channels</font></td>
+<td class='confluenceTd'><font color="navy">Channels</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Connections</font></td>
+<td class='confluenceTd'><font color="navy">Connections</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+</tr>
+</tbody></table>
+</div>
+ 
+
+<h3><a name="RabbitMQ-RabbitMQExchangeMetrics"></a>RabbitMQ Exchange Metrics </h3>
+
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'>Name</th>
+<th class='confluenceTh'>Alias</th>
+<th class='confluenceTh'>Units</th>
+<th class='confluenceTh'>Category</th>
+<th class='confluenceTh'>Default On</th>
+<th class='confluenceTh'>Default Interval</th>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Availability</font></td>
+<td class='confluenceTd'><font color="navy">Availability</font></td>
+<td class='confluenceTd'><font color="navy">percentage</font></td>
+<td class='confluenceTd'><font color="navy">AVAILABILITY</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">IN Messages Publish /s</font></td>
+<td class='confluenceTd'><font color="navy">in_publish_details</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">OUT Messages Publish /s</font></td>
+<td class='confluenceTd'><font color="navy">out_publish_details</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+</tr>
+</tbody></table>
+</div>
+
+
+ 
+
+<h3><a name="RabbitMQ-RabbitMQQueueMetrics"></a>RabbitMQ Queue Metrics </h3>
+
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'>Name</th>
+<th class='confluenceTh'>Alias</th>
+<th class='confluenceTh'>Units</th>
+<th class='confluenceTh'>Category</th>
+<th class='confluenceTh'>Default On</th>
+<th class='confluenceTh'>Default Interval</th>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Availability</font></td>
+<td class='confluenceTd'><font color="navy">Availability</font></td>
+<td class='confluenceTd'><font color="navy">percentage</font></td>
+<td class='confluenceTd'><font color="navy">AVAILABILITY</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">idle Time</font></td>
+<td class='confluenceTd'><font color="navy">idleTime</font></td>
+<td class='confluenceTd'><font color="navy">ms</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">30 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Messages Publish /s</font></td>
+<td class='confluenceTd'><font color="navy">publishDetails</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Messages Confirm /s</font></td>
+<td class='confluenceTd'><font color="navy">confirmDetails</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Messages Deliver /s</font></td>
+<td class='confluenceTd'><font color="navy">deliverDetails</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Messages Acknowledge /s</font></td>
+<td class='confluenceTd'><font color="navy">ackDetails</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Messages Get /s</font></td>
+<td class='confluenceTd'><font color="navy">getDetails</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Messages Get (noack) /s</font></td>
+<td class='confluenceTd'><font color="navy">getNoAckDetails</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Messages Deliver (noack) /s</font></td>
+<td class='confluenceTd'><font color="navy">deliverNoAckDetails</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Messages Deliver+Get /s</font></td>
+<td class='confluenceTd'><font color="navy">deliverGetDetails</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Messages</font></td>
+<td class='confluenceTd'><font color="navy">messages</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Consumers</font></td>
+<td class='confluenceTd'><font color="navy">consumers</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Transactions</font></td>
+<td class='confluenceTd'><font color="navy">transactions</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Acks Uncommitted</font></td>
+<td class='confluenceTd'><font color="navy">acksUncommitted</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Messages Ready</font></td>
+<td class='confluenceTd'><font color="navy">messagesReady</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Messages Unacknowledged</font></td>
+<td class='confluenceTd'><font color="navy">messagesUnacknowledged</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Messages Uncommitted</font></td>
+<td class='confluenceTd'><font color="navy">messagesUncommitted</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Memory</font></td>
+<td class='confluenceTd'><font color="navy">memory</font></td>
+<td class='confluenceTd'><font color="navy">b</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+</tr>
+</tbody></table>
+</div>
+
+
+ 
+
+
+<h3><a name="RabbitMQ-RabbitMQVirtualHostMetrics"></a>RabbitMQ VirtualHost Metrics </h3>
+
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'>Name</th>
+<th class='confluenceTh'>Alias</th>
+<th class='confluenceTh'>Units</th>
+<th class='confluenceTh'>Category</th>
+<th class='confluenceTh'>Default On</th>
+<th class='confluenceTh'>Default Interval</th>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Availability</font></td>
+<td class='confluenceTd'><font color="navy">Availability</font></td>
+<td class='confluenceTd'><font color="navy">percentage</font></td>
+<td class='confluenceTd'><font color="navy">AVAILABILITY</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Exchanges</font></td>
+<td class='confluenceTd'><font color="navy">exchangeCount</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Queues</font></td>
+<td class='confluenceTd'><font color="navy">queueCount</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+</tr>
+</tbody></table>
+</div>
+
+ 
+
+
+<h3><a name="RabbitMQ-RabbitMQConnectionMetrics"></a>RabbitMQ Connection Metrics </h3>
+
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'>Name</th>
+<th class='confluenceTh'>Alias</th>
+<th class='confluenceTh'>Units</th>
+<th class='confluenceTh'>Category</th>
+<th class='confluenceTh'>Default On</th>
+<th class='confluenceTh'>Default Interval</th>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Octets Received</font></td>
+<td class='confluenceTd'><font color="navy">octetsReceived</font></td>
+<td class='confluenceTd'><font color="navy">B</font></td>
+<td class='confluenceTd'><font color="navy">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Octets Sent</font></td>
+<td class='confluenceTd'><font color="navy">octetsSent</font></td>
+<td class='confluenceTd'><font color="navy">B</font></td>
+<td class='confluenceTd'><font color="navy">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Network Packets Received</font></td>
+<td class='confluenceTd'><font color="navy">packetsReceived</font></td>
+<td class='confluenceTd'><font color="navy">B</font></td>
+<td class='confluenceTd'><font color="navy">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Network Packets Sent</font></td>
+<td class='confluenceTd'><font color="navy">packetsSent</font></td>
+<td class='confluenceTd'><font color="navy">B</font></td>
+<td class='confluenceTd'><font color="navy">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Channels</font></td>
+<td class='confluenceTd'><font color="navy">channelCount</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Pending Sends</font></td>
+<td class='confluenceTd'><font color="navy">pendingSends</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Availability</font></td>
+<td class='confluenceTd'><font color="navy">Availability</font></td>
+<td class='confluenceTd'><font color="navy">percentage</font></td>
+<td class='confluenceTd'><font color="navy">AVAILABILITY</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+</tr>
+</tbody></table>
+</div>
+
+ 
+
+<h3><a name="RabbitMQ-RabbitMQChannelMetrics"></a>RabbitMQ Channel Metrics </h3>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'>Name</th>
+<th class='confluenceTh'>Alias</th>
+<th class='confluenceTh'>Units</th>
+<th class='confluenceTh'>Category</th>
+<th class='confluenceTh'>Default On</th>
+<th class='confluenceTh'>Default Interval</th>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Availability</font></td>
+<td class='confluenceTd'><font color="navy">Availability</font></td>
+<td class='confluenceTd'><font color="navy">percentage</font></td>
+<td class='confluenceTd'><font color="navy">AVAILABILITY</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Messages Publish /s</font></td>
+<td class='confluenceTd'><font color="navy">publishDetails</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Messages Confirm /s</font></td>
+<td class='confluenceTd'><font color="navy">confirmDetails</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Messages Deliver /s</font></td>
+<td class='confluenceTd'><font color="navy">deliverDetails</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Messages Acknowledge /s</font></td>
+<td class='confluenceTd'><font color="navy">ackDetails</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Messages Get /s</font></td>
+<td class='confluenceTd'><font color="navy">getDetails</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Messages Get (noack) /s</font></td>
+<td class='confluenceTd'><font color="navy">getNoAckDetails</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Messages Deliver (noack) /s</font></td>
+<td class='confluenceTd'><font color="navy">deliverNoAckDetails</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Messages Deliver+Get /s</font></td>
+<td class='confluenceTd'><font color="navy">deliverGetDetails</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">idle Time</font></td>
+<td class='confluenceTd'><font color="navy">idleTime</font></td>
+<td class='confluenceTd'><font color="navy">ms</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">30 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Consumers</font></td>
+<td class='confluenceTd'><font color="navy">consumerCount</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Prefetch Count</font></td>
+<td class='confluenceTd'><font color="navy">prefetchCount</font></td>
+<td class='confluenceTd'><font color="navy">B</font></td>
+<td class='confluenceTd'><font color="navy">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Acks Uncommitted</font></td>
+<td class='confluenceTd'><font color="navy">acksUncommitted</font></td>
+<td class='confluenceTd'><font color="navy">B</font></td>
+<td class='confluenceTd'><font color="navy">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Messages Unacknowledged</font></td>
+<td class='confluenceTd'><font color="navy">messagesUnacknowledged</font></td>
+<td class='confluenceTd'><font color="navy">B</font></td>
+<td class='confluenceTd'><font color="navy">THROUGHPUT</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">5 min</font></td>
+</tr>
+<tr>
+</tr>
+</tbody></table>
+</div>
+
+
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

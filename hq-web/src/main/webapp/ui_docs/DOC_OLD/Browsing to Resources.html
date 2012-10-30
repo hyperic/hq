@@ -1,0 +1,93 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : Browsing to Resources</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : Browsing to Resources
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325700413841 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325700413841 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325700413841 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1325700413841'>
+<ul>
+    <li><a href='#BrowsingtoResources-ListResourcesbyInventoryType'>List Resources by Inventory Type</a></li>
+    <li><a href='#BrowsingtoResources-ListResourcesbyResourceType'>List Resources by Resource Type</a></li>
+    <li><a href='#BrowsingtoResources-FilterPlatforms%2CServers%2CandServicesbyGroup'>Filter Platforms, Servers, and Services by Group</a></li>
+    <li><a href='#BrowsingtoResources-FilterResourcesbyName%2COwner%2CandAvailability'>Filter Resources by Name, Owner, and Availability</a></li>
+</ul></div>
+
+<h1><a name="BrowsingtoResources-ListResourcesbyInventoryType"></a>List Resources by Inventory Type</h1>
+<p>The first time you display the <b>Resources &gt; Browse</b> page during a session, it lists the platforms in inventory, and the type, description, and current availability for each. See the screenshot below for an example.  To list resources of another inventory type, click the link for that type &#8212; <b>Servers</b>, <b>Services</b>, <b>Compatible Groups/Clusters</b>, <b>Mixed Groups</b>, or <b>Applications</b> &#8212; above the resource list.</p>
+
+<p><span class="image-wrap" style=""><img src="attachments/79660206/79921911.png" width="750px" style="border: 0px solid black"/></span></p>
+
+<h1><a name="BrowsingtoResources-ListResourcesbyResourceType"></a>List Resources by Resource Type</h1>
+
+<p>After you select an inventory type to list, a resource type selector list appears. The pulldown label depends on the currently selected inventory type, for example, <b>All Platform Types</b>, <b>All Server Types</b>, and so on. For example, in when screenshot below, the <b>Platforms</b> inventory type is selected, so a <b>Platform Types</b> pulldown is present. Select a platform type from the list to list only resources of that type.</p>
+
+<p><span class="image-wrap" style=""><img src="attachments/79660206/79921910.png" width="750px" style="border: 0px solid black"/></span></p>
+
+<p>If the currently selected inventory level is <b>Servers</b> or <b>Services</b>, a pulldown list of resource types of the selected inventory type is present.  Select a resource type from the list to list only resources of that type.</p>
+
+<p>If the currently selected inventory level is <b>Compatible Groups/Clusters</b>, a pulldown list labelled "Group Type" will appear. The list will contain resource types. If there is at least one compatible group of a resource type, that type will appear in the pulldown.  Select a resource type from the list to list only groups that contain that type.</p>
+
+<p>If the currently selected inventory level is <b>Mixed Groups</b>, a pulldown list labelled "Group Type" will appear. (See the pulldown to the right of the *Platform Types" list in the screenshot in <a href="#BrowsingtoResources-ListResourcesbyResourceType">List Resources by Resource Type</a>). The entries in the list depend on the mixed groups configured in your environment. Select a group type from the list to list only groups of that composition. Depending on your deployment, the list may include:</p>
+<ul>
+	<li><b>Mixed Group - Platforms, Servers and Services</b></li>
+	<li><b>Mixed Group - Groups</b></li>
+	<li><b>Mixed Group - Applications</b></li>
+</ul>
+
+
+<h1><a name="BrowsingtoResources-FilterPlatforms%2CServers%2CandServicesbyGroup"></a>Filter Platforms, Servers, and Services by Group</h1>
+
+<p>When the currently selected inventory level is <b>Platforms</b>, <b>Servers</b> or <b>Services</b>, a pulldown list of groups appears. It lists both compatible and mixed groups to which you have access.  To list the platforms, servers, or services that are members of a particular group, select the group from the <b>All Groups</b> pulldown. </p>
+
+<h1><a name="BrowsingtoResources-FilterResourcesbyName%2COwner%2CandAvailability"></a>Filter Resources by Name, Owner, and Availability </h1>
+
+<p>You can apply additional filters the list of resources currently displayed.  </p>
+<ol>
+	<li>To filter by resource name, enter an alphanumeric string that matches all or a portion of resource name.</li>
+	<li>Click the <b>Unavailable</b> box to filter the current list of resources to include only resources that are currently unavailable.</li>
+	<li>Click the <b>Owned by <em>UserName</em></b> box to filter to include only resources</li>
+	<li>Click the green control to the right of the filter options to apply the filters.</li>
+</ol>
+
+
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:06</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>
