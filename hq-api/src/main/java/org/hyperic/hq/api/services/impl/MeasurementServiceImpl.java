@@ -64,7 +64,7 @@ public class MeasurementServiceImpl extends RestApiService implements Measuremen
             ApiMessageContext apiMessageContext = newApiMessageContext();
             return measurementTransfer.getAggregatedMetricData(apiMessageContext, hqMsmtReqs, begin, end);
         } catch (TimeframeBoundriesException e) {
-            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.WRONG_DATE_VALUES);
+            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.WRONG_DATE_VALUES,"");
         }
     }
 }
