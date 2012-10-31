@@ -27,13 +27,13 @@ public class MeasurementMapper {
     public Measurement toMeasurement(org.hyperic.hq.measurement.server.session.Measurement hqMsmt) {
         Measurement msmt = new Measurement();
         msmt.setInterval(hqMsmt.getInterval());
-        msmt.setName(hqMsmt.getTemplate().getName());
+        msmt.setName(hqMsmt.getTemplate().getAlias());
         return msmt;
     }
 
     public Measurement toMeasurement(org.hyperic.hq.measurement.server.session.Measurement hqMsmt, double avg) {
         Measurement msmt = new Measurement();
-        msmt.setName(hqMsmt.getTemplate().getName());
+        msmt.setName(hqMsmt.getTemplate().getAlias());
         msmt.setInterval(hqMsmt.getInterval());
         msmt.setAvg(avg);
         return msmt;

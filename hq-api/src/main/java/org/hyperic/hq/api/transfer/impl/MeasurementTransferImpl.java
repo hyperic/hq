@@ -197,7 +197,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             Map<Integer, List<Integer>> rscIdsToTmpIds = new HashMap<Integer, List<Integer>>(); // will contain all the resources for which at least one of the templates requested for them exists
             List<String> rscIds = null;
             for (MeasurementTemplate tmp : tmps) {
-                rscIds = tmpNameToRscs.get(tmp.getName());
+                rscIds = tmpNameToRscs.get(tmp.getAlias());
                 if (rscIds==null) { continue;   }
                 for (String _rscId : rscIds) {
                     Integer rscIdInt = Integer.valueOf(_rscId);
