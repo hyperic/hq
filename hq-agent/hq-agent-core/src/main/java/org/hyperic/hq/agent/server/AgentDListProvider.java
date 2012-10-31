@@ -382,8 +382,8 @@ public class AgentDListProvider implements AgentStorageProvider {
                 String key = dIs.readUTF();
                 String val = dIs.readUTF();
                 
-                String decryptedKey = PropertyValueEncryptionUtils.isEncryptedValue(key)?SecurityUtil.decrypt(encryptor, key, false/*stripSingleEncryptionParenthesis*/):key;
-                String decryptedVal = PropertyValueEncryptionUtils.isEncryptedValue(val)?SecurityUtil.decrypt(encryptor, val, false/*stripSingleEncryptionParenthesis*/):val;
+                String decryptedKey = PropertyValueEncryptionUtils.isEncryptedValue(key)?SecurityUtil.decryptRecursiveUnmark(encryptor, key):key;
+                String decryptedVal = PropertyValueEncryptionUtils.isEncryptedValue(val)?SecurityUtil.decryptRecursiveUnmark(encryptor, val):val;
 
                 this.keyVals.put(decryptedKey, decryptedVal);
             }
