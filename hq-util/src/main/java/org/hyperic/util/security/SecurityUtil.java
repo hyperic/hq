@@ -66,7 +66,10 @@ public class SecurityUtil {
     }
     
     public static String unmark(String str) {
-        return str.substring(ENC_MARK_PREFIX.length(), str.length()-ENC_MARK_POSTFIX.length()); 
+        while(str.startsWith(ENC_MARK_PREFIX)) { 
+            str = str.substring(ENC_MARK_PREFIX.length(), str.length()-ENC_MARK_POSTFIX.length());
+        }
+        return str ; 
     }
     
     public static String mark(String str) {
@@ -98,7 +101,7 @@ public class SecurityUtil {
     }
 
     public static String decrypt(StringEncryptor encryptor, String data) {
-        return PropertyValueEncryptionUtils.decrypt(data,encryptor);
+        return encryptor.decrypt(unmark(data.trim())) ;
     }
     
     /**
