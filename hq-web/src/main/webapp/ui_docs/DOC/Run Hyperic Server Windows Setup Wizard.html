@@ -1,0 +1,81 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : Run Hyperic Server Windows Setup Wizard</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : Run Hyperic Server Windows Setup Wizard
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Oct 24, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <style type='text/css'>/*<![CDATA[*/
+div.rbtoc1351121797896 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1351121797896 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1351121797896 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style>
+
+<blockquote><p><b>About this page...</b></p>
+
+<p>This page has instructions for performing a <b>new</b> installation of vFabric Hyperic Server using the vFabric Hyperic Server Windows Setup Wizard. Before running the wizard, see <a href="Hyperic Installation and Startup Process.html" title="Hyperic Installation and Startup Process">Hyperic Installation and Startup Process</a> for information about where installation fits in the implementation process. For production environments, there are several steps to perform before installing the Hyperic Server and Hyperic Agent, including database setup and SSL configuration.</p>
+
+<p>If you wish to upgrade an existing Hyperic deployment, please see <a href="Migrate v4 Hyperic Server and Database to v5.html" title="Migrate v4 Hyperic Server and Database to v5">Migrate v4 Hyperic Server and Database to v5</a>.</p>
+
+<p>The instruction below assume you have already downloaded the vFabric Hyperic Server Setup Wizard to the platform where you want to run the server.</p>
+</blockquote>
+
+
+<p>To install the vFabric Hyperic Server:</p>
+
+<ol>
+	<li>In Windows Explorer, double-click the <tt>vFabric-hyperic-hqee-server-5.x.x.exe</tt> file.</li>
+	<li>On the <b>Welcome</b> page click <b>Next</b> to start the installation.<br/>
+<span class="image-wrap" style=""><img src="attachments/79660206/80281840.png" style="border: 0px solid black"/></span></li>
+	<li>On the <b>Administrator User Information</b> page, enter a username and password for the Hyperic admin account.<br/>
+<span class="image-wrap" style=""><img src="attachments/79660206/80281841.png" style="border: 0px solid black"/></span></li>
+	<li>The <b>HQ Server Properties</b> page displays default values for the Hyperic Server's plain text and SSL listen ports, 7080 and 7443, respectively. Enter different values as desired, or accept the defaults and click <b>Next</b>. &nbsp;<br/>
+<span class="image-wrap" style=""><img src="attachments/79660206/80281842.png" style="border: 0px solid black"/></span></li>
+	<li>On the <b>Server Database Choice</b> page, select whether you wish to use the built-in or an external Postgres database and click <b>Next</b>. For more information, see <a href="About Sizing Profiles in vFabric Hyperic.html" title="About Sizing Profiles in vFabric Hyperic">About Sizing Profiles in vFabric Hyperic</a>.
+<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>If you are going to use an external Postgres database, it must be set up prior to Hyperic Server installation. If you have not already configured the Hyperic database, click <b>Cancel</b>, and configure the Hyperic database as described in <b>Set Up Hyperic Database</b> before installing the Hyperic Server.</td></tr></table></div>
+<p><span class="image-wrap" style=""><img src="attachments/79660206/80281839.png" style="border: 0px solid black"/></span></p></li>
+	<li>On the <b>Server Profile Choice</b> page, choose the appropriate scaling profile for your environment and click <b>Next</b>. For more information, see <a href="About Sizing Profiles in vFabric Hyperic.html" title="About Sizing Profiles in vFabric Hyperic">About Sizing Profiles in vFabric Hyperic</a>.<br/>
+<span class="image-wrap" style=""><img src="attachments/79660206/80281854.png" style="border: 0px solid black"/></span></li>
+	<li>On the <b>License Agreement</b> page, accept the agreement and click <b>Next</b> to continue.<br/>
+<span class="image-wrap" style=""><img src="attachments/79660206/80281845.png" style="border: 0px solid black"/></span></li>
+	<li>On the <b>Select Destination Location</b> page, accept the default installation directory, or browse to the desired directory, and click <b>Next</b>.<br/>
+<span class="image-wrap" style=""><img src="attachments/79660206/80281846.png" style="border: 0px solid black"/></span></li>
+	<li>On the <b>Completing..</b> page, click <b>Finish</b> to complete the installation.<br/>
+<span class="image-wrap" style=""><img src="attachments/79660206/80281847.png" style="border: 0px solid black"/></span></li>
+</ol>
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 29, 2012 12:59</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

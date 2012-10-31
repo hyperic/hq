@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : JBoss 4.3 Entity EJB service</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : JBoss 4.3 Entity EJB service
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <h3><a name="JBoss4.3EntityEJBservice-JBoss4.3EntityEJBservice"></a>JBoss 4.3 Entity EJB service</h3>
+<p><b>Log Track Supported:</b> No<br/>
+<b>Config Track Supported:</b> No<br/>
+<b>Custom Properties Supported:</b> None<br/>
+<b>Supported Control Actions:</b> None<br/>
+<b>Supported Metrics:</b> </p>
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'>Name</th>
+<th class='confluenceTh'>Alias</th>
+<th class='confluenceTh'>Units</th>
+<th class='confluenceTh'>Category</th>
+<th class='confluenceTh'>Default On</th>
+<th class='confluenceTh'>Default Interval</th>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Create Calls</font></td>
+<td class='confluenceTd'><font color="gray">StatisticCreateCount</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Create Calls per Minute</font></td>
+<td class='confluenceTd'><font color="navy">StatisticCreateCount1m</font></td>
+<td class='confluenceTd'><font color="navy">none</font></td>
+<td class='confluenceTd'><font color="navy">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Remove Calls</font></td>
+<td class='confluenceTd'><font color="gray">StatisticRemoveCount</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Remove Calls per Minute</font></td>
+<td class='confluenceTd'><font color="gray">StatisticRemoveCount1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Ready Beans</font></td>
+<td class='confluenceTd'><font color="gray">StatisticReadyCount</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">Pooled Beans</font></td>
+<td class='confluenceTd'><font color="gray">StatisticPooledCount</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">CacheSize</font></td>
+<td class='confluenceTd'><font color="gray">CacheSize</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">PassivatedCount</font></td>
+<td class='confluenceTd'><font color="gray">PassivatedCount</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">PassivatedCount per Minute</font></td>
+<td class='confluenceTd'><font color="gray">PassivatedCount1m</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">10 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">PoolSize</font></td>
+<td class='confluenceTd'><font color="gray">CurrentSize</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="gray">MaxPoolSize</font></td>
+<td class='confluenceTd'><font color="gray">MaxSize</font></td>
+<td class='confluenceTd'><font color="gray">none</font></td>
+<td class='confluenceTd'><font color="gray">UTILIZATION</font></td>
+<td class='confluenceTd'><font color="gray">false</font></td>
+<td class='confluenceTd'><font color="gray">5 min</font></td>
+</tr>
+<tr>
+<td class='confluenceTd'><font color="navy">Availability</font></td>
+<td class='confluenceTd'><font color="navy">Availability</font></td>
+<td class='confluenceTd'><font color="navy">percentage</font></td>
+<td class='confluenceTd'><font color="navy">AVAILABILITY</font></td>
+<td class='confluenceTd'><font color="navy">true</font></td>
+<td class='confluenceTd'><font color="navy">10 min</font></td>
+</tr>
+<tr>
+</tr>
+</tbody></table>
+</div>
+
+
+<p><b>Configuration help:</b> </p>
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

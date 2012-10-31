@@ -1,0 +1,116 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : Configure Unidirectional Agent - Server Communication</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : Configure Unidirectional Agent - Server Communication
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+
+<p>If your security policies dictate, you can configure the agent to initiate all communications with the HQ Server. You can configure unidirectional communications at first startup. Unidirectional communications are always via SSL. </p>
+
+<p>This section has instructions for changing agent communications from bidirectional to unidirectional and vice versa after the agent has already been configured.  </p>
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325699515454 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699515454 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699515454 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1325699515454'>
+<ul>
+    <li><a href='#ConfigureUnidirectionalAgent-ServerCommunication-ChangingfromBidirectionaltoUnidirectionalCommunications'>Changing from Bidirectional to Unidirectional Communications</a></li>
+    <li><a href='#ConfigureUnidirectionalAgent-ServerCommunication-ChangingfromUnidirectionaltoBidirectionalCommunications'>Changing from Unidirectional to Bidirectional Communications</a></li>
+</ul></div>
+
+<h1><a name="ConfigureUnidirectionalAgent-ServerCommunication-ChangingfromBidirectionaltoUnidirectionalCommunications"></a>Changing from Bidirectional to Unidirectional Communications</h1>
+
+<ol>
+	<li>Stop the agent.</li>
+	<li>Remove the agent's <tt>\data</tt> directory.
+	<ul>
+		<li>Removing the <tt>\data</tt> directory will cause the agent, at next startup, to look for the startup settings it needs to connect to the HQ Server in its agent.properties file; if the properties file doesn't contain them, it will prompt for settings in the shell.</li>
+	</ul>
+	</li>
+	<li>Configure the agent for unidirectional communications using one of these methods:
+	<ul>
+		<li>If your practice is to provide all agent startup properties in the properties file, edit <tt>agent.properties</tt> to set  <tt>agent.setup.unidirectional=yes</tt>, and start the agent.</li>
+		<li>If your practice is to configure the agent startup properties interactively, start the agent, and respond "yes" when asked if the agent should be configured for unidirectional communications.</li>
+	</ul>
+	</li>
+	<li>In the HQ user interface, navigate to the platform's Inventory tab and click <b>Edit</b> in the "Type &amp; Network Properties" section.
+	<ul>
+		<li>In the edit view for "Type &amp; Network Properties", the "Agent Connection" drop-down list will show your currently selected port for bidirectional communications, something like 10.2.0.213:2144, where 10.2.0.213 is the IP address of the platform, and 2144 is the bidirectional port number previously used.</li>
+	</ul>
+	</li>
+	<li>Expand the drop-down list and select the entry that shows the same IP address, and "-1" as the port:</li>
+	<li>10.2.0.213:-1
+	<ul>
+		<li>Your agent will now use unidirectional communications.</li>
+	</ul>
+	</li>
+</ol>
+
+
+<h1><a name="ConfigureUnidirectionalAgent-ServerCommunication-ChangingfromUnidirectionaltoBidirectionalCommunications"></a>Changing from Unidirectional to Bidirectional Communications</h1>
+<ol>
+	<li>Stop the agent.</li>
+	<li>Remove the agent's <tt>data</tt> directory.
+	<ul>
+		<li>Removing the <tt>data</tt> directory will cause the agent, at next startup, to look for the startup settings it needs to connect to the HQ Server in its <tt>agent.properties</tt> file; if the properties file doesn't contain them, it will prompt for settings in the shell.</li>
+	</ul>
+	</li>
+	<li>Configure the agent for bidirectional communications using one of these methods:
+	<ul>
+		<li>If your practice is to provide all agent startup properties in the properties file, edit <tt>agent.properties</tt> to set <tt>agent.setup.unidirectional=no</tt>, and start the agent.</li>
+		<li>If your practice to configure the agent startup properties interactively, start the agent, and when prompted for communications direction, respond "no" when asked if the agent should be configured to run in uni-directional mode.</li>
+	</ul>
+	</li>
+	<li>In the HQ user interface, navigate to the platform's Inventory tab and click Edit in the "Type &amp; Network Properties" selection.</li>
+	<li>Select the appropriate agent in the "Agent Connection" drop down.
+	<ul>
+		<li>In the edit view for "Type &amp; Network Properties", the "Agent Connection" drop-down list will show your currently selected port for unidirectional communications, something like  10.2.0.213:-1, where 10.2.0.213 is the IP address of the platform, and -1 is the port number.</li>
+	</ul>
+	</li>
+	<li>Expand the drop-down list and select the entry that shows the same IP address, and "2144" as the port (or the port you are configured to use, if not the default), for example, 10.2.0.213:2144
+	<ul>
+		<li>Your agent will now use  bidirectional communications.</li>
+	</ul>
+	</li>
+</ol>
+
+
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:06</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : Windows Service Service</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : Windows Service Service
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Mar 23, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+ 
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1332532858725 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1332532858725 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1332532858725 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1332532858725'>
+<ul>
+    <li><a href='#WindowsServiceService-MonitoringaWindowsService'>Monitoring a Windows Service</a></li>
+    <li><a href='#WindowsServiceService-ResourcePlugin%2CFunctions%2CandClasses'>Resource Plugin, Functions, and Classes</a></li>
+    <li><a href='#WindowsServiceService-ConfiguretheWindowsServiceinHyperic'>Configure the Windows Service in Hyperic</a></li>
+    <li><a href='#WindowsServiceService-WindowsServiceConfigurationPropertiesPage'>Windows Service Configuration Properties Page</a></li>
+    <li><a href='#WindowsServiceService-WindowsServiceMetrics'>Windows Service Metrics</a></li>
+    <li><a href='#WindowsServiceService-WindowsServiceMonitoringDefaultsPage'>Windows Service Monitoring Defaults Page</a></li>
+    <li><a href='#WindowsServiceService-EventTracking'>Event Tracking</a></li>
+</ul></div> 
+ 
+
+<h1><a name="WindowsServiceService-MonitoringaWindowsService"></a>Monitoring a Windows Service </h1>
+
+<p>Hyperic can monitor a windows service. You configure a platform service of type "Windows Service" on a Windows platform</p>
+
+<h1><a name="WindowsServiceService-ResourcePlugin%2CFunctions%2CandClasses"></a>Resource Plugin, Functions, and Classes </h1>
+
+<p>The Windows Service service type is managed by Hyperic's system plugin.</p>
+
+<h1><a name="WindowsServiceService-ConfiguretheWindowsServiceinHyperic"></a>Configure the Windows Service in Hyperic </h1>
+
+<p>The "Windows Service" service type must be manually configured. </p>
+
+<ol>
+	<li>If you know the name of the Windows Service, proceed to step 2. Otherwise:
+	<ol>
+		<li>Select <b>Run</b> from the Windows <b>Start</b> menu.</li>
+		<li>Type <tt>services.msc</tt> in the run dialog and click <b>OK</b>.</li>
+	</ol>
+	</li>
+	<li>In the list of services displayed, right-click the service you wish to monitor and choose <b>Properties</b>.
+	<ol>
+		<li>Locate the Service Name on the <b>General</b> tab.</li>
+	</ol>
+	</li>
+	<li>In the Hyperic user interface, navigate to the Windows platform where the service runs.</li>
+	<li>Select <b>New Platform Service</b> from the <b>Tools</b> menu.</li>
+	<li>On <b>New Service</b> page, enter a name for the service and select "Windows Service" from the <b>Service Type</b> pull-down.</li>
+	<li>Supply all required values on the <b>Configuration Properties</b> page. Configuration options are shown below in <a href="#WindowsServiceService-WindowsServiceConfigurationPropertiesPage">Windows Service Configuration Properties Page</a>.</li>
+</ol>
+
+
+<h1><a name="WindowsServiceService-WindowsServiceConfigurationPropertiesPage"></a>Windows Service Configuration Properties Page </h1>
+
+<p>The <b>Configuration Properties</b> page for the Windows Service service type is shown below. </p>
+
+<p><span class="image-wrap" style=""><img src="attachments/79660206/79921885.png" width="750" style="border: 0px solid black"/></span></p>
+
+
+
+<h1><a name="WindowsServiceService-WindowsServiceMetrics"></a>Windows Service Metrics </h1>
+
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'>Name	</th>
+<th class='confluenceTh'>Alias	</th>
+<th class='confluenceTh'>Units	</th>
+<th class='confluenceTh'>Category	</th>
+<th class='confluenceTh'>Default On	</th>
+<th class='confluenceTh'>Default Interval</th>
+</tr>
+<tr>
+<td class='confluenceTd'>Availability </td>
+<td class='confluenceTd'>Availability </td>
+<td class='confluenceTd'>percentage </td>
+<td class='confluenceTd'>Availability </td>
+<td class='confluenceTd'>true </td>
+<td class='confluenceTd'>10 </td>
+</tr>
+<tr>
+<td class='confluenceTd'>Start Type </td>
+<td class='confluenceTd'>StartType </td>
+<td class='confluenceTd'>None </td>
+<td class='confluenceTd'>false </td>
+<td class='confluenceTd'>30 </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Memory Size </td>
+<td class='confluenceTd'>MemSize </td>
+<td class='confluenceTd'>B </td>
+<td class='confluenceTd'>UTILIZATION  </td>
+<td class='confluenceTd'>5</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Resident Memory Size </td>
+<td class='confluenceTd'>ResidentMemSize </td>
+<td class='confluenceTd'>B </td>
+<td class='confluenceTd'>UTILIZATION </td>
+<td class='confluenceTd'>5 </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Cpu System Time </td>
+<td class='confluenceTd'>SystemTime </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>UTILIZATION </td>
+<td class='confluenceTd'>10 </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Cpu User Time </td>
+<td class='confluenceTd'>UserTime </td>
+<td class='confluenceTd'>ms</td>
+<td class='confluenceTd'>UTILIZATION </td>
+<td class='confluenceTd'>10 </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Cpu Total Time </td>
+<td class='confluenceTd'>TotalTime </td>
+<td class='confluenceTd'>ms </td>
+<td class='confluenceTd'>UTILIZATION </td>
+<td class='confluenceTd'>10 </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Cpu Usage</td>
+<td class='confluenceTd'>Usage </td>
+<td class='confluenceTd'>ms </td>
+<td class='confluenceTd'>UTILIZATION </td>
+<td class='confluenceTd'>true </td>
+<td class='confluenceTd'>5  </td>
+</tr>
+<tr>
+<td class='confluenceTd'>Start Time</td>
+<td class='confluenceTd'>StartTime </td>
+<td class='confluenceTd'>epoch-millis </td>
+<td class='confluenceTd'>UTILIZATION </td>
+<td class='confluenceTd'>30</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Open Handles</td>
+<td class='confluenceTd'>OpenHandles </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>UTILIZATION </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Threads</td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>none </td>
+<td class='confluenceTd'>UTILIZATION </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+</tbody></table>
+</div>
+
+
+<h1><a name="WindowsServiceService-WindowsServiceMonitoringDefaultsPage"></a>Windows Service Monitoring Defaults Page </h1>
+
+<p>You can enable and disable metrics, select indicator metrics, and change the collection interval for a resource type on its <b>Monitoring Defaults</b> page. To navigate to a resource type's <b>Monitoring Defaults</b> page: </p>
+
+<ol>
+	<li>Click the <b>Administration</b> tab.</li>
+	<li>Click <b>Monitoring Defaults</b>.</li>
+	<li>Scroll down to the resource type and click <b>Edit Metric Template</b>.</li>
+</ol>
+
+
+<p>The <b>Monitoring Defaults</b> page for the Windows Service service type is shown below: </p>
+
+<p><span class="image-wrap" style=""><img src="attachments/79660206/79921508.png" width="800" style="border: 0px solid black"/></span> </p>
+
+<h1><a name="WindowsServiceService-EventTracking"></a>Event Tracking </h1>
+
+<p>You can enable log tracking for a network service. If you do, the agent will log an event for responses that match the criteria you specify. </p>
+
+<p>To enable log tracking, click the <b>Enable Log Tracking</b> box in the <b>Monitoring</b> section of the <b>Configuration Properties</b> page. </p>
+
+<p>For information about Hyperic log tracking functionality and configuration options, and how to view log events, see <a href="Set Up Log Tracking for a Resource.html" title="Set Up Log Tracking for a Resource">Set Up Log Tracking for a Resource</a>.</p>
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

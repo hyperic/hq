@@ -1,0 +1,150 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : Manage Alert and Notification Volume</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : Manage Alert and Notification Volume
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325699664422 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699664422 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699664422 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1325699664422'>
+<ul>
+    <li><a href='#ManageAlertandNotificationVolume-ManageAlertingforOptimalVisibilityintoProblems'>Manage Alerting for Optimal Visibility into Problems</a></li>
+    <li><a href='#ManageAlertandNotificationVolume-PreventMultipleAlertsfortheSameProblem'>Prevent Multiple Alerts for the Same Problem</a></li>
+    <li><a href='#ManageAlertandNotificationVolume-DisableallAlertNotifications'>Disable all Alert Notifications</a></li>
+    <li><a href='#ManageAlertandNotificationVolume-HierarchicalAlertingPreventsaCascadeofAlertsinResourceHierarchies'>Hierarchical Alerting Prevents a Cascade of Alerts in Resource Hierarchies</a></li>
+    <li><a href='#ManageAlertandNotificationVolume-ConfigureNetworkHostDependenciesforHierarchicalAlerting'>Configure Network Host Dependencies for Hierarchical Alerting</a></li>
+    <li><a href='#ManageAlertandNotificationVolume-SetaNotificationThrottle'>Set a Notification Throttle</a></li>
+    <li><a href='#ManageAlertandNotificationVolume-EnableorDisableallAlertDefinitions'>Enable or Disable all Alert Definitions</a></li>
+</ul></div>
+
+
+
+<h1><a name="ManageAlertandNotificationVolume-ManageAlertingforOptimalVisibilityintoProblems"></a>Manage Alerting for Optimal Visibility into Problems</h1>
+
+<p>The purpose of alerting is to speed the process of detecting and resolving problems. Rapid detection and response can be compromised when multiple alerts fire as a result of the same problem, or if responders are inundated by repetitive alert notifications. Excessive alert and notification are less likely when:</p>
+<ul>
+	<li>A given problem or root cause results in one, rather than many, alerts.</li>
+	<li>An alert status of "unfixed" indicates a problem that still exists and needs attention, rather than a transient issue that occurred, and then went away.</li>
+	<li>A single problem doesn't result in a firestorm of redundant notifications.</li>
+</ul>
+
+
+<p>The following sections  describe  options for controlling the volume of alerts and notifications.</p>
+
+<h1><a name="ManageAlertandNotificationVolume-PreventMultipleAlertsfortheSameProblem"></a>Prevent Multiple Alerts for the Same Problem</h1>
+
+<p>When the volume of fired alerts is high, prioritizing and resolving problems is harder. You can reduce the overall volume of fired alerts without sacrificing visibility if you limit the number of times a given alert definition fires an alert for the same incident.</p>
+<ul>
+	<li><b>Use repeating escalations</b> &#45; Assign an escalation that repeats until the alert is fixed.&nbsp; An alert is in escalation cannot re-fire. The use of repeating escalations for all alerts is highly recommended and the best way to control alert volume in Hyperic.</li>
+</ul>
+
+
+<ul>
+	<li><b>Fire one alert then disable the definition</b> &#45; You can configure a alert definition to fire once and disable itself until that alert is marked fixed. When the alert is marked "fixed" the alert definition is re-enabled. Note that if you have vFabric Hyperic, you can can define an associated recovery alert to automatically fix the alert when the triggering condition is no longer true.</li>
+</ul>
+
+
+<h1><a name="ManageAlertandNotificationVolume-DisableallAlertNotifications"></a>Disable all Alert Notifications</h1>
+
+<p>If the volume of notifications exceeds manageable levels you can disable alert notifications globally.&nbsp; This option stops all alert notifications immediately including those resulting from escalations in process.</p>
+
+<ol>
+	<li>Click the <b>Administration</b> tab.</li>
+	<li>Click <b>HQ Server Settings</b>.</li>
+	<li>In the "Global Alert Properties" section, click the <b>Alert Notifications</b> OFF or ON control.</li>
+</ol>
+
+
+<p>The change takes effect immediately. No alert notifications will be issued when OFF is selected. Escalations currently in progress will be terminated.</p>
+
+<h1><a name="ManageAlertandNotificationVolume-HierarchicalAlertingPreventsaCascadeofAlertsinResourceHierarchies"></a>Hierarchical Alerting Prevents a Cascade of Alerts in Resource Hierarchies</h1>
+<p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+
+<p><a name="ManageAlertandNotificationVolume-hierarchical"></a><br/>
+Hierarchical alerting prevents a single root cause in the same resource hierarchy from causing a cascade of alerts to fire.</p>
+
+<p>When hierarchical alerting is enabled, the alert evaluation process takes into account the availability and alert status of a resource's parent. Specifically, when an agent reports that a resource with an active alert definition is unavailable, HQ checks the availability of the resource's&nbsp; parent in the resource hierarchy. Hyperic will fire an alert for the child resource only if:</p>
+<ul>
+	<li>the parent is available, or</li>
+	<li>the parent is unavailable, and there is not an enabled, single-condition alert definition on its Availability metric.</li>
+</ul>
+
+
+<p>Hierarchical alerting takes advantage of Hyperic's knowledge of the platform-server-service resource hierarchy, obtained via the auto-discovery process. For example, before firing an alert for a service, Hyperic checks the availability and alert status of its parent server. Similarly, before firing an alert for a server, Hyperic checks the availability and alert status of its parent platform.</p>
+
+<p>Hierarchical alerting is a global behavior that applies to all resources in inventory; it is enabled by default. You enable or disable hierarchical alerting in the "Global Alert Settings" section of the <b>HQ Server Settings</b> page, accessible from the <b>Administration</b> tab in the vFabric Hyperic user interface.The change takes effect immediately.</p>
+
+<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Hierarchical Alerting and vSphere Resources</b><br />This version of Hyperic does not fully support hierarchical alerting for the vSphere virtual resources hierarchy (VMware vCenter - vSphere Host - vSphere VM). For more information see "Known Issues in Hyperic Enterprise 4.4" on <a href="http://support.hyperic.com/display/DOC/Hyperic+HQ+4.4.0+Release+Notes">http://support.hyperic.com/display/DOC/Hyperic+HQ+4.4.0+Release+Notes</a>.</td></tr></table></div>
+
+<h1><a name="ManageAlertandNotificationVolume-ConfigureNetworkHostDependenciesforHierarchicalAlerting"></a>Configure Network Host Dependencies for Hierarchical Alerting</h1>
+<p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+
+
+<p>You can extend the reach of hierarchical alerting beyond the basic platform-server-service hierarchy to top level platforms - network devices or virtual hosts upon which operating system platforms depend.</p>
+
+<p>To enable Hyperic to consider a top-level platform's availability and alert status before firing an alert for a dependent resources, you must define the relationship between a top-level platform and the operating system platforms that depend on it. To do so, you use the <b>Network Host Dependency Manager</b>, available in the "Plugins" section on the <b>Administration</b> tab of the vFabric Hyperic user interface. The <a href="ui-Admin.Dependency.html" title="ui-Admin.Dependency">help page</a> for the <b>Network Host Dependency Manager</b> provides instructions.</p>
+
+<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>vSphere Resource Relationships in vFabric Hyperic</b><br />If you manage vSphere resources using the new vSphere plugin, do not use the <b>Network Host Dependency Manager</b> to configure dependencies for vSphere resources. vSphere resource types will be removed from the <b>Network Host Dependency Manager</b> pulldown menus in a future release. For information about the vSphere virtual resource hierarchy, see <a href="vSphere.html" title="vSphere">vSphere</a>.</td></tr></table></div>
+
+<h1><a name="ManageAlertandNotificationVolume-SetaNotificationThrottle"></a>Set a Notification Throttle</h1>
+<p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+
+
+
+<p>You can configure the Hyperic Server to throttle back alert notifications in the event of an alert storm. You configure the maximum number of notifications that Hyperic will issue within a fifteen second interval. When the threshold is reached, Hyperic stops sending individual alert notifications, and instead, sends a summary of alert activity to&nbsp; designated recipients every ten minutes. When the volume of notifications falls below the specified threshold, Hyperic resumes sending individual notifications.</p>
+
+<p>Notification throttling is disabled by default. You configure it on the <b>HQ Server Settings</b> page, available from the <b>Administration</b> tab.</p>
+
+<h1><a name="ManageAlertandNotificationVolume-EnableorDisableallAlertDefinitions"></a>Enable or Disable all Alert Definitions</h1>
+
+<p>You can disable or enable alert definitions globally, if you want to turn alerting on or off for all resources in inventory.</p>
+<ol>
+	<li>Click the <b>Administration</b> tab.</li>
+	<li>Click <b>HQ Server Settings</b>.</li>
+	<li>In the "Global Alert Properties" section, click the <b>Alerts</b> ON or OFF control.</li>
+</ol>
+
+
+<p>The change takes effect immediately. No alerts will be fired for any resource when OFF is selected. Escalations currently in progress will be completed.</p>
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:06</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

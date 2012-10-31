@@ -171,6 +171,8 @@
 			<table name="EAM_KEYSTORE" />
 			<table name="EAM_MEASUREMENT" />
 			<table name="EAM_MEASUREMENT_TEMPL" />
+			<table name="EAM_MEASUREMENT_BL"/>
+			<table name="EAM_MEASUREMENT_CAT" />
 			<table name="EAM_METRIC_PROB" />
 			<table name="EAM_MONITORABLE_TYPE" />
 			<table name="EAM_NUMBERS" />
@@ -215,8 +217,6 @@
 		</tables>
 		
 		<tables id="data.tables"> 
-			<table name="EAM_MEASUREMENT_BL"/>
-			<table name="EAM_MEASUREMENT_CAT" />
 			<bigTable name="EAM_MEASUREMENT_DATA_1D" noOfPartitions="10" partitionColumn="MEASUREMENT_ID" truncate="false"/>
 			<bigTable name="EAM_MEASUREMENT_DATA_1H" noOfPartitions="10" partitionColumn="MEASUREMENT_ID" truncate="false"/>
 			<bigTable name="EAM_MEASUREMENT_DATA_6H" noOfPartitions="10" partitionColumn="MEASUREMENT_ID" truncate="false"/>

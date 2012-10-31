@@ -21,15 +21,15 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Sep 24, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Oct 26, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1348510780976 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1348510780976 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1348510780976 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1351280319908 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1351280319908 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1351280319908 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1348510780976'>
+/*]]>*/</style><div class='rbtoc1351280319908'>
 <ul>
     <li><a href='#SelectandDownloadanInstaller-KeyFactsAboutHypericInstallerPackaging'>Key Facts About Hyperic Installer Packaging</a></li>
     <li><a href='#SelectandDownloadanInstaller-InstallerTypes'>Installer Types</a></li>
@@ -79,24 +79,21 @@ div.rbtoc1348510780976 li {margin-left: 0px;padding-left: 0px;}
 	<li>Hyperic vApp &#8212; A virtual appliance (vApp) is one or moore virtual machine image files (.ovf), each with a  preconfigured operating system environment and application. The Hyperic vApp contains two VM images, one for the Hyperic Server and one for the Hyperic database. Deploying the Hyperic vApp offers these advantages over traditional installation:
 	<ul>
 		<li>Greatly simplified deployment, because the components are already configured to work, and to work with each other</li>
-		<li>Reduced support impacts and risks because the components are self-contained and hence unable to interact, undesirably or otherwise, with other applications.</li>
+		<li>Reduced support impacts and risks because the components are self-contained and hence unable to interact, undesirably or otherwise, with other applications.
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>About vApp Packaging</b><br />The Hyperic vApp is available as an <tt>.ova</tt> archive that contains the <tt>.ovf</tt> descriptor, <tt>.mf</tt>, and <tt>.vmdk</tt> files necessary to deploy the Hyperic Server and Hyperic Database vApps using the vSphere client, as described on <a href="Install Hyperic vApp.html" title="Install Hyperic vApp">Install Hyperic vApp</a>.</td></tr></table></div></li>
 	</ul>
 	</li>
+	<li>Hyperic Installer &#8212; The hyperic installer is script-based and prompts you for installation options with options. You can do a quick install that sets up defaults for most Hyperic Server configuration options, or run it in "full" mode to respond to the configuration dialog yourself. You can also use this installer to install the Hyperic Agent. To install an agent, the installer simply creates a home directory for the agent, and unpacks the agent archive into it &#8212; you configure agent behavior by editing its properties file prior to first startup, or via an interactive dialog at first startup. Full installer packages are available for both Windows and Unix-like environments, with and without built-in JREs. See rows 1 and 2 in <a href="#SelectandDownloadanInstaller-HypericInstallerFeatures">Hyperic Installer Features</a> below. See <a href="Run Hyperic Installer.html" title="Run Hyperic Installer">Run Hyperic Installer</a> for information about running the installer.</li>
 </ul>
 
 
 <ul>
-	<li>Hyperic Installer &#8212; The hyperic installer is script-based and prompts you for installation options with options. You can do a quick install that sets up defaults for most Hyperic Server configuration options, or run it in "full" mode to respond to the configuration dialog yourself. You can also use this installer to install the Hyperic Agent. To install an agent, the installer simply creates a home directory for the agent, and unpacks the agent archive into it &#8212; you configure agent behavior by editing its properties file prior to first startup, or via an interactive dialog at first startup. Full installer packages are available for both Windows and Unix-like environments, with and without built-in JREs. See rows 1 and 2 in <a href="#SelectandDownloadanInstaller-HypericInstallerFeatures">Hyperic Installer Features</a> below.</li>
+	<li>Agent Archives &#8212; Agent-only archives are useful when you roll out agents to a large number of platforms with varying operating systems and architectures. Agent archives are available for both Windows and Unix-like environments, with and without built-in JREs. See rows 3 and 4 in <a href="#SelectandDownloadanInstaller-HypericInstallerFeatures">Hyperic Installer Features</a> below. For related information, see <a href="Install an Agent-Only Package.html" title="Install an Agent-Only Package">Install an Agent&#45;Only Package</a> and <a href="Install Hyperic Agents in Volume.html" title="Install Hyperic Agents in Volume">Install Hyperic Agents in Volume</a>.</li>
 </ul>
 
 
 <ul>
-	<li>Agent Archives &#8212; Agent-only archives are useful when you roll out agents to a large number of platforms with varying operating systems and architectures. Agent archives are available for both Windows and Unix-like environments, with and without built-in JREs. See rows 3 and 4 in <a href="#SelectandDownloadanInstaller-HypericInstallerFeatures">Hyperic Installer Features</a> below.</li>
-</ul>
-
-
-<ul>
-	<li>RHEL RPM &#8212; RPMs are available. Note that the Hyperic RPM is the standard Hyperic installer wrapped in an Expect script. See rows 5 and 6 in <a href="#SelectandDownloadanInstaller-HypericInstallerFeatures">Hyperic Installer Features</a> below.</li>
+	<li>RHEL RPM &#8212; RPMs are available. Note that the Hyperic Server RPM is the standard Hyperic installer wrapped in an Expect script. See rows 5 and 6 in <a href="#SelectandDownloadanInstaller-HypericInstallerFeatures">Hyperic Installer Features</a> below. For RPM installation instructions, see <a href="Install Hyperic Server RPM.html" title="Install Hyperic Server RPM">Install Hyperic Server RPM</a> and <a href="Install Hyperic Agent RPM.html" title="Install Hyperic Agent RPM">Install Hyperic Agent RPM</a>.</li>
 </ul>
 
 
@@ -147,6 +144,11 @@ Platform-independent (64 bit) </td>
 <td class='confluenceTd'> Agent RPM </td>
 <td class='confluenceTd'> Platform-independent (32 or 64 bit) </td>
 </tr>
+<tr>
+<td class='confluenceTd'> 7 </td>
+<td class='confluenceTd'> Hyperic vApp (.ova) </td>
+<td class='confluenceTd'> SUSE (64 bit) </td>
+</tr>
 </tbody></table>
 </div>
 
@@ -158,10 +160,6 @@ Platform-independent (64 bit) </td>
 
 <p>vFabric Hyperic and Hyperic HQ installers are available on the VMware download page at <a href="http://downloads.vmware.com/">http://downloads.vmware.com/</a>. Navigate to the page and choose <b>VMware vFabric Hyperic</b>.</p>
 
-<p>vFabric Hyperic RPM packages are available in the VMware RPM repository. For information about installing from the repository, see <a href="http://pubs.vmware.com:8080/vfabric5/topic/com.vmware.vfabric.platform.5.0/vfabric/install-repo-install.html">http://pubs.vmware.com:8080/vfabric5/topic/com.vmware.vfabric.platform.5.0/vfabric/install-repo-install.html</a>.</p>
-
-<p>If you plan a local RPM installation, rather than from the repository, vFabric Hyperic RPMs are available for download at <a href="http://repo.vmware.com/pub/rhel5/vfabric/5/i386">http://repo.vmware.com/pub/rhel5/vfabric/5/i386</a> and <a href="http://repo.vmware.com/pub/rhel5/vfabric/5/x86_64">http://repo.vmware.com/pub/rhel5/vfabric/5/x86_64</a>.</p>
-
 				    
                     			    </td>
 		    </tr>
@@ -171,7 +169,7 @@ Platform-independent (64 bit) </td>
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:06</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 29, 2012 12:59</font></td>
 		    </tr>
 	    </table>
     </body>

@@ -1,0 +1,195 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : View Inventory Properties for a Service</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : View Inventory Properties for a Service
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+ 
+<p>This page describes the contents of the <b>Inventory</b> page for a service.  </p>
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1329930398435 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1329930398435 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1329930398435 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1329930398435'>
+<ul>
+    <li><a href='#ui-Inventory.Service-InventoryPageforaService'>Inventory Page for a Service</a></li>
+    <li><a href='#ui-Inventory.Service-InventoryPageHeaderforaService'>Inventory Page Header for a Service</a></li>
+<ul>
+    <li><a href='#ui-Inventory.Service-ResourceProperties'>Resource Properties</a></li>
+    <li><a href='#ui-Inventory.Service-MapControlforaService'>Map Control for a Service</a></li>
+    <li><a href='#ui-Inventory.Service-ToolsMenuforaService'>Tools Menu for a Service</a></li>
+</ul>
+    <li><a href='#ui-Inventory.Service-GeneralPropertiesforaService'>General Properties for a Service</a></li>
+    <li><a href='#ui-Inventory.Service-GroupsContainingaService'>Groups Containing a Service</a></li>
+    <li><a href='#ui-Inventory.Service-ConfigurationPropertiesforaService'>Configuration Properties for a Service</a></li>
+</ul></div> 
+
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Learn about Services</b><br />See <a href="Resources, Resource Types and Inventory Types.html" title="Resources, Resource Types and Inventory Types">Resources, Resource Types and Inventory Types</a> in <em>vFabric Hyperic Overview</em>.</td></tr></table></div>
+
+ 
+
+
+
+<h1><a name="ViewInventoryPropertiesforaService-InventoryPageforaService"></a>Inventory Page for a Service </h1>
+
+<p>To display the <b>Inventory</b> page for a service, use <b>Resources &gt; Browse &gt; Services</b> to navigate to the service, and click the <b>Inventory</b> tab. </p>
+
+<p>To view a screenshot of the <b>Inventory</b> page for a service, see <a href="Inventory Page - Service.html" title="Inventory Page - Service">Inventory Page &#45; Service</a>.</p>
+
+<h1><a name="ViewInventoryPropertiesforaService-InventoryPageHeaderforaService"></a>Inventory Page Header for a Service</h1>
+
+<p>The sections below describe the data and controls that appear at the top of the <b>Inventory</b> page for a service. </p>
+
+<h2><a name="ViewInventoryPropertiesforaService-ResourceProperties"></a>Resource Properties </h2>
+
+<p>The properties at the top of the <b>Inventory</b> page for a service provide identifying information including: </p>
+
+<ul>
+	<li><b>Description&nbsp;</b></li>
+	<li><b>Owner</b> - By default, the Hyperic user under whose account the resource was added to inventory.&nbsp; Click <b>Change...</b> to assign a different resource owner.</li>
+</ul>
+
+
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>The plugin developer controls which resource properties are displayed at the top of a resource's <b>Inventory</b> page: any properties enclosed in a <tt>&lt;properties&gt;</tt> element for a resource type appear in the page header when you browse to an instance of that type.</td></tr></table></div> 
+<p><span class="image-wrap" style=""><img src="attachments/79660206/79921642.png" width="750pxpx" style="border: 0px solid black"/></span> </p>
+
+<h2><a name="ViewInventoryPropertiesforaService-MapControlforaService"></a>Map Control for a Service</h2>
+
+<p>The <b>Map</b> control presents graphical view of the service and the resources that are related to it. The map illustrates hierarchical inventory relationships, and a resource's membership in groups or applications. <br/>
+The screenshot below is a resource map for a service of type "ActiveMQ Embedded 5.3 Topic". </p>
+
+<ul>
+	<li>The service runs in an&nbsp;"ActiveMQ Embedded 5.3" server, which is hosted on a "MacOSX" platform</li>
+	<li>The service is part of an application called "myap".</li>
+</ul>
+
+
+<p><span class="image-wrap" style=""><img src="attachments/79660206/79921643.png" style="border: 0px solid black"/></span> </p>
+
+<h2><a name="ViewInventoryPropertiesforaService-ToolsMenuforaService"></a>Tools Menu for a Service</h2>
+
+<p>The screenshot below is the <b>Tools</b> menu for a service. </p>
+
+<p><span class="image-wrap" style=""><img src="attachments/79660206/79921679.png" width="150px" style="border: 0px solid black"/></span> </p>
+
+<p>When a service is selected, the <b>Tools</b> menu has the following commands: </p>
+
+<ul>
+	<li><b>Configure Service</b> &#8212; Opens the <b>Configuration Properties</b> page for the service, where you can edit the resource's configuration properties.</li>
+</ul>
+
+
+<ul>
+	<li><b>Delete Service</b> &#8212; Delete service from inventory.</li>
+</ul>
+
+
+<ul>
+	<li><b>Add to Dashboard Favorites</b> &#8212; Adds the service to the <b>Favorite Resources</b> portlet on the the current Hyperic user's Dashboard.</li>
+</ul>
+
+
+<ul>
+	<li><b>Add to Group</b> &#8212; Opens the <b>Group Manager</b> page, which lists the groups to which the service may be added. You can add a service to a group if:
+	<ul>
+		<li>You have permission to access the group, and:
+		<ul>
+			<li>The group is a mixed group that contains platforms, servers, and services.</li>
+			<li>The group is a compatible group of the selected service's service type.</li>
+		</ul>
+		</li>
+	</ul>
+	</li>
+</ul>
+
+
+<h1><a name="ViewInventoryPropertiesforaService-GeneralPropertiesforaService"></a>General Properties for a Service</h1>
+
+<p>The <b>General Properties</b> section of the <b>Inventory</b> page for a service lists the following information: </p>
+
+<ul>
+	<li><b>Description</b> &#8212; A description of the service. This is an optional, user-configured value.</li>
+	<li><b>Date Created</b> &#8212; The date the service was added to the Hyperic inventory</li>
+	<li><b>Location</b></li>
+	<li><b>Date Modified</b>, <b>Modified By</b> &#8212; The date the service was last modified and the user who modified it.</li>
+	<li><b>Resource Type</b> &#8212; The service type.</li>
+</ul>
+
+
+<p>Click the <b>Edit</b> button to open a page where you can edit the service's Name or Description. </p>
+
+
+<p><span class="image-wrap" style=""><img src="attachments/79660206/79921642.png" width="750pxpx" style="border: 0px solid black"/></span> </p>
+
+
+<h1><a name="ViewInventoryPropertiesforaService-GroupsContainingaService"></a>Groups Containing a Service</h1>
+
+<p>This "Groups Containing this Resource* section lists the following information for each the group of which the service is a member. </p>
+<ul>
+	<li><b>Group</b> &#8212; The resource name, presented as a hyperlink you can click to navigate to the group.</li>
+	<li><b>Description</b></li>
+</ul>
+
+
+<p>There are two controls available: </p>
+
+<ul>
+	<li><b>Add to List</b> &#8212; Click to add the service to a group.</li>
+	<li><b>Remove From Lis</b>t &#8212; If you have checkmarked one or more groups in the list, this control allows you to remove the resource from the selected groups.</li>
+</ul>
+
+
+<p><span class="image-wrap" style=""><img src="attachments/79660206/79921487.png" width="750px" style="border: 0px solid black"/></span> </p>
+
+<h1><a name="ViewInventoryPropertiesforaService-ConfigurationPropertiesforaService"></a>Configuration Properties for a Service</h1>
+
+<p>This section displays the configuration properties for the service. </p>
+<ul>
+	<li><b>Shared</b> &#8212; These properties vary by service type.</li>
+	<li><b>Monitoring</b> &#8212; These properties control log and configuration tracking for the service. For more information see <a href="" title="ui-Inventory.Service">ui&#45;Inventory.Service</a>.</li>
+</ul>
+
+
+
+<p><span class="image-wrap" style=""><img src="attachments/79660206/79921678.png" width="750px" style="border: 0px solid black"/></span></p>
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:06</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

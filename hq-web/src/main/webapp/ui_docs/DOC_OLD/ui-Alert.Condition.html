@@ -1,0 +1,153 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : ui-Alert.Condition</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : ui-Alert.Condition
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <h3><a name="ui-Alert.Condition-ConditionSet"></a>Condition Set</h3>
+
+<p>An alert condition specifies a resource metric value or event that will initiate the alert firing process.</p>
+
+<p>The condition types you can choose when you define a alert vary by resource type and Hyperic version. If a condition type is not supported by your version of Hyperic or is not valid for the target resource, it will not appear as an option.</p>
+
+<p>To define a condition, choose one of the following condition types, and supply required parameter values.</p>
+<ul>
+	<li><b>Metric condition</b> &#45;&nbsp; To base the alert on the value of a metric that Hyperic collects for the resource:
+	<ol>
+		<li><b>Metric</b> &#45; Select a metric from the selector list.&nbsp; Only currently enabled metrics are listed.&nbsp; (If the metric you're looking for is not listed, see the note below.)</li>
+		<li>Define the rule for evaluating the metric value.&nbsp; You can:
+		<ul>
+			<li><ins>Compare metric value to an absolute value</ins>. Select an operator: <b>&gt;(greater than)</b>, <b>&lt;(less than)</b>, <b>=(equal to)</b>, or <b>&#33;= (not equal to)</b>, and enter a metric value. If the metric value is a percentage, specify it as a float value. For example, enter <tt>.99</tt> for <tt>99%</tt>, <tt>1.0</tt> for 100%. Use a period (.) as a decimal separator, rather than a comma (,).</li>
+			<li><ins>Compare metric value to its minimum, baseline, or maximum value</ins> <font color="red">&#42;</font>, in vFabric Hyperic only. Select an operator: <b>&gt;(greater than)</b>, <b>&lt;(less than)</b>, <b>=(equal to)</b>, or <b>&#33;= (not equal to)</b>, and choose "Min Value", "Baseline Value" or "Max Value". Baselining must be enabled. For more information, see <a href="Metrics and Metric Collection.html#MetricsandMetricCollection-baselines">Baselines</a>.</li>
+			<li><ins>Fire upon change in metric value</ins>.&nbsp; Click <b>value changes</b>.</li>
+		</ul>
+		</li>
+	</ol>
+	</li>
+</ul>
+
+
+<div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>To Enable Collection of a Metric</b></div><div class="panelContent">
+<p>If you want to base a metric condition on a metric that is not currently collected, you have to enable collection of that metric. To do so, update the metric collection settings for the resource type (choose <b>Monitoring Defaults</b> from the <b>Administration</b> tab), or for the specific resource (click <b>Metrics</b> on the <b>Monitor</b> tab for the resource).</p>
+</div></div>
+<ul>
+	<li><b>Inventory Property Condition</b> &#45; To define a condition that is triggered when the value of an inventory property for resource changes, select an inventory property.&nbsp; The pulldown contains only those inventory properties that are valid for the type of the resource to which the alert applies.</li>
+</ul>
+
+
+<ul>
+	<li><b>Control Action Condition</b> &#45; When you define an alert for a resource that supports control actions, you can define a condition that is triggered when a particular control action is performed. If desired, you can base the condition on a control action with a particular result status: "in progress", "completed", or "failed".&nbsp; Pulldowns allow you to select a control action that the resource supports, and a result status if desired.</li>
+</ul>
+
+
+<ul>
+	<li><b>Events/Log Level Condition</b> &#45; To define a condition that is triggered by a log event, select a message severity level ("error", "warn", "info", "debug", "all") and optionally a match string. The condition is satisfied each time a message of the selected severity that contains the match string (if one was specified) is written to a log file that Hyperic is tracking. Log tracking must be enabled for the resource. To determine the log files that Hyperic monitors for the resource, see the <b>Configuration Properties</b> section of the resource's <b>Inventory</b> tab. The log files that Hyperic monitors for a resource are defined using the <b>server.log_track.files</b> property. For configuration instructions, see&nbsp; see <a href="Set Up Log Tracking for a Resource.html" title="Set Up Log Tracking for a Resource">Set Up Log Tracking for a Resource</a>.</li>
+</ul>
+
+
+<ul>
+	<li><b>Config Changed... Condition</b> &#45; This type of condition is triggered by a change to a configuration file that Hyperic is configured to monitor for the resource. To limit the condition to a single file, enter its filename in the "match filename" field.&nbsp; If you don't specify a filename, a change to any file monitored will trigger the alert.&nbsp; To determine the log files that Hyperic monitors for the resource, see the <b>Configuration Properties</b> section of the resource's <b>Inventory</b> tab. The files that Hyperic monitors for a resource are defined using the <b>server.config_track.files</b> property. The maximum length for filename entered is&nbsp; 25 characters.&nbsp; For configuration instructions, see <a href="Set Up Configuration Tracking for a Resource.html" title="Set Up Configuration Tracking for a Resource">Set Up Configuration Tracking for a Resource</a>.</li>
+</ul>
+
+
+<h3><a name="ui-Alert.Condition-DefineAdditionalConditions"></a>Define Additional Conditions</h3>
+<p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+
+
+<p>In vFabric Hyperic, you can define up to three conditions for an alert. To add another condition, click <b>Add Another Condition</b> and specify whether both the new condition and the preceding one must be satisfied for the alert to be triggered ("AND") or only one must be satisfied ("OR").</p>
+
+<h3><a name="ui-Alert.Condition-DefineRecoveryAlertBehavior"></a>Define Recovery Alert Behavior</h3>
+<p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+
+
+
+<p>To designate the alert you're defining as a recovery alert, select the primary alert definition from the pulldown.</p>
+
+<p>A recovery alert condition should detect when the condition that fired the primary alert is no longer true. When a recovery alert fires, it marks the primary alert "Fixed", and the primary alert definition is re-enabled. The primary alert definition should be configured to <b>Generate one alert and then disable alert definition until fixed,</b> as described below. For more information, see <a href="Define a Recovery Alert for a Resource Alert.html" title="Define a Recovery Alert for a Resource Alert">Define a Recovery Alert for a Resource Alert</a>.</p>
+
+<h3><a name="ui-Alert.Condition-EnableActions"></a>Enable Actions</h3>
+<p><a name="ui-Alert.Condition-EnableActions"></a></p>
+
+<p>You can make the condition absolute - (one strike you're out) or fire after the condition occurs repeatedly.&nbsp; Choose either:</p>
+<ul>
+	<li><b>Each time conditions are met</b>.&nbsp; The alert fires upon a single occurrence of the condition, or</li>
+</ul>
+
+
+<ul>
+	<li><b>Once every</b> <b>_ times conditions are met within a time period of _</b> <b>minutes</b>. This option configures an alert to fire when the condition(s) occur multiple times over a period of time. Enter the number of occurrences and period of time.</li>
+</ul>
+
+
+<h3><a name="ui-Alert.Condition-EnableActionFilters"></a>Enable Action Filters</h3>
+
+<p>An action filter can be used to control alert firing and alert actions.</p>
+
+<h4><a name="ui-Alert.Condition-DisableanAlertDefinitionuponFiring"></a>Disable an Alert Definition upon Firing</h4>
+
+<p>Click <b>Generate one alert and then disable alert definition until fixed</b> to disable the alert definition after firing and reenable it when the alert that triggered it is marked "Fixed".</p>
+
+<p>This option eliminates redundant firing for the same problem. If you do not choose this option, the alert will fire repeatedly as long as the triggering condition is still true.&nbsp;&nbsp;</p>
+
+<p>In vFabric Enterprise this configuration option, used in conjunction with recovery alerts, automates the process of disabling and re-enabling an alert definition. Result: (1) no redundant alerts for the same problem, and (2) you don't have manually "fix" an alert triggered by a transient problem.</p>
+
+<h4><a name="ui-Alert.Condition-DisregardControlActionsforRelatedAlerts."></a>Disregard Control Actions for Related Alerts.</h4>
+<p><a name="ui-Alert.Condition-DisregardControlActions"></a></p>
+
+<p>The <b>Disregard control actions that are defined for related alerts</b> option appears on <b>New Alert Definition</b> pages for resources that support control actions. This option only applies when:</p>
+
+<ol>
+	<li>The current alert definition will include an alert action</li>
+	<li>The resource associated with the alert is a member of an application</li>
+	<li>There are other members of the same application with alerts that fire control actions (ideally the same control action)</li>
+</ol>
+
+
+<p>Under these circumstances, this configuration option ensures that if multiple alerts are fired within a short period for resources that are members of the same application, only one control action will be executed. For example, this would prevent a server from being restarted several times in a short period of time for the same alert conditions. For instance, you might have an alert with an action to restart a Tomcat server if the JVM Free Memory got too low and another alert with an action to restart the same server if the JVM Active Thread count got too high. If both alerts fired at the same time and they were filtering control actions, only 1 restart control action would be executed and not two.</p>
+
+				    					    <br/>
+                        <div class="tabletitle">
+                            <a name="attachments">
+                                <h2>Attachments:</h2>
+                            </a>
+                        </div>
+
+                        <div class="greybox" align="left">
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79659920/79921253.gif">fb_ok.gif</a> (image/gif)
+                                <br/>
+                                                    </div>
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

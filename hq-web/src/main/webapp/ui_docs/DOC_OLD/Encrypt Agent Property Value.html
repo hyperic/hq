@@ -1,0 +1,101 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : Encrypt Agent Property Value</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : Encrypt Agent Property Value
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jun 11, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p>Starting in Hyperic 4.6.6, the <tt>agent.properties</tt> file supports encrypted property values. </p>
+
+<p>If, prior to first agent startup, you uncomment and assign a plain text value to <tt>agent.setup.camPword</tt> or <tt>agent.keystore.password</tt>, the agent will automatically encrypt the property value, as described in <a href="Hyperic Security Features and Recommendations.html#HypericSecurityFeaturesandRecommendations-PasswordEncryption">Hyperic Security Features and Recommendations</a>. </p>
+
+<p>If you prefer, you can encrypt these (and other, if desired) property values yourself. </p>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>About Where the Agent Finds Server Connection Data</b><br />Note that upon first successful connection to the Hyperic Server, a Hyperic Agent saves the credentials it used in its <tt>/data</tt> directory. Upon each restart, the agent looks first in that directory for server connection details. Hence, edits to the username and password (<tt>agent.setup.cam.Login</tt> and <tt>agent.setup.camPword</tt>) configured in <tt>agent.properties</tt> have no effect, if the agent has valid connection data its <tt>/data</tt> directory.</td></tr></table></div> 
+
+<p>To add an encrypted entry to <tt>agent.properties</tt>, run the agent start script (<tt>AgentHome/bin/hq-agent.sh</tt> or <tt>AgentHome/bin/hq-agent.bat</tt> with the new <tt>set-property</tt> option, and supply the name of the property and the value you wish to encrypt. </p>
+
+<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Do not use set-property option on an agent upgraded to v4.6.6</b><br />The <tt>set-property</tt> option is only supported for newly installed agents. You cannot manually encrypt properties for an agent that you upgraded to 4.6.6 by pushing the 4.6.6 bundle from the Hyperic Server. Note however that if an upgraded agent's <tt>agent.properties</tt> file contains uncommented password properties with plaintext values, they will be automatically encrypted.</td></tr></table></div>
+
+<p>The command syntax is: </p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">./hq-agent.sh set-property PropertyKey PropertyValue</pre>
+		</div>
+</div></div> 
+<p>For example, to set the <tt>agent.setup.camPword</tt> to "hqadmin": </p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">./bin/ hq-agent.sh set-property agent.setup.camPword hqadmin</pre>
+		</div>
+</div></div> 
+
+<p>If the properties file does not already define the property, the property definition is added at the end of the <tt>agent.properties</tt> file; the encrypted value (not plain text) is shown. For example: </p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">agent.setup.camPword=ENC(gaSh3I8gg1olL1EDHHJo/g==)</pre>
+		</div>
+</div></div> 
+
+<p>The key that was used to encrypt the value is saved in <tt>AgentHome/conf/agent.scu</tt>. </p>
+
+<p>If you encrypt another property value, the key in <tt>AgentHome/conf/agent.scu</tt> will be used. </p>
+
+<p>Note that after you encrypt <tt>agent.setup.camPword</tt> (or any property that the agent uses to connect to the server) the agent must be able to access <tt>AgentHome/conf/agent.scu</tt> or it will fail to start up. <b>Do not delete <tt>agent.scu</tt></b>. </p>
+
+<p>If your agent deployment strategy involves distributed a standard <tt>agent.properties</tt> file to all agents, you must also distribute <tt>agent.scu</tt>. For more information, see <a href="Install Hyperic Agents in Volume.html" title="Install Hyperic Agents in Volume">Install Hyperic Agents in Volume</a>.</p>
+
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>If agent.scu is missing...</b><br />Iff a Hyperic Agent's <tt>AgentHome/conf/agent.scu</tt> file is missing, subsequent attempts to run the agent start script (<tt>hq-agent.sh</tt> or <tt>hq-agent.bat</tt>) with the <tt>setup</tt> option will fail. To resolve this problem, you must either:
+
+<ul>
+	<li>Reinstall the agent, or</li>
+</ul>
+
+
+<ul>
+	<li>Perform these steps:
+	<ol>
+		<li>Stop the agent.</li>
+		<li>Delete its <tt>/data</tt> directory.</li>
+		<li>Set <tt>agent.setup.camPword</tt> in <tt>AgentHome/conf/agent.properties</tt> to a plain text value.</li>
+		<li>Start the agent.</li>
+	</ol>
+	</li>
+</ul>
+</td></tr></table></div>
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:06</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

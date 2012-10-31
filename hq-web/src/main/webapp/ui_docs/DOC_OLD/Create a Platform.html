@@ -1,0 +1,114 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : Create a Platform</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : Create a Platform
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p>This page has general instructions for creating a platform in Hyperic.</p>
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325699726859 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699726859 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699726859 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1325699726859'>
+<ul>
+    <li><a href='#CreateaPlatform-WhentoCreateaPlatformManually'>When to Create a Platform Manually</a></li>
+    <li><a href='#CreateaPlatform-AddaPlatformtoInventoryfromtheHypericUserInterface'>Add a Platform to Inventory from the Hyperic User Interface</a></li>
+    <li><a href='#CreateaPlatform-ConfigurePlatformforMonitoring'>Configure Platform for Monitoring</a></li>
+</ul></div>
+<p>For information about creating a platform using the HQApi see <a href="HQApi resource command.html" title="HQApi resource command">HQApi resource command</a> in <em>vFabric Hyperic Web Services API</em>. </p>
+
+<h1><a name="CreateaPlatform-WhentoCreateaPlatformManually"></a>When to Create a Platform Manually</h1>
+
+<p>Operating system platform types are auto-discovered and cannot be manually added to inventory. The only platform types you can manually add to inventory are:</p>
+
+<ul>
+	<li>Cisco IOS</li>
+	<li>Cicso PIXOS</li>
+	<li>GemFire Distributed System</li>
+	<li>NetApp Filer</li>
+	<li>Network Device</li>
+	<li>VMWare VI3 Host</li>
+	<li>Network Host</li>
+	<li>VMWare vSphere Host</li>
+	<li>VMWare vSphere VM</li>
+	<li>Xen Host</li>
+</ul>
+
+
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Need to Know What a "Platform" Is?</b><br />See <a href="Resources, Resource Types and Inventory Types.html" title="Resources, Resource Types and Inventory Types">Resources, Resource Types and Inventory Types</a> for a more information.</td></tr></table></div>
+<h1><a name="CreateaPlatform-AddaPlatformtoInventoryfromtheHypericUserInterface"></a>Add a Platform to Inventory from the Hyperic User Interface</h1>
+
+<ol>
+	<li>Click <b>New Platform</b> on either:
+	<ul>
+		<li>The Dashboard's <b>Summary Counts</b> portlet</li>
+		<li>The <b>Tools</b> menu on the <b>Browse &gt; Resources</b>.<br/>
+<span class="image-wrap" style=""><img src="attachments/79660206/79921734.png" width="850pxpx" style="border: 0px solid black"/></span></li>
+	</ul>
+	</li>
+	<li>On the <b>New Platform</b> page, enter:
+	<ul>
+		<li><b>Name</b> &#8212; The name of the platform</li>
+		<li><b>Description</b> &#8212; (optional) A description of the platform</li>
+		<li><b>Location</b> &#8212; (optional) The physical location of the platform hardware</li>
+		<li><b>Platform Type</b> &#8212; Select the platform type from the list. Once you create the platform, you cannot change its type.</li>
+		<li><b>Fully Qualified Domain Name</b> &#8212; The platform's FQDN</li>
+		<li><b>Agent Connection</b> &#8212; The IP address:port pair of the Agent the proxied connection to this platform should go through. When a platform is created manually (on this screen), the platform cannot or does not run an Agent itself, and therefore the Agent must connect to the platform via proxy. The list contains the IP address:port pairs from all the currently deployed Agents.</li>
+		<li><b>IP Address</b> &#8212; (optional)</li>
+		<li><b>MAC Address</b> ---(optional)</li>
+		<li><b>Netmask</b> &#8212; At a minimum specify values for the loopback (local) IP address, and then additional sets of values for each network interface on the device.</li>
+	</ul>
+	</li>
+	<li>Click <b>OK</b>.
+	<ul>
+		<li>The <b>Inventory</b> page for the new platform is displayed.</li>
+	</ul>
+	</li>
+</ol>
+
+
+
+<p>The platform's <b>Owner</b> defaults to the account that created the platform.</p>
+
+
+
+<h1><a name="CreateaPlatform-ConfigurePlatformforMonitoring"></a>Configure Platform for Monitoring</h1>
+
+<p>After creating the new platform, you may need supply values for one or more configuration properties. See the resource's <b>Inventory</b> page for configuration options and requirements.</p>
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:06</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

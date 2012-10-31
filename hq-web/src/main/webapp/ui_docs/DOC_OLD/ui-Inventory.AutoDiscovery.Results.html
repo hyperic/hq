@@ -1,0 +1,139 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : ui-Inventory.AutoDiscovery.Results</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : ui-Inventory.AutoDiscovery.Results
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Feb 22, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+ 
+
+ 
+
+<ul>
+	<li><a href="#ui-Inventory.AutoDiscovery.Results-ContentsoftheAutoDiscoveryResultsPage">Contents of the Auto-Discovery Results Page</a></li>
+	<li><a href="#ui-Inventory.AutoDiscovery.Results-ImportorSkipResourcesinAutoDiscoveryResultsPage">Import or Skip Resources in Auto-Discovery Results Page</a></li>
+</ul>
+
+
+<h2><a name="ui-Inventory.AutoDiscovery.Results-ContentsoftheAutoDiscoveryResultsPage"></a>Contents of the Auto-Discovery Results Page </h2>
+
+<p>The <b>Auto-Discovery Results</b> page appears when you click a platform name in the Dashboard's <b>Auto-Discovery</b> portlet. The page shows the results of the most recent platform scan - the new or changed resource information that was discovered, as well as information for unchanged resources. You can filter the page for new, modified, or unchanged resources. You can selectively import new and changed data to inventory. </p>
+
+<p><span class="image-wrap" style=""><img src="attachments/79660206/79921875.png" width="750" style="border: 0px solid black"/></span> </p>
+
+<p>The <b>Auto-Discovery Results</b> page has three sections: </p>
+
+<ul>
+	<li><b>Platform Type</b> &#8212; This section contains the following data and controls:
+	<ul>
+		<li><b>Platform Type</b> &#8212; The resource type of the platform.</li>
+		<li><b>Fully Qualified Domain Name</b> &#8212; The platform's FQDN.</li>
+		<li><b>Import Values/Do Not Import</b> (callout #1 in screenshot) &#8212; In this version of Hyperic, this control has <b>no</b> effect. Changing the value has no impact on what values are imported.</li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul>
+	<li><b>Network Properties</b> &#8212; This section contains the following data and controls:
+	<ul>
+		<li><b>All States/New/Modified/Unchanged</b> selector (callout #2 in screenshot) &#8212; This pulldown allows you to filter the IP addresses that appear in the list by change state.</li>
+		<li>The following data is shown for each IP address matching the currently selected filter value:
+		<ul>
+			<li><b>IP Address</b></li>
+			<li><b>Netmask</b></li>
+			<li><b>MAC Address</b></li>
+			<li><b>Properties State</b> &#8212; Value indicates if the connection properties are "New", "Unchanged", or "Changed".</li>
+		</ul>
+		</li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul>
+	<li><b>Servers</b> &#8212; This section contains the following data and controls:
+	<ul>
+		<li><b>Server Types</b> selector (callout #3 in screenshot)---This pulldown allows you restrict the list to servers of a particular type.</li>
+		<li><b>All States/New/Modified/Unchanged</b> filter&nbsp;(callout #4 in screenshot)---This pulldown allows you to filter the servers that appear in the list by change state.</li>
+		<li>The following data is shown for each for each server in the list:
+		<ul>
+			<li><b>Server</b>&#45;--The name of the resource.</li>
+			<li><b>Server type</b>&#45;--The resource type of the server.</li>
+			<li><b>Install Path</b>&#45;--Where the server is installed</li>
+			<li><b>Server Status</b>&#45;--Value indicates whether the server is "New", "Unchanged", or "Modified.</li>
+			<li><b>Import Values/Do Not Import</b> (callout #5 in screenshot)---The value of this pull-down controls whether the server data will be imported when the <b>OK</b> button is clicked.</li>
+		</ul>
+		</li>
+	</ul>
+	</li>
+</ul>
+
+
+<h2><a name="ui-Inventory.AutoDiscovery.Results-ImportorSkipResourcesinAutoDiscoveryResultsPage"></a>Import or Skip Resources in Auto-Discovery Results Page </h2>
+
+<p>To process the contents of the <b>Auto-Discovery Results</b> page: </p>
+
+<ol>
+	<li>View the new and changed properties in the <b>Network Properties</b> section of the page.</li>
+	<li>If you do not want to import the new or changed network properties to Hyperic inventory, select "Do Not Import"&nbsp;from the pulldown in the <b>Platform Type</b> section of the page (callout #1 in screenshot).</li>
+	<li>View the new and changed servers listed in the <b>Servers</b> section of the page.</li>
+	<li>For each each new or changed server:
+	<ul>
+		<li>If you do not want to import a new or changed server to Hyperic inventory, select "Do Not Import" from the pulldown in the &#42;Action&nbsp;*column</li>
+	</ul>
+	</li>
+	<li>Click <b>OK</b> to import the resource data which you have approved for import.</li>
+</ol>
+
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Configure Resources for Monitoring</b><br />If the Hyperic Agent discovered all of the resource properties required to monitor a resource, it starts monitoring that resource as soon as you add it to inventory. This is the case for most resource types. Note however, that some level of configuration is required to start managing some resources types - see the <b>Configuration Properties</b> section on a resource's <b>Inventory</b> tab for configuration requirements.</td></tr></table></div> 
+
+
+				    					    <br/>
+                        <div class="tabletitle">
+                            <a name="attachments">
+                                <h2>Attachments:</h2>
+                            </a>
+                        </div>
+
+                        <div class="greybox" align="left">
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79660055/79921177.gif">fb_ok.gif</a> (image/gif)
+                                <br/>
+                                                    </div>
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

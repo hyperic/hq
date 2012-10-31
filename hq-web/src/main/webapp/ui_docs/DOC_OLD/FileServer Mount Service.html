@@ -1,0 +1,275 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : FileServer Mount Service</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : FileServer Mount Service
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+ 
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325699975051 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699975051 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699975051 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1325699975051'>
+<ul>
+    <li><a href='#FileServerMountService-FileServerMount'>FileServer Mount</a></li>
+    <li><a href='#FileServerMountService-CreateFileServerMountServiceinHyperic'>Create FileServer Mount Service in Hyperic</a></li>
+    <li><a href='#FileServerMountService-FileServerMountServiceConfigurationOptions'>FileServer Mount Service Configuration Options</a></li>
+    <li><a href='#FileServerMountService-FileServerMountServiceMetrics'>FileServer Mount Service Metrics</a></li>
+    <li><a href='#FileServerMountService-EventTracking'>Event Tracking</a></li>
+</ul></div> 
+
+ 
+
+
+<h1><a name="FileServerMountService-FileServerMount"></a>FileServer Mount</h1>
+
+<p>In Hyperic, a file system is represented by a platform service of type "FileServer Mount". Typically, the Hyperic Agent automatically discovers file systems on a platform. If the agent does not discover the file system on a platform, you can manually configure it.</p>
+
+
+<h1><a name="FileServerMountService-CreateFileServerMountServiceinHyperic"></a>Create FileServer Mount Service in Hyperic</h1>
+
+<p>To create a FileServer Mount service. </p>
+
+<ol>
+	<li>Navigate to the platform where the file server exists.</li>
+	<li>Select <b>New Platform Service</b> from the <b>Tools</b> menu.&nbsp;</li>
+	<li>Name the service.</li>
+	<li>Select "FileServer Mount" from the <b>Service Type</b> pull-down.</li>
+	<li>Click <b>Edit</b> in the "Configuration Properties" section of the new service's <b>Inventory</b> page.</li>
+	<li>On the <b>Configuration Properties</b> page, supply at least the required properties, described in the table below.</li>
+</ol>
+
+
+<h1><a name="FileServerMountService-FileServerMountServiceConfigurationOptions"></a>FileServer Mount Service Configuration Options </h1>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Name </th>
+<th class='confluenceTh'> Description </th>
+<th class='confluenceTh'> Required </th>
+<th class='confluenceTh'> Example </th>
+<th class='confluenceTh'> Notes </th>
+</tr>
+<tr>
+<td class='confluenceTd'> path </td>
+<td class='confluenceTd'> Path to the directory </td>
+<td class='confluenceTd'> Yes </td>
+<td class='confluenceTd'> /Users/myfiles </td>
+<td class='confluenceTd'> Hyperic will verify that the path exists. </td>
+</tr>
+</tbody></table>
+</div>
+
+
+
+<h1><a name="FileServerMountService-FileServerMountServiceMetrics"></a>FileServer Mount Service Metrics </h1>
+
+<p>Each instance of a <b>FileServer Mount</b> service provides the following metrics: </p>
+
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'>Name	</th>
+<th class='confluenceTh'>Alias	</th>
+<th class='confluenceTh'>Units	</th>
+<th class='confluenceTh'>Category	</th>
+<th class='confluenceTh'>Default On	</th>
+<th class='confluenceTh'>Default Interval</th>
+</tr>
+<tr>
+<td class='confluenceTd'>Availability	</td>
+<td class='confluenceTd'>Availability	</td>
+<td class='confluenceTd'>percentage	</td>
+<td class='confluenceTd'>AVAILABILITY	</td>
+<td class='confluenceTd'>true	</td>
+<td class='confluenceTd'>10 min</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Use Percent	</td>
+<td class='confluenceTd'>UsePercent	</td>
+<td class='confluenceTd'>percentage	</td>
+<td class='confluenceTd'>UTILIZATION	</td>
+<td class='confluenceTd'>true	</td>
+<td class='confluenceTd'>5 min</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Total Bytes Used	</td>
+<td class='confluenceTd'>TotFsUsed	</td>
+<td class='confluenceTd'>KB	</td>
+<td class='confluenceTd'>UTILIZATION	</td>
+<td class='confluenceTd'>false	</td>
+<td class='confluenceTd'>5 min</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Capacity	</td>
+<td class='confluenceTd'>Capacity	</td>
+<td class='confluenceTd'>KB	</td>
+<td class='confluenceTd'>UTILIZATION	</td>
+<td class='confluenceTd'>false	</td>
+<td class='confluenceTd'>30 min</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Total Bytes Free	</td>
+<td class='confluenceTd'>TotFsFree	</td>
+<td class='confluenceTd'>KB	</td>
+<td class='confluenceTd'>UTILIZATION	</td>
+<td class='confluenceTd'>true	</td>
+<td class='confluenceTd'>5 min</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Total Bytes Avail	</td>
+<td class='confluenceTd'>TotFsAvail	</td>
+<td class='confluenceTd'>KB	</td>
+<td class='confluenceTd'>UTILIZATION	</td>
+<td class='confluenceTd'>false	</td>
+<td class='confluenceTd'>5 min</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Disk Reads	</td>
+<td class='confluenceTd'>DiskReads	</td>
+<td class='confluenceTd'>none	</td>
+<td class='confluenceTd'>THROUGHPUT	</td>
+<td class='confluenceTd'>false	</td>
+<td class='confluenceTd'>10 min</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Disk Reads per Minute	</td>
+<td class='confluenceTd'>DiskReads1m	</td>
+<td class='confluenceTd'>none	</td>
+<td class='confluenceTd'>THROUGHPUT	</td>
+<td class='confluenceTd'>true	</td>
+<td class='confluenceTd'>10 min</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Disk Writes	</td>
+<td class='confluenceTd'>DiskWrites	</td>
+<td class='confluenceTd'>none	</td>
+<td class='confluenceTd'>THROUGHPUT	</td>
+<td class='confluenceTd'>false	</td>
+<td class='confluenceTd'>10 min</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Disk Writes per Minute	</td>
+<td class='confluenceTd'>DiskWrites1m	</td>
+<td class='confluenceTd'>none	</td>
+<td class='confluenceTd'>THROUGHPUT	</td>
+<td class='confluenceTd'>true	</td>
+<td class='confluenceTd'>10 min</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Disk Read Bytes	</td>
+<td class='confluenceTd'>DiskReadBytes	</td>
+<td class='confluenceTd'>B	</td>
+<td class='confluenceTd'>THROUGHPUT	</td>
+<td class='confluenceTd'>false	</td>
+<td class='confluenceTd'>10 min</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Disk Read Bytes per Minute	</td>
+<td class='confluenceTd'>DiskReadBytes1m	</td>
+<td class='confluenceTd'>B	</td>
+<td class='confluenceTd'>THROUGHPUT	</td>
+<td class='confluenceTd'>false	</td>
+<td class='confluenceTd'>10 min</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Disk Write Bytes	</td>
+<td class='confluenceTd'>DiskWriteBytes	</td>
+<td class='confluenceTd'>B	</td>
+<td class='confluenceTd'>THROUGHPUT	</td>
+<td class='confluenceTd'>false	</td>
+<td class='confluenceTd'>10 min</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Disk Write Bytes per Minute	</td>
+<td class='confluenceTd'>DiskWriteBytes1m	</td>
+<td class='confluenceTd'>B	</td>
+<td class='confluenceTd'>THROUGHPUT	</td>
+<td class='confluenceTd'>false	</td>
+<td class='confluenceTd'>10 min</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Disk Queue	</td>
+<td class='confluenceTd'>DiskQueue	</td>
+<td class='confluenceTd'>none	</td>
+<td class='confluenceTd'>THROUGHPUT	</td>
+<td class='confluenceTd'>false	</td>
+<td class='confluenceTd'>5 min</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Disk Service Time	</td>
+<td class='confluenceTd'>DiskServiceTime	</td>
+<td class='confluenceTd'>ms	</td>
+<td class='confluenceTd'>UTILIZATION	</td>
+<td class='confluenceTd'>false	</td>
+<td class='confluenceTd'>5 min</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Free Files	</td>
+<td class='confluenceTd'>FreeFiles	</td>
+<td class='confluenceTd'>none	</td>
+<td class='confluenceTd'>UTILIZATION	</td>
+<td class='confluenceTd'>false	</td>
+<td class='confluenceTd'>5 min</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Total Files	</td>
+<td class='confluenceTd'>Files	</td>
+<td class='confluenceTd'>none	</td>
+<td class='confluenceTd'>UTILIZATION	</td>
+<td class='confluenceTd'>false	</td>
+<td class='confluenceTd'>5 min</td>
+</tr>
+</tbody></table>
+</div>
+
+
+
+<h1><a name="FileServerMountService-EventTracking"></a>Event Tracking </h1>
+
+<p>You can enable log tracking for a FileServer Mount service. If you do, the agent will log an event for responses that match the criteria you specify. </p>
+
+<p>To enable log tracking, click the <b>Enable Log Tracking</b> box in the <b>Monitoring</b> section of the <b>Configuration Properties</b> page. </p>
+
+<p>For information about Hyperic log tracking functionality and configuration options, and how to view log events, see <a href="Set Up Log Tracking for a Resource.html" title="Set Up Log Tracking for a Resource">Set Up Log Tracking for a Resource</a> in <em>vFabric Hyperic Administration</em>.</p>
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

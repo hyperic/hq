@@ -1,0 +1,147 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : Enable and Disable Alert Definitions</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : Enable and Disable Alert Definitions
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325699715684 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699715684 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699715684 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1325699715684'>
+<ul>
+    <li><a href='#EnableandDisableAlertDefinitions-EnableorDisableaResourceAlertDefinition'>Enable or Disable a Resource Alert Definition</a></li>
+    <li><a href='#EnableandDisableAlertDefinitions-EnableorDisableMultipleAlertDefinitionsforaResource'>Enable or Disable Multiple Alert Definitions for a Resource</a></li>
+    <li><a href='#EnableandDisableAlertDefinitions-EnableorDisableaResourceTypeAlertDefinition'>Enable or Disable a Resource Type Alert Definition</a></li>
+    <li><a href='#EnableandDisableAlertDefinitions-EnableorDisableanGroupAlertDefinition'>Enable or Disable an Group Alert Definition</a></li>
+    <li><a href='#EnableandDisableAlertDefinitions-EnableorDisableallAlertDefinitionsforMultipleResources'>Enable or Disable all Alert Definitions for Multiple Resources</a></li>
+    <li><a href='#EnableandDisableAlertDefinitions-EnableorDisableallAlertDefinitions'>Enable or Disable all Alert Definitions</a></li>
+</ul></div>
+
+
+<h1><a name="EnableandDisableAlertDefinitions-EnableorDisableaResourceAlertDefinition"></a>Enable or Disable a Resource Alert Definition</h1>
+
+<p>There are multiple ways you can enable or disable a resource alert definition in the HQ user interface:</p>
+<ul>
+	<li>On the <b>Alerts</b> tab for a resource:
+	<ol>
+		<li>Browse the the resource to which the alert definition is assigned.</li>
+		<li>Click the <b>Alerts</b> tab.</li>
+		<li>Click <b>Configure</b> to display a list of alert definitions for the resource.<br/>
+The page will include any alert definitions that the resource inherits from a resource type alert definition, marked with an asterisk. if you enable or disable the alert definition at this level, the change will be overridden by subsequent updates to the alert definition at the resource type level.</li>
+		<li>Checkmark the alert definition you wish to enable or disable and toggle the <b>Set Active</b> control.</li>
+	</ol>
+	</li>
+</ul>
+
+
+<ul>
+	<li>On the <b>Alert Definition</b> page:
+	<ol>
+		<li>Navigate to the <b>Alert Definition</b> page, by clicking the alert definition name on the <b>Alert Center</b> page or the <b>Alert Detail</b> page for a alert that has fired.</li>
+		<li>Click <b>Edit</b> the in the "Alert Properties" section of the <b>Alert Definition</b> page.</li>
+		<li>Toggle the <b>Set Active</b> button.</li>
+	</ol>
+	</li>
+</ul>
+
+
+<h1><a name="EnableandDisableAlertDefinitions-EnableorDisableMultipleAlertDefinitionsforaResource"></a>Enable or Disable Multiple Alert Definitions for a Resource</h1>
+
+<ol>
+	<li>Browse the the resource to which the alert definition is assigned.</li>
+	<li>Click the <b>Alert</b> tab.</li>
+	<li>Click <b>Configure</b> to display a list of alert definitions for the resource.</li>
+	<li>Checkmark the alert definitions you wish to enable or disable and toggle the <b>Set Active</b> control.</li>
+</ol>
+
+
+<h1><a name="EnableandDisableAlertDefinitions-EnableorDisableaResourceTypeAlertDefinition"></a>Enable or Disable a Resource Type Alert Definition</h1>
+
+<p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+
+
+<p>When you enable or disable a resource type alert, the change applies to all resources of that type.</p>
+<ol>
+	<li>Click <b>Administration</b> in the masthead.</li>
+	<li>Click <b>Monitoring Defaults</b> in "HQ Server Settings" section.</li>
+	<li>On the <b>HQ Monitoring Defaults Configuration</b> page, click <b>Edit Alerts</b> for the resource type.</li>
+	<li>The <b>Monitoring Defaults</b> page displays alert definitions for the resource type.</li>
+	<li>Click one or more alert definitions, and toggle the <b>Set Active</b> button.</li>
+</ol>
+
+
+<h1><a name="EnableandDisableAlertDefinitions-EnableorDisableanGroupAlertDefinition"></a>Enable or Disable an Group Alert Definition</h1>
+<p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+
+
+
+<ol>
+	<li>Browse the the group to which the alert definition is assigned.</li>
+	<li>Click the <b>Alert</b> tab.</li>
+	<li>Click <b>Configure</b> to display a list of alert definitions for the group.</li>
+	<li>Checkmark the alert definition you wish to enable or disable and toggle the <b>Set Active</b> control.</li>
+</ol>
+
+
+<h1><a name="EnableandDisableAlertDefinitions-EnableorDisableallAlertDefinitionsforMultipleResources"></a>Enable or Disable all Alert Definitions for Multiple Resources</h1>
+
+<p>You can disable or enable all of the alert definitions for selected resources on the <b>Browse Resource</b> page.</p>
+<ol>
+	<li>Click the <b>Resources</b> tab.</li>
+	<li>Use the filter options at the top of the page to list the resources of interest.</li>
+	<li>Place a checkmark next to one or more resources.</li>
+	<li>Click <b>Enable all Alerts</b> or <b>Disable all Alerts</b>.</li>
+</ol>
+
+
+<h1><a name="EnableandDisableAlertDefinitions-EnableorDisableallAlertDefinitions"></a>Enable or Disable all Alert Definitions</h1>
+
+<p>You can disable or enable alert definitions globally, if you want to turn alerting on or off for all resources in inventory.</p>
+<ol>
+	<li>Click the <b>Administration</b> tab.</li>
+	<li>Click <b>HQ Server Settings</b>.</li>
+	<li>In the "Global Alert Properties" section, click the <b>Alerts</b> ON or OFF control.</li>
+</ol>
+
+
+<p>The change takes effect immediately. No alerts will be fired for any resource when OFF is selected. Escalations currently in progress will be completed.</p>
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:06</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

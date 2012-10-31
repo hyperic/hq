@@ -1,0 +1,254 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : iostat Tutorial</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : iostat Tutorial
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p>As an example, we will create an I/O Device service which uses an <tt>iostat</tt>  script wrapper to format the data. Most Linux admins are familar with the <b>iostat</b> command which reports CPU and I/O stats for devices and partitions.  For more information, see <a href="http://linuxcommand.org/man_pages/iostat1.html">http://linuxcommand.org/man_pages/iostat1.html</a>.</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">% iostat -d -x
+Linux 2.6.9-22.EL (hammer)      06/23/2006
+
+Device:    rrqm/s wrqm/s   r/s   w/s   rsec/s   wsec/s avgrq-sz avgqu-sz   await  svctm  %util
+hdc          0.00   0.00  0.00  0.00     0.00     0.00    96.94     0.00  129.82 113.47   0.00
+sda          0.02   0.59  0.07  0.54     2.00     9.06    17.95     0.00    4.21   1.75   0.11</pre>
+		</div>
+</div></div>
+<p>Each device (<em>hdc</em>, <em>sda</em>) will be an instance of the <em>I/O Device</em> service, so we want the wrapper script to only collect metrics for a given device:</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">% iostat -d -x sda
+
+Linux 2.6.9-22.EL (hammer)      06/23/2006
+
+Device:    rrqm/s wrqm/s   r/s   w/s   rsec/s   wsec/s avgrq-sz avgqu-sz   await  svctm  %util
+sda          0.02   0.59  0.07  0.54     2.00     9.06    17.95     0.00    4.21   1.75   0.11</pre>
+		</div>
+</div></div>
+<p>The <a href="http://support.hyperic.com/download/attachments/59375678/device_iostat.pl?version=1&amp;modificationDate=1151101764000">wrapper script</a> will invoke <b>iostat</b> with the arguments given above and parse the tabular output into key value pairs like so:</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">% ./pdk/scripts/device_iostat.pl sda
+rrqm/s=0.02
+wrqm/s=0.59
+r/s=0.07
+w/s=0.54
+rsec/s=2.00
+wsec/s=9.06
+avgrq-sz=17.95
+avgqu-sz=0.00
+await=4.21
+svctm=1.75
+%util=0.11</pre>
+		</div>
+</div></div>
+<p>The plugin defines configuration properties for the script path and the device name:</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: xml; gutter: false">&lt;config&gt;
+  &lt;option name="script"
+          description="Collector script"
+          default="pdk/scripts/device_iostat.pl"/&gt;
+  &lt;option name="device"
+          description="Device name"
+          default="sda"/&gt;
+&lt;/config&gt;</pre>
+		</div>
+</div></div>
+<p>The properties are then applied to a filter template:</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: xml; gutter: false">&lt;filter name="template"
+        value="exec:file=%script%,args=%device%"/&gt;</pre>
+		</div>
+</div></div>
+<p>Where <b>exec</b> will route collection of the metric to the script executor plugin and the properties will be expanded to:</p>
+
+<p><em>exec:file=pdk/scripts/device_iostat.pl,args=sda</em>.</p>
+
+<p>The filter is then used in each <b>metric</b> <b>template</b> with the key it is to collect:</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: xml; gutter: false">&lt;metric name="Write Requests per Second"
+        category="PERFORMANCE"
+        indicator="true"
+        template="${template}:w/s"/&gt;</pre>
+		</div>
+</div></div>
+<p>Which is expanded to:</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">template="exec:file=pdk/scripts/device_iostat.pl,args=sda:w/s"</pre>
+		</div>
+</div></div>
+<p><a name="iostatTutorial-iodevicetest"></a></p>
+
+<h4><a name="iostatTutorial-CommandLineTest"></a>Command Line Test</h4>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">% java -jar pdk/lib/hq-pdk.jar -Dplugins.include=io-device -Ddevice=sda -t "I/O Device"
+
+I/O Device Availability:
+   I/O Device:exec:file=pdk/scripts/device_iostat.pl,args=sda:Availability
+   =&gt;100.0%&lt;=
+
+I/O Device Read Requests Merged per Second:
+   I/O Device:exec:file=pdk/scripts/device_iostat.pl,args=sda:rrqm/s
+   =&gt;0.0&lt;=
+
+I/O Device Write Requests Merged per Second:
+   I/O Device:exec:file=pdk/scripts/device_iostat.pl,args=sda:wrqm/s
+   =&gt;0.6&lt;=
+
+I/O Device Read Requests per Second:
+   I/O Device:exec:file=pdk/scripts/device_iostat.pl,args=sda:r/s
+   =&gt;0.1&lt;=
+
+I/O Device Write Requests per Second:
+   I/O Device:exec:file=pdk/scripts/device_iostat.pl,args=sda:w/s
+   =&gt;0.6&lt;=
+
+I/O Device Sectors Read per Second:
+   I/O Device:exec:file=pdk/scripts/device_iostat.pl,args=sda:rsec/s
+   =&gt;2.0&lt;=
+
+I/O Device Sectors Writen per Second:
+   I/O Device:exec:file=pdk/scripts/device_iostat.pl,args=sda:wsec/s
+   =&gt;9.1&lt;=
+
+I/O Device Average Sector Request Size:
+   I/O Device:exec:file=pdk/scripts/device_iostat.pl,args=sda:avgrq-sz
+   =&gt;18.0&lt;=
+
+I/O Device Average Queue Length:
+   I/O Device:exec:file=pdk/scripts/device_iostat.pl,args=sda:avgqu-sz
+   =&gt;0.0&lt;=
+
+I/O Device Average Wait Time:
+   I/O Device:exec:file=pdk/scripts/device_iostat.pl,args=sda:await
+   =&gt;0.004s&lt;=
+
+I/O Device Average Service Time:
+   I/O Device:exec:file=pdk/scripts/device_iostat.pl,args=sda:svctm
+   =&gt;0.001s&lt;=
+
+I/O Device CPU Usage:
+   I/O Device:exec:file=pdk/scripts/device_iostat.pl,args=sda:%util
+   =&gt;0.1%&lt;=</pre>
+		</div>
+</div></div>
+<p><a name="iostatTutorial-iodeviceservice"></a></p>
+
+<h4><a name="iostatTutorial-CreateanI%2FODeviceservice"></a>Create an I/O Device service</h4>
+
+<p>After you have deployed the iodevice plugin, instances of the service must be created manually. Using the Hyperic user interface:</p>
+<ul>
+	<li>Navigate to the platform view of choice and click the "New Platform Service" link</li>
+	<li>Enter a <b>Name</b> of your choice</li>
+	<li>Select <b>I/O Device</b> from the drop-down list</li>
+	<li>Click the <b>OK</b> button</li>
+	<li>From the Inventory tab, click the <b>Edit</b> button</li>
+	<li>Change any properties if needed</li>
+	<li>Click the <b>OK</b> button</li>
+</ul>
+
+
+<p>Your service and now configured and metric data will be viewable from the <b>Monitor</b> tab.</p>
+
+<p><a name="iostatTutorial-iodevicesources"></a></p>
+
+<h4><a name="iostatTutorial-I%2FODevicepluginsources"></a>I/O Device plugin sources</h4>
+
+<ul>
+	<li>The <a href="http://support.hyperic.com/display/hypcomm/io-device-plugin.xml" title="io-device-plugin.xml">io-device-plugin.xml</a> HQ plugin descriptor (<a href="http://support.hyperic.com/download/attachments/59375678/io-device-plugin.xml?version=1&amp;modificationDate=1151101752000">Download</a>)</li>
+</ul>
+
+
+<ul>
+	<li>The iostat wrapper script (<a href="http://support.hyperic.com/download/attachments/59375678/device_iostat.pl?version=1&amp;modificationDate=1151101764000">Download</a>)</li>
+</ul>
+
+
+<h3><a name="iostatTutorial-Howoftenaremyscriptsexecuted%3F"></a>How often are my scripts executed?</h3>
+
+<p>The script collector caches the results to avoid executing the script for each individual metric.  The cache key is properties of the metric template.</p>
+
+<p>In the iostat example, where the template is:</p>
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>exec:file=pdk/scripts/device_iostat.pl,args=sda:Availability
+
+</pre>
+</div></div>
+<p>The properties/cache-key would be:</p>
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>file=pdk/scripts/device_iostat.pl,args=sda
+
+</pre>
+</div></div>
+<p>If you wanted the script to collect data for all resources in a single round, you could just change the template like so:</p>
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>exec:file=pdk/scripts/device_iostat.pl:sda_Availability
+
+</pre>
+</div></div>
+<p>Which makes the properties/cache-key the same for all resources:</p>
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>file=pdk/scripts/device_iostat.pl
+
+</pre>
+</div></div>
+<p>The io-device-plugin.xml would change to:</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: xml; gutter: false">&lt;filter name="template"
+             value="exec:file=%script%:%device%"/&gt;
+
+     &lt;metric name="Availability"
+             template="${template}:Availability"
+             indicator="true"/&gt;</pre>
+		</div>
+</div></div>
+<p>And <b>device_iostat.pl</b> would just format the output keys with device name in the key:</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">print "${device}_$labels[$i]=$values[$i]\n";</pre>
+		</div>
+</div></div>
+<p>The lifetime of the cache is defined by the metric intervals, whose defaults are defined by the plugin and can be changed later per-resource or globally per-type in the UI.  So, if your metric intervals were configured to collect every 5 minutes, the script would only be run once every 5 minutes regardless of how many resources the script output applies to.</p>
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

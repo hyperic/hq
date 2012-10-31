@@ -21,15 +21,15 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Sep 25, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Oct 02, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1348605149948 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1348605149948 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1348605149948 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1349200763736 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1349200763736 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1349200763736 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1348605149948'>
+/*]]>*/</style><div class='rbtoc1349200763736'>
 <ul>
     <li><a href='#RunHypericInstaller-ObtainHypericInstaller'>Obtain Hyperic Installer</a></li>
     <li><a href='#RunHypericInstaller-AbouttheSetupScript'>About the Setup Script</a></li>
@@ -40,7 +40,7 @@ div.rbtoc1348605149948 li {margin-left: 0px;padding-left: 0px;}
 
 <p>This page has instructions for performing a <b>new</b> installation of Hyperic components using the Hyperic installer. Before running the installer, see <a href="Hyperic Installation and Startup Process.html" title="Hyperic Installation and Startup Process">Hyperic Installation and Startup Process</a> for information about where installation fits in the implementation process. For production environments, there are several steps to perform before installing the Hyperic Server and Hyperic Agent, including database setup and SSL configuration.</p>
 
-<p>If you wish to upgrade an existing Hyperic deployment, please see <a href="Hyperic Upgrade Processes.html" title="Hyperic Upgrade Processes">Hyperic Upgrade Processes</a>.</p></blockquote>
+<p>If you wish to upgrade an existing Hyperic deployment, please see <a href="Migrate v4 Hyperic Server and Database to v5.html" title="Migrate v4 Hyperic Server and Database to v5">Migrate v4 Hyperic Server and Database to v5</a> and <a href="Upgrade Hyperic Agent.html" title="Upgrade Hyperic Agent">Upgrade Hyperic Agent</a>.</p></blockquote>
 
 <h1><a name="RunHypericInstaller-ObtainHypericInstaller"></a>Obtain Hyperic Installer</h1>
 
@@ -63,17 +63,12 @@ div.rbtoc1348605149948 li {margin-left: 0px;padding-left: 0px;}
 
 
 <ul>
-	<li><tt>&#45;upgrade</tt> &#8212; Use "upgrade" mode if you have an existing Hyperic Server installation. The server configuration and the contents of the existing Hyperic database are preserved. See <a href="Hyperic Upgrade Processes.html" title="Hyperic Upgrade Processes">Hyperic Upgrade Processes</a> before doing an upgrade installation.</li>
+	<li><tt>&#45;upgrade</tt> &#8212; Use "upgrade" mode to upgrade a 5.x Hyperic Server to a later version. For more information see [Upgrade Hyperic Server}. To upgrade a 4.x Hyperic Server to 5.0, see <a href="Migrate v4 Hyperic Server and Database to v5.html" title="Migrate v4 Hyperic Server and Database to v5">Migrate v4 Hyperic Server and Database to v5</a>. if you have an existing Hyperic Server installation. The server configuration and the contents of the existing Hyperic database are preserved. See <a href="Hyperic Upgrade Processes.html" title="Hyperic Upgrade Processes">Hyperic Upgrade Processes</a> before doing an upgrade installation.</li>
 </ul>
 
 
 <ul>
-	<li><tt>&#45;postgresql</tt> &#8212; Quick install when using a standalone (not the Hyperic built-in) PostgreSQL database; installer will prompt you for database connection information and use defaults for other configuration settings.</li>
-</ul>
-
-
-<ul>
-	<li><tt>&#45;updateScale</tt> &#8212; In vFabric Hyperic 4.6.5 and later, run the installer with this option to change the sizing profile for the Hyperic Server. For information about sizing profiles, see <a href="About Sizing Profiles in vFabric Hyperic.html" title="About Sizing Profiles in vFabric Hyperic">About Sizing Profiles in vFabric Hyperic</a>. For information about changing the sizing profile for vFabric Hyperic Server, see <a href="Change vFabric Hyperic Server Sizing Profile.html" title="Change vFabric Hyperic Server Sizing Profile">Change vFabric Hyperic Server Sizing Profile</a>.</li>
+	<li><tt>&#45;updateScale</tt> &#8212; Run the installer with this option to change the sizing profile for the Hyperic Server. For information about sizing profiles, see <a href="About Sizing Profiles in vFabric Hyperic.html" title="About Sizing Profiles in vFabric Hyperic">About Sizing Profiles in vFabric Hyperic</a>. For information about changing the sizing profile for vFabric Hyperic Server, see <a href="Change vFabric Hyperic Server Sizing Profile.html" title="Change vFabric Hyperic Server Sizing Profile">Change vFabric Hyperic Server Sizing Profile</a>.</li>
 </ul>
 
 
@@ -110,13 +105,13 @@ div.rbtoc1348605149948 li {margin-left: 0px;padding-left: 0px;}
 		<li>On Unix-based platforms, enter:
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
-		<pre class="theme: Confluence; brush: java; gutter: false">PathToInstaller/setup.sh -mode</pre>
+		<pre class="theme: Confluence; brush: java; gutter: false">PathToInstaller/setup.sh -full</pre>
 		</div>
 </div></div></li>
 		<li>On Windows platforms, enter:
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
-		<pre class="theme: Confluence; brush: java; gutter: false">PathToInstaller\setup.bat -mode</pre>
+		<pre class="theme: Confluence; brush: java; gutter: false">PathToInstaller\setup.bat -full</pre>
 		</div>
 </div></div></li>
 		<li>where <em>mode</em> is one of the values in the table above, with the exception of <tt>upgrade</tt> &#8212; if you are upgrading an existing Hyperic deployment, see <a href="Hyperic Upgrade Processes.html" title="Hyperic Upgrade Processes">Hyperic Upgrade Processes</a>.</li>
@@ -229,7 +224,7 @@ div.rbtoc1348605149948 li {margin-left: 0px;padding-left: 0px;}
 		</li>
 		<li><b><em>Override the JDBC connection URL for the PostgreSQL database [default 'jdbc:postgresql://localhost:5432/HQ?protocolVersion=2']:</em></b>
 		<ul>
-			<li>.</li>
+			<li>Correct the URL, if necessary.</li>
 		</ul>
 		</li>
 	</ol>
@@ -263,7 +258,7 @@ div.rbtoc1348605149948 li {margin-left: 0px;padding-left: 0px;}
 	<li><b><em>What should the email address be for the initial admin user? [default 'hqadmin@eng.vmware.com']:</em></b></li>
 	<li>If the installer detects a database from a previous Hyperic installation, it will prompt you to:
 	<ul>
-		<li><b>1: Upgrade the HQ server database</b> &#8212; Choose this option to preserve your existing Hyperic data, then follow the instructions in <a href="Upgrade Hyperic Server and Database.html" title="Upgrade Hyperic Server and Database">Upgrade Hyperic Server and Database</a>.</li>
+		<li><b>1: Upgrade the HQ server database</b> &#8212; Choose this option to preserve your existing Hyperic data, then follow the instructions in <a href="Migrate v4 Hyperic Server and Database to v5.html" title="Migrate v4 Hyperic Server and Database to v5">Migrate v4 Hyperic Server and Database to v5</a>.</li>
 		<li><b>2: Overwrite the HQ server database</b> &#8212; This option erases all of the data in your Hyperic database. If you do not want to preserve the contents of the database, it would be quicker to drop and recreate the database prior to installing Hyperic Server.</li>
 		<li><b>3: Exit the installer</b></li>
 	</ul>
@@ -288,7 +283,7 @@ div.rbtoc1348605149948 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:06</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 29, 2012 12:59</font></td>
 		    </tr>
 	    </table>
     </body>

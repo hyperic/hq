@@ -1,0 +1,277 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : metrics</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : metrics
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325699859868 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699859868 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699859868 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1325699859868'>
+<ul>
+    <li><a href='#metrics-ElementStructure'>Element Structure</a></li>
+    <li><a href='#metrics-Parentage'>Parentage</a></li>
+    <li><a href='#metrics-Contents'>Contents</a></li>
+    <li><a href='#metrics-Examples'>Examples</a></li>
+<ul>
+    <li><a href='#metrics-unnamedmetricselementwithinaserviceelement'>unnamed metrics element within a service element</a></li>
+    <li><a href='#metrics-metricselementdefined'>metrics element defined</a></li>
+    <li><a href='#metrics-metricselementisreferencedusingincludeattribute'>metrics element is referenced using include attribute</a></li>
+    <li><a href='#metrics-metricselementsincludedusingincludeelement'>metrics elements included using include element</a></li>
+    <li><a href='#metrics-metricselementincludesseveralmetricgroups%2Cplusametricdefinition'>metrics element includes several metric groups, plus a metric definition</a></li>
+    <li><a href='#metrics-metricsnamematchesresource%27sNameAttributestring'>metrics name matches resource's Name Attribute string</a></li>
+</ul>
+</ul></div>
+
+<p>The <tt>&lt;metrics&gt;</tt> element defines a set of metrics.  A <tt>&lt;metrics&gt;</tt> element can containing one or more <tt>&lt;metric&gt;</tt> elements that define an individual metric and its attributes. <tt>&lt;metrics&gt;</tt> elements can serve as building blocks - one <tt>&lt;metrics&gt;</tt> element  can include one or more other named <tt>&lt;metrics&gt;</tt> elements by reference.</p>
+
+<p>Creating a named <tt>&lt;metrics&gt;</tt> element is  useful if you will to collect the same set of metrics for multiple resources. You can define the set of metrics once, and then include it in multiple places in the descriptor. There are several ways to use a <tt>&lt;metrics&gt;</tt> element defined in the root of a plugin in resource elements that follow in the descriptor.&nbsp; Each method is shown in the <a href="#metrics-Examples">Examples</a> section below.</p>
+
+<h1><a name="metrics-ElementStructure"></a>Element Structure</h1>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">&lt;metrics&gt;
+    name
+    include
+    &lt;include&gt;
+    &lt;metric&gt;</pre>
+		</div>
+</div></div>
+
+<h1><a name="metrics-Parentage"></a>Parentage</h1>
+
+<p>The <tt>&lt;metrics&gt;</tt> element can be a child of:</p>
+<ul>
+	<li><tt>&lt;plugin&gt;</tt> (root) - A <tt>&lt;metrics&gt;</tt> element in the plugin root is not associated with a resource type unless  it (1) is included explicitly in a resource element later in the descriptor, or (2) has a <tt>name</tt> attribute value that matches the string that results from concatenating a resource element's <tt>name</tt> and <tt>version</tt> attributes.</li>
+</ul>
+
+
+<ul>
+	<li><tt>&lt;platform&gt;</tt> &#45; A <tt>&lt;metrics&gt;</tt> element at this level is associated with the platform type.</li>
+</ul>
+
+
+<ul>
+	<li><tt>&lt;server&gt;</tt> &#45; A <tt>&lt;metrics&gt;</tt> element  at this level is associated with the server type.</li>
+</ul>
+
+
+<ul>
+	<li><tt>&lt;service&gt;</tt> &#45; A <tt>&lt;metrics&gt;</tt> element  at this level is associated with the service  type.</li>
+</ul>
+
+
+<h1><a name="metrics-Contents"></a>Contents</h1>
+
+<ul>
+	<li><tt>name</tt> &#45; Optionally, specifies the name <tt>&lt;metrics&gt;</tt> element. The <tt>name</tt> is required if you wish to associate the element with <tt>&lt;platform&gt;</tt>, <tt>&lt;server&gt;</tt>, and <tt>&lt;service&gt;</tt> elements later in the the descriptor.&nbsp; There are several ways that a <tt>&lt;metrics&gt;</tt> element defined in the root of a plugin can be used in resource elements that follow in the descriptor:
+	<ul>
+		<li>Use the <tt>&lt;include&gt;</tt> element to reference the <tt>&lt;metrics&gt;</tt>&nbsp; element by its <tt>name</tt> .</li>
+		<li>Use the <tt>include</tt> attribute, to reference the&nbsp; <tt>&lt;metrics&gt;</tt> element by its <tt>name</tt> .</li>
+		<li>Set the <tt>&lt;metrics&gt;</tt> element's <tt>name</tt> attribute to a string that matches the string made up by concatenating a resource element's <tt>name</tt> and <tt>version</tt> attributes. See <a href="#metrics-metricsnamematchesresource%27sNameAttributestring">metrics name matches resource's NameAttribute string</a>.</li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul>
+	<li><tt>include</tt> &#45; Can be used to include one or more <tt>&lt;metrics&gt;</tt> elements in the descriptor by reference to the target <tt>name</tt> attribute(s). If you use include attribute to include multiple <tt>&lt;metrics&gt;</tt> elements, specify the element names as a comma-separated list. For usage, see <a href="#metrics-metricselementisreferencedusingincludeattribute">metrics element is referenced using include attribute</a>.</li>
+</ul>
+
+
+<ul>
+	<li><tt>&lt;include&gt;</tt> &#45; Has similar functionality to the include attribute, can be used to include another <tt>&lt;metrics&gt;</tt> element in the descriptor by reference to the target's name attribute. For usage, see <a href="#metrics-metricselementsincludedusingincludeelement">metrics elements included using include element</a>.</li>
+</ul>
+
+
+<ul>
+	<li><tt>&lt;metric&gt;</tt> &#45; A <tt>&lt;metrics&gt;</tt> element can contain multiple <tt>&lt;metric&gt;</tt> elements that define the name and other attributes of a particular metric. see <a href="#metrics-unnamedmetricselementwithinaserviceelement">unnamed metrics element within a service element</a>. For information about the contents of the <tt>&lt;metric&gt;</tt> element, see <a href="metric.html" title="metric">metric</a>.</li>
+</ul>
+
+
+<h1><a name="metrics-Examples"></a>Examples</h1>
+
+
+<h2><a name="metrics-unnamedmetricselementwithinaserviceelement"></a>unnamed metrics element within a service element</h2>
+
+<p>The excerpt below from the oc4j-plugin is a <tt>&lt;service&gt;</tt> element that contains an&nbsp; unnamed <tt>&lt;metrics&gt;</tt> element that defines two metrics. Because the <tt>&lt;metrics&gt;</tt> element is not referenced elsewhere in the descriptor, the <tt>name</tt> attribute is optional.</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">&lt;service name="Application"&gt;
+   &lt;config&gt;
+      &lt;option name="name" description="Name" default="" /&gt;
+   &lt;/config&gt;
+   &lt;property name="OBJECT_NAME"
+      value="${domain}:j2eeType=J2EEApplication,name=*,J2EEServer=standalone" /&gt;
+   &lt;metrics&gt;
+      &lt;metric name="Availability"
+         template="${OBJECT_NAME}:state:jmx.url=%jmx.url%,jmx.username=%jmx.username%,jmx.password=%jmx.password%,jmx.provider.pkgs=%jmx.provider.pkgs%"
+         indicator="true" /&gt;
+      &lt;metric name="Start Time" alias="startTime"
+         template="${OBJECT_NAME}:${alias}:jmx.url=%jmx.url%,jmx.username=%jmx.username%,jmx.password=%jmx.password%,jmx.provider.pkgs=%jmx.provider.pkgs%"
+         indicator="true" units="epoch-millis" collectionType="static" /&gt;
+   &lt;/metrics&gt;
+   &lt;plugin type="autoinventory" /&gt;
+&lt;/service&gt;</pre>
+		</div>
+</div></div>
+
+<h2><a name="metrics-metricselementdefined"></a>metrics element defined</h2>
+
+<p>This excerpt from the Jetty plugin defines a <tt>&lt;metrics&gt;</tt> element named "Class Loading Metrics" in the root <tt>&lt;plugin&gt;</tt> element.</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">&lt;metrics name="Class Loading Metrics"&gt;
+  &lt;metric name="Loaded Class Count"
+          indicator="false"
+          category="THROUGHPUT"/&gt;
+  &lt;metric name="Total Loaded Class Count"
+          indicator="false"
+          category="THROUGHPUT"/&gt;
+  &lt;metric name="Unloaded Class Count"
+          indicator="false"
+          category="THROUGHPUT"/&gt;
+&lt;/metrics&gt;</pre>
+		</div>
+</div></div>
+
+<h2><a name="metrics-metricselementisreferencedusingincludeattribute"></a>metrics element is referenced using include attribute</h2>
+
+<p>This <tt>&lt;metrics&gt;</tt> element in the Jetty plugin includes the  group of metrics defined in the previous example in a <tt>&lt;server&gt;</tt> element.</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">&lt;server name="Jetty"
+     &lt;metrics include="Class Loading Metrics"/&gt;</pre>
+		</div>
+</div></div>
+
+<h2><a name="metrics-metricselementsincludedusingincludeelement"></a>metrics elements included using include element</h2>
+<p><a name="metrics-MetricsElement"></a></p>
+
+<p>In this excerpt from the mssql-plugin, the <tt>&lt;metrics&gt;</tt> element includes 8 sets of metrics, defined in the root of the plugin.  This is an example of using the <tt>&lt;include&gt;</tt> element, instead the <tt>include</tt> attribute to point to a named set of metrics. Both forms of inclusion are supported, and have the same effect.</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">&lt;server name="MsSQL"
+  ...
+  ...
+  &lt;metrics&gt;
+    &lt;include name="mssql-avail"/&gt;
+    &lt;include name="mssql-database"/&gt;
+    &lt;include name="mssql-access"/&gt;
+    &lt;include name="mssql-general"/&gt;
+    &lt;include name="mssql-memory"/&gt;
+    &lt;include name="mssql-locks"/&gt;
+    &lt;include name="mssql-latches"/&gt;
+    &lt;include name="mssql-cache"/&gt;
+  &lt;/metrics&gt;</pre>
+		</div>
+</div></div>
+
+<h2><a name="metrics-metricselementincludesseveralmetricgroups%2Cplusametricdefinition"></a>metrics element includes several metric groups, plus a metric definition</h2>
+
+<p>This <tt>&lt;metrics&gt;</tt> element from the weblogic-plugin includes other metric groups, and defines an Availability <tt>&lt;metric&gt;</tt> specifically.</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">&lt;service name="Entity EJB"&gt;
+  &lt;metrics include="ejb-tx-runtime,ejb-pool-runtime,ejb-cache-runtime"&gt;
+    &lt;metric name="Availability"
+            template="${EntityEJBRuntime}:Name"
+            indicator="true"/&gt;
+  &lt;/metrics&gt;</pre>
+		</div>
+</div></div>
+
+<h2><a name="metrics-metricsnamematchesresource%27sNameAttributestring"></a>metrics name matches resource's Name Attribute string</h2>
+
+<p>The <tt>metrics</tt> element named "iPlanet Admin 4.1" is defined in the root of the HQ's iplanet-plugin descriptor.</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">&lt;metrics name="iPlanet Admin 4.1"&gt;
+   &lt;metric name="Availability"
+   alias="Availability"
+   template="%protocol%:$\{url.config\}:$\{alias\}"
+   category="AVAILABILITY"
+   group="Reliability"
+   indicator="true"
+   units="percentage"
+   collectionType="dynamic"/&gt;
+&lt;/metrics&gt;</pre>
+		</div>
+</div></div>
+<p>The <tt>server</tt> element later in the same descriptor does not contain any <tt>&lt;metric&gt;</tt> or <tt>&lt;metrics&gt;</tt> elements. Instead, the metrics in <tt>&lt;metrics&gt;</tt> element named "iPlanet Admin 4.1" are mapped to the resource element whose <tt>name</tt> attribute is "iPlanet Admin" and <tt>version</tt> attribute is "4.1"</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">&lt;server name="iPlanet Admin"
+   description="Admin Server"
+   version="4.1"
+   platforms="Unix,Win32"&gt;
+
+   &lt;plugin type="measurement"
+      class="iPlanetMeasurementPlugin"/&gt;
+
+   &lt;plugin type="control"
+            class="iPlanetControlPlugin"/&gt;
+
+   &lt;actions include="start,stop,restart"/&gt;
+
+   &lt;plugin type="autoinventory"
+            class="iPlanet4Detector"/&gt;
+
+    &lt;config include="url,protocol"&gt;
+      &lt;option name="server.id"
+              description="Server instance id"
+              default="https-admserv"/&gt;
+    &lt;/config&gt;
+
+    &lt;config include="snmp" type="measurement"/&gt;
+
+    &lt;scan&gt;
+      &lt;include name="/**/https-admserv/config/obj.conf"/&gt;
+    &lt;/scan&gt;
+
+&lt;/server&gt;</pre>
+		</div>
+</div></div>
+
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:08</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

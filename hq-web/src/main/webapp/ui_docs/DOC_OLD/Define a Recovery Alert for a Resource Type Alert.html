@@ -1,0 +1,95 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : Define a Recovery Alert for a Resource Type Alert</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : Define a Recovery Alert for a Resource Type Alert
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325699749341 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699749341 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699749341 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1325699749341'>
+<ul>
+    <li><a href='#DefineaRecoveryAlertforaResourceTypeAlert-UnderstandingRecoveryAlerts'>Understanding Recovery Alerts</a></li>
+    <li><a href='#DefineaRecoveryAlertforaResourceTypeAlert-DefinePrimaryAlertDefinitiontoDisableItself'>Define Primary Alert Definition to Disable Itself</a></li>
+    <li><a href='#DefineaRecoveryAlertforaResourceTypeAlert-CreateaRecoveryAlertDefinitionforaResourceTypeAlert'>Create a Recovery Alert Definition for a Resource Type Alert</a></li>
+</ul></div>
+
+
+<h1><a name="DefineaRecoveryAlertforaResourceTypeAlert-UnderstandingRecoveryAlerts"></a>Understanding Recovery Alerts</h1>
+
+<p>A recovery alert is special type of alert definition that you pair with a properly configured primary alert definition to streamline alert management. The purpose of a recovery alert is to fire when the condition that fired another alert - the "primary" alert - is no longer true, and then mark the primary alert "fixed" and re-enable the primary alert definition. This strategy prevents redundant alerts and automates the task of marking an alert "fixed".</p>
+
+<p>You can define a recovery alert for a resource alert, and in vFabric Hyperic, a resource type alert. You cannot and don't need to define a recovery alert for a resource group alert in vFabric Hyperic &#8212; recovery alert behavior is automatic for resource group alerts.</p>
+
+<p>To effectively leverage the benefits of recovery alert functionality you need to:</p>
+<ul>
+	<li>Configure the primary alert definition to fire once when triggered and then disable itself until that fired alert is fixed. This prevents multiple alerts for a single incident.</li>
+</ul>
+
+
+<ul>
+	<li>Configure a recovery alert definition and assign it to the primary alert definition. Make the recovery alert condition the opposite of the primary alert condition. The recovery alert fires when the primary alert condition is no longer true. Upon firing, the recovery alert marks the alert fired by the primary alert "fixed", and re-enables the primarily alert definition, so that if the problem occurs again, the primary alert is again triggered.</li>
+</ul>
+
+
+<p>Properly configured primary and recovery alert definitions keep users notified of problems without deluging them with alert notifications.</p>
+
+<h1><a name="DefineaRecoveryAlertforaResourceTypeAlert-DefinePrimaryAlertDefinitiontoDisableItself"></a>Define Primary Alert Definition to Disable Itself</h1>
+
+<p>You can only define a recovery alert for a primary alert definition that already exists. Before setting up a recovery alert, create the primary alert definition, and choose the "Disable alert until re-enabled manually or by recovery alert" option.</p>
+
+<h1><a name="DefineaRecoveryAlertforaResourceTypeAlert-CreateaRecoveryAlertDefinitionforaResourceTypeAlert"></a>Create a Recovery Alert Definition for a Resource Type Alert</h1>
+
+<p>To create a recovery alert definition for a resource type alert:</p>
+
+<ol>
+	<li>Click <b>Administration</b> in the masthead.</li>
+	<li>Click <b>Monitoring Defaults</b> in "HQ Server Settings" section of the page.</li>
+	<li>On the <b>HQ Monitoring Defaults Configuration</b> page, click <b>Edit Alerts</b> for the resource type to which the primary alert is defined. The <b>Monitoring Defaults</b> page will display any alert definitions already assigned to the alert.</li>
+	<li>Click <b>New</b> and follow the directions in <a href="Define an Alert for a Resource Type.html" title="Define an Alert for a Resource Type">Define an Alert for a Resource Type</a>, making sure, when defining the "Condition Set" to
+	<ol>
+		<li>specify the condition that is the opposite of the primary alert definition's condition.&nbsp; For example if the primary alert condition is "1 Minute Load Avg &gt; 2.0.", define the recovery alert condition as "1 Minute Load Avg &lt; 2.0.</li>
+		<li>Use the <b>Recovery Alert</b> pulldown to select the primary alert.</li>
+	</ol>
+	</li>
+</ol>
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:06</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

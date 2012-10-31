@@ -21,17 +21,15 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 20, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Oct 26, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+				    <style type='text/css'>/*<![CDATA[*/
+div.rbtoc1351288224749 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1351288224749 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1351288224749 li {margin-left: 0px;padding-left: 0px;}
 
-<style type='text/css'>/*<![CDATA[*/
-div.rbtoc1342797915703 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1342797915703 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1342797915703 li {margin-left: 0px;padding-left: 0px;}
-
-/*]]>*/</style><div class='rbtoc1342797915703'>
+/*]]>*/</style><div class='rbtoc1351288224749'>
 <ul>
     <li><a href='#ScalingandTuningHypericPerformance-SizingConsiderations'>Sizing Considerations</a></li>
     <li><a href='#ScalingandTuningHypericPerformance-ServerConfigurationSettingsforScaling'>Server Configuration Settings for Scaling</a></li>
@@ -46,13 +44,14 @@ div.rbtoc1342797915703 li {margin-left: 0px;padding-left: 0px;}
 <blockquote><p><b>About this page...</b></p>
 
 <p>This page has information about tuning Hyperic Server for large deployments, including recommended values for server properties based on the number of platforms you will manage.</p></blockquote>
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Sizing Profiles in vFabric Hyperic</b><br />In vFabric Hyperic 4.6.5, the settings described below are implemented by the Hyperic installer &#8212; server property values are set based on the <em>sizing profile</em> you select when installing the Hyperic Server. For information about sizing profiles, see <a href="About Sizing Profiles in vFabric Hyperic.html" title="About Sizing Profiles in vFabric Hyperic">About Sizing Profiles in vFabric Hyperic</a>. Note that you can run the Hyperic installer to change the current sizing profile for the vFabrich Hyperic Server, as described in <a href="Change vFabric Hyperic Server Sizing Profile.html" title="Change vFabric Hyperic Server Sizing Profile">Change vFabric Hyperic Server Sizing Profile</a>.</td></tr></table></div>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Sizing Profiles in vFabric Hyperic</b><br />In vFabric Hyperic the settings described below are implemented by the Hyperic installer &#8212; server property values are set based on the <em>sizing profile</em> you select when installing the Hyperic Server. For information about sizing profiles, see <a href="About Sizing Profiles in vFabric Hyperic.html" title="About Sizing Profiles in vFabric Hyperic">About Sizing Profiles in vFabric Hyperic</a>. Note that you can run the Hyperic installer to change the current sizing profile for the vFabrich Hyperic Server, as described in <a href="Change vFabric Hyperic Server Sizing Profile.html" title="Change vFabric Hyperic Server Sizing Profile">Change vFabric Hyperic Server Sizing Profile</a>.</td></tr></table></div>
 
+<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Hyperic vApp Tuning</b><br />If you run the Hyperic vApp, see Tuning Hyperic vApp</td></tr></table></div>
 <h1><a name="ScalingandTuningHypericPerformance-SizingConsiderations"></a>Sizing Considerations</h1>
 
 <p>The number of platforms the Hyperic Server can manage depends on the hardware it runs on, the number of Hyperic Agents reporting to the server, the volume of metrics that are collected, and the size of the Hyperic database.</p>
 
-<p>See <a href="vFabric Hyperic Supported Configurations and System Requirements.html" title="vFabric Hyperic Supported Configurations and System Requirements">vFabric Hyperic Supported Configurations and System Requirements</a> for Hyperic Server system requirements. Typically, a minimal system configuration will support 25 Hyperic Agents or more. On a high performance platform, a properly configured Hyperic Server can support up to 1500 agents. There are a variety of Hyperic Server properties that govern the system resources available to the server &#8212; settings whose values should be set based on the number of platforms under management.</p>
+<p>See <a href="vFabric Hyperic Supported Configurations and System Requirements.html" title="vFabric Hyperic Supported Configurations and System Requirements">vFabric Hyperic Supported Configurations and System Requirements</a> for Hyperic Server system requirements. Typically, a minimal system configuration will support 25 Hyperic Agents or more. On a high performance platform, a properly configured Hyperic Server can support up to 2,000 agents. There are a variety of Hyperic Server properties that govern the system resources available to the server &#8212; settings whose values should be set based on the number of platforms under management.</p>
 
 <h1><a name="ScalingandTuningHypericPerformance-ServerConfigurationSettingsforScaling"></a>Server Configuration Settings for Scaling</h1>
 
@@ -278,7 +277,7 @@ div.rbtoc1342797915703 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:06</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 29, 2012 13:00</font></td>
 		    </tr>
 	    </table>
     </body>

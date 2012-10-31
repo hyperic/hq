@@ -1,0 +1,345 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : HQApi metric command</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : HQApi metric command
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+ 
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325699164576 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699164576 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699164576 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1325699164576'>
+<ul>
+    <li><a href='#HQApimetriccommand-Functionality'>Functionality</a></li>
+    <li><a href='#HQApimetriccommand-metricCommandOptions'>metric Command Options</a></li>
+<ul>
+    <li><a href='#HQApimetriccommand-metriclist'>metric list</a></li>
+<ul>
+    <li><a href='#HQApimetriccommand-MetriclistCommandQualifiers'>Metric list Command Qualifiers</a></li>
+    <li><a href='#HQApimetriccommand-StructureofaMetricsResponse'>Structure of a MetricsResponse</a></li>
+    <li><a href='#HQApimetriccommand-AttributesinaMetricsResponse'>Attributes in a MetricsResponse</a></li>
+</ul>
+    <li><a href='#HQApimetriccommand-metricsync'>metric sync</a></li>
+    <li><a href='#HQApimetriccommand-metricreschedule'>metric reschedule</a></li>
+</ul>
+    <li><a href='#HQApimetriccommand-Examples'>Examples</a></li>
+<ul>
+    <li><a href='#HQApimetriccommand-metriclist'>metric list</a></li>
+    <li><a href='#HQApimetriccommand-metricsync'>metric sync</a></li>
+    <li><a href='#HQApimetriccommand-metricreschedule'>metric reschedule</a></li>
+</ul>
+</ul></div> 
+ 
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Related Topics</b><br />This page provides information for running an HQ API from the command line. Related topics include: 
+<ul>
+	<li><a href="vFabric Hyperic Web Services API.html" title="vFabric Hyperic Web Services API">vFabric Hyperic Web Services API</a> - brief introduction to the API.</li>
+	<li><a href="HQApi Command-Line Tools.html" title="HQApi Command-Line Tools">HQApi Command&#45;Line Tools</a> - how to get started with the command line tools.</li>
+	<li><a href="HQApi Java API.html" title="HQApi Java API">HQApi Java API</a> - about accessing the APIs programmatically.</li>
+</ul>
+</td></tr></table></div>  
+
+ 
+
+<h1><a name="HQApimetriccommand-Functionality"></a>Functionality </h1>
+
+<p>The <b>metric</b> command has options to list and update the metric collection configuration for an individual resource. </p>
+
+<p>To work with metric collection configurations for resource types, see <a href="HQApi metricTemplate command.html" title="HQApi metricTemplate command">HQApi metricTemplate command</a>. </p>
+
+<h1><a name="HQApimetriccommand-metricCommandOptions"></a>metric Command Options </h1>
+
+<h2><a name="HQApimetriccommand-metriclist"></a>metric list </h2>
+
+<p>The <b>metric list</b> command returns a <tt>MetricsResponse</tt> element that defines the all the metrics that are supported for a specific resource and whether each is currently enabled. </p>
+
+<h3><a name="HQApimetriccommand-MetriclistCommandQualifiers"></a>Metric list Command Qualifiers </h3>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'>Qualifier </th>
+<th class='confluenceTh'>Description </th>
+<th class='confluenceTh'> Optionality </th>
+</tr>
+<tr>
+<td class='confluenceTd'>--id </td>
+<td class='confluenceTd'>limits results to a single resource </td>
+<td class='confluenceTd'>required </td>
+</tr>
+<tr>
+<td class='confluenceTd'>--enabled </td>
+<td class='confluenceTd'>Limits results to metrics that are enabled. </td>
+<td class='confluenceTd'>optional</td>
+</tr>
+</tbody></table>
+</div>
+
+
+<h3><a name="HQApimetriccommand-StructureofaMetricsResponse"></a>Structure of a MetricsResponse </h3>
+
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre> 
+MetricsResponse 
+Metric 
+MetricTemplate 
+</pre>
+</div></div> 
+
+<p>where there is: </p>
+<ul>
+	<li>1 <tt>Metric</tt> element for each metric that can be collected for the resource</li>
+	<li>1 <tt>MetricTemplate</tt> for each metric that can be collected for the resource</li>
+</ul>
+
+
+<h3><a name="HQApimetriccommand-AttributesinaMetricsResponse"></a>Attributes in a MetricsResponse </h3>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'>Element </th>
+<th class='confluenceTh'>Attribute </th>
+<th class='confluenceTh'>Description </th>
+<th class='confluenceTh'>Allowable Values </th>
+</tr>
+<tr>
+<td class='confluenceTd'><tt>Metric</tt> </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>collectionType </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>indicator </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>defaultOn </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>enabled </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>interval </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>id </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>name </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'><tt>MetricTemplate</tt> </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>defaultInterval </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>category </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>collectionType </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>defaultOn </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>indicator </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>plugin </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>units </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>alias </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>name </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>id </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+</tbody></table>
+</div>
+
+
+<h2><a name="HQApimetriccommand-metricsync"></a>metric sync </h2>
+
+<p>The <b>metric sync</b> command can be used to enable/disable metrics or change their metric collection intervals. The sync operation will only update the <tt>enabled</tt> and <tt>interval</tt> attributes for a <tt>Metric</tt> element. </p>
+
+<h2><a name="HQApimetriccommand-metricreschedule"></a>metric reschedule </h2>
+
+<p><b>metric reschedule</b> </p>
+
+<p>The <b>metric reschedule</b> command reschedules metric collection for one or more resources. </p>
+
+<p>It is useful to reschedule metric collection for affected resources after you redeploy a plugin whose metric collection definitions have been updated, for instance, with a new metric, or with changed default metric collection settings. </p>
+
+<p>Rescheduling metric collection for the resources managed by a updated plugin is an alternative to forcing the agent to reload all plugins by restarting it. </p>
+
+<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Plugin changes that add resource types require agent restart.</b><br />If you update a plugin to define a new resource type, you must restart the Hyperic Agent for the changes to take effect. You can only reschedule metric collection for resources that already exist in inventory.</td></tr></table></div> 
+
+<p>The <b>metric reschedule</b> command accepts a <tt>ResourcesResponse</tt> element, which can contain one or more resources. You can create a file containing a <tt>ResourcesResponse</tt> element using the resource list command. See <b>HQApi resource</b> command for more information. </p>
+
+
+
+<h1><a name="HQApimetriccommand-Examples"></a>Examples </h1>
+
+<h2><a name="HQApimetriccommand-metriclist"></a>metric list </h2>
+<p><a name="HQApimetriccommand-list"></a><br/>
+This command returns the metrics that are enabled for a resource whose internal id is 10661. </p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">bash-3.2$ ./bin/hqapi.sh metric list --id=10661 --enabled 
+&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt; 
+&lt;MetricsResponse&gt; 
+&lt;Status&gt;Success&lt;/Status&gt; 
+&lt;Metric collectionType="0" indicator="true" defaultOn="false" enabled="true" 
+interval="60000" id="10001" name="Availability"&gt; 
+&lt;MetricTemplate defaultInterval="60000" category="AVAILABILITY" collectionType="0" 
+defaultOn="true" indicator="true" plugin="system" units="percentage" 
+alias="Availability" name="Availability" id="10436"/&gt; 
+&lt;/Metric&gt; 
+&lt;Metric collectionType="0" indicator="true" defaultOn="false" enabled="true" 
+interval="300000" id="10007" name="Free Memory"&gt; 
+&lt;MetricTemplate defaultInterval="300000" category="UTILIZATION" collectionType="0" 
+defaultOn="true" indicator="true" plugin="system" units="B" 
+alias="MemFree" name="Free Memory" id="10373"/&gt; 
+&lt;/Metric&gt; 
+&lt;Metric collectionType="0" indicator="true" defaultOn="false" enabled="true" 
+interval="300000" id="10010" name="Load Average 5 Minutes"&gt; 
+&lt;MetricTemplate defaultInterval="300000" category="UTILIZATION" collectionType="0" 
+defaultOn="true" indicator="true" plugin="system" units="none" 
+alias="LoadAverage1" name="Load Average 5 Minutes" id="10429"/&gt; 
+&lt;/Metric&gt; 
+&lt;Metric collectionType="0" indicator="true" defaultOn="false" enabled="true" 
+interval="300000" id="10067" name="Swap Used"&gt; 
+&lt;MetricTemplate defaultInterval="300000" category="UTILIZATION" collectionType="0" 
+defaultOn="true" indicator="true" plugin="system" units="B" 
+alias="SwapUsed" name="Swap Used" id="10414"/&gt; 
+&lt;/Metric&gt; 
+&lt;/MetricsResponse&gt;</pre>
+		</div>
+</div></div> 
+
+<h2><a name="HQApimetriccommand-metricsync"></a>metric sync </h2>
+
+<p>In this example, the first command writes metrics that are enabled for a resource whose internal id is 10661 to a file called metrics.xml. The second command sends metrics.xml to the sync method to update the metric collection configuration in HQ. </p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">$ ./bin/hqapi.sh metric list --id=10661 --enabled &gt; metrics.xml 
+... 
+... 
+$ cat metrics.xml | ./bin/hqapi.sh metric sync 
+Successfully synced 4 metrics.</pre>
+		</div>
+</div></div> 
+
+<h2><a name="HQApimetriccommand-metricreschedule"></a>metric reschedule </h2>
+
+<p>The command below reschedules metric collection for the resources defined in the <tt>resources.xml</tt> file. </p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">$ ./bin/hqapi.sh metric reschedule --file=resources.xml 
+Successfully rescheduled 2 resources</pre>
+		</div>
+</div></div>
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

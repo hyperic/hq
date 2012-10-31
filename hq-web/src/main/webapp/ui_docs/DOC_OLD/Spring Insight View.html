@@ -1,0 +1,386 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : Spring Insight View</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : Spring Insight View
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325699336128 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699336128 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699336128 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1325699336128'>
+<ul>
+    <li><a href='#ui-SpringInsight-SpringInsightApplications'>Spring Insight Applications</a></li>
+    <li><a href='#ui-SpringInsight-UnderstandingApplicationMetrics'>Understanding Application Metrics</a></li>
+<ul>
+    <li><a href='#ui-SpringInsight-ApplicationHealth'>Application Health</a></li>
+    <li><a href='#ui-SpringInsight-ApplicationVitals'>Application Vitals</a></li>
+    <li><a href='#ui-SpringInsight-UnfixedAlertCount'>Unfixed Alert Count</a></li>
+    <li><a href='#ui-SpringInsight-ErrorRate'>Error Rate</a></li>
+    <li><a href='#ui-SpringInsight-ResponseTimeLevels'>Response Time Levels</a></li>
+</ul>
+    <li><a href='#ui-SpringInsight-ContentsoftheSpringInsightApplicationsPage'>Contents of the Spring Insight Applications Page</a></li>
+<ul>
+    <li><a href='#ui-SpringInsight-DashboardsTab'>Dashboards Tab</a></li>
+    <li><a href='#ui-SpringInsight-HealthTabforallApplications'>Health Tab for all Applications</a></li>
+    <li><a href='#ui-SpringInsight-PerformanceTabforaDashboard'>Performance Tab for a Dashboard</a></li>
+    <li><a href='#ui-SpringInsight-PerformanceTabforanApplication'>Performance Tab for an Application</a></li>
+</ul>
+    <li><a href='#ui-SpringInsight-JumptoInsightOperations'>Jump to Insight Operations</a></li>
+</ul></div>
+
+<h1><a name="SpringInsightView-SpringInsightApplications"></a>Spring Insight Applications </h1>
+
+<p>This page describes the <b>Spring Insight Applications</b> page, available in vFabric Hyperic if you have Insight Operations under management.</p>
+
+<h1><a name="SpringInsightView-UnderstandingApplicationMetrics"></a>Understanding Application Metrics</h1>
+
+<p>The <b>Spring Insight Applications</b> page presents multiple metrics that indicate how well an application is running, for instance, the percentage of application requests had an unacceptable response time, how many requests return errors, and so on.  </p>
+
+<p>These metrics, described in the sections below, appear in several places in the <b>Spring Insight Applications</b> user interface: on the <b>Health</b> tab, which presents metrics for <em>all</em> applications reporting to Hyperic monitored Dashboards applications, and also on the <b>Performance</b> tab for an Insight Dashboard or an Insight Application.</p>
+
+<h2><a name="SpringInsightView-ApplicationHealth"></a>Application Health</h2>
+
+<p>The Application Health metric for an application is the health value that Insight calculates for the application.  The Insight health metric is based on the percentage of Insight traces that complete without error. The values, indicators, and thresholds for the Application Health metric are defined below.</p>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'>Value </th>
+<th class='confluenceTh'>Indicator </th>
+<th class='confluenceTh'> Percentage of Successful Insight Traces </th>
+</tr>
+<tr>
+<td class='confluenceTd'>Excellent </td>
+<td class='confluenceTd'><span class="image-wrap" style=""><img src="/download/attachments/79660088/healthlamp-excellent.png?version=1&amp;modificationDate=1325697630440" style="border: 0px solid black" /></span> </td>
+<td class='confluenceTd'> 94% or more</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Good </td>
+<td class='confluenceTd'><span class="image-wrap" style=""><img src="/download/attachments/79660088/healthlamp-good.png?version=1&amp;modificationDate=1325697630646" style="border: 0px solid black" /></span> </td>
+<td class='confluenceTd'>85% - 93%  </td>
+</tr>
+<tr>
+<td class='confluenceTd'>Fair </td>
+<td class='confluenceTd'><span class="image-wrap" style=""><img src="/download/attachments/79660088/healthlamp-fair.png?version=1&amp;modificationDate=1325697630757" style="border: 0px solid black" /></span> </td>
+<td class='confluenceTd'>70% - 84%</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Poor </td>
+<td class='confluenceTd'><span class="image-wrap" style=""><img src="/download/attachments/79660088/healthlamp-poor.png?version=1&amp;modificationDate=1325697630544" style="border: 0px solid black" /></span> </td>
+<td class='confluenceTd'>50% - 83%</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Unacceptable </td>
+<td class='confluenceTd'><span class="image-wrap" style=""><img src="/download/attachments/79660088/healthlamp-unacceptable.png?version=1&amp;modificationDate=1325697630317" style="border: 0px solid black" /></span> </td>
+<td class='confluenceTd'> 0% - 49% </td>
+</tr>
+</tbody></table>
+</div>
+
+
+<h2><a name="SpringInsightView-ApplicationVitals"></a>Application Vitals</h2>
+
+<p>The Vitals metric for an application is calculated by Hyperic. It is based on the Application Health metric (described above), and also takes into account the Hyperic metrics and events for the application and for resources that the application depends upon, including:</p>
+<ul>
+	<li>Number of unfixed alerts for the application in Hyperic.</li>
+	<li>Availability of the managed resources that the application depends upon:  application servers, database servers (if applicable), and platforms.</li>
+	<li>Number of unfixed alerts for the resources that the application depends upon:  application servers, database servers (if applicable), and platforms.</li>
+</ul>
+
+
+<p>If an application has no unfixed alerts in Hyperic and the resources it depends upon are available and have no unfixed alerts, the application's value of the applications Vitals metric is equal to the value of its Application Health metric.</p>
+
+<h2><a name="SpringInsightView-UnfixedAlertCount"></a>Unfixed Alert Count </h2>
+
+<p>The number of unfixed alerts during the timeframe.</p>
+
+<h2><a name="SpringInsightView-ErrorRate"></a>Error Rate</h2>
+
+<p>The percentage of Insight traces that resulted in an HTTP error status code (500 to 600).</p>
+
+<h2><a name="SpringInsightView-ResponseTimeLevels"></a>Response Time Levels</h2>
+
+<p>The "Invocations" metric tells you what percentage of traces had response times in each of three response time levels. The response time thresholds for each level are configurable in Spring Insight, and by default are:  </p>
+
+<ul>
+	<li>Satisfied &#8212; Response time 200 ms or less.</li>
+	<li>Tolerated &#8212; Response time over 200 ms but less than 800 ms.</li>
+	<li>Frustrated &#8212; Response time 800 ms or over.</li>
+</ul>
+
+
+<p>For example </p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<script type="syntaxhighlighter" class="theme: Confluence; brush: java; gutter: false"><![CDATA[19.8%/7.4%/72.7%]]></script>
+</div></div>
+
+<p>indicates that over the selected interval:</p>
+
+<ul>
+	<li>19.2% of the traces had response time 200 ms or less.</li>
+	<li>7.5% had response time over 200 ms but less than 800 ms.</li>
+	<li>73.4% had response time 800 ms or over.</li>
+</ul>
+
+
+<h1><a name="SpringInsightView-ContentsoftheSpringInsightApplicationsPage"></a>Contents of the Spring Insight Applications Page </h1>
+
+<p>The sections below describe the contents of each section of the <b>Spring Insight Applications</b> page. </p>
+
+<h2><a name="SpringInsightView-DashboardsTab"></a>Dashboards Tab</h2>
+
+<p>The <b>Dashboards</b> pane on the left side of the <b>Spring Insight Applications</b> page is a tree control whose nodes are Insight Dashboards and Insight Applications.</p>
+
+<p>The color of the bar to the left of a Dashboard node indicates the worst Vitals metric among the applications reporting to the Dashboard.</p>
+
+<p><span class="image-wrap" style=""><img src="attachments/79660088/79921404.png" width="250px" style="border: 0px solid black"/></span> <br/>
+ You use the <b>Dashboards</b> pane to browse a hierarchy of performance data. Depending on your need and interest, you view filter your view to include health information for:</p>
+
+<ul>
+	<li>All applications reporting to all Hyperic-managed Insight Dashboards
+	<ul>
+		<li>This is the view that appears when neither a dashboard or application is selected in the tree control. To return to this view, click the <b>Dashboards</b> link above the tree control. For a description of the view, see <a href="#SpringInsightView-HealthTabforallApplications">Health Tab for all Applications</a>.</li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul>
+	<li>Just the applications reporting to a particular Insight Dashboards
+	<ul>
+		<li>To display this view, click the dashboard of interest in the tree control. For a description of the view, see  <a href="#SpringInsightView-PerformanceTabforaDashboard">Performance Tab for a Dashboard</a>.</li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul>
+	<li>Just one particular application
+	<ul>
+		<li>To display this view, select the application of interest in the tree control. For a description of the view, see <a href="#SpringInsightView-PerformanceTabforanApplication">Performance Tab for an Application</a>.</li>
+	</ul>
+	</li>
+</ul>
+
+
+<h2><a name="SpringInsightView-HealthTabforallApplications"></a>Health Tab for all Applications</h2>
+<p>The <b>Health</b> tab summarizes the health of all of the applications reporting to Hyperic-managed Insight Dashboards. This tab is present when you first open the <b>Spring Insight Applications</b> page. </p>
+
+<p>After navigating to a dashboard or an application, you can redisplay the <b>Health</b> tab by clicking the "Dashboards" link at the top of the left pane. </p>
+
+<p><span class="image-wrap" style=""><img src="attachments/79660088/79921401.png" width="500px" style="border: 0px solid black"/></span></p>
+
+<p>The <b>Health</b> tab contains the following data and metrics:</p>
+
+<ul>
+	<li><b>Applications Health Trend</b> chart &#8212; By default, this chart plots the health of the five applications that currently have the poorest vitals. You can add and remove applications to the chart by checking and unchecking the box next to it. For a definition of the metric, see <a href="#SpringInsightView-ApplicationHealth">Application Health</a>.</li>
+</ul>
+
+
+<ul>
+	<li>Worst <b>Vitals</b>  &#8212; The <b>Vitals</b> indicator in the "All Applications" bar reflects the worst value reported among all applications reporting to all Dashboards. For a definition of the Vitals metric, see <a href="#SpringInsightView-ApplicationVitals">Application Vitals</a>.</li>
+</ul>
+
+
+<ul>
+	<li>Application Metrics &#8212; Below the <b>Applications Health Trend</b> chart is a list of all applications under management, ordered by the applications' Vitals metric, starting with the worst. The following data and metrics are displayed for each application:
+	<ul>
+		<li>Application &#8212; The name of the application is a link; if you click it, the <b>Performance</b> tab for the dashboard appears. See <a href="#SpringInsightView-PerformanceTabforanApplication">Performance Tab for an Application</a>.</li>
+		<li>Vitals</li>
+		<li>Alerts &#8212; For a definition of the metric, see <a href="#SpringInsightView-UnfixedAlertCount">Unfixed Alert Count</a>.</li>
+		<li>Errors &#8212; For a definition of the metric, see <a href="#SpringInsightView-ErrorRate">Error Rate</a>.</li>
+		<li>Invocations (F/T/S) &#8212; For a definition of the metric, see <a href="#SpringInsightView-ResponseTimeLevels">Response Time Levels</a>.</li>
+	</ul>
+	</li>
+</ul>
+
+
+<h2><a name="SpringInsightView-PerformanceTabforaDashboard"></a>Performance Tab for a Dashboard</h2>
+
+<p>To display the <b>Performance</b> tab for an Insight Dashboard, click the dashboard's name in the <b>Dashboards</b> tab. </p>
+
+<p> <span class="image-wrap" style=""><img src="attachments/79660088/79921402.png" width="500px" style="border: 0px solid black"/></span> </p>
+
+
+<p><b>Note:</b> In the list of applications reporting to the dashboard:</p>
+<ul>
+	<li>The list is ordered by application health, from worst to best.</li>
+	<li>You can mouse over the application name to highlight the line for it in the <b>Application Health Trend</b> chart.</li>
+	<li>You can click the application name to display the <b>Performance</b> tab for it. See <a href="#SpringInsightView-PerformanceTabforanApplication">Performance Tab for an Application</a>.</li>
+</ul>
+
+
+<p>The <b>Performance</b> tab for a Dashboard contains: </p>
+
+<ul>
+	<li><b>Applications Health Trend</b> chart &#8212; By default, this chart plots the health of the five applications (reporting to the Dashboard) that currently have the poorest vitals. You can add and remove applications to the chart by checking and unchecking the box next to it. For a definition of the metric, see <a href="#SpringInsightView-ApplicationHealth">Application Health</a>.</li>
+</ul>
+
+
+<ul>
+	<li>Dashboard <b>Vitals</b>  &#8212; The <b>Vitals</b> indicator in the "Dashboard" bar is a composite health indicator that takes into account:
+	<ul>
+		<li>The Vitals for the applications reporting to the currently selected Insight Dashboard.</li>
+		<li>Availability of the managed resources that the Insight Dashboard depends upon: application server (tc Server) and platform.</li>
+		<li>Number of unfixed alerts for the resources that the Insight Dashboard depends upon: application server (tc Server) and platform.</li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul>
+	<li>Application Metrics &#8212; Below the <b>Applications Health Trend</b> chart is a list of the applications reporting to the Dashboard. The following metrics are displayed for each application:
+	<ul>
+		<li><b>Vitals</b> &#8212; For a definition, see <a href="#SpringInsightView-ApplicationVitals">Application Vitals</a>.</li>
+		<li><b>Alerts</b> &#8212; For a definition, see <a href="#SpringInsightView-UnfixedAlertCount">Unfixed Alert Count</a>.</li>
+		<li><b>Errors</b> &#8212; For a definition, see <a href="#SpringInsightView-ErrorRate">Error Rate</a>.</li>
+		<li>Invocations (F/T/S) &#8212; For a definition, see <a href="#SpringInsightView-ResponseTimeLevels">Response Time Levels</a>.</li>
+	</ul>
+	</li>
+	<li>Application Server Performance &#8212; To view health data for the application server that the Insight Dashboard runs on,  click the control in the <b>Application Server</b> bar. See <a href="#SpringInsightView-ApplicationServerPerformance">Application Server Performance</a>.</li>
+</ul>
+
+
+<ul>
+	<li>Platform Performance &#8212; To view health data for platform on which the Insight Dashboard runs, click the control in the <b>Platforms</b> bar.  See <a href="#SpringInsightView-PlatformPerformance">Platform Performance</a>.</li>
+</ul>
+
+
+
+<h3><a name="SpringInsightView-ApplicationServerPerformance"></a>Application Server Performance</h3>
+<p>The "Application Server" section charts a selected app server metric for all, or selected application servers where the applications in the dashbaord run.  
+<br class="atl-forced-newline" />
+<span class="image-wrap" style=""><img src="attachments/79660088/79921357.png" width="500px" style="border: 0px solid black"/></span> </p>
+
+<p> The <b>Metric Low/Avg/Peak</b> pulldown lists all of the available metrics for the application server and shows the low, average, and peak values for the metric over the current time range.  Choose a metric from the list to graph it. 
+<br class="atl-forced-newline" />
+Below the chart, the following information is listed for each application server:</p>
+<ul>
+	<li>name &#8212; The name of the resource in Hyperic.</li>
+	<li>AVAIL &#8212; Current availability of the resource</li>
+	<li>ALERTS &#8212; Current number of unfixed alerts</li>
+	<li>LOW &#8212; Low value during current display range.</li>
+	<li>AVG &#8212; Average value during current display range.</li>
+	<li>PEAK &#8212; High value during current display range.</li>
+</ul>
+
+
+<h3><a name="SpringInsightView-PlatformPerformance"></a>Platform Performance</h3>
+
+<p>The "Platform" section charts a selected platform metric for all, or selected platforms where the applications in the dashbaord run.  </p>
+
+<p><span class="image-wrap" style=""><img src="attachments/79660088/79921398.png" width="500px" style="border: 0px solid black"/></span> <br/>
+The <b>Metric Low/Avg/Peak</b> pulldown lists all of the available platform metrics and shows the low, average, and peak values for the metric over the current time range. Choose a metric from the list to graph it.</p>
+
+<p>Below the chart, the following information is listed for each platform:</p>
+<ul>
+	<li>name &#8212; The name of the resource in Hyperic.</li>
+	<li>AVAIL &#8212; Current availability of the resource</li>
+	<li>ALERTS &#8212; Current number of unfixed alerts</li>
+	<li>LOW &#8212; Low value during current display range.</li>
+	<li>AVG &#8212; Average value during current display range.</li>
+	<li>PEAK &#8212; High value during current display range.</li>
+</ul>
+
+
+<h2><a name="SpringInsightView-PerformanceTabforanApplication"></a>Performance Tab for an Application</h2>
+
+<p>To display the <b>Performance</b> tab for an Insight Application, click the applications's name in the <b>Dashboards</b> tab. </p>
+
+<p><span class="image-wrap" style=""><img src="attachments/79660088/79921358.png" width="500px" style="border: 0px solid black"/></span> <br/>
+The <b>Performance</b> tab has four sections:</p>
+<ul>
+	<li>Applications
+	<ul>
+		<li>The application name is a link &#8212; if you click it, Insight Operations will open in a new window, and display more detailed resource health and performance metrics for the current display range.</li>
+		<li>The <b>Vitals</b> health bar to the right of the application name indicates the current Vitals for the application. For a definition of the Vitals metric, see <a href="#SpringInsightView-ApplicationVitals">Application Vitals</a>.</li>
+		<li>The <b>Health Trend</b> chart plots the application's "Health" and "Error Rate" metrics for the display range. For a definition of the health metric metric, see <a href="#SpringInsightView-ApplicationHealth">Application Health</a>.</li>
+		<li>The <b>Invocations</b> chart plots the distribution of request response times across the three response time levels defined in <a href="#SpringInsightView-ResponseTimeLevels">Response Time Levels</a>.</li>
+	</ul>
+	</li>
+	<li>Application Server
+	<ul>
+		<li>This section is expanded if one or more application servers to which the app is deployed is unhealthy. Otherwise, the section is collapsed.</li>
+		<li>For information about the metrics presented, see <a href="#SpringInsightView-ApplicationServerPerformance">Application Server Performance</a>.</li>
+	</ul>
+	</li>
+	<li>Data Service
+	<ul>
+		<li>This section is present if the application access a Hyperic managed database server.   see <a href="#SpringInsightView-DataServicePerformance">Data Service Performance</a>.</li>
+		<li>This section is expanded if the database that the app uses is unhealthy application. Otherwise, the section is collapsed.</li>
+		<li>For information about the metrics presented, see <a href="#SpringInsightView-DataServicePerformance">Data Service Performance</a>.</li>
+	</ul>
+	</li>
+	<li>Platform
+	<ul>
+		<li>** This section is expanded if one or more platforms where the app runs is unhealthy. Otherwise, the section is collapsed.</li>
+		<li>For information about the metrics presented, see <a href="#SpringInsightView-PlatformPerformance">Platform Performance</a>.</li>
+	</ul>
+	</li>
+</ul>
+
+
+
+<h3><a name="SpringInsightView-DataServicePerformance"></a>Data Service Performance</h3>
+
+
+<p>The "Data Service" section is present if the currently selected application accesses a database managed by Hyperic.  </p>
+
+<p><span class="image-wrap" style=""><img src="attachments/79660088/79921399.png" width="500px" style="border: 0px solid black"/></span> <br/>
+The <b>Metric Low/Avg/Peak</b> pulldown lists all of the available platform metrics and shows the low, average, and peak values for the metric over the current time range. Choose a metric from the list to graph it.</p>
+
+<p>Below the chart, the following information is listed for each platform:</p>
+<ul>
+	<li>name &#8212; The name of the resource in Hyperic.</li>
+	<li>AVAIL &#8212; Current availability of the resource</li>
+	<li>ALERTS &#8212; Current number of unfixed alerts</li>
+	<li>LOW &#8212; Low value during current display range.</li>
+	<li>AVG &#8212; Average value during current display range.</li>
+	<li>PEAK &#8212; High value during current display range.</li>
+</ul>
+
+
+<h1><a name="SpringInsightView-JumptoInsightOperations"></a>Jump to Insight Operations</h1>
+
+<p>You can jump from the <b>Spring Insight Applications</b> page into the Insight application to investigate problems. Click the application name link on the application's <b>Performance</b> tab. (See the screenshot in <a href="#SpringInsightView-PerformanceTabforanApplication">Performance Tab for an Application</a>.)  Insight will open in a new window, with the application selected in the <b>Browse Resources</b> tab, where you can view more detailed application health data for display range currently selected in the Hyperic user interface.  </p>
+
+<p><span class="image-wrap" style=""><img src="attachments/79660088/79921397.png" width="650px" style="border: 0px solid black"/></span></p>
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:06</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

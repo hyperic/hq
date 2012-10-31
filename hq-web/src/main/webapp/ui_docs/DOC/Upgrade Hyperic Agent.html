@@ -21,15 +21,15 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on May 31, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Oct 24, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1338502628334 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1338502628334 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1338502628334 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1351121924906 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1351121924906 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1351121924906 li {margin-left: 0px;padding-left: 0px;}
 
-/*]] >*/</style><div class='rbtoc1338502628334'>
+/*]]>*/</style><div class='rbtoc1351121924906'>
 <ul>
     <li><a href='#UpgradeHypericAgent-AgentUpgradeMethods'>Agent Upgrade Methods</a></li>
     <li><a href='#UpgradeHypericAgent-PushAgentBundlefromthevFabricHypericServer'>Push Agent Bundle from the vFabric Hyperic Server</a></li>
@@ -41,21 +41,21 @@ div.rbtoc1338502628334 li {margin-left: 0px;padding-left: 0px;}
 <blockquote>
 <p><b>About this page...</b> </p>
 
-<p>This page has instructions for upgrading the Hyperic Agent to 4.6. Before performing the steps on this page, see <a href="Hyperic Upgrade Processes.html" title="Hyperic Upgrade Processes">Hyperic Upgrade Processes</a> for information about upgrade options and other steps in the upgrade process. </p>
+<p>This page has instructions for upgrading the Hyperic Agent to 5.0. Before performing the steps on this page, see <a href="Hyperic Upgrade Processes.html" title="Hyperic Upgrade Processes">Hyperic Upgrade Processes</a> for information about upgrade options and other steps in the upgrade process. </p>
 
-<p>If you want to configure your 4.6 agents for a user-managed keystore, see the information in the <a href="Hyperic Upgrade Processes.html#HypericUpgradeProcesses-UpgradeWithTrust">Upgrade Server and Agent with User-Managed Keystores</a> section of <a href="Hyperic Upgrade Processes.html" title="Hyperic Upgrade Processes">Hyperic Upgrade Processes</a>. </p></blockquote> 
+<p>If you want to configure your 5.0 agents for a user-managed keystore, see the information in the <a href="Hyperic Upgrade Processes.html#HypericUpgradeProcesses-UpgradeWithTrust">Upgrade Server and Agent with User-Managed Keystores</a> section of <a href="Hyperic Upgrade Processes.html" title="Hyperic Upgrade Processes">Hyperic Upgrade Processes</a>. </p></blockquote> 
 
 <h1><a name="UpgradeHypericAgent-AgentUpgradeMethods"></a>Agent Upgrade Methods</h1>
 
-<p>To upgrade a Hyperic 4.x Agent to 4.6 you can either:</p>
+<p>To upgrade a Hyperic 4.x Agent to 5.0 you can either:</p>
 
 <ul>
-	<li>Install just the 4.6 agent bundle, by pushing it from your upgraded Hyperic 4.6 Server to each agent (in vFabric Hyperic only) as described in <a href="#UpgradeHypericAgent-PushAgentBundlefromthevFabricHypericServer">Push Agent Bundle from the vFabric Hyperic Server</a>, or by manually copying the bundle to each agent as described in <a href="#UpgradeHypericAgent-UpgradeAgentBundleManually">Upgrade Agent Bundle Manually</a>. If desired, you can first create your own agent bundle, as described in <a href="#UpgradeHypericAgent-CreateaCustomAgentUpgradeBundle">Create a Custom Agent Upgrade Bundle</a>.</li>
+	<li>Install just the 5.0 agent bundle, by pushing it from your upgraded Hyperic 5.0 Server to each agent (in vFabric Hyperic only) as described in <a href="#UpgradeHypericAgent-PushAgentBundlefromthevFabricHypericServer">Push Agent Bundle from the vFabric Hyperic Server</a>, or by manually copying the bundle to each agent as described in <a href="#UpgradeHypericAgent-UpgradeAgentBundleManually">Upgrade Agent Bundle Manually</a>. If desired, you can first create your own agent bundle, as described in <a href="#UpgradeHypericAgent-CreateaCustomAgentUpgradeBundle">Create a Custom Agent Upgrade Bundle</a>.</li>
 </ul>
 
 
 <ul>
-	<li>Install complete 4.6 agent package, as described in <a href="#UpgradeHypericAgent-UpgradeAgentUsingaFullAgentPackage">Upgrade Agent Using a Full Agent Package</a>.</li>
+	<li>Install complete 5.0 agent package, as described in <a href="#UpgradeHypericAgent-UpgradeAgentUsingaFullAgentPackage">Upgrade Agent Using a Full Agent Package</a>.</li>
 </ul>
 
 
@@ -67,9 +67,9 @@ div.rbtoc1338502628334 li {margin-left: 0px;padding-left: 0px;}
 
 <p>The agent upgrade command is available on the <b>Views</b> tab for an Hyperic Agent (or a group of agents). For more information see <a href="Start, Stop, and Other Agent Operations.html" title="Start, Stop, and Other Agent Operations">Start, Stop, and Other Agent Operations</a> in <em>vFabric Hyperic Configuration</em>.</p>
 
-<p><b>Note:</b> When you update an agent bundle, the configuration settings in the agent's <tt>AgentHome/conf/agent.properties</tt> file are not changed. However, the first time you start an agent that you have updated to 4.6.6 or later, passwords specified in the file will be encrypted.  </p>
+<p><b>Note:</b> When you update an agent bundle, the configuration settings in the agent's <tt>AgentHome/conf/agent.properties</tt> file are not changed. However, the first time you start an agent that you have updated from 4.5 or earlier, passwords specified in the file will be encrypted.  </p>
 
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Agent Name Unchanged by Bundle Upgrade Process</b><br />Note that if you upgrade a 4.x agent by pushing a new bundle from the Hyperic Server, the name of the agent is not changed. So, an agent name that contains the Hyperic version number &#8212; as is the default naming convention &#8212; reflects the originally installed version, rather than the version to which it has been upgraded. For example, if you push a 4.6 bundle to an agent whose name is "HQ Agent 4.5", the agent name will remain "HQ Agent 4.5".</td></tr></table></div>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Agent Name Unchanged by Bundle Upgrade Process</b><br />Note that if you upgrade a pre-4.6 agent by pushing a new bundle from the Hyperic Server, the name of the agent is not changed. So, an agent name that contains the Hyperic version number &#8212; as is the default naming convention &#8212; reflects the originally installed version, rather than the version to which it has been upgraded. For example, if you push a 5.0 bundle to an agent whose name is "HQ Agent 4.5", the agent name will remain "HQ Agent 4.5".</td></tr></table></div>
 
 
 <h1><a name="UpgradeHypericAgent-UpgradeAgentBundleManually"></a>Upgrade Agent Bundle Manually</h1>
@@ -79,7 +79,7 @@ div.rbtoc1338502628334 li {margin-left: 0px;padding-left: 0px;}
 <p><b>Note:</b> When you update an agent bundle, your previous agent configuration is preserved &#8212; the <tt>AgentHome/conf/agent.properties</tt> file is not overwritten.</p>
 
 <ol>
-	<li>Copy the agent bundle (agent-4.x.y-nnn.tgz or agent-4.x.y-nnn.zip) from<br/>
+	<li>Copy the agent bundle (agent-5.x.y-nnn.tgz or agent-5.x.y-nnn.zip) from<br/>
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
 		<pre class="theme: Confluence; brush: java; gutter: false">ServerHome/hq-engine/hq-server/webapps/ROOT/WEB-INF/hq-agent-bundles</pre>
@@ -102,7 +102,7 @@ div.rbtoc1338502628334 li {margin-left: 0px;padding-left: 0px;}
 <tr>
 <td class='confluenceTd'> HQ_AGENT_BUNDLE </td>
 <td class='confluenceTd'> Name of directory with the new bundle, without full path specification. </td>
-<td class='confluenceTd'> agent-4.6.0-EE-nnn </td>
+<td class='confluenceTd'> agent-5.x.y-EE-nnn </td>
 </tr>
 <tr>
 <td class='confluenceTd'> HQ_AGENT&#95; <br class="atl-forced-newline" />
@@ -201,7 +201,7 @@ gzip ServerHome/hq-engine/hq-server/webapps/ROOT/WEB-INF/hq-agent-bundles/my-bun
 		<pre class="theme: Confluence; brush: java; gutter: false">hq-agent.bat remove</pre>
 		</div>
 </div></div></li>
-	<li>Unpack the 4.y agent into the agent installation directory.</li>
+	<li>Unpack the 5.0 agent into the agent installation directory.</li>
 	<li>Restore the backed up <tt>agent.properties</tt> file to <tt>AgentHome/conf</tt> (unless you keep the properties file in the <tt>.hq</tt> subdirectory of the home directory of the user that runs the agent.)</li>
 	<li>Start the Hyperic Agent
 	<ul>
@@ -235,7 +235,7 @@ hq-agent.bat start</pre>
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:06</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 29, 2012 13:00</font></td>
 		    </tr>
 	    </table>
     </body>

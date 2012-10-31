@@ -1,0 +1,252 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : Facts About Script Plugins</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : Facts About Script Plugins
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325699768332 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699768332 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699768332 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1325699768332'>
+<ul>
+    <li><a href='#FactsAboutScriptPlugins-WhatisaScriptPlugin%3F'>What is a Script Plugin?</a></li>
+    <li><a href='#FactsAboutScriptPlugins-ScriptPluginContentsandPackaging'>Script Plugin Contents and Packaging</a></li>
+    <li><a href='#FactsAboutScriptPlugins-RequirementsforScript'>Requirements for Script</a></li>
+    <li><a href='#FactsAboutScriptPlugins-HowtoDefinetheProxyResourcesinPluginDescriptor'>How to Define the Proxy Resources in Plugin Descriptor</a></li>
+    <li><a href='#FactsAboutScriptPlugins-HowtoDefineManagementFunctions'>How to Define Management Functions</a></li>
+<ul>
+    <li><a href='#FactsAboutScriptPlugins-AutoDiscovery'>Auto-Discovery</a></li>
+    <li><a href='#FactsAboutScriptPlugins-Measurement'>Measurement</a></li>
+    <li><a href='#FactsAboutScriptPlugins-Control'>Control</a></li>
+</ul>
+    <li><a href='#FactsAboutScriptPlugins-OtherPropertiestoDefine'>Other Properties to Define</a></li>
+</ul></div>
+
+<h2><a name="FactsAboutScriptPlugins-WhatisaScriptPlugin%3F"></a>What is a Script Plugin?</h2>
+
+<p>A <em>script plugin</em> is a plugin that runs one or more scripts that return process metrics.  A script plugin uses the <tt>org.hyperic.hq.product.DaemonDetector</tt> support to discover resources from the process table &#8212; <tt>DaemonDetector</tt> runs a PTQL <tt>process.query</tt>.</p>
+
+<h2><a name="FactsAboutScriptPlugins-ScriptPluginContentsandPackaging"></a>Script Plugin Contents and Packaging  </h2>
+
+<p>The components  of a script plugin are:</p>
+<ul>
+	<li>an XML plugin descriptor that defines the monitored process and its properties, along with the metrics that the script reports.</li>
+	<li>a script that returns metric name:value pairs, or in the case of a control plugin, performs a supported control action.  You can embed your script in the XML plugin descriptor, in which case you deploy only the XML file. If your script is in its own file, you reference it in the descriptor, and deploy an archive containing the script and the descriptor.</li>
+</ul>
+
+
+<p>Put the script in <tt>AgentHome/bundles/AgentBundleDir/pdk/scripts/</tt>, or in the XML descriptor.</p>
+
+<h2><a name="FactsAboutScriptPlugins-RequirementsforScript"></a>Requirements for Script</h2>
+
+<p>The script can be written in any language desired. You can use existing Nagios plugins if desired.</p>
+
+<p>A measurement script must report metrics as name-value pairs. For example:</p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">% ./pdk/scripts/device_iostat.pl sda
+rrqm/s=0.02
+wrqm/s=0.59
+r/s=0.07
+w/s=0.54
+rsec/s=2.00
+wsec/s=9.06
+avgrq-sz=17.95
+avgqu-sz=0.00
+await=4.21
+svctm=1.75
+%util=0.11</pre>
+		</div>
+</div></div> 
+
+<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Unicode characters must be escaped</b><br />Unicode characters encountered in a script will be decoded during script processing. For example, the string "%3D" is decoded to an equals sign (=). To preserve the value of s string that might be interpreted as a Unicode character, escape the string with a double backslash, for example:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">\\%3D</pre>
+		</div>
+</div></div></td></tr></table></div>
+
+<h2><a name="FactsAboutScriptPlugins-HowtoDefinetheProxyResourcesinPluginDescriptor"></a>How to Define the Proxy Resources in Plugin Descriptor</h2>
+
+<p>If the plugin manages a single process, model the monitored process as a platform service: specify it in a <tt>&lt;service&gt;</tt> element in the root <tt>&lt;plugin&gt;</tt> element of the descriptor. </p>
+
+<p>If the plugin manages a server and its component services, script reports on a multiple services, create a server-service hierarchy. Specify the parent <tt>&lt;server&gt;</tt> element in the root <tt>&lt;plugin&gt;</tt> element of the descriptor, and specify the each component service as a child <tt>&lt;service&gt;</tt> element.</p>
+
+<h2><a name="FactsAboutScriptPlugins-HowtoDefineManagementFunctions"></a>How to Define Management Functions</h2>
+
+<p>The sections below have information about defining the management functions a script plugin performs.</p>
+
+<h3><a name="FactsAboutScriptPlugins-AutoDiscovery"></a>Auto-Discovery</h3>
+<p>Script plugins use Hyperic's <tt>org.hyperic.hq.product.DaemonDetector</tt> auto-discovery support class to discovery a process. <tt>DaemonDetector</tt> requires a PTQL process query.</p>
+
+<p>Determine the PTQL statement that identifies target process. </p>
+
+<p>The most common query types for discovering a process are:</p>
+<ul>
+	<li><tt>State.Name.eq=BASENAME</tt> &#8212; Where <tt>BASENAME</tt> is the base name of the process executable (or regex ) and uniquely identifies it. For example, <tt>State.Name.eq=crond</tt>.</li>
+	<li><tt>Pid.PidFile.eq=PIDFILE</tt> ---- Where <tt>PIDFILE</tt> is the path and name of the process PID file. For example, <tt>Pid.PidFile.eq=/var/run/sshd.pid</tt>. This query is useful if the process base name does not uniquely identify the process.</li>
+	<li><tt>Pid.Service.eq=SERVICENAME</tt> &#8212; Where <tt>SERVICENAME</tt> is the name of the process.  This query is useful in Windows environments.  For example, <tt>Pid.Service.eq=Eventlog</tt>.</li>
+</ul>
+
+
+<p>You can supply multiple, comma-separated PTQL queries, if necessary</p>
+
+<p>For a Java process, you typically need to specify command line arguments for the process to identify it.  </p>
+
+<p>To define auto-discovery in the plugin descriptor.</p>
+
+<ul>
+	<li>If you have defined a server-service hierarchy, in the <tt>&lt;server&gt;</tt> define a <tt>&lt;property&gt;</tt> element whose <tt>name</tt> is "HAS_BUILTIN_SERVICES" and <tt>value</tt>="true", so that component services will be discovered.</li>
+</ul>
+
+
+<ul>
+	<li>Define the auto-discovery function and identify <tt>org.hyperic.hq.product.DaemonDetector</tt> as the class that performs it, in a <tt>&lt;plugin&gt;</tt> element whose <tt>type</tt> is "autoinventory". If you have defined a server-service hierarchy, put the <tt>&lt;plugin&gt;</tt> element in the <tt>&lt;server&gt;</tt> element. If the plugin manages a single service, put it in the <tt>&lt;service&gt;</tt> element that models the process to discover.</li>
+</ul>
+
+
+<ul>
+	<li>In the same resource element that contains the <tt>&lt;plugin&gt;</tt> element, define the process query in an <tt>&lt;option&gt;</tt> element whose <tt>name</tt> is "process.query" and <tt>default</tt> is the PTQL query.</li>
+</ul>
+
+
+
+
+<h3><a name="FactsAboutScriptPlugins-Measurement"></a>Measurement </h3>
+
+<p>Script plugins use Hyperic's <tt>org.hyperic.hq.product.MeasurementPlugin</tt> class to report the metrics returned by the script(s). <tt>MeasurementPlugin</tt> accepts metric name:value pairs.</p>
+
+<p>You:</p>
+
+<ul>
+	<li>Define the measurement function and identify <tt>MeasurementPlugin</tt> as the class that performs it in a <tt>&lt;plugin&gt;</tt> element whose <tt>type</tt> is "measurement". If you have defined a server-service hierarchy, put the <tt>&lt;plugin&gt;</tt> element in the <tt>&lt;server&gt;</tt> element. If your resource "hierarchy" is simply a single platform service, put <tt>&lt;plugin&gt;</tt> element in the or <tt>&lt;service&gt;</tt> element that models the process.</li>
+</ul>
+
+
+<ul>
+	<li>Define a <tt>&lt;metric&gt;</tt> element for each metric reported by the script. You must define at least the <tt>name</tt>, <tt>indicator</tt>, and <tt>template</tt> attributes.
+	<ul>
+		<li>The form of a metric template for a metric collected by a script is:<br/>
+<tt>exec:timeout=TIMEOUT,exec=PREFIX,file=FILENAME,exec=MODE,args=ARGUMENTS:METRIC</tt></li>
+	</ul>
+	</li>
+</ul>
+
+
+<p>where: </p>
+<ul>
+	<li><tt>TIMEOUT</tt> &#8212; Time in seconds to wait for a response when the script runs. (Optional, but recommended.)</li>
+	<li><tt>PREFIX</tt> &#8212; Script prefix, for instance <tt>sudo</tt>. (Optional.)</li>
+	<li><tt>FILENAME</tt> &#8212; Path and name of script that returns the metric.</li>
+	<li><tt>ARGUMENTS</tt> &#8212; Space-separated list of argument values to pass to the script.</li>
+	<li><tt>METRIC</tt> &#8212; Name of the metric.</li>
+</ul>
+
+
+<p>For example: </p>
+
+<p><tt>exec:timeout=10,exec=sudo,file=pdk/scripts/metric_script.pl,args=sda:w/s</tt> </p>
+
+<h3><a name="FactsAboutScriptPlugins-Control"></a>Control</h3>
+
+<p>Script plugins use Hyperic's <tt>org.hyperic.hq.product.ScriptControlPlugin</tt> class to run control actions. The class uses these properties:</p>
+
+<ul>
+	<li><tt>DEFAULT_PROGRAM</tt> &#8212; The control script.</li>
+	<li><tt>BACKGROUND_COMMAND</tt> &#8212; Causes script to be run in the background.</li>
+</ul>
+
+
+<p>You:</p>
+
+<ul>
+	<li>Define the control function and identify <tt>org.hyperic.hq.product.ScriptControlPlugin</tt> as the class that performs it in a <tt>&lt;plugin&gt;</tt> element whose <tt>type</tt> is "control".</li>
+	<li>Define a <tt>&lt;property&gt;</tt> element whose <tt>name</tt> is "DEFAULT_PROGRAM" and <tt>value</tt> is the name of the script. <font color="blue"> Specify full path to the script?  Or is there a required location for it??</font></li>
+	<li>If you wish the script to be run in the background, define a <tt>&lt;property&gt;</tt> element whose <tt>name</tt> is "BACKGROUND_COMMAND" and <tt>value</tt> is "true".</li>
+	<li>If the control script supports multiple command options, define an <tt>&lt;actions&gt;</tt> element that specifies the commands options the control script supports. The commands will appear in the Hyperic user interface.
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">&lt;actions include="start,restart,stop,kill,status,test"/&gt;}}</pre>
+		</div>
+</div></div> </li>
+</ul>
+
+
+<h2><a name="FactsAboutScriptPlugins-OtherPropertiestoDefine"></a>Other Properties to Define </h2>
+
+<p><font color="blue"><br/>
+The Sendmail plugin defines these properties:<br/>
+* &lt;property name="INVENTORY_ID" value="sendmail"/&gt; <br/>
+* &lt;property name="INSTALLPATH" value="/usr/sbin/sendmail"/&gt; <br/>
+<br/>
+Should any script plugin define them?<br/>
+</font></p>
+
+
+
+
+				    					    <br/>
+                        <div class="tabletitle">
+                            <a name="attachments">
+                                <h2>Attachments:</h2>
+                            </a>
+                        </div>
+
+                        <div class="greybox" align="left">
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79659765/79921542.gif">icon_available_orange.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79659765/79921543.gif">icon_available_yellow.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79659765/79921544.vbs">windows_updates.vbs</a> (application/octet-stream)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79659765/79921537.gif">icon_available_green.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79659765/79921538.gif">icon_available_error.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79659765/79921539.gif">icon_available_red.gif</a> (image/gif)
+                                <br/>
+                                                    </div>
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

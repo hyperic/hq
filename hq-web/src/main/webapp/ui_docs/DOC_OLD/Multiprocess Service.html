@@ -1,0 +1,250 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : Multiprocess Service</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : Multiprocess Service
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+ 
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325699983989 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699983989 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699983989 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1325699983989'>
+<ul>
+    <li><a href='#MultiprocessService-Multiprocess'>Multiprocess</a></li>
+    <li><a href='#MultiprocessService-SpecifyingProcessQueries'>Specifying Process Queries</a></li>
+    <li><a href='#MultiprocessService-CreateMultiprocessServiceinHyperic'>Create Multiprocess Service in Hyperic</a></li>
+    <li><a href='#MultiprocessService-ProcessServiceConfigurationOptions'>Process Service Configuration Options</a></li>
+    <li><a href='#MultiprocessService-ProcessServiceMetrics'>Process Service Metrics</a></li>
+</ul></div> 
+
+ 
+
+
+<h1><a name="MultiprocessService-Multiprocess"></a>Multiprocess</h1>
+
+<p>You can configure Hyperic to monitor a set of processs.</p>
+
+<h1><a name="MultiprocessService-SpecifyingProcessQueries"></a>Specifying Process Queries</h1>
+
+<p>You specify a query statement that identifies the processes you wish to monitor. You specify queries using <em>Process Table Query Language</em> (PTQL), a simple query language for finding processes based based on their attributes.</p>
+
+<p>PTQL queries take this form:</p>
+
+<p><tt>Class.Attribute.operator=value</tt></p>
+
+<p>Where:</p>
+<ul>
+	<li><tt>Class</tt> &#8212; is the name of the Sigar class minus the Proc prefix.</li>
+	<li><tt>Attribute</tt> &#8212; is an attribute of the given Class, index into an array or key in a Map class.</li>
+	<li><tt>operator</tt> &#8212; is one of the following (for String values):
+	<ul>
+		<li><tt>eq</tt> &#8212; Equal to value</li>
+		<li><tt>ne</tt> &#8212; Not Equal to value</li>
+		<li><tt>ew</tt> &#8212; Ends with value</li>
+		<li><tt>sw</tt> &#8212; Starts with value</li>
+		<li><tt>ct</tt> &#8212; Contains value (substring)</li>
+		<li><tt>re</tt> &#8212; Regular expression value matches</li>
+	</ul>
+	</li>
+</ul>
+
+
+<p>Delimit queries with a comma.</p>
+
+<p>For example, this query statement finds a JBoss instance by looking for a process whose name is "org.jboss.Main":</p>
+
+<p><tt>State.Name.eq=java,Args.*.eq=org.jboss.Main</tt></p>
+
+<p>this query statement finds the OpenSSH daemon by looking for sshd PID file. </p>
+
+<p><tt>Pid.PidFile.eq=/var/run/sshd.pid</tt></p>
+
+
+<p>For more examples, see the <tt>pdk/lib/.sigar_shellrc</tt> file included in the Hyperic Agent distribution and the Sigar PTQL Documentation at <a href="http://support.hyperic.com/display/SIGAR/Home">http://support.hyperic.com/display/SIGAR/Home</a>.</p>
+
+
+<h1><a name="MultiprocessService-CreateMultiprocessServiceinHyperic"></a>Create Multiprocess Service in Hyperic</h1>
+
+<p>To create a Multirocess service: </p>
+
+<ol>
+	<li>Navigate to the platform where the process runs.</li>
+	<li>Select <b>New Platform Service</b> from the <b>Tools</b> menu.&nbsp;</li>
+	<li>Name the service.</li>
+	<li>Select "Multiprocess" from the <b>Service Type</b> pull-down.</li>
+	<li>Click <b>Edit</b> in the "Configuration Properties" section of the new service's <b>Inventory</b> page.</li>
+	<li>On the <b>Configuration Properties</b> page, supply at least the required properties, described in the table below.</li>
+</ol>
+
+
+<h1><a name="MultiprocessService-ProcessServiceConfigurationOptions"></a>Process Service Configuration Options </h1>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Name </th>
+<th class='confluenceTh'> Description </th>
+<th class='confluenceTh'> Required </th>
+<th class='confluenceTh'> Example </th>
+<th class='confluenceTh'> Notes </th>
+</tr>
+<tr>
+<td class='confluenceTd'> process.query </td>
+<td class='confluenceTd'>A PTQL statement, which contains one or more PTQL queries, that identifies the processrd to monitor.    </td>
+<td class='confluenceTd'> Yes </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+</tbody></table>
+</div>
+
+
+
+
+<h1><a name="MultiprocessService-ProcessServiceMetrics"></a>Process Service Metrics </h1>
+
+<p>Each instance of a <b>Process</b> service provides the following metrics: </p>
+
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'>Name	</th>
+<th class='confluenceTh'>Alias	</th>
+<th class='confluenceTh'>Units	</th>
+<th class='confluenceTh'>Category	</th>
+<th class='confluenceTh'>Default On	</th>
+<th class='confluenceTh'>Default Interval</th>
+</tr>
+<tr>
+<td class='confluenceTd'>Availability	</td>
+<td class='confluenceTd'>Availability	</td>
+<td class='confluenceTd'>percentage	</td>
+<td class='confluenceTd'>AVAILABILITY	</td>
+<td class='confluenceTd'>true	</td>
+<td class='confluenceTd'>10 min</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Number of Processes	</td>
+<td class='confluenceTd'>NumProcesses	</td>
+<td class='confluenceTd'>none	</td>
+<td class='confluenceTd'>UTILIZATION	</td>
+<td class='confluenceTd'>true	</td>
+<td class='confluenceTd'>10 min</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Memory Size	</td>
+<td class='confluenceTd'>MemSize	</td>
+<td class='confluenceTd'>B	</td>
+<td class='confluenceTd'>UTILIZATION	</td>
+<td class='confluenceTd'>false	</td>
+<td class='confluenceTd'>5 min</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Resident Memory Size	</td>
+<td class='confluenceTd'>ResidentMemSize	</td>
+<td class='confluenceTd'>B	</td>
+<td class='confluenceTd'>UTILIZATION	</td>
+<td class='confluenceTd'>true	</td>
+<td class='confluenceTd'>5 min</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Cpu System Time</td>
+<td class='confluenceTd'>SystemTime	</td>
+<td class='confluenceTd'>ms	</td>
+<td class='confluenceTd'>UTILIZATION	</td>
+<td class='confluenceTd'>false	</td>
+<td class='confluenceTd'>10 min</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Cpu System Time per Minute	</td>
+<td class='confluenceTd'>SystemTime1m	</td>
+<td class='confluenceTd'>ms	</td>
+<td class='confluenceTd'>UTILIZATION	</td>
+<td class='confluenceTd'>false	</td>
+<td class='confluenceTd'>10 min</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Cpu User Time	</td>
+<td class='confluenceTd'>UserTime	</td>
+<td class='confluenceTd'>ms	</td>
+<td class='confluenceTd'>UTILIZATION	</td>
+<td class='confluenceTd'>false	</td>
+<td class='confluenceTd'>10 min</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Cpu User Time per Minute	</td>
+<td class='confluenceTd'>UserTime1m	</td>
+<td class='confluenceTd'>ms	</td>
+<td class='confluenceTd'>UTILIZATION	</td>
+<td class='confluenceTd'>false	</td>
+<td class='confluenceTd'>10 min</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Cpu Total Time	</td>
+<td class='confluenceTd'>TotalTime	</td>
+<td class='confluenceTd'>ms	</td>
+<td class='confluenceTd'>UTILIZATION	</td>
+<td class='confluenceTd'>false	</td>
+<td class='confluenceTd'>10 min</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Cpu Total Time per Minute	</td>
+<td class='confluenceTd'>TotalTime1m	</td>
+<td class='confluenceTd'>ms	</td>
+<td class='confluenceTd'>UTILIZATION	</td>
+<td class='confluenceTd'>false	</td>
+<td class='confluenceTd'>10 min</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Cpu Usage	</td>
+<td class='confluenceTd'>Usage	</td>
+<td class='confluenceTd'>percentage	</td>
+<td class='confluenceTd'>UTILIZATION	</td>
+<td class='confluenceTd'>true	</td>
+<td class='confluenceTd'>5 min</td>
+</tr>
+</tbody></table>
+</div>
+
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

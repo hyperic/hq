@@ -21,17 +21,17 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Oct 24, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1325699613261 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1325699613261 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1325699613261 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1351103541819 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1351103541819 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1351103541819 li {margin-left: 0px;padding-left: 0px;}
 
-/*]] >*/</style><div class='rbtoc1325699613261'>
+/*]]>*/</style><div class='rbtoc1351103541819'>
 <ul>
     <li><a href='#ClusteringHypericServersforFailover-Overview'>Overview</a></li>
     <li><a href='#ClusteringHypericServersforFailover-RequirementsforanFailoverDeployment'>Requirements for an Failover Deployment</a></li>
@@ -83,7 +83,12 @@ div.rbtoc1325699613261 li {margin-left: 0px;padding-left: 0px;}
 
 
 <ul>
-	<li>Database Considerations---All nodes in the Hyperic cluster must share the same database. You cannot use Hyperic's internal PostgreSQL database in a failover configuration. You must use an external database; MySQL, Oracle, and PostgreSQL are supported.</li>
+	<li>Database Considerations---All nodes in the Hyperic cluster must share the same database. You cannot use Hyperic's internal PostgreSQL database in a failover configuration. You must use an Postgres database.</li>
+</ul>
+
+
+<ul>
+	<li>The database password, and the encryption key used to encrypt the database password on each Hyperic Server instance must be identical. Supply the same database password and encryption key when installing each of the server instances to be clustered.</li>
 </ul>
 
 
@@ -93,13 +98,15 @@ div.rbtoc1325699613261 li {margin-left: 0px;padding-left: 0px;}
 
 <h2><a name="ClusteringHypericServersforFailover-Step1InstalltheFirstHypericServerInstance"></a>Step 1 - Install the First Hyperic Server Instance</h2>
 
-<p>Run the full installer in the appropriate mode for the type of database server you will use (-mysql, &#45;postgresql, or &#45;oracle).&nbsp; You <b>must</b> choose one of these options, because clustering requires the use of an external Hyperic database. The installer will create the Hyperic database schema.</p>
+<p>Run the full installer, following the instructions at <a href="Run Hyperic Installer.html" title="Run Hyperic Installer">Run Hyperic Installer</a> and select the external Postgres database option. Clustering requires the use of an external Hyperic database. The installer will create the Hyperic database schema.</p>
+
+<p>Note the encryption key you supply during the installation process.</p>
 
 <h2><a name="ClusteringHypericServersforFailover-Step2InstallAdditionalHypericServerNodes"></a>Step 2 - Install Additional Hyperic Server Nodes</h2>
 
 <p>For each additional node:</p>
 <ul>
-	<li>Run the full installer in the appropriate mode for the type of database created during installation of the first server instance (-mysql, &#45;postgresql, or &#45;oracle).&nbsp;</li>
+	<li>Run the full installer and select the external Postgres database option.</li>
 </ul>
 
 
@@ -110,6 +117,11 @@ div.rbtoc1325699613261 li {margin-left: 0px;padding-left: 0px;}
 
 <ul>
 	<li>When the installer asks if you want to upgrade, overwrite, or exit the process, select the choice for "upgrade".</li>
+</ul>
+
+
+<ul>
+	<li>When prompted to supply the database password and the encryption key to be used to encrypt the database password, enter the same password and encryption key supplied when installing the first server instance.</li>
 </ul>
 
 
@@ -213,7 +225,7 @@ and ha.node.cacheProvider.port </td>
 
 <h2><a name="ClusteringHypericServersforFailover-Step4ConfiguretheLoadBalancer"></a>Step 4 - Configure the Load Balancer</h2>
 
-<p>Configure the load balancer, according to the vendor or supplier instructions. Procedures vary, but at a minimum you will identify the Hyperic Server nodes in the cluster and the failover behavior. </p>
+<p>Configure the load balancer, according to the vendor or supplier instructions. Procedures vary, but at a minimum you will identify the Hyperic Server nodes in the cluster and the failover behavior.</p>
 
 <ol>
 	<li>Identify the Hyperic Server nodes in the cluster.</li>
@@ -245,7 +257,7 @@ and ha.node.cacheProvider.port </td>
 
 <p>This section describes the most common sources of problems the failover configuration.</p>
 <ul>
-	<li>Multicast blocking ---T he cluster detection and cache peer detection relies on multicast. Make sure your router isn't blocking multicast packets; otherwise the Hyperic cluster will fail to initialize properly. It's also common for virtualization technologies like VMware and Xen to not enable multicast by default.</li>
+	<li>Multicast blocking &#45;--T he cluster detection and cache peer detection relies on multicast. Make sure your router isn't blocking multicast packets; otherwise the Hyperic cluster will fail to initialize properly. It's also common for virtualization technologies like VMware and Xen to not enable multicast by default.</li>
 </ul>
 
 
@@ -270,7 +282,7 @@ and ha.node.cacheProvider.port </td>
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:06</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 29, 2012 13:00</font></td>
 		    </tr>
 	    </table>
     </body>

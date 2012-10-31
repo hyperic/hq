@@ -1,0 +1,273 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : SMTP Platform Service</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : SMTP Platform Service
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325700036924 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325700036924 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325700036924 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1325700036924'>
+<ul>
+    <li><a href='#SMTPPlatformService-MonitoringaRemoteSMTPService'>Monitoring a Remote SMTP Service</a></li>
+    <li><a href='#SMTPPlatformService-ResourcePlugin%2CFunctions%2CandClasses'>Resource Plugin, Functions, and Classes</a></li>
+    <li><a href='#SMTPPlatformService-ConfiguretheSMTPServiceinHyperic'>Configure the SMTP Service in Hyperic</a></li>
+    <li><a href='#SMTPPlatformService-ConfigurationPropertiesPage'>Configuration Properties Page</a></li>
+    <li><a href='#SMTPPlatformService-SMTPConfigurationOptions'>SMTP Configuration Options</a></li>
+    <li><a href='#SMTPPlatformService-SMTPMetrics'>SMTP Metrics</a></li>
+    <li><a href='#SMTPPlatformService-SMTPMonitoringDefaultsPage'>SMTP Monitoring Defaults Page</a></li>
+    <li><a href='#SMTPPlatformService-EventTracking'>Event Tracking</a></li>
+</ul></div>
+
+
+<h1><a name="SMTPPlatformService-MonitoringaRemoteSMTPService"></a>Monitoring a Remote SMTP Service</h1>
+
+<p>Hyperic can monitor an SMTP service over the network. You configure a platform service of type "SMTP" on the operating system platform of your choice. The Hyperic Agent on that platform collects the metrics for the remote service and presents them under the newly created platform service.</p>
+
+<h1><a name="SMTPPlatformService-ResourcePlugin%2CFunctions%2CandClasses"></a>Resource Plugin, Functions, and Classes</h1>
+
+<p>The SMTP service type is managed by Hyperic's netservices plugin. The plugin performs the following functions:</p>
+
+<ul>
+	<li>Metric collection using the <tt>org.hyperic.hq.plugin.netservices.SMTPCollector</tt> class.</li>
+</ul>
+
+
+<ul>
+	<li>Event tracking using the <tt>reportEvent</tt> method in the <tt>Collector</tt> class.</li>
+</ul>
+
+
+<h1><a name="SMTPPlatformService-ConfiguretheSMTPServiceinHyperic"></a>Configure the SMTP Service in Hyperic</h1>
+
+<p>The "SMTP" service type must be manually configured.</p>
+<ol>
+	<li>Navigate to the platform whose Agent will monitor the service.</li>
+	<li>Select <b>New Platform Service</b> from the <b>Tools</b> menu.</li>
+	<li>On <b>New Service</b> page, enter a name for the service and select "SMTP" from the <b>Service Type</b> pull-down.</li>
+	<li>Supply all required values on the <b>Configuration Properties</b> page. Configuration options are defined below in <a href="#SMTPPlatformService-SMTPConfigurationOptions">SMTP Configuration Options</a>.
+<br class="atl-forced-newline" /></li>
+</ol>
+
+
+<h1><a name="SMTPPlatformService-ConfigurationPropertiesPage"></a>Configuration Properties Page</h1>
+
+<p>The <b>Configuration Properties</b> page for the SMTP service type is shown below.</p>
+
+<p><span class="image-wrap" style=""><img src="attachments/79660206/79921855.png" width="800" style="border: 0px solid black"/></span><br class="atl-forced-newline" /></p>
+
+<h1><a name="SMTPPlatformService-SMTPConfigurationOptions"></a>SMTP Configuration Options</h1>
+
+<p>The tables below define the options in the configuration schema for the "HTTP" service type. These are the resource attributes that are displayed, and may be edited, on the <b>Configuration Properties</b> page for an SMTP service, shown above.</p>
+
+
+<p><b>Note:</b> For the SMTP service type, the netservices plugin sets value of:</p>
+<ul>
+	<li><tt>port</tt> to 25</li>
+	<li><tt>sslport</tt> to 250</li>
+</ul>
+
+
+
+<p>
+<div class='table-wrap'>
+
+<table id='TBL1321721046672' width='800px' class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> &lt;option&gt; name <br class="atl-forced-newline" /> </th>
+<th class='confluenceTh'> description <br class="atl-forced-newline" /> </th>
+<th class='confluenceTh'> default <br class="atl-forced-newline" /> </th>
+<th class='confluenceTh'> optional <br class="atl-forced-newline" /> </th>
+<th class='confluenceTh'> type </th>
+<th class='confluenceTh'> Notes <br class="atl-forced-newline" /> </th>
+<th class='confluenceTh'> Parent Schema </th>
+</tr>
+</tbody></table>
+</div>
+
+<div class='table-wrap'>
+
+<table id='TBL1321721046673' width='800px' class='confluenceTable'><tbody>
+<tr>
+<td class='confluenceTd'> ssl </td>
+<td class='confluenceTd'> Use SSL </td>
+<td class='confluenceTd'> false </td>
+<td class='confluenceTd'> true </td>
+<td class='confluenceTd'> boolean </td>
+<td class='confluenceTd'> <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>ssl </td>
+</tr>
+</tbody></table>
+</div>
+
+<div class='table-wrap'>
+
+<table id='TBL1321721046674' width='800px' class='confluenceTable'><tbody>
+<tr>
+<td class='confluenceTd'> hostname </td>
+<td class='confluenceTd'> Hostname </td>
+<td class='confluenceTd'> localhost </td>
+<td class='confluenceTd'> false </td>
+<td class='confluenceTd'> <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>Hostname of system that hosts the service to monitor. For example: mysite.com</td>
+<td class='confluenceTd'>sockaddr</td>
+</tr>
+<tr>
+<td class='confluenceTd'> port </td>
+<td class='confluenceTd'> Port </td>
+<td class='confluenceTd'>A default value for port is usually set for each type of network service by properties in the netservices plugin descriptor.</td>
+<td class='confluenceTd'> false </td>
+<td class='confluenceTd'> <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>Port where service listens.   </td>
+<td class='confluenceTd'>sockaddr</td>
+</tr>
+<tr>
+<td class='confluenceTd'> sotimeout </td>
+<td class='confluenceTd'> Socket Timeout (in seconds) </td>
+<td class='confluenceTd'> 10 </td>
+<td class='confluenceTd'>true </td>
+<td class='confluenceTd'> int </td>
+<td class='confluenceTd'>The maximum amount of time the agent will wait for a response to a request to the remote service.</td>
+<td class='confluenceTd'> sockaddr</td>
+</tr>
+</tbody></table>
+</div>
+
+<script type='text/javascript'> <!-- 
+//Copyright(c)2005,2010 Bob Swift and other contributors. All rights reserved. 
+function getElementInnerText(element){var str="";for(var i=0;i<element.childNodes.length;i++){switch(element.childNodes.item(i).nodeType){case 1:str+=getElementInnerText(element.childNodes.item(i));break;case 3:str+=element.childNodes.item(i).nodeValue;break;}}return str;}
+function trimSafe(v){return((v==undefined)||(v==null))?"":v.Trim();}String.prototype.Trim=new Function("return this.replace(/^\\s+|\\s+$/g,'')");
+function compareNumber(v1,v2){if(isNaN(v2)){if(isNaN(v1))return 0;return-1;}if(v1<v2)return-1;if(v1==v2)return 0;return 1;}
+function compareSeparatedNumber(v1,v2){for(i=0;(i<v1.length)&&(i<v2.length);i++){var result=compareNumber(parseInt(v1[i]),parseInt(v2[i]));if(result!=0)return result;}if(v1.length<v2.length)return-1;if(v2.length<v1.length)return 1;return 0;}
+function sortByCell(sortCell,firstDataRowIndex,footingCount){var compareFunction;var valueParser;compareFunction=compareNumber;if(sortCell.columnType=="I"){valueParser=function(value){return parseInt(getElementInnerText(value));};}else if(sortCell.columnType=="F"){valueParser=function(value){return parseFloat(getElementInnerText(value));};}else if(sortCell.columnType=="C"){valueParser=function(value){return parseFloat(getElementInnerText(value).replace(/[^\d\.\,\-]*([\d\.\,\-*]*).*/,'$1'));};}else if(sortCell.columnType.charAt(0)=='D'){if(Date.parseString){valueParser=function(value){var date=Date.parseString(trimSafe(getElementInnerText(value)),sortCell.columnType.substring(1));return((date==null)?NaN:date.getTime());};}else{valueParser=function(value){return Date.parse(getElementInnerText(value));};}}else if((sortCell.columnType=="/")||(sortCell.columnType==".")||(sortCell.columnType=="-")||(sortCell.columnType==":")){compareFunction=compareSeparatedNumber;valueParser=function(value){return getElementInnerText(value).split(sortCell.columnType);};}else if(sortCell.columnType=="A"){valueParser=function(value){return 0;};}else{compareFunction=function(v1,v2){if(v1<v2)return-1;if(v1==v2)return 0;return 1;};valueParser=function(value){return trimSafe(getElementInnerText(value)).toUpperCase();};}var headRowCount=(sortCell.sortTable.tHead==null)?0:sortCell.sortTable.tHead.rows.length;firstDataRowIndex=firstDataRowIndex-headRowCount;var table=sortCell.sortTable.tBodies[0];var rowCount=table.rows.length-firstDataRowIndex-footingCount;var map=Array(rowCount);var values=Array(rowCount);var compareTest=(sortCell.sortDescending?-1:1);sortCell.sortDescending=!sortCell.sortDescending;var firstCell=(((sortCell.sortTable.tHead==null)||(sortCell.sortTable.tHead.rows.length==0))?table.rows[0].cells[sortCell.columnIndex]:sortCell.sortTable.tHead.rows[0].cells[sortCell.columnIndex]);if((firstCell!=null)&&(firstCell.sortTable!=null)&&(firstCell.sortTable!=undefined)&&(firstCell.sortTable.sortImage!=null)&&(firstCell.sortTable.sortImage!=undefined)){firstCell.sortTable.sortImage.setAttribute("src",firstCell.sortDescending?firstCell.sortTable.sortAttributeDescending:firstCell.sortTable.sortAttributeAscending);firstCell.appendChild(firstCell.sortTable.sortImage);}var i;for(i=0;i<rowCount;i++){map[i]=sortCell.sortFirstTime?i:(rowCount-1-i);var row=table.rows[i+firstDataRowIndex];var cellValue=row.cells[sortCell.columnIndex];values[i]=valueParser(cellValue);}sortCell.sortFirstTime=false;var didSwap;do{didSwap=false;for(i=0;i<rowCount-1;i++){if(compareFunction(values[map[i]],values[map[i+1]])==compareTest){saveIndex=map[i];map[i]=map[i+1];map[i+1]=saveIndex;didSwap=true;}}}while(didSwap);var tableRows=new Array();for(i=0;i<rowCount+footingCount;i++){tableRows.push(table.rows[i+firstDataRowIndex]);}for(i=0;i<rowCount+footingCount;i++){table.removeChild(tableRows[i]);}for(i=0;i<rowCount;i++){var row=tableRows[map[i]];table.appendChild(row);if(row.autoNumber){row.cells[0].innerHTML=i+1;}}for(i=0;i<footingCount;i++){table.appendChild(tableRows[i+rowCount]);}}
+function enableSortOnCell(cell,columnIndex,table,columnTypes,customize){cell.style.cursor="pointer";cell.sortTable=table;cell.sortFirstTime=true;cell.sortDescending=false;cell.columnIndex=(customize.autoNumber?(columnIndex+1):columnIndex);if(columnIndex==-1){cell.columnType="I";}else{cell.columnType=(columnTypes&&columnTypes[columnIndex])?columnTypes[columnIndex]:"S";}if(cell.columnType!="X"){cell.onmouseover=function(){this.saveTitle=this.getAttribute('title');this.setAttribute('title',customize.sortTip+" "+((this.saveTitle!=null)&&(this.saveTitle!=undefined)?this.saveTitle:''));};cell.onmouseout=function(){this.setAttribute('title',this.saveTitle);};cell.onclick=function(){sortByCell(this,customize.firstDataRowIndex,customize.footingCount);};}else{cell.columnType=cell.columnType.substring(1);}}
+function sumColumn(table,index,firstDataRowIndex,columnType){var total=0;for(var i=firstDataRowIndex;i<table.rows.length;i++){var cell=table.rows[i].cells[index];var value;if(cell){if(columnType=='C'){value=parseFloat(getElementInnerText(cell).replace(/[^\d\.\,\-]*([\d\.\,\-*]*).*/,'$1'))}else{value=parseFloat(getElementInnerText(cell));}if(!isNaN(value)){total=total+value;}}}return total;}
+function appendTotalRow(table,columnTypes,firstDataRowIndex){var row=document.createElement('tr');var table=table.tBodies[0];var columnCount=(0<table.rows.length)?table.rows[table.rows.length-1].cells.length:0;for(var columnIndex=0;columnIndex<columnCount;columnIndex++){var column=document.createElement('th');column.className='confluenceTh';column.innerHTML=(columnIndex<columnTypes.length&&((columnTypes[columnIndex]=='I')||(columnTypes[columnIndex]=='F')||(columnTypes[columnIndex]=='C')))?sumColumn(table,columnIndex,firstDataRowIndex,columnTypes[columnIndex]):'';row.appendChild(column);}table.appendChild(row);}
+function handleRow(table,row,rowIndex,customize){var columnCount=row.cells.length;for(var i=0;i<columnCount;i++){if(customize.enableSorting&&(rowIndex<=customize.lastClickableRow)){enableSortOnCell(row.cells[i],i,table,customize.columnTypes,customize);}if((rowIndex==0)&&(customize.sortColumn!='')&&(customize.sortCell==null)&&(((i+1).toString()==customize.sortColumn)||(trimSafe(getElementInnerText(row.cells[i]))==customize.sortColumn)||(trimSafe(row.cells[i].getAttribute('title'))==customize.sortColumn))){customize.sortCell=row.cells[i];}if(customize.firstDataRowIndex<=rowIndex){if((customize.columnTypes[i]=="I")||(customize.columnTypes[i]=="F")||(customize.columnTypes[i]=="C")){row.cells[i].style.textAlign="right";}}if(customize.columnTypes[i]=="H"){row.cells[i].style.display="none";}if(customize.enableHeadingAttributes||(customize.firstDataRowIndex<=rowIndex)){if(i<customize.attrList.length){for(var j=0;j<customize.attrList[i].length;j++){var attr=customize.attrList[i][j].Trim().split("=");if(1<attr.length){var aName=attr[0].Trim();var aValue=attr[1].Trim();if((aName.toLowerCase()=="style")&&(2<aValue.length)){if((aValue.charAt(0)=='"')){aValue=aValue.substring(1,aValue.length-1);}row.cells[i].style.cssText=aValue;}else{row.cells[i].setAttribute(aName,aValue);}}}}}}if(customize.autoNumber){var column=document.createElement(!customize.autoNumberSort||(rowIndex<customize.firstDataRowIndex)?'th':'td');column.className=(!customize.autoNumberSort||(rowIndex<customize.firstDataRowIndex)?'confluenceTh':'confluenceTd');column.innerHTML=((rowIndex<customize.firstDataRowIndex)||(customize.totalRowCount-customize.firstDataRowIndex-customize.footingCount<rowIndex)?'':customize.dataRowCount++);column.setAttribute('align','right');row.autoNumber=!customize.autoNumberSort;row.insertBefore(column,row.cells[0]);if(customize.enableSorting&&customize.autoNumberSort&&(rowIndex<=customize.lastClickableRow)){enableSortOnCell(column,-1,table,null,customize);}}if((customize.highlightColor!="")&&(customize.firstDataRowIndex<=rowIndex)){row.onmouseover=function(){this.tableHighLightRowColor=this.bgColor;this.bgColor=customize.highlightColor;};row.onmouseout=function(){this.bgColor=this.tableHighLightRowColor;this.tableHighLightRowColor=null;};}}
+function customizeMacroTable(tableId,columnTypes,firstDataRowIndex,highlightColor,enableSorting,sortTip,sortColumn,sortDescending,autoNumber,autoNumberSort,enableHeadingAttributes,footingCount,autoTotal,iconLocation){var customize=new Object;customize.columnTypes=columnTypes;customize.firstDataRowIndex=firstDataRowIndex;customize.highlightColor=highlightColor;customize.enableSorting=enableSorting;customize.sortTip=sortTip;customize.sortColumn=sortColumn;customize.sortDescending=sortDescending;customize.autoNumber=autoNumber;customize.autoNumberSort=autoNumberSort;customize.enableHeadingAttributes=enableHeadingAttributes;customize.footingCount=footingCount;customize.autoTotal=autoTotal;customize.iconLocation=iconLocation;var table=(typeof(tableId)=="string")?document.getElementById(tableId):null;if(table){if(customize.autoTotal){appendTotalRow(table,customize.columnTypes,customize.firstDataRowIndex);customize.footingCount++;}if(customize.iconLocation!=""){table.sortAttributeAscending=contextPath+customize.iconLocation+"down.gif";table.sortAttributeDescending=contextPath+customize.iconLocation+"up.gif";table.sortImage=document.createElement("IMG");}customize.lastClickableRow=customize.firstDataRowIndex-1;if(customize.lastClickableRow<0){customize.lastClickableRow=0;}customize.sortCell=null;customize.dataRowCount=1;var colAttrs=columnAttributes.split(",");customize.attrList=Array(colAttrs.length);for(var i=0;i<colAttrs.length;i++){customize.attrList[i]=colAttrs[i].Trim().split(";;");}var rowIndex=0;var headRowCount=(table.tHead==null)?0:table.tHead.rows.length;var footRowCount=(table.tFoot==null)?0:table.tFoot.rows.length;var bodyRowCount=table.tBodies[0].rows.length;customize.totalRowCount=headRowCount+footRowCount+bodyRowCount;for(var i=0;i<headRowCount;i++){var row=table.tHead.rows[i];handleRow(table,row,rowIndex,customize);rowIndex++;}for(var i=0;i<bodyRowCount;i++){var row=table.tBodies[0].rows[i];handleRow(table,row,rowIndex,customize);rowIndex++;}for(var i=0;i<footRowCount;i++){var row=table.tFoot.rows[i];handleRow(table,row,rowIndex,customize);rowIndex++;}if(customize.sortCell!=null){customize.sortCell.sortDescending=customize.sortDescending;sortByCell(customize.sortCell,customize.firstDataRowIndex,customize.footingCount);}}return table;}
+
+var columnTypes = ['S'];
+var columnAttributes = 'style=&quot;width:10%;&quot;,style=&quot;width:15%;&quot;,style=&quot;width:15%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:30%;&quot;,style=&quot;width:10%;&quot;';
+customizeMacroTable('TBL1321721046672', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
+//-->
+ </script> 
+<script type='text/javascript'> <!-- 
+var columnTypes = ['S'];
+var columnAttributes = 'style=&quot;width:10%;&quot;,style=&quot;width:15%;&quot;,style=&quot;width:15%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:30%;&quot;,style=&quot;width:10%;&quot;';
+customizeMacroTable('TBL1321721046673', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
+//-->
+ </script> 
+<script type='text/javascript'> <!-- 
+var columnTypes = ['S'];
+var columnAttributes = 'style=&quot;width:10%;&quot;,style=&quot;width:15%;&quot;,style=&quot;width:15%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:30%;&quot;,style=&quot;width:10%;&quot;';
+customizeMacroTable('TBL1321721046674', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
+//-->
+ </script> </p>
+
+<h1><a name="SMTPPlatformService-SMTPMetrics"></a>SMTP Metrics</h1>
+
+<ul>
+	<li>Availability - The agent reports an SMTP service available if it can connect to it and read the welcome banner.</li>
+</ul>
+
+
+
+<ul>
+	<li>Connection Metrics
+	<ul>
+		<li>All Inbound Connections - Number of inbound connections of all types to the service.</li>
+		<li>All Outbound Connections - Number of outbound connections of all types from the service.</li>
+		<li>Inbound Connections - Number of inbound TCP connections to the service.</li>
+		<li>Outbound Connections - Number of outbound TCP connections from the service.</li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul>
+	<li>Response Time - The time (in ms) it took to determine service availability.</li>
+</ul>
+
+
+<ul>
+	<li>TCP connection state metrics - The number of connections in each connection state is reported:
+	<ul>
+		<li>CLOSE_WAIT</li>
+		<li>CLOSED</li>
+		<li>ESTABLISHED</li>
+		<li>FIN_WAIT_1</li>
+		<li>FIN_WAIT_2</li>
+		<li>LAST_ACK</li>
+		<li>LISTEN</li>
+		<li>SYN_RECEIVED</li>
+		<li>SYN_SEND</li>
+		<li>TIME_WAIT</li>
+	</ul>
+	</li>
+</ul>
+
+
+<p>For definitions of TCP connection states, see <a href="http://tools.ietf.org/html/rfc793">RFC 793</a>.</p>
+
+<h1><a name="SMTPPlatformService-SMTPMonitoringDefaultsPage"></a>SMTP Monitoring Defaults Page</h1>
+
+<p>You can enable and disable metrics, select indicator metrics, and change the collection interval for a resource type on its <b>Monitoring Defaults</b> page. To navigate to a resource type's <b>Monitoring Defaults</b> page:</p>
+
+<ol>
+	<li>Click the <b>Administration</b> tab.</li>
+	<li>Click <b>Monitoring Defaults</b>.</li>
+	<li>Scroll down to the resource type and click <b>Edit Metric Template</b>.</li>
+</ol>
+
+
+<p>The <b>Monitoring Defaults</b> page for the SMTP service type is shown below:</p>
+
+<p><span class="image-wrap" style=""><img src="attachments/79660206/79921854.png" width="800" style="border: 0px solid black"/></span></p>
+
+<h1><a name="SMTPPlatformService-EventTracking"></a>Event Tracking</h1>
+
+<p>You can enable log tracking for a network service. If you do, the agent will log an event for responses that match the criteria you specify.</p>
+
+<p>To enable log tracking, click the <b>Enable Log Tracking</b> box in the <b>Monitoring</b> section of the <b>Configuration Properties</b> page.</p>
+
+<p>For information about Hyperic log tracking functionality and configuration options, and how to view log events, see <a href="Set Up Log Tracking for a Resource.html" title="Set Up Log Tracking for a Resource">Set Up Log Tracking for a Resource</a>.</p>
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

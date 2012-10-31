@@ -1,0 +1,151 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : Auto-Discovery Portlet</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : Auto-Discovery Portlet
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+
+
+
+<ul>
+	<li><a href="#Auto-DiscoveryPortlet-ContentsoftheAutoDiscoveryPortlet">Contents of the Auto&#45;Discovery Portlet</a></li>
+	<li><a href="#Auto-DiscoveryPortlet-ImportorSkipResourcesinAutoDiscoveryPortlet">Import or Skip Resources in Auto&#45;Discovery Portlet</a></li>
+	<li><a href="#Auto-DiscoveryPortlet-ConfiguretheNumberofAutoDiscoveriesDisplayed">Configure the Number of Auto&#45;Discoveries Displayed</a></li>
+</ul>
+
+
+
+
+<h1><a name="Auto-DiscoveryPortlet-ContentsoftheAutoDiscoveryPortlet"></a>Contents of the Auto-Discovery Portlet</h1>
+
+<p>The <b>Auto-Discovery</b> portlet on the Hyperic Dashboard lists recently added or modified platforms and servers, and allows an authorized user to view discovery details, and to import the new or changed resource data to the Hyperic database.</p>
+
+<p>By default, the <b>Auto-Discovery</b> portlet lists the (up to) five most recently new or changed platforms. To set the maximum number of platforms that can appear in the list, see <a href="#Auto-DiscoveryPortlet-ConfiguretheNumberofAutoDiscoveriesDisplayed">Configure the Number of Auto&#45;Discoveries Displayed</a>.</p>
+
+<p>A platform appears in the the <b>Auto-Discovery</b> portlet if it, or a server running on it, is new or changed. The rules are these:</p>
+<ul>
+	<li><b>The platform is new</b> &#8212; A platform appears as new in the portlet, if neither its IP address or FQDN match that of an existing platform in inventory. In this case, any new servers discovered on the platform appear below the platform in the portlet.</li>
+</ul>
+
+
+<ul>
+	<li><b>The platform has a new server</b> &#8212; A new server has been discovered on the platform since the last scan. The new server is listed below the platform.</li>
+</ul>
+
+
+<ul>
+	<li><b>Platform or server properties have changed</b> &#8212; One or more inventory properties for the platform, or for one or more of the servers running it, have changed since the last scan. Servers with changed properties are listed below the platform.</li>
+</ul>
+
+
+<p>The image below shows the Auto-Discovery portlet after the agent was started for the first time on a platform.</p>
+
+<p><span class="image-wrap" style=""><img src="attachments/79660206/79921466.png" style="border: 0px solid black"/></span></p>
+
+<p>The <b>Auto-Discovery</b> portlet presents the following information for each platform it contains:</p>
+
+<ul>
+	<li><b>Hostname</b> &#8212; The hostname of the platform is a link to a page &#8212; the <b>Auto-Discovery Results</b> page - that contains detailed information about the scan results for the platform and servers running there. See <a href="Using the Auto-Discovery Results Page.html" title="Using the Auto-Discovery Results Page">Using the Auto&#45;Discovery Results Page</a>.</li>
+</ul>
+
+
+<ul>
+	<li><b>Platform type</b> &#8212; The resource type for the platform.</li>
+</ul>
+
+
+<ul>
+	<li><b>Status</b> &#8212; Indicates the type of change that was detected for a resource, either "new" or "modified".</li>
+</ul>
+
+
+<ul>
+	<li><b>Changes</b> &#8212; If the <b>Status</b> for a resource is "modified", the <b>Changes</b> column contains a summary of what changed. For example:
+	<ul>
+		<li>"server set changed" &#8212; Applies to platforms; this value indicates that changes to one or more servers on the platform were detected. The changed server(s) are listed below the platform.</li>
+		<li>"name change" &#8212; Indicates that the name of the resource has changed; a resource name can change when a resource is upgraded from one version to another, if version number forms a portion of the resource name, as is often the case.</li>
+		<li>"install path changed" &#8212; Indicates that the installation path for a server has changed; the installation path for a resource can change when a resource is upgraded from one version to another, if version number forms a portion of the path, as is often the case.</li>
+		<li>"IP set changed" &#8212; Indicates that the IP address has changed. When the agent detects an IP address not associated with an existing platform in inventory, it checks for a platform with a matching FQDN - if found, Hyperic recognizes the platform as existing.</li>
+		<li>"FQDN changed"</li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul>
+	<li>For each newly discovered or changed server on the platform:
+	<ul>
+		<li><b>Installation path</b> &#8212;</li>
+		<li><b>Status</b> &#8212; Indicates "new" or "modified"</li>
+		<li><b>Changes</b> &#8212; If <b>Status</b> is "modified", the <b>Changes</b> column contains a summary of what changed.</li>
+	</ul>
+	</li>
+</ul>
+
+
+<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>About Discovery and Import of Services</b><br />The <b>Auto-Discovery Portlet</b> does not display new or changed services.  Serviced are discovered during a run-time scan and are automatically added to Hyperic inventory. For more information, see <a href="Resource Auto-Discovery Processes.html" title="Resource Auto-Discovery Processes">Resource Auto&#45;Discovery Processes</a>.</td></tr></table></div>
+
+<h1><a name="Auto-DiscoveryPortlet-ImportorSkipResourcesinAutoDiscoveryPortlet"></a>Import or Skip Resources in Auto-Discovery Portlet</h1>
+
+<p>You can process the contents of the <b>Auto-Discovery Portlet</b> in these ways:</p>
+<ul>
+	<li>To import all resources---leave all resources selected, and click <b>Add to Inventory</b>.</li>
+	<li>To skip all resources---leave all resources selected, and click <b>Skip Checked Resources</b>.</li>
+	<li>To import selected resources---Either:
+	<ul>
+		<li>De-select the resources you do not want to add to inventory, and click <b>Add to Inventory</b>, or</li>
+		<li>De-select the resources you do want to add to inventory and <b>Skip Checked Resources</b>.</li>
+	</ul>
+	</li>
+</ul>
+
+
+<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>About Skipped Resources</b><br />If you do not import a resource displayed in the <b>Auto-Discovery</b> portlet, note:
+<ul>
+	<li>If you skip a new platform, you skip its servers as well.</li>
+	<li>During the next platform scan, skipped resources will reappear in the portlet after the next scan that detects them. If you have resources that you do not want the agent to discover, see the relevant section in <a href="Options for Running and Controlling Resource Discovery.html" title="Options for Running and Controlling Resource Discovery">Options for Running and Controlling Resource Discovery</a>.</li>
+</ul>
+</td></tr></table></div>
+<div class='panelMacro'><table class='noteMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/warning.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>If the Hyperic Agent discovered all of the resource properties required to monitor a resource, it starts monitoring that resource as soon as you add it to inventory. This is the case for most resource types. Note however, that some level of configuration is required to start managing some resources types - see the <b>Configuration Properties</b> section on a resource's <b>Inventory</b> tab for configuration requirements.</td></tr></table></div>
+<h1><a name="Auto-DiscoveryPortlet-ConfiguretheNumberofAutoDiscoveriesDisplayed"></a>Configure the Number of Auto-Discoveries Displayed</h1>
+
+<p>To set the number of completed auto-discoveries displayed in the portlet, click the gear icon in the upper left corner of the portlet. On the <b>Display Settings</b> page, select "10" or "all", and click <b>OK</b>.</p>
+
+ 
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:06</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : ui-Admin</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : ui-Admin
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Aug 08, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1344444152174 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1344444152174 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1344444152174 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1344444152174'>
+<ul>
+    <li><a href='#ui-Admin-AdministrationPage'> Administration Page</a></li>
+<ul>
+    <li><a href='#ui-Admin-Authentication%2FAuthorization'>Authentication/Authorization</a></li>
+    <li><a href='#ui-Admin-HQServerSettings'>HQ Server Settings</a></li>
+    <li><a href='#ui-Admin-Plugins'>Plugins</a></li>
+    <li><a href='#ui-Admin-vFabricHypericLicenseInformation'>vFabric Hyperic License Information</a></li>
+    <li><a href='#ui-Admin-vCenterOperationsManagementSuiteLicenseInformation'>vCenter Operations Management Suite License Information</a></li>
+    <li><a href='#ui-Admin-LicensesUsageStatus'>Licenses Usage Status</a></li>
+</ul>
+</ul></div>
+
+
+<h1><a name="ui-Admin-AdministrationPage"></a><a name="ui-Admin-top"></a>Administration Page</h1>
+
+<p>This page appears when you click <b>Administration</b> in the Masthead. Only users with administrator privilege can use the features on this page.</p>
+
+<h2><a name="ui-Admin-Authentication%2FAuthorization"></a>Authentication/Authorization</h2>
+
+<p>The "Authentication/Authorization" section has options for viewing and updating HQ user accounts.</p>
+
+<p>In vFabric Hyperic, additional options for creating and managing managing roles are also available.</p>
+
+<p>For more information, see <a href="User Accounts and Roles in Hyperic.html" title="User Accounts and Roles in Hyperic">User Accounts and Roles in Hyperic</a>.</p>
+
+<h2><a name="ui-Admin-HQServerSettings"></a>HQ Server Settings</h2>
+
+<p>The "HQ Server Settings" section has links to several configuration pages:</p>
+<ul>
+	<li><b>HQ Server Settings</b> &#8212; You can set a variety of deployment-wide HQ Server configuration options here. For more information see the associated <a href="ui-Admin.HQServer.html" title="ui-Admin.HQServer">help page</a>.</li>
+</ul>
+
+
+<ul>
+	<li><b>Monitoring Defaults</b> &#8212; You set the default monitoring settings for each resource type on this page.&nbsp; For more information see the associated <a href="ui-Admin.Monitor.html" title="ui-Admin.Monitor">help page</a>.&nbsp; <b>Note:&nbsp;</b> Although metric collection settings defined here can be over-written for an individual resource,&nbsp; such changes will not persist when type-level defaults are updated. Each time you update the monitoring configuration for a resource type, the settings for each individual resource of that type are updated.</li>
+</ul>
+
+
+<ul>
+	<li><b>Escalation Schemes Configuration</b> &#8212; Use this page to create and manage escalation schemes for use in alert definitions. For more information, see the associated <a href="ui-Admin.Escalation.html" title="ui-Admin.Escalation">help page</a>.</li>
+</ul>
+
+
+<ul>
+	<li><b>Plugin Manager</b> &#8212; A user interface for deployment-wide management of product plugins; it displays all plugins deployed to the Hyperic Server, and a summary of agent deployment status for the plugin. You can use Plugin Manager to deploy new or updated plugins and to remove plugins on Hyperic Agents version 4.6 or later.  For more information, see <a href="Plugin Deployment and Management.html" title="Plugin Deployment and Management">Plugin Deployment and Management</a>.</li>
+</ul>
+
+
+<h2><a name="ui-Admin-Plugins"></a>Plugins</h2>
+
+<p>This section is an attachment point for HQU plugins.</p>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Learn About HQU Plugins</b><br />HQU plugins are Groovy-based HQ extensions that can be attached:
+<ul>
+	<li>to the <b>Views</b> tab for a resource type,</li>
+	<li>as an item on a Masthead tab menu, or</li>
+	<li>to the "Plugins" section of HQ's <b>Administration</b> tab.<br/>
+HQ has a number of built-in HQU plugins. Users can also develop and deploy custom HQU plugins. For more information see <a href="vFabric Hyperic HQU Plug-in Development.html" title="vFabric Hyperic HQU Plug-in Development">vFabric Hyperic HQU Plug&#45;in Development</a>.</li>
+</ul>
+</td></tr></table></div>
+<p>The HQU plugins available here are:</p>
+<ul>
+	<li><b>Network and Host Dependency Manager</b> <font color="red">*</font> &#8212; In vFabric Hyperic, you can use this plugin to define the relationship between platforms and network hosts or devices. For more information see the associated <a href="ui-Admin.Dependency.html" title="ui-Admin.Dependency">help page</a>.</li>
+</ul>
+
+
+<ul>
+	<li><b>Groovy Console</b> &#8212; Allows users to run Groovy code directly in the HQ Server. For more information see the associated <a href="ui-Groovy.html" title="ui-Groovy">help page</a>.</li>
+</ul>
+
+
+<ul>
+	<li><b>HQ Health</b> &#8212; Provides real-time diagnostic data for the HQ Server host used by HQ Support for troubleshooting. For more information see the associated <a href="ui-HQHealth.html" title="ui-HQHealth">help page</a>.</li>
+</ul>
+
+
+<ul>
+	<li><b>HQ Web Services API</b> &#8212; The API enables programmatic and command-line access to the HQ Server. For more information, see <a href="vFabric Hyperic Web Services API.html" title="vFabric Hyperic Web Services API">vFabric Hyperic Web Services API</a>.</li>
+</ul>
+
+
+<ul>
+	<li><b>tc Server Command-Line Interface</b> - A command-line tool, available with tc Server for use with vFabric Hyperic, for performing tc Server configuration and application deployment tasks. For more information, see <a href="ui-tcserverclient.html" title="ui-tcserverclient">ui-Admin.tcServerCLI</a>.<br/>
+<a name="ui-Admin-SuiteLicense"></a></li>
+</ul>
+
+
+<h2><a name="ui-Admin-vFabricHypericLicenseInformation"></a>vFabric Hyperic License Information</h2>
+
+<p>This section appears if you have configured a vFabric Suite license, or you are running with the default Hyperic evaluation license. The following data is displayed:</p>
+
+<ul>
+	<li><b>Expires</b> &#8212; When the license will expire. For a configured license, the value "Never" indicates that the license is perpetual. For the default evaluation license, "Never" is displayed until you import at least one platform into inventory, at which point the date two months after the first platform was imported appears.</li>
+</ul>
+
+
+<ul>
+	<li><b>Platform Limit</b> &#8212; The maximum number of platforms the license entitles you to manage. "None" indicates that you can managed an unlimited number of platforms. If you are running with the default evaluation license, the limit is 60 platforms.</li>
+</ul>
+
+
+<p><a name="ui-Admin-VcopsLicense"></a></p>
+<h2><a name="ui-Admin-vCenterOperationsManagementSuiteLicenseInformation"></a>vCenter Operations Management Suite License Information</h2>
+
+<p>This section appears if you have configured a vCenter Operations Management Suite (VCOPs) license.The following data is displayed:</p>
+
+<ul>
+	<li><b>Expires</b> &#8212; When the license will expire. "Never" indicates that the license is perpetual.</li>
+</ul>
+
+
+<ul>
+	<li><b>Platform Limit</b> &#8212; The maximum umber of platforms the license entitles you to manage. "None" indicates that you can managed an unlimited number of platforms.</li>
+</ul>
+
+
+<p><a name="ui-Admin-LicenseUsage"></a></p>
+
+<h2><a name="ui-Admin-LicensesUsageStatus"></a>Licenses Usage Status</h2>
+
+<p>In this section, the value of <b>PLatform Count</b> indicates how many platforms Hyperic is currently managing out of the total number of platforms that your licenses (including both vFabric and VCOPs licenses if you have both) entitle you to manage. For example:</p>
+
+<ul>
+	<li>1/500 indicates that you have one platform under management, and are licensed to manage 500 platforms.</li>
+</ul>
+
+
+<ul>
+	<li>1/UNLIMITED indicates you have one platform under management, and are licensed to manage an unlimited number platforms.</li>
+</ul>
+
+
+<ul>
+	<li>50/0 indicates that you have 50 platforms under management, and that your license is expired.</li>
+</ul>
+
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

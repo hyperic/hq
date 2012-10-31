@@ -1,0 +1,140 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : About Platforms, Servers, and Services</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : About Platforms, Servers, and Services
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on May 09, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1336582414251 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1336582414251 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1336582414251 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1336582414251'>
+<ul>
+    <li><a href='#AboutPlatforms%2CServers%2CandServices-Platforms'>Platforms</a></li>
+<ul>
+    <li><a href='#AboutPlatforms%2CServers%2CandServices-OperatingSystemPlatforms'>Operating System Platforms</a></li>
+    <li><a href='#AboutPlatforms%2CServers%2CandServices-VirtualandNetworkPlatforms'>Virtual and Network Platforms</a></li>
+</ul>
+    <li><a href='#AboutPlatforms%2CServers%2CandServices-Servers'>Servers</a></li>
+    <li><a href='#AboutPlatforms%2CServers%2CandServices-ServicesandPlatformServices'>Services and Platform Services</a></li>
+</ul></div>
+
+<p>This page describes the fundamental inventory types in Hyperic: <em>platforms</em>, <em>servers</em>, and <em>services</em> &#8212; any individual resource instances has one of these types.  For information about inventory types that are configurable collections of other resources &#8212; <em>groups</em> and <em>applications</em> &#8212; see <a href="About Groups in Hyperic.html" title="About Groups in Hyperic">About Groups in Hyperic</a> and <a href="About Applications in Hyperic.html" title="About Applications in Hyperic">About Applications in Hyperic</a>.</p>
+
+
+
+
+
+<p><a name="AboutPlatforms%2CServers%2CandServices-platforms"></a></p>
+<h2><a name="AboutPlatforms%2CServers%2CandServices-Platforms"></a>Platforms</h2>
+
+<p>There are two major kinds of platforms in Hyperic.</p>
+
+<h3><a name="AboutPlatforms%2CServers%2CandServices-OperatingSystemPlatforms"></a>Operating System Platforms</h3>
+
+<p>An <em>operating system platform</em> is a computer and the operating system that runs on it. The Hyperic Agent auto-discovers operating system platform using Hyperic's <tt>system</tt> plugin. You cannot manually add an operating system platform to inventory.&nbsp;Hyperic supports these operating system platform types:</p>
+<ul>
+	<li>AIX</li>
+	<li>FreeBSD</li>
+	<li>HPUX</li>
+	<li>Linux</li>
+	<li>MacOSX</li>
+	<li>Solaris</li>
+	<li>Unix</li>
+	<li>Win32</li>
+</ul>
+
+
+<h3><a name="AboutPlatforms%2CServers%2CandServices-VirtualandNetworkPlatforms"></a>Virtual and Network Platforms</h3>
+<p><a name="AboutPlatforms%2CServers%2CandServices-NetworkHostPlatforms"></a>Hyperic supports a variety of platform types that do not map to an individual physical machine running a traditional operating system. These include:</p>
+<ul>
+	<li>Resources that a Hyperic Agent monitors remotely over the network, such as for network hosts and devices,</li>
+	<li>Virtual resources such as VMware vSphere hosts and VMs, and</li>
+	<li>Distributed sets of resources, such as GemFire Distributed Systems.</li>
+</ul>
+
+
+<p>The Hyperic Agent does not automatically discover and monitor virtual and network platforms &#8212; typically you create such platforms manually (using the <b>New Platform</b> command on the <b>Tools</b> menu in the <b>Resource</b> tab of the Hyperic user interface), or at a minimum, supply resource properties data that enable the agent to manage them. These are the virtual and network platform types that Hyperic supports:</p>
+
+<ul>
+	<li>Cisco IOS</li>
+	<li>Cisco Pixos</li>
+	<li>GemFire Distributed System</li>
+	<li>NetApp Filer</li>
+	<li>Network Device</li>
+	<li>Network Host</li>
+	<li>VMware vSphere Host</li>
+	<li>VMware vSphere VM</li>
+	<li>Xen Host</li>
+</ul>
+
+
+<p>For information about creating an un-discoverable platform, see <a href="Create a Platform.html" title="Create a Platform">Create a Platform</a>.</p>
+
+<h2><a name="AboutPlatforms%2CServers%2CandServices-Servers"></a>Servers</h2>
+
+<p>In Hyperic, a server is software product that runs on a platform. Servers provide a communications interface and perform specific tasks upon request. Examples of server types include Tomcat, JBoss, and Exchange. The <b>Monitoring Defaults</b> page in Hyperic's <b>Administration</b> tab lists all of the server types that Hyperic supports.</p>
+
+<p>Most server types are auto-discovered by a server type-specific Hyperic plugin. If the plugin that manages a server does not support auto-discovery, or if auto-discover of a server fails, you may need to manually create a server, as described in <a href="Create a Server.html" title="Create a Server">Create a Server</a>.</p>
+
+<p>The screenshot below shows the <b>Monitor</b> tab for a server. The <b>Resources</b> panel for the server lists its child services and parent platform.&nbsp;</p>
+
+<p><span class="image-wrap" style=""><img src="attachments/79660206/79921672.png" style="border: 0px solid black"/></span></p>
+
+<h2><a name="AboutPlatforms%2CServers%2CandServices-ServicesandPlatformServices"></a>Services and Platform Services</h2>
+
+<p>In Hyperic, a service is a software component dedicated to a particular task that runs on a server or platform. A service that runs on a server is referred to as a <em>service</em>. A service that runs on a platform is referred to as a <em>platform service</em>.</p>
+
+<p>The resource plugin that discovers a platform or server also discovers key services &#8212; such as CPUs, network interfaces, file systems, and so on &#8212; running on the platform.  </p>
+
+<p>In addition, an authorized user can explicitly configure a platform service on a platform to serve as a proxy for a resource the Hyperic Agent can monitor over the network, for example, a DNS or POP3 service.  For more information see <a href="Create a Platform Service.html" title="Create a Platform Service">Create a Platform Service</a></p>
+
+<p>Services that runs on a server can be either an internal component of the server (for instance, "Weblogic Admin 9.2 Entity EJB service") or a deployed item ("CustomerEntityEJB").</p>
+
+<p>The <b>Monitoring Defaults</b> page in Hyperic's <b>Administration</b> tab lists the service and platform service types that Hyperic supports.</p>
+
+<p>The screenshot below shows the <b>Monitor</b> tab for a service. The <b>Resources</b> panel for the service lists its parent server.</p>
+
+<p><span class="image-wrap" style=""><img src="attachments/79660206/79921673.png" style="border: 0px solid black"/></span></p>
+
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:06</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

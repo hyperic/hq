@@ -1,0 +1,421 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : Measurement Plugin</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : Measurement Plugin
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325699819347 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699819347 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699819347 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1325699819347'>
+<ul>
+    <li><a href='#MeasurementPlugin-MeasurementPlugins'>Measurement Plugins</a></li>
+    <li><a href='#MeasurementPlugin-WritingtheXMLDescriptor'>Writing the XML Descriptor</a></li>
+    <li><a href='#MeasurementPlugin-MeasurementSupportClasses'>Measurement Support Classes</a></li>
+<ul>
+    <li><a href='#MeasurementPlugin-SpecifyMeasurementPlugininPluginDescriptor'>Specify Measurement Plugin in Plugin Descriptor</a></li>
+</ul>
+    <li><a href='#MeasurementPlugin-DefiningMeasurementswiththemetricTag'>Defining Measurements with the metric Tag</a></li>
+    <li><a href='#MeasurementPlugin-UsingTemplatestoCollectMetricData'>Using Templates to Collect Metric Data</a></li>
+    <li><a href='#MeasurementPlugin-UsingSupportClassestoSimplifyMetricCollection'>Using Support Classes to Simplify Metric Collection</a></li>
+    <li><a href='#MeasurementPlugin-UsingaFiltertoEfficientlyApplyaTemplatetoMetrics'>Using a Filter to Efficiently Apply a Template to Metrics</a></li>
+    <li><a href='#MeasurementPlugin-GettingYourPlugintoAutoDiscoverResources'>Getting Your Plugin to Auto-Discover Resources</a></li>
+</ul></div>
+
+<h1><a name="MeasurementPlugin-MeasurementPlugins"></a>Measurement Plugins</h1>
+
+<p>A measurement plugin the part of a resource plugin that implements metric collection &#8212; it can identify a resource instance and collect metrics for it. A custom plugin that leverages Hyperic's base measurement classes consists of only the plugin XML descriptor. For example, most custom JMX measurement plugins use Hyperic's JMX measurement classes; to write a custom JMX plugin you typically just define the resources and the desired metrics in an XML file &#8212; which is the complete plugin. </p>
+
+<h1><a name="MeasurementPlugin-WritingtheXMLDescriptor"></a>Writing the XML Descriptor</h1>
+
+<p>Each plugin requires an XML descriptor that specifies the type of plugin and, in this case, the resources to look for and the metrics to collect from them. The rest of this page describes the major elements that you need to include in that file.</p>
+
+<p>For more information, see <a href="Key Facts About HQ Plugin Descriptors.html" title="Key Facts About HQ Plugin Descriptors">Key Facts About HQ Plugin Descriptors</a>.</p>
+
+<h1><a name="MeasurementPlugin-MeasurementSupportClasses"></a>Measurement Support Classes</h1>
+
+<p>This section lists Hyperic classes for metric collection.</p>
+
+<ul>
+	<li><tt>org.hyperic.hq.product.MeasurementPlugin</tt> &#8212; This is Hyperic's base measurement class; its <tt>getValue()</tt> method is called when a plugin is asked for a metric value. This class is extended by the classes below, each of which specifies a <tt>getValue()</tt> method for the a particular type of metric collection &#8212; JMX, JDBC, Sigar, and so on.</li>
+</ul>
+
+
+<ul>
+	<li><tt>org.hyperic.hq.product.JDBCMeasurementPlugin</tt> &#8212; Obtains database server and database metrics using JDBC. Measurement classes in Hyperic plugins that monitor database servers extend this class. Such plugins include:
+	<ul>
+		<li>Mysql</li>
+		<li>PostgreSQL</li>
+		<li>Oracle</li>
+		<li>Sybase</li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul>
+	<li><tt>org.hyperic.hq.product.jmx.MxMeasurementPlugin</tt> &#8212; Obtains MBean attribute values. Measurement classes in Hyperic plugins that monitor application servers extend this class. Such plugins include:
+	<ul>
+		<li>JBoss</li>
+		<li>WebLogic</li>
+		<li>WebSphere</li>
+		<li>Tomcat</li>
+		<li>Resin</li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul>
+	<li><tt>org.hyperic.hq.product.SigarMeasurementPlugin</tt> &#8212; Uses SIGAR API to obtain system and process data. Hyperic's <tt>system</tt> plugin uses this class to and monitor system and process information for operating system platform types, such as Linux, Win32, and so on.</li>
+</ul>
+
+
+<ul>
+	<li><tt>org.hyperic.hq.product.SNMPMeasurementPlugin</tt> &#8212; Obtains metrics from SNMP-enabled resources. Measurement classes in Hyperic plugins that use this class include  :
+	<ul>
+		<li>Apache</li>
+		<li>iPlanet/SunONE</li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul>
+	<li><tt>org.hyperic.hq.product.Win32MeasurementPlugin</tt> &#8212; Collects Windows Perflib data.</li>
+</ul>
+
+
+<h2><a name="MeasurementPlugin-SpecifyMeasurementPlugininPluginDescriptor"></a>Specify Measurement Plugin in Plugin Descriptor</h2>
+
+<p>You identify the measurement class for a resource type in the plugin descriptor, in a <tt>&lt;plugin&gt;</tt> element in the resource element &#8212; the <tt>&lt;platform&gt;</tt>, <tt>&lt;server&gt;</tt>, or <tt>&lt;service&gt;</tt> element that defines the resource type. For example, a plugin that uses <tt>org.hyperic.hq.product.MeasurementPlugin</tt> to collect metrics for a server type will include a <tt>&lt;plugin&gt;</tt> element like the one shown below:</p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">&lt;server...
+     ... 
+     &lt;plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/&gt;
+     ...
+&lt;/server&gt;</pre>
+		</div>
+</div></div>
+
+
+
+
+
+<h1><a name="MeasurementPlugin-DefiningMeasurementswiththemetricTag"></a>Defining Measurements with the metric Tag</h1>
+
+<p>A measurement plugins collects metrics. In the plugin descriptor, you define a <tt>&lt;metric&gt;</tt> element for each metric to be collected for a resource type. </p>
+
+<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>You Must Always Collect the Availability Metric</b><br />The Availability metric indicates whether a Resource is up or down.
+
+<p>A metrics-gathering plugin must determine Availability for <em>every</em> server and <em>every</em> service it monitors. A single plugin will likely gather Availability for multiple Resources. If Availability is not gathered for a Resource, HQ will consider the Resource to be unavailable, and will not show any metrics for it in the Portal.</p>
+
+<p>A plugin sets the value of Availability to 1 if the Resource is up, and 0 if it is down.&nbsp; These values are displayed in the Portal as "available" or "not available".</p>
+
+<p>Verifying the existence of a Resource's process is a common technique for determining its Availability. However, the method a plugin uses to determine Availability can vary depending on the Resource Type and the plugin developer's judgment. There might be alternative techniques for determining the Availability of a Resource. For instance, a plugin might determine the Availability of a web server based on whether its process is up, its port is listening, it is responsive to a request, or by some combination of these conditions.&nbsp; </p></td></tr></table></div>
+
+<p>The following explains each each metric attribute, most of which, in fact, are intended for use by th eServer to control display of the metric data.</p>
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Metric Attribute </th>
+<th class='confluenceTh'> Description </th>
+<th class='confluenceTh'> Req'd </th>
+<th class='confluenceTh'> Possible Values </th>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>name</tt> </td>
+<td class='confluenceTd'> The name that appears for the metric in the Hyperic user interface.  </td>
+<td class='confluenceTd'> Y </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> <a name="MeasurementPlugin-alias"></a> <tt>alias</tt> </td>
+<td class='confluenceTd'> Abbreviated name of the metric, displayed in the plugin's output (name-value pairs). If not specified, <tt>alias</tt> defaults to the value of <tt>name</tt>, stripped of white space and any non-alphanumeric characters. </td>
+<td class='confluenceTd'> N </td>
+<td class='confluenceTd'> In the case of a JMX metric, <tt>alias</tt> exactly matches the name of the MBean attribute that supplies the metric value. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>category</tt> </td>
+<td class='confluenceTd'> The category of metric. <br class="atl-forced-newline" /> <br class="atl-forced-newline" />
+In the Hyperic user interface, a user can filter resource metrics by category on the <b>Metric Data</b> tab for the resource. For more information, see <a href="Resources Minitab.html#ResourcesMinitab-filter">Filter Metrics by Category and Value Type</a>. <br class="atl-forced-newline" /> <br class="atl-forced-newline" />
+Metric categories are defined in <a href="Metrics and Metric Collection.html" title="Metrics and Metric Collection">Metrics and Metric Collection</a>.</td>
+<td class='confluenceTd'> N </td>
+<td class='confluenceTd'><ul>
+	<li>AVAILABILITY &#8212; This is the default <tt>category</tt> for a metric whose <tt>name</tt> attribute is "Availability". <br class="atl-forced-newline" /></li>
+	<li>THROUGHPUT  <br class="atl-forced-newline" /></li>
+	<li>PERFORMANCE <br class="atl-forced-newline" /></li>
+	<li>UTILIZATION  &#8212; This is the default <tt>category</tt> for a metric whose, except for a metric whose <tt>name</tt> is "Availability".</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>units</tt> </td>
+<td class='confluenceTd'> The units of measurement for the metric, which affects how metric values are displayed and labelled in the Hyperic user interface. </td>
+<td class='confluenceTd'> N </td>
+<td class='confluenceTd'> <ul>
+	<li>none: Will not be formatted.</li>
+	<li>percentage</li>
+	<li>B: Bytes</li>
+	<li>KB: Kilobytes</li>
+	<li>MB: Megabytes</li>
+	<li>GB: Gigabytes</li>
+	<li>TB: Terabytes</li>
+	<li>epoch-millis: Time since January 1, 1970 in milliseconds.</li>
+	<li>epoch-seconds: Time since January 1, 1970 in seconds.</li>
+	<li>ns: Nanoseconds</li>
+	<li>mu: Microseconds</li>
+	<li>ms: Milliseconds</li>
+	<li>jiffys: Jiffies (1/100 sec)</li>
+	<li>sec: Seconds</li>
+	<li>cents: Cents (1/100 of 1 US Dollar)</li>
+</ul>
+
+
+<p>If the name attribute is Availability, defaults to percentage, otherwise defaults to none.</p> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>indicator</tt> </td>
+<td class='confluenceTd'> Whether or not the metric is an <em>indicator</em> metric in Hyperic. <br class="atl-forced-newline" /> <br class="atl-forced-newline" /> 
+Indicator metrics are charted on a resource's <b>Indicators</b> page in the Hyperic user interface. For more information, see <a href="Indicators Minitab.html#IndicatorsMinitab-indicators">Metric Charts in the Indicators Minitab</a>. </td>
+<td class='confluenceTd'> N<br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'><ul>
+	<li>true <br class="atl-forced-newline" /></li>
+	<li>false</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>collectionType</tt> </td>
+<td class='confluenceTd'> A description of how the metric's data will behave, for purposes of display in HQ. For example, the metric "Requests Served" will trend up as more and more requests are counted over time. In the Hyperic user interface, a user can filter metrics on the <b>Metric Data</b> tab by collection type &#8212; not that in the user interface collection type is referred to as "value type".  </td>
+<td class='confluenceTd'> N </td>
+<td class='confluenceTd'><ul>
+	<li>dynamic: Value may go up or down.</li>
+	<li>static: Value will not change or not graph. For example, a date stamp.</li>
+	<li>trendsup: Values will always increase. Because of that, the rate of change becomes more important, so HQ automatically creates a secondary metric: a per-minute rate measurement. If this rate metric has a defaultOn attribute set to true, the defaultOn attribute for the original metric is set to false (therefore only the rate metric will be displayed, not the original metric). To disable the automatically generated rate metric, set its rate attribute to none.</li>
+	<li>trendsdown: Value changes will always decrease.<br class="atl-forced-newline" />
+ Defaults to dynamic. </li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>template</tt>  </td>
+<td class='confluenceTd'> Expresses a request for a specific metric, for a specific resource, in a format that the Hyperic Agent understands. It identifies the resource instance, a particular metric, and where to get the metric value. A metric template takes this form: <br class="atl-forced-newline" />
+<br class="atl-forced-newline" />
+<em>Domain:Properties:Metric:Connection</em>   </td>
+<td class='confluenceTd'> N </td>
+<td class='confluenceTd'> The content of each segment of the metric template depends on how the metric is obtained - from an MBean server, SIGAR, an HQ measurement class, via SNMP, and so on. For more information, see <a href="Understanding Metric Templates.html" title="Understanding Metric Templates">Understanding Metric Templates</a>. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>defaultOn</tt> </td>
+<td class='confluenceTd'> If true, this measurement will be scheduled by default. </td>
+<td class='confluenceTd'> N </td>
+<td class='confluenceTd'> If <tt>indicator</tt> is true defaults to true. Otherwise defaults to false. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>interval</tt> </td>
+<td class='confluenceTd'> Default collection interval (in milliseconds) </td>
+<td class='confluenceTd'> N </td>
+<td class='confluenceTd'> If the name attribute is Availability, defaults are:
+<ul>
+	<li>Platforms, 1 minute</li>
+	<li>Servers, 5 minute</li>
+	<li>Services, 10 minutes <br class="atl-forced-newline" />
+Otherwise, defaults are:</li>
+	<li>collectionType dynamic, 5 minutes</li>
+	<li>collectionType trendsup,trendsdown,10 minutes</li>
+	<li>collectionType static, 30 minutes</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>rate</tt> </td>
+<td class='confluenceTd'> Specifies the time period for a rate measurement. Valid only for metrics of collectionType trendsup. </td>
+<td class='confluenceTd'> N </td>
+<td class='confluenceTd'> Possible values:
+<ul>
+	<li>1s (1 second)</li>
+	<li>1m (1 minute)</li>
+	<li>1h (1 hour)</li>
+	<li>&lt;none&gt; (disable automatically generated rate metric)</li>
+</ul>
+</td>
+</tr>
+</tbody></table>
+</div>
+
+<p><b>Example of a simple metric tag:</b></p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: xml; gutter: false">&lt;metric name="Availability"
+            category="AVAILABILITY"
+            units="percentage"
+            indicator="true"
+            collectionType="dynamic"/&gt;</pre>
+		</div>
+</div></div>
+<p><b>Example of a more complicated one:</b></p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: xml; gutter: false">&lt;metric name="Availability"
+            alias="Availability"
+            template="sigar:Type=ProcState,Arg=%process.query%:State"
+            category="AVAILABILITY"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/&gt;</pre>
+		</div>
+</div></div>
+
+<h1><a name="MeasurementPlugin-UsingTemplatestoCollectMetricData"></a>Using Templates to Collect Metric Data</h1>
+<p><br class="atl-forced-newline" />
+Metric templates allow plugins to "mix and match" sources for the data they collect.
+<br class="atl-forced-newline" /></p>
+
+<p>The measurement template uses an extended form of a JMX ObjectName:<br/>
+<div class="code panel" style="border-width: 1px;"><div class="codeHeader panelHeader" style="border-bottom-width: 1px;"><b>Template...template</b></div><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">domain:properties:attribute:connection-properties</pre>
+		</div>
+</div></div><br class="atl-forced-newline" /></p>
+<div class="code panel" style="border-width: 1px;"><div class="codeHeader panelHeader" style="border-bottom-width: 1px;"><b>Example template</b></div><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">jboss.system:Type=ServerInfo:FreeMemory:naming.url=%naming.url%</pre>
+		</div>
+</div></div>
+<p>where:</p>
+<ul>
+	<li><tt>domain</tt> = jboss.system</li>
+	<li><tt>properties</tt> = Type=ServerInfo</li>
+	<li><tt>attribute</tt> = FreeMemory</li>
+	<li><tt>connection-properties</tt> = naming.url=%naming.url%</li>
+</ul>
+
+
+<p>This is the extension to the JMX ObjectName format. Arbitrary properties generally used to connect to the managed server. In this example, JBoss JMX requires a JNP URL (specified here as a variable, indicated by "%": <tt>%naming.url%</tt>). The variable is given a value by the MeasurementPlugin.translate method, using the inventory property value for this server instance.</p>
+
+<h1><a name="MeasurementPlugin-UsingSupportClassestoSimplifyMetricCollection"></a>Using Support Classes to Simplify Metric Collection</h1>
+
+<p>In a template, the <tt>domain</tt> can be used to invoke an HQ-provided support class for handling common sources of metrics, such as Process Information, scripts, SQL Queries, and Network Services. You can see this use of templates in many of the plugin examples.</p>
+
+<p>A template needs to be written in a way that the underlying support class is expecting: the order and kinds of values being passed to it.</p>
+
+<p>In script plugins, the <tt>exec</tt> domain, in the Script support class, is common. It is invoked with the arguments <tt>file</tt> (the file to execute) and possibly <tt>timeout</tt> (to make the timeout value explicit, instead of the default value, for easier troubleshooting) and <tt>exec</tt> (to specify permissions). For example:</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: xml; gutter: false">template=exec:timeout=10,file=pdk/work/scripts/sendmail/hq-sendmail-stat,exec=sudo:${alias}</pre>
+		</div>
+</div></div>
+<p><a name="MeasurementPlugin-protocol"></a>There is also a large class of "protocol checkers" that you can use in a template for easy collection of protocol metrics, for example, for HTTP or SMTP. You can use a protocol checker for any of the platform services that are defined in HQ. For more information, see <a href="Network Platform Services.html" title="Network Platform Services">Network Platform Services</a>. </p>
+
+<h1><a name="MeasurementPlugin-UsingaFiltertoEfficientlyApplyaTemplatetoMetrics"></a>Using a Filter to Efficiently Apply a Template to Metrics</h1>
+
+<p>A filter with variables can be used to easily "macro-ize" templates. The <tt>alias</tt> variable is particularly useful. For example:</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: xml; gutter: false">&lt;filter name="template" value="jboss.system:Type=ServerInfo:${alias}:naming.url=%naming.url%"/&gt;
+
+&lt;metric name="Free Memory"
+        indicator="true"
+        units="B"/&gt;
+
+&lt;metric name="Used Memory"
+        indicator="true"
+        units="B"/&gt;</pre>
+		</div>
+</div></div>
+<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Using Variables</b><br />In plugin XML descriptors, variables are indicated by "%" on either side of the variable name (for example, <tt>%process.query%</tt>). The variables are assigned the value that was most recently determined. The value of the variable must be determined <em>before</em> the variable is used. </td></tr></table></div>
+<p>The variable <tt>alias</tt>, when the filter is applied to each metric, takes on the value of the metric's alias. Neither metrics have an explicit <tt>alias</tt> value, so it is taken from the metric's <tt>name</tt>: "FreeMemory" and "UsedMemory". So, the previous code expands to:</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: xml; gutter: false">&lt;metric name="Free Memory"
+        alias="FreeMemory"
+        template="jboss.system:Type=ServerInfo:FreeMemory:naming.url=%naming.url%"
+        indicator="true"
+        units="B"/&gt;
+
+&lt;metric name="Used Memory"
+        alias="UsedMemory"
+        template="jboss.system:Type=ServerInfo:UsedMemory:naming.url=%naming.url%"
+        indicator="true"
+        units="B"/&gt;</pre>
+		</div>
+</div></div>
+
+<h1><a name="MeasurementPlugin-GettingYourPlugintoAutoDiscoverResources"></a>Getting Your Plugin to Auto-Discover Resources</h1>
+
+<p>HQ has already defined an autoinventory plugin for several collection methods, and for the most part, all you need to do in your own plugin is call it.</p>
+
+<p><b>To auto-discover a server:</b></p>
+<ul>
+	<li>Add this one line within the &lt;server&gt; tag:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: xml; gutter: false">&lt;plugin type="autoinventory" class="org.hyperic.hq.product.jmx.MxServerDetector"/&gt;</pre>
+		</div>
+</div></div>
+<p>The class name varies by type of plugin. That class is for a JMX plugin. For a script plugin:</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: xml; gutter: false">&lt;plugin type="autoinventory" class="org.hyperic.hq.product.DaemonDetector"/&gt;</pre>
+		</div>
+</div></div></li>
+</ul>
+
+
+<p><b>To auto-discover services on a server:</b></p>
+<ol>
+	<li>Add one more line that tells the plugin that the server hosts services and please discover them, too:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: xml; gutter: false">&lt;property name="HAS_BUILTIN_SERVICES" value="true"/&gt;</pre>
+		</div>
+</div></div></li>
+	<li>For each hosted service enumerated in the plugin, within the &lt;service&gt; tag, you again call the autoinventory plugin, but <em>without</em> a class argument.
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: xml; gutter: false">&lt;plugin type="autoinventory"/&gt;</pre>
+		</div>
+</div></div></li>
+</ol>
+
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

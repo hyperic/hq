@@ -1,0 +1,242 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 5.0 : Set Up Configuration Tracking for a Resource</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+ <p>
+ <p>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 5.0 : Set Up Configuration Tracking for a Resource
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Feb 14, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1329252507396 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1329252507396 ul {list-style: disc;margin-left: 0px;padding-left: 20x;}
+div.rbtoc1329252507396 li {margin-left: 0px;padding-left: 0px;}
+
+/*]] >*/</style><div class='rbtoc1329252507396'>
+<ul>
+    <li><a href='#SetUpConfigurationTrackingforaResource-HypericConfigurationTrackingFunctionality'>Hyperic Configuration Tracking Functionality</a></li>
+    <li><a href='#SetUpConfigurationTrackingforaResource-SetUp4.6.5ConfigurationTrackingforaServer'>Set Up 4.6.5 Configuration Tracking for a Server</a></li>
+    <li><a href='#SetUpConfigurationTrackingforaResource-SetUpPollingBasedConfigurationTracking'>Set Up Polling-Based Configuration Tracking</a></li>
+    <li><a href='#SetUpConfigurationTrackingforaResource-ViewConfigurationEventsforaResource'>View Configuration Events for a Resource</a></li>
+    <li><a href='#SetUpConfigurationTrackingforaResource-ConfigureAlertsBasedonConfigurationEvents'>Configure Alerts Based on Configuration Events</a></li>
+</ul></div>
+
+
+
+
+<h1><a name="SetUpConfigurationTrackingforaResource-HypericConfigurationTrackingFunctionality"></a>Hyperic Configuration Tracking Functionality</h1>
+
+<p>For supported resource types, you can configure Hyperic to track changes made to configuration files (or other local files of interest) and log events for the associated resource. Configuration tracking is supported for most platform and server types; typically not for services.</p>
+
+<p>Configuration tracking functionality for server types varies by resource type, plugins that have been updated to use the new event-based tracking added in Hyperic 4.6.5 track more information about file changes than those that still use the still-supported polling-based tracking. </p>
+
+<p>The plugins that are updated to use event-based tracking are listed in <a href="#SetUpConfigurationTrackingforaResource-SetUp4.6.5ConfigurationTrackingforaServer">Set Up 4.6.5 Configuration Tracking for a Server</a>. Follow the instructions in that section for those server types. For other server types, and for platform and service types that support configuration tracking see <a href="#SetUpConfigurationTrackingforaResource-SetUpPollingBasedConfigurationTracking">Set Up Polling&#45;Based Configuration Tracking</a>.</p>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Learn about Configuration Tracking</b><br />See <a href="Log and Configuration Event Tracking.html" title="Log and Configuration Event Tracking">Log and Configuration Event Tracking</a> for information about:
+<ul>
+	<li>What resource types support configuration tracking,</li>
+	<li>Prerequisites for configuration tracking,</li>
+	<li>The differences between Hyperic's event-based and polling-based configuration tracking,</li>
+	<li>Where to view configuration events in the Hyperic user interface, and</li>
+	<li>Support for using configuration change events in alerts.</li>
+</ul>
+</td></tr></table></div>
+
+
+<p><a name="SetUpConfigurationTrackingforaResource-config"></a></p>
+<h1><a name="SetUpConfigurationTrackingforaResource-SetUp4.6.5ConfigurationTrackingforaServer"></a>Set Up 4.6.5 Configuration Tracking for a Server</h1>
+
+<p>Hyperic 4.6.5 has enhanced configuration tracking support for server types. The instructions in the section apply to server types whose plugin is updated to use event-based configuration tracking listed below. </p>
+<ul>
+	<li>Tomcat</li>
+	<li>Apache</li>
+	<li>WebSphere</li>
+	<li>WebLogic Server</li>
+	<li>JBoss</li>
+	<li>PostgreSQL</li>
+	<li>mySQL</li>
+	<li>Oracle</li>
+</ul>
+
+
+<p>To enable and configure configuration tracking for a resource of one of the previous server types:</p>
+
+<ol>
+	<li>Navigate to the server instance.</li>
+	<li>Select <b>Configure Server</b> from the <b>Tools</b> menu.
+	<ul>
+		<li>The <b>Configuration Properties</b> page appears.<br/>
+<span class="image-wrap" style=""><img src="attachments/79660206/79921934.png" style="border: 0px solid black"/></span></li>
+	</ul>
+	</li>
+	<li>In the <b>Monitoring section of the</b> page:
+	<ol>
+		<li>Make sure that the <b>Enable Config Tracking</b> box, which enables and disables configuration tracking for the server, is checked.
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>If you are satisfied with the default filter definition in the "Configuration Files" in, skip the following step, and click <b>OK</b>.</td></tr></table></div></li>
+		<li>In the "Configuration Files" box, specify the files you wish to monitor in this fashion:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">path;recurse;regex1|regex2,path2;recurse;regex1|regex2|...|regexN</pre>
+		</div>
+</div></div>
+		<ul>
+			<li>where:
+			<ul>
+				<li><tt>path</tt> &#8212; An absolute path, or a path relative to the managed resource's discovered install directory.</li>
+				<li><tt>recurse</tt> &#8212; Indicates, with a value of "true" or "false", whether or not track the files inside directories below the target directory specified by <tt>path</tt>.</li>
+				<li><tt>regex</tt> &#8212; A regular expression for filtering the directories or files to track for changes, in the directory (or directory tree for recursive tracking) specified by <tt>path</tt>.</li>
+			</ul>
+			</li>
+		</ul>
+		</li>
+		<li>Click <b>OK</b>.</li>
+	</ol>
+	</li>
+</ol>
+
+
+<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Example <b>Configuration Files</b> setting</b><br />For MySQL, the default value of the <b>Configuration Files</b> field, which specifies which files to track is:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">/etc;false;my\.cnf;,/etc/mysql;false;my\.cnf;,;false;my\.cnf;,~/;false;
+\.my\.cnf;,/usr/local/mysql/data;false;my\.cnf;,/usr/local/var;false;my\.cnf
+;,%WINDIR%;false;my\.ini|my\.cnf;,c:;false;my\.ini|my\.cnf;,;false;my\.ini|my\.cnf;</pre>
+		</div>
+</div></div>
+
+<p>When configuration tracking is enabled, this filter causes Hyperic to track <tt>my.cnf</tt> in the following directories:</p>
+
+<ul>
+	<li><tt>MySqlHome/etc</tt></li>
+	<li><tt>MySqlHome/etc/mysql</tt></li>
+	<li><tt>MySqlHome</tt></li>
+	<li>the home directory of the user under which MySQL runs</li>
+	<li><tt>/usr/local/mysql/data</tt></li>
+	<li><tt>/usr/local/var</tt></li>
+	<li>the Windows directory</li>
+	<li>c:/</li>
+</ul>
+
+
+<p>and track&nbsp;<tt>my.ini</tt> in the following directories:</p>
+<ul>
+	<li>the Windows directory</li>
+	<li><tt>c:/</tt></li>
+	<li><tt>MySqlHome</tt></li>
+</ul>
+</td></tr></table></div>
+<p><a name="SetUpConfigurationTrackingforaResource-polling"></a></p>
+<h1><a name="SetUpConfigurationTrackingforaResource-SetUpPollingBasedConfigurationTracking"></a>Set Up Polling-Based Configuration Tracking </h1>
+
+<p>For platforms and services that support configuration tracking, and server types that have the agent uses a cryptographic hash function to continuously compare a original version of the file with the current version to see if it has changed.</p>
+
+<p>To enable and configure configuration tracking for a platform or service:</p>
+<ol>
+	<li>Navigate to the resource instance.</li>
+	<li>Select <b>Configure ...</b> from the <b>Tools</b> menu.
+	<ul>
+		<li>The <b>Configuration Properties</b> page appears.</li>
+	</ul>
+	</li>
+	<li>On the <b>Edit Configuration Properties</b> page:
+	<ol>
+		<li>Click the <b>Enable Config Tracking</b> box to turn configuration tracking on and off for the resource.</li>
+		<li>Enter the path, relative to the resource's installation directory, to each file you wish to track. Separate files with a comma.</li>
+		<li>Click <b>OK</b>.</li>
+	</ol>
+	</li>
+</ol>
+
+
+<h1><a name="SetUpConfigurationTrackingforaResource-ViewConfigurationEventsforaResource"></a>View Configuration Events for a Resource</h1>
+
+<p>You can view configuration event data on:</p>
+<ul>
+	<li>The <b>Monitor</b> page for a resource. For more information, see <a href="ui-Monitor.CurrentHealth.html" title="ui-Monitor.CurrentHealth">ui-Monitor.CurrentHealth</a> in <em>vFabric Hyperic User Interface</em>.</li>
+	<li>The <b>Event Center</b> page. For more information see <a href="ui-Event.Center.html" title="ui-Event.Center">ui-Event.Center</a> in <em>vFabric Hyperic User Interface</em>.</li>
+</ul>
+
+
+<h1><a name="SetUpConfigurationTrackingforaResource-ConfigureAlertsBasedonConfigurationEvents"></a>Configure Alerts Based on Configuration Events</h1>
+
+<ol>
+	<li>Enable and configure configuration tracking as described above.</li>
+	<li>For the instructions in <a href="Define an Alert for a Resource.html" title="Define an Alert for a Resource">Define an Alert for a Resource</a>, or <a href="Define an Alert for a Resource Type.html" title="Define an Alert for a Resource Type">Define an Alert for a Resource Type</a> and choose the "Config Changed" condition type.</li>
+</ol>
+
+
+
+
+				    					    <br/>
+                        <div class="tabletitle">
+                            <a name="attachments">
+                                <h2>Attachments:</h2>
+                            </a>
+                        </div>
+
+                        <div class="greybox" align="left">
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79659813/79921551.gif">tab_Alert_on.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79659813/79921546.gif">tbb_new.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79659813/79921545.gif">tbb_edit.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79659813/79921548.gif">icon_hub_i.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79659813/79921547.bmp">logTrackingBar.bmp</a> (image/bmp)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79659813/79921558.gif">icon_hub_m.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79659813/79921557.gif">tab_Monitor_on.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79659813/79921560.gif">tab_Inventory_on.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79659813/79921559.gif">MiniTab_Indicators_on.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/79659813/79921554.gif">icon_hub_a.gif</a> (image/gif)
+                                <br/>
+                                                    </div>
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:06</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

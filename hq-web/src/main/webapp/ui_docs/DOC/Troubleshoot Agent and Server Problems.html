@@ -21,7 +21,7 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Sep 21, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Oct 09, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    
@@ -30,11 +30,11 @@
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1348261155881 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1348261155881 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1348261155881 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1349814046467 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1349814046467 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1349814046467 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1348261155881'>
+/*]]>*/</style><div class='rbtoc1349814046467'>
 <ul>
     <li><a href='#TroubleshootAgentandServerProblems-LookingforClues'>Looking for Clues</a></li>
 <ul>
@@ -46,10 +46,11 @@ div.rbtoc1348261155881 li {margin-left: 0px;padding-left: 0px;}
     <li><a href='#TroubleshootAgentandServerProblems-CheckPortAvailability'>Check Port Availability</a></li>
 </ul>
     <li><a href='#TroubleshootAgentandServerProblems-HypericServerProblems'>Hyperic Server Problems</a></li>
-    <li><a href='#TroubleshootAgentandServerProblems-LargeEventTable'>Large Event Table</a></li>
 <ul>
+    <li><a href='#TroubleshootAgentandServerProblems-LargeEventTable'>Large Event Table</a></li>
     <li><a href='#TroubleshootAgentandServerProblems-LicenseIssues'>License Issues</a></li>
     <li><a href='#TroubleshootAgentandServerProblems-BackloggedHypericServer'>Backlogged Hyperic Server</a></li>
+    <li><a href='#TroubleshootAgentandServerProblems-DecryptionErrors'>Decryption Errors</a></li>
 </ul>
     <li><a href='#TroubleshootAgentandServerProblems-AgentStartuporConnectionProblems'>Agent Startup or Connection Problems</a></li>
 <ul>
@@ -73,6 +74,7 @@ div.rbtoc1348261155881 li {margin-left: 0px;padding-left: 0px;}
 </ul></div>
 
 
+
 <h1><a name="TroubleshootAgentandServerProblems-LookingforClues"></a>Looking for Clues</h1>
 
 <p>This section describes options for getting information that might help you diagnose problems in an Hyperic deployment.</p>
@@ -81,7 +83,7 @@ div.rbtoc1348261155881 li {margin-left: 0px;padding-left: 0px;}
 
 <p>The <b>HQ Health</b> page, available in the "Plugins" section of the <b>Administration</b> page, displays a variety of metrics and status about your Hyperic deployment, including server host statistics and Hyperic Server process information.</p>
 
-<p><b>HQ Health</b> provides views, queries, and diagnostic tools that provide visibility into metric loads, caches, the Hyperic database, and agents across your deployment. For more information, see <a href="ui-HQHealth.html" title="ui-HQHealth">ui&#45;HQHealth</a> in <em>vFabric Hyperic User Interface</em>.</p>
+<p><b>HQ Health</b> provides views, queries, and diagnostic tools that provide visibility into metric loads, caches, the Hyperic database, and agents across your deployment. For more information, see <a href="ui-HQHealth.html" title="ui-HQHealth">ui-HQHealth</a> in <em>vFabric Hyperic User Interface</em>.</p>
 
 <h2><a name="TroubleshootAgentandServerProblems-hqstatsandagentstats"></a>hqstats and agentstats</h2>
 
@@ -178,6 +180,7 @@ div.rbtoc1348261155881 li {margin-left: 0px;padding-left: 0px;}
 		</div>
 </div></div></td></tr></table></div>
 <div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>On Unix-like systems, you can also run <tt>Kill &#45;3</tt> on the Hyperic server process. Note however, that if you do, the thread dump will be written to <tt>wrapper.log</tt>, and be difficult to parse.</td></tr></table></div>
+
 <h3><a name="TroubleshootAgentandServerProblems-GenerateAgentThreadDumpfromUserInterface"></a>Generate Agent Thread Dump from User Interface</h3>
 
 <p>Run the agent launcher with the <tt>dump</tt> option. For more information see <a href="Start, Stop, and Other Agent Operations.html" title="Start, Stop, and Other Agent Operations">Start, Stop, and Other Agent Operations</a></p>
@@ -186,7 +189,7 @@ div.rbtoc1348261155881 li {margin-left: 0px;padding-left: 0px;}
 
 <p>The Hyperic Server must be able to establish a connection with the agent, and vice versa.</p>
 
-<p>To verify that the server can access the agent's listen port, run the following from the server platform:  </p>
+<p>To verify that the server can access the agent's listen port, run the following from the server platform:</p>
 
 <p><tt>telnet AgentIp AgentPort</tt></p>
 
@@ -206,8 +209,8 @@ Connection closed by foreign host.
 </pre>
 </div></div>
 
-<p>To verify that the agent can access the server's listen port, run the following from the agent platform:  <br/>
-<tt>$ telnet ServerIP ServerPort</tt>  </p>
+<p>To verify that the agent can access the server's listen port, run the following from the agent platform:<br/>
+<tt>$ telnet ServerIP ServerPort</tt></p>
 
 <p>For example:</p>
 
@@ -219,11 +222,12 @@ Connection closed by foreign host.
 
 <p>This section describes problems that could prevent the Hyperic Server from starting up.</p>
 
-<h1><a name="TroubleshootAgentandServerProblems-LargeEventTable"></a>Large Event Table</h1>
+<h2><a name="TroubleshootAgentandServerProblems-LargeEventTable"></a>Large Event Table</h2>
 
-<p>A message like the following in <tt>server.log</tt> indicates that the <tt>EAM_EVENT_LOG</tt> is so large that trigger initialization is taking more than 15 minutes. </p>
+<p>A message like the following in <tt>server.log</tt> indicates that the <tt>EAM_EVENT_LOG</tt> is so large that trigger initialization is taking more than 15 minutes.</p>
 
-<h2><a name="TroubleshootAgentandServerProblems-LicenseIssues"></a>License Issues </h2>
+
+<h2><a name="TroubleshootAgentandServerProblems-LicenseIssues"></a>License Issues</h2>
 
 <p>In vFabric Hyperic, the number of platforms you can manage is limited by your license.  For more information, see <a href="Install or Configure Hyperic License.html" title="Install or Configure Hyperic License">Install or Configure Hyperic License</a>.</p>
 
@@ -249,8 +253,42 @@ Connection closed by foreign host.
 &lt;/init-param&gt;</pre>
 		</div>
 </div></div></li>
-	<li>As necessary, configure the maximum number of Tomcat threads &#8212; <tt>tomcat.maxthreads</tt>  &#8212; in <tt>server.conf</tt>. Ensure that the value of <tt>maxThreads</tt> greater than the value of <tt>maxConns</tt>.</li>
+	<li>As necessary, configure the maximum number of Tomcat threads &#8212; <tt>tomcat.maxthreads</tt> &#8212; in <tt>server.conf</tt>. Ensure that the value of <tt>maxThreads</tt> greater than the value of <tt>maxConns</tt>.</li>
 	<li>Restart the Hyperic Server to enable the changes to take effect.</li>
+</ol>
+
+
+<p><a name="TroubleshootAgentandServerProblems-DecryptionError"></a></p>
+<h2><a name="TroubleshootAgentandServerProblems-DecryptionErrors"></a>Decryption Errors</h2>
+
+<p>If the Hyperic Server attempts to decrypt data using a different database password encryption key than was supplied during Hyperic Server installation, decryption errors like the following may be written to the <tt>server.log</tt> file.</p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">org.jasypt.exceptions.EncryptionOperationNotPossibleException</pre>
+		</div>
+</div></div>
+
+<p>Such errors can occur if the <tt>ServerHome/server.conf</tt> file is lost, the value of the <tt>server.encryption-key</tt>  property in that file is changed is lost or changed, or (if Hyperic Server is configured for high availability) after server failover. </p>
+
+<p>To resolve this problem, you must restore the encryption key that was originally configured, as described below:</p>
+
+<ol>
+	<li>Stop the Hyperic Server.</li>
+	<li>Retrieve the <tt>server.encryption-key</tt> values from the <tt>EAM_ENCRYPTION_KEYS</tt> table in reverse chronological order, using this SQL statement:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">select * from EAM_ENCRYPTION_KEYS order by creation_date desc</pre>
+		</div>
+</div></div></li>
+	<li>Set the value of the <tt>server.encryption-key</tt> property in <tt>server.conf</tt> with the <tt>EAM_ENCRYPTION_KEYS.ENCRYPTION_KEY</tt> value previous to the current one.</li>
+	<li>Restart the Hyperic Server.</li>
+	<li>Review <tt>server.log</tt> for encryption errors.
+	<ul>
+		<li>Lack of encryption errors indicates the problem is solved.</li>
+		<li>If encryption errors are still occurring, set the <tt>server.encryption-key</tt> property to the next earlier value, and repeat the process as necessary until the problem is solved.</li>
+	</ul>
+	</li>
 </ol>
 
 
@@ -280,7 +318,7 @@ Connection closed by foreign host.
 	</li>
 	<li>Verify the address and listen port for the Hyperic Server.
 	<ul>
-		<li>Is there a firewall between agent and server? See the instructions in Configure Agent &#45; Server Communication Interactively or Configure Agent &#45; Server Communication in Properties File.</li>
+		<li>Is there a firewall between agent and server? See the instructions in Configure Agent - Server Communication Interactively or Configure Agent - Server Communication in Properties File.</li>
 	</ul>
 	</li>
 	<li>Verify the Hyperic Server is up.</li>
@@ -289,6 +327,7 @@ Connection closed by foreign host.
 
 
 <p><a name="TroubleshootAgentandServerProblems-TokenGone"></a></p>
+
 <h2><a name="TroubleshootAgentandServerProblems-ServerDoesNotHaveAgentToken"></a>Server Does Not Have Agent Token</h2>
 
 <p>Starting in 4.6.5, if all platforms managed by an agent are removed from Hyperic inventory, the Hyperic Server also removes the saved authentication token for that agent from the Hyperic database. So after you delete a platform that is managed by an agent that does not manage any other platforms (as in the case of an agent that manages only the platform it runs on), the Hyperic Server will not accept connections from that agent.</p>
@@ -382,7 +421,7 @@ Connection closed by foreign host.
 
 <p>To solve an offset problem, install NTP and synchronize system clocks on the agent and server hosts.</p>
 
-<p>To prevent agent and server becoming significantly out-of-sync, you can run NTP on each system, use Hyperic to monitor the offset on each system, and set alerts based on the offset metric. To do so, configure a platform service of type "NTP" to monitor each NTP service, and set alerts to fire when an offset from the time authority grows unacceptably high. For more information, see the "Network Services" section in <em>vFabric Hyperic Resource Configuration and Metrics</em>. </p>
+<p>To prevent agent and server becoming significantly out-of-sync, you can run NTP on each system, use Hyperic to monitor the offset on each system, and set alerts based on the offset metric. To do so, configure a platform service of type "NTP" to monitor each NTP service, and set alerts to fire when an offset from the time authority grows unacceptably high. For more information, see the "Network Services" section in <em>vFabric Hyperic Resource Configuration and Metrics</em>.</p>
 
 <h2><a name="TroubleshootAgentandServerProblems-OverloadedBackend"></a>Overloaded Backend</h2>
 
@@ -390,7 +429,7 @@ Connection closed by foreign host.
 
 <p>You can view Hyperic Server process statistics, as well as load and utilization data - load, process, system and JVM memory, and so on - on the <b>HQ Health</b> page.</p>
 
-<p>Based on your load, it may be appropriate to tune Hyperic Server, the Hyperic database, or both. For more information, see <a href="Scaling and Tuning Hyperic Performance.html" title="Scaling and Tuning Hyperic Performance">Scaling and Tuning Hyperic Performance</a>. </p>
+<p>Based on your load, it may be appropriate to tune Hyperic Server, the Hyperic database, or both. For more information, see <a href="Scaling and Tuning Hyperic Performance.html" title="Scaling and Tuning Hyperic Performance">Scaling and Tuning Hyperic Performance</a>.</p>
 
 <p><b>Important:</b> First and foremost: run the Hyperic database on dedicated hardware. Competition for system resources can slow down metric processing.</p>
 
@@ -454,7 +493,7 @@ Connection closed by foreign host.
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Oct 01, 2012 10:06</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 29, 2012 13:00</font></td>
 		    </tr>
 	    </table>
     </body>
