@@ -32,6 +32,7 @@ import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.jasypt.properties.PropertyValueEncryptionUtils;
 
 public class SecurityUtil {
+    public final static int UNLIMITED_ENCRYPTION_PARENTHESIS_NESTING_DEPTH = -1 ;
     public final static String DEFAULT_ENCRYPTION_ALGORITHM = "PBEWithMD5AndDES";
     public final static String ENC_MARK_PREFIX = "ENC(";
     public final static String ENC_MARK_POSTFIX = ")";
@@ -67,7 +68,19 @@ public class SecurityUtil {
     
     public static String unmark(String str) {
         return str.substring(ENC_MARK_PREFIX.length(), str.length()-ENC_MARK_POSTFIX.length()); 
-    }
+    }//EOM 
+    
+    public static String unmark(String str,  boolean stripSingleEncryptionParenthesis) {
+        final int noOfParenthesisNestingDepth = (stripSingleEncryptionParenthesis ? 1 : UNLIMITED_ENCRYPTION_PARENTHESIS_NESTING_DEPTH) ; 
+        int iDepthCounter = 0 ; 
+        
+        while(str.startsWith(ENC_MARK_PREFIX)) { 
+            str = str.substring(ENC_MARK_PREFIX.length(), str.length()-ENC_MARK_POSTFIX.length());
+            if(++iDepthCounter == noOfParenthesisNestingDepth) break ; 
+         }//EO while there are more parenthesis
+
+        return str ; 
+    }//EOM 
     
     public static String mark(String str) {
         return new StringBuilder().append(ENC_MARK_PREFIX).append(str).append(ENC_MARK_POSTFIX).toString(); 
@@ -97,6 +110,10 @@ public class SecurityUtil {
         return encrypt(encryptor,data);
     }
 
+    public static String decrypt(StringEncryptor encryptor, String data, final boolean stripSingleEncryptionParenthesis) {
+        return encryptor.decrypt(unmark(data.trim(), stripSingleEncryptionParenthesis)) ;
+    }
+    
     public static String decrypt(StringEncryptor encryptor, String data) {
         return PropertyValueEncryptionUtils.decrypt(data,encryptor);
     }
@@ -114,4 +131,5 @@ public class SecurityUtil {
         encryptor.setAlgorithm(encryptionAlgorithm);
         return decrypt(encryptor,data);
     }
+    
 }
