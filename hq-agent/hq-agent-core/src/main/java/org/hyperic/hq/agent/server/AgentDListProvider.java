@@ -231,8 +231,11 @@ public class AgentDListProvider implements AgentStorageProvider {
     protected String getKeyvalsPass() throws KeyStoreException, IOException, NoSuchAlgorithmException, UnrecoverableEntryException {
         KeystoreConfig keystoreConfig = new AgentKeystoreConfig();
         KeyStore keystore = KeystoreManager.getKeystoreManager().getKeyStore(keystoreConfig);
-        KeyStore.Entry e = keystore.getEntry(DEFAULT_PRIVATE_KEY_KEY,
-                new KeyStore.PasswordProtection(keystoreConfig.getFilePassword().toCharArray()));
+        KeyStore.Entry e = keystore.getEntry(keystoreConfig.getAlias(), new KeyStore.PasswordProtection(keystoreConfig.getFilePassword().toCharArray()));
+        if(e == null) { 
+            throw new UnrecoverableEntryException("Encryptor password generation failure: No such alias") ; 
+        }//EO if no private key was found 
+        
         byte[] pk = ((PrivateKeyEntry)e).getPrivateKey().getEncoded();
         ByteBuffer encryptionKey = Charset.forName("US-ASCII").encode(ByteBuffer.wrap(pk).toString());
         return encryptionKey.toString();
@@ -379,8 +382,8 @@ public class AgentDListProvider implements AgentStorageProvider {
                 String key = dIs.readUTF();
                 String val = dIs.readUTF();
                 
-                String decryptedKey = PropertyValueEncryptionUtils.isEncryptedValue(key)?SecurityUtil.decrypt(encryptor, key):key;
-                String decryptedVal = PropertyValueEncryptionUtils.isEncryptedValue(val)?SecurityUtil.decrypt(encryptor, val):val;
+                String decryptedKey = PropertyValueEncryptionUtils.isEncryptedValue(key)?SecurityUtil.decryptRecursiveUnmark(encryptor, key):key;
+                String decryptedVal = PropertyValueEncryptionUtils.isEncryptedValue(val)?SecurityUtil.decryptRecursiveUnmark(encryptor, val):val;
 
                 this.keyVals.put(decryptedKey, decryptedVal);
             }

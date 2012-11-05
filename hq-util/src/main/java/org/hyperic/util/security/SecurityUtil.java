@@ -67,7 +67,16 @@ public class SecurityUtil {
     
     public static String unmark(String str) {
         return str.substring(ENC_MARK_PREFIX.length(), str.length()-ENC_MARK_POSTFIX.length()); 
-    }
+    }//EOM 
+    
+    public static String unmarkRecursive(String str) {
+        
+        while(str.startsWith(ENC_MARK_PREFIX)) { 
+            str = str.substring(ENC_MARK_PREFIX.length(), str.length()-ENC_MARK_POSTFIX.length());
+         }//EO while there are more parenthesis
+
+        return str ; 
+    }//EOM 
     
     public static String mark(String str) {
         return new StringBuilder().append(ENC_MARK_PREFIX).append(str).append(ENC_MARK_POSTFIX).toString(); 
@@ -97,6 +106,10 @@ public class SecurityUtil {
         return encrypt(encryptor,data);
     }
 
+    public static String decryptRecursiveUnmark(StringEncryptor encryptor, String data) {
+        return encryptor.decrypt(unmarkRecursive(data.trim())) ;
+    }
+    
     public static String decrypt(StringEncryptor encryptor, String data) {
         return PropertyValueEncryptionUtils.decrypt(data,encryptor);
     }
@@ -114,4 +127,5 @@ public class SecurityUtil {
         encryptor.setAlgorithm(encryptionAlgorithm);
         return decrypt(encryptor,data);
     }
+    
 }
