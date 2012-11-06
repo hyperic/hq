@@ -89,6 +89,18 @@ public class IntegrationTestContextLoader extends AbstractContextLoader {
 		final Log log = (externalLogger == null ? logger : externalLogger) ;
 
 		try {
+		    //if the tests.server.database-url override property is provided, set it as the server.database-url property (if not already exists) 
+		    String serverDatabaseUrl = System.getProperty("server.database-url") ; 
+		    if(serverDatabaseUrl == null) { 
+		        
+		        serverDatabaseUrl = System.getProperty("override.server.database-url") ; 
+		        if(serverDatabaseUrl != null) {
+		            log.info("An override.server.database-url property value was provided : " + serverDatabaseUrl + " setting in the server.database-url system property") ;
+		            System.setProperty("server.database-url", serverDatabaseUrl) ; 
+		        }//EO if the override database url property was provided 
+		        
+		    }//EO if the server dataabase url was not defined via system property 
+		    
             //Find the sigar libs on the test classpath
             final File sigarBin = new File(context.getResource("/libsigar-sparc64-solaris.so").getFile().getParent());
             log.info("Setting sigar path to : " + sigarBin.getAbsolutePath());
