@@ -72,6 +72,7 @@ import org.springframework.test.context.support.GenericXmlContextLoader;
 import org.springframework.util.StringUtils;
 
 public class IntegrationTestContextLoader extends AbstractContextLoader {
+
     protected static final Log logger = LogFactory.getLog(IntegrationTestContextLoader.class);
     
     private static Sigar sigar ; 
