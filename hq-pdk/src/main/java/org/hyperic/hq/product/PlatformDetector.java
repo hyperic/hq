@@ -81,7 +81,7 @@ public class PlatformDetector extends GenericPlugin {
         //we license x number of platforms, this counts as 1
         platform.setCpuCount(new Integer(1));
         platform.addInterface(addr, null, null);
-
+        
         return platform;
     }
 }

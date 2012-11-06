@@ -1,54 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	
+
 
 	<parent>
-        <groupId>org.hyperic.hq.plugin</groupId>
-        <artifactId>modules</artifactId>
-       <version>5.0.0</version>
-    </parent>
+		<groupId>org.hyperic.hq.plugin</groupId>
+		<artifactId>modules</artifactId>
+		<version>5.0.0</version>
+	</parent>
 	<artifactId>system-plugin</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - System Plugin</name>
 
-	<!-- inherited from modules parent 
 	<dependencies>
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-pdk</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
-           	<groupId>com.cenqua.clover</groupId>
-            <artifactId>clover</artifactId>
-            <version>2.6.3</version>
-			<scope>test</scope>
-       </dependency>
 	</dependencies>
-	-->
+
 
 	<build>
 		<plugins>
-		<plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>animal-sniffer-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>check</goal>
-                                </goals>
-                            <configuration>
-                                <signature>
-                                    <groupId>org.codehaus.mojo.signature</groupId>
-                                    <artifactId>java15-sun</artifactId>
-                                    <version>1.0</version>
-                                </signature>
-                            </configuration>
-                        </execution>
-                        </executions>
-               </plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>animal-sniffer-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<signature>
+								<groupId>org.codehaus.mojo.signature</groupId>
+								<artifactId>java15-sun</artifactId>
+								<version>1.0</version>
+							</signature>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -90,7 +84,7 @@
 					</archive>
 				</configuration>
 			</plugin>
-			<plugin> 
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
 			</plugin>
@@ -107,25 +101,25 @@
 						<configuration>
 							<useDefaultDelimiters>false</useDefaultDelimiters>
 							<delimiters>
-  									<delimiter>@</delimiter>
+								<delimiter>@</delimiter>
 							</delimiters>
 							<outputDirectory>${basedir}/target/classes</outputDirectory>
 							<resources>
-      								<resource>
-        								<directory>src/main/resources</directory>
-        								<filtering>true</filtering>
-        								<includes>
-          									<include>**/*.xml</include>
-        								</includes>
-      								</resource>
-      								<resource>
-        								<directory>src/main/resources</directory>
-        								<filtering>false</filtering>
-        								<excludes>
-          									<exclude>**/*.xml</exclude>
-        								</excludes>
-      								</resource>
-    						</resources>
+								<resource>
+									<directory>src/main/resources</directory>
+									<filtering>true</filtering>
+									<includes>
+										<include>**/*.xml</include>
+									</includes>
+								</resource>
+								<resource>
+									<directory>src/main/resources</directory>
+									<filtering>false</filtering>
+									<excludes>
+										<exclude>**/*.xml</exclude>
+									</excludes>
+								</resource>
+							</resources>
 						</configuration>
 					</execution>
 				</executions>

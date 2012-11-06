@@ -26,9 +26,27 @@
 package org.hyperic.hq.plugin.system;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.logging.Log;
 import org.hyperic.hq.agent.AgentConfig;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.product.ConfigFileTrackPlugin;
+import org.hyperic.hq.product.ControlPlugin;
 import org.hyperic.hq.product.ExecutableMeasurementPlugin;
 import org.hyperic.hq.product.ExecutableProcess;
 import org.hyperic.hq.product.GenericPlugin;
@@ -45,7 +63,6 @@ import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.hq.product.Win32ControlPlugin;
 import org.hyperic.hq.product.Win32EventLogTrackPlugin;
 import org.hyperic.hq.product.Win32MeasurementPlugin;
-
 import org.hyperic.sigar.FileWatcherThread;
 import org.hyperic.sigar.ProcFileMirror;
 import org.hyperic.sigar.Sigar;
@@ -57,6 +74,7 @@ import org.hyperic.util.config.StringConfigOption;
 
 public class SystemPlugin extends ProductPlugin {
 
+    protected static final int DEPLOYMENT_ORDER = 0 ; 
     public static final String NAME = "system";
 
     public static final String FILE_SERVER_NAME    = "FileServer";
@@ -199,7 +217,7 @@ public class SystemPlugin extends ProductPlugin {
         else if (type.equals(ProductPlugin.TYPE_AUTOINVENTORY)) {
             switch (info.getType()) {
               case TypeInfo.TYPE_PLATFORM:
-                return new SigarPlatformDetector();
+                return new SigarPlatformDetector(this.hasPlatformControlActions());
               case TypeInfo.TYPE_SERVER:
                 if (info.getName().equals(FILE_SERVER_NAME)) {
                     return new FileSystemDetector();
@@ -265,6 +283,8 @@ public class SystemPlugin extends ProductPlugin {
 
         return null;
     }
+     
+    protected boolean hasPlatformControlActions() { return false ; }//EOM 
 
     private static final String[][] PLAT_CPROPS = {
         { "arch", "Architecture" },
@@ -499,8 +519,9 @@ public class SystemPlugin extends ProductPlugin {
      * This plugin has to be loaded first.  Almost all other plugins require the OS platforms to be parents of their server types
      */
     protected int getDeploymentOrder() {
-       return 0;
+       return DEPLOYMENT_ORDER ; 
     }
+   
     
     
 }

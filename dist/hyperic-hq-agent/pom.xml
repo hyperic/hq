@@ -106,8 +106,8 @@
        			<activeByDefault>true</activeByDefault>
 		    </activation>
 		    <modules> 
-			<module>modules/hyperic-hq-agent-parent</module>
-			<module>modules/noJRE</module>
+			<!-- <module>modules/hyperic-hq-agent-parent</module>
+			<module>modules/noJRE</module> -->
 		    </modules> 
 		</profile> 
 

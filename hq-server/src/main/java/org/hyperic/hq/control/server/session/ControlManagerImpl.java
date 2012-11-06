@@ -407,6 +407,8 @@ public class ControlManagerImpl implements ControlManager {
                 checkControlPermission(subject, id);
             }
             controlPluginManager.getPlugin(resType);
+             
+            checkControlEnabled(subject, id) ; 
             return true;
         } catch (PluginNotFoundException e) {
             // return false
@@ -415,6 +417,8 @@ public class ControlManagerImpl implements ControlManager {
         } catch (AppdefEntityNotFoundException e) {
             // return false
         } catch (GroupNotCompatibleException e) {
+            // return false
+        }catch(PluginException pe) { 
             // return false
         }
         return false;
@@ -505,7 +509,13 @@ public class ControlManagerImpl implements ControlManager {
         }
 
         Integer pk = new Integer(id);
-        ControlHistory cLocal = controlHistoryDao.get(pk);
+        
+        ControlHistory cLocal = null ; 
+        for(int i=0; i < 3; i++) { 
+            cLocal = controlHistoryDao.get(pk);
+            if(cLocal != null) break ;     
+        }//EO while there are more retries
+        
         if (cLocal == null) {
             // We know the ID, this should not happen
             throw new SystemException(

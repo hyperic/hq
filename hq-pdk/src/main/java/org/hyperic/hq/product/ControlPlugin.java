@@ -76,7 +76,7 @@ public abstract class ControlPlugin extends GenericPlugin {
         return actions;
     }
 
-    private void setExceptionMessage(Throwable t) {
+    protected void setExceptionMessage(Throwable t) {
         String msg = t.getMessage();
         if (msg == null) {
             msg = t.toString();
@@ -108,10 +108,10 @@ public abstract class ControlPlugin extends GenericPlugin {
             new Class[0]
         };
 
+        final Class clz = getClass() ; 
         for (int i=0; i<sigs.length; i++) {
             try {
-                method =
-                    getClass().getMethod(action, (Class[])sigs[i]);
+                method = clz.getDeclaredMethod(action, (Class[])sigs[i]);
                 break;
             } catch (NoSuchMethodException e) {
                 continue;
