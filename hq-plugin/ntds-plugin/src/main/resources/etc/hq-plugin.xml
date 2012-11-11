@@ -27,8 +27,6 @@
 <plugin name="ntds">
   <property name="PLUGIN_VERSION" value="@project.version@"/>
 
-  <filter name="ntds" value="NTDS:Platform=Win32"/>
-
   <metrics name="ldap">
     <metric name="Availability"
             template="NTDS:Type=Availability:LDAP Active Threads"
@@ -145,7 +143,10 @@
   </metrics>
 
   <server name="Active Directory"
+          version="base"
           platforms="Win32">
+  <filter name="ntds" value="NTDS:Platform=Win32"/>
+
 <!--
     <property name="EVENT_LOG_SOURCE_FILTER"
               value="NTDS"/>
@@ -189,4 +190,15 @@
     </service>
   </server>
 
+  <server name="Active Directory"
+          version="2008"
+          include="base"
+          platforms="Win32">
+
+    <filter name="ntds" value="Security System-Wide Statistics:Platform=Win32"/>
+          
+	<metric name="Availability"
+            template="Security System-Wide Statistics:Type=Availability:NTLM Authentications"
+            indicator="true"/>
+  </server>
 </plugin>

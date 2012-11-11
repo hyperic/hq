@@ -61,6 +61,32 @@ public class ActiveDirectoryDetector
                                    RegistryKey current) 
         throws PluginException {
 
+        /**
+         * HHQ-5553
+         */
+        String winVersionStr = org.hyperic.sigar.OperatingSystem.getInstance().getVendorVersion();
+        String pluginServerVersionStr = getTypeInfo().getVersion();
+        boolean isWinVersion2008 = false;
+        if (winVersionStr!=null) {
+            try {
+                int winVersion = Integer.valueOf(winVersionStr);
+                isWinVersion2008 = winVersion>=2008;
+            } catch (NumberFormatException e) {
+                log.debug("ActiveDirectoryDetector was not able to parse the windows version identification");
+            }
+        }
+        boolean isPluginServerVersion2008 = false;
+        if (pluginServerVersionStr!=null) {
+            try {
+                int pluginServerVersion = Integer.valueOf(pluginServerVersionStr);
+                isPluginServerVersion2008 = pluginServerVersion>=2008;
+            } catch (NumberFormatException e) {
+            }
+        }
+        if ((!isWinVersion2008 && isPluginServerVersion2008) || (isWinVersion2008 && !isPluginServerVersion2008)) {
+            return null;
+        }
+        
         if (!new File(path).exists()) {
             log.debug(path + " does not exist");
             return null;
