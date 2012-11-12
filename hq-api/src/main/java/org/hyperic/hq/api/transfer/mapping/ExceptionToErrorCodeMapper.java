@@ -86,7 +86,13 @@ public class ExceptionToErrorCodeMapper  {
     	String description = null ;  
     	try{ 
     		description = errorCodesBundle.getString(errorCode) ;
-    		return (description == null || description.isEmpty() ? null : String.format(description, args) ) ; 
+    		if (description == null || description.isEmpty()) {
+    		    return null;
+    		}
+    		if (args==null || args.length==0) {
+    		    return description.replace("%s", "");
+    		}
+    		return String.format(description, args); 
     	}catch(MissingResourceException mre) {}//EO catch block
     	
     	return null ; 

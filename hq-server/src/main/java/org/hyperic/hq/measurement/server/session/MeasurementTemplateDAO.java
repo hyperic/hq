@@ -188,9 +188,9 @@ public class MeasurementTemplateDAO
     	}
         StringBuilder sql = new StringBuilder().append("select t from MeasurementTemplate t where");
     	for (int i=0 ; i<tmpNames.size()-1 ; i++) {
-    		sql.append(" name=? or");
+    		sql.append(" alias=? or");
 		}
-        sql.append(" name=? order by t.name");
+        sql.append(" alias=? order by t.alias");
         Query getTmpQuery = getSession().createQuery(sql.toString());
         if (getTmpQuery==null) {
             throw new HibernateException("failed creating template retrieval by name query");

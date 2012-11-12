@@ -169,8 +169,8 @@
 	  </target>
 
 	  <target name="changeDataFolderPermWin" if="isWin32">	  	          
-	  	<exec Command="icacls &quot;${server.hqdb.dir}/data&quot; /grant &quot;everyone&quot;:(OI)(CI)M"/>
-	  	<exec Command="icacls &quot;${server.hqdb.dir}/../logs&quot; /grant &quot;everyone&quot;:(OI)(CI)M"/>
+	  	<exec Command="icacls &quot;${server.hqdb.dir}/data&quot; /grant &quot;*S-1-1-0&quot;:(OI)(CI)M"/>
+	  	<exec Command="icacls &quot;${server.hqdb.dir}/../logs&quot; /grant &quot;*S-1-1-0&quot;:(OI)(CI)M"/>
 	  </target>
 	
   <target name="copy-pg" if="server.pgsql.available">
