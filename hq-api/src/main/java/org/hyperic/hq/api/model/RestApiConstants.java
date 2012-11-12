@@ -36,7 +36,7 @@ public class RestApiConstants {
     private RestApiConstants() {
     }
     
-    public static final String SCHEMA_NAMESPACE = "http://vmware.com/hyperic/hq/5.0/api/rest/v1";
+    public static final String SCHEMA_NAMESPACE = "http://vmware.com/hyperic/hq/api/rest/v1";
     
     
     //ERROR CODES 
