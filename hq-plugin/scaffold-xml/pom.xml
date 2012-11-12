@@ -5,7 +5,7 @@
    <parent>
         <groupId>org.hyperic.hq.plugin</groupId>
         <artifactId>modules</artifactId>
-       <version>5.0.0</version>
+       <version>6.0.0</version>
    </parent>
     
   <artifactId>scaffold-xml-archetype</artifactId>
