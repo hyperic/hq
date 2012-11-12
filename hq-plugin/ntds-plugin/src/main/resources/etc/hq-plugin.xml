@@ -27,6 +27,8 @@
 <plugin name="ntds">
   <property name="PLUGIN_VERSION" value="@project.version@"/>
 
+  <filter name="ntds" value="NTDS:Platform=Win32"/>
+
   <metrics name="ldap">
     <metric name="Availability"
             template="NTDS:Type=Availability:LDAP Active Threads"
@@ -145,8 +147,6 @@
   <server name="Active Directory"
           version="base"
           platforms="Win32">
-  <filter name="ntds" value="NTDS:Platform=Win32"/>
-
 <!--
     <property name="EVENT_LOG_SOURCE_FILTER"
               value="NTDS"/>
@@ -194,11 +194,41 @@
           version="2008"
           include="base"
           platforms="Win32">
-
-    <filter name="ntds" value="Security System-Wide Statistics:Platform=Win32"/>
-          
+    
+    <filter name="domain2008" value="Security System-Wide Statistics"/>
 	<metric name="Availability"
-            template="Security System-Wide Statistics:Type=Availability:NTLM Authentications"
+            template="${domain2008}:Type=Availability:NTLM Authentications"
             indicator="true"/>
+            
+    <service name="Authentication" internal="true">
+    	<metrics>
+		    <metric name="Availability"
+		            template="ServiceAvail:Platform=Win32:kdc"
+		            indicator="true"/>
+		
+		    <metric name="KDC AS Requests"
+		            template="${domain2008}:${name}"
+		            category="THROUGHPUT"
+		            collectionType="trendsup"/>
+		
+		    <metric name="KDC TGS Requests"
+		            template="${domain2008}:${name}"
+		            indicator="true" 
+		            category="THROUGHPUT"
+		            collectionType="trendsup"/>
+		
+		    <metric name="Kerberos Authentications"
+		            template="${domain2008}:${name}"
+		            indicator="true"
+		            category="THROUGHPUT"
+		            collectionType="trendsup"/>
+		
+ 			<metric name="NTLM Authentications"
+            	template="${domain2008}:Platform=Win32:${name}"
+            	indicator="true"
+            	category="THROUGHPUT"
+            	collectionType="trendsup"/>
+      	</metrics>
+    </service>
   </server>
 </plugin>
