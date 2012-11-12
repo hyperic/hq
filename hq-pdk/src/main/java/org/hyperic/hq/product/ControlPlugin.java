@@ -31,6 +31,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hyperic.hq.bizapp.shared.lather.ControlSendCommandResult_args;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 
@@ -88,17 +89,23 @@ public abstract class ControlPlugin extends GenericPlugin {
         setResult(RESULT_FAILURE);
     }
 
-    public void doAction(String action)
-        throws PluginException {
-
+    
+    public void doAction(String action) throws PluginException {
         doAction(action, new String[0]);
+    }
+    
+    public void doAction(final String action, final ControlSendCommandResult_args resultsMetadata) throws PluginException{ 
+        this.doAction(action, new String[0], resultsMetadata) ;
+    }
+    
+    public void doAction(final String action, final String[] args) throws PluginException{ 
+        this.doAction(action, args, null/*resultsMetadata*/) ;
     }
     
     /**
      * Invokes plugin method with the name of param action.
      */
-    public void doAction(String action, String[] args)
-        throws PluginException {
+    public void doAction(String action, String[] args, final ControlSendCommandResult_args resultsMetadata) throws PluginException {
         
         setResult(RESULT_SUCCESS); //ControlPluginManager defaults to FAILURE
 

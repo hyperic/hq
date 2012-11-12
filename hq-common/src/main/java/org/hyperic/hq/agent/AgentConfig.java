@@ -145,6 +145,8 @@ public class AgentConfig {
     { "agent.proxyPort", String.valueOf(DEFAULT_PROXY_PORT)};
     private static final String HQ_PASS = "agent.setup.camPword";
     
+    public static final String PERSISTED_CONTROL_RESPONSES_DIR = PROP_DATADIR[1] + "/control_responses" ;
+    
     // A property provided for testing rollback during agent auto-upgrade.
     // Set the property value to the bundle name that will fail when starting 
     // the agent so that the upgrade will revert to the rollback bundle.
