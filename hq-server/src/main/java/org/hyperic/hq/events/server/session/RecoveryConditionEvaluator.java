@@ -113,8 +113,9 @@ public class RecoveryConditionEvaluator
                 }
             }
             fulfilled.add(this.lastAlertFired);
-            fireConditionsSatisfied(fulfilled);
-            this.lastAlertFired = null;
+            if (fireConditionsSatisfied(fulfilled)) {
+            	this.lastAlertFired = null;
+            }
         }
     }
 
@@ -152,7 +153,7 @@ public class RecoveryConditionEvaluator
                     this.lastAlertFired = event;
                 }
                 evaluateRecoveryConditions(getFulfillingConditions());
-            } else {
+            } else if (null != this.lastAlertFired){
                 Collection recoveryConditions = evaluate(event);
                 evaluateRecoveryConditions(recoveryConditions);
             }

@@ -55,16 +55,19 @@ public class SingleAlertExecutionStrategy implements ExecutionStrategy {
         this.zeventEnqueuer = zeventEnqueuer;
     }
 
-    public void conditionsSatisfied(AlertConditionsSatisfiedZEvent event) {
+    
+    public boolean conditionsSatisfied(AlertConditionsSatisfiedZEvent event) {
         try {
             if (log.isDebugEnabled()) {
                 log.debug("Firing event " + event);
             }
             zeventEnqueuer.enqueueEvent(event);
+            return true;
         } catch (InterruptedException e) {
             log.warn("Interrupted enqueuing an AlertConditionsSatisfiedZEvent.  Event: " + event +
                      " will not be processed.  Cause: " + e.getMessage());
         }
+        return false;
     }
 
     public Serializable getState() {

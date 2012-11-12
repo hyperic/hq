@@ -81,7 +81,8 @@ public class CounterExecutionStrategy implements ExecutionStrategy {
         }
     }
 
-    public void conditionsSatisfied(AlertConditionsSatisfiedZEvent event) {
+    
+    public boolean conditionsSatisfied(AlertConditionsSatisfiedZEvent event) {
         synchronized (lock) {
             AlertConditionsSatisfiedZEventPayload payload = (AlertConditionsSatisfiedZEventPayload) event.getPayload();
             expirations.add(Long.valueOf(payload.getTimestamp() + timeRange));
@@ -95,6 +96,7 @@ public class CounterExecutionStrategy implements ExecutionStrategy {
                     }
                     zeventEnqueuer.enqueueEvent(event);
                     expirations.clear();
+                    return true;
                 } catch (InterruptedException e) {
                     log.warn("Interrupted enqueuing an AlertConditionsSatisfiedZEvent.  Event: " +
                              event +
@@ -103,6 +105,7 @@ public class CounterExecutionStrategy implements ExecutionStrategy {
                 }
             }
         }
+        return false;
     }
 
     long getCount() {
