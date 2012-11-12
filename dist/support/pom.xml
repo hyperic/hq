@@ -7,13 +7,13 @@
   <!--   <parent>
         <groupId>org.hyperic.hq</groupId>
         <artifactId>hq-parent</artifactId>
-        <version>5.0.0</version>
+        <version>5.0.0-HA</version>
     </parent>
   --> 
     
     <groupId>org.hyperic.hq.dist</groupId>
     <artifactId>support</artifactId>
-    <version>5.0.0</version>
+    <version>5.0.0-HA</version>
     <packaging>pom</packaging>
     <name>Hyperic HQ Distribution - Hyperic HQ Server Support Bundle</name>
     
