@@ -43,55 +43,55 @@
             <option name="sharepoint.password" description="Password" optional="true"/>
         </config>
 
-        <metric name="Availability" alias="Availability" template="web:url=%sharepoint.mainUrl%,user=%sharepoint.user%,password=%sharepoint.password%:${alias}" indicator="true" interval="60000"/>
-        <metric name="Response Time" alias="responsetime" template="web:url=%sharepoint.mainUrl%,user=%sharepoint.user%,password=%sharepoint.password%:${alias}" indicator="true" interval="60000"/>
+        <metric name="Availability" alias="Availability" template="web:url=%sharepoint.mainUrl%,user=%sharepoint.user%,password=%sharepoint.password%:${alias}"/>
+        <metric name="Response Time" alias="responsetime" template="web:url=%sharepoint.mainUrl%,user=%sharepoint.user%,password=%sharepoint.password%:${alias}" indicator="true"/>
         <filter name="template" value="pdh:SharePoint Foundation(_total):${name}"/>
-        <metric name="Template Cache Average Record Age" template="pdh:SharePoint Foundation(_total)\Template Cache Total Records Evicted:${alias}" indicator="true" interval="60000"/>
-        <metric name="Template Cache Total Records Evicted" indicator="true" interval="60000"/>
-        <metric name="Template Cache Current Records" indicator="true" interval="60000"/>
-        <metric name="Template Cache Total Records Added" indicator="true" interval="60000"/>
-        <metric name="Template Cache Rapid Growth Trim Count" indicator="true" interval="60000"/>
-        <metric name="Template Cache Low Memory Trim Count" indicator="true" interval="60000"/>
-        <metric name="Template Cache Scheduled Trim Count" indicator="true" interval="60000"/>
-        <metric name="Template Cache Total Miss Count" indicator="true" interval="60000"/>
-        <metric name="Template Cache Total Hit Count" indicator="true" interval="60000"/>
-        <metric name="Template Cache XML Miss Count" indicator="true" interval="60000"/>
-        <metric name="Template Cache XML Hit Count" indicator="true" interval="60000"/>
-        <metric name="Template Cache Max Size" indicator="true" interval="60000"/>
-        <metric name="Template Cache Size" indicator="true" interval="60000"/>
-        <metric name="Process ID" indicator="true" interval="60000"/>
-        <metric name="Throttled Page Requests" indicator="true" interval="60000"/>
-        <metric name="Object Cache GC Size" indicator="true" interval="60000"/>
-        <metric name="Object Cache GC Count" indicator="true" interval="60000"/>
-        <metric name="Object Cache Miss Count" indicator="true" interval="60000"/>
-        <metric name="Object Cache Hit Count" indicator="true" interval="60000"/>
-        <metric name="Object Cache Resurrected Count" indicator="true" interval="60000"/>
-        <metric name="Object Cache Expired Size" indicator="true" interval="60000"/>
-        <metric name="Object Cache Expired Count" indicator="true" interval="60000"/>
-        <metric name="Object Cache Always Live Size" indicator="true" interval="60000"/>
-        <metric name="Object Cache Always Live Count" indicator="true" interval="60000"/>
-        <metric name="Object Cache Live Size" indicator="true" interval="60000"/>
-        <metric name="Object Cache Live Count" indicator="true" interval="60000"/>
-        <metric name="Sql Query Executing time" indicator="true" interval="60000"/>
-        <metric name="Executing Sql Queries" indicator="true" interval="60000"/>
-        <metric name="Responded Page Requests Rate" indicator="true" interval="60000"/>
-        <metric name="Executing Time/Page Request" indicator="true"/>
-        <metric name="Current Page Requests" indicator="true" interval="60000"/>
-        <metric name="Reject Page Requests Rate" indicator="true" interval="60000"/>
-        <metric name="Incoming Page Requests Rate" indicator="true" interval="60000"/>
-        <metric name="Active Threads" indicator="true" interval="60000"/>
-        <metric name="Native Heap Size" indicator="true" interval="60000"/>
-        <metric name="Active Heap Count" indicator="true" interval="60000"/>
-        <metric name="Native Heap Count" indicator="true" interval="60000"/>
-        <metric name="Global Heap Size" indicator="true" interval="60000"/>
+        <metric name="Template Cache Average Record Age"/>
+        <metric name="Template Cache Total Records Evicted"/>
+        <metric name="Template Cache Current Records"/>
+        <metric name="Template Cache Total Records Added"/>
+        <metric name="Template Cache Rapid Growth Trim Count"/>
+        <metric name="Template Cache Low Memory Trim Count"/>
+        <metric name="Template Cache Scheduled Trim Count"/>
+        <metric name="Template Cache Total Miss Count" indicator="true"/>
+        <metric name="Template Cache Total Hit Count" indicator="true"/>
+        <metric name="Template Cache XML Miss Count" indicator="true"/>
+        <metric name="Template Cache XML Hit Count" indicator="true"/>
+        <metric name="Template Cache Max Size"/>
+        <metric name="Template Cache Size" indicator="true"/>
+        <metric name="Process ID"/>
+        <metric name="Throttled Page Requests"/>
+        <metric name="Object Cache GC Size"/>
+        <metric name="Object Cache GC Count"/>
+        <metric name="Object Cache Miss Count" indicator="true"/>
+        <metric name="Object Cache Hit Count" indicator="true"/>
+        <metric name="Object Cache Resurrected Count"/>
+        <metric name="Object Cache Expired Size"/>
+        <metric name="Object Cache Expired Count"/>
+        <metric name="Object Cache Always Live Size"/>
+        <metric name="Object Cache Always Live Count"/>
+        <metric name="Object Cache Live Size"/>
+        <metric name="Object Cache Live Count"/>
+        <metric name="Sql Query Executing time"/>
+        <metric name="Executing Sql Queries" indicator="true"/>
+        <metric name="Responded Page Requests Rate"/>
+        <metric name="Executing Time/Page Request"/>
+        <metric name="Current Page Requests"/>
+        <metric name="Reject Page Requests Rate"/>
+        <metric name="Incoming Page Requests Rate" indicator="true"/>
+        <metric name="Active Threads" indicator="true"/>
+        <metric name="Native Heap Size"/>
+        <metric name="Active Heap Count"/>
+        <metric name="Native Heap Count"/>
+        <metric name="Global Heap Size"/>
         
         <service name="Webserver">
             <plugin type="measurement" class="SharePointServerMeasurement"/>
             <config>
                 <option name="url" description="Main SharePoint URL" default="http://localhost:80/"/>
             </config>
-            <metric name="Availability" alias="Availability" template="web:url=%url%,user=%sharepoint.user%,password=%sharepoint.password%:${alias}" indicator="true" interval="60000"/>
-            <metric name="Response Time" alias="responsetime" template="web:url=%url%,user=%sharepoint.user%,password=%sharepoint.password%:${alias}" indicator="true" interval="60000"/>
+            <metric name="Availability" alias="Availability" template="web:url=%url%,user=%sharepoint.user%,password=%sharepoint.password%:${alias}"/>
+            <metric name="Response Time" alias="responsetime" template="web:url=%url%,user=%sharepoint.user%,password=%sharepoint.password%:${alias}"/>
         </service>
         
         <service name="WindowsService">
@@ -100,437 +100,380 @@
                 <option name="service_name" description="Service name"/>
             </config>
             <filter name="service.ptql" value="Pid.Service.eq=%service_name%"/>
-
-            <metric name="Availability"
-                    alias="Availability"
-                    template="win32:Type=Availability,Service=%service_name%:${alias}"
-                    category="AVAILABILITY"
-                    units="percentage"
-                    collectionType="dynamic" indicator="true" interval="60000"/>
-
-            <metric name="Start Type"
-                    template="win32:Service=%service_name%:${alias}"
-                    collectionType="static" indicator="true" interval="60000"/>
-
-            <metric name="Memory Size"
-                    alias="MemSize"
-                    template="sigar:Type=ProcMem,Arg=${service.ptql}:Size"
-                    category="UTILIZATION"
-                    units="B"
-                    collectionType="dynamic" indicator="true" interval="60000"/>
-
-            <metric name="Resident Memory Size"
-                    alias="ResidentMemSize"
-                    template="sigar:Type=ProcMem,Arg=${service.ptql}:Resident"
-                    category="UTILIZATION"
-                    units="B"
-                    collectionType="dynamic" indicator="true" interval="60000"/>
-
-            <metric name="Cpu System Time"
-                    alias="SystemTime"
-                    template="sigar:Type=ProcTime,Arg=${service.ptql}:Sys"
-                    category="UTILIZATION"
-                    units="ms"
-                    collectionType="trendsup" indicator="true" interval="60000"/>
-
-            <metric name="Cpu User Time"
-                    alias="UserTime"
-                    template="sigar:Type=ProcTime,Arg=${service.ptql}:User"
-                    category="UTILIZATION"
-                    units="ms"
-                    collectionType="trendsup" indicator="true" interval="60000"/>
-
-            <metric name="Cpu Total Time"
-                    alias="TotalTime"
-                    template="sigar:Type=ProcTime,Arg=${service.ptql}:Total"
-                    category="UTILIZATION"
-                    units="ms"
-                    collectionType="trendsup" indicator="true" interval="60000"/>
-
-            <metric name="Cpu Usage"
-                    alias="Usage"
-                    template="sigar:Type=ProcCpu,Arg=${service.ptql}:Percent"
-                    category="UTILIZATION"
-                    units="percentage"
-                    collectionType="dynamic" indicator="true" interval="60000"/>
-
-            <metric name="Start Time"
-                    alias="StartTime"
-                    template="sigar:Type=ProcTime,Arg=${service.ptql}:StartTime"
-                    units="epoch-millis"
-                    collectionType="static" indicator="true" interval="60000"/>
-
-            <metric name="Open Handles"
-                    alias="OpenHandles"
-                    template="sigar:Type=ProcFd,Arg=${service.ptql}:Total"
-                    category="UTILIZATION"
-                    units="none"
-                    collectionType="dynamic" indicator="true" interval="60000"/>
-
-            <metric name="Threads" template="sigar:Type=ProcState,Arg=${service.ptql}:Threads" indicator="true" interval="60000"/>
+            <metric name="Availability" alias="Availability" template="win32:Type=Availability,Service=%service_name%:${alias}" category="AVAILABILITY" units="percentage" collectionType="dynamic"/>
+            <metric name="Start Type" template="win32:Service=%service_name%:${alias}" collectionType="static"/>
+            <metric name="Memory Size" alias="MemSize" template="sigar:Type=ProcMem,Arg=${service.ptql}:Size" category="UTILIZATION" units="B" collectionType="dynamic"/>
+            <metric name="Resident Memory Size" alias="ResidentMemSize" template="sigar:Type=ProcMem,Arg=${service.ptql}:Resident" category="UTILIZATION" units="B" collectionType="dynamic"/>
+            <metric name="Cpu System Time" alias="SystemTime" template="sigar:Type=ProcTime,Arg=${service.ptql}:Sys" category="UTILIZATION" units="ms" collectionType="trendsup"/>
+            <metric name="Cpu User Time" alias="UserTime" template="sigar:Type=ProcTime,Arg=${service.ptql}:User" category="UTILIZATION" units="ms" collectionType="trendsup"/>
+            <metric name="Cpu Total Time" alias="TotalTime" template="sigar:Type=ProcTime,Arg=${service.ptql}:Total" category="UTILIZATION" units="ms" collectionType="trendsup"/>
+            <metric name="Cpu Usage" alias="Usage" template="sigar:Type=ProcCpu,Arg=${service.ptql}:Percent" category="UTILIZATION" units="percentage" collectionType="dynamic"/>
+            <metric name="Start Time" alias="StartTime" template="sigar:Type=ProcTime,Arg=${service.ptql}:StartTime" units="epoch-millis" collectionType="static"/>
+            <metric name="Open Handles" alias="OpenHandles" template="sigar:Type=ProcFd,Arg=${service.ptql}:Total" category="UTILIZATION" units="none" collectionType="dynamic"/>
+            <metric name="Threads" template="sigar:Type=ProcState,Arg=${service.ptql}:Threads"/>
         </service>
         
         <service name="Records Management Counters">
             <filter name="template" value="pdh:SharePoint Records Management Counters:${name}"/>
             <metric name="Availability" alias="Availability" template="pdh:SharePoint Records Management Counters\Search results processed / sec base:${alias}" indicator="true" category="AVAILABILITY"/>
-            <metric name="Search results processed / sec base" indicator="true"/>
+            <metric name="Search results processed / sec base"/>
             <metric name="Search results processed / sec" indicator="true"/>
-            <metric name="Rate of processing items for policy change" indicator="true" interval="60000"/>
-            <metric name="Total number of items processed by policy change" indicator="true" interval="60000"/>
-            <metric name="Total number of items processed in Search and Process" indicator="true" interval="60000"/>
-            <metric name="Total number of holds processed" indicator="true" interval="60000"/>
-            <metric name="Records expired / sec" indicator="true"/>
-            <metric name="Total number of records expired" indicator="true" interval="60000"/>
+            <metric name="Rate of processing items for policy change"/>
+            <metric name="Total number of items processed by policy change"/>
+            <metric name="Total number of items processed in Search and Process"/>
+            <metric name="Total number of holds processed"/>
+            <metric name="Records expired / sec"/>
+            <metric name="Total number of records expired"/>
         </service>
 
         <service name="Publishing Cache">
             <filter name="template" value="pdh:SharePoint Publishing Cache(_total):${name}"/>
             <metric name="Availability" alias="Availability" template="pdh:SharePoint Publishing Cache(_total)\Total object discards:${alias}" indicator="true" category="AVAILABILITY"/>
-            <metric name="Total object discards" indicator="true" interval="60000"/>
+            <metric name="Total object discards"/>
             <metric name="Publishing cache flushes / second" indicator="true"/>
-            <metric name="Total number of cache flushes" indicator="true" interval="60000"/>
-            <metric name="Total number of cache compactions" indicator="true" interval="60000"/>
-            <metric name="Total number of objects added" indicator="true" interval="60000"/>
-            <metric name="Total objects" indicator="true" interval="60000"/>
-            <metric name="Publishing cache hit ratio" indicator="true" interval="60000"/>
-            <metric name="Publishing cache miss count" indicator="true" interval="60000"/>
+            <metric name="Total number of cache flushes"/>
+            <metric name="Total number of cache compactions"/>
+            <metric name="Total number of objects added"/>
+            <metric name="Total objects"/>
+            <metric name="Publishing cache hit ratio" indicator="true"/>
+            <metric name="Publishing cache miss count"/>
             <metric name="Publishing cache misses / sec" indicator="true"/>
-            <metric name="Publishing cache hit count" indicator="true" interval="60000"/>
+            <metric name="Publishing cache hit count"/>
             <metric name="Publishing cache hits / sec" indicator="true"/>
         </service>
 
         <service name="Disk-Based Cache">
             <filter name="template" value="pdh:SharePoint Disk-Based Cache:${name}"/>
             <metric name="Availability" alias="Availability" template="pdh:SharePoint Disk-Based Cache\Old Blob Cache Folders Pending Delete:${alias}" indicator="true" category="AVAILABILITY"/>
-            <metric name="Old Blob Cache Folders Pending Delete" indicator="true" interval="60000"/>
-            <metric name="Total Objects Currently Being Transferred to blob cache" indicator="true" interval="60000"/>
-            <metric name="Total objects in Blob Cache" indicator="true" interval="60000"/>
-            <metric name="Total blob index writes" indicator="true" interval="60000"/>
-            <metric name="Total number of objects added to blob cache" indicator="true" interval="60000"/>
-            <metric name="Blob cache hit ratio" indicator="true" interval="60000"/>
-            <metric name="Blob cache miss count" indicator="true" interval="60000"/>
+            <metric name="Old Blob Cache Folders Pending Delete"/>
+            <metric name="Total Objects Currently Being Transferred to blob cache"/>
+            <metric name="Total objects in Blob Cache"/>
+            <metric name="Total blob index writes"/>
+            <metric name="Total number of objects added to blob cache"/>
+            <metric name="Blob cache hit ratio"/>
+            <metric name="Blob cache miss count"/>
             <metric name="Blob cache misses / sec" indicator="true"/>
-            <metric name="Blob cache hit count" indicator="true" interval="60000"/>
+            <metric name="Blob cache hit count"/>
             <metric name="Blob cache hits / sec" indicator="true"/>
             <metric name="Blob cache flushes / second" indicator="true"/>
-            <metric name="Total number of cache flushes" indicator="true" interval="60000"/>
-            <metric name="Blob Cache fill ratio" indicator="true" interval="60000"/>
-            <metric name="Total object discards from blob cache" indicator="true" interval="60000"/>
-            <metric name="Total blob disk size" indicator="true" interval="60000"/>
-            <metric name="Total number of cache compactions" indicator="true" interval="60000"/>
+            <metric name="Total number of cache flushes"/>
+            <metric name="Blob Cache fill ratio"/>
+            <metric name="Total object discards from blob cache"/>
+            <metric name="Total blob disk size"/>
+            <metric name="Total number of cache compactions"/>
         </service>
 
         <service name="Foundation Search Gatherer Projects">
             <filter name="template" value="pdh:SharePoint Foundation Search Gatherer Projects(_total):${name}"/>
             <metric name="Availability" alias="Availability" template="pdh:SharePoint Foundation Search Gatherer Projects(_total)\Gatherer Master Flag:${alias}" indicator="true" category="AVAILABILITY"/>
-            <metric name="Gatherer Master Flag" indicator="true" interval="60000"/>
-            <metric name="Transactions in the locked queue" indicator="true" interval="60000"/>
-            <metric name="Documents Security Only Error" indicator="true" interval="60000"/>
-            <metric name="Documents NoIndex" indicator="true" interval="60000"/>
-            <metric name="Links discovered and not crawled" indicator="true" interval="60000"/>
-            <metric name="Links discovered" indicator="true" interval="60000"/>
-            <metric name="Retries Rate" indicator="true" interval="60000"/>
-            <metric name="Retries" indicator="true" interval="60000"/>
-            <metric name="Incremental Crawls" indicator="true" interval="60000"/>
-            <metric name="Gatherer Locked Flag" indicator="true" interval="60000"/>
-            <metric name="Gatherer Recovery In Progress Flag" indicator="true" interval="60000"/>
-            <metric name="Gatherer Paused Flag" indicator="true" interval="60000"/>
-            <metric name="Crawls in progress" indicator="true" interval="60000"/>
-            <metric name="Filtered Text Rate" indicator="true" interval="60000"/>
-            <metric name="Filtered Text" indicator="true" interval="60000"/>
-            <metric name="Filtered Office Rate" indicator="true" interval="60000"/>
-            <metric name="Filtered Office" indicator="true" interval="60000"/>
-            <metric name="Filtered HTML Rate" indicator="true" interval="60000"/>
-            <metric name="Filtered HTML" indicator="true" interval="60000"/>
-            <metric name="Accessed File Rate" indicator="true" interval="60000"/>
-            <metric name="Accessed Files" indicator="true" interval="60000"/>
-            <metric name="Accessed HTTP Rate" indicator="true" interval="60000"/>
-            <metric name="Accessed HTTP" indicator="true" interval="60000"/>
-            <metric name="File Errors Rate" indicator="true" interval="60000"/>
-            <metric name="File Errors" indicator="true" interval="60000"/>
-            <metric name="HTTP Errors Rate" indicator="true" interval="60000"/>
-            <metric name="HTTP Errors" indicator="true" interval="60000"/>
-            <metric name="Transactions in filters" indicator="true" interval="60000"/>
-            <metric name="Transactions Started" indicator="true" interval="60000"/>
-            <metric name="Transactions Completed" indicator="true" interval="60000"/>
-            <metric name="Transactions Waiting" indicator="true" interval="60000"/>
-            <metric name="Transactions Delayed" indicator="true" interval="60000"/>
-            <metric name="Transactions On Hold" indicator="true" interval="60000"/>
-            <metric name="Transactions In Progress" indicator="true" interval="60000"/>
-            <metric name="Documents Security Only" indicator="true" interval="60000"/>
-            <metric name="Documents Not Modified" indicator="true" interval="60000"/>
-            <metric name="Documents Deleted" indicator="true" interval="60000"/>
-            <metric name="Documents Processed Rate" indicator="true" interval="60000"/>
-            <metric name="Documents Processed" indicator="true" interval="60000"/>
-            <metric name="Documents Error Rate" indicator="true" interval="60000"/>
-            <metric name="Documents Error" indicator="true" interval="60000"/>
-            <metric name="Documents Success Rate" indicator="true" interval="60000"/>
-            <metric name="Documents Success" indicator="true" interval="60000"/>
+            <metric name="Gatherer Master Flag"/>
+            <metric name="Transactions in the locked queue"/>
+            <metric name="Documents Security Only Error"/>
+            <metric name="Documents NoIndex"/>
+            <metric name="Links discovered and not crawled"/>
+            <metric name="Links discovered"/>
+            <metric name="Retries Rate"/>
+            <metric name="Retries"/>
+            <metric name="Incremental Crawls"/>
+            <metric name="Gatherer Locked Flag"/>
+            <metric name="Gatherer Recovery In Progress Flag"/>
+            <metric name="Gatherer Paused Flag"/>
+            <metric name="Crawls in progress" indicator="true"/>
+            <metric name="Filtered Text Rate indicator="true""/>
+            <metric name="Filtered Text"/>
+            <metric name="Filtered Office Rate" indicator="true"/>
+            <metric name="Filtered Office"/>
+            <metric name="Filtered HTML Rate" indicator="true"/>
+            <metric name="Filtered HTML"/>
+            <metric name="Accessed File Rate" indicator="true"/>
+            <metric name="Accessed Files"/>
+            <metric name="Accessed HTTP Rate" indicator="true"/>
+            <metric name="Accessed HTTP"/>
+            <metric name="File Errors Rate" indicator="true"/>
+            <metric name="File Errors"/>
+            <metric name="HTTP Errors Rate" indicator="true"/>
+            <metric name="HTTP Errors"/>
+            <metric name="Transactions in filters"/>
+            <metric name="Transactions Started"/>
+            <metric name="Transactions Completed"/>
+            <metric name="Transactions Waiting"/>
+            <metric name="Transactions Delayed"/>
+            <metric name="Transactions On Hold"/>
+            <metric name="Transactions In Progress"/>
+            <metric name="Documents Security Only"/>
+            <metric name="Documents Not Modified"/>
+            <metric name="Documents Deleted"/>
+            <metric name="Documents Processed Rate"/>
+            <metric name="Documents Processed"/>
+            <metric name="Documents Error Rate"/>
+            <metric name="Documents Error"/>
+            <metric name="Documents Success Rate"/>
+            <metric name="Documents Success"/>
         </service>
 
         <service name="Foundation Search Schema Plugin">
             <filter name="template" value="pdh:SharePoint Foundation Search Schema Plugin(_total):${name}"/>
             <metric name="Availability" alias="Availability" template="pdh:SharePoint Foundation Search Schema Plugin(_total)\Total Documents:${alias}" indicator="true" category="AVAILABILITY"/>
-            <metric name="Total Documents" indicator="true" interval="60000"/>
-            <metric name="Refresh count" indicator="true" interval="60000"/>
-            <metric name="Total properties processed" indicator="true" interval="60000"/>
-            <metric name="Duplicate aliases" indicator="true" interval="60000"/>
-            <metric name="Aliases loaded" indicator="true" interval="60000"/>
-            <metric name="Aliases Mapped" indicator="true" interval="60000"/>
+            <metric name="Total Documents" indicator="true"/>
+            <metric name="Refresh count"/>
+            <metric name="Total properties processed"/>
+            <metric name="Duplicate aliases"/>
+            <metric name="Aliases loaded"/>
+            <metric name="Aliases Mapped"/>
         </service>
 
         <service name="Foundation BDC Online">
             <filter name="template" value="pdh:SharePoint Foundation BDC Online:${name}"/>
             <metric name="Availability" alias="Availability" template="pdh:SharePoint Foundation BDC Online\Total calls failed:${alias}" indicator="true" category="AVAILABILITY"/>
-            <metric name="Total calls failed" indicator="true" interval="60000"/>
-            <metric name="Total calls per second" indicator="true" interval="60000"/>
-            <metric name="BulkIdEnumerators per second" indicator="true" interval="60000"/>
-            <metric name="BulkAssociationNavigators per second" indicator="true" interval="60000"/>
-            <metric name="BulkAssociatedIdEnumerators per second" indicator="true" interval="60000"/>
-            <metric name="BulkSpecificFinders per second" indicator="true" interval="60000"/>
-            <metric name="BinarySecurityDescriptorAccessors per second" indicator="true" interval="60000"/>
-            <metric name="StreamAccessors per second" indicator="true" interval="60000"/>
-            <metric name="Disassociators per second" indicator="true" interval="60000"/>
-            <metric name="Associators per second" indicator="true" interval="60000"/>
-            <metric name="AssociationNavigators per second" indicator="true" interval="60000"/>
-            <metric name="DeletedIdEnumerators per second" indicator="true" interval="60000"/>
-            <metric name="ChangedIdEnumerators per second" indicator="true" interval="60000"/>
-            <metric name="Deleters per second" indicator="true" interval="60000"/>
-            <metric name="Updaters per second" indicator="true" interval="60000"/>
-            <metric name="Creators per second" indicator="true" interval="60000"/>
-            <metric name="AccessCheckers per second" indicator="true" interval="60000"/>
-            <metric name="Scalars per second" indicator="true" interval="60000"/>
-            <metric name="IdEnumerators per second" indicator="true" interval="60000"/>
-            <metric name="GenericInvokers per second" indicator="true" interval="60000"/>
-            <metric name="SpecificFinders per second" indicator="true" interval="60000"/>
-            <metric name="Finders per second" indicator="true" interval="60000"/>
+            <metric name="Total calls failed" indicator="true"/>
+            <metric name="Total calls per second" indicator="true"/>
+            <metric name="BulkIdEnumerators per second"/>
+            <metric name="BulkAssociationNavigators per second"/>
+            <metric name="BulkAssociatedIdEnumerators per second"/>
+            <metric name="BulkSpecificFinders per second"/>
+            <metric name="BinarySecurityDescriptorAccessors per second"/>
+            <metric name="StreamAccessors per second"/>
+            <metric name="Disassociators per second"/>
+            <metric name="Associators per second"/>
+            <metric name="AssociationNavigators per second"/>
+            <metric name="DeletedIdEnumerators per second"/>
+            <metric name="ChangedIdEnumerators per second"/>
+            <metric name="Deleters per second"/>
+            <metric name="Updaters per second"/>
+            <metric name="Creators per second"/>
+            <metric name="AccessCheckers per second"/>
+            <metric name="Scalars per second"/>
+            <metric name="IdEnumerators per second"/>
+            <metric name="GenericInvokers per second"/>
+            <metric name="SpecificFinders per second"/>
+            <metric name="Finders per second"/>
         </service>
 
         <service name="Foundation Search Gatherer">
             <filter name="template" value="pdh:SharePoint Foundation Search Gatherer:${name}"/>
             <metric name="Availability" alias="Availability" template="pdh:SharePoint Foundation Search Gatherer\Filter Processes Terminated 02:${alias}" indicator="true" category="AVAILABILITY"/>
-            <metric name="Filter Processes Terminated 02" indicator="true" interval="60000"/>
-            <metric name="Filter Processes Terminated Dedicated Secondary 02" indicator="true" interval="60000"/>
-            <metric name="Filter Processes Terminated Dedicated 02" indicator="true" interval="60000"/>
-            <metric name="Filter Processes Terminated Secondary 02" indicator="true" interval="60000"/>
-            <metric name="Filter Processes Terminated Primary 02" indicator="true" interval="60000"/>
-            <metric name="Filter Processes Terminated Dedicated Secondary 01" indicator="true" interval="60000"/>
-            <metric name="Filter Processes Terminated Dedicated 01" indicator="true" interval="60000"/>
-            <metric name="Filter Processes Terminated Secondary 01" indicator="true" interval="60000"/>
-            <metric name="Filter Processes Terminated Primary 01" indicator="true" interval="60000"/>
-            <metric name="Filter Processes Created Dedicated Secondary" indicator="true" interval="60000"/>
-            <metric name="Filter Processes Created Dedicated" indicator="true" interval="60000"/>
-            <metric name="Filter Processes Created Secondary" indicator="true" interval="60000"/>
-            <metric name="Filter Processes Created Primary " indicator="true" interval="60000"/>
-            <metric name="Filter Processes Active Dedicated Secondary" indicator="true" interval="60000"/>
-            <metric name="Filter Processes Active Dedicated" indicator="true" interval="60000"/>
-            <metric name="Filter Processes Active Secondary" indicator="true" interval="60000"/>
-            <metric name="Filter Processes Active Primary" indicator="true" interval="60000"/>
-            <metric name="Changes Processed" indicator="true" interval="60000"/>
-            <metric name="DocProcessTime 10 FinalCommit" indicator="true" interval="60000"/>
-            <metric name="DocProcessTime 09 Propagation" indicator="true" interval="60000"/>
-            <metric name="DocProcessTime 08 Merge" indicator="true" interval="60000"/>
-            <metric name="DocProcessTime 07 PropertyStore" indicator="true" interval="60000"/>
-            <metric name="DocProcessTime 06 SyncCompletion" indicator="true" interval="60000"/>
-            <metric name="DocProcessTime 05 Filtering" indicator="true" interval="60000"/>
-            <metric name="DocProcessTime 04 StandardProperties" indicator="true" interval="60000"/>
-            <metric name="DocProcessTime 03 Connect" indicator="true" interval="60000"/>
-            <metric name="DocProcessTime 02 Delayed" indicator="true" interval="60000"/>
-            <metric name="DocProcessTime 01 Loading" indicator="true" interval="60000"/>
-            <metric name="ThreadTime 16 CatchAllProcessing" indicator="true" interval="60000"/>
-            <metric name="ThreadTime 15 OtherPlugins" indicator="true" interval="60000"/>
-            <metric name="ThreadTime 14 GathererPlugin" indicator="true" interval="60000"/>
-            <metric name="ThreadTime 13 RankingPlugin" indicator="true" interval="60000"/>
-            <metric name="ThreadTime 12 ScopesPlugin" indicator="true" interval="60000"/>
-            <metric name="ThreadTime 11 MatrixPlugin" indicator="true" interval="60000"/>
-            <metric name="ThreadTime 10 FeatureExtractionPlugin" indicator="true" interval="60000"/>
-            <metric name="ThreadTime 09 ArchivalPlugin" indicator="true" interval="60000"/>
-            <metric name="ThreadTime 08 IndexerPlugin" indicator="true" interval="60000"/>
-            <metric name="ThreadTime 07 WordBreaking" indicator="true" interval="60000"/>
-            <metric name="ThreadTime 06 IFilterData" indicator="true" interval="60000"/>
-            <metric name="ThreadTime 05 PHData" indicator="true" interval="60000"/>
-            <metric name="ThreadTime 04 GetStandardProperties" indicator="true" interval="60000"/>
-            <metric name="ThreadTime 03 Connect" indicator="true" interval="60000"/>
-            <metric name="ThreadTime 02 FilterDriverInit" indicator="true" interval="60000"/>
-            <metric name="ThreadTime 01 NotActive" indicator="true" interval="60000"/>
-            <metric name="Threads Loading Transactions" indicator="true" interval="60000"/>
-            <metric name="Threads Processing Links" indicator="true" interval="60000"/>
-            <metric name="Threads Committing Transactions" indicator="true" interval="60000"/>
-            <metric name="System IO traffic rate" indicator="true" interval="60000"/>
-            <metric name="Stemmers Cached" indicator="true" interval="60000"/>
-            <metric name="Word Breakers Cached" indicator="true" interval="60000"/>
-            <metric name="Documents Successfully Filtered Rate" indicator="true" interval="60000"/>
-            <metric name="Documents Successfully Filtered" indicator="true" interval="60000"/>
-            <metric name="Threads In Plug-ins" indicator="true" interval="60000"/>
-            <metric name="Threads Accessing Network" indicator="true" interval="60000"/>
-            <metric name="Servers Unavailable" indicator="true" interval="60000"/>
-            <metric name="Servers Currently Unavailable" indicator="true" interval="60000"/>
-            <metric name="Time Outs" indicator="true" interval="60000"/>
-            <metric name="Robots.Txt Requests" indicator="true" interval="60000"/>
-            <metric name="Accessing Robots.Txt File" indicator="true" interval="60000"/>
-            <metric name="Documents Filtered Rate" indicator="true" interval="60000"/>
-            <metric name="Documents Filtered" indicator="true" interval="60000"/>
-            <metric name="Filter Objects" indicator="true" interval="60000"/>
-            <metric name="Server Objects Created" indicator="true" interval="60000"/>
-            <metric name="Server Objects" indicator="true" interval="60000"/>
-            <metric name="Delayed Documents" indicator="true" interval="60000"/>
-            <metric name="Filter Processes Created" indicator="true" interval="60000"/>
-            <metric name="Filter Processes Terminated 01" indicator="true" interval="60000"/>
-            <metric name="Filter Processes Active" indicator="true" interval="60000"/>
-            <metric name="Active Queue Length" indicator="true" interval="60000"/>
-            <metric name="Performance Level" indicator="true" interval="60000"/>
-            <metric name="Document Entries" indicator="true" interval="60000"/>
-            <metric name="Idle Threads" indicator="true" interval="60000"/>
-            <metric name="Filtering Threads" indicator="true" interval="60000"/>
-            <metric name="Heartbeats Rate" indicator="true" interval="60000"/>
-            <metric name="Heartbeats" indicator="true" interval="60000"/>
-            <metric name="Admin Clients" indicator="true" interval="60000"/>
+            <metric name="Filter Processes Terminated 02"/>
+            <metric name="Filter Processes Terminated Dedicated Secondary 02"/>
+            <metric name="Filter Processes Terminated Dedicated 02"/>
+            <metric name="Filter Processes Terminated Secondary 02"/>
+            <metric name="Filter Processes Terminated Primary 02"/>
+            <metric name="Filter Processes Terminated Dedicated Secondary 01"/>
+            <metric name="Filter Processes Terminated Dedicated 01"/>
+            <metric name="Filter Processes Terminated Secondary 01"/>
+            <metric name="Filter Processes Terminated Primary 01"/>
+            <metric name="Filter Processes Created Dedicated Secondary"/>
+            <metric name="Filter Processes Created Dedicated"/>
+            <metric name="Filter Processes Created Secondary"/>
+            <metric name="Filter Processes Created Primary "/>
+            <metric name="Filter Processes Active Dedicated Secondary"/>
+            <metric name="Filter Processes Active Dedicated"/>
+            <metric name="Filter Processes Active Secondary"/>
+            <metric name="Filter Processes Active Primary"/>
+            <metric name="Changes Processed" indicator="true"/>
+            <metric name="DocProcessTime 10 FinalCommit"/>
+            <metric name="DocProcessTime 09 Propagation"/>
+            <metric name="DocProcessTime 08 Merge"/>
+            <metric name="DocProcessTime 07 PropertyStore"/>
+            <metric name="DocProcessTime 06 SyncCompletion"/>
+            <metric name="DocProcessTime 05 Filtering"/>
+            <metric name="DocProcessTime 04 StandardProperties"/>
+            <metric name="DocProcessTime 03 Connect"/>
+            <metric name="DocProcessTime 02 Delayed"/>
+            <metric name="DocProcessTime 01 Loading"/>
+            <metric name="ThreadTime 16 CatchAllProcessing"/>
+            <metric name="ThreadTime 15 OtherPlugins"/>
+            <metric name="ThreadTime 14 GathererPlugin"/>
+            <metric name="ThreadTime 13 RankingPlugin"/>
+            <metric name="ThreadTime 12 ScopesPlugin"/>
+            <metric name="ThreadTime 11 MatrixPlugin"/>
+            <metric name="ThreadTime 10 FeatureExtractionPlugin"/>
+            <metric name="ThreadTime 09 ArchivalPlugin"/>
+            <metric name="ThreadTime 08 IndexerPlugin"/>
+            <metric name="ThreadTime 07 WordBreaking"/>
+            <metric name="ThreadTime 06 IFilterData"/>
+            <metric name="ThreadTime 05 PHData"/>
+            <metric name="ThreadTime 04 GetStandardProperties"/>
+            <metric name="ThreadTime 03 Connect"/>
+            <metric name="ThreadTime 02 FilterDriverInit"/>
+            <metric name="ThreadTime 01 NotActive"/>
+            <metric name="Threads Loading Transactions"/>
+            <metric name="Threads Processing Links"/>
+            <metric name="Threads Committing Transactions" indicator="true"/>
+            <metric name="System IO traffic rate"/>
+            <metric name="Stemmers Cached"/>
+            <metric name="Word Breakers Cached"/>
+            <metric name="Documents Successfully Filtered Rate"/>
+            <metric name="Documents Successfully Filtered"/>
+            <metric name="Threads In Plug-ins"/>
+            <metric name="Threads Accessing Network"/>
+            <metric name="Servers Unavailable"/>
+            <metric name="Servers Currently Unavailable"/>
+            <metric name="Time Outs" indicator="true"/>
+            <metric name="Robots.Txt Requests"/>
+            <metric name="Accessing Robots.Txt File"/>
+            <metric name="Documents Filtered Rate"/>
+            <metric name="Documents Filtered"/>
+            <metric name="Filter Objects"/>
+            <metric name="Server Objects Created"/>
+            <metric name="Server Objects"/>
+            <metric name="Delayed Documents"/>
+            <metric name="Filter Processes Created"/>
+            <metric name="Filter Processes Terminated 01"/>
+            <metric name="Filter Processes Active"/>
+            <metric name="Active Queue Length" indicator="true"/>
+            <metric name="Performance Level"/>
+            <metric name="Document Entries"/>
+            <metric name="Idle Threads" indicator="true"/>
+            <metric name="Filtering Threads"/>
+            <metric name="Heartbeats Rate" indicator="true"/>
+            <metric name="Heartbeats"/>
+            <metric name="Admin Clients"/>
         </service>
 
         <service name="Foundation Search Indexer Plugin">
             <filter name="template" value="pdh:SharePoint Foundation Search Indexer Plugin(_total):${name}"/>
             <metric name="Availability" alias="Availability" template="pdh:SharePoint Foundation Search Indexer Plugin(_total)\Persistent Indexes Propagated:${alias}" indicator="true" category="AVAILABILITY"/>
-            <metric name="Persistent Indexes Propagated" indicator="true" interval="60000"/>
-            <metric name="Average CPU Time Rank Stage 2" indicator="true" interval="60000"/>
-            <metric name="Average Exec Time Rank Stage 2" indicator="true" interval="60000"/>
-            <metric name="Average CPU Time Rank Stage 1 Without Precalc" indicator="true" interval="60000"/>
-            <metric name="Average Exec Time Rank Stage 1 Without Precalc" indicator="true" interval="60000"/>
-            <metric name="Average CPU Time Rank Stage 1 With Precalc" indicator="true" interval="60000"/>
-            <metric name="Average Exec Time Rank Stage 1 With Precalc" indicator="true" interval="60000"/>
-            <metric name="Average CPU Time Create Unsorted Cursor" indicator="true" interval="60000"/>
-            <metric name="Average Exec Time Create Unsorted Cursor" indicator="true" interval="60000"/>
-            <metric name="Average CPU Time Other" indicator="true" interval="60000"/>
-            <metric name="Average CPU Time GetRows" indicator="true" interval="60000"/>
-            <metric name="Average CPU Time Resolve" indicator="true" interval="60000"/>
-            <metric name="Average CPU Time Create" indicator="true" interval="60000"/>
-            <metric name="Average Exec Time Other" indicator="true" interval="60000"/>
-            <metric name="Average Exec Time GetRows" indicator="true" interval="60000"/>
-            <metric name="Average Exec Time Resolve" indicator="true" interval="60000"/>
-            <metric name="Average Exec Time Create" indicator="true" interval="60000"/>
-            <metric name="Documents in Propagation" indicator="true" interval="60000"/>
-            <metric name="Propagation Rate" indicator="true" interval="60000"/>
-            <metric name="Scope Compilations - Propogation Task Receiver" indicator="true" interval="60000"/>
-            <metric name="Scope Compilations - Propogation Task Sender" indicator="true" interval="60000"/>
-            <metric name="Tasks - Propogation Task Sender" indicator="true" interval="60000"/>
-            <metric name="Indexes - Errors In Reception" indicator="true" interval="60000"/>
-            <metric name="Indexes - Received Successfully" indicator="true" interval="60000"/>
-            <metric name="Tasks - Index Receiver" indicator="true" interval="60000"/>
-            <metric name="Indexes - Errors In Propagation " indicator="true" interval="60000"/>
-            <metric name="Indexes - Propagated Successfully " indicator="true" interval="60000"/>
-            <metric name="Tasks - Index Propagator" indicator="true" interval="60000"/>
-            <metric name="Average Query Latency" indicator="true" interval="60000"/>
-            <metric name="L4 Merge Speed - Last" indicator="true" interval="60000"/>
-            <metric name="L4 Merge - Count" indicator="true" interval="60000"/>
-            <metric name="L4 Merge Speed - Average" indicator="true" interval="60000"/>
-            <metric name="L4 Merges Now" indicator="true" interval="60000"/>
-            <metric name="Persistent Indexes L4" indicator="true" interval="60000"/>
-            <metric name="L3 Merge Speed - Last" indicator="true" interval="60000"/>
-            <metric name="L3 Merge - Count" indicator="true" interval="60000"/>
-            <metric name="L3 Merge Speed - Average" indicator="true" interval="60000"/>
-            <metric name="L3 Merges Now" indicator="true" interval="60000"/>
-            <metric name="Persistent Indexes L3" indicator="true" interval="60000"/>
-            <metric name="L2 Merge Speed - Last" indicator="true" interval="60000"/>
-            <metric name="L2 Merge - Count" indicator="true" interval="60000"/>
-            <metric name="L2 Merge Speed - Average" indicator="true" interval="60000"/>
-            <metric name="L2 Merges Now" indicator="true" interval="60000"/>
-            <metric name="Persistent Indexes L2" indicator="true" interval="60000"/>
-            <metric name="L1 Merge Speed - Last" indicator="true" interval="60000"/>
-            <metric name="L1 Merge - Count" indicator="true" interval="60000"/>
-            <metric name="L1 Merge Speed - Average" indicator="true" interval="60000"/>
-            <metric name="L1 Merges Now" indicator="true" interval="60000"/>
-            <metric name="Persistent Indexes L1" indicator="true" interval="60000"/>
-            <metric name="L0 Merge - Flush Speed - Last" indicator="true" interval="60000"/>
-            <metric name="L0 Merge - Flush - Count" indicator="true" interval="60000"/>
-            <metric name="L0 Merge- Flush Speed - Average" indicator="true" interval="60000"/>
-            <metric name="L0 Merges - flushes Now" indicator="true" interval="60000"/>
-            <metric name="L0 Indexes - Wordlists" indicator="true" interval="60000"/>
-            <metric name="Queries Succeeded" indicator="true" interval="60000"/>
-            <metric name="Queries Failed" indicator="true" interval="60000"/>
-            <metric name="Queries" indicator="true" interval="60000"/>
-            <metric name="Active Connections" indicator="true" interval="60000"/>
-            <metric name="Master Merges Now" indicator="true" interval="60000"/>
-            <metric name="Out-Of-Date Document ID Files" indicator="true" interval="60000"/>
-            <metric name="Up-To-Date Document ID Files" indicator="true" interval="60000"/>
-            <metric name="Work Items Deleted" indicator="true" interval="60000"/>
-            <metric name="Work Items Created" indicator="true" interval="60000"/>
-            <metric name="Documents Filtered" indicator="true" interval="60000"/>
-            <metric name="Unique Keys" indicator="true" interval="60000"/>
-            <metric name="Index Size" indicator="true" interval="60000"/>
-            <metric name="Persistent Indexes" indicator="true" interval="60000"/>
-            <metric name="Shadow Merge Levels Threshold" indicator="true" interval="60000"/>
-            <metric name="Shadow Merge Levels" indicator="true" interval="60000"/>
-            <metric name="Master Merge Progress" indicator="true" interval="60000"/>
-            <metric name="Master Merges to Date" indicator="true" interval="60000"/>
-            <metric name="Master Index Level" indicator="true" interval="60000"/>
+            <metric name="Persistent Indexes Propagated"/>
+            <metric name="Average CPU Time Rank Stage 2"/>
+            <metric name="Average Exec Time Rank Stage 2"/>
+            <metric name="Average CPU Time Rank Stage 1 Without Precalc"/>
+            <metric name="Average Exec Time Rank Stage 1 Without Precalc"/>
+            <metric name="Average CPU Time Rank Stage 1 With Precalc"/>
+            <metric name="Average Exec Time Rank Stage 1 With Precalc"/>
+            <metric name="Average CPU Time Create Unsorted Cursor"/>
+            <metric name="Average Exec Time Create Unsorted Cursor"/>
+            <metric name="Average CPU Time Other"/>
+            <metric name="Average CPU Time GetRows"/>
+            <metric name="Average CPU Time Resolve"/>
+            <metric name="Average CPU Time Create"/>
+            <metric name="Average Exec Time Other"/>
+            <metric name="Average Exec Time GetRows"/>
+            <metric name="Average Exec Time Resolve"/>
+            <metric name="Average Exec Time Create"/>
+            <metric name="Documents in Propagation"/>
+            <metric name="Propagation Rate" indicator="true"/>
+            <metric name="Scope Compilations - Propogation Task Receiver"/>
+            <metric name="Scope Compilations - Propogation Task Sender"/>
+            <metric name="Tasks - Propogation Task Sender"/>
+            <metric name="Indexes - Errors In Reception"/>
+            <metric name="Indexes - Received Successfully"/>
+            <metric name="Tasks - Index Receiver"/>
+            <metric name="Indexes - Errors In Propagation "/>
+            <metric name="Indexes - Propagated Successfully "/>
+            <metric name="Tasks - Index Propagator"/>
+            <metric name="Average Query Latency" indicator="true"/>
+            <metric name="L4 Merge Speed - Last"/>
+            <metric name="L4 Merge - Count"/>
+            <metric name="L4 Merge Speed - Average"/>
+            <metric name="L4 Merges Now"/>
+            <metric name="Persistent Indexes L4"/>
+            <metric name="L3 Merge Speed - Last"/>
+            <metric name="L3 Merge - Count"/>
+            <metric name="L3 Merge Speed - Average"/>
+            <metric name="L3 Merges Now"/>
+            <metric name="Persistent Indexes L3"/>
+            <metric name="L2 Merge Speed - Last"/>
+            <metric name="L2 Merge - Count"/>
+            <metric name="L2 Merge Speed - Average"/>
+            <metric name="L2 Merges Now"/>
+            <metric name="Persistent Indexes L2"/>
+            <metric name="L1 Merge Speed - Last"/>
+            <metric name="L1 Merge - Count"/>
+            <metric name="L1 Merge Speed - Average"/>
+            <metric name="L1 Merges Now"/>
+            <metric name="Persistent Indexes L1"/>
+            <metric name="L0 Merge - Flush Speed - Last"/>
+            <metric name="L0 Merge - Flush - Count"/>
+            <metric name="L0 Merge- Flush Speed - Average"/>
+            <metric name="L0 Merges - flushes Now"/>
+            <metric name="L0 Indexes - Wordlists"/>
+            <metric name="Queries Succeeded" indicator="true"/>
+            <metric name="Queries Failed" indicator="true"/>
+            <metric name="Queries" indicator="true"/>
+            <metric name="Active Connections"/>
+            <metric name="Master Merges Now"/>
+            <metric name="Out-Of-Date Document ID Files"/>
+            <metric name="Up-To-Date Document ID Files"/>
+            <metric name="Work Items Deleted"/>
+            <metric name="Work Items Created"/>
+            <metric name="Documents Filtered"/>
+            <metric name="Unique Keys"/>
+            <metric name="Index Size"/>
+            <metric name="Persistent Indexes"/>
+            <metric name="Shadow Merge Levels Threshold"/>
+            <metric name="Shadow Merge Levels"/>
+            <metric name="Master Merge Progress"/>
+            <metric name="Master Merges to Date"/>
+            <metric name="Master Index Level"/>
         </service>
 
 
         <service name="Foundation Search Query Processor">
             <filter name="template" value="pdh:SharePoint Foundation Search Query Processor:${name}"/>
             <metric name="Availability" alias="Availability" template="pdh:SharePoint Foundation Search Query Processor\Security Descriptor Cache Misses:${alias}" indicator="true" category="AVAILABILITY"/>
-            <metric name="Security Descriptor Cache Misses" indicator="true" interval="60000"/>
+            <metric name="Security Descriptor Cache Misses" indicator="true"/>
         </service>
 
 
         <service name="Foundation Search FAST Content Plugin">
             <filter name="template" value="pdh:SharePoint Foundation Search FAST Content Plugin:${name}"/>
             <metric name="Availability" alias="Availability" template="pdh:SharePoint Foundation Search FAST Content Plugin\Batches Failed Timeout:${alias}" indicator="true" category="AVAILABILITY"/>
-            <metric name="Batches Failed Timeout" indicator="true" interval="60000"/>
-            <metric name="Submission Timeouts" indicator="true" interval="60000"/>
-            <metric name="Items Failed Total" indicator="true" interval="60000"/>
-            <metric name="Items Failed Timeout" indicator="true" interval="60000"/>
-            <metric name="Feed Rate Data" indicator="true" interval="60000"/>
-            <metric name="Feed Rate Item" indicator="true" interval="60000"/>
-            <metric name="Submitter Thread Submit Time" indicator="true" interval="60000"/>
-            <metric name="Submitter Thread Idle Time" indicator="true" interval="60000"/>
-            <metric name="Submitter Threads" indicator="true" interval="60000"/>
-            <metric name="Transactions Delete Completed" indicator="true" interval="60000"/>
-            <metric name="Transactions Update Completed" indicator="true" interval="60000"/>
-            <metric name="Transactions Add Completed" indicator="true" interval="60000"/>
-            <metric name="Transactions Delete Started" indicator="true" interval="60000"/>
-            <metric name="Transactions Update Started" indicator="true" interval="60000"/>
-            <metric name="Transactions Add Started" indicator="true" interval="60000"/>
-            <metric name="Avg Callback Time" indicator="true" interval="60000"/>
-            <metric name="Avg Submit Time" indicator="true" interval="60000"/>
-            <metric name="Avg Wait Time" indicator="true" interval="60000"/>
-            <metric name="Avg Init Time" indicator="true" interval="60000"/>
-            <metric name="Avg End-To-End Time" indicator="true" interval="60000"/>
-            <metric name="Batches Submitted" indicator="true" interval="60000"/>
-            <metric name="Batches Ready" indicator="true" interval="60000"/>
-            <metric name="Batches Open" indicator="true" interval="60000"/>
-            <metric name="Batches Failed" indicator="true" interval="60000"/>
-            <metric name="Batches Success" indicator="true" interval="60000"/>
-            <metric name="Batches Total" indicator="true" interval="60000"/>
-            <metric name="Items In Robot Threads" indicator="true" interval="60000"/>
-            <metric name="Items Retried" indicator="true" interval="60000"/>
-            <metric name="Items Warnings" indicator="true" interval="60000"/>
-            <metric name="Items No Index" indicator="true" interval="60000"/>
-            <metric name="Items Ignored" indicator="true" interval="60000"/>
-            <metric name="Items Failed Batch" indicator="true" interval="60000"/>
-            <metric name="Items Open" indicator="true" interval="60000"/>
-            <metric name="Items Failed Individually" indicator="true" interval="60000"/>
-            <metric name="Items Success" indicator="true" interval="60000"/>
-            <metric name="Items Total" indicator="true" interval="60000"/>
+            <metric name="Batches Failed Timeout" indicator="true"/>
+            <metric name="Submission Timeouts" indicator="true"/>
+            <metric name="Items Failed Total" indicator="true"/>
+            <metric name="Items Failed Timeout" indicator="true"/>
+            <metric name="Feed Rate Data"/>
+            <metric name="Feed Rate Item"/>
+            <metric name="Submitter Thread Submit Time"/>
+            <metric name="Submitter Thread Idle Time"/>
+            <metric name="Submitter Threads"/>
+            <metric name="Transactions Delete Completed"/>
+            <metric name="Transactions Update Completed"/>
+            <metric name="Transactions Add Completed"/>
+            <metric name="Transactions Delete Started"/>
+            <metric name="Transactions Update Started"/>
+            <metric name="Transactions Add Started"/>
+            <metric name="Avg Callback Time"/>
+            <metric name="Avg Submit Time"/>
+            <metric name="Avg Wait Time"/>
+            <metric name="Avg Init Time"/>
+            <metric name="Avg End-To-End Time"/>
+            <metric name="Batches Submitted"/>
+            <metric name="Batches Ready"/>
+            <metric name="Batches Open"/>
+            <metric name="Batches Failed"/>
+            <metric name="Batches Success"/>
+            <metric name="Batches Total"/>
+            <metric name="Items In Robot Threads"/>
+            <metric name="Items Retried"/>
+            <metric name="Items Warnings"/>
+            <metric name="Items No Index"/>
+            <metric name="Items Ignored"/>
+            <metric name="Items Failed Batch"/>
+            <metric name="Items Open"/>
+            <metric name="Items Failed Individually"/>
+            <metric name="Items Success"/>
+            <metric name="Items Total"/>
         </service>
 
         <service name="Foundation Search Archival Plugin">
             <filter name="template" value="pdh:SharePoint Foundation Search Archival Plugin(_total):${name}"/>
             <metric name="Availability" alias="Availability" template="pdh:SharePoint Foundation Search Archival Plugin(_total)\Queues Committing:${alias}" indicator="true" category="AVAILABILITY"/>
-            <metric name="Queues Committing" indicator="true" interval="60000"/>
-            <metric name="Queues Waiting" indicator="true" interval="60000"/>
-            <metric name="Queues Filtering" indicator="true" interval="60000"/>
-            <metric name="Queues Available" indicator="true" interval="60000"/>
-            <metric name="Bulk Insert Sessions" indicator="true" interval="60000"/>
-            <metric name="Retried documents" indicator="true" interval="60000"/>
-            <metric name="Blocked documents" indicator="true" interval="60000"/>
-            <metric name="Total documents" indicator="true" interval="60000"/>
+            <metric name="Queues Committing" indicator="true"/>
+            <metric name="Queues Waiting" indicator="true"/>
+            <metric name="Queues Filtering" indicator="true"/>
+            <metric name="Queues Available" indicator="true"/>
+            <metric name="Bulk Insert Sessions"/>
+            <metric name="Retried documents"/>
+            <metric name="Blocked documents"/>
+            <metric name="Total documents"/>
         </service>
 
         <service name="Foundation BDC Metadata">
             <filter name="template" value="pdh:SharePoint Foundation BDC Metadata:${name}"/>
             <metric name="Availability" alias="Availability" template="pdh:SharePoint Foundation BDC Metadata\Cache misses per second:${alias}" indicator="true" category="AVAILABILITY"/>
-            <metric name="Cache misses per second" indicator="true" interval="60000"/>
-            <metric name="Cache hits per second" indicator="true" category="UTILIZATION" interval="60000"/>
+            <metric name="Cache misses per second" indicator="true"/>
+            <metric name="Cache hits per second" indicator="true"/>
         </service>
 
 
@@ -538,10 +481,10 @@
         <service name="Foundation Search Gatherer Databases">
             <filter name="template" value="pdh:SharePoint Foundation Search Gatherer Databases(_total):${name}"/>
             <metric name="Availability" alias="Availability" template="pdh:SharePoint Foundation Search Gatherer Databases(_total)\Documents in the crawl history:${alias}" indicator="true" category="AVAILABILITY"/>
-            <metric name="Documents in the crawl history" indicator="true" interval="60000"/>
-            <metric name="Documents in the crawl queue" indicator="true" interval="60000"/>
-            <metric name="Links Waiting to be processed" indicator="true" interval="60000"/>
-            <metric name="Links processed" indicator="true" interval="60000"/>
+            <metric name="Documents in the crawl history" indicator="true"/>
+            <metric name="Documents in the crawl queue" indicator="true"/>
+            <metric name="Links Waiting to be processed"/>
+            <metric name="Links processed"/>
         </service>
     </server>
 
