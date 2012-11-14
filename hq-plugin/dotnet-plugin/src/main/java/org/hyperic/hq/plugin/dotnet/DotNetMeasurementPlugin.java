@@ -24,7 +24,11 @@
  */
 package org.hyperic.hq.plugin.dotnet;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.*;
+import org.hyperic.sigar.win32.Pdh;
+import org.hyperic.sigar.win32.Win32Exception;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 
@@ -34,20 +38,25 @@ public class DotNetMeasurementPlugin
     private static final String DATA_DOMAIN = ".NET CLR Data";
     private static final String DATA_PREFIX = "SqlClient: ";
     private static final String RUNTIME_NAME = "_Global_";
+    private static Log log = LogFactory.getLog(DotNetMeasurementPlugin.class);
 
     @Override
     public MetricValue getValue(Metric metric) throws PluginException, MetricNotFoundException, MetricUnreachableException {
         MetricValue val = null;
-        try {
-            val = super.getValue(metric);
-            if (metric.isAvail()) {
-                val = new MetricValue(Metric.AVAIL_UP);
-            }
-        } catch (MetricNotFoundException ex) {
-            if (metric.isAvail()) {
-                val = new MetricValue(Metric.AVAIL_DOWN);
-            } else {
-                throw ex;
+        if (metric.getDomainName().equalsIgnoreCase("pdh")) {
+            val = getPDHMetric(metric);
+        } else {
+            try {
+                val = super.getValue(metric);
+                if (metric.isAvail()) {
+                    val = new MetricValue(Metric.AVAIL_UP);
+                }
+            } catch (MetricNotFoundException ex) {
+                if (metric.isAvail()) {
+                    val = new MetricValue(Metric.AVAIL_DOWN);
+                } else {
+                    throw ex;
+                }
             }
         }
         return val;
@@ -57,22 +66,43 @@ public class DotNetMeasurementPlugin
         //avoiding Metric parse errors on ':' in DATA_PREFIX.
         if (metric.getDomainName().equals(DATA_DOMAIN)) {
             return DATA_PREFIX + metric.getAttributeName();
-        }
-        else {
+        } else {
             return metric.getAttributeName();
         }
     }
 
     public String translate(String template, ConfigResponse config) {
-        final String prop = DotNetDetector.PROP_APP;
+        if (!template.startsWith(".NET 4.0 ASP.NET App:pdh:")) {
+            final String prop = DotNetDetector.PROP_APP;
+            template = StringUtil.replace(template, "__percent__", "%");
+            template = StringUtil.replace(template, "${" + prop + "}", config.getValue(prop, RUNTIME_NAME));
+        } else {
+            template = super.translate(template, config);
+        }
+        return template;
+    }
 
-        //undo escape for plugin linter
-        template = StringUtil.replace(template,
-                "__percent__", "%");
-
-        return StringUtil.replace(template,
-                "${" + prop + "}",
-                config.getValue(prop,
-                RUNTIME_NAME));
+    private MetricValue getPDHMetric(Metric metric) {
+        MetricValue res;
+        String obj = "\\" + metric.getObjectPropString();
+        if (!metric.isAvail()) {
+            obj += "\\" + metric.getAttributeName();
+        }
+        try {
+            Double val = new Pdh().getFormattedValue(obj);
+            res = new MetricValue(val);
+            if (metric.isAvail()) {
+                res = new MetricValue(Metric.AVAIL_UP);
+            }
+        } catch (Win32Exception ex) {
+            if (metric.isAvail()) {
+                res = new MetricValue(Metric.AVAIL_DOWN);
+                log.info("error on mteric:'" + metric + "' :" + ex.getLocalizedMessage(), ex);
+            } else {
+                res = MetricValue.NONE;
+                log.info("error on mteric:'" + metric + "' :" + ex.getLocalizedMessage());
+            }
+        }
+        return res;
     }
 }
