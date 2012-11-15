@@ -24,7 +24,7 @@ public class Measurement {
     @XmlAttribute
     private String name;
     @XmlAttribute
-    private double avg;	
+    private Double avg = null;	
 	@XmlElementWrapper(name="metrics", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 	@XmlElement(name="metric", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 	private List<Metric> metrics;
@@ -64,9 +64,12 @@ public class Measurement {
 		this.name = name;
 	}
     public double getAvg() {
-        return avg;
+        return avg.doubleValue();
     }
     public void setAvg(double avg) {
+        this.avg = new Double(avg);
+    }
+    public void setAvg(Double avg) {
         this.avg = avg;
     }
     public String getAlias() {
