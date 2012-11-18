@@ -719,14 +719,14 @@ drop table #tTables
           include="2005">
         <property name="mssql.version.file" value="sqlsvc.dll"/>
         <property name="regKey" value="SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL10.%NAME%\MSSQLServer\CurrentVersion"/>
-        <property name="version" value="10.00"/>
+        <property name="version" value="10.0.\d*\.\d*"/>
     </server>
     <server name="MsSQL"
           version="2008 R2"
           include="2008">
         <property name="mssql.version.file" value="sqlsvc.dll"/>
         <property name="regKey" value="SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL10_50.%NAME%\MSSQLServer\CurrentVersion"/>
-        <property name="version" value="10.5"/>
+        <property name="version" value="10.5.\d*\.\d*"/>
     </server>
     <server name="MsSQL"
           version="2012"

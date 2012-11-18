@@ -1,0 +1,494 @@
+<?xml version="1.0"?>
+
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ USA.
+-->
+
+<!DOCTYPE plugin [
+  <!ENTITY multi-process-metrics SYSTEM "/pdk/plugins/multi-process-metrics.xml">
+]>
+
+<plugin package="org.hyperic.hq.plugin.sharepoint">
+    <property name="PLUGIN_VERSION" value="@project.version@"/>
+    
+    <server name="SharePoint" version="2010">
+        <property name="version" value="SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\14.0"/>
+        <plugin type="measurement" class="SharePointServerMeasurement"/>
+        <plugin type="autoinventory" class="SharePointServerDetector"/>
+        
+        <config>
+            <option name="sharepoint.mainUrl" description="Main SharePoint URL" default="http://localhost:80/"/>
+            <option name="sharepoint.user" description="User name" optional="true"/>
+            <option name="sharepoint.password" description="Password" optional="true"/>
+        </config>
+
+        <metric name="Availability" alias="Availability" template="web:url=%sharepoint.mainUrl%,user=%sharepoint.user%,password=%sharepoint.password%:${alias}"/>
+        <metric name="Response Time" alias="responsetime" template="web:url=%sharepoint.mainUrl%,user=%sharepoint.user%,password=%sharepoint.password%:${alias}" indicator="true"/>
+        <filter name="template" value="pdh:SharePoint Foundation(_total):${name}"/>
+        <metric name="Template Cache Average Record Age"/>
+        <metric name="Template Cache Total Records Evicted"/>
+        <metric name="Template Cache Current Records"/>
+        <metric name="Template Cache Total Records Added"/>
+        <metric name="Template Cache Rapid Growth Trim Count"/>
+        <metric name="Template Cache Low Memory Trim Count"/>
+        <metric name="Template Cache Scheduled Trim Count"/>
+        <metric name="Template Cache Total Miss Count" indicator="true"/>
+        <metric name="Template Cache Total Hit Count" indicator="true"/>
+        <metric name="Template Cache XML Miss Count" indicator="true"/>
+        <metric name="Template Cache XML Hit Count" indicator="true"/>
+        <metric name="Template Cache Max Size"/>
+        <metric name="Template Cache Size" indicator="true"/>
+        <metric name="Process ID"/>
+        <metric name="Throttled Page Requests"/>
+        <metric name="Object Cache GC Size"/>
+        <metric name="Object Cache GC Count"/>
+        <metric name="Object Cache Miss Count" indicator="true"/>
+        <metric name="Object Cache Hit Count" indicator="true"/>
+        <metric name="Object Cache Resurrected Count"/>
+        <metric name="Object Cache Expired Size"/>
+        <metric name="Object Cache Expired Count"/>
+        <metric name="Object Cache Always Live Size"/>
+        <metric name="Object Cache Always Live Count"/>
+        <metric name="Object Cache Live Size"/>
+        <metric name="Object Cache Live Count"/>
+        <metric name="Sql Query Executing time"/>
+        <metric name="Executing Sql Queries" indicator="true"/>
+        <metric name="Responded Page Requests Rate"/>
+        <metric name="Executing Time/Page Request"/>
+        <metric name="Current Page Requests"/>
+        <metric name="Reject Page Requests Rate"/>
+        <metric name="Incoming Page Requests Rate" indicator="true"/>
+        <metric name="Active Threads" indicator="true"/>
+        <metric name="Native Heap Size"/>
+        <metric name="Active Heap Count"/>
+        <metric name="Native Heap Count"/>
+        <metric name="Global Heap Size"/>
+        
+        <service name="Webserver">
+            <plugin type="measurement" class="SharePointServerMeasurement"/>
+            <config>
+                <option name="url" description="Main SharePoint URL" default="http://localhost:80/"/>
+            </config>
+            <metric name="Availability" alias="Availability" template="web:url=%url%,user=%sharepoint.user%,password=%sharepoint.password%:${alias}"/>
+            <metric name="Response Time" alias="responsetime" template="web:url=%url%,user=%sharepoint.user%,password=%sharepoint.password%:${alias}"/>
+        </service>
+        
+        <service name="WindowsService">
+            <plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin"/>
+            <config>
+                <option name="service_name" description="Service name"/>
+            </config>
+            <filter name="service.ptql" value="Pid.Service.eq=%service_name%"/>
+            <metric name="Availability" alias="Availability" template="win32:Type=Availability,Service=%service_name%:${alias}" category="AVAILABILITY" units="percentage" collectionType="dynamic"/>
+            <metric name="Start Type" template="win32:Service=%service_name%:${alias}" collectionType="static"/>
+            <metric name="Memory Size" alias="MemSize" template="sigar:Type=ProcMem,Arg=${service.ptql}:Size" category="UTILIZATION" units="B" collectionType="dynamic"/>
+            <metric name="Resident Memory Size" alias="ResidentMemSize" template="sigar:Type=ProcMem,Arg=${service.ptql}:Resident" category="UTILIZATION" units="B" collectionType="dynamic"/>
+            <metric name="Cpu System Time" alias="SystemTime" template="sigar:Type=ProcTime,Arg=${service.ptql}:Sys" category="UTILIZATION" units="ms" collectionType="trendsup"/>
+            <metric name="Cpu User Time" alias="UserTime" template="sigar:Type=ProcTime,Arg=${service.ptql}:User" category="UTILIZATION" units="ms" collectionType="trendsup"/>
+            <metric name="Cpu Total Time" alias="TotalTime" template="sigar:Type=ProcTime,Arg=${service.ptql}:Total" category="UTILIZATION" units="ms" collectionType="trendsup"/>
+            <metric name="Cpu Usage" alias="Usage" template="sigar:Type=ProcCpu,Arg=${service.ptql}:Percent" category="UTILIZATION" units="percentage" collectionType="dynamic"/>
+            <metric name="Start Time" alias="StartTime" template="sigar:Type=ProcTime,Arg=${service.ptql}:StartTime" units="epoch-millis" collectionType="static"/>
+            <metric name="Open Handles" alias="OpenHandles" template="sigar:Type=ProcFd,Arg=${service.ptql}:Total" category="UTILIZATION" units="none" collectionType="dynamic"/>
+            <metric name="Threads" template="sigar:Type=ProcState,Arg=${service.ptql}:Threads"/>
+        </service>
+        
+        <service name="Records Management Counters">
+            <filter name="template" value="pdh:SharePoint Records Management Counters:${name}"/>
+            <metric name="Availability" alias="Availability" template="pdh:SharePoint Records Management Counters\Search results processed / sec base:${alias}" indicator="true" category="AVAILABILITY"/>
+            <metric name="Search results processed / sec base"/>
+            <metric name="Search results processed / sec" indicator="true"/>
+            <metric name="Rate of processing items for policy change"/>
+            <metric name="Total number of items processed by policy change"/>
+            <metric name="Total number of items processed in Search and Process"/>
+            <metric name="Total number of holds processed"/>
+            <metric name="Records expired / sec"/>
+            <metric name="Total number of records expired"/>
+        </service>
+
+        <service name="Publishing Cache">
+            <filter name="template" value="pdh:SharePoint Publishing Cache(_total):${name}"/>
+            <metric name="Availability" alias="Availability" template="pdh:SharePoint Publishing Cache(_total)\Total object discards:${alias}" indicator="true" category="AVAILABILITY"/>
+            <metric name="Total object discards"/>
+            <metric name="Publishing cache flushes / second" indicator="true"/>
+            <metric name="Total number of cache flushes"/>
+            <metric name="Total number of cache compactions"/>
+            <metric name="Total number of objects added"/>
+            <metric name="Total objects"/>
+            <metric name="Publishing cache hit ratio" indicator="true"/>
+            <metric name="Publishing cache miss count"/>
+            <metric name="Publishing cache misses / sec" indicator="true"/>
+            <metric name="Publishing cache hit count"/>
+            <metric name="Publishing cache hits / sec" indicator="true"/>
+        </service>
+
+        <service name="Disk-Based Cache">
+            <filter name="template" value="pdh:SharePoint Disk-Based Cache:${name}"/>
+            <metric name="Availability" alias="Availability" template="pdh:SharePoint Disk-Based Cache\Old Blob Cache Folders Pending Delete:${alias}" indicator="true" category="AVAILABILITY"/>
+            <metric name="Old Blob Cache Folders Pending Delete"/>
+            <metric name="Total Objects Currently Being Transferred to blob cache"/>
+            <metric name="Total objects in Blob Cache"/>
+            <metric name="Total blob index writes"/>
+            <metric name="Total number of objects added to blob cache"/>
+            <metric name="Blob cache hit ratio"/>
+            <metric name="Blob cache miss count"/>
+            <metric name="Blob cache misses / sec" indicator="true"/>
+            <metric name="Blob cache hit count"/>
+            <metric name="Blob cache hits / sec" indicator="true"/>
+            <metric name="Blob cache flushes / second" indicator="true"/>
+            <metric name="Total number of cache flushes"/>
+            <metric name="Blob Cache fill ratio"/>
+            <metric name="Total object discards from blob cache"/>
+            <metric name="Total blob disk size"/>
+            <metric name="Total number of cache compactions"/>
+        </service>
+
+        <service name="Foundation Search Gatherer Projects">
+            <filter name="template" value="pdh:SharePoint Foundation Search Gatherer Projects(_total):${name}"/>
+            <metric name="Availability" alias="Availability" template="pdh:SharePoint Foundation Search Gatherer Projects(_total)\Gatherer Master Flag:${alias}" indicator="true" category="AVAILABILITY"/>
+            <metric name="Gatherer Master Flag"/>
+            <metric name="Transactions in the locked queue"/>
+            <metric name="Documents Security Only Error"/>
+            <metric name="Documents NoIndex"/>
+            <metric name="Links discovered and not crawled"/>
+            <metric name="Links discovered"/>
+            <metric name="Retries Rate"/>
+            <metric name="Retries"/>
+            <metric name="Incremental Crawls"/>
+            <metric name="Gatherer Locked Flag"/>
+            <metric name="Gatherer Recovery In Progress Flag"/>
+            <metric name="Gatherer Paused Flag"/>
+            <metric name="Crawls in progress" indicator="true"/>
+            <metric name="Filtered Text Rate indicator="true""/>
+            <metric name="Filtered Text"/>
+            <metric name="Filtered Office Rate" indicator="true"/>
+            <metric name="Filtered Office"/>
+            <metric name="Filtered HTML Rate" indicator="true"/>
+            <metric name="Filtered HTML"/>
+            <metric name="Accessed File Rate" indicator="true"/>
+            <metric name="Accessed Files"/>
+            <metric name="Accessed HTTP Rate" indicator="true"/>
+            <metric name="Accessed HTTP"/>
+            <metric name="File Errors Rate" indicator="true"/>
+            <metric name="File Errors"/>
+            <metric name="HTTP Errors Rate" indicator="true"/>
+            <metric name="HTTP Errors"/>
+            <metric name="Transactions in filters"/>
+            <metric name="Transactions Started"/>
+            <metric name="Transactions Completed"/>
+            <metric name="Transactions Waiting"/>
+            <metric name="Transactions Delayed"/>
+            <metric name="Transactions On Hold"/>
+            <metric name="Transactions In Progress"/>
+            <metric name="Documents Security Only"/>
+            <metric name="Documents Not Modified"/>
+            <metric name="Documents Deleted"/>
+            <metric name="Documents Processed Rate"/>
+            <metric name="Documents Processed"/>
+            <metric name="Documents Error Rate"/>
+            <metric name="Documents Error"/>
+            <metric name="Documents Success Rate"/>
+            <metric name="Documents Success"/>
+        </service>
+
+        <service name="Foundation Search Schema Plugin">
+            <filter name="template" value="pdh:SharePoint Foundation Search Schema Plugin(_total):${name}"/>
+            <metric name="Availability" alias="Availability" template="pdh:SharePoint Foundation Search Schema Plugin(_total)\Total Documents:${alias}" indicator="true" category="AVAILABILITY"/>
+            <metric name="Total Documents" indicator="true"/>
+            <metric name="Refresh count"/>
+            <metric name="Total properties processed"/>
+            <metric name="Duplicate aliases"/>
+            <metric name="Aliases loaded"/>
+            <metric name="Aliases Mapped"/>
+        </service>
+
+        <service name="Foundation BDC Online">
+            <filter name="template" value="pdh:SharePoint Foundation BDC Online:${name}"/>
+            <metric name="Availability" alias="Availability" template="pdh:SharePoint Foundation BDC Online\Total calls failed:${alias}" indicator="true" category="AVAILABILITY"/>
+            <metric name="Total calls failed" indicator="true"/>
+            <metric name="Total calls per second" indicator="true"/>
+            <metric name="BulkIdEnumerators per second"/>
+            <metric name="BulkAssociationNavigators per second"/>
+            <metric name="BulkAssociatedIdEnumerators per second"/>
+            <metric name="BulkSpecificFinders per second"/>
+            <metric name="BinarySecurityDescriptorAccessors per second"/>
+            <metric name="StreamAccessors per second"/>
+            <metric name="Disassociators per second"/>
+            <metric name="Associators per second"/>
+            <metric name="AssociationNavigators per second"/>
+            <metric name="DeletedIdEnumerators per second"/>
+            <metric name="ChangedIdEnumerators per second"/>
+            <metric name="Deleters per second"/>
+            <metric name="Updaters per second"/>
+            <metric name="Creators per second"/>
+            <metric name="AccessCheckers per second"/>
+            <metric name="Scalars per second"/>
+            <metric name="IdEnumerators per second"/>
+            <metric name="GenericInvokers per second"/>
+            <metric name="SpecificFinders per second"/>
+            <metric name="Finders per second"/>
+        </service>
+
+        <service name="Foundation Search Gatherer">
+            <filter name="template" value="pdh:SharePoint Foundation Search Gatherer:${name}"/>
+            <metric name="Availability" alias="Availability" template="pdh:SharePoint Foundation Search Gatherer\Filter Processes Terminated 02:${alias}" indicator="true" category="AVAILABILITY"/>
+            <metric name="Filter Processes Terminated 02"/>
+            <metric name="Filter Processes Terminated Dedicated Secondary 02"/>
+            <metric name="Filter Processes Terminated Dedicated 02"/>
+            <metric name="Filter Processes Terminated Secondary 02"/>
+            <metric name="Filter Processes Terminated Primary 02"/>
+            <metric name="Filter Processes Terminated Dedicated Secondary 01"/>
+            <metric name="Filter Processes Terminated Dedicated 01"/>
+            <metric name="Filter Processes Terminated Secondary 01"/>
+            <metric name="Filter Processes Terminated Primary 01"/>
+            <metric name="Filter Processes Created Dedicated Secondary"/>
+            <metric name="Filter Processes Created Dedicated"/>
+            <metric name="Filter Processes Created Secondary"/>
+            <metric name="Filter Processes Created Primary "/>
+            <metric name="Filter Processes Active Dedicated Secondary"/>
+            <metric name="Filter Processes Active Dedicated"/>
+            <metric name="Filter Processes Active Secondary"/>
+            <metric name="Filter Processes Active Primary"/>
+            <metric name="Changes Processed" indicator="true"/>
+            <metric name="DocProcessTime 10 FinalCommit"/>
+            <metric name="DocProcessTime 09 Propagation"/>
+            <metric name="DocProcessTime 08 Merge"/>
+            <metric name="DocProcessTime 07 PropertyStore"/>
+            <metric name="DocProcessTime 06 SyncCompletion"/>
+            <metric name="DocProcessTime 05 Filtering"/>
+            <metric name="DocProcessTime 04 StandardProperties"/>
+            <metric name="DocProcessTime 03 Connect"/>
+            <metric name="DocProcessTime 02 Delayed"/>
+            <metric name="DocProcessTime 01 Loading"/>
+            <metric name="ThreadTime 16 CatchAllProcessing"/>
+            <metric name="ThreadTime 15 OtherPlugins"/>
+            <metric name="ThreadTime 14 GathererPlugin"/>
+            <metric name="ThreadTime 13 RankingPlugin"/>
+            <metric name="ThreadTime 12 ScopesPlugin"/>
+            <metric name="ThreadTime 11 MatrixPlugin"/>
+            <metric name="ThreadTime 10 FeatureExtractionPlugin"/>
+            <metric name="ThreadTime 09 ArchivalPlugin"/>
+            <metric name="ThreadTime 08 IndexerPlugin"/>
+            <metric name="ThreadTime 07 WordBreaking"/>
+            <metric name="ThreadTime 06 IFilterData"/>
+            <metric name="ThreadTime 05 PHData"/>
+            <metric name="ThreadTime 04 GetStandardProperties"/>
+            <metric name="ThreadTime 03 Connect"/>
+            <metric name="ThreadTime 02 FilterDriverInit"/>
+            <metric name="ThreadTime 01 NotActive"/>
+            <metric name="Threads Loading Transactions"/>
+            <metric name="Threads Processing Links"/>
+            <metric name="Threads Committing Transactions" indicator="true"/>
+            <metric name="System IO traffic rate"/>
+            <metric name="Stemmers Cached"/>
+            <metric name="Word Breakers Cached"/>
+            <metric name="Documents Successfully Filtered Rate"/>
+            <metric name="Documents Successfully Filtered"/>
+            <metric name="Threads In Plug-ins"/>
+            <metric name="Threads Accessing Network"/>
+            <metric name="Servers Unavailable"/>
+            <metric name="Servers Currently Unavailable"/>
+            <metric name="Time Outs" indicator="true"/>
+            <metric name="Robots.Txt Requests"/>
+            <metric name="Accessing Robots.Txt File"/>
+            <metric name="Documents Filtered Rate"/>
+            <metric name="Documents Filtered"/>
+            <metric name="Filter Objects"/>
+            <metric name="Server Objects Created"/>
+            <metric name="Server Objects"/>
+            <metric name="Delayed Documents"/>
+            <metric name="Filter Processes Created"/>
+            <metric name="Filter Processes Terminated 01"/>
+            <metric name="Filter Processes Active"/>
+            <metric name="Active Queue Length" indicator="true"/>
+            <metric name="Performance Level"/>
+            <metric name="Document Entries"/>
+            <metric name="Idle Threads" indicator="true"/>
+            <metric name="Filtering Threads"/>
+            <metric name="Heartbeats Rate" indicator="true"/>
+            <metric name="Heartbeats"/>
+            <metric name="Admin Clients"/>
+        </service>
+
+        <service name="Foundation Search Indexer Plugin">
+            <filter name="template" value="pdh:SharePoint Foundation Search Indexer Plugin(_total):${name}"/>
+            <metric name="Availability" alias="Availability" template="pdh:SharePoint Foundation Search Indexer Plugin(_total)\Persistent Indexes Propagated:${alias}" indicator="true" category="AVAILABILITY"/>
+            <metric name="Persistent Indexes Propagated"/>
+            <metric name="Average CPU Time Rank Stage 2"/>
+            <metric name="Average Exec Time Rank Stage 2"/>
+            <metric name="Average CPU Time Rank Stage 1 Without Precalc"/>
+            <metric name="Average Exec Time Rank Stage 1 Without Precalc"/>
+            <metric name="Average CPU Time Rank Stage 1 With Precalc"/>
+            <metric name="Average Exec Time Rank Stage 1 With Precalc"/>
+            <metric name="Average CPU Time Create Unsorted Cursor"/>
+            <metric name="Average Exec Time Create Unsorted Cursor"/>
+            <metric name="Average CPU Time Other"/>
+            <metric name="Average CPU Time GetRows"/>
+            <metric name="Average CPU Time Resolve"/>
+            <metric name="Average CPU Time Create"/>
+            <metric name="Average Exec Time Other"/>
+            <metric name="Average Exec Time GetRows"/>
+            <metric name="Average Exec Time Resolve"/>
+            <metric name="Average Exec Time Create"/>
+            <metric name="Documents in Propagation"/>
+            <metric name="Propagation Rate" indicator="true"/>
+            <metric name="Scope Compilations - Propogation Task Receiver"/>
+            <metric name="Scope Compilations - Propogation Task Sender"/>
+            <metric name="Tasks - Propogation Task Sender"/>
+            <metric name="Indexes - Errors In Reception"/>
+            <metric name="Indexes - Received Successfully"/>
+            <metric name="Tasks - Index Receiver"/>
+            <metric name="Indexes - Errors In Propagation "/>
+            <metric name="Indexes - Propagated Successfully "/>
+            <metric name="Tasks - Index Propagator"/>
+            <metric name="Average Query Latency" indicator="true"/>
+            <metric name="L4 Merge Speed - Last"/>
+            <metric name="L4 Merge - Count"/>
+            <metric name="L4 Merge Speed - Average"/>
+            <metric name="L4 Merges Now"/>
+            <metric name="Persistent Indexes L4"/>
+            <metric name="L3 Merge Speed - Last"/>
+            <metric name="L3 Merge - Count"/>
+            <metric name="L3 Merge Speed - Average"/>
+            <metric name="L3 Merges Now"/>
+            <metric name="Persistent Indexes L3"/>
+            <metric name="L2 Merge Speed - Last"/>
+            <metric name="L2 Merge - Count"/>
+            <metric name="L2 Merge Speed - Average"/>
+            <metric name="L2 Merges Now"/>
+            <metric name="Persistent Indexes L2"/>
+            <metric name="L1 Merge Speed - Last"/>
+            <metric name="L1 Merge - Count"/>
+            <metric name="L1 Merge Speed - Average"/>
+            <metric name="L1 Merges Now"/>
+            <metric name="Persistent Indexes L1"/>
+            <metric name="L0 Merge - Flush Speed - Last"/>
+            <metric name="L0 Merge - Flush - Count"/>
+            <metric name="L0 Merge- Flush Speed - Average"/>
+            <metric name="L0 Merges - flushes Now"/>
+            <metric name="L0 Indexes - Wordlists"/>
+            <metric name="Queries Succeeded" indicator="true"/>
+            <metric name="Queries Failed" indicator="true"/>
+            <metric name="Queries" indicator="true"/>
+            <metric name="Active Connections"/>
+            <metric name="Master Merges Now"/>
+            <metric name="Out-Of-Date Document ID Files"/>
+            <metric name="Up-To-Date Document ID Files"/>
+            <metric name="Work Items Deleted"/>
+            <metric name="Work Items Created"/>
+            <metric name="Documents Filtered"/>
+            <metric name="Unique Keys"/>
+            <metric name="Index Size"/>
+            <metric name="Persistent Indexes"/>
+            <metric name="Shadow Merge Levels Threshold"/>
+            <metric name="Shadow Merge Levels"/>
+            <metric name="Master Merge Progress"/>
+            <metric name="Master Merges to Date"/>
+            <metric name="Master Index Level"/>
+        </service>
+
+
+        <service name="Foundation Search Query Processor">
+            <filter name="template" value="pdh:SharePoint Foundation Search Query Processor:${name}"/>
+            <metric name="Availability" alias="Availability" template="pdh:SharePoint Foundation Search Query Processor\Security Descriptor Cache Misses:${alias}" indicator="true" category="AVAILABILITY"/>
+            <metric name="Security Descriptor Cache Misses" indicator="true"/>
+        </service>
+
+
+        <service name="Foundation Search FAST Content Plugin">
+            <filter name="template" value="pdh:SharePoint Foundation Search FAST Content Plugin:${name}"/>
+            <metric name="Availability" alias="Availability" template="pdh:SharePoint Foundation Search FAST Content Plugin\Batches Failed Timeout:${alias}" indicator="true" category="AVAILABILITY"/>
+            <metric name="Batches Failed Timeout" indicator="true"/>
+            <metric name="Submission Timeouts" indicator="true"/>
+            <metric name="Items Failed Total" indicator="true"/>
+            <metric name="Items Failed Timeout" indicator="true"/>
+            <metric name="Feed Rate Data"/>
+            <metric name="Feed Rate Item"/>
+            <metric name="Submitter Thread Submit Time"/>
+            <metric name="Submitter Thread Idle Time"/>
+            <metric name="Submitter Threads"/>
+            <metric name="Transactions Delete Completed"/>
+            <metric name="Transactions Update Completed"/>
+            <metric name="Transactions Add Completed"/>
+            <metric name="Transactions Delete Started"/>
+            <metric name="Transactions Update Started"/>
+            <metric name="Transactions Add Started"/>
+            <metric name="Avg Callback Time"/>
+            <metric name="Avg Submit Time"/>
+            <metric name="Avg Wait Time"/>
+            <metric name="Avg Init Time"/>
+            <metric name="Avg End-To-End Time"/>
+            <metric name="Batches Submitted"/>
+            <metric name="Batches Ready"/>
+            <metric name="Batches Open"/>
+            <metric name="Batches Failed"/>
+            <metric name="Batches Success"/>
+            <metric name="Batches Total"/>
+            <metric name="Items In Robot Threads"/>
+            <metric name="Items Retried"/>
+            <metric name="Items Warnings"/>
+            <metric name="Items No Index"/>
+            <metric name="Items Ignored"/>
+            <metric name="Items Failed Batch"/>
+            <metric name="Items Open"/>
+            <metric name="Items Failed Individually"/>
+            <metric name="Items Success"/>
+            <metric name="Items Total"/>
+        </service>
+
+        <service name="Foundation Search Archival Plugin">
+            <filter name="template" value="pdh:SharePoint Foundation Search Archival Plugin(_total):${name}"/>
+            <metric name="Availability" alias="Availability" template="pdh:SharePoint Foundation Search Archival Plugin(_total)\Queues Committing:${alias}" indicator="true" category="AVAILABILITY"/>
+            <metric name="Queues Committing" indicator="true"/>
+            <metric name="Queues Waiting" indicator="true"/>
+            <metric name="Queues Filtering" indicator="true"/>
+            <metric name="Queues Available" indicator="true"/>
+            <metric name="Bulk Insert Sessions"/>
+            <metric name="Retried documents"/>
+            <metric name="Blocked documents"/>
+            <metric name="Total documents"/>
+        </service>
+
+        <service name="Foundation BDC Metadata">
+            <filter name="template" value="pdh:SharePoint Foundation BDC Metadata:${name}"/>
+            <metric name="Availability" alias="Availability" template="pdh:SharePoint Foundation BDC Metadata\Cache misses per second:${alias}" indicator="true" category="AVAILABILITY"/>
+            <metric name="Cache misses per second" indicator="true"/>
+            <metric name="Cache hits per second" indicator="true"/>
+        </service>
+
+
+
+        <service name="Foundation Search Gatherer Databases">
+            <filter name="template" value="pdh:SharePoint Foundation Search Gatherer Databases(_total):${name}"/>
+            <metric name="Availability" alias="Availability" template="pdh:SharePoint Foundation Search Gatherer Databases(_total)\Documents in the crawl history:${alias}" indicator="true" category="AVAILABILITY"/>
+            <metric name="Documents in the crawl history" indicator="true"/>
+            <metric name="Documents in the crawl queue" indicator="true"/>
+            <metric name="Links Waiting to be processed"/>
+            <metric name="Links processed"/>
+        </service>
+    </server>
+
+    <server name="SharePoint" version="2007" include="SharePoint 2010">
+        <property name="version" value="SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\12.0"/>
+    </server>
+</plugin>
