@@ -401,6 +401,12 @@
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>sharepoint-plugin</artifactId>
+			<version>${project.version}</version>
+		    <type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>spring-plugin</artifactId>
 			<version>${project.version}</version>
 		</dependency>

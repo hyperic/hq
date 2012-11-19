@@ -22,10 +22,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
 package org.hyperic.hq.plugin.dotnet;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -45,21 +45,28 @@ import org.hyperic.sigar.win32.RegistryKey;
 import org.hyperic.sigar.win32.Win32Exception;
 
 public class DotNetDetector
-    extends ServerDetector
-    implements AutoServerDetector {
+        extends ServerDetector
+        implements AutoServerDetector {
 
+    /**
+     * service type, performance counter group, use service type on service name
+     * (back compatibility)
+     */
+    private static final String[][] aspAppServices = {
+        {"Application", ".NET CLR Loading", "false"},
+        {"ASP.NET App", "ASP.NET Applications", "true"},
+        {"ASP.NET App", "ASP.NET Apps v4.0.30319", "true"},
+        {"ASP.NET App", "ASP.NET Apps v2.0.50727", "true"}
+    };
     static final String PROP_APP = "app.name";
-
-    private static final String APP_NAME = "Application";
-
+    static final String PROP_PATH = "app.path";
     private static final String REG_KEY =
-        "SOFTWARE\\Microsoft\\.NETFramework";
-
+            "SOFTWARE\\Microsoft\\.NETFramework";
     private static Log log =
-        LogFactory.getLog(DotNetDetector.class.getName());
+            LogFactory.getLog(DotNetDetector.class.getName());
 
     private RegistryKey getRegistryKey(String path)
-        throws Win32Exception {
+            throws Win32Exception {
 
         return RegistryKey.LocalMachine.openSubKey(path);
     }
@@ -72,14 +79,14 @@ public class DotNetDetector
             key = getRegistryKey(REG_KEY + "\\policy");
             String[] names = key.getSubKeyNames();
 
-            for (int i=0; i<names.length; i++) {
+            for (int i = 0; i < names.length; i++) {
                 if (names[i].charAt(0) == 'v') {
                     String version = names[i].substring(1);
                     versions.add(version);
                 }
             }
         } catch (Win32Exception e) {
-            return null;            
+            return null;
         } finally {
             if (key != null) {
                 key.close();
@@ -97,7 +104,7 @@ public class DotNetDetector
 
         //all runtime versions have the same metrics,
         //so just discover the highest version
-        return (String)versions.get(size-1);
+        return (String) versions.get(size - 1);
     }
 
     private String getInstallPath() {
@@ -115,7 +122,7 @@ public class DotNetDetector
     }
 
     public List getServerResources(ConfigResponse platformConfig)
-        throws PluginException {
+            throws PluginException {
 
         String thisVersion = getTypeInfo().getVersion();
         String version = getVersion();
@@ -128,13 +135,13 @@ public class DotNetDetector
 
         String path = getInstallPath();
         if (path == null) {
-            log.debug("Found .NET version=" + version +
-                      ", path=" + path);
+            log.debug("Found .NET version=" + version
+                    + ", path=" + path);
             return null;
         }
 
         ServerResource server = createServerResource(path);
-            
+
         server.setProductConfig();
         //server.setControlConfig(...); N/A
         server.setMeasurementConfig();
@@ -144,38 +151,48 @@ public class DotNetDetector
         return servers;
     }
 
-    protected List discoverServices(ConfigResponse serverConfig) 
-        throws PluginException {
-        
+    @Override
+    protected List discoverServices(ConfigResponse serverConfig) throws PluginException {
         List services = new ArrayList();
-        String[] apps;
+        String instancesToSkipStr = getProperties().getProperty("dotnet.instances.to.skip", "_Global_");
+        List<String> instancesToSkip = Arrays.asList(instancesToSkipStr.toUpperCase().split(","));
+        log.debug("dotnet.instances.to.skip = " + instancesToSkip);
+        for (int i = 0; i < aspAppServices.length; i++) {
+            String serviceType = aspAppServices[i][0];
+            String counterName = aspAppServices[i][1];
+            boolean useServiceType = aspAppServices[i][2].equals("true");
 
-        try {
-            apps = Pdh.getInstances(".NET CLR Loading");
-        } catch (Win32Exception e) {
-            throw new PluginException("Error getting pdh data: " + e, e);
-        } 
+            try {
+                String[] apps = Pdh.getInstances(counterName);
 
-        for (int i=0; i<apps.length; i++) {
-            String name = apps[i];
-            if (name.equals("_Global_")) {
-                continue;
+                for (int idx = 0; idx < apps.length; idx++) {
+                    String name = apps[idx];
+                    if (!instancesToSkip.contains(name.toUpperCase())) {
+                        log.debug("instace '" + name + "' (" + counterName + ") valid.");
+                        ServiceResource service = new ServiceResource();
+                        service.setType(this, serviceType);
+                        if (useServiceType) {
+                            service.setServiceName(serviceType + " " + name);
+                        } else {
+                            service.setServiceName(name);
+                        }
+
+                        ConfigResponse pc = new ConfigResponse();
+                        pc.setValue(PROP_APP, name);
+                        pc.setValue(PROP_PATH, counterName);
+                        service.setProductConfig(pc);
+
+                        service.setMeasurementConfig();
+
+                        services.add(service);
+                    } else {
+                        log.debug("instace '" + name + "' (" + counterName + ") skiped.");
+                    }
+                }
+            } catch (Win32Exception e) {
+                log.debug("Error getting pdh data for '" + serviceType + "': " + e, e);
             }
-
-            ServiceResource service = new ServiceResource();
-            service.setType(this, APP_NAME);
-            service.setServiceName(name);
-
-            ConfigResponse config = new ConfigResponse();
-            config.setValue(PROP_APP, name);
-            service.setProductConfig(config);
-
-            service.setMeasurementConfig();
-            //service.setControlConfig(...); XXX?
-
-            services.add(service);
         }
-
         return services;
     }
 }
