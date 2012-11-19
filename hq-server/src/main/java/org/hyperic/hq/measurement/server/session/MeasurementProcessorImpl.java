@@ -200,13 +200,8 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
             }
             measurements.add(entry.getValue());
         }
-        
-        // Want to batch this operation.  There is something funky with the agent where it
-        // appears to slow down drastically when too many measurements are scheduled at
-        // once.  I believe (not 100% sure) this is due to the agent socket listener
-        // not being multi-threaded and processing the scheduled measurements one-by-one while
-        // reading the socket. Once that is enhanced it should be fine to remove the batching here.
-        final int batchSize = 100;
+
+        final int batchSize = 10000;
         final List<AppdefEntityID> aeids = new ArrayList<AppdefEntityID>(eids);
         for (int i=0; i<aeids.size(); i+=batchSize) {
             final int end = Math.min(i+batchSize, aeids.size());
