@@ -55,6 +55,7 @@ import org.hyperic.hq.agent.AgentLifecycle;
 import org.hyperic.hq.agent.AgentMonitorValue;
 import org.hyperic.hq.agent.AgentStartupCallback;
 import org.hyperic.hq.agent.AgentUpgradeManager;
+import org.hyperic.hq.agent.diagnostics.AgentDiagnostics;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorException;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorInterface;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorSimple;
@@ -111,6 +112,7 @@ public class AgentDaemon
 
     private ProductPluginManager ppm;
     private AgentConfig config;
+    private AgentDiagnostics agentDiagnostics;
     
     public static AgentDaemon getMainInstance(){
         synchronized(AgentDaemon.mainInstanceLock){
@@ -656,6 +658,8 @@ public class AgentDaemon
         }
         listener.die();
         running.set(false);
+        storageProvider.dispose();
+        agentDiagnostics.die();
     }
 
     /**
@@ -929,6 +933,9 @@ public class AgentDaemon
             agentStarted = true;
             AgentStatsWriter statsWriter = new AgentStatsWriter(config);
             statsWriter.startWriter();
+            agentDiagnostics = AgentDiagnostics.getInstance();
+            agentDiagnostics.setConfig(config);
+            agentDiagnostics.start();
             this.listener.listenLoop();
             this.sendNotification(NOTIFY_AGENT_DOWN, "goin' down, baby!");
             statsWriter.stopWriter();

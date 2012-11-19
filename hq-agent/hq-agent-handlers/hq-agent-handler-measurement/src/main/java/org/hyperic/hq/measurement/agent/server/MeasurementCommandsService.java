@@ -70,6 +70,7 @@ import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.schedule.UnscheduledItemException;
+import org.hyperic.util.timer.StopWatch;
 
 /**
  * The Measurement Commands service.
@@ -292,14 +293,14 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
     private class Scheduler extends Thread {
         final AtomicBoolean shutdown = new AtomicBoolean(false);
         private Scheduler() {
+            super("MeasurementSchedulerThread");
             setDaemon(true);
         }
         public void run() {
             try {
                 while (!shutdown.get()) {
                     try {
-                        final List<ScheduleMeasurements_args> list =
-                            new ArrayList<ScheduleMeasurements_args>();
+                        final List<ScheduleMeasurements_args> list = new ArrayList<ScheduleMeasurements_args>();
                         argQueue.drainTo(list);
                         if (!list.isEmpty()) {
                             scheduleMeasurements(list);
@@ -318,9 +319,12 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
         }
     }
 
-    private void scheduleMeasurements(Collection<ScheduleMeasurements_args> args)
-    throws AgentRemoteException {
+    private void scheduleMeasurements(Collection<ScheduleMeasurements_args> args) throws AgentRemoteException {
         final Map<AppdefEntityID, SRN> aeids = new HashMap<AppdefEntityID, SRN>();
+        final StopWatch watch = new StopWatch();
+        final List<ScheduledMeasurement> metrics = new ArrayList<ScheduledMeasurement>(args.size());
+        final boolean debug = _log.isDebugEnabled();
+        if (debug) watch.markTimeBegin("unscheduleMeasurements");
         for (final ScheduleMeasurements_args arg : args) {
             final SRN srn = arg.getSRN();
             final AppdefEntityID aeid = srn.getEntity();
@@ -332,13 +336,17 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
                 _log.debug(e,e);
             }
         }
+        if (debug) watch.markTimeEnd("unscheduleMeasurements");
+        if (debug) watch.markTimeBegin("deleteMeasurements");
         try {
             _schedStorage.deleteMeasurements(aeids.keySet());
-        } catch (AgentStorageException e) {
-            _log.error("unable to cleanup metric storage " + e, e);
+        } catch(AgentStorageException exc){
+            _log.error("Failed to delete from measurement storage: " +  exc, exc);
         }
-        // we may be able to consolidate loops here to the loop above, but i don't want to change
-        // too much at this time
+        if (debug) watch.markTimeEnd("deleteMeasurements");
+        // this looks weird since the loops are so similar, but they can't be consolidated unless the entire
+        // flow is reworked down to the srn
+        if (debug) watch.markTimeBegin("updateSRN");
         for (final ScheduleMeasurements_args arg : args) {
             int numMeasurements = arg.getNumMeasurements();
             final SRN srn = arg.getSRN();
@@ -351,13 +359,7 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
                                              metric.getDerivedID(),
                                              metric.getDSNID(),
                                              aeid, metric.getCategory());
-                try {
-                    _schedStorage.storeMeasurement(sMetric);
-                } catch(AgentStorageException exc){
-                    _log.debug("Failed to put measurement in storage: " + 
-                                   exc.getMessage());
-                }
-                scheduleMeasurement(sMetric);
+                metrics.add(sMetric);
             }
             try {
                 _schedStorage.updateSRN(srn);
@@ -365,6 +367,20 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
                 _log.error("Unable to update SRN in storage: " + e, e);
             }
         }
+        if (debug) watch.markTimeEnd("updateSRN");
+        if (debug) watch.markTimeBegin("storeMeasurements");
+        try {
+            _schedStorage.storeMeasurements(metrics);
+        } catch(AgentStorageException exc){
+            _log.error("Failed to store measurements: " +  exc, exc);
+        }
+        if (debug) watch.markTimeEnd("storeMeasurements");
+        if (debug) watch.markTimeBegin("scheduleMeasurement");
+        for (ScheduledMeasurement m : metrics) {
+            _scheduleObject.scheduleMeasurement(m);
+        }
+        if (debug) watch.markTimeEnd("scheduleMeasurement");
+        if (debug) _log.debug("scheduled " + metrics.size() + " measurements, " + watch);
     }
     
     void scheduleMeasurement(ScheduledMeasurement m) {

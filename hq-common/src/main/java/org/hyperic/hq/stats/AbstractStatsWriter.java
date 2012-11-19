@@ -175,7 +175,7 @@ public abstract class AbstractStatsWriter {
         return basedir + fs + rtn + ".csv";
     }
 
-    private void gzipFile(final String filename) {
+    public static void gzipFile(final String filename) {
         new Thread() {
             public void run() {
                 FileOutputStream gfile = null;

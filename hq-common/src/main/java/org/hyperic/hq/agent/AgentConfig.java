@@ -106,7 +106,7 @@ public class AgentConfig {
     { "agent.storageProvider", 
       "org.hyperic.hq.agent.server.AgentDListProvider" };
     public static final String[] PROP_STORAGEPROVIDERINFO =
-    { "agent.storageProvider.info", "${agent.dataDir}|m|100|20|50" };
+    { "agent.storageProvider.info", "${agent.dataDir}|m|1000|20|50" };
     public static final String[] PROP_INSTALLHOME =
     { "agent.install.home", System.getProperty("agent.install.home", System.getProperty("user.dir")) };
     // has no default since we want to throw an error when property is not set

@@ -70,9 +70,8 @@ public abstract class AgentServerConnection {
         AgentRemoteValue cmdArg;
         String cmd;
         int cmdVersion, agentVersion;
-
         try {
-            dIs          = new DataInputStream(this.getInputStream());
+            dIs          = new DataInputStream(getInputStream());
             agentVersion = dIs.readInt();
             cmdVersion   = dIs.readInt();
             cmd          = dIs.readUTF();
@@ -80,10 +79,8 @@ public abstract class AgentServerConnection {
         } catch(EOFException exc){
             throw exc;
         } catch(IOException exc){
-            throw new AgentConnectionException("Unable to read command: " +
-                                               exc.getMessage(), exc);
+            throw new AgentConnectionException("Unable to read command: " + exc.getMessage(), exc);
         }
-
         return new AgentCommand(agentVersion, cmdVersion, cmd, cmdArg);
     }
 
