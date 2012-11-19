@@ -179,7 +179,7 @@
             <metric name="Gatherer Recovery In Progress Flag"/>
             <metric name="Gatherer Paused Flag"/>
             <metric name="Crawls in progress" indicator="true"/>
-            <metric name="Filtered Text Rate indicator="true""/>
+            <metric name="Filtered Text Rate" indicator="true"/>
             <metric name="Filtered Text"/>
             <metric name="Filtered Office Rate" indicator="true"/>
             <metric name="Filtered Office"/>
