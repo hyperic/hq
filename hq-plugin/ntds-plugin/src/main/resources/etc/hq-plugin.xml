@@ -234,7 +234,5 @@
 
   <server name="Active Directory"
           version="2012"
-          include="2008"
-          platforms="Win32">
-  </server>
+          include="2008"/>
 </plugin>
