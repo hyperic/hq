@@ -119,7 +119,7 @@ public class AgentDAO extends HibernateDAO<Agent> {
         return (Agent) getSession().createQuery(sql).setString(0, address).setInteger(1, port)
             .uniqueResult();
     }
-
+    
     private Agent findByAgentToken(String token, Session session) {
         return (Agent) session.createCriteria(Agent.class)
                               .add(Restrictions.eq("agentToken", token))
@@ -159,6 +159,57 @@ public class AgentDAO extends HibernateDAO<Agent> {
     }
     
     /**
+     * Returns the agent's installation path 
+     * @param agentToken
+     */
+    public String getAgentInstallationPath(String agentToken) {
+    	final StringBuilder sql = new StringBuilder()
+    	.append("select distinct s from Server s ")
+    	.append(" JOIN s.platform p")
+    	.append(" JOIN p.agent a")
+    	.append(" WHERE a.agentToken='" + agentToken + "' and s.description like '%Hyperic%Agent%'");
+    	final Query q = getSession().createQuery(sql.toString());
+    	try{
+    		return ((Server)q.uniqueResult()).getInstallPath();
+    	}catch (Exception e) {
+    	}
+    	return null;
+    }
+
+    /**
+     * Get a list of all agents in the system, whose version is older than server's version and 
+     *  which are actually used (e. have platforms)
+     */
+    @SuppressWarnings("unchecked")
+    public List<Agent> findOldAgentsUsed() {
+        final String sql = new StringBuilder(150)
+        .append("from Agent a where ")
+        .append(LIMIT_A_TO_OLD_AGENTS)
+        .append("and exists (select 1 from Platform p where p.agent.id = a.id)")
+        .toString();
+        final Query query = getSession().createQuery(sql);
+        query.setParameter("serverVersion", serverConfigManager.getServerMajorVersion());
+        return query.list();
+    }
+  
+    
+    /**
+     * Get a list of all agents in the system, whose version is equal to or newer than server's version and 
+     *  which are actually used (e. have platforms)
+     */
+    @SuppressWarnings("unchecked")
+    public List<Agent> findUpToDateAgentsUsed() {
+        final String sql = new StringBuilder(150)
+        .append("from Agent a where ")
+        .append(LIMIT_A_TO_CURRENT_AGENTS)
+        .append("and exists (select 1 from Platform p where p.agent.id = a.id)")
+        .toString();
+        final Query query = getSession().createQuery(sql);
+        query.setParameter("serverVersion", serverConfigManager.getServerMajorVersion());
+        return query.list();
+    }
+    
+    /**
      * 
      * @return number of agents, whose version is older than that of the server
      */
@@ -170,18 +221,17 @@ public class AgentDAO extends HibernateDAO<Agent> {
     }
     
 
-    public long getNumAutoUpdatingAgents() {
+    public long getNumVersionUpToDateAgents() {
         final String sql = new StringBuilder(150)
-            .append("select count(a) from Agent a where ")
-            .append(LIMIT_A_TO_CURRENT_AGENTS)
-            .append("and exists (select 1 from Platform p where p.agent.id = a.id)")
-            .toString();
-        final Query query = getSession().createQuery(sql);
-        query.setParameter("serverVersion", serverConfigManager.getServerMajorVersion());
-        return ((Number) query.uniqueResult()).longValue();
+        .append("select count(a) from Agent a where ")
+        .append(LIMIT_A_TO_CURRENT_AGENTS)
+        .append("and exists (select 1 from Platform p where p.agent.id = a.id)")
+        .toString();
+	    final Query query = getSession().createQuery(sql);
+	    query.setParameter("serverVersion", serverConfigManager.getServerMajorVersion());
+	    return ((Number) query.uniqueResult()).longValue();    	
     }
     
-
     /**
      * 
      * @param agent

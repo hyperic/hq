@@ -263,7 +263,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         throws AgentNotFoundException, PermissionException {
 
         Agent agt = getAgentInternal(agentToken);
-        Collection<Platform> plats = platformDao.findByAgent(agt);
+        Collection<Platform> plats = agt.getPlatforms();
         if (plats.size() == 0) {
             return new ResourceTree();
         }
@@ -311,6 +311,26 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         return agentDao.findOldAgents();
     } 
     
+    
+    
+    /**
+     * Get a list of all agents in the system, whose version is older than server's version and 
+     *  which are actually used (e. have platforms)
+     */
+    @Transactional(readOnly = true)
+    public List<Agent> getOldAgentsUsed() {
+        return agentDao.findOldAgentsUsed();    	
+    }
+    
+
+    /**
+     * Get a list of all agents in the system, whose version is older than server's version
+     */
+    @Transactional(readOnly = true)
+    public List<Agent> getCurrentNonSyncAgents() {
+    	return agentPluginStatusDAO.getCurrentNonSyncAgents();
+    }
+
     /**
      * Get a count of all the agents in the system
      */
@@ -505,6 +525,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     public List<Agent> findAgentsByIP(String ip) {
         return agentDao.findByIP(ip);
     }
+    
 
     /**
      * Update an existing agent's IP and port based on an agent token. The type
@@ -612,6 +633,14 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     @Transactional(readOnly = true)
     public Agent getAgent(String agentToken) throws AgentNotFoundException {
         return this.getAgentInternal(agentToken);
+    }
+    
+    /* (non-Javadoc)
+     * @see org.hyperic.hq.appdef.shared.AgentManager#getAgentInstallationPath(java.lang.String)
+     */
+    @Transactional(readOnly = true)
+    public String getAgentInstallationPath(String agentToken) {
+    	return agentDao.getAgentInstallationPath(agentToken);
     }
 
     /**
@@ -1594,7 +1623,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     
     @Transactional(readOnly=true)
     public long getNumAutoUpdatingAgents() {
-        return agentDao.getNumAutoUpdatingAgents();
+        return agentPluginStatusDAO.getNumAutoUpdatingAgents();
     }
     
     @Transactional(readOnly=true)
