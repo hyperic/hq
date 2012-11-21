@@ -38,7 +38,6 @@ import java.io.OutputStream;
 import java.io.UTFDataFormatException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.security.KeyStoreException;
@@ -47,7 +46,6 @@ import java.security.UnrecoverableEntryException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -64,7 +62,6 @@ import org.hyperic.util.security.KeystoreConfig;
 import org.hyperic.util.security.KeystoreManager;
 import org.hyperic.util.security.SecurityUtil;
 import org.jasypt.encryption.pbe.PooledPBEStringEncryptor;
-import org.jasypt.properties.PropertyValueEncryptionUtils;
 
 public class AgentDListProvider implements AgentStorageProvider {
     private static final Log log = LogFactory.getLog(AgentDListProvider.class);
@@ -73,7 +70,6 @@ public class AgentDListProvider implements AgentStorageProvider {
     private static final long MAXSIZE = 50 * 1024 * 1024; // 50MB
     private static final long CHKSIZE = 10 * 1024 * 1024;  // 10MB
     private static final int CHKPERC  = 50; // Only allow < 50% free
-    private static final String DEFAULT_PRIVATE_KEY_KEY = "hq";
 
     private final AgentStatsCollector agentStatsCollector = AgentStatsCollector.getInstance();
     private AtomicBoolean shutdown = new AtomicBoolean(false);
@@ -92,13 +88,13 @@ public class AgentDListProvider implements AgentStorageProvider {
     private long chkSize = CHKSIZE;
     private int chkPerc = CHKPERC;
 
-    private PooledPBEStringEncryptor encryptor = null;
+    private final PooledPBEStringEncryptor encryptor;
     
     public AgentDListProvider() {
         keyVals = null;
         lists   = null;
         try {
-            encryptor = new MarkedStringEncryptor(SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM, getKeyvalsPass());
+            encryptor = createEncryptor();
         } catch (Exception e) {
             throw new SystemException(e);
         }
@@ -242,6 +238,11 @@ public class AgentDListProvider implements AgentStorageProvider {
         if (e == null) { 
             throw new UnrecoverableEntryException("Encryptor password generation failure: No such alias") ; 
         }
+// XXX scottmf - I'm a bit concerned about this.  I tested the upgrade path on the agent on the new code with the
+// ByteBuffer and it doesn't work, the agent throws a org.jasypt.exceptions.EncryptionOperationNotPossibleException.
+// When I put back the old code with the replaceAll() everything works.
+//final String p = ((PrivateKeyEntry)e).getPrivateKey().toString();
+//return p.replaceAll("[^a-zA-Z0-9]", "_");
         byte[] pk = ((PrivateKeyEntry)e).getPrivateKey().getEncoded();
         ByteBuffer encryptionKey = Charset.forName("US-ASCII").encode(ByteBuffer.wrap(pk).toString());
         return encryptionKey.toString();
@@ -385,12 +386,7 @@ public class AgentDListProvider implements AgentStorageProvider {
             fIs = new FileInputStream(this.keyValFile);
             bIs = new BufferedInputStream(fIs);
             dIs = new DataInputStream(bIs);
-
             nEnts = dIs.readLong();
-
-            if (this.encryptor==null) {
-                this.encryptor = createEncryptor();
-            }
             while(nEnts-- != 0){
                 String encKey = dIs.readUTF();
                 String encVal = dIs.readUTF();
@@ -401,11 +397,6 @@ public class AgentDListProvider implements AgentStorageProvider {
         } catch(FileNotFoundException exc) {
             // Normal when it doesn't exist
             log.debug("file not found (this is ok): " + exc);
-        } catch (GeneralSecurityException e) {
-            log.error(e.getMessage());
-            AgentStorageException t = new AgentStorageException(e.getMessage());
-            t.initCause(e);
-            throw t;
         } catch(IOException exc){
             log.error("Error reading " + this.keyValFile + " loading " + "last known good version");
             // Close old stream
@@ -416,9 +407,6 @@ public class AgentDListProvider implements AgentStorageProvider {
                 bIs = new BufferedInputStream(fIs);
                 dIs = new DataInputStream(bIs);
                 nEnts = dIs.readLong();
-                if (this.encryptor==null) {
-                    this.encryptor = createEncryptor();
-                }
                 while (nEnts-- != 0) {
                     String encKey = dIs.readUTF();
                     String encVal = dIs.readUTF();
@@ -430,13 +418,7 @@ public class AgentDListProvider implements AgentStorageProvider {
                 log.warn(e);
                 log.debug(e,e);
             } catch (IOException e) {
-                this.log.error(e.getMessage());
-                // Throw original error
                 AgentStorageException toThrow = new AgentStorageException("Error reading " +  this.keyValFile + ": " + e);
-                toThrow.initCause(e);
-                throw toThrow;
-            } catch(GeneralSecurityException e){
-                AgentStorageException toThrow = new AgentStorageException(e.getMessage());
                 toThrow.initCause(e);
                 throw toThrow;
             }
@@ -465,16 +447,12 @@ public class AgentDListProvider implements AgentStorageProvider {
         } catch(Exception exc){
             log.error("Error flushing key/vals storage", exc);
         }
-
-        for(Iterator i=this.lists.entrySet().iterator(); i.hasNext(); ){
-            Map.Entry ent = (Map.Entry)i.next();
-            DiskList dl = (DiskList)ent.getValue();
-
+        for (final Entry<String, DiskList> entry : lists.entrySet()) {
             try {
+                DiskList dl = entry.getValue();
                 dl.close();
             } catch(Exception exc){
-                this.log.error("Unable to dispose of disk list '" +
-                        ent.getKey() + "'", exc);
+                log.error("Unable to dispose of disk list '" + entry.getKey() + "'", exc);
             }
         }
 
@@ -566,7 +544,7 @@ public class AgentDListProvider implements AgentStorageProvider {
                 try {
                     dList = intrCreateList(listName, RECSIZE);
                 } catch(IOException exc){
-                    this.log.error("Error loading disk list", exc);
+                    log.error("Error loading disk list", exc);
                     return null; // XXX
                 }
                 this.lists.put(listName, dList);
@@ -584,13 +562,13 @@ public class AgentDListProvider implements AgentStorageProvider {
     private class EncVal {
         private final String val;
         private String encrypted = null;
-        private final StringEncryptor encryptor;
-        private EncVal(StringEncryptor encryptor, String val, String encrypted) {
+        private final PooledPBEStringEncryptor encryptor;
+        private EncVal(PooledPBEStringEncryptor encryptor, String val, String encrypted) {
             this.val = val;
             this.encrypted = SecurityUtil.isMarkedEncrypted(encrypted) ? encrypted : null;
             this.encryptor = encryptor;
         }
-        private EncVal(StringEncryptor encryptor, String val) {
+        private EncVal(PooledPBEStringEncryptor encryptor, String val) {
             this.val = val;
             this.encryptor = encryptor;
         }

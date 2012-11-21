@@ -709,6 +709,7 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable, Age
     }
 
     private void collect(ResourceSchedule rs, List<ScheduledMeasurement> items) {
+        final boolean debug = log.isDebugEnabled();
         for (int i=0; i<items.size() && (!shouldDie.get()); i++) {
             ScheduledMeasurement meas = items.get(i);
             ParsedTemplate tmpl = toParsedTemplate(meas);
