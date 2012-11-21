@@ -610,13 +610,16 @@ public class FileUtil {
     public static final void persistObject(final Serializable obj, final File destFile) throws Throwable{ 
         ObjectOutputStream oos = null ; 
          
-        //destFile.createNewFile() ; 
+        //destFile.createNewFile() ;
+        FileOutputStream fos = null ; 
         try{ 
-            oos = new ObjectOutputStream(new FileOutputStream(destFile)) ; 
+            fos = new FileOutputStream(destFile) ; 
+            oos = new ObjectOutputStream(fos) ; 
             oos.writeObject(obj) ; 
-        }finally{ 
+        }finally{   
             if(oos != null) { 
                 oos.flush() ; 
+                fos.getFD().sync() ; 
                 oos.close() ; 
             }//EO if OOS not null 
         }//EO catch block 
