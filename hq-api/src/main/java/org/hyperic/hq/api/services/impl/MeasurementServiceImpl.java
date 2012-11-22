@@ -29,7 +29,25 @@ public class MeasurementServiceImpl extends RestApiService implements Measuremen
     @Autowired
     private ExceptionToErrorCodeMapper errorHandler ; 
     
-	public MeasurementResponse getMetrics(final MeasurementRequest measurementRequest,
+    public MeasurementResponse getAndRegisterMetrics(final MeasurementRequest measurementRequest,
+            final String rscId, final Date begin, final Date end)
+                    throws Throwable {
+        ApiMessageContext apiMessageContext = newApiMessageContext();
+        measurementTransfer.getAndRegisterMetrics(apiMessageContext, measurementRequest, rscId, begin, end);
+        return null;
+    }
+    public void register() throws SessionNotFoundException, SessionTimeoutException {
+        ApiMessageContext apiMessageContext = newApiMessageContext();
+        Integer sessionId = apiMessageContext.getSessionId();
+        measurementTransfer.register(sessionId);
+    }
+    public MeasurementResponse poll() throws SessionNotFoundException, SessionTimeoutException {
+        ApiMessageContext apiMessageContext = newApiMessageContext();
+        Integer sessionId = apiMessageContext.getSessionId();
+        return measurementTransfer.poll(sessionId);
+    }
+
+    public MeasurementResponse getMetrics(final MeasurementRequest measurementRequest,
 			final String rscId, final Date begin, final Date end)
 			        throws Throwable {
 	    try {

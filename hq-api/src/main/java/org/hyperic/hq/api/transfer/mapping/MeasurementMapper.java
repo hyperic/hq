@@ -9,6 +9,7 @@ import org.hyperic.hq.api.model.measurements.Measurement;
 import org.hyperic.hq.api.model.measurements.Metric;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
+import org.hyperic.hq.product.MetricValue;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -37,7 +38,16 @@ public class MeasurementMapper {
         msmt.setAvg(avg);
         return msmt;
     }
-
+    public List<Metric> toMetrics2(List<MetricValue> hqMetrics) {
+        List<Metric> metrics = new ArrayList<Metric>();
+        for (MetricValue hqMetric : hqMetrics) {
+            Metric metric = new Metric();
+            metric.setValue(Double.valueOf(df.format(hqMetric.getValue())));
+            metric.setTimestamp(hqMetric.getTimestamp());
+            metrics.add(metric);
+        }
+        return metrics;
+    }
     public List<Metric> toMetrics(List<HighLowMetricValue> hqMetrics) {
         List<Metric> metrics = new ArrayList<Metric>();
         for (HighLowMetricValue hqMetric : hqMetrics) {

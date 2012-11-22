@@ -6,7 +6,9 @@ import java.util.Calendar;
 import java.util.Date;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -47,6 +49,10 @@ public interface MeasurementService {
 			@QueryParam("end") final Date end) 
 			        throws PermissionException, SessionNotFoundException, SessionTimeoutException, Throwable;
 	
+	@GET
+    @Path("/metrics/poll")
+	public MeasurementResponse poll() throws SessionNotFoundException, SessionTimeoutException;
+	
 	@POST
     @Path("/metrics/aggregation")
     @Descriptions({ 
@@ -60,4 +66,8 @@ public interface MeasurementService {
             @QueryParam("begin") final Date begin, 
             @QueryParam("end") final Date end) 
             throws ParseException, PermissionException, SessionNotFoundException, SessionTimeoutException, ObjectNotFoundException, UnsupportedOperationException, SQLException;
+	
+    @PUT
+    @Path("/metrics/register")
+	public void register() throws SessionNotFoundException, SessionTimeoutException;
 }
