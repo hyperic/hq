@@ -39,6 +39,7 @@ import java.util.Set;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
+import org.hyperic.hq.api.model.measurements.Metric;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementBatchResponse;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequest;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequests;
@@ -54,11 +55,13 @@ import org.hyperic.hq.common.TimeframeBoundriesException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.measurement.server.session.Q;
 import org.hyperic.hq.measurement.server.session.TimeframeSizeException;
 import org.hyperic.hq.measurement.shared.DataManager;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.TemplateManager;
+import org.hyperic.hq.product.MetricValue;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,16 +75,18 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     private DataManager dataMgr; 
     private MeasurementMapper mapper;
     private ExceptionToErrorCodeMapper errorHandler ;
-
+    private Q q;
+    
     @Autowired
     public MeasurementTransferImpl(MeasurementManager measurementMgr, TemplateManager tmpltMgr, DataManager dataMgr, 
-            MeasurementMapper mapper, ExceptionToErrorCodeMapper errorHandler) {
+            MeasurementMapper mapper, ExceptionToErrorCodeMapper errorHandler, Q q) {
         super();
         this.measurementMgr = measurementMgr;
         this.tmpltMgr = tmpltMgr;
         this.mapper=mapper;
         this.dataMgr = dataMgr;
         this.errorHandler = errorHandler;
+        this.q = q;
     }
 
     protected List<Measurement> getMeasurements(final String rscId, final List<MeasurementTemplate> tmps, final AuthzSubject authzSubject) throws PermissionException {
@@ -103,7 +108,25 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         }
         return hqMsmts;
     }
-
+    public void register(Integer sessionId) {
+        q.register(sessionId);
+    }
+    
+    public MeasurementResponse poll(Integer sessionId) {
+        MeasurementResponse res = new MeasurementResponse();
+        List<MetricValue> hqMetrics = this.q.poll(sessionId);
+        List<Metric> metrics = this.mapper.toMetrics2(hqMetrics);
+        org.hyperic.hq.api.model.measurements.Measurement msmt = new org.hyperic.hq.api.model.measurements.Measurement();
+        msmt.setMetrics(metrics);
+        res.add(msmt);
+        return res;
+    }
+    public MeasurementResponse getAndRegisterMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest hqMsmtReq, 
+            final String rscId, final Date begin, final Date end) 
+                    throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException, TimeframeSizeException {
+//        register
+        return null;
+    }
     public MeasurementResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest hqMsmtReq, 
             final String rscId, final Date begin, final Date end) 
                     throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException, TimeframeSizeException {

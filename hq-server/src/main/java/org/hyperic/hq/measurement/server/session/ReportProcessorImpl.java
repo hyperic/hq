@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.annotation.PostConstruct;
 
@@ -63,6 +64,8 @@ import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.data.DSNList;
 import org.hyperic.hq.measurement.data.MeasurementReport;
 import org.hyperic.hq.measurement.data.ValueList;
+import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZeventPayload;
+import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZeventSource;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.ReportProcessor;
 import org.hyperic.hq.measurement.shared.SRNManager;
@@ -97,6 +100,7 @@ public class ReportProcessorImpl implements ReportProcessor {
     private ResourceManager resourceManager;
 
     private AgentScheduleSynchronizer agentScheduleSynchronizer;
+    private Q q;
 
     @Autowired
     public ReportProcessorImpl(MeasurementManager measurementManager,
@@ -105,7 +109,7 @@ public class ReportProcessorImpl implements ReportProcessor {
                                ReportStatsCollector reportStatsCollector,
                                MeasurementInserterHolder measurementInserterManager,
                                AgentManager agentManager, ZeventEnqueuer zEventManager,
-                               ResourceManager resourceManager, AgentScheduleSynchronizer agentScheduleSynchronizer) {
+                               ResourceManager resourceManager, AgentScheduleSynchronizer agentScheduleSynchronizer, Q q) {
         this.measurementManager = measurementManager;
         this.platformManager = platformManager;
         this.serverManager = serverManager;
@@ -117,12 +121,14 @@ public class ReportProcessorImpl implements ReportProcessor {
         this.zEventManager = zEventManager;
         this.resourceManager = resourceManager;
         this.agentScheduleSynchronizer = agentScheduleSynchronizer;
+        this.q = q;
     }
     
     @PostConstruct
     public void init() {
         zEventManager.addBufferedListener(PlatformAvailZevent.class, new PlatformAvailZeventListener());
         zEventManager.addBufferedListener(SrnCheckerZevent.class, new SrnCheckerZeventListener());
+        zEventManager.addBufferedListener(OutgoingMetricsZevent.class, new OutgoingMetricZeventListener(this.q,this.measurementManager));
     }
 
     private long now() {
@@ -482,6 +488,26 @@ public class ReportProcessorImpl implements ReportProcessor {
             }
         }
     }
+    private class OutgoingMetricZeventListener implements ZeventListener<OutgoingMetricsZevent> {
+//        protected MeasurementManager msmtMgr;
+        protected Q q;
+        
+        OutgoingMetricZeventListener(Q q, MeasurementManager msmtMgr) {
+            this.q = q;
+        }
+        
+        public void processEvents(List<OutgoingMetricsZevent> events) {
+            List<MetricValue> metricValues = new ArrayList<MetricValue>();
+            for(OutgoingMetricsZevent event:events) {
+//                int msmtId = ((MeasurementZeventSource) event.getSourceId()).getId();
+                MetricValue ptp = ((MeasurementZeventPayload) event.getPayload()).getValue();
+                metricValues.add(ptp);
+            }
+            this.q.publish(metricValues);
+        }
+    }
+
+  
     
     private class SrnCheckerZevent extends Zevent {
         private String agentToken;
