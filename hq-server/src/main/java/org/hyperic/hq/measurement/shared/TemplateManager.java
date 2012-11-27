@@ -142,7 +142,7 @@ public interface TemplateManager {
     /**
      * Set the measurement templates to be "designated" for a monitorable type.
      */
-    public void setDesignatedTemplates(Integer[] desigIds,boolean designated);
+    public void setDesignatedTemplates(String mType, Integer[] desigIds);
 
     public MonitorableType createMonitorableType(String pluginName, TypeInfo info);
 

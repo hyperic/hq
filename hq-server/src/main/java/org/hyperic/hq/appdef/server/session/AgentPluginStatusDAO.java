@@ -30,8 +30,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -56,8 +59,13 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
 
-    private static final Object LIMIT_S_TO_CURRENT_AGENTS = "join EAM_AGENT agent on s.agent_id = agent.id " +         
-            "where agent.version >= :serverVersion ";
+    private static final String LIMIT_S_TO_CURRENT_AGENTS = "join EAM_AGENT agent on s.agent_id = agent.id " +         
+    		"where agent.version >= :serverVersion ";
+    private static final String SYNCHABLE_AGENT_IDS_QUERY_STRING = 	"select distinct agent_id from EAM_AGENT_PLUGIN_STATUS s "+
+    		LIMIT_S_TO_CURRENT_AGENTS + "and exists (select 1 from EAM_PLATFORM p where p.agent_id = s.agent_id)";
+    private static final String UNSYNCHABLE_AGENT_IDS_QUERY_STRING = "select distinct id from EAM_AGENT where id not in (" +
+    		SYNCHABLE_AGENT_IDS_QUERY_STRING + ")";
+ 
     
     private final AgentDAO agentDAO;
     private final PluginDAO pluginDAO;
@@ -277,6 +285,54 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
                            .list();
     }
 
+    
+    
+    @SuppressWarnings("unchecked")
+    public Set<Integer> getAutoUpdatingAgentIDs() {
+        String serverMajorVersion = serverConfigManager.getServerMajorVersion();
+        final SQLQuery query = getSession().createSQLQuery(SYNCHABLE_AGENT_IDS_QUERY_STRING);
+        query.setParameter("serverVersion", serverMajorVersion);
+        final List<Integer> ids = query.addScalar("agent_id", Hibernate.INTEGER).list();
+        final Set<Integer> idsSet = new HashSet<Integer>(ids);
+        return idsSet;
+    }
+    
+
+    @SuppressWarnings("unchecked")
+   public Collection<Agent> getAutoUpdatingAgents() {
+        final Set<Integer> idsSet = getAutoUpdatingAgentIDs();
+        final List<Agent> rtn = new ArrayList<Agent>(idsSet.size());
+        for (final Integer agentId : idsSet) {
+            rtn.add(agentDAO.findById(agentId));
+        }
+        return rtn;
+    }
+   
+   
+   @SuppressWarnings("unchecked")
+   public List<Agent> getCurrentNonSyncAgents() {
+       String serverMajorVersion = serverConfigManager.getServerMajorVersion();
+       final SQLQuery query = getSession().createSQLQuery(UNSYNCHABLE_AGENT_IDS_QUERY_STRING);
+       query.setParameter("serverVersion", serverMajorVersion);
+       final List<Integer> ids = query.addScalar("id", Hibernate.INTEGER).list();
+       final Set<Integer> idsSet = new HashSet<Integer>(ids);
+
+       final List<Agent> rtn = new ArrayList<Agent>(idsSet.size());
+       for (final Integer agentId : idsSet) {
+           rtn.add(agentDAO.findById(agentId));
+       }
+       return rtn;
+	}   
+   
+   
+   
+   public Long getNumAutoUpdatingAgents() {
+	   Set<Integer> synchedAgentIDs = getAutoUpdatingAgentIDs();
+       return ((long)synchedAgentIDs.size());
+   }
+
+
+/*
     @SuppressWarnings("unchecked")
     public Collection<Agent> getAutoUpdatingAgents() {
         String serverMajorVersion = serverConfigManager.getServerMajorVersion();
@@ -294,6 +350,7 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
         }
         return rtn;
     }
+*/
 
     public void removeAgentPluginStatuses(Integer agentId, Collection<String> pluginFileNames) {
         final String hql =

@@ -85,30 +85,13 @@ public class EditPasswordAction
 
         log.trace("Editing user's password.");
 
-        boolean admin = false;
-
-        for (Operation operation : authzBoss.getAllOperations(sessionId)) {
-            if (admin = AuthzConstants.subjectOpModifySubject.equals(operation.getName())) {
-                break;
-            }
+        try {
+        	authBoss.authenticate(RequestUtils.getWebUser(request).getName(), pForm.getCurrentPassword());
+        } catch (Exception e) {
+        	RequestUtils.setError(request, "admin.user.error.WrongPassword", "currentPassword");
+        	return returnFailure(request, mapping, Constants.USER_PARAM, pForm.getId());
         }
 
-        String [] vals = request.getParameterValues("u");
-        String val = null;
-        if (vals != null && vals.length > 0)
-        	val = vals[0];
-   	    // if the admin user is changing her own pw, require authentication of current pw 
-		if (val != null)
-			admin = admin & String.valueOf(user.getId()).equals(val) == false;
-
-        if (!admin) {
-            try {
-                authBoss.authenticate(user.getName(), pForm.getCurrentPassword());
-            } catch (Exception e) {
-                RequestUtils.setError(request, "admin.user.error.WrongPassword", "currentPassword");
-                return returnFailure(request, mapping, Constants.USER_PARAM, pForm.getId());
-            }
-        }
         authBoss.changePassword(sessionId.intValue(), user.getName(), pForm.getNewPassword());
 
         return returnSuccess(request, mapping, Constants.USER_PARAM,

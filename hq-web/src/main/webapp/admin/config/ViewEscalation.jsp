@@ -65,7 +65,13 @@
 	}
 
 	function showViewEscResponse(response, args) {
-		var tmp = response;
+		var tmp ; 
+
+		if(!response.escalation) { 
+			eval("tmp = " + response) ; 
+		}else { 
+			tmp = response;
+		}
 
 		if (tmp.error) {
     	    var escmsg = hqDojo.byId('errMsg');

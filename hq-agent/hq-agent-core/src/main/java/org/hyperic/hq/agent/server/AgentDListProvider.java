@@ -34,6 +34,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.KeyStore.PrivateKeyEntry;
@@ -64,6 +66,7 @@ public class AgentDListProvider implements AgentStorageProvider {
     private static final long MAXSIZE = 50 * 1024 * 1024; // 50MB
     private static final long CHKSIZE = 10 * 1024 * 1024;  // 10MB
     private static final int CHKPERC  = 50; // Only allow < 50% free
+    private static final String DEFAULT_PRIVATE_KEY_KEY = "hq";
 
     private final Log      log;        // da logger
     private HashMap  keyVals;    // The key-value pairs
@@ -220,16 +223,14 @@ public class AgentDListProvider implements AgentStorageProvider {
     protected String getKeyvalsPass() throws KeyStoreException, IOException, NoSuchAlgorithmException, UnrecoverableEntryException {
         KeystoreConfig keystoreConfig = new AgentKeystoreConfig();
         KeyStore keystore = KeystoreManager.getKeystoreManager().getKeyStore(keystoreConfig);
-             
-        KeyStore.Entry e = keystore.getEntry(keystoreConfig.getAlias(),
-                new KeyStore.PasswordProtection(keystoreConfig.getFilePassword().toCharArray()));
- 	    
-		if(e == null) { 
-			throw new UnrecoverableEntryException("Encryptor password generation failure: No such alias") ; 
-		}//EO if no such key exists 		
-
-        final String pk = ((PrivateKeyEntry)e).getPrivateKey().toString() ;  
-        return pk.replaceAll("[^a-zA-Z0-9]", "_") ;
+        KeyStore.Entry e = keystore.getEntry(keystoreConfig.getAlias(), new KeyStore.PasswordProtection(keystoreConfig.getFilePassword().toCharArray()));
+        if(e == null) { 
+            throw new UnrecoverableEntryException("Encryptor password generation failure: No such alias") ; 
+        }//EO if no private key was found 
+        
+        byte[] pk = ((PrivateKeyEntry)e).getPrivateKey().getEncoded();
+        ByteBuffer encryptionKey = Charset.forName("US-ASCII").encode(ByteBuffer.wrap(pk).toString());
+        return encryptionKey.toString();
     }
     
     //synchronized because concurrent threads cannot
@@ -397,19 +398,22 @@ public class AgentDListProvider implements AgentStorageProvider {
                     this.encryptor = new MarkedStringEncryptor(SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM,getKeyvalsPass());
                 }
                 while(nEnts-- != 0) {
-                    String denryptedKey = SecurityUtil.encrypt(this.encryptor, dIs.readUTF());
+                    String decryptedKey = SecurityUtil.encrypt(this.encryptor, dIs.readUTF());
                     String decryptedVal = SecurityUtil.encrypt(this.encryptor, dIs.readUTF());
-                    this.keyVals.put(denryptedKey, decryptedVal);
+                    this.keyVals.put(decryptedKey, decryptedVal);
                 }
             } catch (FileNotFoundException e) {
+                this.log.error(e.getMessage());
                 // Already checked this before, shouldn't happen
             } catch (IOException e) {
+                this.log.error(e.getMessage());
                 // Throw original error
                 throw new AgentStorageException("Error reading " + 
                         this.keyValFile + ": " +
                         e.getMessage());
             
             } catch(GeneralSecurityException e){
+                this.log.error(e.getMessage());
                 // Throw original error
                 throw new AgentStorageException(e.getMessage());
             }
