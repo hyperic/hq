@@ -36,7 +36,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.jms.Destination;
+
+import org.apache.cxf.jaxrs.ext.search.SearchContext;
 import org.hibernate.ObjectNotFoundException;
+import org.hyperic.hq.api.filtering.IFilter;
+import org.hyperic.hq.api.filtering.IMetricFilter;
+import org.hyperic.hq.api.filtering.IResourceFilter;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
 import org.hyperic.hq.api.model.measurements.Metric;
@@ -55,6 +61,7 @@ import org.hyperic.hq.common.TimeframeBoundriesException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.measurement.server.session.MetricDestinationEvaluator;
 import org.hyperic.hq.measurement.server.session.Q;
 import org.hyperic.hq.measurement.server.session.TimeframeSizeException;
 import org.hyperic.hq.measurement.shared.DataManager;
@@ -75,17 +82,21 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     private DataManager dataMgr; 
     private MeasurementMapper mapper;
     private ExceptionToErrorCodeMapper errorHandler ;
+    private MetricDestinationEvaluator evaluator;
     private Q q;
+    @javax.ws.rs.core.Context
+    private SearchContext context ;
     
     @Autowired
     public MeasurementTransferImpl(MeasurementManager measurementMgr, TemplateManager tmpltMgr, DataManager dataMgr, 
-            MeasurementMapper mapper, ExceptionToErrorCodeMapper errorHandler, Q q) {
+            MeasurementMapper mapper, ExceptionToErrorCodeMapper errorHandler, MetricDestinationEvaluator evaluator, Q q) {
         super();
         this.measurementMgr = measurementMgr;
         this.tmpltMgr = tmpltMgr;
         this.mapper=mapper;
         this.dataMgr = dataMgr;
         this.errorHandler = errorHandler;
+        this.evaluator = evaluator;
         this.q = q;
     }
 
@@ -108,13 +119,31 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         }
         return hqMsmts;
     }
-    public void register(Integer sessionId) {
-        q.register(sessionId);
+    
+    protected Map<Integer,Destination> sessionToDestination = new HashMap<Integer,Destination>();
+    
+    public void register(Integer sessionId, IResourceFilter rscFilter, IMetricFilter metricFilter) {
+//        List<IFilter> userFilters = new ArrayList<IFilter>();
+//        userFilters.add(rscFilter);
+//        userFilters.add(metricFilter);
+        // already registered!
+        if (this.sessionToDestination.containsKey(sessionId)) {
+            return;
+        }
+        Destination dest = new Destination() {};
+        this.sessionToDestination.put(sessionId,dest);
+        this.evaluator.register(dest/*,userFilters*/);
+        this.q.register(dest);
     }
     
     public MeasurementResponse poll(Integer sessionId) {
         MeasurementResponse res = new MeasurementResponse();
-        List<MetricValue> hqMetrics = this.q.poll(sessionId);
+        Destination dest = this.sessionToDestination.get(sessionId);
+        if (dest==null) {
+            return null;
+        }
+        List<Object> hqObjs = this.q.poll(dest);
+        List<MetricValue> hqMetrics = (List<MetricValue>) hqObjs;
         List<Metric> metrics = this.mapper.toMetrics2(hqMetrics);
         org.hyperic.hq.api.model.measurements.Measurement msmt = new org.hyperic.hq.api.model.measurements.Measurement();
         msmt.setMetrics(metrics);
