@@ -30,14 +30,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.annotation.PostConstruct;
+import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.Message;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -64,6 +69,7 @@ import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.data.DSNList;
 import org.hyperic.hq.measurement.data.MeasurementReport;
 import org.hyperic.hq.measurement.data.ValueList;
+import org.hyperic.hq.measurement.ext.MeasurementEvent;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZeventPayload;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZeventSource;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
@@ -100,6 +106,7 @@ public class ReportProcessorImpl implements ReportProcessor {
     private ResourceManager resourceManager;
 
     private AgentScheduleSynchronizer agentScheduleSynchronizer;
+    private MetricDestinationEvaluator evaluator;
     private Q q;
 
     @Autowired
@@ -109,7 +116,8 @@ public class ReportProcessorImpl implements ReportProcessor {
                                ReportStatsCollector reportStatsCollector,
                                MeasurementInserterHolder measurementInserterManager,
                                AgentManager agentManager, ZeventEnqueuer zEventManager,
-                               ResourceManager resourceManager, AgentScheduleSynchronizer agentScheduleSynchronizer, Q q) {
+                               ResourceManager resourceManager, AgentScheduleSynchronizer agentScheduleSynchronizer, 
+                               MetricDestinationEvaluator evaluator, Q q) {
         this.measurementManager = measurementManager;
         this.platformManager = platformManager;
         this.serverManager = serverManager;
@@ -121,6 +129,7 @@ public class ReportProcessorImpl implements ReportProcessor {
         this.zEventManager = zEventManager;
         this.resourceManager = resourceManager;
         this.agentScheduleSynchronizer = agentScheduleSynchronizer;
+        this.evaluator = evaluator;
         this.q = q;
     }
     
@@ -128,7 +137,7 @@ public class ReportProcessorImpl implements ReportProcessor {
     public void init() {
         zEventManager.addBufferedListener(PlatformAvailZevent.class, new PlatformAvailZeventListener());
         zEventManager.addBufferedListener(SrnCheckerZevent.class, new SrnCheckerZeventListener());
-        zEventManager.addBufferedListener(OutgoingMetricsZevent.class, new OutgoingMetricZeventListener(this.q,this.measurementManager));
+        zEventManager.addBufferedListener(OutgoingMetricsZevent.class, new OutgoingMetricZeventListener(this.q,this.evaluator));
     }
 
     private long now() {
@@ -328,7 +337,7 @@ public class ReportProcessorImpl implements ReportProcessor {
         	if (debug) watch.markTimeEnd("sendAvailDataToDB");
         }
         if (debug) log.debug(watch);
-
+            
         // need to process these in background queue since I don't want cache misses to backup
         // report processor since it runs in several threads.  Better to backup one thread with
         // db queries
@@ -336,8 +345,29 @@ public class ReportProcessorImpl implements ReportProcessor {
         if (platformRes != null && setPlatformAvail) {
             zEventManager.enqueueEventAfterCommit(new PlatformAvailZevent(platformRes.getId()));
         }
+        sendOutgoingMetricsZevent(dataPoints,availPoints,priorityAvailPts);
     }
 
+//    private void sendOutgoingMetricsZevent(final List<DataPoint> dataPoints, final Map<Integer, Measurement> measMap) {
+//        Map<Measurement,List<DataPoint>> data = new LinkedHashMap<Measurement,List<DataPoint>>();
+//        // build measurement->dtps data structure
+//        for(DataPoint dp:dataPoints) {
+//            Integer metricId = dp.getMeasurementId();
+//            Measurement m = measMap.get(metricId);
+//            MetricValue val = dp.getMetricValue();
+//        }        
+//        List<Destination> destinationsList = evaluator.getDestinations(m,val);
+//    }
+    
+    private void sendOutgoingMetricsZevent(final List<DataPoint> dataPoints,final List<DataPoint> availPoints,
+            final List<DataPoint> priorityAvailPts) {
+        List<DataPoint> dtps = new ArrayList<DataPoint>();
+        dtps.addAll(dataPoints);
+        dtps.addAll(availPoints);
+        dtps.addAll(priorityAvailPts);
+        zEventManager.enqueueEventAfterCommit(new OutgoingMetricsZevent(dtps));
+    }
+    
     private Measurement getMeasurement(Integer mid, Map<Integer, Measurement> measMap) {
     	Measurement measurement = measMap.get(mid);
     	if (measurement == null) {
@@ -488,26 +518,7 @@ public class ReportProcessorImpl implements ReportProcessor {
             }
         }
     }
-    private class OutgoingMetricZeventListener implements ZeventListener<OutgoingMetricsZevent> {
-//        protected MeasurementManager msmtMgr;
-        protected Q q;
-        
-        OutgoingMetricZeventListener(Q q, MeasurementManager msmtMgr) {
-            this.q = q;
-        }
-        
-        public void processEvents(List<OutgoingMetricsZevent> events) {
-            List<MetricValue> metricValues = new ArrayList<MetricValue>();
-            for(OutgoingMetricsZevent event:events) {
-//                int msmtId = ((MeasurementZeventSource) event.getSourceId()).getId();
-                MetricValue ptp = ((MeasurementZeventPayload) event.getPayload()).getValue();
-                metricValues.add(ptp);
-            }
-            this.q.publish(metricValues);
-        }
-    }
-
-  
+    
     
     private class SrnCheckerZevent extends Zevent {
         private String agentToken;
@@ -568,4 +579,164 @@ public class ReportProcessorImpl implements ReportProcessor {
         }
     }
 
+    static class DummyMsg implements Message {
+
+        public void acknowledge() throws JMSException {
+        }
+
+        public void clearBody() throws JMSException {
+        }
+
+        public void clearProperties() throws JMSException {
+        }
+
+        public boolean getBooleanProperty(String arg0) throws JMSException {
+            return false;
+        }
+
+        public byte getByteProperty(String arg0) throws JMSException {
+            return 0;
+        }
+
+        public double getDoubleProperty(String arg0) throws JMSException {
+            return 0;
+        }
+
+        public float getFloatProperty(String arg0) throws JMSException {
+            return 0;
+        }
+
+        public int getIntProperty(String arg0) throws JMSException {
+            return 0;
+        }
+
+        public String getJMSCorrelationID() throws JMSException {
+            return null;
+        }
+
+        public byte[] getJMSCorrelationIDAsBytes() throws JMSException {
+            return null;
+        }
+
+        public int getJMSDeliveryMode() throws JMSException {
+            return 0;
+        }
+
+        public Destination getJMSDestination() throws JMSException {
+            return null;
+        }
+
+        public long getJMSExpiration() throws JMSException {
+            return 0;
+        }
+
+        public String getJMSMessageID() throws JMSException {
+            return null;
+        }
+
+        public int getJMSPriority() throws JMSException {
+            return 0;
+        }
+
+        public boolean getJMSRedelivered() throws JMSException {
+            return false;
+        }
+
+        public Destination getJMSReplyTo() throws JMSException {
+            return null;
+        }
+
+        public long getJMSTimestamp() throws JMSException {
+            return 0;
+        }
+
+        public String getJMSType() throws JMSException {
+            return null;
+        }
+
+        public long getLongProperty(String arg0) throws JMSException {
+            return 0;
+        }
+
+        public Object getObjectProperty(String arg0) throws JMSException {
+            return null;
+        }
+
+        public Enumeration getPropertyNames() throws JMSException {
+            return null;
+        }
+
+        public short getShortProperty(String arg0) throws JMSException {
+            return 0;
+        }
+
+        public String getStringProperty(String arg0) throws JMSException {
+            return null;
+        }
+
+        public boolean propertyExists(String arg0) throws JMSException {
+            return false;
+        }
+
+        public void setBooleanProperty(String arg0, boolean arg1) throws JMSException {
+        }
+
+        public void setByteProperty(String arg0, byte arg1) throws JMSException {
+        }
+
+        public void setDoubleProperty(String arg0, double arg1) throws JMSException {
+        }
+
+        public void setFloatProperty(String arg0, float arg1) throws JMSException {
+        }
+
+        public void setIntProperty(String arg0, int arg1) throws JMSException {
+        }
+
+        public void setJMSCorrelationID(String arg0) throws JMSException {
+        }
+
+        public void setJMSCorrelationIDAsBytes(byte[] arg0) throws JMSException {
+        }
+
+        public void setJMSDeliveryMode(int arg0) throws JMSException {
+        }
+
+        public void setJMSDestination(Destination arg0) throws JMSException {
+        }
+
+        public void setJMSExpiration(long arg0) throws JMSException {
+        }
+
+        public void setJMSMessageID(String arg0) throws JMSException {
+        }
+
+        public void setJMSPriority(int arg0) throws JMSException {
+        }
+
+        public void setJMSRedelivered(boolean arg0) throws JMSException {
+        }
+
+        public void setJMSReplyTo(Destination arg0) throws JMSException {
+        }
+
+        public void setJMSTimestamp(long arg0) throws JMSException {
+        }
+
+        public void setJMSType(String arg0) throws JMSException {
+        }
+
+        public void setLongProperty(String arg0, long arg1) throws JMSException {
+        }
+
+        public void setObjectProperty(String arg0, Object arg1) throws JMSException {
+        }
+
+        public void setShortProperty(String arg0, short arg1) throws JMSException {
+        }
+
+        public void setStringProperty(String arg0, String arg1) throws JMSException {
+        }
+        
+    }
 }

@@ -4,36 +4,39 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.hyperic.hq.product.MetricValue;
+import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.ObjectMessage;
+
 import org.springframework.stereotype.Component;
 
 @Component
 public class Q {
-    private static Q instance = new Q();
-    private Q() {}
+    protected Map<Destination, LinkedBlockingQueue<Object>> destinations = new HashMap<Destination, LinkedBlockingQueue<Object>>();
 
-    protected Map<Integer, LinkedBlockingQueue<MetricValue>> topics = new HashMap<Integer, LinkedBlockingQueue<MetricValue>>();
-    public Q getInstance() {
-        return instance;
+    public void register(Destination dest) {
+        this.destinations.put(dest, new LinkedBlockingQueue<Object>());
     }
-    public void register(Integer sessionId) {
-        this.topics.put(sessionId, new LinkedBlockingQueue<MetricValue>());
-    }
-    public List<MetricValue> poll(Integer sessionId) {
-        LinkedBlockingQueue<MetricValue> topic = this.topics.get(sessionId);
-        List<MetricValue> metrics = new ArrayList<MetricValue>();
+    
+    public List<Object> poll(Destination dest) {
+        LinkedBlockingQueue<Object> topic = this.destinations.get(dest);
+        List<Object> metrics = new ArrayList<Object>();
         topic.drainTo(metrics);
         return metrics;
     }
-    public void publish(List<MetricValue> metricValues) {
-        Set<Entry<Integer, LinkedBlockingQueue<MetricValue>>> topics = this.topics.entrySet();
-        for(Entry<Integer, LinkedBlockingQueue<MetricValue>> topicE:topics) {
-            LinkedBlockingQueue<MetricValue> topic = topicE.getValue();
-            topic.addAll(metricValues);
+    
+    public void publish(List<ObjectMessage> msgs) throws JMSException {
+        for(ObjectMessage msg:msgs) {
+            Destination dest = msg.getJMSDestination();
+            List<Object> data = (List<Object>) msg.getObject();
+            LinkedBlockingQueue<Object> q = destinations.get(dest);
+            if (q==null) {
+                return;
+            }
+            q.addAll(data);
         }
     }
+
 }
