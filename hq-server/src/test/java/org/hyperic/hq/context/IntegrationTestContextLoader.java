@@ -89,17 +89,8 @@ public class IntegrationTestContextLoader extends AbstractContextLoader {
 		final Log log = (externalLogger == null ? logger : externalLogger) ;
 
 		try {
-		    //if the tests.server.database-url override property is provided, set it as the server.database-url property (if not already exists) 
-		    String serverDatabaseUrl = System.getProperty("server.database-url") ; 
-		    if(serverDatabaseUrl == null) { 
-		        
-		        serverDatabaseUrl = System.getProperty("override.server.database-url") ; 
-		        if(serverDatabaseUrl != null) {
-		            log.info("An override.server.database-url property value was provided : " + serverDatabaseUrl + " setting in the server.database-url system property") ;
-		            System.setProperty("server.database-url", serverDatabaseUrl) ; 
-		        }//EO if the override database url property was provided 
-		        
-		    }//EO if the server dataabase url was not defined via system property 
+		    updateByDatabaseOverrideProperties(log);
+		     
 		    
             //Find the sigar libs on the test classpath
             final File sigarBin = new File(context.getResource("/libsigar-sparc64-solaris.so").getFile().getParent());
@@ -116,6 +107,44 @@ public class IntegrationTestContextLoader extends AbstractContextLoader {
         }//EO catch block
 	}//EOM 
 
+	/*
+	 *#server.database-url=jdbc:postgresql://localhost:5432/hq?protocolVersion=2
+        #server.database-driver=org.postgresql.Driver
+        #server.database=PostgreSQL
+        #server.database-user=hqadmin
+        #server.database-password=hqadmin
+        #server.hibernate.dialect=org.hyperic.hibernate.dialect.PostgreSQLDialect
+ 
+	 */
+    static private void updateByDatabaseOverrideProperties(Log log) {
+        String possbileProperties[] = { 
+                "server.database-url",
+                "server.database-driver",
+                "server.database",
+                "server.database-password",
+                "server.database-user",
+                "server.database-password",
+                "server.hibernate.dialect"
+        };
+        
+        String overridePrefix = "override.";
+        for(int i = 0;i < possbileProperties.length;i++) {
+            String propertyStr = possbileProperties[i];
+            //if the tests.server.database-url override property is provided, set it as the server.database-url property (if not already exists) 
+            String propertyVal = System.getProperty(propertyStr) ; 
+            if(propertyVal == null) { 
+                
+                String overridePropertyStr = overridePrefix+propertyStr;
+                propertyVal = System.getProperty(overridePropertyStr) ; 
+                if(propertyVal != null) {
+                    log.info("An " + overridePropertyStr + " property value was provided : " + propertyVal + " setting in the " + propertyStr + " system property") ;
+                    System.setProperty(propertyStr, propertyVal) ; 
+                }//EO if the override database property was provided 
+            } //EO if the server dataabase was not defined via system property
+            
+        }
+    }
+        
     public ApplicationContext loadContext(final String... locations) throws Exception {
         if (logger.isDebugEnabled()) {
             logger.debug("Loading ApplicationContext for locations [" +
