@@ -50,25 +50,26 @@ public class MultiLogTrackMeasurementPlugin extends MeasurementPlugin {
         String alias = metric.getAttributeName();
         String logfilePattern = (pattern == null) ? "" : pattern;
         String basedir = metric.getObjectProperty("basedir");
+        String includepattern = metric.getObjectProperty("includepattern");
         boolean overrideChecks = Boolean.parseBoolean(metric.getObjectProperty(MultiLogTrackServerDetector.OVERRIDE_CHECKS));
         basedir = MultiLogTrackServerDetector.getBasedir(basedir);
-        List<String> files = MultiLogTrackServerDetector.getFilesCached(logfilePattern, basedir, false);
+        List<String> files = MultiLogTrackServerDetector.getFilesCached(logfilePattern, basedir, includepattern, false);
         if (metric.isAvail()) {
             if (!overrideChecks && (files == null || files.isEmpty())) {
                 return new MetricValue(Metric.AVAIL_DOWN);
             }
             return new MetricValue(Metric.AVAIL_UP);
         } else if (alias.equals("NumCapturedLogs")) {
-            TimeValuePair num = getNumLinesAndClear(MultiLogTrackPlugin.INCLUDE_PATTERN, basedir + "," + logfilePattern);
+            TimeValuePair num = getNumLinesAndClear(MultiLogTrackPlugin.INCLUDE_PATTERN, basedir, logfilePattern, includepattern);
             MetricValue rtn = num == null ? new MetricValue(0) : new MetricValue(num.getVal());
             return rtn;
         } else if (alias.equals("SecondaryNumCapturedLogs")) {
-            TimeValuePair num = getNumLinesAndClear(MultiLogTrackPlugin.INCLUDE_PATTERN_2, basedir + "," + logfilePattern);
+            TimeValuePair num = getNumLinesAndClear(MultiLogTrackPlugin.INCLUDE_PATTERN_2, basedir, logfilePattern, includepattern);
             MetricValue rtn = num == null ? new MetricValue(0) : new MetricValue(num.getVal());
             return rtn;
         } else if (alias.equals("DiffNumCapturedLogs")) {
-            TimeValuePair tl = getNumLinesAndClear(MultiLogTrackPlugin.INCLUDE_PATTERN, basedir + "," + logfilePattern);
-            TimeValuePair tl2 = getNumLinesAndClear(MultiLogTrackPlugin.INCLUDE_PATTERN_2, basedir + "," + logfilePattern);
+            TimeValuePair tl = getNumLinesAndClear(MultiLogTrackPlugin.INCLUDE_PATTERN, basedir, logfilePattern, includepattern);
+            TimeValuePair tl2 = getNumLinesAndClear(MultiLogTrackPlugin.INCLUDE_PATTERN_2, basedir, logfilePattern, includepattern);
             MetricValue diff = getDiff(tl, tl2);
             return diff;
         }
@@ -101,7 +102,8 @@ public class MultiLogTrackMeasurementPlugin extends MeasurementPlugin {
         return (val <= 0) ? new MetricValue(0) : new MetricValue(1);
     }
 
-    private static TimeValuePair getNumLinesAndClear(String property, String key) {
+    private static TimeValuePair getNumLinesAndClear(String property, String basedir, String logpattern, String includePattern) {
+        String key = basedir + "," + logpattern + "," + includePattern;
         TimeValuePair last = getLastCachedValue(property, key);
         if (last != null) {
             return last;
@@ -163,27 +165,12 @@ public class MultiLogTrackMeasurementPlugin extends MeasurementPlugin {
         return approxTime - (approxTime % interval);
     }
 
-/*
-            final Iterator<Long> it = tl.iterator();
-            final long now = now();
-            while (it.hasNext()) {
-                long time = it.next();
-//                time = roundDownTime(time, 60000);
-log.info("checking time=" + TimeUtil.toString(time) + " against " + TimeUtil.toString(now));
-                if (time + 60000 < now) {
-log.info("remove");
-                    it.remove();
-                }
-            }
-            return (tl.isEmpty()) ? null : tl;
-        }
-*/
-
     private static Long now() {
         return System.currentTimeMillis();
     }
 
-    static void incrementNumLines(String property, String key, int offset) {
+    static void incrementNumLines(String property, String basedir, String logfilepattern, String includepattern, int offset) {
+        String key = basedir + "," + logfilepattern + "," + includepattern;
         Map<String, TimeValuePair> numLines = null;
         synchronized (numLinesPerPattern) {
             numLines = numLinesPerPattern.get(property);

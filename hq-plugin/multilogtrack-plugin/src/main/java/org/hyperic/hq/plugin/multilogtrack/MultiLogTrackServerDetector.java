@@ -130,9 +130,9 @@ public class MultiLogTrackServerDetector extends ServerDetector {
         }
     }
     
-    static List<String> getFilesCached(String logfilepattern, String basedir, boolean resetCache) {
+    static List<String> getFilesCached(String logfilepattern, String basedir, String includePattern, boolean resetCache) {
         synchronized(files) {
-            String key = logfilepattern + "|" + basedir;
+            String key = logfilepattern + "|" + basedir + "|" + includePattern;
             if (resetCache) {
                 files.remove(key);
             }
@@ -189,7 +189,8 @@ public class MultiLogTrackServerDetector extends ServerDetector {
     static String getBasedirAndSetFilesFromCache(ConfigResponse config, Collection<String> files, boolean resetCache) {
         final String logfilepattern = getLogfilepattern(config);
         String basedir = getBasedir(config);
-        files.addAll(getFilesCached(logfilepattern, basedir, resetCache));
+        String includePattern = config.getValue(MultiLogTrackPlugin.INCLUDE_PATTERN, "");
+        files.addAll(getFilesCached(logfilepattern, basedir, includePattern, resetCache));
         return basedir;
     }
 
