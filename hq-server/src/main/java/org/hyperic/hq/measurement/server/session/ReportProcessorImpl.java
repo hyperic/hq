@@ -345,7 +345,7 @@ public class ReportProcessorImpl implements ReportProcessor {
         if (platformRes != null && setPlatformAvail) {
             zEventManager.enqueueEventAfterCommit(new PlatformAvailZevent(platformRes.getId()));
         }
-        sendOutgoingMetricsZevent(dataPoints,availPoints,priorityAvailPts);
+        sendOutgoingMetricsZevent(dataPoints,availPoints,priorityAvailPts);   should be done in the datamanagerimpl/dao and availabilitymanagerimpl / dao instead
     }
 
 //    private void sendOutgoingMetricsZevent(final List<DataPoint> dataPoints, final Map<Integer, Measurement> measMap) {
@@ -360,7 +360,7 @@ public class ReportProcessorImpl implements ReportProcessor {
 //    }
     
     private void sendOutgoingMetricsZevent(final List<DataPoint> dataPoints,final List<DataPoint> availPoints,
-            final List<DataPoint> priorityAvailPts) {
+            final List<DataPoint> priorityAvailPts, final Map<Integer, Measurement> measMap) {
         List<DataPoint> dtps = new ArrayList<DataPoint>();
         dtps.addAll(dataPoints);
         dtps.addAll(availPoints);
