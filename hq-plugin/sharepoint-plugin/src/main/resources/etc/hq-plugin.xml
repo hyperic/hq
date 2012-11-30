@@ -32,7 +32,7 @@
 <plugin package="org.hyperic.hq.plugin.sharepoint">
     <property name="PLUGIN_VERSION" value="@project.version@"/>
     
-    <server name="SharePoint" version="2010">
+    <server name="SharePoint" version="2010" platforms="Win32">
         <property name="version" value="SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\14.0"/>
         <plugin type="measurement" class="SharePointServerMeasurement"/>
         <plugin type="autoinventory" class="SharePointServerDetector"/>
