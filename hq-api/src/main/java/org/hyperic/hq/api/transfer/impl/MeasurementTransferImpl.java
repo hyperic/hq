@@ -143,18 +143,12 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             return null;
         }
         List<Object> hqObjs = this.q.poll(dest);
-        List<MetricValue> hqMetrics = (List<MetricValue>) hqObjs;
-        List<Metric> metrics = this.mapper.toMetrics2(hqMetrics);
+//        List<MetricValue> hqMetrics = (List<MetricValue>) hqObjs;
+        List<Metric> metrics = this.mapper.toMetrics2(hqObjs);
         org.hyperic.hq.api.model.measurements.Measurement msmt = new org.hyperic.hq.api.model.measurements.Measurement();
         msmt.setMetrics(metrics);
         res.add(msmt);
         return res;
-    }
-    public MeasurementResponse getAndRegisterMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest hqMsmtReq, 
-            final String rscId, final Date begin, final Date end) 
-                    throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException, TimeframeSizeException {
-//        register
-        return null;
     }
     public MeasurementResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest hqMsmtReq, 
             final String rscId, final Date begin, final Date end) 

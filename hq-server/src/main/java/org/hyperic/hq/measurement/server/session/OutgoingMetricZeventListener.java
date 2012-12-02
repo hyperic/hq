@@ -1,14 +1,15 @@
 package org.hyperic.hq.measurement.server.session;
 
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 
+import javax.jms.Destination;
+import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.jms.ObjectMessage;
 import javax.annotation.PostConstruct;
 
-import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZeventPayload;
-import org.hyperic.hq.measurement.server.session.ReportProcessorImpl.DummyMsg;
-import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
@@ -30,18 +31,14 @@ public class OutgoingMetricZeventListener implements ZeventListener<OutgoingMetr
     }
     public void processEvents(List<OutgoingMetricsZevent> events) {
         List<MetricValue> metricValues = new ArrayList<MetricValue>();
-        
-        for(OutgoingMetricsZevent event:events) {
-            
-            MetricValue ptp = ((MeasurementZeventPayload) event.getPayload()).getValue();
-//            List<Integer> this.cond.evaluate(ptp);
-//            metricValues.add(ptp);
-            
-            Message msg = new DummyMsg();
-            
-            msg.setJMSDestination();
+        List<ObjectMessage> msgs;
+        try {
+            msgs = this.evaluator.evaluate(metricValues);
+            this.q.publish(msgs);
+        }catch(JMSException e) {
+            e.printStackTrace();
+            RuntimeException r = new RuntimeException(e.getCause());
+            throw r;
         }
-        this.q.publish();
     }
 }
-

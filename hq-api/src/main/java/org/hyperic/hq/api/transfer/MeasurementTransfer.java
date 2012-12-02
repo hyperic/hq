@@ -43,9 +43,6 @@ public interface MeasurementTransfer {
     
     public MeasurementResponse poll(Integer sessionId);
     
-    public MeasurementResponse getAndRegisterMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest measurementRequest,
-            final String rscId, final Date begin, final Date end) throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException, TimeframeSizeException;
-    
     public ResourceMeasurementBatchResponse getAggregatedMetricData(ApiMessageContext apiMessageContext, final ResourceMeasurementRequests hqMsmtReqs, 
             final Date begin, final Date end) 
             throws PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException, SQLException;

@@ -12,6 +12,7 @@ import javax.jms.ObjectMessage;
 
 //import org.hyperic.hq.api.filtering.IFilter;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
+import org.hyperic.hq.product.MetricValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,12 +37,15 @@ public class MetricDestinationEvaluator {
         this.destToFilter.add(dest);
     }
     
-    public List<ObjectMessage> evaluate(List<DataPoint> dtps) {
-        ObjectMessage msg = new DummyMsg();
-        for(DataPoint dtp:dtps) {
-            msg.setJMSDestination(arg0)
+    public List<ObjectMessage> evaluate(List<MetricValue> dtps) throws JMSException {
+        List<ObjectMessage> msgs = new ArrayList<ObjectMessage>();
+        for(Destination dest:destToFilter) {
+            ObjectMessage msg = new DummyMsg();
+            msg.setJMSDestination(dest);
+            msg.setObject((Serializable) dtps);
+            msgs.add(msg);
         }
-        return ;
+        return msgs;
     }
     
     class DummyMsg implements ObjectMessage {
