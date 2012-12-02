@@ -38,10 +38,11 @@ public class MeasurementMapper {
         msmt.setAvg(avg);
         return msmt;
     }
-    public List<Metric> toMetrics2(List<MetricValue> hqMetrics) {
+    public List<Metric> toMetrics2(List<Object> hqObjs) {
         List<Metric> metrics = new ArrayList<Metric>();
-        for (MetricValue hqMetric : hqMetrics) {
+        for (Object hqObj : hqObjs) {
             Metric metric = new Metric();
+            MetricValue hqMetric = (MetricValue) hqObj;
             metric.setValue(Double.valueOf(df.format(hqMetric.getValue())));
             metric.setTimestamp(hqMetric.getTimestamp());
             metrics.add(metric);

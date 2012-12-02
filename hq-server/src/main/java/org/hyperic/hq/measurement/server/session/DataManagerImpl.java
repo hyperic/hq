@@ -607,6 +607,7 @@ public class DataManagerImpl implements DataManager {
             }
 
             zevents.add(new MeasurementZevent(metricId.intValue(), val));
+            zevents.add(new OutgoingMetricsZevent(metricId.intValue(), val));
         }
 
         if (!events.isEmpty()) {
