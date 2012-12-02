@@ -1587,6 +1587,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
                     events.add(event);
                 }
             }
+            zevents.add(new OutgoingMetricsZevent(metricId.intValue(), val));
             zevents.add(new MeasurementZevent(metricId.intValue(), val));
         }
         if (debug)
