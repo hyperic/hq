@@ -596,7 +596,7 @@ public class DataManagerImpl implements DataManager {
         boolean allEventsInteresting = Boolean.getBoolean(ALL_EVENTS_INTERESTING_PROP);
 
         for (DataPoint dp : data) {
-
+ 
             Integer metricId = dp.getMeasurementId();
             MetricValue val = dp.getMetricValue();
             MeasurementEvent event = new MeasurementEvent(metricId, val);
@@ -607,7 +607,6 @@ public class DataManagerImpl implements DataManager {
             }
 
             zevents.add(new MeasurementZevent(metricId.intValue(), val));
-            zevents.add(new OutgoingMetricsZevent(metricId.intValue(), val));
         }
 
         if (!events.isEmpty()) {

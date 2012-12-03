@@ -40,9 +40,6 @@ import javax.jms.Destination;
 
 import org.apache.cxf.jaxrs.ext.search.SearchContext;
 import org.hibernate.ObjectNotFoundException;
-import org.hyperic.hq.api.filtering.IFilter;
-import org.hyperic.hq.api.filtering.IMetricFilter;
-import org.hyperic.hq.api.filtering.IResourceFilter;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
 import org.hyperic.hq.api.model.measurements.Metric;
@@ -59,16 +56,19 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.TimeframeBoundriesException;
 import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
-import org.hyperic.hq.measurement.server.session.MetricDestinationEvaluator;
-import org.hyperic.hq.measurement.server.session.Q;
 import org.hyperic.hq.measurement.server.session.TimeframeSizeException;
 import org.hyperic.hq.measurement.shared.DataManager;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.TemplateManager;
-import org.hyperic.hq.product.MetricValue;
+import org.hyperic.hq.notifications.MetricDestinationEvaluator;
+import org.hyperic.hq.notifications.Q;
+import org.hyperic.hq.notifications.filtering.IFilter;
+import org.hyperic.hq.notifications.filtering.IMetricFilter;
+import org.hyperic.hq.notifications.filtering.IMetricFilterByResource;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -122,18 +122,23 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     
     protected Map<Integer,Destination> sessionToDestination = new HashMap<Integer,Destination>();
     
-    public void register(Integer sessionId, IResourceFilter rscFilter, IMetricFilter metricFilter) {
-//        List<IFilter> userFilters = new ArrayList<IFilter>();
-//        userFilters.add(rscFilter);
-//        userFilters.add(metricFilter);
-        // already registered!
-        if (this.sessionToDestination.containsKey(sessionId)) {
-            return;
+    public void register(Integer sessionId, IMetricFilterByResource metricFilterByRsc, IMetricFilter metricFilter) {
+        List<IFilter<DataPoint>> userFilters = new ArrayList<IFilter<DataPoint>>();
+        if (metricFilterByRsc!=null) {
+            userFilters.add(metricFilterByRsc);
         }
-        Destination dest = new Destination() {};
-        this.sessionToDestination.put(sessionId,dest);
-        this.evaluator.register(dest/*,userFilters*/);
-        this.q.register(dest);
+        if (metricFilter!=null) {
+            userFilters.add(metricFilter);
+        }        
+        // TODO init filters with needed managers to enable them to retrieve filter related data
+        
+        Destination dest = this.sessionToDestination.get(sessionId); 
+        if (dest==null) {
+            dest = new Destination() {};
+            this.sessionToDestination.put(sessionId,dest);
+            this.q.register(dest);
+        }
+        this.evaluator.register(dest,userFilters);
     }
     
     public MeasurementResponse poll(Integer sessionId) {
