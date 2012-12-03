@@ -11955,6 +11955,10 @@ has already been defined.
         </statement>
     </schema-directSQL>  
   </schemaSpec>
+	
+	  <schemaSpec version="3.218" >
+	  	<user-password-upgrader encryption="EAM_PRINCIPAL.PASSWORD" />
+	  </schemaSpec>
 
 </dbupgrade>
 </target>
