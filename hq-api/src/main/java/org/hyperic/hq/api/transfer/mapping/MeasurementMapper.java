@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.hyperic.hq.api.model.measurements.Measurement;
 import org.hyperic.hq.api.model.measurements.Metric;
+import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.product.MetricValue;
@@ -42,7 +43,7 @@ public class MeasurementMapper {
         List<Metric> metrics = new ArrayList<Metric>();
         for (Object hqObj : hqObjs) {
             Metric metric = new Metric();
-            MetricValue hqMetric = (MetricValue) hqObj;
+            DataPoint hqMetric = (DataPoint) hqObj;
             metric.setValue(Double.valueOf(df.format(hqMetric.getValue())));
             metric.setTimestamp(hqMetric.getTimestamp());
             metrics.add(metric);
