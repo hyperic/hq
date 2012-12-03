@@ -25,13 +25,15 @@
 
 package org.hyperic.tools.ant;
 
-import java.io.IOException;
 
-import org.hyperic.util.security.MD5;
+
+import org.springframework.security.authentication.encoding.Md5PasswordEncoder;
+import org.springframework.security.authentication.encoding.ShaPasswordEncoder;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
+
 
 public class CryptoTask extends Task {
 
@@ -49,12 +51,12 @@ public class CryptoTask extends Task {
     public void execute() throws BuildException {
         validateAttributes();
 
-        String encrypted;
-        try {
-            encrypted = MD5.getEncodedDigest(value);
-        } catch (IOException e) {
-            throw new BuildException(e.getMessage(), e);
-        }
+        // TODO: the following code copies the Md5PlusShaPasswordEncoder, which resides in a dependant project.
+        // This class should be moved into this project instead.
+        Md5PasswordEncoder md5PwdEncoder = new Md5PasswordEncoder();
+        ShaPasswordEncoder shaPwdEncoder = new ShaPasswordEncoder(256);
+        String md5Encoded = md5PwdEncoder.encodePassword(value, null);
+        String encrypted = shaPwdEncoder.encodePassword(md5Encoded, null);
 
         Project project = getOwningTarget().getProject();
         project.setNewProperty(property, encrypted);
