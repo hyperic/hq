@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.jms.Destination;
@@ -43,6 +44,8 @@ import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
 import org.hyperic.hq.api.model.measurements.Metric;
+import org.hyperic.hq.api.model.measurements.MetricGroup;
+import org.hyperic.hq.api.model.measurements.RawMetric;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementBatchResponse;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequest;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequests;
@@ -147,12 +150,39 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         if (dest==null) {
             return null;
         }
-        List<Object> hqObjs = this.q.poll(dest);
-//        List<MetricValue> hqMetrics = (List<MetricValue>) hqObjs;
-        List<Metric> metrics = this.mapper.toMetrics2(hqObjs);
-        org.hyperic.hq.api.model.measurements.Measurement msmt = new org.hyperic.hq.api.model.measurements.Measurement();
-        msmt.setMetrics(metrics);
-        res.add(msmt);
+        List<DataPoint> dtps = (List<DataPoint>) this.q.poll(dest);
+        if (dtps.isEmpty()) {
+            return res;
+        }
+        // sort return metrics by measurement
+        Map<Integer,List<DataPoint>> msmtIdToDtp = new HashMap<Integer,List<DataPoint>>();
+        for(DataPoint dtp:dtps) {
+            Integer msmtId = dtp.getMeasurementId();
+            List<DataPoint> dtpsForMsmtId = msmtIdToDtp.get(msmtId);
+            if (dtpsForMsmtId==null) {
+                dtpsForMsmtId = new ArrayList<DataPoint>();
+                msmtIdToDtp.put(msmtId, dtpsForMsmtId);
+            }
+            dtpsForMsmtId.add(dtp);
+        }
+        // extract measurements meta-data as per the dtps on which we got notifications of
+        Set<Integer> msmtIds = msmtIdToDtp.keySet();
+        Map<Integer,Measurement> msmts = this.measurementMgr.findMeasurementsByIds(new ArrayList<Integer>(msmtIds));
+        // build the externalized data model as per what we have collected
+        Set<Entry<Integer,List<DataPoint>>> msmtIdToDtpESet = msmtIdToDtp.entrySet();
+        for(Entry<Integer,List<DataPoint>> msmtIdToDtpE:msmtIdToDtpESet) {
+            MetricGroup metricGrp = new MetricGroup();
+            Integer msmtId = msmtIdToDtpE.getKey();
+            metricGrp.setId(msmtId);
+            Measurement msmt = msmts.get(msmtId);
+            MeasurementTemplate tmpl = msmt.getTemplate();
+            metricGrp.setName(tmpl.getName());
+            metricGrp.setAlias(tmpl.getAlias());
+            List<DataPoint> dtpsForMsmtId = msmtIdToDtpE.getValue();
+            List<RawMetric> metrics = this.mapper.toMetrics2(dtpsForMsmtId);
+            metricGrp.setMetrics(metrics);
+            res.add(metricGrp);
+        }
         return res;
     }
     public MeasurementResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest hqMsmtReq, 

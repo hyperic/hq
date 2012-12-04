@@ -7,10 +7,9 @@ import java.util.List;
 
 import org.hyperic.hq.api.model.measurements.Measurement;
 import org.hyperic.hq.api.model.measurements.Metric;
+import org.hyperic.hq.api.model.measurements.RawMetric;
 import org.hyperic.hq.measurement.server.session.DataPoint;
-import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
-import org.hyperic.hq.product.MetricValue;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -23,8 +22,6 @@ public class MeasurementMapper {
         df.setGroupingUsed(false);
         df.setRoundingMode(RoundingMode.HALF_EVEN);
     }
-    
-    
     
     public Measurement toMeasurement(org.hyperic.hq.measurement.server.session.Measurement hqMsmt) {
         Measurement msmt = new Measurement();
@@ -39,10 +36,10 @@ public class MeasurementMapper {
         msmt.setAvg(avg);
         return msmt;
     }
-    public List<Metric> toMetrics2(List<Object> hqObjs) {
-        List<Metric> metrics = new ArrayList<Metric>();
+    public List<RawMetric> toMetrics2(List<DataPoint> hqObjs) {
+        List<RawMetric> metrics = new ArrayList<RawMetric>();
         for (Object hqObj : hqObjs) {
-            Metric metric = new Metric();
+            RawMetric metric = new RawMetric();
             DataPoint hqMetric = (DataPoint) hqObj;
             metric.setValue(Double.valueOf(df.format(hqMetric.getValue())));
             metric.setTimestamp(hqMetric.getTimestamp());

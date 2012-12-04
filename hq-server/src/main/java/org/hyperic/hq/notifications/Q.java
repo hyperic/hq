@@ -20,7 +20,7 @@ public class Q {
         this.destinations.put(dest, new LinkedBlockingQueue<Object>());
     }
     
-    public List<Object> poll(Destination dest) {
+    public List<?> poll(Destination dest) {
         LinkedBlockingQueue<Object> topic = this.destinations.get(dest);
         List<Object> metrics = new ArrayList<Object>();
         topic.drainTo(metrics);
