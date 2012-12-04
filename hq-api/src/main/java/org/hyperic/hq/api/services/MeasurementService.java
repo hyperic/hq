@@ -51,7 +51,7 @@ public interface MeasurementService {
 	
 	@GET
     @Path("/metrics/poll")
-	public MeasurementResponse poll() throws SessionNotFoundException, SessionTimeoutException;
+	public ResourceMeasurementBatchResponse poll() throws SessionNotFoundException, SessionTimeoutException;
 	
 	@POST
     @Path("/metrics/aggregation")

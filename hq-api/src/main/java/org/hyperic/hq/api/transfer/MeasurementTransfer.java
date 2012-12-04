@@ -41,7 +41,7 @@ public interface MeasurementTransfer {
     
     public void register(Integer sessionId, IMetricFilterByResource rscFilter, IMetricFilter metricFilter);
     
-    public MeasurementResponse poll(Integer sessionId);
+    public ResourceMeasurementBatchResponse poll(Integer sessionId);
     
     public ResourceMeasurementBatchResponse getAggregatedMetricData(ApiMessageContext apiMessageContext, final ResourceMeasurementRequests hqMsmtReqs, 
             final Date begin, final Date end) 
