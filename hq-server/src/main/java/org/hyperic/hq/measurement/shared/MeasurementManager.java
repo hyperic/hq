@@ -91,6 +91,8 @@ public interface MeasurementManager {
 
     public Measurement findMeasurementById(Integer mid);
 
+    public Map<Integer,Measurement> findMeasurementsByIds(final List<Integer> mids);
+    
     /**
      * Remove all measurements no longer associated with a resource.
      * @return The number of Measurement objects removed.
