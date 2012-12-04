@@ -8,15 +8,15 @@ import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.ObjectMessage;
 
-import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.notifications.filtering.FilterChain;
 import org.hyperic.hq.notifications.filtering.IFilter;
+import org.hyperic.hq.notifications.model.MetricNotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MetricDestinationEvaluator extends DestinationEvaluator<DataPoint> {
+public class MetricDestinationEvaluator extends DestinationEvaluator<MetricNotification> {
     public MeasurementManager msmtMgr;
     
     @Autowired
@@ -25,8 +25,8 @@ public class MetricDestinationEvaluator extends DestinationEvaluator<DataPoint> 
     }
 
     @Override
-    protected FilterChain<DataPoint> instantiateFilterChain(Collection<IFilter<DataPoint>> filters) {
-        return new FilterChain<DataPoint>(filters);
+    protected FilterChain<MetricNotification> instantiateFilterChain(Collection<IFilter<MetricNotification>> filters) {
+        return new FilterChain<MetricNotification>(filters);
     }
 }
 

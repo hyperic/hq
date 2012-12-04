@@ -72,6 +72,7 @@ import org.hyperic.hq.notifications.Q;
 import org.hyperic.hq.notifications.filtering.IFilter;
 import org.hyperic.hq.notifications.filtering.IMetricFilter;
 import org.hyperic.hq.notifications.filtering.IMetricFilterByResource;
+import org.hyperic.hq.notifications.model.MetricNotification;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -126,7 +127,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     protected Map<Integer,Destination> sessionToDestination = new HashMap<Integer,Destination>();
     
     public void register(Integer sessionId, IMetricFilterByResource metricFilterByRsc, IMetricFilter metricFilter) {
-        List<IFilter<DataPoint>> userFilters = new ArrayList<IFilter<DataPoint>>();
+        List<IFilter<MetricNotification>> userFilters = new ArrayList<IFilter<MetricNotification>>();
         if (metricFilterByRsc!=null) {
             userFilters.add(metricFilterByRsc);
         }
@@ -150,36 +151,32 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         if (dest==null) {
             return null;
         }
-        List<DataPoint> dtps = (List<DataPoint>) this.q.poll(dest);
-        if (dtps.isEmpty()) {
+        List<MetricNotification> mns = (List<MetricNotification>) this.q.poll(dest);
+        if (mns.isEmpty()) {
             return res;
         }
         // sort return metrics by measurement
-        Map<Integer,List<DataPoint>> msmtIdToDtp = new HashMap<Integer,List<DataPoint>>();
-        for(DataPoint dtp:dtps) {
-            Integer msmtId = dtp.getMeasurementId();
-            List<DataPoint> dtpsForMsmtId = msmtIdToDtp.get(msmtId);
-            if (dtpsForMsmtId==null) {
-                dtpsForMsmtId = new ArrayList<DataPoint>();
-                msmtIdToDtp.put(msmtId, dtpsForMsmtId);
+        Map<Integer,List<MetricNotification>> msmtIdToMn = new HashMap<Integer,List<MetricNotification>>();
+        for(MetricNotification mn:mns) {
+            Integer msmtId = mn.getMeasurementId();
+            List<MetricNotification> mnsForMsmtId = msmtIdToMn.get(msmtId);
+            if (mnsForMsmtId==null) {
+                mnsForMsmtId = new ArrayList<MetricNotification>();
+                msmtIdToMn.put(msmtId, mnsForMsmtId);
             }
-            dtpsForMsmtId.add(dtp);
+            mnsForMsmtId.add(mn);
         }
-        // extract measurements meta-data as per the dtps on which we got notifications of
-        Set<Integer> msmtIds = msmtIdToDtp.keySet();
+        // extract measurements meta-data as per the mns on which we got notifications of
+        Set<Integer> msmtIds = msmtIdToMn.keySet();
         Map<Integer,Measurement> msmts = this.measurementMgr.findMeasurementsByIds(new ArrayList<Integer>(msmtIds));
         // build the externalized data model as per what we have collected
-        Set<Entry<Integer,List<DataPoint>>> msmtIdToDtpESet = msmtIdToDtp.entrySet();
-        for(Entry<Integer,List<DataPoint>> msmtIdToDtpE:msmtIdToDtpESet) {
-            MetricGroup metricGrp = new MetricGroup();
-            Integer msmtId = msmtIdToDtpE.getKey();
-            metricGrp.setId(msmtId);
-            Measurement msmt = msmts.get(msmtId);
-            MeasurementTemplate tmpl = msmt.getTemplate();
-            metricGrp.setName(tmpl.getName());
-            metricGrp.setAlias(tmpl.getAlias());
-            List<DataPoint> dtpsForMsmtId = msmtIdToDtpE.getValue();
-            List<RawMetric> metrics = this.mapper.toMetrics2(dtpsForMsmtId);
+        Set<Entry<Integer,List<MetricNotification>>> msmtIdToMnESet = msmtIdToMn.entrySet();
+        for(Entry<Integer,List<MetricNotification>> msmtIdToMnE:msmtIdToMnESet) {
+            Integer mid = msmtIdToMnE.getKey();
+            Measurement hqMsmt = msmts.get(mid);
+            MetricGroup metricGrp = this.mapper.toMetricGroup(hqMsmt);
+            List<MetricNotification> mn = msmtIdToMnE.getValue();
+            List<RawMetric> metrics = this.mapper.toMetrics2(mn);
             metricGrp.setMetrics(metrics);
             res.add(metricGrp);
         }

@@ -9,10 +9,16 @@ import javax.jms.Message;
 import javax.jms.ObjectMessage;
 import javax.annotation.PostConstruct;
 
+import org.apache.velocity.runtime.resource.ResourceManager;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.measurement.server.session.DataPoint;
+import org.hyperic.hq.measurement.server.session.Measurement;
+import org.hyperic.hq.measurement.server.session.MeasurementManagerImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZeventPayload;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZeventSource;
+import org.hyperic.hq.measurement.shared.MeasurementManager;
+import org.hyperic.hq.notifications.model.MetricNotification;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
@@ -21,14 +27,16 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class OutgoingMetricZeventListener implements ZeventListener<MeasurementZevent> {
+    protected MeasurementManager msmtMgr;
     protected MetricDestinationEvaluator evaluator;
     protected ZeventEnqueuer zEventManager;
     protected Q q;
 
     @Autowired
-    OutgoingMetricZeventListener(Q q,ZeventEnqueuer zEventManager, MetricDestinationEvaluator evaluator) {
+    OutgoingMetricZeventListener(Q q,ZeventEnqueuer zEventManager, MetricDestinationEvaluator evaluator, MeasurementManager msmtMgr) {
         this.zEventManager=zEventManager;
         this.evaluator = evaluator;
+        this.msmtMgr = msmtMgr;
         this.q = q;
     }
     
@@ -37,8 +45,8 @@ public class OutgoingMetricZeventListener implements ZeventListener<MeasurementZ
         zEventManager.addBufferedListener(MeasurementZevent.class, this);
     }
     
-    protected static List<DataPoint> extract(List<MeasurementZevent> events) {
-        List<DataPoint> dtps = new ArrayList<DataPoint>();
+    protected List<MetricNotification> extract(List<MeasurementZevent> events) {
+        List<MetricNotification> dtps = new ArrayList<MetricNotification>();
         for(MeasurementZevent measurementZevent:events) {
             MeasurementZeventSource zEventSource = (MeasurementZeventSource) measurementZevent.getSourceId(); 
             MeasurementZeventPayload zEventPayload = (MeasurementZeventPayload) measurementZevent.getPayload();
@@ -50,14 +58,19 @@ public class OutgoingMetricZeventListener implements ZeventListener<MeasurementZ
             if (zEventPayload!=null) {
                 metricVal = zEventPayload.getValue();
             }
-            DataPoint dtp = new DataPoint(Integer.valueOf(measurementId),metricVal);
+            Integer mid = Integer.valueOf(measurementId);
+            Measurement msmt = this.msmtMgr.getMeasurement(mid);
+            // TODO black list should be here
+            
+            Resource rsc = msmt.getResource();
+            MetricNotification dtp = new MetricNotification(rsc.getId(),mid,metricVal);
             dtps.add(dtp);
         }
         return dtps;
     }
     
     public void processEvents(List<MeasurementZevent> events) {
-        List<DataPoint> dtps = extract(events);
+        List<MetricNotification> dtps = extract(events);
         List<ObjectMessage> msgs;
         try {
             msgs = this.evaluator.evaluate(dtps);
