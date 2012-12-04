@@ -34,7 +34,7 @@ public class MeasurementServiceImpl extends RestApiService implements Measuremen
         Integer sessionId = apiMessageContext.getSessionId();
         measurementTransfer.register(sessionId, null, null);
     }
-    public MeasurementResponse poll() throws SessionNotFoundException, SessionTimeoutException {
+    public ResourceMeasurementBatchResponse poll() throws SessionNotFoundException, SessionTimeoutException {
         ApiMessageContext apiMessageContext = newApiMessageContext();
         Integer sessionId = apiMessageContext.getSessionId();
         return measurementTransfer.poll(sessionId);

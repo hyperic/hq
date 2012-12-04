@@ -29,6 +29,7 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -145,8 +146,8 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         this.evaluator.register(dest,userFilters);
     }
     
-    public MeasurementResponse poll(Integer sessionId) {
-        MeasurementResponse res = new MeasurementResponse();
+    public ResourceMeasurementBatchResponse poll(Integer sessionId) {
+        ResourceMeasurementBatchResponse res = new ResourceMeasurementBatchResponse();
         Destination dest = this.sessionToDestination.get(sessionId);
         if (dest==null) {
             return null;
@@ -155,31 +156,47 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         if (mns.isEmpty()) {
             return res;
         }
-        // sort return metrics by measurement
-        Map<Integer,List<MetricNotification>> msmtIdToMn = new HashMap<Integer,List<MetricNotification>>();
+        // map metrics notifications per measurement & resource
+        Map<Integer,Map<Integer,List<MetricNotification>>> rscIdToMsmtIdToMn = new HashMap<Integer,Map<Integer,List<MetricNotification>>>();
+        Set<Integer> overallMsmtIds = new HashSet<Integer>();  
         for(MetricNotification mn:mns) {
-            Integer msmtId = mn.getMeasurementId();
-            List<MetricNotification> mnsForMsmtId = msmtIdToMn.get(msmtId);
+            Integer rid = mn.getResourceId();
+            Map<Integer,List<MetricNotification>> msmtIdToMn = rscIdToMsmtIdToMn.get(rid);
+            if(msmtIdToMn==null) {
+                msmtIdToMn = new HashMap<Integer,List<MetricNotification>>();
+                rscIdToMsmtIdToMn.put(rid,msmtIdToMn);
+            }
+            Integer mid = mn.getMeasurementId();
+            overallMsmtIds.add(mid);
+            List<MetricNotification> mnsForMsmtId = msmtIdToMn.get(mid);
             if (mnsForMsmtId==null) {
                 mnsForMsmtId = new ArrayList<MetricNotification>();
-                msmtIdToMn.put(msmtId, mnsForMsmtId);
+                msmtIdToMn.put(mid, mnsForMsmtId);
             }
             mnsForMsmtId.add(mn);
         }
         // extract measurements meta-data as per the mns on which we got notifications of
-        Set<Integer> msmtIds = msmtIdToMn.keySet();
-        Map<Integer,Measurement> msmts = this.measurementMgr.findMeasurementsByIds(new ArrayList<Integer>(msmtIds));
+        Map<Integer,Measurement> msmtIdToMsmt = this.measurementMgr.findMeasurementsByIds(new ArrayList<Integer>(overallMsmtIds));
         // build the externalized data model as per what we have collected
-        Set<Entry<Integer,List<MetricNotification>>> msmtIdToMnESet = msmtIdToMn.entrySet();
-        for(Entry<Integer,List<MetricNotification>> msmtIdToMnE:msmtIdToMnESet) {
-            Integer mid = msmtIdToMnE.getKey();
-            Measurement hqMsmt = msmts.get(mid);
-            MetricGroup metricGrp = this.mapper.toMetricGroup(hqMsmt);
-            List<MetricNotification> mn = msmtIdToMnE.getValue();
-            List<RawMetric> metrics = this.mapper.toMetrics2(mn);
-            metricGrp.setMetrics(metrics);
-            res.add(metricGrp);
+        Set<Entry<Integer,Map<Integer,List<MetricNotification>>>> rscIdToMsmtIdToMnESet = rscIdToMsmtIdToMn.entrySet();
+        for(Entry<Integer,Map<Integer,List<MetricNotification>>> rscIdToMsmtIdToMnE:rscIdToMsmtIdToMnESet) {
+            Integer rid = rscIdToMsmtIdToMnE.getKey();
+            ResourceMeasurementResponse rscRes = new ResourceMeasurementResponse();
+            rscRes.setRscId(String.valueOf(rid));
+            Map<Integer,List<MetricNotification>> msmtIdToMn = rscIdToMsmtIdToMnE.getValue();
+            Set<Entry<Integer,List<MetricNotification>>> msmtIdToMnESet =  msmtIdToMn.entrySet();
+            for(Entry<Integer,List<MetricNotification>> msmtIdToMnE:msmtIdToMnESet) {
+                Integer mid = msmtIdToMnE.getKey();
+                Measurement hqMsmt = msmtIdToMsmt.get(mid);
+                MetricGroup metricGrp = this.mapper.toMetricGroup(hqMsmt);
+                List<MetricNotification> mn = msmtIdToMnE.getValue();
+                List<RawMetric> metrics = this.mapper.toMetrics2(mn);
+                metricGrp.setMetrics(metrics);
+                rscRes.add(metricGrp);
+            }            
+            res.addResponse(rscRes);
         }
+
         return res;
     }
     public MeasurementResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest hqMsmtReq, 
