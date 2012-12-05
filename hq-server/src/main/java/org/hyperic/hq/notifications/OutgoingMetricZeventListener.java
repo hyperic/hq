@@ -3,17 +3,12 @@ package org.hyperic.hq.notifications;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.jms.Destination;
 import javax.jms.JMSException;
-import javax.jms.Message;
 import javax.jms.ObjectMessage;
 import javax.annotation.PostConstruct;
 
-import org.apache.velocity.runtime.resource.ResourceManager;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.server.session.Measurement;
-import org.hyperic.hq.measurement.server.session.MeasurementManagerImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZeventPayload;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZeventSource;
