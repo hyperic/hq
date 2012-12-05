@@ -36,7 +36,23 @@
 </jsu:script>
 <c:set var="entityId" value="${Resource.entityId}"/>
 <c:set var="eid" value="${Resource.entityId.appdefKey}"/>
-<c:set var="view" value="${param.view}"/>
+<c:set var="view1" value="${param.view}"/>
+<c:if test="${empty view1}">
+  <c:set var="view1" value="default"/>
+</c:if>
+<c:set var="view" value="default"/>
+<c:choose>
+  <c:when test="${view1 == 'default'}">
+    <c:set var="view" value="default"/>
+  </c:when>
+  <c:when test="${view1 == 'list'}">
+    <c:set var="view" value="list"/>
+  </c:when>
+  <c:when test="${view1 == 'chart'}">
+    <c:set var="view" value="chart"/>
+  </c:when>
+</c:choose>
+
 <c:set var="mode" value="${param.mode}"/>
 <c:if test="${empty mode}">
   <c:set var="mode" value="currentHealth"/>
@@ -93,7 +109,7 @@
           <tiles:put name="mode" beanName="mode"/>
           <tiles:put name="eid" beanName="eid"/>
           <c:if test="${not empty view}">
-            <tiles:put name="view" beanName="view"/>
+            	<tiles:put name="view" beanName="view"/>
           </c:if>
           </tiles:insert>
       </html:form>
@@ -107,7 +123,7 @@
             action="/resource/common/monitor/visibility/SelectResources.do">
             <input type="hidden" name="eid" value="<c:out value="${eid}"/>">
           <c:if test="${not empty view}">
-            <input type="hidden" name="view" value="<c:out value="${view}"/>">
+            <input type="hidden" name="view" value="<c:out value="${view}"/>"/>">
           </c:if>
             <html:hidden property="mode"/>
             
