@@ -37,14 +37,7 @@
         <plugin type="measurement" class="SharePointServerMeasurement"/>
         <plugin type="autoinventory" class="SharePointServerDetector"/>
         
-        <config>
-            <option name="sharepoint.mainUrl" description="Main SharePoint URL" default="http://localhost:80/"/>
-            <option name="sharepoint.user" description="User name" optional="true"/>
-            <option name="sharepoint.password" description="Password" optional="true"/>
-        </config>
-
-        <metric name="Availability" alias="Availability" template="web:url=%sharepoint.mainUrl%,user=%sharepoint.user%,password=%sharepoint.password%:${alias}"/>
-        <metric name="Response Time" alias="responsetime" template="web:url=%sharepoint.mainUrl%,user=%sharepoint.user%,password=%sharepoint.password%:${alias}" indicator="true"/>
+        <metric name="Availability" alias="Availability" template="pdh:SharePoint Foundation(_total)\Process ID:${alias}" indicator="true" category="AVAILABILITY"/>
         <filter name="template" value="pdh:SharePoint Foundation(_total):${name}"/>
         <metric name="Template Cache Average Record Age"/>
         <metric name="Template Cache Total Records Evicted"/>
@@ -88,10 +81,10 @@
         <service name="Webserver">
             <plugin type="measurement" class="SharePointServerMeasurement"/>
             <config>
-                <option name="url" description="Main SharePoint URL" default="http://localhost:80/"/>
+                <option name="url" description="Webserver URL" default="http://localhost:80/"/>
             </config>
-            <metric name="Availability" alias="Availability" template="web:url=%url%,user=%sharepoint.user%,password=%sharepoint.password%:${alias}"/>
-            <metric name="Response Time" alias="responsetime" template="web:url=%url%,user=%sharepoint.user%,password=%sharepoint.password%:${alias}"/>
+            <metric name="Availability" alias="Availability" template="web:url=%url%:${alias}" indicator="true"/>
+            <metric name="Response Time" alias="responsetime" template="web:url=%url%:${alias}" indicator="true"/>
         </service>
         
         <service name="WindowsService">
@@ -100,17 +93,17 @@
                 <option name="service_name" description="Service name"/>
             </config>
             <filter name="service.ptql" value="Pid.Service.eq=%service_name%"/>
-            <metric name="Availability" alias="Availability" template="win32:Type=Availability,Service=%service_name%:${alias}" category="AVAILABILITY" units="percentage" collectionType="dynamic"/>
+            <metric name="Availability" alias="Availability" template="win32:Type=Availability,Service=%service_name%:${alias}" indicator="true" category="AVAILABILITY" units="percentage" collectionType="dynamic"/>
             <metric name="Start Type" template="win32:Service=%service_name%:${alias}" collectionType="static"/>
-            <metric name="Memory Size" alias="MemSize" template="sigar:Type=ProcMem,Arg=${service.ptql}:Size" category="UTILIZATION" units="B" collectionType="dynamic"/>
+            <metric name="Memory Size" alias="MemSize" template="sigar:Type=ProcMem,Arg=${service.ptql}:Size" indicator="true" category="UTILIZATION" units="B" collectionType="dynamic"/>
             <metric name="Resident Memory Size" alias="ResidentMemSize" template="sigar:Type=ProcMem,Arg=${service.ptql}:Resident" category="UTILIZATION" units="B" collectionType="dynamic"/>
             <metric name="Cpu System Time" alias="SystemTime" template="sigar:Type=ProcTime,Arg=${service.ptql}:Sys" category="UTILIZATION" units="ms" collectionType="trendsup"/>
             <metric name="Cpu User Time" alias="UserTime" template="sigar:Type=ProcTime,Arg=${service.ptql}:User" category="UTILIZATION" units="ms" collectionType="trendsup"/>
-            <metric name="Cpu Total Time" alias="TotalTime" template="sigar:Type=ProcTime,Arg=${service.ptql}:Total" category="UTILIZATION" units="ms" collectionType="trendsup"/>
-            <metric name="Cpu Usage" alias="Usage" template="sigar:Type=ProcCpu,Arg=${service.ptql}:Percent" category="UTILIZATION" units="percentage" collectionType="dynamic"/>
+            <metric name="Cpu Total Time" alias="TotalTime" template="sigar:Type=ProcTime,Arg=${service.ptql}:Total" indicator="true" category="UTILIZATION" units="ms" collectionType="trendsup"/>
+            <metric name="Cpu Usage" alias="Usage" template="sigar:Type=ProcCpu,Arg=${service.ptql}:Percent" indicator="true" category="UTILIZATION" units="percentage" collectionType="dynamic"/>
             <metric name="Start Time" alias="StartTime" template="sigar:Type=ProcTime,Arg=${service.ptql}:StartTime" units="epoch-millis" collectionType="static"/>
             <metric name="Open Handles" alias="OpenHandles" template="sigar:Type=ProcFd,Arg=${service.ptql}:Total" category="UTILIZATION" units="none" collectionType="dynamic"/>
-            <metric name="Threads" template="sigar:Type=ProcState,Arg=${service.ptql}:Threads"/>
+            <metric name="Threads" template="sigar:Type=ProcState,Arg=${service.ptql}:Threads" indicator="true"/>
         </service>
         
         <service name="Records Management Counters">
