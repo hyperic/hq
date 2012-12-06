@@ -34,9 +34,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UTFDataFormatException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.security.KeyStoreException;
@@ -45,51 +46,58 @@ import java.security.UnrecoverableEntryException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentKeystoreConfig;
 import org.hyperic.hq.agent.db.DiskList;
+import org.hyperic.hq.agent.stats.AgentStatsCollector;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.file.FileUtil;
 import org.hyperic.util.security.KeystoreConfig;
 import org.hyperic.util.security.KeystoreManager;
 import org.hyperic.util.security.SecurityUtil;
 import org.jasypt.encryption.pbe.PooledPBEStringEncryptor;
-import org.jasypt.properties.PropertyValueEncryptionUtils;
 
 public class AgentDListProvider implements AgentStorageProvider {
+    private static final Log log = LogFactory.getLog(AgentDListProvider.class);
     private static final int RECSIZE  = 4000;
     private static final int OLD_RECSIZE = 1024;
     private static final long MAXSIZE = 50 * 1024 * 1024; // 50MB
     private static final long CHKSIZE = 10 * 1024 * 1024;  // 10MB
     private static final int CHKPERC  = 50; // Only allow < 50% free
-    private static final String DEFAULT_PRIVATE_KEY_KEY = "hq";
 
-    private final Log      log;        // da logger
-    private HashMap  keyVals;    // The key-value pairs
-    private HashMap  lists;      // Names onto DiskList objects
-    private HashMap  overloads;
-    private File     writeDir;   // Dir to write stuff to
-    private File     keyValFile;
-    private File     keyValFileBackup;
+    private final AgentStatsCollector agentStatsCollector = AgentStatsCollector.getInstance();
+    private AtomicBoolean shutdown = new AtomicBoolean(false);
+    private HashMap<EncVal, EncVal>  keyVals;
+    private HashMap<String, DiskList>  lists;
+    private HashMap<String, ListInfo> overloads;
+    private File writeDir;
+    private File keyValFile;
+    private File keyValFileBackup; 
     
     // Dirty flag for when writing to keyvals.  Set to true at startup
     // to force an initial flush.
-    private boolean  keyValDirty = true;      // Dirty flag for when writing to keyvals
+    private AtomicBoolean keyValDirty = new AtomicBoolean(true);      // Dirty flag for when writing to keyvals
 
-    private long      maxSize = MAXSIZE;
-    private long      chkSize = CHKSIZE;
-    private int       chkPerc = CHKPERC;
+    private long maxSize = MAXSIZE;
+    private long chkSize = CHKSIZE;
+    private int chkPerc = CHKPERC;
 
-    private PooledPBEStringEncryptor encryptor = null;
+    private final PooledPBEStringEncryptor encryptor;
     
-    public AgentDListProvider(){
-        this.log     = LogFactory.getLog(AgentDListProvider.class);
-        this.keyVals = null;
-        this.lists   = null;
+    public AgentDListProvider() {
+        keyVals = null;
+        lists   = null;
+        try {
+            encryptor = createEncryptor();
+        } catch (Exception e) {
+            throw new SystemException(e);
+        }
     }
 
     protected PooledPBEStringEncryptor createEncryptor() throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, IOException {
@@ -106,8 +114,7 @@ public class AgentDListProvider implements AgentStorageProvider {
      * @return A string describing the functionality of the object.
      */
     public String getDescription(){
-        return "Agent D-list provider.  Data is written to data/idx files " +
-                "for lists, and a single file for key/values";
+        return "Agent D-list provider.  Data is written to data/idx files for lists, and a single file for key/values";
     }
 
     private DiskList intrCreateList(String name, int recSize) throws IOException {
@@ -120,32 +127,27 @@ public class AgentDListProvider implements AgentStorageProvider {
             _chkSize = info.chkSize;
             _chkPerc = info.chkPerc;
         }
-        return new DiskList(new File(this.writeDir, name),
-                recSize, _chkSize, _chkPerc, _maxSize);
+        return new DiskList(new File(this.writeDir, name), recSize, _chkSize, _chkPerc, _maxSize);
     }
-    
-
 
     /**
      * Create a list of non-standard record size.
      */
-    public void createList(String name, int recSize)
-            throws AgentStorageException
-            {
+    public void createList(String name, int recSize) throws AgentStorageException {
         try {
             DiskList dList = intrCreateList(name, recSize);
-            this.lists.put(name, dList);
+            lists.put(name, dList);
         } catch (IOException e) {
-            throw new AgentStorageException("Unable to create DiskList: " + 
-                    e.getMessage());
+            AgentStorageException toThrow = new AgentStorageException("Unable to create DiskList: " +  e);
+            toThrow.initCause(e);
+            throw toThrow;
         }
-            }
+    }
 
     private ListInfo parseInfo(String info) throws AgentStorageException {
         StringTokenizer st = new StringTokenizer(info, ":");
         if (st.countTokens() != 4) {
-            throw new AgentStorageException(info + " is an invalid agent " +
-                    "disklist configuration");
+            throw new AgentStorageException(info + " is an invalid agent disklist configuration");
         }
         String s = st.nextToken().trim();
         long factor;
@@ -154,8 +156,7 @@ public class AgentDListProvider implements AgentStorageProvider {
         } else if ("k".equalsIgnoreCase(s)) {
             factor = 1024;
         } else {
-            throw new AgentStorageException(info + " is an invalid agent " +
-                    "disklist configuration");
+            throw new AgentStorageException(info + " is an invalid agent disklist configuration");
         }
         ListInfo listInfo = new ListInfo();
         try {
@@ -183,21 +184,21 @@ public class AgentDListProvider implements AgentStorageProvider {
      * @param key    Key of the value to set.
      * @param value  Value to set for 'key'.
      */
-    public void setValue(String key, String value){
-        if(value == null){
-            this.log.debug("Removing '" + key + "' from storage");
-            synchronized(this.keyVals){
-                this.keyVals.remove(key);
+    public void setValue(String key, String value) {
+        final boolean debug = log.isDebugEnabled();
+        if(value == null) {
+            if (debug) log.debug("Removing '" + key + "' from storage");
+            synchronized(keyVals){
+                keyVals.remove(key);
             }
         } else {
-            this.log.debug("Setting '" + key + "' to '" + value + "'");
-            synchronized(this.keyVals){
-                this.keyVals.put(key, value);
+            if (debug) log.debug("Setting '" + key + "' to '" + value + "'");
+            synchronized(keyVals){
+                keyVals.put(new EncVal(encryptor, key), new EncVal(encryptor, value));
             }
         }
-
         // After call to setValue() set dirty flag for flush to storage
-        this.keyValDirty = true;
+        keyValDirty.set(true);
     }
 
     /**
@@ -207,23 +208,25 @@ public class AgentDListProvider implements AgentStorageProvider {
      *
      * @return The value associated with the key for the subsystem.
      */
-    public String getValue(String key){
-        String res;
-
-        synchronized(this.keyVals){
-            res = (String)this.keyVals.get(key);
+    public String getValue(String key) {
+        String res = null;
+        synchronized(keyVals){
+            EncVal encVal = keyVals.get(new EncVal(encryptor, key));
+            res = encVal == null ? null : encVal.getVal();
         }
         if(log.isDebugEnabled()){
-            this.log.debug("Got " + key + "='" + res + "'");
+            log.debug("Got " + key + "='" + res + "'");
         }
         return res;
     }
 
-    public Set getKeys(){ 
+    public Set<String> getKeys(){ 
         //copy keys to avoid possible ConcurrentModificationException
-        HashSet set = new HashSet();
-        synchronized(this.keyVals){
-            set.addAll(this.keyVals.keySet()); 
+        Set<String> set = new HashSet<String>();
+        synchronized(keyVals){
+            for (EncVal v : keyVals.keySet()) {
+                set.add(v.getVal());
+            }
         }
         return set;
     }
@@ -232,80 +235,95 @@ public class AgentDListProvider implements AgentStorageProvider {
         KeystoreConfig keystoreConfig = new AgentKeystoreConfig();
         KeyStore keystore = KeystoreManager.getKeystoreManager().getKeyStore(keystoreConfig);
         KeyStore.Entry e = keystore.getEntry(keystoreConfig.getAlias(), new KeyStore.PasswordProtection(keystoreConfig.getFilePassword().toCharArray()));
-        if(e == null) { 
+        if (e == null) { 
             throw new UnrecoverableEntryException("Encryptor password generation failure: No such alias") ; 
-        }//EO if no private key was found 
-        
+        }
+// XXX scottmf - I'm a bit concerned about this.  I tested the upgrade path on the agent on the new code with the
+// ByteBuffer and it doesn't work, the agent throws a org.jasypt.exceptions.EncryptionOperationNotPossibleException.
+// When I put back the old code with the replaceAll() everything works.
+//final String p = ((PrivateKeyEntry)e).getPrivateKey().toString();
+//return p.replaceAll("[^a-zA-Z0-9]", "_");
         byte[] pk = ((PrivateKeyEntry)e).getPrivateKey().getEncoded();
         ByteBuffer encryptionKey = Charset.forName("US-ASCII").encode(ByteBuffer.wrap(pk).toString());
         return encryptionKey.toString();
     }
     
-    //synchronized because concurrent threads cannot
-    //have this.keyValFile open for writing on win32
-    public synchronized void flush()
-            throws AgentStorageException
-            {
-        BufferedOutputStream bOs;
-        FileOutputStream fOs = null;
-        DataOutputStream dOs;
+    public synchronized void flush() throws AgentStorageException {
+        flush(false);
+    }
 
-        if (! this.keyValDirty)
+    private synchronized void flush(boolean toShutdown) throws AgentStorageException {
+        if (shutdown.get() && !toShutdown) {
             return;
-
+        }
+        final long start = System.currentTimeMillis();
+        BufferedOutputStream bOs = null;
+        FileOutputStream fOs = null;
+        DataOutputStream dOs = null;
+        if (!keyValDirty.get()) {
+            return;
+        }
+        Entry<EncVal, EncVal> curr = null;
         try {
-            fOs = new FileOutputStream(this.keyValFile);
+            fOs = new FileOutputStream(keyValFile);
             bOs = new BufferedOutputStream(fOs);
             dOs = new DataOutputStream(bOs);
-            if (this.encryptor==null) {
-                this.encryptor = createEncryptor();
-            }
-            synchronized(this.keyVals){
-                dOs.writeLong(this.keyVals.size());
-                
-                for(Iterator i=this.keyVals.entrySet().iterator(); 
-                        i.hasNext();
-                        )
-                {
-                    Map.Entry ent = (Map.Entry)i.next();
-                    String key = (String)ent.getKey(),
-                            value = (String)ent.getValue();
-
-                    String encryptedKey = SecurityUtil.encrypt(this.encryptor, key);
-                    String encryptedVal =  SecurityUtil.encrypt(this.encryptor, value);
-
-                    dOs.writeUTF(encryptedKey);
-                    dOs.writeUTF(encryptedVal);
+            synchronized(keyVals){
+                dOs.writeLong(keyVals.size());
+                for (Entry<EncVal, EncVal> entry : keyVals.entrySet()) {
+                    curr = entry;
+                    String encKey = entry.getKey().getEnc();
+                    String encVal = entry.getValue().getEnc();
+                    dOs.writeUTF(encKey);
+                    dOs.writeUTF(encVal);
                 }
-
-                dOs.flush();
-
-                // After successful write, clear dirty flag.
-                this.keyValDirty = false;
             }
-        } catch(IOException exc){
-            this.log.error("Error flushing data", exc);
-            throw new AgentStorageException("Error flushing data: " +
-                    exc.getMessage());
-        } catch (GeneralSecurityException e) {
-            throw new AgentStorageException(e.getMessage());
+        } catch(UTFDataFormatException e) {
+            if (curr != null) {
+                log.error("error writing key=" + curr.getKey().getVal() + ", value=" + curr.getValue().getVal(), e);
+            } else {
+                log.error(e,e);
+            }
+        } catch(IOException e) {
+            log.error("Error flushing data", e);
+            AgentStorageException toThrow = new AgentStorageException("Error flushing data: " + e);
+            toThrow.initCause(e);
+            throw toThrow;
         } finally {
-            try {if(fOs != null)fOs.close();} catch(IOException exc){}
+            close(dOs);
+            close(bOs);
+            // After successful write, clear dirty flag.
+            keyValDirty.set(false);
+            close(fOs);
         }
 
         // After successful flush, update backup copy
         try {
-            synchronized(this.keyVals){
+            synchronized(keyVals){
                 FileUtil.copyFile(this.keyValFile, this.keyValFileBackup);
             }
         } catch (FileNotFoundException e) {
-            // Should never happen
+            log.warn(e);
+            log.debug(e,e);
         } catch (IOException e) {
-            this.log.error("Error backing up keyvals", e);
-            throw new AgentStorageException("Error backing up keyvals: " +
-                    e.getMessage());
+            log.error("Error backing up keyvals", e);
+            AgentStorageException toThrow = new AgentStorageException("Error backing up keyvals: " + e);
+            toThrow.initCause(e);
+            throw toThrow;
         }
+        agentStatsCollector.addStat(System.currentTimeMillis() - start, AgentStatsCollector.DISK_LIST_KEYVALS_FLUSH_TIME);
+    }
+
+    private void close(OutputStream os) {
+        try {
+            if (os != null) {
+                os.flush();
+                os.close();
             }
+        } catch (IOException e) {
+            log.error(e,e);
+        }
+    }
 
     /**
      * DList info string is a series of properties seperated by '|'
@@ -317,9 +335,7 @@ public class AgentDListProvider implements AgentStorageProvider {
      *
      * Default is 'data|20|50'
      */
-    public void init(String info)
-            throws AgentStorageException 
-            {
+    public void init(String info) throws AgentStorageException  {
         BufferedInputStream bIs;
         FileInputStream fIs = null;
         DataInputStream dIs;
@@ -328,15 +344,14 @@ public class AgentDListProvider implements AgentStorageProvider {
         // Parse out configuration
         StringTokenizer st = new StringTokenizer(info, "|");
         if (st.countTokens() != 5) {
-            throw new AgentStorageException(info + " is an invalid agent" +
-                    " storage provider configuration");
+            throw new AgentStorageException(info + " is an invalid agent storage provider configuration");
         }
 
-        this.keyVals    = new HashMap();
-        this.lists      = new HashMap();
-        overloads       = new HashMap();
-        String dir      = st.nextToken();
-        this.writeDir   = new File(dir);
+        keyVals = new HashMap<EncVal, EncVal>();
+        lists = new HashMap<String, DiskList>();
+        overloads = new HashMap<String, ListInfo>();
+        String dir = st.nextToken();
+        this.writeDir = new File(dir);
         this.keyValFile = new File(writeDir, "keyvals");
         this.keyValFileBackup = new File(writeDir, "keyvals.backup");
 
@@ -347,8 +362,7 @@ public class AgentDListProvider implements AgentStorageProvider {
         } else if ("k".equalsIgnoreCase(s)) {
             factor = 1024;
         } else {
-            throw new AgentStorageException(info + " is an invalid agent" +
-                    " storage provider configuration");
+            throw new AgentStorageException(info + " is an invalid agent storage provider configuration");
         }
         try {
             maxSize = Long.parseLong(st.nextToken().trim()) * factor;
@@ -372,86 +386,73 @@ public class AgentDListProvider implements AgentStorageProvider {
             fIs = new FileInputStream(this.keyValFile);
             bIs = new BufferedInputStream(fIs);
             dIs = new DataInputStream(bIs);
-
             nEnts = dIs.readLong();
-
-            if (this.encryptor==null) {
-                this.encryptor = createEncryptor();
-            }
             while(nEnts-- != 0){
-                String key = dIs.readUTF();
-                String val = dIs.readUTF();
-                
-                String decryptedKey = PropertyValueEncryptionUtils.isEncryptedValue(key)?SecurityUtil.decryptRecursiveUnmark(encryptor, key):key;
-                String decryptedVal = PropertyValueEncryptionUtils.isEncryptedValue(val)?SecurityUtil.decryptRecursiveUnmark(encryptor, val):val;
-
-                this.keyVals.put(decryptedKey, decryptedVal);
+                String encKey = dIs.readUTF();
+                String encVal = dIs.readUTF();
+                String key = SecurityUtil.isMarkedEncrypted(encKey) ? SecurityUtil.decrypt(encryptor, encKey) : encKey;
+                String val = SecurityUtil.isMarkedEncrypted(encVal) ? SecurityUtil.decrypt(encryptor, encVal) : encKey;
+                this.keyVals.put(new EncVal(encryptor, key, encKey), new EncVal(encryptor, val, encVal));
             }
-        } catch(FileNotFoundException exc){
+        } catch(FileNotFoundException exc) {
             // Normal when it doesn't exist
-        } catch (GeneralSecurityException e) {
-            this.log.error(e.getMessage());
-            throw new AgentStorageException(e.getMessage());
+            log.debug("file not found (this is ok): " + exc);
         } catch(IOException exc){
-            this.log.error("Error reading " + this.keyValFile + " loading " +
-                    "last known good version");
-
+            log.error("Error reading " + this.keyValFile + " loading " + "last known good version");
             // Close old stream
-            try {if(fIs != null)fIs.close();} catch(IOException e){}
-
+            close(fIs);
             // Fall back to last known good keyvals file
             try {
                 fIs = new FileInputStream(this.keyValFileBackup);
                 bIs = new BufferedInputStream(fIs);
                 dIs = new DataInputStream(bIs);
-
                 nEnts = dIs.readLong();
-                if (this.encryptor==null) {
-                    this.encryptor = createEncryptor();
-                }
-                while(nEnts-- != 0) { 
-                    String key = dIs.readUTF(),
-                            val = dIs.readUTF();
-                    String decryptedKey = SecurityUtil.encrypt(this.encryptor, key);
-                    String decryptedVal = SecurityUtil.encrypt(this.encryptor, val);
-                    this.keyVals.put(decryptedKey, decryptedVal);
+                while (nEnts-- != 0) {
+                    String encKey = dIs.readUTF();
+                    String encVal = dIs.readUTF();
+                    String key = SecurityUtil.encrypt(this.encryptor, encKey);
+                    String val = SecurityUtil.encrypt(this.encryptor, encVal);
+                    this.keyVals.put(new EncVal(encryptor, key, encKey), new EncVal(encryptor, val, encVal));
                 }
             } catch (FileNotFoundException e) {
-                this.log.error(e.getMessage());
-                // Already checked this before, shouldn't happen
+                log.warn(e);
+                log.debug(e,e);
             } catch (IOException e) {
-                this.log.error(e.getMessage());
-                // Throw original error
-                throw new AgentStorageException("Error reading " + 
-                        this.keyValFile + ": " +
-                        e.getMessage());
-            
-            } catch(GeneralSecurityException e){
-                this.log.error(e.getMessage());
-                // Throw original error
-                throw new AgentStorageException(e.getMessage());
+                AgentStorageException toThrow = new AgentStorageException("Error reading " +  this.keyValFile + ": " + e);
+                toThrow.initCause(e);
+                throw toThrow;
             }
-    } finally {
-            try {if(fIs != null)fIs.close();} catch(IOException exc){}
+        } finally {
+            close(fIs);
         }
+    }
+
+    private void close(FileInputStream fIs) {
+        try {
+            if(fIs != null) {
+                fIs.close();
             }
+        } catch(IOException e){
+            log.debug(e,e);
+        }
+    }
 
     public void dispose(){
-        try {
-            this.flush();
-        } catch(Exception exc){
-            this.log.error("Error flushing key/vals storage", exc);
+        if (shutdown.get()) {
+            return;
         }
-
-        for(Iterator i=this.lists.entrySet().iterator(); i.hasNext(); ){
-            Map.Entry ent = (Map.Entry)i.next();
-            DiskList dl = (DiskList)ent.getValue();
-
+        try {
+            shutdown.set(true);
+            flush(true);
+        } catch(Exception exc){
+            log.error("Error flushing key/vals storage", exc);
+        }
+        for (final Entry<String, DiskList> entry : lists.entrySet()) {
             try {
+                DiskList dl = entry.getValue();
                 dl.close();
             } catch(Exception exc){
-                this.log.error("Unable to dispose of disk list '" +
-                        ent.getKey() + "'", exc);
+                log.error("Unable to dispose of disk list '" + entry.getKey() + "'", exc);
             }
         }
 
@@ -459,25 +460,32 @@ public class AgentDListProvider implements AgentStorageProvider {
 
     /*** LIST FUNCTIONALITY ***/
 
-    public void addToList(String listName, String value)
-            throws AgentStorageException
-            {
+    public void addToList(String listName, String value) throws AgentStorageException {
+        if (shutdown.get()) {
+            return;
+        }
         DiskList dList = getDiskList(listName);
         if (null == dList) {
-            log.error("Error adding data , cannot read list '" + listName + "' " +
-                    "from storage");
+            log.error("Error adding data , cannot read list '" + listName + "' from storage");
             return;
         }
         try {
+            if (log.isDebugEnabled()) {
+                log.debug("adding value to list=" + listName + ", value=" + value);
+            }
             dList.addToList(value);
         } catch(IOException exc){
-            this.log.error("Error adding to list '" + listName + "'", exc);
-            throw new AgentStorageException("Error adding data to list: " +
-                    exc.getMessage());
+            log.error("Error adding to list '" + listName + "'", exc);
+            AgentStorageException toThrow = new AgentStorageException("Error adding data to list: " + exc);
+            toThrow.initCause(exc);
+            throw toThrow;
         }
-            }
+    }
 
     public void removeFromList(String listName, long recNumber) throws AgentStorageException {
+        if (shutdown.get()) {
+            return;
+        }
         DiskList dList = getDiskList(listName);
         if (null == dList) {
             log.error("Error removing data , cannot read list '" + listName + "' " +
@@ -487,13 +495,17 @@ public class AgentDListProvider implements AgentStorageProvider {
         try {
             dList.removeRecord(recNumber);
         } catch(IOException exc){
-            this.log.error("Error deleting from list '" + listName + "'", exc);
-            throw new AgentStorageException("Error deleting data from list: " +
-                    exc.getMessage());
+            log.error("Error deleting from list '" + listName + "'", exc);
+            AgentStorageException t = new AgentStorageException("Error deleting data from list: " + exc);
+            t.initCause(exc);
+            throw t;
         }
     }
 
     public void deleteList(String listName) {
+        if (shutdown.get()) {
+            return;
+        }
         DiskList dList = getDiskList(listName);
         if (null == dList) {
             return ;
@@ -501,7 +513,7 @@ public class AgentDListProvider implements AgentStorageProvider {
         try {
             dList.deleteAllRecords();
         } catch(IOException exc){
-            this.log.error("Error deleting all records", exc);
+            log.error("Error deleting all records", exc);
         }
     }
 
@@ -532,7 +544,7 @@ public class AgentDListProvider implements AgentStorageProvider {
                 try {
                     dList = intrCreateList(listName, RECSIZE);
                 } catch(IOException exc){
-                    this.log.error("Error loading disk list", exc);
+                    log.error("Error loading disk list", exc);
                     return null; // XXX
                 }
                 this.lists.put(listName, dList);
@@ -540,12 +552,51 @@ public class AgentDListProvider implements AgentStorageProvider {
         }
         return dList;
     }
-    
+
     private static class ListInfo {
         long      maxSize;
         long      chkSize;
         int       chkPerc;
     }
 
-
+    private class EncVal {
+        private final String val;
+        private String encrypted = null;
+        private final PooledPBEStringEncryptor encryptor;
+        private EncVal(PooledPBEStringEncryptor encryptor, String val, String encrypted) {
+            this.val = val;
+            this.encrypted = SecurityUtil.isMarkedEncrypted(encrypted) ? encrypted : null;
+            this.encryptor = encryptor;
+        }
+        private EncVal(PooledPBEStringEncryptor encryptor, String val) {
+            this.val = val;
+            this.encryptor = encryptor;
+        }
+        private String getVal() {
+            return val;
+        }
+        private String getEnc() {
+            if (encrypted == null) {
+                encrypted = SecurityUtil.encrypt(encryptor, val);
+            }
+            return encrypted;
+        }
+        public String toString() {
+            return val;
+        }
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o instanceof EncVal) {
+                EncVal v = (EncVal) o;
+                return val.equals(v.val);
+            }
+            return false;
+        }
+        public int hashCode() {
+            return val.hashCode();
+        }
+    }
+    
 }

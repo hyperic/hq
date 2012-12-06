@@ -62,6 +62,7 @@
 		<module>scaffold-jar</module>
 		<module>scaffold-xml</module>
 		<module>sendmail-plugin</module>
+		<module>sharepoint-plugin</module>
 		<module>spring-plugin</module>
 		<module>sqlquery-plugin</module>
 		<module>sybase-plugin</module>

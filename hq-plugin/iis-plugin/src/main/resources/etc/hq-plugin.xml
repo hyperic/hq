@@ -734,4 +734,8 @@
   <server name="IIS"
           version="7.x"
           include="6.x"/>
+          
+  <server name="IIS"
+          version="8.x"
+          include="7.x"/>
 </plugin>

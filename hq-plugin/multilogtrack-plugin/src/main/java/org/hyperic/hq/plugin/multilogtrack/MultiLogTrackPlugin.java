@@ -67,6 +67,7 @@ public class MultiLogTrackPlugin extends LogFileTailPlugin {
     private final Long matchSleepTime;
     protected static final String FILE_SCAN_INTERVAL = "300000";
     private static final HashSet<String> firstTimeConfig = new HashSet<String>();
+    /** picks up new files as they appear */
     private static AtomicReference<Collection<MultiDirWatcher>> fileWatcherThreads =
         new AtomicReference<Collection<MultiDirWatcher>>();
     static final String INCLUDE_PATTERN = "includepattern";
@@ -80,10 +81,10 @@ public class MultiLogTrackPlugin extends LogFileTailPlugin {
     }
 
     public TrackEvent processLine(FileInfo info, String line, String basedir, String logfilepattern, int offset) {
-        final TrackEvent event =
-            processLine(INCLUDE_PATTERN, includePattern, excludePattern, info, line, basedir, logfilepattern, offset);
-        final TrackEvent event2 =
-            processLine(INCLUDE_PATTERN_2, includePattern_2, excludePattern_2, info, line, basedir, logfilepattern, offset);
+        final TrackEvent event = processLine(
+            INCLUDE_PATTERN, includePattern, includePattern, excludePattern, info, line, basedir, logfilepattern, offset);
+        final TrackEvent event2 = processLine(
+            INCLUDE_PATTERN_2, includePattern, includePattern_2, excludePattern_2, info, line, basedir, logfilepattern, offset);
         // don't want to return a null event if one was evaluated.  Need to make sure we return the correct one
         if (event != null) {
             return event;
@@ -94,15 +95,17 @@ public class MultiLogTrackPlugin extends LogFileTailPlugin {
         }
     }
     
-    private TrackEvent processLine(String property, Pattern includePattern, Pattern excludePattern, FileInfo info,
-                                   String line, String basedir, String logfilepattern, int offset) {
+    private TrackEvent processLine(String property, Pattern primaryIncludePattern, Pattern includePattern,
+                                   Pattern excludePattern, FileInfo info, String line, String basedir,
+                                   String logfilepattern, int offset) {
         if (null == includePattern || !includePattern.matcher(line).find()) {
             return null;
         }
         if (null != excludePattern && excludePattern.matcher(line).find()) {
             return null;
         }
-        MultiLogTrackMeasurementPlugin.incrementNumLines(property, basedir + "," + logfilepattern, offset);
+        MultiLogTrackMeasurementPlugin.incrementNumLines(property, basedir, logfilepattern,
+                                                         primaryIncludePattern.toString(), offset);
         return newTrackEvent(System.currentTimeMillis(), LogTrackPlugin.LOGLEVEL_ANY, info.getName(), line);
     }
 
@@ -200,13 +203,16 @@ public class MultiLogTrackPlugin extends LogFileTailPlugin {
         try {
             final Set<String> oldFiles = new HashSet<String>();
             final String basedir = MultiLogTrackServerDetector.getBasedir(cfg);
+            final String includePatternBuf = cfg.getValue(INCLUDE_PATTERN);
             final String logfilepattern = MultiLogTrackServerDetector.getLogfilepattern(cfg);
-            if (firstTimeConfig.contains(logfilepattern + "|" + basedir)) {
+            final String key = logfilepattern + "|" + basedir + "|" + includePatternBuf;
+            if (firstTimeConfig.contains(key)) {
                 MultiLogTrackServerDetector.getBasedirAndSetFilesFromCache(cfg, oldFiles, false);
             } else {
-                firstTimeConfig.add(logfilepattern + "|" + basedir);
+                firstTimeConfig.add(key);
             }
-            final List<String> files = MultiLogTrackServerDetector.getFilesCached(logfilepattern, basedir, true);
+            final List<String> files =
+                MultiLogTrackServerDetector.getFilesCached(logfilepattern, basedir, includePatternBuf, true);
             for (final String logfile : files) {
                 boolean exists = oldFiles.remove(logfile);
                 if (!exists) {
@@ -215,8 +221,8 @@ public class MultiLogTrackPlugin extends LogFileTailPlugin {
                 }
             }
             final FileTail fileWatcher = getFileWatcher(cfg);
-            for (final String nonExistantLogFile : oldFiles) {
-                fileWatcher.remove(nonExistantLogFile);
+            for (final String nonExistentLogFile : oldFiles) {
+                fileWatcher.remove(nonExistentLogFile);
             }
         } catch (SigarException e) {
             throw new PluginException(e.getMessage(), e);
@@ -244,76 +250,108 @@ public class MultiLogTrackPlugin extends LogFileTailPlugin {
             log.error(e,e);
         }
     }
-    
+
     private FileTail getFileWatcher(final ConfigResponse cfg) {
         if (this.watcher.get() == null) {
-            log.debug("init file tail");
             if (sigar == null) {
                 sigar = new Sigar();
             }
-            this.watcher.set(new FileTail(sigar) {
-                public void tail(FileInfo info, Reader reader) {
-                    FileInfo previous = info.getPreviousInfo();
-                    if (info.getInode() == 0 || previous.getInode() == 0) {
-                        long prevSize = previous.getSize();
-                        if (log.isDebugEnabled()) {
-                            final String msg = "Inode=0, will attempt to seek to previous Inode size=" + prevSize;
-                            log.debug((info.getInode() != 0 ? "previous " : "") + msg);
-                        }
-                        if (info.getSize() == prevSize) {
-                            log.debug("log watcher event occured but there are no lines to read since info.getSize() == previous.getSize()");
-                            return;
-                        }
-                        try {
-                            reader.skip(prevSize);
-                        } catch (IOException e) {
-                            log.error("Could not skip to the previous offset on Inode=0: " + e, e);
-                            return;
-                        }
-                    }
-                    BufferedReader buffer = new BufferedReader(reader);
-                    String basedir = MultiLogTrackServerDetector.getBasedir(cfg);
-                    String logfilepattern = MultiLogTrackServerDetector.getLogfilepattern(cfg);
-                    try {
-                        String line;
-                        final boolean debug = log.isDebugEnabled();
-                        boolean first = true;
-                        int i=0;
-                        while ((line = buffer.readLine()) != null) {
-                            if (!first && matchSleepTime != null && matchSleepTime > 0) {
-                                sleep(matchSleepTime);
-                            }
-                            first = false;
-                            if (debug) log.debug("processing file=" + info.getName() + ", line=" + line);
-                            TrackEvent event = processLine(info, line, basedir, logfilepattern, i++);
-                            if (event != null && reportEvents()) {
-                                getManager().reportEvent(event);
-                            }
-                        }
-                    } catch (IOException e) {
-                        log.error(info.getName() + ": " + e, e);
-                    }
-                }
-                private void sleep(Long sleepTime) {
-                    try {
-                        Thread.sleep(sleepTime);
-                    } catch (InterruptedException e) {
-                        log.debug(e,e);
-                    }
-                }
-                private boolean reportEvents() {
-                    String value = cfg.getValue(MultiLogTrackServerDetector.ENABLE_ONLY_METRICS);
-                    if (value == null || value.equalsIgnoreCase("false")) {
-                        return true;
-                    }
-                    return false;
-                }
-            });
+            this.watcher.set(new MultiFileTail(sigar, cfg));
             getManager().addFileWatcher(this.watcher.get());
+            if (log.isDebugEnabled()) {
+                log.debug("init file tail basedir=" + MultiLogTrackServerDetector.getBasedir(cfg) + 
+                          ", pattern=" + MultiLogTrackServerDetector.getLogfilepattern(cfg) +
+                          ", watcher=" + watcher +
+                          ", this=" + this +
+                          ", cfg=" + cfg +
+                          ", sigar=" + sigar);
+            }
         }
         return this.watcher.get();
     }
-    
+
+    private class MultiFileTail extends FileTail {
+        private final ConfigResponse cfg;
+        private MultiFileTail(Sigar sigar, ConfigResponse cfg) {
+            super(sigar);
+            this.cfg = cfg;
+        }
+        public void tail(FileInfo info, Reader reader) {
+            FileInfo previous = info.getPreviousInfo();
+            if (info.getInode() == 0 || previous.getInode() == 0) {
+                long prevSize = previous.getSize();
+                if (log.isDebugEnabled()) {
+                    final String msg = "Inode=0, will attempt to seek to previous Inode size=" + prevSize;
+                    log.debug((info.getInode() != 0 ? "previous " : "") + msg);
+                }
+                if (info.getSize() == prevSize) {
+                    log.debug("log watcher event occured but there are no lines to read since info.getSize() == previous.getSize()");
+                    return;
+                }
+                try {
+                    reader.skip(prevSize);
+                } catch (IOException e) {
+                    log.error("Could not skip to the previous offset on Inode=0: " + e, e);
+                    return;
+                }
+            }
+            BufferedReader buffer = new BufferedReader(reader);
+            String basedir = MultiLogTrackServerDetector.getBasedir(cfg);
+            String logfilepattern = MultiLogTrackServerDetector.getLogfilepattern(cfg);
+            try {
+                String line;
+                final boolean debug = log.isDebugEnabled();
+                boolean first = true;
+                int i=0;
+                while ((line = buffer.readLine()) != null) {
+                    if (!first && matchSleepTime != null && matchSleepTime > 0) {
+                        sleep(matchSleepTime);
+                    }
+                    first = false;
+                    if (debug) {
+                        log.debug("processing file=" + info.getName() + ", line=" + line +
+                                  ", basedir=" + MultiLogTrackServerDetector.getBasedir(cfg) + 
+                                  ", pattern=" + MultiLogTrackServerDetector.getLogfilepattern(cfg) +
+                                  ", includepattern=" + includePattern +
+                                  ", this=" + toString());
+                    }
+                    TrackEvent event = processLine(info, line, basedir, logfilepattern, i++);
+                    if (event != null && reportEvents()) {
+                        getManager().reportEvent(event);
+                    }
+                }
+            } catch (IOException e) {
+                log.error(info.getName() + ": " + e, e);
+            }
+        }
+        private void sleep(Long sleepTime) {
+            try {
+                Thread.sleep(sleepTime);
+            } catch (InterruptedException e) {
+                log.debug(e,e);
+            }
+        }
+        private boolean reportEvents() {
+            String value = cfg.getValue(MultiLogTrackServerDetector.ENABLE_ONLY_METRICS);
+            if (value == null || value.equalsIgnoreCase("false")) {
+                return true;
+            }
+            return false;
+        }
+        public int hashCode() {
+            return cfg.hashCode();
+        }
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            } else if (o instanceof MultiFileTail) {
+                MultiFileTail t = (MultiFileTail) o;
+                return cfg.equals(t.cfg);
+            }
+            return false;
+        }
+    }
+
     private Long getSleepTime() {
         // TODO should handle this via the AgentConfig, but for now doing it via System.getProperty()
         String sleepTimeBuf = System.getProperty("multilogtrack.sleep");

@@ -231,4 +231,8 @@
       	</metrics>
     </service>
   </server>
+
+  <server name="Active Directory"
+          version="2012"
+          include="2008"/>
 </plugin>

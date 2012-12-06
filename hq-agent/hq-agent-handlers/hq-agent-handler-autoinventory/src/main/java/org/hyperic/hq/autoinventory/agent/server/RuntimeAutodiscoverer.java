@@ -26,23 +26,29 @@
 package org.hyperic.hq.autoinventory.agent.server;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentRemoteValue;
+import org.hyperic.hq.agent.diagnostics.AgentDiagnosticObject;
+import org.hyperic.hq.agent.diagnostics.AgentDiagnostics;
 import org.hyperic.hq.agent.server.AgentDaemon;
 import org.hyperic.hq.agent.server.AgentRunningException;
 import org.hyperic.hq.agent.server.AgentStorageException;
 import org.hyperic.hq.agent.server.AgentStorageProvider;
 import org.hyperic.hq.agent.server.ConfigStorage;
+import org.hyperic.hq.agent.server.ConfigStorage.Key;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.CompositeRuntimeResourceReport;
 import org.hyperic.hq.autoinventory.RuntimeScanner;
 import org.hyperic.hq.autoinventory.Scanner;
-import org.hyperic.hq.bizapp.client.AgentCallbackClientException;
 import org.hyperic.hq.bizapp.client.AutoinventoryCallbackClient;
 import org.hyperic.hq.product.AutoinventoryPluginManager;
 import org.hyperic.hq.product.PlatformResource;
@@ -56,10 +62,7 @@ import org.hyperic.util.PluginLoader;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.timer.StopWatch;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-class RuntimeAutodiscoverer implements RuntimeScanner {
+class RuntimeAutodiscoverer implements RuntimeScanner, AgentDiagnosticObject {
 
     private static final long DEFAULT_SCAN_INTERVAL = 15 * 60000;
 
@@ -69,8 +72,7 @@ class RuntimeAutodiscoverer implements RuntimeScanner {
     private static final String SERVICE_KEYLIST = "service-keylist";
         
 
-    private static Log _log =
-        LogFactory.getLog(RuntimeAutodiscoverer.class.getName());
+    private static Log _log = LogFactory.getLog(RuntimeAutodiscoverer.class);
 
     private AutoinventoryCommandsServer _aicmd;
     private AgentDaemon                 _agent;
@@ -87,15 +89,18 @@ class RuntimeAutodiscoverer implements RuntimeScanner {
     private long _normalDefaultScanInterval;
 
     private volatile boolean _isRuntimeScanning = false;
-    private volatile Map     _insertsDuringScan = new HashMap();
+    private volatile Map<Key, ConfigResponse> _insertsDuringScan = new HashMap<Key, ConfigResponse>();
 
-    private CompositeRuntimeResourceReport _lastReport;
+    private final AtomicReference<CompositeRuntimeResourceReport> _lastReport =
+        new AtomicReference<CompositeRuntimeResourceReport>();
+    private final AtomicBoolean _writeLastReportDiag = new AtomicBoolean(true);
 
     public RuntimeAutodiscoverer (AutoinventoryCommandsServer aicmd,
                                   AgentStorageProvider storageProvider,
                                   AgentDaemon agent,
                                   AutoinventoryCallbackClient client) 
     {
+        AgentDiagnostics.getInstance().addDiagnostic(this);
         _aicmd = aicmd;
         _storage = new ConfigStorage(storageProvider, STORAGE_KEYLIST, 
                                      STORAGE_PREFIX);
@@ -142,7 +147,7 @@ class RuntimeAutodiscoverer implements RuntimeScanner {
         boolean isEnable = (args.getValue("disable.rtad") == null);
 
         try {
-            _lastReport = null; //clear cache
+            _lastReport.set(null); //clear cache
             if (isEnable) {
                 ConfigResponse config = configStorage.put(key, args);
                 if (_isRuntimeScanning) {
@@ -197,7 +202,7 @@ class RuntimeAutodiscoverer implements RuntimeScanner {
     /** @see org.hyperic.hq.autoinventory.RuntimeScanner#doRuntimeScan */
     public void doRuntimeScan() throws AutoinventoryException {
         //This Map is a copy, we can do with it as we please.
-        Map configs = _storage.load();
+        Map<Key, ConfigResponse> configs = _storage.load();
         
         _isRuntimeScanning = (configs.size() > 0);
 
@@ -212,8 +217,9 @@ class RuntimeAutodiscoverer implements RuntimeScanner {
                     _isRuntimeScanning = false;
                     break;
                 } else {
-                    _log.debug("Processing " + size +
-                              " configs inserted while scan was running");
+                    if (_log.isDebugEnabled()) {
+                        _log.debug("Processing " + size + " configs inserted while scan was running");
+                    }
                     // reset flag, scan again
                     configs.clear();
                     configs.putAll(_insertsDuringScan);
@@ -223,26 +229,24 @@ class RuntimeAutodiscoverer implements RuntimeScanner {
         }
     }
 
-    private void doRuntimeScan_internal(Map configs) throws AutoinventoryException {
-        Map serviceConfigs = _serviceStorage.load();
+    @SuppressWarnings("deprecation")
+    private void doRuntimeScan_internal(Map<ConfigStorage.Key, ConfigResponse> configs) throws AutoinventoryException {
+        Map<ConfigStorage.Key, ConfigResponse> serviceConfigs = _serviceStorage.load();
 
         //drop service configs into the plugin manager so they can
         //be used by plugins to discover cprops for services
-        for (Iterator i = serviceConfigs.entrySet().iterator(); i.hasNext();) {
-            Map.Entry entry = (Map.Entry)i.next();
-            ConfigStorage.Key key = (ConfigStorage.Key)entry.getKey();
-            ConfigResponse config = (ConfigResponse)entry.getValue();
+        for (Entry<ConfigStorage.Key, ConfigResponse> entry : serviceConfigs.entrySet()) {
+            ConfigStorage.Key key = entry.getKey();
+            ConfigResponse config = entry.getValue();
             String type = key.getTypeName();
             _apm.addServiceConfig(type, config);
         }
         
-        CompositeRuntimeResourceReport compositeReport =
-            new CompositeRuntimeResourceReport();
+        CompositeRuntimeResourceReport compositeReport = new CompositeRuntimeResourceReport();
         
-        for (Iterator i = configs.entrySet().iterator(); i.hasNext();) {
-            Map.Entry entry = (Map.Entry)i.next();
-            ConfigStorage.Key key = (ConfigStorage.Key)entry.getKey();
-            ConfigResponse config = (ConfigResponse)entry.getValue();
+        for (Entry<ConfigStorage.Key, ConfigResponse> entry : configs.entrySet()) {
+            ConfigStorage.Key key = entry.getKey();
+            ConfigResponse config = entry.getValue();
             String type = key.getTypeName();
             ServerDetector detector;
             RuntimeDiscoverer discoverer;
@@ -251,12 +255,16 @@ class RuntimeAutodiscoverer implements RuntimeScanner {
                 detector = (ServerDetector)_apm.getPlugin(type);
             } catch (PluginNotFoundException e) {
                 //plugins are not required to support AI
-                _log.debug("Plugin does not support server detection: " + type);
+                if (_log.isDebugEnabled()) {
+                    _log.debug("Plugin does not support server detection: " + type, e);
+                }
                 continue;
             }
 
             if (!detector.isRuntimeDiscoverySupported()) {
-                _log.debug("Plugin does not support runtime discovery: " + type);
+                if (_log.isDebugEnabled()) {
+                    _log.debug("Plugin does not support runtime discovery: " + type);
+                }
                 continue;
             }
 
@@ -264,25 +272,17 @@ class RuntimeAutodiscoverer implements RuntimeScanner {
             try {
                 discoverer = detector.getRuntimeDiscoverer();
                 _log.info("Running runtime autodiscovery for " + type);
-
-                PlatformResource platform =
-                    Scanner.detectPlatform(_apm, config);
+                PlatformResource platform = Scanner.detectPlatform(_apm, config);
                 StopWatch timer = new StopWatch();
-
-                RuntimeResourceReport report =
-                    discoverer.discoverResources(key.getId(), platform, config);  
-
+                RuntimeResourceReport report = discoverer.discoverResources(key.getId(), platform, config);  
                 _log.info(key.getTypeName() + " discovery took " + timer);
-
                 compositeReport.addServerReport(report);
             } catch (Exception e) {
-                _log.error("Unexpected error running autodiscoverer for plugin: "
-                          + type + ": " + e.getMessage(), e);
+                _log.error("Unexpected error running autodiscoverer for plugin: " + type + ": " + e, e);
                 continue;
             } catch (NoClassDefFoundError e) {
                 _log.error("Unable to run autodiscoverer for plugin: "
-                          + type + " (consult product setup help): "
-                          + e.getMessage(), e);
+                          + type + " (consult product setup help): " + e, e);
                 _log.debug("Current ClassLoader=" + PluginLoader.getClassLoader());
                 continue;
             } finally {
@@ -291,23 +291,18 @@ class RuntimeAutodiscoverer implements RuntimeScanner {
         }
 
         compositeReport = loadReportFilter().filterReport(compositeReport);
-        if (compositeReport.isSameReport(_lastReport)) {
+        if (compositeReport.isSameReport(_lastReport.get())) {
             _log.debug("No changes detected, not sending runtime report");
+            _writeLastReportDiag.set(false);
         } else {
             final String errMsg = "Error sending runtime report to server: ";
-            _lastReport = compositeReport;
+            _lastReport.set(compositeReport);
+            _writeLastReportDiag.set(true);
             try {
                 if (_log.isDebugEnabled()) {
-                    _log.debug("Sending RuntimeReport: " +
-                              compositeReport.simpleSummary());
+                    _log.debug("Sending RuntimeReport: " + compositeReport.simpleSummary());
                 }
                 _client.aiSendRuntimeReport(compositeReport);
-            } catch(AgentCallbackClientException e) {
-                if(_log.isDebugEnabled()) {
-                    _log.error(errMsg + e, e);
-                } else {
-                    _log.error(errMsg + e);
-                }
             } catch (Exception e) {
                 _log.error(errMsg + e, e);
             }
@@ -348,25 +343,32 @@ class RuntimeAutodiscoverer implements RuntimeScanner {
     
     private RuntimeReportFilter loadReportFilter() {
         RuntimeReportFilter defaultFilter = new RuntimeReportFilter() {
-            public CompositeRuntimeResourceReport 
-                filterReport(CompositeRuntimeResourceReport r) 
-            {
+            public CompositeRuntimeResourceReport filterReport(CompositeRuntimeResourceReport r)  {
                 return r;
             }
         };
-        
-        String val = _agent.getBootConfig().getBootProperties()
-                           .getProperty("autoinventory.reportFilter");
-        if (val == null)
-            return defaultFilter;
-        
-        try {
-            Class c = Class.forName(val);
-            return (RuntimeReportFilter)c.newInstance();
-        } catch(Throwable t) {
-            _log.error("Unable to create autoinventory.reportFilter [" + 
-                       val + "], using default", t);
+        String val = _agent.getBootConfig().getBootProperties().getProperty("autoinventory.reportFilter");
+        if (val == null) {
             return defaultFilter;
         }
+        try {
+            Class<?> c = Class.forName(val);
+            return (RuntimeReportFilter)c.newInstance();
+        } catch(Throwable t) {
+            _log.error("Unable to create autoinventory.reportFilter [" +  val + "], using default", t);
+            return defaultFilter;
+        }
+    }
+
+    public String getDiagStatus() {
+        if (!_writeLastReportDiag.get() || _lastReport.get() == null) {
+            return "Discovery report has not changed";
+        }
+        _writeLastReportDiag.set(false);
+        return _lastReport.get().fullSummary();
+    }
+
+    public String getDiagName() {
+        return "Runtime Report Diagnostic";
     }
 }

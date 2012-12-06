@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.hyperic.hq.agent.AgentKeystoreConfig;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.lather.LatherRemoteException;
 import org.hyperic.lather.LatherValue;
 import org.hyperic.lather.xcode.LatherXCoder;
@@ -135,7 +136,11 @@ public class LatherHTTPClient
 	                                            "' which the client did not have access to");
 	        }
 	
-	        bIs = new ByteArrayInputStream(Base64.decode(responseBody));
+            try {
+                bIs = new ByteArrayInputStream(Base64.decode(responseBody));
+            } catch (IllegalArgumentException e) {
+                throw new SystemException("could not decode response from server body=" + responseBody, e);
+            }
 	        dIs = new DataInputStream(bIs);
 	
 	        return this.xCoder.decode(dIs, resClass);

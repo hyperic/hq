@@ -49,11 +49,13 @@ import org.hyperic.hq.bizapp.agent.CommandsAPIInfo;
 import org.hyperic.hq.bizapp.client.AgentCallbackClientException;
 import org.hyperic.hq.bizapp.client.MeasurementCallbackClient;
 import org.hyperic.hq.bizapp.client.StorageProviderFetcher;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.data.DSNList;
 import org.hyperic.hq.measurement.data.MeasurementReport;
 import org.hyperic.hq.measurement.data.MeasurementReportConstructor;
 import org.hyperic.hq.measurement.server.session.SRN;
 import org.hyperic.hq.product.MetricValue;
+import org.hyperic.hq.util.Reference;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.encoding.Base64;
 
@@ -354,7 +356,7 @@ public class SenderThread
      *          sent, otherwise it returns the timestamp of the last
      *          measurement sent to the server.
      */
-    private Long sendBatch(String listName) {
+    private Long sendBatch(String listName, Reference<Integer> numSent) {
         MeasurementReportConstructor constructor;
         DSNList[] clientIds;
         long batchStart = 0, batchEnd = 0, lastMetricTime = 0, serverTime = 0;
@@ -390,7 +392,8 @@ public class SenderThread
             }
         }
 
-        for (Iterator<Record> it=records.iterator(); it.hasNext(); ) {                
+        int num = 0;
+        for (Iterator<Record> it=records.iterator(); it.hasNext(); num++) {
             Record rec = it.next();
 
             lastMetricTime = rec.data.getTimestamp();
@@ -410,19 +413,20 @@ public class SenderThread
             }
             constructor.addDataPoint(rec.derivedID, rec.dsnId, rec.data);
         }
+        numSent.set(num);
 
         // If we don't have anything to send -- move along
-        if(numUsed == 0)
+        if(numUsed == 0) {
             return null;
+        }
         
         clientIds = constructor.constructDSNList();
         
         success = false;
         try {
             MeasurementReport report;
-            SRN[] srnList;
 
-            srnList = this.schedule.getSRNsAsArray();
+            SRN[] srnList = this.schedule.getSRNsAsArray();
             if (srnList.length == 0) {
                 log.error("Agent does not have valid SRNs, but has metric data to send, removing measurements");
                 removeMeasurements(numUsed, listName);
@@ -443,7 +447,11 @@ public class SenderThread
             report.setClientIdList(clientIds);
             report.setSRNList(srnList);
             batchStart = now();
-            serverTime= this.client.measurementSendReport(report);
+            try {
+                serverTime = this.client.measurementSendReport(report);
+            } catch (IllegalArgumentException e) {
+                throw new SystemException("error sending report: " + e + ", report=" + report, e);
+            }
             batchEnd = now();
 
             // Compute offset from server (will include network latency)
@@ -601,22 +609,23 @@ public class SenderThread
                 //is for measurement. We are doing this because we want to make sure that availability 
                 //data will get processed by the server even if the server is not able to process measurement
                 //data at the moment (Jira issue [HHQ-5566])
-                sendData(AVAILABILITY_LISTNAME);
-                sendData(MEASURENENT_LISTNAME);
+                Reference<Integer> numSent = new Reference<Integer>(0);
+                sendData(AVAILABILITY_LISTNAME, numSent);
+                sendData(MEASURENENT_LISTNAME, numSent);
             } catch (Throwable e) {
                 log.error(e.getMessage(), e);
             }
         }
     }
     
-    private void sendData(String listName) {
+    private void sendData(String listName, Reference<Integer> numSent) {
     	Long lastMetricTime;
-        lastMetricTime = this.sendBatch(listName);
+        lastMetricTime = this.sendBatch(listName, numSent);
         if(lastMetricTime != null){
             String backlogNum = "";
             final long start = System.currentTimeMillis();
             // Give it a single shot to catch up before starting to squawk
-            while((lastMetricTime = this.sendBatch(listName)) != null) {
+            while((lastMetricTime = this.sendBatch(listName, numSent)) != null) {
                 long now = System.currentTimeMillis();
                 long tDiff = now - lastMetricTime.longValue();
                 String backlog = Long.toString(tDiff / (60 * 1000));

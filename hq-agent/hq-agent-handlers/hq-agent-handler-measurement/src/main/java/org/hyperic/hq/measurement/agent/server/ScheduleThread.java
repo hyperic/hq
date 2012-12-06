@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2012], VMware, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -25,13 +25,18 @@
 
 package org.hyperic.hq.measurement.agent.server;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -46,6 +51,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.diagnostics.AgentDiagnosticObject;
+import org.hyperic.hq.agent.diagnostics.AgentDiagnostics;
 import org.hyperic.hq.agent.server.AgentStartException;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorException;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorSimple;
@@ -77,7 +84,7 @@ import org.hyperic.util.schedule.UnscheduledItemException;
  * depositing the results on disk, and sending them to the bizapp.
  */
 
-public class ScheduleThread  extends AgentMonitorSimple implements Runnable {
+public class ScheduleThread  extends AgentMonitorSimple implements Runnable, AgentDiagnosticObject {
     private static final String SCHEDULE_THREAD_METRICS_COLLECTED_TIME = AgentStatsCollector.SCHEDULE_THREAD_METRICS_COLLECTED_TIME;
     private static final String SCHEDULE_THREAD_METRIC_TASKS_SUBMITTED = AgentStatsCollector.SCHEDULE_THREAD_METRIC_TASKS_SUBMITTED;
     private static final String SCHEDULE_THREAD_METRIC_COLLECT_FAILED  = AgentStatsCollector.SCHEDULE_THREAD_METRIC_COLLECT_FAILED;
@@ -105,7 +112,7 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable {
     // AppdefID -> Schedule
     private final Map<String,ResourceSchedule> schedules = new HashMap<String,ResourceSchedule>();
     // Should I shut down?
-    private AtomicBoolean shouldDie = new AtomicBoolean(false);
+    private final AtomicBoolean shouldDie = new AtomicBoolean(false);
     // Interrupt object
     private final Object interrupter = new Object();
     // Hash of DSNs to their errors
@@ -118,12 +125,13 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable {
     private final HashMap<Future<?>,MetricTask> metricCollections = new HashMap<Future<?>,MetricTask>();
     // The executor confirming metric collections, cancelling tasks that exceed
     // our timeouts.
-    private ScheduledExecutorService metricVerificationService;
-    private ScheduledFuture<?> metricVerificationTask;
-    private ScheduledFuture<?> metricLoggingTask;
+    private final ScheduledExecutorService metricVerificationService;
+    private final ScheduledFuture<?> metricVerificationTask;
+    private final ScheduledFuture<?> metricLoggingTask;
     
-    private MeasurementValueGetter manager;
-    private Sender sender;  // Guy handling the results
+    private final MeasurementValueGetter manager;
+    private final Sender sender;  // Guy handling the results
+    private final Set<Integer> scheduled = new HashSet<Integer>();
 
     // Statistics
     private final Object statsLock = new Object();
@@ -136,6 +144,7 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable {
     private final AgentStatsCollector statsCollector;
     private final Random rand = new Random();
     private final int offset;
+    private final Map<AppdefEntityID, DiagInfo> diagInfo = new HashMap<AppdefEntityID, DiagInfo>();
 
     ScheduleThread(Sender sender, MeasurementValueGetter manager, Properties config) throws AgentStartException {
         this.statsCollector = AgentStatsCollector.getInstance();
@@ -176,13 +185,12 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable {
         }
 
         metricVerificationService = Executors.newSingleThreadScheduledExecutor();
-        metricVerificationTask =
-                metricVerificationService.scheduleAtFixedRate(new MetricVerificationTask(),
-                                                               POLL_PERIOD, POLL_PERIOD,
-                                                               TimeUnit.MILLISECONDS);
-        metricLoggingTask =
-                metricVerificationService.scheduleAtFixedRate(new MetricLoggingTask(),
-                                                               1, 600, TimeUnit.SECONDS);
+        metricVerificationTask = metricVerificationService.scheduleAtFixedRate(new MetricVerificationTask(),
+                                                                               POLL_PERIOD, POLL_PERIOD,
+                                                                               TimeUnit.MILLISECONDS);
+        metricLoggingTask = metricVerificationService.scheduleAtFixedRate(new MetricLoggingTask(),
+                                                                          1, 600, TimeUnit.SECONDS);
+        AgentDiagnostics.getInstance().addDiagnostic(this);
     }
 
     /**
@@ -324,8 +332,10 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable {
         }
 
         if (rs == null) {
-            throw new UnscheduledItemException("No measurement schedule for: " + key);
+            if (log.isDebugEnabled()) log.debug("No measurement schedule for: " + key);
+            return;
         }
+        setDiagScheduled(rs, false);
 
         items = rs.schedule.getScheduledItems();
         log.debug("Un-scheduling " + items.length + " metrics for " + ent);
@@ -334,14 +344,17 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable {
             statNumMetricsScheduled -= items.length;
         }
 
-        for (ScheduledItem item : items) {
-            ScheduledMeasurement meas = (ScheduledMeasurement) item.getObj();
-            //For plugin/Collector awareness
-            ParsedTemplate tmpl = getParsedTemplate(meas);
-            if (tmpl == null || tmpl.metric == null) {
-                continue;
+        synchronized (scheduled) {
+            for (ScheduledItem item : items) {
+                ScheduledMeasurement meas = (ScheduledMeasurement) item.getObj();
+                scheduled.remove(meas.getDerivedID());
+                //For plugin/Collector awareness
+                ParsedTemplate tmpl = getParsedTemplate(meas);
+                if (tmpl == null || tmpl.metric == null) {
+                    continue;
+                }
+                tmpl.metric.setInterval(-1);
             }
-            tmpl.metric.setInterval(-1);
         }
     }
 
@@ -350,23 +363,36 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable {
      *
      * @param meas Measurement to schedule
      */
-
     void scheduleMeasurement(ScheduledMeasurement meas){
-        ResourceSchedule rs = getSchedule(meas);
-        try {
-            if (log.isDebugEnabled()) {
-                log.debug("scheduleMeasurement " + getParsedTemplate(meas).metric.toDebugString());
+        int mid = meas.getDerivedID();
+        synchronized (scheduled) {
+            if (scheduled.contains(mid)) {
+                return;
             }
-
+            scheduled.add(mid);
+        }
+        ResourceSchedule rs = getSchedule(meas);
+        setDiagScheduled(rs, true);
+        try {
             rs.schedule.scheduleItem(meas, meas.getInterval(), true, true);
-
+            if (log.isDebugEnabled()) {
+                Long timeOfNext;
+                try {
+                    timeOfNext = rs.schedule.getTimeOfNext();
+                } catch (EmptyScheduleException e) {
+                    timeOfNext = null;
+                }
+                log.debug("scheduleMeasurement timeOfNext=" + TimeUtil.toString(timeOfNext) +
+                          ", template=" + getParsedTemplate(meas).metric.toDebugString());
+            }
             synchronized (statsLock) {
                 statNumMetricsScheduled++;
             }
         } catch (ScheduleException e) {
-            log.error("Unable to schedule metric '" +
-                      getParsedTemplate(meas) + "', skipping. Cause is " +
-                      e.getMessage(), e);
+            log.error("Unable to schedule metric '" + getParsedTemplate(meas) + "', skipping. Cause is " + e, e);
+            synchronized (scheduled) {
+                scheduled.remove(mid);
+            }
         }
     }
 
@@ -457,13 +483,6 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable {
         return tmpl;
     }
 
-    private MetricValue getValue(ParsedTemplate tmpl)
-        throws PluginException, MetricNotFoundException,
-               MetricUnreachableException
-    {
-        return manager.getValue(tmpl.plugin, tmpl.metric);
-    }
-
     private class MetricTask implements Runnable {
         ResourceSchedule rs;
         ScheduledMeasurement meas;
@@ -543,9 +562,9 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable {
                 if (isDebug) {
                     log.debug("collecting data for meas=" + meas);
                 }
-                data = getValue(dsn);
+                data = manager.getValue(dsn.plugin, dsn.metric);
                 long time = TimingVoodoo.roundDownTime(now, meas.getInterval());
-				meas.setLastCollected(time);
+                meas.setLastCollected(time);
                 if (data == null) {
                     // Don't allow plugins to return null from getValue(),
                     // convert these to MetricValue.NONE
@@ -553,6 +572,7 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable {
                     data = MetricValue.NONE;
                 }
                 rs.collected.put(mid, Boolean.TRUE);
+                setDiagInfo(data, dsn, rs, mid);
                 success = true;
                 clearLogCache(dsn);
             } catch(PluginNotFoundException exc){
@@ -633,6 +653,33 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable {
         }
     }
 
+    private void setDiagInfo(MetricValue data, ParsedTemplate dsn, ResourceSchedule rs, int mid) {
+        final AppdefEntityID aeid = rs.id;
+        synchronized (diagInfo) {
+            DiagInfo tmp = diagInfo.get(aeid);
+            if (tmp == null) {
+                tmp = new DiagInfo(rs.id);
+                diagInfo.put(aeid, tmp);
+            }
+            tmp.add(new MetricValuePlusId(mid, data));
+        }
+    }
+
+    private void setDiagScheduled(ResourceSchedule rs, boolean incrementSchedules) {
+        synchronized(diagInfo) {
+            DiagInfo tmp = diagInfo.get(rs.id);
+            if (tmp == null) {
+                tmp = new DiagInfo(rs.id);
+                diagInfo.put(rs.id, tmp);
+            }
+            if (incrementSchedules) {
+                tmp.incrementSchedules();
+            } else {
+                tmp.incrementUnSchedules();
+            }
+        }
+    }
+
     private int getQueueSize(String plugin) {
         String prop = PROP_QUEUE_SIZE + plugin;
         String sQueueSize = agentConfig.getProperty(prop);
@@ -661,10 +708,10 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable {
         return 1;
     }
 
-    private void collect(ResourceSchedule rs, List items) {
+    private void collect(ResourceSchedule rs, List<ScheduledMeasurement> items) {
         final boolean debug = log.isDebugEnabled();
         for (int i=0; i<items.size() && (!shouldDie.get()); i++) {
-            ScheduledMeasurement meas = (ScheduledMeasurement)items.get(i);
+            ScheduledMeasurement meas = items.get(i);
             ParsedTemplate tmpl = toParsedTemplate(meas);
             if (tmpl == null) {
                 log.warn("template for meas id=" + meas.getDerivedID() + " is null");
@@ -904,5 +951,72 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable {
             }
             return statMinFetchTime;
         }
+    }
+    
+    public String getDiagStatus() {
+        StringBuilder rtn = new StringBuilder();
+        synchronized (diagInfo) {
+            for (Entry<AppdefEntityID, DiagInfo> entry : diagInfo.entrySet()) {
+                AppdefEntityID aeid = entry.getKey();
+                DiagInfo d = entry.getValue();
+                rtn.append(aeid).append(":").append(d).append("\n");
+                d.clear();
+            }
+        }
+        return rtn.toString();
+    }
+    
+    private static final SimpleDateFormat diagInfoTimeFormat = new SimpleDateFormat("HH:mm");
+    private class DiagInfo {
+        @SuppressWarnings("unused")
+        private AppdefEntityID aeid;
+        private final List<MetricValuePlusId> collected = new ArrayList<MetricValuePlusId>();
+        private int numSchedules = 0;
+        private int numUnSchedules = 0;
+        private DiagInfo(AppdefEntityID aeid) {
+            this.aeid = aeid;
+        }
+        private void add(MetricValuePlusId data) {
+            collected.add(data);
+        }
+        private void clear() {
+            collected.clear();
+            numUnSchedules = 0;
+            numSchedules = 0;
+        }
+        private void incrementUnSchedules() {
+            numUnSchedules++;
+        }
+        private void incrementSchedules() {
+            numSchedules++;
+        }
+        public String toString() {
+            final StringBuilder rtn = new StringBuilder();
+            rtn.append("(").append(numSchedules).append("-").append(numUnSchedules).append(")");
+            for (MetricValuePlusId m : collected) {
+                rtn.append("(").append(m.mid).append("-").append(diagInfoTimeFormat.format(new Date(m.getTimestamp())))
+                   .append("=").append(m.getValue()).append(")");
+            }
+            return rtn.toString();
+        }
+    }
+    
+    private class MetricValuePlusId {
+        private final int mid;
+        private final MetricValue value;
+        private MetricValuePlusId(int mid, MetricValue value) {
+            this.mid = mid;
+            this.value = value;
+        }
+        public double getValue() {
+            return value.getValue();
+        }
+        public long getTimestamp() {
+            return value.getTimestamp();
+        }
+    }
+
+    public String getDiagName() {
+        return "Schedule Thread Diagnostics";
     }
 }

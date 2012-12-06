@@ -114,12 +114,9 @@ public class CompositeRuntimeResourceReport {
     }
 
     public String simpleSummary () {
-        String rstr = "";
-
-        rstr = "[CompositeRRR ";
+        String rstr = "[CompositeRRR ";
         for ( int i=0; i<_serverReports.length; i++ ) {
-            rstr += "\n\tReport #" + i + " from "
-            + "reporting server=" + _serverReports[i].getServerId() + ": ";
+            rstr += "\n\tReport #" + i + " from " + "reporting server=" + _serverReports[i].getServerId() + ": ";
             AIPlatformValue[] platforms = _serverReports[i].getAIPlatforms();
             for ( int j=0; j<platforms.length; j++ ) {
                 rstr += "\n\t\tPlatform #" + j
@@ -148,4 +145,59 @@ public class CompositeRuntimeResourceReport {
         }
         return rstr + "\n]";
     }
+
+    public String fullSummary() {
+        final StringBuilder rstr = new StringBuilder(1024);
+        rstr.append("[CompositeRRR ");
+        for ( int i=0; i<_serverReports.length; i++ ) {
+            rstr.append("\n\tReport #").append(i).append(" from reporting server=")
+                .append(_serverReports[i].getServerId()).append(": ");
+            final AIPlatformValue[] platforms = _serverReports[i].getAIPlatforms();
+            for (int j=0; j<platforms.length; j++ ) {
+                final AIPlatformValue platform = platforms[j];
+                final Integer platformId = platform.getId();
+                final String platformFqdn = platform.getFqdn();
+                final String platformName = platform.getName();
+                final String platformType = platform.getPlatformTypeName();
+                rstr.append("\n\t\tPlatform #").append(j)
+                    .append(" ID=").append(platformId)
+                    .append(" FQDN=").append(platformFqdn)
+                    .append(" Name=").append(platformName)
+                    .append(" Type=").append(platformType);
+                final AIServerValue[] servers = platforms[j].getAIServerValues();
+                rstr.append(" serverCount=").append((servers != null) ? servers.length : -1);
+                if (servers == null) {
+                    continue;
+                }
+                for (int k=0; k<servers.length; k++) {
+                    final AIServerValue server = servers[k];
+                    final Integer serverId = server.getId();
+                    final String serverName = server.getName();
+                    final String serverType = server.getServerTypeName();
+                    rstr.append("\n\t\t\tServer #").append(k)
+                        .append(" ID=").append(serverId)
+                        .append(" Name=").append(serverName)
+                        .append(" Stype=").append(serverType);
+                    if (!(servers[k] instanceof AIServerExtValue)) {
+                        continue;
+                    }
+                    final AIServiceValue[] services = ((AIServerExtValue) servers[k]).getAIServiceValues();
+                    rstr.append(" serviceCount=").append((services != null) ? services.length : -1);
+                    for (int m=0; m<services.length; m++) {
+                        final AIServiceValue service = services[m];
+                        final Integer serviceId = service.getId();
+                        final String serviceName = service.getName();
+                        final String serviceType = service.getServiceTypeName();
+                        rstr.append("\n\t\t\t\tService #").append(m)
+                            .append(" ID=").append(serviceId)
+                            .append(" Name=").append(serviceName)
+                            .append(" Type=").append(serviceType);
+                    }
+                }
+            }
+        }
+        rstr.append("\n]");
+        return rstr.toString();
+    }
+
 }

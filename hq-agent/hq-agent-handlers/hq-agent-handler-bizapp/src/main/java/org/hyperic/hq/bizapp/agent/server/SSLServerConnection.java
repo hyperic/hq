@@ -43,23 +43,19 @@ class SSLServerConnection
         this.socket = socket;
     }
 
-    public InputStream getInputStream()
-       throws AgentConnectionException
-    {
+    public InputStream getInputStream() throws AgentConnectionException {
         try {
-            return this.socket.getInputStream();
+            return socket.getInputStream();
         } catch(IOException exc){
-            throw new AgentConnectionException(exc.getMessage());
+            throw new AgentConnectionException(exc.getMessage(), exc);
         }
     }
 
-    public OutputStream getOutputStream()
-       throws AgentConnectionException
-    {
+    public OutputStream getOutputStream() throws AgentConnectionException {
         try {
             return this.socket.getOutputStream();
         } catch(IOException exc){
-            throw new AgentConnectionException(exc.getMessage());
+            throw new AgentConnectionException(exc.getMessage(), exc);
         }
     }
 

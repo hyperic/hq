@@ -51,6 +51,7 @@ public class AgentStatsCollector extends AbstractStatsCollector {
     public static final String DISK_LIST_READ_RECORD_TIME = "DISK_LIST_READ_RECORD_TIME";
     public static final String DISK_LIST_ADD_TO_LIST_TIME = "DISK_LIST_ADD_TO_LIST_TIME";
     public static final String DISK_LIST_DELETE_ALL_RECORDS_TIME = "DISK_LIST_DELETE_ALL_RECORDS_TIME";
+    public static final String DISK_LIST_KEYVALS_FLUSH_TIME = "DISK_LIST_KEYVALS_FLUSH_TIME";
 
     private AgentStatsCollector() {
         super(getMBeanServer());

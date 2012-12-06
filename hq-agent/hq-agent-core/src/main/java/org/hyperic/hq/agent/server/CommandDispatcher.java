@@ -27,16 +27,15 @@ package org.hyperic.hq.agent.server;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Hashtable;
+import java.util.HashMap;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentAPIInfo;
 import org.hyperic.hq.agent.AgentCommand;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentRemoteValue;
 import org.hyperic.hq.agent.stats.AgentStatsCollector;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 
 /**
@@ -46,17 +45,14 @@ import org.apache.commons.logging.LogFactory;
  * is processed, their registered methods will be invoked.
  */
 public class CommandDispatcher {
-    private Log log;     
-    private Hashtable<String, AgentServerHandler> commands;
-    private AgentStatsCollector statsCollector;
-    private String COMMAND_DISPATCHER_INCOMING_COMMAND = "COMMAND_DISPATCHER_INCOMING_COMMAND";
+    private final Log log = LogFactory.getLog(CommandDispatcher.class);
+    private final HashMap<String, AgentServerHandler> commands = new HashMap<String, AgentServerHandler>();
+    private final AgentStatsCollector statsCollector = AgentStatsCollector.getInstance();
+    private static final String COMMAND_DISPATCHER_INCOMING_COMMAND = "COMMAND_DISPATCHER_INCOMING_COMMAND";
     // this should never happen but the agent is in such an unknown state so I didn't want to leave it out
-    private String COMMAND_DISPATCHER_ILLEGAL_COMMAND = "COMMAND_DISPATCHER_ILLEGAL_COMMAND";
+    private static final String COMMAND_DISPATCHER_ILLEGAL_COMMAND = "COMMAND_DISPATCHER_ILLEGAL_COMMAND";
 
     CommandDispatcher(){
-        this.commands = new Hashtable<String, AgentServerHandler>();
-        this.log      = LogFactory.getLog(CommandDispatcher.class);
-        this.statsCollector = AgentStatsCollector.getInstance();
         statsCollector.register(COMMAND_DISPATCHER_ILLEGAL_COMMAND);
         statsCollector.register(COMMAND_DISPATCHER_INCOMING_COMMAND);
     }
@@ -74,8 +70,8 @@ public class CommandDispatcher {
     void addServerHandler(AgentServerHandler handler){
         String[] cmds = handler.getCommandSet();
         for(int i=0; i<cmds.length; i++){
-            this.commands.put(cmds[i], handler);
-            statsCollector.register(COMMAND_DISPATCHER_INCOMING_COMMAND + "_" + cmds[i]);
+            commands.put(cmds[i], handler);
+            statsCollector.register(COMMAND_DISPATCHER_INCOMING_COMMAND + "_" + cmds[i].toUpperCase());
         }
     }
 
@@ -100,7 +96,7 @@ public class CommandDispatcher {
             AgentServerHandler handler;
             AgentAPIInfo apiInfo;
             Object val;
-            if((val = this.commands.get(cmd.getCommand())) == null){
+            if((val = commands.get(cmd.getCommand())) == null){
                 throw new AgentRemoteException("Unknown command, '" + cmd.getCommand() + "'");
             }
             handler = (AgentServerHandler) val;        
@@ -110,11 +106,14 @@ public class CommandDispatcher {
                                                " vs. " + apiInfo.getVersion());
             }
             legalCommand = true;
+            if (log.isDebugEnabled()) {
+                log.debug("processing cmd=" + cmd.getCommand() + ", arg=" + cmd.getCommandArg());
+            }
             return handler.dispatchCommand(cmd.getCommand(), cmd.getCommandArg(), inStream, outStream);
         } catch(AgentRemoteException exc){
             throw exc;
         } catch(Exception exc){
-            this.log.error("Error while processing request", exc);
+            log.error("Error while processing request", exc);
             throw new AgentRemoteException(exc.toString(), exc);
         } catch(LinkageError err){
             AgentRemoteException e = new AgentRemoteException(err.toString());

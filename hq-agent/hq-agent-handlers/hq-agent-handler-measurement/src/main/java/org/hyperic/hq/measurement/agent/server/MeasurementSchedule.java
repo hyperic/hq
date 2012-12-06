@@ -31,12 +31,15 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.server.AgentStorageException;
@@ -46,7 +49,6 @@ import org.hyperic.hq.measurement.agent.ScheduledMeasurement;
 import org.hyperic.hq.measurement.server.session.SRN;
 import org.hyperic.util.encoding.Base64;
 
-
 /**
  * Class which does the storage/retrieval of schedule information from
  * the Agent's simple storage provider.
@@ -55,93 +57,100 @@ import org.hyperic.util.encoding.Base64;
 class MeasurementSchedule {
     private static final String PROP_MSCHED = "measurement_schedule";
     private static final String PROP_MSRNS =  "measurement_srn";
+    private static final String PROP_MSRNS_LENGTH = "measurement_srn_length";
+    private static final int MAX_ELEM_SIZE = 10000;
     
     private final AgentStorageProvider store;      
-    private final ArrayList            srnList;
-    private final Log                  log;
+    private final ArrayList<SRN> srnList = new ArrayList<SRN>();
+    private final Log log = LogFactory.getLog(MeasurementSchedule.class);
 
     MeasurementSchedule(AgentStorageProvider store, Properties bootProps) {
         String info = bootProps.getProperty(PROP_MSCHED);
         if (info != null) {
             store.addOverloadedInfo(PROP_MSCHED, info);
         }
-
         this.store    = store;
-        this.srnList  = new ArrayList();
-        this.log      = LogFactory.getLog(MeasurementSchedule.class);
-
         this.populateSRNInfo();
     }
 
     private void populateSRNInfo(){
-        ByteArrayInputStream bIs;
-        DataInputStream dIs;
-        HashSet seenEnts;
-        String encSRNList;
-
-        this.srnList.clear();
-
-        encSRNList = this.store.getValue(MeasurementSchedule.PROP_MSRNS);
-        if(encSRNList == null){
-            return;
+        srnList.clear();
+        final String lengthBuf = store.getValue(PROP_MSRNS_LENGTH);
+        final List<Byte> encSRNBytes = new ArrayList<Byte>();
+        if (lengthBuf == null) {
+            final String mSchedBuf = store.getValue(PROP_MSRNS);
+            if (mSchedBuf == null) {
+                log.warn("no srns to retrieve from storage");
+                return;
+            }
+            final byte[] bytes = Base64.decode(mSchedBuf);
+            encSRNBytes.addAll(Arrays.asList(ArrayUtils.toObject(bytes)));
+        } else {
+            final int length = Integer.parseInt(lengthBuf);
+            for (int i=0; i<length; i++) {
+                final byte[] bytes = Base64.decode(store.getValue(PROP_MSRNS + "_" + i));
+                encSRNBytes.addAll(Arrays.asList(ArrayUtils.toObject(bytes)));
+            }
         }
-
-        seenEnts = new HashSet();
-
-        bIs = new ByteArrayInputStream(Base64.decode(encSRNList));
-        dIs = new DataInputStream(bIs);
-
+        byte[] srnBytes = ArrayUtils.toPrimitive(encSRNBytes.toArray(new Byte[0]));
+        HashSet<AppdefEntityID> seenEnts = new HashSet<AppdefEntityID>();
+        String srnBuf = new String(srnBytes);
+        ByteArrayInputStream bIs = new ByteArrayInputStream(srnBytes);
+        DataInputStream dIs = new DataInputStream(bIs);
         try {
             int numSRNs = dIs.readInt();
             int entType, entID, revNo;
 
-            for(int i=0; i<numSRNs; i++){
-                AppdefEntityID ent;
-
+            for (int i=0; i<numSRNs; i++) {
                 entType = dIs.readInt();
                 entID   = dIs.readInt();
                 revNo   = dIs.readInt();
-
-                ent = new AppdefEntityID(entType, entID);
+                AppdefEntityID ent = new AppdefEntityID(entType, entID);
                 if(seenEnts.contains(ent)){
-                    this.log.warn("Entity '" + ent + "' contained more than " +
-                                  "once in SRN storage.  Ignoring");
+                    log.warn("Entity '" + ent + "' contained more than once in SRN storage.  Ignoring");
                     continue;
                 }
-
                 seenEnts.add(ent);
-                this.srnList.add(new SRN(ent, revNo));
+                srnList.add(new SRN(ent, revNo));
             }
         } catch(IOException exc){
-            this.log.error("Unable to decode SRN list: " + exc.getMessage());
+            this.log.error("Unable to decode SRN list: " + exc + " srn=\"" + srnBuf + "\"", exc);
         }
     }
 
-    private void writeSRNs()
-        throws AgentStorageException
-    {
+    private void writeSRNs() throws AgentStorageException {
         ByteArrayOutputStream bOs;
         DataOutputStream dOs;
-
         bOs = new ByteArrayOutputStream();
         dOs = new DataOutputStream(bOs);
-
-        synchronized(this.srnList){
+        synchronized(srnList){
             try {
-                dOs.writeInt(this.srnList.size());
-                
-                for(Iterator i=this.srnList.iterator(); i.hasNext(); ){
-                    SRN srn = (SRN)i.next();
+                dOs.writeInt(srnList.size());
+                for(SRN srn : srnList) {
                     AppdefEntityID ent = srn.getEntity();
-                    
                     dOs.writeInt(ent.getType());
                     dOs.writeInt(ent.getID());
                     dOs.writeInt(srn.getRevisionNumber());
                 }
-                this.store.setValue(MeasurementSchedule.PROP_MSRNS, 
-                                    Base64.encode(bOs.toByteArray()));
-            } catch(IOException exc){
-                this.log.error("Error encoding SRN list");
+                List<Byte> bytes = Arrays.asList(ArrayUtils.toObject(bOs.toByteArray()));
+                int size = bytes.size();
+                if (size > MAX_ELEM_SIZE) {
+                    store.setValue(PROP_MSRNS_LENGTH, new Integer((size/MAX_ELEM_SIZE) + 1).toString());
+                    int ii=0;
+                    for (int i=0; i<size; i+=MAX_ELEM_SIZE) {
+                        int start = i;
+                        int max = Math.min(i+MAX_ELEM_SIZE, size);
+                        List<Byte> subList = bytes.subList(start, max);
+                        Byte[] b = subList.toArray(new Byte[0]);
+                        store.setValue(MeasurementSchedule.PROP_MSRNS + "_" + ii++, Base64.encode(ArrayUtils.toPrimitive(b)));
+                    }
+                } else {
+                    store.setValue(PROP_MSRNS_LENGTH, "1");
+                    Byte[] b = bytes.toArray(new Byte[0]);
+                	store.setValue(MeasurementSchedule.PROP_MSRNS + "_0", Base64.encode(ArrayUtils.toPrimitive(b)));
+                }
+           } catch(IOException exc){
+                this.log.error("Error encoding SRN list", exc);
                 return;
             }
         }
@@ -177,7 +186,7 @@ class MeasurementSchedule {
      * Get a list of all the measurements within the storage.
      * @throws IOException 
      */
-    public Iterator<ScheduledMeasurement> getMeasurementList() throws IOException {
+    public synchronized Iterator<ScheduledMeasurement> getMeasurementList() throws IOException {
         Collection<String> records = new ArrayList<String>();
         try {
             readRecordsFromStorage(records);
@@ -186,9 +195,9 @@ class MeasurementSchedule {
             //For version 4.6.5 the default record size for Disk list was changed from 1024 to 4000
             //If we get an exception here this is probably because this is the first startup after an
             //upgrade from a pre 4.6.5 version and we need to try to fix the list 
-            log.warn("Error reading measurement list from storage = '" + e.getMessage() + "' ," +
-                    " trying to convert the list records size");
-            this.store.convertListToCurrentRecordSize(MeasurementSchedule.PROP_MSCHED);
+            log.warn("Error reading measurement list from storage = '" + e + "' ," +
+                     " trying to convert the list records size");
+            store.convertListToCurrentRecordSize(MeasurementSchedule.PROP_MSCHED);
             //If this time readRecordsFromStorage() we don't want to catch the exception,
             //the AgentDeamon will catch this exception and fail the agent startup
             readRecordsFromStorage(records);
@@ -204,33 +213,35 @@ class MeasurementSchedule {
     private void readRecordsFromStorage(Collection<String> records) {
         Iterator<String> i;
         records.clear();
-        i = this.store.getListIterator(MeasurementSchedule.PROP_MSCHED);
+        i = store.getListIterator(MeasurementSchedule.PROP_MSCHED);
         for(; i != null && i.hasNext(); ){
             String value = i.next();
             records.add(value);
         }
     }
 
-    void storeMeasurement(ScheduledMeasurement newMeas)
-        throws AgentStorageException 
-    {
-        this.store.addToList(MeasurementSchedule.PROP_MSCHED,
-                             newMeas.encode());
-        this.store.flush();
+    synchronized void storeMeasurements(Collection<ScheduledMeasurement> measurements) throws AgentStorageException {
+        for (ScheduledMeasurement m : measurements) {
+            final String encoded = m.encode();
+            store.addToList(MeasurementSchedule.PROP_MSCHED, encoded.toString());
+        }
+        store.flush();
     }
 
-    void updateSRN(SRN updSRN)
-        throws AgentStorageException
-    {
-        AppdefEntityID ent = updSRN.getEntity();
-        boolean toWrite = false, found = false;
+    synchronized void storeMeasurement(ScheduledMeasurement newMeas) throws AgentStorageException {
+        final String encoded = newMeas.encode();
+        store.addToList(MeasurementSchedule.PROP_MSCHED, encoded.toString());
+        store.flush();
+    }
 
+    void updateSRN(SRN updSRN) throws AgentStorageException {
+        AppdefEntityID ent = updSRN.getEntity();
+        boolean toWrite = false;
+        boolean found = false;
         synchronized(this.srnList){
             final boolean debug = log.isDebugEnabled();
-            for(Iterator i=this.srnList.iterator(); i.hasNext(); ){
-                SRN srn = (SRN) i.next();
-
-                if(found = srn.getEntity().equals(ent)){
+            for (SRN srn : srnList) {
+                if(found = srn.getEntity().equals(ent)) {
                     if (toWrite =
                         srn.getRevisionNumber() != updSRN.getRevisionNumber()) {
                         if (debug) {
@@ -243,17 +254,13 @@ class MeasurementSchedule {
                     break;
                 }
             }
-
             if(!found){
-                this.log.debug("Adding new SRN for entity " + ent + 
-                               ": Initial value = " + 
-                               updSRN.getRevisionNumber());
-                this.srnList.add(updSRN);
+                log.debug("Adding new SRN for entity " + ent +  ": Initial value = " + updSRN.getRevisionNumber());
+                srnList.add(updSRN);
                 toWrite = true;
             }
-
             if(toWrite){
-                this.writeSRNs();
+                writeSRNs();
             }
         }
     }
@@ -263,9 +270,8 @@ class MeasurementSchedule {
         boolean toWrite = false, found = false;
 
         synchronized (this.srnList) {
-            for (Iterator i = this.srnList.iterator(); i.hasNext();) {
-                SRN srn = (SRN) i.next();
-
+            for (Iterator<SRN> i = this.srnList.iterator(); i.hasNext();) {
+                SRN srn = i.next();
                 if (srn.getEntity().equals(ent)) {
                     found = true;
                     i.remove();
@@ -300,7 +306,7 @@ class MeasurementSchedule {
      *                 an update of the SRN is unnecessary), then the
      *                 SRN will not be updated.
      */
-    void deleteMeasurements(Set<AppdefEntityID> aeids) throws AgentStorageException  {
+    synchronized void deleteMeasurements(Set<AppdefEntityID> aeids) throws AgentStorageException  {
         if (aeids == null || aeids.isEmpty()) {
             return;
         }
@@ -319,9 +325,9 @@ class MeasurementSchedule {
                 i.remove();
             }
         }
-        final Iterator<SRN> it = srnList.iterator();
         // Clear out the SRN 
         synchronized(this.srnList){
+            final Iterator<SRN> it = srnList.iterator();
             while (it.hasNext()) {
                 final SRN srn = it.next();
                 final AppdefEntityID entity = srn.getEntity();
