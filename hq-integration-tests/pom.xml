@@ -181,6 +181,7 @@
     	</testResources>
 	</build>
 
+<!--
     <profiles>
         <profile>
             <id>CI-Build</id>
@@ -200,10 +201,10 @@
                                 <phase>process-resources</phase>
                                 <configuration>
                                     <target>
-                                        <exec executable="mvn" dir="${project.basedir}/../dist/installer/modules/installer">
+                                        <exec executable="mvn" dir="${project.basedir}/../../hq/dist/installer/modules/installer">
                                             <arg value="assembly:directory"/>
                                         </exec>
-                                        <exec executable="ant" dir="${project.basedir}/../dist/installer/modules/installer">
+                                        <exec executable="ant" dir="${project.basedir}/../../hq/dist/installer/modules/installer">
                                             <arg value="dbsetup"/>
                                             <arg value="-Dserver.database-url=${override.server.database-url}"/>
                                             <arg value="-Dserver.database-driver=${override.server.database-driver}"/>
@@ -224,5 +225,6 @@
             </build>
         </profile>
     </profiles>
+-->
 
 </project>
