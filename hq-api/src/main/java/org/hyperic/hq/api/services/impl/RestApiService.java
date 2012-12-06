@@ -140,6 +140,15 @@ public class RestApiService {
     }    
     public void setLogger(Log logger) {
         this.logger = logger;
-    }        
+    }   
+    
+    protected HttpSession getSession() {
+        HttpServletRequest request = messageContext.getHttpServletRequest();
+        assert(null != request);
+        //do not create a session one should already exist.
+        HttpSession session = request.getSession(false);
+        return session;
+    }
+
 
 }
