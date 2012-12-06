@@ -204,7 +204,13 @@
                                             <arg value="assembly:directory"/>
                                         </exec>
                                         <exec executable="ant" dir="${project.basedir}/../dist/installer/modules/installer">
+                                            <arg value="dbsetup"/>
                                             <arg value="-Dserver.database-url=${override.server.database-url}"/>
+                                            <arg value="-Dserver.database-driver=${override.server.database-driver}"/>
+                                            <arg value="-Dserver.database=${override.server.database}"/>
+                                            <arg value="-Dserver.database-user=${override.server.database-user}"/>
+                                            <arg value="-Dserver.database-password=${override.server.database-password}"/>
+                                            <arg value="-Dserver.hibernate.dialect=${override.server.hibernate.dialect}"/>
                                         </exec>
                                     </target>
                                 </configuration>
