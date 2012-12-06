@@ -36,22 +36,7 @@
 </jsu:script>
 <c:set var="entityId" value="${Resource.entityId}"/>
 <c:set var="eid" value="${Resource.entityId.appdefKey}"/>
-<c:set var="view1" value="${param.view}"/>
-<c:if test="${empty view1}">
-  <c:set var="view1" value="default"/>
-</c:if>
-<c:set var="view" value="default"/>
-<c:choose>
-  <c:when test="${view1 == 'default'}">
-    <c:set var="view" value="default"/>
-  </c:when>
-  <c:when test="${view1 == 'list'}">
-    <c:set var="view" value="list"/>
-  </c:when>
-  <c:when test="${view1 == 'chart'}">
-    <c:set var="view" value="chart"/>
-  </c:when>
-</c:choose>
+<c:set var="view"><c:out value="${param.view}"/></c:set>
 
 <c:set var="mode" value="${param.mode}"/>
 <c:if test="${empty mode}">
