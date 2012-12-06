@@ -180,5 +180,43 @@
     		</testResource>
     	</testResources>
 	</build>
-	
+
+    <profiles>
+        <profile>
+            <id>CI-Build</id>
+            <activation>
+                <property><name>CI-build</name></property>
+            </activation>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>${maven-antrun-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>test</id>
+                                <phase>process-resources</phase>
+                                <configuration>
+                                    <target>
+                                        <exec executable="mvn" dir="${project.basedir}/dist/installer/modules/installer">
+                                            <arg value="assembly:directory"/>
+                                        </exec>
+                                        <exec executable="ant" dir="${project.basedir}/dist/installer/modules/installer">
+                                            <arg value="-Dserver.database-url=${override.server.database-url}"/>
+                                        </exec>
+                                    </target>
+                                </configuration>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 </project>
