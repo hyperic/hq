@@ -31,10 +31,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
-import java.util.Collection;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
@@ -85,7 +82,7 @@ public class IntegrationTestContextLoader extends AbstractContextLoader {
 		this.testClass = testClass ; 
 	}//EOM 
 	
-	public static final void configureSigar(final ApplicationContext context, final Log externalLogger) { 
+	public static final void configureSigar(final ApplicationContext context, final Log externalLogger) {
 		final Log log = (externalLogger == null ? logger : externalLogger) ;
 
 		try {
