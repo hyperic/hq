@@ -48,6 +48,9 @@
 		<!-- <property name="schemaHandler" ref="schemaHolder"/> -->
 	</bean>
 
+	<bean id="searchProvider" class="org.apache.cxf.jaxrs.ext.search.SearchContextProvider">
+	</bean>
+
 	<bean id="timeProvider" class="org.hyperic.hq.api.common.DateParameterProvider">
 	</bean>
 
