@@ -7,9 +7,13 @@ import javax.jms.JMSException;
 import javax.jms.ObjectMessage;
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent;
+import org.hyperic.hq.measurement.server.session.ReportProcessorImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZeventPayload;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZeventSource;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
@@ -19,9 +23,11 @@ import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class OutgoingMetricZeventListener implements ZeventListener<MeasurementZevent> {
+    private final Log log = LogFactory.getLog(ReportProcessorImpl.class);
     protected MeasurementManager msmtMgr;
     protected MetricDestinationEvaluator evaluator;
     protected ZeventEnqueuer zEventManager;
@@ -40,6 +46,7 @@ public class OutgoingMetricZeventListener implements ZeventListener<MeasurementZ
         zEventManager.addBufferedListener(MeasurementZevent.class, this);
     }
     
+    @Transactional(readOnly = true)
     protected List<MetricNotification> extract(List<MeasurementZevent> events) {
         List<MetricNotification> dtps = new ArrayList<MetricNotification>();
         for(MeasurementZevent measurementZevent:events) {
@@ -71,9 +78,9 @@ public class OutgoingMetricZeventListener implements ZeventListener<MeasurementZ
             msgs = this.evaluator.evaluate(dtps);
             this.q.publish(msgs);
         }catch(JMSException e) {
-            e.printStackTrace();
-            RuntimeException r = new RuntimeException(e.getCause());
-            throw r;
+            log.error(e);
+            SystemException sysEx = new SystemException(e);
+            throw sysEx;
         }
     }
 }

@@ -10,14 +10,20 @@ import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.ObjectMessage;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.measurement.server.session.ReportProcessorImpl;
 import org.springframework.stereotype.Component;
 
 @Component
 public class Q {
+    private final Log log = LogFactory.getLog(ReportProcessorImpl.class);
+    protected final static int QUEUE_LIMIT = 10000;
+
     protected Map<Destination, LinkedBlockingQueue<Object>> destinations = new HashMap<Destination, LinkedBlockingQueue<Object>>();
 
     public void register(Destination dest) {
-        this.destinations.put(dest, new LinkedBlockingQueue<Object>());
+        this.destinations.put(dest, new LinkedBlockingQueue<Object>(QUEUE_LIMIT));
     }
     
     public List<?> poll(Destination dest) {
@@ -38,7 +44,7 @@ public class Q {
             try {
                 q.addAll(data);
             } catch (IllegalStateException e) {
-                log(e);
+                log.error(e);
             }
         }
     }
