@@ -322,8 +322,10 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
     @Transactional(readOnly = true)
     public Map<Integer,Measurement> findMeasurementsByIds(final List<Integer> mids) {
-        Integer[] midsArr = mids.toArray(new Integer[mids.size()]);
-        List<Measurement> msmts = measurementDAO.findByIds(midsArr);
+        List<Measurement> msmts = new ArrayList<Measurement>(mids.size());
+        for(Integer mid:mids) {
+            msmts.add(findMeasurementById(mid));
+        }
         Map<Integer,Measurement> midToMsmt = new HashMap<Integer,Measurement>();
         for(Measurement msmt:msmts) {
             midToMsmt.put(msmt.getId(), msmt);
