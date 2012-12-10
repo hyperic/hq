@@ -35,17 +35,11 @@ public class Q {
             if (q==null) {
                 return;
             }
-            q.addAll(data);
+            try {
+                q.addAll(data);
+            } catch (IllegalStateException e) {
+                log(e);
+            }
         }
     }
-    
-    public static void main(String[] args) throws Throwable {
-        List<Object> a = new ArrayList<Object>();
-        List<?> b = new ArrayList();
-        a.add(new Integer(2));
-        a.add(new String());
-        ((List<Object>)b).add(new Object());
-    }//EOM 
-    
-
 }
