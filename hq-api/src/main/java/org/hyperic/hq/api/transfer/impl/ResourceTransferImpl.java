@@ -254,7 +254,6 @@ public class ResourceTransferImpl implements ResourceTransfer{
 				resourceConfig = inputResource.getResourceConfig() ; 
 				if(resourceConfig !=  null) this.updateResourceConfig(flowContext, resourceConfig) ; 
 				
-				flowContext.reset() ; 
 			}catch(Throwable t) { 
 				this.errorHandler.log(t) ; 
 
@@ -270,7 +269,9 @@ public class ResourceTransferImpl implements ResourceTransfer{
 				
 				response.addFailedResource(t,resourceID, additionalDescription /*additional Description*/, description) ;
 				resourceID = null  ;
-			}//EO catch block 
+			} finally { //EO catch block
+                flowContext.reset() ; 
+			}
 			
 		}//EO while there are more resources
 		
