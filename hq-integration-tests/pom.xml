@@ -181,6 +181,7 @@
     	</testResources>
 	</build>
 
+<!--
     <profiles>
         <profile>
             <id>CI-Build</id>
@@ -224,5 +225,6 @@
             </build>
         </profile>
     </profiles>
+-->
 
 </project>
