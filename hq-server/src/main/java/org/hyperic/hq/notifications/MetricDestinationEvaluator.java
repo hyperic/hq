@@ -1,5 +1,6 @@
 package org.hyperic.hq.notifications;
 
+
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Enumeration;
