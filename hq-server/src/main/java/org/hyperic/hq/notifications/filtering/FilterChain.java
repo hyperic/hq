@@ -53,4 +53,9 @@ public class FilterChain<T> extends AbstractCollection<IFilter<T>> {
         return filteredEntities;
         
     }
+    @Override
+    public String toString() {
+        return super.toString();
+        // TODO print internal filters list and see debug logs that prints this class are fine
+    }
 }

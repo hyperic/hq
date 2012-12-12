@@ -37,9 +37,15 @@ public class MeasurementServiceImpl extends RestApiService implements Measuremen
     public void register() throws SessionNotFoundException, SessionTimeoutException {
         ApiMessageContext apiMessageContext = newApiMessageContext();
         Integer sessionId = apiMessageContext.getSessionId();
-        searchContext.getCondition(org.hyperic.hq.api.model.measurements.RawMetric.class);   
+//        searchContext.getCondition(org.hyperic.hq.api.model.measurements.RawMetric.class);   
         measurementTransfer.register(sessionId, null, null);
     }
+    public void unregister() throws SessionNotFoundException, SessionTimeoutException {
+        ApiMessageContext apiMessageContext = newApiMessageContext();
+        Integer sessionId = apiMessageContext.getSessionId();
+        measurementTransfer.unregister(sessionId, null, null);
+    }
+
     public ResourceMeasurementBatchResponse poll() throws SessionNotFoundException, SessionTimeoutException {
         ApiMessageContext apiMessageContext = newApiMessageContext();
         Integer sessionId = apiMessageContext.getSessionId();

@@ -23,12 +23,36 @@ public class Q {
     protected Map<Destination, LinkedBlockingQueue<Object>> destinations = new HashMap<Destination, LinkedBlockingQueue<Object>>();
 
     public void register(Destination dest) {
-        this.destinations.put(dest, new LinkedBlockingQueue<Object>(QUEUE_LIMIT));
+        LinkedBlockingQueue<Object> q = this.destinations.put(dest, new LinkedBlockingQueue<Object>(QUEUE_LIMIT));
+        if (log.isDebugEnabled()) {
+            if (q==null) {
+                log.debug("a new queue was registered for destination " + dest);
+            } else {
+                log.debug("a new queue was registered for destination " + dest + " instead of a previously existing queue");
+            }
+        }
     }
     
+    public void unregister(Destination dest) {
+        LinkedBlockingQueue<Object> q = this.destinations.remove(dest);
+        if (log.isDebugEnabled()) {
+            if (q==null) {
+                log.debug("there is no queue assigned for destination " + dest);
+            } else {
+                log.debug("removing the queue assigned for destination " + dest);
+            }
+        }
+    }
+
     public List<?> poll(Destination dest) {
         LinkedBlockingQueue<Object> topic = this.destinations.get(dest);
         List<Object> metrics = new ArrayList<Object>();
+        if (topic==null) {
+            if (log.isDebugEnabled()) {
+                log.debug("unable to poll - there is no queue assigned for destination " + dest);
+            }
+            return metrics;
+        }
         topic.drainTo(metrics);
         return metrics;
     }

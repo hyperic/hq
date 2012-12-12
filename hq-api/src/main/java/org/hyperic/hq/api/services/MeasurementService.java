@@ -70,6 +70,10 @@ public interface MeasurementService {
     @Path("/metrics/register")
 	public void register() throws SessionNotFoundException, SessionTimeoutException;
     
+    @PUT
+    @Path("/metrics/unregister")
+    public void unregister() throws SessionNotFoundException, SessionTimeoutException;
+
     @POST
     @Path("/metadata")
     public MeasurementResponse getMeasurementMetaData(BulkMeasurementMetaDataRequest msmtMetaReq) throws SessionNotFoundException, SessionTimeoutException;

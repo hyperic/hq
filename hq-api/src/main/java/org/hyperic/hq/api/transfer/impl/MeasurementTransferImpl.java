@@ -40,6 +40,8 @@ import java.util.Set;
 
 import javax.jms.Destination;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.search.SearchContext;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.ID;
@@ -63,6 +65,7 @@ import org.hyperic.hq.common.TimeframeBoundriesException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.measurement.server.session.ReportProcessorImpl;
 import org.hyperic.hq.measurement.server.session.TimeframeSizeException;
 import org.hyperic.hq.measurement.shared.DataManager;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
@@ -74,11 +77,11 @@ import org.hyperic.hq.notifications.filtering.IFilter;
 import org.hyperic.hq.notifications.filtering.IMetricFilter;
 import org.hyperic.hq.notifications.filtering.IMetricFilterByResource;
 import org.hyperic.hq.notifications.model.MetricNotification;
-import org.joda.time.format.ISODateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 public class MeasurementTransferImpl implements MeasurementTransfer {
+    private final Log log = LogFactory.getLog(ReportProcessorImpl.class);
     private static final int MAX_DTPS = 400;
 
     private MeasurementManager measurementMgr;
@@ -143,6 +146,27 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             this.q.register(dest);
         }
         this.evaluator.register(dest,userFilters);
+    }
+    
+    public void unregister(Integer sessionId, IMetricFilterByResource metricFilterByRsc, IMetricFilter metricFilter) {
+        List<IFilter<MetricNotification>> userFilters = new ArrayList<IFilter<MetricNotification>>();
+        if (metricFilterByRsc!=null) {
+            userFilters.add(metricFilterByRsc);
+        }
+        if (metricFilter!=null) {
+            userFilters.add(metricFilter);
+        }        
+
+        Destination dest = this.sessionToDestination.get(sessionId); 
+        if (dest!=null) {
+            this.sessionToDestination.remove(sessionId);
+            this.q.unregister(dest);
+            this.evaluator.unregister(dest,userFilters);
+        } else {
+           if (log.isDebugEnabled()) {
+               log.debug("no destination was previously registered with the current user session");
+           }
+        }
     }
     
     public ResourceMeasurementBatchResponse poll(Integer sessionId) {
