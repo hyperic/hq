@@ -37,7 +37,6 @@ public abstract class DestinationEvaluator<T> {
             if (log.isDebugEnabled()) {
                 log.debug("no filters were passed to be registered with destination " + dest);
             }
-            return;
         }
         FilterChain<T> filterChain = this.destToFilter.get(dest);
         if (filterChain==null) {
@@ -65,6 +64,7 @@ public abstract class DestinationEvaluator<T> {
             if (filterChain==null) {
                 log.debug("no filters were previously registered with destination " + dest);
             } else {
+                // TODO remove all filter chain filters from it
                 log.debug("un-registering all previously regitered filters from destination " + dest + ":\n" + filterChain);
             }
         }
@@ -72,7 +72,7 @@ public abstract class DestinationEvaluator<T> {
     /**
      * 
      * @param dest
-     * @param filters if empty, all the filters currently assigned to this destination would be removed
+     * @param filters
      */
     public void unregister(Destination dest, List<IFilter<MetricNotification>> filters) {
         if (filters==null || filters.isEmpty()) {
@@ -102,7 +102,7 @@ public abstract class DestinationEvaluator<T> {
     public List<ObjectMessage> evaluate(final List<T> entities) throws JMSException {
         List<ObjectMessage> msgs = new ArrayList<ObjectMessage>();
         Set<Entry<Destination,FilterChain<T>>> destToFilterESet = destToFilter.entrySet();
-        
+         
         for(Entry<Destination,FilterChain<T>> destToFilterE:destToFilterESet) {
             FilterChain<T> filterChain = destToFilterE.getValue();
             Collection<T> filteredEntities = ((Collection<T>) filterChain.filter(entities));

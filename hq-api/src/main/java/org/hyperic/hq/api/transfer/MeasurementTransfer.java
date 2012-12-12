@@ -42,6 +42,20 @@ public interface MeasurementTransfer {
     
     public void register(Integer sessionId, IMetricFilterByResource rscFilter, IMetricFilter metricFilter);
 
+    /**
+     * unregister session data and all assigned filters
+     * 
+     * @param sessionId
+     */
+    public void unregister(Integer sessionId);
+
+    /**
+     * unregister the filters assigned to this user destination
+     * 
+     * @param sessionId
+     * @param rscFilter
+     * @param metricFilter
+     */
     public void unregister(Integer sessionId, IMetricFilterByResource rscFilter, IMetricFilter metricFilter);
 
     public ResourceMeasurementBatchResponse poll(Integer sessionId);

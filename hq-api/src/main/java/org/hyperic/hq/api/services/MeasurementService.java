@@ -72,7 +72,11 @@ public interface MeasurementService {
     
     @PUT
     @Path("/metrics/unregister")
+    @Descriptions({ 
+        @Description(value = "unregister user session and all assigned filters this user destination has", target = DocTarget.METHOD),
+    })
     public void unregister() throws SessionNotFoundException, SessionTimeoutException;
+    
 
     @POST
     @Path("/metadata")
