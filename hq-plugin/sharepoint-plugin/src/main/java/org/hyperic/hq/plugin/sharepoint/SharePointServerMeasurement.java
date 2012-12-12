@@ -57,11 +57,12 @@ import org.hyperic.util.http.HttpConfig;
 
 public class SharePointServerMeasurement extends Win32MeasurementPlugin {
 
-    private Log log = LogFactory.getLog(SharePointServerMeasurement.class);
+    private static Log log = LogFactory.getLog(SharePointServerMeasurement.class);
 
     @Override
     public MetricValue getValue(Metric metric) throws PluginException, MetricNotFoundException, MetricUnreachableException {
         MetricValue res;
+            log.debug("[getValue] metric="+metric);
         if (metric.getDomainName().equalsIgnoreCase("web")) {
             try {
                 long rt = System.currentTimeMillis();
@@ -112,7 +113,7 @@ public class SharePointServerMeasurement extends Win32MeasurementPlugin {
         return res;
     }
 
-    private void testWebServer(Properties props) throws PluginException {
+    protected static void testWebServer(Properties props) throws PluginException {
 
         String user = props.getProperty("user");
         String pass = props.getProperty("password");
@@ -137,8 +138,8 @@ public class SharePointServerMeasurement extends Win32MeasurementPlugin {
         try {
             HttpResponse response = client.execute(get, new BasicHttpContext());
             int r = response.getStatusLine().getStatusCode();
-            log.debug("[testWebServer] url='" + get.getURI() + "' user='" + user + "' statusCode='" + r + "'");
-            if ((r / 100) != 2) {
+            log.debug("[testWebServer] url='" + get.getURI() + "' user='" + user + "' statusCode='" + r + "' ("+response.getStatusLine().getReasonPhrase()+")");
+            if (r>=500) {
                 throw new PluginException(response.getStatusLine().getReasonPhrase());
             }
         } catch (IOException ex) {
@@ -151,7 +152,7 @@ public class SharePointServerMeasurement extends Win32MeasurementPlugin {
     /**
      * http://hc.apache.org/httpcomponents-client-ga/ntlm.html
      */
-    public final class JCIFSEngine implements NTLMEngine {
+    public static final class JCIFSEngine implements NTLMEngine {
 
         private static final int TYPE_1_FLAGS =
                 NtlmFlags.NTLMSSP_NEGOTIATE_56
@@ -184,7 +185,7 @@ public class SharePointServerMeasurement extends Win32MeasurementPlugin {
         }
     }
 
-    public class NTLMJCIFSSchemeFactory implements AuthSchemeFactory {
+    public static class NTLMJCIFSSchemeFactory implements AuthSchemeFactory {
 
         public AuthScheme newInstance(final HttpParams params) {
             return new NTLMScheme(new JCIFSEngine());
