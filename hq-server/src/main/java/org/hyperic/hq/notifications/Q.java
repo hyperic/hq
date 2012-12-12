@@ -45,6 +45,7 @@ public class Q {
                 q.addAll(data);
             } catch (IllegalStateException e) {
                 log.error(e);
+                // TODO persist messages to disk in case Q is full
             }
         }
     }

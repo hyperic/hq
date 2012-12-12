@@ -10,6 +10,7 @@ import org.hyperic.hq.api.model.measurements.MeasurementResponse;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementBatchResponse;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequests;
 import org.hyperic.hq.api.services.impl.ApiMessageContext;
+import org.hyperic.hq.api.model.measurements.BulkMeasurementMetaDataRequest;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.TimeframeBoundriesException;
 import org.hyperic.hq.measurement.server.session.TimeframeSizeException;
@@ -46,4 +47,5 @@ public interface MeasurementTransfer {
     public ResourceMeasurementBatchResponse getAggregatedMetricData(ApiMessageContext apiMessageContext, final ResourceMeasurementRequests hqMsmtReqs, 
             final Date begin, final Date end) 
             throws PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException, SQLException;
+    public MeasurementResponse getMeasurementMetaData(BulkMeasurementMetaDataRequest msmtMetaReq);
 }

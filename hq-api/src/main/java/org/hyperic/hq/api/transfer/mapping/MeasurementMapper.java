@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.hyperic.hq.api.model.ID;
 import org.hyperic.hq.api.model.measurements.Measurement;
 import org.hyperic.hq.api.model.measurements.Metric;
 import org.hyperic.hq.api.model.measurements.MetricGroup;
@@ -28,7 +29,13 @@ public class MeasurementMapper {
         df.setGroupingUsed(false);
         df.setRoundingMode(RoundingMode.HALF_EVEN);
     }
-    
+    public List<Integer> toIds(List<ID> ids) {
+        List<Integer> ints = new ArrayList<Integer>(ids.size());
+        for(ID id:ids) {
+            ints.add(id.getId());
+        }
+        return ints;
+    }
     public Measurement toMeasurement(org.hyperic.hq.measurement.server.session.Measurement hqMsmt) {
         Measurement msmt = new Measurement();
         msmt.setInterval(hqMsmt.getInterval());
@@ -36,7 +43,14 @@ public class MeasurementMapper {
         msmt.setName(hqMsmt.getTemplate().getName());
         return msmt;
     }
-    
+    public Measurement toMeasurementExtendedData(org.hyperic.hq.measurement.server.session.Measurement hqMsmt) {
+        Measurement msmt = toMeasurement(hqMsmt);
+        msmt.setId(msmt.getId());
+        msmt.setInterval(hqMsmt.getInterval());
+        msmt.setAlias(hqMsmt.getTemplate().getAlias());
+        msmt.setName(hqMsmt.getTemplate().getName());
+        return msmt;
+    }
     public MetricGroup toMetricGroup(org.hyperic.hq.measurement.server.session.Measurement msmt) {
         MetricGroup metricGrp = new MetricGroup();
         Integer msmtId = msmt.getId();
@@ -46,9 +60,6 @@ public class MeasurementMapper {
         metricGrp.setAlias(tmpl.getAlias());
         return metricGrp;
     }
-    
-
-
     public Measurement toMeasurement(org.hyperic.hq.measurement.server.session.Measurement hqMsmt, double avg) {
         Measurement msmt = toMeasurement(hqMsmt);
         msmt.setAvg(avg);

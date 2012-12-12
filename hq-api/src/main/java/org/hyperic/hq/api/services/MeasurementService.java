@@ -2,7 +2,6 @@ package org.hyperic.hq.api.services;
 
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.util.Calendar;
 import java.util.Date;
 
 import javax.ws.rs.Consumes;
@@ -19,10 +18,9 @@ import org.apache.cxf.jaxrs.model.wadl.Description;
 import org.apache.cxf.jaxrs.model.wadl.Descriptions;
 import org.apache.cxf.jaxrs.model.wadl.DocTarget;
 import org.hibernate.ObjectNotFoundException;
+import org.hyperic.hq.api.model.measurements.BulkMeasurementMetaDataRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
-import org.hyperic.hq.api.model.measurements.RawMetric;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementBatchResponse;
-import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequest;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequests;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
@@ -71,4 +69,8 @@ public interface MeasurementService {
     @PUT
     @Path("/metrics/register")
 	public void register() throws SessionNotFoundException, SessionTimeoutException;
+    
+    @POST
+    @Path("/metadata")
+    public MeasurementResponse getMeasurementMetaData(BulkMeasurementMetaDataRequest msmtMetaReq) throws SessionNotFoundException, SessionTimeoutException;
 }

@@ -20,6 +20,7 @@ import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.TimeframeSizeException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.hyperic.hq.api.model.measurements.BulkMeasurementMetaDataRequest;
 
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -82,5 +83,9 @@ public class MeasurementServiceImpl extends RestApiService implements Measuremen
         } catch (TimeframeBoundriesException e) {
             throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.WRONG_DATE_VALUES, e.getMessage());
         }
+    }
+    
+    public MeasurementResponse getMeasurementMetaData(BulkMeasurementMetaDataRequest msmtMetaReq) {
+        return this.measurementTransfer.getMeasurementMetaData(msmtMetaReq);
     }
 }

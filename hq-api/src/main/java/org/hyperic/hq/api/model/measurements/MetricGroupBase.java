@@ -7,17 +7,17 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 import org.hyperic.hq.api.model.RestApiConstants;
-import org.hyperic.hq.api.model.resources.ComplexIp;
 
 @XmlSeeAlso({Measurement.class,MetricGroup.class})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name="BaseMetricGroupType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 public class MetricGroupBase {
+    @XmlAttribute
+    protected Integer id;
     @XmlAttribute
     private String alias;
     @XmlAttribute
@@ -26,6 +26,12 @@ public class MetricGroupBase {
     @XmlElement(name="metric", namespace=RestApiConstants.SCHEMA_NAMESPACE)
     private List<? extends RawMetric> metrics;
     
+    public Integer getId() {
+        return id;
+    }
+    public void setId(Integer id) {
+        this.id = id;
+    }
     public String getName() {
         return name;
     }
