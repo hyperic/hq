@@ -29,6 +29,7 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,9 +42,9 @@ import javax.jms.Destination;
 
 import org.apache.cxf.jaxrs.ext.search.SearchContext;
 import org.hibernate.ObjectNotFoundException;
+import org.hyperic.hq.api.model.ID;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
-import org.hyperic.hq.api.model.measurements.Metric;
 import org.hyperic.hq.api.model.measurements.MetricGroup;
 import org.hyperic.hq.api.model.measurements.RawMetric;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementBatchResponse;
@@ -51,6 +52,7 @@ import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequest;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequests;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementResponse;
 import org.hyperic.hq.api.services.impl.ApiMessageContext;
+import org.hyperic.hq.api.model.measurements.BulkMeasurementMetaDataRequest;
 import org.hyperic.hq.api.transfer.MeasurementTransfer;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 import org.hyperic.hq.api.transfer.mapping.MeasurementMapper;
@@ -59,7 +61,6 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.TimeframeBoundriesException;
 import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.TimeframeSizeException;
@@ -73,7 +74,6 @@ import org.hyperic.hq.notifications.filtering.IFilter;
 import org.hyperic.hq.notifications.filtering.IMetricFilter;
 import org.hyperic.hq.notifications.filtering.IMetricFilterByResource;
 import org.hyperic.hq.notifications.model.MetricNotification;
-import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -379,5 +379,18 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
                 rscRes.add(msmt);
             }
             return res;
+    }
+    
+    public MeasurementResponse getMeasurementMetaData(BulkMeasurementMetaDataRequest msmtMetaReq) {
+        List<ID> ids = msmtMetaReq.getMids();
+        List<Integer> mids = this.mapper.toIds(ids);
+        Map<Integer,Measurement> msmtIdToMsmt = this.measurementMgr.findMeasurementsByIds(mids);
+        MeasurementResponse res = new MeasurementResponse();
+        Collection<Measurement> hqMsmts = msmtIdToMsmt.values();
+        for(Measurement hqMsmt:hqMsmts) {
+            org.hyperic.hq.api.model.measurements.Measurement msmt = this.mapper.toMeasurementExtendedData(hqMsmt);
+            res.add(msmt);
+        }
+        return res;
     }
 }
