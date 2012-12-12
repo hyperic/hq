@@ -1,4 +1,3 @@
-/* **********************************************************************
 /*
  * NOTE: This copyright does *not* cover user programs that use Hyperic
  * program services by normal system calls through the application
