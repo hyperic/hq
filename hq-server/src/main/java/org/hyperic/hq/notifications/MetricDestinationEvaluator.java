@@ -4,6 +4,7 @@ package org.hyperic.hq.notifications;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.List;
 
 import javax.jms.Destination;
 import javax.jms.JMSException;
