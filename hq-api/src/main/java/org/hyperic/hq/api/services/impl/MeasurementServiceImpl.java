@@ -19,6 +19,8 @@ import org.hyperic.hq.common.TimeframeBoundriesException;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.TimeframeSizeException;
+import org.hyperic.hq.notifications.filtering.IMetricFilter;
+import org.hyperic.hq.notifications.filtering.IMetricFilterByResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.hyperic.hq.api.model.measurements.BulkMeasurementMetaDataRequest;
 
@@ -43,7 +45,7 @@ public class MeasurementServiceImpl extends RestApiService implements Measuremen
     public void unregister() throws SessionNotFoundException, SessionTimeoutException {
         ApiMessageContext apiMessageContext = newApiMessageContext();
         Integer sessionId = apiMessageContext.getSessionId();
-        measurementTransfer.unregister(sessionId, null, null);
+        measurementTransfer.unregister(sessionId);
     }
 
     public ResourceMeasurementBatchResponse poll() throws SessionNotFoundException, SessionTimeoutException {

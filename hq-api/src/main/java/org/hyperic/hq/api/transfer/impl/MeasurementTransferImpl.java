@@ -147,7 +147,14 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         }
         this.evaluator.register(dest,userFilters);
     }
-    
+    public void unregister(Integer sessionId) {
+        Destination dest = this.sessionToDestination.get(sessionId); 
+        if (dest!=null) {
+            this.sessionToDestination.remove(sessionId);
+            this.q.unregister(dest);
+            this.evaluator.unregisterAll(dest);
+        }        
+    }
     public void unregister(Integer sessionId, IMetricFilterByResource metricFilterByRsc, IMetricFilter metricFilter) {
         List<IFilter<MetricNotification>> userFilters = new ArrayList<IFilter<MetricNotification>>();
         if (metricFilterByRsc!=null) {
@@ -157,16 +164,20 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             userFilters.add(metricFilter);
         }        
 
-        Destination dest = this.sessionToDestination.get(sessionId); 
-        if (dest!=null) {
-            this.sessionToDestination.remove(sessionId);
-            this.q.unregister(dest);
-            this.evaluator.unregister(dest,userFilters);
-        } else {
-           if (log.isDebugEnabled()) {
-               log.debug("no destination was previously registered with the current user session");
-           }
+        if (userFilters.isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("no filters were passed to be unregistered");
+            }
+            return;
         }
+        Destination dest = this.sessionToDestination.get(sessionId); 
+        if (dest==null) {
+            if (log.isDebugEnabled()) {
+                log.debug("no destination was previously registered with the current user session");
+            }
+            return;
+        }
+        this.evaluator.unregister(dest,userFilters);
     }
     
     public ResourceMeasurementBatchResponse poll(Integer sessionId) {
