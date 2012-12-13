@@ -54,13 +54,14 @@ import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequest;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequests;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementResponse;
 import org.hyperic.hq.api.services.impl.ApiMessageContext;
-import org.hyperic.hq.api.model.measurements.BulkMeasurementMetaDataRequest;
+import org.hyperic.hq.api.model.measurements.BulkResourceMeasurementRequest;
 import org.hyperic.hq.api.transfer.MeasurementTransfer;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 import org.hyperic.hq.api.transfer.mapping.MeasurementMapper;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.TimeframeBoundriesException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.Measurement;
@@ -84,6 +85,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     private final Log log = LogFactory.getLog(ReportProcessorImpl.class);
     private static final int MAX_DTPS = 400;
 
+    private ResourceManager resourceManager ; 
     private MeasurementManager measurementMgr;
     private TemplateManager tmpltMgr;
     private DataManager dataMgr; 
@@ -95,9 +97,10 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     private SearchContext context ;
     
     @Autowired
-    public MeasurementTransferImpl(MeasurementManager measurementMgr, TemplateManager tmpltMgr, DataManager dataMgr, 
+    public MeasurementTransferImpl(ResourceManager resourceManager,MeasurementManager measurementMgr, TemplateManager tmpltMgr, DataManager dataMgr, 
             MeasurementMapper mapper, ExceptionToErrorCodeMapper errorHandler, MetricDestinationEvaluator evaluator, Q q) {
         super();
+        this.resourceManager = resourceManager;
         this.measurementMgr = measurementMgr;
         this.tmpltMgr = tmpltMgr;
         this.mapper=mapper;
@@ -416,16 +419,28 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             return res;
     }
     
-    public MeasurementResponse getMeasurementMetaData(BulkMeasurementMetaDataRequest msmtMetaReq) {
-        List<ID> ids = msmtMetaReq.getMids();
-        List<Integer> mids = this.mapper.toIds(ids);
-        Map<Integer,Measurement> msmtIdToMsmt = this.measurementMgr.findMeasurementsByIds(mids);
-        MeasurementResponse res = new MeasurementResponse();
-        Collection<Measurement> hqMsmts = msmtIdToMsmt.values();
-        for(Measurement hqMsmt:hqMsmts) {
-            org.hyperic.hq.api.model.measurements.Measurement msmt = this.mapper.toMeasurementExtendedData(hqMsmt);
-            res.add(msmt);
+    public ResourceMeasurementBatchResponse getMeasurements(ApiMessageContext apiMessageContext, BulkResourceMeasurementRequest rcsMsmtReq) {
+        ResourceMeasurementBatchResponse res = new ResourceMeasurementBatchResponse();
+        AuthzSubject authzSubject = apiMessageContext.getAuthzSubject();
+        List<ID> ids = rcsMsmtReq.getRids();
+        List<Integer> rids = this.mapper.toIds(ids);
+        for(Integer rid:rids) {
+            Resource rsc = this.resourceManager.findResourceById(rid);
+            if (rsc==null) {
+                res.addFailedResource(String.valueOf(rid), ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID.getErrorCode(), null,new Object[] {""});
+                log.error("resource not found for resource id - " + rid);
+                continue;
+            }
+            ResourceMeasurementResponse rscRes = new ResourceMeasurementResponse();
+            rscRes.setRscId(String.valueOf(rid));
+            Collection<Measurement> hqMsmts = this.measurementMgr.findMeasurements(authzSubject, rsc);
+            for(Measurement hqMsmt:hqMsmts) {
+                org.hyperic.hq.api.model.measurements.Measurement msmt = this.mapper.toMeasurementExtendedData(hqMsmt);
+                rscRes.add(msmt);
+            }
+            res.addResponse(rscRes);
         }
+
         return res;
     }
 }
