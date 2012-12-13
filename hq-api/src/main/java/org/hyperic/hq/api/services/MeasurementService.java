@@ -20,6 +20,7 @@ import org.apache.cxf.jaxrs.model.wadl.DocTarget;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.measurements.BulkResourceMeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
+import org.hyperic.hq.api.model.measurements.MetricGroup;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementBatchResponse;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequests;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
@@ -50,7 +51,7 @@ public interface MeasurementService {
 	
 	@GET
     @Path("/metrics/poll")
-	public ResourceMeasurementBatchResponse poll() throws SessionNotFoundException, SessionTimeoutException;
+	public MetricGroup poll() throws SessionNotFoundException, SessionTimeoutException;
 	
 	@POST
     @Path("/metrics/aggregation")
@@ -77,7 +78,6 @@ public interface MeasurementService {
     })
     public void unregister() throws SessionNotFoundException, SessionTimeoutException;
     
-
     @POST
     @Path("/")
     public ResourceMeasurementBatchResponse getMeasurements(BulkResourceMeasurementRequest msmtMetaReq) throws SessionNotFoundException, SessionTimeoutException;

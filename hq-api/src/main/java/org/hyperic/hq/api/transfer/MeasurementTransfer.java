@@ -7,6 +7,7 @@ import java.util.Date;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
+import org.hyperic.hq.api.model.measurements.MetricGroup;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementBatchResponse;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequests;
 import org.hyperic.hq.api.services.impl.ApiMessageContext;
@@ -59,7 +60,7 @@ public interface MeasurementTransfer {
      */
     public void unregister(Integer sessionId, IMetricFilterByResource rscFilter, IMetricFilter metricFilter);
 
-    public ResourceMeasurementBatchResponse poll(Integer sessionId);
+    public MetricGroup poll(Integer sessionId);
     
     public ResourceMeasurementBatchResponse getAggregatedMetricData(ApiMessageContext apiMessageContext, final ResourceMeasurementRequests hqMsmtReqs, 
             final Date begin, final Date end) 

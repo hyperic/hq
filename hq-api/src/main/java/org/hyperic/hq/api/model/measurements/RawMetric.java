@@ -14,7 +14,9 @@ public class RawMetric {
     protected double  value;
     @XmlAttribute
     protected long timestamp; 
-
+    @XmlAttribute
+    protected Integer measurementId;
+    
     public double getValue() {
         return value;
     }
@@ -27,11 +29,17 @@ public class RawMetric {
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
-    @Override
-    public boolean equals(Object obj) {
-        if (obj==null || !(obj instanceof RawMetric)) { return false;}
-        RawMetric other = (RawMetric) obj;
-        return this.value==other.value
-                && this.timestamp==other.timestamp;
+    public Integer getMeasurementId() {
+        return measurementId;
     }
+    public void setMeasurementId(Integer measurementId) {
+        this.measurementId = measurementId;
+    }
+//    @Override
+//    public boolean equals(Object obj) {
+//        if (obj==null || !(obj instanceof RawMetric)) { return false;}
+//        RawMetric other = (RawMetric) obj;
+//        return this.value==other.value
+//                && this.timestamp==other.timestamp;
+//    }
 }

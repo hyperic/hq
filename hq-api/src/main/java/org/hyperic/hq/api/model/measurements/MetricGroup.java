@@ -9,18 +9,9 @@ import javax.xml.bind.annotation.XmlType;
 import org.hyperic.hq.api.model.RestApiConstants;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-//@XmlRootElement(name = "metricGroup", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+@XmlRootElement(name = "metricGroup", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 @XmlType(name="MetricGroupType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 public class MetricGroup extends MetricGroupBase {
 
     public MetricGroup() {}
-    
-    @XmlAttribute
-    protected Integer id;
-    public Integer getId() {
-        return id;
-    }
-    public void setId(Integer id) {
-        this.id = id;
-    }
 }
