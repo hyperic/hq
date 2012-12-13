@@ -45,33 +45,31 @@ public class MeasurementMapper {
     }
     public Measurement toMeasurementExtendedData(org.hyperic.hq.measurement.server.session.Measurement hqMsmt) {
         Measurement msmt = toMeasurement(hqMsmt);
-        msmt.setId(msmt.getId());
-        msmt.setInterval(hqMsmt.getInterval());
-        msmt.setAlias(hqMsmt.getTemplate().getAlias());
-        msmt.setName(hqMsmt.getTemplate().getName());
+        msmt.setId(hqMsmt.getId());
         return msmt;
     }
-    public MetricGroup toMetricGroup(org.hyperic.hq.measurement.server.session.Measurement msmt) {
-        MetricGroup metricGrp = new MetricGroup();
-        Integer msmtId = msmt.getId();
-        metricGrp.setId(msmtId);
-        MeasurementTemplate tmpl = msmt.getTemplate();
-        metricGrp.setName(tmpl.getName());
-        metricGrp.setAlias(tmpl.getAlias());
-        return metricGrp;
-    }
+//    public MetricGroup toMetricGroup(org.hyperic.hq.measurement.server.session.Measurement msmt) {
+//        Measurement metricGrp = new Measurement();
+//        Integer msmtId = msmt.getId();
+//        metricGrp.setId(msmtId);
+//        MeasurementTemplate tmpl = msmt.getTemplate();
+//        metricGrp.setName(tmpl.getName());
+//        metricGrp.setAlias(tmpl.getAlias());
+//        return metricGrp;
+//    }
     public Measurement toMeasurement(org.hyperic.hq.measurement.server.session.Measurement hqMsmt, double avg) {
         Measurement msmt = toMeasurement(hqMsmt);
         msmt.setAvg(avg);
         return msmt;
     }
-    public List<RawMetric> toMetrics2(List<MetricNotification> mns) {
+    public List<RawMetric> toMetricsWithId(List<MetricNotification> mns) {
         List<RawMetric> metrics = new ArrayList<RawMetric>();
         for (MetricNotification mn : mns) {
             RawMetric metric = new RawMetric();
             MetricValue hqMetric = mn.getMetricVal();
             metric.setValue(Double.valueOf(df.format(hqMetric.getValue())));
             metric.setTimestamp(hqMetric.getTimestamp());
+            metric.setMeasurementId(mn.getMeasurementId());
             metrics.add(metric);
         }
         return metrics;

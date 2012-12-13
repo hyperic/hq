@@ -17,6 +17,12 @@ import org.hyperic.hq.api.model.RestApiConstants;
 @XmlRootElement(name = "measurement", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 @XmlType(name="MeasurementType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 public class Measurement extends MetricGroupBase {
+    @XmlAttribute
+    protected Integer id;
+    @XmlAttribute
+    private String alias;
+    @XmlAttribute
+    private String name;
 	@XmlAttribute
 	private Long interval;
     @XmlAttribute
@@ -38,7 +44,25 @@ public class Measurement extends MetricGroupBase {
 //                && this.interval == other.interval
 //                && this.avg == other.avg);
 //    }
-	public Long getInterval() {
+    public Integer getId() {
+        return id;
+    }
+    public void setId(Integer id) {
+        this.id = id;
+    }
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    public String getAlias() {
+        return alias;
+    }
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
+    public Long getInterval() {
 		return interval;
 	}
 	public void setInterval(Long interval) {
