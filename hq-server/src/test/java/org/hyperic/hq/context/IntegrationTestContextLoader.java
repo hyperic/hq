@@ -32,9 +32,12 @@ import java.lang.annotation.Annotation;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Properties;
 
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
@@ -70,9 +73,11 @@ import org.springframework.util.StringUtils;
 
 public class IntegrationTestContextLoader extends AbstractContextLoader {
 	protected static final Log logger = LogFactory.getLog(IntegrationTestContextLoader.class);
+	
 	private static Sigar sigar ; 
 	private static Field platformBeanServerField ;
 	protected Class<?> testClass ; 
+	private static boolean initializedSysProps ; 
 	
 	private final ExternalizingGenericXmlContextLoader delegateLoader ;  
 	
@@ -89,17 +94,7 @@ public class IntegrationTestContextLoader extends AbstractContextLoader {
 		final Log log = (externalLogger == null ? logger : externalLogger) ;
 
 		try {
-		    //if the tests.server.database-url override property is provided, set it as the server.database-url property (if not already exists) 
-		    String serverDatabaseUrl = System.getProperty("server.database-url") ; 
-		    if(serverDatabaseUrl == null) { 
-		        
-		        serverDatabaseUrl = System.getProperty("override.server.database-url") ; 
-		        if(serverDatabaseUrl != null) {
-		            log.info("An override.server.database-url property value was provided : " + serverDatabaseUrl + " setting in the server.database-url system property") ;
-		            System.setProperty("server.database-url", serverDatabaseUrl) ; 
-		        }//EO if the override database url property was provided 
-		        
-		    }//EO if the server dataabase url was not defined via system property 
+		    overrideProperties(log) ; 
 		    
             //Find the sigar libs on the test classpath
             final File sigarBin = new File(context.getResource("/libsigar-sparc64-solaris.so").getFile().getParent());
@@ -114,6 +109,60 @@ public class IntegrationTestContextLoader extends AbstractContextLoader {
         	log.error("Unable to initiailize sigar path",t);
             throw new SystemException(t) ; 
         }//EO catch block
+	}//EOM 
+	
+	private static final void overrideProperties(final Log log) {
+	    if(!initializedSysProps)  return ; 
+	    
+	    final String OVERRIDE_PREFIX =  "override." ;
+	    
+	    final Properties sysProps = System.getProperties() ; 
+	   
+	    final Map<String,String> newProps = new HashMap<String,String>() ; 
+	    
+	    String origSysPropName, overrideSysPropName, origSyspropVal, overrideVal ;
+	    int indexOfPrefix ; 
+	    
+	    for(Entry<Object,Object> syspropEntry : sysProps.entrySet()) { 
+	        overrideSysPropName = (String) syspropEntry.getKey() ; 
+	        if( (indexOfPrefix = overrideSysPropName.indexOf(OVERRIDE_PREFIX)) == -1 ) continue ; 
+	        //first search for an explicitly defined corresponding original sys prop 
+	        //and found skip the override.
+	        origSysPropName = overrideSysPropName.substring(indexOfPrefix+1) ;
+	        origSyspropVal  = System.getProperty(origSysPropName) ;
+	        if(origSyspropVal != null) continue ; 
+	        //else create a new orig sys prop with the override value 
+	        newProps.put(origSysPropName, (String)syspropEntry.getValue()) ;
+	    }//EO while there are more system properties
+	    
+	    for(Map.Entry<String,String> newPropEntry : newProps.entrySet())  {
+	        System.setProperty(newPropEntry.getKey(), newPropEntry.getValue()) ;
+	    }//EO while there are more new properties  
+	   
+	    initializedSysProps = true ; 	    
+	}//EOM 
+	
+	private final void overrideProperties(final String[][] properties, final Log log) { 
+	    
+	    final int length = properties.length ;
+	    
+	    String sysPropName, overrideSysPropName,  syspropOrigVal, overrideVal ;  
+	    for(int i=0; i < length; i++) { 
+	        sysPropName = properties[i][0] ; 
+	        syspropOrigVal  = System.getProperty(sysPropName) ; 
+	        //if the org system property already exists then it was explicitly defined and should 
+	        //not be overriden 
+	        if(syspropOrigVal != null) continue ; 
+	        //else attempt to looukup the overrding property value and if found, define
+	        //a new system proeprty with the orig name and the overriding value 
+	        overrideSysPropName = properties[i][1];  
+	        overrideVal = System.getProperty(overrideSysPropName) ;
+	        if(overrideVal == null) continue ; 
+	        //else there is an override value and not explicitly defined orig value so override 
+	        log.info("An "+overrideSysPropName+" property value was provided : " + overrideVal + " setting in the " + sysPropName + " system property") ;
+	        
+	    }//EO while there are more properties to potentially override
+	    
 	}//EOM 
 
     public ApplicationContext loadContext(final String... locations) throws Exception {
