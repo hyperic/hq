@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.jms.Destination;
@@ -20,7 +21,8 @@ public class Q {
     private final Log log = LogFactory.getLog(ReportProcessorImpl.class);
     protected final static int QUEUE_LIMIT = 10000;
 
-    protected Map<Destination, LinkedBlockingQueue<Object>> destinations = new HashMap<Destination, LinkedBlockingQueue<Object>>();
+    // TODO~ change to write through versioning (each node would have versioning - write on one version, read another, then sync between them), o/w will pose problems in scale
+    protected Map<Destination, LinkedBlockingQueue<Object>> destinations = new ConcurrentHashMap<Destination, LinkedBlockingQueue<Object>>();
 
     public void register(Destination dest) {
         LinkedBlockingQueue<Object> q = this.destinations.put(dest, new LinkedBlockingQueue<Object>(QUEUE_LIMIT));
@@ -69,7 +71,7 @@ public class Q {
                 q.addAll(data);
             } catch (IllegalStateException e) {
                 log.error(e);
-                // TODO persist messages to disk in case Q is full
+                // TODO~ persist messages to disk in case Q is full
             }
         }
     }

@@ -62,7 +62,7 @@ public class OutgoingMetricZeventListener implements ZeventListener<MeasurementZ
             }
             Integer mid = Integer.valueOf(measurementId);
             Measurement msmt = this.msmtMgr.getMeasurement(mid);
-            // TODO black list should be here
+            // TODO~ black list should be here
             
             Resource rsc = msmt.getResource();
             MetricNotification dtp = new MetricNotification(rsc.getId(),mid,metricVal);
