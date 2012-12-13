@@ -137,7 +137,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         if (metricFilter!=null) {
             userFilters.add(metricFilter);
         }        
-        // TODO init filters with needed managers to enable them to retrieve filter related data
+        // TODO~ init filters with needed managers to enable them to retrieve filter related data
         
         Destination dest = this.sessionToDestination.get(sessionId); 
         if (dest==null) {

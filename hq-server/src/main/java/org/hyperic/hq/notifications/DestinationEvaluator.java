@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.jms.Destination;
 import javax.jms.JMSException;
@@ -22,7 +23,8 @@ import org.hyperic.hq.notifications.model.MetricNotification;
 
 public abstract class DestinationEvaluator<T> {
     private final Log log = LogFactory.getLog(ReportProcessorImpl.class);
-    protected Map<Destination,FilterChain<T>> destToFilter = new HashMap<Destination,FilterChain<T>>();
+    // TODO~ change to write through versioning (each node would have versioning - write on one version, read another, then sync between them), o/w will pose problems in scale
+    protected Map<Destination,FilterChain<T>> destToFilter = new ConcurrentHashMap<Destination,FilterChain<T>>();
 
     protected abstract FilterChain<T> instantiateFilterChain(Collection<IFilter<T>> filters);
     
@@ -64,7 +66,7 @@ public abstract class DestinationEvaluator<T> {
             if (filterChain==null) {
                 log.debug("no filters were previously registered with destination " + dest);
             } else {
-                // TODO remove all filter chain filters from it
+                // TODO~ remove all filter chain filters from it
                 log.debug("un-registering all previously regitered filters from destination " + dest + ":\n" + filterChain);
             }
         }
