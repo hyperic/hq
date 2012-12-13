@@ -22,7 +22,7 @@ import org.hyperic.hq.measurement.server.session.TimeframeSizeException;
 import org.hyperic.hq.notifications.filtering.IMetricFilter;
 import org.hyperic.hq.notifications.filtering.IMetricFilterByResource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.hyperic.hq.api.model.measurements.BulkMeasurementMetaDataRequest;
+import org.hyperic.hq.api.model.measurements.BulkResourceMeasurementRequest;
 
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -93,7 +93,8 @@ public class MeasurementServiceImpl extends RestApiService implements Measuremen
         }
     }
     
-    public MeasurementResponse getMeasurementMetaData(BulkMeasurementMetaDataRequest msmtMetaReq) {
-        return this.measurementTransfer.getMeasurementMetaData(msmtMetaReq);
+    public ResourceMeasurementBatchResponse getMeasurements(BulkResourceMeasurementRequest msmtMetaReq) throws SessionNotFoundException, SessionTimeoutException {
+        ApiMessageContext apiMessageContext = newApiMessageContext();
+        return this.measurementTransfer.getMeasurements(apiMessageContext,msmtMetaReq);
     }
 }
