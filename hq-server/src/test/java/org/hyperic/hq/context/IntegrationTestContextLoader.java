@@ -112,9 +112,10 @@ public class IntegrationTestContextLoader extends AbstractContextLoader {
 	}//EOM 
 	
 	private static final void overrideProperties(final Log log) {
-	    if(!initializedSysProps)  return ; 
+	    if(initializedSysProps)  return ; 
 	    
 	    final String OVERRIDE_PREFIX =  "override." ;
+	    final int OVERRIDE_PREFIX_LENGTH = OVERRIDE_PREFIX.length() ;
 	    
 	    final Properties sysProps = System.getProperties() ; 
 	   
@@ -128,11 +129,14 @@ public class IntegrationTestContextLoader extends AbstractContextLoader {
 	        if( (indexOfPrefix = overrideSysPropName.indexOf(OVERRIDE_PREFIX)) == -1 ) continue ; 
 	        //first search for an explicitly defined corresponding original sys prop 
 	        //and found skip the override.
-	        origSysPropName = overrideSysPropName.substring(indexOfPrefix+1) ;
+	        origSysPropName = overrideSysPropName.substring(OVERRIDE_PREFIX_LENGTH) ;
 	        origSyspropVal  = System.getProperty(origSysPropName) ;
 	        if(origSyspropVal != null) continue ; 
 	        //else create a new orig sys prop with the override value 
-	        newProps.put(origSysPropName, (String)syspropEntry.getValue()) ;
+	        overrideVal = (String) syspropEntry.getValue() ; 
+	        newProps.put(origSysPropName, overrideVal) ;
+	        
+	        log.info("An "+overrideSysPropName+" property value was provided : " + overrideVal + " setting in the " + origSysPropName + " system property") ;
 	    }//EO while there are more system properties
 	    
 	    for(Map.Entry<String,String> newPropEntry : newProps.entrySet())  {
@@ -692,4 +696,8 @@ public class IntegrationTestContextLoader extends AbstractContextLoader {
         }//EOM 
         
     }//EOC ProxyingGenericApplicationContext
+    
+    public static void main(String[] args) throws Throwable {
+        overrideProperties(logger) ;
+    }//EOM 
 }//EOC 

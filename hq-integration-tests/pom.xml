@@ -235,8 +235,7 @@
 								  <try> 
 										<sql driver="${server.database-driver}" url="${server.database-url}" userid="${server.database-user}" 
 			    							password="${server.database-password}" print="yes" failOnConnectionError="true" classpathref="maven.compile.classpath">
-			    							
-			    						    select 1 from eam_config_props 
+			    						    select 1 from eam_config_props limit 1
 										</sql>
 										<property name="execution.target" value="upgrade-db" />
 									</try> 
