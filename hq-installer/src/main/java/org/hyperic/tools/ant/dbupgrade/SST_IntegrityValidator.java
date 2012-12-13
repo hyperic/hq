@@ -27,7 +27,7 @@ public class SST_IntegrityValidator extends SchemaSpecTask {
         //first determine whether the validation was disabled if if so abort 
         final String validationEnabled = this.getProject().getProperty(ENABLE_INTEGRITY_VALIDATION_KEY) ; 
         
-        if(validationEnabled != null && validationEnabled.trim().equalsIgnoreCase("TRUE")) { 
+        if(validationEnabled != null && validationEnabled.trim().equalsIgnoreCase("FALSE")) { 
             this.log(">>>>> Integrity Validation was disabled, aborting.", Project.MSG_WARN) ;
             return ; 
         }//EO if validation is disabled 
