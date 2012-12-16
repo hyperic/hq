@@ -2,6 +2,7 @@ package org.hyperic.hq.api.services.impl;
 
 import javax.ws.rs.core.Response;
 
+import org.apache.cxf.jaxrs.ext.search.SearchCondition;
 import org.apache.cxf.jaxrs.ext.search.SearchContext;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
@@ -39,8 +40,8 @@ public class MeasurementServiceImpl extends RestApiService implements Measuremen
     
     public void register() throws SessionNotFoundException, SessionTimeoutException {
         ApiMessageContext apiMessageContext = newApiMessageContext();
-        Integer sessionId = apiMessageContext.getSessionId();
-//        searchContext.getCondition(org.hyperic.hq.api.model.measurements.RawMetric.class);   
+        Integer sessionId = apiMessageContext.getSessionId(); 
+//        SearchCondition<RawMetric> a = searchContext.getCondition(org.hyperic.hq.api.model.measurements.RawMetric.class);
         measurementTransfer.register(sessionId, null, null);
     }
     public void unregister() throws SessionNotFoundException, SessionTimeoutException {

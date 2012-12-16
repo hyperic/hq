@@ -20,6 +20,7 @@ import org.apache.cxf.jaxrs.model.wadl.DocTarget;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.measurements.BulkResourceMeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
+import org.hyperic.hq.api.model.measurements.MetricFilterRequest;
 import org.hyperic.hq.api.model.measurements.MetricGroup;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementBatchResponse;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequests;
@@ -67,9 +68,9 @@ public interface MeasurementService {
             @QueryParam("end") final Date end) 
             throws ParseException, PermissionException, SessionNotFoundException, SessionTimeoutException, ObjectNotFoundException, UnsupportedOperationException, SQLException;
 	
-    @PUT
+    @POST
     @Path("/metrics/register")
-	public void register() throws SessionNotFoundException, SessionTimeoutException;
+	public void register(final MetricFilterRequest resourceFilter) throws SessionNotFoundException, SessionTimeoutException;
     
     @PUT
     @Path("/metrics/unregister")
