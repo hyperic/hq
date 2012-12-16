@@ -8,9 +8,9 @@
 		<artifactId>hq-parent</artifactId>
 		<version>5.0.0</version>
 	</parent>
-
+	
 	<artifactId>hq-integration-tests</artifactId>
-	<packaging>pom</packaging>
+	<packaging>jar</packaging>
 	<name>Hyperic HQ - Integration Tests</name>
 	
 	<dependencies>
