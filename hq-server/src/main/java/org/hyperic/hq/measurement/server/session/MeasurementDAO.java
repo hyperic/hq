@@ -554,18 +554,6 @@ public class MeasurementDAO
         return rtn;
     }
 
-    
-    @SuppressWarnings("unchecked")
-    List<Measurement> findByIds(Integer[] mids) {
-        final StringBuilder buf = new StringBuilder()
-            .append("select m from Measurement m ")
-            .append("where m.id in (:mids)");
-        final String sql = buf.toString();
-        Session session = getSession();
-        Query query = session.createQuery(sql).setParameterList("mids", mids);
-        return query.list();
-    }
-    
     @SuppressWarnings("unchecked")
     List<Measurement> findAvailMeasurements(Integer[] tids, Integer[] iids) {
         final IntegerType iType = new IntegerType();
