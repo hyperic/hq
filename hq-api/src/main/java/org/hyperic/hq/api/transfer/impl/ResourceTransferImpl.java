@@ -388,7 +388,7 @@ public class ResourceTransferImpl implements ResourceTransfer{
 		if(bHadConfigResponsesChanged) {
 		    //allConfigs.setEnableRuntimeAIScan(true) ;  
 		    //rollbackConfigs.setEnableRuntimeAIScan(true); 
-		    this.appdepBoss.setAllConfigResponses(flowContext.subject, allConfigs, rollbackConfigs, false /*isUserManaged*/) ;
+		    this.appdepBoss.setAllConfigResponses(flowContext.subject, allConfigs, rollbackConfigs, true) ;
 		}//EO if there was a change 
 
 		//TODO: pojo fields modifications 
