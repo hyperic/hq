@@ -40,7 +40,6 @@ public interface MeasurementTransfer {
             final String rscId, final Date begin, final Date end) throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException, TimeframeSizeException;
     
     public void register(Integer sessionId, IMetricFilterByResource rscFilter, IMetricFilter metricFilter);
-    
     public ResourceMeasurementBatchResponse poll(Integer sessionId);
     
     public ResourceMeasurementBatchResponse getAggregatedMetricData(ApiMessageContext apiMessageContext, final ResourceMeasurementRequests hqMsmtReqs, 

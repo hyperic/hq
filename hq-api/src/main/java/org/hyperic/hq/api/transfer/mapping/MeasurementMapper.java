@@ -47,8 +47,6 @@ public class MeasurementMapper {
         return metricGrp;
     }
     
-
-
     public Measurement toMeasurement(org.hyperic.hq.measurement.server.session.Measurement hqMsmt, double avg) {
         Measurement msmt = toMeasurement(hqMsmt);
         msmt.setAvg(avg);
