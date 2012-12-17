@@ -189,24 +189,61 @@ public class IntegrationTestContextLoader extends AbstractContextLoader {
                 "server.hibernate.dialect"
         };
         
-        String overridePrefix = "override.";
-        for(int i = 0;i < possbileProperties.length;i++) {
-            String propertyStr = possbileProperties[i];
-            //if the tests.server.database-url override property is provided, set it as the server.database-url property (if not already exists) 
-            String propertyVal = System.getProperty(propertyStr) ; 
-            if(propertyVal == null) { 
-                
-                String overridePropertyStr = overridePrefix+propertyStr;
-                propertyVal = System.getProperty(overridePropertyStr) ; 
-                if(propertyVal != null) {
-                    log.info("An " + overridePropertyStr + " property value was provided : " + propertyVal + " setting in the " + propertyStr + " system property") ;
-                    System.setProperty(propertyStr, propertyVal) ; 
-                }//EO if the override database property was provided 
-            } //EO if the server dataabase was not defined via system property
-            
-        }
-    }
+        final String OVERRIDE_PREFIX =  "override." ;
+        final int OVERRIDE_PREFIX_LENGTH = OVERRIDE_PREFIX.length() ;
         
+        final Properties sysProps = System.getProperties() ; 
+       
+        final Map<String,String> newProps = new HashMap<String,String>() ; 
+        
+        String origSysPropName, overrideSysPropName, origSyspropVal, overrideVal ;
+        int indexOfPrefix ; 
+        
+        for(Entry<Object,Object> syspropEntry : sysProps.entrySet()) { 
+            overrideSysPropName = (String) syspropEntry.getKey() ; 
+            if( (indexOfPrefix = overrideSysPropName.indexOf(OVERRIDE_PREFIX)) == -1 ) continue ; 
+            //first search for an explicitly defined corresponding original sys prop 
+            //and found skip the override.
+            origSysPropName = overrideSysPropName.substring(OVERRIDE_PREFIX_LENGTH) ;
+            origSyspropVal  = System.getProperty(origSysPropName) ;
+            if(origSyspropVal != null) continue ; 
+            //else create a new orig sys prop with the override value 
+            overrideVal = (String) syspropEntry.getValue() ; 
+            newProps.put(origSysPropName, overrideVal) ;
+            
+            log.info("An "+overrideSysPropName+" property value was provided : " + overrideVal + " setting in the " + origSysPropName + " system property") ;
+        }//EO while there are more system properties
+        
+        for(Map.Entry<String,String> newPropEntry : newProps.entrySet())  {
+            System.setProperty(newPropEntry.getKey(), newPropEntry.getValue()) ;
+        }//EO while there are more new properties  
+       
+        initializedSysProps = true ;        
+    }//EOM 
+    
+    private final void overrideProperties(final String[][] properties, final Log log) { 
+        
+        final int length = properties.length ;
+        
+        String sysPropName, overrideSysPropName,  syspropOrigVal, overrideVal ;  
+        for(int i=0; i < length; i++) { 
+            sysPropName = properties[i][0] ; 
+            syspropOrigVal  = System.getProperty(sysPropName) ; 
+            //if the org system property already exists then it was explicitly defined and should 
+            //not be overriden 
+            if(syspropOrigVal != null) continue ; 
+            //else attempt to looukup the overrding property value and if found, define
+            //a new system proeprty with the orig name and the overriding value 
+            overrideSysPropName = properties[i][1];  
+            overrideVal = System.getProperty(overrideSysPropName) ;
+            if(overrideVal == null) continue ; 
+            //else there is an override value and not explicitly defined orig value so override 
+            log.info("An "+overrideSysPropName+" property value was provided : " + overrideVal + " setting in the " + sysPropName + " system property") ;
+            
+        }//EO while there are more properties to potentially override
+        
+    }//EOM 
+
     public ApplicationContext loadContext(final String... locations) throws Exception {
         if (logger.isDebugEnabled()) {
             logger.debug("Loading ApplicationContext for locations [" +
