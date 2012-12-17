@@ -18,7 +18,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.measurement.server.session.ReportProcessorImpl;
 import org.hyperic.hq.notifications.filtering.FilterChain;
-import org.hyperic.hq.notifications.filtering.IFilter;
+import org.hyperic.hq.notifications.filtering.Filter;
 import org.hyperic.hq.notifications.model.MetricNotification;
 
 public abstract class DestinationEvaluator<T> {
@@ -26,7 +26,7 @@ public abstract class DestinationEvaluator<T> {
     // TODO~ change to write through versioning (each node would have versioning - write on one version, read another, then sync between them), o/w will pose problems in scale
     protected Map<Destination,FilterChain<T>> destToFilter = new ConcurrentHashMap<Destination,FilterChain<T>>();
 
-    protected abstract FilterChain<T> instantiateFilterChain(Collection<IFilter<T>> filters);
+    protected abstract FilterChain<T> instantiateFilterChain(Collection<Filter<T>> filters);
     
     /**
      * append filters
@@ -34,7 +34,7 @@ public abstract class DestinationEvaluator<T> {
      * @param dest
      * @param filters
      */
-    public void register(Destination dest, Collection<IFilter<T>> filters) {
+    public void register(Destination dest, Collection<Filter<T>> filters) {
         if (filters==null || filters.isEmpty()) {
             if (log.isDebugEnabled()) {
                 log.debug("no filters were passed to be registered with destination " + dest);
@@ -76,7 +76,7 @@ public abstract class DestinationEvaluator<T> {
      * @param dest
      * @param filters
      */
-    public void unregister(Destination dest, List<IFilter<MetricNotification>> filters) {
+    public void unregister(Destination dest, List<Filter<MetricNotification>> filters) {
         if (filters==null || filters.isEmpty()) {
             if (log.isDebugEnabled()) {
                 log.debug("no filters were passed to be un-registered from destination " + dest);

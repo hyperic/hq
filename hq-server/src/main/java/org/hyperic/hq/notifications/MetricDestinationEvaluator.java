@@ -12,7 +12,7 @@ import javax.jms.ObjectMessage;
 
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.notifications.filtering.FilterChain;
-import org.hyperic.hq.notifications.filtering.IFilter;
+import org.hyperic.hq.notifications.filtering.Filter;
 import org.hyperic.hq.notifications.model.MetricNotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,7 +27,7 @@ public class MetricDestinationEvaluator extends DestinationEvaluator<MetricNotif
     }
 
     @Override
-    protected FilterChain<MetricNotification> instantiateFilterChain(Collection<IFilter<MetricNotification>> filters) {
+    protected FilterChain<MetricNotification> instantiateFilterChain(Collection<Filter<MetricNotification>> filters) {
         return new FilterChain<MetricNotification>(filters);
     }
 }
