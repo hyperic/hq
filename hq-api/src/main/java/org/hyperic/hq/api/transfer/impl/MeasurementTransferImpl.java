@@ -29,16 +29,24 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
+import javax.jms.Destination;
+
+import org.apache.cxf.jaxrs.ext.search.SearchContext;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
+import org.hyperic.hq.api.model.measurements.Metric;
+import org.hyperic.hq.api.model.measurements.MetricGroup;
+import org.hyperic.hq.api.model.measurements.RawMetric;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementBatchResponse;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequest;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequests;
@@ -52,6 +60,7 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.TimeframeBoundriesException;
 import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.TimeframeSizeException;
@@ -59,6 +68,12 @@ import org.hyperic.hq.measurement.shared.DataManager;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.TemplateManager;
+import org.hyperic.hq.notifications.MetricDestinationEvaluator;
+import org.hyperic.hq.notifications.Q;
+import org.hyperic.hq.notifications.filtering.IFilter;
+import org.hyperic.hq.notifications.filtering.IMetricFilter;
+import org.hyperic.hq.notifications.filtering.IMetricFilterByResource;
+import org.hyperic.hq.notifications.model.MetricNotification;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,16 +87,22 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     private DataManager dataMgr; 
     private MeasurementMapper mapper;
     private ExceptionToErrorCodeMapper errorHandler ;
-
+    private MetricDestinationEvaluator evaluator;
+    private Q q;
+    @javax.ws.rs.core.Context
+    private SearchContext context ;
+    
     @Autowired
     public MeasurementTransferImpl(MeasurementManager measurementMgr, TemplateManager tmpltMgr, DataManager dataMgr, 
-            MeasurementMapper mapper, ExceptionToErrorCodeMapper errorHandler) {
+            MeasurementMapper mapper, ExceptionToErrorCodeMapper errorHandler, MetricDestinationEvaluator evaluator, Q q) {
         super();
         this.measurementMgr = measurementMgr;
         this.tmpltMgr = tmpltMgr;
         this.mapper=mapper;
         this.dataMgr = dataMgr;
         this.errorHandler = errorHandler;
+        this.evaluator = evaluator;
+        this.q = q;
     }
 
     protected List<Measurement> getMeasurements(final String rscId, final List<MeasurementTemplate> tmps, final AuthzSubject authzSubject) throws PermissionException {
@@ -103,7 +124,81 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         }
         return hqMsmts;
     }
+    
+    protected Map<Integer,Destination> sessionToDestination = new HashMap<Integer,Destination>();
+    
+    public void register(Integer sessionId, IMetricFilterByResource metricFilterByRsc, IMetricFilter metricFilter) {
+        List<IFilter<MetricNotification>> userFilters = new ArrayList<IFilter<MetricNotification>>();
+        if (metricFilterByRsc!=null) {
+            userFilters.add(metricFilterByRsc);
+        }
+        if (metricFilter!=null) {
+            userFilters.add(metricFilter);
+        }        
+        // TODO init filters with needed managers to enable them to retrieve filter related data
+        
+        Destination dest = this.sessionToDestination.get(sessionId); 
+        if (dest==null) {
+            dest = new Destination() {};
+            this.sessionToDestination.put(sessionId,dest);
+            this.q.register(dest);
+        }
+        this.evaluator.register(dest,userFilters);
+    }
+    
+    public ResourceMeasurementBatchResponse poll(Integer sessionId) {
+        ResourceMeasurementBatchResponse res = new ResourceMeasurementBatchResponse();
+        Destination dest = this.sessionToDestination.get(sessionId);
+        if (dest==null) {
+            return null;
+        }
+        List<MetricNotification> mns = (List<MetricNotification>) this.q.poll(dest);
+        if (mns.isEmpty()) {
+            return res;
+        }
+        // map metrics notifications per measurement & resource
+        Map<Integer,Map<Integer,List<MetricNotification>>> rscIdToMsmtIdToMn = new HashMap<Integer,Map<Integer,List<MetricNotification>>>();
+        Set<Integer> overallMsmtIds = new HashSet<Integer>();  
+        for(MetricNotification mn:mns) {
+            Integer rid = mn.getResourceId();
+            Map<Integer,List<MetricNotification>> msmtIdToMn = rscIdToMsmtIdToMn.get(rid);
+            if(msmtIdToMn==null) {
+                msmtIdToMn = new HashMap<Integer,List<MetricNotification>>();
+                rscIdToMsmtIdToMn.put(rid,msmtIdToMn);
+            }
+            Integer mid = mn.getMeasurementId();
+            overallMsmtIds.add(mid);
+            List<MetricNotification> mnsForMsmtId = msmtIdToMn.get(mid);
+            if (mnsForMsmtId==null) {
+                mnsForMsmtId = new ArrayList<MetricNotification>();
+                msmtIdToMn.put(mid, mnsForMsmtId);
+            }
+            mnsForMsmtId.add(mn);
+        }
+        // extract measurements meta-data as per the mns on which we got notifications of
+        Map<Integer,Measurement> msmtIdToMsmt = this.measurementMgr.findMeasurementsByIds(new ArrayList<Integer>(overallMsmtIds));
+        // build the externalized data model as per what we have collected
+        Set<Entry<Integer,Map<Integer,List<MetricNotification>>>> rscIdToMsmtIdToMnESet = rscIdToMsmtIdToMn.entrySet();
+        for(Entry<Integer,Map<Integer,List<MetricNotification>>> rscIdToMsmtIdToMnE:rscIdToMsmtIdToMnESet) {
+            Integer rid = rscIdToMsmtIdToMnE.getKey();
+            ResourceMeasurementResponse rscRes = new ResourceMeasurementResponse();
+            rscRes.setRscId(String.valueOf(rid));
+            Map<Integer,List<MetricNotification>> msmtIdToMn = rscIdToMsmtIdToMnE.getValue();
+            Set<Entry<Integer,List<MetricNotification>>> msmtIdToMnESet =  msmtIdToMn.entrySet();
+            for(Entry<Integer,List<MetricNotification>> msmtIdToMnE:msmtIdToMnESet) {
+                Integer mid = msmtIdToMnE.getKey();
+                Measurement hqMsmt = msmtIdToMsmt.get(mid);
+                MetricGroup metricGrp = this.mapper.toMetricGroup(hqMsmt);
+                List<MetricNotification> mn = msmtIdToMnE.getValue();
+                List<RawMetric> metrics = this.mapper.toMetrics2(mn);
+                metricGrp.setMetrics(metrics);
+                rscRes.add(metricGrp);
+            }            
+            res.addResponse(rscRes);
+        }
 
+        return res;
+    }
     public MeasurementResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest hqMsmtReq, 
             final String rscId, final Date begin, final Date end) 
                     throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException, TimeframeSizeException {

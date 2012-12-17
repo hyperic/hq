@@ -2,9 +2,11 @@ package org.hyperic.hq.api.services.impl;
 
 import javax.ws.rs.core.Response;
 
+import org.apache.cxf.jaxrs.ext.search.SearchContext;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
+import org.hyperic.hq.api.model.measurements.RawMetric;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementBatchResponse;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequests;
 import org.hyperic.hq.api.services.MeasurementService;
@@ -28,8 +30,22 @@ public class MeasurementServiceImpl extends RestApiService implements Measuremen
     private MeasurementTransfer measurementTransfer;
     @Autowired
     private ExceptionToErrorCodeMapper errorHandler ; 
+    @javax.ws.rs.core.Context
+    private SearchContext searchContext ;
     
-	public MeasurementResponse getMetrics(final MeasurementRequest measurementRequest,
+    public void register() throws SessionNotFoundException, SessionTimeoutException {
+        ApiMessageContext apiMessageContext = newApiMessageContext();
+        Integer sessionId = apiMessageContext.getSessionId();
+        searchContext.getCondition(org.hyperic.hq.api.model.measurements.RawMetric.class);   
+        measurementTransfer.register(sessionId, null, null);
+    }
+    public ResourceMeasurementBatchResponse poll() throws SessionNotFoundException, SessionTimeoutException {
+        ApiMessageContext apiMessageContext = newApiMessageContext();
+        Integer sessionId = apiMessageContext.getSessionId();
+        return measurementTransfer.poll(sessionId);
+    }
+
+    public MeasurementResponse getMetrics(final MeasurementRequest measurementRequest,
 			final String rscId, final Date begin, final Date end)
 			        throws Throwable {
 	    try {
