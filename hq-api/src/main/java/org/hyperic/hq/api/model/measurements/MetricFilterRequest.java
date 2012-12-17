@@ -10,6 +10,7 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.hyperic.hq.api.model.RestApiConstants;
 import org.hyperic.hq.api.model.resources.ResourceFilterDefinitioin;
+import org.hyperic.hq.notifications.filtering.MetricFilterByResource;
 
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -17,5 +18,9 @@ import org.hyperic.hq.api.model.resources.ResourceFilterDefinitioin;
 @XmlType(name="FilterRequestType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 public class MetricFilterRequest {
     @XmlAttribute
-    private ResourceFilterDefinitioin resourceFilter;
+    private ResourceFilterDefinitioin resourceFilterDef;
+
+    public ResourceFilterDefinitioin getResourceFilterDefinition() {
+        return resourceFilterDef;
+    }
 }

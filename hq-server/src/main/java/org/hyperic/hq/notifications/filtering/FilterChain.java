@@ -10,18 +10,18 @@ import java.util.Iterator;
  * @author yakarn
  *
  */
-public class FilterChain<T> extends AbstractCollection<IFilter<T>> {
-    protected Collection<IFilter<T>> filters;
+public class FilterChain<T> extends AbstractCollection<Filter<T>> {
+    protected Collection<Filter<T>> filters;
      
-    public FilterChain(Collection<IFilter<T>> filters) {
+    public FilterChain(Collection<Filter<T>> filters) {
         this.addAll(filters);
     }
     @Override
-    public boolean add(IFilter<T> filter) {
+    public boolean add(Filter<T> filter) {
         return this.filters.add(filter);
     }
     @Override
-    public Iterator<IFilter<T>> iterator() {
+    public Iterator<Filter<T>> iterator() {
         if (this.filters==null) {
             return null;
         }
@@ -38,7 +38,7 @@ public class FilterChain<T> extends AbstractCollection<IFilter<T>> {
      * @return
      */
     @Override
-    public boolean addAll(Collection<? extends IFilter<T>> c) {
+    public boolean addAll(Collection<? extends Filter<T>> c) {
         // TODO impose one filter policy per entity type
         return super.addAll(c);
     }
@@ -47,7 +47,7 @@ public class FilterChain<T> extends AbstractCollection<IFilter<T>> {
         if (this.filters==null) {
             return filteredEntities;
         }
-        for(IFilter<T> filter:this.filters) {
+        for(Filter<T> filter:this.filters) {
             filteredEntities = filter.filter(filteredEntities);
         }
         return filteredEntities;

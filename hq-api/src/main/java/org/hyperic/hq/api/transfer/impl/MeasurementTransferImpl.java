@@ -46,6 +46,7 @@ import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.ID;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
+import org.hyperic.hq.api.model.measurements.MetricFilterRequest;
 import org.hyperic.hq.api.model.measurements.MetricGroup;
 import org.hyperic.hq.api.model.measurements.RawMetric;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementBatchResponse;
@@ -73,9 +74,9 @@ import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.notifications.MetricDestinationEvaluator;
 import org.hyperic.hq.notifications.Q;
-import org.hyperic.hq.notifications.filtering.IFilter;
-import org.hyperic.hq.notifications.filtering.IMetricFilter;
-import org.hyperic.hq.notifications.filtering.IMetricFilterByResource;
+import org.hyperic.hq.notifications.filtering.Filter;
+import org.hyperic.hq.notifications.filtering.MetricFilter;
+import org.hyperic.hq.notifications.filtering.MetricFilterByResource;
 import org.hyperic.hq.notifications.model.MetricNotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -131,8 +132,10 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     
     protected Map<Integer,Destination> sessionToDestination = new HashMap<Integer,Destination>();
     
-    public void register(Integer sessionId, IMetricFilterByResource metricFilterByRsc, IMetricFilter metricFilter) {
-        List<IFilter<MetricNotification>> userFilters = new ArrayList<IFilter<MetricNotification>>();
+    public void register(Integer sessionId, final MetricFilterRequest metricFilterReq) {
+        MetricFilterByResource metricFilterByRsc = this.mapper.toMetricFilterByRsc(metricFilterReq);
+        MetricFilter metricFilter = null;
+        List<Filter<MetricNotification>> userFilters = new ArrayList<Filter<MetricNotification>>();
         if (metricFilterByRsc!=null) {
             userFilters.add(metricFilterByRsc);
         }
@@ -157,8 +160,8 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             this.evaluator.unregisterAll(dest);
         }        
     }
-    public void unregister(Integer sessionId, IMetricFilterByResource metricFilterByRsc, IMetricFilter metricFilter) {
-        List<IFilter<MetricNotification>> userFilters = new ArrayList<IFilter<MetricNotification>>();
+    public void unregister(Integer sessionId, MetricFilterByResource metricFilterByRsc, MetricFilter metricFilter) {
+        List<Filter<MetricNotification>> userFilters = new ArrayList<Filter<MetricNotification>>();
         if (metricFilterByRsc!=null) {
             userFilters.add(metricFilterByRsc);
         }

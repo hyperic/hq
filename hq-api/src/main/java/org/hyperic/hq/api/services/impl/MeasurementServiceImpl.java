@@ -7,6 +7,7 @@ import org.apache.cxf.jaxrs.ext.search.SearchContext;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
+import org.hyperic.hq.api.model.measurements.MetricFilterRequest;
 import org.hyperic.hq.api.model.measurements.MetricGroup;
 import org.hyperic.hq.api.model.measurements.RawMetric;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementBatchResponse;
@@ -21,8 +22,8 @@ import org.hyperic.hq.common.TimeframeBoundriesException;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.TimeframeSizeException;
-import org.hyperic.hq.notifications.filtering.IMetricFilter;
-import org.hyperic.hq.notifications.filtering.IMetricFilterByResource;
+import org.hyperic.hq.notifications.filtering.MetricFilter;
+import org.hyperic.hq.notifications.filtering.MetricFilterByResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.hyperic.hq.api.model.measurements.BulkResourceMeasurementRequest;
 
@@ -38,11 +39,11 @@ public class MeasurementServiceImpl extends RestApiService implements Measuremen
     @javax.ws.rs.core.Context
     private SearchContext searchContext ;
     
-    public void register() throws SessionNotFoundException, SessionTimeoutException {
+    public void register(final MetricFilterRequest metricFilterReq) throws SessionNotFoundException, SessionTimeoutException {
         ApiMessageContext apiMessageContext = newApiMessageContext();
-        Integer sessionId = apiMessageContext.getSessionId(); 
+        Integer sessionId = apiMessageContext.getSessionId();
 //        SearchCondition<RawMetric> a = searchContext.getCondition(org.hyperic.hq.api.model.measurements.RawMetric.class);
-        measurementTransfer.register(sessionId, null, null);
+        measurementTransfer.register(sessionId, metricFilterReq);
     }
     public void unregister() throws SessionNotFoundException, SessionTimeoutException {
         ApiMessageContext apiMessageContext = newApiMessageContext();

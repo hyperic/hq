@@ -3,12 +3,15 @@ package org.hyperic.hq.notifications.model;
 import org.hyperic.hq.product.MetricValue;
 
 public class MetricNotification implements INotification {
+    public Integer getMeasurementId() {
+        return measurementId;
+    }
     public MetricNotification(Integer resourceId, Integer measurementId, MetricValue metricVal) {
         super();
         this.measurementId = measurementId;
         this.metricVal = metricVal;
     }
-    public Integer getMeasurementId() {
+    public Integer metricNotification() {
         return measurementId;
     }
     public void setMeasurementId(Integer measurementId) {

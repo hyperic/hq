@@ -9,12 +9,16 @@ import java.util.Map;
 import org.hyperic.hq.api.model.ID;
 import org.hyperic.hq.api.model.measurements.Measurement;
 import org.hyperic.hq.api.model.measurements.Metric;
+import org.hyperic.hq.api.model.measurements.MetricFilterRequest;
 import org.hyperic.hq.api.model.measurements.MetricGroup;
 import org.hyperic.hq.api.model.measurements.RawMetric;
+import org.hyperic.hq.api.model.resources.ResourceFilterDefinitioin;
+import org.hyperic.hq.api.transfer.impl.toMetricFilterByRscMetricFilterRequest;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
+import org.hyperic.hq.notifications.filtering.MetricFilterByResource;
 import org.hyperic.hq.notifications.model.MetricNotification;
 import org.hyperic.hq.product.MetricValue;
 import org.springframework.stereotype.Component;
@@ -48,15 +52,6 @@ public class MeasurementMapper {
         msmt.setId(hqMsmt.getId());
         return msmt;
     }
-//    public MetricGroup toMetricGroup(org.hyperic.hq.measurement.server.session.Measurement msmt) {
-//        Measurement metricGrp = new Measurement();
-//        Integer msmtId = msmt.getId();
-//        metricGrp.setId(msmtId);
-//        MeasurementTemplate tmpl = msmt.getTemplate();
-//        metricGrp.setName(tmpl.getName());
-//        metricGrp.setAlias(tmpl.getAlias());
-//        return metricGrp;
-//    }
     public Measurement toMeasurement(org.hyperic.hq.measurement.server.session.Measurement hqMsmt, double avg) {
         Measurement msmt = toMeasurement(hqMsmt);
         msmt.setAvg(avg);
@@ -85,5 +80,10 @@ public class MeasurementMapper {
             metrics.add(metric);
         }
         return metrics;
+    }
+    public MetricFilterByResource toMetricFilterByRsc(MetricFilterRequest metricFilterReq) {
+        ResourceFilterDefinitioin rscFilterDef = metricFilterReq.getResourceFilterDefinition();
+        
+        return rscFilter;
     }
 }

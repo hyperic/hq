@@ -70,12 +70,12 @@ public interface MeasurementService {
 	
     @POST
     @Path("/metrics/register")
-	public void register(final MetricFilterRequest resourceFilter) throws SessionNotFoundException, SessionTimeoutException;
+	public void register(final MetricFilterRequest metricFilterReq) throws SessionNotFoundException, SessionTimeoutException;
     
     @PUT
     @Path("/metrics/unregister")
     @Descriptions({ 
-        @Description(value = "unregister user session and all assigned filters this user destination has", target = DocTarget.METHOD),
+        @Description(value = "unregister user session and all assigned filters this user destination has", target = DocTarget.METHOD)
     })
     public void unregister() throws SessionNotFoundException, SessionTimeoutException;
     
