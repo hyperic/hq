@@ -97,8 +97,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     private Pager _groupPager;
     private Pager _ownedGroupPager;
     private static final String GROUP_PAGER = PagerProcessor_resourceGroup.class.getName();
-    private static final String OWNEDGROUP_PAGER = PagerProcessor_ownedResourceGroup.class
-        .getName();
+    private static final String OWNEDGROUP_PAGER = PagerProcessor_ownedResourceGroup.class.getName();
 
     private final ResourceEdgeDAO resourceEdgeDAO;
 
@@ -108,10 +107,13 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     private final Log log = LogFactory.getLog(ResourceGroupManagerImpl.class);
     private final ResourceManager resourceManager;
     private final ResourceGroupDAO resourceGroupDAO;
-    private final ResourceDAO resourceDAO;
+    protected final ResourceDAO resourceDAO;
     private final ResourceRelationDAO resourceRelationDAO;
     private ApplicationContext applicationContext;
     private final CritterTranslator critterTranslator;
+    protected GroupCriteriaDAO groupCriteriaDAO;
+    protected PermissionManager permissionManager;
+    protected ResourceTypeDAO resourceTypeDAO;
 
     @Autowired
     public ResourceGroupManagerImpl(ResourceEdgeDAO resourceEdgeDAO,
@@ -119,6 +121,9 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
                                     ResourceManager resourceManager,
                                     ResourceGroupDAO resourceGroupDAO, ResourceDAO resourceDAO,
                                     ResourceRelationDAO resourceRelationDAO,
+                                    GroupCriteriaDAO groupCriteriaDAO,
+                                    ResourceTypeDAO resourceTypeDAO,
+                                    PermissionManager permissionManager,
                                     CritterTranslator critterTranslator) {
         this.resourceEdgeDAO = resourceEdgeDAO;
         this.authzSubjectManager = authzSubjectManager;
@@ -127,6 +132,9 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         this.resourceDAO = resourceDAO;
         this.resourceRelationDAO = resourceRelationDAO;
         this.critterTranslator = critterTranslator;
+        this.groupCriteriaDAO = groupCriteriaDAO;
+        this.permissionManager = permissionManager;
+        this.resourceTypeDAO = resourceTypeDAO;
     }
 
     @PostConstruct
@@ -959,4 +967,17 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         }
         return resourceGroupDAO.get(id);
     }
+    
+    public Collection<ResourceGroup> getAllResourceGroupsWithCriteria() {
+        final Collection<ResourceGroup> list = new ArrayList<ResourceGroup>(resourceGroupDAO.findAll());
+        for (final Iterator<ResourceGroup> it=list.iterator(); it.hasNext(); ) {
+            final ResourceGroup group = it.next();
+// XXX need to check implications of lazy loading here
+            if (group.getGroupCriteria() == null) {
+                it.remove();
+            }
+        }
+        return list;
+    }
+
 }

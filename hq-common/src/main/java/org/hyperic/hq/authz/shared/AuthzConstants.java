@@ -180,6 +180,11 @@ public final class AuthzConstants {
     public static final String escOpModifyEscalation = "modifyEscalation";
     public static final String escOpRemoveEscalation = "removeEscalation";
 
+    public static final String profileOpCreateProfile = "createProfile";
+    public static final String profileOpViewProfile = VIEW_PREFIX + "Profile";
+    public static final String profileOpModifyProfile = "modifyProfile";
+    public static final String profileOpRemoveProfile = "removeProfile";
+
     public static final String privateRoleGroupName = "camPrivateRoleGroup:";
     public static final int authzDefaultResourceGroupType = 13;
 
@@ -197,6 +202,7 @@ public final class AuthzConstants {
     public static final Integer     authzServerProto    =  new Integer(602);
     public static final Integer     authzServiceProto   =  new Integer(603);
     public static final Integer     authzApplicationProto  =  new Integer(604);
+    public static final Integer     authzProfile       =  new Integer(701);
  
     // Resource Relation constants
     public static final Integer RELATION_CONTAINMENT_ID = new Integer(1);
@@ -213,7 +219,7 @@ public final class AuthzConstants {
                         serviceOpViewService,
                         groupOpViewResourceGroup
     };
-    
+
     public static boolean isOverlord(Integer subject) {
         return subject.equals(AuthzConstants.overlordId);
     }

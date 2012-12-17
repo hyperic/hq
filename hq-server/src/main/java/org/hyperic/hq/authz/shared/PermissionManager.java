@@ -176,7 +176,11 @@ public abstract class PermissionManager {
             // seed data error if this is not there
             throw new SystemException(e);
         }
+    }
 
+    public void checkCreateProfilePermission(AuthzSubject subject) throws PermissionException {
+//        checkPermission(subject, getResourceTypeDAO().findById(AuthzConstants.authzProfile),
+//           AuthzConstants.rootResourceId, AuthzConstants.profileOpCreateProfile);
     }
 
     /**

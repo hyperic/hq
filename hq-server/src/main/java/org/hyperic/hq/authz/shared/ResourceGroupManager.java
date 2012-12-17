@@ -33,6 +33,7 @@ import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.GroupCriteria;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupSortField;
@@ -341,5 +342,8 @@ public interface ResourceGroupManager
     public ResourceGroup getGroupById(Integer id);
 
     public ResourceGroup getResourceGroupById(Integer id);
+
+// TODO javadoc!!!
+    public Collection<ResourceGroup> getAllResourceGroupsWithCriteria();
 
 }

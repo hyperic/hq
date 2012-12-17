@@ -61,6 +61,9 @@ public class ResourceGroupDAO
     private ResourceDAO rDao;
 
     @Autowired
+    private GroupCriteriaDAO groupCriteriaDAO;
+
+    @Autowired
     private ResourceTypeDAO resourceTypeDAO;
 
     @Autowired
@@ -98,31 +101,34 @@ public class ResourceGroupDAO
             case AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP:
             case AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS:
                 if (cInfo.getResourcePrototype() != null) {
-                    throw new GroupCreationException("Cannot specify a prototype "
-                                                     + "for mixed groups");
+                    throw new GroupCreationException("Cannot specify a prototype for mixed groups");
                 }
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS:
             case AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC:
                 if (cInfo.getResourcePrototype() == null) {
-                    throw new GroupCreationException("Compatable groups must "
-                                                     + "specify a prototype");
+                    throw new GroupCreationException("Compatable groups must specify a prototype");
                 }
                 break;
         }
 
-        ResourceGroup resGrp = new ResourceGroup(cInfo, creator);
+        ResourceGroup resGrp = cInfo.getResourceGroup(creator);
 
         ResourceType resType = resourceTypeDAO.findById(AuthzConstants.authzGroup);
 
         assert resType != null;
 
+        GroupCriteria groupCriteria = cInfo.getGroupCriteria();
+        if (groupCriteria != null) {
+            groupCriteriaDAO.save(groupCriteria);
+        }
         final Resource proto = rDao.findById(AuthzConstants.rootResourceId);
-        Resource r = cInfo.isPrivateGroup() ? rDao.createPrivate(resType, proto, cInfo.getName(),
-            creator, resGrp.getId(), cInfo.isSystem()) : rDao.create(resType, proto, cInfo
-            .getName(), creator, resGrp.getId(), cInfo.isSystem());
+        Resource r = cInfo.isPrivateGroup() ?
+            rDao.createPrivate(resType, proto, cInfo.getName(), creator, resGrp.getId(), cInfo.isSystem()) :
+            rDao.create(resType, proto, cInfo.getName(), creator, resGrp.getId(), cInfo.isSystem());
 
         resGrp.setResource(r);
+        resGrp.setGroupCriteria(groupCriteria);
         save(resGrp);
 
         /*

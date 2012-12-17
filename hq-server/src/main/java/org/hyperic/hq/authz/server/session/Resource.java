@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2012], VMware, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -30,11 +30,10 @@ import java.util.Collection;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 
-public class Resource extends AuthzNamedBean implements Comparable {
+@SuppressWarnings("serial")
+public class Resource extends AuthzNamedBean implements Comparable<Resource> {
     public static final Log _log = LogFactory.getLog(Resource.class);
 
     private ResourceType _resourceType;
@@ -44,9 +43,9 @@ public class Resource extends AuthzNamedBean implements Comparable {
     private long         _mtime = System.currentTimeMillis();
     private boolean      _system = false;
     private Collection   _virtuals = new ArrayList();
-    private Collection   _fromEdges = new ArrayList();
-    private Collection   _toEdges = new ArrayList();
-    private Collection   _groupBag = new ArrayList();
+    private Collection<ResourceEdge>   _fromEdges = new ArrayList<ResourceEdge>();
+    private Collection<ResourceEdge>   _toEdges = new ArrayList<ResourceEdge>();
+    private Collection<ResourceGroup>  _groupBag = new ArrayList<ResourceGroup>();
 
     protected Resource() {
     }
@@ -62,11 +61,11 @@ public class Resource extends AuthzNamedBean implements Comparable {
         _system       = system;
     }
 
-    protected Collection getGroupBag() {
+    protected Collection<ResourceGroup> getGroupBag() {
         return _groupBag;
     }
 
-    protected void setGroupBag(Collection b) {
+    protected void setGroupBag(Collection<ResourceGroup> b) {
         _groupBag = b;
     }
 
@@ -141,19 +140,19 @@ public class Resource extends AuthzNamedBean implements Comparable {
         _virtuals = virtuals;
     }
 
-    protected void setFromEdges(Collection e) {
+    protected void setFromEdges(Collection<ResourceEdge> e) {
         _fromEdges = e;
     }
 
-    protected Collection getFromEdges() {
+    protected Collection<ResourceEdge> getFromEdges() {
         return _fromEdges;
     }
 
-    protected void setToEdges(Collection e) {
+    protected void setToEdges(Collection<ResourceEdge> e) {
         _toEdges = e;
     }
 
-    protected Collection getToEdges() {
+    protected Collection<ResourceEdge> getToEdges() {
         return _toEdges;
     }
 
@@ -205,12 +204,13 @@ public class Resource extends AuthzNamedBean implements Comparable {
         return result;
     }
 
-    public int compareTo(Object arg0) {
-        if (!(arg0 instanceof Resource) || getSortName() == null ||
-                ((Resource) arg0).getSortName() == null)
+    public int compareTo(Resource r) {
+        if (getSortName() == null || r.getSortName() == null) {
             return -1;
-
-        return getSortName().compareTo(((Resource) arg0).getSortName());
+        } else if (this == r) {
+            return 0;
+        }
+        return getSortName().compareTo(getSortName());
     }
     
     public String toString() {

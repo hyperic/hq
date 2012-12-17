@@ -87,6 +87,10 @@
       <column name="RESOURCE_ID" not-null="true" index="RES_GRP_RES_ID_IDX"/>
     </many-to-one>
 
+    <many-to-one name="groupCriteria" class="GroupCriteria">
+      <column name="GROUP_CRITERIA_ID" not-null="false" index="GRP_CRITERIA_ID_IDX"/>
+    </many-to-one>
+
     <set name="roles" table="EAM_ROLE_RESOURCE_GROUP_MAP">
       <cache usage="read-write"/>
       <key column="RESOURCE_GROUP_ID"/>

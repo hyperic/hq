@@ -212,13 +212,13 @@
 		Subsystems. Uncomment individual subsystems to see debug messages.
 	-->
 
+	<!--
 	<logger name="org.hyperic.hq.auth">
 		<level value="DEBUG" />
 	</logger> 
 	<logger name="org.hyperic.hq.authz">
 		<level value="DEBUG" />
 	</logger>
-	<!--
 	<logger name="org.hyperic.hq.appdef">
 		<level value="DEBUG" />
 	</logger>
