@@ -31,7 +31,13 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Properties;
 
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
@@ -66,26 +72,30 @@ import org.springframework.test.context.support.GenericXmlContextLoader;
 import org.springframework.util.StringUtils;
 
 public class IntegrationTestContextLoader extends AbstractContextLoader {
-	protected static final Log logger = LogFactory.getLog(IntegrationTestContextLoader.class);
-	private static Sigar sigar ; 
-	private static Field platformBeanServerField ;
-	protected Class<?> testClass ; 
-	
-	private final ExternalizingGenericXmlContextLoader delegateLoader ;  
-	
-	public IntegrationTestContextLoader() { 
-	    super();
-	    this.delegateLoader = new ExternalizingGenericXmlContextLoader() ;  
-	}//EOM 
-	
-	public final void setTestClass(final Class<?> testClass) { 
-		this.testClass = testClass ; 
-	}//EOM 
-	
-	public static final void configureSigar(final ApplicationContext context, final Log externalLogger) {
-		final Log log = (externalLogger == null ? logger : externalLogger) ;
+    protected static final Log logger = LogFactory.getLog(IntegrationTestContextLoader.class);
+    
+    private static Sigar sigar ; 
+    private static Field platformBeanServerField ;
+    protected Class<?> testClass ; 
+    private static boolean initializedSysProps ; 
+    
+    private final ExternalizingGenericXmlContextLoader delegateLoader ;  
+    
+    public IntegrationTestContextLoader() { 
+        super();
+        this.delegateLoader = new ExternalizingGenericXmlContextLoader() ;  
+    }//EOM 
+    
+    public final void setTestClass(final Class<?> testClass) { 
+        this.testClass = testClass ; 
+    }//EOM 
+    
+    public static final void configureSigar(final ApplicationContext context, final Log externalLogger) { 
+        final Log log = (externalLogger == null ? logger : externalLogger) ;
 
-		try {
+        try {
+            overrideProperties(log) ; 
+            
             //Find the sigar libs on the test classpath
             final File sigarBin = new File(context.getResource("/libsigar-sparc64-solaris.so").getFile().getParent());
             log.info("Setting sigar path to : " + sigarBin.getAbsolutePath());
@@ -96,10 +106,68 @@ public class IntegrationTestContextLoader extends AbstractContextLoader {
             Sigar.load() ; 
             
         } catch (Throwable t) {
-        	log.error("Unable to initiailize sigar path",t);
+            log.error("Unable to initiailize sigar path",t);
             throw new SystemException(t) ; 
         }//EO catch block
-	}//EOM 
+    }//EOM 
+    
+    private static final void overrideProperties(final Log log) {
+        if(initializedSysProps)  return ; 
+        
+        final String OVERRIDE_PREFIX =  "override." ;
+        final int OVERRIDE_PREFIX_LENGTH = OVERRIDE_PREFIX.length() ;
+        
+        final Properties sysProps = System.getProperties() ; 
+       
+        final Map<String,String> newProps = new HashMap<String,String>() ; 
+        
+        String origSysPropName, overrideSysPropName, origSyspropVal, overrideVal ;
+        int indexOfPrefix ; 
+        
+        for(Entry<Object,Object> syspropEntry : sysProps.entrySet()) { 
+            overrideSysPropName = (String) syspropEntry.getKey() ; 
+            if( (indexOfPrefix = overrideSysPropName.indexOf(OVERRIDE_PREFIX)) == -1 ) continue ; 
+            //first search for an explicitly defined corresponding original sys prop 
+            //and found skip the override.
+            origSysPropName = overrideSysPropName.substring(OVERRIDE_PREFIX_LENGTH) ;
+            origSyspropVal  = System.getProperty(origSysPropName) ;
+            if(origSyspropVal != null) continue ; 
+            //else create a new orig sys prop with the override value 
+            overrideVal = (String) syspropEntry.getValue() ; 
+            newProps.put(origSysPropName, overrideVal) ;
+            
+            log.info("An "+overrideSysPropName+" property value was provided : " + overrideVal + " setting in the " + origSysPropName + " system property") ;
+        }//EO while there are more system properties
+        
+        for(Map.Entry<String,String> newPropEntry : newProps.entrySet())  {
+            System.setProperty(newPropEntry.getKey(), newPropEntry.getValue()) ;
+        }//EO while there are more new properties  
+       
+        initializedSysProps = true ;        
+    }//EOM 
+    
+    private final void overrideProperties(final String[][] properties, final Log log) { 
+        
+        final int length = properties.length ;
+        
+        String sysPropName, overrideSysPropName,  syspropOrigVal, overrideVal ;  
+        for(int i=0; i < length; i++) { 
+            sysPropName = properties[i][0] ; 
+            syspropOrigVal  = System.getProperty(sysPropName) ; 
+            //if the org system property already exists then it was explicitly defined and should 
+            //not be overriden 
+            if(syspropOrigVal != null) continue ; 
+            //else attempt to looukup the overrding property value and if found, define
+            //a new system proeprty with the orig name and the overriding value 
+            overrideSysPropName = properties[i][1];  
+            overrideVal = System.getProperty(overrideSysPropName) ;
+            if(overrideVal == null) continue ; 
+            //else there is an override value and not explicitly defined orig value so override 
+            log.info("An "+overrideSysPropName+" property value was provided : " + overrideVal + " setting in the " + sysPropName + " system property") ;
+            
+        }//EO while there are more properties to potentially override
+        
+    }//EOM 
 
     public ApplicationContext loadContext(final String... locations) throws Exception {
         if (logger.isDebugEnabled()) {
@@ -187,9 +255,9 @@ public class IntegrationTestContextLoader extends AbstractContextLoader {
         }//EOM
         
         public ProxyingGenericApplicationContext(AbstractApplicationContext appcontext) {
-        	super() ; 
-        	this.delegate = appcontext ; 
-        	this.isDelegateInstanceofGenericAppContext = (appcontext instanceof GenericApplicationContext) ; 
+            super() ; 
+            this.delegate = appcontext ; 
+            this.isDelegateInstanceofGenericAppContext = (appcontext instanceof GenericApplicationContext) ; 
         }//EOM 
 
         @Override
@@ -204,23 +272,23 @@ public class IntegrationTestContextLoader extends AbstractContextLoader {
 
         @Override
         public void setAllowBeanDefinitionOverriding(boolean allowBeanDefinitionOverriding) {
-        	if(isDelegateInstanceofGenericAppContext) { 
-        		((GenericApplicationContext)this.delegate).setAllowBeanDefinitionOverriding(allowBeanDefinitionOverriding);
-        	}//EO if delegate is generic application context  
+            if(isDelegateInstanceofGenericAppContext) { 
+                ((GenericApplicationContext)this.delegate).setAllowBeanDefinitionOverriding(allowBeanDefinitionOverriding);
+            }//EO if delegate is generic application context  
         }//EOM 
 
         @Override
         public void setAllowCircularReferences(boolean allowCircularReferences) {
-        	if(isDelegateInstanceofGenericAppContext) { 
-        		((GenericApplicationContext)this.delegate).setAllowCircularReferences(allowCircularReferences);
-        	}//EO if delegate is generic application context 
+            if(isDelegateInstanceofGenericAppContext) { 
+                ((GenericApplicationContext)this.delegate).setAllowCircularReferences(allowCircularReferences);
+            }//EO if delegate is generic application context 
         }//EOM 
    
         @Override
         public void setResourceLoader(ResourceLoader resourceLoader) {
-        	if(isDelegateInstanceofGenericAppContext) { 
-        		((GenericApplicationContext)this.delegate).setResourceLoader(resourceLoader);
-        	}//EO if delegate is generic application context 
+            if(isDelegateInstanceofGenericAppContext) { 
+                ((GenericApplicationContext)this.delegate).setResourceLoader(resourceLoader);
+            }//EO if delegate is generic application context 
         }//EOM 
 
         @Override
@@ -236,54 +304,54 @@ public class IntegrationTestContextLoader extends AbstractContextLoader {
         @Override
         public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition)
                 throws BeanDefinitionStoreException {
-        	if(isDelegateInstanceofGenericAppContext) { 
-        		((GenericApplicationContext)this.delegate).registerBeanDefinition(beanName, beanDefinition);
+            if(isDelegateInstanceofGenericAppContext) { 
+                ((GenericApplicationContext)this.delegate).registerBeanDefinition(beanName, beanDefinition);
             }//EO if delegate is generic application context 
         }//EOM 
 
         @Override
         public void removeBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
-        	if(isDelegateInstanceofGenericAppContext) { 
-        		((GenericApplicationContext)this.delegate).removeBeanDefinition(beanName);
+            if(isDelegateInstanceofGenericAppContext) { 
+                ((GenericApplicationContext)this.delegate).removeBeanDefinition(beanName);
             }//EO if delegate is generic application context 
         }
 
         @Override
         public BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
-        	if(isDelegateInstanceofGenericAppContext) {   
-        		return ((GenericApplicationContext)this.delegate).getBeanDefinition(beanName);
+            if(isDelegateInstanceofGenericAppContext) {   
+                return ((GenericApplicationContext)this.delegate).getBeanDefinition(beanName);
             }//EO if delegate is generic application context
-        	else throw new UnsupportedOperationException();
+            else throw new UnsupportedOperationException();
         }//EOM 
 
         @Override
         public boolean isBeanNameInUse(String beanName) {
-        	if(isDelegateInstanceofGenericAppContext) { 
-        		return ((GenericApplicationContext)this.delegate).isBeanNameInUse(beanName);
+            if(isDelegateInstanceofGenericAppContext) { 
+                return ((GenericApplicationContext)this.delegate).isBeanNameInUse(beanName);
             }//EO if delegate is generic application context
-        	else throw new UnsupportedOperationException();
+            else throw new UnsupportedOperationException();
         }//EOM 
  
         @Override
         public void registerAlias(String beanName, String alias) {
-        	if(isDelegateInstanceofGenericAppContext) { 
-        		((GenericApplicationContext)this.delegate).registerAlias(beanName, alias);
+            if(isDelegateInstanceofGenericAppContext) { 
+                ((GenericApplicationContext)this.delegate).registerAlias(beanName, alias);
             }//EO if delegate is generic application context
         }//EOM 
 
         @Override
         public void removeAlias(String alias) {
-        	if(isDelegateInstanceofGenericAppContext) { 
-        		((GenericApplicationContext)this.delegate).removeAlias(alias);
+            if(isDelegateInstanceofGenericAppContext) { 
+                ((GenericApplicationContext)this.delegate).removeAlias(alias);
             }//EO if delegate is generic application context
         }//EOM 
 
         @Override
         public boolean isAlias(String beanName) {
-        	if(isDelegateInstanceofGenericAppContext) { 
-        		return ((GenericApplicationContext)this.delegate).isAlias(beanName);
+            if(isDelegateInstanceofGenericAppContext) { 
+                return ((GenericApplicationContext)this.delegate).isAlias(beanName);
             }//EO if delegate is generic application context
-        	else throw new UnsupportedOperationException() ;
+            else throw new UnsupportedOperationException() ;
         }//EOM 
 
         @Override
@@ -379,12 +447,12 @@ public class IntegrationTestContextLoader extends AbstractContextLoader {
             }//EO if already closed 
             
             try{  
-            	Object scheduler = this.delegate.getBean("scheduler") ; 
-            	if(scheduler instanceof ExecutorConfigurationSupport) ((ExecutorConfigurationSupport) scheduler).shutdown() ;
+                Object scheduler = this.delegate.getBean("scheduler") ; 
+                if(scheduler instanceof ExecutorConfigurationSupport) ((ExecutorConfigurationSupport) scheduler).shutdown() ;
             }catch(org.springframework.beans.factory.NoSuchBeanDefinitionException nsbde)  { 
-            	//swallow exception
+                //swallow exception
             }catch(Throwable t) { 
-            	t.printStackTrace() ; 
+                t.printStackTrace() ; 
             }//EO catch block 
             
             //Clear the JMX resources 
@@ -628,4 +696,8 @@ public class IntegrationTestContextLoader extends AbstractContextLoader {
         }//EOM 
         
     }//EOC ProxyingGenericApplicationContext
+    
+    public static void main(String[] args) throws Throwable {
+        overrideProperties(logger) ;
+    }//EOM 
 }//EOC 
