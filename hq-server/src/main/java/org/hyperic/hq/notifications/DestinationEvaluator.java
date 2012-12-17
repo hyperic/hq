@@ -16,7 +16,8 @@ import javax.jms.ObjectMessage;
 import org.hyperic.hq.notifications.filtering.FilterChain;
 import org.hyperic.hq.notifications.filtering.IFilter;
 
-public abstract class DestinationEvaluator<T> implements IEvaluator<T> {
+public abstract class DestinationEvaluator<T> {
+    private final Log log = LogFactory.getLog(ReportProcessorImpl.class);
     protected Map<Destination,FilterChain<T>> destToFilter = new HashMap<Destination,FilterChain<T>>();
 
     protected abstract FilterChain<T> instantiateFilterChain(Collection<IFilter<T>> filters);
