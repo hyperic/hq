@@ -10,7 +10,7 @@
 	</parent>
 
 	<artifactId>hq-integration-tests</artifactId>
-	<packaging>pom</packaging>
+	<packaging>jar</packaging>
 	<name>Hyperic HQ - Integration Tests</name>
 	
 	<dependencies>
@@ -42,6 +42,7 @@
 			<artifactId>hq-server</artifactId> 
 			<version>${project.version}</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-api</artifactId> 
@@ -52,6 +53,7 @@
 			<artifactId>hq-agent-handler-measurement</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.hyperic</groupId>
 			<artifactId>sigar</artifactId>
@@ -180,5 +182,83 @@
     		</testResource>
     	</testResources>
 	</build>
+  
+
+    <profiles>
+        <profile>
+      		<id>production</id>
+      		<activation>
+        		<property><name>production</name></property>
+      		</activation>
+
+      		<dependencies>
+      			<dependency>
+					<groupId>org.hyperic.hq.dist</groupId>
+					<artifactId>installer</artifactId> 
+					<version>${project.version}</version>
+					<type>tar.gz</type>
+				</dependency>
+      			<dependency>
+					<groupId>ant-contrib</groupId>
+					<artifactId>ant-contrib</artifactId>
+				</dependency>
+			</dependencies>      			
+            <build>
+                <plugins>
+					<plugin>
+			        <groupId>org.apache.maven.plugins</groupId>
+			        <artifactId>maven-antrun-plugin</artifactId>
+			        <version>1.7</version>
+			        <executions>
+			          <execution>
+			       		  <phase>process-resources</phase>
+			           	  <configuration>
+				              <tasks> 
+				              	<taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="maven.compile.classpath" />
+
+				              	<property name="installer.basedir" value="${basedir}/../dist/installer/modules/installer"/>
+				              	<property name="install.dir" value="${installer.basedir}/target/installer"/>
+				              	<property name="server.database-url" value="${override.server.database-url}"/> 
+				              	<property name="server.database-driver" value="${override.server.database-driver}"/> 
+				              	<property name="server.database" value="${override.server.database}"/> 
+				              	<property name="server.database-user" value="${override.server.database-user}"/> 
+				              	<property name="server.database-password" value="${override.server.database-password}"/> 
+				              	<property name="server.hibernate.dialect" value="${override.server.hibernate.dialect}"/> 
+				              	<property name="server.encryption-key" value="38e58edd0226" />
+				              	<property name="enable.validation.integrity" value="false" />
+		
+				              	<!--<property name="compile_classpath" refid="maven.compile.classpath"/>-->
+
+								<untar src="${installer.basedir}/target/installer.tar.gz" dest="${installer.basedir}/target" compression="gzip"/> 
+
+								<trycatch property="db.unavailable">
+								  <try> 
+										<sql driver="${server.database-driver}" url="${server.database-url}" userid="${server.database-user}" 
+			    							password="${server.database-password}" print="yes" failOnConnectionError="true" classpathref="maven.compile.classpath">
+			    						    select 1 from eam_config_props limit 1
+										</sql>
+										<property name="execution.target" value="upgrade-db" />
+									</try> 
+									<catch>
+										<property name="execution.target" value="dbsetup" />
+									</catch> 
+								
+								</trycatch>
+
+								<echo message=">>>>>>>>>>>>>>>>>>>>>> Execution target: ${execution.target}" />
+
+								<ant antfile="${installer.basedir}/build.xml" target="${execution.target}"/>
+				              </tasks> 
+			            </configuration>
+			            <goals>
+			              <goal>run</goal>
+			            </goals>
+			          </execution>
+			        </executions>
+			      </plugin>
+                </plugins> 
+            </build> 
+        </profile> 
+    </profiles> 
 	
 </project>
