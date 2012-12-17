@@ -28,7 +28,6 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.hyperic.hq.api.model.ID;
 import org.hyperic.hq.api.model.measurements.Measurement;

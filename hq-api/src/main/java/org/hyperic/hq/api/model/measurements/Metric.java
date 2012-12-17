@@ -10,11 +10,15 @@ import org.hyperic.hq.api.model.RestApiConstants;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name="MetricType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
-public class Metric extends RawMetric {
+public class Metric {
 	@XmlAttribute
 	private double  highValue;
 	@XmlAttribute
     private double  lowValue;
+	@XmlAttribute
+    private double  value;
+	@XmlAttribute
+    private long timestamp; 
 
     public Metric() {}
     
@@ -30,12 +34,26 @@ public class Metric extends RawMetric {
 	public void setLowValue(double lowValue) {
 		this.lowValue = lowValue;
 	}
+	public double getValue() {
+		return value;
+	}
+	public void setValue(double value) {
+		this.value = value;
+	}
+	public long getTimestamp() {
+		return timestamp;
+	}
+	public void setTimestamp(long timestamp) {
+		this.timestamp = timestamp;
+	}
 	
 	@Override
 	public boolean equals(Object obj) {
 	    if (obj==null || !(obj instanceof Metric)) { return false;}
 	    Metric other = (Metric) obj;
 	    return this.highValue==other.highValue
-	            && this.lowValue==other.lowValue;
+	            && this.lowValue==other.lowValue
+	            && this.value==other.value
+	            && this.timestamp==other.timestamp;
 	}
 }

@@ -336,19 +336,6 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         return measurementTemplateDAO.findTemplatesByMonitorableType(proto.getName());
     }
 
-    @Transactional(readOnly = true)
-    public Map<Integer,Measurement> findMeasurementsByIds(final List<Integer> mids) {
-        List<Measurement> msmts = new ArrayList<Measurement>(mids.size());
-        for(Integer mid:mids) {
-            msmts.add(findMeasurementById(mid));
-        }
-        Map<Integer,Measurement> midToMsmt = new HashMap<Integer,Measurement>();
-        for(Measurement msmt:msmts) {
-            midToMsmt.put(msmt.getId(), msmt);
-        }
-        return midToMsmt;
-    }
-    
     /**
      * Create Measurement objects for an appdef entity based on default
      * templates. This method will only create them if there currently no

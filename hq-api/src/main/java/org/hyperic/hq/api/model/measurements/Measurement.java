@@ -52,11 +52,20 @@ public class Measurement extends MetricGroupBase {
     public Long getInterval() {
 		return interval;
 	}
-	public void setInterval(Long interval) {
+	public void setInterval(long interval) {
 		this.interval = interval;
 	}
-    public Double getAvg() {
-        return avg;
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+    public double getAvg() {
+        return avg.doubleValue();
+    }
+    public void setAvg(double avg) {
+        this.avg = new Double(avg);
     }
     public void setAvg(Double avg) {
         this.avg = avg;

@@ -34,8 +34,6 @@ public class MeasurementServiceImpl extends RestApiService implements Measuremen
     private MeasurementTransfer measurementTransfer;
     @Autowired
     private ExceptionToErrorCodeMapper errorHandler ; 
-    @javax.ws.rs.core.Context
-    private SearchContext searchContext ;
     
     public void register(final MetricFilterRequest metricFilterReq) throws SessionNotFoundException, SessionTimeoutException {
         ApiMessageContext apiMessageContext = newApiMessageContext();
