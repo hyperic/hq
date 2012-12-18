@@ -1,9 +1,8 @@
-package org.hyperic.hq.notifications;
+package org.hyperic.hq.notifications.filtering;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -17,16 +16,14 @@ import javax.jms.ObjectMessage;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.measurement.server.session.ReportProcessorImpl;
-import org.hyperic.hq.notifications.filtering.FilterChain;
-import org.hyperic.hq.notifications.filtering.Filter;
-import org.hyperic.hq.notifications.model.MetricNotification;
+import org.hyperic.hq.notifications.model.INotification;
 
-public abstract class DestinationEvaluator<T> {
+public abstract class DestinationEvaluator<N extends INotification> {
     private final Log log = LogFactory.getLog(ReportProcessorImpl.class);
     // TODO~ change to write through versioning (each node would have versioning - write on one version, read another, then sync between them), o/w will pose problems in scale
-    protected Map<Destination,FilterChain<T>> destToFilter = new ConcurrentHashMap<Destination,FilterChain<T>>();
+    protected Map<Destination,FilterChain<N>> destToFilter = new ConcurrentHashMap<Destination,FilterChain<N>>();
 
-    protected abstract FilterChain<T> instantiateFilterChain(Collection<Filter<T>> filters);
+    protected abstract FilterChain<N> instantiateFilterChain(Collection<Filter<N,? extends FilteringCondition<?>>> filters);
     
     /**
      * append filters
@@ -34,13 +31,13 @@ public abstract class DestinationEvaluator<T> {
      * @param dest
      * @param filters
      */
-    public void register(Destination dest, Collection<Filter<T>> filters) {
+    public void register(Destination dest, Collection<Filter<N,? extends FilteringCondition<?>>> filters) {
         if (filters==null || filters.isEmpty()) {
             if (log.isDebugEnabled()) {
                 log.debug("no filters were passed to be registered with destination " + dest);
             }
         }
-        FilterChain<T> filterChain = this.destToFilter.get(dest);
+        FilterChain<N> filterChain = this.destToFilter.get(dest);
         if (filterChain==null) {
             filterChain = instantiateFilterChain(filters);
             this.destToFilter.put(dest,filterChain);
@@ -61,7 +58,7 @@ public abstract class DestinationEvaluator<T> {
      * @param dest
      */
     public void unregisterAll(Destination dest) {
-        FilterChain<T> filterChain = this.destToFilter.remove(dest);
+        FilterChain<N> filterChain = this.destToFilter.remove(dest);
         if (log.isDebugEnabled()) {
             if (filterChain==null) {
                 log.debug("no filters were previously registered with destination " + dest);
@@ -76,14 +73,14 @@ public abstract class DestinationEvaluator<T> {
      * @param dest
      * @param filters
      */
-    public void unregister(Destination dest, List<Filter<MetricNotification>> filters) {
+    public void unregister(Destination dest, List<Filter<N,? extends FilteringCondition<?>>> filters) {
         if (filters==null || filters.isEmpty()) {
             if (log.isDebugEnabled()) {
                 log.debug("no filters were passed to be un-registered from destination " + dest);
             }
             return;
         }
-        FilterChain<T> filterChain = this.destToFilter.get(dest);
+        FilterChain<N> filterChain = this.destToFilter.get(dest);
         if (filterChain==null) {
             if (log.isDebugEnabled()) {
                 log.debug("no filters were previously registered with destination " + dest);
@@ -101,13 +98,13 @@ public abstract class DestinationEvaluator<T> {
             }
         }
     }
-    public List<ObjectMessage> evaluate(final List<T> entities) throws JMSException {
+    public List<ObjectMessage> evaluate(final List<N> entities) throws JMSException {
         List<ObjectMessage> msgs = new ArrayList<ObjectMessage>();
-        Set<Entry<Destination,FilterChain<T>>> destToFilterESet = destToFilter.entrySet();
+        Set<Entry<Destination,FilterChain<N>>> destToFilterESet = destToFilter.entrySet();
          
-        for(Entry<Destination,FilterChain<T>> destToFilterE:destToFilterESet) {
-            FilterChain<T> filterChain = destToFilterE.getValue();
-            Collection<T> filteredEntities = ((Collection<T>) filterChain.filter(entities));
+        for(Entry<Destination,FilterChain<N>> destToFilterE:destToFilterESet) {
+            FilterChain<N> filterChain = destToFilterE.getValue();
+            Collection<N> filteredEntities = ((Collection<N>) filterChain.filter(entities));
             if (filteredEntities!=null) {
                 ObjectMessage msg = new DummyMsg();
                 Destination dest = destToFilterE.getKey();

@@ -9,24 +9,29 @@ import org.hyperic.hq.notifications.model.INotification;
  * 
  * @author yakarn
  *
- * @param <T> defines the type of entities this filter handles
+ * @param <N> defines the type of entities this filter handles
  */
-public abstract class Filter<T extends INotification, C extends INotificationFilteringCondition> {
+public abstract class Filter<N extends INotification, C extends FilteringCondition<?>> {
     protected C cond;
 
     public Filter(C cond) {
         this.cond=cond;
     }
 
-    public Collection<T> filter(Collection<T> entities) {
-        Collection<T> rscsLeftIn = new ArrayList<T>();
-        for(T entity:entities) {
-            T entityLeftIn = this.filter(entity);
-            if (entityLeftIn!=null) {
-                rscsLeftIn.add(entityLeftIn);
+    public Collection<N> filter(Collection<N> notifications) {
+        Collection<N> notificationsLeftIn = new ArrayList<N>();
+        for(N notification:notifications) {
+            N notificationLeftIn = this.filter(notification);
+            if (notificationLeftIn!=null) {
+                notificationsLeftIn.add(notificationLeftIn);
             }
         }
-        return rscsLeftIn;
+        return notificationsLeftIn;
     }
-    protected abstract T filter(T metricNotification);
+    /**
+     * 
+     * @param notification
+     * @return the notification in case it passed the filtering condition check, o/w - null
+     */
+    protected abstract N filter(N notification);
 }

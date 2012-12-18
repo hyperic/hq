@@ -4,24 +4,26 @@ import java.util.AbstractCollection;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.hyperic.hq.notifications.model.INotification;
+
 /**
  * currently behave as the collection object passed to it in the c'tor
  * 
  * @author yakarn
  *
  */
-public class FilterChain<T> extends AbstractCollection<Filter<T>> {
-    protected Collection<Filter<T>> filters;
+public class FilterChain<N extends INotification> extends AbstractCollection<Filter<N,? extends FilteringCondition<?>>> {
+    protected Collection<Filter<N,? extends FilteringCondition<?>>> filters;
      
-    public FilterChain(Collection<Filter<T>> filters) {
+    public FilterChain(Collection<Filter<N,? extends FilteringCondition<?>>> filters) {
         this.addAll(filters);
     }
     @Override
-    public boolean add(Filter<T> filter) {
+    public boolean add(Filter<N,? extends FilteringCondition<?>> filter) {
         return this.filters.add(filter);
     }
     @Override
-    public Iterator<Filter<T>> iterator() {
+    public Iterator<Filter<N,? extends FilteringCondition<?>>> iterator() {
         if (this.filters==null) {
             return null;
         }
@@ -38,16 +40,16 @@ public class FilterChain<T> extends AbstractCollection<Filter<T>> {
      * @return
      */
     @Override
-    public boolean addAll(Collection<? extends Filter<T>> c) {
+    public boolean addAll(Collection<? extends Filter<N,? extends FilteringCondition<?>>> c) {
         // TODO impose one filter policy per entity type
         return super.addAll(c);
     }
-    public Collection<T> filter(final Collection<T> entities) {
-        Collection<T> filteredEntities = entities;
+    public Collection<N> filter(final Collection<N> entities) {
+        Collection<N> filteredEntities = entities;
         if (this.filters==null) {
             return filteredEntities;
         }
-        for(Filter<T> filter:this.filters) {
+        for(Filter<N,? extends FilteringCondition<?>> filter:this.filters) {
             filteredEntities = filter.filter(filteredEntities);
         }
         return filteredEntities;

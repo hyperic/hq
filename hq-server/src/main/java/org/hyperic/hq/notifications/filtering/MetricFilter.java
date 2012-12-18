@@ -1,14 +1,11 @@
 package org.hyperic.hq.notifications.filtering;
 
-import java.util.ArrayList;
-import java.util.Collection;
 
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.notifications.model.MetricNotification;
 
-public class MetricFilter<C extends Measurement> extends Filter<MetricNotification,C> {
+public class MetricFilter<C extends FilteringCondition<Measurement>> extends Filter<MetricNotification,C> {
     private MeasurementManager measurementManager;
     
     public MetricFilter(final MeasurementManager measurementManager,C cond) {

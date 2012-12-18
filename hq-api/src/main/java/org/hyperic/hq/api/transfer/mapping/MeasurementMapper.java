@@ -13,51 +13,62 @@ import org.hyperic.hq.api.model.measurements.MetricFilterRequest;
 import org.hyperic.hq.api.model.measurements.MetricGroup;
 import org.hyperic.hq.api.model.measurements.RawMetric;
 import org.hyperic.hq.api.model.resources.ResourceFilterDefinitioin;
-import org.hyperic.hq.api.transfer.impl.toMetricFilterByRscMetricFilterRequest;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
+import org.hyperic.hq.measurement.shared.MeasurementManager;
+import org.hyperic.hq.notifications.filtering.Filter;
+import org.hyperic.hq.notifications.filtering.FilteringCondition;
+import org.hyperic.hq.notifications.filtering.MetricFilter;
 import org.hyperic.hq.notifications.filtering.MetricFilterByResource;
+import org.hyperic.hq.notifications.filtering.ResourceFilteringCondition;
 import org.hyperic.hq.notifications.model.MetricNotification;
 import org.hyperic.hq.product.MetricValue;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class MeasurementMapper {
     protected final static int MAX_FRACTION_DIGITS = 3;
     protected final static DecimalFormat df = new DecimalFormat();
+    protected final MeasurementManager measurementMgr;
     
+    @Autowired
+    public MeasurementMapper(final MeasurementManager measurementMgr) {
+        this.measurementMgr=measurementMgr;
+    }
     static {
         df.setMaximumFractionDigits(MAX_FRACTION_DIGITS);
         df.setGroupingUsed(false);
         df.setRoundingMode(RoundingMode.HALF_EVEN);
     }
-    public List<Integer> toIds(List<ID> ids) {
+    public List<Integer> toIds(final List<ID> ids) {
         List<Integer> ints = new ArrayList<Integer>(ids.size());
         for(ID id:ids) {
             ints.add(id.getId());
         }
         return ints;
     }
-    public Measurement toMeasurement(org.hyperic.hq.measurement.server.session.Measurement hqMsmt) {
+    public Measurement toMeasurement(final org.hyperic.hq.measurement.server.session.Measurement hqMsmt) {
         Measurement msmt = new Measurement();
         msmt.setInterval(hqMsmt.getInterval());
         msmt.setAlias(hqMsmt.getTemplate().getAlias());
         msmt.setName(hqMsmt.getTemplate().getName());
         return msmt;
     }
-    public Measurement toMeasurementExtendedData(org.hyperic.hq.measurement.server.session.Measurement hqMsmt) {
+    public Measurement toMeasurementExtendedData(final org.hyperic.hq.measurement.server.session.Measurement hqMsmt) {
         Measurement msmt = toMeasurement(hqMsmt);
         msmt.setId(hqMsmt.getId());
         return msmt;
     }
-    public Measurement toMeasurement(org.hyperic.hq.measurement.server.session.Measurement hqMsmt, double avg) {
+    public Measurement toMeasurement(final org.hyperic.hq.measurement.server.session.Measurement hqMsmt, double avg) {
         Measurement msmt = toMeasurement(hqMsmt);
         msmt.setAvg(avg);
         return msmt;
     }
-    public List<RawMetric> toMetricsWithId(List<MetricNotification> mns) {
+    public List<RawMetric> toMetricsWithId(final List<MetricNotification> mns) {
         List<RawMetric> metrics = new ArrayList<RawMetric>();
         for (MetricNotification mn : mns) {
             RawMetric metric = new RawMetric();
@@ -69,7 +80,7 @@ public class MeasurementMapper {
         }
         return metrics;
     }
-    public List<Metric> toMetrics(List<HighLowMetricValue> hqMetrics) {
+    public List<Metric> toMetrics(final List<HighLowMetricValue> hqMetrics) {
         List<Metric> metrics = new ArrayList<Metric>();
         for (HighLowMetricValue hqMetric : hqMetrics) {
             Metric metric = new Metric();
@@ -81,9 +92,25 @@ public class MeasurementMapper {
         }
         return metrics;
     }
-    public MetricFilterByResource toMetricFilterByRsc(MetricFilterRequest metricFilterReq) {
+    public MetricFilterByResource<ResourceFilteringCondition<Resource>> toMetricFilterByResource(final ResourceFilterDefinitioin rscFilterDef) {
+        String nameToCompareTo = rscFilterDef.getName();
+        ResourceFilteringCondition<Resource> cond = new ResourceFilteringCondition<Resource>(nameToCompareTo);
+        MetricFilterByResource<ResourceFilteringCondition<Resource>> filter = new MetricFilterByResource<ResourceFilteringCondition<Resource>>(this.measurementMgr,cond);
+        return filter;
+    }
+    public List<Filter<MetricNotification,? extends FilteringCondition<?>>> toMetricFilters(final MetricFilterRequest metricFilterReq) {
+        List<Filter<MetricNotification,? extends FilteringCondition<?>>> userFilters = new ArrayList<Filter<MetricNotification,? extends FilteringCondition<?>>>();
         ResourceFilterDefinitioin rscFilterDef = metricFilterReq.getResourceFilterDefinition();
-        
-        return rscFilter;
+
+        MetricFilterByResource<ResourceFilteringCondition<Resource>> metricFilterByRsc = toMetricFilterByResource(rscFilterDef);
+        if (metricFilterByRsc!=null) {
+            userFilters.add(metricFilterByRsc);
+        }
+        //TODO~ marshal metric filter
+        MetricFilter<? extends FilteringCondition<org.hyperic.hq.measurement.server.session.Measurement>> metricFilter = null;
+        if (metricFilter!=null) {
+            userFilters.add(metricFilter);
+        }        
+        return userFilters;
     }
 }
