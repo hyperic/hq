@@ -1,5 +1,5 @@
 package org.hyperic.hq.notifications.filtering;
 
-public abstract class FilteringCondition<T> {
-    public abstract boolean check(T entity);
+public abstract class FilteringCondition<E> {
+    public abstract boolean check(E entity);
 }

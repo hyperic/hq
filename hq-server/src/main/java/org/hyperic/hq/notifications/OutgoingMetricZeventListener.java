@@ -17,6 +17,8 @@ import org.hyperic.hq.measurement.server.session.ReportProcessorImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZeventPayload;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZeventSource;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
+import org.hyperic.hq.notifications.filtering.FilteringCondition;
+import org.hyperic.hq.notifications.filtering.MetricDestinationEvaluator;
 import org.hyperic.hq.notifications.model.MetricNotification;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.zevents.ZeventEnqueuer;

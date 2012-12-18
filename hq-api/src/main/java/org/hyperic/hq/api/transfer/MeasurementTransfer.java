@@ -59,7 +59,7 @@ public interface MeasurementTransfer {
      * @param rscFilter
      * @param metricFilter
      */
-    public void unregister(Integer sessionId, MetricFilterByResource rscFilter, MetricFilter metricFilter);
+    public void unregister(final Integer sessionId, final MetricFilterRequest metricFilterReq);
 
     public MetricGroup poll(Integer sessionId);
     

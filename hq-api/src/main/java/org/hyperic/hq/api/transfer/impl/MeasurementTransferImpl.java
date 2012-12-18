@@ -72,11 +72,10 @@ import org.hyperic.hq.measurement.shared.DataManager;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.TemplateManager;
-import org.hyperic.hq.notifications.MetricDestinationEvaluator;
 import org.hyperic.hq.notifications.Q;
 import org.hyperic.hq.notifications.filtering.Filter;
-import org.hyperic.hq.notifications.filtering.MetricFilter;
-import org.hyperic.hq.notifications.filtering.MetricFilterByResource;
+import org.hyperic.hq.notifications.filtering.FilteringCondition;
+import org.hyperic.hq.notifications.filtering.MetricDestinationEvaluator;
 import org.hyperic.hq.notifications.model.MetricNotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -133,15 +132,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     protected Map<Integer,Destination> sessionToDestination = new HashMap<Integer,Destination>();
     
     public void register(Integer sessionId, final MetricFilterRequest metricFilterReq) {
-        MetricFilterByResource metricFilterByRsc = this.mapper.toMetricFilterByRsc(metricFilterReq);
-        MetricFilter metricFilter = null;
-        List<Filter<MetricNotification>> userFilters = new ArrayList<Filter<MetricNotification>>();
-        if (metricFilterByRsc!=null) {
-            userFilters.add(metricFilterByRsc);
-        }
-        if (metricFilter!=null) {
-            userFilters.add(metricFilter);
-        }        
+        List<Filter<MetricNotification,? extends FilteringCondition<?>>> userFilters = this.mapper.toMetricFilters(metricFilterReq); 
         // TODO~ init filters with needed managers to enable them to retrieve filter related data
         
         Destination dest = this.sessionToDestination.get(sessionId); 
@@ -160,15 +151,8 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             this.evaluator.unregisterAll(dest);
         }        
     }
-    public void unregister(Integer sessionId, MetricFilterByResource metricFilterByRsc, MetricFilter metricFilter) {
-        List<Filter<MetricNotification>> userFilters = new ArrayList<Filter<MetricNotification>>();
-        if (metricFilterByRsc!=null) {
-            userFilters.add(metricFilterByRsc);
-        }
-        if (metricFilter!=null) {
-            userFilters.add(metricFilter);
-        }        
-
+    public void unregister(final Integer sessionId, final MetricFilterRequest metricFilterReq) {
+        List<Filter<MetricNotification,? extends FilteringCondition<?>>> userFilters = this.mapper.toMetricFilters(metricFilterReq); 
         if (userFilters.isEmpty()) {
             if (log.isDebugEnabled()) {
                 log.debug("no filters were passed to be unregistered");
