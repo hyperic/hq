@@ -14,13 +14,17 @@ import org.hyperic.hq.notifications.filtering.MetricFilterByResource;
 
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name="filterRequest", namespace=RestApiConstants.SCHEMA_NAMESPACE)
-@XmlType(name="FilterRequestType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+@XmlRootElement(name="metricFilterRequest", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+@XmlType(name="MetricFilterRequestType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 public class MetricFilterRequest {
-    @XmlAttribute
+    @XmlElement(name="resourceFilter", namespace=RestApiConstants.SCHEMA_NAMESPACE)
     private ResourceFilterDefinitioin resourceFilterDef;
 
     public ResourceFilterDefinitioin getResourceFilterDefinition() {
         return resourceFilterDef;
+    }
+    
+    public static boolean validate(MetricFilterRequest metricFilterRequest) {
+        return metricFilterRequest!=null && ResourceFilterDefinitioin.validate(metricFilterRequest.resourceFilterDef);
     }
 }

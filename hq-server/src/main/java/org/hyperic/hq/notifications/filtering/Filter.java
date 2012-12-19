@@ -34,4 +34,20 @@ public abstract class Filter<N extends INotification, C extends FilteringConditi
      * @return the notification in case it passed the filtering condition check, o/w - null
      */
     protected abstract N filter(N notification);
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (this==obj) {
+            return true;
+        }
+        if (obj==null || !(obj instanceof Filter)) {
+            return false;
+        }
+        @SuppressWarnings("unchecked")
+        Filter<N, C> other = (Filter<N, C>) obj;
+        if (this.cond==null) {
+            return other.cond==null;
+        }
+        return this.cond.equals(other.cond);
+    }
 }

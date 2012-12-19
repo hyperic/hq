@@ -16,7 +16,7 @@ public class FilterChain<N extends INotification> extends AbstractCollection<Fil
     protected Collection<Filter<N,? extends FilteringCondition<?>>> filters;
      
     public FilterChain(Collection<Filter<N,? extends FilteringCondition<?>>> filters) {
-        this.addAll(filters);
+        this.filters=filters;
     }
     @Override
     public boolean add(Filter<N,? extends FilteringCondition<?>> filter) {

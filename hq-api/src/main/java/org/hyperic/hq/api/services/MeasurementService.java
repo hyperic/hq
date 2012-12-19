@@ -78,7 +78,11 @@ public interface MeasurementService {
         @Description(value = "unregister user session and all assigned filters this user destination has", target = DocTarget.METHOD)
     })
     public void unregister() throws SessionNotFoundException, SessionTimeoutException;
-    
+
+    @POST
+    @Path("/metrics/unregister")
+    public void unregister(final MetricFilterRequest metricFilterReq) throws SessionNotFoundException, SessionTimeoutException;
+
     @POST
     @Path("/")
     public ResourceMeasurementBatchResponse getMeasurements(BulkResourceMeasurementRequest msmtMetaReq) throws SessionNotFoundException, SessionTimeoutException;

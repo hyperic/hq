@@ -48,7 +48,7 @@ public class OutgoingMetricZeventListener implements ZeventListener<MeasurementZ
         zEventManager.addBufferedListener(MeasurementZevent.class, this);
     }
     
-    @Transactional(readOnly = true)
+//    @Transactional(readOnly = true) 
     protected List<MetricNotification> extract(List<MeasurementZevent> events) {
         List<MetricNotification> dtps = new ArrayList<MetricNotification>();
         for(MeasurementZevent measurementZevent:events) {
@@ -71,18 +71,19 @@ public class OutgoingMetricZeventListener implements ZeventListener<MeasurementZ
             dtps.add(dtp);
         }
         return dtps;
-    }
+    } 
     
+    @Transactional(readOnly = true) 
     public void processEvents(List<MeasurementZevent> events) {
         List<MetricNotification> dtps = extract(events);
         List<ObjectMessage> msgs;
         try {
             msgs = this.evaluator.evaluate(dtps);
             this.q.publish(msgs);
-        }catch(JMSException e) {
+        }catch(/*JMSException*/Throwable e) {
             log.error(e);
-            SystemException sysEx = new SystemException(e);
-            throw sysEx;
-        }
+//            SystemException sysEx = new SystemException(e);
+//            throw sysEx;
+        } 
     }
 }
