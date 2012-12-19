@@ -14,6 +14,7 @@ import org.hyperic.hq.api.model.measurements.MetricGroup;
 import org.hyperic.hq.api.model.measurements.RawMetric;
 import org.hyperic.hq.api.model.resources.ResourceFilterDefinitioin;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
@@ -33,11 +34,13 @@ import org.springframework.stereotype.Component;
 public class MeasurementMapper {
     protected final static int MAX_FRACTION_DIGITS = 3;
     protected final static DecimalFormat df = new DecimalFormat();
+    protected final ResourceManager resourceMgr;
     protected final MeasurementManager measurementMgr;
     
     @Autowired
-    public MeasurementMapper(final MeasurementManager measurementMgr) {
+    public MeasurementMapper(final MeasurementManager measurementMgr,ResourceManager resourceMgr) {
         this.measurementMgr=measurementMgr;
+        this.resourceMgr=resourceMgr;
     }
     static {
         df.setMaximumFractionDigits(MAX_FRACTION_DIGITS);
@@ -95,7 +98,7 @@ public class MeasurementMapper {
     public MetricFilterByResource<ResourceFilteringCondition<Resource>> toMetricFilterByResource(final ResourceFilterDefinitioin rscFilterDef) {
         String nameToCompareTo = rscFilterDef.getName();
         ResourceFilteringCondition<Resource> cond = new ResourceFilteringCondition<Resource>(nameToCompareTo);
-        MetricFilterByResource<ResourceFilteringCondition<Resource>> filter = new MetricFilterByResource<ResourceFilteringCondition<Resource>>(this.measurementMgr,cond);
+        MetricFilterByResource<ResourceFilteringCondition<Resource>> filter = new MetricFilterByResource<ResourceFilteringCondition<Resource>>(this.measurementMgr,this.resourceMgr,cond);
         return filter;
     }
     public List<Filter<MetricNotification,? extends FilteringCondition<?>>> toMetricFilters(final MetricFilterRequest metricFilterReq) {

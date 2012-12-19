@@ -10,12 +10,15 @@ import org.hyperic.hq.api.model.RestApiConstants;
 @XmlType(name="ResourceFilterDefinitioin", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 public class ResourceFilterDefinitioin {
     @XmlAttribute
-    String name;
+    String resourceName;
     
     public String getName() {
-        return name;
+        return resourceName;
     }
-    public void setName(String name) {
-        this.name = name;
+    public void setName(String resourceName) {
+        this.resourceName = resourceName;
+    }
+    public static boolean validate(ResourceFilterDefinitioin resourceFilterDefinitioin) {
+        return resourceFilterDefinitioin!=null && resourceFilterDefinitioin.resourceName!=null && !resourceFilterDefinitioin.resourceName.isEmpty();
     }
 }

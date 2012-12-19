@@ -132,6 +132,14 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     protected Map<Integer,Destination> sessionToDestination = new HashMap<Integer,Destination>();
     
     public void register(Integer sessionId, final MetricFilterRequest metricFilterReq) {
+        //TODO~ return failed/successful registration
+        //TODO~ add schema to the xml's which automatically validates legal values (no null / empty name for instance)
+        if (!MetricFilterRequest.validate(metricFilterReq)) {
+            if (log.isDebugEnabled()) {
+                log.debug("illegal request");
+            }
+            return;
+        }
         List<Filter<MetricNotification,? extends FilteringCondition<?>>> userFilters = this.mapper.toMetricFilters(metricFilterReq); 
         // TODO~ init filters with needed managers to enable them to retrieve filter related data
         
@@ -152,6 +160,13 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         }        
     }
     public void unregister(final Integer sessionId, final MetricFilterRequest metricFilterReq) {
+        //TODO~ return failed/successful registration
+        if (!MetricFilterRequest.validate(metricFilterReq)) {
+            if (log.isDebugEnabled()) {
+                log.debug("illegal request");
+            }
+            return;
+        }
         List<Filter<MetricNotification,? extends FilteringCondition<?>>> userFilters = this.mapper.toMetricFilters(metricFilterReq); 
         if (userFilters.isEmpty()) {
             if (log.isDebugEnabled()) {
@@ -170,6 +185,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     }
     
     public MetricGroup poll(Integer sessionId) {
+        //TODO~ return adequate response if not registered
         MetricGroup res = new MetricGroup();
         Destination dest = this.sessionToDestination.get(sessionId);
         if (dest==null) {
