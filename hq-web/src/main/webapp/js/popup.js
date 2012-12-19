@@ -82,6 +82,7 @@ var overlay = {
         else
             this.curPopup.style.top = top + 'px';
 
+        Element.show(this.curPopup);
         this.fadeInTimePopup();
 
         if (e) {
@@ -103,6 +104,7 @@ var overlay = {
         else
             this.curPopup.style.top = top + 'px';
 
+        Element.show(this.curPopup);
         this.fadeInTimePopup();
 
         if (e) {
