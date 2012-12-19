@@ -42,7 +42,6 @@ public final class AppdefEntityConstants {
     public static final int APPDEF_TYPE_AUTOGROUP   = 9;
     public static final int APPDEF_TYPE_POLICY      = 10;
 
-
     private static final String APPDEF_NAME_PRIVATEGROUP = "privateGroup";
     private static final String APPDEF_NAME_PLATFORM    = "platform";
     private static final String APPDEF_NAME_SERVER      = "server";
