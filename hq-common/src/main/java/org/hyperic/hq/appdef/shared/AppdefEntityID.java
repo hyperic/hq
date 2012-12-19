@@ -188,6 +188,8 @@ public class AppdefEntityID
             return AuthzConstants.authzApplication;
         case AppdefEntityConstants.APPDEF_TYPE_GROUP:
             return AuthzConstants.authzGroup;
+        case AppdefEntityConstants.APPDEF_TYPE_PROFILE:
+            return AuthzConstants.authzProfile;
         default:
             throw new IllegalArgumentException("Unknown type: " + getType());
         }

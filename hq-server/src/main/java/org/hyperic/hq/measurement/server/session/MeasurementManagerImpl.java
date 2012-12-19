@@ -76,6 +76,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementCreateException;
@@ -318,6 +319,14 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     @Transactional(readOnly = true)
     public Measurement findMeasurementById(Integer mid) {
         return measurementDAO.findById(mid);
+    }
+    
+    @Transactional(readOnly=true)
+    public Collection<MeasurementTemplate> getTemplatesByPrototype(Resource proto) {
+        if (proto == null) {
+            return Collections.emptyList();
+        }
+        return measurementTemplateDAO.findTemplatesByMonitorableType(proto.getName());
     }
 
     /**

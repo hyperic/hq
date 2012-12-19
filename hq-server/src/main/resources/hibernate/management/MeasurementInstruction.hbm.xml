@@ -58,6 +58,12 @@
       <column name="TEMPLATE_ID" not-null="true"/>
     </many-to-one>
 
+    <properties name="profile">
+      <many-to-one name="managementProfile">
+        <column name="MGMT_PROFILE_ID" not-null="true"/>
+      </many-to-one>
+    </properties>
+
   </class>
 
 </hibernate-mapping>

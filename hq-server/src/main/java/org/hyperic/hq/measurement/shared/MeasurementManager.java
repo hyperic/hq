@@ -430,4 +430,6 @@ public interface MeasurementManager {
 	
 	void setMeasurementTemplateDao(MeasurementTemplateDAO mTemplateDao);
 
+    Collection<MeasurementTemplate> getTemplatesByPrototype(Resource proto);
+
 }

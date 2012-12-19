@@ -49,6 +49,7 @@ public final class AuthzConstants {
     public static final String serviceResType = "covalentEAMService";
     public static final String applicationResType = "covalentEAMApplication";
     public static final String groupResType = "covalentAuthzResourceGroup";
+    public static final String profileResType = "groupProfileResourceType";
 
     // Appdef Operations
 

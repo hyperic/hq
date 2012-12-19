@@ -12,7 +12,7 @@ public class ManagementProfile extends PersistedObject {
     private String description;
     private Resource resource;
     private Crispo config;
-    private Collection<MeasurementInstruction> measurementInstructions;
+    private Collection<MeasurementInstruction> measurementInstructionBag;
 
     public String getDescription() {
         return description;
@@ -32,12 +32,11 @@ public class ManagementProfile extends PersistedObject {
     public void setConfig(Crispo config) {
         this.config = config;
     }
-    public Collection<MeasurementInstruction> getMeasurementInstructions() {
-        return measurementInstructions;
+    public Collection<MeasurementInstruction> getMeasurementInstructionBag() {
+        return measurementInstructionBag;
     }
-    public void setMeasurementInstructions(
-        Collection<MeasurementInstruction> measurementInstructions) {
-        this.measurementInstructions = measurementInstructions;
+    public void setMeasurementInstructionBag(Collection<MeasurementInstruction> measurementInstructions) {
+        this.measurementInstructionBag = measurementInstructions;
     }
 
 }

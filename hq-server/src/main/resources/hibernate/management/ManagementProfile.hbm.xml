@@ -54,8 +54,8 @@
       <column name="CRISPO_ID" not-null="true"/>
     </many-to-one>
 
-    <bag inverse="true" cascade="none" name="measurementInstructions" table="EAM_MEAS_INSTR">
-      <key on-delete="cascade" column="MGMT_PROFILE_ID"/>
+    <bag inverse="true" cascade="all" name="measurementInstructionBag" table="EAM_MEAS_INSTR">
+      <key on-delete="cascade" column="MGMT_PROFILE_ID" not-null="true"/>
       <one-to-many class="MeasurementInstruction"/>
     </bag>
 

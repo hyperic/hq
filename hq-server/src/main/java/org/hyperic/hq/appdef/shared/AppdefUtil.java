@@ -132,6 +132,9 @@ public class AppdefUtil {
             else if(resType.getId().equals(AuthzConstants.authzGroup)) {
                 entityType = AppdefEntityConstants.APPDEF_TYPE_GROUP;
             } 
+            else if(resType.getId().equals(AuthzConstants.authzProfile)) {
+                entityType = AppdefEntityConstants.APPDEF_TYPE_PROFILE;
+            } 
             else {
                 throw new IllegalArgumentException(resType.getName() + 
                     " is not a valid Appdef Resource Type");

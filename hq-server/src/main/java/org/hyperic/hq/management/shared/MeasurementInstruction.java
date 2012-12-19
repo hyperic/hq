@@ -10,6 +10,7 @@ public class MeasurementInstruction extends PersistedObject {
     private boolean defaultOn;
     private boolean indicator;
     private MeasurementTemplate measurementTemplate;
+    private ManagementProfile managementProfile;
 
     public long getInterval() {
         return interval;
@@ -34,6 +35,12 @@ public class MeasurementInstruction extends PersistedObject {
     }
     public void setMeasurementTemplate(MeasurementTemplate measurementTemplate) {
         this.measurementTemplate = measurementTemplate;
+    }
+    public ManagementProfile getManagementProfile() {
+        return managementProfile;
+    }
+    public void setManagementProfile(ManagementProfile managementProfile) {
+        this.managementProfile = managementProfile;
     }
     
     public int hashCode() {
