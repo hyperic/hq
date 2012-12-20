@@ -43,7 +43,7 @@ case "$platform" in
         fi
         ;;
     SunOS )
-        JRE_NAME=sparc-sun-solaris-1.7_9.tar.gz
+        JRE_NAME=sparc-sun-solaris-1.6_30.tar.gz
         ;;
 esac
 
