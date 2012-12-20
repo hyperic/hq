@@ -38,5 +38,12 @@ public class ManagementProfile extends PersistedObject {
     public void setMeasurementInstructionBag(Collection<MeasurementInstruction> measurementInstructions) {
         this.measurementInstructionBag = measurementInstructions;
     }
+    
+    public String toString() {
+        return new StringBuilder()
+            .append("resource=").append(resource).append(",name=").append(resource.getName())
+            .append(",description=").append(description)
+            .append(",prototype=").append(resource.getPrototype().getName()).toString();
+    }
 
 }

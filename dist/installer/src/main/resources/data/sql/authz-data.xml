@@ -222,6 +222,7 @@
         <data ID="303" NAME="covalentEAMServer" FSYSTEM="FALSE"/>
         <data ID="305" NAME="covalentEAMService" FSYSTEM="FALSE"/>
         <data ID="308" NAME="covalentEAMApplication" FSYSTEM="FALSE"/>
+        <data ID="701" NAME="groupProfileResourceType" FSYSTEM="FALSE"/>
     </table>
 
     <table name="EAM_RESOURCE">
@@ -241,6 +242,10 @@
               RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
               SUBJECT_ID="%EAM_SUBJECT.ID:0"  PROTO_ID="0"
               FSYSTEM="TRUE"/>
+        <data ID="701" INSTANCE_ID="%EAM_RESOURCE_TYPE.ID:701"
+              RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
+              SUBJECT_ID="%EAM_SUBJECT.ID:0"  PROTO_ID="0"
+              FSYSTEM="TRUE"/>
     </table>
 
     <!-- now set the resource ids -->
@@ -249,6 +254,7 @@
         <data ID="303" RESOURCE_ID="%EAM_RESOURCE.ID:303"/>
         <data ID="305" RESOURCE_ID="%EAM_RESOURCE.ID:305"/>
         <data ID="308" RESOURCE_ID="%EAM_RESOURCE.ID:308"/>
+        <data ID="701" RESOURCE_ID="%EAM_RESOURCE.ID:701"/>
     </table>
 
 
@@ -323,7 +329,7 @@
         <data ID="328" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:308"
             NAME="controlApplication"/>
 
-		<!-- Alerting Permissions -->
+        <!-- Alerting Permissions -->
         <data ID="400" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:301"
             NAME="managePlatformAlerts"/>
         <data ID="401" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:303"
@@ -332,8 +338,8 @@
             NAME="manageServiceAlerts"/>
         <data ID="403" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:308"
             NAME="manageApplicationAlerts"/>  	
-		<data ID="404" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:3"
-		    NAME="manageGroupAlerts"/>
+        <data ID="404" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:3"
+            NAME="manageGroupAlerts"/>
 
         <!-- Escalation -->
         <data ID="412" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"

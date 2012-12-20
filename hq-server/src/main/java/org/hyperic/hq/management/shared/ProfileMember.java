@@ -21,64 +21,53 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  *  USA.
- *
  */
 
 package org.hyperic.hq.management.shared;
 
 import org.hyperic.hibernate.PersistedObject;
-import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
 
 @SuppressWarnings("serial")
-public class MeasurementInstruction extends PersistedObject {
+public class ProfileMember extends PersistedObject {
     
-    private long interval;
-    private boolean defaultOn;
-    private boolean indicator;
-    private MeasurementTemplate measurementTemplate;
-    private ManagementProfile managementProfile;
+    private long created;
+    private Resource resource;
+    private ResourceGroup resourceGroup;
 
-    public long getInterval() {
-        return interval;
+    public long getCreated() {
+        return created;
     }
-    public void setInterval(long interval) {
-        this.interval = interval;
+    public void setCreated(long created) {
+        this.created = created;
     }
-    public boolean isDefaultOn() {
-        return defaultOn;
+    public Resource getResource() {
+        return resource;
     }
-    public void setDefaultOn(boolean defaultOn) {
-        this.defaultOn = defaultOn;
+    public void setResource(Resource resource) {
+        this.resource = resource;
     }
-    public boolean isIndicator() {
-        return indicator;
+    public ResourceGroup getResourceGroup() {
+        return resourceGroup;
     }
-    public void setIndicator(boolean indicator) {
-        this.indicator = indicator;
-    }
-    public MeasurementTemplate getMeasurementTemplate() {
-        return measurementTemplate;
-    }
-    public void setMeasurementTemplate(MeasurementTemplate measurementTemplate) {
-        this.measurementTemplate = measurementTemplate;
-    }
-    public ManagementProfile getManagementProfile() {
-        return managementProfile;
-    }
-    public void setManagementProfile(ManagementProfile managementProfile) {
-        this.managementProfile = managementProfile;
+    public void setResourceGroup(ResourceGroup resourceGroup) {
+        this.resourceGroup = resourceGroup;
     }
     
     public int hashCode() {
-        return super.hashCode();
+        return resource.getId().hashCode() + resourceGroup.getId().hashCode();
     }
     
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
-        if (o instanceof MeasurementInstruction) {
-            return super.equals(o);
+        if (o instanceof ProfileMember) {
+            ProfileMember p = (ProfileMember) o;
+            if (resource.getId().equals(p.resource.getId()) && resourceGroup.getId().equals(p.resourceGroup.getId())) {
+                return true;
+            }
         }
         return false;
     }

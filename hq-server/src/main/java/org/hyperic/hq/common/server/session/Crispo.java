@@ -158,4 +158,17 @@ public class Crispo
         }
         return res;
     }
+    
+    public String toString() {
+        final StringBuilder rtn = new StringBuilder();
+        boolean first = true;
+        for (CrispoOption o : _opts) {
+            if (!first) {
+                rtn.append(";");
+            }
+            first = false;
+            rtn.append(o.getKey()).append("=").append(o.getValue());
+        }
+        return rtn.toString();
+    }
 }
