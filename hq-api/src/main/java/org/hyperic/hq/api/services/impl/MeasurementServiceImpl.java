@@ -8,7 +8,7 @@ import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
 import org.hyperic.hq.api.model.measurements.MetricFilterRequest;
-import org.hyperic.hq.api.model.measurements.MetricGroup;
+import org.hyperic.hq.api.model.measurements.MetricNotifications;
 import org.hyperic.hq.api.model.measurements.RawMetric;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementBatchResponse;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequests;
@@ -53,7 +53,7 @@ public class MeasurementServiceImpl extends RestApiService implements Measuremen
         Integer sessionId = apiMessageContext.getSessionId();
         measurementTransfer.unregister(sessionId,metricFilterReq);
     }
-    public MetricGroup poll() throws SessionNotFoundException, SessionTimeoutException {
+    public MetricNotifications poll() throws SessionNotFoundException, SessionTimeoutException {
         ApiMessageContext apiMessageContext = newApiMessageContext();
         Integer sessionId = apiMessageContext.getSessionId();
         return measurementTransfer.poll(sessionId);

@@ -47,7 +47,7 @@ import org.hyperic.hq.api.model.ID;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
 import org.hyperic.hq.api.model.measurements.MetricFilterRequest;
-import org.hyperic.hq.api.model.measurements.MetricGroup;
+import org.hyperic.hq.api.model.measurements.MetricNotifications;
 import org.hyperic.hq.api.model.measurements.RawMetric;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementBatchResponse;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequest;
@@ -184,9 +184,9 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         this.evaluator.unregister(dest,userFilters);
     }
     
-    public MetricGroup poll(Integer sessionId) {
+    public MetricNotifications poll(Integer sessionId) {
         //TODO~ return adequate response if not registered
-        MetricGroup res = new MetricGroup();
+        MetricNotifications res = new MetricNotifications();
         Destination dest = this.sessionToDestination.get(sessionId);
         if (dest==null) {
             return null;
@@ -382,6 +382,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             return res;
     }
     
+    @Transactional(readOnly = true)
     public ResourceMeasurementBatchResponse getMeasurements(ApiMessageContext apiMessageContext, BulkResourceMeasurementRequest rcsMsmtReq) {
         ResourceMeasurementBatchResponse res = new ResourceMeasurementBatchResponse();
         AuthzSubject authzSubject = apiMessageContext.getAuthzSubject();
@@ -398,7 +399,9 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             rscRes.setRscId(String.valueOf(rid));
             Collection<Measurement> hqMsmts = this.measurementMgr.findMeasurements(authzSubject, rsc);
             for(Measurement hqMsmt:hqMsmts) {
-                org.hyperic.hq.api.model.measurements.Measurement msmt = this.mapper.toMeasurementExtendedData(hqMsmt);
+//                Integer tmplId = hqMsmt.getTemplate().getId();
+                MeasurementTemplate hqTmpl = hqMsmt.getTemplate();//tmpltMgr.getTemplate(tmplId);
+                org.hyperic.hq.api.model.measurements.Measurement msmt = this.mapper.toMeasurementExtendedData(hqMsmt,hqTmpl);
                 rscRes.add(msmt);
             }
             res.addResponse(rscRes);
