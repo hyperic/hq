@@ -21,6 +21,7 @@ import org.hyperic.hq.notifications.filtering.FilteringCondition;
 import org.hyperic.hq.notifications.filtering.MetricDestinationEvaluator;
 import org.hyperic.hq.notifications.model.MetricNotification;
 import org.hyperic.hq.product.MetricValue;
+import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,24 +31,26 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class OutgoingMetricZeventListener implements ZeventListener<MeasurementZevent> {
     private final Log log = LogFactory.getLog(ReportProcessorImpl.class);
+    protected ConcurrentStatsCollector concurrentStatsCollector;
     protected MeasurementManager msmtMgr;
     protected MetricDestinationEvaluator evaluator;
     protected ZeventEnqueuer zEventManager;
     protected Q q;
 
     @Autowired
-    OutgoingMetricZeventListener(Q q,ZeventEnqueuer zEventManager, MetricDestinationEvaluator evaluator, MeasurementManager msmtMgr) {
+    OutgoingMetricZeventListener(Q q,ZeventEnqueuer zEventManager, MetricDestinationEvaluator evaluator, MeasurementManager msmtMgr,ConcurrentStatsCollector concurrentStatsCollector) {
         this.zEventManager=zEventManager;
         this.evaluator = evaluator;
         this.msmtMgr = msmtMgr;
+        this.concurrentStatsCollector=concurrentStatsCollector;
         this.q = q;
     }
     
     @PostConstruct
     public void init() {
         zEventManager.addBufferedListener(MeasurementZevent.class, this);
-    }
-    
+        concurrentStatsCollector.register(ConcurrentStatsCollector.NOTIFICATION_FILTERING_TIME);
+    }    
 //    @Transactional(readOnly = true) 
     protected List<MetricNotification> extract(List<MeasurementZevent> events) {
         List<MetricNotification> dtps = new ArrayList<MetricNotification>();
@@ -75,15 +78,16 @@ public class OutgoingMetricZeventListener implements ZeventListener<MeasurementZ
     
     @Transactional(readOnly = true) 
     public void processEvents(List<MeasurementZevent> events) {
+        final long start = System.currentTimeMillis();
         List<MetricNotification> dtps = extract(events);
         List<ObjectMessage> msgs;
         try {
             msgs = this.evaluator.evaluate(dtps);
             this.q.publish(msgs);
-        }catch(/*JMSException*/Throwable e) {
+        }catch(Throwable e) {
             log.error(e);
-//            SystemException sysEx = new SystemException(e);
-//            throw sysEx;
-        } 
+        }
+        final long end = System.currentTimeMillis();
+        concurrentStatsCollector.addStat(end-start, ConcurrentStatsCollector.NOTIFICATION_FILTERING_TIME);
     }
 }

@@ -11,7 +11,7 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.hyperic.hq.api.model.RestApiConstants;
 
-@XmlSeeAlso({Measurement.class,MetricGroup.class})
+@XmlSeeAlso({Measurement.class,MetricNotifications.class})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name="BaseMetricGroupType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 public class MetricGroupBase {

@@ -1,12 +1,9 @@
 package org.hyperic.hq.api.model.measurements;
 
-import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
@@ -20,31 +17,21 @@ public class Measurement extends MetricGroupBase {
     @XmlAttribute
     protected Integer id;
     @XmlAttribute
-    private String alias;
+    protected String alias;
     @XmlAttribute
-    private String name;
+    protected String name;
 	@XmlAttribute
-	private Long interval;
+	protected Long interval;
     @XmlAttribute
-    private Double avg;	
-	
-	public Measurement() {}
-//    /**
-//     * order of metrics does matter
-//     */
-//    @Override
-//    public boolean equals(Object obj) {
-//        if (obj==null || !(obj instanceof Measurement)) {
-//            return false;
-//        }
-//        Measurement other = (Measurement) obj;
-//        return (super.equals(other)
-//                && this.alias==null?other.alias==null:(other.alias!=null && this.alias.equals(other.alias))
-//                && this.name==null?other.name==null:(other.name!=null && this.name.equals(other.name))
-//                && this.interval == other.interval
-//                && this.avg == other.avg);
-//    }
-    public Integer getId() {
+    protected Double avg;
+    @XmlAttribute
+    protected Boolean enabled;
+    @XmlAttribute
+    protected Boolean indicator;
+    
+	public Measurement() {
+	}
+	public Integer getId() {
         return id;
     }
     public void setId(Integer id) {
@@ -73,5 +60,17 @@ public class Measurement extends MetricGroupBase {
     }
     public void setAvg(Double avg) {
         this.avg = avg;
+    }
+    public Boolean getIndicator() {
+        return indicator;
+    }
+    public void setIndicator(Boolean indicator) {
+        this.indicator = indicator;
+    }
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
+    public Boolean getEnabled() {
+        return this.enabled;
     }
 }

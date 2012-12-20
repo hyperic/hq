@@ -21,7 +21,7 @@ import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.measurements.BulkResourceMeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MetricFilterRequest;
-import org.hyperic.hq.api.model.measurements.MetricGroup;
+import org.hyperic.hq.api.model.measurements.MetricNotifications;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementBatchResponse;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequests;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
@@ -52,7 +52,7 @@ public interface MeasurementService {
 	
 	@GET
     @Path("/metrics/poll")
-	public MetricGroup poll() throws SessionNotFoundException, SessionTimeoutException;
+	public MetricNotifications poll() throws SessionNotFoundException, SessionTimeoutException;
 	
 	@POST
     @Path("/metrics/aggregation")

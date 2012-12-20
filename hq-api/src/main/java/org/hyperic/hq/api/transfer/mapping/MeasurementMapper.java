@@ -10,7 +10,7 @@ import org.hyperic.hq.api.model.ID;
 import org.hyperic.hq.api.model.measurements.Measurement;
 import org.hyperic.hq.api.model.measurements.Metric;
 import org.hyperic.hq.api.model.measurements.MetricFilterRequest;
-import org.hyperic.hq.api.model.measurements.MetricGroup;
+import org.hyperic.hq.api.model.measurements.MetricNotifications;
 import org.hyperic.hq.api.model.measurements.RawMetric;
 import org.hyperic.hq.api.model.resources.ResourceFilterDefinitioin;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -61,8 +61,10 @@ public class MeasurementMapper {
         msmt.setName(hqMsmt.getTemplate().getName());
         return msmt;
     }
-    public Measurement toMeasurementExtendedData(final org.hyperic.hq.measurement.server.session.Measurement hqMsmt) {
+    public Measurement toMeasurementExtendedData(final org.hyperic.hq.measurement.server.session.Measurement hqMsmt, MeasurementTemplate templ) {
         Measurement msmt = toMeasurement(hqMsmt);
+        msmt.setIndicator(templ.isDesignate());
+        msmt.setEnabled(hqMsmt.isEnabled());
         msmt.setId(hqMsmt.getId());
         return msmt;
     }

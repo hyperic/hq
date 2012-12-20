@@ -27,33 +27,19 @@ public class Q {
 
     public void register(Destination dest) {
         LinkedBlockingQueue<INotification> q = this.destinations.put(dest, new LinkedBlockingQueue<INotification>(QUEUE_LIMIT));
-        if (log.isDebugEnabled()) {
-            if (q==null) {
-                log.debug("a new queue was registered for destination " + dest);
-            } else {
-                log.debug("a new queue was registered for destination " + dest + " instead of a previously existing queue");
-            }
-        }
+        if (log.isDebugEnabled()) { log.debug(q==null?("a new queue was registered for destination " + dest):("a new queue was registered for destination " + dest + " instead of a previously existing queue")); }
     }
     
     public void unregister(Destination dest) {
         LinkedBlockingQueue<INotification> q = this.destinations.remove(dest);
-        if (log.isDebugEnabled()) {
-            if (q==null) {
-                log.debug("there is no queue assigned for destination " + dest);
-            } else {
-                log.debug("removing the queue assigned for destination " + dest);
-            }
-        }
+        if (log.isDebugEnabled()) { log.debug(q==null?"there is no queue assigned for destination ":"removing the queue assigned for destination " + dest); }
     }
 
     public List<? extends INotification> poll(Destination dest) {
         LinkedBlockingQueue<INotification> topic = this.destinations.get(dest);
         List<INotification> data = new ArrayList<INotification>();
         if (topic==null) {
-            if (log.isDebugEnabled()) {
-                log.debug("unable to poll - there is no queue assigned for destination " + dest);
-            }
+            if (log.isDebugEnabled()) { log.debug("unable to poll - there is no queue assigned for destination " + dest);}
             return data;
         }
         topic.drainTo(data);
@@ -73,7 +59,7 @@ public class Q {
                 q.addAll(data);
             } catch (IllegalStateException e) {
                 log.error(e);
-                // TODO~ persist messages to disk in case Q is full
+                // TODO~ persist messages to disk in case the Q is full
             }
         }
     }

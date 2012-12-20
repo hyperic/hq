@@ -9,9 +9,9 @@ import javax.xml.bind.annotation.XmlType;
 import org.hyperic.hq.api.model.RestApiConstants;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name = "metricGroup", namespace=RestApiConstants.SCHEMA_NAMESPACE)
-@XmlType(name="MetricGroupType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
-public class MetricGroup extends MetricGroupBase {
+@XmlRootElement(name = "metricNotifications", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+@XmlType(name="MetricsNotifications Type", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+public class MetricNotifications extends MetricGroupBase {
 
-    public MetricGroup() {}
+    public MetricNotifications() {}
 }
