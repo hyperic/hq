@@ -45,6 +45,7 @@ public class ResourceOperationsHelper {
     public final static int USER = 5 * MULTIPLIER;
     public final static int ROLE = 6 * MULTIPLIER;
     public final static int ESCALATION = 7 * MULTIPLIER;
+    public final static int PROFILE = 8 * MULTIPLIER;
     
     // Operation codes...these are added to the resource type code to get the actual operation
     public final static int CREATE = 0;
@@ -60,12 +61,12 @@ public class ResourceOperationsHelper {
     public final static int READ_WRITE_PERMISSIONS = 2;
     public final static int FULL_PERMISSIONS = 3;
     
-    private static List operationsList;
+    private static List<String> operationsList;
     
     static {
         // ArrayList containing all the operations for each resource type...
         // ORDER IS IMPORTANT!
-        operationsList = new ArrayList(48);
+        operationsList = new ArrayList<String>(56);
         
         operationsList.add(AuthzConstants.platformOpCreatePlatform);
         operationsList.add(AuthzConstants.platformOpViewPlatform);
@@ -117,10 +118,16 @@ public class ResourceOperationsHelper {
         operationsList.add(AuthzConstants.escOpRemoveEscalation);
         operationsList.add(null);
         operationsList.add(null);       
+        operationsList.add(AuthzConstants.profileOpCreateProfile);
+        operationsList.add(AuthzConstants.profileOpModifyProfile);
+        operationsList.add(AuthzConstants.profileOpRemoveProfile);
+        operationsList.add(AuthzConstants.profileOpViewProfile);
+        operationsList.add(null);
+        operationsList.add(null);       
     }
     
     public static String getOperationName(int resourceTypeCode, int operationCode) {
-        return (String) operationsList.get(resourceTypeCode + operationCode);
+        return operationsList.get(resourceTypeCode + operationCode);
     }
     
     public static String getCreateOperation(Resource resource) 
@@ -236,6 +243,9 @@ public class ResourceOperationsHelper {
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
                 resourceTypeCode = APPLICATION;
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_PROFILE:
+                resourceTypeCode = PROFILE;
                 break;
             default:
                 resourceTypeCode = -1;

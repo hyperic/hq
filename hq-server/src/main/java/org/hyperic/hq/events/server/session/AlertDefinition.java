@@ -391,7 +391,7 @@ public class AlertDefinition
         return _resource;
     }
 
-    void setResource(Resource resource) {
+    public void setResource(Resource resource) {
         _resource = resource;
     }
 
