@@ -25,7 +25,7 @@
 		<dependency>
 			<groupId>org.hyperic.jre</groupId>
 			<artifactId>x86-win32</artifactId>
-			<version>1.7_9</version>
+			<version>1.6_33</version>
 			<type>exe</type>
 		</dependency>
 		<dependency>
