@@ -104,10 +104,6 @@ public class ResourceGroup extends PersistedObject implements ContainerManagedTi
         public int getClusterId() { return _clusterId; }
         public boolean isSystem() { return _system; }
         public boolean isPrivateGroup() { return _privateGroup; }
-        public GroupCriteria getGroupCriteria() {
-// need to fill this in on the EE class
-            return null;
-        }
         public ResourceGroup getResourceGroup(AuthzSubject creator) {
             return new ResourceGroup(this, creator);
         }

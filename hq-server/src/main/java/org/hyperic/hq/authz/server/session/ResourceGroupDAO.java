@@ -61,9 +61,6 @@ public class ResourceGroupDAO
     private ResourceDAO rDao;
 
     @Autowired
-    private GroupCriteriaDAO groupCriteriaDAO;
-
-    @Autowired
     private ResourceTypeDAO resourceTypeDAO;
 
     @Autowired
@@ -118,17 +115,12 @@ public class ResourceGroupDAO
 
         assert resType != null;
 
-        GroupCriteria groupCriteria = cInfo.getGroupCriteria();
-        if (groupCriteria != null) {
-            groupCriteriaDAO.save(groupCriteria);
-        }
         final Resource proto = rDao.findById(AuthzConstants.rootResourceId);
         Resource r = cInfo.isPrivateGroup() ?
             rDao.createPrivate(resType, proto, cInfo.getName(), creator, resGrp.getId(), cInfo.isSystem()) :
             rDao.create(resType, proto, cInfo.getName(), creator, resGrp.getId(), cInfo.isSystem());
 
         resGrp.setResource(r);
-        resGrp.setGroupCriteria(groupCriteria);
         save(resGrp);
 
         /*
@@ -245,7 +237,6 @@ public class ResourceGroupDAO
      * 
      * @return {@link Resource}s
      */
-    @SuppressWarnings("unchecked")
     int getNumMembers(ResourceGroup g) {
         String hql = "select count(g.resource) from GroupMember g " +
                      "where g.group = :group and g.resource.resourceType is not null";

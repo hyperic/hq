@@ -131,29 +131,25 @@ public class Crispo
         }
     }
 
-    static Crispo create(Map<String, String> keyVals) {
+    static Crispo create(Map<String, String> keyVals, boolean override) {
         Crispo res = new Crispo();
-
         for (Map.Entry<String, String> ent : keyVals.entrySet()) {
             String val = ent.getValue();
-
-            if (val == null || val.length() == 0)
+            if (!override && (val == null || val.length() == 0)) {
                 continue;
-
+            }
             res.addOption(ent.getKey(), val);
         }
         return res;
     }
 
-    public static Crispo create(ConfigResponse cfg) {
+    public static Crispo create(ConfigResponse cfg, boolean override) {
         Crispo res = new Crispo();
-
         for (String key : cfg.getKeys()) {
             String val = cfg.getValue(key);
-
-            if (val == null || val.length() == 0)
+            if (!override && (val == null || val.length() == 0)) {
                 continue;
-
+            }
             res.addOption(key, cfg.getValue(key));
         }
         return res;

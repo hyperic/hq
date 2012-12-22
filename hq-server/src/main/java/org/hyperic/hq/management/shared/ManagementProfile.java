@@ -43,7 +43,10 @@ public class ManagementProfile extends PersistedObject {
         return new StringBuilder()
             .append("resource=").append(resource).append(",name=").append(resource.getName())
             .append(",description=").append(description)
-            .append(",prototype=").append(resource.getPrototype().getName()).toString();
+            .append(",prototype=").append(resource.getPrototype().getName())
+// XXX need to eventually take this out, or *** out secret options
+.append(",config:").append(config)
+            .toString();
     }
 
 }
