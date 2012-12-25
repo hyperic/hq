@@ -205,7 +205,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             final String rscId, final Date begin, final Date end) 
                     throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException, TimeframeSizeException {
 
-        MeasurementResponse res = new MeasurementResponse();
+        MetricResponse res = new MetricResponse();
         if (hqMsmtReq==null || hqMsmtReq.getMeasurementTemplateNames()==null || hqMsmtReq.getMeasurementTemplateNames().size()==0) {
             throw new UnsupportedOperationException("message body is missing or corrupted"); 
         }

@@ -5,35 +5,33 @@ import java.text.ParseException;
 import java.util.Date;
 
 import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.cxf.jaxrs.model.wadl.Description;
 import org.apache.cxf.jaxrs.model.wadl.Descriptions;
 import org.apache.cxf.jaxrs.model.wadl.DocTarget;
 import org.hibernate.ObjectNotFoundException;
-import org.hyperic.hq.api.model.measurements.BulkResourceMeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
-import org.hyperic.hq.api.model.measurements.MetricFilterRequest;
-import org.hyperic.hq.api.model.measurements.MetricNotifications;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementBatchResponse;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequests;
-import org.hyperic.hq.api.model.measurements.MeasurementResponse;
+import org.hyperic.hq.api.model.measurements.MetricResponse;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 
+
 @Path("/") 
 @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON}) 
 @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-public interface MeasurementService {
+public interface MetricService {
 	
 	@POST
-	@Path("/metrics/{rscId}")
+	@Path("/")
     @Descriptions({ 
         @Description(value = "Get metric data/availability for measurements for a given time frame", target = DocTarget.METHOD),
         @Description(value = "Requested metric data per measuremet", target = DocTarget.RETURN),
@@ -41,18 +39,14 @@ public interface MeasurementService {
         @Description(value = "Requested metric data per measuremet per resource", target = DocTarget.RESPONSE),
         @Description(value = "Metric data", target = DocTarget.RESOURCE)
      })
-	MeasurementResponse getMetrics(final MeasurementRequest measurementRequest,
-	        @PathParam("rscId") final String rscId,
+	MetricResponse getMetrics(final MeasurementRequest measurementRequest,
+	        @QueryParam("resource_id") final String rscId,
 	        @QueryParam("begin") final Date begin,
 			@QueryParam("end") final Date end) 
 			        throws PermissionException, SessionNotFoundException, SessionTimeoutException, Throwable;
 	
-	@GET
-    @Path("/metrics/poll")
-	public MetricNotifications poll() throws SessionNotFoundException, SessionTimeoutException;
-	
 	@POST
-    @Path("/metrics/aggregation")
+    @Path("/aggregation")
     @Descriptions({ 
         @Description(value = "Get an aggregation of the metric data for measurements per resources for a given time frame", target = DocTarget.METHOD),
         @Description(value = "Aggregation of the requested metric data per measuremet per resource", target = DocTarget.RETURN),
@@ -64,23 +58,4 @@ public interface MeasurementService {
             @QueryParam("begin") final Date begin, 
             @QueryParam("end") final Date end) 
             throws ParseException, PermissionException, SessionNotFoundException, SessionTimeoutException, ObjectNotFoundException, UnsupportedOperationException, SQLException;
-	
-    @POST
-    @Path("/metrics/register")
-	public void register(final MetricFilterRequest metricFilterReq) throws SessionNotFoundException, SessionTimeoutException;
-    
-    @PUT
-    @Path("/metrics/unregister")
-    @Descriptions({ 
-        @Description(value = "unregister user session and all assigned filters this user destination has", target = DocTarget.METHOD)
-    })
-    public void unregister() throws SessionNotFoundException, SessionTimeoutException;
-
-    @POST
-    @Path("/metrics/unregister")
-    public void unregister(final MetricFilterRequest metricFilterReq) throws SessionNotFoundException, SessionTimeoutException;
-
-    @POST
-    @Path("/")
-    public ResourceMeasurementBatchResponse getMeasurements(BulkResourceMeasurementRequest msmtMetaReq) throws SessionNotFoundException, SessionTimeoutException;
 }
