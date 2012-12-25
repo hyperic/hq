@@ -11,6 +11,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent;
 import org.hyperic.hq.measurement.server.session.ReportProcessorImpl;
@@ -22,13 +23,14 @@ import org.hyperic.hq.notifications.filtering.MetricDestinationEvaluator;
 import org.hyperic.hq.notifications.model.MetricNotification;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
+import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Component
+@Component("OutgoingMetricZeventListener")
 public class OutgoingMetricZeventListener implements ZeventListener<MeasurementZevent> {
     private final Log log = LogFactory.getLog(ReportProcessorImpl.class);
     protected ConcurrentStatsCollector concurrentStatsCollector;
@@ -48,10 +50,9 @@ public class OutgoingMetricZeventListener implements ZeventListener<MeasurementZ
     
     @PostConstruct
     public void init() {
-        zEventManager.addBufferedListener(MeasurementZevent.class, this);
+        zEventManager.addBufferedListener(MeasurementZevent.class, (OutgoingMetricZeventListener) Bootstrap.getBean("OutgoingMetricZeventListener"));
         concurrentStatsCollector.register(ConcurrentStatsCollector.NOTIFICATION_FILTERING_TIME);
     }    
-//    @Transactional(readOnly = true) 
     protected List<MetricNotification> extract(List<MeasurementZevent> events) {
         List<MetricNotification> dtps = new ArrayList<MetricNotification>();
         for(MeasurementZevent measurementZevent:events) {

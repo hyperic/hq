@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.jms.Destination;
+import javax.ws.rs.core.Response;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -189,7 +190,8 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         MetricNotifications res = new MetricNotifications();
         Destination dest = this.sessionToDestination.get(sessionId);
         if (dest==null) {
-            return null;
+            log.error("the current session is not registered for notifications");
+            this.errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.INVALID_SESSION);            
         }
         List<MetricNotification> mns = (List<MetricNotification>) this.q.poll(dest);
         if (mns.isEmpty()) {
