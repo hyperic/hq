@@ -48,9 +48,6 @@
 		<!-- <property name="schemaHandler" ref="schemaHolder"/> -->
 	</bean>
 
-	<bean id="searchProvider" class="org.apache.cxf.jaxrs.ext.search.SearchContextProvider">
-	</bean>
-
 	<bean id="timeProvider" class="org.hyperic.hq.api.common.DateParameterProvider">
 	</bean>
 
@@ -95,6 +92,8 @@
 		
     <bean name="pluginServiceImpl" class="org.hyperic.hq.api.services.impl.PluginServiceImpl" />		
 	
+	<bean name="CloudProviderServiceImpl" class="org.hyperic.hq.api.services.impl.CloudProviderServiceImpl" />
+	
 	<bean name="sessionManagementImpl" class="org.hyperic.hq.api.services.impl.SessionManagementServiceImpl" />
 	
 	<jaxrs:server id="resourceService" address="/inventory/resources">
@@ -136,4 +135,18 @@
             <cxf:logging />
         </jaxrs:features>        
     </jaxrs:server>
+    
+    <jaxrs:server id="CloudProviderService" address="/cloud">
+		<jaxrs:serviceBeans>
+			<ref bean="CloudProviderServiceImpl" />
+        </jaxrs:serviceBeans>
+        <jaxrs:providers>
+            <ref bean="jaxbProvider" />
+			<ref bean="jsonProvider" />
+        </jaxrs:providers>
+        <jaxrs:features>
+            <cxf:logging />
+        </jaxrs:features>        
+    </jaxrs:server>
+    
 </beans>
