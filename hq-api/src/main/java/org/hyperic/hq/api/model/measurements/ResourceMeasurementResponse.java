@@ -17,17 +17,17 @@ public class ResourceMeasurementResponse extends MetricResponse {
 
     public ResourceMeasurementResponse() {}
     
-    public ResourceMeasurementResponse(String rscId) {
+    public ResourceMeasurementResponse(String resource) {
         super();
-        this.resource=rscId;
+        this.resource=resource;
     }
 
     public String getResourceId() {
         return resource;
     }
 
-    public void setResourceId(String rscId) {
-        this.resource = rscId;
+    public void setResourceId(String resource) {
+        this.resource = resource;
     }
 
 }

@@ -72,6 +72,10 @@ public interface AIResourceService {
         })
     public AIResource getAIResource(@PathParam("discovery-id") String discoveryId, @QueryParam("type") ResourceType type);
 
+    /**
+     * NYI?
+     * mock method?
+     */
     @POST
     @Path("/approve")
     @Descriptions({ 
@@ -83,6 +87,10 @@ public interface AIResourceService {
     })    
     public List<Resource> approveAIResource(@QueryParam("id") List<String> ids, @QueryParam("type") ResourceType type);
     
+    /**
+     * NYI
+     * ?
+     */
     public List<ConfigOption> getConfigurationSchema();    
 //    
 //    @POST
