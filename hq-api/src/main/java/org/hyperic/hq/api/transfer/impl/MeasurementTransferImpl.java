@@ -38,7 +38,7 @@ import java.util.Set;
 
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
-import org.hyperic.hq.api.model.measurements.MeasurementResponse;
+import org.hyperic.hq.api.model.measurements.MetricResponse;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementBatchResponse;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequest;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequests;
@@ -104,11 +104,11 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         return hqMsmts;
     }
 
-    public MeasurementResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest hqMsmtReq, 
+    public MetricResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest hqMsmtReq, 
             final String rscId, final Date begin, final Date end) 
                     throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException, TimeframeSizeException {
 
-        MeasurementResponse res = new MeasurementResponse();
+        MetricResponse res = new MetricResponse();
         if (hqMsmtReq==null || hqMsmtReq.getMeasurementTemplateNames()==null || hqMsmtReq.getMeasurementTemplateNames().size()==0) {
             throw new UnsupportedOperationException("message body is missing or corrupted"); 
         }
