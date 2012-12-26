@@ -24,7 +24,7 @@ import org.springframework.test.annotation.DirtiesContext;
 @org.hyperic.hq.api.rest.RestTestCaseBase.SecurityInfo(ignore=true)
 public class AuthenticationTest extends RestTestCaseBase<ResourceService, EmptyRestTestDataPopulator<ResourceService>> {
     
-    public static final String SERVICE_URL = ResourceServiceTest.CONTEXT_URL + "/rest-api/inventory/resources"  ;  
+    public static final String SERVICE_URL = ResourceServiceTest.CONTEXT_URL + "/rest/resource"  ;  
     
     @Rule 
     public RuleChain interceptorsChain = super.interceptorsChain ;     

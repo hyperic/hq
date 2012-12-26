@@ -40,7 +40,7 @@ public interface MetricService {
         @Description(value = "Metric data", target = DocTarget.RESOURCE)
      })
 	MetricResponse getMetrics(final MeasurementRequest measurementRequest,
-	        @QueryParam("resource_id") final String rscId,
+	        @QueryParam("resourceId") final String resourceId,
 	        @QueryParam("begin") final Date begin,
 			@QueryParam("end") final Date end) 
 			        throws PermissionException, SessionNotFoundException, SessionTimeoutException, Throwable;
