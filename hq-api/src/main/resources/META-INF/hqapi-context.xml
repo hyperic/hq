@@ -139,7 +139,7 @@
         <jaxrs:features>
             <cxf:logging />
         </jaxrs:features>        
-    </jaxrs:server>
+    </jaxrs:server-->
     
 	<jaxrs:server id="measurementService" address="/measurement">
 		<jaxrs:serviceBeans>
