@@ -104,7 +104,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 
 @DirtiesContext
-@ServiceBindingsIteration(ResourceServiceTest.CONTEXT_URL + "/rest/resource")
+@ServiceBindingsIteration(ResourceServiceTest.CONTEXT_URL + "/rest-api/inventory/resources")
 @ContextConfiguration(locations = { "ResourceServiceTest-context.xml"}) 
 @TestData(ResourceServiceTestDataPopulator.class)
 public class ResourceServiceTest extends RestTestCaseBase<ResourceService, ResourceServiceTestDataPopulator>{
@@ -644,7 +644,7 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 	    private SessionManager sessionManager;
 	    
 	    public ResourceServiceTestDataPopulator() { 
-	    	super(ResourceService.class, CONTEXT_URL + "/rest/resource") ;
+	    	super(ResourceService.class, CONTEXT_URL + "/rest-api/inventory/resources") ;
 	    }//EOM 
 	    
 		@Override
