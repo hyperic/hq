@@ -39,8 +39,8 @@ import org.hyperic.hq.api.model.common.PropertyListMapAdapter;
 
 @XmlRootElement(namespace=RestApiConstants.SCHEMA_NAMESPACE)
 @XmlType(name="ResourceConfigType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
-public class ResourceConfig implements Serializable{
 	
+public class ResourceConfig implements Serializable{
 	private static final long serialVersionUID = 8233944180632888593L;
 	
 	private String resourceID; 
