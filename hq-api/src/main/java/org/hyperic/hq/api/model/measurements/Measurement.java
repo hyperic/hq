@@ -35,7 +35,7 @@ import org.hyperic.hq.api.model.RestApiConstants;
 
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name = "measurement", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+//@XmlRootElement(name = "measurement", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 @XmlType(name="MeasurementType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 public class Measurement extends MetricGroupBase {
     @XmlAttribute
@@ -85,14 +85,11 @@ public class Measurement extends MetricGroupBase {
 	public void setName(String name) {
 		this.name = name;
 	}
-    public double getAvg() {
-        return avg.doubleValue();
+    public double getAverage() {
+        return average.doubleValue();
     }
-    public void setAvg(double avg) {
-        this.avg = new Double(avg);
-    }
-    public void setAvg(Double avg) {
-        this.avg = avg;
+    public void setAverage(Double avg) {
+        this.average = avg;
     }
     public Boolean getIndicator() {
         return indicator;
