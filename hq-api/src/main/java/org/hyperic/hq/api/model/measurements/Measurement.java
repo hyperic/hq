@@ -14,7 +14,7 @@ import org.hyperic.hq.api.model.RestApiConstants;
 
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name = "measurement", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+//@XmlRootElement(name = "measurement", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 @XmlType(name="MeasurementType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 public class Measurement {
 	@XmlAttribute
@@ -24,7 +24,7 @@ public class Measurement {
     @XmlAttribute
     private String name;
     @XmlAttribute
-    private Double avg = null;	
+    private Double average = null;	
 	@XmlElementWrapper(name="metrics", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 	@XmlElement(name="metric", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 	private List<Metric> metrics;
@@ -42,7 +42,7 @@ public class Measurement {
         return (this.alias==null?other.alias==null:(other.alias!=null && this.alias.equals(other.alias))
                 && this.name==null?other.name==null:(other.name!=null && this.name.equals(other.name))
                 && this.interval == other.interval
-                && this.avg == other.avg
+                && this.average == other.average
                 && this.metrics==null?other.metrics==null:(other.metrics!=null && this.metrics.equals(other.metrics)));
     }
 	public List<Metric> getMetrics() {
@@ -63,14 +63,11 @@ public class Measurement {
 	public void setName(String name) {
 		this.name = name;
 	}
-    public double getAvg() {
-        return avg.doubleValue();
+    public double getAverage() {
+        return average.doubleValue();
     }
-    public void setAvg(double avg) {
-        this.avg = new Double(avg);
-    }
-    public void setAvg(Double avg) {
-        this.avg = avg;
+    public void setAverage(Double avg) {
+        this.average = avg;
     }
     public String getAlias() {
         return alias;
