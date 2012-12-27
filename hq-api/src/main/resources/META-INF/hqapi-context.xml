@@ -88,7 +88,10 @@
 	<bean class="org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer" />
 
 	<bean name="resourceServiceImpl" class="org.hyperic.hq.api.services.impl.ResourceServiceImpl" />
+	
 	<bean name="measurementServiceImpl" class="org.hyperic.hq.api.services.impl.MeasurementServiceImpl" />
+
+	<bean name="vmServiceImpl" class="org.hyperic.hq.api.services.impl.VMServiceImpl" />
 		
     <bean name="pluginServiceImpl" class="org.hyperic.hq.api.services.impl.PluginServiceImpl" />		
 	
@@ -143,6 +146,19 @@
             <ref bean="jaxbProvider" />
 			<ref bean="jsonProvider" />
 			<ref bean="timeProvider" />
+        </jaxrs:providers>
+        <jaxrs:features>
+            <cxf:logging />
+        </jaxrs:features>        
+    </jaxrs:server>
+    
+	<jaxrs:server id="vmService" address="/vm">
+		<jaxrs:serviceBeans>
+			<ref bean="vmServiceImpl" />
+        </jaxrs:serviceBeans>
+        <jaxrs:providers>
+            <ref bean="jaxbProvider" />
+			<ref bean="jsonProvider" />
         </jaxrs:providers>
         <jaxrs:features>
             <cxf:logging />

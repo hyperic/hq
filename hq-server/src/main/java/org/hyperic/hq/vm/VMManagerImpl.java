@@ -9,6 +9,10 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.vmware.vim25.GuestInfo;
+import com.vmware.vim25.GuestNicInfo;
+import com.vmware.vim25.InvalidProperty;
+import com.vmware.vim25.RuntimeFault;
 import com.vmware.vim25.mo.Folder;
 import com.vmware.vim25.mo.HostSystem;
 import com.vmware.vim25.mo.InventoryNavigator;
@@ -23,12 +27,28 @@ public class VMManagerImpl implements VMManager {
     private static final String DATACENTER = "Datacenter";
     private static final String CLOUD_CONFIGURATION = "cloud_configuration";
     
-    public void collect(String url, String usr, String pass) throws RemoteException, MalformedURLException {
+    public void collect(String url, String usr, String pass, String hostName) throws RemoteException, MalformedURLException {
       ServiceInstance si = new ServiceInstance(new URL(url), usr, pass, true);
-      List<VirtualMachine> vms = getAllVms(si,);
+      
+      List<VirtualMachine> vms = getAllVms(si, hostName);
       saveDB(vms);
     }
 
+    protected void saveDB(List<VirtualMachine> vms) {
+        for(VirtualMachine vm:vms) {
+            GuestInfo guest = vm.getGuest();
+            if (guest==null) {
+                return;
+            }
+            GuestNicInfo[] nics = guest.getNet();
+            if (nics != null) {
+                for (int i=0; i<nics.length; i++) {
+                    String mac = nics[i].getMacAddress();
+                    
+                }
+            }
+        }
+    }
 
 //    public DataCenterList getDataCenters() throws Throwable {  
 //        ServiceInstance si = getServiceInstance();
@@ -38,7 +58,7 @@ public class VMManagerImpl implements VMManager {
 //        DataCenterList dcList = new DataCenterList();
 //        if(mes==null || mes.length ==0){
 //            si.getServerConnection().logout();
-//            return dcList;
+//            return dcList;vcops_VM_mapping
 //        }
 //
 //        for (ManagedEntity mEntity : mes) {
@@ -74,23 +94,24 @@ public class VMManagerImpl implements VMManager {
 //        return hostsList;
 //    }
 
-    public List<VirtualMachine> getAllVms(ServiceInstance si, String dcName, String hostName) throws Throwable {
+    public List<VirtualMachine> getAllVms(ServiceInstance si, String hostName) throws InvalidProperty, RuntimeFault, RemoteException {
         List<VirtualMachine> vmsList = new ArrayList<VirtualMachine>();
         Folder rootFolder = si.getRootFolder();
         //find the host based on the provided hostname
-        ManagedEntity me = new InventoryNavigator(rootFolder).searchManagedEntity(HOST_SYSTEM, hostName);
-        if(me==null){
+        ManagedEntity[] me = new InventoryNavigator(rootFolder).searchManagedEntities("VirtualMachine");
+        if(me==null || me.length==0){
+            return null;
 //            si.getServerConnection().logout();
 //            WebApplicationException webApplicationException = 
 //                    errorHandler.newWebApplicationException(, hostName);     
 //            throw webApplicationException;
         }
-        HostSystem host = (HostSystem)me;
+//        HostSystem host = (HostSystem)me;
         //iterate over the host's virtual machines
-        for (VirtualMachine vm : host.getVms()) {
+        for (Object vm : me) {
 //            org.hyperic.hq.api.model.cloud.VirtualMachine virtualMachine = new org.hyperic.hq.api.model.cloud.VirtualMachine(vm.getName());
 //            virtualMachine.setIp(vm.getGuest().getIpAddress());
-            vmsList.add(vm);
+            vmsList.add((VirtualMachine)vm);
         }
         si.getServerConnection().logout();
         return vmsList;
