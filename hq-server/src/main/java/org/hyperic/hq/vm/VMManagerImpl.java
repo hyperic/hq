@@ -4,8 +4,14 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
+import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.shared.PlatformManager;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,18 +29,21 @@ import com.vmware.vim25.mo.VirtualMachine;
 @Service
 //@Transactional
 public class VMManagerImpl implements VMManager {
+    @Autowired
+    protected PlatformManager platformMgr;
+    
     private static final String HOST_SYSTEM = "HostSystem";
     private static final String DATACENTER = "Datacenter";
     private static final String CLOUD_CONFIGURATION = "cloud_configuration";
     
-    public void collect(String url, String usr, String pass, String hostName) throws RemoteException, MalformedURLException {
+    public void collect(AuthzSubject subject, String url, String usr, String pass, String hostName) throws RemoteException, MalformedURLException, PermissionException {
       ServiceInstance si = new ServiceInstance(new URL(url), usr, pass, true);
       
       List<VirtualMachine> vms = getAllVms(si, hostName);
-      saveDB(vms);
+      saveDB(subject, vms);
     }
 
-    protected void saveDB(List<VirtualMachine> vms) {
+    protected void saveDB(AuthzSubject subject, List<VirtualMachine> vms) throws PermissionException {
         for(VirtualMachine vm:vms) {
             GuestInfo guest = vm.getGuest();
             if (guest==null) {
@@ -44,7 +53,7 @@ public class VMManagerImpl implements VMManager {
             if (nics != null) {
                 for (int i=0; i<nics.length; i++) {
                     String mac = nics[i].getMacAddress();
-                    
+                    Collection<Platform> platforms = this.platformMgr.getPlatformByMacAddr(subject, mac);
                 }
             }
         }

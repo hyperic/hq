@@ -33,7 +33,6 @@ import org.hyperic.hq.api.model.ID;
 import org.hyperic.hq.api.model.measurements.Measurement;
 import org.hyperic.hq.api.model.measurements.Metric;
 import org.hyperic.hq.api.model.measurements.MetricFilterRequest;
-import org.hyperic.hq.api.model.measurements.MetricNotifications;
 import org.hyperic.hq.api.model.measurements.RawMetric;
 import org.hyperic.hq.api.model.resources.ResourceFilterDefinitioin;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -51,7 +50,7 @@ import org.hyperic.hq.notifications.model.MetricNotification;
 import org.hyperic.hq.product.MetricValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
+ 
 @Component
 public class MeasurementMapper {
     protected final static int MAX_FRACTION_DIGITS = 3;
