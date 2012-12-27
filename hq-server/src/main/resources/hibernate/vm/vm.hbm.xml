@@ -27,7 +27,7 @@
 
 -->
 
-<hibernate-mapping package="org.hyperic.hq.vm">
+<!--hibernate-mapping package="org.hyperic.hq.vm">
 
   <class name="VM" table="EAM_VM">
     <cache usage="read-write"/>
@@ -42,22 +42,13 @@
       <column name="VERSION_COL" default="0"/>
     </version>
 
-    <!--properties name="ipId" unique="true">
-      <many-to-one name="platform" class="org.hyperic.hq.appdef.server.session.Platform">
-        <column name="PLATFORM_ID" not-null="true"/>
-      </many-to-one>
-      <property name="address" type="string">
-        <column name="ADDRESS" not-null="true" length="64"/>
-      </property>
-    </properties-->
-
-    <property name="macAddress" type="string">
+    <property name="mac" type="string">
       <column name="MAC_ADDRESS" length="64"/>
     </property>
 
     <property name="uuid" type="String">
-      <column name="UUID"/>
+      <column name="UUID" length="64"/>
     </property>
   </class>
 
-</hibernate-mapping>
+</hibernate-mapping-->
