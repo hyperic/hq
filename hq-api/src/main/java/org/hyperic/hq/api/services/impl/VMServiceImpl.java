@@ -1,17 +1,11 @@
 package org.hyperic.hq.api.services.impl;
 
-import java.net.URL;
+import java.net.MalformedURLException;
+import java.rmi.RemoteException;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 
 import org.hyperic.hq.api.model.cloud.CloudConfiguration;
 import org.hyperic.hq.api.services.VMService;
-import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 import org.hyperic.hq.vm.VMManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -151,9 +145,8 @@ public class VMServiceImpl extends RestApiService  implements VMService {
 //        }
 //        return (CloudConfiguration) configuration;
 //    }
-    @POST
-    @Path("/collect")
-    public void collect(CloudConfiguration cloudConfiguration) {
-        this.vmMgr.collect(cloudConfiguration.getUrl(),cloudConfiguration.getUsername(),cloudConfiguration.getPassword());
+
+    public void collect(CloudConfiguration cloudConfiguration, String hostName) throws RemoteException, MalformedURLException {
+        this.vmMgr.collect(cloudConfiguration.getUrl(),cloudConfiguration.getUsername(),cloudConfiguration.getPassword(), hostName);
     }
 }
