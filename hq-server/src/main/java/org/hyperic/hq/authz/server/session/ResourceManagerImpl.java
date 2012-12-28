@@ -245,7 +245,6 @@ public class ResourceManagerImpl implements ResourceManager {
             // is processed instead
             createVirtualResourceEdges(owner, parent, res, system);
             
-            
         }
 
         resourceAuditFactory.createResource(res, owner, start, System.currentTimeMillis());
