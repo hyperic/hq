@@ -48,6 +48,10 @@
       <column name="FQDN" not-null="true" length="255" unique="true"/>
     </property>
 
+    <property name="uuid" type="string">
+      <column name="UUID" not-null="true" length="64" unique="true"/>
+    </property>
+
     <property name="certdn" type="string">
       <column name="CERTDN" not-null="false" length="200"/>
     </property>

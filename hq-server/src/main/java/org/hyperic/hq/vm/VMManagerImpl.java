@@ -5,9 +5,14 @@ import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.server.session.PlatformManagerImpl;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -19,6 +24,7 @@ import com.vmware.vim25.GuestInfo;
 import com.vmware.vim25.GuestNicInfo;
 import com.vmware.vim25.InvalidProperty;
 import com.vmware.vim25.RuntimeFault;
+import com.vmware.vim25.VirtualMachineConfigInfo;
 import com.vmware.vim25.mo.Folder;
 import com.vmware.vim25.mo.HostSystem;
 import com.vmware.vim25.mo.InventoryNavigator;
@@ -26,9 +32,11 @@ import com.vmware.vim25.mo.ManagedEntity;
 import com.vmware.vim25.mo.ServiceInstance;
 import com.vmware.vim25.mo.VirtualMachine;
 
-@Service
+@Service("VMManagerImpl")
 //@Transactional
 public class VMManagerImpl implements VMManager {
+    protected final Log log = LogFactory.getLog(VMManagerImpl.class.getName());
+    protected Map<String,String> macToUUID = new HashMap<String,String>();
     @Autowired
     protected PlatformManager platformMgr;
     
@@ -40,114 +48,100 @@ public class VMManagerImpl implements VMManager {
       ServiceInstance si = new ServiceInstance(new URL(url), usr, pass, true);
       
       List<VirtualMachine> vms = getAllVms(si, hostName);
-      saveDB(subject, vms);
+      save(subject, vms);
     }
 
-    protected void saveDB(AuthzSubject subject, List<VirtualMachine> vms) throws PermissionException {
+    @Transactional(readOnly = false)
+    protected void save(AuthzSubject subject, List<VirtualMachine> vms) throws PermissionException {
         for(VirtualMachine vm:vms) {
-            GuestInfo guest = vm.getGuest();
-            if (guest==null) {
-                return;
-            }
-            GuestNicInfo[] nics = guest.getNet();
-            if (nics != null) {
-                for (int i=0; i<nics.length; i++) {
-                    String mac = nics[i].getMacAddress();
-                    Collection<Platform> platforms = this.platformMgr.getPlatformByMacAddr(subject, mac);
+            VirtualMachineConfigInfo vmConf = vm.getConfig();
+            if (vmConf==null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("no conf info for vm " + vm.getName());
                 }
+                continue;
             }
+            
+            String uuid = vmConf.getUuid();
+            if (uuid==null || uuid.equals("")) {
+                if (log.isDebugEnabled()) {
+                    log.debug("no UUID for vm " + vm.getName());
+                }
+                continue;
+            }
+            
+            GuestInfo guest = vm.getGuest();
+            if (guest==null)  {
+                if (log.isDebugEnabled()) {
+                    log.debug("no guest for vm " + vm.getName());
+                }
+                continue;
+            }
+            
+            GuestNicInfo[] nics = guest.getNet();
+            Platform assosiatedPlatform= null;
+            if (nics == null) {continue;}
+            for (int i=0; i<nics.length; i++) {
+                if (nics[i]==null)  {
+                    if (log.isDebugEnabled()) {
+                        log.debug("nic no." + i + "is null on " + vm.getName());
+                    }
+                    continue;
+                }
+                
+                String mac = nics[i].getMacAddress();
+                if (mac==null) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("no mac address on nic" + nics[i] + " of vm " + vm.getName());
+                    }
+                    continue;
+                }
+                
+                macToUUID.put(mac,uuid);
+                Collection<Platform> platforms = this.platformMgr.getPlatformByMacAddr(subject, mac);
+                if (platforms!=null && platforms.size()>0) {
+                    if (platforms.size()>1) {
+                        // illegal state to have multiple platforms with the same mac address in the system
+                        StringBuilder sb = new StringBuilder();
+                        for(Platform platform2:platforms) {
+                            sb.append(platform2.getName()).append(",");
+                        }
+                        log.error("multiple platforms exists in the system with the same mac address: " + mac + "\n" +sb.substring(0,sb.length()-1));
+                    } else {
+                        assosiatedPlatform=platforms.iterator().next();
+                    }
+                    // assume one mac address is sufficient for VM-platform mapping
+                    continue;
+                }
+             }
+            if (assosiatedPlatform==null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("no platform in the system is assosiated to any of the " + vm.getName() + " VM mac addresses");
+                }
+                continue;
+            }
+            
+            //TODO~ check if updates DB by the end of the transaction
+            //TODO~ make sure the uuid is extracted in the resource mapper for platforms
+            assosiatedPlatform.setUuid(uuid);
         }
     }
-
-//    public DataCenterList getDataCenters() throws Throwable {  
-//        ServiceInstance si = getServiceInstance();
-//        Folder rootFolder = si.getRootFolder();
-//        //get all the data centers from provider
-//        ManagedEntity[] mes = new InventoryNavigator(rootFolder).searchManagedEntities(DATACENTER);
-//        DataCenterList dcList = new DataCenterList();
-//        if(mes==null || mes.length ==0){
-//            si.getServerConnection().logout();
-//            return dcList;vcops_VM_mapping
-//        }
-//
-//        for (ManagedEntity mEntity : mes) {
-//            Datacenter dc = (Datacenter) mEntity; 
-//            dcList.addDataCenter(new DataCenter(dc.getName()));
-//        }
-//        si.getServerConnection().logout();
-//        return dcList;
-//    }
-//
-//
-//    public HostsList getHosts(String dcName) throws Throwable {
-//        HostsList hostsList = new HostsList();
-//        ServiceInstance si = getServiceInstance();
-//        Folder rootFolder = si.getRootFolder();
-//        //find the data center based on the provided name
-//        ManagedEntity me = new InventoryNavigator(rootFolder).searchManagedEntity(DATACENTER, dcName);
-//        if(me==null){
-//            si.getServerConnection().logout();
-//            WebApplicationException webApplicationException = 
-//                    errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.CLOUD_RESOURCE_NOT_FOUND, dcName);     
-//            throw webApplicationException;
-//        }
-//        Datacenter dataCenter = (Datacenter)me;
-//        //iterate over the data center's hosts
-//        for (ManagedEntity mEntity : dataCenter.getHostFolder().getChildEntity()) {
-//            ComputeResource computer = (ComputeResource) mEntity;
-//            for (HostSystem hostSystem : computer.getHosts()) {
-//                hostsList.addHost(new Host(hostSystem.getName()));
-//            }
-//        }
-//        si.getServerConnection().logout();
-//        return hostsList;
-//    }
-
+    
     public List<VirtualMachine> getAllVms(ServiceInstance si, String hostName) throws InvalidProperty, RuntimeFault, RemoteException {
         List<VirtualMachine> vmsList = new ArrayList<VirtualMachine>();
         Folder rootFolder = si.getRootFolder();
-        //find the host based on the provided hostname
         ManagedEntity[] me = new InventoryNavigator(rootFolder).searchManagedEntities("VirtualMachine");
         if(me==null || me.length==0){
             return null;
-//            si.getServerConnection().logout();
-//            WebApplicationException webApplicationException = 
-//                    errorHandler.newWebApplicationException(, hostName);     
-//            throw webApplicationException;
         }
-//        HostSystem host = (HostSystem)me;
-        //iterate over the host's virtual machines
         for (Object vm : me) {
-//            org.hyperic.hq.api.model.cloud.VirtualMachine virtualMachine = new org.hyperic.hq.api.model.cloud.VirtualMachine(vm.getName());
-//            virtualMachine.setIp(vm.getGuest().getIpAddress());
             vmsList.add((VirtualMachine)vm);
         }
         si.getServerConnection().logout();
         return vmsList;
     }
 
-//    public void configureCloudProvider(CloudConfiguration cloudConfiguration) throws Throwable {
-//        //check that the configuration is correct
-//        try {
-//            new ServiceInstance(new URL(cloudConfiguration.getUrl()), cloudConfiguration.getUsername(), 
-//                    cloudConfiguration.getPassword(), true);
-//        }catch(Throwable t) {
-//            WebApplicationException webApplicationException = 
-//                    errorHandler.newWebApplicationException(Response.Status.NOT_ACCEPTABLE, ExceptionToErrorCodeMapper.ErrorCode.BAD_CLOUD_PROVIDER_CONFIGURATION);     
-//            throw webApplicationException;
-//        }
-//        //configuration is fine, save it in the session
-//        getSession().setAttribute(CLOUD_CONFIGURATION, cloudConfiguration);
-//    }
-//
-//    private CloudConfiguration getCloudConfiguration() {
-//        Object configuration = getSession().getAttribute(CLOUD_CONFIGURATION);
-//        if (null == configuration) {
-//            WebApplicationException webApplicationException = 
-//                    errorHandler.newWebApplicationException(Response.Status.PRECONDITION_FAILED, ExceptionToErrorCodeMapper.ErrorCode.CLOUD_PROVIDER_NOT_CONFIGURED);            
-//            throw webApplicationException;
-//        }
-//        return (CloudConfiguration) configuration;
-//    }
-
+    public String getUuid(String mac) {
+        return this.macToUUID.get(mac);
+    }
 }
