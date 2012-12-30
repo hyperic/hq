@@ -93,7 +93,6 @@
 		<maven.build.timestamp.format>MMM dd, yyyy</maven.build.timestamp.format>
 		<build.timestamp>${maven.build.timestamp}</build.timestamp>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<powermock.version>1.4.12</powermock.version>
 	</properties>
 
 	<dependencyManagement>
