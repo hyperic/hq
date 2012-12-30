@@ -564,6 +564,12 @@
     <plugin type="measurement"
             class="org.hyperic.hq.plugin.vsphere.VCenterMeasurementPlugin"/>
 
+	<plugin type="control"  class="org.hyperic.hq.plugin.vsphere.VCenterControlPlugin"/>
+	
+	<actions>
+	<include name="raiseVcEvent"/>
+	</actions>
+	
     <filter name="template"
             value="vcenter:url=%url%,user=%user%,pass=%pass%:${alias}"/>
     <metric name="Availability"

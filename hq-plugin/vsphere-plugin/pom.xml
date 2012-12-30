@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-        <groupId>org.hyperic.hq.plugin</groupId>
-        <artifactId>modules</artifactId>
-       <version>5.0.0</version>
-    </parent>
+		<groupId>org.hyperic.hq.plugin</groupId>
+		<artifactId>modules</artifactId>
+		<version>5.0.0</version>
+	</parent>
 	<artifactId>vsphere-plugin</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - vSphere Plugin</name>
@@ -19,25 +20,12 @@
 	</properties>
 
 	<dependencies>
-		<!-- inherited from modules parent 
-		<dependency>
-			<groupId>org.hyperic.hq</groupId>
-			<artifactId>hq-pdk</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq</groupId>
-			<artifactId>hq-pdk</artifactId>
-			<version>${project.version}</version>
-			<classifier>tests</classifier>
-		</dependency>
-		<dependency>
-           	<groupId>com.cenqua.clover</groupId>
-            <artifactId>clover</artifactId>
-            <version>2.6.3</version>
-			<scope>test</scope>
-       </dependency>
-		-->
+		<!-- inherited from modules parent <dependency> <groupId>org.hyperic.hq</groupId> 
+			<artifactId>hq-pdk</artifactId> <version>${project.version}</version> </dependency> 
+			<dependency> <groupId>org.hyperic.hq</groupId> <artifactId>hq-pdk</artifactId> 
+			<version>${project.version}</version> <classifier>tests</classifier> </dependency> 
+			<dependency> <groupId>com.cenqua.clover</groupId> <artifactId>clover</artifactId> 
+			<version>2.6.3</version> <scope>test</scope> </dependency> -->
 		<dependency>
 			<groupId>org.hyperic.hq.agent</groupId>
 			<artifactId>hq-agent-core</artifactId>
@@ -125,7 +113,7 @@
 					</archive>
 				</configuration>
 			</plugin>
-			<plugin> 
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
 			</plugin>
@@ -142,25 +130,25 @@
 						<configuration>
 							<useDefaultDelimiters>false</useDefaultDelimiters>
 							<delimiters>
-  									<delimiter>@</delimiter>
+								<delimiter>@</delimiter>
 							</delimiters>
 							<outputDirectory>${basedir}/target/classes</outputDirectory>
 							<resources>
-      								<resource>
-        								<directory>src/main/resources</directory>
-        								<filtering>true</filtering>
-        								<includes>
-          									<include>**/*.xml</include>
-        								</includes>
-      								</resource>
-      								<resource>
-        								<directory>src/main/resources</directory>
-        								<filtering>false</filtering>
-        								<excludes>
-          									<exclude>**/*.xml</exclude>
-        								</excludes>
-      								</resource>
-    						</resources>
+								<resource>
+									<directory>src/main/resources</directory>
+									<filtering>true</filtering>
+									<includes>
+										<include>**/*.xml</include>
+									</includes>
+								</resource>
+								<resource>
+									<directory>src/main/resources</directory>
+									<filtering>false</filtering>
+									<excludes>
+										<exclude>**/*.xml</exclude>
+									</excludes>
+								</resource>
+							</resources>
 						</configuration>
 					</execution>
 				</executions>
