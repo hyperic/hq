@@ -11,23 +11,23 @@ import org.hyperic.hq.api.model.RestApiConstants;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name="resourceMeasurementResponse", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 @XmlType(name="ResourceMeasurementResponseType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
-public class ResourceMeasurementResponse extends MetricResponse {
+public class ResourceMeasurementResponse extends MeasurementResponse {
     @XmlAttribute
-    protected String resource;
+    protected String rscId;
 
     public ResourceMeasurementResponse() {}
     
-    public ResourceMeasurementResponse(String resource) {
+    public ResourceMeasurementResponse(String rscId) {
         super();
-        this.resource=resource;
+        this.rscId=rscId;
     }
 
-    public String getResourceId() {
-        return resource;
+    public String getRscId() {
+        return rscId;
     }
 
-    public void setResourceId(String resource) {
-        this.resource = resource;
+    public void setRscId(String rscId) {
+        this.rscId = rscId;
     }
 
 }

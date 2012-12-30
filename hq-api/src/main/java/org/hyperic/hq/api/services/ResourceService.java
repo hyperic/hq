@@ -73,9 +73,6 @@ public interface ResourceService {
     RegisteredResourceBatchResponse getResources(@QueryParam("responseStructure")  final ResourceDetailsType responseMetadata,
 	        @QueryParam("hierarchyDepth") final int hierarchyDepth, @QueryParam("register") final boolean register, final ResourceFilterRequest resourceFilterRequest) throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException  ;  
 	
-    /**
-     * NYI
-     */
 	@POST
 	@Path("/approve")
 	ResourceBatchResponse approveResource(final Resources aiResources) throws SessionNotFoundException, SessionTimeoutException ; 
@@ -83,9 +80,6 @@ public interface ResourceService {
 	@PUT
 	ResourceBatchResponse updateResources(final Resources resources) throws SessionNotFoundException, SessionTimeoutException ; 
 
-	/**
-     * NYI
-     */
 	@PUT
 	@Path("/search")
 	ResourceBatchResponse updateResourcesByCriteria(final Resource updateData) throws SessionNotFoundException, SessionTimeoutException ;
