@@ -29,6 +29,7 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -36,52 +37,77 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.jms.Destination;
+import javax.ws.rs.core.Response;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.jaxrs.ext.search.SearchContext;
 import org.hibernate.ObjectNotFoundException;
+import org.hyperic.hq.api.model.ID;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
+import org.hyperic.hq.api.model.measurements.MetricFilterRequest;
+import org.hyperic.hq.api.model.measurements.MetricNotifications;
+import org.hyperic.hq.api.model.measurements.RawMetric;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementBatchResponse;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequest;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequests;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementResponse;
 import org.hyperic.hq.api.services.impl.ApiMessageContext;
+import org.hyperic.hq.api.model.measurements.BulkResourceMeasurementRequest;
 import org.hyperic.hq.api.transfer.MeasurementTransfer;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 import org.hyperic.hq.api.transfer.mapping.MeasurementMapper;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.TimeframeBoundriesException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.measurement.server.session.ReportProcessorImpl;
 import org.hyperic.hq.measurement.server.session.TimeframeSizeException;
 import org.hyperic.hq.measurement.shared.DataManager;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.TemplateManager;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
+import org.hyperic.hq.notifications.Q;
+import org.hyperic.hq.notifications.filtering.Filter;
+import org.hyperic.hq.notifications.filtering.FilteringCondition;
+import org.hyperic.hq.notifications.filtering.MetricDestinationEvaluator;
+import org.hyperic.hq.notifications.model.MetricNotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 public class MeasurementTransferImpl implements MeasurementTransfer {
+    private final Log log = LogFactory.getLog(ReportProcessorImpl.class);
     private static final int MAX_DTPS = 400;
 
+    private ResourceManager resourceManager ; 
     private MeasurementManager measurementMgr;
     private TemplateManager tmpltMgr;
     private DataManager dataMgr; 
     private MeasurementMapper mapper;
     private ExceptionToErrorCodeMapper errorHandler ;
-
+    private MetricDestinationEvaluator evaluator;
+    private Q q;
+    @javax.ws.rs.core.Context
+    private SearchContext context ;
+    
     @Autowired
-    public MeasurementTransferImpl(MeasurementManager measurementMgr, TemplateManager tmpltMgr, DataManager dataMgr, 
-            MeasurementMapper mapper, ExceptionToErrorCodeMapper errorHandler) {
+    public MeasurementTransferImpl(ResourceManager resourceManager,MeasurementManager measurementMgr, TemplateManager tmpltMgr, DataManager dataMgr, 
+            MeasurementMapper mapper, ExceptionToErrorCodeMapper errorHandler, MetricDestinationEvaluator evaluator, Q q) {
         super();
+        this.resourceManager = resourceManager;
         this.measurementMgr = measurementMgr;
         this.tmpltMgr = tmpltMgr;
         this.mapper=mapper;
         this.dataMgr = dataMgr;
         this.errorHandler = errorHandler;
+        this.evaluator = evaluator;
+        this.q = q;
     }
 
     protected List<Measurement> getMeasurements(final String rscId, final List<MeasurementTemplate> tmps, final AuthzSubject authzSubject) throws PermissionException {
@@ -103,7 +129,78 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         }
         return hqMsmts;
     }
-
+    
+    protected Map<Integer,Destination> sessionToDestination = new HashMap<Integer,Destination>();
+    
+    public void register(Integer sessionId, final MetricFilterRequest metricFilterReq) {
+        //TODO~ return failed/successful registration
+        //TODO~ add schema to the xml's which automatically validates legal values (no null / empty name for instance)
+        if (!MetricFilterRequest.validate(metricFilterReq)) {
+            if (log.isDebugEnabled()) {
+                log.debug("illegal request");
+            }
+            return;
+        }
+        List<Filter<MetricNotification,? extends FilteringCondition<?>>> userFilters = this.mapper.toMetricFilters(metricFilterReq); 
+        // TODO~ init filters with needed managers to enable them to retrieve filter related data
+        
+        Destination dest = this.sessionToDestination.get(sessionId); 
+        if (dest==null) {
+            dest = new Destination() {};
+            this.sessionToDestination.put(sessionId,dest);
+            this.q.register(dest);
+        }
+        this.evaluator.register(dest,userFilters);
+    }
+    public void unregister(Integer sessionId) {
+        Destination dest = this.sessionToDestination.get(sessionId); 
+        if (dest!=null) {
+            this.sessionToDestination.remove(sessionId);
+            this.q.unregister(dest);
+            this.evaluator.unregisterAll(dest);
+        }        
+    }
+    public void unregister(final Integer sessionId, final MetricFilterRequest metricFilterReq) {
+        //TODO~ return failed/successful registration
+        if (!MetricFilterRequest.validate(metricFilterReq)) {
+            if (log.isDebugEnabled()) {
+                log.debug("illegal request");
+            }
+            return;
+        }
+        List<Filter<MetricNotification,? extends FilteringCondition<?>>> userFilters = this.mapper.toMetricFilters(metricFilterReq); 
+        if (userFilters.isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("no filters were passed to be unregistered");
+            }
+            return;
+        }
+        Destination dest = this.sessionToDestination.get(sessionId); 
+        if (dest==null) {
+            if (log.isDebugEnabled()) {
+                log.debug("no destination was previously registered with the current user session");
+            }
+            return;
+        }
+        this.evaluator.unregister(dest,userFilters);
+    }
+    
+    public MetricNotifications poll(Integer sessionId) {
+        //TODO~ return adequate response if not registered
+        MetricNotifications res = new MetricNotifications();
+        Destination dest = this.sessionToDestination.get(sessionId);
+        if (dest==null) {
+            log.error("the current session is not registered for notifications");
+            this.errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.INVALID_SESSION);            
+        }
+        List<MetricNotification> mns = (List<MetricNotification>) this.q.poll(dest);
+        if (mns.isEmpty()) {
+            return res;
+        }
+        List<? extends RawMetric> metrics = this.mapper.toMetricsWithId(mns);
+        res.setMetrics(metrics);
+        return res;
+    }
     public MeasurementResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest hqMsmtReq, 
             final String rscId, final Date begin, final Date end) 
                     throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException, TimeframeSizeException {
@@ -285,5 +382,33 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
                 rscRes.add(msmt);
             }
             return res;
+    }
+    
+    @Transactional(readOnly = true)
+    public ResourceMeasurementBatchResponse getMeasurements(ApiMessageContext apiMessageContext, BulkResourceMeasurementRequest rcsMsmtReq) {
+        ResourceMeasurementBatchResponse res = new ResourceMeasurementBatchResponse();
+        AuthzSubject authzSubject = apiMessageContext.getAuthzSubject();
+        List<ID> ids = rcsMsmtReq.getRids();
+        List<Integer> rids = this.mapper.toIds(ids);
+        for(Integer rid:rids) {
+            Resource rsc = this.resourceManager.findResourceById(rid);
+            if (rsc==null) {
+                res.addFailedResource(String.valueOf(rid), ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID.getErrorCode(), null,new Object[] {""});
+                log.error("resource not found for resource id - " + rid);
+                continue;
+            }
+            ResourceMeasurementResponse rscRes = new ResourceMeasurementResponse();
+            rscRes.setRscId(String.valueOf(rid));
+            Collection<Measurement> hqMsmts = this.measurementMgr.findMeasurements(authzSubject, rsc);
+            for(Measurement hqMsmt:hqMsmts) {
+//                Integer tmplId = hqMsmt.getTemplate().getId();
+                MeasurementTemplate hqTmpl = hqMsmt.getTemplate();//tmpltMgr.getTemplate(tmplId);
+                org.hyperic.hq.api.model.measurements.Measurement msmt = this.mapper.toMeasurementExtendedData(hqMsmt,hqTmpl);
+                rscRes.add(msmt);
+            }
+            res.addResponse(rscRes);
+        }
+
+        return res;
     }
 }

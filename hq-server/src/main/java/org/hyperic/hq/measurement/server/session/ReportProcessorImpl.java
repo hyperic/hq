@@ -27,7 +27,6 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,7 +34,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
@@ -63,6 +61,9 @@ import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.data.DSNList;
 import org.hyperic.hq.measurement.data.MeasurementReport;
 import org.hyperic.hq.measurement.data.ValueList;
+import org.hyperic.hq.measurement.ext.MeasurementEvent;
+import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZeventPayload;
+import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZeventSource;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.ReportProcessor;
 import org.hyperic.hq.measurement.shared.SRNManager;
@@ -322,7 +323,7 @@ public class ReportProcessorImpl implements ReportProcessor {
         	if (debug) watch.markTimeEnd("sendAvailDataToDB");
         }
         if (debug) log.debug(watch);
-
+            
         // need to process these in background queue since I don't want cache misses to backup
         // report processor since it runs in several threads.  Better to backup one thread with
         // db queries
@@ -331,7 +332,7 @@ public class ReportProcessorImpl implements ReportProcessor {
             zEventManager.enqueueEventAfterCommit(new PlatformAvailZevent(platformRes.getId()));
         }
     }
-
+    
     private Measurement getMeasurement(Integer mid, Map<Integer, Measurement> measMap) {
     	Measurement measurement = measMap.get(mid);
     	if (measurement == null) {
@@ -483,6 +484,7 @@ public class ReportProcessorImpl implements ReportProcessor {
         }
     }
     
+    
     private class SrnCheckerZevent extends Zevent {
         private String agentToken;
         private Set<AppdefEntityID> toUnschedule;
@@ -541,5 +543,4 @@ public class ReportProcessorImpl implements ReportProcessor {
             return (last == null) ? 0l : last;
         }
     }
-
 }
