@@ -132,19 +132,6 @@
         <jaxrs:providers>
             <ref bean="jaxbProvider" />
 			<ref bean="jsonProvider" />
-        </jaxrs:providers>
-        <jaxrs:features>
-            <cxf:logging />
-        </jaxrs:features>        
-    </jaxrs:server>
-    
-	<jaxrs:server id="metricService" address="/metric">
-		<jaxrs:serviceBeans>
-			<ref bean="metricServiceImpl" />
-        </jaxrs:serviceBeans>
-        <jaxrs:providers>
-            <ref bean="jaxbProvider" />
-			<ref bean="jsonProvider" />
 			<ref bean="timeProvider" />
         </jaxrs:providers>
         <jaxrs:features>
