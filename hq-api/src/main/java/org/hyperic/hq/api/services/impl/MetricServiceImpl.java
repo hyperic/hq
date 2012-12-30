@@ -36,12 +36,12 @@ public class MetricServiceImpl extends RestApiService implements MetricService {
     protected ExceptionToErrorCodeMapper errorHandler ; 
     
 	public MetricResponse getMetrics(final MeasurementRequest measurementRequest,
-			final String resourceId, final Date begin, final Date end)
+			final String rscId, final Date begin, final Date end)
 			        throws Throwable {
 	    try {
 	        try {
 	            ApiMessageContext apiMessageContext = newApiMessageContext();
-	            return measurementTransfer.getMetrics(apiMessageContext, measurementRequest, resourceId, begin, end);
+	            return measurementTransfer.getMetrics(apiMessageContext, measurementRequest, rscId, begin, end);
 	        } catch (Throwable t) {
 	            errorHandler.log(t);
 	            throw t;

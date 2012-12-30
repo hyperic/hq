@@ -66,7 +66,7 @@ public class AIResourceServiceTest {
 
 //    @Test
     public final void testGetApprovedResource() throws Throwable {
-        String baseAddress = endpointUrl + "/rest/resource";
+        String baseAddress = endpointUrl + "/rest-api/inventory/resources";
         ResourceService aiResourceSvc = JAXRSClientFactory.create(baseAddress, ResourceService.class, providers);
 
         Client client = WebClient.client(aiResourceSvc);
@@ -86,7 +86,7 @@ public class AIResourceServiceTest {
     // @Test(expected=SessionNotFoundException.class)
 //    @Test
     public final void testGetApprovedResource_NotAuth() throws Throwable {
-        String baseAddress = endpointUrl + "/rest/resource";
+        String baseAddress = endpointUrl + "/rest-api/inventory/resources";
         ResourceService aiResourceSvc = JAXRSClientFactory.create(baseAddress, ResourceService.class, providers);
 
         Client client = WebClient.client(aiResourceSvc);
@@ -103,7 +103,7 @@ public class AIResourceServiceTest {
 
 //    @Test
     public final void testGetApprovedResource_WrongPassword() throws Throwable {
-        String baseAddress = endpointUrl + "/rest/resource";
+        String baseAddress = endpointUrl + "/rest-api/inventory/resources";
         ResourceService aiResourceSvc = JAXRSClientFactory.create(baseAddress, ResourceService.class, providers);
 
         Client client = WebClient.client(aiResourceSvc);
@@ -124,7 +124,7 @@ public class AIResourceServiceTest {
 
 //    @Test
     public final void testJSessionId() throws Throwable {
-        String baseAddress = endpointUrl + "/rest/resource";
+        String baseAddress = endpointUrl + "/rest-api/inventory/resources";
         ResourceService aiResourceSvc = JAXRSClientFactory.create(baseAddress, ResourceService.class, providers);
 
         Client client = WebClient.client(aiResourceSvc);
@@ -142,7 +142,7 @@ public class AIResourceServiceTest {
 
         result = aiResourceSvc.updateResources(resources);
 
-        String sessionBaseAddress = endpointUrl + "/rest/session";
+        String sessionBaseAddress = endpointUrl + "/rest-api/session";
         SessionManagementService sessionService = JAXRSClientFactory.create(sessionBaseAddress,
                 SessionManagementService.class, providers);
 
@@ -155,7 +155,7 @@ public class AIResourceServiceTest {
 
     // @Test
     public final void testUpdateResource() throws Throwable {
-        String baseAddress = endpointUrl + "/rest/resource";
+        String baseAddress = endpointUrl + "/rest-api/inventory/resources";
         ResourceService aiResourceSvc = JAXRSClientFactory.create(baseAddress, ResourceService.class, providers);
 
         Client client = WebClient.client(aiResourceSvc);
