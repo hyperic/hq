@@ -11795,11 +11795,15 @@ has already been defined.
 			commit="true"/>
 	</schemaSpec>
 	
-	<!--schemaSpec version="3.217" alwaysExecute="true">
-	 	<schema-directSQL>  
+	<schemaSpec version="3.217" alwaysExecute="true">
+		<schema-addColumn table="EAM_PLATFORM"
+		                      column="UUID"
+		                      nullable="NULL"
+		                      columnType="VARCHAR2" />
+	 	<!--schema-directSQL>  
 	 		<statement>create table if not exists EAM_VM (MAC_ADDRESS varchar(64) not null, UUID varchar(64) not null) </statement>
-	 	</schema-directSQL>
-	</schemaSpec-->
+	 	</schema-directSQL-->
+	</schemaSpec>
 </dbupgrade>
 </target>
 </project>
