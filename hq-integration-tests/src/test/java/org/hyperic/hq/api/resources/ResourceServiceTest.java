@@ -592,18 +592,18 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     				(String)arrResources[i][1]/*natural ID*/,
     				(ResourceType)arrResources[i][2], 
     				(arrResources[i][3] != null /*generate resource*/), 
-    				(HashMap<String,String>)arrResources[i][4]) ; 
+    				(Map<String,String>)arrResources[i][4]) ; 
     		resources.addResource(resource)  ; 
     	}//EO while there are more resources 
     	return resources ; 
     }//EOM 
     
-    private final ResourceConfig generateResourceConfig(final HashMap<String,String> configMap) { 
+    private final ResourceConfig generateResourceConfig(final Map<String,String> configMap) { 
     	return new ResourceConfig(null, configMap, null) ; 
     }//EOM 
     
     private final Resource generateResource(final String ID, final String naturalID, final ResourceType enumResourceType, 
-    														final boolean generateConfig, final HashMap<String,String> configMap) { 
+    														final boolean generateConfig, final Map<String,String> configMap) { 
 		final Resource resource = new Resource(ID) ; 
 		resource.setNaturalID(naturalID) ; 
 		resource.setResourceType(enumResourceType); 
@@ -621,7 +621,7 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 		private Method addConfigSchemaMethod ; 
 	    private Method setTypeInfoMethod ;
 	    private Map<String,String> persistedConfigAttributes ; 	    
-	    private HashMap<String,String> requestConfigAttributes ;	    
+	    private Map<String,String> requestConfigAttributes ;	    
 	    // these  are readonly properties, so won't be mapped from reqest, just have to be fetched
 	    private Map<String, PropertyList> persistedListConfigAttributes;
         
