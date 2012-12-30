@@ -50,7 +50,7 @@ public class OutgoingMetricZeventListener implements ZeventListener<MeasurementZ
     
     @PostConstruct
     public void init() {
-        zEventManager.addBufferedListener(MeasurementZevent.class, (OutgoingMetricZeventListener) Bootstrap.getBean("OutgoingMetricZeventListener"));
+        zEventManager.addBufferedListener(MeasurementZevent.class, (ZeventListener<MeasurementZevent>) Bootstrap.getBean("OutgoingMetricZeventListener"));
         concurrentStatsCollector.register(ConcurrentStatsCollector.NOTIFICATION_FILTERING_TIME);
     }    
     protected List<MetricNotification> extract(List<MeasurementZevent> events) {
