@@ -163,7 +163,7 @@ public class ResourceMapper {
 	public final Resource mergeConfig(ResourceType resourceType, org.hyperic.hq.authz.server.session.Resource backendResource, final Resource resource, final ConfigSchemaAndBaseResponse[] configResponses) throws AppdefEntityNotFoundException {
 		if(configResponses == null) return resource ;  
 		
-		final HashMap<String,String> configValues = new HashMap<String,String>() ; 
+		final Map<String,String> configValues = new HashMap<String,String>() ; 
 		
 		//TODO: iterate over the resource properties and convert to key-val hashmap
 		ConfigResponse configResponse = null ;

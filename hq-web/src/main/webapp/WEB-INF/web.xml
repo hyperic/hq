@@ -481,7 +481,7 @@
 
     <servlet-mapping>
         <servlet-name>CXFServlet</servlet-name>
-        <url-pattern>/rest/*</url-pattern>
+        <url-pattern>/rest-api/*</url-pattern>
     </servlet-mapping>
 
 
