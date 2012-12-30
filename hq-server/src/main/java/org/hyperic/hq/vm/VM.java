@@ -1,6 +1,9 @@
 package org.hyperic.hq.vm;
 
-public class VM {
+import java.io.Serializable;
+
+public class VM implements Serializable {
+    private static final long serialVersionUID = -833293198386426936L;
     private String mac;
     private String uuid;
 
