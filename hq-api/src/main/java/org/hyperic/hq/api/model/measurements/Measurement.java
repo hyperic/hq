@@ -11,7 +11,7 @@ import org.hyperic.hq.api.model.RestApiConstants;
 
 
 @XmlAccessorType(XmlAccessType.FIELD)
-//@XmlRootElement(name = "measurement", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+@XmlRootElement(name = "measurement", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 @XmlType(name="MeasurementType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 public class Measurement extends MetricGroupBase {
     @XmlAttribute

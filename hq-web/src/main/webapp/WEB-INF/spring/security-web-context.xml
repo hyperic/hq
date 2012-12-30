@@ -56,7 +56,7 @@
 																basicSessionManagementFilter,
 			    	                                     		filterSecurityInterceptor" /> 
              <!-- TODO: change to correct filters -->
-             <sec:filter-chain pattern="/rest/**" filters="securityContextPersistenceFilter,
+             <sec:filter-chain pattern="/rest-api/**" filters="securityContextPersistenceFilter,
 																basicAuthenticationFilter,
 																basicAuthenticationExceptionTranslationFilter,
 																apiBasicSessionManagementFilter,
@@ -195,7 +195,7 @@
 		    	<sec:intercept-url pattern="/app/login" access="ROLE_ANONYMOUS,ROLE_HQ_USER" />
 		    	<sec:intercept-url pattern="/**" access="ROLE_HQ_USER" />
 		    	<sec:intercept-url pattern="/hqu/hqapi*/**" access="ROLE_HQ_USER" />
-		    	<sec:intercept-url pattern="/rest/**" access="ROLE_HQ_USER" />  
+		    	<sec:intercept-url pattern="/rest-api/**" access="ROLE_HQ_USER" />  
 			</sec:filter-security-metadata-source>
 		</property>
 	</bean>
