@@ -79,7 +79,6 @@ public class VMManagerImpl implements VMManager {
             }
             
             GuestNicInfo[] nics = guest.getNet();
-            Platform assosiatedPlatform= null;
             if (nics == null) {continue;}
             for (int i=0; i<nics.length; i++) {
                 if (nics[i]==null)  {
@@ -99,31 +98,21 @@ public class VMManagerImpl implements VMManager {
                 
                 macToUUID.put(mac,uuid);
                 Collection<Platform> platforms = this.platformMgr.getPlatformByMacAddr(subject, mac);
-                if (platforms!=null && platforms.size()>0) {
-                    if (platforms.size()>1) {
-                        // illegal state to have multiple platforms with the same mac address in the system
-                        StringBuilder sb = new StringBuilder();
-                        for(Platform platform2:platforms) {
-                            sb.append(platform2.getName()).append(",");
-                        }
-                        log.error("multiple platforms exists in the system with the same mac address: " + mac + "\n" +sb.substring(0,sb.length()-1));
-                    } else {
-                        assosiatedPlatform=platforms.iterator().next();
+                if (platforms==null || platforms.isEmpty()) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("no platform in the system is assosiated to any of the " + vm.getName() + " VM mac addresses");
                     }
-                    // assume one mac address is sufficient for VM-platform mapping
                     continue;
                 }
-             }
-            if (assosiatedPlatform==null) {
-                if (log.isDebugEnabled()) {
-                    log.debug("no platform in the system is assosiated to any of the " + vm.getName() + " VM mac addresses");
+                // will set UUID field for virtual and for regular platforms
+                for(Platform platform:platforms) {
+                    platform.setUuid(uuid);
                 }
-                continue;
-            }
-            
+                // assume one mac address is sufficient for VM-platform mapping
+                break;
+             }
             //TODO~ check if updates DB by the end of the transaction
             //TODO~ make sure the uuid is extracted in the resource mapper for platforms
-            assosiatedPlatform.setUuid(uuid);
         }
     }
     
