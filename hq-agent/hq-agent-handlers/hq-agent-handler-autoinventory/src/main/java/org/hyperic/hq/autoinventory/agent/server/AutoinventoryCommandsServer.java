@@ -169,6 +169,8 @@ public class AutoinventoryCommandsServer implements AgentServerHandler, AgentNot
             _rtAutodiscoverer.triggerDefaultScan();
         }
     }
+    
+    public final void postInitActions() throws AgentStartException { /*do nothing*/ }//EOM
 
     public void shutdown () {
         _log.info("Autoinventory Commands Server shutting down");
@@ -351,6 +353,8 @@ public class AutoinventoryCommandsServer implements AgentServerHandler, AgentNot
             throw new AgentRemoteException("Unknown command: " + cmd);
         }
     }
+    
+    
 
     private AutoinventoryCallbackClient setupClient() {
         StorageProviderFetcher fetcher =

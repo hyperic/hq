@@ -32,12 +32,14 @@ import org.easymock.EasyMock;
 import org.hyperic.hq.events.MockEvent;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
+import org.junit.Ignore;
 
 /**
  * Unit test of {@link SingleConditionEvaluator}
  * @author jhickey
  *
  */
+@Ignore
 public class SingleConditionEvaluatorTest
     extends TestCase
 {

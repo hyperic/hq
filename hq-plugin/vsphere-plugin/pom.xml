@@ -5,10 +5,10 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>org.hyperic.hq.plugin</groupId>
-		<artifactId>modules</artifactId>
-		<version>5.0.0</version>
-	</parent>
+        <groupId>org.hyperic.hq.plugin</groupId>
+        <artifactId>modules</artifactId>
+       <version>5.0.0-HA</version>
+    </parent>
 	<artifactId>vsphere-plugin</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - vSphere Plugin</name>

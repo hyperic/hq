@@ -674,7 +674,7 @@
           platforms="Win32">
 
     <plugin type="control"
-            class="org.hyperic.hq.product.Win32ControlPlugin"/>
+            class="IisControlPlugin"/>
 
     <plugin type="measurement"
             class="IisMeasurementPlugin"/>

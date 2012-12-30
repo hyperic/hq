@@ -803,6 +803,12 @@ public class AgentDaemon
             this.startedHandlers.add(handler);
         }
     }
+    
+    private final void postInitActions() throws AgentStartException { 
+        for(AgentServerHandler handler : this.startedHandlers) { 
+            handler.postInitActions() ; 
+        }//EO while there are more agents 
+    }//EOM 
 
     //these files should have already been deleted on normal
     //jvm shutdown.  however, agent.exe start + CTRL-c on windows
@@ -913,7 +919,6 @@ public class AgentDaemon
             
             this.startPluginManagers();
             this.startHandlers();
-
             
             // The started handlers should have already registered with the 
             // agent transport lifecycle
@@ -929,6 +934,7 @@ public class AgentDaemon
             agentStarted = true;
             AgentStatsWriter statsWriter = new AgentStatsWriter(config);
             statsWriter.startWriter();
+            this.postInitActions() ;
             this.listener.listenLoop();
             this.sendNotification(NOTIFY_AGENT_DOWN, "goin' down, baby!");
             statsWriter.stopWriter();

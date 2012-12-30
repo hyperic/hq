@@ -36,6 +36,7 @@ import org.hyperic.hq.events.MockEvent;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.TriggerNotFiredEvent;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
+import org.junit.Ignore;
 
 import junit.framework.TestCase;
 
@@ -44,6 +45,7 @@ import junit.framework.TestCase;
  * @author jhickey
  * 
  */
+@Ignore
 public class RecoveryConditionEvaluatorTest
     extends TestCase
 {

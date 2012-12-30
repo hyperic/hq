@@ -20,6 +20,8 @@ public class Measurement {
 	@XmlAttribute
 	private long interval;
     @XmlAttribute
+    private String alias;
+    @XmlAttribute
     private String name;
     @XmlAttribute
     private double avg;	
@@ -28,7 +30,21 @@ public class Measurement {
 	private List<Metric> metrics;
 	
 	public Measurement() {}
-
+    /**
+     * order of metrics does matter
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (obj==null || !(obj instanceof Measurement)) {
+            return false;
+        }
+        Measurement other = (Measurement) obj;
+        return (this.alias==null?other.alias==null:(other.alias!=null && this.alias.equals(other.alias))
+                && this.name==null?other.name==null:(other.name!=null && this.name.equals(other.name))
+                && this.interval == other.interval
+                && this.avg == other.avg
+                && this.metrics==null?other.metrics==null:(other.metrics!=null && this.metrics.equals(other.metrics)));
+    }
 	public List<Metric> getMetrics() {
 		return metrics;
 	}
@@ -47,28 +63,16 @@ public class Measurement {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
-	
-	/**
-	 * order of metrics does matter
-	 */
-	@Override
-	public boolean equals(Object obj) {
-	    if (obj==null || !(obj instanceof Measurement)) {
-	        return false;
-	    }
-	    Measurement other = (Measurement) obj;
-	    return (this.name==null?other.name==null:(other.name!=null && this.name.equals(other.name))
-	            && this.interval == other.interval
-	            && this.avg == other.avg
-	            && this.metrics==null?other.metrics==null:(other.metrics!=null && this.metrics.equals(other.metrics)));
-	}
-
     public double getAvg() {
         return avg;
     }
-
     public void setAvg(double avg) {
         this.avg = avg;
+    }
+    public String getAlias() {
+        return alias;
+    }
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
 }
