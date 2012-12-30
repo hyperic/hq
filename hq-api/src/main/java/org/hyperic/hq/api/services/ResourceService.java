@@ -62,15 +62,9 @@ public interface ResourceService {
 			@QueryParam("status") final ResourceStatusType resourceStatusType, @QueryParam("hierarchyDepth") final int hierarchyDepth, 
 			@QueryParam("responseStructure") final ResourceDetailsType[] responseStructure) throws SessionNotFoundException, SessionTimeoutException ;  
 	
-	/**
-	 * NYI
-	 */
 	@GET
 	ResourceBatchResponse getResources() throws SessionNotFoundException, SessionTimeoutException  ;  
 	
-    /**
-     * NYI
-     */
 	@POST
 	@Path("/approve")
 	ResourceBatchResponse approveResource(final Resources aiResources) throws SessionNotFoundException, SessionTimeoutException ; 
@@ -78,9 +72,6 @@ public interface ResourceService {
 	@PUT
 	ResourceBatchResponse updateResources(final Resources resources) throws SessionNotFoundException, SessionTimeoutException ; 
 
-	/**
-     * NYI
-     */
 	@PUT
 	@Path("/search")
 	ResourceBatchResponse updateResourcesByCriteria(final Resource updateData) throws SessionNotFoundException, SessionTimeoutException ;  
