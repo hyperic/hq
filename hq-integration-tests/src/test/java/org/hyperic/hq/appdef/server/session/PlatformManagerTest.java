@@ -505,6 +505,9 @@ public class PlatformManagerTest
         for (Platform platform : testPlatforms) {
             testPlatformPKs.add(platform.getId());
         }
+
+        java.util.Collections.sort(testPlatformPKs) ; 
+        java.util.Collections.sort(platformPKs) ; 
         assertEquals(testPlatformPKs, platformPKs);
     }
 
