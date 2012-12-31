@@ -3,9 +3,13 @@ package org.hyperic.hq.api.services.impl;
 import java.net.MalformedURLException;
 import java.rmi.RemoteException;
 
+import javax.ws.rs.QueryParam;
+
 
 import org.hyperic.hq.api.model.cloud.CloudConfiguration;
 import org.hyperic.hq.api.services.VMService;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -32,10 +36,10 @@ public class VMServiceImpl extends RestApiService  implements VMService {
         this.vmMgr=vmMgr;        
     }
 
-    public void collect(CloudConfiguration cloudConfiguration, String hostName) throws RemoteException, MalformedURLException, SessionNotFoundException, SessionTimeoutException, PermissionException {
+    public void collect(String url, String user, String password) throws RemoteException, MalformedURLException, SessionNotFoundException, SessionTimeoutException, PermissionException, CPropKeyNotFoundException, AppdefEntityNotFoundException {
         ApiMessageContext apiMessageContext = newApiMessageContext();
         AuthzSubject authzSubject = apiMessageContext.getAuthzSubject();
 
-        this.vmMgr.collect(authzSubject, cloudConfiguration.getUrl(),cloudConfiguration.getUsername(),cloudConfiguration.getPassword(), hostName);
+        this.vmMgr.collect(authzSubject, url,user,password);
     }
 }

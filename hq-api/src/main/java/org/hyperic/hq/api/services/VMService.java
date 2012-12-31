@@ -11,6 +11,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.hyperic.hq.api.model.cloud.CloudConfiguration;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -22,5 +24,5 @@ public interface VMService {
 
     @POST
     @Path("/collect")
-    public void collect(final CloudConfiguration cloudConfiguration, @QueryParam("host") String host) throws RemoteException, MalformedURLException, SessionNotFoundException, SessionTimeoutException, PermissionException;
+    public void collect(@QueryParam("url") String url,@QueryParam("user") String user, @QueryParam("password") String password) throws RemoteException, MalformedURLException, SessionNotFoundException, SessionTimeoutException, PermissionException, CPropKeyNotFoundException, AppdefEntityNotFoundException;
 }
