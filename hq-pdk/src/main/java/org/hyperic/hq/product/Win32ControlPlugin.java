@@ -30,6 +30,7 @@ import java.util.List;
 
 import org.hyperic.util.config.ConfigResponse;
 
+import org.hyperic.hq.bizapp.shared.lather.ControlSendCommandResult_args;
 import org.hyperic.sigar.win32.Service;
 import org.hyperic.sigar.win32.Win32Exception;
 
@@ -182,7 +183,7 @@ public class Win32ControlPlugin extends ControlPlugin {
         return commands;
     }
 
-    public void doAction(String action)
+    public void doAction(String action, final ControlSendCommandResult_args resultsMetadata)
         throws PluginException
     {
         try {

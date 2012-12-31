@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.plugin.mssql;
 
+import org.hyperic.hq.bizapp.shared.lather.ControlSendCommandResult_args;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.Win32ControlPlugin;
 import org.hyperic.sigar.win32.Service;
@@ -42,7 +43,7 @@ public class MsSQLControlPlugin extends Win32ControlPlugin{
     private static final String SQL_AGENT_SERVICE_NAME = "SQLSERVERAGENT";
 
     @Override
-    public void doAction(String action) throws PluginException {
+    public void doAction(String action, final ControlSendCommandResult_args resultsMetadata) throws PluginException {
         
         Service sqlAgent = null;
         try {

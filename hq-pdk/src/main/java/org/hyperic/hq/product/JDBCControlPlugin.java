@@ -29,6 +29,7 @@ import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.SQLException;
 
+import org.hyperic.hq.bizapp.shared.lather.ControlSendCommandResult_args;
 import org.hyperic.hq.product.ControlPlugin;
 import org.hyperic.hq.product.PluginException;
 
@@ -120,7 +121,7 @@ public abstract class JDBCControlPlugin extends ControlPlugin {
     protected abstract Connection getConnection(String url, String user,
         String password) throws SQLException;
 
-    public abstract void doAction(String action) throws PluginException;
+    public abstract void doAction(String action, final ControlSendCommandResult_args resultsMetadata) throws PluginException;
 
     public void execute(String query) throws PluginException {
         Connection conn = null;
