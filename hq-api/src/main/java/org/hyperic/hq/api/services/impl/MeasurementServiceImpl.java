@@ -2,9 +2,14 @@ package org.hyperic.hq.api.services.impl;
 
 import javax.ws.rs.core.Response;
 
+import org.apache.cxf.jaxrs.ext.search.SearchCondition;
+import org.apache.cxf.jaxrs.ext.search.SearchContext;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
+import org.hyperic.hq.api.model.measurements.MetricFilterRequest;
+import org.hyperic.hq.api.model.measurements.MetricNotifications;
+import org.hyperic.hq.api.model.measurements.RawMetric;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementBatchResponse;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequests;
 import org.hyperic.hq.api.services.MeasurementService;
@@ -18,6 +23,7 @@ import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.TimeframeSizeException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.hyperic.hq.api.model.measurements.BulkResourceMeasurementRequest;
 
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -28,8 +34,32 @@ public class MeasurementServiceImpl extends RestApiService implements Measuremen
     private MeasurementTransfer measurementTransfer;
     @Autowired
     private ExceptionToErrorCodeMapper errorHandler ; 
+    @javax.ws.rs.core.Context
+    private SearchContext searchContext ;
     
-	public MeasurementResponse getMetrics(final MeasurementRequest measurementRequest,
+    public void register(final MetricFilterRequest metricFilterReq) throws SessionNotFoundException, SessionTimeoutException {
+        ApiMessageContext apiMessageContext = newApiMessageContext();
+        Integer sessionId = apiMessageContext.getSessionId();
+//        SearchCondition<RawMetric> a = searchContext.getCondition(org.hyperic.hq.api.model.measurements.RawMetric.class);
+        measurementTransfer.register(sessionId, metricFilterReq);
+    }
+    public void unregister() throws SessionNotFoundException, SessionTimeoutException {
+        ApiMessageContext apiMessageContext = newApiMessageContext();
+        Integer sessionId = apiMessageContext.getSessionId();
+        measurementTransfer.unregister(sessionId);
+    }
+    public void unregister(final MetricFilterRequest metricFilterReq) throws SessionNotFoundException, SessionTimeoutException {
+        ApiMessageContext apiMessageContext = newApiMessageContext();
+        Integer sessionId = apiMessageContext.getSessionId();
+        measurementTransfer.unregister(sessionId,metricFilterReq);
+    }
+    public MetricNotifications poll() throws SessionNotFoundException, SessionTimeoutException {
+        ApiMessageContext apiMessageContext = newApiMessageContext();
+        Integer sessionId = apiMessageContext.getSessionId();
+        return measurementTransfer.poll(sessionId);
+    }
+
+    public MeasurementResponse getMetrics(final MeasurementRequest measurementRequest,
 			final String rscId, final Date begin, final Date end)
 			        throws Throwable {
 	    try {
@@ -66,5 +96,10 @@ public class MeasurementServiceImpl extends RestApiService implements Measuremen
         } catch (TimeframeBoundriesException e) {
             throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.WRONG_DATE_VALUES, e.getMessage());
         }
+    }
+    
+    public ResourceMeasurementBatchResponse getMeasurements(BulkResourceMeasurementRequest msmtMetaReq) throws SessionNotFoundException, SessionTimeoutException {
+        ApiMessageContext apiMessageContext = newApiMessageContext();
+        return this.measurementTransfer.getMeasurements(apiMessageContext,msmtMetaReq);
     }
 }
