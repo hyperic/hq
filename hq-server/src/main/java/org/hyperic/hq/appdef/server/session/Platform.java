@@ -46,11 +46,11 @@ public class Platform extends PlatformBase
     implements HasAuthzOperations
 {
     public String getUuid() {
-        return uuid;
+        return "";//uuid;
     }
 
     public void setUuid(String uuid) {
-        this.uuid = uuid;
+//        this.uuid = uuid;
     }
 
     // Map 'simple' names onto Authz operations
@@ -73,7 +73,7 @@ public class Platform extends PlatformBase
     private Agent _agent;
     private Collection _ips = new ArrayList();
     private Collection _servers =  new ArrayList();
-    private String uuid;
+//    private String uuid;
     public Platform() {
         super();
     }

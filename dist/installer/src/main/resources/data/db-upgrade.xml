@@ -11796,10 +11796,10 @@ has already been defined.
 	</schemaSpec>
 	
 	<schemaSpec version="3.217" alwaysExecute="true">
-		<schema-addColumn table="EAM_PLATFORM"
+		<!--schema-addColumn table="EAM_PLATFORM"
 		                      column="UUID"
 		                      nullable="NULL"
-		                      columnType="VARCHAR2" />
+		                      columnType="VARCHAR2" /-->
 	 	<!--schema-directSQL>  
 	 		<statement>create table if not exists EAM_VM (MAC_ADDRESS varchar(64) not null, UUID varchar(64) not null) </statement>
 	 	</schema-directSQL-->
