@@ -27,6 +27,7 @@ package org.hyperic.hq.plugin.iis;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.bizapp.shared.lather.ControlSendCommandResult_args;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.Win32ControlPlugin;
 import org.hyperic.sigar.win32.Service;
@@ -37,7 +38,7 @@ public class IisControlPlugin extends Win32ControlPlugin {
     private Log log = LogFactory.getLog(IisControlPlugin.class);
 
     @Override
-    public void doAction(String action) throws PluginException {
+    public void doAction(String action, final ControlSendCommandResult_args resultsMetadata) throws PluginException {
         log.debug("[doAction] action: " + action);
         try {
             if (action.equals("restart")) {
@@ -56,7 +57,7 @@ public class IisControlPlugin extends Win32ControlPlugin {
 
                 log.debug("[doAction] svc.status: " + svc.getStatusString());
             } else {
-                super.doAction(action);
+                super.doAction(action, resultsMetadata);
             }
         } catch (Win32Exception e) {
             setResult(RESULT_FAILURE);

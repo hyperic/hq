@@ -88,7 +88,6 @@ public abstract class ControlPlugin extends GenericPlugin {
         getLog().debug(msg, t);
         setResult(RESULT_FAILURE);
     }
-
     
     public void doAction(String action) throws PluginException {
         doAction(action, new String[0]);

@@ -31,6 +31,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.hyperic.hq.bizapp.shared.lather.ControlSendCommandResult_args;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.JDBCControlPlugin;
 
@@ -50,7 +51,7 @@ public class MySQLControlPlugin extends JDBCControlPlugin {
         return DriverManager.getConnection(url, user, password);
     }
 
-    public void doAction(String action)
+    public void doAction(String action, final ControlSendCommandResult_args resultsMetadata)
         throws PluginException
     {
         String query;
