@@ -277,6 +277,7 @@ public class SystemPlugin extends ProductPlugin {
         { "primaryDNS", "Primary DNS" },
         { "secondaryDNS", "Secondary DNS" },
         { "defaultGateway", "Default Gateway" },
+        { "UUID", "Related VM UUID" },
     };
 
     private static final String[][] NETIF_CPROPS = {
