@@ -33,6 +33,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
@@ -50,11 +52,13 @@ import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.hq.vm.VMManager;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
+import org.hyperic.util.pager.Pager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -77,7 +81,7 @@ public class CPropManagerImpl implements CPropManager {
     @Autowired
     public CPropManagerImpl(Messenger sender, CpropDAO cPropDAO, CpropKeyDAO cPropKeyDAO,
                             ApplicationTypeDAO applicationTypeDAO, PlatformTypeDAO platformTypeDAO,
-                            ServerTypeDAO serverTypeDAO, ServiceTypeDAO serviceTypeDAO, VMManager vmMgr) {
+                            ServerTypeDAO serverTypeDAO, ServiceTypeDAO serviceTypeDAO) {
         this.sender = sender;
         this.cPropDAO = cPropDAO;
         this.cPropKeyDAO = cPropKeyDAO;
@@ -85,8 +89,13 @@ public class CPropManagerImpl implements CPropManager {
         this.platformTypeDAO = platformTypeDAO;
         this.serverTypeDAO = serverTypeDAO;
         this.serviceTypeDAO = serviceTypeDAO;
-        this.vmMgr = vmMgr;
     }
+
+    @PostConstruct
+    public void afterPropertiesSet() throws Exception {
+        this.vmMgr = (VMManager) Bootstrap.getBean("VMManagerImpl");
+    }
+
 
     /**
      * Get all the keys associated with an appdef resource type.

@@ -11794,16 +11794,6 @@ has already been defined.
 			bindingParams="${server.encryption-key},${server.encryption-key}"
 			commit="true"/>
 	</schemaSpec>
-	
-	<schemaSpec version="3.217" alwaysExecute="true">
-		<!--schema-addColumn table="EAM_PLATFORM"
-		                      column="UUID"
-		                      nullable="NULL"
-		                      columnType="VARCHAR2" /-->
-	 	<!--schema-directSQL>  
-	 		<statement>create table if not exists EAM_VM (MAC_ADDRESS varchar(64) not null, UUID varchar(64) not null) </statement>
-	 	</schema-directSQL-->
-	</schemaSpec>
 </dbupgrade>
 </target>
 </project>

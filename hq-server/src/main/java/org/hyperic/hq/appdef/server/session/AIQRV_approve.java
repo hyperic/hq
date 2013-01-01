@@ -429,20 +429,21 @@ public class AIQRV_approve implements AIQResourceVisitor {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void setCustomProperties(AIPlatform aiplatform, Platform platform) {
         try {
             int typeId = platform.getPlatformType().getId().intValue();
-            Collection<Ip> ips = platform.getIps();
+            Collection<AIIp> ips = aiplatform.getAIIps();
             List<String> macs = new ArrayList<String>(ips.size());
             if (ips!=null) {
-                for(Ip ip:ips) {
+                for(AIIp ip:ips) {
                     String mac = ip.getMacAddress();
                     if (mac!=null && !mac.isEmpty() && !mac.equals("")) {
                         macs.add(mac);
                     }
                 }
             }
-
+            
             cpropMgr.setConfigResponse(platform.getEntityId(), typeId, aiplatform
                 .getCustomProperties(),macs);
         } catch (Exception e) {

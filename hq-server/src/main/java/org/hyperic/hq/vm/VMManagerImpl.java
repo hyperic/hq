@@ -89,12 +89,12 @@ public class VMManagerImpl implements VMManager {
                   }
 
                   String mac = nics[i].getMacAddress();
-                  if (mac==null) {
-                      log.error("no mac address on nic" + nics[i] + " of vm " + vmName);
+                  if (mac==null || "00:00:00:00:00:00".equals(mac)) {
+                      log.error("no mac address / mac address is 00:00:00:00:00:00 on nic" + nics[i] + " of vm " + vmName);
                       continue;
                   }
 
-                  macToUUID.put(mac,uuid);
+                  macToUUID.put(mac.toUpperCase(),uuid);
                   Collection<Platform> platforms = this.platformMgr.getPlatformByMacAddr(subject, mac);
                   if (platforms==null || platforms.isEmpty()) {
                       if (log.isDebugEnabled()) {
@@ -126,7 +126,7 @@ public class VMManagerImpl implements VMManager {
 
     public String getUuid(final List<String> macs) {
         for(String mac:macs) {
-            String uuid = this.macToUUID.get(mac);
+            String uuid = this.macToUUID.get(mac.toUpperCase());
             if (uuid!=null) {
                 return uuid;
             }
