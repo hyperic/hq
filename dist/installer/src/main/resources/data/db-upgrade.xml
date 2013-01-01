@@ -11794,6 +11794,7 @@ has already been defined.
 			bindingParams="${server.encryption-key},${server.encryption-key}"
 			commit="true"/>
 	</schemaSpec>
+<<<<<<< HEAD:dist/installer/src/main/resources/data/db-upgrade.xml
 
   <schemaSpec version="3.217">
     <schema-insert table="EAM_RESOURCE"
