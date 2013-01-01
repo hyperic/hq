@@ -57,7 +57,7 @@ public class IisControlPlugin extends Win32ControlPlugin {
 
                 log.debug("[doAction] svc.status: " + svc.getStatusString());
             } else {
-                super.doAction(action);
+                super.doAction(action, resultsMetadata);
             }
         } catch (Win32Exception e) {
             setResult(RESULT_FAILURE);
