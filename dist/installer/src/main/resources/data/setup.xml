@@ -63,8 +63,8 @@ ${line.separator}Press enter to continue...
     <condition property="jre.tar.name" value="x86-linux-1.7_9.tar.gz">
         <available file="${install.dir}/jres/x86-linux-1.7_9.tar.gz"/>
     </condition>
-    <condition property="jre.tar.name" value="sparc-sun-solaris-1.6_30.tar.gz">
-        <available file="${install.dir}/jres/sparc-sun-solaris-1.6_30.tar.gz"/>
+    <condition property="jre.tar.name" value="sparc-sun-solaris-1.7_9.tar.gz">
+        <available file="${install.dir}/jres/sparc-sun-solaris-1.7_9.tar.gz"/>
     </condition>
     <condition property="jre.exe.name" value="x86-win32-1.7_9.exe">
         <available file="${install.dir}/jres/x86-win32-1.7_9.exe"/>
