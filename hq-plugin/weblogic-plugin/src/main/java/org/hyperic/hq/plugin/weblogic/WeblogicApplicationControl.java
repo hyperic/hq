@@ -114,7 +114,7 @@ public class WeblogicApplicationControl
     public void doAction(String action, final ControlSendCommandResult_args resultsMetadata) throws PluginException {
         if (!COMMANDS.contains(action)) {
             //e.g. webapp.deleteInvalidSessions
-            super.doAction(action);
+            super.doAction(action, resultsMetadata);
             return;
         }
 

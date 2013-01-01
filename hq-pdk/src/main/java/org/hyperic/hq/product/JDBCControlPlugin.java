@@ -111,7 +111,7 @@ public abstract class JDBCControlPlugin extends ControlPlugin {
 
     public void doAction(String action, String[] args) throws PluginException {
 
-        doAction(action);
+        super.doAction(action, args);
     }
 
     /**
