@@ -182,6 +182,9 @@ public class PlatformManagerTest
                 expectedPlatformTypes.add(platformType);
             }
         }
+
+        java.util.Collections.sort(unsupportedPlatformTypes) ; 
+        java.util.Collections.sort(expectedPlatformTypes) ; 
         assertEquals("Unsupported platform doesn't exist", unsupportedPlatformTypes,
             expectedPlatformTypes);
     }
@@ -673,8 +676,28 @@ public class PlatformManagerTest
         List<Platform> foundPlatforms = platformManager.findPlatformPojosByTypeAndName(
             authzSubjectManager.getOverlordPojo(), testPlatformTypes.get(0).getId(),
             "RegexTestPlatform");
-        assertEquals(platforms, foundPlatforms);
+
+        assertEqualsList(platforms,foundPlatforms) ;
+        //assertEquals(platforms, foundPlatforms);
     }
+
+    private final void assertEqualsList(final List expected, final List actual) { 
+        boolean areEqual = true ; 
+
+        if(expected == null)  areEqual = (actual == null) ; 
+        else if(actual == null)  areEqual = false ; 
+        else if(expected.size() != actual.size()) areEqual = false ; 
+        else { 
+            for(Object o : expected) { 
+                if(!actual.contains(o)) { 
+                    areEqual = false ; 
+                    break ; 
+                }//EO if not the same 
+            }//EO while there are more items      
+        }//EO else if not null or different sizes 
+
+        if(!areEqual) fail("expected same:<"+expected+"> was not:<"+actual+">") ;
+    }//EOM 
 
     // TODO
     public void testFindParentPlatformPojosByNetworkRelation() {
