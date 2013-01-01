@@ -1682,10 +1682,10 @@ public class PlatformManagerImpl implements PlatformManager {
             .findResourceTypeByName(AuthzConstants.platformResType), proto, platform.getId(),
             platform.getName(), false, null);
         platform.setResource(resource);
-        String mac = getPlatformMacAddress(platform);
-        if (mac==null || mac.isEmpty()) { return;}
-        String uuid = this.vmMgr.getUuid(mac);
-        platform.setUuid(uuid);
+//        String mac = getPlatformMacAddress(platform);
+//        if (mac==null || mac.isEmpty()) { return;}
+//        String uuid = this.vmMgr.getUuid(mac);
+//        platform.setUuid(uuid);
     }
 
     /**

@@ -52,6 +52,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.product.TypeInfo;
+import org.hyperic.hq.vm.VMManager;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,11 +72,12 @@ public class CPropManagerImpl implements CPropManager {
     private PlatformTypeDAO platformTypeDAO;
     private ServerTypeDAO serverTypeDAO;
     private ServiceTypeDAO serviceTypeDAO;
-
+    private VMManager vmMgr;
+    
     @Autowired
     public CPropManagerImpl(Messenger sender, CpropDAO cPropDAO, CpropKeyDAO cPropKeyDAO,
                             ApplicationTypeDAO applicationTypeDAO, PlatformTypeDAO platformTypeDAO,
-                            ServerTypeDAO serverTypeDAO, ServiceTypeDAO serviceTypeDAO) {
+                            ServerTypeDAO serverTypeDAO, ServiceTypeDAO serviceTypeDAO, VMManager vmMgr) {
         this.sender = sender;
         this.cPropDAO = cPropDAO;
         this.cPropKeyDAO = cPropKeyDAO;
@@ -83,6 +85,7 @@ public class CPropManagerImpl implements CPropManager {
         this.platformTypeDAO = platformTypeDAO;
         this.serverTypeDAO = serverTypeDAO;
         this.serviceTypeDAO = serviceTypeDAO;
+        this.vmMgr = vmMgr;
     }
 
     /**
@@ -356,6 +359,11 @@ public class CPropManagerImpl implements CPropManager {
      * @param data Encoded ConfigResponse
      */
     public void setConfigResponse(AppdefEntityID aID, int typeId, byte[] data)
+            throws PermissionException, AppdefEntityNotFoundException {
+        setConfigResponse(aID, typeId, data, null);
+    }
+    
+    public void setConfigResponse(AppdefEntityID aID, int typeId, byte[] data, List<String> macs)
         throws PermissionException, AppdefEntityNotFoundException {
         if (data == null) {
             return;
@@ -369,6 +377,10 @@ public class CPropManagerImpl implements CPropManager {
             throw new SystemException(e);
         }
 
+        if (macs!=null) {
+            String uuid = this.vmMgr.getUuid(macs);
+            cprops.setValue("UUID", uuid);
+        }
         if (log.isDebugEnabled()) {
             log.debug("cprops=" + cprops);
             log.debug("aID=" + aID.toString() + ", typeId=" + typeId);
