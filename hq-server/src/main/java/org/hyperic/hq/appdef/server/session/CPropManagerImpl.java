@@ -55,7 +55,7 @@ import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.product.TypeInfo;
-import org.hyperic.hq.vm.VMManager;
+import org.hyperic.hq.vm.VCManager;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.Pager;
@@ -76,7 +76,7 @@ public class CPropManagerImpl implements CPropManager {
     private PlatformTypeDAO platformTypeDAO;
     private ServerTypeDAO serverTypeDAO;
     private ServiceTypeDAO serviceTypeDAO;
-    private VMManager vmMgr;
+    private VCManager vmMgr;
     
     @Autowired
     public CPropManagerImpl(Messenger sender, CpropDAO cPropDAO, CpropKeyDAO cPropKeyDAO,
@@ -93,7 +93,7 @@ public class CPropManagerImpl implements CPropManager {
 
     @PostConstruct
     public void afterPropertiesSet() throws Exception {
-        this.vmMgr = (VMManager) Bootstrap.getBean("VMManagerImpl");
+        this.vmMgr = (VCManager) Bootstrap.getBean("VMManagerImpl");
     }
 
 

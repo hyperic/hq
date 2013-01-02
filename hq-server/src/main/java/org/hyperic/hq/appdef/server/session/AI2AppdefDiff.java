@@ -49,7 +49,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.AICompare;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.vm.VMManager;
+import org.hyperic.hq.vm.VCManager;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
@@ -60,9 +60,9 @@ import org.hyperic.util.config.EncodingException;
 public class AI2AppdefDiff {
 
     private static Log _log = LogFactory.getLog(AI2AppdefDiff.class);
-    protected VMManager vmMgr;
+    protected VCManager vmMgr;
 
-    public AI2AppdefDiff (VMManager vmMgr) {
+    public AI2AppdefDiff (VCManager vmMgr) {
         this.vmMgr=vmMgr;
     }
 
