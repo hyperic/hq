@@ -11964,7 +11964,7 @@ has already been defined.
         <schema-directSQL>
             <statement targetDB="postgresql">
                CREATE TABLE if not exists EAM_UUIDTable (
-            	 MAC_ADDRESS VARCHAR(64) NOT NULL, 
+            	 MAC_ADDRESS VARCHAR(64) NOT NULL PRIMARY KEY, 
             	 UUID VARCHAR(128) NOT NULL
                )
             </statement>
