@@ -39,7 +39,9 @@ public class CryptoTask extends Task {
 
     private String value;
     private String property;
-
+    private int strength = 256;//set 256 as default just in case.
+    private boolean encodeHashAsBase64;
+    
     public void setValue(String s) {
         value = s;
     }
@@ -47,6 +49,15 @@ public class CryptoTask extends Task {
     public void setProperty(String s) {
         property = s;
     }
+    
+    public void setStrength(int strength) {
+        this.strength = strength;
+    }
+    
+    public void setEncodeHashAsBase64(boolean encodeHashAsBase64) {
+        this.encodeHashAsBase64 = encodeHashAsBase64;
+    }
+
 
     public void execute() throws BuildException {
         validateAttributes();
@@ -54,7 +65,10 @@ public class CryptoTask extends Task {
         // TODO: the following code copies the Md5PlusShaPasswordEncoder, which resides in a dependant project.
         // This class should be moved into this project instead.
         Md5PasswordEncoder md5PwdEncoder = new Md5PasswordEncoder();
-        ShaPasswordEncoder shaPwdEncoder = new ShaPasswordEncoder(256);
+        md5PwdEncoder.setEncodeHashAsBase64(encodeHashAsBase64 );
+        ShaPasswordEncoder shaPwdEncoder = new ShaPasswordEncoder(strength);
+        shaPwdEncoder.setEncodeHashAsBase64(encodeHashAsBase64 );
+        
         String md5Encoded = md5PwdEncoder.encodePassword(value, null);
         String encrypted = shaPwdEncoder.encodePassword(md5Encoded, null);
 

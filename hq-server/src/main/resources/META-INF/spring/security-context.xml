@@ -36,9 +36,21 @@
            http://www.springframework.org/schema/context/spring-context-2.5.xsd
            http://www.springframework.org/schema/security 
            http://www.springframework.org/schema/security/spring-security-3.0.xsd">
-
-	<bean id="passwordEncoder" class="org.hyperic.hq.security.Md5PlusShaPasswordEncoder">
+           
+           
+    <bean id="Md5PasswordEncoder" class="org.springframework.security.authentication.encoding.Md5PasswordEncoder">
 		<property name="encodeHashAsBase64" value="true" />
+	</bean>
+		
+	<bean id="ShaPasswordEncoder" class="org.springframework.security.authentication.encoding.ShaPasswordEncoder">
+		<constructor-arg type="int" value="256" /> <!-- strength -->    
+		<property name="encodeHashAsBase64" value="true" />
+		
+	</bean>
+
+	<bean id="passwordEncoder" class="org.hyperic.hq.security.Md5PlusShaPasswordEncoder" >
+		<constructor-arg ref="Md5PasswordEncoder"/>
+		<constructor-arg ref="ShaPasswordEncoder"/>
 	</bean>
 		
 	<bean id="internalAuthenticationProvider" class="org.hyperic.hq.security.InternalAuthenticationProvider">
