@@ -14,7 +14,7 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.vm.VMManager;
+import org.hyperic.hq.vm.VCManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,10 +29,10 @@ import com.vmware.vim25.mo.VirtualMachine;
 
 @Component
 public class VMServiceImpl extends RestApiService  implements VMService {
-    private VMManager vmMgr;
+    private VCManager vmMgr;
     
     @Autowired
-    public VMServiceImpl(VMManager vmMgr) {
+    public VMServiceImpl(VCManager vmMgr) {
         this.vmMgr=vmMgr;        
     }
 

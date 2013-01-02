@@ -95,7 +95,7 @@ import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.shared.SRNManager;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.PlatformTypeInfo;
-import org.hyperic.hq.vm.VMManager;
+import org.hyperic.hq.vm.VCManager;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.sigar.NetFlags;
 import org.hyperic.util.pager.PageControl;
@@ -158,7 +158,7 @@ public class PlatformManagerImpl implements PlatformManager {
 
     private SRNManager srnManager;
 
-    private VMManager vmMgr;
+    private VCManager vmMgr;
     
     @Autowired
     public PlatformManagerImpl(PlatformTypeDAO platformTypeDAO,
@@ -2018,7 +2018,7 @@ public class PlatformManagerImpl implements PlatformManager {
 
     @PostConstruct
     public void afterPropertiesSet() throws Exception {
-        this.vmMgr = (VMManager) Bootstrap.getBean("VMManagerImpl");
+        this.vmMgr = (VCManager) Bootstrap.getBean("VMManagerImpl");
         valuePager = Pager.getPager(VALUE_PROCESSOR);
     }
 
