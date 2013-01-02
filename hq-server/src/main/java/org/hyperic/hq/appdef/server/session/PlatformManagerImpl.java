@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -60,6 +61,7 @@ import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
+import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
 import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.IpValue;
@@ -2036,6 +2038,37 @@ public class PlatformManagerImpl implements PlatformManager {
     		}
     	}
     	return null;
+    }
+
+    public void mapUUIDToPlatforms(AuthzSubject subject, Map<String, List<String>> uuidToMacsMap) throws PermissionException, CPropKeyNotFoundException {
+        for(String uuid : uuidToMacsMap.keySet()) {
+            List<String> macs = uuidToMacsMap.get(uuid);
+            for (String mac : macs) {
+                if ("00:00:00:00:00:00".equals(mac)) { continue; }
+                Collection<Platform> platforms = this.getPlatformByMacAddr(subject, mac);
+                if (platforms!=null && !platforms.isEmpty()) {
+                    if (log.isDebugEnabled()) { log.debug("no platform in the system is assosiated to the " + mac + " mac address"); }
+                    continue;
+                }
+
+                // there should only be 2 platforms
+                boolean platformUUIDUpdated = false;
+                for(Platform platform:platforms) {
+                    try {
+                        // only map the UUID for actual platforms, not for virtual ones discovered by the vc plugin
+                        if (AuthzConstants.platformPrototypeVmwareVsphereVm.equals(platform.getResource().getPrototype().getName())) { continue; }
+                        AppdefEntityID id = platform.getEntityId();
+                        int typeId = platform.getAppdefResourceType().getId().intValue();
+                        this.cpropManager.setValue(id, typeId, "UUID", uuid);
+                        platformUUIDUpdated=true;
+                    } catch (AppdefEntityNotFoundException e) { log.error(e); }
+                }
+                // assume one mac address is sufficient for VM-platform mapping
+                if (platformUUIDUpdated) { break;}
+            }
+        }
+        //TODO~ check if updates DB by the end of the transaction
+        //TODO~ make sure the uuid is extracted in the resource mapper for platforms
     }
     
 }
