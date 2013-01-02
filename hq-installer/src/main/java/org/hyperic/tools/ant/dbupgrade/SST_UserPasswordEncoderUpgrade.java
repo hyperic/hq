@@ -1,5 +1,6 @@
 package org.hyperic.tools.ant.dbupgrade;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -13,11 +14,21 @@ import org.springframework.security.authentication.encoding.ShaPasswordEncoder;
 
 public class SST_UserPasswordEncoderUpgrade extends SchemaSpecTask {
     private String encryption ; 
+    private int strength = 256;//set 256 as default just in case.
+    private boolean encodeHashAsBase64;
     
     public final void setEncryption(final String encryption) { 
         this.encryption = encryption ; 
     }//EOM 
     
+    public void setStrength(int strength) {
+        this.strength = strength;
+    }
+    
+    public void setEncodeHashAsBase64(boolean encodeHashAsBase64) {
+        this.encodeHashAsBase64 = encodeHashAsBase64;
+    }
+
     @Override
     public void execute() throws BuildException {
        
@@ -35,40 +46,35 @@ public class SST_UserPasswordEncoderUpgrade extends SchemaSpecTask {
         ResultSet rs = null ;
         
         try{ 
-            final String stmtTemplate = "select %2$s.%1$s from %2$s" ;
-            //final String stmtTemplate = "select %2$s.%1$s from %2$s where %1$s like 'ENC(%%' limit 2" ; 
+            final String stmtTemplate = "select %1$s.%2$s from %1$s" ;
             stmt = this._conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY) ; 
             
-            final String[] qualifiedColumnNames = this.encryption.split("[,]") ;
             String[] tableColumntuples = null ; 
-            final int length = qualifiedColumnNames.length ;
+            tableColumntuples = encryption.split("\\.") ;
             
-            final StringBuilder stmtBuilder = new StringBuilder() ; 
-            
-            for(int i=0; i < length; i++) {
-                tableColumntuples = qualifiedColumnNames[i].split("\\.") ; 
-                stmtBuilder.append(String.format(stmtTemplate, tableColumntuples[1], tableColumntuples[0])) ; 
-                if(i < length-1) stmtBuilder.append(";") ;
-            }//EO while there are more table-column tuples 
-            
+            final StringBuilder stmtBuilder = new StringBuilder() ;
+            stmtBuilder.append(String.format(stmtTemplate, tableColumntuples[0], tableColumntuples[1])); 
+            stmtBuilder.append(";") ;
+             
             final boolean resultSetExists = stmt.execute(stmtBuilder.toString()) ;
             if(resultSetExists) { 
-                
-                final ShaPasswordEncoder encoder = new ShaPasswordEncoder();
+                this.log("Re-encoding Encyrption for Table " + tableColumntuples[0] + "...") ;
+                final ShaPasswordEncoder encoder = new ShaPasswordEncoder(strength);
+                encoder.setEncodeHashAsBase64(encodeHashAsBase64 );
                 
                 String encryptedValue = null, qualifiedColumnName = null ;
                 int rsCounter = 0 ; 
                 try{ 
                     do { 
-                       rs = stmt.getResultSet() ;
-                       qualifiedColumnName = qualifiedColumnNames[rsCounter++] ; 
-                       this.log("Re-encoding Encyrption for Table " + qualifiedColumnName + "...") ;
+                       rs = stmt.getResultSet();                     
                        while(rs.next()) { 
                            encryptedValue = rs.getString(1) ; 
                            //now attempt to decrypt the value 
-                           encoder.encodePassword(encryptedValue, null) ;
+                           updateDBwithNewEncodePassword(tableColumntuples[0], tableColumntuples[1], encryptedValue, encoder.encodePassword(encryptedValue, null));
+                           rsCounter++;
                        }//EO while there are more records 
                     }while(stmt.getMoreResults()) ; 
+                    this.log("Re-encoded " + rsCounter + " passwords.", Project.MSG_DEBUG);
                 }catch(SQLException sqle) { 
                     throw sqle ; 
                 }catch(Throwable t) {
@@ -84,7 +90,7 @@ public class SST_UserPasswordEncoderUpgrade extends SchemaSpecTask {
             
             }//EO if resultset(s) exist
             
-            this.log(": User Password upgrade was successful.", Project.MSG_INFO) ; 
+            this.log(": User Password upgrade was successful.") ; 
         }catch(Throwable t) { 
             t.printStackTrace() ; 
             throw t ; 
@@ -93,6 +99,17 @@ public class SST_UserPasswordEncoderUpgrade extends SchemaSpecTask {
         }//EO catch block 
         
     }//EOM 
-    
+
+    private void updateDBwithNewEncodePassword(String table, String column, String orgValue, String newValue) throws SQLException {
+        PreparedStatement ps = null;
+        String updateSql
+        = "UPDATE " + table + " SET " + column + " = ? " + 
+                "WHERE " + column + " = ? ;";
+        ps = this._conn.prepareStatement(updateSql);
+        ps.setObject(1, newValue, java.sql.Types.VARCHAR);
+        ps.setObject(2, orgValue, java.sql.Types.VARCHAR);
+        ps.executeUpdate();
+    }
+
     
 }

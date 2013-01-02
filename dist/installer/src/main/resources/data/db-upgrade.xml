@@ -11957,7 +11957,7 @@ has already been defined.
   </schemaSpec>
 	
 	  <schemaSpec version="3.218" >
-	  	<user-password-upgrader encryption="EAM_PRINCIPAL.PASSWORD" />
+	  	<user-password-upgrader encryption="EAM_PRINCIPAL.PASSWORD" strength="256" encodeHashAsBase64="true" />
 	  </schemaSpec>
 
 	<schemaSpec version="3.219" alwaysExecute="true">

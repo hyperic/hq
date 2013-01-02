@@ -11,14 +11,22 @@ public class Md5PlusShaPasswordEncoder extends BaseDigestPasswordEncoder {
     
     Md5PasswordEncoder md5PwdEncoder;
     ShaPasswordEncoder shaPwdEncoder;
-
-    public Md5PlusShaPasswordEncoder() {
-        //super("Md5PlusSha");
-        md5PwdEncoder = new Md5PasswordEncoder();
-        shaPwdEncoder = new ShaPasswordEncoder(256);
+    
+    public Md5PlusShaPasswordEncoder(Md5PasswordEncoder md5PwdEncoder, ShaPasswordEncoder shaPwdEncoder){
+        this.md5PwdEncoder = md5PwdEncoder;
+        this.shaPwdEncoder = shaPwdEncoder;
+    }
+    
+        
+    @Override
+    public void setEncodeHashAsBase64(boolean encodeHashAsBase64) {
+        super.setEncodeHashAsBase64(encodeHashAsBase64);
+        //delegate also to components
+        md5PwdEncoder.setEncodeHashAsBase64(encodeHashAsBase64);
+        shaPwdEncoder.setEncodeHashAsBase64(encodeHashAsBase64);
     }
 
-    
+
     public String encodePassword(String rawPass, Object salt) throws DataAccessException {
         String md5Encoded = md5PwdEncoder.encodePassword(rawPass, salt);
         String res = shaPwdEncoder.encodePassword(md5Encoded, salt);
