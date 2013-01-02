@@ -46,6 +46,7 @@ import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.AICompare;
 import org.hyperic.hq.common.SystemException;
@@ -169,19 +170,22 @@ public class AI2AppdefDiff {
                 AppdefEntityID.newPlatformID(appdefPlatform.getId());
             int type =
                 appdefPlatform.getPlatformType().getId().intValue();
-            
-            Collection<Ip> ips = appdefPlatform.getIps();
-            List<String> macs = new ArrayList<String>(ips.size());
-            if (ips!=null) {
-                for(Ip ip:ips) {
-                    String mac = ip.getMacAddress();
-                    if (mac!=null && !mac.isEmpty() && !mac.equals("")) {
-                        macs.add(mac);
+            // only map the UUID for actual platforms, not for virtual ones discovered by the vc plugin
+            if (AuthzConstants.platformPrototypeVmwareVsphereVm.equals(appdefPlatform.getResource().getPrototype().getName())) { 
+                updateCprops(cpropMgr, aid, type, aiplatform.getCustomProperties(),null);
+            } else {
+                Collection<Ip> ips = appdefPlatform.getIps();
+                List<String> macs = new ArrayList<String>(ips.size());
+                if (ips!=null) {
+                    for(Ip ip:ips) {
+                        String mac = ip.getMacAddress();
+                        if (mac!=null && !mac.isEmpty() && !mac.equals("")) {
+                            macs.add(mac);
+                        }
                     }
                 }
+                updateCprops(cpropMgr, aid, type, aiplatform.getCustomProperties(),macs);
             }
-            updateCprops(cpropMgr, aid, type,
-                         aiplatform.getCustomProperties(),macs);
         }
 
         return revisedAIplatform;
