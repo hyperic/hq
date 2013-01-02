@@ -27,6 +27,7 @@ package org.hyperic.hq.appdef.shared;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.Ip;
@@ -409,5 +410,7 @@ public interface PlatformManager {
     public Collection<Platform> findAll(AuthzSubject superUser) throws PermissionException;
 
     public Platform getPlatformById(Integer id);
+
+    void mapUUIDToPlatforms(AuthzSubject subject, Map<String, List<String>> uuidToMacsMap) throws PermissionException, CPropKeyNotFoundException;
 
 }
