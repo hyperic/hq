@@ -203,7 +203,7 @@ public final class AuthzConstants {
     public static final Integer     authzServerProto    =  new Integer(602);
     public static final Integer     authzServiceProto   =  new Integer(603);
     public static final Integer     authzApplicationProto  =  new Integer(604);
-    public static final Integer     authzProfile       =  new Integer(701);
+    public static final Integer     authzPolicy         =  new Integer(701);
  
     // Resource Relation constants
     public static final Integer RELATION_CONTAINMENT_ID = new Integer(1);

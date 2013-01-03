@@ -7,7 +7,7 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.common.server.session.Crispo;
 
 @SuppressWarnings("serial")
-public class ManagementProfile extends PersistedObject {
+public class ManagementPolicy extends PersistedObject {
     
     private String description;
     private Resource resource;

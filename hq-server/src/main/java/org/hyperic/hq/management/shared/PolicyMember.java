@@ -30,7 +30,7 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 
 @SuppressWarnings("serial")
-public class ProfileMember extends PersistedObject {
+public class PolicyMember extends PersistedObject {
     
     private long created;
     private Resource resource;
@@ -63,8 +63,8 @@ public class ProfileMember extends PersistedObject {
         if (this == o) {
             return true;
         }
-        if (o instanceof ProfileMember) {
-            ProfileMember p = (ProfileMember) o;
+        if (o instanceof PolicyMember) {
+            PolicyMember p = (PolicyMember) o;
             if (resource.getId().equals(p.resource.getId()) && resourceGroup.getId().equals(p.resourceGroup.getId())) {
                 return true;
             }
