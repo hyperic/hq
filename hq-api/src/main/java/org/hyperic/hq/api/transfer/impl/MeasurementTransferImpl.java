@@ -151,7 +151,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             this.sessionToDestination.remove(sessionId);
             this.q.unregister(dest);
             this.evaluator.unregisterAll(dest);
-        }        
+        }
     }
     public void unregister(final Integer sessionId, final MetricFilterRequest metricFilterReq) {
         //TODO~ return failed/successful registration

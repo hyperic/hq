@@ -58,6 +58,6 @@ public class FilterChain<N extends INotification> extends AbstractCollection<Fil
     @Override
     public String toString() {
         return super.toString();
-        // TODO print internal filters list and see debug logs that prints this class are fine
+        // TODO~ print internal filters list and see debug logs that prints this class are fine
     }
 }
