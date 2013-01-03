@@ -3,6 +3,7 @@ package org.hyperic.hq.plugin.vsphere;
 import java.util.Calendar;
 import java.util.Properties;
 
+import org.hyperic.hq.bizapp.shared.lather.ControlSendCommandResult_args;
 import org.hyperic.hq.product.ControlPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
@@ -19,7 +20,7 @@ public class VCenterControlPlugin extends ControlPlugin {
         super.configure(config);
     }
     
-    public void doAction(String action, String[] args) throws PluginException {
+    public void doAction(String action, String[] args, final ControlSendCommandResult_args resultsMetadata) throws PluginException {
         setResult(ControlPlugin.RESULT_FAILURE);
         // We expect to get the vm's moid and the event type. Without these parameters we can't continue
         if(args.length < 3) {
