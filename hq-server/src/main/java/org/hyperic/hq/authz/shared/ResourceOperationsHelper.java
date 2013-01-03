@@ -244,7 +244,7 @@ public class ResourceOperationsHelper {
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
                 resourceTypeCode = APPLICATION;
                 break;
-            case AppdefEntityConstants.APPDEF_TYPE_PROFILE:
+            case AppdefEntityConstants.APPDEF_TYPE_POLICY:
                 resourceTypeCode = PROFILE;
                 break;
             default:

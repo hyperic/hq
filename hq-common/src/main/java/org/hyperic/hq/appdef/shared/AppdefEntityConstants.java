@@ -40,7 +40,7 @@ public final class AppdefEntityConstants {
     public static final int APPDEF_TYPE_AISERVER    = 7;
     public static final int APPDEF_TYPE_AIIP        = 8;
     public static final int APPDEF_TYPE_AUTOGROUP   = 9;
-    public static final int APPDEF_TYPE_PROFILE     = 10;
+    public static final int APPDEF_TYPE_POLICY      = 10;
 
 
     private static final String APPDEF_NAME_PRIVATEGROUP = "privateGroup";
@@ -53,7 +53,7 @@ public final class AppdefEntityConstants {
     private static final String APPDEF_NAME_AISERVER    = "aiserver";
     private static final String APPDEF_NAME_AIIP        = "aiip";
     private static final String APPDEF_NAME_AUTOGROUP   = "autogroup";
-    private static final String APPDEF_NAME_PROFILE     = "profile";
+    private static final String APPDEF_NAME_POLICY      = "policy";
 
     public static final String GENERIC_APPLICATION_TYPE = 
         "Generic Application";
@@ -173,7 +173,7 @@ public final class AppdefEntityConstants {
 
     public static boolean typeIsValid(int type){
         return type >= AppdefEntityConstants.APPDEF_TYPE_PLATFORM &&
-            type <= AppdefEntityConstants.APPDEF_TYPE_PROFILE;
+            type <= AppdefEntityConstants.APPDEF_TYPE_POLICY;
     }
 
     public static boolean groupTypeIsValid (int type) {

@@ -26,13 +26,13 @@
 
 <hibernate-mapping package="org.hyperic.hq.management.shared">
 
-  <class name="PolicyMember" table="EAM_PROFILE_GRP_MAP" lazy="true" mutable="false">
+  <class name="PolicyMember" table="EAM_POLICY_GRP_MAP" lazy="true" mutable="false">
     <cache usage="read-write"/>
     <id name="id" type="integer">
       <meta attribute="scope-set"><![CDATA[private]]></meta>
       <column name="ID" not-null="true"/>
       <generator class="org.hyperic.hibernate.id.ComboGenerator">
-        <param name="sequence">EAM_PROFILE_GRP_MAP_ID_SEQ</param>
+        <param name="sequence">EAM_POLICY_GRP_MAP_ID_SEQ</param>
       </generator>
     </id>
 
