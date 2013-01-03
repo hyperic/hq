@@ -160,8 +160,6 @@ public class PlatformManagerImpl implements PlatformManager {
 
     private SRNManager srnManager;
 
-    private VCManager vmMgr;
-    
     @Autowired
     public PlatformManagerImpl(PlatformTypeDAO platformTypeDAO,
                                PermissionManager permissionManager, AgentDAO agentDAO,
@@ -1684,10 +1682,6 @@ public class PlatformManagerImpl implements PlatformManager {
             .findResourceTypeByName(AuthzConstants.platformResType), proto, platform.getId(),
             platform.getName(), false, null);
         platform.setResource(resource);
-//        String mac = getPlatformMacAddress(platform);
-//        if (mac==null || mac.isEmpty()) { return;}
-//        String uuid = this.vmMgr.getUuid(mac);
-//        platform.setUuid(uuid);
     }
 
     /**
@@ -2020,7 +2014,6 @@ public class PlatformManagerImpl implements PlatformManager {
 
     @PostConstruct
     public void afterPropertiesSet() throws Exception {
-        this.vmMgr = (VCManager) Bootstrap.getBean("VMManagerImpl");
         valuePager = Pager.getPager(VALUE_PROCESSOR);
     }
 
@@ -2040,13 +2033,13 @@ public class PlatformManagerImpl implements PlatformManager {
     	return null;
     }
 
-    public void mapUUIDToPlatforms(AuthzSubject subject, Map<String, List<String>> uuidToMacsMap) throws PermissionException, CPropKeyNotFoundException {
+    public void mapUUIDToPlatforms(AuthzSubject subject, Map<String, Set<String>> uuidToMacsMap) throws PermissionException, CPropKeyNotFoundException {
         for(String uuid : uuidToMacsMap.keySet()) {
-            List<String> macs = uuidToMacsMap.get(uuid);
+            Set<String> macs = uuidToMacsMap.get(uuid);
             for (String mac : macs) {
                 if ("00:00:00:00:00:00".equals(mac)) { continue; }
                 Collection<Platform> platforms = this.getPlatformByMacAddr(subject, mac);
-                if (platforms!=null && !platforms.isEmpty()) {
+                if (platforms==null || platforms.isEmpty()) {
                     if (log.isDebugEnabled()) { log.debug("no platform in the system is assosiated to the " + mac + " mac address"); }
                     continue;
                 }

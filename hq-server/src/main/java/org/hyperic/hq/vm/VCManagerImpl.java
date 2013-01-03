@@ -5,8 +5,11 @@ import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 
 import org.apache.commons.logging.Log;
@@ -38,7 +41,7 @@ public class VCManagerImpl implements VCManager {
     @Autowired
     protected VCDAO vcDao;
 
-    protected Map<String,List<String>> collectUUIDs(final String url, final String usr, final String pass) throws RemoteException, MalformedURLException {
+    protected Map<String,Set<String>> collectUUIDs(final String url, final String usr, final String pass) throws RemoteException, MalformedURLException {
         ServiceInstance si = new ServiceInstance(new URL(url), usr, pass, true);
         try {
             Folder rootFolder = si.getRootFolder();
@@ -49,7 +52,7 @@ public class VCManagerImpl implements VCManager {
                 }
                 return null;
             }
-            Map<String,List<String>> uuidToMacsMap = new HashMap<String,List<String>>();
+            Map<String,Set<String>> uuidToMacsMap = new HashMap<String,Set<String>>();
             for (Object o : me) {
                 // gather data from the vc
                 VirtualMachine vm = (VirtualMachine)o;
@@ -94,9 +97,9 @@ public class VCManagerImpl implements VCManager {
                         log.error("no mac address / mac address is 00:00:00:00:00:00 on nic" + nics[i] + " of vm " + vmName);
                         continue;
                     }
-                    List<String> macs = uuidToMacsMap.get(uuid);
+                    Set<String> macs = uuidToMacsMap.get(uuid);
                     if (macs==null) {
-                        macs = new ArrayList<String>();
+                        macs = new TreeSet<String>();
                         uuidToMacsMap.put(uuid,macs);
                     }
                     macs.add(mac.toUpperCase());
@@ -119,9 +122,22 @@ public class VCManagerImpl implements VCManager {
      * @param subject
      * @param uuidToMacsMap
      */
-    protected void createUUIDToMacsMapping(AuthzSubject subject, Map<String, List<String>> uuidToMacsMap) {
+    protected void updateUUIDToMacsMapping(AuthzSubject subject, Map<String, Set<String>> uuidToMacsMap) {
+        List<MacToUUID> persistedMacToUUIDs = this.vcDao.findAll();
+        List<MacToUUID> macToUUIDsToRemove = new ArrayList<MacToUUID>();
+        for(Iterator<MacToUUID> itr = persistedMacToUUIDs.iterator() ; itr.hasNext() ; ) {
+            MacToUUID macToUUID = itr.next();
+            Set<String> macs = uuidToMacsMap.get(macToUUID.getUuid());
+            if (macs==null || !macs.contains(macToUUID.getMac())) { 
+                macToUUIDsToRemove.add(macToUUID);
+                continue;
+            }
+        }
+        for(MacToUUID macToUUID:macToUUIDsToRemove) {
+            this.vcDao.remove(macToUUID);
+        }
         for(String uuid : uuidToMacsMap.keySet()) {
-            List<String> macs = uuidToMacsMap.get(uuid);
+            Set<String> macs = uuidToMacsMap.get(uuid);
             for (String mac : macs) {
                 MacToUUID uuidToMacs = new MacToUUID(mac,uuid);
                 this.vcDao.save(uuidToMacs);
@@ -131,8 +147,8 @@ public class VCManagerImpl implements VCManager {
     
     @Transactional(readOnly = false)
     public void collect(AuthzSubject subject, String url, String usr, String pass) throws RemoteException, MalformedURLException, PermissionException, CPropKeyNotFoundException, AppdefEntityNotFoundException {
-        Map<String, List<String>> uuidToMacsMap = this.collectUUIDs(url,usr,pass);
-        createUUIDToMacsMapping(subject,uuidToMacsMap);
+        Map<String, Set<String>> uuidToMacsMap = this.collectUUIDs(url,usr,pass);
+        updateUUIDToMacsMapping(subject,uuidToMacsMap);
         this.platformMgr.mapUUIDToPlatforms(subject, uuidToMacsMap);
     }
 
@@ -150,4 +166,24 @@ public class VCManagerImpl implements VCManager {
         }
         return null;
     }
+    
+    
+    public static void main(String[] args) throws Throwable {
+        List<Integer> persistedMacToUUIDs= new ArrayList<Integer>();
+        for (int x =1 ; x<=5 ; x++) {
+            persistedMacToUUIDs.add(new Integer(x));
+        }
+        System.out.println(persistedMacToUUIDs);
+        int x = 1;
+        for(Iterator<Integer> itr = persistedMacToUUIDs.iterator() ; itr.hasNext() ; ) {
+            Integer i = itr.next();
+            System.out.println(i);
+            if (x==2 || x==4) {
+                itr.remove();
+            }
+            x++;
+        }
+        System.out.println(persistedMacToUUIDs);
+
+    }//EOM 
 }
