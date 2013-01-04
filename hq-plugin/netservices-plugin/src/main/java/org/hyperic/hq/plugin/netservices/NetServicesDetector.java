@@ -213,6 +213,10 @@ public class NetServicesDetector
             discoverNFS(services);
         }
 
+        if ("true".equals(getDiscover("http"))) {
+            services.add(createService("HTTP", "localhost", "80", false));
+        }
+
         //not enabled by default, but helpful for testing.
         if (!"true".equals(getDiscover(null))) {
             return services;
