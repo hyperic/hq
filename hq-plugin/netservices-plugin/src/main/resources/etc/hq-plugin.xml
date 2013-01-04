@@ -100,6 +100,7 @@
             description="Request Method">
       <include name="HEAD"/>
       <include name="GET"/>
+      <include name="POST"/>
     </option>
 
     <option name="hostheader"
@@ -118,6 +119,11 @@
     <option name="proxy"
             description="Proxy Connection"
             optional="true"/>
+    
+    <option name="postargs"
+            description="POST Argumets"
+            optional="true"/>
+
   </config>
 
   <config name="pop3"

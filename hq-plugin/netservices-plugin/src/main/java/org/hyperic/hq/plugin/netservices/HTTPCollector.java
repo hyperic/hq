@@ -26,6 +26,7 @@
 package org.hyperic.hq.plugin.netservices;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -34,24 +35,32 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.Header;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.ParseException;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.auth.params.AuthPNames;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.params.ClientPNames;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
@@ -75,6 +84,7 @@ public class HTTPCollector extends SocketChecker {
 	private String proxyHost = null;
 	private int proxyPort = 8080;
 	private Log log;
+    private String postargs;
 
 	protected void init() throws PluginException {
 		super.init();
@@ -95,6 +105,7 @@ public class HTTPCollector extends SocketChecker {
 
 		this.method = props.getProperty(PROP_METHOD, METHOD_HEAD);
 		this.hosthdr = props.getProperty("hostheader");
+		this.postargs = props.getProperty("postargs");
 		
 		try {
 			URL url = new URL(protocol, getHostname(), getPort(), getPath());
@@ -128,7 +139,6 @@ public class HTTPCollector extends SocketChecker {
 		
 		if (pattern != null) {
 			this.pattern = Pattern.compile(pattern);
-			this.method = METHOD_GET;
 		}
 
 		String proxy = props.getProperty("proxy");
@@ -288,7 +298,6 @@ public class HTTPCollector extends SocketChecker {
 
 		this.matches.clear();
 		
-		boolean isHEAD = getMethod().equals(METHOD_HEAD);
 		HttpConfig config = new HttpConfig(getTimeoutMillis(), getTimeoutMillis(), proxyHost, proxyPort);
 
 		AgentKeystoreConfig keystoreConfig = new AgentKeystoreConfig();
@@ -303,9 +312,27 @@ public class HTTPCollector extends SocketChecker {
 			params.setParameter(ClientPNames.VIRTUAL_HOST, this.hosthdr);
 		}
 
-		HttpRequestBase method = (isHEAD) ? new HttpHead(getURL()) : new HttpGet(getURL());
+		HttpRequestBase request;
+                if (getMethod().equals(HttpHead.METHOD_NAME)) {
+                    request = new HttpHead(getURL());
+                } else if (getMethod().equals(HttpPost.METHOD_NAME)) {
+                    try {
+                        HttpPost httpPost = new HttpPost(getURL());
+                        if(postargs!=null){
+                            httpPost.setEntity(preparePostArgs(postargs));
+                        }
+                        request = httpPost;
+                    } catch (UnsupportedEncodingException ex) {
+                        log.debug(ex,ex);
+			setErrorMessage(ex.getLocalizedMessage());
+                        setAvailability(Metric.AVAIL_DOWN);
+                        return;
+                    }
+                } else {
+                    request = new HttpGet(getURL());
+                }
 
-		method.getParams().setParameter(ClientPNames.HANDLE_REDIRECTS, isFollow());
+		request.getParams().setParameter(ClientPNames.HANDLE_REDIRECTS, isFollow());
 
 		if (hasCredentials()) {
 			UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(getUsername(), getPassword());
@@ -316,14 +343,14 @@ public class HTTPCollector extends SocketChecker {
 				boolean isProxied = (StringUtils.hasText(proxyHost) && proxyPort != -1);
 				Header authenticationHeader = BasicScheme.authenticate(credentials, "UTF-8", isProxied);
 
-				method.addHeader(authenticationHeader);
+				request.addHeader(authenticationHeader);
 			} else {
 				String authenticationHost = (this.hosthdr == null) ? getHostname() : this.hosthdr;
 				AuthScope authScope = new AuthScope(authenticationHost, -1, realm);
 				
 				((DefaultHttpClient) client).getCredentialsProvider().setCredentials(authScope, credentials);
 
-				method.getParams().setParameter(ClientPNames.HANDLE_AUTHENTICATION, true);
+				request.getParams().setParameter(ClientPNames.HANDLE_AUTHENTICATION, true);
 			}
 		}
 
@@ -332,7 +359,7 @@ public class HTTPCollector extends SocketChecker {
 		try {
 			startTime();
 			
-			HttpResponse response = client.execute(method);
+			HttpResponse response = client.execute(request);
 			
 			endTime();
 
@@ -371,7 +398,7 @@ public class HTTPCollector extends SocketChecker {
 				setValue("LastModified", lastModified);
 			}
 
-			if (!isHEAD && (avail == Metric.AVAIL_UP)) {
+			if (!getMethod().equals(HttpHead.METHOD_NAME) && (avail == Metric.AVAIL_UP)) {
 				if (this.pattern != null) {
 					if (!matchResponse(response)) {
 						avail = Metric.AVAIL_WARN;
@@ -403,4 +430,25 @@ public class HTTPCollector extends SocketChecker {
 
 		netstat();
 	}
+
+    private HttpEntity preparePostArgs(String args) throws UnsupportedEncodingException {
+        HttpEntity res;
+        if (args.contains("=")) {
+            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+            String[] argslist = args.split("&");
+            for (int i = 0; i < argslist.length; i++) {
+                String[] arg = argslist[i].split("=");
+                if (arg.length == 2) {
+                    nameValuePairs.add(new BasicNameValuePair(arg[0], arg[1]));
+                } else {
+                    nameValuePairs.add(new BasicNameValuePair(arg[0], ""));
+                }
+            }
+            log.debug("[preparePostArgs] args="+nameValuePairs);
+            res = new UrlEncodedFormEntity(nameValuePairs);
+        } else {
+            res = new StringEntity(args);
+        }
+        return res;
+    }
 }
