@@ -43,14 +43,14 @@ public interface MeasurementTransfer {
     public MeasurementResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest measurementRequest,
             final String rscId, final Date begin, final Date end) throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException, TimeframeSizeException;
     
-    public void register(Integer sessionId, final MetricFilterRequest metricFilterReq);
+    public void register(/*Integer sessionId, */final MetricFilterRequest metricFilterReq);
 
     /**
      * unregister session data and all assigned filters
      * 
      * @param sessionId
      */
-    public void unregister(Integer sessionId);
+    public void unregister(/*Integer sessionId*/);
 
     /**
      * unregister the filters assigned to this user destination
@@ -59,9 +59,9 @@ public interface MeasurementTransfer {
      * @param rscFilter
      * @param metricFilter
      */
-    public void unregister(final Integer sessionId, final MetricFilterRequest metricFilterReq);
+    public void unregister(/*final Integer sessionId, */final MetricFilterRequest metricFilterReq);
 
-    public MetricNotifications poll(Integer sessionId);
+    public MetricNotifications poll(/*Integer sessionId*/);
     
     public ResourceMeasurementBatchResponse getAggregatedMetricData(ApiMessageContext apiMessageContext, final ResourceMeasurementRequests hqMsmtReqs, 
             final Date begin, final Date end) 

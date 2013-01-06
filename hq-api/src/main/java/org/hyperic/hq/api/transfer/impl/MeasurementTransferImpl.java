@@ -130,9 +130,9 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         return hqMsmts;
     }
     
-    protected Map<Integer,Destination> sessionToDestination = new HashMap<Integer,Destination>();
-    
-    public void register(Integer sessionId, final MetricFilterRequest metricFilterReq) {
+//    protected Map<Integer,Destination> sessionToDestination = new HashMap<Integer,Destination>();
+    protected Destination dest;
+    public void register(/*Integer sessionId,*/ final MetricFilterRequest metricFilterReq) {
         //TODO~ return failed/successful registration
         //TODO~ add schema to the xml's which automatically validates legal values (no null / empty name for instance)
         if (!MetricFilterRequest.validate(metricFilterReq)) {
@@ -144,23 +144,28 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         List<Filter<MetricNotification,? extends FilteringCondition<?>>> userFilters = this.mapper.toMetricFilters(metricFilterReq); 
         // TODO~ init filters with needed managers to enable them to retrieve filter related data
         
-        Destination dest = this.sessionToDestination.get(sessionId); 
+        Destination dest = this.dest;//this.sessionToDestination.get(sessionId); 
         if (dest==null) {
             dest = new Destination() {};
-            this.sessionToDestination.put(sessionId,dest);
+//            this.sessionToDestination.put(sessionId,dest);
+            this.dest=dest;
             this.q.register(dest);
+        } else {
+            // not allowing sequential registrations
+            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.SEQUENTIAL_REGISTRATION);
         }
         this.evaluator.register(dest,userFilters);
     }
-    public void unregister(Integer sessionId) {
-        Destination dest = this.sessionToDestination.get(sessionId); 
+    public void unregister(/*Integer sessionId*/) {
+        Destination dest = this.dest;//this.sessionToDestination.get(sessionId); 
         if (dest!=null) {
-            this.sessionToDestination.remove(sessionId);
+//            this.sessionToDestination.remove(sessionId);
+            this.dest=null;
             this.q.unregister(dest);
             this.evaluator.unregisterAll(dest);
-        }        
+        }
     }
-    public void unregister(final Integer sessionId, final MetricFilterRequest metricFilterReq) {
+    public void unregister(/*final Integer sessionId,*/ final MetricFilterRequest metricFilterReq) {
         //TODO~ return failed/successful registration
         if (!MetricFilterRequest.validate(metricFilterReq)) {
             if (log.isDebugEnabled()) {
@@ -175,7 +180,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             }
             return;
         }
-        Destination dest = this.sessionToDestination.get(sessionId); 
+        Destination dest = this.dest;//this.sessionToDestination.get(sessionId); 
         if (dest==null) {
             if (log.isDebugEnabled()) {
                 log.debug("no destination was previously registered with the current user session");
@@ -185,10 +190,10 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         this.evaluator.unregister(dest,userFilters);
     }
     
-    public MetricNotifications poll(Integer sessionId) {
+    public MetricNotifications poll(/*Integer sessionId*/) {
         //TODO~ return adequate response if not registered
         MetricNotifications res = new MetricNotifications();
-        Destination dest = this.sessionToDestination.get(sessionId);
+        Destination dest = this.dest;//this.sessionToDestination.get(sessionId);
         if (dest==null) {
             log.error("the current session is not registered for notifications");
             this.errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.INVALID_SESSION);            
@@ -386,7 +391,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     
     @Transactional(readOnly = true)
     public ResourceMeasurementBatchResponse getMeasurements(ApiMessageContext apiMessageContext, BulkResourceMeasurementRequest rcsMsmtReq) {
-        ResourceMeasurementBatchResponse res = new ResourceMeasurementBatchResponse();
+        ResourceMeasurementBatchResponse res = new ResourceMeasurementBatchResponse(this.errorHandler);
         AuthzSubject authzSubject = apiMessageContext.getAuthzSubject();
         List<ID> ids = rcsMsmtReq.getRids();
         List<Integer> rids = this.mapper.toIds(ids);
@@ -397,9 +402,14 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
                 log.error("resource not found for resource id - " + rid);
                 continue;
             }
+            Collection<Measurement> hqMsmts = this.measurementMgr.findMeasurements(authzSubject, rsc);
+            if (hqMsmts==null || hqMsmts.isEmpty()) {
+                res.addFailedResource(String.valueOf(rid), ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID.getErrorCode(), null,new Object[] {""});
+                log.error("no measurements for resource id - " + rid);
+                continue;
+            }
             ResourceMeasurementResponse rscRes = new ResourceMeasurementResponse();
             rscRes.setRscId(String.valueOf(rid));
-            Collection<Measurement> hqMsmts = this.measurementMgr.findMeasurements(authzSubject, rsc);
             for(Measurement hqMsmt:hqMsmts) {
 //                Integer tmplId = hqMsmt.getTemplate().getId();
                 MeasurementTemplate hqTmpl = hqMsmt.getTemplate();//tmpltMgr.getTemplate(tmplId);

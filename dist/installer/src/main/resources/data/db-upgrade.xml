@@ -11795,6 +11795,17 @@ has already been defined.
 			commit="true"/>
 	</schemaSpec>
 	
+	<schemaSpec version="3.217" alwaysExecute="true">
+        <schema-directSQL>
+            <statement targetDB="postgresql">
+               CREATE TABLE if not exists EAM_UUIDTable (
+                ID INTEGER NOT NULL PRIMARY KEY, 
+            	 MAC_ADDRESS VARCHAR(64) NOT NULL UNIQUE, 
+            	 UUID VARCHAR(128) NOT NULL
+               )
+            </statement>
+        </schema-directSQL>
+	</schemaSpec>
 </dbupgrade>
 </target>
 </project>

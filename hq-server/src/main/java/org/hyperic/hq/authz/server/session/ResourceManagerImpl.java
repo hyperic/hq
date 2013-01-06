@@ -244,6 +244,7 @@ public class ResourceManagerImpl implements ResourceManager {
             // TODO: Explore calling this when ResourceCreatedZevent
             // is processed instead
             createVirtualResourceEdges(owner, parent, res, system);
+            
         }
 
         resourceAuditFactory.createResource(res, owner, start, System.currentTimeMillis());
