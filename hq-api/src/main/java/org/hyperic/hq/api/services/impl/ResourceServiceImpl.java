@@ -49,8 +49,8 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
 	@Autowired
 	private ResourceTransfer resourceTransfer ; 
 	
-	@javax.ws.rs.core.Context
-	private SearchContext context ;
+//	@javax.ws.rs.core.Context
+//	private SearchContext context ;
 	
 	public final Resource getResource(final String platformNaturalID, final ResourceType resourceType, final ResourceStatusType resourceStatusType, 
 			final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) throws SessionNotFoundException, SessionTimeoutException {
