@@ -23,7 +23,7 @@
  * USA.
  */
 package org.hyperic.hq.api.model.measurements;
-
+ 
 import java.util.ArrayList;
 import java.util.List;
 

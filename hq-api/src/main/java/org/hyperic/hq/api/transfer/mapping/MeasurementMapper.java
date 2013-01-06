@@ -23,7 +23,7 @@
  * USA.
  */
 package org.hyperic.hq.api.transfer.mapping;
-
+ 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
