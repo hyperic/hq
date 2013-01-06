@@ -4,19 +4,15 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.hyperic.hq.api.model.ID;
 import org.hyperic.hq.api.model.measurements.Measurement;
 import org.hyperic.hq.api.model.measurements.Metric;
 import org.hyperic.hq.api.model.measurements.MetricFilterRequest;
-import org.hyperic.hq.api.model.measurements.MetricNotifications;
 import org.hyperic.hq.api.model.measurements.RawMetric;
 import org.hyperic.hq.api.model.resources.ResourceFilterDefinitioin;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.ResourceManager;
-import org.hyperic.hq.measurement.MeasurementNotFoundException;
-import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
@@ -29,7 +25,7 @@ import org.hyperic.hq.notifications.model.MetricNotification;
 import org.hyperic.hq.product.MetricValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
+ 
 @Component
 public class MeasurementMapper {
     protected final static int MAX_FRACTION_DIGITS = 3;

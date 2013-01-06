@@ -25,12 +25,15 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.shared.AIConversionUtil;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQApprovalException;
@@ -426,11 +429,23 @@ public class AIQRV_approve implements AIQResourceVisitor {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void setCustomProperties(AIPlatform aiplatform, Platform platform) {
         try {
             int typeId = platform.getPlatformType().getId().intValue();
+            Collection<AIIp> ips = aiplatform.getAIIps();
+            List<String> macs = new ArrayList<String>(ips.size());
+            if (ips!=null) {
+                for(AIIp ip:ips) {
+                    String mac = ip.getMacAddress();
+                    if (mac!=null && !mac.isEmpty() && !mac.equals("")) {
+                        macs.add(mac);
+                    }
+                }
+            }
+            
             cpropMgr.setConfigResponse(platform.getEntityId(), typeId, aiplatform
-                .getCustomProperties());
+                .getCustomProperties(),macs);
         } catch (Exception e) {
             log.warn("Error setting platform custom properties: " + e, e);
         }

@@ -48,9 +48,6 @@
 		<!-- <property name="schemaHandler" ref="schemaHolder"/> -->
 	</bean>
 
-	<bean id="searchProvider" class="org.apache.cxf.jaxrs.ext.search.SearchContextProvider">
-	</bean>
-
 	<bean id="timeProvider" class="org.hyperic.hq.api.common.DateParameterProvider">
 	</bean>
 
@@ -91,7 +88,12 @@
 	<bean class="org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer" />
 
 	<bean name="resourceServiceImpl" class="org.hyperic.hq.api.services.impl.ResourceServiceImpl" />
+	
 	<bean name="measurementServiceImpl" class="org.hyperic.hq.api.services.impl.MeasurementServiceImpl" />
+
+	<bean name="vmServiceImpl" class="org.hyperic.hq.api.services.impl.VMServiceImpl" />
+
+	<bean name="metricServiceImpl" class="org.hyperic.hq.api.services.impl.MetricServiceImpl" />
 		
     <bean name="pluginServiceImpl" class="org.hyperic.hq.api.services.impl.PluginServiceImpl" />		
 	
@@ -125,14 +127,40 @@
         </jaxrs:features>		
 	</jaxrs:server>	
 
-	<jaxrs:server id="measurementService" address="/measurements">
+	<jaxrs:server id="measurementService" address="/measurement">
 		<jaxrs:serviceBeans>
 			<ref bean="measurementServiceImpl" />
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <ref bean="jaxbProvider" />
 			<ref bean="jsonProvider" />
+        </jaxrs:providers>
+        <jaxrs:features>
+            <cxf:logging />
+        </jaxrs:features>        
+    </jaxrs:server>
+    
+	<jaxrs:server id="metricService" address="/metric">
+		<jaxrs:serviceBeans>
+			<ref bean="metricServiceImpl" />
+        </jaxrs:serviceBeans>
+        <jaxrs:providers>
+            <ref bean="jaxbProvider" />
+			<ref bean="jsonProvider" />
 			<ref bean="timeProvider" />
+        </jaxrs:providers>
+        <jaxrs:features>
+            <cxf:logging />
+        </jaxrs:features>        
+    </jaxrs:server>
+    
+	<jaxrs:server id="vmService" address="/vm">
+		<jaxrs:serviceBeans>
+			<ref bean="vmServiceImpl" />
+        </jaxrs:serviceBeans>
+        <jaxrs:providers>
+            <ref bean="jaxbProvider" />
+			<ref bean="jsonProvider" />
         </jaxrs:providers>
         <jaxrs:features>
             <cxf:logging />
