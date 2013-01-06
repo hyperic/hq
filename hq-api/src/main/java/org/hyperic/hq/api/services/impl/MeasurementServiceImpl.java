@@ -38,25 +38,25 @@ public class MeasurementServiceImpl extends RestApiService implements Measuremen
     private SearchContext searchContext ;
     
     public void register(final MetricFilterRequest metricFilterReq) throws SessionNotFoundException, SessionTimeoutException {
-        ApiMessageContext apiMessageContext = newApiMessageContext();
-        Integer sessionId = apiMessageContext.getSessionId();
+//        ApiMessageContext apiMessageContext = newApiMessageContext();
+//        Integer sessionId = apiMessageContext.getSessionId();
 //        SearchCondition<RawMetric> a = searchContext.getCondition(org.hyperic.hq.api.model.measurements.RawMetric.class);
-        measurementTransfer.register(sessionId, metricFilterReq);
+        measurementTransfer.register(/*sessionId, */metricFilterReq);
     }
     public void unregister() throws SessionNotFoundException, SessionTimeoutException {
-        ApiMessageContext apiMessageContext = newApiMessageContext();
-        Integer sessionId = apiMessageContext.getSessionId();
-        measurementTransfer.unregister(sessionId);
+//        ApiMessageContext apiMessageContext = newApiMessageContext();
+//        Integer sessionId = apiMessageContext.getSessionId();
+        measurementTransfer.unregister(/*sessionId*/);
     }
     public void unregister(final MetricFilterRequest metricFilterReq) throws SessionNotFoundException, SessionTimeoutException {
-        ApiMessageContext apiMessageContext = newApiMessageContext();
-        Integer sessionId = apiMessageContext.getSessionId();
-        measurementTransfer.unregister(sessionId,metricFilterReq);
+//        ApiMessageContext apiMessageContext = newApiMessageContext();
+//        Integer sessionId = apiMessageContext.getSessionId();
+        measurementTransfer.unregister(/*sessionId,*/metricFilterReq);
     }
     public MetricNotifications poll() throws SessionNotFoundException, SessionTimeoutException {
-        ApiMessageContext apiMessageContext = newApiMessageContext();
-        Integer sessionId = apiMessageContext.getSessionId();
-        return measurementTransfer.poll(sessionId);
+//        ApiMessageContext apiMessageContext = newApiMessageContext();
+//        Integer sessionId = apiMessageContext.getSessionId();
+        return measurementTransfer.poll(/*sessionId*/);
     }
 
     public MeasurementResponse getMetrics(final MeasurementRequest measurementRequest,
