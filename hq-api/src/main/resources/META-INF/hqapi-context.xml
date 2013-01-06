@@ -82,16 +82,24 @@
     </bean>
     
     <bean class="org.hyperic.hq.api.transfer.impl.ResourceTransferImpl" />
+    
     <bean class="org.hyperic.hq.api.transfer.impl.MeasurementTransferImpl" />
 
 	<bean class="org.springframework.web.context.support.ServletContextPropertyPlaceholderConfigurer" />
 	<bean class="org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer" />
 
 	<bean name="resourceServiceImpl" class="org.hyperic.hq.api.services.impl.ResourceServiceImpl" />
+<<<<<<< HEAD
 	
 	<bean name="measurementServiceImpl" class="org.hyperic.hq.api.services.impl.MeasurementServiceImpl" />
 
 	<bean name="vmServiceImpl" class="org.hyperic.hq.api.services.impl.VMServiceImpl" />
+=======
+
+	<bean name="measurementServiceImpl" class="org.hyperic.hq.api.services.impl.MeasurementServiceImpl" />
+
+	<bean name="metricServiceImpl" class="org.hyperic.hq.api.services.impl.MetricServiceImpl" />
+>>>>>>> REST-changes
 		
     <bean name="pluginServiceImpl" class="org.hyperic.hq.api.services.impl.PluginServiceImpl" />		
 	
@@ -99,7 +107,7 @@
 	
 	<bean name="sessionManagementImpl" class="org.hyperic.hq.api.services.impl.SessionManagementServiceImpl" />
 	
-	<jaxrs:server id="resourceService" address="/inventory/resources">
+	<jaxrs:server id="resourceService" address="/resource">
 		<jaxrs:serviceBeans>
 			<ref bean="resourceServiceImpl" />
 		</jaxrs:serviceBeans>
@@ -125,9 +133,22 @@
         </jaxrs:features>		
 	</jaxrs:server>	
 
-	<jaxrs:server id="measurementService" address="/measurements">
+	<!-- jaxrs:server id="measurementService" address="/measurement">
 		<jaxrs:serviceBeans>
 			<ref bean="measurementServiceImpl" />
+        </jaxrs:serviceBeans>
+        <jaxrs:providers>
+            <ref bean="jaxbProvider" />
+			<ref bean="jsonProvider" />
+        </jaxrs:providers>
+        <jaxrs:features>
+            <cxf:logging />
+        </jaxrs:features>        
+    </jaxrs:server-->
+    
+	<jaxrs:server id="metricService" address="/metric">
+		<jaxrs:serviceBeans>
+			<ref bean="metricServiceImpl" />
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <ref bean="jaxbProvider" />
@@ -139,6 +160,7 @@
         </jaxrs:features>        
     </jaxrs:server>
     
+<<<<<<< HEAD
 	<jaxrs:server id="vmService" address="/vm">
 		<jaxrs:serviceBeans>
 			<ref bean="vmServiceImpl" />
@@ -152,6 +174,8 @@
         </jaxrs:features>        
     </jaxrs:server>
     
+=======
+>>>>>>> REST-changes
     <jaxrs:server id="CloudProviderService" address="/cloud">
 		<jaxrs:serviceBeans>
 			<ref bean="CloudProviderServiceImpl" />

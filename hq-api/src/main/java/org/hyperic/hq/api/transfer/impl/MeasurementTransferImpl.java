@@ -46,10 +46,10 @@ import org.apache.cxf.jaxrs.ext.search.SearchContext;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.ID;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
-import org.hyperic.hq.api.model.measurements.MeasurementResponse;
 import org.hyperic.hq.api.model.measurements.MetricFilterRequest;
 import org.hyperic.hq.api.model.measurements.MetricNotifications;
 import org.hyperic.hq.api.model.measurements.RawMetric;
+import org.hyperic.hq.api.model.measurements.MetricResponse;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementBatchResponse;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequest;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequests;
@@ -206,11 +206,12 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         res.setMetrics(metrics);
         return res;
     }
-    public MeasurementResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest hqMsmtReq, 
+
+    public MetricResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest hqMsmtReq, 
             final String rscId, final Date begin, final Date end) 
                     throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException, TimeframeSizeException {
 
-        MeasurementResponse res = new MeasurementResponse();
+        MetricResponse res = new MetricResponse();
         if (hqMsmtReq==null || hqMsmtReq.getMeasurementTemplateNames()==null || hqMsmtReq.getMeasurementTemplateNames().size()==0) {
             throw new UnsupportedOperationException("message body is missing or corrupted"); 
         }
@@ -409,7 +410,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
                 continue;
             }
             ResourceMeasurementResponse rscRes = new ResourceMeasurementResponse();
-            rscRes.setRscId(String.valueOf(rid));
+            rscRes.setResourceId(String.valueOf(rid));
             for(Measurement hqMsmt:hqMsmts) {
 //                Integer tmplId = hqMsmt.getTemplate().getId();
                 MeasurementTemplate hqTmpl = hqMsmt.getTemplate();//tmpltMgr.getTemplate(tmplId);

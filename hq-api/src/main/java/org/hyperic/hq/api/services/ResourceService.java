@@ -51,8 +51,8 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 public interface ResourceService {
 	
 	@GET
-	@Path("/{platformNaturalID}/{resourceType}")
-	Resource getResource(@PathParam("platformNaturalID") final String platformNaturalID, @PathParam("resourceType") final ResourceType resourceType, 
+	@Path("/{platformNaturalID}")
+	Resource getResource(@PathParam("platformNaturalID") final String platformNaturalID, @QueryParam("resourceType") final ResourceType resourceType, 
 			@QueryParam("status") final ResourceStatusType resourceStatusType, @QueryParam("hierarchyDepth") final int hierarchyDepth, 
 			@QueryParam("responseStructure") final ResourceDetailsType[] responseStructure) throws SessionNotFoundException, SessionTimeoutException ;  
 		
@@ -62,9 +62,15 @@ public interface ResourceService {
 			@QueryParam("status") final ResourceStatusType resourceStatusType, @QueryParam("hierarchyDepth") final int hierarchyDepth, 
 			@QueryParam("responseStructure") final ResourceDetailsType[] responseStructure) throws SessionNotFoundException, SessionTimeoutException ;  
 	
+	/**
+	 * NYI
+	 */
 	@GET
 	ResourceBatchResponse getResources() throws SessionNotFoundException, SessionTimeoutException  ;  
 	
+    /**
+     * NYI
+     */
 	@POST
 	@Path("/approve")
 	ResourceBatchResponse approveResource(final Resources aiResources) throws SessionNotFoundException, SessionTimeoutException ; 
@@ -72,6 +78,9 @@ public interface ResourceService {
 	@PUT
 	ResourceBatchResponse updateResources(final Resources resources) throws SessionNotFoundException, SessionTimeoutException ; 
 
+	/**
+     * NYI
+     */
 	@PUT
 	@Path("/search")
 	ResourceBatchResponse updateResourcesByCriteria(final Resource updateData) throws SessionNotFoundException, SessionTimeoutException ;  
