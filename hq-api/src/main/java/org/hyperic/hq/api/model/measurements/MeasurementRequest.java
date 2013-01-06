@@ -1,5 +1,5 @@
 package org.hyperic.hq.api.model.measurements;
-
+ 
 import java.io.Serializable;
 import java.util.List;
 

@@ -2,7 +2,7 @@ package org.hyperic.hq.api.model.common;
 
 import java.util.HashMap;
 import java.util.Map;
-
+  
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 public class MapPropertiesAdapter extends XmlAdapter<PropertyMapElements[], Map<String, String>> {

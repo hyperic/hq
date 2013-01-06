@@ -1,5 +1,5 @@
 package org.hyperic.hq.api.model.common;
-
+ 
 import java.util.HashMap;
 import java.util.Map;
 

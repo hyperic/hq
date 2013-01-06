@@ -1,5 +1,5 @@
 package org.hyperic.hq.api.model.measurements;
-
+ 
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;

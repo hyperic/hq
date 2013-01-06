@@ -1,5 +1,5 @@
 package org.hyperic.hq.api.services.impl;
-
+ 
 import javax.ws.rs.core.Response;
 
 import org.hibernate.ObjectNotFoundException;

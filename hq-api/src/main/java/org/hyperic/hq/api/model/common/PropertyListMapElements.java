@@ -1,5 +1,5 @@
 package org.hyperic.hq.api.model.common;
-
+ 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 

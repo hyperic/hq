@@ -1,5 +1,5 @@
 package org.hyperic.hq.api.services;
-
+ 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
