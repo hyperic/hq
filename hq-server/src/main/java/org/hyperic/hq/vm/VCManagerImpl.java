@@ -123,26 +123,17 @@ public class VCManagerImpl implements VCManager {
      * @param uuidToMacsMap
      */
     protected void updateUUIDToMacsMapping(AuthzSubject subject, Map<String, Set<String>> uuidToMacsMap) {
-        List<MacToUUID> persistedMacToUUIDs = this.vcDao.findAll();
-        List<MacToUUID> macToUUIDsToRemove = new ArrayList<MacToUUID>();
-        for(Iterator<MacToUUID> itr = persistedMacToUUIDs.iterator() ; itr.hasNext() ; ) {
-            MacToUUID macToUUID = itr.next();
-            Set<String> macs = uuidToMacsMap.get(macToUUID.getUuid());
-            if (macs==null || !macs.contains(macToUUID.getMac())) { 
-                macToUUIDsToRemove.add(macToUUID);
-                continue;
-            }
-        }
-        for(MacToUUID macToUUID:macToUUIDsToRemove) {
-            this.vcDao.remove(macToUUID);
-        }
+        List<MacToUUID> macToUUIDs = this.vcDao.findAll();
+        this.vcDao.remove(macToUUIDs);
+        List<MacToUUID> toSave = new ArrayList<MacToUUID>();
         for(String uuid : uuidToMacsMap.keySet()) {
             Set<String> macs = uuidToMacsMap.get(uuid);
             for (String mac : macs) {
                 MacToUUID uuidToMacs = new MacToUUID(mac,uuid);
-                this.vcDao.save(uuidToMacs);
+                toSave.add(uuidToMacs);
             }
         }
+        this.vcDao.save(toSave);
     }
     
     @Transactional(readOnly = false)

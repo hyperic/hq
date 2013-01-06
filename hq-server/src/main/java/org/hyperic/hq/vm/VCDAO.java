@@ -17,9 +17,18 @@ public class VCDAO extends HibernateDAO<MacToUUID> {
     protected VCDAO(SessionFactory f) {
         super(MacToUUID.class, f);
     }
+    
+    public void remove(List<MacToUUID> macToUUIDs) {
+        for(MacToUUID macToUUID:macToUUIDs) {
+            this.remove(macToUUID);
+        }
+        getSession().flush();
+    }
 
-    public void save(MacToUUID macToUUID) {
-        super.save(macToUUID);
+    public void save(List<MacToUUID> macToUUIDs) {
+        for(MacToUUID macToUUID:macToUUIDs) {
+            super.save(macToUUID);
+        }
         getSession().flush();
     }
     
