@@ -15,7 +15,7 @@
 
 	<properties>
 		<easymock.version>2.4</easymock.version>
-		<hqapi.version>5.0.0</hqapi.version>
+		<hqapi.version>5.0.0-HA</hqapi.version>
 		<!-- <junit.version>4.6</junit.version> -->
 	</properties>
 
