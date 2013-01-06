@@ -89,17 +89,12 @@
 	<bean class="org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer" />
 
 	<bean name="resourceServiceImpl" class="org.hyperic.hq.api.services.impl.ResourceServiceImpl" />
-<<<<<<< HEAD
 	
 	<bean name="measurementServiceImpl" class="org.hyperic.hq.api.services.impl.MeasurementServiceImpl" />
 
 	<bean name="vmServiceImpl" class="org.hyperic.hq.api.services.impl.VMServiceImpl" />
-=======
-
-	<bean name="measurementServiceImpl" class="org.hyperic.hq.api.services.impl.MeasurementServiceImpl" />
 
 	<bean name="metricServiceImpl" class="org.hyperic.hq.api.services.impl.MetricServiceImpl" />
->>>>>>> REST-changes
 		
     <bean name="pluginServiceImpl" class="org.hyperic.hq.api.services.impl.PluginServiceImpl" />		
 	
@@ -133,7 +128,7 @@
         </jaxrs:features>		
 	</jaxrs:server>	
 
-	<!-- jaxrs:server id="measurementService" address="/measurement">
+	<jaxrs:server id="measurementService" address="/measurement">
 		<jaxrs:serviceBeans>
 			<ref bean="measurementServiceImpl" />
         </jaxrs:serviceBeans>
@@ -144,7 +139,7 @@
         <jaxrs:features>
             <cxf:logging />
         </jaxrs:features>        
-    </jaxrs:server-->
+    </jaxrs:server>
     
 	<jaxrs:server id="metricService" address="/metric">
 		<jaxrs:serviceBeans>
@@ -160,7 +155,6 @@
         </jaxrs:features>        
     </jaxrs:server>
     
-<<<<<<< HEAD
 	<jaxrs:server id="vmService" address="/vm">
 		<jaxrs:serviceBeans>
 			<ref bean="vmServiceImpl" />
@@ -174,8 +168,6 @@
         </jaxrs:features>        
     </jaxrs:server>
     
-=======
->>>>>>> REST-changes
     <jaxrs:server id="CloudProviderService" address="/cloud">
 		<jaxrs:serviceBeans>
 			<ref bean="CloudProviderServiceImpl" />
