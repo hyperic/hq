@@ -535,7 +535,7 @@
 			<name>HQApi Snapshot Repository</name>
 			<url>http://maven.hyperic.org/hqapi/snapshot</url>
 			<snapshots>
-				<enabled>true</enabled>
+				<enabled>false</enabled>
 			</snapshots>
 		</repository>
 		<repository>
@@ -551,7 +551,7 @@
 			<name>HQApi Milestone Repository</name>
 			<url>http://maven.hyperic.org/hqapi/milestone</url>
 			<snapshots>
-				<enabled>false</enabled>
+				<enabled>true</enabled>
 			</snapshots>
 		</repository>
 	</repositories>
