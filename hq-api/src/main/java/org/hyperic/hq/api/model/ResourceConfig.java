@@ -3,7 +3,6 @@ package org.hyperic.hq.api.model;
 import java.io.Serializable; 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
  
 import javax.xml.bind.annotation.XmlRootElement;
