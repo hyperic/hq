@@ -409,7 +409,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
                 continue;
             }
             ResourceMeasurementResponse rscRes = new ResourceMeasurementResponse();
-            rscRes.setRscId(String.valueOf(rid));
+            rscRes.setResourceId(String.valueOf(rid));
             for(Measurement hqMsmt:hqMsmts) {
                 MeasurementTemplate hqTmpl = hqMsmt.getTemplate();//tmpltMgr.getTemplate(tmplId);
                 org.hyperic.hq.api.model.measurements.Measurement msmt = this.mapper.toMeasurementExtendedData(hqMsmt,hqTmpl);
