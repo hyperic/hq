@@ -5,7 +5,6 @@ import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,7 +15,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
-import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,16 +31,11 @@ import com.vmware.vim25.mo.ServerConnection;
 import com.vmware.vim25.mo.ServiceInstance;
 import com.vmware.vim25.mo.VirtualMachine;
 
-@Service("VCManagerImpl")
+@Service()
 public class VCManagerImpl implements VCManager {
     protected final Log log = LogFactory.getLog(VCManagerImpl.class.getName());
     @Autowired
     protected VCDAO vcDao;
-    protected PlatformManager platformMgr;
-    @Autowired
-    public void setPlatformMgr(PlatformManager platformMgr) {
-        this.platformMgr = platformMgr;
-    }
 
     protected Map<String,Set<String>> collectUUIDs(final String url, final String usr, final String pass) throws RemoteException, MalformedURLException {
         ServiceInstance si = new ServiceInstance(new URL(url), usr, pass, true);
@@ -140,10 +133,10 @@ public class VCManagerImpl implements VCManager {
     }
     
     @Transactional(readOnly = false)
-    public void collect(AuthzSubject subject, String url, String usr, String pass) throws RemoteException, MalformedURLException, PermissionException, CPropKeyNotFoundException, AppdefEntityNotFoundException {
+    public Map<String, Set<String>> collect(AuthzSubject subject, String url, String usr, String pass) throws RemoteException, MalformedURLException, PermissionException, CPropKeyNotFoundException, AppdefEntityNotFoundException {
         Map<String, Set<String>> uuidToMacsMap = this.collectUUIDs(url,usr,pass);
         updateUUIDToMacsMapping(subject,uuidToMacsMap);
-        this.platformMgr.mapUUIDToPlatforms(subject, uuidToMacsMap);
+        return uuidToMacsMap;
     }
 
     public String getUuid(final List<String> macs) {
