@@ -176,5 +176,14 @@ public class VCManagerImpl implements VCManager {
         }
         System.out.println(persistedMacToUUIDs);
 
-    }//EOM 
+    }//EOM
+    
+    public boolean validateVCSettings(String url, String user, String password) {
+        try{
+            new ServiceInstance(new URL(url), user, password, true);
+        }catch(Throwable t) {
+            return false;
+        }
+        return true;
+    }
 }
