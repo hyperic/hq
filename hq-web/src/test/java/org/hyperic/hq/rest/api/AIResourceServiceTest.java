@@ -173,7 +173,7 @@ public class AIResourceServiceTest {
         updatedResource.setResourcePrototype(resourcePrototype);
         updatedResource.setResourceStatusType(resourceStatusType);
         updatedResource.setResourceType(type);
-        Map<String, String> mapProps = new HashMap<String, String>(1);
+        HashMap<String, String> mapProps = new HashMap<String, String>(1);
         mapProps.put("key1", "value1");
         Map<String, PropertyList> mapListProps = new HashMap<String, PropertyList>(2);
         ComplexIp[] macAddresses = { new ComplexIp("netmask1", "mac1", "address1"), new ComplexIp("netmask2", "mac2", "address2") };
