@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.util.Date;
 
 import org.hibernate.ObjectNotFoundException;
+import org.hyperic.hq.api.model.common.RegistrationID;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
 import org.hyperic.hq.api.model.measurements.MetricFilterRequest;
@@ -44,7 +45,7 @@ public interface MeasurementTransfer {
     public MetricResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest measurementRequest,
             final String rscId, final Date begin, final Date end) throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException, TimeframeSizeException;
     
-    public void register(final MetricFilterRequest metricFilterReq);
+    public RegistrationID register(final MetricFilterRequest metricFilterReq);
 
     /**
      * unregister session data and all assigned filters

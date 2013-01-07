@@ -18,6 +18,7 @@ import org.apache.cxf.jaxrs.model.wadl.Description;
 import org.apache.cxf.jaxrs.model.wadl.Descriptions;
 import org.apache.cxf.jaxrs.model.wadl.DocTarget;
 import org.hibernate.ObjectNotFoundException;
+import org.hyperic.hq.api.model.common.RegistrationID;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MetricFilterRequest;
 import org.hyperic.hq.api.model.measurements.MetricNotifications;
@@ -69,7 +70,7 @@ public interface MetricService {
 
     @POST
     @Path("/register")
-    public void register(final MetricFilterRequest metricFilterReq) throws SessionNotFoundException, SessionTimeoutException;
+    public RegistrationID register(final MetricFilterRequest metricFilterReq) throws SessionNotFoundException, SessionTimeoutException;
 
     @PUT
     @Path("/unregister")

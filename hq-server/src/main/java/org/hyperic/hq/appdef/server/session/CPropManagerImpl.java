@@ -66,7 +66,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class CPropManagerImpl implements CPropManager {
-
     private static Log log = LogFactory.getLog(CPropManagerImpl.class.getName());
 
     private Messenger sender;
@@ -76,7 +75,11 @@ public class CPropManagerImpl implements CPropManager {
     private PlatformTypeDAO platformTypeDAO;
     private ServerTypeDAO serverTypeDAO;
     private ServiceTypeDAO serviceTypeDAO;
-    private VCManager vmMgr;
+    private VCManager vcMgr;
+    @Autowired
+    public void setVmMgr(VCManager vcMgr) {
+        this.vcMgr = vcMgr;
+    }
     
     @Autowired
     public CPropManagerImpl(Messenger sender, CpropDAO cPropDAO, CpropKeyDAO cPropKeyDAO,
@@ -90,12 +93,6 @@ public class CPropManagerImpl implements CPropManager {
         this.serverTypeDAO = serverTypeDAO;
         this.serviceTypeDAO = serviceTypeDAO;
     }
-
-    @PostConstruct
-    public void afterPropertiesSet() throws Exception {
-        this.vmMgr = (VCManager) Bootstrap.getBean("VMManagerImpl");
-    }
-
 
     /**
      * Get all the keys associated with an appdef resource type.
@@ -387,7 +384,7 @@ public class CPropManagerImpl implements CPropManager {
         }
 
         if (macs!=null) {
-            String uuid = this.vmMgr.getUuid(macs);
+            String uuid = this.vcMgr.getUuid(macs);
             cprops.setValue("UUID", uuid);
         }
         if (log.isDebugEnabled()) {

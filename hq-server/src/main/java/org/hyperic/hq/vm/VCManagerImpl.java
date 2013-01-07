@@ -33,13 +33,16 @@ import com.vmware.vim25.mo.ServerConnection;
 import com.vmware.vim25.mo.ServiceInstance;
 import com.vmware.vim25.mo.VirtualMachine;
 
-@Service("VMManagerImpl")
+@Service("VCManagerImpl")
 public class VCManagerImpl implements VCManager {
     protected final Log log = LogFactory.getLog(VCManagerImpl.class.getName());
     @Autowired
+    protected VCDAO vcDao;
     protected PlatformManager platformMgr;
     @Autowired
-    protected VCDAO vcDao;
+    public void setPlatformMgr(PlatformManager platformMgr) {
+        this.platformMgr = platformMgr;
+    }
 
     protected Map<String,Set<String>> collectUUIDs(final String url, final String usr, final String pass) throws RemoteException, MalformedURLException {
         ServiceInstance si = new ServiceInstance(new URL(url), usr, pass, true);
@@ -146,7 +149,7 @@ public class VCManagerImpl implements VCManager {
     public String getUuid(final List<String> macs) {
         for(String mac:macs) {
             try {
-                //TODO~ change to findByID if more efficient, and make mac the id of this class
+                //TODO~ change to findByID if more efficient, and turn mac the id of this class
                 String uuid = this.vcDao.findByMac(mac);
                 if (uuid!=null) {
                     return uuid;
