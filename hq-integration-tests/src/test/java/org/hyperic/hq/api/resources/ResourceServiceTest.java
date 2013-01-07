@@ -104,7 +104,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 
 @DirtiesContext
-@ServiceBindingsIteration(ResourceServiceTest.CONTEXT_URL + "/rest-api/inventory/resources")
+@ServiceBindingsIteration(ResourceServiceTest.CONTEXT_URL + "/rest-api/resource")
 @ContextConfiguration(locations = { "ResourceServiceTest-context.xml"}) 
 @TestData(ResourceServiceTestDataPopulator.class)
 public class ResourceServiceTest extends RestTestCaseBase<ResourceService, ResourceServiceTestDataPopulator>{
