@@ -1,26 +1,3 @@
-rc/main/java/org/hyperic/hq/api/model/common/MapPropertiesAdapter.java
-vim hq-api/src/main/java/org/hyperic/hq/api/model/common/PropertyListMapAdapter.java
-vim hq-api/src/main/java/org/hyperic/hq/api/model/common/PropertyListMapElements.java
-vim hq-api/src/main/java/org/hyperic/hq/api/model/common/PropertyMapElements.java
-vim hq-api/src/main/java/org/hyperic/hq/api/model/measurements/Measurement.java
-vim hq-api/src/main/java/org/hyperic/hq/api/model/measurements/MeasurementRequest.java
-vim hq-api/src/main/java/org/hyperic/hq/api/model/measurements/MeasurementResponse.java
-vim hq-api/src/main/java/org/hyperic/hq/api/model/measurements/MetricResponse.java
-vim hq-api/src/main/java/org/hyperic/hq/api/model/measurements/ResourceMeasurementResponse.java
-vim hq-api/src/main/java/org/hyperic/hq/api/services/AIResourceService.java
-vim hq-api/src/main/java/org/hyperic/hq/api/services/MeasurementService.java
-vim hq-api/src/main/java/org/hyperic/hq/api/services/MetricService.java
-vim hq-api/src/main/java/org/hyperic/hq/api/services/ResourceService.java
-vim hq-api/src/main/java/org/hyperic/hq/api/services/impl/MeasurementServiceImpl.java
-vim hq-api/src/main/java/org/hyperic/hq/api/services/impl/MetricServiceImpl.java
-vim hq-api/src/main/java/org/hyperic/hq/api/services/impl/ResourceServiceImpl.java
-vim hq-api/src/main/java/org/hyperic/hq/api/transfer/MeasurementTransfer.java
-vim hq-api/src/main/java/org/hyperic/hq/api/transfer/impl/MeasurementTransferImpl.java
-vim hq-api/src/main/java/org/hyperic/hq/api/transfer/mapping/MeasurementMapper.java
-vim hq-api/src/main/java/org/hyperic/hq/api/transfer/mapping/ResourceMapper.java
-vim hq-api/src/main/resources/META-INF/hqapi-context.xml
-vim hq-integration-tests/src/test/java/org/hyperic/hq/api/resources/ResourceServiceTest.java
-vim hq-web/src/test/java/org/hyperic/hq/rest/api/AIResourceServiceTest.java
 import java.io.Serializable; 
 import java.util.Collection;
 import java.util.HashMap;
