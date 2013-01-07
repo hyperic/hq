@@ -76,6 +76,7 @@ public class CPropManagerImpl implements CPropManager {
     private PlatformTypeDAO platformTypeDAO;
     private ServerTypeDAO serverTypeDAO;
     private ServiceTypeDAO serviceTypeDAO;
+    @Autowired
     private VCManager vmMgr;
     
     @Autowired
@@ -90,12 +91,6 @@ public class CPropManagerImpl implements CPropManager {
         this.serverTypeDAO = serverTypeDAO;
         this.serviceTypeDAO = serviceTypeDAO;
     }
-
-    @PostConstruct
-    public void afterPropertiesSet() throws Exception {
-        this.vmMgr = (VCManager) Bootstrap.getBean("VMManagerImpl");
-    }
-
 
     /**
      * Get all the keys associated with an appdef resource type.

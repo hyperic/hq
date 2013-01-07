@@ -44,6 +44,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.search.SearchContext;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.ID;
+import org.hyperic.hq.api.model.common.RegistrationID;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
 import org.hyperic.hq.api.model.measurements.MetricFilterRequest;
@@ -126,14 +127,14 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     //    protected Map<Integer,Destination> sessionToDestination = new HashMap<Integer,Destination>();
     protected Destination dest;
 
-    public void register(/*Integer sessionId,*/ final MetricFilterRequest metricFilterReq) {
+    public RegistrationID register(/*Integer sessionId,*/ final MetricFilterRequest metricFilterReq) {
         //TODO~ return failed/successful registration
         //TODO~ add schema to the xml's which automatically validates legal values (no null / empty name for instance)
         if (!MetricFilterRequest.validate(metricFilterReq)) {
             if (log.isDebugEnabled()) {
                 log.debug("illegal request");
             }
-            return;
+            return null;
         }
         List<Filter<MetricNotification,? extends FilteringCondition<?>>> userFilters = this.mapper.toMetricFilters(metricFilterReq); 
         // TODO~ init filters with needed managers to enable them to retrieve filter related data
@@ -149,6 +150,8 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.SEQUENTIAL_REGISTRATION);
         }
         this.evaluator.register(dest,userFilters);
+        return new RegistrationID(1);
+        
     }
     public void unregister(/*Integer sessionId*/) {
         Destination dest = this.dest;//this.sessionToDestination.get(sessionId); 
