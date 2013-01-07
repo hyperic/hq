@@ -20,9 +20,9 @@ import java.util.Date;
 
 public class MeasurementServiceImpl extends RestApiService implements MeasurementService {
     @Autowired
-    MeasurementTransfer measurementTransfer;
+    protected MeasurementTransfer measurementTransfer;
     @Autowired
-    private ExceptionToErrorCodeMapper errorHandler ; 
+    protected ExceptionToErrorCodeMapper errorHandler ; 
     
     public ResourceMeasurementBatchResponse getMeasurements(BulkResourceMeasurementRequest msmtMetaReq) throws SessionNotFoundException, SessionTimeoutException {
         ApiMessageContext apiMessageContext = newApiMessageContext();
