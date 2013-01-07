@@ -19,4 +19,6 @@ public interface VCManager {
      * @return a uuid of the VM the platform identified by these mac addresses is on
      */
     public String getUuid(final List<String> macs);
+    
+    boolean validateVCSettings(String url, String user, String password);
 }

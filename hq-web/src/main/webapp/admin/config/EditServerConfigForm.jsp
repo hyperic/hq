@@ -290,6 +290,32 @@
     	<td class="BlockLabel" colspan="2" width="30%"></td>
   	</tr>
 </table>
+
+<tiles:insert definition=".header.tab">  
+  <tiles:put name="tabKey" value="admin.settings.vCenterTab"/>  
+</tiles:insert>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr>
+    <td width="20%" class="BlockLabel"><fmt:message key="admin.settings.vCenterAddress"/></td>
+    <td width="30%" class="BlockContent"><html:text size="31" property="vCenterURL"/></td>
+    <td width="30%" class="BlockContent" colspan="2"></td>
+  </tr>
+  <tr>
+    <td width="20%" class="BlockLabel"><fmt:message key="admin.settings.vCenterUser"/></td>
+    <td width="30%" class="BlockContent"><html:text size="31" property="vCenterUser"/></td>
+    <td width="30%" class="BlockContent" colspan="2"></td>
+   </tr>
+  <tr>
+    <td width="20%" class="BlockLabel"><fmt:message key="admin.settings.vCenterPassword"/></td>
+    <td width="30%" class="BlockContent"><html:password size="31" property="vCenterPassword" redisplay="true"/></td>
+    <td width="30%" class="BlockContent" colspan="2"></td>
+  </tr>
+  <tr>
+    <td colspan="4" class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
+  </tr>
+</table>
+
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
   	<tr>
     	<td class="BlockHeader" colspan="2">
