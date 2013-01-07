@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import org.hyperic.hq.api.model.AIResource;
@@ -160,7 +161,7 @@ public class ResourceMapper {
 		return (o1 == o2 || (o1 != null && o1.equals(o2)) ) ; 
 	}//EOM 
 	
-	public final Resource mergeConfig(ResourceType resourceType, org.hyperic.hq.authz.server.session.Resource backendResource, final Resource resource, final ConfigSchemaAndBaseResponse[] configResponses) throws AppdefEntityNotFoundException {
+	public final Resource mergeConfig(ResourceType resourceType, org.hyperic.hq.authz.server.session.Resource backendResource, final Resource resource, final ConfigSchemaAndBaseResponse[] configResponses, Properties cprops) throws AppdefEntityNotFoundException {
 		if(configResponses == null) return resource ;  
 		
 		final HashMap<String,String> configValues = new HashMap<String,String>() ; 
@@ -178,7 +179,11 @@ public class ResourceMapper {
 				configValues.put(entry.getKey(), value) ;  
 			}//EO while there are more attributes 
 		}//EO while there are more config responses 
-		
+		String uuidKey = "UUID";
+		String uuid = cprops.getProperty(uuidKey);
+		if (uuid!=null) {
+		    configValues.put(uuidKey,uuid);
+		}
 		final ResourceConfig resourceConfig = new ResourceConfig() ;
 		resourceConfig.setMapProps(configValues) ; 
 		resource.setResourceConfig(resourceConfig) ; 

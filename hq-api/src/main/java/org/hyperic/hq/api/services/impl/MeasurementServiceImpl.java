@@ -57,7 +57,7 @@ public class MeasurementServiceImpl extends RestApiService implements Measuremen
     @Autowired
     private MeasurementTransfer measurementTransfer;
     @Autowired
-    private ExceptionToErrorCodeMapper errorHandler ; 
+    protected ExceptionToErrorCodeMapper errorHandler ; 
     
     public void register(final MetricFilterRequest metricFilterReq) throws SessionNotFoundException, SessionTimeoutException {
 //        ApiMessageContext apiMessageContext = newApiMessageContext();

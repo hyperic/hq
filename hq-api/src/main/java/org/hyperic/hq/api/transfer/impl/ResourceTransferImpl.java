@@ -453,7 +453,7 @@ public class ResourceTransferImpl implements ResourceTransfer{
 				
 				flowContext.entityID = AppdefUtil.newAppdefEntityId(flowContext.backendResource) ;
 				flowContext.visitor.initResourceConfig(flowContext) ;
-				return flowContext.visitor.resourceMapper.mergeConfig(flowContext.resourceType, flowContext.backendResource ,resource, flowContext.configResponses) ; 
+				return flowContext.visitor.resourceMapper.mergeConfig(flowContext.resourceType, flowContext.backendResource ,resource, flowContext.configResponses, flowContext.cprops) ; 
 			}//EOM 
 		},//EO PROPERTIES
 		ALL{ 
