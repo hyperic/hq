@@ -124,6 +124,12 @@ public class MeasurementMapper {
         MetricFilterByResource<ResourceFilteringCondition<Resource>> filter = new MetricFilterByResource<ResourceFilteringCondition<Resource>>(this.measurementMgr,this.resourceMgr,cond);
         return filter;
     }
+//    public MetricFilter<ResourceFilteringCondition<Resource>> toMetricFilter(final MetricFilterDefinitioin rscFilterDef) {
+//        String nameToCompareTo = rscFilterDef.getName();
+//        ResourceFilteringCondition<Resource> cond = new ResourceFilteringCondition<Resource>(nameToCompareTo);
+//        MetricFilter<ResourceFilteringCondition<Resource>> filter = new MetricFilter<ResourceFilteringCondition<Resource>>(this.measurementMgr,cond);
+//        return filter;
+//    }
     public List<Filter<MetricNotification,? extends FilteringCondition<?>>> toMetricFilters(final MetricFilterRequest metricFilterReq) {
         List<Filter<MetricNotification,? extends FilteringCondition<?>>> userFilters = new ArrayList<Filter<MetricNotification,? extends FilteringCondition<?>>>();
         ResourceFilterDefinitioin rscFilterDef = metricFilterReq.getResourceFilterDefinition();
@@ -133,7 +139,7 @@ public class MeasurementMapper {
             userFilters.add(metricFilterByRsc);
         }
         //TODO~ marshal metric filter
-        MetricFilter<? extends FilteringCondition<org.hyperic.hq.measurement.server.session.Measurement>> metricFilter = null;
+        MetricFilter<? extends FilteringCondition<org.hyperic.hq.measurement.server.session.Measurement>> metricFilter = null;//oMetricFilter(rscFilterDef);
         if (metricFilter!=null) {
             userFilters.add(metricFilter);
         }        
