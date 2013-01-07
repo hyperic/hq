@@ -1,5 +1,5 @@
 package org.hyperic.hq.api.transfer;
-
+ 
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Date;

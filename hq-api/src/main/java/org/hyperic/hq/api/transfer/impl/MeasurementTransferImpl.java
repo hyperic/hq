@@ -1,5 +1,5 @@
 /* **********************************************************************
-/*
+/* 
  * NOTE: This copyright does *not* cover user programs that use Hyperic
  * program services by normal system calls through the application
  * program interfaces provided as part of the Hyperic Plug-in Development
@@ -387,38 +387,5 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
                 rscRes.add(msmt);
             }
             return res;
-    }
-    
-    @Transactional(readOnly = true)
-    public ResourceMeasurementBatchResponse getMeasurements(ApiMessageContext apiMessageContext, BulkResourceMeasurementRequest rcsMsmtReq) {
-        ResourceMeasurementBatchResponse res = new ResourceMeasurementBatchResponse(this.errorHandler);
-        AuthzSubject authzSubject = apiMessageContext.getAuthzSubject();
-        List<ID> ids = rcsMsmtReq.getRids();
-        List<Integer> rids = this.mapper.toIds(ids);
-        for(Integer rid:rids) {
-            Resource rsc = this.resourceManager.findResourceById(rid);
-            if (rsc==null) {
-                res.addFailedResource(String.valueOf(rid), ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID.getErrorCode(), null,new Object[] {""});
-                log.error("resource not found for resource id - " + rid);
-                continue;
-            }
-            Collection<Measurement> hqMsmts = this.measurementMgr.findMeasurements(authzSubject, rsc);
-            if (hqMsmts==null || hqMsmts.isEmpty()) {
-                res.addFailedResource(String.valueOf(rid), ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID.getErrorCode(), null,new Object[] {""});
-                log.error("no measurements for resource id - " + rid);
-                continue;
-            }
-            ResourceMeasurementResponse rscRes = new ResourceMeasurementResponse();
-            rscRes.setRscId(String.valueOf(rid));
-            for(Measurement hqMsmt:hqMsmts) {
-//                Integer tmplId = hqMsmt.getTemplate().getId();
-                MeasurementTemplate hqTmpl = hqMsmt.getTemplate();//tmpltMgr.getTemplate(tmplId);
-                org.hyperic.hq.api.model.measurements.Measurement msmt = this.mapper.toMeasurementExtendedData(hqMsmt,hqTmpl);
-                rscRes.add(msmt);
-            }
-            res.addResponse(rscRes);
-        }
-
-        return res;
     }
 }

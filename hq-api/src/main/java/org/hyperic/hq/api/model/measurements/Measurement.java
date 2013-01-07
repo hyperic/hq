@@ -1,5 +1,6 @@
 package org.hyperic.hq.api.model.measurements;
-
+ 
+import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -23,11 +24,11 @@ public class Measurement extends MetricGroupBase {
 	@XmlAttribute
 	protected Long interval;
     @XmlAttribute
-    protected Double avg;
-    @XmlAttribute
     protected Boolean enabled;
     @XmlAttribute
     protected Boolean indicator;
+    @XmlAttribute
+    protected Double average;
     
 	public Measurement() {
 	}
@@ -55,12 +56,6 @@ public class Measurement extends MetricGroupBase {
 	public void setInterval(Long interval) {
 		this.interval = interval;
 	}
-    public Double getAvg() {
-        return avg;
-    }
-    public void setAvg(Double avg) {
-        this.avg = avg;
-    }
     public Boolean getIndicator() {
         return indicator;
     }
@@ -72,5 +67,11 @@ public class Measurement extends MetricGroupBase {
     }
     public Boolean getEnabled() {
         return this.enabled;
+    }
+    public void setAverage(Double avg) {
+        this.average=avg;
+    }
+    public Double getAverage() {
+        return average;
     }
 }
