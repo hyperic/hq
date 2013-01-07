@@ -9,6 +9,7 @@ import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
 import org.hyperic.hq.api.model.measurements.MetricFilterRequest;
 import org.hyperic.hq.api.model.measurements.MetricNotifications;
+import org.hyperic.hq.api.model.measurements.MetricResponse;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementBatchResponse;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequests;
 import org.hyperic.hq.api.services.impl.ApiMessageContext;
@@ -40,17 +41,17 @@ public interface MeasurementTransfer {
 	 * @throws TimeframeSizeException 
 	 * @throws IllegalArgumentException 
 	 */
-    public MeasurementResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest measurementRequest,
+    public MetricResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest measurementRequest,
             final String rscId, final Date begin, final Date end) throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException, TimeframeSizeException;
     
-    public void register(/*Integer sessionId, */final MetricFilterRequest metricFilterReq);
+    public void register(final MetricFilterRequest metricFilterReq);
 
     /**
      * unregister session data and all assigned filters
      * 
      * @param sessionId
      */
-    public void unregister(/*Integer sessionId*/);
+    public void unregister();
 
     /**
      * unregister the filters assigned to this user destination
@@ -59,9 +60,9 @@ public interface MeasurementTransfer {
      * @param rscFilter
      * @param metricFilter
      */
-    public void unregister(/*final Integer sessionId, */final MetricFilterRequest metricFilterReq);
+    public void unregister(final MetricFilterRequest metricFilterReq);
 
-    public MetricNotifications poll(/*Integer sessionId*/);
+    public MetricNotifications poll();
     
     public ResourceMeasurementBatchResponse getAggregatedMetricData(ApiMessageContext apiMessageContext, final ResourceMeasurementRequests hqMsmtReqs, 
             final Date begin, final Date end) 
