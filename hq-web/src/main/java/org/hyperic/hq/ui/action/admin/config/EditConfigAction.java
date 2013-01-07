@@ -27,7 +27,9 @@ package org.hyperic.hq.ui.action.admin.config;
 
 import java.net.MalformedURLException;
 import java.rmi.RemoteException;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -39,6 +41,7 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
+import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -58,14 +61,16 @@ public class EditConfigAction
     private UpdateBoss updateBoss;
     private VCManager vcManager;
     private SessionManager sessionManager;
-
+    private PlatformManager platformMgr;
+    
     @Autowired
-    public EditConfigAction(ConfigBoss configBoss, UpdateBoss updateBoss, VCManager vcManager, SessionManager sessionManager) {
+    public EditConfigAction(ConfigBoss configBoss, UpdateBoss updateBoss, VCManager vcManager, SessionManager sessionManager, PlatformManager platformMgr) {
         super();
         this.configBoss = configBoss;
         this.updateBoss = updateBoss;
         this.vcManager = vcManager;
         this.sessionManager = sessionManager;
+        this.platformMgr = platformMgr;
     }
 
     /**
@@ -117,7 +122,8 @@ public class EditConfigAction
             cForm.resetVCenterValues();
         }
         else {
-            vcManager.collect(subject, cForm.getvCenterURL(), cForm.getvCenterUser(), cForm.getvCenterPassword());
+            Map<String, Set<String>> uuidToMacsMap = vcManager.collect(subject, cForm.getvCenterURL(), cForm.getvCenterUser(), cForm.getvCenterPassword());
+            this.platformMgr.mapUUIDToPlatforms(subject, uuidToMacsMap);
         }
     }
 }
