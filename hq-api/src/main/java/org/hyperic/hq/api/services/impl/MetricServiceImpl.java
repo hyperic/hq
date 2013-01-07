@@ -4,6 +4,8 @@ import javax.ws.rs.core.Response;
 
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
+import org.hyperic.hq.api.model.measurements.MetricFilterRequest;
+import org.hyperic.hq.api.model.measurements.MetricNotifications;
 import org.hyperic.hq.api.model.measurements.MetricResponse;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementBatchResponse;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequests;
@@ -66,5 +68,17 @@ public class MetricServiceImpl extends RestApiService implements MetricService {
         } catch (TimeframeBoundriesException e) {
             throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.WRONG_DATE_VALUES, e.getMessage());
         }
+    }
+    
+    public void register(final MetricFilterRequest metricFilterReq) throws SessionNotFoundException, SessionTimeoutException {
+        measurementTransfer.register(metricFilterReq);
+    }
+    
+    public void unregister() throws SessionNotFoundException, SessionTimeoutException {
+        measurementTransfer.unregister();
+    }
+    
+    public MetricNotifications poll() throws SessionNotFoundException, SessionTimeoutException {
+        return measurementTransfer.poll();
     }
 }
