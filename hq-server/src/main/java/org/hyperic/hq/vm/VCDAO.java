@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class VCDAO extends HibernateDAO<MacToUUID> {
-    protected final Log log = LogFactory.getLog(VCManagerImpl.class.getName());
+    protected final Log log = LogFactory.getLog(VCDAO.class.getName());
 
     @Autowired
     protected VCDAO(SessionFactory f) {

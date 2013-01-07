@@ -33,7 +33,7 @@ import com.vmware.vim25.mo.ServerConnection;
 import com.vmware.vim25.mo.ServiceInstance;
 import com.vmware.vim25.mo.VirtualMachine;
 
-@Service("VMManagerImpl")
+@Service("VCManagerImpl")
 public class VCManagerImpl implements VCManager {
     protected final Log log = LogFactory.getLog(VCManagerImpl.class.getName());
     @Autowired
