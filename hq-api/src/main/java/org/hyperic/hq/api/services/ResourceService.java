@@ -50,9 +50,10 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 public interface ResourceService {
 	
-	@GET
-	@Path("/{platformNaturalID}/{resourceType}")
-	Resource getResource(@PathParam("platformNaturalID") final String platformNaturalID, @PathParam("resourceType") final ResourceType resourceType, 
+
+    @GET
+    @Path("/{platformNaturalID}")
+    Resource getResource(@PathParam("platformNaturalID") final String platformNaturalID, @QueryParam("resourceType") final ResourceType resourceType, 
 			@QueryParam("status") final ResourceStatusType resourceStatusType, @QueryParam("hierarchyDepth") final int hierarchyDepth, 
 			@QueryParam("responseStructure") final ResourceDetailsType[] responseStructure) throws SessionNotFoundException, SessionTimeoutException ;  
 		
