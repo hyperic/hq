@@ -644,7 +644,7 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 	    private SessionManager sessionManager;
 	    
 	    public ResourceServiceTestDataPopulator() { 
-	    	super(ResourceService.class, CONTEXT_URL + "/rest-api/inventory/resources") ;
+	    	super(ResourceService.class, CONTEXT_URL + "/rest-api/resource") ;
 	    }//EOM 
 	    
 		@Override
