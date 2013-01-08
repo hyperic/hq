@@ -35,7 +35,7 @@ public class MetricFilteringCondition extends FilteringCondition<Measurement> {
     public boolean check(Measurement m) {
         if (isIndicator!=null) {
             MeasurementTemplate t = m.getTemplate();
-            return t.isDesignate();
+            return isIndicator.equals(t.isDesignate());
         }
         return true;
     }
