@@ -169,7 +169,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             this.evaluator.unregisterAll(dest);
         }
     }
-    public void unregister(/*final Integer sessionId,*/ final MetricFilterRequest metricFilterReq) {
+    public void unregister(final MetricFilterRequest metricFilterReq) {
         //TODO~ return failed/successful registration
         if (!MetricFilterRequest.validate(metricFilterReq)) {
             if (log.isDebugEnabled()) {
@@ -194,7 +194,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         this.evaluator.unregister(dest,userFilters);
     }
 
-    public MetricNotifications poll(/*Integer sessionId*/) {
+    public MetricNotifications poll() {
         //TODO~ return adequate response if not registered
         MetricNotifications res = new MetricNotifications();
         Destination dest = this.dest;//this.sessionToDestination.get(sessionId);
