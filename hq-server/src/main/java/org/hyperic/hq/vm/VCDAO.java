@@ -33,18 +33,19 @@ public class VCDAO extends HibernateDAO<MacToUUID> {
     }
     
     @SuppressWarnings("unchecked")
-    public String findByMac(String mac) throws DupMacException {
+    public VMID findByMac(String mac) throws DupMacException {
         String sql = "from MacToUUID u where u.mac = :mac ";
 
         List<MacToUUID> rs = getSession().createQuery(sql).setString("mac", mac).list();
         if (rs.size()==0) {
-            log.error("no UUIDs are recorded for " + mac);
+            log.error("no IDs are recorded for " + mac);
             return null;
         }
         if (rs.size()>1) {
-            throw new DupMacException("dup4licate mac address " + mac + " in the UUID table");
+            throw new DupMacException("duplicate mac address " + mac + " in the UUID table");
         }
         
-        return rs.iterator().next().getUuid();
+        MacToUUID macToUUID = rs.iterator().next();
+        return new VMID(macToUUID.getMORef(),macToUUID.getVcUUID());
     }
 }

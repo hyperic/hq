@@ -54,6 +54,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.bizapp.server.session.ProductBossImpl.ConfigSchemaAndBaseResponse;
+import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -179,11 +180,16 @@ public class ResourceMapper {
 				configValues.put(entry.getKey(), value) ;  
 			}//EO while there are more attributes 
 		}//EO while there are more config responses 
-		String uuidKey = "UUID";
-		String uuid = cprops.getProperty(uuidKey);
-		if (uuid!=null) {
-		    configValues.put(uuidKey,uuid);
-		}
+        String moRefKey = HQConstants.MOREF;
+        String moRef = cprops.getProperty(moRefKey);
+        if (moRef!=null) {
+            configValues.put(moRefKey,moRef);
+        }
+        String vcUuidKey = HQConstants.VCUUID;
+        String vcUuid = cprops.getProperty(vcUuidKey);
+        if (vcUuid!=null) {
+            configValues.put(vcUuidKey,vcUuid);
+        }
 		final ResourceConfig resourceConfig = new ResourceConfig() ;
 		resourceConfig.setMapProps(configValues) ; 
 		resource.setResourceConfig(resourceConfig) ; 

@@ -141,5 +141,6 @@ public class HQConstants {
     public static final String vCenterUser = "VCENTER_USER";
     public static final String vCenterPassword = "VCENTER_PASSWORD";
     
-
+    public static final String MOREF = "MOREF";
+    public static final String VCUUID = "VCUUID";
 }

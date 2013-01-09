@@ -51,11 +51,13 @@ import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.hq.vm.VCManager;
+import org.hyperic.hq.vm.VMID;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.Pager;
@@ -388,8 +390,9 @@ public class CPropManagerImpl implements CPropManager {
         }
 
         if (macs!=null) {
-            String uuid = this.vmMgr.getUuid(macs);
-            cprops.setValue("UUID", uuid);
+            VMID vmid = this.vmMgr.getVMID(macs);
+            cprops.setValue(HQConstants.MOREF, vmid.getMoref());
+            cprops.setValue(HQConstants.VCUUID, vmid.getVcUUID());
         }
         if (log.isDebugEnabled()) {
             log.debug("cprops=" + cprops);
