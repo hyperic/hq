@@ -127,7 +127,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     //    protected Map<Integer,Destination> sessionToDestination = new HashMap<Integer,Destination>();
     protected Destination dest;
 
-    public RegistrationID register(/*Integer sessionId,*/ final MetricFilterRequest metricFilterReq) {
+    public RegistrationID register(final MetricFilterRequest metricFilterReq) {
         //TODO~ return failed/successful registration
         //TODO~ add schema to the xml's which automatically validates legal values (no null / empty name for instance)
         if (!MetricFilterRequest.validate(metricFilterReq)) {
@@ -153,7 +153,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         return new RegistrationID(1);
         
     }
-    public void unregister(/*Integer sessionId*/) {
+    public void unregister() {
         Destination dest = this.dest;//this.sessionToDestination.get(sessionId); 
         if (dest!=null) {
             //            this.sessionToDestination.remove(sessionId);
