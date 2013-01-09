@@ -120,8 +120,13 @@
             description="Proxy Connection"
             optional="true"/>
     
-    <option name="postargs"
-            description="POST Argumets"
+    <option name="requestparams"
+            description="Request Arguments: arg0=val0,arg1=val1,..."
+            optional="true"/>
+    
+    <option name="secretrequestparams"
+            description="Secret Request Arguments: arg0=val0,arg1=val1,..."
+            type="secret"
             optional="true"/>
 
   </config>
