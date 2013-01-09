@@ -89,7 +89,7 @@ public class HTTPCollector extends SocketChecker {
     private AtomicInteger proxyPort = new AtomicInteger(8080);
     private AtomicReference<Map<String, String>> params = new AtomicReference<Map<String,String>>();
 
-	protected void init() throws PluginException {
+    protected void init() throws PluginException {
         super.init();
         Properties props = getProperties();
         boolean isSSL = isSSL();
@@ -157,90 +157,90 @@ public class HTTPCollector extends SocketChecker {
         }
     }
 
-	protected String getURL() {
-		return url.get();
-	}
+    protected String getURL() {
+        return url.get();
+    }
 
-	protected void setURL(String url) {
-		this.url.set(url);
-	}
+    protected void setURL(String url) {
+        this.url.set(url);
+    }
 
-	protected String getMethod() {
-		return method.get();
-	}
+    protected String getMethod() {
+        return method.get();
+    }
 
-	protected void setMethod(String method) {
-		this.method.set(method);
-	}
+    protected void setMethod(String method) {
+        this.method.set(method);
+    }
 
-	private double getAvail(int code) {
-		// There are too many options to list everything that is
-		// successful. So, instead we are going to call out the
-		// things that should be considered failure, everything else
-		// is OK.
-		switch (code) {
-		case HttpURLConnection.HTTP_BAD_REQUEST:
-		case HttpURLConnection.HTTP_FORBIDDEN:
-		case HttpURLConnection.HTTP_NOT_FOUND:
-		case HttpURLConnection.HTTP_BAD_METHOD:
-		case HttpURLConnection.HTTP_CLIENT_TIMEOUT:
-		case HttpURLConnection.HTTP_CONFLICT:
-		case HttpURLConnection.HTTP_PRECON_FAILED:
-		case HttpURLConnection.HTTP_ENTITY_TOO_LARGE:
-		case HttpURLConnection.HTTP_REQ_TOO_LONG:
-		case HttpURLConnection.HTTP_INTERNAL_ERROR:
-		case HttpURLConnection.HTTP_NOT_IMPLEMENTED:
-		case HttpURLConnection.HTTP_UNAVAILABLE:
-		case HttpURLConnection.HTTP_VERSION:
-		case HttpURLConnection.HTTP_BAD_GATEWAY:
-		case HttpURLConnection.HTTP_GATEWAY_TIMEOUT:
+    private double getAvail(int code) {
+        // There are too many options to list everything that is
+        // successful. So, instead we are going to call out the
+        // things that should be considered failure, everything else
+        // is OK.
+        switch (code) {
+        case HttpURLConnection.HTTP_BAD_REQUEST:
+        case HttpURLConnection.HTTP_FORBIDDEN:
+        case HttpURLConnection.HTTP_NOT_FOUND:
+        case HttpURLConnection.HTTP_BAD_METHOD:
+        case HttpURLConnection.HTTP_CLIENT_TIMEOUT:
+        case HttpURLConnection.HTTP_CONFLICT:
+        case HttpURLConnection.HTTP_PRECON_FAILED:
+        case HttpURLConnection.HTTP_ENTITY_TOO_LARGE:
+        case HttpURLConnection.HTTP_REQ_TOO_LONG:
+        case HttpURLConnection.HTTP_INTERNAL_ERROR:
+        case HttpURLConnection.HTTP_NOT_IMPLEMENTED:
+        case HttpURLConnection.HTTP_UNAVAILABLE:
+        case HttpURLConnection.HTTP_VERSION:
+        case HttpURLConnection.HTTP_BAD_GATEWAY:
+        case HttpURLConnection.HTTP_GATEWAY_TIMEOUT:
             return Metric.AVAIL_DOWN;
-		default:
-		}
+        default:
+        }
 
-		if (hasCredentials()) {
-			if (code == HttpURLConnection.HTTP_UNAUTHORIZED) {
-				return Metric.AVAIL_DOWN;
-			}
-		}
+        if (hasCredentials()) {
+            if (code == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                return Metric.AVAIL_DOWN;
+            }
+        }
 
-		return Metric.AVAIL_UP;
-	}
+        return Metric.AVAIL_UP;
+    }
 
-	// allow response to have metrics, must be:
-	// Content-Type: text/plain
-	// Content-Length: <= 8192   DRC: Why the limitation?
-	// XXX flag to always disable and/or change these checks
-	protected void parseResults(HttpResponse response) {
-		Header length = response.getFirstHeader("Content-Length");
-		Header type = response.getFirstHeader("Content-Type");
+    // allow response to have metrics, must be:
+    // Content-Type: text/plain
+    // Content-Length: <= 8192   DRC: Why the limitation?
+    // XXX flag to always disable and/or change these checks
+    protected void parseResults(HttpResponse response) {
+        Header length = response.getFirstHeader("Content-Length");
+        Header type = response.getFirstHeader("Content-Type");
 
-		if (type == null || !type.getValue().equals("text/plain")) {
-			return;
-		}
+        if (type == null || !type.getValue().equals("text/plain")) {
+            return;
+        }
 
-		if (length != null) {
-			try {
-				if (Integer.parseInt(length.getValue()) > 8192) {
-					return;
-				}
-			} catch (NumberFormatException e) {
-				return;
-			}
-		}
+        if (length != null) {
+            try {
+                if (Integer.parseInt(length.getValue()) > 8192) {
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                return;
+            }
+        }
 
-		try {
-			parseResults(EntityUtils.toString(response.getEntity(), "UTF-8"));
-		} catch (ParseException e) {
-			setErrorMessage("Exception parsing response: " + e.getMessage(), e);
-		} catch (IOException e) {
-			setErrorMessage("Exception reading response stream: " + e.getMessage(), e);
-		}
-	}
+        try {
+            parseResults(EntityUtils.toString(response.getEntity(), "UTF-8"));
+        } catch (ParseException e) {
+            setErrorMessage("Exception parsing response: " + e.getMessage(), e);
+        } catch (IOException e) {
+            setErrorMessage("Exception reading response stream: " + e.getMessage(), e);
+        }
+    }
 
-	private boolean matchResponse(HttpResponse response) {
-		String body;
-		try {
+    private boolean matchResponse(HttpResponse response) {
+        String body;
+        try {
             body = EntityUtils.toString(response.getEntity(), "UTF-8");
             body = body == null ? "" : body;
             if (log.isDebugEnabled()) {
@@ -274,29 +274,29 @@ public class HTTPCollector extends SocketChecker {
                 log.debug("pattern='" + pattern.get() + "' does not match");
             }
             setWarningMessage("Response (length=" + body.length() + ") does not match " + pattern.get());
-    		return false;
+            return false;
         }
-	}
+    }
 
-	public void collect() {
-		if (isPingCompat.get()) {
-			// back compat w/ old url.availability templates
-			super.collect();
-			return;
-		}
-		this.matches.clear();
-		HttpConfig config = new HttpConfig(getTimeoutMillis(), getTimeoutMillis(), proxyHost.get(), proxyPort.get());
-		AgentKeystoreConfig keystoreConfig = new AgentKeystoreConfig();
+    public void collect() {
+        if (isPingCompat.get()) {
+            // back compat w/ old url.availability templates
+            super.collect();
+            return;
+        }
+        this.matches.clear();
+        HttpConfig config = new HttpConfig(getTimeoutMillis(), getTimeoutMillis(), proxyHost.get(), proxyPort.get());
+        AgentKeystoreConfig keystoreConfig = new AgentKeystoreConfig();
         log.debug("isAcceptUnverifiedCert:"+keystoreConfig.isAcceptUnverifiedCert());
-		HQHttpClient client = new HQHttpClient (keystoreConfig, config, keystoreConfig.isAcceptUnverifiedCert());
-		HttpParams params = client.getParams();
-		params.setParameter(CoreProtocolPNames.USER_AGENT, useragent.get());
-		if (this.hosthdr != null) {
-			params.setParameter(ClientPNames.VIRTUAL_HOST, this.hosthdr);
-		}
-		HttpRequestBase request;
-		double avail = 0;
-		try {
+        HQHttpClient client = new HQHttpClient (keystoreConfig, config, keystoreConfig.isAcceptUnverifiedCert());
+        HttpParams params = client.getParams();
+        params.setParameter(CoreProtocolPNames.USER_AGENT, useragent.get());
+        if (this.hosthdr != null) {
+            params.setParameter(ClientPNames.VIRTUAL_HOST, this.hosthdr);
+        }
+        HttpRequestBase request;
+        double avail = 0;
+        try {
             if (getMethod().equals(HttpHead.METHOD_NAME)) {
                 request = new HttpHead(getURL());
                 addParams(request, this.params.get());
