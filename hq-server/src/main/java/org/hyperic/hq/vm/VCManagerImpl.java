@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.vmware.vim25.GuestInfo;
 import com.vmware.vim25.GuestNicInfo;
+import com.vmware.vim25.ManagedObjectReference;
 import com.vmware.vim25.VirtualMachineConfigInfo;
 import com.vmware.vim25.mo.Folder;
 import com.vmware.vim25.mo.InventoryNavigator;
@@ -37,9 +38,10 @@ public class VCManagerImpl implements VCManager {
     @Autowired
     protected VCDAO vcDao;
 
-    protected Map<String,Set<String>> collectUUIDs(final String url, final String usr, final String pass) throws RemoteException, MalformedURLException {
+    protected Map<VMID,Set<String>> collectUUIDs(final String url, final String usr, final String pass) throws RemoteException, MalformedURLException {
         ServiceInstance si = new ServiceInstance(new URL(url), usr, pass, true);
         try {
+            String vcUUID = si.getServiceContent().getAbout().getInstanceUuid();
             Folder rootFolder = si.getRootFolder();
             ManagedEntity[] me = new InventoryNavigator(rootFolder).searchManagedEntities("VirtualMachine");
             if(me==null || me.length==0){
@@ -48,19 +50,13 @@ public class VCManagerImpl implements VCManager {
                 }
                 return null;
             }
-            Map<String,Set<String>> uuidToMacsMap = new HashMap<String,Set<String>>();
+            Map<VMID,Set<String>> vmidToMacsMap = new HashMap<VMID,Set<String>>();
             for (Object o : me) {
                 // gather data from the vc
                 VirtualMachine vm = (VirtualMachine)o;
-                String vmName = "";
-                String uuid = "";
                 GuestNicInfo[] nics = null;
                 try { 
-                    VirtualMachineConfigInfo vmConf = vm.getConfig();
-                    if (vmConf==null) {
-                        log.error("no conf info for vm " + vmName);
-                        continue;
-                    }
+                    String vmName = vm.getName();
                     GuestInfo guest = vm.getGuest();
                     if (guest==null)  {
                         log.error("no guest for vm " + vmName);
@@ -71,37 +67,36 @@ public class VCManagerImpl implements VCManager {
                         log.error("no nics defined on vm " + vmName);
                         continue;
                     }
-                    vmName = vm.getName();
-                    uuid = vmConf.getUuid();
-                    if (uuid==null || uuid.equals("")) {
-                        log.error("no UUID discovered on vm " + vmName);
+                    ManagedObjectReference moref = vm.getMOR();
+                    if (moref==null) {
+                        log.error("no moref is defined for vm " + vmName);
                         continue;
+                    }
+                    VMID vmid = new VMID(moref.getVal(),vcUUID);
+
+                    // gather macs
+                    for (int i=0; i<nics.length; i++) {
+                        if (nics[i]==null)  {
+                            log.error("nic no." + i + " is null on " + vmName);
+                            continue;
+                        }
+                        String mac = nics[i].getMacAddress();
+                        if (mac==null || "00:00:00:00:00:00".equals(mac)) {
+                            log.error("no mac address / mac address is 00:00:00:00:00:00 on nic" + nics[i] + " of vm " + vmName);
+                            continue;
+                        }
+                        Set<String> macs = vmidToMacsMap.get(vmid);
+                        if (macs==null) {
+                            macs = new TreeSet<String>();
+                            vmidToMacsMap.put(vmid,macs);
+                        }
+                        macs.add(mac.toUpperCase());
                     }
                 } catch (Throwable e) {
                     log.error(e);
-                    continue;
-                }
-
-                // gather macs
-                for (int i=0; i<nics.length; i++) {
-                    if (nics[i]==null)  {
-                        log.error("nic no." + i + " is null on " + vmName);
-                        continue;
-                    }
-                    String mac = nics[i].getMacAddress();
-                    if (mac==null || "00:00:00:00:00:00".equals(mac)) {
-                        log.error("no mac address / mac address is 00:00:00:00:00:00 on nic" + nics[i] + " of vm " + vmName);
-                        continue;
-                    }
-                    Set<String> macs = uuidToMacsMap.get(uuid);
-                    if (macs==null) {
-                        macs = new TreeSet<String>();
-                        uuidToMacsMap.put(uuid,macs);
-                    }
-                    macs.add(mac.toUpperCase());
                 }
             }
-            return uuidToMacsMap;
+            return vmidToMacsMap;
         } finally {
             if (si!=null) {
                 ServerConnection sc = si.getServerConnection();
@@ -118,34 +113,34 @@ public class VCManagerImpl implements VCManager {
      * @param subject
      * @param uuidToMacsMap
      */
-    protected void updateUUIDToMacsMapping(AuthzSubject subject, Map<String, Set<String>> uuidToMacsMap) {
+    protected void updateUUIDToMacsMapping(AuthzSubject subject, Map<VMID, Set<String>> uuidToMacsMap) {
         List<MacToUUID> macToUUIDs = this.vcDao.findAll();
         this.vcDao.remove(macToUUIDs);
         List<MacToUUID> toSave = new ArrayList<MacToUUID>();
-        for(String uuid : uuidToMacsMap.keySet()) {
-            Set<String> macs = uuidToMacsMap.get(uuid);
+        for(VMID vmid : uuidToMacsMap.keySet()) {
+            Set<String> macs = uuidToMacsMap.get(vmid);
             for (String mac : macs) {
-                MacToUUID uuidToMacs = new MacToUUID(mac,uuid);
+                MacToUUID uuidToMacs = new MacToUUID(mac,vmid.getMoref(),vmid.getVcUUID());
                 toSave.add(uuidToMacs);
             }
         }
         this.vcDao.save(toSave);
     }
-    
+
     @Transactional(readOnly = false)
-    public Map<String, Set<String>> collect(AuthzSubject subject, String url, String usr, String pass) throws RemoteException, MalformedURLException, PermissionException, CPropKeyNotFoundException, AppdefEntityNotFoundException {
-        Map<String, Set<String>> uuidToMacsMap = this.collectUUIDs(url,usr,pass);
+    public Map<VMID, Set<String>> collect(AuthzSubject subject, String url, String usr, String pass) throws RemoteException, MalformedURLException, PermissionException, CPropKeyNotFoundException, AppdefEntityNotFoundException {
+        Map<VMID, Set<String>> uuidToMacsMap = this.collectUUIDs(url,usr,pass);
         updateUUIDToMacsMapping(subject,uuidToMacsMap);
         return uuidToMacsMap;
     }
 
-    public String getUuid(final List<String> macs) {
+    public VMID getVMID(final List<String> macs) {
         for(String mac:macs) {
             try {
                 //TODO~ change to findByID if more efficient, and turn mac the id of this class
-                String uuid = this.vcDao.findByMac(mac);
-                if (uuid!=null) {
-                    return uuid;
+                VMID vmid = this.vcDao.findByMac(mac);
+                if (vmid!=null) {
+                    return vmid;
                 }
             } catch (DupMacException e) {
                 log.error(e);
@@ -153,7 +148,7 @@ public class VCManagerImpl implements VCManager {
         }
         return null;
     }
-    
+
     public boolean validateVCSettings(String url, String user, String password) {
         try{
             new ServiceInstance(new URL(url), user, password, true);

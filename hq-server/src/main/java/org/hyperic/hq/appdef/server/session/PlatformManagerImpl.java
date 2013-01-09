@@ -93,10 +93,12 @@ import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.ResourceAuditFactory;
 import org.hyperic.hq.common.shared.AuditManager;
+import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.shared.SRNManager;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.PlatformTypeInfo;
+import org.hyperic.hq.vm.VMID;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.sigar.NetFlags;
 import org.hyperic.util.pager.PageControl;
@@ -2032,9 +2034,9 @@ public class PlatformManagerImpl implements PlatformManager {
     	return null;
     }
 
-    public void mapUUIDToPlatforms(AuthzSubject subject, Map<String, Set<String>> uuidToMacsMap) throws PermissionException, CPropKeyNotFoundException {
-        for(String uuid : uuidToMacsMap.keySet()) {
-            Set<String> macs = uuidToMacsMap.get(uuid);
+    public void mapUUIDToPlatforms(AuthzSubject subject, Map<VMID, Set<String>> uuidToMacsMap) throws PermissionException, CPropKeyNotFoundException {
+        for(VMID vmid : uuidToMacsMap.keySet()) {
+            Set<String> macs = uuidToMacsMap.get(vmid);
             for (String mac : macs) {
                 if ("00:00:00:00:00:00".equals(mac)) { continue; }
                 Collection<Platform> platforms = this.getPlatformByMacAddr(subject, mac);
@@ -2051,7 +2053,8 @@ public class PlatformManagerImpl implements PlatformManager {
                         if (AuthzConstants.platformPrototypeVmwareVsphereVm.equals(platform.getResource().getPrototype().getName())) { continue; }
                         AppdefEntityID id = platform.getEntityId();
                         int typeId = platform.getAppdefResourceType().getId().intValue();
-                        this.cpropManager.setValue(id, typeId, "UUID", uuid);
+                        this.cpropManager.setValue(id, typeId, HQConstants.MOREF, vmid.getMoref());
+                        this.cpropManager.setValue(id, typeId, HQConstants.VCUUID, vmid.getVcUUID());
                         platformUUIDUpdated=true;
                     } catch (AppdefEntityNotFoundException e) { log.error(e); }
                 }
