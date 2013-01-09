@@ -391,8 +391,10 @@ public class CPropManagerImpl implements CPropManager {
 
         if (macs!=null) {
             VMID vmid = this.vmMgr.getVMID(macs);
-            cprops.setValue(HQConstants.MOREF, vmid.getMoref());
-            cprops.setValue(HQConstants.VCUUID, vmid.getVcUUID());
+            if (vmid!=null) {
+                cprops.setValue(HQConstants.MOREF, vmid.getMoref());
+                cprops.setValue(HQConstants.VCUUID, vmid.getVcUUID());
+            }
         }
         if (log.isDebugEnabled()) {
             log.debug("cprops=" + cprops);
