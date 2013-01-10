@@ -19,12 +19,16 @@ import org.hyperic.hq.notifications.filtering.MetricFilterByResource;
 public class MetricFilterRequest {
     @XmlElement(name="resourceFilter", namespace=RestApiConstants.SCHEMA_NAMESPACE)
     private ResourceFilterDefinitioin resourceFilterDef;
+    @XmlElement(name="metricFilter", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+    private MetricFilterDefinition metricFilterDef;
 
+    public static boolean validate(MetricFilterRequest metricFilterRequest) {
+        return metricFilterRequest!=null && ResourceFilterDefinitioin.validate(metricFilterRequest.resourceFilterDef);
+    }
     public ResourceFilterDefinitioin getResourceFilterDefinition() {
         return resourceFilterDef;
     }
-    
-    public static boolean validate(MetricFilterRequest metricFilterRequest) {
-        return metricFilterRequest!=null && ResourceFilterDefinitioin.validate(metricFilterRequest.resourceFilterDef);
+    public MetricFilterDefinition getMetricFilterDefinition() {
+        return metricFilterDef;
     }
 }

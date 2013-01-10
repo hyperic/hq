@@ -12,7 +12,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 
 public interface VCManager {
-    public Map<String, Set<String>> collect(final AuthzSubject subject, final String url, final String usr, final String pass) throws RemoteException, MalformedURLException, PermissionException, CPropKeyNotFoundException, AppdefEntityNotFoundException;
+    public Map<VMID, Set<String>> collect(final AuthzSubject subject, final String url, final String usr, final String pass) throws RemoteException, MalformedURLException, PermissionException, CPropKeyNotFoundException, AppdefEntityNotFoundException;
 
     /**
      *  retrieve a uuid of the VM the platform
@@ -20,7 +20,7 @@ public interface VCManager {
      * @param macs   mac addresses of a single platform
      * @return a uuid of the VM the platform identified by these mac addresses is on
      */
-    public String getUuid(final List<String> macs);
+    public VMID getVMID(final List<String> macs);
     
     boolean validateVCSettings(String url, String user, String password);
 }

@@ -134,7 +134,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     //    protected Map<Integer,Destination> sessionToDestination = new HashMap<Integer,Destination>();
     protected Destination dest;
 
-    public RegistrationID register(/*Integer sessionId,*/ final MetricFilterRequest metricFilterReq) {
+    public RegistrationID register(final MetricFilterRequest metricFilterReq) {
         //TODO~ return failed/successful registration
         //TODO~ add schema to the xml's which automatically validates legal values (no null / empty name for instance)
         if (!MetricFilterRequest.validate(metricFilterReq)) {
@@ -160,7 +160,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         return new RegistrationID(1);
         
     }
-    public void unregister(/*Integer sessionId*/) {
+    public void unregister() {
         Destination dest = this.dest;//this.sessionToDestination.get(sessionId); 
         if (dest!=null) {
             //            this.sessionToDestination.remove(sessionId);
@@ -169,7 +169,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             this.evaluator.unregisterAll(dest);
         }
     }
-    public void unregister(/*final Integer sessionId,*/ final MetricFilterRequest metricFilterReq) {
+    public void unregister(final MetricFilterRequest metricFilterReq) {
         //TODO~ return failed/successful registration
         if (!MetricFilterRequest.validate(metricFilterReq)) {
             if (log.isDebugEnabled()) {
@@ -194,7 +194,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         this.evaluator.unregister(dest,userFilters);
     }
 
-    public MetricNotifications poll(/*Integer sessionId*/) {
+    public MetricNotifications poll() {
         //TODO~ return adequate response if not registered
         MetricNotifications res = new MetricNotifications();
         Destination dest = this.dest;//this.sessionToDestination.get(sessionId);

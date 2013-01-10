@@ -50,7 +50,9 @@ import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.AICompare;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.vm.VCManager;
+import org.hyperic.hq.vm.VMID;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
@@ -562,8 +564,11 @@ public class AI2AppdefDiff {
         }
 
         if (macs!=null) {
-            String uuid = this.vmMgr.getUuid(macs);
-            aicprops.setValue("UUID", uuid);
+            VMID vmid = this.vmMgr.getVMID(macs);
+            if (vmid!=null) {
+                aicprops.setValue(HQConstants.MOREF, vmid.getMoref());
+                aicprops.setValue(HQConstants.VCUUID, vmid.getVcUUID());
+            }
         }
         try {
             existing = cpropMgr.getEntries(id);

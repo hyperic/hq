@@ -145,7 +145,8 @@ public class ExceptionToErrorCodeMapper  {
         CLOUD_PROVIDER_NOT_CONFIGURED("6001"),
         BAD_CLOUD_PROVIDER_CONFIGURATION("6002"),
         CLOUD_RESOURCE_NOT_FOUND("6003"),
-        SEQUENTIAL_REGISTRATION("7000");
+        SEQUENTIAL_REGISTRATION("7000"),
+        MISSING_MANDATORY_FILTER("7001");
         
         private final String errorCode;
 

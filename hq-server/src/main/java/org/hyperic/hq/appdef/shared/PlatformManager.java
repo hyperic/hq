@@ -40,6 +40,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.vm.VMID;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -412,6 +413,6 @@ public interface PlatformManager {
 
     public Platform getPlatformById(Integer id);
 
-    void mapUUIDToPlatforms(AuthzSubject subject, Map<String, Set<String>> uuidToMacsMap) throws PermissionException, CPropKeyNotFoundException;
+    void mapUUIDToPlatforms(AuthzSubject subject, Map<VMID, Set<String>> uuidToMacsMap) throws PermissionException, CPropKeyNotFoundException;
 
 }

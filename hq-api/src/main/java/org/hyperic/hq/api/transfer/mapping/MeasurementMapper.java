@@ -5,9 +5,12 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.core.Response;
+
 import org.hyperic.hq.api.model.ID;
 import org.hyperic.hq.api.model.measurements.Measurement;
 import org.hyperic.hq.api.model.measurements.Metric;
+import org.hyperic.hq.api.model.measurements.MetricFilterDefinition;
 import org.hyperic.hq.api.model.measurements.MetricFilterRequest;
 import org.hyperic.hq.api.model.measurements.RawMetric;
 import org.hyperic.hq.api.model.resources.ResourceFilterDefinitioin;
@@ -21,6 +24,7 @@ import org.hyperic.hq.notifications.filtering.FilteringCondition;
 import org.hyperic.hq.notifications.filtering.MetricFilter;
 import org.hyperic.hq.notifications.filtering.MetricFilterByResource;
 import org.hyperic.hq.notifications.filtering.ResourceFilteringCondition;
+import org.hyperic.hq.notifications.filtering.MetricFilteringCondition;
 import org.hyperic.hq.notifications.model.MetricNotification;
 import org.hyperic.hq.product.MetricValue;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,11 +36,13 @@ public class MeasurementMapper {
     protected final static DecimalFormat df = new DecimalFormat();
     protected final ResourceManager resourceMgr;
     protected final MeasurementManager measurementMgr;
-    
+    private ExceptionToErrorCodeMapper errorHandler ;
+
     @Autowired
-    public MeasurementMapper(final MeasurementManager measurementMgr,ResourceManager resourceMgr) {
+    public MeasurementMapper(final MeasurementManager measurementMgr,ResourceManager resourceMgr,ExceptionToErrorCodeMapper errorHandler) {
         this.measurementMgr=measurementMgr;
         this.resourceMgr=resourceMgr;
+        this.errorHandler=errorHandler;
     }
     static {
         df.setMaximumFractionDigits(MAX_FRACTION_DIGITS);
@@ -99,25 +105,31 @@ public class MeasurementMapper {
         MetricFilterByResource<ResourceFilteringCondition<Resource>> filter = new MetricFilterByResource<ResourceFilteringCondition<Resource>>(this.measurementMgr,this.resourceMgr,cond);
         return filter;
     }
-//    public MetricFilter<ResourceFilteringCondition<Resource>> toMetricFilter(final MetricFilterDefinitioin rscFilterDef) {
-//        String nameToCompareTo = rscFilterDef.getName();
-//        ResourceFilteringCondition<Resource> cond = new ResourceFilteringCondition<Resource>(nameToCompareTo);
-//        MetricFilter<ResourceFilteringCondition<Resource>> filter = new MetricFilter<ResourceFilteringCondition<Resource>>(this.measurementMgr,cond);
-//        return filter;
-//    }
+    public MetricFilter<MetricFilteringCondition> toMetricFilter(final MetricFilterDefinition metricFilterDef) {
+        if (metricFilterDef==null) {
+            return null;
+        }
+        Boolean isIndicator = metricFilterDef.getIsIndicator();
+        MetricFilteringCondition cond = new MetricFilteringCondition(isIndicator);
+        MetricFilter<MetricFilteringCondition> filter = new MetricFilter<MetricFilteringCondition>(this.measurementMgr,cond);
+        return filter;
+    }
     public List<Filter<MetricNotification,? extends FilteringCondition<?>>> toMetricFilters(final MetricFilterRequest metricFilterReq) {
         List<Filter<MetricNotification,? extends FilteringCondition<?>>> userFilters = new ArrayList<Filter<MetricNotification,? extends FilteringCondition<?>>>();
         ResourceFilterDefinitioin rscFilterDef = metricFilterReq.getResourceFilterDefinition();
-
+        if (rscFilterDef==null) {
+            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.MISSING_MANDATORY_FILTER,"resourceFilterDefinitioin");
+        }
         MetricFilterByResource<ResourceFilteringCondition<Resource>> metricFilterByRsc = toMetricFilterByResource(rscFilterDef);
         if (metricFilterByRsc!=null) {
             userFilters.add(metricFilterByRsc);
         }
-        //TODO~ marshal metric filter
-        MetricFilter<? extends FilteringCondition<org.hyperic.hq.measurement.server.session.Measurement>> metricFilter = null;//oMetricFilter(rscFilterDef);
+        
+        MetricFilterDefinition metricFilterDef = metricFilterReq.getMetricFilterDefinition();
+        MetricFilter<? extends FilteringCondition<org.hyperic.hq.measurement.server.session.Measurement>> metricFilter = toMetricFilter(metricFilterDef);
         if (metricFilter!=null) {
             userFilters.add(metricFilter);
-        }        
+        }
         return userFilters;
     }
 }

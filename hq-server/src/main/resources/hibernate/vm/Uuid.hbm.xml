@@ -46,8 +46,12 @@
       <column name="MAC_ADDRESS" not-null="true" length="64" unique="true"/>
     </property>
 
-    <property name="uuid" type="string">
-      <column name="UUID" not-null="true" length="128"/>
+    <property name="MORef" type="string">
+      <column name="MOREF" not-null="true" length="64"/>
+    </property>
+
+    <property name="vcUUID" type="string">
+      <column name="VCUUID" not-null="true" length="128"/>
     </property>
   </class>
 
