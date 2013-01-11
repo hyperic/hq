@@ -26,16 +26,16 @@
 package org.hyperic.util.stats;
 
 public class StatsObject {
-    private final long _val;
-    private final String _id;
+    private long _val;
+    private String _id;
     public StatsObject(long val, String id) {
         _val = val;
         _id = id;
     }
-    public final long getVal() {
+    public long getVal() {
         return _val;
     }
-    public final String getId() {
+    public String getId() {
         return _id;
     }
     public boolean equals(Object rhs) {
