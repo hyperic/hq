@@ -282,7 +282,12 @@ public abstract class AbstractStatsWriter {
             while (marker != (obj = statsCollector.pollQueue())) {
                 final StatsObject stat = (StatsObject) obj;
                 final String id = stat.getId();
-                final long val = stat.getVal();
+                // HHQ-5724 - this line should not be needed, but marker != (..) should do the trick
+                // id == null is the id of the marker.
+                if (id == null) {
+                    break;
+                }
+                final Long val = stat.getVal();
                 if (null == (tmp = rtn.get(id))) {
                     tmp = new ArrayList<Number>();
                     rtn.put(id, tmp);
