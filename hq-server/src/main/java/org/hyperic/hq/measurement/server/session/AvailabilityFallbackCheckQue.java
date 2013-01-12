@@ -168,7 +168,6 @@ public class AvailabilityFallbackCheckQue {
 	public synchronized Collection<DataPoint> beforeDataUpdate(Collection<DataPoint> dataPoints, boolean isUpdateFromServer) {
 		
 		Collection<DataPoint> res = new ArrayList<DataPoint>();
-Collection<DataPoint> removed = new ArrayList();
 		for (DataPoint dataPoint : dataPoints) {
 			
 			Integer measurementId = dataPoint.getMeasurementId();
@@ -192,7 +191,6 @@ Collection<DataPoint> removed = new ArrayList();
 					this.platformsRecheckQue.remove(platformDataPoint);
 					this.measurementIdToPlatformId.remove(measurementId);
 					this.currentPlatformsInQue.remove(platformId);
-removed.add(dataPoint);
 				}
 				else {
 					res.add(dataPoint);
@@ -211,10 +209,8 @@ removed.add(dataPoint);
 			
 		}
 
-		if (isUpdateFromServer) {
-			log.debug("beforeDataUpdate from Server: updating: " + res.size() + " out of " + dataPoints.size() +
-			          ", removed=" + removed);
-		}
+		if (isUpdateFromServer)
+			log.debug("beforeDataUpdate from Server: updating: " + res.size() + " out of " + dataPoints.size());
 		return res;
 	}
 	
