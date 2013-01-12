@@ -137,11 +137,11 @@ public class AvailabilityFallbackChecker {
 			//log.info("checkAvailability-Platform: " + platformAvailPoint.getResource().getId() + " value: " + platformAvailPoint.getValue());
 			resPlatforms.add(platformAvailPoint);
 		}
-		log.debug("marking " + resPlatforms.size() + " platforms down, resourceIds=" + resPlatforms);
+		log.info("checkAvailability: checking " + resPlatforms.size() + " platforms.");
 		Map<Integer, Collection<DataPoint>> res = addStatusOfPlatformsDescendantsByPlatformId(resPlatforms);
 		Collection<Collection<DataPoint>> resChunks = orderChunksBeforeUpdates(res);
 		for (Collection<DataPoint> resChunk : resChunks) {
-			log.debug("checkAvailability: updating chunk with " + resChunk.size() + " platforms & descendants.");
+			log.info("checkAvailability: updating chunk with " + resChunk.size() + " platforms & descendants.");
 			storeUpdates(resChunk);			
 		}
 	}

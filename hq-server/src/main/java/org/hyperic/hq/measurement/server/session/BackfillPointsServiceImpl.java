@@ -60,6 +60,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author jhickey
  * 
  */
+@SuppressWarnings("restriction")
 @Transactional(readOnly = true)
 @Service
 public class BackfillPointsServiceImpl implements BackfillPointsService {
@@ -195,7 +196,8 @@ public class BackfillPointsServiceImpl implements BackfillPointsService {
                 final long lastTimestamp = last.getTimestamp();
                 if (debug) {
                     String msg = "Checking availability for " + last + ", CacheValue=(" +
-                                 TimeUtil.toString(lastTimestamp) + ") vs. Now=(" + nowTimestamp + ")";
+                                 TimeUtil.toString(lastTimestamp) + ") vs. Now=(" + nowTimestamp +
+                                 ")";
                     log.debug(msg);
                 }
                 if (begin > end) {
@@ -206,10 +208,9 @@ public class BackfillPointsServiceImpl implements BackfillPointsService {
                 }
                 if (!meas.isEnabled()) {
                     final long t = TimingVoodoo.roundDownTime(now - interval, interval);
-                    final DataPoint point = new DataPoint(meas.getId(), new MetricValue(AVAIL_PAUSED, t));
+                    final DataPoint point = new DataPoint(meas.getId(), new MetricValue(
+                        AVAIL_PAUSED, t));
                     resource = meas.getResource();
-                    if (debug) log.debug("adding resourceId=" + resource.getId() +
-                                         " to list of down platforms, metric is not enabled");
                     rtn.put(resource.getId(), new ResourceDataPoint(resource, point));
                 } else if (last.getValue() == AVAIL_DOWN || (now - lastTimestamp) > interval * 2) {
                     // HQ-1664: This is a hack: Give a 5 minute grace period for
@@ -219,18 +220,21 @@ public class BackfillPointsServiceImpl implements BackfillPointsService {
                     if (last.getValue() == AVAIL_PAUSED && (now - lastTimestamp) <= 5 * 60 * 1000) {
                         continue;
                     }
-                    long t = (last.getValue() != AVAIL_DOWN) ?
-                        lastTimestamp + interval : TimingVoodoo.roundDownTime(now - interval, interval);
-                    t = (last.getValue() == AVAIL_PAUSED) ? TimingVoodoo.roundDownTime(now, interval) : t;
+                    long t = (last.getValue() != AVAIL_DOWN) ? lastTimestamp + interval
+                                                            : TimingVoodoo.roundDownTime(now -
+                                                                                         interval,
+                                                                interval);
+                    t = (last.getValue() == AVAIL_PAUSED) ? TimingVoodoo.roundDownTime(now,
+                        interval) : t;
                     DataPoint point = new DataPoint(meas.getId(), new MetricValue(AVAIL_DOWN, t));
                     resource = meas.getResource();
-                    if (debug) log.debug("adding resourceId=" + resource.getId() + " to list of down platforms");
                     rtn.put(resource.getId(), new ResourceDataPoint(resource, point));
                 }
             }
         }
         if (!rtn.isEmpty()) {
-            permissionManager.getHierarchicalAlertingManager().performSecondaryAvailabilityCheck(rtn);
+            permissionManager.getHierarchicalAlertingManager().performSecondaryAvailabilityCheck(
+                rtn);
         }
         return rtn;
     }

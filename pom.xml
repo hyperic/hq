@@ -1057,15 +1057,6 @@
 			</build>
 		</profile>
 
-        <profile>
-            <id>servercommon</id>
-            <modules>
-                <module>hq-common</module>
-                <module>hq-server</module>
-                <module>hq-web</module>
-            </modules>
-        </profile>
-
 		<profile>
 			<id>integration-test</id>
 			<modules>
