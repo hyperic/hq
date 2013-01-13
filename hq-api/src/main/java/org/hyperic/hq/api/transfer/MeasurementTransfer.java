@@ -43,6 +43,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.TimeframeBoundriesException;
 import org.hyperic.hq.measurement.server.session.TimeframeSizeException;
+import org.hyperic.hq.notifications.UnregisteredException;
 import org.hyperic.hq.notifications.filtering.MetricFilter;
 import org.hyperic.hq.notifications.filtering.MetricFilterByResource;
 
@@ -87,7 +88,7 @@ public interface MeasurementTransfer {
      */
     public void unregister(final MetricFilterRequest metricFilterReq);
 
-    public MetricNotifications poll();
+    public MetricNotifications poll() throws UnregisteredException;
     
     public ResourceMeasurementBatchResponse getAggregatedMetricData(ApiMessageContext apiMessageContext, final ResourceMeasurementRequests hqMsmtReqs, 
             final Date begin, final Date end) 

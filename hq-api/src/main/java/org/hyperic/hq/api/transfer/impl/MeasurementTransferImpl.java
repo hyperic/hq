@@ -75,6 +75,7 @@ import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.notifications.Q;
+import org.hyperic.hq.notifications.UnregisteredException;
 import org.hyperic.hq.notifications.filtering.Filter;
 import org.hyperic.hq.notifications.filtering.FilteringCondition;
 import org.hyperic.hq.notifications.filtering.MetricDestinationEvaluator;
@@ -187,13 +188,11 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         this.evaluator.unregister(dest,userFilters);
     }
 
-    public MetricNotifications poll() {
-        //TODO~ return adequate response if not registered
+    public MetricNotifications poll() throws UnregisteredException {
         MetricNotifications res = new MetricNotifications();
         Destination dest = this.dest;//this.sessionToDestination.get(sessionId);
         if (dest==null) {
-            log.error("the current session is not registered for notifications");
-            this.errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.INVALID_SESSION);            
+            throw new UnregisteredException();
         }
         List<MetricNotification> mns = (List<MetricNotification>) this.q.poll(dest);
         if (mns.isEmpty()) {

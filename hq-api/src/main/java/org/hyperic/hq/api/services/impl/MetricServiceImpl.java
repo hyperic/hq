@@ -20,6 +20,7 @@ import org.hyperic.hq.common.TimeframeBoundriesException;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.TimeframeSizeException;
+import org.hyperic.hq.notifications.UnregisteredException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.sql.SQLException;
@@ -80,6 +81,11 @@ public class MetricServiceImpl extends RestApiService implements MetricService {
     }
     
     public MetricNotifications poll() throws SessionNotFoundException, SessionTimeoutException {
-        return measurementTransfer.poll();
+        try {
+            return measurementTransfer.poll();
+        } catch (UnregisteredException e) {
+            errorHandler.log(e);
+            throw errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.UNREGISTERED_FOR_NOTIFICATIONS, e.getMessage());
+        }
     }
 }
