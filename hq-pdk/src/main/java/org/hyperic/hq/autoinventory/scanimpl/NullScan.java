@@ -63,8 +63,7 @@ public class NullScan extends ScanMethodBase {
         return OPTS;
     }
 
-    public void scan(ConfigResponse platformConfig, ServerDetector[] serverDetectors)
-        throws AutoinventoryException {
+    public void scan(ConfigResponse platformConfig, ServerDetector[] serverDetectors) {
 
         for (ServerDetector detector : serverDetectors) {
 
@@ -98,11 +97,9 @@ public class NullScan extends ScanMethodBase {
                     _state.addServers(this, servers);
                     _state.setAreServersIncluded(true);
                 }
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 log.error("AutoScan failed for " + detector.getTypeInfo().getName(), e);
-            } catch (NoClassDefFoundError e) {
-                log.error("AutoScan failed for " + detector.getTypeInfo().getName(), e);
-            } finally {
+           } finally {
                 PluginLoader.resetClassLoader(detector);
             }
         }

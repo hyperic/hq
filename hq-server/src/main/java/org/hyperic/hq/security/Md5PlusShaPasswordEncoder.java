@@ -5,19 +5,18 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.authentication.encoding.*;
 
-public class Md5PlusShaPasswordEncoder extends BaseDigestPasswordEncoder {
+public class Md5PlusShaPasswordEncoder implements PasswordEncoder {
     
     private static final Log log = LogFactory.getLog(Md5PlusShaPasswordEncoder.class);
     
-    Md5PasswordEncoder md5PwdEncoder;
-    ShaPasswordEncoder shaPwdEncoder;
-
-    public Md5PlusShaPasswordEncoder() {
-        //super("Md5PlusSha");
-        md5PwdEncoder = new Md5PasswordEncoder();
-        shaPwdEncoder = new ShaPasswordEncoder(256);
+    private Md5PasswordEncoder md5PwdEncoder;
+    private ShaPasswordEncoder shaPwdEncoder;
+    
+    public Md5PlusShaPasswordEncoder(Md5PasswordEncoder md5PwdEncoder, ShaPasswordEncoder shaPwdEncoder){
+        this.md5PwdEncoder = md5PwdEncoder;
+        this.shaPwdEncoder = shaPwdEncoder;
     }
-
+    
     
     public String encodePassword(String rawPass, Object salt) throws DataAccessException {
         String md5Encoded = md5PwdEncoder.encodePassword(rawPass, salt);

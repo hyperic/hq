@@ -32,7 +32,7 @@
 <plugin package="org.hyperic.hq.plugin.sharepoint">
     <property name="PLUGIN_VERSION" value="@project.version@"/>
     
-    <server name="SharePoint" version="2010">
+    <server name="SharePoint" version="2010" platforms="Win32">
         <property name="version" value="SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\14.0"/>
         <plugin type="measurement" class="SharePointServerMeasurement"/>
         <plugin type="autoinventory" class="SharePointServerDetector2010"/>
@@ -488,6 +488,7 @@
         <plugin type="measurement" class="SharePointServerMeasurement"/>
         <plugin type="autoinventory" class="SharePointServerDetector2007"/>
 
+        <metric name="Availability" alias="Availability" template="pdh:SharePoint Search Indexer Catalogs(Search)\Queries:${alias}" indicator="true" category="AVAILABILITY"/>
         <filter name="template" value="pdh:SharePoint Search Indexer Catalogs(Search):${name}"/>
         <metric name="Master Index Level"/>
         <metric name="Master Merges to Date"/>

@@ -52,6 +52,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.event.AutoFlushEvent;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.common.ProductProperties;
 import org.hyperic.hq.common.SystemException;
@@ -1556,7 +1557,17 @@ public class DataManagerImpl implements DataManager {
     }
     
     private void merge(int bucket, AggMetricValue[] rtn, AggMetricValue val, long timestamp) {
-        AggMetricValue amv = rtn[bucket];
+    	AggMetricValue amv = null;
+    	try {
+			amv = rtn[bucket];
+		} catch (NullPointerException e) {
+			log.error("Error has occured in Merge function, bucket size[" + bucket + "] " +
+            			"but AggMetricValue array size is [" + rtn.length +"] ," + e, e);
+		} catch (ArrayIndexOutOfBoundsException e){
+            log.error("Error has occured in Merge function, bucket size[" + bucket + "] " +
+            			"but AggMetricValue array is null, " + e, e); 
+		}
+		
         if (amv == null) {
             rtn[bucket] = val;
         } else {

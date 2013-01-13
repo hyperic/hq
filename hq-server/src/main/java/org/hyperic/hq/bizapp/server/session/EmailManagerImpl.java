@@ -109,9 +109,12 @@ public class EmailManagerImpl implements EmailManager {
                 mimeMessage.setFrom(from);
             }
 
-            mimeMessage.setSubject(subject);
+            // HHQ-5708
+            // remove any possible new line from the subject
+            // the subject can be render form 'subject.gsp' file
+            mimeMessage.setSubject(subject.replace("\r", "").replace("\n", ""));
 
-            // If priority not null, set it in body
+            // If priority not null, set it in body 
             if (priority != null) {
                 switch (priority.intValue()) {
                     case EventConstants.PRIORITY_HIGH:
