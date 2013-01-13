@@ -11799,11 +11799,15 @@ has already been defined.
         <schema-directSQL>
             <statement targetDB="postgresql">
                CREATE TABLE if not exists EAM_UUIDTable (
-                ID INTEGER NOT NULL PRIMARY KEY, 
+                ID int4 NOT NULL PRIMARY KEY, 
+                version_col bigint DEFAULT 0 NOT NULL,
             	 MAC_ADDRESS VARCHAR(64) NOT NULL UNIQUE, 
             	 MOREF VARCHAR(64) NOT NULL,
            	 	 VCUUID VARCHAR(128) NOT NULL
                )
+            </statement>
+            <statement targetDB="postgresql">
+                create sequence EAM_VM_ID_SEQ start 0 increment 1
             </statement>
         </schema-directSQL>
 	</schemaSpec>
