@@ -11972,7 +11972,7 @@ has already been defined.
                )
             </statement>
             <statement targetDB="postgresql">
-                create sequence EAM_VM_ID_SEQ start 0 increment 1
+                create sequence EAM_VM_ID_SEQ start 1 increment 1
             </statement>
         </schema-directSQL>
 	</schemaSpec>
