@@ -189,7 +189,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
 
     
     public AvailabilityFallbackCheckQue getFallbackCheckQue() {
-    	return this.fallbackCheckQue;
+        return this.fallbackCheckQue;
     }
     
     
@@ -945,7 +945,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         }
     }
 
-	private void flushCreateAndRemoves(Map<DataPoint, AvailabilityDataRLE> createMap,
+    private void flushCreateAndRemoves(Map<DataPoint, AvailabilityDataRLE> createMap,
                                        Map<DataPoint, AvailabilityDataRLE> removeMap) {
         final StopWatch watch = new StopWatch();
         final boolean debug = log.isDebugEnabled();
@@ -1529,8 +1529,8 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         }
     }
 
-	private void checkAvailabilityState(List<DataPoint> availPoints) {
-		// The following code (until the creation of the StopWatch) is a fix for
+    private void checkAvailabilityState(List<DataPoint> availPoints) {
+        // The following code (until the creation of the StopWatch) is a fix for
         // Jira issue [HHQ-5524].
         // There is a strange scenario where the cache holds an availability
         // metric with 'available' value while
@@ -1546,7 +1546,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         // the correct value.
         List<Integer> includes = new ArrayList<Integer>(availPoints.size());
         for (DataPoint point : availPoints) {
-        	includes.add(point.getMeasurementId());
+            includes.add(point.getMeasurementId());
         }
         // Find out which of the availPoints is marked as 'not available' in the
         // database and check
@@ -1562,7 +1562,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
                 continue;
             }
         }
-	}
+    }
 
     private void sendDataToEventHandlers(List<DataPoint> data) {
         final StopWatch watch = new StopWatch();
