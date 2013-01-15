@@ -102,7 +102,7 @@ public class BackfillPointsServiceImpl implements BackfillPointsService {
 
     public Map<Integer, ResourceDataPoint> getBackfillPlatformPoints(long current) {
         Map<Integer, ResourceDataPoint> downPlatforms = getDownPlatforms(current);
-    	log.debug("getBackfillPlatformPoints: found " + downPlatforms.size() + " downPlatforms");
+        log.debug("getBackfillPlatformPoints: found " + downPlatforms.size() + " downPlatforms");
         removeRestartingAgents(downPlatforms);
         log.debug("getBackfillPlatformPoints: after removeRestartingAgents: " + downPlatforms.size() + " downPlatforms");
         if (downPlatforms != null) {
