@@ -1,3 +1,28 @@
+/*
+ * NOTE: This copyright does *not* cover user programs that use Hyperic
+ * program services by normal system calls through the application
+ * program interfaces provided as part of the Hyperic Plug-in Development
+ * Kit or the Hyperic Client Development Kit - this is merely considered
+ * normal use of the program, and does *not* fall under the heading of
+ *  "derived work".
+ *
+ *  Copyright (C) [2004-2013], VMware, Inc.
+ *  This file is part of Hyperic.
+ *
+ *  Hyperic is free software; you can redistribute it and/or modify
+ *  it under the terms version 2 of the GNU General Public License as
+ *  published by the Free Software Foundation. This program is distributed
+ *  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ *  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ *  PARTICULAR PURPOSE. See the GNU General Public License for more
+ *  details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ *  USA.
+ */
+
 package org.hyperic.hq.measurement.server.session;
 
 import java.util.ArrayList;
@@ -102,7 +127,9 @@ public class AvailabilityFallbackCheckQue {
      * @return true, if added. false, if the platform is already in the que and will not be re-added.
      */
     public synchronized boolean addToQue(Integer platformId, ResourceDataPoint dataPoint) {
-    	log.debug("addToQue: start " + platformId+ ", curQueSize: " + getSize());
+        if (log.isDebugEnabled()) {
+    	   log.debug("addToQue: start resourcePlatformId=" + platformId+ ", curQueSize: " + getSize());
+        }
     	if (this.currentPlatformsInQue.containsKey(platformId)) {
     		// in case there was an agent update in the middle, we do not want to remove it from the recheck que.
     		//this.platformsPendingQueRemoval.remove(platformId);
@@ -125,7 +152,9 @@ public class AvailabilityFallbackCheckQue {
     		boolean added = addToQue(platformId, platformsToAdd.get(platformId));
     		res += added ? 1 : 0;
 		}
-    	log.debug("addToQue: added "+res);
+    	if (log.isDebugEnabled()) {
+    	   log.debug("addToQue: added "+res);
+    	}
     	return res;
     }
     
@@ -134,7 +163,9 @@ public class AvailabilityFallbackCheckQue {
      * @return the next ResourceDataPoint in the que. The ResourceDataPoint is the latest status of the checked platform. Return null if the que is empty.
      */
 	public synchronized ResourceDataPoint poll() {
-    	log.debug("poll: start, que size: " + getSize());
+	    if (log.isDebugEnabled()) {
+    	   log.debug("poll: start, que size: " + getSize());
+	    }
 		ResourceDataPoint res = this.platformsRecheckQue.poll();
 		if (res != null) {
 			Integer platformId = res.getResource().getId();
@@ -165,11 +196,12 @@ public class AvailabilityFallbackCheckQue {
 	 * @param isUpdateFromServer - true, if the server fallback checks asked for the updated, false if the agent updated with the status.
 	 * @return a filtered collection of datapoints, the ones that should be updated in the DB/cache
 	 */
-	public synchronized Collection<DataPoint> beforeDataUpdate(Collection<DataPoint> dataPoints, boolean isUpdateFromServer) {
-		
+	public synchronized Collection<DataPoint> beforeDataUpdate(Collection<DataPoint> dataPoints,
+	                                                           boolean isUpdateFromServer) {
 		Collection<DataPoint> res = new ArrayList<DataPoint>();
+        Collection<DataPoint> removed = new ArrayList<DataPoint>();
+        final boolean debug = log.isDebugEnabled();
 		for (DataPoint dataPoint : dataPoints) {
-			
 			Integer measurementId = dataPoint.getMeasurementId();
 			Integer resourceId = this.measurementIdToPlatformId.get(measurementId);
 			if (resourceId == null) {
@@ -179,11 +211,9 @@ public class AvailabilityFallbackCheckQue {
 				res.add(dataPoint);
 				continue;
 			}
-			
 			Integer platformId = resourceId;
 			if (isUpdateFromServer) {
 				this.platformsRecheckInProgress.remove(platformId);
-				
 				if (this.platformsPendingQueRemoval.contains(platformId)) {
 					// this should not be updated from the server.
 	    			this.platformsPendingQueRemoval.remove(platformId);
@@ -191,26 +221,26 @@ public class AvailabilityFallbackCheckQue {
 					this.platformsRecheckQue.remove(platformDataPoint);
 					this.measurementIdToPlatformId.remove(measurementId);
 					this.currentPlatformsInQue.remove(platformId);
-				}
-				else {
+                    if (debug) removed.add(dataPoint);
+				} else {
 					res.add(dataPoint);
 					ResourceDataPoint queDataPoint = this.currentPlatformsInQue.get(platformId);
 					ResourceDataPoint pointToAddToQue = new ResourceDataPoint(queDataPoint.getResource(), dataPoint);
 					this.currentPlatformsInQue.remove(platformId);
 					addToQue(platformId, pointToAddToQue);
 				}	
-			}
-			
-			else {
+			} else {
 				// update from agent
 				res.add(dataPoint);
 				removeFromQueBeforeUpdateFromAgent(platformId);
 			}
-			
 		}
-
-		if (isUpdateFromServer)
-			log.debug("beforeDataUpdate from Server: updating: " + res.size() + " out of " + dataPoints.size());
+		if (isUpdateFromServer) {
+		    if (debug) {
+                log.debug("beforeDataUpdate from Server: updating: " + res.size() + " out of " + dataPoints.size() +
+			          ", removed=" + removed);
+		    }
+		}
 		return res;
 	}
 	
@@ -263,21 +293,23 @@ public class AvailabilityFallbackCheckQue {
 			}			
 		}
 		platformsRecheckQue.removeAll(pointsToDel);
-		if (res != 0)
+		if (res != 0 && log.isDebugEnabled()) {
 			log.debug("cleanQueFromNonExistant: removing " + res + " platforms.");
+		}
 		return res;
 	}
 
 	public synchronized int removeFromQue(Collection<Integer> platformResourceIds) {
 		int res = 0;
+		final boolean debug = log.isDebugEnabled();
 		for (Integer platformId : platformResourceIds) {
-	    	log.debug("removeFromQueBeforeUpdateFromAgent: start " + platformId+ ", curQueSize: " + getSize());
 			if (this.platformsRecheckInProgress.contains(platformId)) {
+			    if (debug) {
+                    log.debug("0 adding to pending queue platformId=" + platformId+ ", curQueSize: " + getSize());
+			    }
 				this.platformsPendingQueRemoval.add(platformId);
 				continue;
 			}
-			
-
 			ResourceDataPoint platformDataPoint = this.currentPlatformsInQue.get(platformId);
 	    	if (platformDataPoint == null) {
 	    		// this point is not in the que.
@@ -295,8 +327,10 @@ public class AvailabilityFallbackCheckQue {
     
 	
     private synchronized boolean removeFromQueBeforeUpdateFromAgent(Integer platformId) {
-    	log.debug("removeFromQueBeforeUpdateFromAgent: start " + platformId+ ", curQueSize: " + getSize());
 		if (this.platformsRecheckInProgress.contains(platformId)) {
+		    if (log.isDebugEnabled()) {
+                log.debug("adding to pending queue removal platformId=" + platformId+ ", curQueSize: " + getSize());
+		    }
 			this.platformsPendingQueRemoval.add(platformId);
 			return true;
 		}
