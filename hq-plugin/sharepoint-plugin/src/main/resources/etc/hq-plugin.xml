@@ -482,7 +482,7 @@
         </service>
     </server>
 
-    <server name="SharePoint" version="2007">
+    <server name="SharePoint" version="2007" platforms="Win32">
         <property name="version" value="SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\12.0"/>
 
         <plugin type="measurement" class="SharePointServerMeasurement"/>
