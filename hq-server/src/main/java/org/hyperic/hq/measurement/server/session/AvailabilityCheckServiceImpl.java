@@ -57,7 +57,6 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
     private final Log log = LogFactory.getLog(AvailabilityCheckServiceImpl.class);
     private static final String AVAIL_BACKFILLER_TIME = ConcurrentStatsCollector.AVAIL_BACKFILLER_TIME;
 
-    
     private long startTime = 0;
     private long wait = 5 * MeasurementConstants.MINUTE;
     private final Object IS_RUNNING_LOCK = new Object();
@@ -134,11 +133,12 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
                 // The code must be extremely efficient or else it will have
                 // a big impact on the performance of availability insertion.
                 synchronized (availabilityCache) {
-                	log.info("starting availability check");
+//                	log.info("starting availability check");
                     backfillPoints = backfillPointsService.getBackfillPlatformPoints(current);
                 }
-                if (backfillPoints.size() > 0)
-                	log.info("backfillPlatformAvailability: got " + backfillPoints.size() + " platforms to check. Adding to que.");
+                if (backfillPoints.size() > 0 && log.isDebugEnabled()) {
+                    log.debug("backfillPlatformAvailability: got " + backfillPoints.size() + " platforms to check. Adding to que.");
+                }
                 checkQue.addToQue(backfillPoints);
                 List<ResourceDataPoint> availabilityDataPoints = pollWorkList();
                 //if (fallbackChecker == null)

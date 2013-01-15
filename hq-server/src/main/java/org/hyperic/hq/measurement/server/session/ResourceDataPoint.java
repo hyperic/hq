@@ -26,17 +26,26 @@
 package org.hyperic.hq.measurement.server.session;
 
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.util.TimeUtil;
 
 public class ResourceDataPoint extends DataPoint {
     private Resource _resource;
     
     public ResourceDataPoint(Resource resource, DataPoint point) {
-        super(point.getMeasurementId().intValue(), point.getValue(),
-            point.getTimestamp());
+        super(point.getMeasurementId().intValue(), point.getValue(), point.getTimestamp());
         _resource = resource;
     }
     
     public Resource getResource() {
         return _resource;
     }   
+    
+    public String toString() {
+        StringBuilder s = new StringBuilder();
+        s.append("resId=").append(_resource.getId());
+        s.append(" timestamp=").append(TimeUtil.toString(getTimestamp()));
+        s.append(" value=").append(getValue());
+        return s.toString();
+    }
+
 }

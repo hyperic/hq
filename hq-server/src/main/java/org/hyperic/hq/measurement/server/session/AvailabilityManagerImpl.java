@@ -914,6 +914,9 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         Map<DataPoint, AvailabilityDataRLE> removeMap = new HashMap<DataPoint, AvailabilityDataRLE>();
         Map<Integer, StringBuilder> state = null;
         Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails = Collections.emptyMap();
+        if (log.isDebugEnabled()) {
+            log.debug(availDataPoints);
+        }
         synchronized (availabilityCache) {
             try {
                 availabilityCache.beginTran();
