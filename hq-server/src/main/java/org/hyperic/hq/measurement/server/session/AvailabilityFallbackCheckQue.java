@@ -334,7 +334,6 @@ public class AvailabilityFallbackCheckQue {
             this.platformsPendingQueRemoval.add(platformId);
             return true;
         }
-        
 
         ResourceDataPoint platformDataPoint = this.currentPlatformsInQue.get(platformId);
         if (platformDataPoint == null) {
