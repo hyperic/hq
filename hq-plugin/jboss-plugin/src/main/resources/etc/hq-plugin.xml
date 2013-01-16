@@ -1755,7 +1755,7 @@
         <metric name="Non-Heap Max" alias="nh.max" units="B"/>
     </server>
         
-    <server name="JBoss Host Controller" version="7.1" name="JBoss Host Controller 7">
+    <server name="JBoss Host Controller" version="7.1" include="JBoss Host Controller 7">
     </server>
 
     <server name="JBoss" version="7" include="JBoss Host Controller 7">
