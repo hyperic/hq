@@ -51,11 +51,11 @@
   PARTICULAR PURPOSE. See the GNU General Public License for more
   details.
   
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
-  USA.
- -->
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ USA.
+-->
 
 <plugin name="jboss" class="JBossProductPlugin">
     <property name="PLUGIN_VERSION" value="@project.version@"/>
@@ -71,20 +71,20 @@
         <include name="lib/jboss-jmx.jar"/>
         <include name="lib/jboss-management.jar"/>
         <include name="lib/dom4j.jar"/>
-    <!-- used underneath javax.management.Query.match() -->
+        <!-- used underneath javax.management.Query.match() -->
         <include name="lib/gnu-regexp.jar"/>
-    <!-- required for MainDeployer.listDeployed() -->
+        <!-- required for MainDeployer.listDeployed() -->
         <include name="lib/endorsed/xercesImpl.jar"/>
         <include name="lib/endorsed/xml-apis.jar"/>
 
         <include name="server/default/lib/jboss-management.jar"/>
         <include name="server/all/lib/jboss-management.jar"/>
-    <!-- for jndi authentication -->
+        <!-- for jndi authentication -->
         <include name="server/default/lib/jbosssx.jar"/>
         <include name="server/all/lib/jbosssx.jar"/>
 
-    <!-- relative to $installpath incase
-         server/{default,all} do not exist -->
+        <!-- relative to $installpath incase
+        server/{default,all} do not exist -->
         <include name="lib/jboss-management.jar"/>
         <include name="lib/jbosssx.jar"/>
     </classpath>
@@ -97,526 +97,526 @@
     
     <filter name="template" value="${OBJECT_NAME}:${alias}" />
 	
-	<property name="template" value="${OBJECT_NAME}:${alias}" />
+    <property name="template" value="${OBJECT_NAME}:${alias}" />
 
-  <!-- appended to each template by MeasurementInfoXML -->
+    <!-- appended to each template by MeasurementInfoXML -->
     <property name="template-config"
-            value="${url}=%${url}%,${user}=%${user}%,${pass}=%${pass}%"/>
+              value="${url}=%${url}%,${user}=%${user}%,${pass}=%${pass}%"/>
 
     <filter name="TxManager"
-	  value="jboss:service=TransactionManager"/>
+            value="jboss:service=TransactionManager"/>
 
     <filter name="JMSMessageCache"
-	  value="jboss.mq:service=MessageCache"/>
+            value="jboss.mq:service=MessageCache"/>
 
     <filter name="EJB"
-          value="jboss.management.local:name=%ejb.name%,J2EEServer=Local,J2EEApplication=%j2ee.application%,EJBModule=%ejb.jar%"/>
+            value="jboss.management.local:name=%ejb.name%,J2EEServer=Local,J2EEApplication=%j2ee.application%,EJBModule=%ejb.jar%"/>
 
     <filter name="EJBService"
-           value="jboss.j2ee:jndiName=%ejb.name%,service=EJB"/>
+            value="jboss.j2ee:jndiName=%ejb.name%,service=EJB"/>
 
     <filter name="EJBPool" value="${EJBService},plugin=pool"/>
   			
     <filter name="EJBCache" value="${EJBService},plugin=cache"/>
 
-  <!-- ObjectName properties used in the control plugins -->
+    <!-- ObjectName properties used in the control plugins -->
 
     <property name="JCAConnectionPool"
-	    value="jboss.jca:service=ManagedConnectionPool,name=%jca.connpool%"/>
+              value="jboss.jca:service=ManagedConnectionPool,name=%jca.connpool%"/>
   
-  <property name="measurement-class"
-		value="org.hyperic.hq.plugin.jboss.JBossMeasurementPlugin" />
+    <property name="measurement-class"
+              value="org.hyperic.hq.plugin.jboss.JBossMeasurementPlugin" />
   
-  <property name="control-class"
-		value="org.hyperic.hq.plugin.jboss.JBossServiceControlPlugin" />
+    <property name="control-class"
+              value="org.hyperic.hq.plugin.jboss.JBossServiceControlPlugin" />
 
     <metrics name="JBoss 3.2">
         <metric name="Availability"
-            alias="Availability"
-            template="jboss.system:service=MainDeployer:StateString"
-            category="AVAILABILITY"
-            indicator="true"
-            units="percentage"
-            collectionType="dynamic"/>
+                alias="Availability"
+                template="jboss.system:service=MainDeployer:StateString"
+                category="AVAILABILITY"
+                indicator="true"
+                units="percentage"
+                collectionType="dynamic"/>
 
-     <!-- ServerInfo metrics -->
+        <!-- ServerInfo metrics -->
         <metric name="Active Thread Count"
-            alias="ActiveThreadCount"
-            template="jboss.system:type=ServerInfo:${alias}"
-            category="THROUGHPUT"
-            indicator="true"
-            units="none"
-            collectionType="dynamic"/>
+                alias="ActiveThreadCount"
+                template="jboss.system:type=ServerInfo:${alias}"
+                category="THROUGHPUT"
+                indicator="true"
+                units="none"
+                collectionType="dynamic"/>
 
         <metric name="Active Thread Group Count"
-            alias="ActiveThreadGroupCount"
-            template="jboss.system:type=ServerInfo:${alias}"
-            category="THROUGHPUT"
-            units="none"
-            collectionType="dynamic"/>
+                alias="ActiveThreadGroupCount"
+                template="jboss.system:type=ServerInfo:${alias}"
+                category="THROUGHPUT"
+                units="none"
+                collectionType="dynamic"/>
 
         <metric name="JVM Free Memory"
-            alias="FreeMemory"
-            template="jboss.system:type=ServerInfo:${alias}"
-            category="UTILIZATION"
-            units="B"
-            collectionType="dynamic"/>
+                alias="FreeMemory"
+                template="jboss.system:type=ServerInfo:${alias}"
+                category="UTILIZATION"
+                units="B"
+                collectionType="dynamic"/>
 
         <metric name="JVM Total Memory"
-            alias="TotalMemory"
-            template="jboss.system:type=ServerInfo:${alias}"
-            category="UTILIZATION"
-            indicator="true"
-            units="B"
-            collectionType="dynamic"/>
+                alias="TotalMemory"
+                template="jboss.system:type=ServerInfo:${alias}"
+                category="UTILIZATION"
+                indicator="true"
+                units="B"
+                collectionType="dynamic"/>
 
         <metric name="JVM Max Memory"
-            alias="MaxMemory"
-            template="jboss.system:type=ServerInfo:${alias}"
-            category="UTILIZATION"
-            units="B"
-            collectionType="static"/>
+                alias="MaxMemory"
+                template="jboss.system:type=ServerInfo:${alias}"
+                category="UTILIZATION"
+                units="B"
+                collectionType="static"/>
 
-    <!-- transaction manager -->
+        <!-- transaction manager -->
         <metric name="Transactions Active"
-            alias="TxCount"
-            template="${TxManager}:TransactionCount"
-            category="UTILIZATION"
-            units="none"
-            collectionType="dynamic"/>
+                alias="TxCount"
+                template="${TxManager}:TransactionCount"
+                category="UTILIZATION"
+                units="none"
+                collectionType="dynamic"/>
 
         <metric name="Transactions Committed"
-            alias="TxCommits"
-            template="${TxManager}:CommitCount"
-            category="UTILIZATION"
-            units="none"
-            collectionType="trendsup"/>
+                alias="TxCommits"
+                template="${TxManager}:CommitCount"
+                category="UTILIZATION"
+                units="none"
+                collectionType="trendsup"/>
 
         <metric name="Transactions Rolledback"
-            alias="TxRollbacks"
-            template="${TxManager}:RollbackCount"
-            category="UTILIZATION"
-            units="none"
-            collectionType="trendsup"/>
+                alias="TxRollbacks"
+                template="${TxManager}:RollbackCount"
+                category="UTILIZATION"
+                units="none"
+                collectionType="trendsup"/>
 
         <metric name="JMS Message Cache Size"
-            alias="TotalCacheSize"
-            template="${JMSMessageCache}:${alias}"
-            category="UTILIZATION"
-            units="none"
-            collectionType="dynamic"/>
+                alias="TotalCacheSize"
+                template="${JMSMessageCache}:${alias}"
+                category="UTILIZATION"
+                units="none"
+                collectionType="dynamic"/>
 
         <metric name="JMS Message Cache Hits"
-            alias="CacheHits"
-            template="${JMSMessageCache}:${alias}"
-            category="THROUGHPUT"
-            units="none"
-            collectionType="trendsup"/>
+                alias="CacheHits"
+                template="${JMSMessageCache}:${alias}"
+                category="THROUGHPUT"
+                units="none"
+                collectionType="trendsup"/>
 
         <metric name="JMS Message Cache Misses"
-            alias="CacheMisses"
-            template="${JMSMessageCache}:${alias}"
-            category="THROUGHPUT"
-            units="none"
-            collectionType="trendsup"/>
+                alias="CacheMisses"
+                template="${JMSMessageCache}:${alias}"
+                category="THROUGHPUT"
+                units="none"
+                collectionType="trendsup"/>
 
         <metric name="JMS Message Cache Current Memory Usage"
-            alias="CurrentMemoryUsage"
-            template="${JMSMessageCache}:${alias}"
-            category="UTILIZATION"
-            units="B"
-            collectionType="dynamic"/>
+                alias="CurrentMemoryUsage"
+                template="${JMSMessageCache}:${alias}"
+                category="UTILIZATION"
+                units="B"
+                collectionType="dynamic"/>
 
         <metric name="JMS Message Cache High Memory Mark"
-            alias="HighMemoryMark"
-            template="${JMSMessageCache}:${alias}"
-            category="UTILIZATION"
-            units="B"
-            collectionType="static"/>
+                alias="HighMemoryMark"
+                template="${JMSMessageCache}:${alias}"
+                category="UTILIZATION"
+                units="B"
+                collectionType="static"/>
 
         <metric name="JMS Message Cache Max Memory Mark"
-            alias="MaxMemoryMark"
-            template="${JMSMessageCache}:${alias}"
-            category="UTILIZATION"
-            units="B"
-            collectionType="static"/>
+                alias="MaxMemoryMark"
+                template="${JMSMessageCache}:${alias}"
+                category="UTILIZATION"
+                units="B"
+                collectionType="static"/>
     </metrics>
 
     <metrics name="JBoss 5.0">
         <metric name="Availability"
-            alias="Availability"
-            template="jboss.system:service=MainDeployer:StateString"
-            category="AVAILABILITY"
-            indicator="true"
-            units="percentage"
-            collectionType="dynamic"/>
+                alias="Availability"
+                template="jboss.system:service=MainDeployer:StateString"
+                category="AVAILABILITY"
+                indicator="true"
+                units="percentage"
+                collectionType="dynamic"/>
 
-     <!-- ServerInfo metrics -->
+        <!-- ServerInfo metrics -->
         <metric name="Active Thread Count"
-            alias="ActiveThreadCount"
-            template="jboss.system:type=ServerInfo:${alias}"
-            category="THROUGHPUT"
-            indicator="true"
-            units="none"
-            collectionType="dynamic"/>
+                alias="ActiveThreadCount"
+                template="jboss.system:type=ServerInfo:${alias}"
+                category="THROUGHPUT"
+                indicator="true"
+                units="none"
+                collectionType="dynamic"/>
 
         <metric name="Active Thread Group Count"
-            alias="ActiveThreadGroupCount"
-            template="jboss.system:type=ServerInfo:${alias}"
-            category="THROUGHPUT"
-            units="none"
-            collectionType="dynamic"/>
+                alias="ActiveThreadGroupCount"
+                template="jboss.system:type=ServerInfo:${alias}"
+                category="THROUGHPUT"
+                units="none"
+                collectionType="dynamic"/>
 
         <metric name="JVM Free Memory"
-            alias="FreeMemory"
-            template="jboss.system:type=ServerInfo:${alias}"
-            category="UTILIZATION"
-            units="B"
-            collectionType="dynamic"/>
+                alias="FreeMemory"
+                template="jboss.system:type=ServerInfo:${alias}"
+                category="UTILIZATION"
+                units="B"
+                collectionType="dynamic"/>
 
         <metric name="JVM Total Memory"
-            alias="TotalMemory"
-            template="jboss.system:type=ServerInfo:${alias}"
-            category="UTILIZATION"
-            indicator="true"
-            units="B"
-            collectionType="dynamic"/>
+                alias="TotalMemory"
+                template="jboss.system:type=ServerInfo:${alias}"
+                category="UTILIZATION"
+                indicator="true"
+                units="B"
+                collectionType="dynamic"/>
 
         <metric name="JVM Max Memory"
-            alias="MaxMemory"
-            template="jboss.system:type=ServerInfo:${alias}"
-            category="UTILIZATION"
-            units="B"
-            collectionType="static"/>
+                alias="MaxMemory"
+                template="jboss.system:type=ServerInfo:${alias}"
+                category="UTILIZATION"
+                units="B"
+                collectionType="static"/>
 
-    <!-- transaction manager -->
+        <!-- transaction manager -->
         <metric name="Transactions Active"
-            alias="TxCount"
-            template="${TxManager}:TransactionCount"
-            category="UTILIZATION"
-            units="none"
-            collectionType="dynamic"/>
+                alias="TxCount"
+                template="${TxManager}:TransactionCount"
+                category="UTILIZATION"
+                units="none"
+                collectionType="dynamic"/>
 
         <metric name="Transactions Committed"
-            alias="TxCommits"
-            template="${TxManager}:CommitCount"
-            category="UTILIZATION"
-            units="none"
-            collectionType="trendsup"/>
+                alias="TxCommits"
+                template="${TxManager}:CommitCount"
+                category="UTILIZATION"
+                units="none"
+                collectionType="trendsup"/>
 
         <metric name="Transactions Rolledback"
-            alias="TxRollbacks"
-            template="${TxManager}:RollbackCount"
-            category="UTILIZATION"
-            units="none"
-            collectionType="trendsup"/>
+                alias="TxRollbacks"
+                template="${TxManager}:RollbackCount"
+                category="UTILIZATION"
+                units="none"
+                collectionType="trendsup"/>
     </metrics>
 
     <metrics name="JBoss 3.2 JCA Connection Pool">
         <metric name="Min Connections"
-            alias="MinSize"
-            template="${JCAConnectionPool}:${alias}"
-            category="UTILIZATION"
-            units="none"
-            collectionType="static"/>
+                alias="MinSize"
+                template="${JCAConnectionPool}:${alias}"
+                category="UTILIZATION"
+                units="none"
+                collectionType="static"/>
 
         <metric name="Max Connections"
-            alias="MaxSize"
-            template="${JCAConnectionPool}:${alias}"
-            category="UTILIZATION"
-            units="none"
-            collectionType="static"/>
+                alias="MaxSize"
+                template="${JCAConnectionPool}:${alias}"
+                category="UTILIZATION"
+                units="none"
+                collectionType="static"/>
 
         <metric name="Total Connections"
-            alias="ConnectionCount"
-            template="${JCAConnectionPool}:${alias}"
-            category="UTILIZATION"
-            units="none"
-            collectionType="dynamic"/>
+                alias="ConnectionCount"
+                template="${JCAConnectionPool}:${alias}"
+                category="UTILIZATION"
+                units="none"
+                collectionType="dynamic"/>
 
         <metric name="Available Connections"
-            alias="AvailableConnectionCount"
-            template="${JCAConnectionPool}:${alias}"
-            category="UTILIZATION"
-            indicator="true"
-            units="none"
-            collectionType="dynamic"/>
+                alias="AvailableConnectionCount"
+                template="${JCAConnectionPool}:${alias}"
+                category="UTILIZATION"
+                indicator="true"
+                units="none"
+                collectionType="dynamic"/>
 
         <metric name="Active Connections"
-            alias="InUseConnectionCount"
-            template="${JCAConnectionPool}:${alias}"
-            category="UTILIZATION"
-            indicator="true"
-            units="none"
-            collectionType="dynamic"/>
+                alias="InUseConnectionCount"
+                template="${JCAConnectionPool}:${alias}"
+                category="UTILIZATION"
+                indicator="true"
+                units="none"
+                collectionType="dynamic"/>
 
         <metric name="Connections Created"
-            alias="ConnectionCreatedCount"
-            template="${JCAConnectionPool}:${alias}"
-            category="UTILIZATION"
-            units="none"
-            collectionType="trendsup"/>
+                alias="ConnectionCreatedCount"
+                template="${JCAConnectionPool}:${alias}"
+                category="UTILIZATION"
+                units="none"
+                collectionType="trendsup"/>
 
         <metric name="Connections Destroyed"
-            alias="ConnectionDestroyedCount"
-            template="${JCAConnectionPool}:${alias}"
-            category="UTILIZATION"
-            units="none"
-            collectionType="trendsup"/>
+                alias="ConnectionDestroyedCount"
+                template="${JCAConnectionPool}:${alias}"
+                category="UTILIZATION"
+                units="none"
+                collectionType="trendsup"/>
 
         <metric name="Availability"
-            alias="Availability"
-            template="${JCAConnectionPool}:StateString"
-            category="AVAILABILITY"
-            indicator="true"
-            units="percentage"
-            collectionType="dynamic"/>
+                alias="Availability"
+                template="${JCAConnectionPool}:StateString"
+                category="AVAILABILITY"
+                indicator="true"
+                units="percentage"
+                collectionType="dynamic"/>
     </metrics>
 
     <metrics name="JBoss 3.2 Stateless Session EJB">
         <metric name="Create Calls"
-            alias="StatisticCreateCount"
-            template="${EJB},j2eeType=StatelessSessionBean:${alias}"
-            category="UTILIZATION"
-            indicator="true"
-            units="none"
-            collectionType="trendsup"/>
+                alias="StatisticCreateCount"
+                template="${EJB},j2eeType=StatelessSessionBean:${alias}"
+                category="UTILIZATION"
+                indicator="true"
+                units="none"
+                collectionType="trendsup"/>
 
         <metric name="Remove Calls"
-            alias="StatisticRemoveCount"
-            template="${EJB},j2eeType=StatelessSessionBean:${alias}"
-            category="UTILIZATION"
-            units="none"
-            collectionType="trendsup"/>
+                alias="StatisticRemoveCount"
+                template="${EJB},j2eeType=StatelessSessionBean:${alias}"
+                category="UTILIZATION"
+                units="none"
+                collectionType="trendsup"/>
 
         <metric name="Method-Ready Beans"
-            alias="StatisticMethodReadyCount"
-            template="${EJB},j2eeType=StatelessSessionBean:${alias}"
-            category="UTILIZATION"
-            units="none"
-            collectionType="dynamic"/>
+                alias="StatisticMethodReadyCount"
+                template="${EJB},j2eeType=StatelessSessionBean:${alias}"
+                category="UTILIZATION"
+                units="none"
+                collectionType="dynamic"/>
 
         <metric name="PoolSize"
-            alias="CurrentSize"
-            template="${EJBPool}:${alias}"
-            category="UTILIZATION"
-            units="none"
-            collectionType="dynamic"/>
+                alias="CurrentSize"
+                template="${EJBPool}:${alias}"
+                category="UTILIZATION"
+                units="none"
+                collectionType="dynamic"/>
 
         <metric name="MaxPoolSize"
-            alias="MaxSize"
-            template="${EJBPool}:${alias}"
-            category="UTILIZATION"
-            units="none"
-            collectionType="dynamic"/>
+                alias="MaxSize"
+                template="${EJBPool}:${alias}"
+                category="UTILIZATION"
+                units="none"
+                collectionType="dynamic"/>
 
         <metric name="Availability"
-            alias="Availability"
-            template="${EJB},j2eeType=StatelessSessionBean:StateManageable"
-            category="AVAILABILITY"
-            indicator="true"
-            units="percentage"
-            collectionType="dynamic"/>
+                alias="Availability"
+                template="${EJB},j2eeType=StatelessSessionBean:StateManageable"
+                category="AVAILABILITY"
+                indicator="true"
+                units="percentage"
+                collectionType="dynamic"/>
     </metrics>
 
     <metrics name="JBoss 3.2 Stateful Session EJB">
         <metric name="Create Calls"
-            alias="StatisticCreateCount"
-            template="${EJB},j2eeType=StatefulSessionBean:${alias}"
-            category="UTILIZATION"
-            indicator="true"
-            units="none"
-            collectionType="dynamic"/>
+                alias="StatisticCreateCount"
+                template="${EJB},j2eeType=StatefulSessionBean:${alias}"
+                category="UTILIZATION"
+                indicator="true"
+                units="none"
+                collectionType="dynamic"/>
 
         <metric name="Remove Calls"
-            alias="StatisticRemoveCount"
-            template="${EJB},j2eeType=StatefulSessionBean:${alias}"
-            category="UTILIZATION"
-            units="none"
-            collectionType="dynamic"/>
+                alias="StatisticRemoveCount"
+                template="${EJB},j2eeType=StatefulSessionBean:${alias}"
+                category="UTILIZATION"
+                units="none"
+                collectionType="dynamic"/>
 
         <metric name="Method-Ready Beans"
-            alias="StatisticMethodReadyCount"
-            template="${EJB},j2eeType=StatefulSessionBean:${alias}"
-            category="UTILIZATION"
-            units="none"
-            collectionType="dynamic"/>
+                alias="StatisticMethodReadyCount"
+                template="${EJB},j2eeType=StatefulSessionBean:${alias}"
+                category="UTILIZATION"
+                units="none"
+                collectionType="dynamic"/>
 
         <metric name="Passive Beans"
-            alias="StatisticPassiveCount"
-            template="${EJB},j2eeType=StatefulSessionBean:${alias}"
-            category="UTILIZATION"
-            units="none"
-            collectionType="dynamic"/>
+                alias="StatisticPassiveCount"
+                template="${EJB},j2eeType=StatefulSessionBean:${alias}"
+                category="UTILIZATION"
+                units="none"
+                collectionType="dynamic"/>
 
         <metric name="Availability"
-            alias="Availability"
-            template="${EJB},j2eeType=StatefulSessionBean:StateManageable"
-            category="AVAILABILITY"
-            indicator="true"
-            units="percentage"
-            collectionType="dynamic"/>
+                alias="Availability"
+                template="${EJB},j2eeType=StatefulSessionBean:StateManageable"
+                category="AVAILABILITY"
+                indicator="true"
+                units="percentage"
+                collectionType="dynamic"/>
     </metrics>
 
     <metrics name="JBoss 3.2 Entity EJB">
         <metric name="Create Calls"
-            alias="StatisticCreateCount"
-            template="${EJB},j2eeType=EntityBean:${alias}"
-            category="UTILIZATION"
-            indicator="true"
-            units="none"
-            collectionType="trendsup"/>
+                alias="StatisticCreateCount"
+                template="${EJB},j2eeType=EntityBean:${alias}"
+                category="UTILIZATION"
+                indicator="true"
+                units="none"
+                collectionType="trendsup"/>
 
         <metric name="Remove Calls"
-            alias="StatisticRemoveCount"
-            template="${EJB},j2eeType=EntityBean:${alias}"
-            category="UTILIZATION"
-            units="none"
-            collectionType="trendsup"/>
+                alias="StatisticRemoveCount"
+                template="${EJB},j2eeType=EntityBean:${alias}"
+                category="UTILIZATION"
+                units="none"
+                collectionType="trendsup"/>
 
         <metric name="Ready Beans"
-            alias="StatisticReadyCount"
-            template="${EJB},j2eeType=EntityBean:${alias}"
-            category="UTILIZATION"
-            units="none"
-            collectionType="dynamic"/>
+                alias="StatisticReadyCount"
+                template="${EJB},j2eeType=EntityBean:${alias}"
+                category="UTILIZATION"
+                units="none"
+                collectionType="dynamic"/>
 
         <metric name="Pooled Beans"
-            alias="StatisticPooledCount"
-            template="${EJB},j2eeType=EntityBean:${alias}"
-            category="UTILIZATION"
-            units="none"
-            collectionType="dynamic"/>
+                alias="StatisticPooledCount"
+                template="${EJB},j2eeType=EntityBean:${alias}"
+                category="UTILIZATION"
+                units="none"
+                collectionType="dynamic"/>
 
         <metric name="CacheSize"
-            alias="CacheSize"
-            template="${EJBCache}:${alias}"
-            category="UTILIZATION"
-            units="none"
-            collectionType="dynamic"/>
+                alias="CacheSize"
+                template="${EJBCache}:${alias}"
+                category="UTILIZATION"
+                units="none"
+                collectionType="dynamic"/>
 
         <metric name="PassivatedCount"
-            alias="PassivatedCount"
-            template="${EJBCache}:${alias}"
-            category="UTILIZATION"
-            units="none"
-            collectionType="trendsup"/>
+                alias="PassivatedCount"
+                template="${EJBCache}:${alias}"
+                category="UTILIZATION"
+                units="none"
+                collectionType="trendsup"/>
 
         <metric name="PoolSize"
-            alias="CurrentSize"
-            template="${EJBPool}:${alias}"
-            category="UTILIZATION"
-            units="none"
-            collectionType="dynamic"/>
+                alias="CurrentSize"
+                template="${EJBPool}:${alias}"
+                category="UTILIZATION"
+                units="none"
+                collectionType="dynamic"/>
 
         <metric name="MaxPoolSize"
-            alias="MaxSize"
-            template="${EJBPool}:${alias}"
-            category="UTILIZATION"
-            units="none"
-            collectionType="dynamic"/>
+                alias="MaxSize"
+                template="${EJBPool}:${alias}"
+                category="UTILIZATION"
+                units="none"
+                collectionType="dynamic"/>
 
         <metric name="Availability"
-            alias="Availability"
-            template="${EJB},j2eeType=EntityBean:StateManageable"
-            category="AVAILABILITY"
-            indicator="true"
-            units="percentage"
-            collectionType="dynamic"/>
+                alias="Availability"
+                template="${EJB},j2eeType=EntityBean:StateManageable"
+                category="AVAILABILITY"
+                indicator="true"
+                units="percentage"
+                collectionType="dynamic"/>
     </metrics>
 
     <metrics name="JBoss 3.2 Message Driven EJB">
         <metric name="Create Calls"
-            alias="StatisticCreateCount"
-            template="${EJB},j2eeType=MessageDrivenBean:${alias}"
-            category="UTILIZATION"
-            units="none"
-            collectionType="trendsup"/>
+                alias="StatisticCreateCount"
+                template="${EJB},j2eeType=MessageDrivenBean:${alias}"
+                category="UTILIZATION"
+                units="none"
+                collectionType="trendsup"/>
 
         <metric name="Remove Calls"
-            alias="StatisticRemoveCount"
-            template="${EJB},j2eeType=MessageDrivenBean:${alias}"
-            category="UTILIZATION"
-            units="none"
-            collectionType="trendsup"/>
+                alias="StatisticRemoveCount"
+                template="${EJB},j2eeType=MessageDrivenBean:${alias}"
+                category="UTILIZATION"
+                units="none"
+                collectionType="trendsup"/>
 
         <metric name="Messages Received"
-            alias="StatisticMessageCount"
-            template="${EJB},j2eeType=MessageDrivenBean:${alias}"
-            category="UTILIZATION"
-            indicator="true"
-            units="none"
-            collectionType="trendsup"/>
+                alias="StatisticMessageCount"
+                template="${EJB},j2eeType=MessageDrivenBean:${alias}"
+                category="UTILIZATION"
+                indicator="true"
+                units="none"
+                collectionType="trendsup"/>
 
         <metric name="Availability"
-            alias="Availability"
-            template="${EJB},j2eeType=MessageDrivenBean:StateManageable"
-            category="AVAILABILITY"
-            indicator="true"
-            units="percentage"
-            collectionType="dynamic"/>
+                alias="Availability"
+                template="${EJB},j2eeType=MessageDrivenBean:StateManageable"
+                category="AVAILABILITY"
+                indicator="true"
+                units="percentage"
+                collectionType="dynamic"/>
     </metrics>
 
-  <!-- note that the templates are not exactly the same.
-       jboss 4.0 changed the case of some attribute names,
-       the JBoss4MeasurementPlugin.translate method makes the
-       adjustments.  -->
+    <!-- note that the templates are not exactly the same.
+    jboss 4.0 changed the case of some attribute names,
+    the JBoss4MeasurementPlugin.translate method makes the
+    adjustments.  -->
     <metrics name="JBoss 4.0" include="JBoss 3.2"/>
 
     <metrics name="JBoss 4.0 JCA Connection Pool"
-           include="JBoss 3.2 JCA Connection Pool"/>
+             include="JBoss 3.2 JCA Connection Pool"/>
 
     <metrics name="JBoss 4.0 Stateless Session EJB"
-           include="JBoss 3.2 Stateless Session EJB"/>
+             include="JBoss 3.2 Stateless Session EJB"/>
 
     <metrics name="JBoss 4.0 Stateful Session EJB"
-           include="JBoss 3.2 Stateful Session EJB"/>
+             include="JBoss 3.2 Stateful Session EJB"/>
 
     <metrics name="JBoss 4.0 Entity EJB"
-           include="JBoss 3.2 Entity EJB"/>
+             include="JBoss 3.2 Entity EJB"/>
 
     <metrics name="JBoss 4.0 Message Driven EJB"
-           include="JBoss 3.2 Message Driven EJB"/>
+             include="JBoss 3.2 Message Driven EJB"/>
 
     <metrics name="jchannel">
         <metric name="Availability"
-            template="${JCHANNEL_OBJECT_NAME}:Connected"
-            indicator="true"/>
+                template="${JCHANNEL_OBJECT_NAME}:Connected"
+                indicator="true"/>
 
         <metric name="Number of Messages"
-            template="${JCHANNEL_OBJECT_NAME}:NumMessages"
-            category="THROUGHPUT"
-            indicator="true"
-            collectionType="trendsup"/>
+                template="${JCHANNEL_OBJECT_NAME}:NumMessages"
+                category="THROUGHPUT"
+                indicator="true"
+                collectionType="trendsup"/>
 
         <metric name="Sent Messages"
-            template="${JCHANNEL_OBJECT_NAME}:SentMessages"
-            category="THROUGHPUT"
-            indicator="true"
-            collectionType="trendsup"/>
+                template="${JCHANNEL_OBJECT_NAME}:SentMessages"
+                category="THROUGHPUT"
+                indicator="true"
+                collectionType="trendsup"/>
 
         <metric name="Sent Bytes"
-            template="${JCHANNEL_OBJECT_NAME}:SentBytes"
-            category="THROUGHPUT"
-            indicator="true"
-            units="B"
-            collectionType="trendsup"/>
+                template="${JCHANNEL_OBJECT_NAME}:SentBytes"
+                category="THROUGHPUT"
+                indicator="true"
+                units="B"
+                collectionType="trendsup"/>
 
         <metric name="Received Bytes"
-            template="${JCHANNEL_OBJECT_NAME}:ReceivedBytes"
-            category="THROUGHPUT"
-            indicator="true"
-            units="B"
-            collectionType="trendsup"/>
+                template="${JCHANNEL_OBJECT_NAME}:ReceivedBytes"
+                category="THROUGHPUT"
+                indicator="true"
+                units="B"
+                collectionType="trendsup"/>
     </metrics>
 
     <filter name="JCHANNEL_OBJECT_NAME"
-          value="JGroups:channel=%channel%"/>
+            value="JGroups:channel=%channel%"/>
 
     <metrics name="JBoss 4.0 JGroups Channel" include="jchannel"/>
 
     <filter name="JCHANNEL_OBJECT_NAME"
-          value="jboss.jgroups:type=channel,cluster=%cluster%"/>
+            value="jboss.jgroups:type=channel,cluster=%cluster%"/>
 
     <metrics name="JBoss 4.2 JGroups Channel" include="jchannel"/>
 
@@ -637,86 +637,86 @@
 
     <config name="EJB">
         <option name="ejb.name"
-            description="EJB Name"
-            default=""/>
+                description="EJB Name"
+                default=""/>
         <option name="ejb.jar"
-            description="EJB Module (JAR)"
-            default=""/>
+                description="EJB Module (JAR)"
+                default=""/>
         <option name="j2ee.application"
-            description="J2EE Application"
-            default=""/>
-      <option name="listen.ports"
-              description="Listening Ports" optional="true"/>
+                description="J2EE Application"
+                default=""/>
+        <option name="listen.ports"
+                description="Listening Ports" optional="true"/>
     </config>
 
     <server name="JBoss"
-          version="3.2"
-          description="Application Server"
-          platforms="Unix,Win32">
+            version="3.2"
+            description="Application Server"
+            platforms="Unix,Win32">
 
         <config>
             <option name="${url}"
-              description="Naming Provider URL"
-              default="jnp://localhost:1099"/>
+                    description="Naming Provider URL"
+                    default="jnp://localhost:1099"/>
             <option name="${user}"
-              optional="true"
-              description="Username"/>
+                    optional="true"
+                    description="Username"/>
             <option name="${pass}"
-              type="secret"
-              optional="true"
-              description="Password"/>
-      <option name="listen.ports"
-              description="Listening Ports" optional="true"/>
+                    type="secret"
+                    optional="true"
+                    description="Password"/>
+            <option name="listen.ports"
+                    description="Listening Ports" optional="true"/>
         </config>
 
         <config type="control">
             <option name="start.args"
-              description="Server start program arguments"
-              optional="true"/>
+                    description="Server start program arguments"
+                    optional="true"/>
             <option name="stop.program"
-              description="Server stop program (default uses JMX)"
-              optional="true"/>
+                    description="Server stop program (default uses JMX)"
+                    optional="true"/>
             <option name="stop.args"
-              description="Server stop program arguments"
-              optional="true"
-              default="-S"/>
+                    description="Server stop program arguments"
+                    optional="true"
+                    default="-S"/>
             <option name="configSet"
-              description="Server config file set"
-              optional="true"
-              default="default"/>
+                    description="Server config file set"
+                    optional="true"
+                    default="default"/>
         </config>
 
         <properties>
             <property name="version"
-                 description="JBoss Version"/>
+                      description="JBoss Version"/>
             <property name="JavaVersion"
-                 description="Java Version"/>
+                      description="Java Version"/>
             <property name="JavaVendor"
-                 description="Java Vendor"/>
+                      description="Java Vendor"/>
             <property name="BuildDate"
-                 description="Build Date"/>
+                      description="Build Date"/>
             <property name="VersionName"
-                 description="Version Name"/>
+                      description="Version Name"/>
         </properties>
 
         <plugin type="measurement"
-            class="JBossMeasurementPlugin"/>
+                class="JBossMeasurementPlugin"/>
 
         <plugin type="autoinventory"
-            class="JBossDetector"/>
+                class="JBossDetector"/>
 
         <plugin type="control"
-            class="JBossServerControlPlugin"/>
+                class="JBossServerControlPlugin"/>
 
-    <!-- default control plugin impl for services -->
+        <!-- default control plugin impl for services -->
         <property name="SERVICE_CONTROL_PLUGIN"
-              value="${package}.JBossServiceControlPlugin"/>
+                  value="${package}.JBossServiceControlPlugin"/>
 
         <property name="DEFAULT_LOG_FILE"
-              value="log/server.log"/>
+                  value="log/server.log"/>
 
         <plugin type="log_track"
-            class="org.hyperic.hq.product.Log4JLogTrackPlugin"/>
+                class="org.hyperic.hq.product.Log4JLogTrackPlugin"/>
 
         <actions include="stop,start,restart,runGarbageCollector"/>
 
@@ -728,14 +728,14 @@
 
         <service name="JGroups Channel">
             <property name="OBJECT_NAME"
-                value="JGroups:channel=%channel%"/>
+                      value="JGroups:channel=%channel%"/>
 
             <plugin type="autoinventory"/>
 
             <config>
                 <option name="channel"
-                description="Channel Name"
-                default=""/>
+                        description="Channel Name"
+                        default=""/>
             </config>
         </service>
 
@@ -758,344 +758,344 @@
         <service name="JMS Destination" internal="true">
             <config>
                 <option name="name"
-                description="JMS Destination"
-                default=""/>
+                        description="JMS Destination"
+                        default=""/>
             </config>
 
             <property name="OBJECT_NAME"
-                value="jboss.mq.destination:service=Queue,name=%name%"/>
+                      value="jboss.mq.destination:service=Queue,name=%name%"/>
 
             <plugin type="autoinventory"/>
 
             <plugin type="control"
-              class="JBossStateServiceControlPlugin"/>
+                    class="JBossStateServiceControlPlugin"/>
 
             <actions include="stop,start,removeAllMessages"/>
 
             <properties>
                 <property name="InMemory"
-                  description="In Memory"/>
+                          description="In Memory"/>
 
                 <property name="RedeliveryDelay"
-                  description="Redelivery Delay"/>
+                          description="Redelivery Delay"/>
 
                 <property name="RedeliveryLimit"
-                  description="Redelivery Limit"/>
+                          description="Redelivery Limit"/>
 
                 <property name="MaxDepth"
-                  description="Max Depth"/>
+                          description="Max Depth"/>
 
                 <property name="JNDIName"
-                  description="JNDI Name"/>
+                          description="JNDI Name"/>
             </properties>
 
             <metric name="Availability"
-              template="${OBJECT_NAME}:StateString"
-              indicator="true"/>
+                    template="${OBJECT_NAME}:StateString"
+                    indicator="true"/>
 
             <metric name="Messages in Queue"
-              template="${OBJECT_NAME}:QueueDepth"
-              category="THROUGHPUT"
-              indicator="true"/>
+                    template="${OBJECT_NAME}:QueueDepth"
+                    category="THROUGHPUT"
+                    indicator="true"/>
 
             <metric name="Receivers Count"
-              template="${OBJECT_NAME}:ReceiversCount"
-              indicator="true"/>
+                    template="${OBJECT_NAME}:ReceiversCount"
+                    indicator="true"/>
 
             <metric name="Scheduled Message Count"
-              template="${OBJECT_NAME}:ScheduledMessageCount"/>
+                    template="${OBJECT_NAME}:ScheduledMessageCount"/>
         </service>
 
         <service name="JMS Topic" internal="true">
             <config>
                 <option name="name"
-                description="JMS Topic"
-                default=""/>
+                        description="JMS Topic"
+                        default=""/>
             </config>
 
             <property name="OBJECT_NAME"
-                value="jboss.mq.destination:service=Topic,name=%name%"/>
+                      value="jboss.mq.destination:service=Topic,name=%name%"/>
 
             <plugin type="autoinventory"/>
 
             <plugin type="control"
-              class="JBossStateServiceControlPlugin"/>
+                    class="JBossStateServiceControlPlugin"/>
 
             <actions include="stop,start,removeAllMessages"/>
 
             <properties>
                 <property name="InMemory"
-                  description="In Memory"/>
+                          description="In Memory"/>
 
                 <property name="RedeliveryDelay"
-                  description="Redelivery Delay"/>
+                          description="Redelivery Delay"/>
 
                 <property name="RedeliveryLimit"
-                  description="Redelivery Limit"/>
+                          description="Redelivery Limit"/>
 
                 <property name="MaxDepth"
-                  description="Max Depth"/>
+                          description="Max Depth"/>
 
                 <property name="JNDIName"
-                  description="JNDI Name"/>
+                          description="JNDI Name"/>
             </properties>
 
             <metric name="Availability"
-              template="${OBJECT_NAME}:StateString"
-              indicator="true"/>
+                    template="${OBJECT_NAME}:StateString"
+                    indicator="true"/>
 
             <metric name="All Subscriptions Count"
-              template="${OBJECT_NAME}:AllSubscriptionsCount"
-              category="UTILIZATION"
-              indicator="true"/>
+                    template="${OBJECT_NAME}:AllSubscriptionsCount"
+                    category="UTILIZATION"
+                    indicator="true"/>
 
             <metric name="Non Durable Subscriptions Count"
-              template="${OBJECT_NAME}:NonDurableSubscriptionsCount"
-              category="UTILIZATION"/>
+                    template="${OBJECT_NAME}:NonDurableSubscriptionsCount"
+                    category="UTILIZATION"/>
 
             <metric name="Durable Subscriptions Count"
-              template="${OBJECT_NAME}:DurableSubscriptionsCount"
-              category="UTILIZATION"
-              indicator="true"/>
+                    template="${OBJECT_NAME}:DurableSubscriptionsCount"
+                    category="UTILIZATION"
+                    indicator="true"/>
 
             <metric name="All Message Count"
-              template="${OBJECT_NAME}:AllMessageCount"
-              category="THROUGHPUT"
-              indicator="true"/>
+                    template="${OBJECT_NAME}:AllMessageCount"
+                    category="THROUGHPUT"
+                    indicator="true"/>
 
             <metric name="Durable Message Count"
-              template="${OBJECT_NAME}:DurableMessageCount"
-              category="THROUGHPUT"
-              indicator="true"/>
+                    template="${OBJECT_NAME}:DurableMessageCount"
+                    category="THROUGHPUT"
+                    indicator="true"/>
 
             <metric name="NonDurableMessageCount"
-              template="${OBJECT_NAME}:NonDurableMessageCount"
-              category="THROUGHPUT"/>
+                    template="${OBJECT_NAME}:NonDurableMessageCount"
+                    category="THROUGHPUT"/>
         </service>
 
         <service name="JCA Connection Pool" internal="true">
             <config>
                 <option name="jca.connpool"
-                description="JCA Connection Pool"
-                default=""/>
+                        description="JCA Connection Pool"
+                        default=""/>
             </config>
 
             <properties>
                 <property name="Criteria"
-                  description="Connection Pool Criteria"/>
+                          description="Connection Pool Criteria"/>
             </properties>
 
             <plugin type="control"
-              class="JBossJCAControlPlugin"/>
+                    class="JBossJCAControlPlugin"/>
 
             <actions include="stop,start,restart,flush"/>
         </service>
         
-	<filter name="conf" value=".*\.xml|.*\.cfg|.*\.properties|.*\.ini|.*\.conf|.*\.config|.*\.policy"/>
-    <filter name="code" value=".*\.jar|.*\.dll|.*\.class|.*\.asp|.*\.aspx|.*\.php|.*\.pl|.*\.py|.*\.pyc|.*\.cgi"/>    
-    <plugin type="config_track"
-    		class="org.hyperic.hq.product.FileChangeTrackPlugin">
-      <monitored>
-        <folder path="conf" recursive="true" filter="${conf}"/>
-        <folder path="deploy" recursive="true" filter="${code}|${conf}"/>
-      </monitored>
-    </plugin>
-    <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="false" />
+        <filter name="conf" value=".*\.xml|.*\.cfg|.*\.properties|.*\.ini|.*\.conf|.*\.config|.*\.policy"/>
+        <filter name="code" value=".*\.jar|.*\.dll|.*\.class|.*\.asp|.*\.aspx|.*\.php|.*\.pl|.*\.py|.*\.pyc|.*\.cgi"/>    
+        <plugin type="config_track"
+                class="org.hyperic.hq.product.FileChangeTrackPlugin">
+            <monitored>
+                <folder path="conf" recursive="true" filter="${conf}"/>
+                <folder path="deploy" recursive="true" filter="${code}|${conf}"/>
+            </monitored>
+        </plugin>
+        <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="false" />
         
     </server>
 
     <server name="JBoss"
-          version="4.0"
-          include="3.2">
+            version="4.0"
+            include="3.2">
 
         <plugin type="measurement"
-            class="JBoss4MeasurementPlugin"/>
+                class="JBoss4MeasurementPlugin"/>
 
         <service name="JCA Data Source">
             <config>
                 <option name="name"
-                description="JNDI Name"
-                default="DefaultDS"/>
+                        description="JNDI Name"
+                        default="DefaultDS"/>
             </config>
 
             <property name="OBJECT_NAME"
-                value="jboss.jca:name=%name%,service=DataSourceBinding"/>
+                      value="jboss.jca:name=%name%,service=DataSourceBinding"/>
 
             <metric name="Availability"
-              template="${OBJECT_NAME}:StateString"
-              indicator="true"/>
+                    template="${OBJECT_NAME}:StateString"
+                    indicator="true"/>
 
             <plugin type="autoinventory"/>
 
             <plugin type="control"
-              class="JBossStateServiceControlPlugin"/>
+                    class="JBossStateServiceControlPlugin"/>
             <actions include="stop,start"/>
         </service>
 
         <service name="EJB3">
             <config>
                 <option name="module"
-                description="Module Name"
-                default="EJB3Trail-ejb3.ejb3"/>
+                        description="Module Name"
+                        default="EJB3Trail-ejb3.ejb3"/>
             </config>
 
             <property name="OBJECT_NAME"
-                value="jboss.j2ee:module=%module%,service=EJB3"/>
+                      value="jboss.j2ee:module=%module%,service=EJB3"/>
 
             <metric name="Availability"
-              template="${OBJECT_NAME}:StateString"
-              indicator="true"/>
+                    template="${OBJECT_NAME}:StateString"
+                    indicator="true"/>
 
             <plugin type="autoinventory"/>
 
             <plugin type="control"
-              class="JBossStateServiceControlPlugin"/>
+                    class="JBossStateServiceControlPlugin"/>
             <actions include="stop,start"/>
         </service>
     </server>
 
     <server name="JBoss"
-          version="4.2"
-          include="4.0">
+            version="4.2"
+            include="4.0">
 
         <service name="JGroups Channel">
             <property name="OBJECT_NAME"
-                value="jboss.jgroups:type=channel,cluster=%cluster%"/>
+                      value="jboss.jgroups:type=channel,cluster=%cluster%"/>
 
             <plugin type="autoinventory"/>
 
             <config>
                 <option name="cluster"
-                description="Cluster Name"
-                default="DefaultCluster"/>
-  			     <option name="listen.ports"
-            	  description="Listening Ports" optional="true"/>
+                        description="Cluster Name"
+                        default="DefaultCluster"/>
+                <option name="listen.ports"
+                        description="Listening Ports" optional="true"/>
             </config>
         </service>
     </server>
 
     <server name="JBoss"
-          version="4.3"
-          include="4.2">
-          <service name="JMS Queue Destination" internal="true">
+            version="4.3"
+            include="4.2">
+        <service name="JMS Queue Destination" internal="true">
             <config>
                 <option name="name"
-                description="JMS Destination"
-                default=""/>
+                        description="JMS Destination"
+                        default=""/>
             </config>
 
             <property name="OBJECT_NAME"
-                value="jboss.messaging.destination:service=Queue,name=%name%"/>
+                      value="jboss.messaging.destination:service=Queue,name=%name%"/>
 
             <plugin type="autoinventory"/>
 
             <plugin type="measurement" class="JBoss5MeasurementPlugin"/>
             <plugin type="control"
-              class="JBoss5ServiceControlPlugin"/>
+                    class="JBoss5ServiceControlPlugin"/>
 
             <actions include="stop,start,removeAllMessages"/>
 
             <properties>
-				<property name="RedeliveryDelay" description="Redelivery Delay" />
-				<property name="JNDIName" description="JNDI Name" />
+                <property name="RedeliveryDelay" description="Redelivery Delay" />
+                <property name="JNDIName" description="JNDI Name" />
                 <property name="ServerPeer" description="Server Peer" />
-				<property name="CreatedProgrammatically" description="Created Programmatically" />
-				<property name="MaxSize" description="Max Size" />
-				<property name="FullSize" description="Full Size" />
-				<property name="PageSize" description="Page Size" />
-				<property name="DownCacheSize" description="Down Cache Size" />
-				<property name="Clustered" description="Clustered" />
-				<property name="MaxDeliveryAttempts" description="Max Delivery Attempts" />
-				<property name="MessageCount" description="All Message Count" />
-				<property name="ConsumerCount" description="All Subscriptions Count" />
+                <property name="CreatedProgrammatically" description="Created Programmatically" />
+                <property name="MaxSize" description="Max Size" />
+                <property name="FullSize" description="Full Size" />
+                <property name="PageSize" description="Page Size" />
+                <property name="DownCacheSize" description="Down Cache Size" />
+                <property name="Clustered" description="Clustered" />
+                <property name="MaxDeliveryAttempts" description="Max Delivery Attempts" />
+                <property name="MessageCount" description="All Message Count" />
+                <property name="ConsumerCount" description="All Subscriptions Count" />
             </properties>
 
             <metric name="Availability" template="jboss.system:service=MainDeployer:StateString"
-				indicator="true" />
+                    indicator="true" />
 
             <metric name="Messages in Queue"
-                alias="MessageCount"
-            template="${OBJECT_NAME}:${alias}"
-              category="THROUGHPUT"
-              indicator="true"/>
+                    alias="MessageCount"
+                    template="${OBJECT_NAME}:${alias}"
+                    category="THROUGHPUT"
+                    indicator="true"/>
 
             <metric name="Delivering Count"
-                 alias="DeliveringCount"
-           template="${OBJECT_NAME}:${alias}"
-              indicator="true"/>
+                    alias="DeliveringCount"
+                    template="${OBJECT_NAME}:${alias}"
+                    indicator="true"/>
 
             <metric name="Consumer Count"
-                 alias="ConsumerCount"
-           template="${OBJECT_NAME}:${alias}"
-              indicator="true"/>
+                    alias="ConsumerCount"
+                    template="${OBJECT_NAME}:${alias}"
+                    indicator="true"/>
 
             <metric name="Scheduled Message Count"
-                  alias="ScheduledMessageCount"
-          template="${OBJECT_NAME}:${alias}"/>
+                    alias="ScheduledMessageCount"
+                    template="${OBJECT_NAME}:${alias}"/>
         </service>
 
         <service name="JMS Topic" internal="true">
             <config>
                 <option name="name"
-                description="JMS Topic"
-                default=""/>
+                        description="JMS Topic"
+                        default=""/>
             </config>
 
             <property name="OBJECT_NAME"
-                value="jboss.messaging.destination:service=Topic,name=%name%"/>
+                      value="jboss.messaging.destination:service=Topic,name=%name%"/>
 
             <plugin type="autoinventory"/>
 
             <plugin type="control"
-              class="JBoss5ServiceControlPlugin"/>
+                    class="JBoss5ServiceControlPlugin"/>
 
             <actions include="stop,start,removeAllMessages"/>
 
             <properties>
-				<property name="RedeliveryDelay" description="Redelivery Delay" />
-				<property name="ServerPeer" description="Server Peer" />
-				<property name="JNDIName" description="JNDI Name" />
+                <property name="RedeliveryDelay" description="Redelivery Delay" />
+                <property name="ServerPeer" description="Server Peer" />
+                <property name="JNDIName" description="JNDI Name" />
                 <property name="CreatedProgrammatically" description="Created Programmatically" />
-				<property name="MaxSize" description="Max Size" />
-				<property name="FullSize" description="Full Size" />
-				<property name="PageSize" description="Page Size" />
-				<property name="DownCacheSize" description="Down Cache Size" />
-				<property name="Clustered" description="Clustered" />
-				<property name="MaxDeliveryAttempts" description="Max Delivery Attempts" />
-				<property name="AllMessageCount" description="All Message Count" />
-				<property name="AllSubscriptionsCount" description="All Subscriptions Count" />
+                <property name="MaxSize" description="Max Size" />
+                <property name="FullSize" description="Full Size" />
+                <property name="PageSize" description="Page Size" />
+                <property name="DownCacheSize" description="Down Cache Size" />
+                <property name="Clustered" description="Clustered" />
+                <property name="MaxDeliveryAttempts" description="Max Delivery Attempts" />
+                <property name="AllMessageCount" description="All Message Count" />
+                <property name="AllSubscriptionsCount" description="All Subscriptions Count" />
             </properties>
 
             <metric name="Availability" template="jboss.system:service=MainDeployer:StateString"
-				indicator="true" />
+                    indicator="true" />
 
             <metric name="All Subscriptions Count"
-              template="${OBJECT_NAME}:AllSubscriptionsCount"
-              category="UTILIZATION"
-              indicator="true"/>
+                    template="${OBJECT_NAME}:AllSubscriptionsCount"
+                    category="UTILIZATION"
+                    indicator="true"/>
 
             <metric name="Non Durable Subscriptions Count"
-              template="${OBJECT_NAME}:NonDurableSubscriptionsCount"
-              category="UTILIZATION"/>
+                    template="${OBJECT_NAME}:NonDurableSubscriptionsCount"
+                    category="UTILIZATION"/>
 
             <metric name="Durable Subscriptions Count"
-              template="${OBJECT_NAME}:DurableSubscriptionsCount"
-              category="UTILIZATION"
-              indicator="true"/>
+                    template="${OBJECT_NAME}:DurableSubscriptionsCount"
+                    category="UTILIZATION"
+                    indicator="true"/>
 
             <metric name="All Message Count"
-              template="${OBJECT_NAME}:AllMessageCount"
-              category="THROUGHPUT"
-              indicator="true"/>
+                    template="${OBJECT_NAME}:AllMessageCount"
+                    category="THROUGHPUT"
+                    indicator="true"/>
 
             <metric name="Durable Message Count"
-              template="${OBJECT_NAME}:DurableMessageCount"
-              category="THROUGHPUT"
-              indicator="true"/>
+                    template="${OBJECT_NAME}:DurableMessageCount"
+                    category="THROUGHPUT"
+                    indicator="true"/>
 
             <metric name="NonDurableMessageCount"
-              template="${OBJECT_NAME}:NonDurableMessageCount"
-              category="THROUGHPUT"/>
+                    template="${OBJECT_NAME}:NonDurableMessageCount"
+                    category="THROUGHPUT"/>
         </service>
           
     </server>
@@ -1108,78 +1108,78 @@
 
         <config>
             <option name="${url}"
-              description="Naming Provider URL"
-              default="jnp://localhost:1099"/>
+                    description="Naming Provider URL"
+                    default="jnp://localhost:1099"/>
             <option name="${user}"
-              optional="true"
-              description="Username"/>
+                    optional="true"
+                    description="Username"/>
             <option name="${pass}"
-              type="secret"
-              optional="true"
-              description="Password"/>
-      <option name="listen.ports"
-              description="Listening Ports" optional="true"/>
+                    type="secret"
+                    optional="true"
+                    description="Password"/>
+            <option name="listen.ports"
+                    description="Listening Ports" optional="true"/>
         </config>
 
         <config type="control">
             <option name="start.args"
-              description="Server start program arguments"
-              optional="true"/>
+                    description="Server start program arguments"
+                    optional="true"/>
             <option name="stop.program"
-              description="Server stop program (default uses JMX)"
-              optional="true"/>
+                    description="Server stop program (default uses JMX)"
+                    optional="true"/>
             <option name="stop.args"
-              description="Server stop program arguments"
-              optional="true"
-              default="-S"/>
+                    description="Server stop program arguments"
+                    optional="true"
+                    default="-S"/>
             <option name="configSet"
-              description="Server config file set"
-              optional="true"
-              default="default"/>
+                    description="Server config file set"
+                    optional="true"
+                    default="default"/>
         </config>
 
         <properties>
             <property name="version"
-                 description="JBoss Version"/>
+                      description="JBoss Version"/>
             <property name="JavaVersion"
-                 description="Java Version"/>
+                      description="Java Version"/>
             <property name="JavaVendor"
-                 description="Java Vendor"/>
+                      description="Java Vendor"/>
             <property name="BuildDate"
-                 description="Build Date"/>
+                      description="Build Date"/>
             <property name="VersionName"
-                 description="Version Name"/>
+                      description="Version Name"/>
         </properties>
 
         <plugin type="measurement"
-            class="JBoss5MeasurementPlugin"/>
+                class="JBoss5MeasurementPlugin"/>
 
         <plugin type="autoinventory"
-            class="JBossDetector"/>
+                class="JBossDetector"/>
 
         <plugin type="control"
-            class="JBossServerControlPlugin"/>
+                class="JBossServerControlPlugin"/>
 
-    <!-- default control plugin impl for services -->
+        <!-- default control plugin impl for services -->
         <property name="SERVICE_CONTROL_PLUGIN"
-              value="${package}.JBossServiceControlPlugin"/>
+                  value="${package}.JBossServiceControlPlugin"/>
 
         <property name="DEFAULT_LOG_FILE"
-              value="log/server.log"/>
+                  value="log/server.log"/>
 
         <plugin type="log_track"
-            class="org.hyperic.hq.product.Log4JLogTrackPlugin"/>
+                class="org.hyperic.hq.product.Log4JLogTrackPlugin"/>
 
-	     <plugin type="config_track"
-	            class="org.hyperic.hq.product.FileChangeTrackPlugin">
-	      <monitored>
-	        <folder path="conf" recursive="true" filter="${conf}"/>
-	        <folder path="deploy" recursive="true" filter="${code}|${conf}"/>
-	      </monitored>
-	    </plugin>
-	    <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="false" />
+        <plugin type="config_track"
+                class="org.hyperic.hq.product.FileChangeTrackPlugin">
+            <monitored>
+                <folder path="conf" recursive="true" filter="${conf}"/>
+                <folder path="deploy" recursive="true" filter="${code}|${conf}"/>
+            </monitored>
+        </plugin>
+        <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="false" />
 	    
-	    <actions include="stop,start,restart,runGarbageCollector"/>
+        <actions include="stop,start,restart,runGarbageCollector"/>
 
         <scan>
             <include name="/**/server/*/conf/jboss-service.xml"/>
@@ -1189,14 +1189,14 @@
 
         <service name="JGroups Channel">
             <metric name="Timer Threads"
-            template="${JCHANNEL_OBJECT_NAME}:TimerThreads"
-            category="THROUGHPUT"
-            indicator="true"/>
+                    template="${JCHANNEL_OBJECT_NAME}:TimerThreads"
+                    category="THROUGHPUT"
+                    indicator="true"/>
 
             <metric name="Tasks In Timer"
-            template="${JCHANNEL_OBJECT_NAME}:NumberOfTasksInTimer"
-            category="THROUGHPUT"
-            indicator="true"/>
+                    template="${JCHANNEL_OBJECT_NAME}:NumberOfTasksInTimer"
+                    category="THROUGHPUT"
+                    indicator="true"/>
 
         </service>
 
@@ -1215,40 +1215,40 @@
 
             <metrics >
                 <metric name="Availability"
-            template="${OBJECT_NAME}:${alias}"
-              indicator="true"/>
+                        template="${OBJECT_NAME}:${alias}"
+                        indicator="true"/>
                 <metric name="AvailableCount"
-            alias="AvailableCount"
-            template="${OBJECT_NAME}:${alias}"
-            category="UTILIZATION"
-            indicator="true"
-            units="none"/>
+                        alias="AvailableCount"
+                        template="${OBJECT_NAME}:${alias}"
+                        category="UTILIZATION"
+                        indicator="true"
+                        units="none"/>
 
                 <metric name="MaxSize"
-            alias="MaxSize"
-            template="${OBJECT_NAME}:${alias}"
-            category="UTILIZATION"
-            units="none"/>
+                        alias="MaxSize"
+                        template="${OBJECT_NAME}:${alias}"
+                        category="UTILIZATION"
+                        units="none"/>
 
                 <metric name="CurrentSize"
-            alias="CurrentSize"
-            template="${OBJECT_NAME}:${alias}"
-            category="UTILIZATION"
-            units="none"/>
+                        alias="CurrentSize"
+                        template="${OBJECT_NAME}:${alias}"
+                        category="UTILIZATION"
+                        units="none"/>
 
                 <metric name="CreateCount"
-            alias="CreateCount"
-            template="${OBJECT_NAME}:${alias}"
-            category="UTILIZATION"
-            units="none"
-            collectionType="trendsup"/>
+                        alias="CreateCount"
+                        template="${OBJECT_NAME}:${alias}"
+                        category="UTILIZATION"
+                        units="none"
+                        collectionType="trendsup"/>
 
                 <metric name="RemoveCount"
-            alias="RemoveCount"
-            template="${OBJECT_NAME}:${alias}"
-            category="UTILIZATION"
-            units="none"
-            collectionType="trendsup"/>
+                        alias="RemoveCount"
+                        template="${OBJECT_NAME}:${alias}"
+                        category="UTILIZATION"
+                        units="none"
+                        collectionType="trendsup"/>
             </metrics>
 
         </service>
@@ -1269,61 +1269,61 @@
 
             <metrics>
                 <metric name="Availability"
-            template="${OBJECT_NAME}:${alias}"
-              indicator="true"/>
+                        template="${OBJECT_NAME}:${alias}"
+                        indicator="true"/>
 
                 <metric name="Cache Size"
-            alias="CacheSize"
-            template="${OBJECT_NAME}:${alias}"
-            category="UTILIZATION"
-            indicator="true"
-            units="none"/>
+                        alias="CacheSize"
+                        template="${OBJECT_NAME}:${alias}"
+                        category="UTILIZATION"
+                        indicator="true"
+                        units="none"/>
 
                 <metric name="Available Count"
-            alias="AvailableCount"
-            template="${OBJECT_NAME}:${alias}"
-            category="UTILIZATION"
-            units="none"/>
+                        alias="AvailableCount"
+                        template="${OBJECT_NAME}:${alias}"
+                        category="UTILIZATION"
+                        units="none"/>
 
                 <metric name="Max Size"
-            alias="MaxSize"
-            template="${OBJECT_NAME}:${alias}"
-            category="UTILIZATION"
-            units="none"/>
+                        alias="MaxSize"
+                        template="${OBJECT_NAME}:${alias}"
+                        category="UTILIZATION"
+                        units="none"/>
 
                 <metric name="Total Size"
-            alias="TotalSize"
-            template="${OBJECT_NAME}:${alias}"
-            category="UTILIZATION"
-            units="none"/>
+                        alias="TotalSize"
+                        template="${OBJECT_NAME}:${alias}"
+                        category="UTILIZATION"
+                        units="none"/>
 
                 <metric name="Current Size"
-            alias="CurrentSize"
-            template="${OBJECT_NAME}:${alias}"
-            category="UTILIZATION"
-            indicator="true"
-            units="none"/>
+                        alias="CurrentSize"
+                        template="${OBJECT_NAME}:${alias}"
+                        category="UTILIZATION"
+                        indicator="true"
+                        units="none"/>
 
                 <metric name="Create Count"
-            alias="CreateCount"
-            template="${OBJECT_NAME}:${alias}"
-            category="UTILIZATION"
-            units="none"
-            collectionType="trendsup"/>
+                        alias="CreateCount"
+                        template="${OBJECT_NAME}:${alias}"
+                        category="UTILIZATION"
+                        units="none"
+                        collectionType="trendsup"/>
 
                 <metric name="Remove Count"
-            alias="RemoveCount"
-            template="${OBJECT_NAME}:${alias}"
-            category="UTILIZATION"
-            units="none"
-            collectionType="trendsup"/>
+                        alias="RemoveCount"
+                        template="${OBJECT_NAME}:${alias}"
+                        category="UTILIZATION"
+                        units="none"
+                        collectionType="trendsup"/>
 
                 <metric name="Passivated Count"
-            alias="PassivatedCount"
-            template="${OBJECT_NAME}:${alias}"
-            category="UTILIZATION"
-            units="none"
-            collectionType="trendsup"/>
+                        alias="PassivatedCount"
+                        template="${OBJECT_NAME}:${alias}"
+                        category="UTILIZATION"
+                        units="none"
+                        collectionType="trendsup"/>
             </metrics>
         </service>
 
@@ -1346,177 +1346,177 @@
             <plugin type="measurement" class="JBoss5MeasurementPlugin"/>
 
             <metric name="Availability"
-            template="${OBJECT_NAME}:${alias}"
-              indicator="true"/>
+                    template="${OBJECT_NAME}:${alias}"
+                    indicator="true"/>
             <metric name="Min Pool Size"
-                alias="MinPoolSize"
-            template="${OBJECT_NAME}:${alias}"
-                category="UTILIZATION"
-                units="none"/>
+                    alias="MinPoolSize"
+                    template="${OBJECT_NAME}:${alias}"
+                    category="UTILIZATION"
+                    units="none"/>
 
             <metric name="Max Messages"
-                alias="MaxMessages"
-            template="${OBJECT_NAME}:${alias}"
-                category="UTILIZATION"
-                units="none"/>
+                    alias="MaxMessages"
+                    template="${OBJECT_NAME}:${alias}"
+                    category="UTILIZATION"
+                    units="none"/>
 
             <metric name="Keep AliveMillis"
-                alias="KeepAliveMillis"
-            template="${OBJECT_NAME}:${alias}"
-                category="UTILIZATION"
-                units="sec"
-                collectionType="static"/>
+                    alias="KeepAliveMillis"
+                    template="${OBJECT_NAME}:${alias}"
+                    category="UTILIZATION"
+                    units="sec"
+                    collectionType="static"/>
 
             <metric name="Max Pool Size"
-                alias="MaxPoolSize"
-            template="${OBJECT_NAME}:${alias}"
-                category="UTILIZATION"
-                indicator="true"
-                units="none"/>
+                    alias="MaxPoolSize"
+                    template="${OBJECT_NAME}:${alias}"
+                    category="UTILIZATION"
+                    indicator="true"
+                    units="none"/>
 
         </service>
 
         <service name="JMS QUEUE Destination" internal="true">
             <config>
                 <option name="name"
-                description="JMS Destination"
-                default=""/>
+                        description="JMS Destination"
+                        default=""/>
             </config>
 
             <property name="OBJECT_NAME"
-                value="jboss.messaging.destination:service=Queue,name=%name%"/>
+                      value="jboss.messaging.destination:service=Queue,name=%name%"/>
 
             <plugin type="autoinventory"/>
 
             <plugin type="measurement" class="JBoss5MeasurementPlugin"/>
             <plugin type="control"
-              class="JBoss5ServiceControlPlugin"/>
+                    class="JBoss5ServiceControlPlugin"/>
 
             <actions include="stop,start,removeAllMessages"/>
 
             <properties>
                 <property name="InMemory"
-                  description="In Memory"/>
+                          description="In Memory"/>
 
                 <property name="RedeliveryDelay"
-                  description="Redelivery Delay"/>
+                          description="Redelivery Delay"/>
 
                 <property name="RedeliveryLimit"
-                  description="Redelivery Limit"/>
+                          description="Redelivery Limit"/>
 
                 <property name="MaxDepth"
-                  description="Max Depth"/>
+                          description="Max Depth"/>
 
                 <property name="JNDIName"
-                  description="JNDI Name"/>
+                          description="JNDI Name"/>
             </properties>
 
             <metric name="Availability"
-            template="${OBJECT_NAME}:${alias}"
-              indicator="true"/>
+                    template="${OBJECT_NAME}:${alias}"
+                    indicator="true"/>
 
             <metric name="Messages in Queue"
-                alias="MessageCount"
-            template="${OBJECT_NAME}:${alias}"
-              category="THROUGHPUT"
-              indicator="true"/>
+                    alias="MessageCount"
+                    template="${OBJECT_NAME}:${alias}"
+                    category="THROUGHPUT"
+                    indicator="true"/>
 
             <metric name="Delivering Count"
-                 alias="DeliveringCount"
-           template="${OBJECT_NAME}:${alias}"
-              indicator="true"/>
+                    alias="DeliveringCount"
+                    template="${OBJECT_NAME}:${alias}"
+                    indicator="true"/>
 
             <metric name="Consumer Count"
-                 alias="ConsumerCount"
-           template="${OBJECT_NAME}:${alias}"
-              indicator="true"/>
+                    alias="ConsumerCount"
+                    template="${OBJECT_NAME}:${alias}"
+                    indicator="true"/>
 
             <metric name="Scheduled Message Count"
-                  alias="ScheduledMessageCount"
-          template="${OBJECT_NAME}:${alias}"/>
+                    alias="ScheduledMessageCount"
+                    template="${OBJECT_NAME}:${alias}"/>
         </service>
 
         <service name="JMS Topic" internal="true">
             <config>
                 <option name="name"
-                description="JMS Topic"
-                default=""/>
+                        description="JMS Topic"
+                        default=""/>
             </config>
 
             <property name="OBJECT_NAME"
-                value="jboss.messaging.destination:service=Topic,name=%name%"/>
+                      value="jboss.messaging.destination:service=Topic,name=%name%"/>
 
             <plugin type="autoinventory"/>
 
             <plugin type="control"
-              class="JBoss5ServiceControlPlugin"/>
+                    class="JBoss5ServiceControlPlugin"/>
 
             <actions include="stop,start,removeAllMessages"/>
 
             <properties>
                 <property name="InMemory"
-                  description="In Memory"/>
+                          description="In Memory"/>
 
                 <property name="RedeliveryDelay"
-                  description="Redelivery Delay"/>
+                          description="Redelivery Delay"/>
 
                 <property name="RedeliveryLimit"
-                  description="Redelivery Limit"/>
+                          description="Redelivery Limit"/>
 
                 <property name="MaxDepth"
-                  description="Max Depth"/>
+                          description="Max Depth"/>
 
                 <property name="JNDIName"
-                  description="JNDI Name"/>
+                          description="JNDI Name"/>
             </properties>
 
             <metric name="Availability"
-            template="${OBJECT_NAME}:AllMessageCount"
-              indicator="true"/>
+                    template="${OBJECT_NAME}:AllMessageCount"
+                    indicator="true"/>
 
             <metric name="All Subscriptions Count"
-              template="${OBJECT_NAME}:AllSubscriptionsCount"
-              category="UTILIZATION"
-              indicator="true"/>
+                    template="${OBJECT_NAME}:AllSubscriptionsCount"
+                    category="UTILIZATION"
+                    indicator="true"/>
 
             <metric name="Non Durable Subscriptions Count"
-              template="${OBJECT_NAME}:NonDurableSubscriptionsCount"
-              category="UTILIZATION"/>
+                    template="${OBJECT_NAME}:NonDurableSubscriptionsCount"
+                    category="UTILIZATION"/>
 
             <metric name="Durable Subscriptions Count"
-              template="${OBJECT_NAME}:DurableSubscriptionsCount"
-              category="UTILIZATION"
-              indicator="true"/>
+                    template="${OBJECT_NAME}:DurableSubscriptionsCount"
+                    category="UTILIZATION"
+                    indicator="true"/>
 
             <metric name="All Message Count"
-              template="${OBJECT_NAME}:AllMessageCount"
-              category="THROUGHPUT"
-              indicator="true"/>
+                    template="${OBJECT_NAME}:AllMessageCount"
+                    category="THROUGHPUT"
+                    indicator="true"/>
 
             <metric name="Durable Message Count"
-              template="${OBJECT_NAME}:DurableMessageCount"
-              category="THROUGHPUT"
-              indicator="true"/>
+                    template="${OBJECT_NAME}:DurableMessageCount"
+                    category="THROUGHPUT"
+                    indicator="true"/>
 
             <metric name="NonDurableMessageCount"
-              template="${OBJECT_NAME}:NonDurableMessageCount"
-              category="THROUGHPUT"/>
+                    template="${OBJECT_NAME}:NonDurableMessageCount"
+                    category="THROUGHPUT"/>
         </service>
 
         <service name="JCA Connection Pool" internal="true">
             <config>
                 <option name="jca.connpool"
-                description="JCA Connection Pool"
-                default=""/>
+                        description="JCA Connection Pool"
+                        default=""/>
             </config>
 
             <properties>
                 <property name="Criteria"
-                  description="Connection Pool Criteria"/>
+                          description="Connection Pool Criteria"/>
             </properties>
 
             <plugin type="control"
-              class="JBossJCAControlPlugin"/>
+                    class="JBossJCAControlPlugin"/>
 
             <actions include="stop,start,flush"/>
 
@@ -1526,21 +1526,21 @@
         <service name="JCA Data Source">
             <config>
                 <option name="name"
-                description="JNDI Name"
-                default="DefaultDS"/>
+                        description="JNDI Name"
+                        default="DefaultDS"/>
             </config>
 
             <property name="OBJECT_NAME"
-                value="jboss.jca:name=%name%,service=DataSourceBinding"/>
+                      value="jboss.jca:name=%name%,service=DataSourceBinding"/>
 
             <metric name="Availability"
-              template="${OBJECT_NAME}:StateString"
-              indicator="true"/>
+                    template="${OBJECT_NAME}:StateString"
+                    indicator="true"/>
 
             <plugin type="autoinventory"/>
 
             <plugin type="control"
-              class="JBoss5ServiceControlPlugin"/>
+                    class="JBoss5ServiceControlPlugin"/>
             <actions include="stop,start"/>
         </service>
 
@@ -1551,64 +1551,64 @@
             </config>
 
             <property name="MBEAN_CLASS"
-                value="org.jboss.ejb3.deployers.Ejb3JBoss5Deployment"/>
+                      value="org.jboss.ejb3.deployers.Ejb3JBoss5Deployment"/>
             <property name="OBJECT_NAME"
-                value="jboss.j2ee:jar=%jar%,ear=_%ear%,service=EJB3"/>
+                      value="jboss.j2ee:jar=%jar%,ear=_%ear%,service=EJB3"/>
 
 
             <metric name="Availability"
-              template="${OBJECT_NAME}:State"
-              indicator="true"/>
+                    template="${OBJECT_NAME}:State"
+                    indicator="true"/>
 
             <plugin type="autoinventory"/>
 
             <plugin type="measurement" class="JBoss5MeasurementPlugin"/>
             <plugin type="control"
-              class="JBoss5ServiceControlPlugin"/>
+                    class="JBoss5ServiceControlPlugin"/>
             <actions include="stop,start"/>
         </service>
 
         <service name="WebApp" internal="true">
             <config>
                 <option name="path"
-                description="URL path"
-                default=""/>
+                        description="URL path"
+                        default=""/>
             </config>
 
             <property name="OBJECT_NAME"
-                value="jboss.web:host=localhost,path=%path%,type=Cache"/>
+                      value="jboss.web:host=localhost,path=%path%,type=Cache"/>
 
             <plugin type="autoinventory"/>
 
             <plugin type="measurement" class="JBoss5MeasurementPlugin"/>
             <plugin type="control"
-              class="JBossStateServiceControlPlugin"/>
+                    class="JBossStateServiceControlPlugin"/>
 
             <actions include="stop,start"/>
 
             <metric name="Availability"
-            template="${OBJECT_NAME}:${alias}"
-              indicator="true"/>
+                    template="${OBJECT_NAME}:${alias}"
+                    indicator="true"/>
 
             <metric name="Cache MaxSize"
-                alias="cacheMaxSize"
-            template="${OBJECT_NAME}:${alias}"
-              category="THROUGHPUT"
-              indicator="true"/>
+                    alias="cacheMaxSize"
+                    template="${OBJECT_NAME}:${alias}"
+                    category="THROUGHPUT"
+                    indicator="true"/>
 
             <metric name="Access Count"
-                 alias="accessCount"
-           template="${OBJECT_NAME}:${alias}"
-              indicator="true"/>
+                    alias="accessCount"
+                    template="${OBJECT_NAME}:${alias}"
+                    indicator="true"/>
 
             <metric name="Cache Size"
-                 alias="cacheSize"
-           template="${OBJECT_NAME}:${alias}"
-              indicator="true"/>
+                    alias="cacheSize"
+                    template="${OBJECT_NAME}:${alias}"
+                    indicator="true"/>
 
             <metric name="Hits Count"
-                  alias="hitsCount"
-          template="${OBJECT_NAME}:${alias}"/>
+                    alias="hitsCount"
+                    template="${OBJECT_NAME}:${alias}"/>
         </service>
     </server>
     
@@ -1661,7 +1661,7 @@
                 <property name="Address" description="Address"/>
                 <property name="JNDIBindings" description="JNDI Bindings"/>
             </properties>
-        
+                    
             <filter name="template" value="${OBJECT_NAME}:${alias}"/>
 
             <metric name="Availability" indicator="true"/>
@@ -1672,9 +1672,9 @@
             <metric name="Durable Message Count" alias="DurableMessageCount" category="THROUGHPUT" indicator="true"/>
             <metric name="NonDurableMessageCount" alias="NonDurableMessageCount" category="THROUGHPUT"/>
         </service>
-       <service name="WebApp" internal="true">
+        <service name="WebApp" internal="true">
             <property name="CONTROL_OBJECT_NAME"
-                value="jboss.web:j2eeType=WebModule,name=//localhost%path%,J2EEApplication=none,J2EEServer=none"/>
+                      value="jboss.web:j2eeType=WebModule,name=//localhost%path%,J2EEApplication=none,J2EEServer=none"/>
             <plugin type="control" class="JBoss6StateServiceControlPlugin"/>
         </service>
     </server>
@@ -1698,8 +1698,8 @@
             <option name="jboss7.user" description="Username" default="guest"/>
             <option name="jboss7.pass" description="Password" default="guest" type="secret"/>
             <option name="jboss7.host" description="Host Name"/>
-       <option name="listen.ports"
-              description="Listening Ports" optional="true"/>
+            <option name="listen.ports"
+                    description="Listening Ports" optional="true"/>
         </config>
         <help>
             <![CDATA[
@@ -1755,6 +1755,9 @@
         <metric name="Non-Heap Max" alias="nh.max" units="B"/>
     </server>
         
+    <server name="JBoss Host Controller" version="7.1" name="JBoss Host Controller 7">
+    </server>
+
     <server name="JBoss" version="7" include="JBoss Host Controller 7">
         <plugin type="autoinventory" class="org.hyperic.hq.plugin.jboss7.JBossStandaloneDetector"/>
         <plugin type="collector" class="org.hyperic.hq.plugin.jboss7.JBoss7Collector"/>
@@ -1764,8 +1767,8 @@
             <option name="jboss7.https" description="Use SSL" default="false" type="boolean"/>
             <option name="jboss7.user" description="Username" default="guest"/>
             <option name="jboss7.pass" description="Password" default="guest" type="secret"/>
-      <option name="listen.ports"
-              description="Listening Ports" optional="true"/>
+            <option name="listen.ports"
+                    description="Listening Ports" optional="true"/>
         </config>
         <plugin type="config_track" class="org.hyperic.hq.product.FileChangeTrackPlugin">
             <monitored>
@@ -1878,6 +1881,9 @@
         </service>
     </server>
     
+    <server name="JBoss" version="7.1" include="JBoss 7">
+    </server>
+    
     <server name="JBoss Managed" version="7" include="JBoss 7">
         <plugin type="autoinventory" class="org.hyperic.hq.plugin.jboss7.JBossManagedDetector"/>
         <config>
@@ -1888,8 +1894,8 @@
             <option name="jboss7.pass" description="Password" default="guest" type="secret"/>
             <option name="jboss7.host" description="Host Name"/>
             <option name="jboss7.server" description="Server Name"/>
-      <option name="listen.ports"
-              description="Listening Ports" optional="true"/>
+            <option name="listen.ports"
+                    description="Listening Ports" optional="true"/>
         </config>
         <help>
             <![CDATA[
@@ -1925,4 +1931,8 @@
             ]]>
         </help>
     </server>
+    
+    <server name="JBoss Managed" version="7.1" include="JBoss Managed 7">
+    </server>
+
 </plugin>
