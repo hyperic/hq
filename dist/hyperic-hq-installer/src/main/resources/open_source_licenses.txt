@@ -1,6 +1,6 @@
 open_source_license.txt
 
-Hyperic-HQ 4.6.6 GA
+Hyperic HQ 4.6.6.1 GA
 
 
 ===========================================================================
@@ -13,16 +13,14 @@ The VMware Product that includes this file does not necessarily use all the open
 =================================================================
 TABLE OF CONTENTS
 =================================================================
+
 The following is a listing of the open source components detailed in this document. This list is provided for your convenience; please read further if you wish to review the copyright notice(s) and the full text of the license associated with each component.
 
  
-
 PART 1. HYPERIC HQ: ENTERPRISE VERSION
 
 
 SECTION 1: BSD-STYLE, MIT-STYLE, OR SIMILAR STYLE LICENSES
-
-The BSD-STYLE, MIT-STYLE, OR SIMILAR STYLE LICENSES are applicable to the following component(s).
 
    >>> ant-contrib-1.0b2
    >>> antlr-2.7.6
@@ -224,7 +222,7 @@ PART 2. HYPERIC HQ: OPEN SOURCE VERSION
 
 SECTION 1: BSD-STYLE, MIT-STYLE, OR SIMILAR STYLE LICENSES
 
-The BSD-STYLE, MIT-STYLE, OR SIMILAR STYLE LICENSES are applicable to the following component(s).
+The BSD-STYLE, MIT-STYLE, OR SIMILAR STYLE LICENSES is applicable to the following component(s).
 
    >>> ant-contrib-1.0b2
    >>> antlr-2.7.6
@@ -2395,7 +2393,7 @@ All trademarks and registered trademarks mentioned herein are the property of th
 
 --------------- SECTION 2: Apache License, V2.0 ----------
 
-Apache License, V2.0 are applicable to the following component(s).
+Apache License, V2.0 is applicable to the following component(s).
 
 
 >>> activemq-5.3.0
@@ -5596,7 +5594,7 @@ limitations under the License.
 
 --------------- SECTION 3: Common Development and Distribution License, V1.0 ----------
 
-Common Development and Distribution License, V1.0 are applicable to the following component(s).
+Common Development and Distribution License, V1.0 is applicable to the following component(s).
 
 
 >>> activation-1.1
@@ -6476,7 +6474,7 @@ holder.
 
 --------------- SECTION 4: Creative Commons Attribution License, V3.0 ----------
 
-Creative Commons Attribution License, V3.0 are applicable to the following component(s).
+Creative Commons Attribution License, V3.0 is applicable to the following component(s).
 
 
 >>> adxmenu-4.21
@@ -6570,7 +6568,7 @@ The rights granted under, and the subject matter referenced, in this License wer
 
 --------------- SECTION 5: Eclipse Public License, V1.0 ----------
 
-Eclipse Public License, V1.0 are applicable to the following component(s).
+Eclipse Public License, V1.0 is applicable to the following component(s).
 
 
 >>> aspectj-1.6.8
@@ -6640,7 +6638,7 @@ Portions Licensed:
 
 --------------- SECTION 6: GNU General Public License, V2.0 ----------
 
-GNU General Public License, V2.0 are applicable to the following component(s).
+GNU General Public License, V2.0 is applicable to the following component(s).
 
 
 >>> amqp-client-1.8.1
@@ -6691,7 +6689,7 @@ License: GPL 2.0
 
 --------------- SECTION 7: GNU Lesser General Public License, V2.1 ----------
 
-GNU Lesser General Public License, V2.1 are applicable to the following component(s).
+GNU Lesser General Public License, V2.1 is applicable to the following component(s).
 
 
 >>> bsh-2.0.0.b4
@@ -7057,7 +7055,7 @@ in the United States and other countries.]
 
 --------------- SECTION 8: GNU Lesser General Public License, V3.0 ----------
 
-GNU Lesser General Public License, V3.0 are applicable to the following component(s).
+GNU Lesser General Public License, V3.0 is applicable to the following component(s).
 
 
 >>> bsh-2.0b4
@@ -7099,7 +7097,7 @@ License: LGPL 3.0
 
 --------------- SECTION 9: GNU Library General Public License, V2.0 ----------
 
-GNU Library General Public License, V2.0 are applicable to the following component(s).
+GNU Library General Public License, V2.0 is applicable to the following component(s).
 
 
 >>> itext-2.0.6
@@ -9237,7 +9235,7 @@ All trademarks and registered trademarks mentioned herein are the property of th
 
 --------------- SECTION 2: Apache License, V2.0 ----------
 
-Apache License, V2.0 are applicable to the following component(s).
+Apache License, V2.0 is applicable to the following component(s).
 
 
 >>> activemq-5.3.0
@@ -9666,6 +9664,43 @@ This License constitutes the entire agreement between the parties with respect t
 
       10) Termination for Patent Action. This License shall terminate automatically and You may no longer exercise any of the rights granted to You by this License as of the date You commence an action, including a cross-claim or counterclaim, against Licensor or any licensee alleging that the Original Work infringes a patent. This termination provision shall not apply for an action alleging patent infringement by combinations of the Original Work with other software or hardware.
 
+      11) Jurisdiction, Venue and Governing Law. Any action or suit relating to this License may be brought only in the courts of a jurisdiction wherein the Licensor resides or in which Licensor conducts its primary business, and under the laws of that jurisdiction excluding its conflict-of-law provisions. The application of the United Nations Convention on Contracts for the International Sale of Goods is expressly excluded. Any use of the Original Work outside the scope of this License or after its termination shall be subject to the requirements and penalties of the U.S. Copyright Act, 17 U.S.C.  101 et seq., the equivalent laws of other countries, and international treaty. This section shall survive the termination of this License.
+
+      12) Attorneys Fees. In any action to enforce the terms of this License or seeking damages relating thereto, the prevailing party shall be entitled to recover its costs and expenses, including, without limitation, reasonable attorneys' fees and costs incurred in connection with such action, including any appeal of such action. This section shall survive the termination of this License.
+
+      13) Miscellaneous. This License represents the complete agreement concerning the subject matter hereof. If any provision of this License is held to be unenforceable, such provision shall be reformed only to the extent necessary to make it enforceable.
+
+      14) Definition of "You" in This License. "You" throughout this License, whether in upper or lower case, means an individual or a legal entity exercising rights under, and complying with all of the terms of, this License. For legal entities, "You" includes any entity that controls, is controlled by, or is under common control with you. For purposes of this definition, "control" means (i) the power, direct or indirect, to cause the direction or management of such entity, whether by contract or otherwise, or (ii) ownership of fifty percent (50%) or more of the outstanding shares, or (iii) beneficial ownership of such entity.
+
+      15) Right to Use. You may use the Original Work in all ways not otherwise restricted or conditioned by this License or by law, and Licensor promises not to interfere with or be responsible for such uses by You.
+
+      This license is Copyright (C) 2003-2004 Lawrence E. Rosen. All rights reserved. Permission is hereby granted to copy and distribute this license without modification. This license may not be modified without the express written permission of its copyright owner.
+
+      =========================================================================
+      == For the Plotkit library                                             ==
+      =========================================================================
+
+      Copyright (c) 2006, Alastair Tse
+      All rights reserved.
+
+      Redistribution and use in source and binary forms, with or without
+      modification, are permitted provided that the following conditions are
+      met:
+
+          * Redistributions of source code must retain the above copyright
+            notice, this list of conditions and the following disclaimer.
+          * Redistributions in binary form must reproduce the above
+            copyright notice, this list of conditions and the following
+            disclaimer in the documentation and/or other materials provided
+            with the distribution.
+          * Neither the name of the Alastair Tse nor the names of its
+            contributors may be used to endorse or promote products derived
+            from this software without specific prior written permission.
+
+      THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+      "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+      LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+      A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
       OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
       SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
       LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
@@ -12240,7 +12275,7 @@ limitations under the License.
 
 --------------- SECTION 3: Common Development and Distribution License, V1.0 ----------
 
-Common Development and Distribution License, V1.0 are applicable to the following component(s).
+Common Development and Distribution License, V1.0 is applicable to the following component(s).
 
 
 >>> activation-1.1
@@ -12279,7 +12314,7 @@ Copyright 2006 Sun Microsystems, Inc. All rights reserved.
 
 --------------- SECTION 4: Creative Commons Attribution License, V3.0 ----------
 
-Creative Commons Attribution License, V3.0 are applicable to the following component(s).
+Creative Commons Attribution License, V3.0 is applicable to the following component(s).
 
 
 >>> adxmenu-4.21
@@ -12373,7 +12408,7 @@ The rights granted under, and the subject matter referenced, in this License wer
 
 --------------- SECTION 5: Eclipse Public License, V1.0 ----------
 
-Eclipse Public License, V1.0 are applicable to the following component(s).
+Eclipse Public License, V1.0 is applicable to the following component(s).
 
 
 >>> aspectj-1.6.8
@@ -12443,7 +12478,7 @@ Portions Licensed:
 
 --------------- SECTION 6: GNU General Public License, V2.0 ----------
 
-GNU General Public License, V2.0 are applicable to the following component(s).
+GNU General Public License, V2.0 is applicable to the following component(s).
 
 >>> jaxb-impl-2.1.12.jar-2.1.12
 
@@ -13428,7 +13463,7 @@ License: GPL 2.0
 
 --------------- SECTION 7: GNU Lesser General Public License, V2.1 ----------
 
-GNU Lesser General Public License, V2.1 are applicable to the following component(s).
+GNU Lesser General Public License, V2.1 is applicable to the following component(s).
 
 
 >>> bsh-2.0.0.b4
@@ -13770,7 +13805,7 @@ in the United States and other countries.]
 
 --------------- SECTION 8: GNU Lesser General Public License, V3.0 ----------
 
-GNU Lesser General Public License, V3.0 are applicable to the following component(s).
+GNU Lesser General Public License, V3.0 is applicable to the following component(s).
 
 
 >>> bsh-2.0b4
@@ -13807,7 +13842,7 @@ http://www.pat.net/~pat/
 
 --------------- SECTION 9: GNU Library General Public License, V2.0 ----------
 
-GNU Library General Public License, V2.0 are applicable to the following component(s).
+GNU Library General Public License, V2.0 is applicable to the following component(s).
 
 
 >>> itext-2.0.6
@@ -16465,4 +16500,4 @@ offer to obtain a copy of the Source Files is valid for three
 years from the date you acquired this Software product. Alternatively, 
 the Source Files may accompany the VMware product.
 
-[HYPERIC-HQ466GAKL052412]
+[HYPERICHQ4661GASC010813]

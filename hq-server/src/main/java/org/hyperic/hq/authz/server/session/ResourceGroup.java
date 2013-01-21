@@ -33,14 +33,26 @@ import java.util.List;
 
 import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
 import org.hyperic.hibernate.PersistedObject;
+import org.hyperic.hq.appdef.server.session.PlatformType;
+import org.hyperic.hq.appdef.server.session.ServerType;
+import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.AppdefGroupValue;
+import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
+import org.hyperic.hq.appdef.shared.GroupTypeValue;
+import org.hyperic.hq.appdef.shared.PlatformManager;
+import org.hyperic.hq.appdef.shared.ServerManager;
+import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.grouping.Critter;
 import org.hyperic.hq.grouping.CritterList;
 import org.hyperic.hq.grouping.CritterRegistry;
 import org.hyperic.hq.grouping.CritterType;
 import org.hyperic.hq.grouping.GroupException;
+
 
 public class ResourceGroup extends PersistedObject
     implements ContainerManagedTimestampTrackable
@@ -423,5 +435,42 @@ public class ResourceGroup extends PersistedObject
 
     public boolean equals(Object obj) {
         return (obj instanceof ResourceGroup) && super.equals(obj);
+    }
+
+    public AppdefGroupValue getAppdefResourceValue() {
+        AppdefGroupValue val = new AppdefGroupValue();
+        val.setClusterId(getClusterId());
+        val.setCTime(new Long(getCtime()));
+        val.setDescription(getDescription());
+        val.setGroupEntResType(getGroupEntResType());
+        val.setGroupEntType(getGroupEntType());
+        val.setGroupType(getGroupType());
+        val.setId(getId());
+        val.setLocation(getLocation());
+        val.setModifiedBy(getModifiedBy());
+        val.setMTime(new Long(getMtime()));
+        val.setName(getName());
+        val.setTotalSize(Bootstrap.getBean(ResourceGroupManager.class).getNumMembers(this));
+        final Resource proto = getResourcePrototype();
+        if (proto != null) {
+            int protoTypeId = proto.getResourceType().getId();
+            int protoTypeInstanceId = proto.getInstanceId();
+            if (AuthzConstants.authzPlatformProto.equals(protoTypeId)) {
+                PlatformType platformType = Bootstrap.getBean(PlatformManager.class).findPlatformType(protoTypeInstanceId);
+                val.setAppdefResourceTypeValue(platformType.getAppdefResourceTypeValue());
+            } else if (AuthzConstants.authzServerProto.equals(protoTypeId)) {
+                ServerType serverType = Bootstrap.getBean(ServerManager.class).findServerType(protoTypeInstanceId);
+                val.setAppdefResourceTypeValue(serverType.getAppdefResourceTypeValue());
+            } else if (AuthzConstants.authzServiceProto.equals(protoTypeId)) {
+                ServiceType serviceType = Bootstrap.getBean(ServiceManager.class).findServiceType(protoTypeInstanceId);
+                val.setAppdefResourceTypeValue(serviceType.getAppdefResourceTypeValue());
+            }
+        } else {
+            AppdefResourceTypeValue tvo = new GroupTypeValue();
+            tvo.setId(getGroupType());
+            tvo.setName(AppdefEntityConstants.getAppdefGroupTypeName(getGroupType()));
+            val.setAppdefResourceTypeValue(tvo);
+        }
+        return val;
     }
 }

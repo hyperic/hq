@@ -74,7 +74,7 @@ public class AgentDListProvider implements AgentStorageProvider {
     private HashMap  overloads;
     private File     writeDir;   // Dir to write stuff to
     private File     keyValFile;
-    private File     keyValFileBackup;
+    private File     keyValFileBackup; 
     
     // Dirty flag for when writing to keyvals.  Set to true at startup
     // to force an initial flush.
@@ -223,8 +223,11 @@ public class AgentDListProvider implements AgentStorageProvider {
     protected String getKeyvalsPass() throws KeyStoreException, IOException, NoSuchAlgorithmException, UnrecoverableEntryException {
         KeystoreConfig keystoreConfig = new AgentKeystoreConfig();
         KeyStore keystore = KeystoreManager.getKeystoreManager().getKeyStore(keystoreConfig);
-        KeyStore.Entry e = keystore.getEntry(DEFAULT_PRIVATE_KEY_KEY,
-                new KeyStore.PasswordProtection(keystoreConfig.getFilePassword().toCharArray()));
+        KeyStore.Entry e = keystore.getEntry(keystoreConfig.getAlias(), new KeyStore.PasswordProtection(keystoreConfig.getFilePassword().toCharArray()));
+        if(e == null) { 
+            throw new UnrecoverableEntryException("Encryptor password generation failure: No such alias") ; 
+        }//EO if no private key was found 
+        
         byte[] pk = ((PrivateKeyEntry)e).getPrivateKey().getEncoded();
         ByteBuffer encryptionKey = Charset.forName("US-ASCII").encode(ByteBuffer.wrap(pk).toString());
         return encryptionKey.toString();
@@ -395,19 +398,22 @@ public class AgentDListProvider implements AgentStorageProvider {
                     this.encryptor = new MarkedStringEncryptor(SecurityUtil.DEFAULT_ENCRYPTION_ALGORITHM,getKeyvalsPass());
                 }
                 while(nEnts-- != 0) {
-                    String denryptedKey = SecurityUtil.encrypt(this.encryptor, dIs.readUTF());
+                    String decryptedKey = SecurityUtil.encrypt(this.encryptor, dIs.readUTF());
                     String decryptedVal = SecurityUtil.encrypt(this.encryptor, dIs.readUTF());
-                    this.keyVals.put(denryptedKey, decryptedVal);
+                    this.keyVals.put(decryptedKey, decryptedVal);
                 }
             } catch (FileNotFoundException e) {
+                this.log.error(e.getMessage());
                 // Already checked this before, shouldn't happen
             } catch (IOException e) {
+                this.log.error(e.getMessage());
                 // Throw original error
                 throw new AgentStorageException("Error reading " + 
                         this.keyValFile + ": " +
                         e.getMessage());
             
             } catch(GeneralSecurityException e){
+                this.log.error(e.getMessage());
                 // Throw original error
                 throw new AgentStorageException(e.getMessage());
             }
@@ -526,6 +532,6 @@ public class AgentDListProvider implements AgentStorageProvider {
         long      chkSize;
         int       chkPerc;
     }
+    
+    }
 
-
-}
