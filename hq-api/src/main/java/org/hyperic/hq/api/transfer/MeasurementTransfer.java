@@ -55,15 +55,6 @@ public interface MeasurementTransfer {
      */
     public void unregister();
 
-    /**
-     * unregister the filters assigned to this user destination
-     * 
-     * @param sessionId
-     * @param rscFilter
-     * @param metricFilter
-     */
-    public void unregister(final MetricFilterRequest metricFilterReq);
-
     public MetricNotifications poll() throws UnregisteredException;
     
     public ResourceMeasurementBatchResponse getAggregatedMetricData(ApiMessageContext apiMessageContext, final ResourceMeasurementRequests hqMsmtReqs, 
