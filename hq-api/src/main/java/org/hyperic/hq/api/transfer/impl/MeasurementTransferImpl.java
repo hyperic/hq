@@ -46,7 +46,6 @@ import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.ID;
 import org.hyperic.hq.api.model.common.RegistrationID;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
-import org.hyperic.hq.api.model.measurements.MeasurementResponse;
 import org.hyperic.hq.api.model.measurements.MetricFilterRequest;
 import org.hyperic.hq.api.model.measurements.MetricNotifications;
 import org.hyperic.hq.api.model.measurements.MetricResponse;
@@ -162,30 +161,6 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             this.q.unregister(dest);
             this.evaluator.unregisterAll(dest);
         }
-    }
-    public void unregister(final MetricFilterRequest metricFilterReq) {
-        //TODO~ return failed/successful registration
-        if (!MetricFilterRequest.validate(metricFilterReq)) {
-            if (log.isDebugEnabled()) {
-                log.debug("illegal request");
-            }
-            return;
-        }
-        List<Filter<MetricNotification,? extends FilteringCondition<?>>> userFilters = this.mapper.toMetricFilters(metricFilterReq); 
-        if (userFilters.isEmpty()) {
-            if (log.isDebugEnabled()) {
-                log.debug("no filters were passed to be unregistered");
-            }
-            return;
-        }
-        Destination dest = this.dest;//this.sessionToDestination.get(sessionId); 
-        if (dest==null) {
-            if (log.isDebugEnabled()) {
-                log.debug("no destination was previously registered with the current user session");
-            }
-            return;
-        }
-        this.evaluator.unregister(dest,userFilters);
     }
 
     public MetricNotifications poll() throws UnregisteredException {

@@ -125,7 +125,13 @@ public class MeasurementMapper {
         return metrics;
     }
     public MetricFilterByResource<ResourceFilteringCondition<Resource>> toMetricFilterByResource(final ResourceFilterDefinitioin rscFilterDef) {
+        if (rscFilterDef==null) {
+            return null;
+        }
         String nameToCompareTo = rscFilterDef.getName();
+        if (nameToCompareTo==null) {
+            return null;
+        }
         ResourceFilteringCondition<Resource> cond = new ResourceFilteringCondition<Resource>(nameToCompareTo);
         MetricFilterByResource<ResourceFilteringCondition<Resource>> filter = new MetricFilterByResource<ResourceFilteringCondition<Resource>>(this.measurementMgr,this.resourceMgr,cond);
         return filter;
@@ -142,9 +148,6 @@ public class MeasurementMapper {
     public List<Filter<MetricNotification,? extends FilteringCondition<?>>> toMetricFilters(final MetricFilterRequest metricFilterReq) {
         List<Filter<MetricNotification,? extends FilteringCondition<?>>> userFilters = new ArrayList<Filter<MetricNotification,? extends FilteringCondition<?>>>();
         ResourceFilterDefinitioin rscFilterDef = metricFilterReq.getResourceFilterDefinition();
-        if (rscFilterDef==null) {
-            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.MISSING_MANDATORY_FILTER,"resourceFilterDefinitioin");
-        }
         MetricFilterByResource<ResourceFilteringCondition<Resource>> metricFilterByRsc = toMetricFilterByResource(rscFilterDef);
         if (metricFilterByRsc!=null) {
             userFilters.add(metricFilterByRsc);
