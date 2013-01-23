@@ -319,6 +319,7 @@
                   value="/WEB-INF/tiles/component-def.xml,
                          /WEB-INF/tiles/component-def-ext.xml,
                          /WEB-INF/tiles/portal-def.xml,
+                         /WEB-INF/tiles/management-def.xml,
                          /WEB-INF/tiles/admin-def.xml,
                          /WEB-INF/tiles/admin-def-ext.xml,
                          /WEB-INF/tiles/dashboard-def.xml,

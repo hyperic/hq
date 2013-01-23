@@ -2391,6 +2391,12 @@
         <forward name="success" path="/resource/{1}/Inventory.do?mode=view"/>
       </action>
 
+      <!-- Management Tab -->
+      <action path="/Management" forward=".management.layout">
+      </action>
+
+
+
       <action path="/welcome" forward="/welcome.jsp" >
         <set-property property="title" value="EXAMPLE" />
       </action>
