@@ -25,6 +25,7 @@
  */
 package org.hyperic.hq.api.services.impl;
 
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
@@ -40,6 +41,8 @@ import org.hyperic.hq.api.transfer.ResourceTransfer;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -80,11 +83,10 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
         return resource;
 	}//EOM 
 	
-	public final ResourceBatchResponse getResources() throws SessionNotFoundException, SessionTimeoutException { 
-	    ApiMessageContext apiMessageContext = newApiMessageContext();
-		//TODO: NYI 
+	public final ResourceBatchResponse getResources(final ResourceDetailsType[] responseStructure, final int hierarchyDepth, final boolean register) throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException { 
 		//return this.resourceTransfer.getResources(criteria);
-		throw new UnsupportedOperationException() ; 
+        ApiMessageContext apiMessageContext = newApiMessageContext();
+        return this.resourceTransfer.getResources(apiMessageContext, responseStructure, hierarchyDepth,register) ;
 	}//EOM 
 	
 	public final ResourceBatchResponse approveResource(final Resources aiResources) throws SessionNotFoundException, SessionTimeoutException {

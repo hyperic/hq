@@ -57,6 +57,7 @@ import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
+import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
@@ -70,6 +71,7 @@ import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.ObjectNotFoundException;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
@@ -78,6 +80,8 @@ import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;
+import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Transactional;
@@ -646,5 +650,23 @@ public class ResourceTransferImpl implements ResourceTransfer{
 		
 	}//EO inner class Context 
 
-	
+	@Transactional (readOnly=true)
+    public ResourceBatchResponse getResources(ApiMessageContext messageContext, ResourceDetailsType[] responseMetadata, final int hierarchyDepth, final boolean register) throws PermissionException, NotFoundException {
+        AuthzSubject authzSubject = messageContext.getAuthzSubject();
+        final ResourceBatchResponse res = new ResourceBatchResponse(this.errorHandler) ; 
+        List<Resource> resources = new ArrayList<Resource>();
+        PageList<PlatformValue> platforms = this.platformManager.getAllPlatforms(authzSubject, PageControl.PAGE_ALL);
+        for(PlatformValue pv:platforms) {
+            try {
+                String fqdn = pv.getFqdn();
+                Resource r = this.getResourceInner(new Context(authzSubject, fqdn, ResourceType.PLATFORM, responseMetadata, this), hierarchyDepth) ;  
+                resources.add(r);
+            } catch (Throwable t) {
+//TODO~                res.addFailedResource(resourceID, errorCode, additionalDescription, args)
+            }
+        }
+        
+        res.setResources(resources);
+        return res;
+    }
 }//EOC 
