@@ -43,6 +43,8 @@ import org.hyperic.hq.api.model.Resources;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.common.NotFoundException;
 
 
 @Path("/") 
@@ -57,14 +59,15 @@ public interface ResourceService {
 			@QueryParam("status") final ResourceStatusType resourceStatusType, @QueryParam("hierarchyDepth") final int hierarchyDepth, 
 			@QueryParam("responseStructure") final ResourceDetailsType[] responseStructure) throws SessionNotFoundException, SessionTimeoutException ;  
 		
-	@GET
+    @GET
 	@Path("/{platformID}")
 	Resource getResource(@PathParam("platformID") final String platformID, 
 			@QueryParam("status") final ResourceStatusType resourceStatusType, @QueryParam("hierarchyDepth") final int hierarchyDepth, 
 			@QueryParam("responseStructure") final ResourceDetailsType[] responseStructure) throws SessionNotFoundException, SessionTimeoutException ;  
 	
-	@GET
-	ResourceBatchResponse getResources() throws SessionNotFoundException, SessionTimeoutException  ;  
+    @GET
+    @Path("/")
+	ResourceBatchResponse getResources(@QueryParam("responseStructure")  final ResourceDetailsType[] responseMetadata, @QueryParam("hierarchyDepth") final int hierarchyDepth, @QueryParam("register") final boolean register) throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException  ;  
 	
 	@POST
 	@Path("/approve")
