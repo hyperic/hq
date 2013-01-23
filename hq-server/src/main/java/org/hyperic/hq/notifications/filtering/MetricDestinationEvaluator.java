@@ -16,19 +16,11 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class MetricDestinationEvaluator extends DestinationEvaluator<MetricNotification> {
-    public MeasurementManager msmtMgr;
-    
-    @Autowired
-    public MetricDestinationEvaluator(MeasurementManager msmtMgr) {
-        this.msmtMgr=msmtMgr;
-    }
-
     @Override
     protected FilterChain<MetricNotification> instantiateFilterChain(Collection<Filter<MetricNotification,? extends FilteringCondition<?>>> filters) {
         return new FilterChain<MetricNotification>(filters);
     }
 }
-
 
 class DummyMsg implements ObjectMessage {
     Destination d = null;
