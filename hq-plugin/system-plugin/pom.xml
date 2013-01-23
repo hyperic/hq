@@ -7,7 +7,7 @@
 	<artifactId>system-plugin</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - System Plugin</name>
-	<version>4.6.6.2.BUILD-SNAPSHOT</version>
+	<version>4.6.6.BUILD-SNAPSHOT</version>
 
 	<dependencies>
 		<dependency>
