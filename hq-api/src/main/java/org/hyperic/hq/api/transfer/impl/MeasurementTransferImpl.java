@@ -137,11 +137,11 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     public RegistrationID register(final MetricFilterRequest metricFilterReq) {
         //TODO~ return failed/successful registration
         //TODO~ add schema to the xml's which automatically validates legal values (no null / empty name for instance)
-        if (!MetricFilterRequest.validate(metricFilterReq)) {
+        if (metricFilterReq==null) {
             if (log.isDebugEnabled()) {
                 log.debug("illegal request");
             }
-            return null;
+            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.BAD_REQ_BODY);
         }
         List<Filter<MetricNotification,? extends FilteringCondition<?>>> userFilters = this.mapper.toMetricFilters(metricFilterReq); 
         // TODO~ init filters with needed managers to enable them to retrieve filter related data
