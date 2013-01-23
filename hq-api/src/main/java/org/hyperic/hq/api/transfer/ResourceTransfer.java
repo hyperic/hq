@@ -30,7 +30,9 @@ import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourceStatusType;
 import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.api.model.Resources;
+import org.hyperic.hq.api.model.resources.RegisteredResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
+import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
 import org.hyperic.hq.api.services.impl.ApiMessageContext;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
@@ -45,7 +47,7 @@ public interface ResourceTransfer {
 	
 	Resource getResource(final ApiMessageContext messageContext, final String platformID, final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) throws ObjectNotFoundException ; 
 	
-	ResourceBatchResponse getResources(final ApiMessageContext messageContext, final ResourceDetailsType[] responseMetadata, final int hierarchyDepth, final boolean register) throws PermissionException, NotFoundException;
+	RegisteredResourceBatchResponse getResources(final ApiMessageContext messageContext, final ResourceDetailsType[] responseMetadata, final int hierarchyDepth, final boolean register,final ResourceFilterRequest resourceFilterRequest) throws PermissionException, NotFoundException;
 	
 	ResourceBatchResponse approveResource(final ApiMessageContext messageContext, final Resources aiResources) ;
 	ResourceBatchResponse updateResources(final ApiMessageContext messageContext, final Resources resources); 

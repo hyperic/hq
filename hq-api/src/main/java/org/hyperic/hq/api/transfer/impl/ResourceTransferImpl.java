@@ -33,6 +33,9 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import javax.jms.Destination;
+import javax.ws.rs.core.Response;
+
 import org.apache.commons.logging.Log;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.api.model.Resource;
@@ -41,7 +44,10 @@ import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourceStatusType;
 import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.api.model.Resources;
+import org.hyperic.hq.api.model.common.RegistrationID;
+import org.hyperic.hq.api.model.resources.RegisteredResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
+import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
 import org.hyperic.hq.api.services.impl.ApiMessageContext;
 import org.hyperic.hq.api.transfer.ResourceTransfer;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
@@ -73,6 +79,14 @@ import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.ObjectNotFoundException;
+import org.hyperic.hq.notifications.Q;
+import org.hyperic.hq.notifications.filtering.AgnosticFilter;
+import org.hyperic.hq.notifications.filtering.Filter;
+import org.hyperic.hq.notifications.filtering.FilteringCondition;
+import org.hyperic.hq.notifications.filtering.MetricDestinationEvaluator;
+import org.hyperic.hq.notifications.filtering.ResourceDestinationEvaluator;
+import org.hyperic.hq.notifications.model.InventoryNotification;
+import org.hyperic.hq.notifications.model.MetricNotification;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
@@ -99,12 +113,15 @@ public class ResourceTransferImpl implements ResourceTransfer{
 	private PlatformManager platformManager ; 
 	private ExceptionToErrorCodeMapper errorHandler ;
 	private Log log ;
-	
+	protected Destination dest;
+    private ResourceDestinationEvaluator evaluator;
+    private Q q;
+
 	@Autowired  
     public ResourceTransferImpl(final AIQueueManager aiQueueManager, final ResourceManager resourceManager, 
     		final AuthzSubjectManager authzSubjectManager, final ResourceMapper resourceMapper, 
     		final ProductBoss productBoss, final CPropManager cpropManager, final AppdefBoss appdepBoss, 
-    		final PlatformManager platformManager, final ExceptionToErrorCodeMapper errorHandler, @Qualifier("restApiLogger")Log log) { 
+    		final PlatformManager platformManager, final ExceptionToErrorCodeMapper errorHandler, ResourceDestinationEvaluator evaluator, Q q, @Qualifier("restApiLogger")Log log) { 
     	this.aiQueueManager = aiQueueManager ; 
     	this.resourceManager = resourceManager ; 
     	this.authzSubjectManager = authzSubjectManager ; 
@@ -114,6 +131,8 @@ public class ResourceTransferImpl implements ResourceTransfer{
     	this.appdepBoss = appdepBoss ;
     	this.platformManager = platformManager ; 
     	this.errorHandler = errorHandler ; 
+    	this.evaluator = evaluator;
+    	this.q=q;
     	this.log = log ;
     }//EOM 
 	    
@@ -651,9 +670,16 @@ public class ResourceTransferImpl implements ResourceTransfer{
 	}//EO inner class Context 
 
 	@Transactional (readOnly=true)
-    public ResourceBatchResponse getResources(ApiMessageContext messageContext, ResourceDetailsType[] responseMetadata, final int hierarchyDepth, final boolean register) throws PermissionException, NotFoundException {
+    public RegisteredResourceBatchResponse getResources(ApiMessageContext messageContext, ResourceDetailsType[] responseMetadata, final int hierarchyDepth, 
+            final boolean register,final ResourceFilterRequest resourceFilterRequest) throws PermissionException, NotFoundException {
+        if (resourceFilterRequest==null) {
+            if (log.isDebugEnabled()) {
+                log.debug("illegal request");
+            }
+            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.BAD_REQ_BODY);
+        }
         AuthzSubject authzSubject = messageContext.getAuthzSubject();
-        final ResourceBatchResponse res = new ResourceBatchResponse(this.errorHandler) ; 
+        final RegisteredResourceBatchResponse res = new RegisteredResourceBatchResponse(this.errorHandler) ; 
         List<Resource> resources = new ArrayList<Resource>();
         PageList<PlatformValue> platforms = this.platformManager.getAllPlatforms(authzSubject, PageControl.PAGE_ALL);
         for(PlatformValue pv:platforms) {
@@ -665,8 +691,28 @@ public class ResourceTransferImpl implements ResourceTransfer{
 //TODO~                res.addFailedResource(resourceID, errorCode, additionalDescription, args)
             }
         }
-        
         res.setResources(resources);
+        if (register) {
+            List<Filter<InventoryNotification,? extends FilteringCondition<?>>> userFilters = new ArrayList<Filter<InventoryNotification,? extends FilteringCondition<?>>>();//this.resourceMapper.toResourceFilters(resourceFilterRequest); 
+            if (userFilters.isEmpty()) {
+                userFilters.add(new AgnosticFilter<InventoryNotification,FilteringCondition<?>>());
+            }
+
+            //TODO~ get the destination from the user
+            Destination dest = this.dest;//this.sessionToDestination.get(sessionId); 
+            if (dest==null) {
+                dest = new Destination() {};
+                //            this.sessionToDestination.put(sessionId,dest);
+                this.dest=dest;
+                this.q.register(dest);
+            } else { 
+                // not allowing sequential registrations
+                throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.SEQUENTIAL_REGISTRATION);
+            }
+            this.evaluator.register(dest,userFilters);
+            //TODO~ return a valid registration id
+            res.setRegId(new RegistrationID(1));
+        }
         return res;
     }
 }//EOC 

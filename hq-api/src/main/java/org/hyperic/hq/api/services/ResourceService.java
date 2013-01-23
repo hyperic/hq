@@ -40,7 +40,9 @@ import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourceStatusType;
 import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.api.model.Resources;
+import org.hyperic.hq.api.model.resources.RegisteredResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
+import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -65,9 +67,10 @@ public interface ResourceService {
 			@QueryParam("status") final ResourceStatusType resourceStatusType, @QueryParam("hierarchyDepth") final int hierarchyDepth, 
 			@QueryParam("responseStructure") final ResourceDetailsType[] responseStructure) throws SessionNotFoundException, SessionTimeoutException ;  
 	
-    @GET
+    @POST
     @Path("/")
-	ResourceBatchResponse getResources(@QueryParam("responseStructure")  final ResourceDetailsType[] responseMetadata, @QueryParam("hierarchyDepth") final int hierarchyDepth, @QueryParam("register") final boolean register) throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException  ;  
+    RegisteredResourceBatchResponse getResources(@QueryParam("responseStructure")  final ResourceDetailsType[] responseMetadata,
+	        @QueryParam("hierarchyDepth") final int hierarchyDepth, @QueryParam("register") final boolean register, final ResourceFilterRequest resourceFilterRequest) throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException  ;  
 	
 	@POST
 	@Path("/approve")

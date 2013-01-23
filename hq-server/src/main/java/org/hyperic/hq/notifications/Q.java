@@ -26,6 +26,9 @@ public class Q {
     protected Map<Destination, LinkedBlockingQueue<INotification>> destinations = new ConcurrentHashMap<Destination, LinkedBlockingQueue<INotification>>();
 
     public void register(Destination dest) {
+        if (this.destinations.containsKey(dest)) {
+            return;
+        }
         LinkedBlockingQueue<INotification> q = this.destinations.put(dest, new LinkedBlockingQueue<INotification>(QUEUE_LIMIT));
         if (log.isDebugEnabled()) { log.debug(q==null?("a new queue was registered for destination " + dest):("a new queue was registered for destination " + dest + " instead of a previously existing queue")); }
     }

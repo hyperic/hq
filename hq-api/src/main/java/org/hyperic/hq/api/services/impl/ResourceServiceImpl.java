@@ -35,7 +35,9 @@ import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourceStatusType;
 import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.api.model.Resources;
+import org.hyperic.hq.api.model.resources.RegisteredResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
+import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
 import org.hyperic.hq.api.services.ResourceService;
 import org.hyperic.hq.api.transfer.ResourceTransfer;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
@@ -83,10 +85,10 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
         return resource;
 	}//EOM 
 	
-	public final ResourceBatchResponse getResources(final ResourceDetailsType[] responseStructure, final int hierarchyDepth, final boolean register) throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException { 
-		//return this.resourceTransfer.getResources(criteria);
+	public final RegisteredResourceBatchResponse getResources(final ResourceDetailsType[] responseStructure, final int hierarchyDepth, final boolean register,
+	        final ResourceFilterRequest resourceFilterRequest) throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException { 
         ApiMessageContext apiMessageContext = newApiMessageContext();
-        return this.resourceTransfer.getResources(apiMessageContext, responseStructure, hierarchyDepth,register) ;
+        return this.resourceTransfer.getResources(apiMessageContext, responseStructure, hierarchyDepth,register,resourceFilterRequest) ;
 	}//EOM 
 	
 	public final ResourceBatchResponse approveResource(final Resources aiResources) throws SessionNotFoundException, SessionTimeoutException {

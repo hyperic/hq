@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.hyperic.hq.notifications.model.INotification;
+import org.hyperic.hq.notifications.model.MetricNotification;
 
 /**
  * 

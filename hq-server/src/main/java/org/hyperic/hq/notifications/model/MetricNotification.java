@@ -2,7 +2,7 @@ package org.hyperic.hq.notifications.model;
 
 import org.hyperic.hq.product.MetricValue;
 
-public class MetricNotification implements INotification {
+public class MetricNotification extends BaseNotification {
     public Integer getMeasurementId() {
         return measurementId;
     }
