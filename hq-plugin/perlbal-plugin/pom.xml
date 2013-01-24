@@ -7,7 +7,7 @@
 	<artifactId>perlbal-plugin</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - perlbal Plugin</name>
-	<version>4.6.6.1</version>
+	<version>4.6.6.x.BUILD</version>
 
 	<dependencies>
 		<dependency>
