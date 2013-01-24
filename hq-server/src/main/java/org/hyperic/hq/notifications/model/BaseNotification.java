@@ -1,6 +1,6 @@
 package org.hyperic.hq.notifications.model;
 
-public class BaseNotification implements INotification {
+public class BaseNotification {
 
     public BaseNotification() {
     }

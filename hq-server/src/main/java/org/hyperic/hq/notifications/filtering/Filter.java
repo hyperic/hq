@@ -3,8 +3,7 @@ package org.hyperic.hq.notifications.filtering;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.hyperic.hq.notifications.model.INotification;
-import org.hyperic.hq.notifications.model.MetricNotification;
+import org.hyperic.hq.notifications.model.BaseNotification;
 
 /**
  * 
@@ -12,7 +11,7 @@ import org.hyperic.hq.notifications.model.MetricNotification;
  *
  * @param <N> defines the type of entities this filter handles
  */
-public abstract class Filter<N extends INotification, C extends FilteringCondition<?>> {
+public abstract class Filter<N extends BaseNotification, C extends FilteringCondition<?>> {
     protected C cond;
 
     public Filter(C cond) {

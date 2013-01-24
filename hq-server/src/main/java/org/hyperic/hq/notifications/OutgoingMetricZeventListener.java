@@ -34,17 +34,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component("OutgoingMetricZeventListener")
 public class OutgoingMetricZeventListener extends BaseNotificationsZeventListener<MeasurementZevent,MetricNotification> {
-    private final Log log = LogFactory.getLog(OutgoingMetricZeventListener.class);
     @Autowired
     MetricDestinationEvaluator evaluator;
     @Autowired
     protected MeasurementManager msmtMgr;
+
     @PostConstruct
     public void init() {
         zEventManager.addBufferedListener(MeasurementZevent.class, (ZeventListener<MeasurementZevent>) Bootstrap.getBean(getListenersBeanName()));
         concurrentStatsCollector.register(getConcurrentStatsCollectorType());
     }    
-    
     protected List<MetricNotification> extract(List<MeasurementZevent> events) {
         List<MetricNotification> ns = new ArrayList<MetricNotification>();
         for(MeasurementZevent measurementZevent:events) {

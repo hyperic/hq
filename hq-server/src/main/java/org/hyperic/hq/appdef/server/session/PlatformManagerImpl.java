@@ -539,7 +539,7 @@ public class PlatformManagerImpl implements PlatformManager {
 
             // Send resource create event
             // Send resource create & increment platform count events
-            zeventManager.enqueueEventAfterCommit(new ResourceCreatedZevent(subject, platform.getEntityId()));
+            zeventManager.enqueueEventAfterCommit(new ResourceCreatedZevent(subject, null, platform.getEntityId()));
 
             return platform;
         } catch (NotFoundException e) {
@@ -592,7 +592,7 @@ public class PlatformManagerImpl implements PlatformManager {
         }
 
         // Send resource create & increment platform count events
-        zeventManager.enqueueEventAfterCommit(new ResourceCreatedZevent(subject, platform.getEntityId()));
+        zeventManager.enqueueEventAfterCommit(new ResourceCreatedZevent(subject, null, platform.getEntityId()));
         
         return platform;
     }

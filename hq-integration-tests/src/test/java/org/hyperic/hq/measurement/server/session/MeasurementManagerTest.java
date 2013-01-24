@@ -139,7 +139,7 @@ public class MeasurementManagerTest
         Server server = createServer(p, serverType, "Server2");
         flushSession();
 
-        ResourceZevent event = new ResourceCreatedZevent(authzSubjectManager.getOverlordPojo(), server.getEntityId());
+        ResourceZevent event = new ResourceCreatedZevent(authzSubjectManager.getOverlordPojo(), p.getEntityId(), server.getEntityId());
         ResourceZevent eventRef = new ResourceRefreshZevent(authzSubjectManager.getOverlordPojo(), server.getEntityId());
     	ResourceZevent eventUpd = new ResourceUpdatedZevent(authzSubjectManager.getOverlordPojo(), server.getEntityId());
 
