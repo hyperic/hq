@@ -7,7 +7,7 @@
 	<artifactId>netservices-plugin</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - Net Services Plugin</name>
-	<version>4.6.6.x.BUILD</version>
+	<version>4.6.6.x.BUILD-SNAPSHOT</version>
 
 	<properties>
 		<dns.version>2.0.6</dns.version>
