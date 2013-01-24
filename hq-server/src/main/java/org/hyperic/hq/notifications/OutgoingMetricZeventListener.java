@@ -18,8 +18,10 @@ import org.hyperic.hq.measurement.server.session.ReportProcessorImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZeventPayload;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZeventSource;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
+import org.hyperic.hq.notifications.filtering.DestinationEvaluator;
 import org.hyperic.hq.notifications.filtering.FilteringCondition;
 import org.hyperic.hq.notifications.filtering.MetricDestinationEvaluator;
+import org.hyperic.hq.notifications.filtering.ResourceDestinationEvaluator;
 import org.hyperic.hq.notifications.model.MetricNotification;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
@@ -31,30 +33,20 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component("OutgoingMetricZeventListener")
-public class OutgoingMetricZeventListener implements ZeventListener<MeasurementZevent> {
-    private final Log log = LogFactory.getLog(ReportProcessorImpl.class);
-    protected ConcurrentStatsCollector concurrentStatsCollector;
-    protected MeasurementManager msmtMgr;
-    protected MetricDestinationEvaluator evaluator;
-    protected ZeventEnqueuer zEventManager;
-    protected Q q;
-
+public class OutgoingMetricZeventListener extends BaseNotificationsZeventListener<MeasurementZevent,MetricNotification> {
+    private final Log log = LogFactory.getLog(OutgoingMetricZeventListener.class);
     @Autowired
-    OutgoingMetricZeventListener(Q q,ZeventEnqueuer zEventManager, MetricDestinationEvaluator evaluator, MeasurementManager msmtMgr,ConcurrentStatsCollector concurrentStatsCollector) {
-        this.zEventManager=zEventManager;
-        this.evaluator = evaluator;
-        this.msmtMgr = msmtMgr;
-        this.concurrentStatsCollector=concurrentStatsCollector;
-        this.q = q;
-    }
-    
+    MetricDestinationEvaluator evaluator;
+    @Autowired
+    protected MeasurementManager msmtMgr;
     @PostConstruct
     public void init() {
-        zEventManager.addBufferedListener(MeasurementZevent.class, (ZeventListener<MeasurementZevent>) Bootstrap.getBean("OutgoingMetricZeventListener"));
-        concurrentStatsCollector.register(ConcurrentStatsCollector.NOTIFICATION_FILTERING_TIME);
+        zEventManager.addBufferedListener(MeasurementZevent.class, (ZeventListener<MeasurementZevent>) Bootstrap.getBean(getListenersBeanName()));
+        concurrentStatsCollector.register(getConcurrentStatsCollectorType());
     }    
+    
     protected List<MetricNotification> extract(List<MeasurementZevent> events) {
-        List<MetricNotification> dtps = new ArrayList<MetricNotification>();
+        List<MetricNotification> ns = new ArrayList<MetricNotification>();
         for(MeasurementZevent measurementZevent:events) {
             MeasurementZeventSource zEventSource = (MeasurementZeventSource) measurementZevent.getSourceId(); 
             MeasurementZeventPayload zEventPayload = (MeasurementZeventPayload) measurementZevent.getPayload();
@@ -71,24 +63,22 @@ public class OutgoingMetricZeventListener implements ZeventListener<MeasurementZ
             // TODO~ black list should be here
             
             Resource rsc = msmt.getResource();
-            MetricNotification dtp = new MetricNotification(rsc.getId(),mid,metricVal);
-            dtps.add(dtp);
+            MetricNotification n = new MetricNotification(rsc.getId(),mid,metricVal);
+            ns.add(n);
         }
-        return dtps;
+        return ns;
     } 
     
-    @Transactional(readOnly = true) 
-    public void processEvents(List<MeasurementZevent> events) {
-        final long start = System.currentTimeMillis();
-        List<MetricNotification> dtps = extract(events);
-        List<ObjectMessage> msgs;
-        try {
-            msgs = this.evaluator.evaluate(dtps);
-            this.q.publish(msgs);
-        }catch(Throwable e) {
-            log.error(e);
-        }
-        final long end = System.currentTimeMillis();
-        concurrentStatsCollector.addStat(end-start, ConcurrentStatsCollector.NOTIFICATION_FILTERING_TIME);
+    @Override
+    protected String getListenersBeanName() {
+        return "OutgoingMetricZeventListener";
+    }
+    @Override
+    protected String getConcurrentStatsCollectorType() {
+        return ConcurrentStatsCollector.METRIC_NOTIFICATION_FILTERING_TIME;
+    }
+    @Override
+    protected DestinationEvaluator<MetricNotification> getEvaluator() {
+        return this.evaluator;
     }
 }
