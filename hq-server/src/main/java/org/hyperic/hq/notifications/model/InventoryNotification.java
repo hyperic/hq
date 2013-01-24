@@ -1,7 +1,14 @@
 package org.hyperic.hq.notifications.model;
 
-public class InventoryNotification extends BaseNotification {
+import org.hyperic.hq.authz.server.session.Resource;
 
-    public InventoryNotification() {
+public abstract class InventoryNotification extends BaseNotification {
+    protected Resource r;
+
+    public InventoryNotification(Resource r) {
+        this.r=r;
+    }
+    public Resource getResource() {
+        return r;
     }
 }

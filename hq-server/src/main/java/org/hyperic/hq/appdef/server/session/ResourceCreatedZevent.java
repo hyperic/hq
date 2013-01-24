@@ -30,16 +30,24 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.zevents.ZeventManager;
 
 public class ResourceCreatedZevent extends ResourceZevent {
+    public AppdefEntityID getParentID() {
+        return parentID;
+    }
+
     static {
         ZeventManager.getInstance()
             .registerEventClass(ResourceCreatedZevent.class);
     }
 
-    public ResourceCreatedZevent(Integer subject, AppdefEntityID id) {
+    protected AppdefEntityID parentID;
+    
+    public ResourceCreatedZevent(Integer subject, AppdefEntityID parentID, AppdefEntityID id) {
         super(subject, id);
+        this.parentID=parentID;
     }
 
-    public ResourceCreatedZevent(AuthzSubject subject, AppdefEntityID id) {
+    public ResourceCreatedZevent(AuthzSubject subject, AppdefEntityID parentID, AppdefEntityID id) {
         super(subject.getId(), id);
+        this.parentID=parentID;
     }
 }
