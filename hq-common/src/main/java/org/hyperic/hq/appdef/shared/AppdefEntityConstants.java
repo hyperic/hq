@@ -73,26 +73,24 @@ public final class AppdefEntityConstants {
      *
      */
     /* Group of applications */
-    public static final int    APPDEF_TYPE_GROUP_ADHOC_APP     = 11;
+    public static final int    APPDEF_TYPE_GROUP_ADHOC_APP  = 11;
     /* Group of group */
-    public static final int    APPDEF_TYPE_GROUP_ADHOC_GRP     = 12;
+    public static final int    APPDEF_TYPE_GROUP_ADHOC_GRP  = 12;
     /* Group of platform, server, service */
-    public static final int    APPDEF_TYPE_GROUP_ADHOC_PSS     = 13;
+    public static final int    APPDEF_TYPE_GROUP_ADHOC_PSS  = 13;
     /* Compatible group of Platform or Servers */
-    public static final int    APPDEF_TYPE_GROUP_COMPAT_PS     = 14;
+    public static final int    APPDEF_TYPE_GROUP_COMPAT_PS  = 14;
     /* Compatible group of Services (cluster) */
-    public static final int    APPDEF_TYPE_GROUP_COMPAT_SVC    = 15;
+    public static final int    APPDEF_TYPE_GROUP_COMPAT_SVC = 15;
+    /* Dynamic group (mixed with special powers) */
+    public static final int    APPDEF_TYPE_GROUP_DYNAMIC    = 16;
 
-    private static final String APPDEF_TYPE_GROUP_ADHOC_APP_LABEL   = 
-        "Mixed Group - Applications";
-    private static final String APPDEF_TYPE_GROUP_ADHOC_GRP_LABEL   = 
-        "Mixed Group - Groups";
-    private static final String APPDEF_TYPE_GROUP_ADHOC_PSS_LABEL   = 
-        "Mixed Group - Platforms,Servers & Services";
-    private static final String APPDEF_TYPE_GROUP_COMPAT_PS_LABEL   = 
-        "Compatible / Cluster Group";
-    private static final String APPDEF_TYPE_GROUP_COMPAT_SVC_LABEL  = 
-        "Compatible Group - Service Cluster";
+    private static final String APPDEF_TYPE_GROUP_ADHOC_APP_LABEL  = "Mixed Group - Applications";
+    private static final String APPDEF_TYPE_GROUP_ADHOC_GRP_LABEL  = "Mixed Group - Groups";
+    private static final String APPDEF_TYPE_GROUP_ADHOC_PSS_LABEL  = "Mixed Group - Platforms,Servers & Services";
+    private static final String APPDEF_TYPE_GROUP_COMPAT_PS_LABEL  = "Compatible / Cluster Group";
+    private static final String APPDEF_TYPE_GROUP_COMPAT_SVC_LABEL = "Compatible Group - Service Cluster";
+    private static final String APPDEF_TYPE_GROUP_DYNAMIC_LABEL    = "Dynamic Group";
 
     /** get primary appdef types */
     public static int[] getAppdefTypes () {
@@ -192,6 +190,8 @@ public final class AppdefEntityConstants {
             return APPDEF_TYPE_GROUP_COMPAT_PS_LABEL;
         case APPDEF_TYPE_GROUP_COMPAT_SVC:
             return APPDEF_TYPE_GROUP_COMPAT_SVC_LABEL;
+        case APPDEF_TYPE_GROUP_DYNAMIC:
+            return APPDEF_TYPE_GROUP_DYNAMIC_LABEL;
         case AppdefEntityConstants.APPDEF_TYPE_PRIVATEGROUP:
             return AppdefEntityConstants.APPDEF_NAME_PRIVATEGROUP;
         }

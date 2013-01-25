@@ -417,6 +417,12 @@ public class ResourceGroupDAO
     }
 
     @SuppressWarnings("unchecked")
+    public Collection<ResourceGroup> findByGroupType(int groupType) {
+        String sql = "from ResourceGroup g where g.groupType = :type";
+        return (Collection<ResourceGroup>) getSession().createQuery(sql).setInteger("type", groupType).list();
+    }
+
+    @SuppressWarnings("unchecked")
     public Collection<ResourceGroup> findByGroupType_orderName(boolean isAscending, int groupType) {
         String sql = "from ResourceGroup g where g.groupType = :type" +
                      " ORDER BY g.resource.name " + ((isAscending) ? "asc" : "desc");

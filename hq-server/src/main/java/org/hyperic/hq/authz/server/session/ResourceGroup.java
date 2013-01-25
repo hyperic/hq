@@ -52,6 +52,7 @@ import org.hyperic.hq.grouping.CritterList;
 import org.hyperic.hq.grouping.CritterRegistry;
 import org.hyperic.hq.grouping.CritterType;
 import org.hyperic.hq.grouping.GroupException;
+import org.hyperic.hq.management.shared.GroupCriteria;
 
 @SuppressWarnings("serial")
 public class ResourceGroup extends PersistedObject implements ContainerManagedTimestampTrackable {

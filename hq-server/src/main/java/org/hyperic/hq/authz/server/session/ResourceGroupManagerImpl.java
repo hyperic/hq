@@ -74,6 +74,7 @@ import org.hyperic.hq.grouping.CritterTranslator;
 import org.hyperic.hq.grouping.GroupException;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.grouping.shared.GroupEntry;
+import org.hyperic.hq.management.server.session.GroupCriteriaDAO;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;

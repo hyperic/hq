@@ -23,9 +23,12 @@
  * USA.
  */
 
-package org.hyperic.hq.authz.server.session;
+package org.hyperic.hq.management.shared;
 
 import java.util.regex.Pattern;
+
+import org.hyperic.hq.authz.server.session.AuthzNamedBean;
+import org.hyperic.hq.authz.server.session.Resource;
 
 @SuppressWarnings("serial")
 public class GroupCriteria extends AuthzNamedBean {

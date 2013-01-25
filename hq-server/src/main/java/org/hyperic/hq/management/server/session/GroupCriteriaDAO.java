@@ -1,7 +1,8 @@
-package org.hyperic.hq.authz.server.session;
+package org.hyperic.hq.management.server.session;
 
 import org.hibernate.SessionFactory;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.management.shared.GroupCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
