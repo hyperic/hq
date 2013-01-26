@@ -7,7 +7,7 @@
 	<artifactId>postgresql-plugin</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - PostgreSQL Plugin</name>
-	<version>4.6.6.x.BUILD-SNAPSHOT</version>
+	<version>4.6.6.1</version>
 
 	<dependencies>
 		<dependency>
