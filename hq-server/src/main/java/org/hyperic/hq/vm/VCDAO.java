@@ -26,7 +26,7 @@ public class VCDAO extends HibernateDAO<MacToUUID> {
         getSession().flush();
     }
 
-    public void save(Set<MacToUUID> macToUUIDs) {
+    public void save(List<MacToUUID> macToUUIDs) {
         for(MacToUUID macToUUID:macToUUIDs) {
             super.save(macToUUID);
         }
