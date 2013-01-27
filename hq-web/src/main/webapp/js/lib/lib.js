@@ -796,7 +796,7 @@ function activateHeaderTab(dojo){
     } else if ( l.indexOf("/admin/") != -1 ) {
     	dojo.addClass("adminTab", "active");
     } else if ( l.indexOf("/Management.do") != -1 ) {
-    	dojo.addClass("managementTab", "active");
+    	dojo.addClass("managementTab", "activeTab");
     }
 }
 

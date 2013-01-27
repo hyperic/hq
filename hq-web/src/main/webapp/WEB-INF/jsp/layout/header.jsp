@@ -117,6 +117,11 @@
 					</c:forEach>
 				</ul>
 	        </li>
+		    <li id="managementTab" class="tab">
+		    	<a href="<spring:url value="/Management.do" />">
+		    		<fmt:message key="header.management"/>
+		    	</a>
+		   	</li>
 		    <li id="adminTab" class="tab">
 		    	<a href="<spring:url value="/Admin.do" />">
 		    		<fmt:message key="header.admin"/>
