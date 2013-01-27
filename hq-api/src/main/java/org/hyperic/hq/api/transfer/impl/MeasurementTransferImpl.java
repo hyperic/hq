@@ -44,6 +44,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.search.SearchContext;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.ID;
+import org.hyperic.hq.api.model.NotificationsReport;
 import org.hyperic.hq.api.model.common.RegistrationID;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MetricFilterRequest;
@@ -79,6 +80,7 @@ import org.hyperic.hq.notifications.filtering.AgnosticFilter;
 import org.hyperic.hq.notifications.filtering.Filter;
 import org.hyperic.hq.notifications.filtering.FilteringCondition;
 import org.hyperic.hq.notifications.filtering.MetricDestinationEvaluator;
+import org.hyperic.hq.notifications.model.BaseNotification;
 import org.hyperic.hq.notifications.model.MetricNotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -165,20 +167,13 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             this.evaluator.unregisterAll(dest);
         }
     }
-
-    public MetricNotifications poll() throws UnregisteredException {
-        MetricNotifications res = new MetricNotifications();
+    public NotificationsReport poll() throws UnregisteredException {
         Destination dest = this.dest;//this.sessionToDestination.get(sessionId);
         if (dest==null) {
             throw new UnregisteredException();
         }
-        List<MetricNotification> mns = (List<MetricNotification>) this.q.poll(dest);
-        if (mns.isEmpty()) {
-            return res;
-        }
-        List<? extends RawMetric> metrics = this.mapper.toMetricsWithId(mns);
-        res.setMetrics(metrics);
-        return res;
+        List<? extends BaseNotification> ns = this.q.poll(dest);
+        return this.mapper.toNotificationsReport(ns);
     }
     public MetricResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest hqMsmtReq, 
             final String rscId, final Date begin, final Date end) 
