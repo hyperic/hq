@@ -7,7 +7,7 @@
 	<artifactId>postfix-plugin</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - Postfix Plugin</name>
-	<version>4.6.6.2.BUILD-SNAPSHOT</version>
+	<version>4.6.6.x.BUILD-SNAPSHOT-SNAPSHOT</version>
 
 	<dependencies>
 		<dependency>

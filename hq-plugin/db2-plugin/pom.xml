@@ -7,7 +7,7 @@
 	<artifactId>db2-plugin</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - db2 Plugin</name>
-	<version>4.6.6.2.BUILD-SNAPSHOT</version>
+	<version>4.6.6.x.BUILD-SNAPSHOT-SNAPSHOT</version>
 
 	<properties>
 		<db2monitor.version>1.0.1</db2monitor.version>
