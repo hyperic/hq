@@ -8,6 +8,7 @@ import java.util.List;
 import javax.ws.rs.core.Response;
 
 import org.hyperic.hq.api.model.ID;
+import org.hyperic.hq.api.model.NotificationsReport;
 import org.hyperic.hq.api.model.measurements.Measurement;
 import org.hyperic.hq.api.model.measurements.Metric;
 import org.hyperic.hq.api.model.measurements.MetricFilterDefinition;
@@ -25,6 +26,8 @@ import org.hyperic.hq.notifications.filtering.MetricFilter;
 import org.hyperic.hq.notifications.filtering.MetricFilterByResource;
 import org.hyperic.hq.notifications.filtering.ResourceFilteringCondition;
 import org.hyperic.hq.notifications.filtering.MetricFilteringCondition;
+import org.hyperic.hq.notifications.model.BaseNotification;
+import org.hyperic.hq.notifications.model.InventoryNotification;
 import org.hyperic.hq.notifications.model.MetricNotification;
 import org.hyperic.hq.product.MetricValue;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,16 +37,15 @@ import org.springframework.stereotype.Component;
 public class MeasurementMapper {
     protected final static int MAX_FRACTION_DIGITS = 3;
     protected final static DecimalFormat df = new DecimalFormat();
-    protected final ResourceManager resourceMgr;
-    protected final MeasurementManager measurementMgr;
-    private ExceptionToErrorCodeMapper errorHandler ;
-
     @Autowired
-    public MeasurementMapper(final MeasurementManager measurementMgr,ResourceManager resourceMgr,ExceptionToErrorCodeMapper errorHandler) {
-        this.measurementMgr=measurementMgr;
-        this.resourceMgr=resourceMgr;
-        this.errorHandler=errorHandler;
-    }
+    protected ResourceManager resourceMgr;
+    @Autowired
+    protected MeasurementManager measurementMgr;
+    @Autowired
+    protected ResourceMapper rscMapper;
+    @Autowired
+    private ExceptionToErrorCodeMapper errorHandler ;
+    
     static {
         df.setMaximumFractionDigits(MAX_FRACTION_DIGITS);
         df.setGroupingUsed(false);
@@ -75,15 +77,18 @@ public class MeasurementMapper {
         msmt.setAverage(avg);
         return msmt;
     }
+    public RawMetric toMetricWithId(final MetricNotification mn) {
+        RawMetric metric = new RawMetric();
+        MetricValue hqMetric = mn.getMetricVal();
+        metric.setValue(Double.valueOf(df.format(hqMetric.getValue())));
+        metric.setTimestamp(hqMetric.getTimestamp());
+        metric.setMeasurementId(mn.getMeasurementId());
+        return metric;
+    }
     public List<RawMetric> toMetricsWithId(final List<MetricNotification> mns) {
         List<RawMetric> metrics = new ArrayList<RawMetric>();
         for (MetricNotification mn : mns) {
-            RawMetric metric = new RawMetric();
-            MetricValue hqMetric = mn.getMetricVal();
-            metric.setValue(Double.valueOf(df.format(hqMetric.getValue())));
-            metric.setTimestamp(hqMetric.getTimestamp());
-            metric.setMeasurementId(mn.getMeasurementId());
-            metrics.add(metric);
+            metrics.add(toMetricWithId(mn));
         }
         return metrics;
     }
@@ -134,5 +139,20 @@ public class MeasurementMapper {
             userFilters.add(metricFilter);
         }
         return userFilters;
+    }
+    public NotificationsReport toNotificationsReport(List<? extends BaseNotification> ns) {
+        NotificationsReport res = new NotificationsReport();
+        if (ns.isEmpty()) {
+            return new NotificationsReport();
+        }
+        for(BaseNotification bn:ns) {
+            // expensive for many notifications, the 'instance of' should be used only in the polling mechanism
+            if (bn instanceof MetricNotification) {
+                res.add(toMetricWithId((MetricNotification)bn));
+            } else if (bn instanceof InventoryNotification) {
+                res.add(rscMapper.toResource((InventoryNotification )bn));
+            }
+        }
+        return res;
     }
 }

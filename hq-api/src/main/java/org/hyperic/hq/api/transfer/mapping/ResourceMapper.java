@@ -55,6 +55,7 @@ import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.bizapp.server.session.ProductBossImpl.ConfigSchemaAndBaseResponse;
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.notifications.model.InventoryNotification;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -327,6 +328,17 @@ public class ResourceMapper {
         }//EOM 
         
     }//EO inner class Context 
+
+
+
+
+    public org.hyperic.hq.api.model.Resource toResource(InventoryNotification bn) {
+        org.hyperic.hq.authz.server.session.Resource backendResource = bn.getResource();
+        if (backendResource==null) {
+            return null;
+        }
+        return toResource(backendResource);
+    }
 	
 	
 	

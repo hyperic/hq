@@ -3,6 +3,7 @@ package org.hyperic.hq.api.services.impl;
 import javax.ws.rs.core.Response;
 
 import org.hibernate.ObjectNotFoundException;
+import org.hyperic.hq.api.model.NotificationsReport;
 import org.hyperic.hq.api.model.common.RegistrationID;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MetricFilterRequest;
@@ -80,7 +81,7 @@ public class MetricServiceImpl extends RestApiService implements MetricService {
         measurementTransfer.unregister();
     }
     
-    public MetricNotifications poll() throws SessionNotFoundException, SessionTimeoutException {
+    public NotificationsReport poll() throws SessionNotFoundException, SessionTimeoutException {
         try {
             return measurementTransfer.poll();
         } catch (UnregisteredException e) {

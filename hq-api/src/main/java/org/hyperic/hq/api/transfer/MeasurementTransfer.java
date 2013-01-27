@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.util.Date;
 
 import org.hibernate.ObjectNotFoundException;
+import org.hyperic.hq.api.model.NotificationsReport;
 import org.hyperic.hq.api.model.common.RegistrationID;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementResponse;
@@ -55,7 +56,7 @@ public interface MeasurementTransfer {
      */
     public void unregister();
 
-    public MetricNotifications poll() throws UnregisteredException;
+    public NotificationsReport poll() throws UnregisteredException;
     
     public ResourceMeasurementBatchResponse getAggregatedMetricData(ApiMessageContext apiMessageContext, final ResourceMeasurementRequests hqMsmtReqs, 
             final Date begin, final Date end) 

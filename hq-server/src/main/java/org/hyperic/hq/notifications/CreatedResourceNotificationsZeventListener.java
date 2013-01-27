@@ -6,7 +6,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.notifications.model.CreatedResourceNotification;
-import org.hyperic.hq.notifications.model.InventoryNotification;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.springframework.stereotype.Component;
 
