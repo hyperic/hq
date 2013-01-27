@@ -1,6 +1,7 @@
 package org.hyperic.hq.vm;
 
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,7 +26,7 @@ public class VCDAO extends HibernateDAO<MacToUUID> {
         getSession().flush();
     }
 
-    public void save(List<MacToUUID> macToUUIDs) {
+    public void save(Set<MacToUUID> macToUUIDs) {
         for(MacToUUID macToUUID:macToUUIDs) {
             super.save(macToUUID);
         }
