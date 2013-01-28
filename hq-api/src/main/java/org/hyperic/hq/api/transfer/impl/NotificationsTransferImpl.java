@@ -26,6 +26,7 @@ public class NotificationsTransferImpl implements NotificationsTransfer {
     protected ResourceTransfer rscTransfer;
     @Autowired
     protected MeasurementTransfer msmtTransfer;
+    // will be replaced by the destinations the invokers of this API will pass when registering
     protected Destination dummyDestination = new Destination() {};
     
     public NotificationsReport poll() throws UnregisteredException {
