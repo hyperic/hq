@@ -13,7 +13,9 @@ import org.hyperic.hq.notifications.Q;
 import org.hyperic.hq.notifications.UnregisteredException;
 import org.hyperic.hq.notifications.model.BaseNotification;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component("notificationsTransfer")
 public class NotificationsTransferImpl implements NotificationsTransfer {
     protected Destination dest;
     @Autowired
@@ -24,6 +26,7 @@ public class NotificationsTransferImpl implements NotificationsTransfer {
     protected ResourceTransfer rscTransfer;
     @Autowired
     protected MeasurementTransfer msmtTransfer;
+    protected Destination dummyDestination = new Destination() {};
     
     public NotificationsReport poll() throws UnregisteredException {
         Destination dest = this.dest;
@@ -34,12 +37,12 @@ public class NotificationsTransferImpl implements NotificationsTransfer {
         return this.mapper.toNotificationsReport(ns);
     }
     public void unregister() {
-        Destination dest = this.dest;
-        if (dest!=null) {
-            this.dest=null;
-            this.q.unregister(dest);
-            this.rscTransfer.getEvaluator().unregisterAll(dest);
-            this.msmtTransfer.getEvaluator().unregisterAll(dest);
-        }
+        this.dest=null;
+        this.q.unregister(dest);
+        this.rscTransfer.unregister();
+        this.msmtTransfer.unregister();
+    }
+    public Destination getDummyDestination() {
+        return this.dummyDestination;
     }
 }

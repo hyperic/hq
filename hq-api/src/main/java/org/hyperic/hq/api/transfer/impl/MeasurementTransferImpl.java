@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
 import javax.jms.Destination;
 import javax.ws.rs.core.Response;
 
@@ -44,13 +45,10 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.search.SearchContext;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.ID;
-import org.hyperic.hq.api.model.NotificationsReport;
 import org.hyperic.hq.api.model.common.RegistrationID;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MetricFilterRequest;
-import org.hyperic.hq.api.model.measurements.MetricNotifications;
 import org.hyperic.hq.api.model.measurements.MetricResponse;
-import org.hyperic.hq.api.model.measurements.RawMetric;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementBatchResponse;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequest;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequests;
@@ -58,6 +56,7 @@ import org.hyperic.hq.api.model.measurements.ResourceMeasurementResponse;
 import org.hyperic.hq.api.services.impl.ApiMessageContext;
 import org.hyperic.hq.api.model.measurements.BulkResourceMeasurementRequest;
 import org.hyperic.hq.api.transfer.MeasurementTransfer;
+import org.hyperic.hq.api.transfer.NotificationsTransfer;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 import org.hyperic.hq.api.transfer.mapping.MeasurementMapper;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -65,6 +64,7 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.TimeframeBoundriesException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
@@ -75,19 +75,17 @@ import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.notifications.Q;
-import org.hyperic.hq.notifications.UnregisteredException;
 import org.hyperic.hq.notifications.filtering.AgnosticFilter;
 import org.hyperic.hq.notifications.filtering.Filter;
 import org.hyperic.hq.notifications.filtering.FilteringCondition;
 import org.hyperic.hq.notifications.filtering.MetricDestinationEvaluator;
-import org.hyperic.hq.notifications.model.BaseNotification;
 import org.hyperic.hq.notifications.model.MetricNotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 public class MeasurementTransferImpl implements MeasurementTransfer {
-    private final Log log = LogFactory.getLog(ReportProcessorImpl.class);
-    private static final int MAX_DTPS = 400;
+    protected final Log log = LogFactory.getLog(ReportProcessorImpl.class);
+    protected static final int MAX_DTPS = 400;
 
     private ResourceManager resourceManager ; 
     private MeasurementManager measurementMgr;
@@ -106,6 +104,10 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         this.mapper=mapper;
         this.dataMgr = dataMgr;
         this.errorHandler = errorHandler;
+    }
+    @PostConstruct
+    public void init() {
+        this.notificationsTransfer = (NotificationsTransfer) Bootstrap.getBean("notificationsTransfer");
     }
     protected List<Measurement> getMeasurements(final String rscId, final List<MeasurementTemplate> tmps, final AuthzSubject authzSubject) throws PermissionException {
         // get measurements
@@ -144,18 +146,21 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         }
 
         //TODO~ get the destination from the user
-        Destination dest = this.dest;//this.sessionToDestination.get(sessionId); 
-        if (dest==null) {
-            dest = new Destination() {};
-            //            this.sessionToDestination.put(sessionId,dest);
-            this.dest=dest;
-            this.q.register(dest);
-        } else { 
-            // not allowing sequential registrations
+        // not allowing sequential registrations
+        if (this.isRegistered) {
             throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.SEQUENTIAL_REGISTRATION);
         }
+        this.isRegistered=true;
+        Destination dest = this.notificationsTransfer.getDummyDestination();
+        this.q.register(dest);
         this.evaluator.register(dest,userFilters);
         return new RegistrationID(1);
+    }
+    public void unregister() {
+        Destination dest = this.notificationsTransfer.getDummyDestination();
+        this.q.unregister(dest);
+        this.evaluator.unregisterAll(dest);
+        this.isRegistered=false;
     }
     public MetricResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest hqMsmtReq, 
             final String rscId, final Date begin, final Date end) 

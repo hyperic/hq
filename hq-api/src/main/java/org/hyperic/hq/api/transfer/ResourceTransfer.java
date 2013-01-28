@@ -39,7 +39,6 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.ObjectNotFoundException;
-import org.hyperic.hq.notifications.filtering.ResourceDestinationEvaluator;
 
 public interface ResourceTransfer {
 
@@ -53,5 +52,5 @@ public interface ResourceTransfer {
 	ResourceBatchResponse approveResource(final ApiMessageContext messageContext, final Resources aiResources) ;
 	ResourceBatchResponse updateResources(final ApiMessageContext messageContext, final Resources resources);
 
-    ResourceDestinationEvaluator getEvaluator(); 
+    void unregister();
 }//EOI 

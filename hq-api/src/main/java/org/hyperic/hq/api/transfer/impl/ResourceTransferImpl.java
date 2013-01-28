@@ -32,6 +32,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import javax.annotation.PostConstruct;
 import javax.jms.Destination;
 import javax.ws.rs.core.Response;
 
@@ -48,6 +49,7 @@ import org.hyperic.hq.api.model.resources.RegisteredResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
 import org.hyperic.hq.api.services.impl.ApiMessageContext;
+import org.hyperic.hq.api.transfer.NotificationsTransfer;
 import org.hyperic.hq.api.transfer.ResourceTransfer;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 import org.hyperic.hq.api.transfer.mapping.ResourceMapper;
@@ -63,7 +65,6 @@ import org.hyperic.hq.appdef.shared.InvalidConfigException;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -78,14 +79,13 @@ import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.ObjectNotFoundException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.notifications.Q;
 import org.hyperic.hq.notifications.filtering.AgnosticFilter;
 import org.hyperic.hq.notifications.filtering.Filter;
 import org.hyperic.hq.notifications.filtering.FilteringCondition;
-import org.hyperic.hq.notifications.filtering.MetricDestinationEvaluator;
 import org.hyperic.hq.notifications.filtering.ResourceDestinationEvaluator;
 import org.hyperic.hq.notifications.model.InventoryNotification;
-import org.hyperic.hq.notifications.model.MetricNotification;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
@@ -112,9 +112,10 @@ public class ResourceTransferImpl implements ResourceTransfer{
 	private PlatformManager platformManager ; 
 	private ExceptionToErrorCodeMapper errorHandler ;
 	private Log log ;
-	protected Destination dest;
     private ResourceDestinationEvaluator evaluator;
     private Q q;
+    protected NotificationsTransfer notificationsTransfer;
+    protected boolean isRegistered = false;
 
 	@Autowired  
     public ResourceTransferImpl(final AIQueueManager aiQueueManager, final ResourceManager resourceManager, 
@@ -134,7 +135,11 @@ public class ResourceTransferImpl implements ResourceTransfer{
     	this.q=q;
     	this.log = log ;
     }//EOM 
-	    
+    @PostConstruct
+    public void init() {
+        this.notificationsTransfer = (NotificationsTransfer) Bootstrap.getBean("notificationsTransfer");
+    }
+    
 	public final Resource getResource(ApiMessageContext messageContext, final String platformNaturalID, final ResourceType resourceType, 
 			final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) throws SessionNotFoundException, SessionTimeoutException, ObjectNotFoundException {
 	    AuthzSubject authzSubject = messageContext.getAuthzSubject();
@@ -692,26 +697,29 @@ public class ResourceTransferImpl implements ResourceTransfer{
         }
         res.setResources(resources);
         if (register) {
+            // not allowing sequential registrations
+            if (this.isRegistered) {
+                throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.SEQUENTIAL_REGISTRATION);
+            }
+            this.isRegistered=true;
             List<Filter<InventoryNotification,? extends FilteringCondition<?>>> userFilters = new ArrayList<Filter<InventoryNotification,? extends FilteringCondition<?>>>();//this.resourceMapper.toResourceFilters(resourceFilterRequest); 
             if (userFilters.isEmpty()) {
                 userFilters.add(new AgnosticFilter<InventoryNotification,FilteringCondition<?>>());
             }
 
             //TODO~ get the destination from the user
-            Destination dest = this.dest;//this.sessionToDestination.get(sessionId); 
-            if (dest==null) {
-                dest = new Destination() {};
-                //            this.sessionToDestination.put(sessionId,dest);
-                this.dest=dest;
-                this.q.register(dest);
-            } else { 
-                // not allowing sequential registrations
-                throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.SEQUENTIAL_REGISTRATION);
-            }
+            Destination dest = this.notificationsTransfer.getDummyDestination();
+            this.q.register(dest);
             this.evaluator.register(dest,userFilters);
             //TODO~ return a valid registration id
             res.setRegId(new RegistrationID(1));
         }
         return res;
+    }
+    public void unregister() {
+        Destination dest = this.notificationsTransfer.getDummyDestination();
+        this.q.unregister(dest);
+        this.evaluator.unregisterAll(dest);
+        this.isRegistered=false;
     }
 }//EOC 
