@@ -87,6 +87,8 @@
 	<bean class="org.springframework.web.context.support.ServletContextPropertyPlaceholderConfigurer" />
 	<bean class="org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer" />
 
+	<bean name="notificationsServiceImpl" class="org.hyperic.hq.api.services.impl.NotificationsService" />
+
 	<bean name="resourceServiceImpl" class="org.hyperic.hq.api.services.impl.ResourceServiceImpl" />
 	
 	<bean name="measurementServiceImpl" class="org.hyperic.hq.api.services.impl.MeasurementServiceImpl" />
@@ -127,6 +129,19 @@
         </jaxrs:features>		
 	</jaxrs:server>	
 
+	<jaxrs:server id="notificationsService" address="/notification">
+		<jaxrs:serviceBeans>
+			<ref bean="notificationsServiceImpl" />
+        </jaxrs:serviceBeans>
+        <jaxrs:providers>
+            <ref bean="jaxbProvider" />
+			<ref bean="jsonProvider" />
+        </jaxrs:providers>
+        <jaxrs:features>
+            <cxf:logging />
+        </jaxrs:features>        
+    </jaxrs:server>
+    
 	<jaxrs:server id="measurementService" address="/measurement">
 		<jaxrs:serviceBeans>
 			<ref bean="measurementServiceImpl" />
@@ -139,7 +154,7 @@
             <cxf:logging />
         </jaxrs:features>        
     </jaxrs:server>
-    
+
 	<jaxrs:server id="metrictService" address="/metric">
 		<jaxrs:serviceBeans>
 			<ref bean="metricServiceImpl" />
