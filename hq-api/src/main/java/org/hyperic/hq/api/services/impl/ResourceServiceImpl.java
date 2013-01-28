@@ -25,6 +25,8 @@
  */
 package org.hyperic.hq.api.services.impl;
 
+import javax.ws.rs.DELETE;
+import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
@@ -108,4 +110,7 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
 		throw new UnsupportedOperationException() ; 
 	}//EOM 
 	
+	public void unregister() throws SessionNotFoundException, SessionTimeoutException {
+	    this.resourceTransfer.unregister();
+	}
 }//EOC 
