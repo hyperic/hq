@@ -73,15 +73,6 @@ public interface MeasurementTransfer {
     
     public RegistrationID register(final MetricFilterRequest metricFilterReq);
 
-    /**
-     * unregister session data and all assigned filters
-     * 
-     * @param sessionId
-     */
-    public void unregister();
-
-    public NotificationsReport poll() throws UnregisteredException;
-    
     public ResourceMeasurementBatchResponse getAggregatedMetricData(ApiMessageContext apiMessageContext, final ResourceMeasurementRequests hqMsmtReqs, 
             final Date begin, final Date end) 
             throws PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException, SQLException;

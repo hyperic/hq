@@ -128,7 +128,6 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     }
 
     //    protected Map<Integer,Destination> sessionToDestination = new HashMap<Integer,Destination>();
-    protected Destination dest;
 
     public RegistrationID register(final MetricFilterRequest metricFilterReq) {
         //TODO~ return failed/successful registration
@@ -157,23 +156,6 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         }
         this.evaluator.register(dest,userFilters);
         return new RegistrationID(1);
-    }
-    public void unregister() {
-        Destination dest = this.dest;//this.sessionToDestination.get(sessionId); 
-        if (dest!=null) {
-            //            this.sessionToDestination.remove(sessionId);
-            this.dest=null;
-            this.q.unregister(dest);
-            this.evaluator.unregisterAll(dest);
-        }
-    }
-    public NotificationsReport poll() throws UnregisteredException {
-        Destination dest = this.dest;//this.sessionToDestination.get(sessionId);
-        if (dest==null) {
-            throw new UnregisteredException();
-        }
-        List<? extends BaseNotification> ns = this.q.poll(dest);
-        return this.mapper.toNotificationsReport(ns);
     }
     public MetricResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest hqMsmtReq, 
             final String rscId, final Date begin, final Date end) 
