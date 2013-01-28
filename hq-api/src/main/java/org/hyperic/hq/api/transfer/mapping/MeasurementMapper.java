@@ -42,8 +42,6 @@ public class MeasurementMapper {
     @Autowired
     protected MeasurementManager measurementMgr;
     @Autowired
-    protected ResourceMapper rscMapper;
-    @Autowired
     private ExceptionToErrorCodeMapper errorHandler ;
     
     static {
@@ -139,20 +137,5 @@ public class MeasurementMapper {
             userFilters.add(metricFilter);
         }
         return userFilters;
-    }
-    public NotificationsReport toNotificationsReport(List<? extends BaseNotification> ns) {
-        NotificationsReport res = new NotificationsReport();
-        if (ns.isEmpty()) {
-            return new NotificationsReport();
-        }
-        for(BaseNotification bn:ns) {
-            // expensive for many notifications, the 'instance of' should be used only in the polling mechanism
-            if (bn instanceof MetricNotification) {
-                res.add(toMetricWithId((MetricNotification)bn));
-            } else if (bn instanceof InventoryNotification) {
-                res.add(rscMapper.toResource((InventoryNotification )bn));
-            }
-        }
-        return res;
     }
 }

@@ -13,6 +13,7 @@ import org.hyperic.hq.api.model.measurements.ResourceMeasurementBatchResponse;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequests;
 import org.hyperic.hq.api.services.MetricService;
 import org.hyperic.hq.api.transfer.MeasurementTransfer;
+import org.hyperic.hq.api.transfer.NotificationsTransfer;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
@@ -30,9 +31,11 @@ import java.util.Date;
 
 public class MetricServiceImpl extends RestApiService implements MetricService {
     @Autowired
-    private MeasurementTransfer measurementTransfer;
+    protected MeasurementTransfer measurementTransfer;
     @Autowired
-    private ExceptionToErrorCodeMapper errorHandler ; 
+    protected NotificationsTransfer notificationsTransfer;
+    @Autowired
+    protected ExceptionToErrorCodeMapper errorHandler ; 
     
 	public MetricResponse getMetrics(final MeasurementRequest measurementRequest,
 			final String resourceId, final Date begin, final Date end)
@@ -83,7 +86,7 @@ public class MetricServiceImpl extends RestApiService implements MetricService {
     
     public NotificationsReport poll() throws SessionNotFoundException, SessionTimeoutException {
         try {
-            return measurementTransfer.poll();
+            return notificationsTransfer.poll();
         } catch (UnregisteredException e) {
             errorHandler.log(e);
             throw errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.UNREGISTERED_FOR_NOTIFICATIONS, e.getMessage());
