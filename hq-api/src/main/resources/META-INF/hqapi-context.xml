@@ -87,7 +87,7 @@
 	<bean class="org.springframework.web.context.support.ServletContextPropertyPlaceholderConfigurer" />
 	<bean class="org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer" />
 
-	<bean name="notificationsServiceImpl" class="org.hyperic.hq.api.services.impl.NotificationsService" />
+	<bean name="notificationsServiceImpl" class="org.hyperic.hq.api.services.impl.NotificationsServiceImpl" />
 
 	<bean name="resourceServiceImpl" class="org.hyperic.hq.api.services.impl.ResourceServiceImpl" />
 	
