@@ -65,10 +65,6 @@ public interface MetricService {
             @QueryParam("end") final Date end) 
                     throws ParseException, PermissionException, SessionNotFoundException, SessionTimeoutException, ObjectNotFoundException, UnsupportedOperationException, SQLException;
 
-    @GET
-    @Path("/poll")
-    public NotificationsReport poll() throws SessionNotFoundException, SessionTimeoutException;
-
     @POST
     @Path("/register")
     public RegistrationID register(final MetricFilterRequest metricFilterReq) throws SessionNotFoundException, SessionTimeoutException;

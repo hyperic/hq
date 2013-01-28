@@ -33,8 +33,6 @@ public class MetricServiceImpl extends RestApiService implements MetricService {
     @Autowired
     protected MeasurementTransfer measurementTransfer;
     @Autowired
-    protected NotificationsTransfer notificationsTransfer;
-    @Autowired
     protected ExceptionToErrorCodeMapper errorHandler ; 
     
 	public MetricResponse getMetrics(final MeasurementRequest measurementRequest,
@@ -82,14 +80,5 @@ public class MetricServiceImpl extends RestApiService implements MetricService {
     
     public void unregister() throws SessionNotFoundException, SessionTimeoutException {
         measurementTransfer.unregister();
-    }
-    
-    public NotificationsReport poll() throws SessionNotFoundException, SessionTimeoutException {
-        try {
-            return notificationsTransfer.poll();
-        } catch (UnregisteredException e) {
-            errorHandler.log(e);
-            throw errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.UNREGISTERED_FOR_NOTIFICATIONS, e.getMessage());
-        }
     }
 }

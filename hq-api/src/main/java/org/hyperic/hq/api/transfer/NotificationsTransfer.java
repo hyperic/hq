@@ -7,6 +7,6 @@ import org.hyperic.hq.notifications.UnregisteredException;
 
 public interface NotificationsTransfer {
     public NotificationsReport poll() throws UnregisteredException;
-
+    public void unregister();
     public Destination getDummyDestination();
 }
