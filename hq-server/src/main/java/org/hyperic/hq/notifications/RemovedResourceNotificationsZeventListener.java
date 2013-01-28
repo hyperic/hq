@@ -7,7 +7,9 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.notifications.model.RemovedResourceNotification;
 import org.hyperic.hq.zevents.ZeventListener;
+import org.springframework.stereotype.Component;
 
+@Component("RemovedResourceNotificationsZeventListener")
 public class RemovedResourceNotificationsZeventListener extends InventoryNotificationsZeventListener<ResourceDeletedZevent> {
     @PostConstruct
     public void init() {

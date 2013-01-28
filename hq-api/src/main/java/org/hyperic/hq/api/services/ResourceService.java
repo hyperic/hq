@@ -26,6 +26,7 @@
 package org.hyperic.hq.api.services;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -81,5 +82,9 @@ public interface ResourceService {
 
 	@PUT
 	@Path("/search")
-	ResourceBatchResponse updateResourcesByCriteria(final Resource updateData) throws SessionNotFoundException, SessionTimeoutException ;  
+	ResourceBatchResponse updateResourcesByCriteria(final Resource updateData) throws SessionNotFoundException, SessionTimeoutException ;
+	
+	@DELETE
+	@Path("/unregister")
+	public void unregister() throws SessionNotFoundException, SessionTimeoutException;
 }//EOC 

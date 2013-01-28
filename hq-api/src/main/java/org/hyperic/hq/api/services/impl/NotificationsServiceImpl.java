@@ -1,8 +1,5 @@
 package org.hyperic.hq.api.services.impl;
 
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 
 import org.hyperic.hq.api.model.NotificationsReport;
@@ -28,8 +25,6 @@ public class NotificationsServiceImpl implements NotificationsService {
             throw errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.UNREGISTERED_FOR_NOTIFICATIONS, e.getMessage());
         }
     }
-    @DELETE
-    @Path("/")
     public void unregister() throws SessionNotFoundException, SessionTimeoutException {
         notificationsTransfer.unregister();
     }
