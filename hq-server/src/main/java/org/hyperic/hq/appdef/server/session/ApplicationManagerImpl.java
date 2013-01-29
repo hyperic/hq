@@ -255,7 +255,6 @@ public class ApplicationManagerImpl implements ApplicationManager,
         if (log.isDebugEnabled()) {
             log.debug("Removing authz resource: " + aeid);
         }
-
         AuthzSubject s = authzSubjectManager.findSubjectById(subject.getId());
         resourceManager.removeResource(s, r);
 

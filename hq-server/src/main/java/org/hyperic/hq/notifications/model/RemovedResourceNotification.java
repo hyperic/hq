@@ -1,9 +1,13 @@
 package org.hyperic.hq.notifications.model;
 
-import org.hyperic.hq.authz.server.session.Resource;
 
 public class RemovedResourceNotification extends InventoryNotification {
-    public RemovedResourceNotification(Resource r) {
-        super(r);
+    protected Integer rid;
+    
+    public RemovedResourceNotification(Integer rid) {
+        this.rid=rid;
+    }
+    public Integer getID() {
+        return rid;
     }
 }

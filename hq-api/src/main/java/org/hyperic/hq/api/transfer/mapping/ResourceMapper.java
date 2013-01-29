@@ -38,8 +38,11 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.hibernate.SessionFactory;
+import org.hibernate.classic.Session;
 import org.hyperic.hq.api.model.AIResource;
 import org.hyperic.hq.api.model.ConfigurationValue;
+import org.hyperic.hq.api.model.ID;
 import org.hyperic.hq.api.model.PropertyList;
 import org.hyperic.hq.api.model.Resource;
 import org.hyperic.hq.api.model.ResourceConfig;
@@ -55,7 +58,9 @@ import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.bizapp.server.session.ProductBossImpl.ConfigSchemaAndBaseResponse;
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.notifications.model.CreatedResourceNotification;
 import org.hyperic.hq.notifications.model.InventoryNotification;
+import org.hyperic.hq.notifications.model.RemovedResourceNotification;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,7 +77,8 @@ import org.springframework.stereotype.Component;
 public class ResourceMapper {
     
     private PlatformManager platformManager;
-    
+    @Autowired  
+    SessionFactory f;
     @Autowired  
     public ResourceMapper(final PlatformManager platformManager) { 
         this.platformManager = platformManager;   
@@ -331,13 +337,33 @@ public class ResourceMapper {
 
 
 
-
-    public org.hyperic.hq.api.model.Resource toResource(InventoryNotification bn) {
-        org.hyperic.hq.authz.server.session.Resource backendResource = bn.getResource();
+    
+    public ID toResource(RemovedResourceNotification n) {
+        Integer id = n.getID();
+        if (id==null) {
+            return null;
+        }
+        ID removedResourceID = new ID();
+        removedResourceID.setId(id);
+        return removedResourceID;
+    }
+    public org.hyperic.hq.api.model.Resource toResource(CreatedResourceNotification n) {
+        org.hyperic.hq.authz.server.session.Resource backendResource = n.getResource();
         if (backendResource==null) {
             return null;
         }
-        return toResource(backendResource);
+        Session hSession = f.getCurrentSession();
+        hSession.update(backendResource);
+        hSession.update(backendResource.getResourceType());
+        Resource newResource = toResource(backendResource);
+        Integer parentID = n.getParentID();
+        // platforms wont have a parent
+        if (parentID==null) {
+            return newResource;
+        }
+        Resource parentResource = new Resource(String.valueOf(parentID));
+        parentResource.addSubResource(newResource);
+        return parentResource;
     }
 	
 	

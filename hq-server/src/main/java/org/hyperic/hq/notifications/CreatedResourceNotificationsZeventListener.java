@@ -1,7 +1,9 @@
 package org.hyperic.hq.notifications;
 
 import javax.annotation.PostConstruct;
-import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
+
+import org.hyperic.hq.appdef.server.session.NewResourceEvent;
+import org.hyperic.hq.appdef.server.session.NewResourceEvent;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.context.Bootstrap;
@@ -10,10 +12,10 @@ import org.hyperic.hq.zevents.ZeventListener;
 import org.springframework.stereotype.Component;
 
 @Component("CreatedResourceNotificationsZeventListener")
-public class CreatedResourceNotificationsZeventListener extends InventoryNotificationsZeventListener<ResourceCreatedZevent> {
+public class CreatedResourceNotificationsZeventListener extends InventoryNotificationsZeventListener<NewResourceEvent> {
     @PostConstruct
     public void init() {
-        zEventManager.addBufferedListener(ResourceCreatedZevent.class, (ZeventListener<ResourceCreatedZevent>) Bootstrap.getBean(getListenersBeanName()));
+        zEventManager.addBufferedListener(NewResourceEvent.class, (ZeventListener<NewResourceEvent>) Bootstrap.getBean(getListenersBeanName()));
         concurrentStatsCollector.register(getConcurrentStatsCollectorType());
     }
     @Override
@@ -21,8 +23,9 @@ public class CreatedResourceNotificationsZeventListener extends InventoryNotific
         return "CreatedResourceNotificationsZeventListener";
     }
     @Override
-    protected CreatedResourceNotification createNotification(ResourceCreatedZevent event, Resource r) {
-        AppdefEntityID parentID = event.getParentID();
+    protected CreatedResourceNotification createNotification(NewResourceEvent event) {
+        Integer parentID = event.getParentID();
+        Resource r = event.getResource();
         CreatedResourceNotification n = new CreatedResourceNotification(parentID,r);
         return n;
     }

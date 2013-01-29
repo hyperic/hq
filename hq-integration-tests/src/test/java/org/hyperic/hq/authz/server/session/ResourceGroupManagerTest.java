@@ -103,7 +103,7 @@ public class ResourceGroupManagerTest
         Platform testPlatform2 = createPlatform("agentToken", TEST_PLATFORM_TYPE, "calculon.local",
             "calculon.local");
         ResourceCreatedZevent platformCreated = new ResourceCreatedZevent(authzSubjectManager
-            .getOverlordPojo(), null, testPlatform2.getEntityId());
+            .getOverlordPojo(), testPlatform2.getEntityId());
         resourceGroupManager.updateGroupMembers(Collections.singletonList(platformCreated));
         flushSession();
         // Query orders resources by resource name
@@ -155,7 +155,7 @@ public class ResourceGroupManagerTest
         Platform testPlatform2 = createPlatform("agentToken", TEST_PLATFORM_TYPE,
             "calculon.remote", "calculon.remote");
         ResourceCreatedZevent platformCreated = new ResourceCreatedZevent(authzSubjectManager
-            .getOverlordPojo(), null, testPlatform2.getEntityId());
+            .getOverlordPojo(),  testPlatform2.getEntityId());
         resourceGroupManager.updateGroupMembers(Collections.singletonList(platformCreated));
         flushSession();
         // Query orders resources by resource name
@@ -218,7 +218,7 @@ public class ResourceGroupManagerTest
         Platform testPlatform2 = createPlatform("agentToken", TEST_PLATFORM_TYPE,
             "calculon.remote", "calculon.remote");
         ResourceCreatedZevent platformCreated = new ResourceCreatedZevent(authzSubjectManager
-            .getOverlordPojo(), null, testPlatform2.getEntityId());
+            .getOverlordPojo(), testPlatform2.getEntityId());
         resourceGroupManager.updateGroupMembers(Collections.singletonList(platformCreated));
         flushSession();
         List<Resource> expectedResources = new ArrayList<Resource>(1);
@@ -242,7 +242,7 @@ public class ResourceGroupManagerTest
         Platform testPlatform2 = createPlatform("agentToken", TEST_PLATFORM_TYPE,
             "calculon.local", "calculon.local");
         ResourceCreatedZevent platformCreated = new ResourceCreatedZevent(authzSubjectManager
-            .getOverlordPojo(), null, testPlatform2.getEntityId());
+            .getOverlordPojo(), testPlatform2.getEntityId());
         resourceGroupManager.updateGroupMembers(Collections.singletonList(platformCreated));
         flushSession();
         List<Resource> expectedResources = new ArrayList<Resource>(2);
@@ -284,7 +284,7 @@ public class ResourceGroupManagerTest
         Platform testPlatform2 = createPlatform("agentToken", TEST_PLATFORM_TYPE,
             "calculon.local", "calculon.local");
         ResourceCreatedZevent platformCreated = new ResourceCreatedZevent(authzSubjectManager
-            .getOverlordPojo(), null, testPlatform2.getEntityId());
+            .getOverlordPojo(), testPlatform2.getEntityId());
         resourceGroupManager.updateGroupMembers(Collections.singletonList(platformCreated));
         flushSession();
         List<Resource> expectedResources = new ArrayList<Resource>(2);

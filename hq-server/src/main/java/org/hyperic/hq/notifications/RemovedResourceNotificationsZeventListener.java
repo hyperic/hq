@@ -2,6 +2,7 @@ package org.hyperic.hq.notifications;
 
 import javax.annotation.PostConstruct;
 
+import org.hyperic.hq.appdef.server.session.RemovedResourceEvent;
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.context.Bootstrap;
@@ -10,10 +11,10 @@ import org.hyperic.hq.zevents.ZeventListener;
 import org.springframework.stereotype.Component;
 
 @Component("RemovedResourceNotificationsZeventListener")
-public class RemovedResourceNotificationsZeventListener extends InventoryNotificationsZeventListener<ResourceDeletedZevent> {
+public class RemovedResourceNotificationsZeventListener extends InventoryNotificationsZeventListener<RemovedResourceEvent> {
     @PostConstruct
     public void init() {
-        zEventManager.addBufferedListener(ResourceDeletedZevent.class, (ZeventListener<ResourceDeletedZevent>) Bootstrap.getBean(getListenersBeanName()));
+        zEventManager.addBufferedListener(RemovedResourceEvent.class, (ZeventListener<RemovedResourceEvent>) Bootstrap.getBean(getListenersBeanName()));
         concurrentStatsCollector.register(getConcurrentStatsCollectorType());
     }
     @Override
@@ -21,7 +22,7 @@ public class RemovedResourceNotificationsZeventListener extends InventoryNotific
         return "RemovedResourceNotificationsZeventListener";
     }
     @Override
-    protected RemovedResourceNotification createNotification(ResourceDeletedZevent event, Resource r) {
-        return new RemovedResourceNotification(r);
+    protected RemovedResourceNotification createNotification(RemovedResourceEvent event) {
+        return new RemovedResourceNotification(event.getID());
     }
 }

@@ -328,7 +328,9 @@ public class ServerManagerImpl implements ServerManager {
             createAuthzServer(subject, s);
 
             // Send resource create event
-            ResourceCreatedZevent zevent = new ResourceCreatedZevent(subject, targetPlatform.getEntityId(), s.getEntityId());
+            ResourceCreatedZevent zevent = new ResourceCreatedZevent(subject, s.getEntityId());
+            NewResourceEvent event = new NewResourceEvent(targetPlatform.getResource().getId(),s.getResource());
+            zeventManager.enqueueEventAfterCommit(event);
             zeventManager.enqueueEventAfterCommit(zevent);
         } else {
             boolean wasUpdated = configManager.configureResponse(subject, cr, s.getEntityId(),
@@ -481,7 +483,9 @@ public class ServerManagerImpl implements ServerManager {
             createAuthzServer(subject, server);
 
             // Send resource create event
-            ResourceCreatedZevent zevent = new ResourceCreatedZevent(subject, platform.getEntityId(),server.getEntityId());
+            ResourceCreatedZevent zevent = new ResourceCreatedZevent(subject,server.getEntityId());
+            NewResourceEvent event = new NewResourceEvent(platform.getResource().getId(),server.getResource());
+            zeventManager.enqueueEventAfterCommit(event);
             zeventManager.enqueueEventAfterCommit(zevent);
 
             return server;

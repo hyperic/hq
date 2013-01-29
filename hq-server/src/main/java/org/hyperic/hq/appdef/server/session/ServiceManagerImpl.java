@@ -154,7 +154,9 @@ public class ServiceManagerImpl implements ServiceManager {
         // Add Service to parent collection
         server.getServices().add(service);
 
-        ResourceCreatedZevent zevent = new ResourceCreatedZevent(subject, server.getEntityId(), service.getEntityId());
+        ResourceCreatedZevent zevent = new ResourceCreatedZevent(subject, service.getEntityId());
+        NewResourceEvent event = new NewResourceEvent(server.getResource().getId(),service.getResource());
+        zeventManager.enqueueEventAfterCommit(event);
         zeventManager.enqueueEventAfterCommit(zevent);
         return service;
     }

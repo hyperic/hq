@@ -48,6 +48,7 @@ import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformDAO;
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.PlatformTypeDAO;
+import org.hyperic.hq.appdef.server.session.RemovedResourceEvent;
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.server.session.Server;
@@ -197,12 +198,15 @@ public class ResourceManagerImpl implements ResourceManager {
             log.debug("Removing authz resource: " + aeid);
 
         Zevent zevent = new ResourceDeletedZevent(subject, aeid);
+        RemovedResourceEvent event = new RemovedResourceEvent(r.getId());
+
         AuthzSubject s = authzSubjectManager.findSubjectById(subject.getId());
         
         removeResource(s, r);
 
         // Send resource delete event
         zeventManager.enqueueEventAfterCommit(zevent);
+        zeventManager.enqueueEventAfterCommit(event);
     }
 
     /**
