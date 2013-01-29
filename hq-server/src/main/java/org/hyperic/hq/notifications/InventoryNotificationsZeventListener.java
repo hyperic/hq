@@ -4,6 +4,7 @@ package org.hyperic.hq.notifications;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hyperic.hq.appdef.server.session.InventoryEvent;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -14,7 +15,7 @@ import org.hyperic.hq.notifications.model.InventoryNotification;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public abstract class InventoryNotificationsZeventListener<E extends ResourceZevent> extends BaseNotificationsZeventListener<E,InventoryNotification> {
+public abstract class InventoryNotificationsZeventListener<E extends InventoryEvent> extends BaseNotificationsZeventListener<E,InventoryNotification> {
     @Autowired
     ResourceDestinationEvaluator evaluator;
     @Autowired
@@ -29,14 +30,12 @@ public abstract class InventoryNotificationsZeventListener<E extends ResourceZev
         return this.evaluator;
     }
     
-    protected abstract InventoryNotification createNotification(E event,Resource r);
+    protected abstract InventoryNotification createNotification(E event);
 
     protected List<InventoryNotification> extract(List<E> events) {
         List<InventoryNotification> ns = new ArrayList<InventoryNotification>();
         for(E event:events) {
-            AppdefEntityID id = event.getAppdefEntityID();
-            Resource r = resourceMgr.getResourceById(id.getId());
-            InventoryNotification n = createNotification(event,r);
+            InventoryNotification n = createNotification(event);
             ns.add(n);
         }
         return ns;

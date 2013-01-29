@@ -11,7 +11,7 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.notifications.UnregisteredException;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class NotificationsServiceImpl implements NotificationsService {
+public class NotificationsServiceImpl extends RestApiService implements NotificationsService {
     @Autowired
     protected NotificationsTransfer notificationsTransfer;
     @Autowired
@@ -19,6 +19,7 @@ public class NotificationsServiceImpl implements NotificationsService {
 
     public NotificationsReport poll() throws SessionNotFoundException, SessionTimeoutException {
         try {
+//            ApiMessageContext apiMessageContext = newApiMessageContext();
             return notificationsTransfer.poll();
         } catch (UnregisteredException e) {
             errorHandler.log(e);

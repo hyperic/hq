@@ -1,16 +1,19 @@
 package org.hyperic.hq.notifications.model;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.Resource;
 
 public class CreatedResourceNotification extends InventoryNotification {
-    protected AppdefEntityID parentID;
-    
-    public CreatedResourceNotification(AppdefEntityID parentID, Resource r) {
-        super(r);
+    protected Integer parentID;
+    protected Resource r;
+
+    public CreatedResourceNotification(Integer parentID, Resource r) {
         this.parentID = parentID;
+        this.r=r;
     }
-    public AppdefEntityID getParentID() {
+    public Resource getResource() {
+        return r;
+    }
+    public Integer getParentID() {
         return parentID;
     }
 }
