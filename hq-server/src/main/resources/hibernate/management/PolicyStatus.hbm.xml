@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!--
-
     NOTE: This copyright does *not* cover user programs that use HQ
     program services by normal system calls through the application
     program interfaces provided as part of the Hyperic Plug-in Development
@@ -8,7 +7,7 @@
     normal use of the program, and does *not* fall under the heading of
      "derived work".
 
-     Copyright (C) [2009-2010], VMware, Inc.
+     Copyright (C) [2009-2013], VMware, Inc.
      This file is part of HQ.
 
      HQ is free software; you can redistribute it and/or modify
@@ -23,49 +22,49 @@
      along with this program; if not, write to the Free Software
      Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
      USA.
-
-
 -->
 
 <hibernate-mapping package="org.hyperic.hq.management.shared">
 
-  <class name="GroupCriteria" table="EAM_GROUP_CRITERIA" lazy="true">
+  <class name="PolicyStatus" table="EAM_POLICY_RESOURCE_STATUS" lazy="true">
     <cache usage="read-write"/>
     <id name="id" type="integer">
       <meta attribute="scope-set"><![CDATA[private]]></meta>
       <column name="ID" not-null="true"/>
       <generator class="org.hyperic.hibernate.id.ComboGenerator">
-        <param name="sequence">EAM_GROUP_CRITERIA_ID_SEQ</param>
+        <param name="sequence">EAM_POLICY_RESOURCE_STATUS_ID_SEQ</param>
       </generator>
     </id>
 
-    <version name="_version_" type="long">
-      <column name="VERSION_COL" default="0" not-null="true"/>
-    </version>
+    <many-to-one name="policy" class="ManagementPolicy">
+      <column name="POLICY_ID"
+              not-null="true"
+              index="policy_status_idx"
+              unique-key="eam_policy_grp_key"/>
+    </many-to-one>
 
-    <property name="ctime" type="long">
+    <many-to-one name="policyGroupMember" class="org.hyperic.hq.authz.server.session.Resource">
+      <column name="RESOURCE_ID"
+              not-null="true"
+              index="policy_group_member_idx"
+              unique-key="eam_policy_grp_key"/>
+    </many-to-one>
+
+    <property name="modified" type="long">
+      <column name="MTIME" not-null="true"/>
+    </property>
+
+    <property name="created" type="long">
       <column name="CTIME" not-null="true"/>
     </property>
 
-    <property name="name" type="string">
-      <column name="NAME" length="128" not-null="true"/>
+    <property name="configStatusBuf" type="string">
+      <column name="CONFIG_STATUS_BUF" not-null="true"/>
     </property>
 
-    <property name="creator" type="string">
-      <column name="CREATED_BY" length="128" not-null="true"/>
+    <property name="configStatus" type="integer">
+      <column name="CONFIG_STATUS" not-null="true"/>
     </property>
-
-    <property name="description" type="string">
-      <column name="DESCRIPTION" not-null="true" length="128"/>
-    </property>
-
-    <property name="resourceNameRegex" type="string">
-      <column name="RESOURCE_NAME_REGEX" not-null="false" length="128"/>
-    </property>
-
-    <many-to-one name="resourcePrototype" class="org.hyperic.hq.authz.server.session.Resource">
-      <column name="RESOURCE_PROTOTYPE" not-null="false"/>
-    </many-to-one>
 
   </class>
 

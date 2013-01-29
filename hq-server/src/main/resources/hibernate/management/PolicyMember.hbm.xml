@@ -53,6 +53,7 @@
     <property name="created" type="long">
       <column name="CTIME" not-null="true"/>
     </property>
+
   </class>
 
 </hibernate-mapping>

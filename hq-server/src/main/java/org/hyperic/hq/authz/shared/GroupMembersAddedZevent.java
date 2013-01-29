@@ -28,6 +28,7 @@ package org.hyperic.hq.authz.shared;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
@@ -39,7 +40,7 @@ public class GroupMembersAddedZevent extends Zevent {
 
     private final Integer groupId;
     // don't use the Resource object.  Could lead to lazy initialization issues if the Resource object is a proxy
-    private final Collection<Integer> addedResourceIds;
+    private final List<Integer> addedResourceIds;
 
     @SuppressWarnings("serial")
     public GroupMembersAddedZevent(ResourceGroup group, Collection<Resource> added) {
@@ -55,7 +56,7 @@ public class GroupMembersAddedZevent extends Zevent {
         return groupId;
     }
 
-    public Collection<Integer> getAddedResourceIds() {
+    public List<Integer> getAddedResourceIds() {
         return addedResourceIds;
     }
 

@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  *  "derived work".
  *
- *  Copyright (C) [2004-2012], VMware, Inc.
+ *  Copyright (C) [2004-2013], VMware, Inc.
  *  This file is part of Hyperic.
  *
  *  Hyperic is free software; you can redistribute it and/or modify
@@ -27,14 +27,16 @@ package org.hyperic.hq.management.shared;
 
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
 
 @SuppressWarnings("serial")
-public class PolicyMember extends PersistedObject {
+public class PolicyStatus extends PersistedObject {
     
     private long created;
-    private Resource resource;
-    private ResourceGroup resourceGroup;
+    private long modified;
+    private ManagementPolicy policy;
+    private Resource policyGroupMember;
+    private int configStatus;
+    private String configStatusBuf;
 
     public long getCreated() {
         return created;
@@ -42,30 +44,49 @@ public class PolicyMember extends PersistedObject {
     public void setCreated(long created) {
         this.created = created;
     }
-    public Resource getResource() {
-        return resource;
+    public long getModified() {
+        return modified;
     }
-    public void setResource(Resource resource) {
-        this.resource = resource;
+    public void setModified(long modified) {
+        this.modified = modified;
     }
-    public ResourceGroup getResourceGroup() {
-        return resourceGroup;
+    public int getConfigStatus() {
+        return configStatus;
     }
-    public void setResourceGroup(ResourceGroup resourceGroup) {
-        this.resourceGroup = resourceGroup;
+    public void setConfigStatus(int configStatus) {
+        this.configStatus = configStatus;
+    }
+    public String getConfigStatusBuf() {
+        return configStatusBuf;
+    }
+    public void setConfigStatusBuf(String configStatusBuf) {
+        this.configStatusBuf = configStatusBuf;
+    }
+    public Resource getPolicyGroupMember() {
+        return policyGroupMember;
+    }
+    public void setPolicyGroupMember(Resource policyGroupMember) {
+        this.policyGroupMember = policyGroupMember;
+    }
+    public ManagementPolicy getPolicy() {
+        return policy;
+    }
+    public void setPolicy(ManagementPolicy policy) {
+        this.policy = policy;
     }
 
     public int hashCode() {
-        return resource.getId().hashCode() + resourceGroup.getId().hashCode();
+        return getPolicy().getId().hashCode() + getPolicyGroupMember().getId().hashCode();
     }
-    
+
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
-        if (o instanceof PolicyMember) {
-            PolicyMember p = (PolicyMember) o;
-            if (resource.getId().equals(p.resource.getId()) && resourceGroup.getId().equals(p.resourceGroup.getId())) {
+        if (o instanceof PolicyStatus) {
+            PolicyStatus p = (PolicyStatus) o;
+            if (getPolicy().getId().equals(p.getPolicy().getId()) &&
+                    getPolicyGroupMember().getId().equals(p.getPolicyGroupMember().getId())) {
                 return true;
             }
         }

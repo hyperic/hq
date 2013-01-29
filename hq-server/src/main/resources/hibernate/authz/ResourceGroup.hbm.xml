@@ -87,7 +87,7 @@
       <column name="RESOURCE_ID" not-null="true" index="RES_GRP_RES_ID_IDX"/>
     </many-to-one>
 
-    <many-to-one name="groupCriteria" class="GroupCriteria">
+    <many-to-one name="groupCriteria" class="org.hyperic.hq.management.shared.GroupCriteria">
       <column name="GROUP_CRITERIA_ID" not-null="false" index="GRP_CRITERIA_ID_IDX"/>
     </many-to-one>
 
