@@ -30,8 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import javax.annotation.PostConstruct;
 import javax.jms.Destination;
@@ -53,6 +51,7 @@ import org.hyperic.hq.api.services.impl.ApiMessageContext;
 import org.hyperic.hq.api.transfer.NotificationsTransfer;
 import org.hyperic.hq.api.transfer.ResourceTransfer;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
+import org.hyperic.hq.api.transfer.mapping.ResourceDetailsTypeStrategy;
 import org.hyperic.hq.api.transfer.mapping.ResourceMapper;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.shared.AIQueueManager;
@@ -422,7 +421,7 @@ public class ResourceTransferImpl implements ResourceTransfer{
 		//TODO: pojo fields modifications 
 	}//EOM 
 	
-	private final Object initResourceConfig(final Context flowContext)  
+	public final Object initResourceConfig(final Context flowContext)  
 		throws ConfigFetchException, EncodingException, PluginNotFoundException, PluginException, PermissionException, AppdefEntityNotFoundException {
 		
 		final int iNoOfConfigTypes = ProductPlugin.CONFIGURABLE_TYPES.length ;
@@ -455,81 +454,7 @@ public class ResourceTransferImpl implements ResourceTransfer{
 	}//EOM 
 		
 	
-	private enum ResourceDetailsTypeStrategy { 
-		BASIC{ 
-			@Override
-			final Resource populateResource(final Context flowContext) throws Throwable{ 
-				return flowContext.currResource = flowContext.visitor.resourceMapper.toResource(flowContext.backendResource) ;
-				
-			}//EOM 
-		},//EO BASIC 
-		PROPERTIES{ 
-			/**
-			 * @throws PluginException 
-			 * @throws EncodingException 
-			 * @throws PermissionException 
-			 * @throws PluginNotFoundException 
-			 * @throws ConfigFetchException 
-			 * @throws AppdefEntityNotFoundException 
-			 */
-			@Override
-			final Resource populateResource(final Context flowContext) throws Throwable { 
-				Resource resource = flowContext.currResource ; 
-				if(resource == null) { 
-					resource = flowContext.currResource = new Resource(flowContext.internalID) ; 
-				}//EO if resource was not initialized yet 
-				//init the response config metadata 
-				
-				flowContext.entityID = AppdefUtil.newAppdefEntityId(flowContext.backendResource) ;
-				flowContext.visitor.initResourceConfig(flowContext) ;
-				return flowContext.visitor.resourceMapper.mergeConfig(flowContext.resourceType, flowContext.backendResource ,resource, flowContext.configResponses, flowContext.cprops) ; 
-			}//EOM 
-		},//EO PROPERTIES
-		ALL{ 
-			@Override
-			final Resource populateResource(final Context flowContext) throws Throwable{ 
-				BASIC.populateResource(flowContext) ;
-				return PROPERTIES.populateResource(flowContext) ;
-			}//EOM
-			
-			@Override 
-			protected final SortedSet<ResourceDetailsTypeStrategy> addToSuperset(SortedSet<ResourceDetailsTypeStrategy> setUniqueResourceDetails) { 
-				setUniqueResourceDetails.clear() ;
-				return super.addToSuperset(setUniqueResourceDetails) ;  
-			}//EOM
-		};//EO ALL 
-		
-		protected SortedSet<ResourceDetailsTypeStrategy> addToSuperset(SortedSet<ResourceDetailsTypeStrategy> setUniqueResourceDetails) { 
-			setUniqueResourceDetails.add(this) ; 
-			return setUniqueResourceDetails ; 
-		}//EOM 
-				
-		abstract Resource populateResource(final Context flowContext) throws Throwable;  
-		
-		static final Set<ResourceDetailsTypeStrategy> valueOf(final ResourceDetailsType[] arrResourceDetailsTypes) { 
-			final SortedSet<ResourceDetailsTypeStrategy> setUniqueResourceDetails = new TreeSet<ResourceDetailsTypeStrategy>() ; 
-
-			if(arrResourceDetailsTypes == null || arrResourceDetailsTypes.length == 0) { 
-				setUniqueResourceDetails.add(ALL) ; 
-				return setUniqueResourceDetails ; 
-			}//EO if all 
-
-			ResourceDetailsTypeStrategy enumResourceDetailsTypeStrategy = null ; 
-			
-			for(ResourceDetailsType enumResourceDetailsType : arrResourceDetailsTypes) { 
-				try{ 
-					enumResourceDetailsTypeStrategy = ResourceDetailsTypeStrategy.valueOf(enumResourceDetailsType.name()) ; 
-					enumResourceDetailsTypeStrategy.addToSuperset(setUniqueResourceDetails) ;  
-				}catch(Throwable t) { 
-					t.printStackTrace() ; 
-				}
-			}//EO while there are more arrResourceDetailsTypes
-			
-			return setUniqueResourceDetails ; 
-		}//EOM 
-	}//EOE ResourceDetailsTypeStrategy
-	
-	private enum ResourceTypeStrategy { 
+	public enum ResourceTypeStrategy { 
 		
 		PLATFORM(AppdefEntityConstants.APPDEF_TYPE_PLATFORM) { 
 			
@@ -617,19 +542,19 @@ public class ResourceTransferImpl implements ResourceTransfer{
 	}//EOM 
 	
 	
-	final static class Context  { 
-		org.hyperic.hq.authz.server.session.Resource backendResource ; 
-		AppdefEntityID entityID ; 
-		AuthzSubject subject ;
-		ConfigSchemaAndBaseResponse[] configResponses ; 
-		Properties cprops ; 
+	public final static class Context  { 
+	    public org.hyperic.hq.authz.server.session.Resource backendResource ; 
+		public AppdefEntityID entityID ; 
+		public AuthzSubject subject ;
+		public ConfigSchemaAndBaseResponse[] configResponses ; 
+		public Properties cprops ; 
 		
-		ResourceTransferImpl visitor ; 
-		String internalID ;  
-		String naturalID ; 
-		ResourceType resourceType ;  
-		Set<ResourceDetailsTypeStrategy> resourceDetails ;  
-		Resource currResource ;
+		public ResourceTransferImpl visitor ; 
+		public String internalID ;  
+		public String naturalID ; 
+		public ResourceType resourceType ;  
+		public Set<ResourceDetailsTypeStrategy> resourceDetails ;  
+		public Resource currResource ;
 		//Resource resourceRoot ; 
 		
 		Context(final AuthzSubject subject, final String naturalID, final ResourceType resourceType, final ResourceDetailsType[] responseMetadata, final ResourceTransferImpl visitor)  { 
@@ -671,6 +596,10 @@ public class ResourceTransferImpl implements ResourceTransfer{
 			this.naturalID = null ; 
 			this.currResource = null  ;
 		}//EOM 
+
+        public ResourceTransferImpl getVisitor() {
+            return this.visitor;
+        }
 		
 	}//EO inner class Context 
 
@@ -722,5 +651,8 @@ public class ResourceTransferImpl implements ResourceTransfer{
         this.q.unregister(dest);
         this.evaluator.unregisterAll(dest);
         this.isRegistered=false;
+    }
+    public ResourceMapper getResourceMapper() {
+        return this.resourceMapper;
     }
 }//EOC 
