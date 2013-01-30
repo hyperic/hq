@@ -61,6 +61,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.server.session.ProductBossImpl.ConfigSchemaAndBaseResponse;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.notifications.model.CreatedResourceNotification;
@@ -352,7 +353,7 @@ public class ResourceMapper {
         removedResourceID.setId(id);
         return removedResourceID;
     }
-    public org.hyperic.hq.api.model.Resource toResource(CreatedResourceNotification n) {
+    public org.hyperic.hq.api.model.Resource toResource(final AuthzSubject subject, CreatedResourceNotification n) {
         org.hyperic.hq.authz.server.session.Resource backendResource = n.getResource();
         if (backendResource==null) {
             return null;
@@ -361,6 +362,11 @@ public class ResourceMapper {
         hSession.update(backendResource);
         hSession.update(backendResource.getResourceType());
         Resource newResource = toResource(backendResource);
+//        newResource.getResourceType()
+//        backendResource.getResourceType()
+//        Context flowContext = new Context(subject, , , ResourceDetailsType.ALL, this.resourceTransfer);
+//        flowContext.setBackendResource(backendResource);
+//        newResource = ResourceDetailsTypeStrategy.ALL.populateResource(flowContext);
         Integer parentID = n.getParentID();
         // platforms wont have a parent
         if (parentID==null) {
