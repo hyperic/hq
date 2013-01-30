@@ -99,7 +99,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Transactional;
 
-//@Component
 public class ResourceTransferImpl implements ResourceTransfer{
 
     private AIQueueManager aiQueueManager;
@@ -460,7 +459,7 @@ public class ResourceTransferImpl implements ResourceTransfer{
 			
 			@Override
 			final org.hyperic.hq.authz.server.session.Resource getResourceByNaturalID(final Context flowContext) throws PlatformNotFoundException, PermissionException {
-				final Platform platform = flowContext.visitor.platformManager.findPlatformByFqdn(flowContext.subject, flowContext.naturalID);  
+				final Platform platform = flowContext.visitor.getPlatformManager().findPlatformByFqdn(flowContext.subject, flowContext.naturalID);  
 				return platform.getResource() ;  
 			}//EOM 
 			
@@ -487,7 +486,7 @@ public class ResourceTransferImpl implements ResourceTransfer{
 		
 		org.hyperic.hq.authz.server.session.Resource getResourceByInternalID(final Context flowContext) { 
 			final int iInternalResourceID = Integer.parseInt(flowContext.internalID) ; 
-			return flowContext.visitor.resourceManager.findResourceById(iInternalResourceID) ; 
+			return flowContext.visitor.getResourceManager().findResourceById(iInternalResourceID) ; 
 		}//EOM
 		
 		org.hyperic.hq.authz.server.session.Resource getResource(final Context flowContext) throws Exception{ 
@@ -549,7 +548,7 @@ public class ResourceTransferImpl implements ResourceTransfer{
 		public ConfigSchemaAndBaseResponse[] configResponses ; 
 		public Properties cprops ; 
 		
-		public ResourceTransferImpl visitor ; 
+		public ResourceTransfer visitor ; 
 		public String internalID ;  
 		public String naturalID ; 
 		public ResourceType resourceType ;  
@@ -557,19 +556,19 @@ public class ResourceTransferImpl implements ResourceTransfer{
 		public Resource currResource ;
 		//Resource resourceRoot ; 
 		
-		Context(final AuthzSubject subject, final String naturalID, final ResourceType resourceType, final ResourceDetailsType[] responseMetadata, final ResourceTransferImpl visitor)  { 
+		public Context(final AuthzSubject subject, final String naturalID, final ResourceType resourceType, final ResourceDetailsType[] responseMetadata, final ResourceTransfer visitor)  { 
 			this(subject, null/*internalID*/,responseMetadata, visitor) ;  
 			this.naturalID = naturalID ; 
 			this.resourceType = resourceType ; 
 		}//EOM
 		
-		Context(final AuthzSubject subject, final String internalID, final ResourceDetailsType[] responseMetadata, final ResourceTransferImpl visitor)  {
+		Context(final AuthzSubject subject, final String internalID, final ResourceDetailsType[] responseMetadata, final ResourceTransfer visitor)  {
 			this(subject, visitor) ;
 			this.internalID  = internalID;  
 			this.resourceDetails = ResourceDetailsTypeStrategy.valueOf(responseMetadata) ; 
 		}//EOM 
 		
-		Context(final AuthzSubject subject, final ResourceTransferImpl visitor) {
+		Context(final AuthzSubject subject, final ResourceTransfer visitor) {
 			this.subject = subject ; 
 			this.visitor = visitor ; 
 			this.configResponses = new ConfigSchemaAndBaseResponse[ProductPlugin.CONFIGURABLE_TYPES.length] ; 
@@ -597,7 +596,7 @@ public class ResourceTransferImpl implements ResourceTransfer{
 			this.currResource = null  ;
 		}//EOM 
 
-        public ResourceTransferImpl getVisitor() {
+        public ResourceTransfer getVisitor() {
             return this.visitor;
         }
 		
@@ -654,5 +653,11 @@ public class ResourceTransferImpl implements ResourceTransfer{
     }
     public ResourceMapper getResourceMapper() {
         return this.resourceMapper;
+    }
+    public PlatformManager getPlatformManager() {
+        return this.platformManager;
+    }
+    public ResourceManager getResourceManager() {
+        return this.resourceManager;
     }
 }//EOC 
