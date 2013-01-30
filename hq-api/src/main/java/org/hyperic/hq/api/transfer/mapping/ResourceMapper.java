@@ -353,7 +353,7 @@ public class ResourceMapper {
         removedResourceID.setId(id);
         return removedResourceID;
     }
-    public org.hyperic.hq.api.model.Resource toResource(final AuthzSubject subject, CreatedResourceNotification n) {
+    public org.hyperic.hq.api.model.Resource toResource(/*final AuthzSubject subject,*/ CreatedResourceNotification n) {
         org.hyperic.hq.authz.server.session.Resource backendResource = n.getResource();
         if (backendResource==null) {
             return null;
