@@ -40,6 +40,8 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import javax.annotation.PostConstruct;
+
 import org.hibernate.SessionFactory;
 import org.hibernate.classic.Session;
 import org.hyperic.hq.api.model.AIResource;
@@ -52,6 +54,9 @@ import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourcePrototype;
 import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.api.model.resources.ComplexIp;
+import org.hyperic.hq.api.transfer.NotificationsTransfer;
+import org.hyperic.hq.api.transfer.ResourceTransfer;
+import org.hyperic.hq.api.transfer.impl.ResourceTransferImpl;
 import org.hyperic.hq.api.transfer.impl.ResourceTransferImpl.Context;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
@@ -64,6 +69,7 @@ import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.server.session.ProductBossImpl.ConfigSchemaAndBaseResponse;
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.notifications.model.CreatedResourceNotification;
 import org.hyperic.hq.notifications.model.InventoryNotification;
 import org.hyperic.hq.notifications.model.RemovedResourceNotification;
@@ -85,10 +91,15 @@ public class ResourceMapper {
     private PlatformManager platformManager;
     @Autowired  
     SessionFactory f;
+    ResourceTransferImpl resourceTransferImpl;
     @Autowired  
     public ResourceMapper(final PlatformManager platformManager) { 
         this.platformManager = platformManager;   
     }//EOM     
+    @PostConstruct
+    public void init() {
+        this.resourceTransferImpl = (ResourceTransferImpl) Bootstrap.getBean("resourceTransferImpl");
+    }
 
 	public AIResource mapAIPLarformValueToAIResource(AIPlatformValue aiPlatform,
 			AIResource aiResource) {
@@ -370,10 +381,10 @@ public class ResourceMapper {
         Integer parentID = n.getParentID();
         // platforms wont have a parent
         if (parentID==null) {
-            return newResource;
+            return newFrontendResource;
         }
         Resource parentResource = new Resource(String.valueOf(parentID));
-        parentResource.addSubResource(newResource);
+        parentResource.addSubResource(newFrontendResource);
         return parentResource;
     }
 	
