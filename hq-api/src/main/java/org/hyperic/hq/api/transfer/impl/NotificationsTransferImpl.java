@@ -5,10 +5,12 @@ import java.util.List;
 import javax.jms.Destination;
 
 import org.hyperic.hq.api.model.NotificationsReport;
+import org.hyperic.hq.api.services.impl.ApiMessageContext;
 import org.hyperic.hq.api.transfer.MeasurementTransfer;
 import org.hyperic.hq.api.transfer.NotificationsTransfer;
 import org.hyperic.hq.api.transfer.ResourceTransfer;
 import org.hyperic.hq.api.transfer.mapping.NotificationsMapper;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.notifications.Q;
 import org.hyperic.hq.notifications.UnregisteredException;
 import org.hyperic.hq.notifications.model.BaseNotification;
@@ -31,13 +33,14 @@ public class NotificationsTransferImpl implements NotificationsTransfer {
     protected Destination dummyDestination = new Destination() {};
 
     @Transactional (readOnly=true)
-    public NotificationsReport poll() throws UnregisteredException {
+    public NotificationsReport poll(ApiMessageContext apiMessageContext) throws UnregisteredException {
         Destination dest = this.dummyDestination;
         if (dest==null) {
             throw new UnregisteredException();
         }
         List<? extends BaseNotification> ns = this.q.poll(dest);
-        return this.mapper.toNotificationsReport(ns);
+        AuthzSubject subject = apiMessageContext.getAuthzSubject();
+        return this.mapper.toNotificationsReport(subject,ns);
     }
     
     @Transactional (readOnly=false)

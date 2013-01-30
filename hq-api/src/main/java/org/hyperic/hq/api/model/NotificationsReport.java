@@ -11,11 +11,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.hyperic.hq.api.model.measurements.RawMetric;
+import org.hyperic.hq.api.model.resources.BatchResponseBase;
+import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "notificationsReport", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 @XmlType(name="NotificationsReport Type", namespace=RestApiConstants.SCHEMA_NAMESPACE)
-public class NotificationsReport {
+public class NotificationsReport extends BatchResponseBase {
     @XmlElementWrapper(name="newResources", namespace=RestApiConstants.SCHEMA_NAMESPACE)
     @XmlElement(name="resource", namespace=RestApiConstants.SCHEMA_NAMESPACE)
     protected List<Resource> newResources = new ArrayList<Resource>();
@@ -26,8 +28,12 @@ public class NotificationsReport {
     @XmlElement(name="metric", namespace=RestApiConstants.SCHEMA_NAMESPACE)
     protected List<RawMetric> metrics = new ArrayList<RawMetric>();
 
-    public NotificationsReport() {}
-
+    public NotificationsReport(final ExceptionToErrorCodeMapper exceptionToErrorCodeMapper) { 
+        super(exceptionToErrorCodeMapper) ; 
+    }
+    public NotificationsReport() {
+        super();
+    }
     public void addNewResource(Resource r) {
         this.newResources.add(r);
     }

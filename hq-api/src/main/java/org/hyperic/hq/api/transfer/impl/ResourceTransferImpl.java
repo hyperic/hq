@@ -97,9 +97,10 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-//@Component
+@Component("resourceTransferImpl")
 public class ResourceTransferImpl implements ResourceTransfer{
 
     private AIQueueManager aiQueueManager;
@@ -557,7 +558,7 @@ public class ResourceTransferImpl implements ResourceTransfer{
 		public Resource currResource ;
 		//Resource resourceRoot ; 
 		
-		Context(final AuthzSubject subject, final String naturalID, final ResourceType resourceType, final ResourceDetailsType[] responseMetadata, final ResourceTransferImpl visitor)  { 
+		public Context(final AuthzSubject subject, final String naturalID, final ResourceType resourceType, final ResourceDetailsType[] responseMetadata, final ResourceTransferImpl visitor)  { 
 			this(subject, null/*internalID*/,responseMetadata, visitor) ;  
 			this.naturalID = naturalID ; 
 			this.resourceType = resourceType ; 
