@@ -70,7 +70,7 @@ public interface ResourceService {
 	
     @POST
     @Path("/")
-    RegisteredResourceBatchResponse getResources(@QueryParam("responseStructure")  final ResourceDetailsType[] responseMetadata,
+    RegisteredResourceBatchResponse getResources(@QueryParam("responseStructure")  final ResourceDetailsType responseMetadata,
 	        @QueryParam("hierarchyDepth") final int hierarchyDepth, @QueryParam("register") final boolean register, final ResourceFilterRequest resourceFilterRequest) throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException  ;  
 	
 	@POST

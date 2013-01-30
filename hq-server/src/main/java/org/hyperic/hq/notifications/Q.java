@@ -15,38 +15,47 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.measurement.server.session.ReportProcessorImpl;
 import org.hyperic.hq.notifications.model.BaseNotification;
+import org.hyperic.hq.notifications.model.InternalResourceDetailsType;
 import org.springframework.stereotype.Component;
 
 @Component
 public class Q {
-    private final Log log = LogFactory.getLog(ReportProcessorImpl.class);
+    private final Log log = LogFactory.getLog(Q.class);
     protected final static int QUEUE_LIMIT = 10000;
 
     // TODO~ change to write through versioning (each node would have versioning - write on one version, read another, then sync between them), o/w will pose problems in scale
-    protected Map<Destination, LinkedBlockingQueue<BaseNotification>> destinations = new ConcurrentHashMap<Destination, LinkedBlockingQueue<BaseNotification>>();
+    protected Map<Destination, AccumulatedRegistrationData> destinations = new ConcurrentHashMap<Destination, AccumulatedRegistrationData>();
 
     public void register(Destination dest) {
+        this.register(dest,null);
+    }
+    public void register(Destination dest, InternalResourceDetailsType resourceDetailsType) {
         if (this.destinations.containsKey(dest)) {
             return;
         }
-        LinkedBlockingQueue<BaseNotification> q = this.destinations.put(dest, new LinkedBlockingQueue<BaseNotification>(QUEUE_LIMIT));
-        if (log.isDebugEnabled()) { log.debug(q==null?("a new queue was registered for destination " + dest):("a new queue was registered for destination " + dest + " instead of a previously existing queue")); }
+        AccumulatedRegistrationData ard = this.destinations.put(dest, new AccumulatedRegistrationData(QUEUE_LIMIT,resourceDetailsType));
+        if (log.isDebugEnabled()) { log.debug(ard==null?("a new queue was registered for destination " + dest):("a new queue was registered for destination " + dest + " instead of a previously existing queue")); }
     }
     
     public void unregister(Destination dest) {
-        LinkedBlockingQueue<BaseNotification> q = this.destinations.remove(dest);
-        if (log.isDebugEnabled()) { log.debug(q==null?"there is no queue assigned for destination ":"removing the queue assigned for destination " + dest); }
+        AccumulatedRegistrationData ard = this.destinations.remove(dest);
+        if (log.isDebugEnabled()) { log.debug(ard==null?"there is no queue assigned for destination ":"removing the queue assigned for destination " + dest); }
     }
 
-    public List<? extends BaseNotification> poll(Destination dest) {
-        LinkedBlockingQueue<BaseNotification> topic = this.destinations.get(dest);
-        List<BaseNotification> data = new ArrayList<BaseNotification>();
-        if (topic==null) {
+    public InternalNotificationReport poll(Destination dest) {
+        AccumulatedRegistrationData ard = this.destinations.get(dest);
+        InternalNotificationReport nr = new InternalNotificationReport();
+        if (ard==null) {
             if (log.isDebugEnabled()) { log.debug("unable to poll - there is no queue assigned for destination " + dest);}
-            return data;
+            return nr;
         }
-        topic.drainTo(data);
-        return data;
+        
+        List<BaseNotification> ns = new ArrayList<BaseNotification>();
+        LinkedBlockingQueue<BaseNotification> anq = ard.getAccumulatedNotificationsQueue();
+        anq.drainTo(ns);
+        nr.setNotifications(ns);
+        nr.setResourceDetailsType(ard.getResourceContentType());
+        return nr;
     }
     
     @SuppressWarnings("unchecked")
@@ -54,12 +63,13 @@ public class Q {
         for(ObjectMessage msg:msgs) {
             Destination dest = msg.getJMSDestination();
             List<BaseNotification> data = (List<BaseNotification>) msg.getObject();
-            LinkedBlockingQueue<BaseNotification> q = destinations.get(dest);
-            if (q==null) {
+            AccumulatedRegistrationData ard = destinations.get(dest);
+            if (ard==null) {
                 return;
             }
+            LinkedBlockingQueue<BaseNotification> anq = ard.getAccumulatedNotificationsQueue();
             try {
-                q.addAll(data);
+                anq.addAll(data);
             } catch (IllegalStateException e) {
                 log.error(e);
                 // TODO~ persist messages to disk in case the Q is full

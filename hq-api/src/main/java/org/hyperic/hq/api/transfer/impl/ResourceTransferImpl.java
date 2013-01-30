@@ -602,7 +602,7 @@ public class ResourceTransferImpl implements ResourceTransfer{
 	}//EO inner class Context 
 
 	@Transactional (readOnly=true)
-    public RegisteredResourceBatchResponse getResources(ApiMessageContext messageContext, ResourceDetailsType[] responseMetadata, final int hierarchyDepth, 
+    public RegisteredResourceBatchResponse getResources(ApiMessageContext messageContext, ResourceDetailsType responseMetadata, final int hierarchyDepth, 
             final boolean register,final ResourceFilterRequest resourceFilterRequest) throws PermissionException, NotFoundException {
         if (resourceFilterRequest==null) {
             if (log.isDebugEnabled()) {
@@ -617,7 +617,7 @@ public class ResourceTransferImpl implements ResourceTransfer{
         for(PlatformValue pv:platforms) {
             try {
                 String fqdn = pv.getFqdn();
-                Resource r = this.getResourceInner(new Context(authzSubject, fqdn, ResourceType.PLATFORM, responseMetadata, this), hierarchyDepth) ;  
+                Resource r = this.getResourceInner(new Context(authzSubject, fqdn, ResourceType.PLATFORM, new ResourceDetailsType[] {responseMetadata}, this), hierarchyDepth) ;  
                 resources.add(r);
             } catch (Throwable t) {
 //TODO~                res.addFailedResource(resourceID, errorCode, additionalDescription, args)
@@ -637,7 +637,7 @@ public class ResourceTransferImpl implements ResourceTransfer{
 
             //TODO~ get the destination from the user
             Destination dest = this.notificationsTransfer.getDummyDestination();
-            this.q.register(dest);
+            this.q.register(dest,ResourceDetailsType.valueOf(responseMetadata));
             this.evaluator.register(dest,userFilters);
             //TODO~ return a valid registration id
             res.setRegId(new RegistrationID(1));
