@@ -40,7 +40,7 @@ public class NotificationsTransferImpl implements NotificationsTransfer {
         }
         List<? extends BaseNotification> ns = this.q.poll(dest);
         AuthzSubject subject = apiMessageContext.getAuthzSubject();
-        return this.mapper.toNotificationsReport(subject,ns);
+        return this.mapper.toNotificationsReport(subject, this.rscTransfer,ns);
     }
     
     @Transactional (readOnly=false)

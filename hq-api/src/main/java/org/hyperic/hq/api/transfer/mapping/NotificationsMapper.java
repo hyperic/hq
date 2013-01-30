@@ -3,6 +3,8 @@ package org.hyperic.hq.api.transfer.mapping;
 import java.util.List;
 
 import org.hyperic.hq.api.model.NotificationsReport;
+import org.hyperic.hq.api.transfer.ResourceTransfer;
+import org.hyperic.hq.api.transfer.impl.ResourceTransferImpl;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.notifications.model.BaseNotification;
 import org.hyperic.hq.notifications.model.CreatedResourceNotification;
@@ -20,7 +22,7 @@ public class NotificationsMapper {
     @Autowired
     protected ExceptionToErrorCodeMapper errorHandler ;
 
-    public NotificationsReport toNotificationsReport(final AuthzSubject subject, List<? extends BaseNotification> ns) {
+    public NotificationsReport toNotificationsReport(final AuthzSubject subject, ResourceTransfer resourceTransfer, List<? extends BaseNotification> ns) {
         NotificationsReport res = new NotificationsReport(this.errorHandler);
         if (ns.isEmpty()) {
             return new NotificationsReport();
@@ -31,7 +33,7 @@ public class NotificationsMapper {
                 if (bn instanceof MetricNotification) {
                     res.addMetric(this.mtmtMapper.toMetricWithId((MetricNotification)bn));
                 } else if (bn instanceof CreatedResourceNotification) {
-                    res.addNewResource(this.rscMapper.toResource(subject, (CreatedResourceNotification )bn));
+                    res.addNewResource(this.rscMapper.toResource(subject, resourceTransfer,(CreatedResourceNotification )bn));
                 } else if (bn instanceof RemovedResourceNotification) {
                     res.addRemovedResourceID(this.rscMapper.toResource((RemovedResourceNotification) bn));
                 }

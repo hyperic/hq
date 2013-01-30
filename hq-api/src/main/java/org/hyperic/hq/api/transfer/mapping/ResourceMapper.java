@@ -91,15 +91,10 @@ public class ResourceMapper {
     private PlatformManager platformManager;
     @Autowired  
     SessionFactory f;
-    ResourceTransferImpl resourceTransferImpl;
     @Autowired  
     public ResourceMapper(final PlatformManager platformManager) { 
         this.platformManager = platformManager;   
     }//EOM     
-    @PostConstruct
-    public void init() {
-        this.resourceTransferImpl = (ResourceTransferImpl) Bootstrap.getBean("resourceTransferImpl");
-    }
 
 	public AIResource mapAIPLarformValueToAIResource(AIPlatformValue aiPlatform,
 			AIResource aiResource) {
