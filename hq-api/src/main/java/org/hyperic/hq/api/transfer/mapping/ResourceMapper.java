@@ -359,7 +359,8 @@ public class ResourceMapper {
         removedResourceID.setId(id);
         return removedResourceID;
     }
-    public org.hyperic.hq.api.model.Resource toResource(final AuthzSubject subject, ResourceTransfer resourceTransfer, CreatedResourceNotification n) throws Throwable {
+    public org.hyperic.hq.api.model.Resource toResource(final AuthzSubject subject, ResourceTransfer resourceTransfer, 
+            ResourceDetailsType resourceDetailsType, CreatedResourceNotification n) throws Throwable {
         org.hyperic.hq.authz.server.session.Resource backendResource = n.getResource();
         if (backendResource==null) {
             return null;
@@ -367,9 +368,14 @@ public class ResourceMapper {
         Session hSession = f.getCurrentSession();
         hSession.update(backendResource);
         Resource newFrontendResource = toResource(backendResource);
-        Context flowContext = new Context(subject, newFrontendResource.getNaturalID(), newFrontendResource.getResourceType(), new ResourceDetailsType[] {ResourceDetailsType.ALL}, resourceTransfer);
+        ResourceDetailsType[] resourceDetailsTypeArr = new ResourceDetailsType[] {resourceDetailsType};
+        Context flowContext = new Context(subject, newFrontendResource.getNaturalID(), newFrontendResource.getResourceType(), resourceDetailsTypeArr, resourceTransfer);
         flowContext.setBackendResource(backendResource);
-        newFrontendResource = ResourceDetailsTypeStrategy.ALL.populateResource(flowContext);
+        Set<ResourceDetailsTypeStrategy> resourceDetailsTypeStrategySet = ResourceDetailsTypeStrategy.valueOf(resourceDetailsTypeArr);
+        if (resourceDetailsTypeStrategySet==null || resourceDetailsTypeStrategySet.isEmpty() || resourceDetailsTypeStrategySet.size()>1) {
+            throw new RuntimeException("unexpected number of ResourceDetailsTypeStrategis");
+        }
+        newFrontendResource = resourceDetailsTypeStrategySet.iterator().next().populateResource(flowContext);
         Integer parentID = n.getParentID();
         // platforms wont have a parent
         if (parentID==null) {
