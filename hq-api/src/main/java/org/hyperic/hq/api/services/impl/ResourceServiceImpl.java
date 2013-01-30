@@ -87,7 +87,7 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
         return resource;
 	}//EOM 
 	
-	public final RegisteredResourceBatchResponse getResources(final ResourceDetailsType[] responseStructure, final int hierarchyDepth, final boolean register,
+	public final RegisteredResourceBatchResponse getResources(final ResourceDetailsType responseStructure, final int hierarchyDepth, final boolean register,
 	        final ResourceFilterRequest resourceFilterRequest) throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException { 
         ApiMessageContext apiMessageContext = newApiMessageContext();
         return this.resourceTransfer.getResources(apiMessageContext, responseStructure, hierarchyDepth,register,resourceFilterRequest) ;
