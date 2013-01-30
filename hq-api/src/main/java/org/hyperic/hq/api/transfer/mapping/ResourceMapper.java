@@ -360,7 +360,7 @@ public class ResourceMapper {
         }
         Session hSession = f.getCurrentSession();
         hSession.update(backendResource);
-        hSession.update(backendResource.getResourceType());
+//        hSession.update(backendResource.getResourceType());
         Resource newResource = toResource(backendResource);
 //        newResource.getResourceType()
 //        backendResource.getResourceType()
