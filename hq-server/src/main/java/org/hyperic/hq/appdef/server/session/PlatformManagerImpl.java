@@ -537,6 +537,8 @@ public class PlatformManagerImpl implements PlatformManager {
 
             platformDAO.getSession().flush();
 
+            NewResourceEvent event = new NewResourceEvent(null,platform.getResource());
+            zeventManager.enqueueEventAfterCommit(event);
             // Send resource create event
             // Send resource create & increment platform count events
             zeventManager.enqueueEventAfterCommit(new ResourceCreatedZevent(subject, platform.getEntityId()));
@@ -591,6 +593,8 @@ public class PlatformManagerImpl implements PlatformManager {
             throw new SystemException(e);
         }
 
+        NewResourceEvent event = new NewResourceEvent(null,platform.getResource());
+        zeventManager.enqueueEventAfterCommit(event);
         // Send resource create & increment platform count events
         zeventManager.enqueueEventAfterCommit(new ResourceCreatedZevent(subject, platform.getEntityId()));
         

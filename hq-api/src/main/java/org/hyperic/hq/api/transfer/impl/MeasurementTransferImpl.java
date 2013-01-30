@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
 import javax.jms.Destination;
 import javax.ws.rs.core.Response;
 
@@ -47,11 +48,8 @@ import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.ID;
 import org.hyperic.hq.api.model.common.RegistrationID;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
-import org.hyperic.hq.api.model.measurements.MeasurementResponse;
 import org.hyperic.hq.api.model.measurements.MetricFilterRequest;
-import org.hyperic.hq.api.model.measurements.MetricNotifications;
 import org.hyperic.hq.api.model.measurements.MetricResponse;
-import org.hyperic.hq.api.model.measurements.RawMetric;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementBatchResponse;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequest;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequests;
@@ -59,6 +57,7 @@ import org.hyperic.hq.api.model.measurements.ResourceMeasurementResponse;
 import org.hyperic.hq.api.services.impl.ApiMessageContext;
 import org.hyperic.hq.api.model.measurements.BulkResourceMeasurementRequest;
 import org.hyperic.hq.api.transfer.MeasurementTransfer;
+import org.hyperic.hq.api.transfer.NotificationsTransfer;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 import org.hyperic.hq.api.transfer.mapping.MeasurementMapper;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -66,6 +65,7 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.TimeframeBoundriesException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
@@ -76,7 +76,7 @@ import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.notifications.Q;
-import org.hyperic.hq.notifications.UnregisteredException;
+import org.hyperic.hq.notifications.filtering.AgnosticFilter;
 import org.hyperic.hq.notifications.filtering.Filter;
 import org.hyperic.hq.notifications.filtering.FilteringCondition;
 import org.hyperic.hq.notifications.filtering.MetricDestinationEvaluator;
@@ -85,19 +85,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 public class MeasurementTransferImpl implements MeasurementTransfer {
-    private final Log log = LogFactory.getLog(ReportProcessorImpl.class);
-    private static final int MAX_DTPS = 400;
+    protected final Log log = LogFactory.getLog(ReportProcessorImpl.class);
+    protected static final int MAX_DTPS = 400;
 
-    private ResourceManager resourceManager ; 
-    private MeasurementManager measurementMgr;
-    private TemplateManager tmpltMgr;
-    private DataManager dataMgr; 
-    private MeasurementMapper mapper;
-    private ExceptionToErrorCodeMapper errorHandler ;
-    private MetricDestinationEvaluator evaluator;
-    private Q q;
+    protected ResourceManager resourceManager ; 
+    protected MeasurementManager measurementMgr;
+    protected TemplateManager tmpltMgr;
+    protected DataManager dataMgr; 
+    protected MeasurementMapper mapper;
+    protected ExceptionToErrorCodeMapper errorHandler ;
+    protected MetricDestinationEvaluator evaluator;
+    protected Q q;
+    protected NotificationsTransfer notificationsTransfer;
     @javax.ws.rs.core.Context
-    private SearchContext context ;
+    protected SearchContext context ;
+    protected boolean isRegistered = false;
 
     @Autowired
     public MeasurementTransferImpl(ResourceManager resourceManager,MeasurementManager measurementMgr, TemplateManager tmpltMgr, DataManager dataMgr, 
@@ -111,6 +113,10 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         this.errorHandler = errorHandler;
         this.evaluator = evaluator;
         this.q = q;
+    }
+    @PostConstruct
+    public void init() {
+        this.notificationsTransfer = (NotificationsTransfer) Bootstrap.getBean("notificationsTransfer");
     }
     protected List<Measurement> getMeasurements(final String rscId, final List<MeasurementTemplate> tmps, final AuthzSubject authzSubject) throws PermissionException {
         // get measurements
@@ -133,81 +139,37 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     }
 
     //    protected Map<Integer,Destination> sessionToDestination = new HashMap<Integer,Destination>();
-    protected Destination dest;
 
     public RegistrationID register(final MetricFilterRequest metricFilterReq) {
         //TODO~ return failed/successful registration
         //TODO~ add schema to the xml's which automatically validates legal values (no null / empty name for instance)
-        if (!MetricFilterRequest.validate(metricFilterReq)) {
+        if (metricFilterReq==null) {
             if (log.isDebugEnabled()) {
                 log.debug("illegal request");
             }
-            return null;
-        }
-        List<Filter<MetricNotification,? extends FilteringCondition<?>>> userFilters = this.mapper.toMetricFilters(metricFilterReq); 
-        // TODO~ init filters with needed managers to enable them to retrieve filter related data
-
-        Destination dest = this.dest;//this.sessionToDestination.get(sessionId); 
-        if (dest==null) {
-            dest = new Destination() {};
-            //            this.sessionToDestination.put(sessionId,dest);
-            this.dest=dest;
-            this.q.register(dest);
-        } else {
-            // not allowing sequential registrations
-            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.SEQUENTIAL_REGISTRATION);
-        }
-        this.evaluator.register(dest,userFilters);
-        return new RegistrationID(1);
-        
-    }
-    public void unregister() {
-        Destination dest = this.dest;//this.sessionToDestination.get(sessionId); 
-        if (dest!=null) {
-            //            this.sessionToDestination.remove(sessionId);
-            this.dest=null;
-            this.q.unregister(dest);
-            this.evaluator.unregisterAll(dest);
-        }
-    }
-    public void unregister(final MetricFilterRequest metricFilterReq) {
-        //TODO~ return failed/successful registration
-        if (!MetricFilterRequest.validate(metricFilterReq)) {
-            if (log.isDebugEnabled()) {
-                log.debug("illegal request");
-            }
-            return;
+            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.BAD_REQ_BODY);
         }
         List<Filter<MetricNotification,? extends FilteringCondition<?>>> userFilters = this.mapper.toMetricFilters(metricFilterReq); 
         if (userFilters.isEmpty()) {
-            if (log.isDebugEnabled()) {
-                log.debug("no filters were passed to be unregistered");
-            }
-            return;
+            userFilters.add(new AgnosticFilter<MetricNotification,FilteringCondition<?>>());
         }
-        Destination dest = this.dest;//this.sessionToDestination.get(sessionId); 
-        if (dest==null) {
-            if (log.isDebugEnabled()) {
-                log.debug("no destination was previously registered with the current user session");
-            }
-            return;
-        }
-        this.evaluator.unregister(dest,userFilters);
-    }
 
-    public MetricNotifications poll() throws UnregisteredException {
-        MetricNotifications res = new MetricNotifications();
-        Destination dest = this.dest;//this.sessionToDestination.get(sessionId);
-        if (dest==null) {
-            throw new UnregisteredException();
+        //TODO~ get the destination from the user
+        // not allowing sequential registrations
+        if (this.isRegistered) {
+            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.SEQUENTIAL_REGISTRATION);
         }
-        List<MetricNotification> mns = (List<MetricNotification>) this.q.poll(dest);
-        if (mns.isEmpty()) {
-            return res;
-        }
-        List<? extends RawMetric> metrics = this.mapper.toMetricsWithId(mns);
-        res.setMetrics(metrics);
-        return res;
+        this.isRegistered=true;
+        Destination dest = this.notificationsTransfer.getDummyDestination();
+        this.q.register(dest);
+        this.evaluator.register(dest,userFilters);
+        return new RegistrationID(1);
+    }
+    public void unregister() {
+        Destination dest = this.notificationsTransfer.getDummyDestination();
+        this.q.unregister(dest);
+        this.evaluator.unregisterAll(dest);
+        this.isRegistered=false;
     }
     public MetricResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest hqMsmtReq, 
             final String rscId, final Date begin, final Date end) 
@@ -421,5 +383,4 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         }
         return res;
     }
-
 }

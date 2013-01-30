@@ -25,6 +25,9 @@
  */
 package org.hyperic.hq.api.services.impl;
 
+import javax.ws.rs.DELETE;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
@@ -34,12 +37,16 @@ import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourceStatusType;
 import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.api.model.Resources;
+import org.hyperic.hq.api.model.resources.RegisteredResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
+import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
 import org.hyperic.hq.api.services.ResourceService;
 import org.hyperic.hq.api.transfer.ResourceTransfer;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -80,11 +87,10 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
         return resource;
 	}//EOM 
 	
-	public final ResourceBatchResponse getResources() throws SessionNotFoundException, SessionTimeoutException { 
-	    ApiMessageContext apiMessageContext = newApiMessageContext();
-		//TODO: NYI 
-		//return this.resourceTransfer.getResources(criteria);
-		throw new UnsupportedOperationException() ; 
+	public final RegisteredResourceBatchResponse getResources(final ResourceDetailsType[] responseStructure, final int hierarchyDepth, final boolean register,
+	        final ResourceFilterRequest resourceFilterRequest) throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException { 
+        ApiMessageContext apiMessageContext = newApiMessageContext();
+        return this.resourceTransfer.getResources(apiMessageContext, responseStructure, hierarchyDepth,register,resourceFilterRequest) ;
 	}//EOM 
 	
 	public final ResourceBatchResponse approveResource(final Resources aiResources) throws SessionNotFoundException, SessionTimeoutException {
@@ -104,4 +110,7 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
 		throw new UnsupportedOperationException() ; 
 	}//EOM 
 	
+	public void unregister() throws SessionNotFoundException, SessionTimeoutException {
+	    this.resourceTransfer.unregister();
+	}
 }//EOC 

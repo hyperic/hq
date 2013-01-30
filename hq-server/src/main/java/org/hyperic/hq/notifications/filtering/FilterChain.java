@@ -4,7 +4,7 @@ import java.util.AbstractCollection;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.hyperic.hq.notifications.model.INotification;
+import org.hyperic.hq.notifications.model.BaseNotification;
 
 /**
  * currently behave as the collection object passed to it in the c'tor
@@ -12,7 +12,7 @@ import org.hyperic.hq.notifications.model.INotification;
  * @author yakarn
  *
  */
-public class FilterChain<N extends INotification> extends AbstractCollection<Filter<N,? extends FilteringCondition<?>>> {
+public class FilterChain<N extends BaseNotification> extends AbstractCollection<Filter<N,? extends FilteringCondition<?>>> {
     protected Collection<Filter<N,? extends FilteringCondition<?>>> filters;
      
     public FilterChain(Collection<Filter<N,? extends FilteringCondition<?>>> filters) {

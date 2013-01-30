@@ -37,24 +37,36 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
+import org.hibernate.SessionFactory;
+import org.hibernate.classic.Session;
 import org.hyperic.hq.api.model.AIResource;
 import org.hyperic.hq.api.model.ConfigurationValue;
+import org.hyperic.hq.api.model.ID;
 import org.hyperic.hq.api.model.PropertyList;
 import org.hyperic.hq.api.model.Resource;
 import org.hyperic.hq.api.model.ResourceConfig;
+import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourcePrototype;
 import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.api.model.resources.ComplexIp;
+import org.hyperic.hq.api.transfer.impl.ResourceTransferImpl.Context;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.server.session.ProductBossImpl.ConfigSchemaAndBaseResponse;
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.notifications.model.CreatedResourceNotification;
+import org.hyperic.hq.notifications.model.InventoryNotification;
+import org.hyperic.hq.notifications.model.RemovedResourceNotification;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +83,8 @@ import org.springframework.stereotype.Component;
 public class ResourceMapper {
     
     private PlatformManager platformManager;
-    
+    @Autowired  
+    SessionFactory f;
     @Autowired  
     public ResourceMapper(final PlatformManager platformManager) { 
         this.platformManager = platformManager;   
@@ -327,6 +340,42 @@ public class ResourceMapper {
         }//EOM 
         
     }//EO inner class Context 
+
+
+
+    
+    public ID toResource(RemovedResourceNotification n) {
+        Integer id = n.getID();
+        if (id==null) {
+            return null;
+        }
+        ID removedResourceID = new ID();
+        removedResourceID.setId(id);
+        return removedResourceID;
+    }
+    public org.hyperic.hq.api.model.Resource toResource(final AuthzSubject subject, CreatedResourceNotification n) {
+        org.hyperic.hq.authz.server.session.Resource backendResource = n.getResource();
+        if (backendResource==null) {
+            return null;
+        }
+        Session hSession = f.getCurrentSession();
+        hSession.update(backendResource);
+        hSession.update(backendResource.getResourceType());
+        Resource newResource = toResource(backendResource);
+//        newResource.getResourceType()
+//        backendResource.getResourceType()
+//        Context flowContext = new Context(subject, , , ResourceDetailsType.ALL, this.resourceTransfer);
+//        flowContext.setBackendResource(backendResource);
+//        newResource = ResourceDetailsTypeStrategy.ALL.populateResource(flowContext);
+        Integer parentID = n.getParentID();
+        // platforms wont have a parent
+        if (parentID==null) {
+            return newResource;
+        }
+        Resource parentResource = new Resource(String.valueOf(parentID));
+        parentResource.addSubResource(newResource);
+        return parentResource;
+    }
 	
 	
 	

@@ -18,7 +18,4 @@ public class ResourceFilterDefinitioin {
     public void setName(String resourceName) {
         this.resourceName = resourceName;
     }
-    public static boolean validate(ResourceFilterDefinitioin resourceFilterDefinitioin) {
-        return resourceFilterDefinitioin!=null && resourceFilterDefinitioin.resourceName!=null && !resourceFilterDefinitioin.resourceName.isEmpty();
-    }
 }
