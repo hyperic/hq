@@ -91,15 +91,10 @@ public class ResourceMapper {
     private PlatformManager platformManager;
     @Autowired  
     SessionFactory f;
-    ResourceTransferImpl resourceTransferImpl;
     @Autowired  
     public ResourceMapper(final PlatformManager platformManager) { 
         this.platformManager = platformManager;   
     }//EOM     
-    @PostConstruct
-    public void init() {
-        this.resourceTransferImpl = (ResourceTransferImpl) Bootstrap.getBean("resourceTransferImpl");
-    }
 
 	public AIResource mapAIPLarformValueToAIResource(AIPlatformValue aiPlatform,
 			AIResource aiResource) {
@@ -364,7 +359,7 @@ public class ResourceMapper {
         removedResourceID.setId(id);
         return removedResourceID;
     }
-    public org.hyperic.hq.api.model.Resource toResource(final AuthzSubject subject, CreatedResourceNotification n) throws Throwable {
+    public org.hyperic.hq.api.model.Resource toResource(final AuthzSubject subject, ResourceTransfer resourceTransfer, CreatedResourceNotification n) throws Throwable {
         org.hyperic.hq.authz.server.session.Resource backendResource = n.getResource();
         if (backendResource==null) {
             return null;
@@ -372,7 +367,7 @@ public class ResourceMapper {
         Session hSession = f.getCurrentSession();
         hSession.update(backendResource);
         Resource newFrontendResource = toResource(backendResource);
-        Context flowContext = new Context(subject, newFrontendResource.getNaturalID(), newFrontendResource.getResourceType(), new ResourceDetailsType[] {ResourceDetailsType.ALL}, this.resourceTransferImpl);
+        Context flowContext = new Context(subject, newFrontendResource.getNaturalID(), newFrontendResource.getResourceType(), new ResourceDetailsType[] {ResourceDetailsType.ALL}, resourceTransfer);
         flowContext.setBackendResource(backendResource);
         newFrontendResource = ResourceDetailsTypeStrategy.ALL.populateResource(flowContext);
         Integer parentID = n.getParentID();
