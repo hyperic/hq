@@ -25,12 +25,12 @@ public class RestApiService {
     @javax.ws.rs.core.Context
     protected MessageContext messageContext;
     
-    @Autowired 
-    SessionManager sessionManager;
+    @Autowired
+    protected SessionManager sessionManager;
     
     @Autowired
     @Qualifier("restApiLogger")
-    Log logger;    
+    protected Log logger;
  
 
     /**
