@@ -1738,8 +1738,8 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
      *  @return {@link List} of {@link Measurement}s
      */
     private List<Measurement> enableDefaultMetrics(AuthzSubject subj, AppdefEntityID id, ConfigResponse config,
-                                      boolean verify) throws AppdefEntityNotFoundException,
-        PermissionException {
+                                                   boolean verify)
+    throws AppdefEntityNotFoundException, PermissionException {
         List<Measurement> rtn = new ArrayList<Measurement>(0);
         String mtype;
 

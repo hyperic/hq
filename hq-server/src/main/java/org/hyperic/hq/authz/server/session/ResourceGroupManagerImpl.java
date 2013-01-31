@@ -389,7 +389,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     /**
      * 
      */
-    public void addResources(AuthzSubject subj, ResourceGroup group, List<Resource> resources)
+    public void addResources(AuthzSubject subj, ResourceGroup group, Collection<Resource> resources)
         throws PermissionException, VetoException {
         checkGroupPermission(subj, group.getId(), AuthzConstants.perm_modifyResourceGroup);
         checkGroupMaintenance(subj, group);
