@@ -68,11 +68,13 @@ import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.server.session.ProductBossImpl.ConfigSchemaAndBaseResponse;
+import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.notifications.model.CreatedResourceNotification;
 import org.hyperic.hq.notifications.model.InventoryNotification;
 import org.hyperic.hq.notifications.model.RemovedResourceNotification;
+import org.hyperic.hq.notifications.model.ResourceChangedContentNotification;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -381,6 +383,35 @@ public class ResourceMapper {
         Resource parentResource = new Resource(String.valueOf(parentID));
         parentResource.addSubResource(newFrontendResource);
         return parentResource;
+    }
+
+    @SuppressWarnings("unchecked")
+    public Resource toChangedResourceContent(ResourceChangedContentNotification n) {
+        Integer rid = n.getResourceID();
+        Resource r = new Resource(String.valueOf(rid));
+        
+        AllConfigResponses allConf = n.getAllConfig();
+        HashMap<String,String> configValues = new HashMap<String,String>(); 
+        String[] cfgTypes = ProductPlugin.CONFIGURABLE_TYPES;
+        int numConfigs = cfgTypes.length;
+        for (int type = 0 ; type<numConfigs ; type++) {
+            ConfigResponse conf = allConf.getConfig(type);
+            if (conf == null) {
+                continue;
+            }
+            Map<String,String> confMap = conf.getConfig();
+            configValues.putAll(confMap);
+        }
+
+        Map<String,String> cprops = n.getCProps();
+        for(Map.Entry<String,String> cprop:cprops.entrySet()) {
+            configValues.put(cprop.getKey(),cprop.getValue());
+        }
+        
+        final ResourceConfig resourceConfig = new ResourceConfig() ;
+        resourceConfig.setMapProps(configValues); 
+        r.setResourceConfig(resourceConfig);
+        return r;
     }
 	
 	
