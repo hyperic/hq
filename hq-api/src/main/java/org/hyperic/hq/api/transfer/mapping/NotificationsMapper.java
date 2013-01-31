@@ -10,6 +10,7 @@ import org.hyperic.hq.notifications.model.BaseNotification;
 import org.hyperic.hq.notifications.model.CreatedResourceNotification;
 import org.hyperic.hq.notifications.model.MetricNotification;
 import org.hyperic.hq.notifications.model.RemovedResourceNotification;
+import org.hyperic.hq.notifications.model.ResourceChangedContentNotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,6 +38,8 @@ public class NotificationsMapper {
                     res.addNewResource(this.rscMapper.toResource(subject, resourceTransfer, resourceDetailsType,(CreatedResourceNotification )bn));
                 } else if (bn instanceof RemovedResourceNotification) {
                     res.addRemovedResourceID(this.rscMapper.toResource((RemovedResourceNotification) bn));
+                } else if (bn instanceof ResourceChangedContentNotification) {
+                    res.addChangedResource(this.rscMapper.toChangedResourceContent((ResourceChangedContentNotification) bn));
                 }
             } catch (Throwable t) {
                 //TODO~ put errors in failed resource/failed metrics

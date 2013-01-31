@@ -86,6 +86,8 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.bizapp.server.session.ResourceContentChangedEvent;
+import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
@@ -2051,17 +2053,27 @@ public class PlatformManagerImpl implements PlatformManager {
 
                 // there should only be 2 platforms
                 boolean platformUUIDUpdated = false;
+                List<ResourceContentChangedEvent> events = new ArrayList<ResourceContentChangedEvent>(platforms.size());
                 for(Platform platform:platforms) {
                     try {
                         // only map the UUID for actual platforms, not for virtual ones discovered by the vc plugin
                         if (AuthzConstants.platformPrototypeVmwareVsphereVm.equals(platform.getResource().getPrototype().getName())) { continue; }
                         AppdefEntityID id = platform.getEntityId();
                         int typeId = platform.getAppdefResourceType().getId().intValue();
-                        this.cpropManager.setValue(id, typeId, HQConstants.MOREF, vmid.getMoref());
-                        this.cpropManager.setValue(id, typeId, HQConstants.VCUUID, vmid.getVcUUID());
+                        String moref = vmid.getMoref();
+                        String vcUUID = vmid.getVcUUID();
+                        this.cpropManager.setValue(id, typeId, HQConstants.MOREF, moref));
+                        this.cpropManager.setValue(id, typeId, HQConstants.VCUUID, vcUUID);
+                        Map<String,String> changedProps = new HashMap<String,String>();
+                        changedProps.put(HQConstants.MOREF,moref);
+                        changedProps.put(HQConstants.VCUUID,vcUUID);
+                        ResourceContentChangedEvent contentChangedEvent = new ResourceContentChangedEvent(platform.getId(),changedProps);
+                        events.add(contentChangedEvent);
                         platformUUIDUpdated=true;
                     } catch (AppdefEntityNotFoundException e) { log.error(e); }
                 }
+                this.zeventManager.enqueueEventsAfterCommit(events);
+
                 // assume one mac address is sufficient for VM-platform mapping
                 if (platformUUIDUpdated) { break;}
             }

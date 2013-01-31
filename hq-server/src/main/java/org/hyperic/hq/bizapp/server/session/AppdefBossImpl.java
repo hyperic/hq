@@ -3186,6 +3186,10 @@ public class AppdefBossImpl implements AppdefBoss {
                         }
                     }
                     events.add(new ResourceUpdatedZevent(eventSubject, ade, allConfigs));
+                    Resource r = this.resourceManager.findResource(ade);
+                    Integer rid = r.getId();
+                    ResourceContentChangedEvent contentChangedEvent = new ResourceContentChangedEvent(rid,allConfigs);
+                    events.add(contentChangedEvent);
                 }
                 zEventManager.enqueueEventsAfterCommit(events);
             }

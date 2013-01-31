@@ -21,9 +21,15 @@ public class NotificationsReport extends BatchResponseBase {
     @XmlElementWrapper(name="newResources", namespace=RestApiConstants.SCHEMA_NAMESPACE)
     @XmlElement(name="resource", namespace=RestApiConstants.SCHEMA_NAMESPACE)
     protected List<Resource> newResources = new ArrayList<Resource>();
+    
     @XmlElementWrapper(name="removedResourcesIDs", namespace=RestApiConstants.SCHEMA_NAMESPACE)
     @XmlElement(name="resource", namespace=RestApiConstants.SCHEMA_NAMESPACE)
     protected List<ID> removedResourcesIDs = new ArrayList<ID>();
+    
+    @XmlElementWrapper(name="changedResources", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+    @XmlElement(name="resource", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+    protected List<Resource> changedResources = new ArrayList<Resource>();
+    
     @XmlElementWrapper(name="metrics", namespace=RestApiConstants.SCHEMA_NAMESPACE)
     @XmlElement(name="metric", namespace=RestApiConstants.SCHEMA_NAMESPACE)
     protected List<RawMetric> metrics = new ArrayList<RawMetric>();
@@ -42,5 +48,8 @@ public class NotificationsReport extends BatchResponseBase {
     }
     public void addMetric(RawMetric metricWithId) {
         this.metrics.add(metricWithId);
+    }
+    public void addChangedResource(Resource r) {
+        this.changedResources.add(r);
     }
 }
