@@ -390,26 +390,10 @@ public class ResourceMapper {
         Integer rid = n.getResourceID();
         Resource r = new Resource(String.valueOf(rid));
         
-        AllConfigResponses allConf = n.getAllConfig();
-        HashMap<String,String> configValues = new HashMap<String,String>(); 
-        String[] cfgTypes = ProductPlugin.CONFIGURABLE_TYPES;
-        int numConfigs = cfgTypes.length;
-        for (int type = 0 ; type<numConfigs ; type++) {
-            ConfigResponse conf = allConf.getConfig(type);
-            if (conf == null) {
-                continue;
-            }
-            Map<String,String> confMap = conf.getConfig();
-            configValues.putAll(confMap);
-        }
-
-        Map<String,String> cprops = n.getCProps();
-        for(Map.Entry<String,String> cprop:cprops.entrySet()) {
-            configValues.put(cprop.getKey(),cprop.getValue());
-        }
+        Map<String,String> configValues = n.getChangedProps(); 
         
         final ResourceConfig resourceConfig = new ResourceConfig() ;
-        resourceConfig.setMapProps(configValues); 
+        resourceConfig.setMapProps((HashMap<String, String>) configValues); 
         r.setResourceConfig(resourceConfig);
         return r;
     }
