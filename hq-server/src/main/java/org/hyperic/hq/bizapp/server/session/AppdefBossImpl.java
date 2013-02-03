@@ -3080,15 +3080,21 @@ public class AppdefBossImpl implements AppdefBoss {
         Service svc = null;
         try {
             existingConfig = configManager.getConfigResponse(entityId);
-            boolean wasUpdated = configManager.configureResponse(subject, existingConfig, entityId,
+            ConfigManager.ConfigDiff diff = configManager.configureResponseDiff(subject, existingConfig, entityId,
                 ConfigResponse.safeEncode(allConfigs.getProductConfig()), ConfigResponse
                     .safeEncode(allConfigs.getMetricConfig()), ConfigResponse.safeEncode(allConfigs
                     .getControlConfig()), ConfigResponse.safeEncode(allConfigs.getRtConfig()),
                     isUserManaged, force);
-            if (wasUpdated) {
+            if (diff.isWasUpdated()) {
                 ids.add(entityId);
+                Resource r = this.resourceManager.findResource(entityId);
+                Integer rid = r.getId();
+                ResourceContentChangedEvent contentChangedEvent = new ResourceContentChangedEvent(rid,diff.getAllConfigDiff(),null);
+                List<ResourceContentChangedEvent> updateEvents = new ArrayList<ResourceContentChangedEvent>();
+                updateEvents.add(contentChangedEvent);
+                zEventManager.enqueueEventsAfterCommit(updateEvents);
             }
-            if (wasUpdated && !doValidation) {
+            if (diff.isWasUpdated() && !doValidation) {
                 Resource r = resourceManager.findResource(entityId);
                 resourceManager.resourceHierarchyUpdated(subject, Collections.singletonList(r));
             }
@@ -3169,7 +3175,6 @@ public class AppdefBossImpl implements AppdefBoss {
             if (ids.size() > 0) { // Actually updated
                 List<ResourceUpdatedZevent> events = new ArrayList<ResourceUpdatedZevent>(ids
                     .size());
-                List<ResourceContentChangedEvent> updateEvents = new ArrayList<ResourceContentChangedEvent>(ids.size());
                 AuthzSubject hqadmin = authzSubjectManager
                     .getSubjectById(AuthzConstants.rootSubjectId);
 
@@ -3187,14 +3192,11 @@ public class AppdefBossImpl implements AppdefBoss {
                         }
                     }
                     events.add(new ResourceUpdatedZevent(eventSubject, ade, allConfigs));
-                    Resource r = this.resourceManager.findResource(ade);
-                    Integer rid = r.getId();
-                    ResourceContentChangedEvent contentChangedEvent = new ResourceContentChangedEvent(rid,allConfigs,null);
-                    updateEvents.add(contentChangedEvent);
                 }
                 zEventManager.enqueueEventsAfterCommit(events);
-                zEventManager.enqueueEventsAfterCommit(updateEvents);
             }
+            
+            
 
             if (entityId.isServer() || entityId.isService()) {
                 aiBoss.toggleRuntimeScan(subject, entityId, allConfigs.getEnableRuntimeAIScan());

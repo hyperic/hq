@@ -8,6 +8,7 @@ import javax.annotation.PostConstruct;
 import org.hyperic.hq.appdef.server.session.ResourceContentChangedEvent;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.bizapp.shared.AllConfigDiff;
 import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.notifications.model.CreatedResourceNotification;
@@ -33,24 +34,36 @@ public class ResourceContentUpdatedNotificationsZeventListener extends Inventory
     protected ResourceChangedContentNotification createNotification(ResourceContentChangedEvent event) {
         Integer rid = event.getResourceID();
         
-        AllConfigResponses allConf = event.getAllConfigs();
+        AllConfigDiff allConfDiff = event.getAllConfigs();
         Map<String,String> configValues = new HashMap<String,String>(); 
-        String[] cfgTypes = ProductPlugin.CONFIGURABLE_TYPES;
-        int numConfigs = cfgTypes.length;
-        for (int type = 0 ; type<numConfigs ; type++) {
-            ConfigResponse conf = allConf.getConfig(type);
-            if (conf == null) {
-                continue;
+        if (allConfDiff!=null) {
+            String[] cfgTypes = ProductPlugin.CONFIGURABLE_TYPES;
+            int numConfigs = cfgTypes.length;
+            for (int type = 0 ; type<numConfigs ; type++) {
+                //TODO~ handle creation/update props differently
+                //TODO~ handle delete props
+                AllConfigResponses allNewConf = allConfDiff.getNewAllConf();
+                ConfigResponse newConf = allNewConf.getConfig(type);
+                if (newConf != null) {
+                    Map<String,String> newConfMap = newConf.getConfig();
+                    configValues.putAll(newConfMap);
+                }
+
+                AllConfigResponses allChangedConf = allConfDiff.getChangedAllConf();
+                ConfigResponse changedConf = allChangedConf.getConfig(type);
+                if (changedConf != null) {
+                    Map<String,String> changedConfMap = changedConf.getConfig();
+                    configValues.putAll(changedConfMap);
+                }
             }
-            Map<String,String> confMap = conf.getConfig();
-            configValues.putAll(confMap);
         }
 
         Map<String,String> cprops = event.getCProps();
-        for(Map.Entry<String,String> cprop:cprops.entrySet()) {
-            configValues.put(cprop.getKey(),cprop.getValue());
+        if (cprops!=null) {
+            for(Map.Entry<String,String> cprop:cprops.entrySet()) {
+                configValues.put(cprop.getKey(),cprop.getValue());
+            }
         }
-
         
         ResourceChangedContentNotification n = new ResourceChangedContentNotification(rid,configValues);
         return n;
