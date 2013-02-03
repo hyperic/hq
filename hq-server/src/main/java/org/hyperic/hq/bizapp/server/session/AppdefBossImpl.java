@@ -58,6 +58,7 @@ import org.hyperic.hq.appdef.server.session.DownResSortField;
 import org.hyperic.hq.appdef.server.session.DownResource;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformType;
+import org.hyperic.hq.appdef.server.session.ResourceContentChangedEvent;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerType;
@@ -3168,7 +3169,7 @@ public class AppdefBossImpl implements AppdefBoss {
             if (ids.size() > 0) { // Actually updated
                 List<ResourceUpdatedZevent> events = new ArrayList<ResourceUpdatedZevent>(ids
                     .size());
-
+                List<ResourceContentChangedEvent> updateEvents = new ArrayList<ResourceContentChangedEvent>(ids.size());
                 AuthzSubject hqadmin = authzSubjectManager
                     .getSubjectById(AuthzConstants.rootSubjectId);
 
@@ -3188,10 +3189,11 @@ public class AppdefBossImpl implements AppdefBoss {
                     events.add(new ResourceUpdatedZevent(eventSubject, ade, allConfigs));
                     Resource r = this.resourceManager.findResource(ade);
                     Integer rid = r.getId();
-                    ResourceContentChangedEvent contentChangedEvent = new ResourceContentChangedEvent(rid,allConfigs);
-                    events.add(contentChangedEvent);
+                    ResourceContentChangedEvent contentChangedEvent = new ResourceContentChangedEvent(rid,allConfigs,null);
+                    updateEvents.add(contentChangedEvent);
                 }
                 zEventManager.enqueueEventsAfterCommit(events);
+                zEventManager.enqueueEventsAfterCommit(updateEvents);
             }
 
             if (entityId.isServer() || entityId.isService()) {

@@ -86,7 +86,6 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
-import org.hyperic.hq.bizapp.server.session.ResourceContentChangedEvent;
 import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
@@ -2062,12 +2061,12 @@ public class PlatformManagerImpl implements PlatformManager {
                         int typeId = platform.getAppdefResourceType().getId().intValue();
                         String moref = vmid.getMoref();
                         String vcUUID = vmid.getVcUUID();
-                        this.cpropManager.setValue(id, typeId, HQConstants.MOREF, moref));
+                        this.cpropManager.setValue(id, typeId, HQConstants.MOREF, moref);
                         this.cpropManager.setValue(id, typeId, HQConstants.VCUUID, vcUUID);
                         Map<String,String> changedProps = new HashMap<String,String>();
                         changedProps.put(HQConstants.MOREF,moref);
                         changedProps.put(HQConstants.VCUUID,vcUUID);
-                        ResourceContentChangedEvent contentChangedEvent = new ResourceContentChangedEvent(platform.getId(),changedProps);
+                        ResourceContentChangedEvent contentChangedEvent = new ResourceContentChangedEvent(platform.getId(),null,changedProps);
                         events.add(contentChangedEvent);
                         platformUUIDUpdated=true;
                     } catch (AppdefEntityNotFoundException e) { log.error(e); }

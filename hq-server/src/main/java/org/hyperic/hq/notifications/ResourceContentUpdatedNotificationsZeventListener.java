@@ -1,14 +1,20 @@
 package org.hyperic.hq.notifications;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.annotation.PostConstruct;
 
 import org.hyperic.hq.appdef.server.session.ResourceContentChangedEvent;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.notifications.model.CreatedResourceNotification;
 import org.hyperic.hq.notifications.model.ResourceChangedContentNotification;
+import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.zevents.ZeventListener;
+import org.hyperic.util.config.ConfigResponse;
 import org.springframework.stereotype.Component;
 
 @Component("resourceContentUpdatedNotificationsZeventListener")
@@ -22,11 +28,31 @@ public class ResourceContentUpdatedNotificationsZeventListener extends Inventory
     protected String getListenersBeanName() {
         return "resourceContentUpdatedNotificationsZeventListener";
     }
+    @SuppressWarnings("unchecked")
     @Override
-    protected CreatedResourceNotification createNotification(ResourceContentChangedEvent event) {
+    protected ResourceChangedContentNotification createNotification(ResourceContentChangedEvent event) {
         Integer rid = event.getResourceID();
-        AllConfigResponses allChangedConfigs = event.getChangedContent();
-        ResourceChangedContentNotification n = new ResourceChangedContentNotification(rid,allChangedConfigs);
+        
+        AllConfigResponses allConf = event.getAllConfigs();
+        Map<String,String> configValues = new HashMap<String,String>(); 
+        String[] cfgTypes = ProductPlugin.CONFIGURABLE_TYPES;
+        int numConfigs = cfgTypes.length;
+        for (int type = 0 ; type<numConfigs ; type++) {
+            ConfigResponse conf = allConf.getConfig(type);
+            if (conf == null) {
+                continue;
+            }
+            Map<String,String> confMap = conf.getConfig();
+            configValues.putAll(confMap);
+        }
+
+        Map<String,String> cprops = event.getCProps();
+        for(Map.Entry<String,String> cprop:cprops.entrySet()) {
+            configValues.put(cprop.getKey(),cprop.getValue());
+        }
+
+        
+        ResourceChangedContentNotification n = new ResourceChangedContentNotification(rid,configValues);
         return n;
     }
 }
