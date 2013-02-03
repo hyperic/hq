@@ -11960,7 +11960,7 @@ has already been defined.
 	  	<user-password-upgrader encryption="EAM_PRINCIPAL.PASSWORD" strength="256" encodeHashAsBase64="true" />
 	</schemaSpec>
 
-	<schemaSpec version="3.219" alwaysExecute="true">
+    <schemaSpec version="3.219" alwaysExecute="true">
         <schema-directSQL>
             <statement targetDB="postgresql">            	
             	CREATE TABLE if not exists EAM_VM_MAPPING(
@@ -11973,7 +11973,7 @@ has already been defined.
             	            	)
             </statement>
         </schema-directSQL>
-	</schemaSpec>
+    </schemaSpec>
 </dbupgrade>
 </target>
 </project>
