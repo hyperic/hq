@@ -68,11 +68,13 @@ import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.server.session.ProductBossImpl.ConfigSchemaAndBaseResponse;
+import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.notifications.model.CreatedResourceNotification;
 import org.hyperic.hq.notifications.model.InventoryNotification;
 import org.hyperic.hq.notifications.model.RemovedResourceNotification;
+import org.hyperic.hq.notifications.model.ResourceChangedContentNotification;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -375,6 +377,7 @@ public class ResourceMapper {
         if (resourceDetailsTypeStrategySet==null || resourceDetailsTypeStrategySet.isEmpty() || resourceDetailsTypeStrategySet.size()>1) {
             throw new RuntimeException("unexpected number of ResourceDetailsTypeStrategis");
         }
+        //TODO~ move this population of resource's properties to be once a creation notification is created, not when it is being polled!
         newFrontendResource = resourceDetailsTypeStrategySet.iterator().next().populateResource(flowContext);
         Integer parentID = n.getParentID();
         // platforms wont have a parent
@@ -384,6 +387,19 @@ public class ResourceMapper {
         Resource parentResource = new Resource(String.valueOf(parentID));
         parentResource.addSubResource(newFrontendResource);
         return parentResource;
+    }
+
+    @SuppressWarnings("unchecked")
+    public Resource toChangedResourceContent(ResourceChangedContentNotification n) {
+        Integer rid = n.getResourceID();
+        Resource r = new Resource(String.valueOf(rid));
+        
+        Map<String,String> configValues = n.getChangedProps(); 
+        
+        final ResourceConfig resourceConfig = new ResourceConfig() ;
+        resourceConfig.setMapProps((HashMap<String, String>) configValues); 
+        r.setResourceConfig(resourceConfig);
+        return r;
     }
 	
 	

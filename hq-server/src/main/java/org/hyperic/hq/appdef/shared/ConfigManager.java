@@ -25,9 +25,13 @@
  */
 package org.hyperic.hq.appdef.shared;
 
+import java.util.Map;
+
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.shared.AllConfigDiff;
+import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 
@@ -106,5 +110,14 @@ public interface ConfigManager {
                                      byte[] controlConfig, byte[] rtConfig, Boolean userManaged,
                                      boolean force);
 
-
+    ConfigDiff configureResponseDiff(AuthzSubject subject, ConfigResponseDB existingConfig, AppdefEntityID appdefID,
+            byte[] productConfig, byte[] measurementConfig, byte[] controlConfig, byte[] rtConfig, Boolean userManaged,
+            boolean force) throws EncodingException;
+    
+    interface ConfigDiff {
+        boolean isWasUpdated();
+        void setWasUpdated(boolean wasUpdated);
+        AllConfigDiff getAllConfigDiff();
+        void setAllConfigDiff(AllConfigDiff allConfigResponses);
+    }
 }
