@@ -44,26 +44,26 @@ public class GroupCriteria extends AuthzNamedBean {
     public long getCtime() {
         return ctime;
     }
-    void setCtime(long ctime) {
+    public void setCtime(long ctime) {
         this.ctime = ctime;
     }
     public String getCreator() {
         return creator;
     }
-    void setCreator(String creator) {
+    public void setCreator(String creator) {
         this.creator = creator;
     }
     public String getResourceNameRegex() {
         return resourceNameRegex;
     }
-    void setResourceNameRegex(String resourceNameRegex) {
+    public void setResourceNameRegex(String resourceNameRegex) {
         this.resourceNameRegex = resourceNameRegex;
         this.resourceNameRegexPattern = null;
     }
     public String getDescription() {
         return description;
     }
-    void setDescription(String description) {
+    public void setDescription(String description) {
         this.description = description;
     }
     public Resource getResourcePrototype() {
