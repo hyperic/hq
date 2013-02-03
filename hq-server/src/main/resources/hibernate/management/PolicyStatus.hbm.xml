@@ -59,7 +59,7 @@
     </property>
 
     <property name="configStatusBuf" type="string">
-      <column name="CONFIG_STATUS_BUF" not-null="true"/>
+      <column name="CONFIG_STATUS_BUF" not-null="true" length="512"/>
     </property>
 
     <property name="configStatus" type="integer">
