@@ -50,7 +50,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "resource", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 @XmlType(name="ResourceTypeType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
-public class Resource {
+public class Resource extends Notification {
 
 	@XmlAttribute
     private String id;

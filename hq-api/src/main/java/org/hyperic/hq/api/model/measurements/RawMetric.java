@@ -5,11 +5,12 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
+import org.hyperic.hq.api.model.Notification;
 import org.hyperic.hq.api.model.RestApiConstants;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name="RawMetricType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
-public class RawMetric {
+public class RawMetric extends Notification {
     @XmlAttribute
     protected double  value;
     @XmlAttribute
