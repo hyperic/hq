@@ -180,13 +180,13 @@ public class LatherDispatcherImpl implements LatherDispatcher {
     }
 
     protected void validateAgent(LatherContext ctx, String agentToken, boolean useCache)
-        throws LatherRemoteException {
+    throws LatherRemoteException {
         log.debug("Validating agent token");
         try {
             agentManager.checkAgentAuth(agentToken);
         } catch (AgentUnauthorizedException exc) {
             log.warn("Unauthorized agent from " + ctx.getCallerIP() + " denied");
-            throw new LatherRemoteException("Unauthorized agent denied");
+            throw new LatherRemoteException("Unauthorized agent denied", exc);
         }
     }
 

@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2011], Hyperic, Inc.
+ * Copyright (C) [2004-2013], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -41,6 +41,7 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 import org.apache.commons.logging.Log;
 import org.hyperic.hq.plugin.jboss7.objects.Connector;
+import org.hyperic.hq.plugin.jboss7.objects.DataSource;
 import org.hyperic.hq.plugin.jboss7.objects.Deployment;
 import org.hyperic.hq.plugin.jboss7.objects.WebSubsystem;
 import org.hyperic.hq.product.AutoServerDetector;
@@ -49,7 +50,6 @@ import org.hyperic.hq.product.DetectionUtil;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
-import org.hyperic.sigar.SigarException;
 import org.hyperic.util.config.ConfigResponse;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -76,9 +76,14 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
         log.debug("[getServerResources] pids.length:" + pids.length);
         for (long pid : pids) {
             Map<String, String> args = parseArgs(getProcArgs(pid));
-            String version = getVersion(args);
-            log.debug("[getServerResources] pid='" + pid + "' version='" + version + "'");
-            if (version.startsWith(getTypeInfo().getVersion())) {
+            String detectedVersion = getVersion(args);
+            String expectedVersion = getTypeInfo().getVersion();
+            if (expectedVersion.equals("7")) {
+                expectedVersion += ".0";
+            }
+            boolean validVersion = detectedVersion.startsWith(expectedVersion);
+            log.debug("[getServerResources] pid='" + pid + "' expectedVersion='" + expectedVersion + "' detectedVersion='" + detectedVersion + "' validVersion='" + validVersion+"'");
+            if (validVersion) {
                 File cfgFile = getConfigFile(args);
                 String installPath;
                 String AIID;
@@ -91,10 +96,10 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
                 }
                 ServerResource server = createServerResource(installPath);
                 server.setIdentifier(AIID);
-                
-                ConfigResponse productConfig =  getServerProductConfig(args);
+
+                ConfigResponse productConfig = getServerProductConfig(args);
                 DetectionUtil.populateListeningPorts(pid, productConfig, true);
-                setProductConfig(server, productConfig);              
+                setProductConfig(server, productConfig);
                 server.setName(prepareServerName(server.getProductConfig()));
                 servers.add(server);
             }
@@ -111,7 +116,8 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
             try {
                 admin = new JBossAdminHttp(config);
             } catch (PluginException ex) {
-                log.error(ex, ex);
+                log.error("Error connecting to JBoss: " + ex, ex);
+                return services;
             }
 
             // DATA SOURCES
@@ -119,13 +125,13 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
                 List<String> datasources = admin.getDatasources();
                 log.debug(datasources);
                 for (String ds : datasources) {
-                    Map<String, String> datasource = admin.getDatasource(ds, false);
+                    DataSource datasource = admin.getDatasource(ds, false, getTypeInfo().getVersion());
                     ServiceResource service = createServiceResource("Datasource");
                     service.setName(prepareServerName(config) + " Datasource " + ds);
 
                     ConfigResponse cp = new ConfigResponse();
-                    cp.setValue("jndi", datasource.get("jndi-name"));
-                    cp.setValue("driver", datasource.get("driver-name"));
+                    cp.setValue("jndi", datasource.getJndiName());
+                    cp.setValue("driver", datasource.getDriverName());
 
                     ConfigResponse pc = new ConfigResponse();
                     pc.setValue("name", ds);
@@ -234,7 +240,6 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
         }
 
         String jars[] = serverModule.list(new FilenameFilter() {
-
             public boolean accept(File dir, String name) {
                 return name.startsWith("jboss-as-server") && name.endsWith(".jar");
             }
@@ -295,8 +300,10 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
 
             String mgntIf = null;
             for (int i = 0; i < nodeList.getLength(); i++) {
-                port = nodeList.item(i).getAttributes().getNamedItem("port").getNodeValue();
-                mgntIf = nodeList.item(i).getAttributes().getNamedItem("interface").getNodeValue();
+                if (nodeList.item(i).getAttributes().getNamedItem("port") != null) {
+                    port = nodeList.item(i).getAttributes().getNamedItem("port").getNodeValue();
+                    mgntIf = nodeList.item(i).getAttributes().getNamedItem("interface").getNodeValue();
+                }
             }
 
             if (mgntIf != null) {

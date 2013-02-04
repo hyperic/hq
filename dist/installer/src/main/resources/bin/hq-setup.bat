@@ -22,11 +22,11 @@ if exist "%JAVA_HOME%\bin\java.exe" goto basicAntSetup
 goto noJavaExe
 
 :haveBuiltinJRE:
-if exist "%INSTALL_DIR%\jres\x86-win32-1.6_33.exe" ( 
-	SET EXE=x86-win32-1.6_33.exe
+if exist "%INSTALL_DIR%\jres\x86-win32-1.7_9.exe" ( 
+	SET EXE=x86-win32-1.7_9.exe
 )else ( 
- 	if exist "%INSTALL_DIR%\jres\x86_64-win-1.6_33.exe" ( 
- 		SET EXE=x86_64-win-1.6_33.exe
+ 	if exist "%INSTALL_DIR%\jres\x86_64-win-1.7_9.exe" ( 
+ 		SET EXE=x86_64-win-1.7_9.exe
  	) 
  )
 "%INSTALL_DIR%\jres\%EXE%" -y -o"%TEMP%" > nul 

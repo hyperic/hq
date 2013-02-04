@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2011], Hyperic, Inc.
+ * Copyright (C) [2004-2013], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -27,6 +27,7 @@ package org.hyperic.hq.plugin.jboss7;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,10 +46,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.protocol.BasicHttpContext;
 import org.hyperic.hq.agent.AgentKeystoreConfig;
 import org.hyperic.hq.plugin.jboss7.objects.Connector;
+import org.hyperic.hq.plugin.jboss7.objects.DataSource;
+import org.hyperic.hq.plugin.jboss7.objects.DataSource71;
 import org.hyperic.hq.plugin.jboss7.objects.Deployment;
 import org.hyperic.hq.plugin.jboss7.objects.ServerInfo;
 import org.hyperic.hq.plugin.jboss7.objects.ServerMemory;
@@ -72,23 +76,27 @@ public final class JBossAdminHttp {
     private String serverName;
 
     public JBossAdminHttp(Properties props) throws PluginException {
-        int port = Integer.parseInt(props.getProperty(JBossStandaloneDetector.PORT));
-        String addr = props.getProperty(JBossStandaloneDetector.ADDR);
-        boolean https = "true".equals(props.getProperty(JBossStandaloneDetector.HTTPS));
-        this.user = props.getProperty(JBossStandaloneDetector.USERNAME);
-        this.pass = props.getProperty(JBossStandaloneDetector.PASSWORD);
-        this.hostName = props.getProperty(JBossStandaloneDetector.HOST);
-        this.serverName = props.getProperty(JBossStandaloneDetector.SERVER);
-        log.debug("props=" + props);
+        try {
+            int port = Integer.parseInt(props.getProperty(JBossStandaloneDetector.PORT));
+            String addr = props.getProperty(JBossStandaloneDetector.ADDR);
+            boolean https = "true".equals(props.getProperty(JBossStandaloneDetector.HTTPS));
+            this.user = props.getProperty(JBossStandaloneDetector.USERNAME);
+            this.pass = props.getProperty(JBossStandaloneDetector.PASSWORD);
+            this.hostName = props.getProperty(JBossStandaloneDetector.HOST);
+            this.serverName = props.getProperty(JBossStandaloneDetector.SERVER);
+            log.debug("props=" + props);
 
-        targetHost = new HttpHost(addr, port, https ? "https" : "http");
-        log.debug("targetHost=" + targetHost);
-        AgentKeystoreConfig config = new AgentKeystoreConfig();
-        client = new HQHttpClient(config, new HttpConfig(5000, 5000, null, 0), config.isAcceptUnverifiedCert());
-        if ((user != null) && (pass != null)) {
-            client.getCredentialsProvider().setCredentials(
-                    new AuthScope(targetHost.getHostName(), targetHost.getPort()),
-                    new UsernamePasswordCredentials(user, pass));
+            targetHost = new HttpHost(addr, port, https ? "https" : "http");
+            log.debug("targetHost=" + targetHost);
+            AgentKeystoreConfig config = new AgentKeystoreConfig();
+            client = new HQHttpClient(config, new HttpConfig(5000, 5000, null, 0), config.isAcceptUnverifiedCert());
+            if ((user != null) && (pass != null)) {
+                client.getCredentialsProvider().setCredentials(
+                        new AuthScope(targetHost.getHostName(), targetHost.getPort()),
+                        new UsernamePasswordCredentials(user, pass));
+            }
+        } catch (Throwable ex) {
+            throw new PluginException(ex.getMessage(), ex);
         }
 
 //        AuthCache authCache = new BasicAuthCache();
@@ -143,6 +151,9 @@ public final class JBossAdminHttp {
                     log.debug("[" + api + "] -(" + statusCode + ")-> " + res);
                 }
             }
+        } catch (JsonParseException ex) {
+            log.debug(ex.getMessage(), ex);
+            throw new PluginException(ex.getMessage(), ex);
         } catch (IOException ex) {
             log.debug(ex.getMessage(), ex);
             throw new PluginException(ex.getMessage(), ex);
@@ -205,18 +216,30 @@ public final class JBossAdminHttp {
         return res;
     }
 
-    public Map<String, String> getDatasource(String ds, boolean runtime) throws PluginException {
-        Type type = new TypeToken<Map<String, String>>() {
-        }.getType();
+    public DataSource getDatasource(String ds, boolean runtime, String jbossVersion) throws PluginException {
+        Type type;
+
+        if (jbossVersion.equalsIgnoreCase("7")) {
+            type = new TypeToken<DataSource>() {
+            }.getType();
+        } else {
+            type = new TypeToken<DataSource71>() {
+            }.getType();
+        }
+
         try {
             ds = URLEncoder.encode(ds, "UTF-8");
         } catch (UnsupportedEncodingException ex) {
             throw new RuntimeException(ex);
         }
+
         if (runtime) {
             ds += "?include-runtime=true";
+            if (!jbossVersion.equalsIgnoreCase("7")) {
+                ds += "&recursive";
+            }
         }
-        Map<String, String> res = (Map<String, String>) get("/subsystem/datasources/data-source/" + ds, type);
+        DataSource res = (DataSource) get("/subsystem/datasources/data-source/" + ds, type);
         return res;
     }
 
