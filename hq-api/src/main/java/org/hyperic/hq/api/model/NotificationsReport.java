@@ -5,12 +5,9 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-import org.hyperic.hq.api.model.measurements.RawMetric;
 import org.hyperic.hq.api.model.resources.BatchResponseBase;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 
@@ -18,38 +15,23 @@ import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 @XmlRootElement(name = "notificationsReport", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 @XmlType(name="NotificationsReport Type", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 public class NotificationsReport extends BatchResponseBase {
-    @XmlElementWrapper(name="newResources", namespace=RestApiConstants.SCHEMA_NAMESPACE)
-    @XmlElement(name="resource", namespace=RestApiConstants.SCHEMA_NAMESPACE)
-    protected List<Resource> newResources = new ArrayList<Resource>();
-    
-    @XmlElementWrapper(name="removedResourcesIDs", namespace=RestApiConstants.SCHEMA_NAMESPACE)
-    @XmlElement(name="resource", namespace=RestApiConstants.SCHEMA_NAMESPACE)
-    protected List<ID> removedResourcesIDs = new ArrayList<ID>();
-    
-    @XmlElementWrapper(name="changedResources", namespace=RestApiConstants.SCHEMA_NAMESPACE)
-    @XmlElement(name="resource", namespace=RestApiConstants.SCHEMA_NAMESPACE)
-    protected List<Resource> changedResources = new ArrayList<Resource>();
-    
-    @XmlElementWrapper(name="metrics", namespace=RestApiConstants.SCHEMA_NAMESPACE)
-    @XmlElement(name="metric", namespace=RestApiConstants.SCHEMA_NAMESPACE)
-    protected List<RawMetric> metrics = new ArrayList<RawMetric>();
+    protected List<NotificationsGroup> notifications;
 
-    public NotificationsReport(final ExceptionToErrorCodeMapper exceptionToErrorCodeMapper) { 
-        super(exceptionToErrorCodeMapper) ; 
+    public NotificationsReport(final ExceptionToErrorCodeMapper exceptionToErrorCodeMapper) {
+        super(exceptionToErrorCodeMapper) ;
+        this.notifications = new ArrayList<NotificationsGroup>();
     }
+
     public NotificationsReport() {
-        super();
+        this.notifications = new ArrayList<NotificationsGroup>();
     }
-    public void addNewResource(Resource r) {
-        this.newResources.add(r);
+    
+    public List<NotificationsGroup> getNotificationsGroupList() {
+        return notifications;
     }
-    public void addRemovedResourceID(ID rid) {
-        this.removedResourcesIDs.add(rid);
+
+    public void setNotificationsGroupList(List<NotificationsGroup> notificationsGroupList) {
+        this.notifications = notificationsGroupList;
     }
-    public void addMetric(RawMetric metricWithId) {
-        this.metrics.add(metricWithId);
-    }
-    public void addChangedResource(Resource r) {
-        this.changedResources.add(r);
-    }
+
 }
