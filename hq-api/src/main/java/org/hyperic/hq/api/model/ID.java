@@ -9,7 +9,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "id", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 @XmlType(name="IDType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
-public class ID {
+public class ID extends Notification {
     public Integer getId() {
         return id;
     }
