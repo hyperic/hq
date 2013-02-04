@@ -41,7 +41,7 @@ public class NotificationsMapper {
             try {
                 // expensive for many notifications, the 'instance of' should be used only in the polling mechanism
                 if (bn instanceof MetricNotification) {
-                    if (creationNotifications!=null) {
+                    if (creationNotifications==null) {
                         creationNotifications = new ArrayList<Notification>();
                     }
                     creationNotifications.add(this.mtmtMapper.toMetricWithId((MetricNotification)bn));

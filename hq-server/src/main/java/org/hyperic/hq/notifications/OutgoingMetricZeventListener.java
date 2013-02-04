@@ -51,7 +51,7 @@ public class OutgoingMetricZeventListener extends BaseNotificationsZeventListene
             // TODO~ black list should be here
             
             Resource rsc = msmt.getResource();
-            MetricNotification n = new MetricNotification(rsc.getId(),mid,metricVal);
+            MetricNotification n = new MetricNotification(rsc.getId(),mid,msmt.getTemplate().getName(),metricVal);
             ns.add(n);
         }
         return ns;
