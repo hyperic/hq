@@ -3,11 +3,14 @@ package org.hyperic.hq.api.transfer.mapping;
 import java.util.List;
 
 import org.hyperic.hq.api.model.NotificationsReport;
+import org.hyperic.hq.api.model.ResourceDetailsType;
+import org.hyperic.hq.api.transfer.ResourceTransfer;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.notifications.model.BaseNotification;
 import org.hyperic.hq.notifications.model.CreatedResourceNotification;
-import org.hyperic.hq.notifications.model.InventoryNotification;
 import org.hyperic.hq.notifications.model.MetricNotification;
 import org.hyperic.hq.notifications.model.RemovedResourceNotification;
+import org.hyperic.hq.notifications.model.ResourceChangedContentNotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,20 +20,29 @@ public class NotificationsMapper {
     protected ResourceMapper rscMapper;
     @Autowired
     protected MeasurementMapper mtmtMapper;
+    @Autowired
+    protected ExceptionToErrorCodeMapper errorHandler ;
 
-    public NotificationsReport toNotificationsReport(List<? extends BaseNotification> ns) {
-        NotificationsReport res = new NotificationsReport();
-        if (ns.isEmpty()) {
+    public NotificationsReport toNotificationsReport(final AuthzSubject subject, ResourceTransfer resourceTransfer, ResourceDetailsType resourceDetailsType,
+            List<? extends BaseNotification> ns) {
+        NotificationsReport res = new NotificationsReport(this.errorHandler);
+        if (ns==null || ns.isEmpty()) {
             return new NotificationsReport();
         }
         for(BaseNotification bn:ns) {
-            // expensive for many notifications, the 'instance of' should be used only in the polling mechanism
-            if (bn instanceof MetricNotification) {
-                res.addMetric(this.mtmtMapper.toMetricWithId((MetricNotification)bn));
-            } else if (bn instanceof CreatedResourceNotification) {
-                res.addNewResource(this.rscMapper.toResource((CreatedResourceNotification )bn));
-            } else if (bn instanceof RemovedResourceNotification) {
-                res.addRemovedResourceID(this.rscMapper.toResource((RemovedResourceNotification) bn));
+            try {
+                // expensive for many notifications, the 'instance of' should be used only in the polling mechanism
+                if (bn instanceof MetricNotification) {
+                    res.addMetric(this.mtmtMapper.toMetricWithId((MetricNotification)bn));
+                } else if (bn instanceof CreatedResourceNotification) {
+                    res.addNewResource(this.rscMapper.toResource(subject, resourceTransfer, resourceDetailsType,(CreatedResourceNotification )bn));
+                } else if (bn instanceof RemovedResourceNotification) {
+                    res.addRemovedResourceID(this.rscMapper.toResource((RemovedResourceNotification) bn));
+                } else if (bn instanceof ResourceChangedContentNotification) {
+                    res.addChangedResource(this.rscMapper.toChangedResourceContent((ResourceChangedContentNotification) bn));
+                }
+            } catch (Throwable t) {
+                //TODO~ put errors in failed resource/failed metrics
             }
         }
         return res;

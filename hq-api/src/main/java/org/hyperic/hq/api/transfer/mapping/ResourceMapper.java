@@ -40,6 +40,8 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import javax.annotation.PostConstruct;
+
 import org.hibernate.SessionFactory;
 import org.hibernate.classic.Session;
 import org.hyperic.hq.api.model.AIResource;
@@ -52,6 +54,9 @@ import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourcePrototype;
 import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.api.model.resources.ComplexIp;
+import org.hyperic.hq.api.transfer.NotificationsTransfer;
+import org.hyperic.hq.api.transfer.ResourceTransfer;
+import org.hyperic.hq.api.transfer.impl.ResourceTransferImpl;
 import org.hyperic.hq.api.transfer.impl.ResourceTransferImpl.Context;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
@@ -63,10 +68,13 @@ import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.server.session.ProductBossImpl.ConfigSchemaAndBaseResponse;
+import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.notifications.model.CreatedResourceNotification;
 import org.hyperic.hq.notifications.model.InventoryNotification;
 import org.hyperic.hq.notifications.model.RemovedResourceNotification;
+import org.hyperic.hq.notifications.model.ResourceChangedContentNotification;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -353,28 +361,45 @@ public class ResourceMapper {
         removedResourceID.setId(id);
         return removedResourceID;
     }
-    public org.hyperic.hq.api.model.Resource toResource(/*final AuthzSubject subject,*/ CreatedResourceNotification n) {
+    public org.hyperic.hq.api.model.Resource toResource(final AuthzSubject subject, ResourceTransfer resourceTransfer, 
+            ResourceDetailsType resourceDetailsType, CreatedResourceNotification n) throws Throwable {
         org.hyperic.hq.authz.server.session.Resource backendResource = n.getResource();
         if (backendResource==null) {
             return null;
         }
         Session hSession = f.getCurrentSession();
         hSession.update(backendResource);
-//        hSession.update(backendResource.getResourceType());
-        Resource newResource = toResource(backendResource);
-//        newResource.getResourceType()
-//        backendResource.getResourceType()
-//        Context flowContext = new Context(subject, , , ResourceDetailsType.ALL, this.resourceTransfer);
-//        flowContext.setBackendResource(backendResource);
-//        newResource = ResourceDetailsTypeStrategy.ALL.populateResource(flowContext);
+        Resource newFrontendResource = toResource(backendResource);
+        ResourceDetailsType[] resourceDetailsTypeArr = new ResourceDetailsType[] {resourceDetailsType};
+        Context flowContext = new Context(subject, newFrontendResource.getNaturalID(), newFrontendResource.getResourceType(), resourceDetailsTypeArr, resourceTransfer);
+        flowContext.setBackendResource(backendResource);
+        Set<ResourceDetailsTypeStrategy> resourceDetailsTypeStrategySet = ResourceDetailsTypeStrategy.valueOf(resourceDetailsTypeArr);
+        if (resourceDetailsTypeStrategySet==null || resourceDetailsTypeStrategySet.isEmpty() || resourceDetailsTypeStrategySet.size()>1) {
+            throw new RuntimeException("unexpected number of ResourceDetailsTypeStrategis");
+        }
+        //TODO~ move this population of resource's properties to be once a creation notification is created, not when it is being polled!
+        newFrontendResource = resourceDetailsTypeStrategySet.iterator().next().populateResource(flowContext);
         Integer parentID = n.getParentID();
         // platforms wont have a parent
         if (parentID==null) {
-            return newResource;
+            return newFrontendResource;
         }
         Resource parentResource = new Resource(String.valueOf(parentID));
-        parentResource.addSubResource(newResource);
+        parentResource.addSubResource(newFrontendResource);
         return parentResource;
+    }
+
+    @SuppressWarnings("unchecked")
+    public Resource toChangedResourceContent(ResourceChangedContentNotification n) {
+        Integer rid = n.getResourceID();
+        Resource r = new Resource(String.valueOf(rid));
+        
+        Map<String,String> configValues = n.getChangedProps(); 
+        
+        final ResourceConfig resourceConfig = new ResourceConfig() ;
+        resourceConfig.setMapProps((HashMap<String, String>) configValues); 
+        r.setResourceConfig(resourceConfig);
+        return r;
     }
 	
 	

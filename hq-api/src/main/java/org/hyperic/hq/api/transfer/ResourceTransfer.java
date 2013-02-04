@@ -34,11 +34,20 @@ import org.hyperic.hq.api.model.resources.RegisteredResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
 import org.hyperic.hq.api.services.impl.ApiMessageContext;
+import org.hyperic.hq.api.transfer.impl.ResourceTransferImpl.Context;
+import org.hyperic.hq.api.transfer.mapping.ResourceMapper;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.ConfigFetchException;
+import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.ObjectNotFoundException;
+import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.PluginNotFoundException;
+import org.hyperic.util.config.EncodingException;
 
 public interface ResourceTransfer {
 
@@ -47,10 +56,18 @@ public interface ResourceTransfer {
 	
 	Resource getResource(final ApiMessageContext messageContext, final String platformID, final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) throws ObjectNotFoundException ; 
 	
-	RegisteredResourceBatchResponse getResources(final ApiMessageContext messageContext, final ResourceDetailsType[] responseMetadata, final int hierarchyDepth, final boolean register,final ResourceFilterRequest resourceFilterRequest) throws PermissionException, NotFoundException;
+	RegisteredResourceBatchResponse getResources(final ApiMessageContext messageContext, final ResourceDetailsType responseMetadata, final int hierarchyDepth, final boolean register,final ResourceFilterRequest resourceFilterRequest) throws PermissionException, NotFoundException;
 	
 	ResourceBatchResponse approveResource(final ApiMessageContext messageContext, final Resources aiResources) ;
 	ResourceBatchResponse updateResources(final ApiMessageContext messageContext, final Resources resources);
 
     void unregister();
+
+    PlatformManager getPlatformManager();
+
+    ResourceManager getResourceManager();
+
+    ResourceMapper getResourceMapper();
+
+    Object initResourceConfig(Context flowContext) throws ConfigFetchException, EncodingException, PluginNotFoundException, PluginException, PermissionException, AppdefEntityNotFoundException;
 }//EOI 
