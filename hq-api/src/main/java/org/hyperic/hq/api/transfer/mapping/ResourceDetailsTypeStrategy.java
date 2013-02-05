@@ -40,6 +40,21 @@ public enum ResourceDetailsTypeStrategy {
             return flowContext.getVisitor().getResourceMapper().mergeConfig(flowContext.resourceType, flowContext.backendResource ,resource, flowContext.configResponses, flowContext.cprops) ; 
         }//EOM 
     },//EO PROPERTIES
+    VIRTUALDATA{
+        @Override
+        public final Resource populateResource(final Context flowContext) throws Throwable {
+            BASIC.populateResource(flowContext) ;
+            Resource resource = flowContext.currResource ; 
+            if(resource == null) { 
+                resource = flowContext.currResource = new Resource(flowContext.internalID) ; 
+            }//EO if resource was not initialized yet 
+            //init the response config metadata 
+            
+            flowContext.entityID = AppdefUtil.newAppdefEntityId(flowContext.backendResource) ;
+            flowContext.getVisitor().initResourceConfig(flowContext) ;
+            return flowContext.getVisitor().getResourceMapper().mergeVirtualData(flowContext.resourceType, flowContext.backendResource ,resource, flowContext.cprops) ; 
+        }        
+    },
     ALL{ 
         @Override
         public final Resource populateResource(final Context flowContext) throws Throwable{ 

@@ -59,7 +59,7 @@ public class NotificationsMapper {
                     if (updateNotifications==null) {
                         updateNotifications = new ArrayList<Notification>();
                     }
-                    updateNotifications.add(this.rscMapper.toChangedResourceContent((ResourceChangedContentNotification) bn));
+                    updateNotifications.add(this.rscMapper.toChangedResourceContent(resourceDetailsType, (ResourceChangedContentNotification) bn));
                 }
             } catch (Throwable t) {
                 //TODO~ put errors in failed resource/failed metrics

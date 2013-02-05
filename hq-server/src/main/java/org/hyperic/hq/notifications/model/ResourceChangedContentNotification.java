@@ -16,4 +16,7 @@ public class ResourceChangedContentNotification extends InventoryNotification {
     public Map<String,String> getChangedProps() {
         return changedProps;
     }
+    public void setChangedProps(Map<String, String> props) {
+        this.changedProps=props;
+    }
 }
