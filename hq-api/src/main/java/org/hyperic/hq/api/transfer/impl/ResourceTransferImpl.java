@@ -83,6 +83,7 @@ import org.hyperic.hq.notifications.Q;
 import org.hyperic.hq.notifications.filtering.AgnosticFilter;
 import org.hyperic.hq.notifications.filtering.Filter;
 import org.hyperic.hq.notifications.filtering.FilteringCondition;
+import org.hyperic.hq.notifications.filtering.ResourceContentFilter;
 import org.hyperic.hq.notifications.filtering.ResourceDestinationEvaluator;
 import org.hyperic.hq.notifications.model.InventoryNotification;
 import org.hyperic.hq.product.PluginException;
@@ -418,7 +419,11 @@ public class ResourceTransferImpl implements ResourceTransfer{
 
 		//TODO: pojo fields modifications 
 	}//EOM 
-	
+    public final void initResourceVirtualData(final Context flowContext)   
+            throws ConfigFetchException, EncodingException, PluginNotFoundException, PluginException, PermissionException, AppdefEntityNotFoundException {
+        flowContext.cprops = cpropManager.getEntries(flowContext.entityID) ;
+    }
+
 	public final Object initResourceConfig(final Context flowContext)  
 		throws ConfigFetchException, EncodingException, PluginNotFoundException, PluginException, PermissionException, AppdefEntityNotFoundException {
 		
@@ -448,7 +453,7 @@ public class ResourceTransferImpl implements ResourceTransfer{
 		
 		//TODO: pojo members data 
 		
-		return null ; 
+        return null ; 
 	}//EOM 
 		
 	
@@ -631,9 +636,8 @@ public class ResourceTransferImpl implements ResourceTransfer{
             }
             this.isRegistered=true;
             List<Filter<InventoryNotification,? extends FilteringCondition<?>>> userFilters = new ArrayList<Filter<InventoryNotification,? extends FilteringCondition<?>>>();//this.resourceMapper.toResourceFilters(resourceFilterRequest); 
-            if (userFilters.isEmpty()) {
-                userFilters.add(new AgnosticFilter<InventoryNotification,FilteringCondition<?>>());
-            }
+            Filter contentFilter = new ResourceContentFilter(ResourceDetailsType.valueOf(responseMetadata));
+            userFilters.add(contentFilter);
 
             //TODO~ get the destination from the user
             Destination dest = this.notificationsTransfer.getDummyDestination();
