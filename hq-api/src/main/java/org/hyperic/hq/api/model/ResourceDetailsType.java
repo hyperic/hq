@@ -34,7 +34,8 @@ import org.hyperic.hq.notifications.model.InternalResourceDetailsType;
 @XmlEnum
 public enum ResourceDetailsType {
 	BASIC,
-	PROPERTIES, 
+	PROPERTIES,
+	VIRTUALDATA,
 	ALL;
 	
 	public static ResourceDetailsType valueOf(InternalResourceDetailsType internalResourceDetailsType) {
@@ -44,6 +45,8 @@ public enum ResourceDetailsType {
                 resourceDetailsType = ResourceDetailsType.BASIC;
             } else if (internalResourceDetailsType==InternalResourceDetailsType.PROPERTIES) {
                 resourceDetailsType = ResourceDetailsType.PROPERTIES;
+            } else if (internalResourceDetailsType==InternalResourceDetailsType.VIRTUALDATA) {
+                resourceDetailsType = ResourceDetailsType.VIRTUALDATA;
             } else if (internalResourceDetailsType==InternalResourceDetailsType.ALL) {
                 resourceDetailsType = ResourceDetailsType.ALL;
             }
@@ -58,6 +61,8 @@ public enum ResourceDetailsType {
                 internalResourceDetailsType = InternalResourceDetailsType.BASIC;
             } else if (resourceDetailsType==ResourceDetailsType.PROPERTIES) {
                 internalResourceDetailsType = InternalResourceDetailsType.PROPERTIES;
+            } else if (resourceDetailsType==ResourceDetailsType.VIRTUALDATA) {
+                internalResourceDetailsType = InternalResourceDetailsType.VIRTUALDATA;
             } else if (resourceDetailsType==ResourceDetailsType.ALL) {
                 internalResourceDetailsType = InternalResourceDetailsType.ALL;
             }

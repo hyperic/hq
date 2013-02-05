@@ -183,6 +183,28 @@ public class ResourceMapper {
 		return (o1 == o2 || (o1 != null && o1.equals(o2)) ) ; 
 	}//EOM 
 	
+	
+    public final Resource mergeVirtualData(ResourceType resourceType, org.hyperic.hq.authz.server.session.Resource backendResource, final Resource resource, Properties cprops) throws AppdefEntityNotFoundException {
+        
+        final HashMap<String,String> configValues = new HashMap<String,String>() ; 
+        
+        String moRefKey = HQConstants.MOREF;
+        String moRef = cprops.getProperty(moRefKey);
+        if (moRef!=null) {
+            configValues.put(moRefKey,moRef);
+        }
+        String vcUuidKey = HQConstants.VCUUID;
+        String vcUuid = cprops.getProperty(vcUuidKey);
+        if (vcUuid!=null) {
+            configValues.put(vcUuidKey,vcUuid);
+        }
+        final ResourceConfig resourceConfig = new ResourceConfig() ;
+        resourceConfig.setMapProps(configValues) ; 
+        resource.setResourceConfig(resourceConfig) ; 
+        
+        return resource ; 
+    }//EOM
+
 	public final Resource mergeConfig(ResourceType resourceType, org.hyperic.hq.authz.server.session.Resource backendResource, final Resource resource, final ConfigSchemaAndBaseResponse[] configResponses, Properties cprops) throws AppdefEntityNotFoundException {
 		if(configResponses == null) return resource ;  
 		
@@ -390,7 +412,7 @@ public class ResourceMapper {
     }
 
     @SuppressWarnings("unchecked")
-    public Resource toChangedResourceContent(ResourceChangedContentNotification n) {
+    public Resource toChangedResourceContent(ResourceDetailsType resourceDetailsType, ResourceChangedContentNotification n) {
         Integer rid = n.getResourceID();
         Resource r = new Resource(String.valueOf(rid));
         
