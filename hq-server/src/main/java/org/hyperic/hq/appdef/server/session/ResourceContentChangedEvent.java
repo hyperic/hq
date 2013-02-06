@@ -6,13 +6,15 @@ import org.hyperic.hq.bizapp.shared.AllConfigDiff;
 
 public class ResourceContentChangedEvent extends InventoryEvent {
     protected Integer resourceID;
+    protected String resourceName;
     protected AllConfigDiff allConfigs;
     protected Map<String, String> cProps;
     
-    public ResourceContentChangedEvent(Integer rid, AllConfigDiff allConfigs, Map<String, String> cProps) {
+    public ResourceContentChangedEvent(Integer rid, String resourceName, AllConfigDiff allConfigs, Map<String, String> cProps) {
         this.resourceID=rid;
         this.allConfigs=allConfigs;
         this.cProps=cProps;
+        this.resourceName=resourceName;
     }
     public Integer getResourceID() {
         return resourceID;
@@ -22,5 +24,8 @@ public class ResourceContentChangedEvent extends InventoryEvent {
     }
     public Map<String, String> getCProps() {
         return this.cProps;
+    }
+    public String getResourceName() {
+        return resourceName;
     }
 }

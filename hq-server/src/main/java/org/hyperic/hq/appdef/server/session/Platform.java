@@ -164,8 +164,9 @@ public class Platform extends PlatformBase
      * Update an existing appdef platform with data from an AI platform.
      * @param aiplatform the AI platform object to use for data
      */
-    void updateWithAI(AIPlatformValue aiplatform, String owner,
+    Resource updateWithAI(AIPlatformValue aiplatform, String owner,
                       Resource resource) {
+        Resource changedResource = null;
         setResource(resource);
         if (aiplatform.getName() != null
             && !aiplatform.getName().equals(getName())) {
@@ -177,6 +178,7 @@ public class Platform extends PlatformBase
                    && getName().equals(getFqdn())) {
             setName(aiplatform.getFqdn());
             resource.setName(aiplatform.getFqdn());
+            changedResource = resource;
         }
         setCertdn(aiplatform.getCertdn());
         setFqdn(aiplatform.getFqdn());
@@ -184,6 +186,7 @@ public class Platform extends PlatformBase
         // setLocation("");
         setCpuCount(aiplatform.getCpuCount());
         setDescription(aiplatform.getDescription());
+        return changedResource;
     }
 
     /**
