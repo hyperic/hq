@@ -1,5 +1,7 @@
 package org.hyperic.hq.notifications.filtering;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -21,21 +23,29 @@ public class ResourceContentFilter extends Filter<ResourceChangedContentNotifica
     }
     @Override
     protected ResourceChangedContentNotification filter(final ResourceChangedContentNotification n) {
-        Map<String,String> props = n.getChangedProps();
+        Map<String,String> filteredProps = new HashMap<String,String>(n.getChangedProps());
         if (this.resourceDetailsType==InternalResourceDetailsType.BASIC) {
-            Set<String> keys = props.keySet();
-            keys.remove(HQConstants.RESOURCE_NAME);
-            filter(props,keys.toArray(new String[] {}));
+            Set<String> filteredPropsKeys = new HashSet<String>(filteredProps.keySet());
+            filteredPropsKeys.remove(HQConstants.RESOURCE_NAME);
+            for(String propToExclude:filteredPropsKeys) {
+                filteredProps.remove(propToExclude);
+            }
         } else if (this.resourceDetailsType==InternalResourceDetailsType.PROPERTIES) {
-            filter(props,new String[] {HQConstants.RESOURCE_NAME});
+            filteredProps.remove(HQConstants.RESOURCE_NAME);
         } else if (this.resourceDetailsType==InternalResourceDetailsType.VIRTUALDATA) {
-            filter(props,new String[] {"Name",HQConstants.VCUUID,HQConstants.MOREF});
+            Set<String> filteredPropsKeys = new HashSet<String>(filteredProps.keySet());
+            filteredPropsKeys.remove(HQConstants.RESOURCE_NAME);
+            filteredPropsKeys.remove(HQConstants.VCUUID);
+            filteredPropsKeys.remove(HQConstants.MOREF);
+            for(String propToExclude:filteredPropsKeys) {
+                filteredProps.remove(propToExclude);
+            }
         } else if (this.resourceDetailsType==InternalResourceDetailsType.ALL) {
             // leave all props as is
         }
         ResourceChangedContentNotification filteredResourceChangedContentNotification = null;
-        if (!props.isEmpty()) {
-            filteredResourceChangedContentNotification = new ResourceChangedContentNotification(n.getResourceID(),props);
+        if (!filteredProps.isEmpty()) {
+            filteredResourceChangedContentNotification = new ResourceChangedContentNotification(n.getResourceID(),filteredProps);
         }
         return filteredResourceChangedContentNotification;
     }

@@ -10,6 +10,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.bizapp.shared.AllConfigDiff;
 import org.hyperic.hq.bizapp.shared.AllConfigResponses;
+import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.notifications.model.CreatedResourceNotification;
 import org.hyperic.hq.notifications.model.ResourceChangedContentNotification;
@@ -33,9 +34,14 @@ public class ResourceContentUpdatedNotificationsZeventListener extends Inventory
     @Override
     protected ResourceChangedContentNotification createNotification(ResourceContentChangedEvent event) {
         Integer rid = event.getResourceID();
+        Map<String,String> configValues = new HashMap<String,String>(); 
+        
+        String changedResourceName = event.getResourceName();
+        if (changedResourceName!=null) {
+            configValues.put(HQConstants.RESOURCE_NAME, changedResourceName);
+        }
         
         AllConfigDiff allConfDiff = event.getAllConfigs();
-        Map<String,String> configValues = new HashMap<String,String>(); 
         if (allConfDiff!=null) {
             String[] cfgTypes = ProductPlugin.CONFIGURABLE_TYPES;
             int numConfigs = cfgTypes.length;

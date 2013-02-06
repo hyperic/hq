@@ -1807,8 +1807,11 @@ public class PlatformManagerImpl implements PlatformManager {
         // Get the FQDN before we update
         String prevFqdn = platform.getFqdn();
 
-        platform.updateWithAI(aiplatform, subj.getName(), platform.getResource());
-
+        Resource changedResource = platform.updateWithAI(aiplatform, subj.getName(), platform.getResource());
+        if (changedResource!=null) {
+            this.zeventManager.enqueueEventAfterCommit(new ResourceContentChangedEvent(changedResource.getId(), changedResource.getName(), null, null));
+        }
+        
         // If FQDN has changed, we need to update servers' auto-inventory tokens
         if (!prevFqdn.equals(platform.getFqdn())) {
             for (Server server : platform.getServers()) {
@@ -2066,7 +2069,7 @@ public class PlatformManagerImpl implements PlatformManager {
                         Map<String,String> changedProps = new HashMap<String,String>();
                         changedProps.put(HQConstants.MOREF,moref);
                         changedProps.put(HQConstants.VCUUID,vcUUID);
-                        ResourceContentChangedEvent contentChangedEvent = new ResourceContentChangedEvent(platform.getId(),null,changedProps);
+                        ResourceContentChangedEvent contentChangedEvent = new ResourceContentChangedEvent(platform.getId(),null,null,changedProps);
                         events.add(contentChangedEvent);
                         platformUUIDUpdated=true;
                     } catch (AppdefEntityNotFoundException e) { log.error(e); }
