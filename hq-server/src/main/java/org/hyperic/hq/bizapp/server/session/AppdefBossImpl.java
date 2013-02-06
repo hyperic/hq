@@ -3089,7 +3089,7 @@ public class AppdefBossImpl implements AppdefBoss {
                 ids.add(entityId);
                 Resource r = this.resourceManager.findResource(entityId);
                 Integer rid = r.getId();
-                ResourceContentChangedEvent contentChangedEvent = new ResourceContentChangedEvent(rid,diff.getAllConfigDiff(),null);
+                ResourceContentChangedEvent contentChangedEvent = new ResourceContentChangedEvent(rid,null,diff.getAllConfigDiff(),null);
                 List<ResourceContentChangedEvent> updateEvents = new ArrayList<ResourceContentChangedEvent>();
                 updateEvents.add(contentChangedEvent);
                 zEventManager.enqueueEventsAfterCommit(updateEvents);

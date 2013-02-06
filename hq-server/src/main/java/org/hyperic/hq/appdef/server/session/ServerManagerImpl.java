@@ -1326,6 +1326,7 @@ public class ServerManagerImpl implements ServerManager {
                 if (!existing.getName().equals(server.getName())) {
                     Resource rv = server.getResource();
                     rv.setName(existing.getName());
+                    this.zeventManager.enqueueEventAfterCommit(new ResourceContentChangedEvent(rv.getId(),rv.getName(), null, null));
                 }
 
                 server.updateServer(existing);
