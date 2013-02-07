@@ -26,6 +26,7 @@
 package org.hyperic.hq.api.services;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -40,9 +41,13 @@ import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourceStatusType;
 import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.api.model.Resources;
+import org.hyperic.hq.api.model.resources.RegisteredResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
+import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.common.NotFoundException;
 
 
 @Path("/") 
@@ -57,14 +62,16 @@ public interface ResourceService {
 			@QueryParam("status") final ResourceStatusType resourceStatusType, @QueryParam("hierarchyDepth") final int hierarchyDepth, 
 			@QueryParam("responseStructure") final ResourceDetailsType[] responseStructure) throws SessionNotFoundException, SessionTimeoutException ;  
 		
-	@GET
+    @GET
 	@Path("/{platformID}")
 	Resource getResource(@PathParam("platformID") final String platformID, 
 			@QueryParam("status") final ResourceStatusType resourceStatusType, @QueryParam("hierarchyDepth") final int hierarchyDepth, 
 			@QueryParam("responseStructure") final ResourceDetailsType[] responseStructure) throws SessionNotFoundException, SessionTimeoutException ;  
 	
-	@GET
-	ResourceBatchResponse getResources() throws SessionNotFoundException, SessionTimeoutException  ;  
+    @POST
+    @Path("/")
+    RegisteredResourceBatchResponse getResources(@QueryParam("responseStructure")  final ResourceDetailsType responseMetadata,
+	        @QueryParam("hierarchyDepth") final int hierarchyDepth, @QueryParam("register") final boolean register, final ResourceFilterRequest resourceFilterRequest) throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException  ;  
 	
 	@POST
 	@Path("/approve")
@@ -75,5 +82,9 @@ public interface ResourceService {
 
 	@PUT
 	@Path("/search")
-	ResourceBatchResponse updateResourcesByCriteria(final Resource updateData) throws SessionNotFoundException, SessionTimeoutException ;  
+	ResourceBatchResponse updateResourcesByCriteria(final Resource updateData) throws SessionNotFoundException, SessionTimeoutException ;
+	
+	@DELETE
+	@Path("/unregister")
+	public void unregister() throws SessionNotFoundException, SessionTimeoutException;
 }//EOC 

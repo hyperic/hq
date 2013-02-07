@@ -57,20 +57,20 @@ ${line.separator}Press enter to continue...
 
   <!-- The server uses a 1.6 JRE. -->
   <target name="pick-server-jre" if="use.builtin.jre">
-    <condition property="jre.tar.name" value="amd64-linux-1.6_33.tar.gz">
-        <available file="${install.dir}/jres/amd64-linux-1.6_33.tar.gz"/>
+    <condition property="jre.tar.name" value="amd64-linux-1.7_9.tar.gz">
+        <available file="${install.dir}/jres/amd64-linux-1.7_9.tar.gz"/>
     </condition>
-    <condition property="jre.tar.name" value="x86-linux-1.6_33.tar.gz">
-        <available file="${install.dir}/jres/x86-linux-1.6_33.tar.gz"/>
+    <condition property="jre.tar.name" value="x86-linux-1.7_9.tar.gz">
+        <available file="${install.dir}/jres/x86-linux-1.7_9.tar.gz"/>
     </condition>
-    <condition property="jre.tar.name" value="sparc-sun-solaris-1.6_30.tar.gz">
-        <available file="${install.dir}/jres/sparc-sun-solaris-1.6_30.tar.gz"/>
+    <condition property="jre.tar.name" value="sparc-sun-solaris-1.7_9.tar.gz">
+        <available file="${install.dir}/jres/sparc-sun-solaris-1.7_9.tar.gz"/>
     </condition>
-    <condition property="jre.exe.name" value="x86-win32-1.6_33.exe">
-        <available file="${install.dir}/jres/x86-win32-1.6_33.exe"/>
+    <condition property="jre.exe.name" value="x86-win32-1.7_9.exe">
+        <available file="${install.dir}/jres/x86-win32-1.7_9.exe"/>
     </condition>
-    <condition property="jre.exe.name" value="x86_64-win-1.6_33.exe">
-        <available file="${install.dir}/jres/x86_64-win-1.6_33.exe"/>
+    <condition property="jre.exe.name" value="x86_64-win-1.7_9.exe">
+        <available file="${install.dir}/jres/x86_64-win-1.7_9.exe"/>
      </condition>
   </target>
 

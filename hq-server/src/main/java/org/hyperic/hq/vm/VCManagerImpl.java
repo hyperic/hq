@@ -5,6 +5,7 @@ import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,12 +33,86 @@ import com.vmware.vim25.mo.ServerConnection;
 import com.vmware.vim25.mo.ServiceInstance;
 import com.vmware.vim25.mo.VirtualMachine;
 
-@Service()
+@Service
 public class VCManagerImpl implements VCManager {
     protected final Log log = LogFactory.getLog(VCManagerImpl.class.getName());
     @Autowired
     protected VCDAO vcDao;
 
+    public Map<VMID,Set<String>> collectUUIDs(ManagedEntity[] mes, String vcUUID) throws RemoteException, MalformedURLException {
+        Map<VMID,Set<String>> vmidToMacsMap = new HashMap<VMID,Set<String>>();
+        // this is done in order to prevent gathering of VMs whichc share identical mac addresses
+        Map<String,VMID> overallMacsSet = new HashMap<String,VMID>();
+        for (ManagedEntity me : mes) {
+            // gather data from the vm
+            VirtualMachine vm = (VirtualMachine)me;
+            GuestNicInfo[] nics = null;
+            try { 
+                String vmName = vm.getName();
+                GuestInfo guest = vm.getGuest();
+                if (guest==null)  {
+                    log.debug("no guest for vm " + vmName);
+                    continue;
+                }
+                nics = guest.getNet();
+                if (nics == null || nics.length==0) {
+                    log.debug("no nics defined on vm " + vmName);
+                    continue;
+                }
+                ManagedObjectReference moref = vm.getMOR();
+                if (moref==null) {
+                    log.debug("no moref is defined for vm " + vmName);
+                    continue;
+                }
+                VMID vmid = new VMID(moref.getVal(),vcUUID);
+
+                // gather macs
+                boolean foundDupMacOnCurrVM = false;
+                for (int i=0; i<nics.length ; i++) {
+                    if (nics[i]==null)  {
+                        log.debug("nic no." + i + " is null on " + vmName);
+                        continue;
+                    }
+                    String mac = nics[i].getMacAddress();
+                    if (mac==null || "00:00:00:00:00:00".equals(mac)) {
+                        log.debug("no mac address / mac address is 00:00:00:00:00:00 on nic" + nics[i] + " of vm " + vmName);
+                        continue;
+                    }
+                    mac = mac.toUpperCase();
+                    VMID dupMacVM = overallMacsSet.get(mac);
+                    if (dupMacVM!=null) {
+                        // mark this VM and the one the 1st duplicate mac is at as illegal as there is another VM with identical mac addresses, and continue collecting the rest of this discovered VMs mac addresses, in order to find duplications on other VMs
+                        foundDupMacOnCurrVM = true;
+                        // remove the other VM with the duplicate mac from the response object, as this is illegal
+                        vmidToMacsMap.remove(dupMacVM);
+                        continue;
+                    }
+                    overallMacsSet.put(mac,vmid);
+                    if (!foundDupMacOnCurrVM) {
+                        Set<String> macs = vmidToMacsMap.get(vmid);
+                        if (macs==null) {
+                            macs = new TreeSet<String>();
+                            vmidToMacsMap.put(vmid,macs);
+                        }
+                        macs.add(mac);
+                    }
+                }
+            } catch (Throwable e) {
+                log.error(e);
+            }
+        }
+        return vmidToMacsMap;
+    }
+    
+    /**
+     * 
+     * @param url
+     * @param usr
+     * @param pass
+     * @return a map of VM IDs mapped to the set of mac addresses of this VM. duplicate macs over VMs is not allowed, so VMs which share identical mac addresses wouldn't be returned.
+     * @throws RemoteException
+     * @throws MalformedURLException
+     */
     protected Map<VMID,Set<String>> collectUUIDs(final String url, final String usr, final String pass) throws RemoteException, MalformedURLException {
         ServiceInstance si = new ServiceInstance(new URL(url), usr, pass, true);
         try {
@@ -50,53 +125,7 @@ public class VCManagerImpl implements VCManager {
                 }
                 return null;
             }
-            Map<VMID,Set<String>> vmidToMacsMap = new HashMap<VMID,Set<String>>();
-            for (Object o : me) {
-                // gather data from the vc
-                VirtualMachine vm = (VirtualMachine)o;
-                GuestNicInfo[] nics = null;
-                try { 
-                    String vmName = vm.getName();
-                    GuestInfo guest = vm.getGuest();
-                    if (guest==null)  {
-                        log.error("no guest for vm " + vmName);
-                        continue;
-                    }
-                    nics = guest.getNet();
-                    if (nics == null || nics.length==0) {
-                        log.error("no nics defined on vm " + vmName);
-                        continue;
-                    }
-                    ManagedObjectReference moref = vm.getMOR();
-                    if (moref==null) {
-                        log.error("no moref is defined for vm " + vmName);
-                        continue;
-                    }
-                    VMID vmid = new VMID(moref.getVal(),vcUUID);
-
-                    // gather macs
-                    for (int i=0; i<nics.length; i++) {
-                        if (nics[i]==null)  {
-                            log.error("nic no." + i + " is null on " + vmName);
-                            continue;
-                        }
-                        String mac = nics[i].getMacAddress();
-                        if (mac==null || "00:00:00:00:00:00".equals(mac)) {
-                            log.error("no mac address / mac address is 00:00:00:00:00:00 on nic" + nics[i] + " of vm " + vmName);
-                            continue;
-                        }
-                        Set<String> macs = vmidToMacsMap.get(vmid);
-                        if (macs==null) {
-                            macs = new TreeSet<String>();
-                            vmidToMacsMap.put(vmid,macs);
-                        }
-                        macs.add(mac.toUpperCase());
-                    }
-                } catch (Throwable e) {
-                    log.error(e);
-                }
-            }
-            return vmidToMacsMap;
+            return collectUUIDs(me, vcUUID);
         } finally {
             if (si!=null) {
                 ServerConnection sc = si.getServerConnection();

@@ -22,9 +22,6 @@ public class MetricFilterRequest {
     @XmlElement(name="metricFilter", namespace=RestApiConstants.SCHEMA_NAMESPACE)
     private MetricFilterDefinition metricFilterDef;
 
-    public static boolean validate(MetricFilterRequest metricFilterRequest) {
-        return metricFilterRequest!=null && ResourceFilterDefinitioin.validate(metricFilterRequest.resourceFilterDef);
-    }
     public ResourceFilterDefinitioin getResourceFilterDefinition() {
         return resourceFilterDef;
     }

@@ -72,6 +72,12 @@ public class DotNetMeasurementPlugin
     }
 
     public String translate(String template, ConfigResponse config) {
+        log.debug("[translate] >> template="+template);
+        for (String key : config.getKeys()) {
+            if(key.toLowerCase().startsWith("app")) {
+                log.debug("[translate]  > "+key+"="+config.getValue(key));
+            }
+        }
         if (!template.startsWith(".NET 4.0 ASP.NET App:pdh:")) {
             final String prop = DotNetDetector.PROP_APP;
             template = StringUtil.replace(template, "__percent__", "%");
@@ -79,6 +85,7 @@ public class DotNetMeasurementPlugin
         } else {
             template = super.translate(template, config);
         }
+        log.debug("[translate] << template="+template);
         return template;
     }
 
@@ -87,6 +94,7 @@ public class DotNetMeasurementPlugin
         String obj = "\\" + metric.getObjectPropString();
         if (!metric.isAvail()) {
             obj += "\\" + metric.getAttributeName();
+            log.info("metric:'" + metric);
         }
         try {
             Double val = new Pdh().getFormattedValue(obj);

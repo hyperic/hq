@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2011], Hyperic, Inc.
+ * Copyright (C) [2004-2013], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -27,42 +27,38 @@ package org.hyperic.hq.plugin.jboss7;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.plugin.jboss7.objects.DataSource;
 import org.hyperic.hq.product.PluginException;
 
 public class DataSourceCollector extends JBoss7DefaultCollector {
 
     private static final Log log = LogFactory.getLog(DataSourceCollector.class);
-    private static final String[] metrics = {
-        "ActiveCount",
-        "AvailableCount",
-        "AverageBlockingTime",
-        "AverageCreationTime",
-        "CreatedCount",
-        "DestroyedCount",
-        "MaxCreationTime",
-        "MaxUsedCount",
-        "MaxWaitCount",
-        "MaxWaitTime",
-        "PreparedStatementCacheAccessCount",
-        "PreparedStatementCacheAddCount",
-        "PreparedStatementCacheCurrentSize",
-        "PreparedStatementCacheDeleteCount",
-        "PreparedStatementCacheHitCount",
-        "PreparedStatementCacheMissCount",
-        "TimedOut",
-        "TotalBlockingTime",
-        "TotalCreationTime"
-    };
 
     @Override
     public void collect(JBossAdminHttp admin) {
         String ds = (String) getProperties().get("datasource");
         try {
-            Map<String, String> datasource = admin.getDatasource(ds, true);
-            setAvailability(datasource.get("enabled").equalsIgnoreCase("true"));
-            for (String metric : metrics) {
-                setValue(metric, datasource.get(metric));
-            }
+            DataSource datasource = admin.getDatasource(ds, true, getPlugin().getTypeInfo().getVersion());
+            setAvailability(datasource.isEnabled());
+            setValue("ActiveCount", datasource.getActiveCount());
+            setValue("AvailableCount", datasource.getAvailableCount());
+            setValue("AverageBlockingTime", datasource.getAverageBlockingTime());
+            setValue("AverageCreationTime", datasource.getAverageCreationTime());
+            setValue("CreatedCount", datasource.getCreatedCount());
+            setValue("DestroyedCount", datasource.getDestroyedCount());
+            setValue("MaxCreationTime", datasource.getMaxCreationTime());
+            setValue("MaxUsedCount", datasource.getMaxUsedCount());
+            setValue("MaxWaitCount", datasource.getMaxWaitCount());
+            setValue("MaxWaitTime", datasource.getMaxWaitTime());
+            setValue("PreparedStatementCacheAccessCount", datasource.getPreparedStatementCacheAccessCount());
+            setValue("PreparedStatementCacheAddCount", datasource.getPreparedStatementCacheAddCount());
+            setValue("PreparedStatementCacheCurrentSize", datasource.getPreparedStatementCacheCurrentSize());
+            setValue("PreparedStatementCacheDeleteCount", datasource.getPreparedStatementCacheDeleteCount());
+            setValue("PreparedStatementCacheHitCount", datasource.getPreparedStatementCacheHitCount());
+            setValue("PreparedStatementCacheMissCount", datasource.getPreparedStatementCacheMissCount());
+            setValue("TimedOut", datasource.getTimedOut());
+            setValue("TotalBlockingTime", datasource.getTotalBlockingTime());
+            setValue("TotalCreationTime", datasource.getTotalCreationTime());
         } catch (PluginException ex) {
             setAvailability(false);
             log.debug(ex.getMessage(), ex);

@@ -49,6 +49,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
+import org.hyperic.hq.appdef.shared.AgentUnauthorizedException;
 import org.hyperic.hq.bizapp.server.session.LatherDispatcher;
 import org.hyperic.hq.bizapp.shared.lather.AiPlatformLatherValue;
 import org.hyperic.hq.bizapp.shared.lather.CommandInfo;
@@ -308,9 +309,11 @@ public class LatherServlet extends HttpServlet {
             
             } catch(Exception e) {
                 Throwable cause = e.getCause();
-                if (e instanceof DataInserterException || (cause != null && cause instanceof DataInserterException)) {
-                    // no need to log a full stack trace for this issue, the agent will resend the metric payload at
-                    // some point.
+                // no need to log a full stack trace for known exceptions
+                if (e instanceof AgentUnauthorizedException || (cause != null && cause instanceof AgentUnauthorizedException)) {
+                    log.warn("unauthorized agent: " + e + ", ip=" + ctx.getCallerIP());
+                    log.debug(e,e);
+                } else if (e instanceof DataInserterException || (cause != null && cause instanceof DataInserterException)) {
                     log.warn(e);
                     log.debug(e,e);
                 } else {

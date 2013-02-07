@@ -2,20 +2,18 @@ package org.hyperic.hq.notifications.model;
 
 import org.hyperic.hq.product.MetricValue;
 
-public class MetricNotification implements INotification {
-    public Integer getMeasurementId() {
-        return measurementId;
-    }
-    public MetricNotification(Integer resourceId, Integer measurementId, MetricValue metricVal) {
+public class MetricNotification extends BaseNotification {
+    protected Integer resourceID;
+    protected Integer measurementID;
+    protected MetricValue metricVal;
+    protected String measurementName;
+    
+    public MetricNotification(Integer resourceID,Integer measurementID, String measurementName, MetricValue metricVal) {
         super();
-        this.measurementId = measurementId;
+        this.resourceID = resourceID;
+        this.measurementID=measurementID;
         this.metricVal = metricVal;
-    }
-    public Integer metricNotification() {
-        return measurementId;
-    }
-    public void setMeasurementId(Integer measurementId) {
-        this.measurementId = measurementId;
+        this.measurementName=measurementName;
     }
     public MetricValue getMetricVal() {
         return metricVal;
@@ -23,6 +21,13 @@ public class MetricNotification implements INotification {
     public void setMetricVal(MetricValue metricVal) {
         this.metricVal = metricVal;
     }
-    protected Integer measurementId;
-    protected MetricValue metricVal;
+    public String getMeasurementName() {
+        return this.measurementName;
+    }
+    public Integer getResourceID() {
+        return this.resourceID;
+    }
+    public Integer getMeasurementId() {
+        return this.measurementID;
+    }
 }

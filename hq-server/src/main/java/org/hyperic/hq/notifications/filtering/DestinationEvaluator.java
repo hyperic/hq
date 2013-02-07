@@ -15,11 +15,10 @@ import javax.jms.ObjectMessage;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.measurement.server.session.ReportProcessorImpl;
-import org.hyperic.hq.notifications.model.INotification;
+import org.hyperic.hq.notifications.model.BaseNotification;
 
-public abstract class DestinationEvaluator<N extends INotification> {
-    private final Log log = LogFactory.getLog(ReportProcessorImpl.class);
+public abstract class DestinationEvaluator<N extends BaseNotification> {
+    private final Log log = LogFactory.getLog(DestinationEvaluator.class);
     // TODO~ change to write through versioning (each node would have versioning - write on one version, read another, then sync between them), o/w will pose problems in scale
     protected Map<Destination,FilterChain<N>> destToFilter = new ConcurrentHashMap<Destination,FilterChain<N>>();
 

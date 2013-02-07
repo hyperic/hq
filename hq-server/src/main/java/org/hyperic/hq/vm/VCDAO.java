@@ -1,6 +1,7 @@
 package org.hyperic.hq.vm;
 
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

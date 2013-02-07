@@ -18,6 +18,7 @@ import org.apache.cxf.jaxrs.model.wadl.Description;
 import org.apache.cxf.jaxrs.model.wadl.Descriptions;
 import org.apache.cxf.jaxrs.model.wadl.DocTarget;
 import org.hibernate.ObjectNotFoundException;
+import org.hyperic.hq.api.model.NotificationsReport;
 import org.hyperic.hq.api.model.common.RegistrationID;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MetricFilterRequest;
@@ -63,10 +64,6 @@ public interface MetricService {
             @QueryParam("begin") final Date begin, 
             @QueryParam("end") final Date end) 
                     throws ParseException, PermissionException, SessionNotFoundException, SessionTimeoutException, ObjectNotFoundException, UnsupportedOperationException, SQLException;
-
-    @GET
-    @Path("/poll")
-    public MetricNotifications poll() throws SessionNotFoundException, SessionTimeoutException;
 
     @POST
     @Path("/register")

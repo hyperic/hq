@@ -143,4 +143,5 @@ public class HQConstants {
     
     public static final String MOREF = "MOREF";
     public static final String VCUUID = "VCUUID";
+    public static final String RESOURCE_NAME = "resource name";
 }
