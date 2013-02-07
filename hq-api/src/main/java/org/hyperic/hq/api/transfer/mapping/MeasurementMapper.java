@@ -80,7 +80,8 @@ public class MeasurementMapper {
         MetricValue hqMetric = mn.getMetricVal();
         metric.setValue(Double.valueOf(df.format(hqMetric.getValue())));
         metric.setTimestamp(hqMetric.getTimestamp());
-        metric.setMeasurementId(mn.getMeasurementId());
+        metric.setResourceID(mn.getResourceID());
+        metric.setMeasurementName(mn.getMeasurementName());
         return metric;
     }
     public List<RawMetric> toMetricsWithId(final List<MetricNotification> mns) {
