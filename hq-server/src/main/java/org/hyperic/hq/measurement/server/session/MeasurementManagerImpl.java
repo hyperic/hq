@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.PreDestroy;
 
@@ -42,6 +43,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
 import org.hibernate.UnresolvableObjectException;
+import org.hyperic.hq.agent.server.session.AgentDataTransferJob;
+import org.hyperic.hq.agent.server.session.AgentSynchronizer;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
@@ -76,7 +79,6 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementCreateException;
@@ -153,6 +155,8 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 	private AvailabilityManager availabilityManager;
     @Autowired
     private MeasurementInserterHolder measurementInserterHolder;
+    @Autowired
+    private AgentSynchronizer agentSynchronizer;
 
     // TODO: Resolve circular dependency with ProductManager
     private MeasurementPluginManager getMeasurementPluginManager() throws Exception {
@@ -499,7 +503,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
         log.info("Getting live measurements for " + dsns.length + " measurements");
         try {
-            getLiveMeasurementValues(id, dsns);
+            getLiveMeasurementValues(id, dsns, true);
         } catch (LiveMeasurementException e) {
             log.info("Resource " + id + " reports it is unavailable, setting " + "measurement ID " +
                      availMeasurement + " to DOWN: " + e);
@@ -1663,11 +1667,9 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
      * 
      */
     @Transactional(readOnly = true)
-    public void checkConfiguration(AuthzSubject subject, AppdefEntityID entity,
-                                   ConfigResponse config) throws PermissionException,
-        InvalidConfigException, AppdefEntityNotFoundException {
+    public void checkConfiguration(AuthzSubject subject, AppdefEntityID entity, ConfigResponse config, boolean priority)
+    throws PermissionException, InvalidConfigException, AppdefEntityNotFoundException {
         String[] templates = getTemplatesToCheck(subject, entity);
-
         // there are no metric templates, just return
         if (templates.length == 0) {
             log.debug("No metrics to checkConfiguration for " + entity);
@@ -1675,14 +1677,12 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         } else {
             log.debug("Using " + templates.length + " metrics to checkConfiguration for " + entity);
         }
-
         String[] dsns = new String[templates.length];
         for (int i = 0; i < dsns.length; i++) {
             dsns[i] = translate(templates[i], config);
         }
-
         try {
-            getLiveMeasurementValues(entity, dsns);
+            getLiveMeasurementValues(entity, dsns, priority);
         } catch (LiveMeasurementException exc) {
             throw new InvalidConfigException("Invalid configuration: " + exc.getMessage(), exc);
         }
@@ -1712,18 +1712,73 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
      * 
      * @param entity Entity to get the measurement values from
      * @param dsns Translated DSNs to fetch from the entity
+     * @param priority tells the {@link AgentSynchronizer} to execute this task immediately rather than queuing it.
+     * Typically set priority = false for background tasks
      * 
      * @return A list of MetricValue objects for each DSN passed
      */
-    private MetricValue[] getLiveMeasurementValues(AppdefEntityID entity, String[] dsns)
-        throws LiveMeasurementException, PermissionException {
+    private MetricValue[] getLiveMeasurementValues(AppdefEntityID entity, String[] dsns, boolean priority)
+    throws LiveMeasurementException, PermissionException {
         try {
             Agent a = agentManager.getAgent(entity);
-            return agentMonitor.getLiveValues(a, dsns);
+            LiveValuesAgentDataJob job = new LiveValuesAgentDataJob(a, dsns);
+            agentSynchronizer.addAgentJob(job, priority);
+            job.waitForJob();
+            if (job.wasSuccessful()) {
+                return job.values;
+            } else {
+                throw new LiveMeasurementException(job.failureEx);
+            }
         } catch (AgentNotFoundException e) {
             throw new LiveMeasurementException(e.getMessage(), e);
-        } catch (MonitorAgentException e) {
-            throw new LiveMeasurementException(e.getMessage(), e);
+        }
+    }
+    
+    private class LiveValuesAgentDataJob implements AgentDataTransferJob {
+        private final String[] dsns;
+        private final Agent agent;
+        private final AtomicBoolean success = new AtomicBoolean(false);
+        private MetricValue[] values;
+        private final Object obj = new Object();
+        private Exception failureEx;
+        private LiveValuesAgentDataJob(final Agent a, final String[] dsns) {
+            this.agent = a;
+            this.dsns = dsns;
+        }
+        public boolean wasSuccessful() {
+            return success.get();
+        }
+        public void onFailure() {
+        }
+        public String getJobDescription() {
+            return "getLiveMeasurementValues";
+        }
+        public int getAgentId() {
+            return agent.getId();
+        }
+        public void execute() {
+            try {
+                values = agentMonitor.getLiveValues(agent, dsns);
+                success.set(true);
+            } catch (MonitorAgentException e) {
+                success.set(false);
+                failureEx = e;
+            } catch (LiveMeasurementException e) {
+                success.set(false);
+                failureEx = e;
+            } finally {
+                synchronized (obj) {
+                    obj.notify();
+                }
+            }
+        }
+        private void waitForJob() {
+            try {
+                synchronized (obj) {
+                    obj.wait();
+                }
+            } catch (InterruptedException e) {
+            }
         }
     }
 
@@ -1764,7 +1819,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         // Check the configuration
         if (verify) {
             try {
-                checkConfiguration(subj, id, config);
+                checkConfiguration(subj, id, config, true);
             } catch (InvalidConfigException e) {
                 log.warn("Error turning on default metrics, configuration (" + config + ") " +
                          "couldn't be validated", e);

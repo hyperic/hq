@@ -372,9 +372,8 @@ public interface MeasurementManager {
      * @param entity Entity to check the configuration for
      * @param config Configuration to check
      */
-    public void checkConfiguration(AuthzSubject subject, AppdefEntityID entity,
-                                   ConfigResponse config) throws PermissionException,
-        InvalidConfigException, AppdefEntityNotFoundException;
+    public void checkConfiguration(AuthzSubject subject, AppdefEntityID entity, ConfigResponse config, boolean priority)
+    throws PermissionException, InvalidConfigException, AppdefEntityNotFoundException;
 
     public List<Measurement> getMeasurements(Integer[] tids, Integer[] aeids);
 

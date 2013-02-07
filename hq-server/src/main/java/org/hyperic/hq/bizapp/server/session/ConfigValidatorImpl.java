@@ -84,7 +84,7 @@ public class ConfigValidatorImpl implements ConfigValidator {
                 responses[i] = configManager.getMergedConfigResponse(subject, ProductPlugin.TYPE_MEASUREMENT, ids[i],
                     true);
 
-                measurementManager.checkConfiguration(subject, ids[i], responses[i]);
+                measurementManager.checkConfiguration(subject, ids[i], responses[i], true);
             } catch (ConfigFetchException exc) {
                 responses[i] = null;
             }
