@@ -68,7 +68,6 @@
 		<module>sybase-plugin</module>
 		<module>system-plugin</module>
 		<module>tomcat-plugin</module>
-		<module>top-plugin</module>
 		<module>vim-plugin</module>
 		<module>vmware-plugin</module>
 		<module>vsphere-plugin</module>
