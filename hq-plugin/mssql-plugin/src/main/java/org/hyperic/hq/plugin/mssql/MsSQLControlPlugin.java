@@ -71,10 +71,12 @@ public class MsSQLControlPlugin extends Win32ControlPlugin{
                 return;
             }
             if (action.equals("restart")) {
-                if (null != sqlAgent) {
+                if (null != sqlAgent && isRunning(sqlAgent)) {              
                     sqlAgent.stop((long)getTimeoutMillis());
                 }
-                svc.stop((long)getTimeoutMillis());
+                if (isRunning()){
+                    svc.stop((long)getTimeoutMillis());
+                }
                 //starting the SQL agent service will also start the server
                 if (null != sqlAgent) {
                     sqlAgent.start();
