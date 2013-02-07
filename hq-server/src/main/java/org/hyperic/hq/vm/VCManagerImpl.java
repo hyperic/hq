@@ -59,17 +59,17 @@ public class VCManagerImpl implements VCManager {
                     String vmName = vm.getName();
                     GuestInfo guest = vm.getGuest();
                     if (guest==null)  {
-                        log.error("no guest for vm " + vmName);
+                        log.debug("no guest for vm " + vmName);
                         continue;
                     }
                     nics = guest.getNet();
                     if (nics == null || nics.length==0) {
-                        log.error("no nics defined on vm " + vmName);
+                        log.debug("no nics defined on vm " + vmName);
                         continue;
                     }
                     ManagedObjectReference moref = vm.getMOR();
                     if (moref==null) {
-                        log.error("no moref is defined for vm " + vmName);
+                        log.debug("no moref is defined for vm " + vmName);
                         continue;
                     }
                     VMID vmid = new VMID(moref.getVal(),vcUUID);
@@ -77,12 +77,12 @@ public class VCManagerImpl implements VCManager {
                     // gather macs
                     for (int i=0; i<nics.length; i++) {
                         if (nics[i]==null)  {
-                            log.error("nic no." + i + " is null on " + vmName);
+                            log.debug("nic no." + i + " is null on " + vmName);
                             continue;
                         }
                         String mac = nics[i].getMacAddress();
                         if (mac==null || "00:00:00:00:00:00".equals(mac)) {
-                            log.error("no mac address / mac address is 00:00:00:00:00:00 on nic" + nics[i] + " of vm " + vmName);
+                            log.debug("no mac address / mac address is 00:00:00:00:00:00 on nic" + nics[i] + " of vm " + vmName);
                             continue;
                         }
                         Set<String> macs = vmidToMacsMap.get(vmid);
@@ -93,7 +93,7 @@ public class VCManagerImpl implements VCManager {
                         macs.add(mac.toUpperCase());
                     }
                 } catch (Throwable e) {
-                    log.error(e);
+                    log.error(e,e);
                 }
             }
             return vmidToMacsMap;
@@ -153,6 +153,7 @@ public class VCManagerImpl implements VCManager {
         try{
             new ServiceInstance(new URL(url), user, password, true);
         }catch(Throwable t) {
+            log.error(t);
             return false;
         }
         return true;

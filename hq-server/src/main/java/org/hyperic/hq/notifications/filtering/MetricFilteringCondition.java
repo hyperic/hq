@@ -18,7 +18,7 @@ public class MetricFilteringCondition extends FilteringCondition<Measurement> {
     public boolean equals(Object obj) {
         if(this == obj) return true;
         if(obj == null) return false;
-        if(getClass() != obj.getClass()) return false;
+        if(!(obj instanceof MetricFilteringCondition)) return false;
         MetricFilteringCondition other = (MetricFilteringCondition) obj;
         if(isIndicator == null) {
             if(other.isIndicator != null) return false;
