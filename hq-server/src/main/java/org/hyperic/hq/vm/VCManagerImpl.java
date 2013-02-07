@@ -143,7 +143,7 @@ public class VCManagerImpl implements VCManager {
                     return vmid;
                 }
             } catch (DupMacException e) {
-                log.error(e);
+                log.error(e,e);
             }
         }
         return null;
@@ -152,8 +152,8 @@ public class VCManagerImpl implements VCManager {
     public boolean validateVCSettings(String url, String user, String password) {
         try{
             new ServiceInstance(new URL(url), user, password, true);
-        }catch(Throwable t) {
-            log.error(t);
+        }catch(Exception e) {
+            log.error(e,e);
             return false;
         }
         return true;

@@ -19,7 +19,7 @@ public class ResourceFilteringCondition<E extends Resource> extends FilteringCon
     public boolean equals(Object obj) {
         if(this == obj) return true;
         if(obj == null) return false;
-        if(getClass() != obj.getClass()) return false;
+        if(obj instanceof ResourceFilteringCondition) {return false;}
         ResourceFilteringCondition other = (ResourceFilteringCondition) obj;
         if(name == null) {
             if(other.name != null) return false;
