@@ -121,7 +121,11 @@ public class Win32ControlPlugin extends ControlPlugin {
     }
 
     protected boolean isRunning() {
-        String resp = detectState();
+        return isRunning(this.svc);
+    }
+    
+    protected boolean isRunning(Service service) {
+        String resp = detectState(service);
         // This is kind of bogus, but Windows service's don't match
         // exactly to our model, so anything other than STOPPED or
         // UNKNOWN is running.
@@ -141,8 +145,8 @@ public class Win32ControlPlugin extends ControlPlugin {
     // have to overload this method.  To take Apache as an example, 
     // during a restart Apache will return START_PENDING to the service
     // manager, so detectState will return STATE_STARTING.
-    protected String detectState() {
-        switch (svc.getStatus()) {
+    protected String detectState(Service service) {
+        switch (service.getStatus()) {
             case Service.SERVICE_START_PENDING:
                 return STATE_STARTING;
             case Service.SERVICE_STOPPED:
@@ -197,7 +201,9 @@ public class Win32ControlPlugin extends ControlPlugin {
                 return;
             }
             if (action.equals("restart")) {
-                svc.stop((long)getTimeoutMillis());
+                if (isRunning()){
+                    svc.stop((long)getTimeoutMillis());
+                }
                 svc.start();
                 setResult(RESULT_SUCCESS);
                 return;
