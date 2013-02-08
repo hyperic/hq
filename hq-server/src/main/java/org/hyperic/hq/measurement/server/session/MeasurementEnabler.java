@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2013], VMware, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -33,11 +33,11 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.HibernateException;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
-import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.appdef.server.session.ResourceZevent;
+import org.hyperic.hq.common.shared.TransactionRetry;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
@@ -45,17 +45,18 @@ import org.hyperic.hq.zevents.ZeventListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 @Component
-public class MeasurementEnabler 
-    implements ZeventListener
-{
+public class MeasurementEnabler implements ZeventListener<ResourceZevent> {
     private final Log log = LogFactory.getLog(MeasurementEnabler.class.getName());
     private MeasurementManager measurementManager;
     private ZeventEnqueuer zEventManager;
+    private TransactionRetry transactionRetry;
     
     @Autowired
-    public MeasurementEnabler(MeasurementManager measurementManager, ZeventEnqueuer zEventManager) {
+    public MeasurementEnabler(MeasurementManager measurementManager, ZeventEnqueuer zEventManager,
+                              TransactionRetry transactionRetry) {
         this.measurementManager = measurementManager;
         this.zEventManager = zEventManager;
+        this.transactionRetry = transactionRetry;
     }
     
     @PostConstruct
@@ -71,35 +72,16 @@ public class MeasurementEnabler
         zEventManager.addBufferedListener(listenEvents, this);
     }
 
-    public void processEvents(List e) {
-        
+    public void processEvents(final List<ResourceZevent> e) {
         if (log.isDebugEnabled()) {
             log.debug("handling refresh event list size=" + e.size());
         }
-        
-        int tries = 0;
-        int MAX_RETRIES = 5;
-        Exception exc = null;
-        while (tries++ < MAX_RETRIES) {
-            try {
+        final Runnable runner = new Runnable() {
+            public void run() {
                 measurementManager.handleCreateRefreshEvents(e);
-                exc = null;
-                break;
-            } catch (HibernateException ex) {
-                exc = ex;
-                log.debug("(retrying cmd, may be fine) " + ex,ex);
             }
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException ex) {
-                exc = ex;
-                break;
-            }
-        }
-        if (exc != null) {
-            throw new SystemException(
-                exc.getMessage() + ", retried " + MAX_RETRIES + " times", exc);
-        }
+        };
+        transactionRetry.runTransaction(runner, 5, 1000);
     }
     
     public String toString() {
