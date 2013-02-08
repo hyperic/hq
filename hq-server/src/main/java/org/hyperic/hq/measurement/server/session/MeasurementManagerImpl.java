@@ -285,15 +285,18 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     /**
      * Create Measurements and enqueue for scheduling after commit
      */
-    public List<Measurement> createMeasurements(AuthzSubject subject, AppdefEntityID id,
+    public List<Measurement> createMeasurements(AuthzSubject subject, AppdefEntityID aeid,
                                                 Integer[] templates, long[] intervals,
-                                                ConfigResponse props)
+                                                ConfigResponse config)
     throws PermissionException, MeasurementCreateException, TemplateNotFoundException {
         // Authz check
-        permissionManager.checkModifyPermission(subject.getId(), id);
+        permissionManager.checkModifyPermission(subject.getId(), aeid);
         Reference<Boolean> updated = new Reference<Boolean>(false);
-        List<Measurement> dmList = createOrUpdateMeasurements(id, templates, intervals, props, updated);
-        srnManager.scheduleInBackground(Collections.singletonList(id), true, updated.get());
+        List<Measurement> dmList = createOrUpdateMeasurements(aeid, templates, intervals, config, updated);
+        if (log.isDebugEnabled()) {
+            log.debug("scheduling measurements for aeid=" + aeid + ", config=" + config);
+        }
+        srnManager.scheduleInBackground(Collections.singletonList(aeid), true, updated.get());
         return dmList;
     }
 
@@ -1544,8 +1547,8 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
         for (ResourceZevent z : events) {
             AuthzSubject subject = authzSubjectManager.findSubjectById(z.getAuthzSubjectId());
-            AppdefEntityID id = z.getAppdefEntityID();
-            final Resource r = resourceManager.findResource(id);
+            AppdefEntityID aeid = z.getAppdefEntityID();
+            final Resource r = resourceManager.findResource(aeid);
             if (r == null || r.isInAsyncDeleteState()) {
                 continue;
             }
@@ -1560,40 +1563,41 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             boolean isUpdate = z instanceof ResourceUpdatedZevent;
 
             try {
+                ConfigResponse config =
+                    configManager.getMergedConfigResponse(subject, ProductPlugin.TYPE_MEASUREMENT, aeid, true);
+                boolean verifyConfig = true;
             	if (isCreate) {
-            		//If this is the creation of a new measurement we will wait for 2 seconds
-            		//so that when we will call the getMergedConfigResponse() method for this resource all
-            		//the information will be there. Fix for Jira bug [HQ-3876]
-            		try{
-            			Thread.sleep(2000);
-            		}
-            		catch (Exception e) {
-            		}
-            	}
-            	// Handle reschedules for when agents are updated.
-            	if (isUpdate) {
-                    if (debug) log.debug("Updated metric schedule for [" + id + "]");
-                    eids.add(id);
-                }
-                if (isRefresh) {
-                    if(debug) log.debug("Refreshing metric schedule for [" + id + "]");
-                    eids.add(id);
+                    if (config == null || config.size() == 0) {
+                        //If this is the creation of a new measurement we will wait for 2 seconds
+                        //so that when we will call the getMergedConfigResponse() method for this resource all
+                        //the information will be there. Fix for Jira bug [HQ-3876]
+                        try{
+                            Thread.sleep(2000);
+                        } catch (InterruptedException e) {
+                        }
+                        config = configManager.getMergedConfigResponse(subject, ProductPlugin.TYPE_MEASUREMENT, aeid, true);
+                    }
+            	} else if (isUpdate) {
+            	    verifyConfig = ((ResourceUpdatedZevent) z).verifyConfig();
+                    if (debug) log.debug("Updated metric schedule for [" + aeid + "]");
+                    eids.add(aeid);
+                } else if (isRefresh) {
+                    if(debug) log.debug("Refreshing metric schedule for [" + aeid + "]");
+                    eids.add(aeid);
                     continue;
                 }
 
                 // For either create or update events, schedule the default
                 // metrics
-                ConfigResponse c = configManager.getMergedConfigResponse(subject,
-                    ProductPlugin.TYPE_MEASUREMENT, id, true);
-                if (getEnabledMetricsCount(subject, id) == 0) {
-                    if (debug) log.debug("Enabling default metrics for [" + id + "]");
-                    List<Measurement> metrics = enableDefaultMetrics(subject, id, c, true);
+                if (getEnabledMetricsCount(subject, aeid) == 0) {
+                    if (debug) log.debug("Enabling default metrics for [" + aeid + "]");
+                    List<Measurement> metrics = enableDefaultMetrics(subject, aeid, config, verifyConfig);
                     if (!metrics.isEmpty()) {
-                        eids.add(id);
+                        eids.add(aeid);
                     }
                 } else {
                     // Update the configuration
-                    updateMeasurements(subject, id, c);
+                    updateMeasurements(subject, aeid, config);
                 }
 
                 if (isCreate) {
@@ -1602,13 +1606,13 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                     // enable log or config tracking for update events since
                     // in the callback we don't know if that flag has changed.
                     // TODO break circular dep preventing DI of TrackerManager
-                    applicationContext.getBean(TrackerManager.class).enableTrackers(subject, id, c);
+                    applicationContext.getBean(TrackerManager.class).enableTrackers(subject, aeid, config);
                 }
 
             } catch (ConfigFetchException e) {
-                log.warn("Config not set for [" + id + "] (this is usually ok): " + e);
+                log.warn("Config not set for [" + aeid + "] (this is usually ok): " + e);
             } catch (Exception e) {
-                log.warn("Unable to enable default metrics for [" + id + "]", e);
+                log.warn("Unable to enable default metrics for [" + aeid + "]", e);
             } 
         }
         srnManager.scheduleInBackground(eids, true, false);
@@ -1724,7 +1728,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             LiveValuesAgentDataJob job = new LiveValuesAgentDataJob(a, dsns);
             agentSynchronizer.addAgentJob(job, priority);
             job.waitForJob();
-            if (job.wasSuccessful()) {
+            if (job.values != null) {
                 return job.values;
             } else {
                 throw new LiveMeasurementException(job.failureEx);
@@ -1759,14 +1763,13 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         public void execute() {
             try {
                 values = agentMonitor.getLiveValues(agent, dsns);
-                success.set(true);
             } catch (MonitorAgentException e) {
-                success.set(false);
                 failureEx = e;
             } catch (LiveMeasurementException e) {
-                success.set(false);
                 failureEx = e;
             } finally {
+                // always set success true since we don't want to retry
+                success.set(true);
                 synchronized (obj) {
                     obj.notify();
                 }
@@ -1793,7 +1796,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
      *  @return {@link List} of {@link Measurement}s
      */
     private List<Measurement> enableDefaultMetrics(AuthzSubject subj, AppdefEntityID id, ConfigResponse config,
-                                                   boolean verify)
+                                                   boolean verifyConfig)
     throws AppdefEntityNotFoundException, PermissionException {
         List<Measurement> rtn = new ArrayList<Measurement>(0);
         String mtype;
@@ -1817,7 +1820,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         }
 
         // Check the configuration
-        if (verify) {
+        if (verifyConfig) {
             try {
                 checkConfiguration(subj, id, config, true);
             } catch (InvalidConfigException e) {
