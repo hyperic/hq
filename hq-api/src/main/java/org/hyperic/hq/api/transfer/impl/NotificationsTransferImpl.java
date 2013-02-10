@@ -43,7 +43,7 @@ public class NotificationsTransferImpl implements NotificationsTransfer {
     @Transactional (readOnly=true)
     public NotificationsReport poll(ApiMessageContext apiMessageContext, Integer regID) throws UnregisteredException {
         Destination dest = this.dummyDestination;
-        if (dest==null) {
+        if (dest==null || regID==null) {
             throw new UnregisteredException();
         }
         InternalNotificationReport inr = this.q.poll(regID);

@@ -45,7 +45,7 @@ public abstract class BaseNotificationsZeventListener<E extends Zevent,N extends
         List<N> ns = extract(events);
         List<NotificationGroup> nsGrp = null;
         try {
-            nsGrp = this.getEvaluator().evaluate(ns);
+            nsGrp = this.getEvaluator().evaluate(ns,getEntityType());
             this.q.publish(nsGrp);
         }catch(Throwable e) {
             log.error(e);
@@ -61,4 +61,5 @@ public abstract class BaseNotificationsZeventListener<E extends Zevent,N extends
         }
         concurrentStatsCollector.addStat(end-start, getConcurrentStatsCollectorType());
     }
+    protected abstract Class<? extends BaseNotification> getEntityType();
 }

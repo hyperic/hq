@@ -18,14 +18,14 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 public interface NotificationsService {
     @PUT
-    @Path("/")
+    @Path("/{regID}")
     public void refresh(@PathParam("regID") final Integer regID) throws SessionNotFoundException, SessionTimeoutException;
     
     @GET
-    @Path("/")
+    @Path("/{regID}")
     public NotificationsReport poll(@PathParam("regID") Integer regID) throws SessionNotFoundException, SessionTimeoutException;
 
     @DELETE
-    @Path("/")
+    @Path("/{regID}")
     public void unregister(@PathParam("regID") Integer regID) throws SessionNotFoundException, SessionTimeoutException;
 }

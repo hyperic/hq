@@ -13,6 +13,7 @@ import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZe
 import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZeventSource;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.notifications.filtering.DestinationEvaluator;
+import org.hyperic.hq.notifications.model.BaseNotification;
 import org.hyperic.hq.notifications.model.MetricNotification;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
@@ -67,5 +68,9 @@ public class OutgoingMetricZeventListener extends BaseNotificationsZeventListene
     @Override
     protected DestinationEvaluator getEvaluator() {
         return this.evaluator;
+    }
+    @Override
+    protected Class<? extends BaseNotification> getEntityType() {
+        return MetricNotification.class;
     }
 }

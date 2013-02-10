@@ -161,7 +161,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         }
         this.isRegistered=true;
         Destination dest = this.notificationsTransfer.getDummyDestination();
-        Integer regID = this.evaluator.register(userFilters);
+        Integer regID = this.evaluator.register(MetricNotification.class,userFilters);
         this.q.register(dest,regID,null);
         
         return new RegistrationID(regID);
@@ -169,7 +169,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     public void unregister(Integer regID) {
         Destination dest = this.notificationsTransfer.getDummyDestination();
         this.q.unregister(regID);
-        this.evaluator.unregisterAll(regID);
+        this.evaluator.unregister(regID);
         this.isRegistered=false;
     }
     public MetricResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest hqMsmtReq, 

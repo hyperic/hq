@@ -643,7 +643,7 @@ public class ResourceTransferImpl implements ResourceTransfer{
 
             //TODO~ get the destination from the user
             Destination dest = this.notificationsTransfer.getDummyDestination();
-            Integer regID = this.evaluator.register(userFilters);
+            Integer regID = this.evaluator.register(InventoryNotification.class,userFilters);
             this.q.register(dest,regID, ResourceDetailsType.valueOf(responseMetadata));
             //TODO~ return a valid registration id
             res.setRegId(new RegistrationID(regID));
@@ -653,7 +653,7 @@ public class ResourceTransferImpl implements ResourceTransfer{
     public void unregister(Integer regID) {
         Destination dest = this.notificationsTransfer.getDummyDestination();
         this.q.unregister(regID);
-        this.evaluator.unregisterAll(regID);
+        this.evaluator.unregister(regID);
         this.isRegistered=false;
     }
     public ResourceMapper getResourceMapper() {

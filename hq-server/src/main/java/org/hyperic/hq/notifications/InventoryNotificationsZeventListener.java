@@ -7,6 +7,7 @@ import java.util.List;
 import org.hyperic.hq.appdef.server.session.InventoryEvent;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.notifications.filtering.DestinationEvaluator;
+import org.hyperic.hq.notifications.model.BaseNotification;
 import org.hyperic.hq.notifications.model.InventoryNotification;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,5 +36,9 @@ public abstract class InventoryNotificationsZeventListener<E extends InventoryEv
             ns.add(n);
         }
         return ns;
-    } 
+    }
+    @Override
+    protected Class<? extends BaseNotification> getEntityType() {
+        return InventoryNotification.class;
+    }
 }

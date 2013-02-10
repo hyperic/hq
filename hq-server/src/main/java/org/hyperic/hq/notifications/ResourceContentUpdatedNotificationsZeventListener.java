@@ -12,6 +12,7 @@ import org.hyperic.hq.bizapp.shared.AllConfigDiff;
 import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.notifications.model.BaseNotification;
 import org.hyperic.hq.notifications.model.CreatedResourceNotification;
 import org.hyperic.hq.notifications.model.ResourceChangedContentNotification;
 import org.hyperic.hq.product.ProductPlugin;
