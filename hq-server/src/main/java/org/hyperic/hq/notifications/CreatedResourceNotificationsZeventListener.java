@@ -3,8 +3,6 @@ package org.hyperic.hq.notifications;
 import javax.annotation.PostConstruct;
 
 import org.hyperic.hq.appdef.server.session.NewResourceEvent;
-import org.hyperic.hq.appdef.server.session.NewResourceEvent;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.notifications.model.CreatedResourceNotification;

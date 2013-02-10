@@ -74,5 +74,5 @@ public interface MetricService {
     @Descriptions({ 
         @Description(value = "unregister user session and all assigned filters this user destination has", target = DocTarget.METHOD)
     })
-    public void unregister() throws SessionNotFoundException, SessionTimeoutException;
+    public void unregister(@PathParam("regID") Integer regID) throws SessionNotFoundException, SessionTimeoutException;
 }

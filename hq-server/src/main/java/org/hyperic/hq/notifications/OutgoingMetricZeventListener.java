@@ -13,7 +13,6 @@ import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZe
 import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZeventSource;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.notifications.filtering.DestinationEvaluator;
-import org.hyperic.hq.notifications.filtering.MetricDestinationEvaluator;
 import org.hyperic.hq.notifications.model.MetricNotification;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
@@ -24,7 +23,7 @@ import org.springframework.stereotype.Component;
 @Component("OutgoingMetricZeventListener")
 public class OutgoingMetricZeventListener extends BaseNotificationsZeventListener<MeasurementZevent,MetricNotification> {
     @Autowired
-    MetricDestinationEvaluator evaluator;
+    DestinationEvaluator evaluator;
     @Autowired
     protected MeasurementManager msmtMgr;
 
@@ -66,7 +65,7 @@ public class OutgoingMetricZeventListener extends BaseNotificationsZeventListene
         return ConcurrentStatsCollector.METRIC_NOTIFICATION_FILTERING_TIME;
     }
     @Override
-    protected DestinationEvaluator<MetricNotification> getEvaluator() {
+    protected DestinationEvaluator getEvaluator() {
         return this.evaluator;
     }
 }

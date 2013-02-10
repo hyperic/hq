@@ -5,19 +5,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hyperic.hq.appdef.server.session.InventoryEvent;
-import org.hyperic.hq.appdef.server.session.ResourceZevent;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.notifications.filtering.DestinationEvaluator;
-import org.hyperic.hq.notifications.filtering.ResourceDestinationEvaluator;
 import org.hyperic.hq.notifications.model.InventoryNotification;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class InventoryNotificationsZeventListener<E extends InventoryEvent> extends BaseNotificationsZeventListener<E,InventoryNotification> {
     @Autowired
-    ResourceDestinationEvaluator evaluator;
+    DestinationEvaluator evaluator;
     @Autowired
     protected ResourceManager resourceMgr;
 
@@ -26,7 +22,7 @@ public abstract class InventoryNotificationsZeventListener<E extends InventoryEv
         return ConcurrentStatsCollector.INVENTORY_NOTIFICATION_FILTERING_TIME;
     }
     @Override
-    protected DestinationEvaluator<InventoryNotification> getEvaluator() {
+    protected DestinationEvaluator getEvaluator() {
         return this.evaluator;
     }
     

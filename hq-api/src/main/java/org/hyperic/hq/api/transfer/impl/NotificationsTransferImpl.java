@@ -16,6 +16,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.notifications.InternalNotificationReport;
 import org.hyperic.hq.notifications.Q;
 import org.hyperic.hq.notifications.UnregisteredException;
+import org.hyperic.hq.notifications.filtering.DestinationEvaluator;
 import org.hyperic.hq.notifications.model.BaseNotification;
 import org.hyperic.hq.notifications.model.InternalResourceDetailsType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,16 +34,19 @@ public class NotificationsTransferImpl implements NotificationsTransfer {
     protected ResourceTransfer rscTransfer;
     @Autowired
     protected MeasurementTransfer msmtTransfer;
+    @Autowired
+    protected DestinationEvaluator evaluator;
+
     // will be replaced by the destinations the invokers of this API will pass when registering
     protected Destination dummyDestination = new Destination() {};
 
     @Transactional (readOnly=true)
-    public NotificationsReport poll(ApiMessageContext apiMessageContext) throws UnregisteredException {
+    public NotificationsReport poll(ApiMessageContext apiMessageContext, Integer regID) throws UnregisteredException {
         Destination dest = this.dummyDestination;
         if (dest==null) {
             throw new UnregisteredException();
         }
-        InternalNotificationReport inr = this.q.poll(dest);
+        InternalNotificationReport inr = this.q.poll(regID);
         AuthzSubject subject = apiMessageContext.getAuthzSubject();
         InternalResourceDetailsType internalResourceDetailsType = inr.getResourceDetailsType();
         ResourceDetailsType resourceDetailsType = null;
@@ -51,13 +55,17 @@ public class NotificationsTransferImpl implements NotificationsTransfer {
     }
     
     @Transactional (readOnly=false)
-    public void unregister() {
+    public void unregister(Integer regID) {
         this.dest=null;
-        this.q.unregister(dest);
-        this.rscTransfer.unregister();
-        this.msmtTransfer.unregister();
+        this.q.unregister(regID);
+        this.rscTransfer.unregister(regID);
+        this.msmtTransfer.unregister(regID);
     }
     public Destination getDummyDestination() {
         return this.dummyDestination;
+    }
+
+    public void refresh(ApiMessageContext apiMessageContext, Integer regID) {
+//        this.evaluator.refresh(regID);
     }
 }

@@ -61,7 +61,7 @@ public interface ResourceTransfer {
 	ResourceBatchResponse approveResource(final ApiMessageContext messageContext, final Resources aiResources) ;
 	ResourceBatchResponse updateResources(final ApiMessageContext messageContext, final Resources resources);
 
-    void unregister();
+    void unregister(Integer regID);
 
     PlatformManager getPlatformManager();
 

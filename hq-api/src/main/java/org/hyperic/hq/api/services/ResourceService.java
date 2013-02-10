@@ -86,5 +86,5 @@ public interface ResourceService {
 	
 	@DELETE
 	@Path("/unregister")
-	public void unregister() throws SessionNotFoundException, SessionTimeoutException;
+	public void unregister(@PathParam("regID") final Integer regID) throws SessionNotFoundException, SessionTimeoutException;
 }//EOC 

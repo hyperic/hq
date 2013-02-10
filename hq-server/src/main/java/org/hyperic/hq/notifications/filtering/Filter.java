@@ -2,6 +2,7 @@ package org.hyperic.hq.notifications.filtering;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.hyperic.hq.notifications.model.BaseNotification;
 
@@ -18,8 +19,8 @@ public abstract class Filter<N extends BaseNotification, C extends FilteringCond
         this.cond=cond;
     }
 
-    public Collection<N> filter(Collection<? extends N> notifications) {
-        Collection<N> notificationsLeftIn = new ArrayList<N>();
+    public List<N> filter(Collection<N> notifications) {
+        List<N> notificationsLeftIn = new ArrayList<N>();
         for(N notification:notifications) {
             N notificationLeftIn = this.filter(notification);
             if (notificationLeftIn!=null) {
