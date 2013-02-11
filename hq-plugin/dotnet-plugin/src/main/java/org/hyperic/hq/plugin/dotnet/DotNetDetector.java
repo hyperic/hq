@@ -76,10 +76,11 @@ public class DotNetDetector
         List versions = new ArrayList();
 
         try {
-            key = getRegistryKey(REG_KEY + "\\policy");
+            key = getRegistryKey("SOFTWARE\\Microsoft\\NET Framework Setup\\NDP");
             String[] names = key.getSubKeyNames();
 
             for (int i = 0; i < names.length; i++) {
+                log.debug("[getVersion] names["+i+"]->"+names[i]);
                 if (names[i].charAt(0) == 'v') {
                     String version = names[i].substring(1);
                     versions.add(version);
@@ -129,7 +130,7 @@ public class DotNetDetector
         if (version == null) {
             return null;
         }
-        if (!thisVersion.equals(version)) {
+        if (!version.startsWith(thisVersion)) {
             return null;
         }
 

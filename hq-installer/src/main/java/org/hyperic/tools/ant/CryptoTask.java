@@ -25,19 +25,23 @@
 
 package org.hyperic.tools.ant;
 
-import java.io.IOException;
 
-import org.hyperic.util.security.MD5;
+
+import org.springframework.security.authentication.encoding.Md5PasswordEncoder;
+import org.springframework.security.authentication.encoding.ShaPasswordEncoder;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 
+
 public class CryptoTask extends Task {
 
     private String value;
     private String property;
-
+    private int strength = 256;//set 256 as default just in case.
+    private boolean encodeHashAsBase64;
+    
     public void setValue(String s) {
         value = s;
     }
@@ -45,16 +49,28 @@ public class CryptoTask extends Task {
     public void setProperty(String s) {
         property = s;
     }
+    
+    public void setStrength(int strength) {
+        this.strength = strength;
+    }
+    
+    public void setEncodeHashAsBase64(boolean encodeHashAsBase64) {
+        this.encodeHashAsBase64 = encodeHashAsBase64;
+    }
+
 
     public void execute() throws BuildException {
         validateAttributes();
 
-        String encrypted;
-        try {
-            encrypted = MD5.getEncodedDigest(value);
-        } catch (IOException e) {
-            throw new BuildException(e.getMessage(), e);
-        }
+        // TODO: the following code copies the Md5PlusShaPasswordEncoder, which resides in a dependant project.
+        // This class should be moved into this project instead.
+        Md5PasswordEncoder md5PwdEncoder = new Md5PasswordEncoder();
+        md5PwdEncoder.setEncodeHashAsBase64(encodeHashAsBase64 );
+        ShaPasswordEncoder shaPwdEncoder = new ShaPasswordEncoder(strength);
+        shaPwdEncoder.setEncodeHashAsBase64(encodeHashAsBase64 );
+        
+        String md5Encoded = md5PwdEncoder.encodePassword(value, null);
+        String encrypted = shaPwdEncoder.encodePassword(md5Encoded, null);
 
         Project project = getOwningTarget().getProject();
         project.setNewProperty(property, encrypted);

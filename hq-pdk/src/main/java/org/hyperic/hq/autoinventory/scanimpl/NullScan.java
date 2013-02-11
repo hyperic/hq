@@ -99,7 +99,7 @@ public class NullScan extends ScanMethodBase {
                 }
             } catch (Throwable e) {
                 log.error("AutoScan failed for " + detector.getTypeInfo().getName(), e);
-            } finally {
+           } finally {
                 PluginLoader.resetClassLoader(detector);
             }
         }

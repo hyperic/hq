@@ -42,9 +42,9 @@ import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.http.HQHttpClient;
 import org.hyperic.util.http.HttpConfig;
 
-public class SharePointServerDetector extends ServerDetector implements AutoServerDetector {
+public abstract class SharePointServerDetectorDefault extends ServerDetector implements AutoServerDetector {
 
-    private Log log = LogFactory.getLog(SharePointServerDetector.class);
+    private Log log = LogFactory.getLog(SharePointServerDetectorDefault.class);
     /**
      * group , instance , counter
      */
@@ -65,7 +65,7 @@ public class SharePointServerDetector extends ServerDetector implements AutoServ
             });
 
     @Override
-    public List getServerResources(ConfigResponse platformConfig) throws PluginException {
+    public final List getServerResources(ConfigResponse platformConfig) throws PluginException {
         log.debug("[discoverServices] config=" + platformConfig);
         List<ServerResource> servers = new ArrayList();
 
@@ -91,7 +91,7 @@ public class SharePointServerDetector extends ServerDetector implements AutoServ
     }
 
     @Override
-    protected List discoverServices(ConfigResponse serverConfig) throws PluginException {
+    protected final List discoverServices(ConfigResponse serverConfig) throws PluginException {
         log.debug("[discoverServices] config=" + serverConfig);
         ArrayList<ServiceResource> services = new ArrayList();
 
@@ -132,7 +132,7 @@ public class SharePointServerDetector extends ServerDetector implements AutoServ
                 try {
                     Service winService = new Service(name);
                     String fullName = winService.getConfig().getDisplayName();
-                    if (fullName.startsWith("SharePoint ") || name.equals("MSSQL$SHAREPOINT")) {
+                    if (fullName.startsWith(servicesPrefix())) {
                         if (winService.getStatus() == Service.SERVICE_RUNNING) {
                             log.debug(fullName + " (" + name + ") is RUNNING");
                             ServiceResource service = new ServiceResource();
@@ -157,8 +157,8 @@ public class SharePointServerDetector extends ServerDetector implements AutoServ
 
         try {
             Pdh pdh = new Pdh();
-            for (int i = 0; i < statsServicesNameList.size(); i++) {
-                String[] counter = statsServicesNameList.get(i);
+            for (int i = 0; i < getStatsServicesNameList().size(); i++) {
+                String[] counter = getStatsServicesNameList().get(i);
                 try {
                     StringBuilder obj = new StringBuilder("\\SharePoint ");
                     obj.append(counter[0]);
@@ -210,17 +210,21 @@ public class SharePointServerDetector extends ServerDetector implements AutoServ
 
     private boolean testWebServer(String url) {
         boolean res = false;
-        HttpGet get = new HttpGet(url);
-        AgentKeystoreConfig ksConfig = new AgentKeystoreConfig();
-        HQHttpClient client = new HQHttpClient(ksConfig, new HttpConfig(5000, 5000, null, 0), ksConfig.isAcceptUnverifiedCert());
-        try {
-            HttpResponse response = client.execute(get, new BasicHttpContext());
-            int r = response.getStatusLine().getStatusCode();
-            log.debug("[testWebServer] url='" + get.getURI() + "' statusCode='" + r + "' " + response.getStatusLine().getReasonPhrase());
-            res = (r < 500);
-        } catch (IOException ex) {
-            log.debug(ex.getMessage(), ex);
-        }
+//        HttpGet get = new HttpGet(url);
+//        AgentKeystoreConfig ksConfig = new AgentKeystoreConfig();
+//        HQHttpClient client = new HQHttpClient(ksConfig, new HttpConfig(5000, 5000, null, 0), ksConfig.isAcceptUnverifiedCert());
+//        try {
+//            HttpResponse response = client.execute(get, new BasicHttpContext());
+//            int r = response.getStatusLine().getStatusCode();
+//            log.debug("[testWebServer] url='" + get.getURI() + "' statusCode='" + r + "' " + response.getStatusLine().getReasonPhrase());
+//            res = (r < 500);
+//        } catch (IOException ex) {
+//            log.debug(ex.getMessage(), ex);
+//        }
         return res;
     }
+
+    protected abstract String servicesPrefix();
+
+    protected abstract List<String[]> getStatsServicesNameList();
 }
