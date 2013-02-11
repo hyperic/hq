@@ -637,8 +637,7 @@ public class ResourceTransferImpl implements ResourceTransfer{
             }
             this.isRegistered=true;
             List<Filter<InventoryNotification,? extends FilteringCondition<?>>> userFilters = new ArrayList<Filter<InventoryNotification,? extends FilteringCondition<?>>>();//this.resourceMapper.toResourceFilters(resourceFilterRequest); 
-            Filter contentFilter = new ResourceContentFilter(ResourceDetailsType.valueOf(responseMetadata));
-            userFilters.add(contentFilter);
+            userFilters.add(new AgnosticFilter<InventoryNotification,FilteringCondition<?>>());
 
             //TODO~ get the destination from the user
             Destination dest = this.notificationsTransfer.getDummyDestination();
