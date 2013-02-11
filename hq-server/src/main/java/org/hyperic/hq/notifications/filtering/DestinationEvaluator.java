@@ -81,7 +81,7 @@ public class DestinationEvaluator {
             FilterChain<BaseNotification> filterChain = regToFilter.get(regID);
             List<? extends BaseNotification> filteredEntities = null;
             filteredEntities = ((List<? extends BaseNotification>) filterChain.filter(entities));
-            if (filteredEntities!=null) {
+            if (filteredEntities!=null && !filteredEntities.isEmpty()) {
                 NotificationGroup nsGrp = new NotificationGroup(regID, filteredEntities);
                 nsGrpList.add(nsGrp);
             }

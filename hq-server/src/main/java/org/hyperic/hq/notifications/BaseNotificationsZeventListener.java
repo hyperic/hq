@@ -46,7 +46,9 @@ public abstract class BaseNotificationsZeventListener<E extends Zevent,N extends
         List<NotificationGroup> nsGrp = null;
         try {
             nsGrp = this.getEvaluator().evaluate(ns,getEntityType());
-            this.q.publish(nsGrp);
+            if (!nsGrp.isEmpty()) {
+                this.q.publish(nsGrp);
+            }
         }catch(Throwable e) {
             log.error(e);
         }

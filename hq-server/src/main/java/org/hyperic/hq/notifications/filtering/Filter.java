@@ -19,7 +19,7 @@ public abstract class Filter<N extends BaseNotification, C extends FilteringCond
         this.cond=cond;
     }
 
-    public List<N> filter(Collection<N> notifications) {
+    public List<N> filter(List<? extends N> notifications) {
         List<N> notificationsLeftIn = new ArrayList<N>();
         for(N notification:notifications) {
             N notificationLeftIn = this.filter(notification);
