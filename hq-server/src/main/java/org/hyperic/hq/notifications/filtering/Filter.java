@@ -14,17 +14,20 @@ import org.hyperic.hq.notifications.model.BaseNotification;
  */
 public abstract class Filter<N extends BaseNotification, C extends FilteringCondition<?>> {
     protected C cond;
-
+    protected abstract Class<? extends N> getHandledNotificationClass();
+    
     public Filter(C cond) {
         this.cond=cond;
     }
 
-    public List<N> filter(List<? extends N> notifications) {
+    public List<N> filter(List<? extends BaseNotification> notifications) {
         List<N> notificationsLeftIn = new ArrayList<N>();
-        for(N notification:notifications) {
-            N notificationLeftIn = this.filter(notification);
-            if (notificationLeftIn!=null) {
-                notificationsLeftIn.add(notificationLeftIn);
+        for(BaseNotification notification:notifications) {
+            if (getHandledNotificationClass().isAssignableFrom(notification.getClass())) {
+                N notificationLeftIn = this.filter((N)notification);
+                if (notificationLeftIn!=null) {
+                    notificationsLeftIn.add(notificationLeftIn);
+                }
             }
         }
         return notificationsLeftIn;

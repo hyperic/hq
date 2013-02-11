@@ -15,7 +15,7 @@ import org.hyperic.hq.notifications.model.BaseNotification;
  */
 public class FilterChain<N extends BaseNotification> extends AbstractCollection<Filter<? extends N,? extends FilteringCondition<?>>> {
     protected Collection<Filter<? extends N,? extends FilteringCondition<?>>> filters;
-     
+    
     public FilterChain(Collection<? extends Filter<? extends N,? extends FilteringCondition<?>>> filters) {
         this.filters=(Collection<Filter<? extends N, ? extends FilteringCondition<?>>>) filters;
     }

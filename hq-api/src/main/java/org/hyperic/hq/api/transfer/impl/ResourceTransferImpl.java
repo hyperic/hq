@@ -182,7 +182,7 @@ public class ResourceTransferImpl implements ResourceTransfer{
 	private final Resource getResourceInner(final Context flowContext, int hierarcyDepth) throws ObjectNotFoundException { 
 		
 		Resource currentResource =  null ; 
-		try{ 
+		try{  
 			//derive the resource type load strategy using the resource type enum 
 			//Note: of the resourceType is null, then the generic resource resource type 
 			//would be used 

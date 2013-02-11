@@ -21,4 +21,9 @@ public class MetricFilter<C extends FilteringCondition<Measurement>> extends Fil
         }
         return null;
     }
+
+    @Override
+    protected Class<? extends MetricNotification> getHandledNotificationClass() {
+        return MetricNotification.class;
+    }
 }
