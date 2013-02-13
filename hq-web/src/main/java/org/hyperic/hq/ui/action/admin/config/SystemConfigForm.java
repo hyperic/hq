@@ -54,6 +54,10 @@ public class SystemConfigForm
     private String elPurgeVal = "0";
     private boolean _alertsAllowed = true;
     private boolean _alertNotificationsAllowed = true;
+    private String vCenterURL = "https://localhost/sdk";
+    private String vCenterUser = "";
+    private String vCenterPassword = "";
+    
 
     public String toString() {
         StringBuffer buf = new StringBuffer(super.toString());
@@ -67,6 +71,9 @@ public class SystemConfigForm
         buf.append(" updateMode=").append(updateMode);
         buf.append(" alertsAllowed=").append(_alertsAllowed);
         buf.append(" alertNotificationsAllowed=").append(_alertNotificationsAllowed);
+        buf.append(" vCenterURL=").append(getvCenterURL());
+        buf.append(" vCenterUser=").append(getvCenterUser());
+        buf.append(" vCenterPassword=").append(getvCenterPassword());
 
         return buf.toString();
     }
@@ -90,6 +97,13 @@ public class SystemConfigForm
         alertPurgeVal = null;
         elPurgeVal = "0";
         updateMode = 0;
+        resetVCenterValues();
+    }
+
+    public void resetVCenterValues() {
+        setvCenterURL("https://localhost/sdk");
+        setvCenterUser("");
+        setvCenterPassword("");
     }
 
     public void loadConfigProperties(Properties prop) {
@@ -126,6 +140,19 @@ public class SystemConfigForm
 
         String alertNotificationsAllowedStr = prop.getProperty(HQConstants.AlertNotificationsEnabled, "true");
         _alertNotificationsAllowed = Boolean.valueOf(alertNotificationsAllowedStr).booleanValue();
+        
+        //load vCenter props
+        for (Object property : prop.keySet()) {
+            if (property.toString().startsWith(HQConstants.vCenterURL)) {
+                setvCenterURL(prop.getProperty(property.toString()));
+            }
+            else if (property.toString().startsWith(HQConstants.vCenterUser)) {
+                setvCenterUser(prop.getProperty(property.toString()));
+            }
+            else if (property.toString().startsWith(HQConstants.vCenterPassword)) {
+                setvCenterPassword(prop.getProperty(property.toString()));
+            }
+        }
     }
 
     /**
@@ -198,6 +225,11 @@ public class SystemConfigForm
         prop.setProperty(HQConstants.AlertsEnabled, String.valueOf(_alertsAllowed));
         prop.setProperty(HQConstants.AlertNotificationsEnabled, String.valueOf(_alertNotificationsAllowed));
 
+        if (!getvCenterURL().isEmpty() && !getvCenterUser().isEmpty() && !getvCenterPassword().isEmpty()) {
+            prop.setProperty(HQConstants.vCenterURL, getvCenterURL()); 
+            prop.setProperty(HQConstants.vCenterUser, getvCenterUser());
+            prop.setProperty(HQConstants.vCenterPassword, getvCenterPassword()); 
+        }
         return prop;
     }
 
@@ -341,5 +373,29 @@ public class SystemConfigForm
         ActionErrors errors = super.validate(mapping, request);
 
         return errors;
+    }
+
+    public String getvCenterURL() {
+        return vCenterURL;
+    }
+
+    public void setvCenterURL(String vCenterURL) {
+        this.vCenterURL = vCenterURL;
+    }
+
+    public String getvCenterUser() {
+        return vCenterUser;
+    }
+
+    public void setvCenterUser(String vCenterUser) {
+        this.vCenterUser = vCenterUser;
+    }
+
+    public String getvCenterPassword() {
+        return vCenterPassword;
+    }
+
+    public void setvCenterPassword(String vCenterPassword) {
+        this.vCenterPassword = vCenterPassword;
     }
 }

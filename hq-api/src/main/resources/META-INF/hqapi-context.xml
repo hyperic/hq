@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-
+  
     NOTE: This copyright does *not* cover user programs that use HQ
     program services by normal system calls through the application
     program interfaces provided as part of the Hyperic Plug-in Development
@@ -87,14 +87,21 @@
 	<bean class="org.springframework.web.context.support.ServletContextPropertyPlaceholderConfigurer" />
 	<bean class="org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer" />
 
+	<bean name="notificationsServiceImpl" class="org.hyperic.hq.api.services.impl.NotificationsServiceImpl" />
+
 	<bean name="resourceServiceImpl" class="org.hyperic.hq.api.services.impl.ResourceServiceImpl" />
+	
 	<bean name="measurementServiceImpl" class="org.hyperic.hq.api.services.impl.MeasurementServiceImpl" />
+	
+	<bean name="metricServiceImpl" class="org.hyperic.hq.api.services.impl.MetricServiceImpl" />
+
+	<bean name="vmServiceImpl" class="org.hyperic.hq.api.services.impl.VMServiceImpl" />
 		
     <bean name="pluginServiceImpl" class="org.hyperic.hq.api.services.impl.PluginServiceImpl" />		
 	
 	<bean name="sessionManagementImpl" class="org.hyperic.hq.api.services.impl.SessionManagementServiceImpl" />
 	
-	<jaxrs:server id="resourceService" address="/inventory/resources">
+	<jaxrs:server id="resourceService" address="/resource">
 		<jaxrs:serviceBeans>
 			<ref bean="resourceServiceImpl" />
 		</jaxrs:serviceBeans>
@@ -120,9 +127,35 @@
         </jaxrs:features>		
 	</jaxrs:server>	
 
-	<jaxrs:server id="measurementService" address="/measurements">
+	<jaxrs:server id="notificationsService" address="/notification">
+		<jaxrs:serviceBeans>
+			<ref bean="notificationsServiceImpl" />
+        </jaxrs:serviceBeans>
+        <jaxrs:providers>
+            <ref bean="jaxbProvider" />
+			<ref bean="jsonProvider" />
+        </jaxrs:providers>
+        <jaxrs:features>
+            <cxf:logging />
+        </jaxrs:features>        
+    </jaxrs:server>
+    
+	<jaxrs:server id="measurementService" address="/measurement">
 		<jaxrs:serviceBeans>
 			<ref bean="measurementServiceImpl" />
+        </jaxrs:serviceBeans>
+        <jaxrs:providers>
+            <ref bean="jaxbProvider" />
+			<ref bean="jsonProvider" />
+        </jaxrs:providers>
+        <jaxrs:features>
+            <cxf:logging />
+        </jaxrs:features>        
+    </jaxrs:server>
+
+	<jaxrs:server id="metrictService" address="/metric">
+		<jaxrs:serviceBeans>
+			<ref bean="metricServiceImpl" />
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <ref bean="jaxbProvider" />
@@ -133,4 +166,18 @@
             <cxf:logging />
         </jaxrs:features>        
     </jaxrs:server>
+    
+	<jaxrs:server id="vmService" address="/vm">
+		<jaxrs:serviceBeans>
+			<ref bean="vmServiceImpl" />
+        </jaxrs:serviceBeans>
+        <jaxrs:providers>
+            <ref bean="jaxbProvider" />
+			<ref bean="jsonProvider" />
+        </jaxrs:providers>
+        <jaxrs:features>
+            <cxf:logging />
+        </jaxrs:features>        
+    </jaxrs:server>
+    
 </beans>

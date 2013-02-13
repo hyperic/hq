@@ -25,7 +25,11 @@
 
 package org.hyperic.hq.ui.action.admin.config;
 
+import java.net.MalformedURLException;
+import java.rmi.RemoteException;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -35,11 +39,19 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
+import org.hyperic.hq.appdef.shared.PlatformManager;
+import org.hyperic.hq.auth.shared.SessionManager;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.server.session.UpdateStatusMode;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.bizapp.shared.UpdateBoss;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.hq.vm.VCManager;
+import org.hyperic.hq.vm.VMID;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class EditConfigAction
@@ -48,12 +60,18 @@ public class EditConfigAction
     private final Log log = LogFactory.getLog(EditConfigAction.class.getName());
     private ConfigBoss configBoss;
     private UpdateBoss updateBoss;
-
+    private VCManager vcManager;
+    private SessionManager sessionManager;
+    private PlatformManager platformMgr;
+    
     @Autowired
-    public EditConfigAction(ConfigBoss configBoss, UpdateBoss updateBoss) {
+    public EditConfigAction(ConfigBoss configBoss, UpdateBoss updateBoss, VCManager vcManager, SessionManager sessionManager, PlatformManager platformMgr) {
         super();
         this.configBoss = configBoss;
         this.updateBoss = updateBoss;
+        this.vcManager = vcManager;
+        this.sessionManager = sessionManager;
+        this.platformMgr = platformMgr;
     }
 
     /**
@@ -69,10 +87,14 @@ public class EditConfigAction
 
         int sessionId = RequestUtils.getSessionIdInt(request);
         SystemConfigForm cForm = (SystemConfigForm) form;
-
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
+        
         if (cForm.isOkClicked()) {
             if (log.isTraceEnabled())
                 log.trace("Getting config");
+            if (!cForm.getvCenterURL().isEmpty() && !cForm.getvCenterUser().isEmpty() && !cForm.getvCenterPassword().isEmpty()) {
+                handleVCenterSettings(cForm, subject);
+            }
             Properties props = cForm.saveConfigProperties(configBoss.getConfig());
 
             if (log.isTraceEnabled())
@@ -91,5 +113,18 @@ public class EditConfigAction
 
         RequestUtils.setConfirmation(request, "admin.config.confirm.saveSettings");
         return returnSuccess(request, mapping);
+    }
+
+    //Check that the vCenter attributes are correct, if not - reset the values so they will not get
+    //persist in the database, if correct - trigger a collect of the VCManager.
+    private void handleVCenterSettings(SystemConfigForm cForm, AuthzSubject subject) throws RemoteException,
+            MalformedURLException, PermissionException, CPropKeyNotFoundException, AppdefEntityNotFoundException {
+        if (!vcManager.validateVCSettings(cForm.getvCenterURL(), cForm.getvCenterUser(), cForm.getvCenterPassword())) {
+            cForm.resetVCenterValues();
+        }
+        else {
+            Map<VMID, Set<String>> uuidToMacsMap = vcManager.collect(subject, cForm.getvCenterURL(), cForm.getvCenterUser(), cForm.getvCenterPassword());
+            this.platformMgr.mapUUIDToPlatforms(subject, uuidToMacsMap);
+        }
     }
 }

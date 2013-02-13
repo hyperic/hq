@@ -27,6 +27,7 @@ package org.hyperic.hq.appdef.server.session;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -45,9 +46,13 @@ import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.AICompare;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.vm.VCManager;
+import org.hyperic.hq.vm.VMID;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
@@ -58,8 +63,11 @@ import org.hyperic.util.config.EncodingException;
 public class AI2AppdefDiff {
 
     private static Log _log = LogFactory.getLog(AI2AppdefDiff.class);
+    protected VCManager vmMgr;
 
-    public AI2AppdefDiff () {}
+    public AI2AppdefDiff (VCManager vmMgr) {
+        this.vmMgr=vmMgr;
+    }
 
     /**
      * @param aiplatform The AI platform data, including nested IPs and servers.
@@ -164,8 +172,22 @@ public class AI2AppdefDiff {
                 AppdefEntityID.newPlatformID(appdefPlatform.getId());
             int type =
                 appdefPlatform.getPlatformType().getId().intValue();
-            updateCprops(cpropMgr, aid, type,
-                         aiplatform.getCustomProperties());
+            // only map the UUID for actual platforms, not for virtual ones discovered by the vc plugin
+            if (AuthzConstants.platformPrototypeVmwareVsphereVm.equals(appdefPlatform.getResource().getPrototype().getName())) { 
+                updateCprops(cpropMgr, aid, type, aiplatform.getCustomProperties(),null);
+            } else {
+                Collection<Ip> ips = appdefPlatform.getIps();
+                List<String> macs = new ArrayList<String>(ips.size());
+                if (ips!=null) {
+                    for(Ip ip:ips) {
+                        String mac = ip.getMacAddress();
+                        if (mac!=null && !mac.isEmpty() && !mac.equals("")) {
+                            macs.add(mac);
+                        }
+                    }
+                }
+                updateCprops(cpropMgr, aid, type, aiplatform.getCustomProperties(),macs);
+            }
         }
 
         return revisedAIplatform;
@@ -426,7 +448,7 @@ public class AI2AppdefDiff {
                 if (scannedServer.customPropertiesHasBeenSet()) {
                     int type = appdefServer.getServerType().getId().intValue();
                     updateCprops(cpropMgr, aID, type,
-                                 scannedServer.getCustomProperties());
+                                 scannedServer.getCustomProperties(),null);
                 }
 
                 revisedAIplatform.addAIServerValue(scannedServer);
@@ -526,7 +548,7 @@ public class AI2AppdefDiff {
     //we have the ai object, the existing appdef object and the cpropMgr.
     //this is simply the easiest place until server AI code is refactored.
     private void updateCprops(CPropManager cpropMgr,
-                              AppdefEntityID id, int type, byte[] data)
+                              AppdefEntityID id, int type, byte[] data, List<String> macs)
     {
         if (data == null) {
             return;
@@ -541,6 +563,13 @@ public class AI2AppdefDiff {
             return;
         }
 
+        if (macs!=null) {
+            VMID vmid = this.vmMgr.getVMID(macs);
+            if (vmid!=null) {
+                aicprops.setValue(HQConstants.MOREF, vmid.getMoref());
+                aicprops.setValue(HQConstants.VCUUID, vmid.getVcUUID());
+            }
+        }
         try {
             existing = cpropMgr.getEntries(id);
         } catch (Exception e) {

@@ -33,6 +33,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
@@ -49,11 +51,16 @@ import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.util.Messenger;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.product.TypeInfo;
+import org.hyperic.hq.vm.VCManager;
+import org.hyperic.hq.vm.VMID;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
+import org.hyperic.util.pager.Pager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -71,7 +78,9 @@ public class CPropManagerImpl implements CPropManager {
     private PlatformTypeDAO platformTypeDAO;
     private ServerTypeDAO serverTypeDAO;
     private ServiceTypeDAO serviceTypeDAO;
-
+    @Autowired
+    private VCManager vmMgr;
+    
     @Autowired
     public CPropManagerImpl(Messenger sender, CpropDAO cPropDAO, CpropKeyDAO cPropKeyDAO,
                             ApplicationTypeDAO applicationTypeDAO, PlatformTypeDAO platformTypeDAO,
@@ -356,6 +365,11 @@ public class CPropManagerImpl implements CPropManager {
      * @param data Encoded ConfigResponse
      */
     public void setConfigResponse(AppdefEntityID aID, int typeId, byte[] data)
+            throws PermissionException, AppdefEntityNotFoundException {
+        setConfigResponse(aID, typeId, data, null);
+    }
+    
+    public void setConfigResponse(AppdefEntityID aID, int typeId, byte[] data, List<String> macs)
         throws PermissionException, AppdefEntityNotFoundException {
         if (data == null) {
             return;
@@ -369,6 +383,13 @@ public class CPropManagerImpl implements CPropManager {
             throw new SystemException(e);
         }
 
+        if (macs!=null) {
+            VMID vmid = this.vmMgr.getVMID(macs);
+            if (vmid!=null) {
+                cprops.setValue(HQConstants.MOREF, vmid.getMoref());
+                cprops.setValue(HQConstants.VCUUID, vmid.getVcUUID());
+            }
+        }
         if (log.isDebugEnabled()) {
             log.debug("cprops=" + cprops);
             log.debug("aID=" + aID.toString() + ", typeId=" + typeId);

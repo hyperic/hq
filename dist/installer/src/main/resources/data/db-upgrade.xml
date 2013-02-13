@@ -11795,9 +11795,26 @@ has already been defined.
 			commit="true"/>
 	</schemaSpec>
 	
-	  <schemaSpec version="3.217" >
+	<schemaSpec version="3.217">
+        <schema-directSQL>
+            <statement targetDB="postgresql">
+               CREATE TABLE if not exists EAM_UUIDTable (
+                ID int4 NOT NULL PRIMARY KEY, 
+                version_col bigint DEFAULT 0 NOT NULL,
+            	 MAC_ADDRESS VARCHAR(64) NOT NULL UNIQUE, 
+            	 MOREF VARCHAR(64) NOT NULL,
+           	 	 VCUUID VARCHAR(128) NOT NULL
+               )
+            </statement>
+            <statement targetDB="postgresql">
+                create sequence EAM_VM_ID_SEQ start 1 increment 1
+            </statement>
+        </schema-directSQL>
+	</schemaSpec>
+
+	<schemaSpec version="3.218" >
 	  	<user-password-upgrader encryption="EAM_PRINCIPAL.PASSWORD" strength="256" encodeHashAsBase64="true" />
-	  </schemaSpec>
+	</schemaSpec>
 
 </dbupgrade>
 </target>

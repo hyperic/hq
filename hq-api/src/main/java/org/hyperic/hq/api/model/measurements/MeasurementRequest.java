@@ -1,5 +1,5 @@
 package org.hyperic.hq.api.model.measurements;
-
+ 
 import java.io.Serializable;
 import java.util.List;
 
@@ -19,8 +19,8 @@ import org.hyperic.hq.api.model.RestApiConstants;
 public class MeasurementRequest implements Serializable {
     private static final long serialVersionUID = 2232715262706967461L;
     
-    @XmlElementWrapper(name="templateNames", namespace=RestApiConstants.SCHEMA_NAMESPACE)
-	@XmlElement(name="templateName", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+    @XmlElementWrapper(name="measurementNames", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+	@XmlElement(name="measurement", namespace=RestApiConstants.SCHEMA_NAMESPACE)
     private List<String> measurementTemplateNames;
 	
 	public List<String> getMeasurementTemplateNames() {

@@ -70,6 +70,7 @@ import org.hyperic.hq.dao.AIIpDAO;
 import org.hyperic.hq.dao.AIPlatformDAO;
 import org.hyperic.hq.dao.AIServerDAO;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
+import org.hyperic.hq.vm.VCManager;
 import org.hyperic.sigar.NetFlags;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -90,7 +91,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
     private Pager aiplatformPager = new Pager(new PagerProcessor_aiplatform());
     private Pager aiplatformPagerNoPlaceholders= new Pager(new PagerProcessor_aiplatform_excludePlaceholders());
 
-    private final AI2AppdefDiff appdefDiffProcessor = new AI2AppdefDiff();
+    private final AI2AppdefDiff appdefDiffProcessor;
     private final AIQSynchronizer queueSynchronizer = new AIQSynchronizer();
 
     private AIServerDAO aIServerDAO;
@@ -118,7 +119,8 @@ public class AIQueueManagerImpl implements AIQueueManager {
                               AuditManager auditManager, AuthzSubjectManager authzSubjectManager,
                               AgentCommandsClientFactory agentCommandsClientFactory,
                               AgentManager agentManager, AIAuditFactory aiAuditFactory,
-                              AIQResourceVisitorFactory aiqResourceVisitorFactory, AgentDAO agentDAO) {
+                              AIQResourceVisitorFactory aiqResourceVisitorFactory, AgentDAO agentDAO,
+                              VCManager vmMgr) {
 
         this.aIServerDAO = aIServerDAO;
         this.aiIpDAO = aiIpDAO;
@@ -135,6 +137,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
         this.aiAuditFactory = aiAuditFactory;
         this.aiqResourceVisitorFactory = aiqResourceVisitorFactory;
         this.agentDAO = agentDAO;
+        appdefDiffProcessor = new AI2AppdefDiff(vmMgr);
     }
 
     /**

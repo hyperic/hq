@@ -27,6 +27,8 @@ package org.hyperic.hq.appdef.server.session;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -45,6 +47,8 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.autoinventory.AICompare;
+import org.hyperic.hq.bizapp.shared.AllConfigDiff;
+import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
@@ -524,6 +528,93 @@ public class ConfigManagerImpl implements ConfigManager {
         }
 
         return wasUpdated;
+    }
+
+    class ConfigDiff implements ConfigManager.ConfigDiff{
+        protected boolean wasUpdated;
+        protected AllConfigDiff allConfigResponses;
+
+        public boolean isWasUpdated() {
+            return wasUpdated;
+        }
+        public void setWasUpdated(boolean wasUpdated) {
+            this.wasUpdated = wasUpdated;
+        }
+        public AllConfigDiff getAllConfigDiff() {
+            return this.allConfigResponses;
+        }
+        public void setAllConfigDiff(AllConfigDiff allConfigResponses) {
+            this.allConfigResponses=allConfigResponses;
+        }
+    }
+    
+    @Transactional
+    public ConfigDiff configureResponseDiff(AuthzSubject subject, ConfigResponseDB existingConfig,
+                                            AppdefEntityID appdefID, byte[] productConfig, byte[] measurementConfig,
+                                            byte[] controlConfig, byte[] rtConfig, Boolean userManaged,
+                                            boolean force) throws EncodingException {
+        byte[] configBytes;
+
+        boolean overwrite = ((userManaged != null) && userManaged.booleanValue()) || // via
+                            // UI
+                            // or
+                            // CLI
+                            !existingConfig.isUserManaged(); // via AI, dont
+        // overwrite
+        // changes made via
+        // UI or CLI
+        ConfigDiff diffs = new ConfigDiff();
+        AllConfigResponses allNewConfigResponses = new AllConfigResponses();
+        AllConfigResponses allChangedConfigResponses = new AllConfigResponses();
+        AllConfigResponses allDeletedConfigResponses = new AllConfigResponses();
+
+        configBytes = mergeConfig(existingConfig.getProductResponse(), productConfig, overwrite, force);
+        AICompare.ConfigDiff productDiffs = AICompare.configsDiff(configBytes, existingConfig.getProductResponse());
+        if (productDiffs!=null && (productDiffs.getNewConf().size()>0 || productDiffs.getChangedConf().size()>0 || productDiffs.getDeletedConf().size()>0)) {
+            existingConfig.setProductResponse(configBytes);
+            allNewConfigResponses.setConfig(ProductPlugin.CFGTYPE_IDX_PRODUCT, productDiffs.getNewConf());
+            allChangedConfigResponses.setConfig(ProductPlugin.CFGTYPE_IDX_PRODUCT, productDiffs.getChangedConf());
+            allDeletedConfigResponses.setConfig(ProductPlugin.CFGTYPE_IDX_PRODUCT, productDiffs.getDeletedConf());
+            diffs.setWasUpdated(true);
+        }
+
+        configBytes = mergeConfig(existingConfig.getMeasurementResponse(), measurementConfig, overwrite, force);
+        AICompare.ConfigDiff msmtDiffs = AICompare.configsDiff(configBytes, existingConfig.getMeasurementResponse());
+        if (msmtDiffs!=null && (msmtDiffs.getNewConf().size()>0 || msmtDiffs.getChangedConf().size()>0 || msmtDiffs.getDeletedConf().size()>0)) {
+            existingConfig.setMeasurementResponse(configBytes);
+            allNewConfigResponses.setConfig(ProductPlugin.CFGTYPE_IDX_MEASUREMENT, msmtDiffs.getNewConf());
+            allChangedConfigResponses.setConfig(ProductPlugin.CFGTYPE_IDX_MEASUREMENT, msmtDiffs.getChangedConf());
+            allDeletedConfigResponses.setConfig(ProductPlugin.CFGTYPE_IDX_MEASUREMENT, msmtDiffs.getDeletedConf());
+            diffs.setWasUpdated(true);
+        }
+
+        configBytes = mergeConfig(existingConfig.getControlResponse(), controlConfig, overwrite, false);
+        AICompare.ConfigDiff controlDiffs = AICompare.configsDiff(configBytes, existingConfig.getControlResponse());
+        if (controlDiffs!=null && (controlDiffs.getNewConf().size()>0 || controlDiffs.getChangedConf().size()>0 || controlDiffs.getDeletedConf().size()>0)) {
+            existingConfig.setControlResponse(configBytes);
+            allNewConfigResponses.setConfig(ProductPlugin.CFGTYPE_IDX_CONTROL, controlDiffs.getNewConf());
+            allChangedConfigResponses.setConfig(ProductPlugin.CFGTYPE_IDX_CONTROL, controlDiffs.getChangedConf());
+            allDeletedConfigResponses.setConfig(ProductPlugin.CFGTYPE_IDX_CONTROL, controlDiffs.getDeletedConf());
+            diffs.setWasUpdated(true);
+        }
+
+        configBytes = mergeConfig(existingConfig.getResponseTimeResponse(), rtConfig, overwrite, false);
+        AICompare.ConfigDiff responseTimeDiffs = AICompare.configsDiff(configBytes, existingConfig.getResponseTimeResponse());
+        if (responseTimeDiffs!=null && (responseTimeDiffs.getNewConf().size()>0 || responseTimeDiffs.getChangedConf().size()>0 || responseTimeDiffs.getDeletedConf().size()>0)) {
+            existingConfig.setResponseTimeResponse(configBytes);
+            allNewConfigResponses.setConfig(ProductPlugin.CFGTYPE_IDX_RESPONSE_TIME, responseTimeDiffs.getNewConf());
+            allChangedConfigResponses.setConfig(ProductPlugin.CFGTYPE_IDX_RESPONSE_TIME, responseTimeDiffs.getChangedConf());
+            allDeletedConfigResponses.setConfig(ProductPlugin.CFGTYPE_IDX_RESPONSE_TIME, responseTimeDiffs.getDeletedConf());
+            diffs.setWasUpdated(true);
+        }
+
+        if (userManaged != null && existingConfig.getUserManaged() != userManaged.booleanValue()) {
+            existingConfig.setUserManaged(userManaged.booleanValue());
+            diffs.setWasUpdated(true);
+        }
+        
+        diffs.setAllConfigDiff(new AllConfigDiff(allNewConfigResponses,allChangedConfigResponses,allDeletedConfigResponses));
+        return diffs;
     }
 
     private byte[] getConfigForType(ConfigResponseDB val, String productType, AppdefEntityID id, boolean fail)

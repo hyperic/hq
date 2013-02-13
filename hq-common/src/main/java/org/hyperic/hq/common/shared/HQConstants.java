@@ -135,5 +135,13 @@ public class HQConstants {
     
     public static final String ORGANIZATION_AUTHENTICATION = "orgAuth";
     public static final String ORG_AUTH_PREFIX = "org\\";
-
+    
+    //vCenter settings
+    public static final String vCenterURL = "VCENTER_URL";
+    public static final String vCenterUser = "VCENTER_USER";
+    public static final String vCenterPassword = "VCENTER_PASSWORD";
+    
+    public static final String MOREF = "MOREF";
+    public static final String VCUUID = "VCUUID";
+    public static final String RESOURCE_NAME = "resource name";
 }

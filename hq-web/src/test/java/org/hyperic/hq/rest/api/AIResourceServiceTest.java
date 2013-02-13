@@ -1,5 +1,5 @@
 package org.hyperic.hq.rest.api;
-
+ 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -66,7 +66,7 @@ public class AIResourceServiceTest {
 
 //    @Test
     public final void testGetApprovedResource() throws Throwable {
-        String baseAddress = endpointUrl + "/rest-api/inventory/resources";
+        String baseAddress = endpointUrl + "/rest-api/resource";
         ResourceService aiResourceSvc = JAXRSClientFactory.create(baseAddress, ResourceService.class, providers);
 
         Client client = WebClient.client(aiResourceSvc);
@@ -86,7 +86,7 @@ public class AIResourceServiceTest {
     // @Test(expected=SessionNotFoundException.class)
 //    @Test
     public final void testGetApprovedResource_NotAuth() throws Throwable {
-        String baseAddress = endpointUrl + "/rest-api/inventory/resources";
+        String baseAddress = endpointUrl + "/rest-api/resource";
         ResourceService aiResourceSvc = JAXRSClientFactory.create(baseAddress, ResourceService.class, providers);
 
         Client client = WebClient.client(aiResourceSvc);
@@ -103,7 +103,7 @@ public class AIResourceServiceTest {
 
 //    @Test
     public final void testGetApprovedResource_WrongPassword() throws Throwable {
-        String baseAddress = endpointUrl + "/rest-api/inventory/resources";
+        String baseAddress = endpointUrl + "/rest-api/resource";
         ResourceService aiResourceSvc = JAXRSClientFactory.create(baseAddress, ResourceService.class, providers);
 
         Client client = WebClient.client(aiResourceSvc);
@@ -124,7 +124,7 @@ public class AIResourceServiceTest {
 
 //    @Test
     public final void testJSessionId() throws Throwable {
-        String baseAddress = endpointUrl + "/rest-api/inventory/resources";
+        String baseAddress = endpointUrl + "/rest-api/resource";
         ResourceService aiResourceSvc = JAXRSClientFactory.create(baseAddress, ResourceService.class, providers);
 
         Client client = WebClient.client(aiResourceSvc);
@@ -155,7 +155,7 @@ public class AIResourceServiceTest {
 
     // @Test
     public final void testUpdateResource() throws Throwable {
-        String baseAddress = endpointUrl + "/rest-api/inventory/resources";
+        String baseAddress = endpointUrl + "/rest-api/resource";
         ResourceService aiResourceSvc = JAXRSClientFactory.create(baseAddress, ResourceService.class, providers);
 
         Client client = WebClient.client(aiResourceSvc);
@@ -173,7 +173,7 @@ public class AIResourceServiceTest {
         updatedResource.setResourcePrototype(resourcePrototype);
         updatedResource.setResourceStatusType(resourceStatusType);
         updatedResource.setResourceType(type);
-        Map<String, String> mapProps = new HashMap<String, String>(1);
+        HashMap<String, String> mapProps = new HashMap<String, String>(1);
         mapProps.put("key1", "value1");
         Map<String, PropertyList> mapListProps = new HashMap<String, PropertyList>(2);
         ComplexIp[] macAddresses = { new ComplexIp("netmask1", "mac1", "address1"), new ComplexIp("netmask2", "mac2", "address2") };

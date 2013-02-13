@@ -86,7 +86,9 @@ public class ConcurrentStatsCollector extends AbstractStatsCollector {
                                LATHER_RUN_COMMAND_TIME = "LATHER_RUN_COMMAND_TIME",
                                AGENT_SYNCHRONIZER_QUEUE_SIZE = "AGENT_SYNCHRONIZER_QUEUE_SIZE",
                                LATHER_REMOTE_EXCEPTION = "LATHER_REMOTE_EXCEPTION",
-                               ZEVENT_REGISTERED_BUFFER_SIZE = "ZEVENT_REGISTERED_BUFFER_SIZE";
+                               ZEVENT_REGISTERED_BUFFER_SIZE = "ZEVENT_REGISTERED_BUFFER_SIZE",
+                               METRIC_NOTIFICATION_FILTERING_TIME = "METRIC_NOTIFICATION_FILTERING_TIME",
+                               INVENTORY_NOTIFICATION_FILTERING_TIME = "INVENTORY_NOTIFICATION_FILTERING_TIME";
     private TaskScheduler taskScheduler;
 
     @Override

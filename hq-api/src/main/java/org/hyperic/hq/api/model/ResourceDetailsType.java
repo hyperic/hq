@@ -28,10 +28,45 @@ package org.hyperic.hq.api.model;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlType;
 
+import org.hyperic.hq.notifications.model.InternalResourceDetailsType;
+
 @XmlType(namespace=RestApiConstants.SCHEMA_NAMESPACE)
 @XmlEnum
 public enum ResourceDetailsType {
 	BASIC,
-	PROPERTIES, 
-	ALL; 
+	PROPERTIES,
+	VIRTUALDATA,
+	ALL;
+	
+	public static ResourceDetailsType valueOf(InternalResourceDetailsType internalResourceDetailsType) {
+	    ResourceDetailsType resourceDetailsType=null;
+	    if (internalResourceDetailsType!=null) {
+            if (internalResourceDetailsType==InternalResourceDetailsType.BASIC) {
+                resourceDetailsType = ResourceDetailsType.BASIC;
+            } else if (internalResourceDetailsType==InternalResourceDetailsType.PROPERTIES) {
+                resourceDetailsType = ResourceDetailsType.PROPERTIES;
+            } else if (internalResourceDetailsType==InternalResourceDetailsType.VIRTUALDATA) {
+                resourceDetailsType = ResourceDetailsType.VIRTUALDATA;
+            } else if (internalResourceDetailsType==InternalResourceDetailsType.ALL) {
+                resourceDetailsType = ResourceDetailsType.ALL;
+            }
+        }
+	    return resourceDetailsType;
+	}
+
+    public static InternalResourceDetailsType valueOf(ResourceDetailsType resourceDetailsType) {
+        InternalResourceDetailsType internalResourceDetailsType=null;
+        if (resourceDetailsType!=null) {
+            if (resourceDetailsType==ResourceDetailsType.BASIC) {
+                internalResourceDetailsType = InternalResourceDetailsType.BASIC;
+            } else if (resourceDetailsType==ResourceDetailsType.PROPERTIES) {
+                internalResourceDetailsType = InternalResourceDetailsType.PROPERTIES;
+            } else if (resourceDetailsType==ResourceDetailsType.VIRTUALDATA) {
+                internalResourceDetailsType = InternalResourceDetailsType.VIRTUALDATA;
+            } else if (resourceDetailsType==ResourceDetailsType.ALL) {
+                internalResourceDetailsType = InternalResourceDetailsType.ALL;
+            }
+        }
+        return internalResourceDetailsType;
+    }
 }//EOE 

@@ -1,44 +1,97 @@
 package org.hyperic.hq.api.transfer.mapping;
-
+ 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.core.Response;
+
+import org.hyperic.hq.api.model.ID;
+import org.hyperic.hq.api.model.NotificationsReport;
 import org.hyperic.hq.api.model.measurements.Measurement;
 import org.hyperic.hq.api.model.measurements.Metric;
+import org.hyperic.hq.api.model.measurements.MetricFilterDefinition;
+import org.hyperic.hq.api.model.measurements.MetricFilterRequest;
+import org.hyperic.hq.api.model.measurements.RawMetric;
+import org.hyperic.hq.api.model.resources.ResourceFilterDefinitioin;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
+import org.hyperic.hq.measurement.shared.MeasurementManager;
+import org.hyperic.hq.notifications.filtering.Filter;
+import org.hyperic.hq.notifications.filtering.FilteringCondition;
+import org.hyperic.hq.notifications.filtering.MetricFilter;
+import org.hyperic.hq.notifications.filtering.MetricFilterByResource;
+import org.hyperic.hq.notifications.filtering.ResourceFilteringCondition;
+import org.hyperic.hq.notifications.filtering.MetricFilteringCondition;
+import org.hyperic.hq.notifications.model.BaseNotification;
+import org.hyperic.hq.notifications.model.InventoryNotification;
+import org.hyperic.hq.notifications.model.MetricNotification;
+import org.hyperic.hq.product.MetricValue;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
+ 
 @Component
 public class MeasurementMapper {
     protected final static int MAX_FRACTION_DIGITS = 3;
     protected final static DecimalFormat df = new DecimalFormat();
+    @Autowired
+    protected ResourceManager resourceMgr;
+    @Autowired
+    protected MeasurementManager measurementMgr;
+    @Autowired
+    private ExceptionToErrorCodeMapper errorHandler ;
     
     static {
         df.setMaximumFractionDigits(MAX_FRACTION_DIGITS);
         df.setGroupingUsed(false);
         df.setRoundingMode(RoundingMode.HALF_EVEN);
     }
-    
-    
-    
-    public Measurement toMeasurement(org.hyperic.hq.measurement.server.session.Measurement hqMsmt) {
+    public List<Integer> toIds(final List<ID> ids) {
+        List<Integer> ints = new ArrayList<Integer>(ids.size());
+        for(ID id:ids) {
+            ints.add(id.getId());
+        }
+        return ints;
+    }
+    public Measurement toMeasurement(final org.hyperic.hq.measurement.server.session.Measurement hqMsmt) {
         Measurement msmt = new Measurement();
         msmt.setInterval(hqMsmt.getInterval());
         msmt.setAlias(hqMsmt.getTemplate().getAlias());
         msmt.setName(hqMsmt.getTemplate().getName());
         return msmt;
     }
-
-    public Measurement toMeasurement(org.hyperic.hq.measurement.server.session.Measurement hqMsmt, double avg) {
+    public Measurement toMeasurementExtendedData(final org.hyperic.hq.measurement.server.session.Measurement hqMsmt, MeasurementTemplate templ) {
         Measurement msmt = toMeasurement(hqMsmt);
-        msmt.setAvg(avg);
+        msmt.setIndicator(templ.isDesignate());
+        msmt.setEnabled(hqMsmt.isEnabled());
+        msmt.setId(hqMsmt.getId());
         return msmt;
     }
-
-    public List<Metric> toMetrics(List<HighLowMetricValue> hqMetrics) {
+    public Measurement toMeasurement(final org.hyperic.hq.measurement.server.session.Measurement hqMsmt, double avg) {
+        Measurement msmt = toMeasurement(hqMsmt);
+        msmt.setAverage(avg);
+        return msmt;
+    }
+    public RawMetric toMetricWithId(final MetricNotification mn) {
+        RawMetric metric = new RawMetric();
+        MetricValue hqMetric = mn.getMetricVal();
+        metric.setValue(Double.valueOf(df.format(hqMetric.getValue())));
+        metric.setTimestamp(hqMetric.getTimestamp());
+        metric.setResourceID(mn.getResourceID());
+        metric.setMeasurementName(mn.getMeasurementName());
+        return metric;
+    }
+    public List<RawMetric> toMetricsWithId(final List<MetricNotification> mns) {
+        List<RawMetric> metrics = new ArrayList<RawMetric>();
+        for (MetricNotification mn : mns) {
+            metrics.add(toMetricWithId(mn));
+        }
+        return metrics;
+    }
+    public List<Metric> toMetrics(final List<HighLowMetricValue> hqMetrics) {
         List<Metric> metrics = new ArrayList<Metric>();
         for (HighLowMetricValue hqMetric : hqMetrics) {
             Metric metric = new Metric();
@@ -49,5 +102,41 @@ public class MeasurementMapper {
             metrics.add(metric);
         }
         return metrics;
+    }
+    public MetricFilterByResource<ResourceFilteringCondition<Resource>> toMetricFilterByResource(final ResourceFilterDefinitioin rscFilterDef) {
+        if (rscFilterDef==null) {
+            return null;
+        }
+        String nameToCompareTo = rscFilterDef.getName();
+        if (nameToCompareTo==null) {
+            return null;
+        }
+        ResourceFilteringCondition<Resource> cond = new ResourceFilteringCondition<Resource>(nameToCompareTo);
+        MetricFilterByResource<ResourceFilteringCondition<Resource>> filter = new MetricFilterByResource<ResourceFilteringCondition<Resource>>(this.measurementMgr,this.resourceMgr,cond);
+        return filter;
+    }
+    public MetricFilter<MetricFilteringCondition> toMetricFilter(final MetricFilterDefinition metricFilterDef) {
+        if (metricFilterDef==null) {
+            return null;
+        }
+        Boolean isIndicator = metricFilterDef.getIsIndicator();
+        MetricFilteringCondition cond = new MetricFilteringCondition(isIndicator);
+        MetricFilter<MetricFilteringCondition> filter = new MetricFilter<MetricFilteringCondition>(this.measurementMgr,cond);
+        return filter;
+    }
+    public List<Filter<MetricNotification,? extends FilteringCondition<?>>> toMetricFilters(final MetricFilterRequest metricFilterReq) {
+        List<Filter<MetricNotification,? extends FilteringCondition<?>>> userFilters = new ArrayList<Filter<MetricNotification,? extends FilteringCondition<?>>>();
+        ResourceFilterDefinitioin rscFilterDef = metricFilterReq.getResourceFilterDefinition();
+        MetricFilterByResource<ResourceFilteringCondition<Resource>> metricFilterByRsc = toMetricFilterByResource(rscFilterDef);
+        if (metricFilterByRsc!=null) {
+            userFilters.add(metricFilterByRsc);
+        }
+        
+        MetricFilterDefinition metricFilterDef = metricFilterReq.getMetricFilterDefinition();
+        MetricFilter<? extends FilteringCondition<org.hyperic.hq.measurement.server.session.Measurement>> metricFilter = toMetricFilter(metricFilterDef);
+        if (metricFilter!=null) {
+            userFilters.add(metricFilter);
+        }
+        return userFilters;
     }
 }
