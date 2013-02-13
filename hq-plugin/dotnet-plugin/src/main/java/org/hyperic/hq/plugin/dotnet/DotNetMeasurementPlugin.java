@@ -62,6 +62,7 @@ public class DotNetMeasurementPlugin
         return val;
     }
 
+    @Override
     protected String getAttributeName(Metric metric) {
         //avoiding Metric parse errors on ':' in DATA_PREFIX.
         if (metric.getDomainName().equals(DATA_DOMAIN)) {
@@ -71,21 +72,27 @@ public class DotNetMeasurementPlugin
         }
     }
 
+    @Override
     public String translate(String template, ConfigResponse config) {
-        log.debug("[translate] >> template="+template);
-        for (String key : config.getKeys()) {
-            if(key.toLowerCase().startsWith("app")) {
-                log.debug("[translate]  > "+key+"="+config.getValue(key));
+        if (log.isDebugEnabled()) {
+            log.debug("[translate] >> template=" + template);
+            for (String key : config.getKeys()) {
+                if (key.toLowerCase().startsWith("app")) {
+                    log.debug("[translate]  > " + key + "=" + config.getValue(key));
+                }
             }
         }
-        if (!template.startsWith(".NET 4.0 ASP.NET App:pdh:")) {
-            final String prop = DotNetDetector.PROP_APP;
-            template = StringUtil.replace(template, "__percent__", "%");
-            template = StringUtil.replace(template, "${" + prop + "}", config.getValue(prop, RUNTIME_NAME));
-        } else {
-            template = super.translate(template, config);
-        }
-        log.debug("[translate] << template="+template);
+
+        template = super.translate(template, config);
+
+        template = StringUtil.replace(template, "__percent__", "%");
+        
+        // default value for .net server
+        final String prop = DotNetDetector.PROP_APP;
+        template = StringUtil.replace(template, "${" + prop + "}", config.getValue(prop, RUNTIME_NAME));
+
+        log.debug("[translate] << template=" + template);
+
         return template;
     }
 
