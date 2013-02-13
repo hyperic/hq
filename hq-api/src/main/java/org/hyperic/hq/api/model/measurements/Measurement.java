@@ -84,14 +84,17 @@ public class Measurement extends MetricGroupBase {
 	public void setName(String name) {
 		this.name = name;
 	}
-    public double getAvg() {
-        return avg.doubleValue();
+	public Integer getId() {
+        return id;
     }
-    public void setAvg(double avg) {
-        this.avg = new Double(avg);
+    public void setId(Integer id) {
+        this.id = id;
     }
-    public void setAvg(Double avg) {
-        this.avg = avg;
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
     }
     public Boolean getIndicator() {
         return indicator;
@@ -104,5 +107,29 @@ public class Measurement extends MetricGroupBase {
     }
     public Boolean getEnabled() {
         return this.enabled;
+    }
+    public Long getInterval() {
+		return interval;
+	}
+	public void setInterval(Long interval) {
+		this.interval = interval;
+	}
+    public Boolean getIndicator() {
+        return indicator;
+    }
+    public void setIndicator(Boolean indicator) {
+        this.indicator = indicator;
+    }
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
+    public Boolean getEnabled() {
+        return this.enabled;
+    }
+    public void setAverage(Double avg) {
+        this.average=avg;
+    }
+    public Double getAverage() {
+        return average;
     }
 }

@@ -29,6 +29,7 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -104,6 +105,12 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         this.mapper=mapper;
         this.dataMgr = dataMgr;
         this.errorHandler = errorHandler;
+        this.evaluator = evaluator;
+        this.q = q;
+    }
+    @PostConstruct
+    public void init() {
+        this.notificationsTransfer = (NotificationsTransfer) Bootstrap.getBean("notificationsTransfer");
     }
     @PostConstruct
     public void init() {
@@ -404,7 +411,6 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             }
             res.addResponse(rscRes);
         }
-
         return res;
     }
 }

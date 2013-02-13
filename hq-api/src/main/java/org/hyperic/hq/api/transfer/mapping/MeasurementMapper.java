@@ -97,7 +97,9 @@ public class MeasurementMapper {
     }
     public Measurement toMeasurement(final org.hyperic.hq.measurement.server.session.Measurement hqMsmt, double avg) {
         Measurement msmt = toMeasurement(hqMsmt);
-        msmt.setAvg(avg);
+        msmt.setIndicator(templ.isDesignate());
+        msmt.setEnabled(hqMsmt.isEnabled());
+        msmt.setId(hqMsmt.getId());
         return msmt;
     }
     public RawMetric toMetricWithId(final MetricNotification mn) {

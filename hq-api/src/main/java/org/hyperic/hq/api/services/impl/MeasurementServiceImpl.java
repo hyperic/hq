@@ -55,7 +55,7 @@ import java.util.Date;
 
 public class MeasurementServiceImpl extends RestApiService implements MeasurementService {
     @Autowired
-    private MeasurementTransfer measurementTransfer;
+    protected MeasurementTransfer measurementTransfer;
     @Autowired
     protected ExceptionToErrorCodeMapper errorHandler ; 
     
