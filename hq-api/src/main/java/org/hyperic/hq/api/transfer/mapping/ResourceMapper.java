@@ -37,23 +37,44 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
+import javax.annotation.PostConstruct;
+
+import org.hibernate.SessionFactory;
+import org.hibernate.classic.Session;
 import org.hyperic.hq.api.model.AIResource;
 import org.hyperic.hq.api.model.ConfigurationValue;
+import org.hyperic.hq.api.model.ID;
 import org.hyperic.hq.api.model.PropertyList;
 import org.hyperic.hq.api.model.Resource;
 import org.hyperic.hq.api.model.ResourceConfig;
+import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourcePrototype;
 import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.api.model.resources.ComplexIp;
+import org.hyperic.hq.api.transfer.NotificationsTransfer;
+import org.hyperic.hq.api.transfer.ResourceTransfer;
+import org.hyperic.hq.api.transfer.impl.ResourceTransferImpl;
+import org.hyperic.hq.api.transfer.impl.ResourceTransferImpl.Context;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.server.session.ProductBossImpl.ConfigSchemaAndBaseResponse;
+import org.hyperic.hq.bizapp.shared.AllConfigResponses;
+import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.notifications.model.CreatedResourceNotification;
+import org.hyperic.hq.notifications.model.InventoryNotification;
+import org.hyperic.hq.notifications.model.RemovedResourceNotification;
+import org.hyperic.hq.notifications.model.ResourceChangedContentNotification;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,7 +91,8 @@ import org.springframework.stereotype.Component;
 public class ResourceMapper {
     
     private PlatformManager platformManager;
-    
+    @Autowired  
+    SessionFactory f;
     @Autowired  
     public ResourceMapper(final PlatformManager platformManager) { 
         this.platformManager = platformManager;   
@@ -161,6 +183,28 @@ public class ResourceMapper {
 		return (o1 == o2 || (o1 != null && o1.equals(o2)) ) ; 
 	}//EOM 
 	
+	
+    public final Resource mergeVirtualData(ResourceType resourceType, org.hyperic.hq.authz.server.session.Resource backendResource, final Resource resource, Properties cprops) throws AppdefEntityNotFoundException {
+        
+        final HashMap<String,String> configValues = new HashMap<String,String>() ; 
+        
+        String moRefKey = HQConstants.MOREF;
+        String moRef = cprops.getProperty(moRefKey);
+        if (moRef!=null) {
+            configValues.put(moRefKey,moRef);
+        }
+        String vcUuidKey = HQConstants.VCUUID;
+        String vcUuid = cprops.getProperty(vcUuidKey);
+        if (vcUuid!=null) {
+            configValues.put(vcUuidKey,vcUuid);
+        }
+        final ResourceConfig resourceConfig = new ResourceConfig() ;
+        resourceConfig.setMapProps(configValues) ; 
+        resource.setResourceConfig(resourceConfig) ; 
+        
+        return resource ; 
+    }//EOM
+
 	public final Resource mergeConfig(ResourceType resourceType, org.hyperic.hq.authz.server.session.Resource backendResource, final Resource resource, final ConfigSchemaAndBaseResponse[] configResponses, Properties cprops) throws AppdefEntityNotFoundException {
 		if(configResponses == null) return resource ;  
 		
@@ -179,11 +223,16 @@ public class ResourceMapper {
 				configValues.put(entry.getKey(), value) ;  
 			}//EO while there are more attributes 
 		}//EO while there are more config responses 
-		String uuidKey = "UUID";
-		String uuid = cprops.getProperty(uuidKey);
-		if (uuid!=null) {
-		    configValues.put(uuidKey,uuid);
-		}
+        String moRefKey = HQConstants.MOREF;
+        String moRef = cprops.getProperty(moRefKey);
+        if (moRef!=null) {
+            configValues.put(moRefKey,moRef);
+        }
+        String vcUuidKey = HQConstants.VCUUID;
+        String vcUuid = cprops.getProperty(vcUuidKey);
+        if (vcUuid!=null) {
+            configValues.put(vcUuidKey,vcUuid);
+        }
 		final ResourceConfig resourceConfig = new ResourceConfig() ;
 		resourceConfig.setMapProps(configValues) ; 
 		resource.setResourceConfig(resourceConfig) ; 
@@ -321,6 +370,59 @@ public class ResourceMapper {
         }//EOM 
         
     }//EO inner class Context 
+
+
+
+    
+    public ID toResource(RemovedResourceNotification n) {
+        Integer id = n.getID();
+        if (id==null) {
+            return null;
+        }
+        ID removedResourceID = new ID();
+        removedResourceID.setId(id);
+        return removedResourceID;
+    }
+    public org.hyperic.hq.api.model.Resource toResource(final AuthzSubject subject, ResourceTransfer resourceTransfer, 
+            ResourceDetailsType resourceDetailsType, CreatedResourceNotification n) throws Throwable {
+        org.hyperic.hq.authz.server.session.Resource backendResource = n.getResource();
+        if (backendResource==null) {
+            return null;
+        }
+        Session hSession = f.getCurrentSession();
+        hSession.update(backendResource);
+        Resource newFrontendResource = toResource(backendResource);
+        ResourceDetailsType[] resourceDetailsTypeArr = new ResourceDetailsType[] {resourceDetailsType};
+        Context flowContext = new Context(subject, newFrontendResource.getNaturalID(), newFrontendResource.getResourceType(), resourceDetailsTypeArr, resourceTransfer);
+        flowContext.setBackendResource(backendResource);
+        Set<ResourceDetailsTypeStrategy> resourceDetailsTypeStrategySet = ResourceDetailsTypeStrategy.valueOf(resourceDetailsTypeArr);
+        if (resourceDetailsTypeStrategySet==null || resourceDetailsTypeStrategySet.isEmpty() || resourceDetailsTypeStrategySet.size()>1) {
+            throw new RuntimeException("unexpected number of ResourceDetailsTypeStrategis");
+        }
+        //TODO~ move this population of resource's properties to be once a creation notification is created, not when it is being polled!
+        newFrontendResource = resourceDetailsTypeStrategySet.iterator().next().populateResource(flowContext);
+        Integer parentID = n.getParentID();
+        // platforms wont have a parent
+        if (parentID==null) {
+            return newFrontendResource;
+        }
+        Resource parentResource = new Resource(String.valueOf(parentID));
+        parentResource.addSubResource(newFrontendResource);
+        return parentResource;
+    }
+
+    @SuppressWarnings("unchecked")
+    public Resource toChangedResourceContent(ResourceDetailsType resourceDetailsType, ResourceChangedContentNotification n) {
+        Integer rid = n.getResourceID();
+        Resource r = new Resource(String.valueOf(rid));
+        
+        Map<String,String> configValues = n.getChangedProps(); 
+        
+        final ResourceConfig resourceConfig = new ResourceConfig() ;
+        resourceConfig.setMapProps((HashMap<String, String>) configValues); 
+        r.setResourceConfig(resourceConfig);
+        return r;
+    }
 	
 	
 	

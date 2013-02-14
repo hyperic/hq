@@ -876,6 +876,10 @@
             include="2.0"/>
 
     <server name=".NET"
+            version="3.5"
+            include="3.0"/>
+
+    <server name=".NET"
             version="4.0"
             include="3.0"/>
 

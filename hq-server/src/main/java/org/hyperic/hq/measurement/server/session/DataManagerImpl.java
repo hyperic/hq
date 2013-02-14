@@ -597,7 +597,7 @@ public class DataManagerImpl implements DataManager {
         boolean allEventsInteresting = Boolean.getBoolean(ALL_EVENTS_INTERESTING_PROP);
 
         for (DataPoint dp : data) {
- 
+
             Integer metricId = dp.getMeasurementId();
             MetricValue val = dp.getMetricValue();
             MeasurementEvent event = new MeasurementEvent(metricId, val);
@@ -1557,17 +1557,17 @@ public class DataManagerImpl implements DataManager {
     }
     
     private void merge(int bucket, AggMetricValue[] rtn, AggMetricValue val, long timestamp) {
-    	AggMetricValue amv = null;
-    	try {
-			amv = rtn[bucket];
-		} catch (NullPointerException e) {
-			log.error("Error has occured in Merge function, bucket size[" + bucket + "] " +
-            			"but AggMetricValue array size is [" + rtn.length +"] ," +e.getMessage());
-		} catch (ArrayIndexOutOfBoundsException e){
+        AggMetricValue amv = null;
+        try {
+            amv = rtn[bucket];
+        } catch (NullPointerException e) {
             log.error("Error has occured in Merge function, bucket size[" + bucket + "] " +
-            			"but AggMetricValue array is null, " + e.getMessage()); 
-		}
-		
+                    "but AggMetricValue array size is [" + rtn.length +"] ," + e, e);
+        } catch (ArrayIndexOutOfBoundsException e){
+            log.error("Error has occured in Merge function, bucket size[" + bucket + "] " +
+                    "but AggMetricValue array is null, " + e, e); 
+        }
+
         if (amv == null) {
             rtn[bucket] = val;
         } else {

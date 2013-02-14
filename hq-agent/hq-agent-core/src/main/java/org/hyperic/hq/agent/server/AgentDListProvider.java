@@ -390,8 +390,8 @@ public class AgentDListProvider implements AgentStorageProvider {
             while(nEnts-- != 0){
                 String encKey = dIs.readUTF();
                 String encVal = dIs.readUTF();
-                String key = SecurityUtil.isMarkedEncrypted(encKey) ? SecurityUtil.decrypt(encryptor, encKey) : encKey;
-                String val = SecurityUtil.isMarkedEncrypted(encVal) ? SecurityUtil.decrypt(encryptor, encVal) : encKey;
+                String key = SecurityUtil.isMarkedEncrypted(encKey) ? SecurityUtil.decryptRecursiveUnmark(encryptor, encKey) : encKey;
+                String val = SecurityUtil.isMarkedEncrypted(encVal) ? SecurityUtil.decryptRecursiveUnmark(encryptor, encVal) : encVal;
                 this.keyVals.put(new EncVal(encryptor, key, encKey), new EncVal(encryptor, val, encVal));
             }
         } catch(FileNotFoundException exc) {

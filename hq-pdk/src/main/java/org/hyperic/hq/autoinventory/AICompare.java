@@ -27,8 +27,10 @@ package org.hyperic.hq.autoinventory;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import org.hyperic.hq.appdef.shared.AIIpValue;
@@ -341,6 +343,69 @@ public class AICompare {
             ConfigResponse cr1 = ConfigResponse.decode(c1); 
             ConfigResponse cr2 = ConfigResponse.decode(c2);
             return cr1.equals(cr2);
+        } catch (EncodingException e) {
+            throw new SystemException(e.getMessage());
+        }
+    }
+
+    public static class ConfigDiff {
+        protected ConfigResponse newConf = new ConfigResponse();
+        protected ConfigResponse changedConf = new ConfigResponse();
+        protected ConfigResponse deletedConf = new ConfigResponse();
+        public ConfigResponse getNewConf() {
+            return newConf;
+        }
+        public void setNewConf(ConfigResponse newConf) {
+            this.newConf = newConf;
+        }
+        public ConfigResponse getChangedConf() {
+            return changedConf;
+        }
+        public void setChangedConf(ConfigResponse changedConf) {
+            this.changedConf = changedConf;
+        }
+        public ConfigResponse getDeletedConf() {
+            return deletedConf;
+        }
+        public void setDeletedConf(ConfigResponse deletedConf) {
+            this.deletedConf = deletedConf;
+        }
+    }
+    public static ConfigDiff configsDiff(byte[] newConf, byte[] oldConf) throws EncodingException {
+        ConfigDiff res = new ConfigDiff();
+        if ((oldConf == null) != (newConf == null)) { // only one is empty (null)
+            res.setNewConf(ConfigResponse.decode(oldConf!=null?oldConf:newConf));
+            return res;
+        }
+        if (oldConf == newConf || Arrays.equals(oldConf, newConf)) {
+            return res;
+        }
+        if ((oldConf.length == 0) && (newConf.length == 0)) {
+            return res; //both empty
+        }
+        
+        //can't use Arrays.equals(oldConf, newConf), order may have changed.
+        try {
+            ConfigResponse cr1 = ConfigResponse.decode(oldConf); 
+            ConfigResponse cr2 = ConfigResponse.decode(newConf);
+            Map<String,String> m1 = cr1.getConfig();
+            Map<String,String> m2 = cr2.getConfig();
+            
+            for(String k1:m1.keySet()) {
+                String v1 = m1.get(k1);
+                String v2 = m2.get(k1);
+                if (v2==null) {
+                    res.getDeletedConf().setValue(k1, v1);
+                } else if ((v1==null && v2!=null) || (v1!=null && v2==null) || !v1.equals(v2)) {
+                    res.getChangedConf().setValue(k1, v2);
+                }
+            }
+            for(String k2:m2.keySet()) {
+                if (!m1.containsKey(k2)) {
+                    res.getNewConf().setValue(k2, m2.get(k2));
+                }
+            }
+            return res;
         } catch (EncodingException e) {
             throw new SystemException(e.getMessage());
         }

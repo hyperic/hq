@@ -5,12 +5,15 @@ import org.hyperic.hibernate.PersistedObject;
 public class MacToUUID extends PersistedObject {
     private static final long serialVersionUID = -833293198386426936L;
     
-    private String mac;
-    private String uuid;
+    protected String mac;
+    protected String moRef;
+    protected String vcUUID;
+    
     public MacToUUID() {}
-    public MacToUUID(String mac, String uuid) {
+    public MacToUUID(String mac, String moRef, String vcUUID) {
         this.mac = mac;
-        this.uuid = uuid;
+        this.moRef = moRef;
+        this.vcUUID = vcUUID;
     }
     public String getMac() {
         return mac;
@@ -18,10 +21,16 @@ public class MacToUUID extends PersistedObject {
     public void setMac(String mac) {
         this.mac = mac;
     }
-    public String getUuid() {
-        return uuid;
+    public String getMORef() {
+        return moRef;
     }
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
+    public void setMORef(String moRef) {
+        this.moRef = moRef;
+    }
+    public String getVcUUID() {
+        return vcUUID;
+    }
+    public void setVcUUID(String vcUUID) {
+        this.vcUUID = vcUUID;
     }
 }

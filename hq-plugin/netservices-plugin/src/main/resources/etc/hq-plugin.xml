@@ -120,8 +120,13 @@
             description="Proxy Connection"
             optional="true"/>
     
-    <option name="postargs"
-            description="POST Argumets"
+    <option name="requestparams"
+            description="Request Arguments: arg0=val0,arg1=val1,..."
+            optional="true"/>
+    
+    <option name="secretrequestparams"
+            description="Secret Request Arguments: arg0=val0,arg1=val1,..."
+            type="secret"
             optional="true"/>
 
   </config>
@@ -266,16 +271,16 @@
             optional="true"/>
 
     <option name="snmpSecurityContext"
-    		description="SNMP Context Name (v3 only)" 
-    		optional="true"/>
+            description="SNMP Context Name (v3 only)" 
+            optional="true"/>
 
     <option name="snmpAuthType"
             description="SNMP Authentication Protocol (v3 only)"
             type="enum"
             optional="true">
-		<include name="none" />		
-   		<include name="MD5"/>
-    	<include name="SHA"/>
+        <include name="none" />        
+           <include name="MD5"/>
+        <include name="SHA"/>
     </option>
     
     <option name="snmpPassword"
@@ -284,29 +289,29 @@
             optional="true"/>
 
     <option name="snmpPrivacyType"
-    		description="SNMP Privacy Protocol (v3 only)"
-    		type="enum"
-    		optional="true">
-    	<include name="none" />		
-    	<include name="DES" />		
-    	<include name="3DES" />		
-    	<include name="AES-128" />		
-    	<include name="AES-192" />		
-    	<include name="AES-256" />		
+            description="SNMP Privacy Protocol (v3 only)"
+            type="enum"
+            optional="true">
+        <include name="none" />        
+        <include name="DES" />        
+        <include name="3DES" />        
+        <include name="AES-128" />        
+        <include name="AES-192" />        
+        <include name="AES-256" />        
     </option>
     
     <option name="snmpPrivacyPassPhrase"
-    		description="SNMP Privacy Passphrase (v3 only)"
-    		type="secret"
-    		optional="true"/>    		
+            description="SNMP Privacy Passphrase (v3 only)"
+            type="secret"
+            optional="true"/>            
 
     <option name="snmpRetries"
-    		description="SNMP Retries"
-    		optional="true"/>    		
+            description="SNMP Retries"
+            optional="true"/>            
 
     <option name="snmpTimeout"
-    		description="SNMP Timeout"
-    		optional="true"/>    		
+            description="SNMP Timeout"
+            optional="true"/>            
 
   </config>
 

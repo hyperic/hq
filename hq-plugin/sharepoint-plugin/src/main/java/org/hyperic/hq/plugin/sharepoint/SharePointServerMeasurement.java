@@ -27,8 +27,6 @@ package org.hyperic.hq.plugin.sharepoint;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import jcifs.ntlmssp.NtlmFlags;
 import jcifs.ntlmssp.Type1Message;
 import jcifs.ntlmssp.Type2Message;
@@ -62,7 +60,7 @@ public class SharePointServerMeasurement extends Win32MeasurementPlugin {
     @Override
     public MetricValue getValue(Metric metric) throws PluginException, MetricNotFoundException, MetricUnreachableException {
         MetricValue res;
-            log.debug("[getValue] metric="+metric);
+        log.debug("[getValue] metric="+metric);
         if (metric.getDomainName().equalsIgnoreCase("web")) {
             try {
                 long rt = System.currentTimeMillis();
@@ -82,7 +80,17 @@ public class SharePointServerMeasurement extends Win32MeasurementPlugin {
                 }
             }
         } else if (metric.getDomainName().equalsIgnoreCase("pdh")) {
-            res = getPDHMetric(metric);
+            if (metric.getAttributeName().equalsIgnoreCase("Object Cache Hit %")) {
+                double hits = getPDHMetric("\\" + metric.getObjectPropString() + "\\Object Cache Hit Count");
+                double miss = getPDHMetric("\\" + metric.getObjectPropString() + "\\Object Cache Miss Count");
+                if ((hits >= 0) && (miss >= 0) && ((hits+miss)>0)) {
+                    res = new MetricValue(hits / (hits + miss));
+                } else {
+                    res = MetricValue.NONE;
+                }
+            } else {
+                res = getPDHMetric(metric);
+            }
         } else {
             throw new PluginException("incorrect domain '" + metric.getDomainName() + "'");
         }
@@ -107,8 +115,18 @@ public class SharePointServerMeasurement extends Win32MeasurementPlugin {
                 log.info("error on mteric:'" + metric + "' :" + ex.getLocalizedMessage(), ex);
             } else {
                 res = MetricValue.NONE;
-                log.info("error on mteric:'" + metric + "' :" + ex.getLocalizedMessage());
+                log.info("error on metric:'" + metric + "' :" + ex.getLocalizedMessage());
             }
+        }
+        return res;
+    }
+
+    private double getPDHMetric(String obj) {
+        double res = -1;
+        try {
+            res = new Pdh().getFormattedValue(obj);
+        } catch (Win32Exception ex) {
+            log.debug("error on value for object:'" + obj + "' :" + ex.getLocalizedMessage());
         }
         return res;
     }
@@ -143,7 +161,6 @@ public class SharePointServerMeasurement extends Win32MeasurementPlugin {
                 throw new PluginException(response.getStatusLine().getReasonPhrase());
             }
         } catch (IOException ex) {
-            log.info(ex.getMessage());
             log.debug(ex.getMessage(), ex);
             throw new PluginException(ex.getMessage(), ex);
         }

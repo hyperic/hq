@@ -21,7 +21,7 @@
 		</dependency>
 		<dependency>
            	<groupId>com.cenqua.clover</groupId>
-            <artifactId>clover</artifactId>
+            	<artifactId>clover</artifactId>
             <version>2.6.3</version>
 			<scope>test</scope>
        </dependency>

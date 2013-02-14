@@ -142,10 +142,13 @@ public class ExceptionToErrorCodeMapper  {
         WRONG_DATE_FORMAT("4001"),
         WRONG_DATE_VALUES("4002"),
         BAD_MEASUREMENT_REQ("5001"),
+        BAD_REQ_BODY("5002"),
         CLOUD_PROVIDER_NOT_CONFIGURED("6001"),
         BAD_CLOUD_PROVIDER_CONFIGURATION("6002"),
         CLOUD_RESOURCE_NOT_FOUND("6003"),
-        SEQUENTIAL_REGISTRATION("7000");
+        SEQUENTIAL_REGISTRATION("7000"),
+        MISSING_MANDATORY_FILTER("7001"),
+        UNREGISTERED_FOR_NOTIFICATIONS("7002");
         
         private final String errorCode;
 

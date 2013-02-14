@@ -51,6 +51,7 @@ import org.hyperic.hq.bizapp.shared.UpdateBoss;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.vm.VCManager;
+import org.hyperic.hq.vm.VMID;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class EditConfigAction
@@ -122,7 +123,7 @@ public class EditConfigAction
             cForm.resetVCenterValues();
         }
         else {
-            Map<String, Set<String>> uuidToMacsMap = vcManager.collect(subject, cForm.getvCenterURL(), cForm.getvCenterUser(), cForm.getvCenterPassword());
+            Map<VMID, Set<String>> uuidToMacsMap = vcManager.collect(subject, cForm.getvCenterURL(), cForm.getvCenterUser(), cForm.getvCenterPassword());
             this.platformMgr.mapUUIDToPlatforms(subject, uuidToMacsMap);
         }
     }

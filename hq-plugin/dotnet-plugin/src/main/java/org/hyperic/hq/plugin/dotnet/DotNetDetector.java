@@ -49,14 +49,14 @@ public class DotNetDetector
         implements AutoServerDetector {
 
     /**
-     * service type, performance counter group, use service type on service name
-     * (back compatibility)
+     * service type, performance counter group, use service type on service
+     * name, name prefix (back compatibility)
      */
     private static final String[][] aspAppServices = {
-        {"Application", ".NET CLR Loading", "false"},
-        {"ASP.NET App", "ASP.NET Applications", "true"},
-        {"ASP.NET App", "ASP.NET Apps v4.0.30319", "true"},
-        {"ASP.NET App", "ASP.NET Apps v2.0.50727", "true"}
+        {"Application", ".NET CLR Loading", "false", ""},
+        {"ASP.NET App", "ASP.NET Applications", "true", ""},
+        {"ASP.NET App", "ASP.NET Apps v4.0.30319", "true", "V4 "},
+        {"ASP.NET App", "ASP.NET Apps v2.0.50727", "true", "V2 "}
     };
     static final String PROP_APP = "app.name";
     static final String PROP_PATH = "app.path";
@@ -76,10 +76,11 @@ public class DotNetDetector
         List versions = new ArrayList();
 
         try {
-            key = getRegistryKey(REG_KEY + "\\policy");
+            key = getRegistryKey("SOFTWARE\\Microsoft\\NET Framework Setup\\NDP");
             String[] names = key.getSubKeyNames();
 
             for (int i = 0; i < names.length; i++) {
+                log.debug("[getVersion] names[" + i + "]->" + names[i]);
                 if (names[i].charAt(0) == 'v') {
                     String version = names[i].substring(1);
                     versions.add(version);
@@ -129,7 +130,7 @@ public class DotNetDetector
         if (version == null) {
             return null;
         }
-        if (!thisVersion.equals(version)) {
+        if (!version.startsWith(thisVersion)) {
             return null;
         }
 
@@ -172,7 +173,7 @@ public class DotNetDetector
                         ServiceResource service = new ServiceResource();
                         service.setType(this, serviceType);
                         if (useServiceType) {
-                            service.setServiceName(serviceType + " " + name);
+                            service.setServiceName(serviceType + " " + aspAppServices[i][3] + name);
                         } else {
                             service.setServiceName(name);
                         }

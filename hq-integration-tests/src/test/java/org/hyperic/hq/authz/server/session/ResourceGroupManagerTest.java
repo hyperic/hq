@@ -155,7 +155,7 @@ public class ResourceGroupManagerTest
         Platform testPlatform2 = createPlatform("agentToken", TEST_PLATFORM_TYPE,
             "calculon.remote", "calculon.remote");
         ResourceCreatedZevent platformCreated = new ResourceCreatedZevent(authzSubjectManager
-            .getOverlordPojo(), testPlatform2.getEntityId());
+            .getOverlordPojo(),  testPlatform2.getEntityId());
         resourceGroupManager.updateGroupMembers(Collections.singletonList(platformCreated));
         flushSession();
         // Query orders resources by resource name

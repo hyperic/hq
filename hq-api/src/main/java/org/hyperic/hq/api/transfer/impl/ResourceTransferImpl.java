@@ -30,8 +30,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+
+import javax.annotation.PostConstruct;
+import javax.jms.Destination;
+import javax.ws.rs.core.Response;
 
 import org.apache.commons.logging.Log;
 import org.hyperic.hq.agent.AgentConnectionException;
@@ -41,10 +43,15 @@ import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourceStatusType;
 import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.api.model.Resources;
+import org.hyperic.hq.api.model.common.RegistrationID;
+import org.hyperic.hq.api.model.resources.RegisteredResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
+import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
 import org.hyperic.hq.api.services.impl.ApiMessageContext;
+import org.hyperic.hq.api.transfer.NotificationsTransfer;
 import org.hyperic.hq.api.transfer.ResourceTransfer;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
+import org.hyperic.hq.api.transfer.mapping.ResourceDetailsTypeStrategy;
 import org.hyperic.hq.api.transfer.mapping.ResourceMapper;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.shared.AIQueueManager;
@@ -57,7 +64,7 @@ import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
-import org.hyperic.hq.auth.shared.SessionManager;
+import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -70,7 +77,16 @@ import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.ObjectNotFoundException;
+import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.notifications.Q;
+import org.hyperic.hq.notifications.filtering.AgnosticFilter;
+import org.hyperic.hq.notifications.filtering.Filter;
+import org.hyperic.hq.notifications.filtering.FilteringCondition;
+import org.hyperic.hq.notifications.filtering.ResourceContentFilter;
+import org.hyperic.hq.notifications.filtering.ResourceDestinationEvaluator;
+import org.hyperic.hq.notifications.model.InventoryNotification;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
@@ -78,11 +94,12 @@ import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;
+import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Transactional;
 
-//@Component
 public class ResourceTransferImpl implements ResourceTransfer{
 
     private AIQueueManager aiQueueManager;
@@ -95,12 +112,16 @@ public class ResourceTransferImpl implements ResourceTransfer{
 	private PlatformManager platformManager ; 
 	private ExceptionToErrorCodeMapper errorHandler ;
 	private Log log ;
-	
+    private ResourceDestinationEvaluator evaluator;
+    private Q q;
+    protected NotificationsTransfer notificationsTransfer;
+    protected boolean isRegistered = false;
+
 	@Autowired  
     public ResourceTransferImpl(final AIQueueManager aiQueueManager, final ResourceManager resourceManager, 
     		final AuthzSubjectManager authzSubjectManager, final ResourceMapper resourceMapper, 
     		final ProductBoss productBoss, final CPropManager cpropManager, final AppdefBoss appdepBoss, 
-    		final PlatformManager platformManager, final ExceptionToErrorCodeMapper errorHandler, @Qualifier("restApiLogger")Log log) { 
+    		final PlatformManager platformManager, final ExceptionToErrorCodeMapper errorHandler, ResourceDestinationEvaluator evaluator, Q q, @Qualifier("restApiLogger")Log log) { 
     	this.aiQueueManager = aiQueueManager ; 
     	this.resourceManager = resourceManager ; 
     	this.authzSubjectManager = authzSubjectManager ; 
@@ -110,9 +131,15 @@ public class ResourceTransferImpl implements ResourceTransfer{
     	this.appdepBoss = appdepBoss ;
     	this.platformManager = platformManager ; 
     	this.errorHandler = errorHandler ; 
+    	this.evaluator = evaluator;
+    	this.q=q;
     	this.log = log ;
     }//EOM 
-	    
+    @PostConstruct
+    public void init() {
+        this.notificationsTransfer = (NotificationsTransfer) Bootstrap.getBean("notificationsTransfer");
+    }
+    
 	public final Resource getResource(ApiMessageContext messageContext, final String platformNaturalID, final ResourceType resourceType, 
 			final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) throws SessionNotFoundException, SessionTimeoutException, ObjectNotFoundException {
 	    AuthzSubject authzSubject = messageContext.getAuthzSubject();
@@ -393,8 +420,12 @@ public class ResourceTransferImpl implements ResourceTransfer{
 
 		//TODO: pojo fields modifications 
 	}//EOM 
-	
-	private final Object initResourceConfig(final Context flowContext)  
+    public final void initResourceVirtualData(final Context flowContext)   
+            throws ConfigFetchException, EncodingException, PluginNotFoundException, PluginException, PermissionException, AppdefEntityNotFoundException {
+        flowContext.cprops = cpropManager.getEntries(flowContext.entityID) ;
+    }
+
+	public final Object initResourceConfig(final Context flowContext)  
 		throws ConfigFetchException, EncodingException, PluginNotFoundException, PluginException, PermissionException, AppdefEntityNotFoundException {
 		
 		final int iNoOfConfigTypes = ProductPlugin.CONFIGURABLE_TYPES.length ;
@@ -423,91 +454,17 @@ public class ResourceTransferImpl implements ResourceTransfer{
 		
 		//TODO: pojo members data 
 		
-		return null ; 
+        return null ; 
 	}//EOM 
 		
 	
-	private enum ResourceDetailsTypeStrategy { 
-		BASIC{ 
-			@Override
-			final Resource populateResource(final Context flowContext) throws Throwable{ 
-				return flowContext.currResource = flowContext.visitor.resourceMapper.toResource(flowContext.backendResource) ;
-				
-			}//EOM 
-		},//EO BASIC 
-		PROPERTIES{ 
-			/**
-			 * @throws PluginException 
-			 * @throws EncodingException 
-			 * @throws PermissionException 
-			 * @throws PluginNotFoundException 
-			 * @throws ConfigFetchException 
-			 * @throws AppdefEntityNotFoundException 
-			 */
-			@Override
-			final Resource populateResource(final Context flowContext) throws Throwable { 
-				Resource resource = flowContext.currResource ; 
-				if(resource == null) { 
-					resource = flowContext.currResource = new Resource(flowContext.internalID) ; 
-				}//EO if resource was not initialized yet 
-				//init the response config metadata 
-				
-				flowContext.entityID = AppdefUtil.newAppdefEntityId(flowContext.backendResource) ;
-				flowContext.visitor.initResourceConfig(flowContext) ;
-				return flowContext.visitor.resourceMapper.mergeConfig(flowContext.resourceType, flowContext.backendResource ,resource, flowContext.configResponses, flowContext.cprops) ; 
-			}//EOM 
-		},//EO PROPERTIES
-		ALL{ 
-			@Override
-			final Resource populateResource(final Context flowContext) throws Throwable{ 
-				BASIC.populateResource(flowContext) ;
-				return PROPERTIES.populateResource(flowContext) ;
-			}//EOM
-			
-			@Override 
-			protected final SortedSet<ResourceDetailsTypeStrategy> addToSuperset(SortedSet<ResourceDetailsTypeStrategy> setUniqueResourceDetails) { 
-				setUniqueResourceDetails.clear() ;
-				return super.addToSuperset(setUniqueResourceDetails) ;  
-			}//EOM
-		};//EO ALL 
-		
-		protected SortedSet<ResourceDetailsTypeStrategy> addToSuperset(SortedSet<ResourceDetailsTypeStrategy> setUniqueResourceDetails) { 
-			setUniqueResourceDetails.add(this) ; 
-			return setUniqueResourceDetails ; 
-		}//EOM 
-				
-		abstract Resource populateResource(final Context flowContext) throws Throwable;  
-		
-		static final Set<ResourceDetailsTypeStrategy> valueOf(final ResourceDetailsType[] arrResourceDetailsTypes) { 
-			final SortedSet<ResourceDetailsTypeStrategy> setUniqueResourceDetails = new TreeSet<ResourceDetailsTypeStrategy>() ; 
-
-			if(arrResourceDetailsTypes == null || arrResourceDetailsTypes.length == 0) { 
-				setUniqueResourceDetails.add(ALL) ; 
-				return setUniqueResourceDetails ; 
-			}//EO if all 
-
-			ResourceDetailsTypeStrategy enumResourceDetailsTypeStrategy = null ; 
-			
-			for(ResourceDetailsType enumResourceDetailsType : arrResourceDetailsTypes) { 
-				try{ 
-					enumResourceDetailsTypeStrategy = ResourceDetailsTypeStrategy.valueOf(enumResourceDetailsType.name()) ; 
-					enumResourceDetailsTypeStrategy.addToSuperset(setUniqueResourceDetails) ;  
-				}catch(Throwable t) { 
-					t.printStackTrace() ; 
-				}
-			}//EO while there are more arrResourceDetailsTypes
-			
-			return setUniqueResourceDetails ; 
-		}//EOM 
-	}//EOE ResourceDetailsTypeStrategy
-	
-	private enum ResourceTypeStrategy { 
+	public enum ResourceTypeStrategy { 
 		
 		PLATFORM(AppdefEntityConstants.APPDEF_TYPE_PLATFORM) { 
 			
 			@Override
 			final org.hyperic.hq.authz.server.session.Resource getResourceByNaturalID(final Context flowContext) throws PlatformNotFoundException, PermissionException {
-				final Platform platform = flowContext.visitor.platformManager.findPlatformByFqdn(flowContext.subject, flowContext.naturalID);  
+				final Platform platform = flowContext.visitor.getPlatformManager().findPlatformByFqdn(flowContext.subject, flowContext.naturalID);  
 				return platform.getResource() ;  
 			}//EOM 
 			
@@ -534,7 +491,7 @@ public class ResourceTransferImpl implements ResourceTransfer{
 		
 		org.hyperic.hq.authz.server.session.Resource getResourceByInternalID(final Context flowContext) { 
 			final int iInternalResourceID = Integer.parseInt(flowContext.internalID) ; 
-			return flowContext.visitor.resourceManager.findResourceById(iInternalResourceID) ; 
+			return flowContext.visitor.getResourceManager().findResourceById(iInternalResourceID) ; 
 		}//EOM
 		
 		org.hyperic.hq.authz.server.session.Resource getResource(final Context flowContext) throws Exception{ 
@@ -589,34 +546,34 @@ public class ResourceTransferImpl implements ResourceTransfer{
 	}//EOM 
 	
 	
-	final static class Context  { 
-		org.hyperic.hq.authz.server.session.Resource backendResource ; 
-		AppdefEntityID entityID ; 
-		AuthzSubject subject ;
-		ConfigSchemaAndBaseResponse[] configResponses ; 
-		Properties cprops ; 
+	public final static class Context  { 
+	    public org.hyperic.hq.authz.server.session.Resource backendResource ; 
+		public AppdefEntityID entityID ; 
+		public AuthzSubject subject ;
+		public ConfigSchemaAndBaseResponse[] configResponses ; 
+		public Properties cprops ; 
 		
-		ResourceTransferImpl visitor ; 
-		String internalID ;  
-		String naturalID ; 
-		ResourceType resourceType ;  
-		Set<ResourceDetailsTypeStrategy> resourceDetails ;  
-		Resource currResource ;
+		public ResourceTransfer visitor ; 
+		public String internalID ;  
+		public String naturalID ; 
+		public ResourceType resourceType ;  
+		public Set<ResourceDetailsTypeStrategy> resourceDetails ;  
+		public Resource currResource ;
 		//Resource resourceRoot ; 
 		
-		Context(final AuthzSubject subject, final String naturalID, final ResourceType resourceType, final ResourceDetailsType[] responseMetadata, final ResourceTransferImpl visitor)  { 
+		public Context(final AuthzSubject subject, final String naturalID, final ResourceType resourceType, final ResourceDetailsType[] responseMetadata, final ResourceTransfer visitor)  { 
 			this(subject, null/*internalID*/,responseMetadata, visitor) ;  
 			this.naturalID = naturalID ; 
 			this.resourceType = resourceType ; 
 		}//EOM
 		
-		Context(final AuthzSubject subject, final String internalID, final ResourceDetailsType[] responseMetadata, final ResourceTransferImpl visitor)  {
+		Context(final AuthzSubject subject, final String internalID, final ResourceDetailsType[] responseMetadata, final ResourceTransfer visitor)  {
 			this(subject, visitor) ;
 			this.internalID  = internalID;  
 			this.resourceDetails = ResourceDetailsTypeStrategy.valueOf(responseMetadata) ; 
 		}//EOM 
 		
-		Context(final AuthzSubject subject, final ResourceTransferImpl visitor) {
+		Context(final AuthzSubject subject, final ResourceTransfer visitor) {
 			this.subject = subject ; 
 			this.visitor = visitor ; 
 			this.configResponses = new ConfigSchemaAndBaseResponse[ProductPlugin.CONFIGURABLE_TYPES.length] ; 
@@ -643,8 +600,67 @@ public class ResourceTransferImpl implements ResourceTransfer{
 			this.naturalID = null ; 
 			this.currResource = null  ;
 		}//EOM 
+
+        public ResourceTransfer getVisitor() {
+            return this.visitor;
+        }
 		
 	}//EO inner class Context 
 
-	
+	@Transactional (readOnly=true)
+    public RegisteredResourceBatchResponse getResources(ApiMessageContext messageContext, ResourceDetailsType responseMetadata, final int hierarchyDepth, 
+            final boolean register,final ResourceFilterRequest resourceFilterRequest) throws PermissionException, NotFoundException {
+        if (resourceFilterRequest==null) {
+            if (log.isDebugEnabled()) {
+                log.debug("illegal request");
+            }
+            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.BAD_REQ_BODY);
+        }
+        AuthzSubject authzSubject = messageContext.getAuthzSubject();
+        final RegisteredResourceBatchResponse res = new RegisteredResourceBatchResponse(this.errorHandler) ; 
+        List<Resource> resources = new ArrayList<Resource>();
+        PageList<PlatformValue> platforms = this.platformManager.getAllPlatforms(authzSubject, PageControl.PAGE_ALL);
+        for(PlatformValue pv:platforms) {
+            try {
+                String fqdn = pv.getFqdn();
+                Resource r = this.getResourceInner(new Context(authzSubject, fqdn, ResourceType.PLATFORM, new ResourceDetailsType[] {responseMetadata}, this), hierarchyDepth) ;  
+                resources.add(r);
+            } catch (Throwable t) {
+//TODO~                res.addFailedResource(resourceID, errorCode, additionalDescription, args)
+            }
+        }
+        res.setResources(resources);
+        if (register) {
+            // not allowing sequential registrations
+            if (this.isRegistered) {
+                throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.SEQUENTIAL_REGISTRATION);
+            }
+            this.isRegistered=true;
+            List<Filter<InventoryNotification,? extends FilteringCondition<?>>> userFilters = new ArrayList<Filter<InventoryNotification,? extends FilteringCondition<?>>>();//this.resourceMapper.toResourceFilters(resourceFilterRequest); 
+            userFilters.add(new AgnosticFilter<InventoryNotification,FilteringCondition<?>>());
+
+            //TODO~ get the destination from the user
+            Destination dest = this.notificationsTransfer.getDummyDestination();
+            this.q.register(dest,ResourceDetailsType.valueOf(responseMetadata));
+            this.evaluator.register(dest,userFilters);
+            //TODO~ return a valid registration id
+            res.setRegId(new RegistrationID(1));
+        }
+        return res;
+    }
+    public void unregister() {
+        Destination dest = this.notificationsTransfer.getDummyDestination();
+        this.q.unregister(dest);
+        this.evaluator.unregisterAll(dest);
+        this.isRegistered=false;
+    }
+    public ResourceMapper getResourceMapper() {
+        return this.resourceMapper;
+    }
+    public PlatformManager getPlatformManager() {
+        return this.platformManager;
+    }
+    public ResourceManager getResourceManager() {
+        return this.resourceManager;
+    }
 }//EOC 

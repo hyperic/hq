@@ -53,11 +53,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Service("availabilityCheckService")
 @Transactional
 public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
-	
+    
     private final Log log = LogFactory.getLog(AvailabilityCheckServiceImpl.class);
     private static final String AVAIL_BACKFILLER_TIME = ConcurrentStatsCollector.AVAIL_BACKFILLER_TIME;
 
-    
     private long startTime = 0;
     private long wait = 5 * MeasurementConstants.MINUTE;
     private final Object IS_RUNNING_LOCK = new Object();
@@ -68,9 +67,9 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
     private AvailabilityCache availabilityCache;
     private BackfillPointsService backfillPointsService;
 
-	private AvailabilityFallbackCheckQue checkQue;
-	private AvailabilityFallbackChecker fallbackChecker;
-	//private ResourceManager resourceManager;
+    private AvailabilityFallbackCheckQue checkQue;
+    private AvailabilityFallbackChecker fallbackChecker;
+    //private ResourceManager resourceManager;
     
 
     @Autowired
@@ -100,12 +99,12 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
     }
 
     public void backfillPlatformAvailability() {
-    	backfillPlatformAvailability(System.currentTimeMillis(), false);
+        backfillPlatformAvailability(System.currentTimeMillis(), false);
     }
 
 
     public void testBackfill(long current) {
-    	backfillPlatformAvailability(current, true);
+        backfillPlatformAvailability(current, true);
     }
     
     public void backfillPlatformAvailability(long current, boolean forceStart) {
@@ -114,7 +113,7 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
         try {
            // Don't start backfilling immediately
             if (!forceStart && !canStart(current)) {
-            	log.info("not starting availability check");
+                log.info("not starting availability check");
                 return;
             }
             synchronized (IS_RUNNING_LOCK) {
@@ -134,15 +133,16 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
                 // The code must be extremely efficient or else it will have
                 // a big impact on the performance of availability insertion.
                 synchronized (availabilityCache) {
-                	log.info("starting availability check");
+//                    log.info("starting availability check");
                     backfillPoints = backfillPointsService.getBackfillPlatformPoints(current);
                 }
-                if (backfillPoints.size() > 0)
-                	log.info("backfillPlatformAvailability: got " + backfillPoints.size() + " platforms to check. Adding to que.");
+                if (backfillPoints.size() > 0 && log.isDebugEnabled()) {
+                    log.debug("backfillPlatformAvailability: got " + backfillPoints.size() + " platforms to check. Adding to que.");
+                }
                 checkQue.addToQue(backfillPoints);
                 List<ResourceDataPoint> availabilityDataPoints = pollWorkList();
                 //if (fallbackChecker == null)
-                //	fallbackChecker = new AvailabilityFallbackChecker(availabilityManager, availabilityCache, resourceManager);
+                //    fallbackChecker = new AvailabilityFallbackChecker(availabilityManager, availabilityCache, resourceManager);
                 fallbackChecker.checkAvailability(availabilityDataPoints, current);
             } finally {
                 synchronized (IS_RUNNING_LOCK) {
@@ -150,25 +150,25 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
                 }
             }
         } catch (Exception e) {
-        	//checkQue.clearQue();
+            //checkQue.clearQue();
             throw new SystemException(e);
         } finally {
             concurrentStatsCollector.addStat(now() - start, AVAIL_BACKFILLER_TIME);
         }
-    	
+        
     }
     
     
     private List<ResourceDataPoint> pollWorkList() {
-    	checkQue.cleanQueFromNonExistant();
-    	List<ResourceDataPoint> dataPointList = new ArrayList<ResourceDataPoint>();
+        checkQue.cleanQueFromNonExistant();
+        List<ResourceDataPoint> dataPointList = new ArrayList<ResourceDataPoint>();
         ResourceDataPoint dp = checkQue.poll();
         while (dp != null) {
             dataPointList.add(dp);
             dp = checkQue.poll();
         }
-       	log.debug("setWorkList: current dataPointList size: " + dataPointList.size());
-       	return dataPointList;
+           log.debug("setWorkList: current dataPointList size: " + dataPointList.size());
+           return dataPointList;
     }
 
     

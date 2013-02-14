@@ -86,6 +86,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
@@ -93,10 +94,12 @@ import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.ResourceAuditFactory;
 import org.hyperic.hq.common.shared.AuditManager;
+import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.shared.SRNManager;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.PlatformTypeInfo;
+import org.hyperic.hq.vm.VMID;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.sigar.NetFlags;
 import org.hyperic.util.pager.PageControl;
@@ -535,6 +538,8 @@ public class PlatformManagerImpl implements PlatformManager {
 
             platformDAO.getSession().flush();
 
+            NewResourceEvent event = new NewResourceEvent(null,platform.getResource());
+            zeventManager.enqueueEventAfterCommit(event);
             // Send resource create event
             // Send resource create & increment platform count events
             zeventManager.enqueueEventAfterCommit(new ResourceCreatedZevent(subject, platform.getEntityId()));
@@ -589,6 +594,8 @@ public class PlatformManagerImpl implements PlatformManager {
             throw new SystemException(e);
         }
 
+        NewResourceEvent event = new NewResourceEvent(null,platform.getResource());
+        zeventManager.enqueueEventAfterCommit(event);
         // Send resource create & increment platform count events
         zeventManager.enqueueEventAfterCommit(new ResourceCreatedZevent(subject, platform.getEntityId()));
         
@@ -1800,8 +1807,11 @@ public class PlatformManagerImpl implements PlatformManager {
         // Get the FQDN before we update
         String prevFqdn = platform.getFqdn();
 
-        platform.updateWithAI(aiplatform, subj.getName(), platform.getResource());
-
+        Resource changedResource = platform.updateWithAI(aiplatform, subj.getName(), platform.getResource());
+        if (changedResource!=null) {
+            this.zeventManager.enqueueEventAfterCommit(new ResourceContentChangedEvent(changedResource.getId(), changedResource.getName(), null, null));
+        }
+        
         // If FQDN has changed, we need to update servers' auto-inventory tokens
         if (!prevFqdn.equals(platform.getFqdn())) {
             for (Server server : platform.getServers()) {
@@ -2032,9 +2042,9 @@ public class PlatformManagerImpl implements PlatformManager {
     	return null;
     }
 
-    public void mapUUIDToPlatforms(AuthzSubject subject, Map<String, Set<String>> uuidToMacsMap) throws PermissionException, CPropKeyNotFoundException {
-        for(String uuid : uuidToMacsMap.keySet()) {
-            Set<String> macs = uuidToMacsMap.get(uuid);
+    public void mapUUIDToPlatforms(AuthzSubject subject, Map<VMID, Set<String>> uuidToMacsMap) throws PermissionException, CPropKeyNotFoundException {
+        for(VMID vmid : uuidToMacsMap.keySet()) {
+            Set<String> macs = uuidToMacsMap.get(vmid);
             for (String mac : macs) {
                 if ("00:00:00:00:00:00".equals(mac)) { continue; }
                 Collection<Platform> platforms = this.getPlatformByMacAddr(subject, mac);
@@ -2045,16 +2055,27 @@ public class PlatformManagerImpl implements PlatformManager {
 
                 // there should only be 2 platforms
                 boolean platformUUIDUpdated = false;
+                List<ResourceContentChangedEvent> events = new ArrayList<ResourceContentChangedEvent>(platforms.size());
                 for(Platform platform:platforms) {
                     try {
                         // only map the UUID for actual platforms, not for virtual ones discovered by the vc plugin
                         if (AuthzConstants.platformPrototypeVmwareVsphereVm.equals(platform.getResource().getPrototype().getName())) { continue; }
                         AppdefEntityID id = platform.getEntityId();
                         int typeId = platform.getAppdefResourceType().getId().intValue();
-                        this.cpropManager.setValue(id, typeId, "UUID", uuid);
+                        String moref = vmid.getMoref();
+                        String vcUUID = vmid.getVcUUID();
+                        this.cpropManager.setValue(id, typeId, HQConstants.MOREF, moref);
+                        this.cpropManager.setValue(id, typeId, HQConstants.VCUUID, vcUUID);
+                        Map<String,String> changedProps = new HashMap<String,String>();
+                        changedProps.put(HQConstants.MOREF,moref);
+                        changedProps.put(HQConstants.VCUUID,vcUUID);
+                        ResourceContentChangedEvent contentChangedEvent = new ResourceContentChangedEvent(platform.getId(),null,null,changedProps);
+                        events.add(contentChangedEvent);
                         platformUUIDUpdated=true;
                     } catch (AppdefEntityNotFoundException e) { log.error(e); }
                 }
+                this.zeventManager.enqueueEventsAfterCommit(events);
+
                 // assume one mac address is sufficient for VM-platform mapping
                 if (platformUUIDUpdated) { break;}
             }
