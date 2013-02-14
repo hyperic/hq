@@ -85,6 +85,7 @@ import org.hyperic.hq.notifications.filtering.Filter;
 import org.hyperic.hq.notifications.filtering.FilteringCondition;
 import org.hyperic.hq.notifications.filtering.ResourceContentFilter;
 import org.hyperic.hq.notifications.filtering.ResourceDestinationEvaluator;
+import org.hyperic.hq.notifications.model.InternalResourceDetailsType;
 import org.hyperic.hq.notifications.model.InventoryNotification;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
@@ -115,7 +116,6 @@ public class ResourceTransferImpl implements ResourceTransfer{
     private Q q;
     protected NotificationsTransfer notificationsTransfer;
     protected boolean isRegistered = false;
-
 	@Autowired  
     public ResourceTransferImpl(final AIQueueManager aiQueueManager, final ResourceManager resourceManager, 
     		final AuthzSubjectManager authzSubjectManager, final ResourceMapper resourceMapper, 
@@ -635,8 +635,7 @@ public class ResourceTransferImpl implements ResourceTransfer{
                 throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.SEQUENTIAL_REGISTRATION);
             }
             this.isRegistered=true;
-            List<Filter<InventoryNotification,? extends FilteringCondition<?>>> userFilters = new ArrayList<Filter<InventoryNotification,? extends FilteringCondition<?>>>();//this.resourceMapper.toResourceFilters(resourceFilterRequest); 
-            userFilters.add(new AgnosticFilter<InventoryNotification,FilteringCondition<?>>());
+            List<Filter<InventoryNotification,? extends FilteringCondition<?>>> userFilters = this.resourceMapper.toResourceFilters(resourceFilterRequest, responseMetadata); 
 
             //TODO~ get the destination from the user
             Destination dest = this.notificationsTransfer.getDummyDestination();
