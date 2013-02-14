@@ -446,7 +446,7 @@ public interface AppdefBoss {
     public void removeServer(AuthzSubject subj, Integer serverId) throws ServerNotFoundException,
         SessionNotFoundException, SessionTimeoutException, PermissionException, SessionException, VetoException;
     
-    void removeService(AuthzSubject subject, Integer serviceId)
+    Service removeService(AuthzSubject subject, Integer serviceId)
     throws VetoException, PermissionException, ServiceNotFoundException;
 
     /**

@@ -39,6 +39,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.TTCCLayout;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
@@ -51,6 +52,7 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceEdge;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.cloudscale.bridge.LegacycloudScaleBridge;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.agent.client.AgentMonitor;
 import org.hyperic.hq.measurement.agent.client.MeasurementCommandsClient;
@@ -93,6 +95,9 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
     private ZeventEnqueuer zEventManager;
     @Autowired
     private ConcurrentStatsCollector concurrentStatsCollector;
+    @Autowired
+    private LegacycloudScaleBridge legacyCloudScaleBridge ; 
+    
     
     public MeasurementProcessorImpl() {}
     
@@ -229,7 +234,8 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
         try {
             client = measurementCommandsClientFactory.getClient(agent);
            
-            for (AppdefEntityID eid : eids ) {
+            int index = 0 ; 
+            for (AppdefEntityID eid : eids) {
                 final long begin = now();
                 ScheduleRevNum srnObj = srnManager.get(eid);
                 SRN srn = new SRN(eid, srnObj == null ? -1 : srnObj.getSrn());
@@ -237,6 +243,7 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
                 if (r == null || r.isInAsyncDeleteState()) {
                     continue;
                 }
+                
                 List<Measurement> measurements = measMap.get(r.getId());
                 if (measurements == null) {
                     continue;
@@ -251,8 +258,17 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
                                 .append("\n");
                     }
                     Measurement[] array = measurements.toArray(new Measurement[0]);
+                    
+                    try{ 
+                        this.legacyCloudScaleBridge.createMeasurements(agent.getId(), r.getId(), measurements) ;
+                    }catch(Throwable t) { 
+                        t.printStackTrace() ; 
+                        throw new RuntimeException(t) ; 
+                    }//EO catch block
+                    
                     agentMonitor.schedule(client, srn, array);
                     concurrentStatsCollector.addStat((now()-begin), ConcurrentStatsCollector.MEASUREMENT_SCHEDULE_TIME);
+                    
                 } catch (AgentConnectionException e) {
                     final String emsg = "Error reported by agent @ "
                         + agent.connectionString() 
@@ -261,11 +277,11 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
                     throw new MonitorAgentException(e.getMessage(), e);
                 } catch (AgentRemoteException e) {
                     final String emsg = "Error reported by agent @ "
-                        + agent.connectionString() 
+                        + agent.connectionString()  
                         +  ": " + e.getMessage();
                     log.warn(emsg);
                     throw new MonitorAgentException(emsg, e);
-                }
+                } 
             }
         } finally {
             if (debug) log.debug(debugBuf);
@@ -289,6 +305,7 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
                 // for this resource.
             }
         }
+        
         List<AppdefEntityID> tmp = new ArrayList<AppdefEntityID>(entIds);
         agentMonitor.unschedule(a, tmp.toArray(new AppdefEntityID[0]));
     }

@@ -27,6 +27,7 @@ package org.hyperic.hq.bizapp.server.session;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -146,6 +147,7 @@ import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceTreeNode;
 import org.hyperic.hq.bizapp.shared.uibeans.SearchResult;
+import org.hyperic.hq.cloudscale.bridge.LegacycloudScaleBridge;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.ProductProperties;
@@ -227,6 +229,8 @@ public class AppdefBossImpl implements AppdefBoss {
     private ZeventEnqueuer zEventManager;
     
     private CritterTranslator critterTranslator; 
+    
+    private LegacycloudScaleBridge legacyCloudScaleBridge ; 
 
     protected Log log = LogFactory.getLog(AppdefBossImpl.class.getName());
     protected final int APPDEF_TYPE_UNDEFINED = -1;
@@ -245,7 +249,8 @@ public class AppdefBossImpl implements AppdefBoss {
                           AIBoss aiBoss, ResourceGroupManager resourceGroupManager,
                           ResourceManager resourceManager, ServerManager serverManager,
                           ServiceManager serviceManager, TrackerManager trackerManager,
-                          AppdefManager appdefManager, ZeventEnqueuer zEventManager, CritterTranslator critterTranslator) {
+                          AppdefManager appdefManager, ZeventEnqueuer zEventManager, CritterTranslator critterTranslator, 
+                          LegacycloudScaleBridge legacyCloudScaleBridge) {
         this.sessionManager = sessionManager;
         this.agentManager = agentManager;
         this.aiQueueManager = aiQueueManager;
@@ -268,6 +273,7 @@ public class AppdefBossImpl implements AppdefBoss {
         this.appdefManager = appdefManager;
         this.zEventManager = zEventManager;
         this.critterTranslator = critterTranslator;
+        this.legacyCloudScaleBridge = legacyCloudScaleBridge ; 
     }
 
     /**
@@ -1283,6 +1289,7 @@ public class AppdefBossImpl implements AppdefBoss {
      *         deleted
      * 
      */
+    @SuppressWarnings("unchecked")
     public AppdefEntityID[] removeAppdefEntity(int sessionId, AppdefEntityID aeid,
     										   boolean removeAllVirtual)
         throws SessionNotFoundException, SessionTimeoutException, ApplicationException,
@@ -1323,21 +1330,26 @@ public class AppdefBossImpl implements AppdefBoss {
         }
         AppdefEntityID[] removed = resourceManager.removeResourceAndRelatedResources(subject, res, false, removeAllVirtual);
         Map<Integer, List<AppdefEntityID>> agentCache = null;
+        Map<Integer, List<Resource>> agentResources = new HashMap<Integer, List<Resource>>() ;
 
         final Integer id = aeid.getId();
         switch (aeid.getType()) {
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
                 Server server = serverManager.findServerById(id);
-                agentCache = buildAsyncDeleteAgentCache(server);
+                agentCache = buildAsyncDeleteAgentCache(server, agentResources);
                 removeServer(subject, server.getId());
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                Platform platform = platformManager.findPlatformById(id);
-                agentCache = buildAsyncDeleteAgentCache(platform);
+                Platform platform = platformManager.findPlatformById(id); 
+                agentCache = buildAsyncDeleteAgentCache(platform, agentResources);
                 removePlatform(subject, platform.getId());
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            	removeService(subject, id);
+                final Agent agent = this.agentManager.getAgent(aeid) ; 
+            	final Service service = removeService(subject, id);
+            	
+            	agentResources.put(agent.getId(), Arrays.asList(new Resource[] {service.getResource()})) ; 
+            	
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_GROUP:
                 resourceGroupManager.removeResourceGroup(subject, resourceGroupManager
@@ -1354,7 +1366,13 @@ public class AppdefBossImpl implements AppdefBoss {
             log.debug("removeAppdefEntity() for " + aeid + " executed in " + timer.getElapsed());
         }
 
-        zEventManager.enqueueEventAfterCommit(new ResourcesCleanupZevent(agentCache));
+        try{ 
+            this.legacyCloudScaleBridge.deleteMeasurements(agentResources) ; 
+            
+            zEventManager.enqueueEventAfterCommit(new ResourcesCleanupZevent(agentCache));
+        }catch(Throwable t) { 
+            throw new ApplicationException(t) ; 
+        }//EO catch block 
 
         return removed;
     }
@@ -1438,17 +1456,27 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return {@link Map} of {@link Integer} of agentIds to {@link List} of
      *         {@link AppdefEntityID}s
      */
-    private Map<Integer, List<AppdefEntityID>> buildAsyncDeleteAgentCache(Server server) {
+    private Map<Integer, List<AppdefEntityID>> buildAsyncDeleteAgentCache(Server server, final Map<Integer, List<Resource>> agentResources) {
         Map<Integer, List<AppdefEntityID>> cache = new HashMap<Integer, List<AppdefEntityID>>();
 
         try {
             Agent agent = findResourceAgent(server.getEntityId());
+            final Integer agentId = agent.getId() ; 
+            
             List<AppdefEntityID> resources = new ArrayList<AppdefEntityID>();
+
+            List<Resource> serverResources = agentResources.get(agentId) ; 
+            if(serverResources == null) { 
+                serverResources = new ArrayList<Resource>() ; 
+                serverResources.add(server.getResource()) ;
+                agentResources.put(agentId, serverResources) ;
+            }//EO if serverResources was not yet initialzied 
 
             for (Service s : server.getServices()) {
                 resources.add(s.getEntityId());
+                serverResources.add(s.getResource()); 
             }
-            cache.put(agent.getId(), resources);
+            cache.put(agentId, resources);
         } catch (Exception e) {
             log.warn("Unable to build AsyncDeleteAgentCache for server[id=" + server.getId() +
                      ", name=" + server.getName() + "]: " + e.getMessage());
@@ -1463,21 +1491,28 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return {@link Map} of {@link Integer} of agentIds to {@link List} of
      *         {@link AppdefEntityID}s
      */
-    private Map<Integer, List<AppdefEntityID>> buildAsyncDeleteAgentCache(Platform platform) {
+    private Map<Integer, List<AppdefEntityID>> buildAsyncDeleteAgentCache(Platform platform, final Map<Integer, List<Resource>> agentResources) {
         Map<Integer, List<AppdefEntityID>> cache = new HashMap<Integer, List<AppdefEntityID>>();
 
         try {
             Agent agent = platform.getAgent();
             List<AppdefEntityID> resources = new ArrayList<AppdefEntityID>();
+            final Integer agentId = agent.getId() ; 
+           
+            final List<Resource> platformResources = new ArrayList<Resource>() ;
+            platformResources.add(platform.getResource()) ; 
+            agentResources.put(agentId, platformResources) ; 
 
             for (Server s : platform.getServers()) {
                 if (!s.getServerType().isVirtual()) {
                     resources.add(s.getEntityId());
                 }
-                List<AppdefEntityID> services = buildAsyncDeleteAgentCache(s).get(agent.getId());
+                //add the resource even if it is virtual 
+                platformResources.add(s.getResource()) ; 
+                List<AppdefEntityID> services = buildAsyncDeleteAgentCache(s, agentResources).get(agentId);
                 resources.addAll(services);
             }
-            cache.put(agent.getId(), resources);
+            cache.put(agentId, resources);
         } catch (Exception e) {
             log.warn("Unable to build AsyncDeleteAgentCache for platform[id=" + platform.getId() +
                      ", name=" + platform.getName() + "]: " + e.getMessage());
@@ -1487,7 +1522,7 @@ public class AppdefBossImpl implements AppdefBoss {
     }
 
   
-    public void removeService(AuthzSubject subject, Integer serviceId)
+    public Service removeService(AuthzSubject subject, Integer serviceId)
         throws VetoException, PermissionException, ServiceNotFoundException {
         try {
             Service service = serviceManager.findServiceById(serviceId);
@@ -1495,8 +1530,8 @@ public class AppdefBossImpl implements AppdefBoss {
             disableMeasurements(subject, service.getResource());
             removeTrackers(subject, service.getEntityId());
             serviceManager.removeService(subject, service);
+            return service ; 
         } catch (PermissionException e) {
-
             throw (PermissionException) e;
         }
     }

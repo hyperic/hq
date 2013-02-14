@@ -76,6 +76,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.cloudscale.bridge.LegacycloudScaleBridge;
 import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementCreateException;
@@ -152,7 +153,9 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 	private AvailabilityManager availabilityManager;
     @Autowired
     private MeasurementInserterHolder measurementInserterHolder;
-
+    @Autowired
+    private LegacycloudScaleBridge legacyCloudScaleBridge ;
+    
     // TODO: Resolve circular dependency with ProductManager
     private MeasurementPluginManager getMeasurementPluginManager() throws Exception {
         return (MeasurementPluginManager) applicationContext.getBean(ProductManager.class).getPluginManager(
@@ -199,6 +202,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                 events.add(new MeasurementScheduleZevent(mid.intValue(), 0));
             }
         }
+        
         zeventManager.enqueueEventsAfterCommit(events);
     }
 
@@ -1219,10 +1223,16 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         if (agent == null || ids == null) {
             return;
         }
+        
         List<Resource> resources = new ArrayList<Resource>();
+        final Map<Integer, List<Measurement>> measurementIdsPerResourceMap = new HashMap<Integer, List<Measurement>>() ;  
+        List resourceMeasurmentIdsList = null ; 
+        Integer measurementId, resourceId ;  
+        
         for (int i = 0; i < ids.length; i++) {
             permissionManager.checkModifyPermission(subject.getId(), ids[i]);
             resources.add(resourceManager.findResource(ids[i]));
+            
         } 
         List<Measurement> mcol = measurementDAO.findByResources(resources);
         
@@ -1231,14 +1241,29 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         for (int j = 0; it.hasNext(); j++) {
             Measurement dm = it.next();
             dm.setEnabled(false);
-            mids[j] = dm.getId();
+            mids[j] = measurementId = dm.getId();
+            resourceId = dm.getResource().getId() ; 
+            
+            resourceMeasurmentIdsList = measurementIdsPerResourceMap.get(resourceId) ;  
+            if(resourceMeasurmentIdsList == null) { 
+                resourceMeasurmentIdsList = new ArrayList<Measurement>() ; 
+                measurementIdsPerResourceMap.put(resourceId, resourceMeasurmentIdsList) ; 
+            }//EO if not yet initialize 
+         
+            resourceMeasurmentIdsList.add(measurementId) ; 
         }
 
         removeMeasurementsFromCache(mids);
         
         enqueueZeventsForMeasScheduleCollectionDisabled(mids);
-    
-        zeventManager.enqueueEventAfterCommit(new AgentUnscheduleZevent(Arrays.asList(ids), agent.getAgentToken()));
+        
+        try{ //OK Map<Integer,List<Measurement>>
+           // this.legacyCloudScaleBridge.deleteMeasurements(agent.getId(), measurementIdsPerResourceMap) ; 
+            
+            zeventManager.enqueueEventAfterCommit(new AgentUnscheduleZevent(Arrays.asList(ids), agent.getAgentToken()));
+        }catch(Throwable t) { 
+            throw (t instanceof RuntimeException ? (RuntimeException)t : new RuntimeException(t)) ; 
+        }//EO catch block
     }
     
     /**
@@ -1253,13 +1278,18 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
      * agent as specified by the agent
      */
     public void disableMeasurements(AuthzSubject subject, Agent agent,
-                                    AppdefEntityID[] ids, boolean isAsyncDelete)
-        throws PermissionException {
-  
+                                    AppdefEntityID[] ids, boolean isAsyncDelete) throws PermissionException {
+        
+        final Map<Integer,List<Measurement>> resourceMeasurements = new HashMap<Integer,List<Measurement>>() ; 
+        final Integer resourceId = null ; 
+        final List<Integer> measurements ; 
+        
+        
         for (int i = 0; i < ids.length; i++) {
             permissionManager.checkModifyPermission(subject.getId(), ids[i]);
             List<Measurement> mcol = null;
             Resource res = resourceManager.findResource(ids[i]);
+            
             if (isAsyncDelete) {
                 // For asynchronous deletes, we need to get all measurements
                 // because some disabled measurements are not unscheduled
@@ -1279,6 +1309,8 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                 continue;
             }
             
+            resourceMeasurements.put(res.getId(), mcol) ;  
+            
             Integer[] mids = new Integer[mcol.size()];
             Iterator<Measurement> it = mcol.iterator();
             for (int j = 0; it.hasNext(); j++) {
@@ -1286,12 +1318,20 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                 dm.setEnabled(false);
                 mids[j] = dm.getId();
             }
-
+            
             removeMeasurementsFromCache(mids);
             
             enqueueZeventsForMeasScheduleCollectionDisabled(mids);
         }
-        zeventManager.enqueueEventAfterCommit(new AgentUnscheduleZevent(Arrays.asList(ids), agent.getAgentToken()));
+        
+        try{ //OK Map<Integer,List<Measurement>>
+          //  this.legacyCloudScaleBridge.deleteMeasurements(agent.getId(), resourceMeasurements) ;
+                    
+            zeventManager.enqueueEventAfterCommit(new AgentUnscheduleZevent(Arrays.asList(ids), agent.getAgentToken()));
+            
+        }catch(Throwable t) { 
+            throw (t instanceof RuntimeException ? (RuntimeException)t : new RuntimeException(t)) ; 
+        }//EO catch block 
     }
 
 
@@ -1312,7 +1352,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
      */
     public void disableMeasurements(AuthzSubject subject, Resource res) throws PermissionException {
         List<Measurement> mcol = measurementDAO.findEnabledByResource(res);
-
+        
         if (mcol.size() == 0) {
             return;
         }
@@ -1332,11 +1372,21 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
         removeMeasurementsFromCache(mids);
         enqueueZeventsForMeasScheduleCollectionDisabled(mids);
-
-        // Unscheduling of all metrics for a resource could indicate that
-        // the resource is getting removed. Send the unschedule synchronously
-        // so that all the necessary plumbing is in place.
-        measurementProcessor.unschedule(Collections.singletonList(aeid));
+        
+        try{ //OK List<Measurement>
+            //final Agent agent = this.agentManager.getAgent(aeid) ; 
+            //this.legacyCloudScaleBridge.deleteMeasurements(agent.getId(), res.getId(), mcol) ;
+            
+            // Unscheduling of all metrics for a resource could indicate that
+            // the resource is getting removed. Send the unschedule synchronously
+            // so that all the necessary plumbing is in place.
+            measurementProcessor.unschedule(Collections.singletonList(aeid));
+                    
+        }catch(Throwable t) { 
+            throw (t instanceof RuntimeException ? (RuntimeException)t : new RuntimeException(t)) ; 
+        }//EO catch block  
+        
+        
     }
 
     /**
@@ -1352,6 +1402,8 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
      * Disable measurements for an instance Enqueues reschedule events after
      * commit
      * 
+     * used for interval change (no cloudscale syncup is required) 
+     * 
      */
     public void disableMeasurements(AuthzSubject subject, AppdefEntityID id, Integer[] tids)
         throws PermissionException {
@@ -1366,6 +1418,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         }
 
         List<Integer> toUnschedule = new ArrayList<Integer>();
+        final List<Measurement> resourcesToDisable = new ArrayList<Measurement>() ; 
         for (Measurement dm : mcol) {
             // Check to see if we need to remove this one
             if (tidSet != null && !tidSet.contains(dm.getTemplate().getId())) {
@@ -1374,16 +1427,25 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
             dm.setEnabled(false);
             toUnschedule.add(dm.getId());
+            resourcesToDisable.add(dm); 
         }
 
         Integer[] mids = toUnschedule.toArray(new Integer[toUnschedule.size()]);
 
-        removeMeasurementsFromCache(mids);
-
-        enqueueZeventsForMeasScheduleCollectionDisabled(mids);
-
-        final List<AppdefEntityID> aeids = Collections.singletonList(id);
-        srnManager.scheduleInBackground(aeids, true, true);
+        try{ 
+            final Agent agent = this.agentManager.getAgent(id) ;
+            this.legacyCloudScaleBridge.deleteMeasurements(agent.getId(), resource.getId(), resourcesToDisable) ;            
+            
+            removeMeasurementsFromCache(mids);
+        
+            enqueueZeventsForMeasScheduleCollectionDisabled(mids);
+    
+            final List<AppdefEntityID> aeids = Collections.singletonList(id);
+            srnManager.scheduleInBackground(aeids, true, true);
+        
+        }catch(Throwable t) { 
+            throw (t instanceof RuntimeException ? (RuntimeException)t : new RuntimeException(t)) ; 
+        }//EO catch block
     }
 
     /**
