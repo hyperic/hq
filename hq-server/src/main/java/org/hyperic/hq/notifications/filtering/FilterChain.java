@@ -3,6 +3,7 @@ package org.hyperic.hq.notifications.filtering;
 import java.util.AbstractCollection;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import org.hyperic.hq.notifications.model.BaseNotification;
 
@@ -44,8 +45,8 @@ public class FilterChain<N extends BaseNotification> extends AbstractCollection<
         // TODO impose one filter policy per entity type
         return super.addAll(c);
     }
-    public Collection<N> filter(final Collection<N> entities) {
-        Collection<N> filteredEntities = entities;
+    public Collection<? extends BaseNotification> filter(final List<N> entities) {
+        List<? extends BaseNotification> filteredEntities = entities;
         if (this.filters==null) {
             return filteredEntities;
         }

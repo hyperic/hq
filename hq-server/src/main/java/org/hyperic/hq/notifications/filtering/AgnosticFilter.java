@@ -8,7 +8,11 @@ public class AgnosticFilter<N extends BaseNotification, C extends FilteringCondi
     }
 
     @Override
-    protected N filter(N notification) {
+    protected BaseNotification filter(BaseNotification notification) {
         return notification;
+    }
+    @Override
+    protected Class<? extends N> getHandledNotificationClass() {
+        return (Class<? extends N>) BaseNotification.class;
     }
 }
