@@ -1012,7 +1012,6 @@
 					<module>hq-bootstrap</module>
 					<module>hq-web</module>
 		    		<module>dist</module>
-		    		<module>hq-integration-tests</module>
                 	<module>hq-maven</module> 
 			</modules>
       	</profile>
