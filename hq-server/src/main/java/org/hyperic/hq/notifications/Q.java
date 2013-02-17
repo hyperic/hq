@@ -36,6 +36,9 @@ public class Q {
     }
     
     public void unregister(Destination dest) {
+        if (dest==null) {
+            return;
+        }
         if (this.destinations.containsKey(dest)) {
             this.destinations.remove(dest);
             if (log.isDebugEnabled()) { log.debug("removing the queue assigned for destination " + dest); }
