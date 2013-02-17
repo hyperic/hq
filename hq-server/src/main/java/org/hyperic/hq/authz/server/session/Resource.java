@@ -62,6 +62,10 @@ public class Resource extends AuthzNamedBean implements Comparable {
         _system       = system;
     }
 
+    @Override
+    public void setName(String name) {
+        super.setName(name);
+    }
     protected Collection getGroupBag() {
         return _groupBag;
     }

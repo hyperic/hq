@@ -28,6 +28,7 @@ package org.hyperic.hq.plugin.system;
 import java.io.File;
 
 import org.hyperic.hq.agent.AgentConfig;
+import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.product.ConfigFileTrackPlugin;
 import org.hyperic.hq.product.ExecutableMeasurementPlugin;
 import org.hyperic.hq.product.ExecutableProcess;
@@ -277,7 +278,9 @@ public class SystemPlugin extends ProductPlugin {
         { "primaryDNS", "Primary DNS" },
         { "secondaryDNS", "Secondary DNS" },
         { "defaultGateway", "Default Gateway" },
-    };
+        { HQConstants.MOREF, "MOREF" },
+        { HQConstants.VCUUID, "VCenter UUID" },
+        };
 
     private static final String[][] NETIF_CPROPS = {
         { "mtu", "Maximum Transmission Unit" },
