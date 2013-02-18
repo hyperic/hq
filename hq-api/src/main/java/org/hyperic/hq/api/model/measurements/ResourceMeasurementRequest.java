@@ -17,19 +17,19 @@ public class ResourceMeasurementRequest extends MeasurementRequest {
     private static final long serialVersionUID = 3235352424289979540L;
 
     @XmlAttribute
-    protected String rscId;
+    protected String resourceID;
     
     public ResourceMeasurementRequest() {
         super();
     }
-    public ResourceMeasurementRequest(String rscId, List<String> measurementTemplateNames) {
+    public ResourceMeasurementRequest(String resourceID, List<String> measurementTemplateNames) {
         super(measurementTemplateNames);
-        this.rscId = rscId;
+        this.resourceID = resourceID;
     }
     public String getRscId() {
-        return rscId;
+        return resourceID;
     }
-    public void setRscId(String rscId) {
-        this.rscId = rscId;
+    public void setRscId(String resourceID) {
+        this.resourceID = resourceID;
     }
 }
