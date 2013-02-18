@@ -192,5 +192,4 @@
             <cxf:logging />
         </jaxrs:features>        
     </jaxrs:server>
-    
 </beans>
