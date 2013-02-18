@@ -61,13 +61,6 @@ public class Resource extends AuthzNamedBean implements Comparable {
         _owner        = owner;
         _system       = system;
     }
-    
-    
-    //TODO~ delete
-    @Override
-    public void setName(String name) {
-        super.setName(name);
-    }
     protected Collection getGroupBag() {
         return _groupBag;
     }

@@ -95,8 +95,11 @@
 	
 	<bean name="metricServiceImpl" class="org.hyperic.hq.api.services.impl.MetricServiceImpl" />
 
+<<<<<<< HEAD
 	<bean name="vmServiceImpl" class="org.hyperic.hq.api.services.impl.VMServiceImpl" />
 		
+=======
+>>>>>>> REST_adaptations
     <bean name="pluginServiceImpl" class="org.hyperic.hq.api.services.impl.PluginServiceImpl" />		
 	
 	<bean name="CloudProviderServiceImpl" class="org.hyperic.hq.api.services.impl.CloudProviderServiceImpl" />
@@ -169,6 +172,7 @@
         </jaxrs:features>        
     </jaxrs:server>
     
+<<<<<<< HEAD
 	<jaxrs:server id="vmService" address="/vm">
 		<jaxrs:serviceBeans>
 			<ref bean="vmServiceImpl" />
@@ -195,4 +199,6 @@
         </jaxrs:features>        
     </jaxrs:server>
     
+=======
+>>>>>>> REST_adaptations
 </beans>

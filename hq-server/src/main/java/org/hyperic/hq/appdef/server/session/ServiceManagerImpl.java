@@ -1317,6 +1317,8 @@ public class ServiceManagerImpl implements ServiceManager {
             log.debug("No changes found between value object and entity");
         } else {
             service.updateService(existing);
+            Resource r = service.getResource();
+            this.zeventManager.enqueueEventAfterCommit(new ResourceContentChangedEvent(r.getId(),r.getName(), null, null));
         }
         return service;
     }

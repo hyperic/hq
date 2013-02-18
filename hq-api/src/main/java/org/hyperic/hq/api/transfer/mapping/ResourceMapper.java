@@ -54,6 +54,7 @@ import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourcePrototype;
 import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.api.model.resources.ComplexIp;
+import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
 import org.hyperic.hq.api.transfer.NotificationsTransfer;
 import org.hyperic.hq.api.transfer.ResourceTransfer;
 import org.hyperic.hq.api.transfer.impl.ResourceTransferImpl;
@@ -71,7 +72,11 @@ import org.hyperic.hq.bizapp.server.session.ProductBossImpl.ConfigSchemaAndBaseR
 import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.notifications.filtering.Filter;
+import org.hyperic.hq.notifications.filtering.FilteringCondition;
+import org.hyperic.hq.notifications.filtering.ResourceContentFilter;
 import org.hyperic.hq.notifications.model.CreatedResourceNotification;
+import org.hyperic.hq.notifications.model.InternalResourceDetailsType;
 import org.hyperic.hq.notifications.model.InventoryNotification;
 import org.hyperic.hq.notifications.model.RemovedResourceNotification;
 import org.hyperic.hq.notifications.model.ResourceChangedContentNotification;
@@ -423,7 +428,10 @@ public class ResourceMapper {
         r.setResourceConfig(resourceConfig);
         return r;
     }
-	
-	
-	
+    public List<Filter<InventoryNotification, ? extends FilteringCondition<?>>> toResourceFilters(ResourceFilterRequest resourceFilterRequest,ResourceDetailsType responseMetadata) {
+        List<Filter<InventoryNotification,? extends FilteringCondition<?>>> userFilters = new ArrayList<Filter<InventoryNotification,? extends FilteringCondition<?>>>();
+        InternalResourceDetailsType resourceDetailsType = ResourceDetailsType.valueOf(responseMetadata);
+        userFilters.add((Filter) new ResourceContentFilter(resourceDetailsType));
+        return userFilters;
+    }
 }//EOC

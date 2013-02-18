@@ -24,4 +24,8 @@ public class MetricFilterByResource<C extends ResourceFilteringCondition<Resourc
         }
         return null;
     }
+    @Override
+    protected Class<? extends MetricNotification> getHandledNotificationClass() {
+        return MetricNotification.class;
+    }
 }
