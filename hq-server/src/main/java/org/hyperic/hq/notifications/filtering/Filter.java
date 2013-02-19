@@ -20,14 +20,16 @@ public abstract class Filter<N extends BaseNotification, C extends FilteringCond
         this.cond=cond;
     }
 
-    public List<N> filter(List<? extends BaseNotification> notifications) {
+    public List<N> filter(List<N> notifications) {
         List<N> notificationsLeftIn = new ArrayList<N>();
-        for(BaseNotification notification:notifications) {
-            if (getHandledNotificationClass().isAssignableFrom(notification.getClass())) {
-                N notificationLeftIn = this.filter((N)notification);
-                if (notificationLeftIn!=null) {
-                    notificationsLeftIn.add(notificationLeftIn);
-                }
+        for(N notification:notifications) {
+            if (!getHandledNotificationClass().isAssignableFrom(notification.getClass())) {
+                notificationsLeftIn.add(notification);
+                continue;
+            }
+            N notificationLeftIn = this.filter((N)notification);
+            if (notificationLeftIn!=null) {
+                notificationsLeftIn.add(notificationLeftIn);
             }
         }
         return notificationsLeftIn;

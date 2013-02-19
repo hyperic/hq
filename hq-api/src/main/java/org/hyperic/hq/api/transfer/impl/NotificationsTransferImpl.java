@@ -41,17 +41,14 @@ public class NotificationsTransferImpl implements NotificationsTransfer {
     protected Destination dummyDestination = new Destination() {};
 
     @Transactional (readOnly=true)
-    public NotificationsReport poll(ApiMessageContext apiMessageContext, Integer regID) throws UnregisteredException {
+    public NotificationsReport poll(ApiMessageContext apiMessageContext) throws UnregisteredException {
         Destination dest = this.dummyDestination;
-        if (dest==null || regID==null) {
+        if (dest==null) {
             throw new UnregisteredException();
         }
-        InternalNotificationReport inr = this.q.poll(regID);
+        InternalNotificationReport inr = this.q.poll();
         AuthzSubject subject = apiMessageContext.getAuthzSubject();
-        InternalResourceDetailsType internalResourceDetailsType = inr.getResourceDetailsType();
-        ResourceDetailsType resourceDetailsType = null;
-        resourceDetailsType = ResourceDetailsType.valueOf(internalResourceDetailsType);
-        return this.mapper.toNotificationsReport(subject, this.rscTransfer, resourceDetailsType, inr.getNotifications());
+        return this.mapper.toNotificationsReport(subject, this.rscTransfer, inr);
     }
     
     @Transactional (readOnly=false)

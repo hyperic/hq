@@ -71,7 +71,7 @@ public class DestinationEvaluator {
         entityTypeToReg.remove(entityType);
 //        removeRegistrationFromDB(regID);
     }
-    public List<NotificationGroup> evaluate(final List<? extends BaseNotification> entities, Class<? extends BaseNotification> entityType) {
+    public List<NotificationGroup> evaluate(final List<? extends BaseNotification> ns, Class<? extends BaseNotification> entityType) {
         List<NotificationGroup> nsGrpList = new ArrayList<NotificationGroup>();
         Set<Integer> regIDForEntityTypeSet = this.entityTypeToReg.get(entityType);
         if (regIDForEntityTypeSet==null) {
@@ -79,10 +79,10 @@ public class DestinationEvaluator {
         }
         for(Integer regID:regIDForEntityTypeSet) {
             FilterChain<BaseNotification> filterChain = regToFilter.get(regID);
-            List<? extends BaseNotification> filteredEntities = null;
-            filteredEntities = ((List<? extends BaseNotification>) filterChain.filter(entities));
-            if (filteredEntities!=null && !filteredEntities.isEmpty()) {
-                NotificationGroup nsGrp = new NotificationGroup(regID, filteredEntities);
+            List<? extends BaseNotification> filteredNS = null;
+            filteredNS = ((List<? extends BaseNotification>) filterChain.filter(ns));
+            if (filteredNS!=null && !filteredNS.isEmpty()) {
+                NotificationGroup nsGrp = new NotificationGroup(regID, filteredNS);
                 nsGrpList.add(nsGrp);
             }
         }

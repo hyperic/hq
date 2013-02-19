@@ -21,10 +21,10 @@ public class NotificationsServiceImpl extends RestApiService implements Notifica
         ApiMessageContext apiMessageContext = newApiMessageContext();
         notificationsTransfer.refresh(apiMessageContext,regID);
     }
-    public NotificationsReport poll(Integer regID) throws SessionNotFoundException, SessionTimeoutException {
+    public NotificationsReport poll() throws SessionNotFoundException, SessionTimeoutException {
         try {
             ApiMessageContext apiMessageContext = newApiMessageContext();
-            return notificationsTransfer.poll(apiMessageContext,regID);
+            return notificationsTransfer.poll(apiMessageContext);
         } catch (UnregisteredException e) {
             errorHandler.log(e);
             throw errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.UNREGISTERED_FOR_NOTIFICATIONS, e.getMessage());

@@ -8,7 +8,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.notifications.UnregisteredException;
 
 public interface NotificationsTransfer {
-    public NotificationsReport poll(ApiMessageContext apiMessageContext, Integer regID) throws UnregisteredException;
+    public NotificationsReport poll(ApiMessageContext apiMessageContext) throws UnregisteredException;
     public void unregister(Integer regID);
     public Destination getDummyDestination();
     public void refresh(ApiMessageContext apiMessageContext,Integer regID);

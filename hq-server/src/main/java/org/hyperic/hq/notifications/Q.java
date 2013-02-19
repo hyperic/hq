@@ -39,19 +39,22 @@ public class Q {
         if (log.isDebugEnabled()) { log.debug(ard==null?"there is no queue assigned for destination ":"removing the queue assigned for destination " + regID); }
     }
 
-    public InternalNotificationReport poll(Integer regID) {
-        AccumulatedRegistrationData ard = this.registrations.get(regID);
+    public InternalNotificationReport poll() {
         InternalNotificationReport nr = new InternalNotificationReport();
-        if (ard==null) {
-            if (log.isDebugEnabled()) { log.debug("unable to poll - there is no queue assigned for destination " + regID);}
-            return nr;
+        for(Map.Entry<Integer, AccumulatedRegistrationData> reg:this.registrations.entrySet()) {
+            AccumulatedRegistrationData ard = reg.getValue();
+            if (ard==null) {
+                if (log.isDebugEnabled()) { log.debug("unable to poll - there is no queue assigned for destination " + reg.getKey());}
+                continue;
+            }
+
+            List<BaseNotification> ns = new ArrayList<BaseNotification>();
+            LinkedBlockingQueue<BaseNotification> anq = ard.getAccumulatedNotificationsQueue();
+            anq.drainTo(ns);
+            // we assign the reg id per notification only at this stage, since if we would have done so earlier, we would have needed to clone each notification per the registration it should be sent to
+            nr.setNotifications(reg.getKey(),ns);
+            nr.setResourceDetailsType(reg.getKey(),ard.getResourceContentType());
         }
-        
-        List<BaseNotification> ns = new ArrayList<BaseNotification>();
-        LinkedBlockingQueue<BaseNotification> anq = ard.getAccumulatedNotificationsQueue();
-        anq.drainTo(ns);
-        nr.setNotifications(ns);
-        nr.setResourceDetailsType(ard.getResourceContentType());
         return nr;
     }
     
@@ -59,13 +62,14 @@ public class Q {
     public void publish(List<NotificationGroup> nsGrpList) {
         for(NotificationGroup nsGrp:nsGrpList) {
             Integer regID = nsGrp.getRegistrationID();
-            List<BaseNotification> data = (List<BaseNotification>) nsGrp.getNotifications();
-            AccumulatedRegistrationData ard = registrations.get(regID);
-            if (ard==null) {
-                return;
+            if (regID==null) {
+                log.error("no registration ID was assigned to one of the NotificationGroups");
+                continue;
             }
+            AccumulatedRegistrationData ard = registrations.get(regID);
             LinkedBlockingQueue<BaseNotification> anq = ard.getAccumulatedNotificationsQueue();
             try {
+                List<BaseNotification> data = (List<BaseNotification>) nsGrp.getNotifications();
                 anq.addAll(data);
             } catch (IllegalStateException e) {
                 log.error(e);

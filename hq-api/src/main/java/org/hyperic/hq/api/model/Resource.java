@@ -173,4 +173,12 @@ public class Resource extends Notification {
 		return builder ; 
     }//EOM 
 
+    @XmlAttribute
+    protected Integer registrationID;
+    public Integer getRegistrationID() {
+        return registrationID;
+    }
+    public void setRegistrationID(Integer registrationID) {
+        this.registrationID = registrationID;
+    }
 }

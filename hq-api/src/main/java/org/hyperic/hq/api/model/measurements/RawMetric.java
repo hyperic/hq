@@ -46,4 +46,12 @@ public class RawMetric extends Notification {
     public void setMeasurementName(String measurementName) {
         this.measurementName = measurementName;
     }
+    @XmlAttribute
+    protected Integer registrationID;
+    public Integer getRegistrationID() {
+        return registrationID;
+    }
+    public void setRegistrationID(Integer registrationID) {
+        this.registrationID = registrationID;
+    }
 }

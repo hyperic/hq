@@ -22,8 +22,8 @@ public interface NotificationsService {
     public void refresh(@PathParam("regID") final Integer regID) throws SessionNotFoundException, SessionTimeoutException;
     
     @GET
-    @Path("/{regID}")
-    public NotificationsReport poll(@PathParam("regID") Integer regID) throws SessionNotFoundException, SessionTimeoutException;
+    @Path("/")
+    public NotificationsReport poll() throws SessionNotFoundException, SessionTimeoutException;
 
     @DELETE
     @Path("/{regID}")

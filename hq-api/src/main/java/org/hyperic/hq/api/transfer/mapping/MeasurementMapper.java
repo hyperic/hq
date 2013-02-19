@@ -75,6 +75,11 @@ public class MeasurementMapper {
         msmt.setAverage(avg);
         return msmt;
     }
+    public RawMetric toMetricWithId(final MetricNotification mn, Integer regID) {
+        RawMetric metric = toMetricWithId(mn);
+        metric.setRegistrationID(regID);
+        return metric;
+    }
     public RawMetric toMetricWithId(final MetricNotification mn) {
         RawMetric metric = new RawMetric();
         MetricValue hqMetric = mn.getMetricVal();
