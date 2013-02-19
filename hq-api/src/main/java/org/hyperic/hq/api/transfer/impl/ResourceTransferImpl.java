@@ -82,11 +82,10 @@ import org.hyperic.hq.common.ObjectNotFoundException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.notifications.Q;
 import org.hyperic.hq.notifications.filtering.AgnosticFilter;
+import org.hyperic.hq.notifications.filtering.DestinationEvaluator;
 import org.hyperic.hq.notifications.filtering.Filter;
 import org.hyperic.hq.notifications.filtering.FilteringCondition;
 import org.hyperic.hq.notifications.filtering.ResourceContentFilter;
-import org.hyperic.hq.notifications.filtering.ResourceDestinationEvaluator;
-import org.hyperic.hq.notifications.model.InternalResourceDetailsType;
 import org.hyperic.hq.notifications.model.InventoryNotification;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
@@ -113,15 +112,16 @@ public class ResourceTransferImpl implements ResourceTransfer{
 	private PlatformManager platformManager ; 
 	private ExceptionToErrorCodeMapper errorHandler ;
 	private Log log ;
-    private ResourceDestinationEvaluator evaluator;
+    private DestinationEvaluator evaluator;
     private Q q;
     protected NotificationsTransfer notificationsTransfer;
     protected boolean isRegistered = false;
+
 	@Autowired  
     public ResourceTransferImpl(final AIQueueManager aiQueueManager, final ResourceManager resourceManager, 
     		final AuthzSubjectManager authzSubjectManager, final ResourceMapper resourceMapper, 
     		final ProductBoss productBoss, final CPropManager cpropManager, final AppdefBoss appdepBoss, 
-    		final PlatformManager platformManager, final ExceptionToErrorCodeMapper errorHandler, ResourceDestinationEvaluator evaluator, Q q, @Qualifier("restApiLogger")Log log) { 
+    		final PlatformManager platformManager, final ExceptionToErrorCodeMapper errorHandler, DestinationEvaluator evaluator, Q q, @Qualifier("restApiLogger")Log log) { 
     	this.aiQueueManager = aiQueueManager ; 
     	this.resourceManager = resourceManager ; 
     	this.authzSubjectManager = authzSubjectManager ; 
@@ -182,7 +182,7 @@ public class ResourceTransferImpl implements ResourceTransfer{
 	private final Resource getResourceInner(final Context flowContext, int hierarcyDepth) throws ObjectNotFoundException { 
 		
 		Resource currentResource =  null ; 
-		try{ 
+		try{  
 			//derive the resource type load strategy using the resource type enum 
 			//Note: of the resourceType is null, then the generic resource resource type 
 			//would be used 
@@ -636,21 +636,24 @@ public class ResourceTransferImpl implements ResourceTransfer{
                 throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.SEQUENTIAL_REGISTRATION);
             }
             this.isRegistered=true;
-            List<Filter<InventoryNotification,? extends FilteringCondition<?>>> userFilters = this.resourceMapper.toResourceFilters(resourceFilterRequest, responseMetadata); 
+            List<Filter<InventoryNotification,? extends FilteringCondition<?>>> userFilters = new ArrayList<Filter<InventoryNotification,? extends FilteringCondition<?>>>();//this.resourceMapper.toResourceFilters(resourceFilterRequest); 
+            //TODO~ fix unchecked conversion
+            Filter contentFilter = new ResourceContentFilter(ResourceDetailsType.valueOf(responseMetadata));
+            userFilters.add(contentFilter);
 
             //TODO~ get the destination from the user
             Destination dest = this.notificationsTransfer.getDummyDestination();
-            this.q.register(dest,ResourceDetailsType.valueOf(responseMetadata));
-            this.evaluator.register(dest,userFilters);
+            Integer regID = this.evaluator.register(InventoryNotification.class,userFilters);
+            this.q.register(dest,regID, ResourceDetailsType.valueOf(responseMetadata));
             //TODO~ return a valid registration id
-            res.setRegId(new RegistrationID(1));
+            res.setRegId(new RegistrationID(regID));
         }
         return res;
     }
-    public void unregister() {
+    public void unregister(Integer regID) {
         Destination dest = this.notificationsTransfer.getDummyDestination();
-        this.q.unregister(dest);
-        this.evaluator.unregisterAll(dest);
+        this.q.unregister(regID);
+        this.evaluator.unregister(regID);
         this.isRegistered=false;
     }
     public ResourceMapper getResourceMapper() {

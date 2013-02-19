@@ -8,6 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.notifications.filtering.DestinationEvaluator;
 import org.hyperic.hq.notifications.model.BaseNotification;
+import org.hyperic.hq.notifications.model.NotificationGroup;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
@@ -31,7 +32,7 @@ public abstract class BaseNotificationsZeventListener<E extends Zevent,N extends
      * @return data which is needed for filtering, extracted per the events data
      */
     protected abstract List<N> extract(List<E> events);
-    protected abstract DestinationEvaluator<N> getEvaluator();
+    protected abstract DestinationEvaluator getEvaluator();
     
 //    @Override
     @Transactional(readOnly = true)
@@ -42,11 +43,11 @@ public abstract class BaseNotificationsZeventListener<E extends Zevent,N extends
         
         final long start = System.currentTimeMillis();
         List<N> ns = extract(events);
-        List<ObjectMessage> msgs = null;
+        List<NotificationGroup> nsGrp = null;
         try {
-            msgs = this.getEvaluator().evaluate(ns);
-            if (msgs!=null && !msgs.isEmpty()) {
-                this.q.publish(msgs);
+            nsGrp = this.getEvaluator().evaluate(ns,getEntityType());
+            if (!nsGrp.isEmpty()) {
+                this.q.publish(nsGrp);
             }
         }catch(Throwable e) {
             log.error(e);
@@ -54,12 +55,13 @@ public abstract class BaseNotificationsZeventListener<E extends Zevent,N extends
         final long end = System.currentTimeMillis();
         
         if (log.isDebugEnabled()) {
-            if (msgs==null) {
+            if (nsGrp==null) {
                 log.debug(getListenersBeanName() + " did not publish any notifications");
             } else {
-                log.debug(getListenersBeanName() + " published:\n" + msgs);
+                log.debug(getListenersBeanName() + " published:\n" + nsGrp);
             }
         }
         concurrentStatsCollector.addStat(end-start, getConcurrentStatsCollectorType());
     }
+    protected abstract Class<? extends BaseNotification> getEntityType();
 }

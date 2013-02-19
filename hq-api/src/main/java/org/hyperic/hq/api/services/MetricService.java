@@ -71,9 +71,9 @@ public interface MetricService {
     public RegistrationID register(final MetricFilterRequest metricFilterReq) throws SessionNotFoundException, SessionTimeoutException;
 
     @DELETE
-    @Path("/registration")
+    @Path("/registration/{regID}")
     @Descriptions({ 
         @Description(value = "unregister user session and all assigned filters this user destination has", target = DocTarget.METHOD)
     })
-    public void unregister() throws SessionNotFoundException, SessionTimeoutException;
+    public void unregister(@PathParam("regID") final Integer regID) throws SessionNotFoundException, SessionTimeoutException;
 }

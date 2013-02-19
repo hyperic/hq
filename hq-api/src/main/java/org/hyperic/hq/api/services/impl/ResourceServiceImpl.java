@@ -110,7 +110,7 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
 		throw new UnsupportedOperationException() ; 
 	}//EOM 
 	
-	public void unregister() throws SessionNotFoundException, SessionTimeoutException {
-	    this.resourceTransfer.unregister();
+	public void unregister(Integer regID) throws SessionNotFoundException, SessionTimeoutException {
+	    this.resourceTransfer.unregister(regID);
 	}
 }//EOC 

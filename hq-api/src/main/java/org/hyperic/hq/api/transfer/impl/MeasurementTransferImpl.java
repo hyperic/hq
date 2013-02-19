@@ -77,9 +77,9 @@ import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.notifications.Q;
 import org.hyperic.hq.notifications.filtering.AgnosticFilter;
+import org.hyperic.hq.notifications.filtering.DestinationEvaluator;
 import org.hyperic.hq.notifications.filtering.Filter;
 import org.hyperic.hq.notifications.filtering.FilteringCondition;
-import org.hyperic.hq.notifications.filtering.MetricDestinationEvaluator;
 import org.hyperic.hq.notifications.model.MetricNotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -94,7 +94,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     protected DataManager dataMgr; 
     protected MeasurementMapper mapper;
     protected ExceptionToErrorCodeMapper errorHandler ;
-    protected MetricDestinationEvaluator evaluator;
+    protected DestinationEvaluator evaluator;
     protected Q q;
     protected NotificationsTransfer notificationsTransfer;
     @javax.ws.rs.core.Context
@@ -103,7 +103,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
 
     @Autowired
     public MeasurementTransferImpl(ResourceManager resourceManager,MeasurementManager measurementMgr, TemplateManager tmpltMgr, DataManager dataMgr, 
-            MeasurementMapper mapper, ExceptionToErrorCodeMapper errorHandler, MetricDestinationEvaluator evaluator, Q q) {
+            MeasurementMapper mapper, ExceptionToErrorCodeMapper errorHandler, DestinationEvaluator evaluator, Q q) {
         super();
         this.resourceManager = resourceManager;
         this.measurementMgr = measurementMgr;
@@ -161,14 +161,15 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         }
         this.isRegistered=true;
         Destination dest = this.notificationsTransfer.getDummyDestination();
-        this.q.register(dest);
-        this.evaluator.register(dest,userFilters);
-        return new RegistrationID(1);
+        Integer regID = this.evaluator.register(MetricNotification.class,userFilters);
+        this.q.register(dest,regID,null);
+        
+        return new RegistrationID(regID);
     }
-    public void unregister() {
+    public void unregister(Integer regID) {
         Destination dest = this.notificationsTransfer.getDummyDestination();
-        this.q.unregister(dest);
-        this.evaluator.unregisterAll(dest);
+        this.q.unregister(regID);
+        this.evaluator.unregister(regID);
         this.isRegistered=false;
     }
     public MetricResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest hqMsmtReq, 

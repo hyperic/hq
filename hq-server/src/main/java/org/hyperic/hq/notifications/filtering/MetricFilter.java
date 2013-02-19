@@ -8,11 +8,6 @@ import org.hyperic.hq.notifications.model.MetricNotification;
 public class MetricFilter<C extends FilteringCondition<Measurement>> extends Filter<MetricNotification,C> {
     private MeasurementManager measurementManager;
     
-    @Override
-    protected Class<? extends MetricNotification> getHandledNotificationClass() {
-        return MetricNotification.class;
-    }
-
     public MetricFilter(final MeasurementManager measurementManager,C cond) {
         super(cond);
         this.measurementManager=measurementManager;
@@ -25,5 +20,10 @@ public class MetricFilter<C extends FilteringCondition<Measurement>> extends Fil
             return metricNotification;
         }
         return null;
+    }
+
+    @Override
+    protected Class<? extends MetricNotification> getHandledNotificationClass() {
+        return MetricNotification.class;
     }
 }

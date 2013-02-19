@@ -78,7 +78,7 @@ public class MetricServiceImpl extends RestApiService implements MetricService {
         return measurementTransfer.register(metricFilterReq);
     }
     
-    public void unregister() throws SessionNotFoundException, SessionTimeoutException {
-        measurementTransfer.unregister();
+    public void unregister(Integer regID) throws SessionNotFoundException, SessionTimeoutException {
+        measurementTransfer.unregister(regID);
     }
 }

@@ -85,6 +85,6 @@ public interface ResourceService {
 	ResourceBatchResponse updateResourcesByCriteria(final Resource updateData) throws SessionNotFoundException, SessionTimeoutException ;
 	
 	@DELETE
-	@Path("/registration")
-	public void unregister() throws SessionNotFoundException, SessionTimeoutException;
+	@Path("/registration/{regID}")
+	public void unregister(@PathParam("regID") final Integer regID) throws SessionNotFoundException, SessionTimeoutException;
 }//EOC 

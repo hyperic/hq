@@ -13,22 +13,22 @@ import org.hyperic.hq.notifications.model.BaseNotification;
  * @author yakarn
  *
  */
-public class FilterChain<N extends BaseNotification> extends AbstractCollection<Filter<N,? extends FilteringCondition<?>>> {
-    protected Collection<Filter<N,? extends FilteringCondition<?>>> filters;
-     
-    public FilterChain(Collection<Filter<N,? extends FilteringCondition<?>>> filters) {
-        this.filters=filters;
+public class FilterChain<N extends BaseNotification> extends AbstractCollection<Filter<? extends N,? extends FilteringCondition<?>>> {
+    protected Collection<Filter<? extends N,? extends FilteringCondition<?>>> filters;
+    
+    public FilterChain(Collection<? extends Filter<? extends N,? extends FilteringCondition<?>>> filters) {
+        this.filters=(Collection<Filter<? extends N, ? extends FilteringCondition<?>>>) filters;
     }
     @Override
-    public boolean add(Filter<N,? extends FilteringCondition<?>> filter) {
+    public boolean add(Filter<? extends N,? extends FilteringCondition<?>> filter) {
         return this.filters.add(filter);
     }
     @Override
-    public Iterator<Filter<N,? extends FilteringCondition<?>>> iterator() {
+    public Iterator<Filter<? extends N,? extends FilteringCondition<?>>> iterator() {
         if (this.filters==null) {
             return null;
         }
-        return this.filters.iterator();
+        return (Iterator<Filter<? extends N, ? extends FilteringCondition<?>>>) this.filters.iterator();
     }
     @Override
     public int size() {
@@ -41,17 +41,18 @@ public class FilterChain<N extends BaseNotification> extends AbstractCollection<
      * @return
      */
     @Override
-    public boolean addAll(Collection<? extends Filter<N,? extends FilteringCondition<?>>> c) {
+    public boolean addAll(Collection<? extends Filter<? extends N,? extends FilteringCondition<?>>> c) {
         // TODO impose one filter policy per entity type
         return super.addAll(c);
     }
-    public Collection<? extends BaseNotification> filter(final List<N> entities) {
-        List<? extends BaseNotification> filteredEntities = entities;
+    public List<? extends N> filter(final List<? extends N> entities) {
+        List<? extends N> filteredEntities = entities;
         if (this.filters==null) {
             return filteredEntities;
         }
-        for(Filter<N,? extends FilteringCondition<?>> filter:this.filters) {
-            filteredEntities = filter.filter(filteredEntities);
+        for(Filter<? extends N,? extends FilteringCondition<?>> filter:this.filters) {
+            //TODO~ fix unchecked conversion
+            filteredEntities = filter.filter((List) filteredEntities);
         }
         return filteredEntities;
         
@@ -61,4 +62,10 @@ public class FilterChain<N extends BaseNotification> extends AbstractCollection<
         return super.toString();
         // TODO~ print internal filters list and see debug logs that prints this class are fine
     }
+    public static void main(String[] args) throws Throwable {
+        List<Number> l = null;
+        List<? extends Number> l1 = null;
+        List<Integer> l2 = null;
+        l1=l;
+    }//EOM 
 }
