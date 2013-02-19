@@ -80,6 +80,7 @@ import org.hyperic.hq.notifications.filtering.AgnosticFilter;
 import org.hyperic.hq.notifications.filtering.DestinationEvaluator;
 import org.hyperic.hq.notifications.filtering.Filter;
 import org.hyperic.hq.notifications.filtering.FilteringCondition;
+import org.hyperic.hq.notifications.model.BaseNotification;
 import org.hyperic.hq.notifications.model.MetricNotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -149,9 +150,9 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             }
             throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.BAD_REQ_BODY);
         }
-        List<Filter<MetricNotification,? extends FilteringCondition<?>>> userFilters = this.mapper.toMetricFilters(metricFilterReq); 
+        List<Filter<? extends BaseNotification,? extends FilteringCondition<?>>> userFilters = this.mapper.toMetricFilters(metricFilterReq); 
         if (userFilters.isEmpty()) {
-            userFilters.add(new AgnosticFilter<MetricNotification,FilteringCondition<?>>());
+            userFilters.add(new AgnosticFilter<FilteringCondition<?>>());
         }
 
         //TODO~ get the destination from the user
