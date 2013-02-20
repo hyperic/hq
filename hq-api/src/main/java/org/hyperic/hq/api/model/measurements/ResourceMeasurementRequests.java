@@ -19,8 +19,8 @@ import org.hyperic.hq.api.model.RestApiConstants;
 public class ResourceMeasurementRequests implements Serializable {
     private static final long serialVersionUID = 4181731710495097644L;
     
-    @XmlElementWrapper(name="requests", namespace=RestApiConstants.SCHEMA_NAMESPACE)
-    @XmlElement(name="request", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+    @XmlElementWrapper(name="resources", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+    @XmlElement(name="resource", namespace=RestApiConstants.SCHEMA_NAMESPACE)
     protected List<ResourceMeasurementRequest> resourceMeasurementRequests = new ArrayList<ResourceMeasurementRequest>();
 
     public ResourceMeasurementRequests() {}
