@@ -70,4 +70,6 @@ public interface ResourceTransfer {
     ResourceMapper getResourceMapper();
 
     Object initResourceConfig(Context flowContext) throws ConfigFetchException, EncodingException, PluginNotFoundException, PluginException, PermissionException, AppdefEntityNotFoundException;
+
+    String getResourceUrl(ApiMessageContext apiMessageContext, String resourceID);
 }//EOI 

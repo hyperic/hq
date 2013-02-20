@@ -35,6 +35,7 @@ import javax.annotation.PostConstruct;
 import javax.jms.Destination;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.api.model.Resource;
@@ -75,10 +76,13 @@ import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.bizapp.server.session.ProductBossImpl.ConfigSchemaAndBaseResponse;
 import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.ConfigProperty;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.ObjectNotFoundException;
+import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.notifications.Q;
 import org.hyperic.hq.notifications.filtering.AgnosticFilter;
@@ -92,6 +96,7 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
+import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;
@@ -115,13 +120,14 @@ public class ResourceTransferImpl implements ResourceTransfer{
 	private Log log ;
     private ResourceDestinationEvaluator evaluator;
     private Q q;
+    private ConfigBoss configBoss;
     protected NotificationsTransfer notificationsTransfer;
     protected boolean isRegistered = false;
 	@Autowired  
     public ResourceTransferImpl(final AIQueueManager aiQueueManager, final ResourceManager resourceManager, 
     		final AuthzSubjectManager authzSubjectManager, final ResourceMapper resourceMapper, 
     		final ProductBoss productBoss, final CPropManager cpropManager, final AppdefBoss appdepBoss, 
-    		final PlatformManager platformManager, final ExceptionToErrorCodeMapper errorHandler, ResourceDestinationEvaluator evaluator, Q q, @Qualifier("restApiLogger")Log log) { 
+    		final PlatformManager platformManager, final ExceptionToErrorCodeMapper errorHandler, ResourceDestinationEvaluator evaluator, Q q, @Qualifier("restApiLogger")Log log, final ConfigBoss configBoss) {
     	this.aiQueueManager = aiQueueManager ; 
     	this.resourceManager = resourceManager ; 
     	this.authzSubjectManager = authzSubjectManager ; 
@@ -134,6 +140,7 @@ public class ResourceTransferImpl implements ResourceTransfer{
     	this.evaluator = evaluator;
     	this.q=q;
     	this.log = log ;
+        this.configBoss = configBoss;
     }//EOM 
     @PostConstruct
     public void init() {
@@ -661,5 +668,24 @@ public class ResourceTransferImpl implements ResourceTransfer{
     }
     public ResourceManager getResourceManager() {
         return this.resourceManager;
+    }
+
+    @Transactional (readOnly=true)
+    public String getResourceUrl(ApiMessageContext apiMessageContext, String resourceID){
+        org.hyperic.hq.authz.server.session.Resource resource;
+        // check for number
+        resource = resourceManager.findResourceById(Integer.valueOf(resourceID));
+        if(resource == null){
+        throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID);
+        }
+        org.hyperic.hq.authz.server.session.ResourceType resourceType = resource.getResourceType();
+        String baseUrl = "";
+        try {
+            baseUrl = configBoss.getConfig().getProperty(HQConstants.BaseURL);
+        } catch (ConfigPropertyException e) {
+            e.printStackTrace();
+        }
+        String x = "baseUrl/";
+        return baseUrl+"resource/" +resourceType.getLocalizedName()+"/monitor/Visibility.do?mode=currentHealth&eid="+resourceType.getAppdefType()+":"+resource.getInstanceId();
     }
 }//EOC 

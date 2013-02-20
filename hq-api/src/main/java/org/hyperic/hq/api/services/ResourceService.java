@@ -63,11 +63,15 @@ public interface ResourceService {
 			@QueryParam("responseStructure") final ResourceDetailsType[] responseStructure) throws SessionNotFoundException, SessionTimeoutException ;  
 		
     @GET
-	@Path("/{platformID}")
-	Resource getResource(@PathParam("platformID") final String platformID, 
-			@QueryParam("status") final ResourceStatusType resourceStatusType, @QueryParam("hierarchyDepth") final int hierarchyDepth, 
-			@QueryParam("responseStructure") final ResourceDetailsType[] responseStructure) throws SessionNotFoundException, SessionTimeoutException ;  
-	
+    @Path("/{platformID}")
+    Resource getResource(@PathParam("platformID") final String platformID,
+                         @QueryParam("status") final ResourceStatusType resourceStatusType, @QueryParam("hierarchyDepth") final int hierarchyDepth,
+                         @QueryParam("responseStructure") final ResourceDetailsType[] responseStructure) throws SessionNotFoundException, SessionTimeoutException ;
+
+    @GET
+    @Path("/resourceUrl/{resourceID}")
+    String getResourceUrl(@PathParam("resourceID") final String resourceID) throws SessionNotFoundException, SessionTimeoutException ;
+
     @POST
     @Path("/")
     RegisteredResourceBatchResponse getResources(@QueryParam("responseStructure")  final ResourceDetailsType responseMetadata,
