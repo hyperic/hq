@@ -396,7 +396,6 @@ public class ResourceMapper {
         if (resourceDetailsTypeStrategySet==null || resourceDetailsTypeStrategySet.isEmpty() || resourceDetailsTypeStrategySet.size()>1) {
             throw new RuntimeException("unexpected number of ResourceDetailsTypeStrategis");
         }
-        //TODO~ move this population of resource's properties to be once a creation notification is created, not when it is being polled!
         newFrontendResource = resourceDetailsTypeStrategySet.iterator().next().populateResource(flowContext);
         Integer parentID = n.getParentID();
         // platforms wont have a parent

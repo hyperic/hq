@@ -1,18 +1,20 @@
 package org.hyperic.hq.notifications.filtering;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.hyperic.hq.notifications.model.BaseNotification;
-
 /**
  * 
  * @author yakarn
  *
  * @param <N> defines the type of entities this filter handles
  */
+//@Entity
+//@Table(name="EAM_NOTIFICATIONS_FILTER")
+//@Inheritance(strategy=InheritanceType.JOINED)
 public abstract class Filter<N extends BaseNotification, C extends FilteringCondition<?>> {
+//    @Column(???)
     protected C cond;
     protected abstract Class<? extends N> getHandledNotificationClass();
     

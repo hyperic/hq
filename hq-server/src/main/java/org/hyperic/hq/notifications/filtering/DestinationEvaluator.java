@@ -23,24 +23,19 @@ public class DestinationEvaluator {
     protected Map<Integer,Class<? extends BaseNotification>> regToEntityType = new  ConcurrentHashMap<Integer,Class<? extends BaseNotification>>();
     /**
      * append filters
+     * @param regID2 
      * 
      * @param dest
      * @param filters
      */
-    public Integer register(Class<? extends BaseNotification> entityType, Collection<? extends Filter<? extends BaseNotification,? extends FilteringCondition<?>>> filters) {
+    public void register(Integer regID, Class<? extends BaseNotification> entityType, Collection<? extends Filter<? extends BaseNotification,? extends FilteringCondition<?>>> filters) {
         if (filters==null || filters.isEmpty()) {
             if (log.isDebugEnabled()) {
                 log.debug("no filters were passed to be registered");
             }
         }
-        Integer regID = createRegID();
-        FilterChain<BaseNotification> filterChain = this.regToFilter.get(regID);
-        if (filterChain==null) {
-            filterChain = new FilterChain<BaseNotification>(filters);
-            this.regToFilter.put(regID,filterChain); 
-        } else {
-            filterChain.addAll(filters);
-        }
+        FilterChain<BaseNotification> filterChain = new FilterChain<BaseNotification>(filters);
+        this.regToFilter.put(regID,filterChain); 
         Set<Integer> regIDSet = entityTypeToReg.get(entityType);
         if (regIDSet==null) {
             regIDSet = new HashSet<Integer>();
@@ -50,8 +45,6 @@ public class DestinationEvaluator {
             regIDSet.add(regID);
         }
         regToEntityType.put(regID,entityType);
-        
-        return regID;
     }
     /**
      * unregister all filters assigned to this destination
@@ -69,7 +62,6 @@ public class DestinationEvaluator {
         }
         Class<? extends BaseNotification> entityType = regToEntityType.remove(regID);
         entityTypeToReg.remove(entityType);
-//        removeRegistrationFromDB(regID);
     }
     public List<NotificationGroup> evaluate(final List<? extends BaseNotification> ns, Class<? extends BaseNotification> entityType) {
         List<NotificationGroup> nsGrpList = new ArrayList<NotificationGroup>();
@@ -87,11 +79,5 @@ public class DestinationEvaluator {
             }
         }
         return nsGrpList;
-    }
-    
-    //TODO~ replace with DB persisted reg ID
-    static Integer regID = 0; 
-    private Integer createRegID() {
-        return ++regID;
     }
 }

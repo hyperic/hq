@@ -9,7 +9,12 @@ import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.notifications.model.InternalResourceDetailsType;
 import org.hyperic.hq.notifications.model.ResourceChangedContentNotification;
 
+//@Entity
+//@Table(name="EAM_NOTIFICATIONS_CONTENT_FILTER")
+//@PrimaryKeyJoinColumn(name="FILTERID")
 public class ResourceContentFilter extends Filter<ResourceChangedContentNotification,FilteringCondition<?>> {
+//    @Column(name="RESOURCEDETAILSTYPE")
+//    @Enumerated(EnumType.STRING)  //TODO~ page 360 in hibernate PDF
     protected InternalResourceDetailsType resourceDetailsType;
     
     public ResourceContentFilter(InternalResourceDetailsType internalResourceDetailsType) {

@@ -81,12 +81,14 @@ import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.ObjectNotFoundException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.notifications.Q;
+import org.hyperic.hq.notifications.RegistrationDAO;
+import org.hyperic.hq.notifications.RegistrationManager;
 import org.hyperic.hq.notifications.filtering.AgnosticFilter;
-import org.hyperic.hq.notifications.filtering.DestinationEvaluator;
 import org.hyperic.hq.notifications.filtering.Filter;
 import org.hyperic.hq.notifications.filtering.FilteringCondition;
 import org.hyperic.hq.notifications.filtering.ResourceContentFilter;
 import org.hyperic.hq.notifications.model.InventoryNotification;
+import org.hyperic.hq.notifications.model.MetricNotification;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
@@ -112,16 +114,17 @@ public class ResourceTransferImpl implements ResourceTransfer{
 	private PlatformManager platformManager ; 
 	private ExceptionToErrorCodeMapper errorHandler ;
 	private Log log ;
-    private DestinationEvaluator evaluator;
     private Q q;
     protected NotificationsTransfer notificationsTransfer;
+    @Autowired
+    protected RegistrationManager registrationMgr;
     protected boolean isRegistered = false;
-
+    
 	@Autowired  
     public ResourceTransferImpl(final AIQueueManager aiQueueManager, final ResourceManager resourceManager, 
     		final AuthzSubjectManager authzSubjectManager, final ResourceMapper resourceMapper, 
     		final ProductBoss productBoss, final CPropManager cpropManager, final AppdefBoss appdepBoss, 
-    		final PlatformManager platformManager, final ExceptionToErrorCodeMapper errorHandler, DestinationEvaluator evaluator, Q q, @Qualifier("restApiLogger")Log log) { 
+    		final PlatformManager platformManager, final ExceptionToErrorCodeMapper errorHandler, Q q, @Qualifier("restApiLogger")Log log) { 
     	this.aiQueueManager = aiQueueManager ; 
     	this.resourceManager = resourceManager ; 
     	this.authzSubjectManager = authzSubjectManager ; 
@@ -131,7 +134,6 @@ public class ResourceTransferImpl implements ResourceTransfer{
     	this.appdepBoss = appdepBoss ;
     	this.platformManager = platformManager ; 
     	this.errorHandler = errorHandler ; 
-    	this.evaluator = evaluator;
     	this.q=q;
     	this.log = log ;
     }//EOM 
@@ -643,17 +645,15 @@ public class ResourceTransferImpl implements ResourceTransfer{
 
             //TODO~ get the destination from the user
             Destination dest = this.notificationsTransfer.getDummyDestination();
-            Integer regID = this.evaluator.register(InventoryNotification.class,userFilters);
+            Integer regID = this.registrationMgr.register(InventoryNotification.class,userFilters);
             this.q.register(dest,regID, ResourceDetailsType.valueOf(responseMetadata));
-            //TODO~ return a valid registration id
             res.setRegId(new RegistrationID(regID));
         }
         return res;
     }
     public void unregister(Integer regID) {
-        Destination dest = this.notificationsTransfer.getDummyDestination();
         this.q.unregister(regID);
-        this.evaluator.unregister(regID);
+        this.registrationMgr.unregister(regID);
         this.isRegistered=false;
     }
     public ResourceMapper getResourceMapper() {
