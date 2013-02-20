@@ -32,13 +32,10 @@ package org.hyperic.hq.api.transfer.mapping;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import javax.annotation.PostConstruct;
 
@@ -47,8 +44,6 @@ import org.hibernate.classic.Session;
 import org.hyperic.hq.api.model.AIResource;
 import org.hyperic.hq.api.model.ConfigurationValue;
 import org.hyperic.hq.api.model.ID;
-import org.hyperic.hq.api.model.PropertyList;
-import org.hyperic.hq.api.model.RegisteredID;
 import org.hyperic.hq.api.model.Resource;
 import org.hyperic.hq.api.model.ResourceConfig;
 import org.hyperic.hq.api.model.ResourceDetailsType;
@@ -56,23 +51,18 @@ import org.hyperic.hq.api.model.ResourcePrototype;
 import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.api.model.resources.ComplexIp;
 import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
-import org.hyperic.hq.api.transfer.NotificationsTransfer;
 import org.hyperic.hq.api.transfer.ResourceTransfer;
-import org.hyperic.hq.api.transfer.impl.ResourceTransferImpl;
 import org.hyperic.hq.api.transfer.impl.ResourceTransferImpl.Context;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.server.session.ProductBossImpl.ConfigSchemaAndBaseResponse;
-import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.notifications.filtering.Filter;
 import org.hyperic.hq.notifications.filtering.FilteringCondition;
 import org.hyperic.hq.notifications.filtering.ResourceContentFilter;
@@ -380,12 +370,12 @@ public class ResourceMapper {
 
 
     
-    public RegisteredID toResource(RemovedResourceNotification n, Integer regID) {
+    public ID toResource(RemovedResourceNotification n, Integer regID) {
         Integer id = n.getID();
         if (id==null) {
             return null;
         }
-        RegisteredID removedResourceID = new RegisteredID();
+        ID removedResourceID = new ID();
         removedResourceID.setId(id);
         removedResourceID.setRegistrationID(regID);
         return removedResourceID;

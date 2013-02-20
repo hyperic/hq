@@ -10,14 +10,20 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(name = "id", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 @XmlType(name="IDType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 public class ID extends Notification {
+    @XmlAttribute
+    protected Integer id;
+    @XmlAttribute
+    protected Integer registrationID = null;
+    public Integer getRegistrationID() {
+        return registrationID;
+    }
+    public void setRegistrationID(Integer registrationID) {
+        this.registrationID = registrationID;
+    }
     public Integer getId() {
         return id;
     }
-
     public void setId(Integer id) {
         this.id = id;
     }
-
-    @XmlAttribute
-    protected Integer id;
 }
