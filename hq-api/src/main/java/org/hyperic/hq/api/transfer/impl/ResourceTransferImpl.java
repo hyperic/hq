@@ -123,6 +123,7 @@ public class ResourceTransferImpl implements ResourceTransfer{
     private ConfigBoss configBoss;
     protected NotificationsTransfer notificationsTransfer;
     protected boolean isRegistered = false;
+    private static final String RESOURCE_URL = "%sresource/%s/monitor/Visibility.do?mode=currentHealth&eid=%d:%d";
 	@Autowired  
     public ResourceTransferImpl(final AIQueueManager aiQueueManager, final ResourceManager resourceManager, 
     		final AuthzSubjectManager authzSubjectManager, final ResourceMapper resourceMapper, 
@@ -670,22 +671,19 @@ public class ResourceTransferImpl implements ResourceTransfer{
         return this.resourceManager;
     }
 
-    @Transactional (readOnly=true)
-    public String getResourceUrl(ApiMessageContext apiMessageContext, String resourceID){
-        org.hyperic.hq.authz.server.session.Resource resource;
-        // check for number
-        resource = resourceManager.findResourceById(Integer.valueOf(resourceID));
-        if(resource == null){
-        throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID);
+    @Transactional(readOnly = true)
+    public String getResourceUrl(int resourceID) {
+        org.hyperic.hq.authz.server.session.Resource resource = resourceManager.getResourceById(resourceID);
+        if (resource == null) {
+            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID);
+        }
+        String hqBaseUrl = "";
+        try {
+            hqBaseUrl = configBoss.getConfig().getProperty(HQConstants.BaseURL);
+        } catch (ConfigPropertyException e) {
+            log.error("Couldn't get HQ Base Url", e);
         }
         org.hyperic.hq.authz.server.session.ResourceType resourceType = resource.getResourceType();
-        String baseUrl = "";
-        try {
-            baseUrl = configBoss.getConfig().getProperty(HQConstants.BaseURL);
-        } catch (ConfigPropertyException e) {
-            e.printStackTrace();
-        }
-        String x = "baseUrl/";
-        return baseUrl+"resource/" +resourceType.getLocalizedName()+"/monitor/Visibility.do?mode=currentHealth&eid="+resourceType.getAppdefType()+":"+resource.getInstanceId();
+        return String.format(RESOURCE_URL, hqBaseUrl, resourceType.getLocalizedName(), resourceType.getAppdefType(), resource.getInstanceId());
     }
 }//EOC 

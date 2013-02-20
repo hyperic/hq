@@ -70,7 +70,7 @@ public interface ResourceService {
 
     @GET
     @Path("/resourceUrl/{resourceID}")
-    String getResourceUrl(@PathParam("resourceID") final String resourceID) throws SessionNotFoundException, SessionTimeoutException ;
+    String getResourceUrl(@PathParam("resourceID") final int resourceID) throws SessionNotFoundException, SessionTimeoutException ;
 
     @POST
     @Path("/")

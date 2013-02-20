@@ -71,5 +71,5 @@ public interface ResourceTransfer {
 
     Object initResourceConfig(Context flowContext) throws ConfigFetchException, EncodingException, PluginNotFoundException, PluginException, PermissionException, AppdefEntityNotFoundException;
 
-    String getResourceUrl(ApiMessageContext apiMessageContext, String resourceID);
+    String getResourceUrl(int resourceID);
 }//EOI 
