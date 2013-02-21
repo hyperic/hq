@@ -37,6 +37,7 @@ import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourceStatusType;
 import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.api.model.Resources;
+import org.hyperic.hq.api.model.common.RegistrationID;
 import org.hyperic.hq.api.model.resources.RegisteredResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
@@ -73,7 +74,11 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
 		return resource;
 	}//EOM 
 
-    public final Resource getResource(final String platformID, final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) throws SessionNotFoundException, SessionTimeoutException {
+    public final Resource getResource(final String platformID,
+                                      final ResourceStatusType resourceStatusType,
+                                      final int hierarchyDepth,
+                                      final ResourceDetailsType[] responseMetadata)
+    throws SessionNotFoundException, SessionTimeoutException {
         ApiMessageContext apiMessageContext = newApiMessageContext();
         Resource resource = null;
         try {
@@ -110,7 +115,7 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
 		throw new UnsupportedOperationException() ; 
 	}//EOM 
 	
-	public void unregister() throws SessionNotFoundException, SessionTimeoutException {
-	    this.resourceTransfer.unregister();
+	public void unregister(RegistrationID id) throws SessionNotFoundException, SessionTimeoutException {
+	    resourceTransfer.unregister(id);
 	}
 }//EOC 

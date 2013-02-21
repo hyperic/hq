@@ -1,4 +1,3 @@
-/* **********************************************************************
 /* 
  * NOTE: This copyright does *not* cover user programs that use Hyperic
  * program services by normal system calls through the application
@@ -38,7 +37,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
-import javax.jms.Destination;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.logging.Log;
@@ -47,6 +45,7 @@ import org.apache.cxf.jaxrs.ext.search.SearchContext;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.ID;
 import org.hyperic.hq.api.model.common.RegistrationID;
+import org.hyperic.hq.api.model.measurements.BulkResourceMeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MetricFilterRequest;
 import org.hyperic.hq.api.model.measurements.MetricResponse;
@@ -55,7 +54,6 @@ import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequest;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequests;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementResponse;
 import org.hyperic.hq.api.services.impl.ApiMessageContext;
-import org.hyperic.hq.api.model.measurements.BulkResourceMeasurementRequest;
 import org.hyperic.hq.api.transfer.MeasurementTransfer;
 import org.hyperic.hq.api.transfer.NotificationsTransfer;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
@@ -75,7 +73,9 @@ import org.hyperic.hq.measurement.shared.DataManager;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.TemplateManager;
-import org.hyperic.hq.notifications.Q;
+import org.hyperic.hq.notifications.DefaultEndpoint;
+import org.hyperic.hq.notifications.EndpointQueue;
+import org.hyperic.hq.notifications.NotificationEndpoint;
 import org.hyperic.hq.notifications.filtering.AgnosticFilter;
 import org.hyperic.hq.notifications.filtering.Filter;
 import org.hyperic.hq.notifications.filtering.FilteringCondition;
@@ -95,15 +95,17 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     protected MeasurementMapper mapper;
     protected ExceptionToErrorCodeMapper errorHandler ;
     protected MetricDestinationEvaluator evaluator;
-    protected Q q;
+    protected EndpointQueue endpointQueue;
     protected NotificationsTransfer notificationsTransfer;
     @javax.ws.rs.core.Context
     protected SearchContext context ;
     protected boolean isRegistered = false;
 
     @Autowired
-    public MeasurementTransferImpl(ResourceManager resourceManager,MeasurementManager measurementMgr, TemplateManager tmpltMgr, DataManager dataMgr, 
-            MeasurementMapper mapper, ExceptionToErrorCodeMapper errorHandler, MetricDestinationEvaluator evaluator, Q q) {
+    public MeasurementTransferImpl(ResourceManager resourceManager,MeasurementManager measurementMgr,
+                                   TemplateManager tmpltMgr, DataManager dataMgr,  MeasurementMapper mapper,
+                                   ExceptionToErrorCodeMapper errorHandler, MetricDestinationEvaluator evaluator,
+                                   EndpointQueue endpointQueue) {
         super();
         this.resourceManager = resourceManager;
         this.measurementMgr = measurementMgr;
@@ -112,13 +114,17 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         this.dataMgr = dataMgr;
         this.errorHandler = errorHandler;
         this.evaluator = evaluator;
-        this.q = q;
+        this.endpointQueue = endpointQueue;
     }
+
     @PostConstruct
     public void init() {
         this.notificationsTransfer = (NotificationsTransfer) Bootstrap.getBean("notificationsTransfer");
     }
-    protected List<Measurement> getMeasurements(final String rscId, final List<MeasurementTemplate> tmps, final AuthzSubject authzSubject) throws PermissionException {
+
+    protected List<Measurement> getMeasurements(final String rscId, final List<MeasurementTemplate> tmps,
+                                                final AuthzSubject authzSubject)
+    throws PermissionException {
         // get measurements
         Map<Integer, List<Integer>> resIdsToTmpIds = new HashMap<Integer, List<Integer>>();
         List<Integer> tmpIds = new ArrayList<Integer>();
@@ -131,8 +137,9 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         if (rscTohqMsmts==null || rscTohqMsmts.size()==0 || rscTohqMsmts.values().isEmpty()) {
             throw new ObjectNotFoundException(tmps.toString(), Measurement.class.getName());
         }
-        List<Measurement> hqMsmts = rscTohqMsmts.values().iterator().next();    // there should be only one list of measurements for one resource
-        if (hqMsmts==null || hqMsmts.size()==0) {
+        // there should be only one list of measurements for one resource
+        List<Measurement> hqMsmts = rscTohqMsmts.values().iterator().next();
+        if (hqMsmts==null || hqMsmts.isEmpty()) {
             throw new ObjectNotFoundException(tmps.toString(), Measurement.class.getName());
         }
         return hqMsmts;
@@ -140,71 +147,74 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
 
     //    protected Map<Integer,Destination> sessionToDestination = new HashMap<Integer,Destination>();
 
-    public RegistrationID register(final MetricFilterRequest metricFilterReq) {
+    public RegistrationID register(final MetricFilterRequest request) {
         //TODO~ return failed/successful registration
         //TODO~ add schema to the xml's which automatically validates legal values (no null / empty name for instance)
-        if (metricFilterReq==null) {
+        if (request==null) {
             if (log.isDebugEnabled()) {
                 log.debug("illegal request");
             }
-            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.BAD_REQ_BODY);
+            throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.BAD_REQUEST,
+                                                          ExceptionToErrorCodeMapper.ErrorCode.BAD_REQ_BODY);
         }
-        List<Filter<MetricNotification,? extends FilteringCondition<?>>> userFilters = this.mapper.toMetricFilters(metricFilterReq); 
+        List<Filter<MetricNotification,? extends FilteringCondition<?>>> userFilters = mapper.toMetricFilters(request); 
         if (userFilters.isEmpty()) {
             userFilters.add(new AgnosticFilter<MetricNotification,FilteringCondition<?>>());
         }
-
         //TODO~ get the destination from the user
         // not allowing sequential registrations
         if (this.isRegistered) {
-            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.SEQUENTIAL_REGISTRATION);
+            throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.BAD_REQUEST,
+                                                          ExceptionToErrorCodeMapper.ErrorCode.SEQUENTIAL_REGISTRATION);
         }
         this.isRegistered=true;
-        Destination dest = this.notificationsTransfer.getDummyDestination();
-        this.q.register(dest);
-        this.evaluator.register(dest,userFilters);
-        return new RegistrationID(1);
+        RegistrationID registrationID = new RegistrationID();
+        final NotificationEndpoint endpoint = new DefaultEndpoint(registrationID.getId());
+        endpointQueue.register(endpoint);
+        evaluator.register(endpoint, userFilters);
+        return registrationID;
     }
-    public void unregister() {
-        Destination dest = this.notificationsTransfer.getDummyDestination();
-        this.q.unregister(dest);
-        this.evaluator.unregisterAll(dest);
-        this.isRegistered=false;
-    }
-    public MetricResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest hqMsmtReq, 
-            final String rscId, final Date begin, final Date end) 
-                    throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException, TimeframeSizeException {
 
+    public void unregister(RegistrationID id) {
+        final NotificationEndpoint endpoint = endpointQueue.unregister(id.getId());
+        evaluator.unregisterAll(endpoint);
+        isRegistered=false;
+    }
+
+    public MetricResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest request, 
+                                     final String rscId, final Date begin, final Date end) 
+    throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException,
+           TimeframeBoundriesException, TimeframeSizeException {
         MetricResponse res = new MetricResponse();
-        if (hqMsmtReq==null || hqMsmtReq.getMeasurementTemplateNames()==null || hqMsmtReq.getMeasurementTemplateNames().size()==0) {
+        List<String> templateNames;
+        if (request==null || (templateNames = request.getMeasurementTemplateNames()) == null || templateNames.isEmpty()) {
             throw new UnsupportedOperationException("message body is missing or corrupted"); 
         }
         validateTimeFrame(begin,end);
         if (rscId==null || "".equals(rscId)) {
             throw new UnsupportedOperationException("The request URL is missing the resource ID");
         }
-
         AuthzSubject authzSubject = apiMessageContext.getAuthzSubject();
         // extract all input measurement templates
-        List<String> tmpNames = hqMsmtReq.getMeasurementTemplateNames();
-        List<MeasurementTemplate> tmps = this.tmpltMgr.findTemplatesByName(tmpNames);
-        if (tmps==null || tmps.size()==0) {
+        List<String> tmpNames = request.getMeasurementTemplateNames();
+        List<MeasurementTemplate> tmps = tmpltMgr.findTemplatesByName(tmpNames);
+        if (tmps==null || tmps.isEmpty()) {
             throw new ObjectNotFoundException(tmpNames.toString(), MeasurementTemplate.class.getName());
         }
-
         List<Measurement> hqMsmts = getMeasurements(rscId, tmps,authzSubject);
         // get metrics
         for (Measurement hqMsmt : hqMsmts) {
-            org.hyperic.hq.api.model.measurements.Measurement msmt = this.mapper.toMeasurement(hqMsmt);
-            List<HighLowMetricValue> hqMetrics = this.dataMgr.getHistoricalData(hqMsmt, begin.getTime(), end.getTime(), true, MAX_DTPS);
-            if (hqMetrics!=null && hqMetrics.size()!=0) {
-                List<org.hyperic.hq.api.model.measurements.Metric> metrics = this.mapper.toMetrics(hqMetrics);
+            org.hyperic.hq.api.model.measurements.Measurement msmt = mapper.toMeasurement(hqMsmt);
+            List<HighLowMetricValue> hqMetrics = dataMgr.getHistoricalData(hqMsmt, begin.getTime(), end.getTime(), true, MAX_DTPS);
+            if (hqMetrics!=null && !hqMetrics.isEmpty()) {
+                List<org.hyperic.hq.api.model.measurements.Metric> metrics = mapper.toMetrics(hqMetrics);
                 msmt.setMetrics(metrics);
             }
             res.add(msmt);
         }
         return res;
     }
+
     protected void validateTimeFrame(Date begin, Date end) throws TimeframeBoundriesException {
         StringBuilder errorMsg = new StringBuilder();
         if (begin==null) {
@@ -233,9 +243,13 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
 
     @Transactional(readOnly = true)
     public ResourceMeasurementBatchResponse getAggregatedMetricData(ApiMessageContext apiMessageContext,
-            ResourceMeasurementRequests hqMsmtReqs, Date begin, Date end) throws TimeframeBoundriesException, PermissionException, SQLException, UnsupportedOperationException, ObjectNotFoundException {
+                                                                    ResourceMeasurementRequests requests,
+                                                                    Date begin, Date end)
+    throws TimeframeBoundriesException, PermissionException, SQLException, UnsupportedOperationException,
+           ObjectNotFoundException {
         ResourceMeasurementBatchResponse res = new ResourceMeasurementBatchResponse(this.errorHandler);
-        if (hqMsmtReqs==null || hqMsmtReqs.getMeasurementRequests()==null || hqMsmtReqs.getMeasurementRequests().size()==0) {
+        List<ResourceMeasurementRequest> measRequests;
+        if (requests==null || (measRequests = requests.getMeasurementRequests()) == null || measRequests.isEmpty()) {
             throw new UnsupportedOperationException("message body is missing or corrupted"); 
         }
         validateTimeFrame(begin,end);
@@ -244,12 +258,12 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         Map<String,List<String>> tmpNameToRscs = new HashMap<String,List<String>>();
         List<String> tmpNames = null;
         String rscId = null;
-        for (ResourceMeasurementRequest hqMsmtReq : hqMsmtReqs.getMeasurementRequests()) {
-            rscId = hqMsmtReq.getRscId();
+        for (ResourceMeasurementRequest request : requests.getMeasurementRequests()) {
+            rscId = request.getRscId();
             if (rscId==null || "".equals(rscId)) {
                 throw new ObjectNotFoundException("no resource ID supplied",Resource.class.getName());
             }
-            tmpNames = hqMsmtReq.getMeasurementTemplateNames();
+            tmpNames = request.getMeasurementTemplateNames();
             for (String tmpName : tmpNames) {
                 List<String> rscs = tmpNameToRscs.get(tmpName);
                 if (rscs==null) {
@@ -260,8 +274,9 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             }
         }
         // extract tmp Ids per rsc
-        List<MeasurementTemplate> tmps = this.tmpltMgr.findTemplatesByName(new ArrayList<String>(tmpNameToRscs.keySet()));
-        Map<Integer, List<Integer>> rscIdsToTmpIds = new HashMap<Integer, List<Integer>>(); // will contain all the resources for which at least one of the templates requested for them exists
+        List<MeasurementTemplate> tmps = tmpltMgr.findTemplatesByName(new ArrayList<String>(tmpNameToRscs.keySet()));
+        // will contain all the resources for which at least one of the templates requested for them exists
+        Map<Integer, List<Integer>> rscIdsToTmpIds = new HashMap<Integer, List<Integer>>();
         List<String> rscIds = null;
         for (MeasurementTemplate tmp : tmps) {
             rscIds = tmpNameToRscs.get(tmp.getAlias());
@@ -279,7 +294,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         // mark resources for which no measurements were found
         final String TEMPLATE_NOT_FOUND_ERR_CODE = ExceptionToErrorCodeMapper.ErrorCode.TEMPLATE_NOT_FOUND.getErrorCode();
         rscId = null;
-        for (ResourceMeasurementRequest hqMsmtReq : hqMsmtReqs.getMeasurementRequests()) {
+        for (ResourceMeasurementRequest hqMsmtReq : requests.getMeasurementRequests()) {
             // by now we know that all reqs are with valid rscs, o/w we wouldn't get here
             rscId = hqMsmtReq.getRscId();
             // if the requested rsc is not in the map of rscs for which at least one template was found, mark it as a failed rsc
@@ -323,8 +338,8 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         for (Measurement msmt : allMsmts) {
             msmtIdToMsmt.put(msmt.getId(), msmt);
         }
-
-        Map<Integer, double[]> msmtIdToAgg = this.dataMgr.getAggregateDataAndAvailUpByMetric(new ArrayList<Measurement>(allMsmts), begin.getTime(), end.getTime());
+        Map<Integer, double[]> msmtIdToAgg =
+            dataMgr.getAggregateDataAndAvailUpByMetric(new ArrayList<Measurement>(allMsmts), begin.getTime(), end.getTime());
         Map<Integer,ResourceMeasurementResponse> rscIdToRes = new HashMap<Integer,ResourceMeasurementResponse>();
         Resource rsc = null;
         for (Map.Entry<Integer, double[]> msmtIdToAggEntry : msmtIdToAgg.entrySet()) {
@@ -342,7 +357,6 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
                 continue;
             }
             org.hyperic.hq.api.model.measurements.Measurement msmt = this.mapper.toMeasurement(hqMsmt,avg);
-
             ResourceMeasurementResponse rscRes =  rscIdToRes.get(rsc.getId());
             if (rscRes==null) {
                 rscRes = new ResourceMeasurementResponse(String.valueOf(rsc.getId()));
@@ -353,6 +367,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         }
         return res;
     }
+
     @Transactional(readOnly = true)
     public ResourceMeasurementBatchResponse getMeasurements(ApiMessageContext apiMessageContext, BulkResourceMeasurementRequest rcsMsmtReq) {
         ResourceMeasurementBatchResponse res = new ResourceMeasurementBatchResponse(this.errorHandler);

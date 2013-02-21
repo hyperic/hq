@@ -4,9 +4,11 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.hyperic.hq.api.model.NotificationsReport;
+import org.hyperic.hq.api.model.common.RegistrationID;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 
@@ -17,9 +19,9 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 public interface NotificationsService {
     @GET
     @Path("/")
-    public NotificationsReport poll() throws SessionNotFoundException, SessionTimeoutException;
+    public NotificationsReport poll(@QueryParam("registrationid") long id) throws SessionNotFoundException, SessionTimeoutException;
 
     @DELETE
     @Path("/")
-    public void unregister() throws SessionNotFoundException, SessionTimeoutException;
+    public void unregister(RegistrationID id) throws SessionNotFoundException, SessionTimeoutException;
 }
