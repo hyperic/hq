@@ -14,8 +14,8 @@
     <name>Hyperic HQ Plugin - RabbitMQ Plugin</name>
 
     <properties>
-        <hqapi.version>5.0.0</hqapi.version>
-		<surefire.version>2.8</surefire.version>
+        <hqapi.version>5.0.0-oem-integration</hqapi.version>
+	<surefire.version>2.8</surefire.version>
     </properties>
 
     <dependencies>

@@ -19,7 +19,7 @@
 
 	<properties>
 		<hq.version>5.0.0</hq.version>
-        <hqapi.version>5.0.0</hqapi.version>
+        	<hqapi.version>5.0.0-oem-integration</hqapi.version>
 		<json.version>20080701</json.version>
 		<spring.framework.version>3.0.5.RELEASE</spring.framework.version>
 		<sigar.version>1.6.6</sigar.version>
