@@ -30,6 +30,7 @@ import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourceStatusType;
 import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.api.model.Resources;
+import org.hyperic.hq.api.model.common.RegistrationID;
 import org.hyperic.hq.api.model.resources.RegisteredResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
@@ -61,7 +62,7 @@ public interface ResourceTransfer {
 	ResourceBatchResponse approveResource(final ApiMessageContext messageContext, final Resources aiResources) ;
 	ResourceBatchResponse updateResources(final ApiMessageContext messageContext, final Resources resources);
 
-    void unregister();
+    void unregister(RegistrationID id);
 
     PlatformManager getPlatformManager();
 

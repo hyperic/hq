@@ -1,22 +1,17 @@
 package org.hyperic.hq.api.transfer.impl;
 
-import java.util.List;
-
-import javax.jms.Destination;
-
 import org.hyperic.hq.api.model.NotificationsReport;
 import org.hyperic.hq.api.model.ResourceDetailsType;
+import org.hyperic.hq.api.model.common.RegistrationID;
 import org.hyperic.hq.api.services.impl.ApiMessageContext;
 import org.hyperic.hq.api.transfer.MeasurementTransfer;
 import org.hyperic.hq.api.transfer.NotificationsTransfer;
 import org.hyperic.hq.api.transfer.ResourceTransfer;
 import org.hyperic.hq.api.transfer.mapping.NotificationsMapper;
-import org.hyperic.hq.api.transfer.mapping.ResourceDetailsTypeStrategy;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.notifications.EndpointQueue;
 import org.hyperic.hq.notifications.InternalNotificationReport;
-import org.hyperic.hq.notifications.Q;
 import org.hyperic.hq.notifications.UnregisteredException;
-import org.hyperic.hq.notifications.model.BaseNotification;
 import org.hyperic.hq.notifications.model.InternalResourceDetailsType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -24,42 +19,32 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component("notificationsTransfer")
 public class NotificationsTransferImpl implements NotificationsTransfer {
-    protected Destination dest;
     @Autowired
-    protected NotificationsMapper mapper;
+    private NotificationsMapper mapper;
     @Autowired
-    protected Q q;
+    private EndpointQueue endpointQueue;
     @Autowired
-    protected ResourceTransfer rscTransfer;
+    private ResourceTransfer rscTransfer;
     @Autowired
-    protected MeasurementTransfer msmtTransfer;
+    private MeasurementTransfer msmtTransfer;
     // will be replaced by the destinations the invokers of this API will pass when registering
-    protected Destination dummyDestination = new Destination() {
-        public int hashCode() {return super.hashCode();};
-    };
 
     @Transactional (readOnly=true)
-    public NotificationsReport poll(ApiMessageContext apiMessageContext) throws UnregisteredException {
-        Destination dest = this.dummyDestination;
-        if (dest==null) {
-            throw new UnregisteredException();
-        }
-        InternalNotificationReport inr = this.q.poll(dest);
+    public NotificationsReport poll(long registrationId, ApiMessageContext apiMessageContext)
+    throws UnregisteredException {
+        InternalNotificationReport inr = endpointQueue.poll(registrationId);
         AuthzSubject subject = apiMessageContext.getAuthzSubject();
         InternalResourceDetailsType internalResourceDetailsType = inr.getResourceDetailsType();
         ResourceDetailsType resourceDetailsType = null;
         resourceDetailsType = ResourceDetailsType.valueOf(internalResourceDetailsType);
-        return this.mapper.toNotificationsReport(subject, this.rscTransfer, resourceDetailsType, inr.getNotifications());
+        return mapper.toNotificationsReport(subject, rscTransfer, resourceDetailsType, inr.getNotifications());
     }
     
     @Transactional (readOnly=false)
-    public void unregister() {
-        this.q.unregister(dest);
-        this.rscTransfer.unregister();
-        this.msmtTransfer.unregister();
-        this.dest=null;
+    public void unregister(RegistrationID id) {
+        endpointQueue.unregister(id.getId());
+        rscTransfer.unregister(id);
+        msmtTransfer.unregister(id);
     }
-    public Destination getDummyDestination() {
-        return this.dummyDestination;
-    }
+
 }

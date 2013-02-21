@@ -47,6 +47,6 @@ public interface MeasurementTransfer {
             throws PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException, SQLException;
     public ResourceMeasurementBatchResponse getMeasurements(ApiMessageContext apiMessageContext,BulkResourceMeasurementRequest msmtMetaReq);
 
-    public void unregister();
+    public void unregister(RegistrationID id);
 
 }

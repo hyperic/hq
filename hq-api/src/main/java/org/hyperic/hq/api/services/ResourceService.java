@@ -41,6 +41,7 @@ import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourceStatusType;
 import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.api.model.Resources;
+import org.hyperic.hq.api.model.common.RegistrationID;
 import org.hyperic.hq.api.model.resources.RegisteredResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
@@ -58,20 +59,25 @@ public interface ResourceService {
 
     @GET
     @Path("/{platformNaturalID}/{resourceType}")
-    Resource getResource(@PathParam("platformNaturalID") final String platformNaturalID, @PathParam("resourceType") final ResourceType resourceType, 
-			@QueryParam("status") final ResourceStatusType resourceStatusType, @QueryParam("hierarchyDepth") final int hierarchyDepth, 
-			@QueryParam("responseStructure") final ResourceDetailsType[] responseStructure) throws SessionNotFoundException, SessionTimeoutException ;  
+    Resource getResource(@PathParam("platformNaturalID") final String platformNaturalID,
+                         @PathParam("resourceType") final ResourceType resourceType, 
+                         @QueryParam("status") final ResourceStatusType resourceStatusType,
+                         @QueryParam("hierarchyDepth") final int hierarchyDepth, 
+                         @QueryParam("responseStructure") final ResourceDetailsType[] responseStructure)
+    throws SessionNotFoundException, SessionTimeoutException ;  
 		
-    @GET
-    @Path("/{platformID}")
-    Resource getResource(@PathParam("platformID") final String platformID,
-                         @QueryParam("status") final ResourceStatusType resourceStatusType, @QueryParam("hierarchyDepth") final int hierarchyDepth,
-                         @QueryParam("responseStructure") final ResourceDetailsType[] responseStructure) throws SessionNotFoundException, SessionTimeoutException ;
-
     @GET
     @Path("/resourceUrl/{resourceID}")
     String getResourceUrl(@PathParam("resourceID") final int resourceID) throws SessionNotFoundException, SessionTimeoutException ;
 
+	@GET
+    @Path("/{platformID}")
+	Resource getResource(@PathParam("platformID") final String platformID, 
+                         @QueryParam("status") final ResourceStatusType resourceStatusType,
+                         @QueryParam("hierarchyDepth") final int hierarchyDepth, 
+                         @QueryParam("responseStructure") final ResourceDetailsType[] responseStructure)
+    throws SessionNotFoundException, SessionTimeoutException ;  
+	
     @POST
     @Path("/")
     RegisteredResourceBatchResponse getResources(@QueryParam("responseStructure")  final ResourceDetailsType responseMetadata,
@@ -90,5 +96,5 @@ public interface ResourceService {
 	
 	@DELETE
 	@Path("/registration")
-	public void unregister() throws SessionNotFoundException, SessionTimeoutException;
+	public void unregister(RegistrationID id) throws SessionNotFoundException, SessionTimeoutException;
 }//EOC 
