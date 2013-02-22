@@ -46,6 +46,7 @@ import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.ID;
 import org.hyperic.hq.api.model.common.RegistrationID;
 import org.hyperic.hq.api.model.measurements.BulkResourceMeasurementRequest;
+import org.hyperic.hq.api.model.measurements.HttpEndpointDefinition;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MetricFilterRequest;
 import org.hyperic.hq.api.model.measurements.MetricResponse;
@@ -75,6 +76,7 @@ import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.notifications.DefaultEndpoint;
 import org.hyperic.hq.notifications.EndpointQueue;
+import org.hyperic.hq.notifications.HttpEndpoint;
 import org.hyperic.hq.notifications.NotificationEndpoint;
 import org.hyperic.hq.notifications.filtering.AgnosticFilter;
 import org.hyperic.hq.notifications.filtering.Filter;
@@ -95,8 +97,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     protected MeasurementMapper mapper;
     protected ExceptionToErrorCodeMapper errorHandler ;
     protected MetricDestinationEvaluator evaluator;
-    protected EndpointQueue endpointQueue;
-    protected NotificationsTransfer notificationsTransfer;
+    private NotificationsTransfer notificationsTransfer;
     @javax.ws.rs.core.Context
     protected SearchContext context ;
     protected boolean isRegistered = false;
@@ -104,8 +105,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     @Autowired
     public MeasurementTransferImpl(ResourceManager resourceManager,MeasurementManager measurementMgr,
                                    TemplateManager tmpltMgr, DataManager dataMgr,  MeasurementMapper mapper,
-                                   ExceptionToErrorCodeMapper errorHandler, MetricDestinationEvaluator evaluator,
-                                   EndpointQueue endpointQueue) {
+                                   ExceptionToErrorCodeMapper errorHandler, MetricDestinationEvaluator evaluator) {
         super();
         this.resourceManager = resourceManager;
         this.measurementMgr = measurementMgr;
@@ -114,7 +114,6 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         this.dataMgr = dataMgr;
         this.errorHandler = errorHandler;
         this.evaluator = evaluator;
-        this.endpointQueue = endpointQueue;
     }
 
     @PostConstruct
@@ -145,9 +144,8 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         return hqMsmts;
     }
 
-    //    protected Map<Integer,Destination> sessionToDestination = new HashMap<Integer,Destination>();
-
-    public RegistrationID register(final MetricFilterRequest request) {
+    @Transactional(readOnly=true)
+    public RegistrationID register(final MetricFilterRequest request, ApiMessageContext apiMessageContext) {
         //TODO~ return failed/successful registration
         //TODO~ add schema to the xml's which automatically validates legal values (no null / empty name for instance)
         if (request==null) {
@@ -169,14 +167,21 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         }
         this.isRegistered=true;
         RegistrationID registrationID = new RegistrationID();
-        final NotificationEndpoint endpoint = new DefaultEndpoint(registrationID.getId());
-        endpointQueue.register(endpoint);
+        final HttpEndpointDefinition httpEndpointDefinition = request.getHttpEndpointDef();
+        final NotificationEndpoint endpoint = (httpEndpointDefinition == null) ?
+            new DefaultEndpoint(registrationID.getId()) :
+            getHttpEndpoint(registrationID, httpEndpointDefinition);
+        notificationsTransfer.register(endpoint, apiMessageContext.getAuthzSubject().getId());
         evaluator.register(endpoint, userFilters);
         return registrationID;
     }
+    
+    private HttpEndpoint getHttpEndpoint(RegistrationID registrationID, HttpEndpointDefinition def) {
+        return new HttpEndpoint(registrationID.getId(), def.getUrl(), def.getUsername(), def.getPassword(),
+                                def.getContentType(), def.getEncoding());
+    }
 
-    public void unregister(RegistrationID id) {
-        final NotificationEndpoint endpoint = endpointQueue.unregister(id.getId());
+    public void unregister(NotificationEndpoint endpoint) {
         evaluator.unregisterAll(endpoint);
         isRegistered=false;
     }
@@ -398,4 +403,5 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         }
         return res;
     }
+
 }

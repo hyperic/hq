@@ -22,17 +22,22 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-package org.hyperic.hq.api.transfer;
+package org.hyperic.hq.notifications;
 
-import org.hyperic.hq.api.model.NotificationsReport;
-import org.hyperic.hq.api.services.impl.ApiMessageContext;
-import org.hyperic.hq.notifications.NotificationEndpoint;
-import org.hyperic.hq.notifications.UnregisteredException;
-import org.hyperic.hq.notifications.model.InternalResourceDetailsType;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public interface NotificationsTransfer {
-    public NotificationsReport poll(long id, ApiMessageContext apiMessageContext) throws UnregisteredException;
-    public void unregister(long id);
-    public void register(NotificationEndpoint endpoint, InternalResourceDetailsType type, int authzSubjectId);
-    public void register(NotificationEndpoint endpoint, int authzSubjectId);
+public class NotificationsThreadFactory implements ThreadFactory {
+    private final String namePrefix = "notification-endpoint-exec-";
+    private final AtomicInteger threadNumber = new AtomicInteger(0);
+
+    public Thread newThread(Runnable r) {
+        Thread t = new Thread(r, namePrefix + threadNumber.getAndIncrement());
+        t.setDaemon(true);
+        if (t.getPriority() != Thread.NORM_PRIORITY) {
+            t.setPriority(Thread.NORM_PRIORITY);
+        }
+        return t;
+    }
+
 }

@@ -1,7 +1,5 @@
 package org.hyperic.hq.notifications;
 
-import java.util.List;
-import java.util.Map;
 
 public abstract class NotificationEndpoint {
     
@@ -11,11 +9,9 @@ public abstract class NotificationEndpoint {
         this.id = registrationId;
     }
     
-    public abstract void setValues(Map<String, String> values);
-    
-    public abstract void init();
+    public abstract boolean canPublish();
 
-    public abstract void publishMessages(List<String> messages);
+    public abstract void publishMessage(String message);
     
     public long getRegistrationId() {
         return id;

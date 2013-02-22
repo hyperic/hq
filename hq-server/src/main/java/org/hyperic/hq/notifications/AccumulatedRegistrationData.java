@@ -2,6 +2,7 @@ package org.hyperic.hq.notifications;
 
 import java.util.Collection;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledFuture;
 
 import org.hyperic.hq.notifications.model.BaseNotification;
 import org.hyperic.hq.notifications.model.InternalResourceDetailsType;
@@ -10,6 +11,8 @@ public class AccumulatedRegistrationData {
     private final InternalResourceDetailsType resourceContentType;
     private final LinkedBlockingQueue<BaseNotification> accumulatedNotificationsQueue;
     private final NotificationEndpoint endpoint;
+    private boolean isValid = true;
+    private ScheduledFuture<?> schedule;
 
     public AccumulatedRegistrationData(NotificationEndpoint endpoint, int queueLimit,
                                        InternalResourceDetailsType resourceDetailsType) {
@@ -45,4 +48,25 @@ public class AccumulatedRegistrationData {
     public void drainTo(Collection<BaseNotification> c) {
         accumulatedNotificationsQueue.drainTo(c);
     }
+    
+    public boolean isValid() {
+        return isValid;
+    }
+    
+    public void markInvalid() {
+        isValid = false;
+    }
+
+    public void clear() {
+        accumulatedNotificationsQueue.clear();
+    }
+
+    public void setSchedule(ScheduledFuture<?> schedule) {
+        this.schedule = schedule;
+    }
+
+    public ScheduledFuture<?> getSchedule() {
+        return schedule;
+    }
+
 }

@@ -23,6 +23,8 @@ import org.hyperic.hq.common.TimeframeBoundriesException;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.TimeframeSizeException;
+import org.hyperic.hq.notifications.EndpointQueue;
+import org.hyperic.hq.notifications.NotificationEndpoint;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class MetricServiceImpl extends RestApiService implements MetricService {
@@ -30,6 +32,8 @@ public class MetricServiceImpl extends RestApiService implements MetricService {
     protected MeasurementTransfer measurementTransfer;
     @Autowired
     protected ExceptionToErrorCodeMapper errorHandler ; 
+    @Autowired
+    private EndpointQueue endpointQueue;
     
     public MetricResponse getMetrics(final MeasurementRequest measurementRequest, final String resourceId,
                                      final Date begin, final Date end)
@@ -82,10 +86,12 @@ public class MetricServiceImpl extends RestApiService implements MetricService {
     
     public RegistrationID register(final MetricFilterRequest request)
     throws SessionNotFoundException, SessionTimeoutException {
-        return measurementTransfer.register(request);
+        ApiMessageContext apiMessageContext = newApiMessageContext();
+        return measurementTransfer.register(request, apiMessageContext);
     }
     
-    public void unregister(RegistrationID id) throws SessionNotFoundException, SessionTimeoutException {
-        measurementTransfer.unregister(id);
+    public void unregister(Long registrationId) throws SessionNotFoundException, SessionTimeoutException {
+        final NotificationEndpoint endpoint = endpointQueue.getEndpoint(registrationId);
+        measurementTransfer.unregister(endpoint);
     }
 }

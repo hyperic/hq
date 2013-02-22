@@ -96,5 +96,5 @@ public interface ResourceService {
 	
 	@DELETE
 	@Path("/registration")
-	public void unregister(RegistrationID id) throws SessionNotFoundException, SessionTimeoutException;
+	public void unregister(@QueryParam("registrationid") Long registrationId) throws SessionNotFoundException, SessionTimeoutException;
 }//EOC 

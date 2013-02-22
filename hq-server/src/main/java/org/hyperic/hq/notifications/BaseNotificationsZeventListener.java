@@ -37,6 +37,9 @@ public abstract class BaseNotificationsZeventListener<E extends Zevent,N extends
     
     @Transactional(readOnly = true)
     public void processEvents(List<E> events) {
+        if (endpointQueue.getNumConsumers() == 0) {
+            return;
+        }
         if (log.isDebugEnabled()) {
             log.debug(getListenersBeanName() + " got events:\n" + events);
         }

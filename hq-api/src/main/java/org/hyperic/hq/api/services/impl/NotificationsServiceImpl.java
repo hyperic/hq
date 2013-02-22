@@ -3,7 +3,6 @@ package org.hyperic.hq.api.services.impl;
 import javax.ws.rs.core.Response;
 
 import org.hyperic.hq.api.model.NotificationsReport;
-import org.hyperic.hq.api.model.common.RegistrationID;
 import org.hyperic.hq.api.services.NotificationsService;
 import org.hyperic.hq.api.transfer.NotificationsTransfer;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
@@ -18,7 +17,7 @@ public class NotificationsServiceImpl extends RestApiService implements Notifica
     @Autowired
     protected ExceptionToErrorCodeMapper errorHandler ; 
 
-    public NotificationsReport poll(long id) throws SessionNotFoundException, SessionTimeoutException {
+    public NotificationsReport poll(Long id) throws SessionNotFoundException, SessionTimeoutException {
         try {
             ApiMessageContext apiMessageContext = newApiMessageContext();
             return notificationsTransfer.poll(id, apiMessageContext);
@@ -29,8 +28,13 @@ public class NotificationsServiceImpl extends RestApiService implements Notifica
         }
     }
 
-    public void unregister(RegistrationID id) throws SessionNotFoundException, SessionTimeoutException {
+    public void unregister(Long id) throws SessionNotFoundException, SessionTimeoutException {
         notificationsTransfer.unregister(id);
     }
 
+    // temporary method for testing
+    public String post(String message) throws SessionNotFoundException, SessionTimeoutException {
+        return message;
+    }
+    
 }

@@ -1,7 +1,5 @@
 package org.hyperic.hq.notifications;
 
-import java.util.List;
-import java.util.Map;
 
 public class DefaultEndpoint extends NotificationEndpoint {
 
@@ -10,17 +8,16 @@ public class DefaultEndpoint extends NotificationEndpoint {
     }
 
     @Override
-    public void setValues(Map<String, String> values) {}
-
-    @Override
-    public void init() {}
-
-    @Override
-    public void publishMessages(List<String> messages) {}
-
-    @Override
     public String toString() {
-        return "DefaultEndpoint";
+        return new StringBuilder().append("[registrationId=").append(getRegistrationId()).append("]").toString();
     }
+
+    @Override
+    public boolean canPublish() {
+        return false;
+    }
+
+    @Override
+    public void publishMessage(String message) {}
 
 }
