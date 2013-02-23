@@ -22,6 +22,9 @@ import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.util.EntityUtils;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.security.ServerKeystoreConfig;
+import org.hyperic.util.http.HQHttpClient;
 
 public class HttpEndpoint extends NotificationEndpoint {
 
@@ -36,10 +39,12 @@ public class HttpEndpoint extends NotificationEndpoint {
     private String contentType;
     private String encoding;
     private URL url;
+    private ServerKeystoreConfig keystoreConfig;
 
     public HttpEndpoint(long registrationId, String url, String username, String password, String contentType,
                         String encoding) {
         super(registrationId);
+        keystoreConfig = Bootstrap.getBean(ServerKeystoreConfig.class);
         try {
             this.url = new URL(url);
             this.hostname = this.url.getHost();
@@ -69,26 +74,30 @@ public class HttpEndpoint extends NotificationEndpoint {
     @Override
     public void publishMessage(String message) {
         DefaultHttpClient client = null;
+        final boolean debug = log.isDebugEnabled();
+        HttpResponse resp = null;
         try {
-            client = new DefaultHttpClient();
+            if (scheme.equalsIgnoreCase("https")) {
+                client = new HQHttpClient(keystoreConfig, null, true);
+            } else {
+                client = new DefaultHttpClient();
+            }
             final HttpHost targetHost = new HttpHost(hostname, port, scheme);
             final AuthScope scope = new AuthScope(targetHost.getHostName(), targetHost.getPort());
             final UsernamePasswordCredentials creds = new UsernamePasswordCredentials(username, password);
             client.getCredentialsProvider().setCredentials(scope, creds);
             client.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, 60000);
             client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 60000);
-            // Create AuthCache instance
             final AuthCache authCache = new BasicAuthCache();
             final BasicScheme basicAuth = new BasicScheme();
             authCache.put(targetHost, basicAuth);
             final BasicHttpContext localcontext = new BasicHttpContext();
             localcontext.setAttribute(ClientContext.AUTH_CACHE, authCache);
-            final boolean debug = log.isDebugEnabled();
             final HttpPost post = new HttpPost(url.getPath());
             final HttpEntity entity = new StringEntity(message, contentType, encoding);
             post.setEntity(entity);
             if (debug) log.debug(post.getRequestLine());
-            final HttpResponse resp = client.execute(targetHost, post, localcontext);
+            resp = client.execute(targetHost, post, localcontext);
             if (debug) {
                 try {
                     String respBuf= EntityUtils.toString(resp.getEntity());
