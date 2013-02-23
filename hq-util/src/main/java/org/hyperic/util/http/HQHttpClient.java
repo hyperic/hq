@@ -20,48 +20,44 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.CoreConnectionPNames;
 import org.hyperic.util.security.DefaultSSLProviderImpl;
 import org.hyperic.util.security.KeystoreConfig;
-import org.hyperic.util.security.KeystoreManager;
 import org.hyperic.util.security.SSLProvider;
 import org.springframework.util.Assert;
 
 public class HQHttpClient extends DefaultHttpClient {
-    private static final Log log = LogFactory.getLog(HQHttpClient.class);
+    private Log log;
     
-    public HQHttpClient(HttpConfig config, boolean acceptUnverifiedCertificates, String dname, String alias,
-                        String filePath, String filePassword, boolean isHqDefault) {
+    public HQHttpClient(final KeystoreConfig keyConfig, final HttpConfig config, final boolean acceptUnverifiedCertificates) {
     	super();
-    	if (log.isDebugEnabled()) {
-            log.debug("Keystore info: Alias=" + alias + ", acceptUnverifiedCert=" + acceptUnverifiedCertificates);
-    	}
-   		final SSLProvider sslProvider =
-   		    new DefaultSSLProviderImpl(acceptUnverifiedCertificates, dname, alias, filePath, filePassword, isHqDefault);
-        final Scheme sslScheme = new Scheme("https", 443, sslProvider.getSSLSocketFactory());
+    	log = LogFactory.getLog(HQHttpClient.class);
+        log.debug("Keystore info: Alias="+keyConfig.getAlias()+
+            ", acceptUnverifiedCert="+acceptUnverifiedCertificates);
+
+   		SSLProvider sslProvider = new DefaultSSLProviderImpl(keyConfig, acceptUnverifiedCertificates);
+        Scheme sslScheme = new Scheme("https", 443, sslProvider.getSSLSocketFactory());
+			
 		getConnectionManager().getSchemeRegistry().register(sslScheme);
+			
 		if (config != null) {
 			getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, config.getSocketTimeout());
 			getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, config.getConnectionTimeout());
+	        
 			// configure proxy, if appropriate
 			String proxyHost = config.getProxyHostname();
 			int proxyPort = config.getProxyPort();
+	        
 			if (proxyHost != null & proxyPort != -1) {
 				HttpHost proxy = new HttpHost(proxyHost, proxyPort);
+
 				getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
 			}
 		}
-    }
-    
-    public HQHttpClient(final KeystoreConfig keyConfig, final HttpConfig config,
-                        final boolean acceptUnverifiedCertificates) {
-        this(config, acceptUnverifiedCertificates, KeystoreManager.getDName(keyConfig), keyConfig.getAlias(),
-             keyConfig.getFilePath(), keyConfig.getFilePassword(), keyConfig.isHqDefault());
     }
     
     public HttpResponse post(String url, Map<String, String> params) throws ClientProtocolException, IOException {
     	return post(url, null, params);
     }
     
-    public HttpResponse post(String url, Map<String, String> headers, Map<String, String> params)
-    throws ClientProtocolException, IOException {
+    public HttpResponse post(String url, Map<String, String> headers, Map<String, String> params) throws ClientProtocolException, IOException {
     	Assert.hasText(url);
     	
     	HttpPost post = new HttpPost(url);

@@ -86,21 +86,22 @@ public class DefaultSSLProviderImpl implements SSLProvider {
         }
     }
             
-    public DefaultSSLProviderImpl(boolean acceptUnverifiedCertificates, String dname, String alias, String filePath,
-                                  String filePassword, boolean isHqDefault) {
+    public DefaultSSLProviderImpl(KeystoreConfig keystoreConfig,
+                                  boolean acceptUnverifiedCertificates ) {
         if (log.isDebugEnabled()) {
-            log.debug("Keystore info: alias=" + alias + ", acceptUnverifiedCertificates=" + acceptUnverifiedCertificates);
+            log.debug("Keystore info: alias=" + keystoreConfig.getAlias() +
+                      ", acceptUnverifiedCertificates=" + acceptUnverifiedCertificates);
         }
         final boolean debug = log.isDebugEnabled();
         final StopWatch watch = new StopWatch();
         try {
             KeystoreManager keystoreMgr = KeystoreManager.getKeystoreManager();
-            KeyStore trustStore = keystoreMgr.getKeyStore(dname, alias, filePath, filePassword, isHqDefault);
-            KeyManagerFactory keyManagerFactory = getKeyManagerFactory(trustStore, filePassword);
+            KeyStore trustStore = keystoreMgr.getKeyStore(keystoreConfig);
+            KeyManagerFactory keyManagerFactory = getKeyManagerFactory(trustStore, keystoreConfig.getFilePassword());
             TrustManagerFactory trustManagerFactory = getTrustManagerFactory(trustStore);
             X509TrustManager defaultTrustManager = (X509TrustManager) trustManagerFactory.getTrustManagers()[0];
             X509TrustManager customTrustManager =
-                keystoreMgr.getCustomTrustManager(defaultTrustManager, alias, filePath, filePassword,
+                keystoreMgr.getCustomTrustManager(defaultTrustManager, keystoreConfig,
                                                   acceptUnverifiedCertificates, trustStore);
             sslContext = SSLContext.getInstance("TLS");
             sslContext.init(keyManagerFactory.getKeyManagers(),
@@ -115,11 +116,6 @@ public class DefaultSSLProviderImpl implements SSLProvider {
         } finally {
             if (debug) log.debug("readCert: " + watch);
         }
-    }
-            
-    public DefaultSSLProviderImpl(KeystoreConfig keystoreConfig, boolean acceptUnverifiedCertificates ) {
-        this(acceptUnverifiedCertificates, KeystoreManager.getDName(keystoreConfig), keystoreConfig.getAlias(),
-             keystoreConfig.getFilePath(), keystoreConfig.getFilePassword(), keystoreConfig.isHqDefault());
     }
     
     private X509HostnameVerifier getHostnameVerifier() {

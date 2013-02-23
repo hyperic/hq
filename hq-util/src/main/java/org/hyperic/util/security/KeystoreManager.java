@@ -52,63 +52,65 @@ import org.hyperic.util.timer.StopWatch;
 import org.springframework.util.StringUtils;
 
 public class KeystoreManager {
-    private static final Log log = LogFactory.getLog(KeystoreManager.class);
+    private final Log log;
     private final AtomicBoolean isDB = new AtomicBoolean(false);
     private static KeystoreManager keystoreManager= new KeystoreManager();
     
-    private KeystoreManager() {}
+    private KeystoreManager() {
+        this.log = LogFactory.getLog(KeystoreManager.class);
+    }
     
     public static KeystoreManager getKeystoreManager() {
         return keystoreManager;
     }
     
-    public static String getDName(KeystoreConfig keystoreConfig) {
+    private String getDName(KeystoreConfig keystoreConfig) {
         return "CN=" + keystoreConfig.getKeyCN()+
                " (HQ Self-Signed Cert), OU=HQ, O=hyperic.net, L=Unknown, ST=Unknown, C=US";
     }
     
     public KeyStore getKeyStore(KeystoreConfig keystoreConfig) throws KeyStoreException, IOException {
+        FileInputStream keyStoreFileInputStream = null;
+        
         String filePath = keystoreConfig.getFilePath();
         String filePassword = keystoreConfig.getFilePassword();
-        String alias = keystoreConfig.getAlias();
-        boolean isHqDefault = keystoreConfig.isHqDefault();
-        String dname = getDName(keystoreConfig);
-        return getKeyStore(dname, alias, filePath, filePassword, isHqDefault);
-    }
-
-    public KeyStore getKeyStore(String dname, String alias, String filePath, String filePassword, boolean isHqDefault)
-    throws KeyStoreException, IOException {
-        FileInputStream keyStoreFileInputStream = null;
+        
         //check if keystoreConfig valid (block if it's null or "")
         String errorMsg="";
-        if (alias == null){
+        if(keystoreConfig.getAlias()==null){
             errorMsg+=" alias is null. ";
         }
-        if (filePath == null){
+        if(keystoreConfig.getFilePath()==null){
             errorMsg+=" filePath is null. ";
         }
-        if (filePassword == null) {
+        if(keystoreConfig.getFilePassword()==null){
             errorMsg+=" password is null. ";
         }
-        if (!"".equals(errorMsg)){
+        if(!"".equals(errorMsg)){
             throw new KeyStoreException(errorMsg);
         }
+        
 	    try {
             KeyStore keystore = DbKeyStore.getInstance(KeyStore.getDefaultType(), isDB);
 	        File file = new File(filePath);
 	        char[] password = null;
+	            
 	        if (!file.exists()) {
 	        	// ...if file doesn't exist, and path was user specified throw IOException...
-	            if (StringUtils.hasText(filePath) && !isHqDefault) {
+	            if (StringUtils.hasText(filePath) && !keystoreConfig.isHqDefault()) {
 	            	throw new IOException("User specified keystore [" + filePath + "] does not exist.");
 	            }
+	                
 	            password = filePassword.toCharArray();
-	            createInternalKeystore(dname, alias, filePath, filePassword);	            
+	            createInternalKeystore(keystoreConfig);	            
 	            FileUtil.setReadWriteOnlyByOwner(file);          
 	        }
+	            
 	        // ...keystore exist, so init the file input stream...
 	        keyStoreFileInputStream = new FileInputStream(file);
+	            
 	        keystore.load(keyStoreFileInputStream, password);
+	
 	        return keystore;
 	    } catch (NoSuchAlgorithmException e) {
 	    	// can't check integrity of keystore, if this happens we're kind of screwed
@@ -129,19 +131,18 @@ public class KeystoreManager {
     }
 
 
-    private void createInternalKeystore(String dname, String alias, String filePath, String filePassword)
-    throws KeyStoreException{
+    private void createInternalKeystore(KeystoreConfig keystoreConfig) throws KeyStoreException{
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         String javaHome = System.getProperty("java.home");
         String keytool = javaHome + File.separator + "bin" + File.separator + "keytool";
         String[] args = {
             keytool,
             "-genkey",
-            "-dname",     dname,
-            "-alias",     alias,
-            "-keystore",  filePath,
-            "-storepass", filePassword,
-            "-keypass",   filePassword,
+            "-dname",    getDName(keystoreConfig),
+            "-alias",     keystoreConfig.getAlias(),
+            "-keystore",  keystoreConfig.getFilePath(),
+            "-storepass", keystoreConfig.getFilePassword(),
+            "-keypass",   keystoreConfig.getFilePassword(),
             "-keyalg",    "RSA",
             "-validity", "3650"  //10 years
         };
@@ -153,7 +154,8 @@ public class KeystoreManager {
         exec.setCommandline(args);
         
         //TODO shouldn't have password in log
-        log.debug("Generating keystore: " + filePath);
+        log.debug("Generating keystore: " +
+        		keystoreConfig.getFilePath());
 
         int rc;
         
@@ -171,45 +173,38 @@ public class KeystoreManager {
                 msg = "timeout after " + timeout + "ms";
             }
 
-            // TODO This is super fugly but considering how we're creating the keystore file, there isn't a clean way
-            //      of accomplishing this.
-            //      Basically, there is a small window of opportunity where two agent processes could discover no
-            //      keystore file and try to generate one using the ExceuteWatchdog.  One will succeed, the other
-            //      will fail, if that happens we shouldn't kill the process.  For any other exception throw it...
-            if (!msg.toLowerCase().contains("key pair not generated, alias <" + alias.toLowerCase() +
-                                            "> already exists")) {
+            // TODO This is super fugly but considering how we're creating the keystore file, there isn't a clean way of accomplishing this
+            //      Basically, there is a small window of opportunity where two agent processes could discover no keystore file and try to
+            //      generate one using the ExceuteWatchdog.  One will succeed, the other will fail, if that happens we shouldn't kill the process.  
+            //      For any other exception throw it...
+            if (!msg.toLowerCase().contains("key pair not generated, alias <" + keystoreConfig.getAlias().toLowerCase() + "> already exists")) {
             	//can't have password in log
-            	throw new KeyStoreException("Failed to create keystore:" + alias + ", " + msg);
+            	throw new KeyStoreException("Failed to create keystore:"+keystoreConfig.getAlias()+", "+msg);
             }
         } 
     }
 
     public X509TrustManager getCustomTrustManager(X509TrustManager defaultTrustManager,
-                                                  String alias, String filePath, String filePassword,
+                                                  KeystoreConfig keystoreConfig,
 										          boolean acceptUnverifiedCertificates,
 										          KeyStore trustStore) {
-        return new CustomTrustManager(defaultTrustManager, alias, filePath, filePassword,
+        return new CustomTrustManager(defaultTrustManager, keystoreConfig,
                                       acceptUnverifiedCertificates, trustStore, isDB.get());
     }
     
     private class CustomTrustManager implements X509TrustManager {
         private final Log log = LogFactory.getLog(X509TrustManager.class);
         private final X509TrustManager defaultTrustManager;
-//        private final KeystoreConfig keystoreConfig;
+        private final KeystoreConfig keystoreConfig;
         private final boolean acceptUnverifiedCertificates;
         private final KeyStore trustStore;
         private final boolean isDB;
-        private final String alias;
-        private final String filePassword;
-        private final String filePath;
         private CustomTrustManager(X509TrustManager defaultTrustManager,
-                                   String alias, String filePath, String filePassword,
+                                   KeystoreConfig keystoreConfig,
                                    boolean acceptUnverifiedCertificates,
                                    KeyStore trustStore, boolean isDB) {
             this.defaultTrustManager = defaultTrustManager;
-            this.alias = alias;
-            this.filePassword = filePassword;
-            this.filePath = filePath;
+            this.keystoreConfig = keystoreConfig;
             this.acceptUnverifiedCertificates = acceptUnverifiedCertificates;
             this.trustStore = trustStore;
             this.isDB = isDB;
@@ -233,9 +228,9 @@ public class KeystoreManager {
                     importCertificate(chain);
                 } else {
                     log.warn("Fail the connection because received certificate is not trusted by " +
-                             "keystore: alias=" + alias);
+                             "keystore: alias=" + keystoreConfig.getAlias());
                     log.debug("Fail the connection because received certificate is not trusted by " +
-                              "keystore: alias=" + alias +
+                              "keystore: alias=" + keystoreConfig.getAlias() +
                               ", acceptUnverifiedCertificates="+acceptUnverifiedCertificates,e);
                     throw new CertificateException(e);
                 }
@@ -268,12 +263,12 @@ public class KeystoreManager {
                     trustStore.setCertificateEntry(alias, cert);
                 }
                 if (!isDB) {
-                    ksFileOutputStream = new FileOutputStream(filePath);
-                    trustStore.store(ksFileOutputStream, filePassword.toCharArray());
+                    ksFileOutputStream = new FileOutputStream(keystoreConfig.getFilePath());
+                    trustStore.store(ksFileOutputStream, keystoreConfig.getFilePassword().toCharArray());
                 }
             } catch (FileNotFoundException e) {
                 // Can't find the keystore in the path
-                log.error("Can't find the keystore in " + filePath +
+                log.error("Can't find the keystore in " + keystoreConfig.getFilePath() +
                           ". Error message: " + e, e);
             } catch (NoSuchAlgorithmException e) {
                 log.error("The algorithm is not supported. Error message: " + e, e);
