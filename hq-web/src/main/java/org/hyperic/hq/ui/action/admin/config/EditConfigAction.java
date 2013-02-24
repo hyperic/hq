@@ -121,10 +121,8 @@ public class EditConfigAction
             MalformedURLException, PermissionException, CPropKeyNotFoundException, AppdefEntityNotFoundException {
         if (!vcManager.validateVCSettings(cForm.getvCenterURL(), cForm.getvCenterUser(), cForm.getvCenterPassword())) {
             cForm.resetVCenterValues();
-        }
-        else {
-            Map<VMID, Set<String>> uuidToMacsMap = vcManager.collect(subject, cForm.getvCenterURL(), cForm.getvCenterUser(), cForm.getvCenterPassword());
-            this.platformMgr.mapUUIDToPlatforms(subject, uuidToMacsMap);
+        }else {
+            vcManager.registerVC(cForm.getvCenterURL(), cForm.getvCenterUser(), cForm.getvCenterPassword());
         }
     }
 }

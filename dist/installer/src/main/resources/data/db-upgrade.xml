@@ -11962,17 +11962,15 @@ has already been defined.
 
 	<schemaSpec version="3.219" alwaysExecute="true">
         <schema-directSQL>
-            <statement targetDB="postgresql">
-               CREATE TABLE if not exists EAM_UUIDTable (
-                ID int4 NOT NULL PRIMARY KEY, 
-                version_col bigint DEFAULT 0 NOT NULL,
-            	 MAC_ADDRESS VARCHAR(64) NOT NULL UNIQUE, 
-            	 MOREF VARCHAR(64) NOT NULL,
-           	 	 VCUUID VARCHAR(128) NOT NULL
-               )
-            </statement>
-            <statement targetDB="postgresql">
-                create sequence EAM_VM_ID_SEQ start 1 increment 1
+            <statement targetDB="postgresql">            	
+            	CREATE TABLE if not exists EAM_VM_MAPPING(
+            	            	VCUUID VARCHAR(128) NOT NULL,
+            	            	MOREF VARCHAR(64) NOT NULL,
+            	            	MACS_ADDRESS VARCHAR(512) NOT NULL UNIQUE, 
+            	            	VM_NAME VARCHAR(128),
+            	            	version_col bigint DEFAULT 0 NOT NULL,
+            	            	PRIMARY KEY (VCUUID, MOREF)
+            	            	)
             </statement>
         </schema-directSQL>
 	</schemaSpec>
