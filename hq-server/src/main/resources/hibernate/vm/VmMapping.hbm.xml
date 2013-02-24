@@ -29,30 +29,36 @@
 
 <hibernate-mapping package="org.hyperic.hq.vm">
 
-  <class name="MacToUUID" table="EAM_UUIDTable">
+  <class name="VmMapping" table="EAM_VM_MAPPING">
+    
     <cache usage="read-write"/>
-    <id name="id" type="integer">
-      <column name="ID" not-null="true"/>
-      <generator class="org.hyperic.hibernate.id.ComboGenerator">
-        <param name="sequence">EAM_VM_ID_SEQ</param>
-      </generator>
-    </id>
+    
+    <composite-id> 
+	
+	<key-property name="MORef" type="string">
+			<column name="MOREF" not-null="true" length="64"/>
+   	 </key-property>
+            
+	<key-property name="vcUUID" type="string">
+			<column name="VCUUID" not-null="true" length="128"/>
+     </key-property>
+         
+	</composite-id>	
 
-    <version name="_version_" type="long">
+	<version name="_version_" type="long">
       <column name="VERSION_COL" default="0"/>
     </version>
-
-    <property name="mac" type="string">
-      <column name="MAC_ADDRESS" not-null="true" length="64" unique="true"/>
+	
+	 <property name="macs" type="string">
+    		 <column name="MACS_ADDRESS" not-null="true" length="512" unique="true"/>
     </property>
-
-    <property name="MORef" type="string">
-      <column name="MOREF" not-null="true" length="64"/>
+        
+	
+	<property name="name" type="string">
+		<column name="VM_NAME" not-null="false" length="128"/>
     </property>
-
-    <property name="vcUUID" type="string">
-      <column name="VCUUID" not-null="true" length="128"/>
-    </property>
+	
+	        
   </class>
 
 </hibernate-mapping>
