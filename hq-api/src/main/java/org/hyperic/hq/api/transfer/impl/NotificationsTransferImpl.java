@@ -34,7 +34,9 @@ public class NotificationsTransferImpl implements NotificationsTransfer {
     @Autowired
     protected MeasurementTransfer msmtTransfer;
     // will be replaced by the destinations the invokers of this API will pass when registering
-    protected Destination dummyDestination = new Destination() {};
+    protected Destination dummyDestination = new Destination() {
+        public int hashCode() {return super.hashCode();};
+    };
 
     @Transactional (readOnly=true)
     public NotificationsReport poll(ApiMessageContext apiMessageContext) throws UnregisteredException {
@@ -52,10 +54,10 @@ public class NotificationsTransferImpl implements NotificationsTransfer {
     
     @Transactional (readOnly=false)
     public void unregister() {
-        this.dest=null;
         this.q.unregister(dest);
         this.rscTransfer.unregister();
         this.msmtTransfer.unregister();
+        this.dest=null;
     }
     public Destination getDummyDestination() {
         return this.dummyDestination;

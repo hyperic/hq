@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.util.Date;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -66,11 +67,11 @@ public interface MetricService {
                     throws ParseException, PermissionException, SessionNotFoundException, SessionTimeoutException, ObjectNotFoundException, UnsupportedOperationException, SQLException;
 
     @POST
-    @Path("/register")
+    @Path("/registration")
     public RegistrationID register(final MetricFilterRequest metricFilterReq) throws SessionNotFoundException, SessionTimeoutException;
 
-    @PUT
-    @Path("/unregister")
+    @DELETE
+    @Path("/registration")
     @Descriptions({ 
         @Description(value = "unregister user session and all assigned filters this user destination has", target = DocTarget.METHOD)
     })

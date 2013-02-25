@@ -45,7 +45,9 @@ public abstract class BaseNotificationsZeventListener<E extends Zevent,N extends
         List<ObjectMessage> msgs = null;
         try {
             msgs = this.getEvaluator().evaluate(ns);
-            this.q.publish(msgs);
+            if (msgs!=null && !msgs.isEmpty()) {
+                this.q.publish(msgs);
+            }
         }catch(Throwable e) {
             log.error(e);
         }

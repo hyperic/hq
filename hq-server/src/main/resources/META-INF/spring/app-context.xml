@@ -107,6 +107,7 @@
                 <prop key="vfabric.licenseServer.url"></prop>
                 <prop key="vcops.license.key"></prop>
                 <prop key="vcloud.license.key"></prop>
+                <prop key="vc.sync.interval.minutes">2</prop>
 				<prop key="server.keystore.path">hyperic.keystore</prop>
 				<prop key="server.keystore.password">hyperic</prop>
 				<prop key="accept.unverified.certificates">false</prop>
@@ -243,6 +244,7 @@
 		class="org.springframework.beans.factory.config.PropertiesFactoryBean"
 		p:location="classpath:/tweak.properties" />
 
+
 	<bean id="securityProperties"
 		class="org.springframework.beans.factory.config.PropertiesFactoryBean">
 		<property name="properties">
@@ -250,6 +252,16 @@
 				<prop key="server.keystore.path">${server.keystore.path}</prop>
 				<prop key="server.keystore.password">${server.keystore.password}</prop>
 				<prop key="accept.unverified.certificates">${accept.unverified.certificates}</prop>
+			</props>
+		</property>	
+	</bean>
+	
+	
+	<bean id="VCProperties"
+		class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+		<property name="properties">
+			<props>
+				<prop key="vc.sync.interval.minutes">${vc.sync.interval.minutes}</prop>
 			</props>
 		</property>	
 	</bean>

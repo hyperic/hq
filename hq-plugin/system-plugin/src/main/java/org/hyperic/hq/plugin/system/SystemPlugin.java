@@ -280,7 +280,7 @@ public class SystemPlugin extends ProductPlugin {
         { "defaultGateway", "Default Gateway" },
         { HQConstants.MOREF, "MOREF" },
         { HQConstants.VCUUID, "VCenter UUID" },
-    };
+        };
 
     private static final String[][] NETIF_CPROPS = {
         { "mtu", "Maximum Transmission Unit" },

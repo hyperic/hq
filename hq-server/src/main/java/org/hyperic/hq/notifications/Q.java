@@ -36,8 +36,15 @@ public class Q {
     }
     
     public void unregister(Destination dest) {
-        AccumulatedRegistrationData ard = this.destinations.remove(dest);
-        if (log.isDebugEnabled()) { log.debug(ard==null?"there is no queue assigned for destination ":"removing the queue assigned for destination " + dest); }
+        if (dest==null) {
+            return;
+        }
+        if (this.destinations.containsKey(dest)) {
+            this.destinations.remove(dest);
+            if (log.isDebugEnabled()) { log.debug("removing the queue assigned for destination " + dest); }
+        } else {
+            if (log.isDebugEnabled()) { log.debug("there is no queue assigned for destination "); }
+        }
     }
 
     public InternalNotificationReport poll(Destination dest) {

@@ -49,4 +49,8 @@ public class ResourceContentFilter extends Filter<ResourceChangedContentNotifica
         }
         return filteredResourceChangedContentNotification;
     }
+    @Override
+    protected Class<? extends ResourceChangedContentNotification> getHandledNotificationClass() {
+        return ResourceChangedContentNotification.class;
+    }
 }

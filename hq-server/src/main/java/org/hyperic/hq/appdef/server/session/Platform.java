@@ -72,6 +72,10 @@ public class Platform extends PlatformBase
     public String getCommentText() {
         return _commentText;
     }
+    @Override
+    public void setName(String name) {
+        super.setName(name);
+    }
 
     void setCommentText(String comment) {
         _commentText = comment;

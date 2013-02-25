@@ -1623,12 +1623,15 @@ public class PlatformManagerImpl implements PlatformManager {
                     }
 
                     getAIQueueManager().queue(subject, aiPlatform, false, false, true);
+
                 } else if (!plat.getAgent().equals(existing.getAgent())) {
                     // Need to enqueue the ResourceUpdatedZevent if the
                     // agent changed to get the metrics scheduled
                     resourceManager.resourceHierarchyUpdated(subject, Collections.singletonList(plat.getResource()));
                 }
             }
+            Resource r = plat.getResource();
+            this.zeventManager.enqueueEventAfterCommit(new ResourceContentChangedEvent(r.getId(),existing.getName(), null, null));
             platformDAO.updatePlatform(plat, existing);
             return plat;
         }

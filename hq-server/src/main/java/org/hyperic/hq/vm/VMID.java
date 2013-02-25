@@ -8,18 +8,23 @@ public class VMID {
         this.moref = moref;
         this.vcUUID = vcUUID;
     }
+
     public String getMoref() {
         return moref;
     }
+    
     public void setMoref(String moref) {
         this.moref = moref;
     }
+    
     public String getVcUUID() {
         return vcUUID;
     }
+    
     public void setVcUUID(String vcUUID) {
         this.vcUUID = vcUUID;
     }
+    
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -28,6 +33,7 @@ public class VMID {
         result = prime * result + ((vcUUID == null) ? 0 : vcUUID.hashCode());
         return result;
     }
+    
     @Override
     public boolean equals(Object obj) {
         if(this == obj) return true;
@@ -41,5 +47,11 @@ public class VMID {
             if(other.vcUUID != null) return false;
         }else if(!vcUUID.equals(other.vcUUID)) return false;
         return true;
+    }
+    
+    
+    @Override
+    public String toString() {
+        return "VMID [moref=" + moref + ", vcUUID=" + vcUUID + "]";
     }
 }

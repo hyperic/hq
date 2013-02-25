@@ -104,7 +104,7 @@ public abstract class DestinationEvaluator<N extends BaseNotification> {
         for(Entry<Destination,FilterChain<N>> destToFilterE:destToFilterESet) {
             FilterChain<N> filterChain = destToFilterE.getValue();
             Collection<N> filteredEntities = ((Collection<N>) filterChain.filter(entities));
-            if (filteredEntities!=null) {
+            if (filteredEntities!=null && !filteredEntities.isEmpty()) {
                 ObjectMessage msg = new DummyMsg();
                 Destination dest = destToFilterE.getKey();
                 msg.setJMSDestination(dest);
