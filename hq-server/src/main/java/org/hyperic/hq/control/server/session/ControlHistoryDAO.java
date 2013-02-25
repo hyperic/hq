@@ -42,6 +42,7 @@ import org.hyperic.util.jdbc.DBUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
 
 @Repository
 public class ControlHistoryDAO
@@ -160,6 +161,15 @@ public class ControlHistoryDAO
             frequencies.add(new ControlFrequency(id,(String)row.get("action"),((Number) row.get("num")).longValue()));
         }
         return frequencies;
+    }
+    
+    public void removeControlHistory(Collection<ControlHistory> controlsHistory) {
+        if (controlsHistory == null || controlsHistory.size() == 0) {
+            return;
+        }
+        final String hql = new StringBuilder().append(
+                "delete from ControlHistory where controlHistory in (:controlsHistory)").toString();
+            getSession().createQuery(hql).setParameterList("controlsHistory", controlsHistory).executeUpdate();
     }
 
     private Criteria createFindByEntity(int type, int id) {
