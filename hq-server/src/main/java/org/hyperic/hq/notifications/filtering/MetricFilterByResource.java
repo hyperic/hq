@@ -7,9 +7,13 @@ import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.notifications.model.MetricNotification;
 
 public class MetricFilterByResource<C extends ResourceFilteringCondition<Resource>> extends Filter<MetricNotification,C> {
+    private static final long serialVersionUID = 4732695338821377227L;
     private MeasurementManager measurementManager;
     protected ResourceManager resourceManager;
     
+    public MetricFilterByResource() {
+        super(null);
+    }
     public MetricFilterByResource(final MeasurementManager measurementManager, ResourceManager resourceManager, C cond) {
         super(cond);
         this.measurementManager=measurementManager;
@@ -27,5 +31,9 @@ public class MetricFilterByResource<C extends ResourceFilteringCondition<Resourc
     @Override
     protected Class<? extends MetricNotification> getHandledNotificationClass() {
         return MetricNotification.class;
+    }
+    @Override
+    protected String initFilterType() {
+        return "METRIC_FILTER_BY_RESOURCE";
     }
 }

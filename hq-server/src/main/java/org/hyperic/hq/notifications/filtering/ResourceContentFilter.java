@@ -9,13 +9,12 @@ import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.notifications.model.InternalResourceDetailsType;
 import org.hyperic.hq.notifications.model.ResourceChangedContentNotification;
 
-//@Entity
-//@Table(name="EAM_NOTIFICATIONS_CONTENT_FILTER")
-//@PrimaryKeyJoinColumn(name="FILTERID")
 public class ResourceContentFilter extends Filter<ResourceChangedContentNotification,FilteringCondition<?>> {
-//    @Column(name="RESOURCEDETAILSTYPE")
-//    @Enumerated(EnumType.STRING)  //TODO~ page 360 in hibernate PDF
+    private static final long serialVersionUID = 6609479947230529789L;
     protected InternalResourceDetailsType resourceDetailsType;
+    public ResourceContentFilter() {
+        super(null);
+    }
     
     public ResourceContentFilter(InternalResourceDetailsType internalResourceDetailsType) {
         super(null);
@@ -57,5 +56,15 @@ public class ResourceContentFilter extends Filter<ResourceChangedContentNotifica
     @Override
     protected Class<? extends ResourceChangedContentNotification> getHandledNotificationClass() {
         return ResourceChangedContentNotification.class;
+    }
+    @Override
+    protected String initFilterType() {
+        return "RESOURCE_CONTENT_FILTER";
+    }
+    public String getResourceDetailsType() {
+        return resourceDetailsType.toString();
+    }
+    public void setResourceDetailsType(String resourceDetailsType) {
+        this.resourceDetailsType = InternalResourceDetailsType.valueOf(resourceDetailsType);
     }
 }

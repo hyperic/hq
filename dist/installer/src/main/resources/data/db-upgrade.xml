@@ -11816,6 +11816,20 @@ has already been defined.
 	  	<user-password-upgrader encryption="EAM_PRINCIPAL.PASSWORD" strength="256" encodeHashAsBase64="true" />
 	</schemaSpec>
 
+	<schemaSpec version="3.219" >
+        <schema-directSQL>
+            <statement targetDB="postgresql">
+               CREATE TABLE if not exists EAM_NOTIFICATIONS_FILTER (
+                ID int4 NOT NULL PRIMARY KEY, 
+                version_col bigint DEFAULT 0 NOT NULL,
+            	FILTER_TYPE VARCHAR(8) NOT NULL
+               )
+            </statement>
+            <statement targetDB="postgresql">
+                create sequence EAM_FILTER_ID_SEQ start 1 increment 1
+            </statement>
+        </schema-directSQL>
+	</schemaSpec>
 </dbupgrade>
 </target>
 </project>

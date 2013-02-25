@@ -167,7 +167,9 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         
         return new RegistrationID(regID);
     }
+    
     public void unregister(Integer regID) {
+        registrationMgr.loadRegistrations();
         this.q.unregister(regID);
         this.registrationMgr.unregister(regID);
         this.isRegistered=false;

@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class RegistrationDAO extends HibernateDAO<xxxxxx>{
+public class RegistrationDAO {}/*extends HibernateDAO<xxxxxx>{
     protected final Log log = LogFactory.getLog(RegistrationDAO.class.getName());
 
     @Autowired
@@ -27,3 +27,4 @@ public class RegistrationDAO extends HibernateDAO<xxxxxx>{
     }
 
 }
+*/

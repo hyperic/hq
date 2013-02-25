@@ -3,6 +3,7 @@ package org.hyperic.hq.notifications.filtering;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.notifications.model.BaseNotification;
 /**
  * 
@@ -10,16 +11,17 @@ import org.hyperic.hq.notifications.model.BaseNotification;
  *
  * @param <N> defines the type of entities this filter handles
  */
-//@Entity
-//@Table(name="EAM_NOTIFICATIONS_FILTER")
-//@Inheritance(strategy=InheritanceType.JOINED)
-public abstract class Filter<N extends BaseNotification, C extends FilteringCondition<?>> {
-//    @Column(???)
+public abstract class Filter<N extends BaseNotification, C extends FilteringCondition<?>> extends PersistedObject {
+    //TODO~  change filterType to ENUM:
+    protected String filterType;
+    protected Integer regID;
     protected C cond;
     protected abstract Class<? extends N> getHandledNotificationClass();
-    
+    protected abstract String initFilterType();
+   
     public Filter(C cond) {
         this.cond=cond;
+        this.filterType = initFilterType();
     }
 
     public List<N> filter(List<N> notifications) {
@@ -57,5 +59,17 @@ public abstract class Filter<N extends BaseNotification, C extends FilteringCond
             return other.cond==null;
         }
         return this.cond.equals(other.cond);
+    }
+    protected String getFilterType() {
+        return this.filterType;
+    }
+    protected void setFilterType(String filterType) {
+        this.filterType=filterType;
+    }
+    public Integer getRegID() {
+        return regID;
+    }
+    public void setRegID(Integer regID) {
+        this.regID = regID;
     }
 }
