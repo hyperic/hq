@@ -32,24 +32,26 @@
     <cache usage="read-write"/>
     <id name="id" type="integer">
       <column name="ID" not-null="true"/>
-      <generator class="org.hyperic.hibernate.id.ComboGenerator">
+      <!--generator class="org.hyperic.hibernate.id.ComboGenerator">
         <param name="sequence">EAM_FILTER_COND_ID_SEQ</param>
-      </generator>
-      <!--generator class="foreign">
-      	<param name="property">filter</param>
       </generator-->
+      <generator class="foreign">
+      	<param name="property">filter</param>
+      </generator>
     </id>
+
+  	<discriminator column="FILTER_COND_TYPE" type="string"/>
 
     <version name="_version_" type="long">
       <column name="VERSION_COL" default="0"/>
     </version>
   	
-  	<discriminator column="FILTER_TYPE" type="string"/>
-    
+  	<one-to-one name="filter" class="org.hyperic.hq.notifications.filtering.Filter" constrained="true" foreign-key="none"/>
+  	
     <subclass name="MetricFilteringCondition" discriminator-value="METRIC_FILTER_COND">
     	<join table="EAM_NOTIFICATIONS_METRIC_FILTER_COND">
 		    <key on-delete="cascade" column="FILTER_COND_ID"/>
-		    <id name="id" type="integer">
+		    <!--id name="id" type="integer">
     		  	<column name="ID" not-null="true"/>
       			<generator class="org.hyperic.hibernate.id.ComboGenerator">
 	        		<param name="sequence">EAM_METRIC_FILTER_COND_ID_SEQ</param>
@@ -57,16 +59,16 @@
 	    	</id>
 		    <version name="_version_" type="long">
       			<column name="VERSION_COL" default="0"/>
-    		</version>
+    		</version-->
 			<property name="isIndicator" type="boolean">
     			<column name="IS_INDICATOR" not-null="true" />
     		</property>
     	</join>
     </subclass>
     <subclass name="ResourceFilteringCondition" discriminator-value="RESOURCE_FILTER_COND">
-    	<join table="EAM_NOTIFICATIONS_FILTER_COND">
+    	<join table="EAM_NOTIFICATIONS_RESOURCE_FILTER_COND">
 		    <key on-delete="cascade" column="FILTER_COND_ID"/>
-		    <id name="id" type="integer">
+		    <!--id name="id" type="integer">
     		  	<column name="ID" not-null="true"/>
       			<generator class="org.hyperic.hibernate.id.ComboGenerator">
 	        		<param name="sequence">EAM_RESOURCE_FILTER_COND_ID_SEQ</param>
@@ -74,7 +76,7 @@
 	    	</id>
 		    <version name="_version_" type="long">
       			<column name="VERSION_COL" default="0"/>
-    		</version>
+    		</version-->
 	    	<property name="name" type="string">
     			<column name="NAME" not-null="true" length="64" unique="false"/>
     		</property>

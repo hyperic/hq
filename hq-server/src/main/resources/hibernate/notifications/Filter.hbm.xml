@@ -48,6 +48,8 @@
       <column name="REGISTRATION_ID" not-null="true" unique="false"/>
     </property>
 
+    <one-to-one name="cond" class="org.hyperic.hq.notifications.filtering.FilteringCondition"/>
+
     <subclass name="MetricFilter" discriminator-value="METRIC_FILTER">
     </subclass>
     <subclass name="MetricFilterByResource" discriminator-value="METRIC_FILTER_BY_RESOURCE">
@@ -55,21 +57,10 @@
     <subclass name="ResourceContentFilter" discriminator-value="RESOURCE_CONTENT_FILTER">
     	<join table="EAM_NOTIFICATIONS_CONTENT_FILTER">
 		    <key on-delete="cascade" column="FILTER_ID"/>
-		    <id name="id" type="integer">
-    		  	<column name="ID" not-null="true"/>
-      			<generator class="org.hyperic.hibernate.id.ComboGenerator">
-	        		<param name="sequence">EAM_CONTENT_FILTER_ID_SEQ</param>
-    	  		</generator>
-	    	</id>
-		    <version name="_version_" type="long">
-      			<column name="VERSION_COL" default="0"/>
-    		</version>
 	        <property name="resourceDetailsType" type="string">
     			<column name="RESOURCE_DETAILS_TYPE" not-null="true" length="8" unique="false"/>
     		</property>
     	</join>
     </subclass>
-    <one-to-one name="cond" class="org.hyperic.hq.notifications.filtering.FilteringCondition" column="COND_ID" unique="true" not-null="false"/>
   </class>
-
 </hibernate-mapping>
