@@ -536,9 +536,6 @@ public class ControlManagerImpl implements ControlManager {
 
         Collection<ControlHistory> controlsHistory = controlHistoryDao.findByEntity(id.getType(), id.getID());
         controlHistoryDao.removeControlHistory(controlsHistory);
-//        for (ControlHistory control : controlsHistory) {
-//            controlHistoryDao.remove(control);
-//        }
     }
 
     /**
