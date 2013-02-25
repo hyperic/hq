@@ -98,6 +98,8 @@
     <bean name="pluginServiceImpl" class="org.hyperic.hq.api.services.impl.PluginServiceImpl" />		
 	
 	<bean name="sessionManagementImpl" class="org.hyperic.hq.api.services.impl.SessionManagementServiceImpl" />
+
+    <bean name="adminServiceImpl" class="org.hyperic.hq.api.services.impl.AdminServiceImpl" />
 	
 	<jaxrs:server id="resourceService" address="/resource">
 		<jaxrs:serviceBeans>
@@ -164,5 +166,18 @@
             <cxf:logging />
         </jaxrs:features>        
     </jaxrs:server>
-    
+
+    <jaxrs:server id="adminService" address="/admin">
+        <jaxrs:serviceBeans>
+            <ref bean="adminServiceImpl" />
+        </jaxrs:serviceBeans>
+        <jaxrs:providers>
+            <ref bean="jaxbProvider" />
+            <ref bean="jsonProvider" />
+        </jaxrs:providers>
+        <jaxrs:features>
+            <cxf:logging />
+        </jaxrs:features>
+    </jaxrs:server>
+
 </beans>
