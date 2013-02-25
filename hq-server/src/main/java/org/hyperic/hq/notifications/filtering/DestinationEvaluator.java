@@ -3,9 +3,11 @@ package org.hyperic.hq.notifications.filtering;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -119,6 +121,16 @@ public abstract class DestinationEvaluator<N extends BaseNotification> {
                     rtn.put(endpoint, list);
                 }
                 list.addAll(filteredEntities);
+            }
+        }
+        Set<N> set = new HashSet<N>();
+        for (Entry<NotificationEndpoint, Collection<N>> entry : rtn.entrySet()) {
+            Collection<N> values = entry.getValue();
+            for (N v : values) {
+                boolean added = set.add(v);
+                if (!added) {
+                    log.debug(v);
+                }
             }
         }
         return rtn;

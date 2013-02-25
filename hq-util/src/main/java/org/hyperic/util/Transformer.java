@@ -22,17 +22,45 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-package org.hyperic.hq.api.transfer;
+package org.hyperic.util;
 
-import org.hyperic.hq.api.model.NotificationsReport;
-import org.hyperic.hq.api.services.impl.ApiMessageContext;
-import org.hyperic.hq.notifications.NotificationEndpoint;
-import org.hyperic.hq.notifications.UnregisteredException;
-import org.hyperic.hq.notifications.model.InternalResourceDetailsType;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-public interface NotificationsTransfer {
-    public NotificationsReport poll(long id, ApiMessageContext apiMessageContext) throws UnregisteredException;
-    public void unregister(long id);
-    public void register(NotificationEndpoint endpoint, InternalResourceDetailsType type, int authzSubjectId);
-    public void register(NotificationEndpoint endpoint, int authzSubjectId);
+public abstract class Transformer<T, R> {
+
+    public Set<R> transformToSet(Collection<T> c) {
+        if (c == null || c.isEmpty()) {
+            return Collections.emptySet();
+        }
+        final Set<R> rtn = new HashSet<R>();
+        for (T obj : c) {
+            R t = transform(obj);
+            if (t != null) {
+                rtn.add(t);
+            }
+        }
+        return rtn;
+    }
+
+    public List<R> transform(Collection<T> c) {
+        if (c == null || c.isEmpty()) {
+            return Collections.emptyList();
+        }
+        final List<R> rtn = new ArrayList<R>(c.size());
+        for (T obj : c) {
+            R t = transform(obj);
+            if (t != null) {
+                rtn.add(t);
+            }
+        }
+        return rtn;
+    }
+
+    public abstract R transform(T obj);
+
 }

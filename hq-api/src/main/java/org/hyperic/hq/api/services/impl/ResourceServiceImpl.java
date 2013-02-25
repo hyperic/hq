@@ -46,13 +46,16 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.ObjectNotFoundException;
+import org.hyperic.hq.notifications.EndpointQueue;
+import org.hyperic.hq.notifications.NotificationEndpoint;
 import org.springframework.beans.factory.annotation.Autowired;
 
-//@Component
-public class ResourceServiceImpl extends RestApiService implements ResourceService{
+public class ResourceServiceImpl extends RestApiService implements ResourceService {
 	
 	@Autowired
-	private ResourceTransfer resourceTransfer ; 
+	private ResourceTransfer resourceTransfer;
+	@Autowired
+	private EndpointQueue endpointQueue;
 	
 	
 	public final Resource getResource(final String platformNaturalID, final ResourceType resourceType, final ResourceStatusType resourceStatusType, 
@@ -116,7 +119,8 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
 		throw new UnsupportedOperationException() ; 
 	}//EOM 
 	
-	public void unregister(RegistrationID id) throws SessionNotFoundException, SessionTimeoutException {
-	    resourceTransfer.unregister(id);
+	public void unregister(Long registrationId) throws SessionNotFoundException, SessionTimeoutException {
+	    NotificationEndpoint endpoint = endpointQueue.getEndpoint(registrationId);
+	    resourceTransfer.unregister(endpoint);
 	}
 }//EOC 

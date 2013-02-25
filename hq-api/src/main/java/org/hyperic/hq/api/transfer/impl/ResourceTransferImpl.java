@@ -1,4 +1,3 @@
-/* **********************************************************************
 /*
  * NOTE: This copyright does *not* cover user programs that use Hyperic
  * program services by normal system calls through the application
@@ -81,7 +80,6 @@ import org.hyperic.hq.common.ObjectNotFoundException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.notifications.DefaultEndpoint;
-import org.hyperic.hq.notifications.EndpointQueue;
 import org.hyperic.hq.notifications.NotificationEndpoint;
 import org.hyperic.hq.notifications.filtering.Filter;
 import org.hyperic.hq.notifications.filtering.FilteringCondition;
@@ -113,7 +111,6 @@ public class ResourceTransferImpl implements ResourceTransfer {
 	private ExceptionToErrorCodeMapper errorHandler ;
     private ResourceDestinationEvaluator evaluator;
     private ConfigBoss configBoss;
-    private EndpointQueue endpointQueue;
     protected NotificationsTransfer notificationsTransfer;
     protected boolean isRegistered = false;
     private static final String RESOURCE_URL = "%sresource/%s/monitor/Visibility.do?mode=currentHealth&eid=%d:%d";
@@ -121,7 +118,7 @@ public class ResourceTransferImpl implements ResourceTransfer {
     public ResourceTransferImpl(ResourceManager resourceManager, ResourceMapper resourceMapper,
                                 ProductBoss productBoss, CPropManager cpropManager, AppdefBoss appdepBoss, 
                                 PlatformManager platformManager, ExceptionToErrorCodeMapper errorHandler,
-                                ResourceDestinationEvaluator evaluator, ConfigBoss configBoss, EndpointQueue endpointQueue) {
+                                ResourceDestinationEvaluator evaluator, ConfigBoss configBoss) {
     	this.resourceManager = resourceManager ;
     	this.resourceMapper = resourceMapper ; 
     	this.productBoss = productBoss ; 
@@ -131,7 +128,6 @@ public class ResourceTransferImpl implements ResourceTransfer {
     	this.errorHandler = errorHandler ; 
     	this.evaluator = evaluator;
         this.configBoss = configBoss;
-    	this.endpointQueue = endpointQueue;
     }//EOM
 
     @PostConstruct
@@ -607,24 +603,30 @@ public class ResourceTransferImpl implements ResourceTransfer {
 	}//EO inner class Context 
 
 	@Transactional (readOnly=true)
-    public RegisteredResourceBatchResponse getResources(ApiMessageContext messageContext, ResourceDetailsType responseMetadata, final int hierarchyDepth, 
-            final boolean register,final ResourceFilterRequest resourceFilterRequest) throws PermissionException, NotFoundException {
+    public RegisteredResourceBatchResponse getResources(ApiMessageContext messageContext,
+                                                        ResourceDetailsType responseMetadata,
+                                                        int hierarchyDepth, boolean register,
+                                                        ResourceFilterRequest resourceFilterRequest)
+    throws PermissionException, NotFoundException {
         if (resourceFilterRequest==null) {
             if (log.isDebugEnabled()) {
                 log.debug("illegal request");
             }
-            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.BAD_REQ_BODY);
+            throw errorHandler.newWebApplicationException(
+                new Throwable(), Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.BAD_REQ_BODY);
         }
         AuthzSubject authzSubject = messageContext.getAuthzSubject();
-        final RegisteredResourceBatchResponse res = new RegisteredResourceBatchResponse(this.errorHandler) ; 
+        final RegisteredResourceBatchResponse res = new RegisteredResourceBatchResponse(errorHandler);
         List<Resource> resources = new ArrayList<Resource>();
         PageList<PlatformValue> platforms = this.platformManager.getAllPlatforms(authzSubject, PageControl.PAGE_ALL);
         for(PlatformValue pv:platforms) {
             try {
                 String fqdn = pv.getFqdn();
-                Resource r = this.getResourceInner(new Context(authzSubject, fqdn, ResourceType.PLATFORM, new ResourceDetailsType[] {responseMetadata}, this), hierarchyDepth) ;  
+                final ResourceDetailsType[] array = new ResourceDetailsType[] {responseMetadata};
+                final Context context = new Context(authzSubject, fqdn, ResourceType.PLATFORM, array, this);
+                final Resource r = getResourceInner(context, hierarchyDepth);
                 resources.add(r);
-            } catch (Throwable t) {
+            } catch (ObjectNotFoundException e) {
 //TODO~                res.addFailedResource(resourceID, errorCode, additionalDescription, args)
             }
         }
@@ -632,16 +634,19 @@ public class ResourceTransferImpl implements ResourceTransfer {
         if (register) {
             // not allowing sequential registrations
             if (this.isRegistered) {
-                throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.SEQUENTIAL_REGISTRATION);
+                throw errorHandler.newWebApplicationException(
+                    new Throwable(), Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.SEQUENTIAL_REGISTRATION);
             }
             this.isRegistered=true;
-            List<Filter<InventoryNotification,? extends FilteringCondition<?>>> userFilters = this.resourceMapper.toResourceFilters(resourceFilterRequest, responseMetadata); 
+            List<Filter<InventoryNotification,? extends FilteringCondition<?>>> userFilters = 
+                resourceMapper.toResourceFilters(resourceFilterRequest, responseMetadata); 
 
 //TODO~ get the destination from the user
 //            Destination dest = this.notificationsTransfer.getDummyDestination();
             RegistrationID registrationID = new RegistrationID();
             final NotificationEndpoint endpoint = new DefaultEndpoint(registrationID.getId());
-            endpointQueue.register(endpoint, ResourceDetailsType.valueOf(responseMetadata));
+            final Integer authzSubjectId = authzSubject.getId();
+            notificationsTransfer.register(endpoint, ResourceDetailsType.valueOf(responseMetadata), authzSubjectId);
             evaluator.register(endpoint, userFilters);
             //TODO~ return a valid registration id
             res.setRegId(registrationID);
@@ -649,8 +654,7 @@ public class ResourceTransferImpl implements ResourceTransfer {
         return res;
     }
 
-    public void unregister(RegistrationID id) {
-        NotificationEndpoint endpoint = endpointQueue.unregister(id.getId());
+    public void unregister(NotificationEndpoint endpoint) {
         evaluator.unregisterAll(endpoint);
         isRegistered=false;
     }
