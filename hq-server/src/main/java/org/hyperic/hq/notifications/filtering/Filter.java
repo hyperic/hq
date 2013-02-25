@@ -13,15 +13,15 @@ import org.hyperic.hq.notifications.model.BaseNotification;
  */
 public abstract class Filter<N extends BaseNotification, C extends FilteringCondition<?>> extends PersistedObject {
     //TODO~  change filterType to ENUM:
-    protected String filterType;
+//    protected String filterType;
     protected Integer regID;
     protected C cond;
     protected abstract Class<? extends N> getHandledNotificationClass();
-    protected abstract String initFilterType();
+//    protected abstract String initFilterType();
    
     public Filter(C cond) {
         this.cond=cond;
-        this.filterType = initFilterType();
+//        this.filterType = initFilterType();
     }
 
     public List<N> filter(List<N> notifications) {
@@ -60,12 +60,12 @@ public abstract class Filter<N extends BaseNotification, C extends FilteringCond
         }
         return this.cond.equals(other.cond);
     }
-    protected String getFilterType() {
-        return this.filterType;
-    }
-    protected void setFilterType(String filterType) {
-        this.filterType=filterType;
-    }
+//    protected String getFilterType() {
+//        return this.filterType;
+//    }
+//    protected void setFilterType(String filterType) {
+//        this.filterType=filterType;
+//    }
     public Integer getRegID() {
         return regID;
     }

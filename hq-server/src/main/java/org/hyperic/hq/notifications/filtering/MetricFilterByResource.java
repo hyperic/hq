@@ -32,8 +32,8 @@ public class MetricFilterByResource<C extends ResourceFilteringCondition<Resourc
     protected Class<? extends MetricNotification> getHandledNotificationClass() {
         return MetricNotification.class;
     }
-    @Override
-    protected String initFilterType() {
-        return "METRIC_FILTER_BY_RESOURCE";
-    }
+//    @Override
+//    protected String initFilterType() {
+//        return "METRIC_FILTER_BY_RESOURCE";
+//    }
 }

@@ -31,8 +31,8 @@ public class MetricFilter<C extends FilteringCondition<Measurement>> extends Fil
         return MetricNotification.class;
     }
 
-    @Override
-    protected String initFilterType() {
-        return "METRIC_FILTER";
-    }
+//    @Override
+//    protected String initFilterType() {
+//        return "METRIC_FILTER";
+//    }
 }

@@ -11822,11 +11822,64 @@ has already been defined.
                CREATE TABLE if not exists EAM_NOTIFICATIONS_FILTER (
                 ID int4 NOT NULL PRIMARY KEY, 
                 version_col bigint DEFAULT 0 NOT NULL,
-            	FILTER_TYPE VARCHAR(8) NOT NULL
+            	REGISTRATION_ID bigint NOT NULL,
+            	FILTER_TYPE VARCHAR(8) NOT NULL,
+            	COND_ID integer,
+                CONSTRAINT COND_FK_STAT FOREIGN KEY (COND_ID)
+                  REFERENCES EAM_NOTIFICATIONS_FILTER_COND(ID) ON DELETE CASCADE
                )
             </statement>
             <statement targetDB="postgresql">
                 create sequence EAM_FILTER_ID_SEQ start 1 increment 1
+            </statement>
+            <statement targetDB="postgresql">
+               CREATE TABLE if not exists EAM_NOTIFICATIONS_CONTENT_FILTER (
+                ID int4 NOT NULL PRIMARY KEY, 
+                version_col bigint DEFAULT 0 NOT NULL,
+            	RESOURCE_DETAILS_TYPE VARCHAR(8) NOT NULL,
+            	FILTER_ID integer,
+                CONSTRAINT FILTER_FK_STAT FOREIGN KEY (FILTER_ID)
+                  REFERENCES EAM_NOTIFICATIONS_FILTER(ID) ON DELETE CASCADE
+               )
+            </statement>
+            <statement targetDB="postgresql">
+                create sequence EAM_CONTENT_FILTER_ID_SEQ start 1 increment 1
+            </statement>
+            <statement targetDB="postgresql">
+               CREATE TABLE if not exists EAM_NOTIFICATIONS_FILTER_COND (
+                ID int4 NOT NULL PRIMARY KEY, 
+                version_col bigint DEFAULT 0 NOT NULL,
+            	FILTER_TYPE VARCHAR(8) NOT NULL
+               )
+            </statement>
+            <statement targetDB="postgresql">
+                create sequence EAM_FILTER_COND_ID_SEQ start 1 increment 1
+            </statement>
+            <statement targetDB="postgresql">
+               CREATE TABLE if not exists EAM_NOTIFICATIONS_METRIC_FILTER_COND (
+                ID int4 NOT NULL PRIMARY KEY, 
+                version_col bigint DEFAULT 0 NOT NULL,
+            	IS_INDICATOR boolean NOT NULL,
+            	FILTER_COND_ID integer,
+                CONSTRAINT FILTER_COND_FK_STAT FOREIGN KEY (FILTER_COND_ID)
+                  REFERENCES EAM_NOTIFICATIONS_FILTER(ID) ON DELETE CASCADE
+               )
+            </statement>
+            <statement targetDB="postgresql">
+                create sequence EAM_METRIC_FILTER_COND_ID_SEQ start 1 increment 1
+            </statement>
+            <statement targetDB="postgresql">
+               CREATE TABLE if not exists EAM_NOTIFICATIONS_FILTER_COND (
+                ID int4 NOT NULL PRIMARY KEY, 
+                version_col bigint DEFAULT 0 NOT NULL,
+            	NAME VARCHAR(64) NOT NULL,
+            	FILTER_COND_ID integer,
+                CONSTRAINT FILTER_COND_FK_STAT FOREIGN KEY (FILTER_COND_ID)
+                  REFERENCES EAM_NOTIFICATIONS_FILTER(ID) ON DELETE CASCADE
+               )
+            </statement>
+            <statement targetDB="postgresql">
+                create sequence EAM_RESOURCE_FILTER_COND_ID_SEQ start 1 increment 1
             </statement>
         </schema-directSQL>
 	</schemaSpec>

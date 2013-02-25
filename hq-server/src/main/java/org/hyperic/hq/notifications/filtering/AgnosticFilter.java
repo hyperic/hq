@@ -19,8 +19,8 @@ public class AgnosticFilter<C extends FilteringCondition<?>> extends Filter<Base
         return BaseNotification.class;
     }
 
-    @Override
-    protected String initFilterType() {
-        return "AGNOSTIC_FILTER";
-    }
+//    @Override
+//    protected String initFilterType() {
+//        return "AGNOSTIC_FILTER";
+//    }
 }

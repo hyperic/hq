@@ -3,6 +3,7 @@ package org.hyperic.hq.notifications.filtering;
 import org.hyperic.hq.authz.server.session.Resource;
 
 public class ResourceFilteringCondition<E extends Resource> extends FilteringCondition<E> {
+    private static final long serialVersionUID = -5997495104479558294L;
     protected String name;
     public ResourceFilteringCondition(String name) {
         super();
@@ -30,5 +31,11 @@ public class ResourceFilteringCondition<E extends Resource> extends FilteringCon
     public boolean check(E rsc) {
         String name = rsc.getName();
         return name.equals(this.name);
+    }
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
     }
 }

@@ -4,6 +4,7 @@ import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 
 public class MetricFilteringCondition extends FilteringCondition<Measurement> {
+    private static final long serialVersionUID = -240096224020845721L;
     protected Boolean isIndicator = null;
 
     @Override

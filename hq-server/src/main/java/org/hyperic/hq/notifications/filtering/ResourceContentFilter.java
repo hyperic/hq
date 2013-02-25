@@ -57,10 +57,10 @@ public class ResourceContentFilter extends Filter<ResourceChangedContentNotifica
     protected Class<? extends ResourceChangedContentNotification> getHandledNotificationClass() {
         return ResourceChangedContentNotification.class;
     }
-    @Override
-    protected String initFilterType() {
-        return "RESOURCE_CONTENT_FILTER";
-    }
+//    @Override
+//    protected String initFilterType() {
+//        return "RESOURCE_CONTENT_FILTER";
+//    }
     public String getResourceDetailsType() {
         return resourceDetailsType.toString();
     }
