@@ -614,7 +614,7 @@ start() {
     if [ "X$pid" = "X" ]
     then
         # delete the lock file
-        if [ -e /tmp/agent.encrypt.lock ]
+        if [ -f /tmp/agent.encrypt.lock ]
         then
             echo "Deleting existing props encryption lock file"
             rm /tmp/agent.encrypt.lock
