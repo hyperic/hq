@@ -48,7 +48,7 @@
       <column name="REGISTRATION_ID" not-null="true" unique="false"/>
     </property>
 
-    <one-to-one name="cond" class="org.hyperic.hq.notifications.filtering.FilteringCondition"/>
+    <one-to-one name="cond" class="org.hyperic.hq.notifications.filtering.FilteringCondition" cascade="save-update" constrained="true"/>
 
     <subclass name="MetricFilter" discriminator-value="METRIC_FILTER">
     </subclass>

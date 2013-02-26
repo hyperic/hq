@@ -118,6 +118,7 @@ public class MeasurementMapper {
         }
         ResourceFilteringCondition<Resource> cond = new ResourceFilteringCondition<Resource>(nameToCompareTo);
         MetricFilterByResource<ResourceFilteringCondition<Resource>> filter = new MetricFilterByResource<ResourceFilteringCondition<Resource>>(this.measurementMgr,this.resourceMgr,cond);
+        cond.setFilter(filter);
         return filter;
     }
     public MetricFilter<MetricFilteringCondition> toMetricFilter(final MetricFilterDefinition metricFilterDef) {
@@ -127,6 +128,7 @@ public class MeasurementMapper {
         Boolean isIndicator = metricFilterDef.getIsIndicator();
         MetricFilteringCondition cond = new MetricFilteringCondition(isIndicator);
         MetricFilter<MetricFilteringCondition> filter = new MetricFilter<MetricFilteringCondition>(this.measurementMgr,cond);
+        cond.setFilter(filter);
         return filter;
     }
     public List<Filter<? extends BaseNotification,? extends FilteringCondition<?>>> toMetricFilters(final MetricFilterRequest metricFilterReq) {

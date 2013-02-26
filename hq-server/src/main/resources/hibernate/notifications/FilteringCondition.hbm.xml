@@ -46,7 +46,7 @@
       <column name="VERSION_COL" default="0"/>
     </version>
   	
-  	<one-to-one name="filter" class="org.hyperic.hq.notifications.filtering.Filter" constrained="true" foreign-key="none"/>
+  	<one-to-one name="filter" class="org.hyperic.hq.notifications.filtering.Filter" foreign-key="none"/>
   	
     <subclass name="MetricFilteringCondition" discriminator-value="METRIC_FILTER_COND">
     	<join table="EAM_NOTIFICATIONS_METRIC_FILTER_COND">

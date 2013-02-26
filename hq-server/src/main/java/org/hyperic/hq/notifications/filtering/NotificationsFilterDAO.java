@@ -14,12 +14,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class NotificationsFilterDAO extends HibernateDAO<Filter>{
     protected final Log log = LogFactory.getLog(NotificationsFilterDAO.class.getName());
-    @Autowired
-    protected MetricFilterDAO metricFilterDAO;
-    @Autowired
-    protected MetricFilterByResourceDAO metricFilterByResourceDAO;
-    @Autowired
-    protected ResourceContentFilterDAO resourceContentFilterDAO;
 
     @Autowired
     protected NotificationsFilterDAO(SessionFactory f) {
@@ -29,13 +23,6 @@ public class NotificationsFilterDAO extends HibernateDAO<Filter>{
     public void save(List<? extends Filter<? extends BaseNotification, ? extends FilteringCondition<?>>> filters) {
         for(Filter<? extends BaseNotification, ? extends FilteringCondition<?>> filter:filters) {
             super.save(filter);
-//            if (filter instanceof MetricFilter) {
-//                this.metricFilterDAO.save((MetricFilter) filter);
-//            } else if (filter instanceof MetricFilterByResource) {
-//                this.metricFilterByResourceDAO.save((MetricFilterByResource) filter);
-//            } else if (filter instanceof ResourceContentFilter) {
-//                this.resourceContentFilterDAO.save((ResourceContentFilter) filter);
-//            }
         }
         getSession().flush();
     }

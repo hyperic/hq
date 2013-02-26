@@ -10,6 +10,7 @@ import org.hyperic.hq.notifications.model.BaseNotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import javax.annotation.PostConstruct;
 
 @Component
 public class RegistrationManagerImpl implements RegistrationManager {
@@ -18,7 +19,6 @@ public class RegistrationManagerImpl implements RegistrationManager {
     @Autowired
     protected NotificationsFilterDAO filterDAO;
 
-    
     @Transactional(readOnly=false)
     public Integer register(Class<? extends BaseNotification> entityType,
             List<? extends Filter<? extends BaseNotification, ? extends FilteringCondition<?>>> userFilters) {
@@ -37,9 +37,12 @@ public class RegistrationManagerImpl implements RegistrationManager {
         this.evaluator.unregister(regID);
     }
     
+    @PostConstruct
+    @Transactional(readOnly=true)
     public boolean loadRegistrations() {
         //TODO~ load user files and entityType from DB
-        List filters = this.filterDAO.findAll();
+        //TODO~ bind thread to hibernate session
+//        List filters = this.filterDAO.findAll();
 //        this.evaluator.register(regID,entityType,userFilters);
         return true;
     }

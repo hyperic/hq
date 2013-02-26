@@ -14,7 +14,8 @@ import org.hyperic.hq.notifications.model.BaseNotification;
 public abstract class Filter<N extends BaseNotification, C extends FilteringCondition<?>> extends PersistedObject {
     //TODO~  change filterType to ENUM:
 //    protected String filterType;
-    protected Integer regID;
+    //TODO~ remove regID and make it a one-to-many relation to new reg table
+    protected Long regID = new Long(5);
     protected C cond;
     protected abstract Class<? extends N> getHandledNotificationClass();
 //    protected abstract String initFilterType();
@@ -66,10 +67,18 @@ public abstract class Filter<N extends BaseNotification, C extends FilteringCond
 //    protected void setFilterType(String filterType) {
 //        this.filterType=filterType;
 //    }
-    public Integer getRegID() {
+    public Long getRegID() {
         return regID;
     }
-    public void setRegID(Integer regID) {
+    public void setRegID(Long regID) {
         this.regID = regID;
+    }
+
+    public C getCond() {
+        return cond;
+    }
+
+    public void setCond(C cond) {
+        this.cond = cond;
     }
 }
