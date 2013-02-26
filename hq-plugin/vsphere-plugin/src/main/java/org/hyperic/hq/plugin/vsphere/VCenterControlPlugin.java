@@ -32,6 +32,7 @@ public class VCenterControlPlugin extends ControlPlugin {
         String vmMoid = args[0];
         String eventType = args[1];
         String serviceName = args[2];
+        String policyName = args[3];
         
         VSphereUtil vim = null;
         try {
@@ -56,11 +57,18 @@ public class VCenterControlPlugin extends ControlPlugin {
         eventEx.setUserName("");
         eventEx.setVm(vmEventArgument);
         
-        final KeyAnyValue[] eventArgs = new KeyAnyValue[1];
+        final KeyAnyValue[] eventArgs = new KeyAnyValue[2];
         eventArgs[0] = new KeyAnyValue();
         eventArgs[0].setKey("serviceName");
         eventArgs[0].setValue(serviceName);
+       
+        eventArgs[1] = new KeyAnyValue();
+        eventArgs[1].setKey("policyName");
+        eventArgs[1].setValue(policyName);
+        
         eventEx.setArguments(eventArgs);
+        
+    
         
         try {
             eventManager.postEvent(eventEx, null);
