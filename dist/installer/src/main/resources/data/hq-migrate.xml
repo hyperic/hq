@@ -351,8 +351,8 @@
 		<!-- Create a Hibernate configuration file containing instructions to use the mapping metadata found in the 
 			target server's hq-server.jar -->  
 		<echo message="Creating hibernate.cfg.xml in ${server.artifacts.dir}/conf for source hbm.xml mappings" />
-		<property name="hibernate.configurations.file" value="${server.artifacts.dir}/conf/source-hibernate.cfg.xml" />
-		<echo file="${hibernate.configurations.file}"><![CDATA[<?xml version='1.0' encoding='utf-8'?>
+		<property name="create.hibernate.configurations.file" value="${server.artifacts.dir}/conf/source-hibernate.cfg.xml" />
+		<echo file="${create.hibernate.configurations.file}"><![CDATA[<?xml version='1.0' encoding='utf-8'?>
 <!DOCTYPE hibernate-configuration PUBLIC
 "-//Hibernate/Hibernate Configuration DTD//EN"
 "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
