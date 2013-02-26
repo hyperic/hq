@@ -66,8 +66,12 @@
 	<property name="hq.schema.statement.delimiter" value=";"/>
 	<property name="hq.schema.export" value="true"/>
 
-	<condition property="hibernate.configurations.file" value="${hibernate.configurations.file}" else="${install.dir}/data/hibernate.cfg.xml"> 
-	   <isset property="hibernate.configurations.file" />
+	<condition property="create.hibernate.configurations.file" value="${create.hibernate.configurations.file}" else="${install.dir}/data/hibernate.cfg.xml"> 
+	   <isset property="create.hibernate.configurations.file" />
+    </condition>
+    
+    <condition property="drop.hibernate.configurations.file" value="${drop.hibernate.configurations.file}" else="${install.dir}/data/hibernate.cfg.xml"> 
+	   <isset property="drop.hibernate.configurations.file" />
     </condition>
 
     <echoproperties destfile="${hibernate-properties-gen}" format="text">
@@ -99,7 +103,7 @@
       <classpath>
         <path refid="alljars"/>
       </classpath>
-      <configuration propertyFile="${hibernate-properties-gen}" configurationfile="${hibernate.configurations.file}" />
+      <configuration propertyFile="${hibernate-properties-gen}" configurationfile="${create.hibernate.configurations.file}" />
   
       <hbm2ddl
           destdir="${build.dir}/sql"
@@ -124,7 +128,7 @@
     	  <classpath>
 			<path refid="alljars"/>
 	      </classpath>
-	      <configuration propertyFile="${hibernate-properties-gen}" configurationfile="${hibernate.configurations.file}">
+	      <configuration propertyFile="${hibernate-properties-gen}" configurationfile="${drop.hibernate.configurations.file}">
       </configuration>
 
       <hbm2ddl
