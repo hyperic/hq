@@ -533,9 +533,7 @@ public class ControlManagerImpl implements ControlManager {
 
     @Transactional
     public void removeControlHistory(AppdefEntityID id) {
-
-        Collection<ControlHistory> controlsHistory = controlHistoryDao.findByEntity(id.getType(), id.getID());
-        controlHistoryDao.removeControlHistory(controlsHistory);
+        controlHistoryDao.removeByEntity(id.getType(), id.getID());
     }
 
     /**
