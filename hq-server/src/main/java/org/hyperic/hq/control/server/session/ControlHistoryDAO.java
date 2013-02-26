@@ -28,6 +28,7 @@ import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -42,7 +43,6 @@ import org.hyperic.util.jdbc.DBUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-import org.springframework.util.CollectionUtils;
 
 @Repository
 public class ControlHistoryDAO
@@ -163,15 +163,12 @@ public class ControlHistoryDAO
         return frequencies;
     }
     
-    public void removeControlHistory(Collection<ControlHistory> controlsHistory) {
-        if (controlsHistory == null || controlsHistory.size() == 0) {
-            return;
-        }
+    public void removeByEntity(int type, int id) {
         final String hql = new StringBuilder().append(
-                "delete from ControlHistory where controlHistory in (:controlsHistory)").toString();
-            getSession().createQuery(hql).setParameterList("controlsHistory", controlsHistory).executeUpdate();
+                "delete from ControlHistory ch where ch.entityId = :id and ch.entityType = :type").toString();
+        getSession().createQuery(hql).setInteger("id", id).setInteger("type", type).executeUpdate();
     }
-
+    
     private Criteria createFindByEntity(int type, int id) {
         return createCriteria().add(Expression.eq("entityType", new Integer(type))).add(
             Expression.eq("entityId", new Integer(id)));
@@ -181,4 +178,5 @@ public class ControlHistoryDAO
         return createCriteria().add(Expression.eq("groupId", new Integer(groupId))).add(
             Expression.eq("batchId", new Integer(batchId)));
     }
+
 }
