@@ -45,14 +45,14 @@ public interface MetricService {
         @Description(value = "ID of the Resource over which the measurements which are requested on the message body are defined, and the time frame for which the metric data is requested", target = DocTarget.REQUEST),
         @Description(value = "Requested metric data per measuremet per resource", target = DocTarget.RESPONSE),
         @Description(value = "Metric data", target = DocTarget.RESOURCE)
-     })
-	MetricResponse getMetrics(final MeasurementRequest measurementRequest,
-	        @QueryParam("resource_id") final String rscId,
-	        @QueryParam("begin") final Date begin,
-			@QueryParam("end") final Date end) 
-			        throws PermissionException, SessionNotFoundException, SessionTimeoutException, Throwable;
-	
-	@POST
+    })
+    MetricResponse getMetrics(final MeasurementRequest measurementRequest,
+            @QueryParam("resourceId") final String resourceId,
+            @QueryParam("begin") final Date begin,
+            @QueryParam("end") final Date end) 
+                    throws PermissionException, SessionNotFoundException, SessionTimeoutException, Throwable;
+
+    @POST
     @Path("/aggregation")
     @Descriptions({ 
         @Description(value = "Get an aggregation of the metric data for measurements per resources for a given time frame", target = DocTarget.METHOD),

@@ -392,4 +392,70 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
         }
         return null;
     }
+
+    /* (non-Javadoc)
+     * @see org.hyperic.hq.vm.VCManager#validateVCSettings(java.lang.String, java.lang.String, java.lang.String)
+     */
+    public boolean validateVCSettings(String url, String user, String password) {
+        try{
+            new ServiceInstance(new URL(url), user, password, true);
+        }catch(Throwable t) {
+            return false;
+        }    
+        return true;
+    }
+
+    /* (non-Javadoc)
+     * @see org.hyperic.hq.vm.VCManager#registerVC(java.lang.String, java.lang.String, java.lang.String)
+     */
+    public void registerVC(String url, String user, String password) {
+        VCCredentials credentials = new VCCredentials(url, user, password);
+        if (vcConnections.contains(credentials)) {
+            log.info("This given vCenter is already registered");
+        }
+        else{
+            vcConnections.add(credentials);
+            // create a scheduled 'sync task' for the vCenter 
+            executor.scheduleWithFixedDelay(new VCSynchronizer(credentials), 0, SYNC_INTERVAL_MINUTES, TimeUnit.MINUTES);
+        }
+    }
+
+    /**
+     * A worker class responsible for keeping the vCenter mapping up to date, 
+     * each worker is responsible for one vCenter.
+     */
+    private class VCSynchronizer implements Runnable{
+
+        private final VCCredentials credantials;
+        
+        public VCSynchronizer(VCCredentials credantials) {    
+            this.credantials = credantials;
+        }
+
+        public void run() {
+           
+            Session session = null;
+            SessionFactory sessionFactory = null;
+            try{
+                //Binds a Hibernate Session to the thread for the entire
+                //processing of the request. This logic is copied from the OpenSessionInViewFilter filter
+                sessionFactory = 
+                        appContext.getBean(OpenSessionInViewFilter.DEFAULT_SESSION_FACTORY_BEAN_NAME, SessionFactory.class);
+                session = SessionFactoryUtils.getSession(sessionFactory, true);
+                session.setFlushMode(FlushMode.MANUAL);
+                if (!TransactionSynchronizationManager.hasResource(sessionFactory)) {
+                    TransactionSynchronizationManager.bindResource(sessionFactory, new SessionHolder(session));
+                }
+                doVCEventsScan(credantials);
+            }catch(Throwable t){
+                log.error(t,t);
+            }finally{
+                TransactionSynchronizationManager.unbindResource(sessionFactory);
+                //Close the given Session
+                SessionFactoryUtils.closeSession(session);
+            }
+        }
+    }
+
+
 }

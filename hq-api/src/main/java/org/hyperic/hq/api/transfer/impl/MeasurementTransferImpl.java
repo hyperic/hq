@@ -88,12 +88,18 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     protected final Log log = LogFactory.getLog(ReportProcessorImpl.class);
     protected static final int MAX_DTPS = 400;
 
-    private ResourceManager resourceManager ; 
-    private MeasurementManager measurementMgr;
-    private TemplateManager tmpltMgr;
-    private DataManager dataMgr; 
-    private MeasurementMapper mapper;
-    private ExceptionToErrorCodeMapper errorHandler ;
+    protected ResourceManager resourceManager ; 
+    protected MeasurementManager measurementMgr;
+    protected TemplateManager tmpltMgr;
+    protected DataManager dataMgr; 
+    protected MeasurementMapper mapper;
+    protected ExceptionToErrorCodeMapper errorHandler ;
+    protected MetricDestinationEvaluator evaluator;
+    protected Q q;
+    protected NotificationsTransfer notificationsTransfer;
+    @javax.ws.rs.core.Context
+    protected SearchContext context ;
+    protected boolean isRegistered = false;
 
     @Autowired
     public MeasurementTransferImpl(ResourceManager resourceManager,MeasurementManager measurementMgr, TemplateManager tmpltMgr, DataManager dataMgr, 
@@ -107,10 +113,6 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         this.errorHandler = errorHandler;
         this.evaluator = evaluator;
         this.q = q;
-    }
-    @PostConstruct
-    public void init() {
-        this.notificationsTransfer = (NotificationsTransfer) Bootstrap.getBean("notificationsTransfer");
     }
     @PostConstruct
     public void init() {
@@ -373,38 +375,6 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             ResourceMeasurementResponse rscRes = new ResourceMeasurementResponse();
             rscRes.setResourceId(String.valueOf(rid));
             for(Measurement hqMsmt:hqMsmts) {
-                MeasurementTemplate hqTmpl = hqMsmt.getTemplate();//tmpltMgr.getTemplate(tmplId);
-                org.hyperic.hq.api.model.measurements.Measurement msmt = this.mapper.toMeasurementExtendedData(hqMsmt,hqTmpl);
-                rscRes.add(msmt);
-            }
-            res.addResponse(rscRes);
-        }
-        return res;
-    }
-    
-    @Transactional(readOnly = true)
-    public ResourceMeasurementBatchResponse getMeasurements(ApiMessageContext apiMessageContext, BulkResourceMeasurementRequest rcsMsmtReq) {
-        ResourceMeasurementBatchResponse res = new ResourceMeasurementBatchResponse(this.errorHandler);
-        AuthzSubject authzSubject = apiMessageContext.getAuthzSubject();
-        List<ID> ids = rcsMsmtReq.getRids();
-        List<Integer> rids = this.mapper.toIds(ids);
-        for(Integer rid:rids) {
-            Resource rsc = this.resourceManager.findResourceById(rid);
-            if (rsc==null) {
-                res.addFailedResource(String.valueOf(rid), ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID.getErrorCode(), null,new Object[] {""});
-                log.error("resource not found for resource id - " + rid);
-                continue;
-            }
-            Collection<Measurement> hqMsmts = this.measurementMgr.findMeasurements(authzSubject, rsc);
-            if (hqMsmts==null || hqMsmts.isEmpty()) {
-                res.addFailedResource(String.valueOf(rid), ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID.getErrorCode(), null,new Object[] {""});
-                log.error("no measurements for resource id - " + rid);
-                continue;
-            }
-            ResourceMeasurementResponse rscRes = new ResourceMeasurementResponse();
-            rscRes.setRscId(String.valueOf(rid));
-            for(Measurement hqMsmt:hqMsmts) {
-//                Integer tmplId = hqMsmt.getTemplate().getId();
                 MeasurementTemplate hqTmpl = hqMsmt.getTemplate();//tmpltMgr.getTemplate(tmplId);
                 org.hyperic.hq.api.model.measurements.Measurement msmt = this.mapper.toMeasurementExtendedData(hqMsmt,hqTmpl);
                 rscRes.add(msmt);

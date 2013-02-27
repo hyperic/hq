@@ -33,7 +33,6 @@ public abstract class Filter<N extends BaseNotification, C extends FilteringCond
         }
         return notificationsLeftIn;
     }
-
     /**
      * 
      * @param notification

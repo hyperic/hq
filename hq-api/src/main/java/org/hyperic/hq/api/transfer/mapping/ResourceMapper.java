@@ -388,20 +388,24 @@ public class ResourceMapper {
         removedResourceID.setId(id);
         return removedResourceID;
     }
-    public org.hyperic.hq.api.model.Resource toResource(/*final AuthzSubject subject,*/ CreatedResourceNotification n) {
+    public org.hyperic.hq.api.model.Resource toResource(final AuthzSubject subject, ResourceTransfer resourceTransfer, 
+            ResourceDetailsType resourceDetailsType, CreatedResourceNotification n) throws Throwable {
         org.hyperic.hq.authz.server.session.Resource backendResource = n.getResource();
         if (backendResource==null) {
             return null;
         }
         Session hSession = f.getCurrentSession();
         hSession.update(backendResource);
-//        hSession.update(backendResource.getResourceType());
-        Resource newResource = toResource(backendResource);
-//        newResource.getResourceType()
-//        backendResource.getResourceType()
-//        Context flowContext = new Context(subject, , , ResourceDetailsType.ALL, this.resourceTransfer);
-//        flowContext.setBackendResource(backendResource);
-//        newResource = ResourceDetailsTypeStrategy.ALL.populateResource(flowContext);
+        Resource newFrontendResource = toResource(backendResource);
+        ResourceDetailsType[] resourceDetailsTypeArr = new ResourceDetailsType[] {resourceDetailsType};
+        Context flowContext = new Context(subject, newFrontendResource.getNaturalID(), newFrontendResource.getResourceType(), resourceDetailsTypeArr, resourceTransfer);
+        flowContext.setBackendResource(backendResource);
+        Set<ResourceDetailsTypeStrategy> resourceDetailsTypeStrategySet = ResourceDetailsTypeStrategy.valueOf(resourceDetailsTypeArr);
+        if (resourceDetailsTypeStrategySet==null || resourceDetailsTypeStrategySet.isEmpty() || resourceDetailsTypeStrategySet.size()>1) {
+            throw new RuntimeException("unexpected number of ResourceDetailsTypeStrategis");
+        }
+        //TODO~ move this population of resource's properties to be once a creation notification is created, not when it is being polled!
+        newFrontendResource = resourceDetailsTypeStrategySet.iterator().next().populateResource(flowContext);
         Integer parentID = n.getParentID();
         // platforms wont have a parent
         if (parentID==null) {
@@ -424,14 +428,10 @@ public class ResourceMapper {
         r.setResourceConfig(resourceConfig);
         return r;
     }
-
     public List<Filter<InventoryNotification, ? extends FilteringCondition<?>>> toResourceFilters(ResourceFilterRequest resourceFilterRequest,ResourceDetailsType responseMetadata) {
         List<Filter<InventoryNotification,? extends FilteringCondition<?>>> userFilters = new ArrayList<Filter<InventoryNotification,? extends FilteringCondition<?>>>();
         InternalResourceDetailsType resourceDetailsType = ResourceDetailsType.valueOf(responseMetadata);
         userFilters.add((Filter) new ResourceContentFilter(resourceDetailsType));
         return userFilters;
     }
-	
-	
-	
 }//EOC
