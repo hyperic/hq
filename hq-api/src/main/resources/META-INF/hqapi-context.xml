@@ -101,7 +101,7 @@
 	
 	<bean name="sessionManagementImpl" class="org.hyperic.hq.api.services.impl.SessionManagementServiceImpl" />
 	
-	<jaxrs:server id="resourceService" address="/inventory/resources">
+	<jaxrs:server id="resourceService" address="/resource">
 		<jaxrs:serviceBeans>
 			<ref bean="resourceServiceImpl" />
 		</jaxrs:serviceBeans>

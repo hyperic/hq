@@ -42,17 +42,17 @@ import org.hyperic.hq.api.model.RestApiConstants;
 public class MeasurementResponse {
     @XmlElementWrapper(name="measurements",namespace=RestApiConstants.SCHEMA_NAMESPACE)
 	@XmlElement(name="measurement",namespace=RestApiConstants.SCHEMA_NAMESPACE)
-	private List<MetricGroupBase> measurements = new ArrayList<MetricGroupBase>();
+	private List<Measurement> measurements = new ArrayList<Measurement>();
 	
 	public MeasurementResponse() {
 		super();
 	}
 
-	public void add(MetricGroupBase msmt) {
+	public void add(Measurement msmt) {
 		this.measurements.add(msmt);
 	}
 	
-	public List<MetricGroupBase> getMeasurements() {
+	public List<Measurement> getMeasurements() {
 		return this.measurements;
 	}
 	

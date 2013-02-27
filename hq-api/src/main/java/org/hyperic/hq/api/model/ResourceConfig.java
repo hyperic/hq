@@ -27,12 +27,15 @@ package org.hyperic.hq.api.model;
 import java.io.Serializable; 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
  
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
- 
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+import org.hyperic.hq.api.model.common.MapPropertiesAdapter;
+import org.hyperic.hq.api.model.common.PropertyListMapAdapter;
+
 @XmlRootElement(namespace=RestApiConstants.SCHEMA_NAMESPACE)
 @XmlType(name="ResourceConfigType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 	
@@ -45,7 +48,7 @@ public class ResourceConfig implements Serializable{
 	
 	public ResourceConfig() {}//EOM
 	
-	public ResourceConfig(final String resourceID, final Map<String,String> mapProps, final Map<String,PropertyList> mapListProps) { 
+	public ResourceConfig(final String resourceID, final HashMap<String,String> mapProps, final Map<String,PropertyList> mapListProps) { 
 		this.resourceID = resourceID ; 
 		this.mapProps = mapProps ; 
 		this.mapListProps = mapListProps ;
@@ -59,7 +62,7 @@ public class ResourceConfig implements Serializable{
 		return this.resourceID ; 
 	}//EOM 
 	
-	public final void setMapProps(final Map<String,String> configValues) { 
+	public final void setMapProps(final HashMap<String,String> configValues) { 
 		this.mapProps= configValues ; 
 	}//EOM 
 	

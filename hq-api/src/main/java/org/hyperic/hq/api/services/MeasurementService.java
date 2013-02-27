@@ -53,6 +53,7 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 
+
 @Path("/") 
 @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON}) 
 @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
