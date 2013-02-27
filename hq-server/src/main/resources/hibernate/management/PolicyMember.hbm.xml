@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!--
+    NOTE: This copyright does *not* cover user programs that use HQ
+    program services by normal system calls through the application
+    program interfaces provided as part of the Hyperic Plug-in Development
+    Kit or the Hyperic Client Development Kit - this is merely considered
+    normal use of the program, and does *not* fall under the heading of
+     "derived work".
+
+     Copyright (C) [2009-2012], VMware, Inc.
+     This file is part of HQ.
+
+     HQ is free software; you can redistribute it and/or modify
+     it under the terms version 2 of the GNU General Public License as
+     published by the Free Software Foundation. This program is distributed
+     in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+     even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+     PARTICULAR PURPOSE. See the GNU General Public License for more
+     details.
+
+     You should have received a copy of the GNU General Public License
+     along with this program; if not, write to the Free Software
+     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+     USA.
+-->
+
+<hibernate-mapping package="org.hyperic.hq.management.shared">
+
+  <class name="PolicyMember" table="EAM_POLICY_GRP_MAP" lazy="true" mutable="false">
+    <cache usage="read-write"/>
+    <id name="id" type="integer">
+      <meta attribute="scope-set"><![CDATA[private]]></meta>
+      <column name="ID" not-null="true"/>
+      <generator class="org.hyperic.hibernate.id.ComboGenerator">
+        <param name="sequence">EAM_POLICY_GRP_MAP_ID_SEQ</param>
+      </generator>
+    </id>
+
+    <many-to-one name="resource" class="org.hyperic.hq.authz.server.session.Resource">
+      <column name="RESOURCE_ID"
+              not-null="true"
+              index="policy_member_idx"
+              unique-key="eam_policy_grp_key"/>
+    </many-to-one>
+
+    <many-to-one name="resourceGroup" class="org.hyperic.hq.authz.server.session.ResourceGroup">
+      <column name="RESOURCE_GROUP_ID"
+              not-null="true"
+              index="policy_grp_idx"
+              unique-key="eam_policy_grp_key"/>
+    </many-to-one>
+
+    <property name="created" type="long">
+      <column name="CTIME" not-null="true"/>
+    </property>
+
+  </class>
+
+</hibernate-mapping>

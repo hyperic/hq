@@ -58,9 +58,18 @@ public class CrispoManagerImpl implements CrispoManager {
      * Create a new {@link Crispo} from a {@link Map} of {@link String}
      * key/value pairs
      */
-    public Crispo createCrispo(Map<String, String> keyVals) {
-        Crispo c = Crispo.create(keyVals);
+    public Crispo createCrispo(Map<String, String> keyVals, boolean override) {
+        Crispo c = Crispo.create(keyVals, override);
+        crispoDao.save(c);
+        return c;
+    }
 
+    /**
+     * Create a new {@link Crispo} from a {@link Map} of {@link String}
+     * key/value pairs
+     */
+    public Crispo createCrispo(Map<String, String> keyVals) {
+        Crispo c = Crispo.create(keyVals, false);
         crispoDao.save(c);
         return c;
     }
@@ -92,7 +101,7 @@ public class CrispoManagerImpl implements CrispoManager {
      * {@link ConfigResponse}
      */
     public Crispo create(ConfigResponse cfg) {
-        Crispo res = Crispo.create(cfg);
+        Crispo res = Crispo.create(cfg, false);
         crispoDao.save(res);
         return res;
     }

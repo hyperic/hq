@@ -224,6 +224,8 @@ public class AlertDefinition
             return AppdefEntityConstants.APPDEF_TYPE_SERVER;
         } else if (rtName.equals(AuthzConstants.serviceResType)) {
             return AppdefEntityConstants.APPDEF_TYPE_SERVICE;
+        } else if (rtName.equals(AuthzConstants.profileResType)) {
+            return AppdefEntityConstants.APPDEF_TYPE_POLICY;
         } else if (rtName.equals(AuthzConstants.applicationResType)) {
             return AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
         } else if (rtName.equals(AuthzConstants.groupResType)) {
@@ -389,7 +391,7 @@ public class AlertDefinition
         return _resource;
     }
 
-    void setResource(Resource resource) {
+    public void setResource(Resource resource) {
         _resource = resource;
     }
 

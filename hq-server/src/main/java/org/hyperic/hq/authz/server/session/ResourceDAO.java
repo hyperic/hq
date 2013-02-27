@@ -366,9 +366,17 @@ public class ResourceDAO
     }
 
     @SuppressWarnings("unchecked")
+    List<Resource> getResourcesByPrototype(Resource proto, String regex) {
+        String hql = "from Resource r where r.prototype = :proto";
+        if (regex != null) {
+            hql += " AND " + getHQDialect().getRegExSQL("r.name", regex, true, false);
+        }
+        return getSession().createQuery(hql).setParameter("proto", proto).list();
+    }
+
+    @SuppressWarnings("unchecked")
     List<Resource> findResourcesOfPrototype(Resource proto, PageInfo pInfo) {
         String sql = "select r from Resource r where r.prototype = :proto";
-
         return pInfo.pageResults(getSession().createQuery(sql).setParameter("proto", proto)).list();
     }
 

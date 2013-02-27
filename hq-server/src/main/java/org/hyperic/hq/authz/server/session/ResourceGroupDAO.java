@@ -47,6 +47,7 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.management.server.session.GroupCriteriaDAO;
 import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -59,6 +60,9 @@ public class ResourceGroupDAO
 
     @Autowired
     private ResourceDAO rDao;
+
+    @Autowired
+    private GroupCriteriaDAO groupCriteriaDAO;
 
     @Autowired
     private ResourceTypeDAO resourceTypeDAO;
@@ -98,29 +102,27 @@ public class ResourceGroupDAO
             case AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP:
             case AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS:
                 if (cInfo.getResourcePrototype() != null) {
-                    throw new GroupCreationException("Cannot specify a prototype "
-                                                     + "for mixed groups");
+                    throw new GroupCreationException("Cannot specify a prototype for mixed groups");
                 }
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS:
             case AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC:
                 if (cInfo.getResourcePrototype() == null) {
-                    throw new GroupCreationException("Compatable groups must "
-                                                     + "specify a prototype");
+                    throw new GroupCreationException("Compatable groups must specify a prototype");
                 }
                 break;
         }
 
-        ResourceGroup resGrp = new ResourceGroup(cInfo, creator);
+        ResourceGroup resGrp = cInfo.getResourceGroup(creator);
 
         ResourceType resType = resourceTypeDAO.findById(AuthzConstants.authzGroup);
 
         assert resType != null;
 
         final Resource proto = rDao.findById(AuthzConstants.rootResourceId);
-        Resource r = cInfo.isPrivateGroup() ? rDao.createPrivate(resType, proto, cInfo.getName(),
-            creator, resGrp.getId(), cInfo.isSystem()) : rDao.create(resType, proto, cInfo
-            .getName(), creator, resGrp.getId(), cInfo.isSystem());
+        Resource r = cInfo.isPrivateGroup() ?
+            rDao.createPrivate(resType, proto, cInfo.getName(), creator, resGrp.getId(), cInfo.isSystem()) :
+            rDao.create(resType, proto, cInfo.getName(), creator, resGrp.getId(), cInfo.isSystem());
 
         resGrp.setResource(r);
         save(resGrp);
@@ -239,7 +241,6 @@ public class ResourceGroupDAO
      * 
      * @return {@link Resource}s
      */
-    @SuppressWarnings("unchecked")
     int getNumMembers(ResourceGroup g) {
         String hql = "select count(g.resource) from GroupMember g " +
                      "where g.group = :group and g.resource.resourceType is not null";
@@ -417,6 +418,12 @@ public class ResourceGroupDAO
 
         List<ResourceGroup> vals = (List<ResourceGroup>) pInfo.pageResults(q).list();
         return new PageList<ResourceGroup>(vals, total);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Collection<ResourceGroup> findByGroupType(int groupType) {
+        String sql = "from ResourceGroup g where g.groupType = :type";
+        return (Collection<ResourceGroup>) getSession().createQuery(sql).setInteger("type", groupType).list();
     }
 
     @SuppressWarnings("unchecked")
