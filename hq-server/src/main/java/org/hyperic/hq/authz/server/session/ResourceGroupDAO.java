@@ -47,6 +47,7 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.management.server.session.GroupCriteriaDAO;
 import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -118,17 +119,12 @@ public class ResourceGroupDAO
 
         assert resType != null;
 
-        GroupCriteria groupCriteria = cInfo.getGroupCriteria();
-        if (groupCriteria != null) {
-            groupCriteriaDAO.save(groupCriteria);
-        }
         final Resource proto = rDao.findById(AuthzConstants.rootResourceId);
         Resource r = cInfo.isPrivateGroup() ?
             rDao.createPrivate(resType, proto, cInfo.getName(), creator, resGrp.getId(), cInfo.isSystem()) :
             rDao.create(resType, proto, cInfo.getName(), creator, resGrp.getId(), cInfo.isSystem());
 
         resGrp.setResource(r);
-        resGrp.setGroupCriteria(groupCriteria);
         save(resGrp);
 
         /*
