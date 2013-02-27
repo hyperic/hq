@@ -167,29 +167,4 @@
         </jaxrs:features>        
     </jaxrs:server>
     
-	<jaxrs:server id="vmService" address="/vm">
-		<jaxrs:serviceBeans>
-			<ref bean="vmServiceImpl" />
-        </jaxrs:serviceBeans>
-        <jaxrs:providers>
-            <ref bean="jaxbProvider" />
-			<ref bean="jsonProvider" />
-        </jaxrs:providers>
-        <jaxrs:features>
-            <cxf:logging />
-        </jaxrs:features>        
-    </jaxrs:server>
-    
-    <jaxrs:server id="CloudProviderService" address="/cloud">
-		<jaxrs:serviceBeans>
-			<ref bean="CloudProviderServiceImpl" />
-        </jaxrs:serviceBeans>
-        <jaxrs:providers>
-            <ref bean="jaxbProvider" />
-			<ref bean="jsonProvider" />
-        </jaxrs:providers>
-        <jaxrs:features>
-            <cxf:logging />
-        </jaxrs:features>        
-    </jaxrs:server>
 </beans>
