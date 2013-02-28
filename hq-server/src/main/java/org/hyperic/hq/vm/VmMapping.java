@@ -39,7 +39,7 @@ public class VmMapping implements Serializable {
     }
     
 
-    public String getMORef() {
+    public String getMoref() {
         return moRef;
     }
     

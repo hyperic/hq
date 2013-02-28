@@ -24,6 +24,8 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hyperic.hq.appdef.shared.PlatformManager;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManager;
@@ -62,19 +64,24 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
 
     private static final String VC_SYNCHRONIZER = "VCSynchronizer";
     protected final Log log = LogFactory.getLog(VCManagerImpl.class.getName());
-    protected VCDAO vcDao;
-    private ServerConfigManager serverConfigManager;
-    private Set<VCCredentials> vcConnections = new HashSet<VCCredentials>();
+    protected final VCDAO vcDao;
+    private final ServerConfigManager serverConfigManager;
+    private final PlatformManager platformManager;
+    private final AuthzSubjectManager authzSubjectManager;
+    private final Set<VCCredentials> vcConnections = new HashSet<VCCredentials>();
     private ScheduledThreadPoolExecutor executor ; 
     private ApplicationContext appContext;
     private final int SYNC_INTERVAL_MINUTES;
-
+    
     @Autowired
-    public VCManagerImpl(VCDAO vcDao, ServerConfigManager serverConfigManager, 
+    public VCManagerImpl(VCDAO vcDao, ServerConfigManager serverConfigManager, PlatformManager platformManager,
+            AuthzSubjectManager authzSubjectManager,
             @Value("#{VCProperties['vc.sync.interval.minutes']}") int syncInterval){
         this.vcDao = vcDao;
         this.serverConfigManager = serverConfigManager;
         this.SYNC_INTERVAL_MINUTES = syncInterval;
+        this.platformManager = platformManager;
+        this.authzSubjectManager = authzSubjectManager;
     }
 
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
@@ -339,9 +346,23 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
     private void persistMapping(List<VmMapping> toSave, List<VmMapping> toRemove) {
         if(null != toRemove) {
             this.vcDao.remove(toRemove);
+            List<String> macAddresses = new ArrayList<String>();
+            for (VmMapping mapping : toRemove) {
+                macAddresses.addAll(Arrays.asList(mapping.getMacs().split(";")));
+            }
+            try {
+                platformManager.removePlatformByMacAddress(authzSubjectManager.getOverlordPojo(), macAddresses);
+            }catch(Throwable t) {
+              log.error(t,t);
+            }
         }
         if(null != toSave) {
             this.vcDao.save(toSave);
+            try {
+                platformManager.mapUUIDToPlatforms(authzSubjectManager.getOverlordPojo(), toSave);
+            }catch(Throwable t) {
+              log.error(t,t);
+            }
         }
     }
 
