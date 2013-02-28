@@ -134,7 +134,6 @@ import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.GroupCreationException;
-import org.hyperic.hq.authz.shared.IntegerConverter;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
@@ -165,6 +164,7 @@ import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
 import org.hyperic.hq.util.Reference;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
+import org.hyperic.util.IntegerTransformer;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
@@ -845,8 +845,8 @@ public class AppdefBossImpl implements AppdefBoss {
             types.add(res.getResourceType());
         }
         final Collection<AppdefResourceValue> rtn =
-            permissionManager.findViewableResources(subject, types, new IntegerConverter<AppdefResourceValue>() {
-                public AppdefResourceValue convert(Integer id) {
+            permissionManager.findViewableResources(subject, types, new IntegerTransformer<AppdefResourceValue>() {
+                public AppdefResourceValue transform(Integer id) {
                     final Resource r = resources.get(id);
                     if (null != r) {
                         return AppdefResourceValue.convertToAppdefResourceValue(r);
@@ -2506,17 +2506,17 @@ public class AppdefBossImpl implements AppdefBoss {
         if (proto != null && excludeId != null && excludeId.equals(proto.getId())) {
             excludeId = null;
         }
-        final IntegerConverter<AppdefResourceValue> converter =
-            getIntegerConverter(subj, appdefTypeId, searchFor, appdefResType, groupId, groupSubTypeSet, matchAny,
+        final IntegerTransformer<AppdefResourceValue> transformer =
+            getIntegerTransformer(subj, appdefTypeId, searchFor, appdefResType, groupId, groupSubTypeSet, matchAny,
                                 matchOwn, matchUnavail, pc, totalSetSize, excludeId);
         final Comparator<AppdefResourceValue> comparator = getNameComparator(pc.getSortorder());
         final Set<AppdefResourceValue> resources =
-            permissionManager.findViewableResources(subj, types, pc.getSortorder(), converter, comparator);
+            permissionManager.findViewableResources(subj, types, pc.getSortorder(), transformer, comparator);
         final PageList<AppdefResourceValue> rtn = new PageList<AppdefResourceValue>(resources, totalSetSize.get());
         return rtn;
     }
 
-    private IntegerConverter<AppdefResourceValue> getIntegerConverter(final AuthzSubject subj, 
+    private IntegerTransformer<AppdefResourceValue> getIntegerTransformer(final AuthzSubject subj, 
                                                                       final int appdefTypeId, String searchFor,
                                                                       final AppdefEntityTypeID appdefResType,
                                                                       final Integer groupId,
@@ -2538,12 +2538,12 @@ public class AppdefBossImpl implements AppdefBoss {
         final boolean isGroup = (appdefTypeId == AppdefEntityConstants.APPDEF_TYPE_GROUP) ||
                                 (groupSubType != null && !groupSubType.isEmpty());
         final Set<Resource> groupMembers = getGroupMembers(groupId);
-        final IntegerConverter<AppdefResourceValue> rtn = new IntegerConverter<AppdefResourceValue>() {
+        final IntegerTransformer<AppdefResourceValue> rtn = new IntegerTransformer<AppdefResourceValue>() {
             int returned = 0;
             int index = 0;
             int resProtoId;
             @SuppressWarnings("deprecation")
-            public AppdefResourceValue convert(Integer id) {
+            public AppdefResourceValue transform(Integer id) {
                 final Resource resource = resourceManager.getResourceById(id);
                 if (resource == null || resource.isInAsyncDeleteState()) {
                     return null;
