@@ -86,7 +86,6 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
-import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
@@ -99,7 +98,7 @@ import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.shared.SRNManager;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.PlatformTypeInfo;
-import org.hyperic.hq.vm.VMID;
+import org.hyperic.hq.vm.VmMapping;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.sigar.NetFlags;
 import org.hyperic.util.pager.PageControl;
@@ -114,6 +113,7 @@ import org.springframework.transaction.annotation.Transactional;
  * relationships
  * 
  */
+@SuppressWarnings("restriction")
 @org.springframework.stereotype.Service
 @Transactional
 public class PlatformManagerImpl implements PlatformManager {
@@ -2044,11 +2044,27 @@ public class PlatformManagerImpl implements PlatformManager {
     	}
     	return null;
     }
+    
+    public void removePlatformByMacAddress(AuthzSubject subject, List<String> macAddresses) throws PermissionException {
+        for (String mac : macAddresses) {
+            Collection<Platform> platforms = this.getPlatformByMacAddr(subject, mac);
+            if (platforms==null || platforms.isEmpty()) {
+                if (log.isDebugEnabled()) { log.debug("no platform in the system is assosiated to the " + mac + " mac address"); }
+                continue;
+            }
+            for (Platform platform : platforms) {
+                try {
+                    removePlatform(subject, platform);
+                }catch(Throwable t) {
+                  log.warn(t,t);
+                }
+            }
+        }
+    }
 
-    public void mapUUIDToPlatforms(AuthzSubject subject, Map<VMID, Set<String>> uuidToMacsMap) throws PermissionException, CPropKeyNotFoundException {
-        for(VMID vmid : uuidToMacsMap.keySet()) {
-            Set<String> macs = uuidToMacsMap.get(vmid);
-            for (String mac : macs) {
+    public void mapUUIDToPlatforms(AuthzSubject subject, List<VmMapping> mapping) throws PermissionException, CPropKeyNotFoundException {
+        for(VmMapping vmMap : mapping) {
+            for (String mac : vmMap.getMacs().split(";")) {
                 if ("00:00:00:00:00:00".equals(mac)) { continue; }
                 Collection<Platform> platforms = this.getPlatformByMacAddr(subject, mac);
                 if (platforms==null || platforms.isEmpty()) {
@@ -2065,8 +2081,8 @@ public class PlatformManagerImpl implements PlatformManager {
                         if (AuthzConstants.platformPrototypeVmwareVsphereVm.equals(platform.getResource().getPrototype().getName())) { continue; }
                         AppdefEntityID id = platform.getEntityId();
                         int typeId = platform.getAppdefResourceType().getId().intValue();
-                        String moref = vmid.getMoref();
-                        String vcUUID = vmid.getVcUUID();
+                        String moref = vmMap.getMoref();
+                        String vcUUID = vmMap.getVcUUID();
                         this.cpropManager.setValue(id, typeId, HQConstants.MOREF, moref);
                         this.cpropManager.setValue(id, typeId, HQConstants.VCUUID, vcUUID);
                         Map<String,String> changedProps = new HashMap<String,String>();
