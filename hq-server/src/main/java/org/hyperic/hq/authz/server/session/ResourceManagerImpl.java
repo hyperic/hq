@@ -69,7 +69,6 @@ import org.hyperic.hq.appdef.shared.ResourceTypeCleanupZevent;
 import org.hyperic.hq.appdef.shared.ResourcesCleanupZevent;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
-import org.hyperic.hq.authz.shared.IntegerConverter;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
@@ -89,6 +88,7 @@ import org.hyperic.hq.measurement.server.session.MonitorableTypeDAO;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
+import org.hyperic.util.IntegerTransformer;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -624,10 +624,10 @@ public class ResourceManagerImpl implements ResourceManager {
         final int pagesize = pc.getPagesize();
         final int startIndex = pc.getPagenum() * pc.getPagesize();
         final Set<Resource> resources = pm.findViewableResources(subject, types, pc.getSortorder(),
-            new IntegerConverter<Resource>() {
+            new IntegerTransformer<Resource>() {
                 int returned = 0;
                 int index = 0;
-                public Resource convert(Integer id) {
+                public Resource transform(Integer id) {
                     if (pc != null && returned > pagesize) {
                         return null;
                     }
@@ -988,8 +988,8 @@ public class ResourceManagerImpl implements ResourceManager {
             types.add(res.getResourceType());
             rtn.put(res.getId(), res);
         }
-        return permissionManager.findViewableResources(subj, types, new IntegerConverter<Resource>() {
-            public Resource convert(Integer id) {
+        return permissionManager.findViewableResources(subj, types, new IntegerTransformer<Resource>() {
+            public Resource transform(Integer id) {
                 return rtn.get(id);
             }
         });

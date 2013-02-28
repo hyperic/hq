@@ -58,6 +58,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.shared.HierarchicalAlertingManager;
 import org.hyperic.hq.events.shared.MaintenanceEventManager;
+import org.hyperic.util.IntegerTransformer;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
@@ -464,25 +465,25 @@ public class PermissionManagerImpl extends PermissionManager {
     }
 
     public Set<Integer> findViewableResources(AuthzSubject subj, Collection<ResourceType> resourceTypes) {
-        return findViewableResources(subj, resourceTypes, new IntegerConverter<Integer>() {
-            public Integer convert(Integer id) {
+        return findViewableResources(subj, resourceTypes, new IntegerTransformer<Integer>() {
+            public Integer transform(Integer id) {
                 return id;
             }
         });
     }
 
     public <T> Set<T> findViewableResources(AuthzSubject subj, Collection<ResourceType> resourceTypes,
-                                            IntegerConverter<T> converter) {
-        return findViewableResources(subj, resourceTypes, PageControl.SORT_UNSORTED, converter);
+                                            IntegerTransformer<T> transformer) {
+        return findViewableResources(subj, resourceTypes, PageControl.SORT_UNSORTED, transformer);
     }
 
     public <T> Set<T> findViewableResources(AuthzSubject subj, Collection<ResourceType> resourceTypes,
-                                            int sortName, IntegerConverter<T> converter) {
-        return findViewableResources(subj, resourceTypes, sortName, converter, null);
+                                            int sortName, IntegerTransformer<T> transformer) {
+        return findViewableResources(subj, resourceTypes, sortName, transformer, null);
     }
 
     public <T> Set<T> findViewableResources(AuthzSubject subj, Collection<ResourceType> resourceTypes,
-                                            int sortName, IntegerConverter<T> converter,
+                                            int sortName, IntegerTransformer<T> transformer,
                                             Comparator<T> comparator) {
         if (resourceTypes.isEmpty()) {
             return Collections.emptySet();
@@ -502,7 +503,7 @@ public class PermissionManagerImpl extends PermissionManager {
             final Integer id = r.getId();
             final int typeId = r.getResourceType().getId();
             if (typeIds.contains(typeId)) {
-                T val = converter.convert(id);
+                T val = transformer.transform(id);
                 if (val != null) {
                     rtn.add(val);
                 }
