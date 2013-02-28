@@ -32,11 +32,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.notifications.model.BaseNotification;
 import org.hyperic.hq.notifications.model.InternalResourceDetailsType;
+import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.util.Transformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -48,8 +50,12 @@ public class EndpointQueue {
 // XXX should make this configurable in some way
     protected final static int QUEUE_LIMIT = 10000;
     private static final long TASK_INTERVAL = 30000;
+    private static final String MSGS_PUBLISHED_TO_ENDPOINT = ConcurrentStatsCollector.MSGS_PUBLISHED_TO_ENDPOINT;
+    private static final String MSGS_PUBLISHED_TO_ENDPOINT_TIME = ConcurrentStatsCollector.MSGS_PUBLISHED_TO_ENDPOINT_TIME;
     @Autowired
     private ThreadPoolTaskScheduler notificationExecutor;
+    @Autowired
+    private ConcurrentStatsCollector concurrentStatsCollector;
 
     // TODO~ change to write through versioning (each node would have versioning -
     // write on one version, read another, then sync between them), w/o will pose problems in scale
@@ -62,6 +68,12 @@ public class EndpointQueue {
     
     public int getNumConsumers() {
         return numConsumers.get();
+    }
+    
+    @PostConstruct
+    public void init() {
+        concurrentStatsCollector.register(MSGS_PUBLISHED_TO_ENDPOINT);
+        concurrentStatsCollector.register(MSGS_PUBLISHED_TO_ENDPOINT_TIME);
     }
 
     public void register(NotificationEndpoint endpoint, InternalResourceDetailsType resourceDetailsType,
@@ -91,13 +103,26 @@ public class EndpointQueue {
         }
         final Runnable task = new Runnable() {
             public void run() {
+                int size = 0;
+                long totalTime = 0;
                 try {
                     final long registrationId = endpoint.getRegistrationId();
                     final InternalNotificationReport report = poll(registrationId);
-                    final String message = transformer.transform(report);
-                    endpoint.publishMessage(message);
+                    if (report.getNotifications().isEmpty()) {
+                        return;
+                    }
+                    final long start = System.currentTimeMillis();
+                    final String toPublish = transformer.transform(report);
+                    endpoint.publishMessage(toPublish);
+                    // do calculations after the message is successfully sent so that we can get indications of
+                    // errors if something goes wrong
+                    totalTime = System.currentTimeMillis() - start;
+                    size = report.getNotifications().size();
                 } catch (Throwable t) {
                     log.error(t, t);
+                } finally {
+                    concurrentStatsCollector.addStat(size, MSGS_PUBLISHED_TO_ENDPOINT);
+                    concurrentStatsCollector.addStat(totalTime, MSGS_PUBLISHED_TO_ENDPOINT_TIME);
                 }
             }
         };
