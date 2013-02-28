@@ -28,6 +28,7 @@ import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -161,7 +162,13 @@ public class ControlHistoryDAO
         }
         return frequencies;
     }
-
+    
+    public void removeByEntity(int type, int id) {
+        final String hql = new StringBuilder().append(
+                "delete from ControlHistory ch where ch.entityId = :id and ch.entityType = :type").toString();
+        getSession().createQuery(hql).setInteger("id", id).setInteger("type", type).executeUpdate();
+    }
+    
     private Criteria createFindByEntity(int type, int id) {
         return createCriteria().add(Expression.eq("entityType", new Integer(type))).add(
             Expression.eq("entityId", new Integer(id)));
@@ -171,4 +178,5 @@ public class ControlHistoryDAO
         return createCriteria().add(Expression.eq("groupId", new Integer(groupId))).add(
             Expression.eq("batchId", new Integer(batchId)));
     }
+
 }

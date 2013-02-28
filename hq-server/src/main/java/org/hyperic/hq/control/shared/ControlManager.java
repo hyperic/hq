@@ -239,4 +239,5 @@ public interface ControlManager {
                                                              AppdefEntityID[] entities)
         throws AppdefEntityNotFoundException, PermissionException;
 
+    public void removeControlHistory(AppdefEntityID id);
 }

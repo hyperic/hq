@@ -26,6 +26,7 @@
 package org.hyperic.hq.control.server.session;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -68,6 +69,7 @@ import org.hyperic.hq.control.agent.client.ControlCommandsClientFactory;
 import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.hq.control.shared.ControlManager;
 import org.hyperic.hq.control.shared.ControlScheduleManager;
+import org.hyperic.hq.control.shared.ScheduledJobRemoveException;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
@@ -527,6 +529,11 @@ public class ControlManagerImpl implements ControlManager {
             .getEntityId(), cLocal.getAction(), cLocal.getScheduled().booleanValue(), cLocal.getDateScheduled(), status);
         event.setMessage(msg);
         messagePublisher.publishMessage(EventConstants.EVENTS_TOPIC, event);
+    }
+
+    @Transactional
+    public void removeControlHistory(AppdefEntityID id) {
+        controlHistoryDao.removeByEntity(id.getType(), id.getID());
     }
 
     /**

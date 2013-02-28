@@ -37,6 +37,7 @@ import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
+import org.hyperic.hq.control.shared.ControlManager;
 import org.hyperic.hq.control.shared.ControlScheduleManager;
 import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
@@ -51,14 +52,16 @@ public class ControlEventListener implements ZeventListener<ResourceZevent> {
     private ControlScheduleManager controlScheduleManager;
     private AuthzSubjectManager authzSubjectManager;
     private ZeventEnqueuer zEventManager;
+    private ControlManager controlManager;
 
     @Autowired
     public ControlEventListener(ControlScheduleManager controlScheduleManager,
                                 AuthzSubjectManager authzSubjectManager,
-                                ZeventEnqueuer zEventManager) {
+                                ZeventEnqueuer zEventManager, ControlManager controlManager) {
         this.controlScheduleManager = controlScheduleManager;
         this.authzSubjectManager = authzSubjectManager;
         this.zEventManager = zEventManager;
+        this.controlManager = controlManager;
     }
 
     @PostConstruct
@@ -75,11 +78,12 @@ public class ControlEventListener implements ZeventListener<ResourceZevent> {
             AuthzSubject subject = authzSubjectManager.findSubjectById(z.getAuthzSubjectId());
             AppdefEntityID id = z.getAppdefEntityID();
 
-            _log.info("Removing scheduled jobs for " + id);
+            _log.info("Removing scheduled jobs and control history for " + id);
             try {
                 controlScheduleManager.removeScheduledJobs(subject, id);
+                controlManager.removeControlHistory(id);
             } catch (Exception e) {
-                _log.error("Unable to remove scheduled jobs for " + id, e);
+                _log.error("Unable to remove scheduled jobs or control history for " + id, e);
             }
         }
     }
