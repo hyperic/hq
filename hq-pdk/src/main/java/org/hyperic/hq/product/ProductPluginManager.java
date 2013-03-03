@@ -35,6 +35,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -90,7 +91,7 @@ public class ProductPluginManager
     private boolean registerTypes = false;
     private boolean client;
     private HashMap<String, PluginManager> managers = new HashMap<String, PluginManager>();
-    private HashMap<String, HashMap<String, TypeInfo>> types = new HashMap<String, HashMap<String, TypeInfo>>();
+    private Map<String, Map<String, TypeInfo>> types = new HashMap<String, Map<String, TypeInfo>>();
     private HashMap includePlugins = null;
     private HashMap excludePlugins = null;
     private Log log = LogFactory.getLog(this.getClass().getName());
@@ -197,7 +198,7 @@ public class ProductPluginManager
      * @param name The type name, e.g. "Apache 2.0"
      */
     public TypeInfo getTypeInfo(String platform, String name) {
-        HashMap<String, TypeInfo> platforms = this.types.get(platform);
+        Map<String, TypeInfo> platforms = this.types.get(platform);
 
         if (platforms == null) {
             return null;
@@ -206,9 +207,13 @@ public class ProductPluginManager
         return platforms.get(name);
     }
 
+    public Map<String, Map<String, TypeInfo>> getTypes() {
+        return Collections.unmodifiableMap(types);
+    }
+
     protected void setTypeInfo(String platform, String name, TypeInfo info) {
 
-        HashMap<String, TypeInfo> platforms = this.types.get(platform);
+        Map<String, TypeInfo> platforms = this.types.get(platform);
 
         if (platforms == null) {
             platforms = new HashMap<String, TypeInfo>();

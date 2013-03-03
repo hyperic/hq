@@ -35,9 +35,9 @@ import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.server.session.ResourceGroupSortField;
 import org.hyperic.hq.authz.server.session.Role;
-import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
@@ -131,7 +131,7 @@ public interface ResourceGroupManager
     public void removeResourceGroup(AuthzSubject whoami, Integer groupId)
     throws PermissionException, VetoException;
 
-    public void addResources(AuthzSubject subj, ResourceGroup group, List<Resource> resources)
+    public void addResources(AuthzSubject subj, ResourceGroup group, Collection<Resource> resources)
         throws PermissionException, VetoException;
 
     /**
@@ -341,5 +341,8 @@ public interface ResourceGroupManager
     public ResourceGroup getGroupById(Integer id);
 
     public ResourceGroup getResourceGroupById(Integer id);
+
+// TODO javadoc!!!
+    public Collection<ResourceGroup> getAllResourceGroupsWithCriteria();
 
 }

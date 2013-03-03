@@ -508,4 +508,5 @@ public abstract class PluginManager {
             e.getMessage() +
             " (invalid classpath or corrupt plugin jar)";
     }
+
 }

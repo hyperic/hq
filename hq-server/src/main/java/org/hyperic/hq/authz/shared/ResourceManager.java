@@ -363,4 +363,11 @@ public interface ResourceManager {
      */
     public Collection<Resource> getDescendantResources(AuthzSubject subj, Collection<Resource> resources,
                                                        ResourceRelation relation, Resource proto, boolean children);
+
+    /**
+     * @param proto {@link Resource} representing a {@link Resource} prototype
+     * @param regex {@link String} representing a regular expression, may be null
+     * @return All {@link Resource}s associated with the proto and optional regex
+     */
+    public Collection<Resource> getResourcesByPrototypeAndRegex(Resource proto, String regex);
 }

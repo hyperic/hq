@@ -72,7 +72,7 @@ public class SharePointServerMeasurement extends Win32MeasurementPlugin {
                     res = new MetricValue(rt);
                 }
             } catch (PluginException ex) {
-                log.info(ex, ex);
+                log.debug(ex, ex);
                 if (metric.isAvail()) {
                     res = new MetricValue(Metric.AVAIL_DOWN);
                 } else {
@@ -112,7 +112,7 @@ public class SharePointServerMeasurement extends Win32MeasurementPlugin {
         } catch (Win32Exception ex) {
             if (metric.isAvail()) {
                 res = new MetricValue(Metric.AVAIL_DOWN);
-                log.info("error on mteric:'" + metric + "' :" + ex.getLocalizedMessage(), ex);
+                log.debug("error on mteric:'" + metric + "' :" + ex.getLocalizedMessage(), ex);
             } else {
                 res = MetricValue.NONE;
                 log.info("error on metric:'" + metric + "' :" + ex.getLocalizedMessage());

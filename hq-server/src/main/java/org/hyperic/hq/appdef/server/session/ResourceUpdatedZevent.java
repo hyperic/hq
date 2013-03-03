@@ -34,19 +34,23 @@ import org.hyperic.hq.zevents.ZeventManager;
  * Event that indicates a resource has been updated.
  */
 public class ResourceUpdatedZevent extends ResourceZevent {
+    private boolean verifyConfig = true;
+
     static {
-        ZeventManager.getInstance()
-            .registerEventClass(ResourceUpdatedZevent.class);
+        ZeventManager.getInstance().registerEventClass(ResourceUpdatedZevent.class);
     }
 
     public ResourceUpdatedZevent(AuthzSubject subject, AppdefEntityID id) {
         super(subject.getId(), id);
     }
+
+    public ResourceUpdatedZevent(AuthzSubject subject, AppdefEntityID id, boolean verifyConfig) {
+        super(subject.getId(), id);
+        this.verifyConfig = verifyConfig;
+    }
     
-    public ResourceUpdatedZevent(AuthzSubject subject, AppdefEntityID id,
-                                 AllConfigResponses allConfgs) {
-        super(new ResourceZeventSource(id),
-              new ResourceConfigZeventPayload(subject.getId(), id, allConfgs));
+    public ResourceUpdatedZevent(AuthzSubject subject, AppdefEntityID id, AllConfigResponses allConfgs) {
+        super(new ResourceZeventSource(id), new ResourceConfigZeventPayload(subject.getId(), id, allConfgs));
     }
     
     public AllConfigResponses getAllConfigs() {
@@ -61,8 +65,7 @@ public class ResourceUpdatedZevent extends ResourceZevent {
         extends ResourceZeventPayload {
         private AllConfigResponses _allConfigs;
         
-        public ResourceConfigZeventPayload(Integer subject, AppdefEntityID id,
-                                           AllConfigResponses allConfgs) {
+        public ResourceConfigZeventPayload(Integer subject, AppdefEntityID id, AllConfigResponses allConfgs) {
             super(subject, id);
             _allConfigs = allConfgs;
         }
@@ -70,5 +73,9 @@ public class ResourceUpdatedZevent extends ResourceZevent {
         public AllConfigResponses getAllConfigs() {
             return _allConfigs;
         }
+    }
+
+    public boolean verifyConfig() {
+        return verifyConfig;
     }
 }

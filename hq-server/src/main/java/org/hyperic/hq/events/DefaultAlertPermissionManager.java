@@ -168,6 +168,9 @@ public class DefaultAlertPermissionManager implements AlertPermissionManager {
     
     private void checkAlertDefinitionPermission(AuthzSubject user, AppdefEntityID id, String operationName) 
     throws PermissionException {
+        if (user.getId().equals(AuthzConstants.overlordId)) {
+            return;
+        }
         int resourceType = id.getType();
         String resourceTypeLabel;
         
