@@ -416,5 +416,5 @@ public interface PlatformManager {
 
     void mapUUIDToPlatforms(AuthzSubject subject, List<VmMapping> mapping) throws PermissionException, CPropKeyNotFoundException;
 
-    void removePlatformByMacAddress(AuthzSubject subject, List<String> macAddresses) throws PermissionException;
+    void removePlatformVmMapping(AuthzSubject subject, List<String> macAddresses) throws PermissionException;
 }
