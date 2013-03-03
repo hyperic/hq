@@ -30,4 +30,15 @@ public class MetricNotification extends BaseNotification {
     public Integer getMeasurementId() {
         return this.measurementID;
     }
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof MetricNotification)) {
+            return false;
+        }
+        MetricNotification mo = (MetricNotification) obj;
+        return (this.measurementID==null)!=(mo.measurementID==null)?false:((this.measurementID==null&&mo.measurementID==null)?true:this.measurementID.equals(mo.measurementID))
+                && (this.measurementName==null)!=(mo.measurementName==null)?false:((this.measurementName==null&&mo.measurementName==null)?true:this.measurementName.equals(mo.measurementName))
+                        && (this.resourceID==null)!=(mo.resourceID==null)?false:((this.resourceID==null&&mo.resourceID==null)?true:this.resourceID.equals(mo.resourceID))
+                                && (this.metricVal==null)!=(mo.metricVal==null)?false:((this.metricVal==null&&mo.metricVal==null)?true:this.metricVal.equals(mo.metricVal));
+    }
 }

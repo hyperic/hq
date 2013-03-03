@@ -10,7 +10,14 @@ public class AccumulatedRegistrationData {
     protected LinkedBlockingQueue<BaseNotification> accumulatedNotificationsQueue;
 
     public AccumulatedRegistrationData(int queueLimit, InternalResourceDetailsType resourceDetailsType) {
-        this.accumulatedNotificationsQueue = new LinkedBlockingQueue<BaseNotification>(queueLimit);
+        this.accumulatedNotificationsQueue = new LinkedBlockingQueue<BaseNotification>(queueLimit) {
+            public boolean offer(BaseNotification e) {
+                if (this.contains(e)) {
+                    return false;
+                }
+                return super.offer(e);
+            }
+        };
         this.resourceContentType = resourceDetailsType;
     }
     public InternalResourceDetailsType getResourceContentType() {
