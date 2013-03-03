@@ -351,7 +351,7 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
                 macAddresses.addAll(Arrays.asList(mapping.getMacs().split(";")));
             }
             try {
-                platformManager.removePlatformByMacAddress(authzSubjectManager.getOverlordPojo(), macAddresses);
+                platformManager.removePlatformVmMapping(authzSubjectManager.getOverlordPojo(), macAddresses);
             }catch(Throwable t) {
               log.error(t,t);
             }

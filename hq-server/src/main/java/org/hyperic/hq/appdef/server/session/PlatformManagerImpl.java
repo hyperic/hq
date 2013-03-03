@@ -2045,19 +2045,37 @@ public class PlatformManagerImpl implements PlatformManager {
     	return null;
     }
     
-    public void removePlatformByMacAddress(AuthzSubject subject, List<String> macAddresses) throws PermissionException {
+    public void removePlatformVmMapping(AuthzSubject subject, List<String> macAddresses) throws PermissionException {
         for (String mac : macAddresses) {
             Collection<Platform> platforms = this.getPlatformByMacAddr(subject, mac);
             if (platforms==null || platforms.isEmpty()) {
                 if (log.isDebugEnabled()) { log.debug("no platform in the system is assosiated to the " + mac + " mac address"); }
                 continue;
             }
+            List<ResourceContentChangedEvent> events = new ArrayList<ResourceContentChangedEvent>(platforms.size());
+          
             for (Platform platform : platforms) {
                 try {
-                    removePlatform(subject, platform);
+                    
+                    for (Ip ip : platform.getIps()) {
+                        ip.setMacAddress("");
+                    }                
+                    platformDAO.save(platform);       
+                    
+                    AppdefEntityID id = platform.getEntityId();
+                    int typeId = platform.getAppdefResourceType().getId().intValue();                 
+                    this.cpropManager.setValue(id, typeId, HQConstants.MOREF, "");
+                    this.cpropManager.setValue(id, typeId, HQConstants.VCUUID, "");
+                    Map<String,String> changedProps = new HashMap<String,String>();
+                    changedProps.put(HQConstants.MOREF, null);
+                    changedProps.put(HQConstants.VCUUID, null);
+                    ResourceContentChangedEvent contentChangedEvent = new ResourceContentChangedEvent(platform.getId(),null,null,changedProps);
+                    events.add(contentChangedEvent);
+
                 }catch(Throwable t) {
                   log.warn(t,t);
                 }
+                this.zeventManager.enqueueEventsAfterCommit(events);
             }
         }
     }
@@ -2081,7 +2099,7 @@ public class PlatformManagerImpl implements PlatformManager {
                         if (AuthzConstants.platformPrototypeVmwareVsphereVm.equals(platform.getResource().getPrototype().getName())) { continue; }
                         AppdefEntityID id = platform.getEntityId();
                         int typeId = platform.getAppdefResourceType().getId().intValue();
-                        String moref = vmMap.getMoref();
+                        String moref = vmMap.getMORef();
                         String vcUUID = vmMap.getVcUUID();
                         this.cpropManager.setValue(id, typeId, HQConstants.MOREF, moref);
                         this.cpropManager.setValue(id, typeId, HQConstants.VCUUID, vcUUID);
