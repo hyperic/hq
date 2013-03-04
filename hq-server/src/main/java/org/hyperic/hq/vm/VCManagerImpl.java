@@ -71,14 +71,15 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
     private ScheduledThreadPoolExecutor executor ; 
     private ApplicationContext appContext;
     private final int SYNC_INTERVAL_MINUTES;
-    private PlatformManager platformManager;
+    private final PlatformManager platformManager;
     
     @Autowired
     public VCManagerImpl(VCDAO vcDao, ServerConfigManager serverConfigManager,
-            AuthzSubjectManager authzSubjectManager,
+            AuthzSubjectManager authzSubjectManager, PlatformManager platformManager,
             @Value("#{VCProperties['vc.sync.interval.minutes']}") int syncInterval){
         this.vcDao = vcDao;
         this.serverConfigManager = serverConfigManager;
+        this.platformManager = platformManager;
         this.SYNC_INTERVAL_MINUTES = syncInterval;
         this.authzSubjectManager = authzSubjectManager;
     }
@@ -89,7 +90,6 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
 
     @PostConstruct
     void initialize() { 
-        this.platformManager = appContext.getBean(PlatformManager.class);
         //get the vCenter credentials from the database
         Set<VCCredentials> vcCredentials = getVCCredentials();
         //create a thread pool with a core size of the number of vCenters we keep mapped or one in case
