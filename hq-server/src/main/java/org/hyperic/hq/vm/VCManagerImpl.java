@@ -66,21 +66,21 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
     protected final Log log = LogFactory.getLog(VCManagerImpl.class.getName());
     protected final VCDAO vcDao;
     private final ServerConfigManager serverConfigManager;
-    private final PlatformManager platformManager;
     private final AuthzSubjectManager authzSubjectManager;
     private final Set<VCCredentials> vcConnections = new HashSet<VCCredentials>();
     private ScheduledThreadPoolExecutor executor ; 
     private ApplicationContext appContext;
     private final int SYNC_INTERVAL_MINUTES;
+    @Autowired
+    private PlatformManager platformManager;
     
     @Autowired
-    public VCManagerImpl(VCDAO vcDao, ServerConfigManager serverConfigManager, PlatformManager platformManager,
+    public VCManagerImpl(VCDAO vcDao, ServerConfigManager serverConfigManager,
             AuthzSubjectManager authzSubjectManager,
             @Value("#{VCProperties['vc.sync.interval.minutes']}") int syncInterval){
         this.vcDao = vcDao;
         this.serverConfigManager = serverConfigManager;
         this.SYNC_INTERVAL_MINUTES = syncInterval;
-        this.platformManager = platformManager;
         this.authzSubjectManager = authzSubjectManager;
     }
 
