@@ -71,7 +71,6 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
     private ScheduledThreadPoolExecutor executor ; 
     private ApplicationContext appContext;
     private final int SYNC_INTERVAL_MINUTES;
-    @Autowired
     private PlatformManager platformManager;
     
     @Autowired
@@ -90,6 +89,7 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
 
     @PostConstruct
     void initialize() { 
+        this.platformManager = appContext.getBean(PlatformManager.class);
         //get the vCenter credentials from the database
         Set<VCCredentials> vcCredentials = getVCCredentials();
         //create a thread pool with a core size of the number of vCenters we keep mapped or one in case
