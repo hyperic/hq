@@ -2121,4 +2121,5 @@ public class PlatformManagerImpl implements PlatformManager {
         //TODO~ make sure the uuid is extracted in the resource mapper for platforms
     }
     
+    
 }

@@ -71,15 +71,15 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
     private ScheduledThreadPoolExecutor executor ; 
     private ApplicationContext appContext;
     private final int SYNC_INTERVAL_MINUTES;
-    @Autowired
     private PlatformManager platformManager;
     
     @Autowired
     public VCManagerImpl(VCDAO vcDao, ServerConfigManager serverConfigManager,
-            AuthzSubjectManager authzSubjectManager,
+            AuthzSubjectManager authzSubjectManager, PlatformManager platformManager,
             @Value("#{VCProperties['vc.sync.interval.minutes']}") int syncInterval){
         this.vcDao = vcDao;
         this.serverConfigManager = serverConfigManager;
+        this.platformManager = platformManager;
         this.SYNC_INTERVAL_MINUTES = syncInterval;
         this.authzSubjectManager = authzSubjectManager;
     }
