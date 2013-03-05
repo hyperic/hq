@@ -69,7 +69,7 @@ public class GroupCriteria extends AuthzNamedBean {
     public Resource getResourcePrototype() {
         return resourcePrototype;
     }
-    void setResourcePrototype(Resource resourcePrototype) {
+    public void setResourcePrototype(Resource resourcePrototype) {
         this.resourcePrototype = resourcePrototype;
     }
 
