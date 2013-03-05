@@ -109,38 +109,61 @@
     <div id="headerLogo" title="Home" onclick="location.href='<html:rewrite action="/Dashboard" />'">&nbsp;</div>
     <div id="navTabContainer">
         <c:set var="pageURL" value="${requestURL}"/>
+
         <div id="dashTab" class="tab">
-        	<a href="<html:rewrite page="/Dashboard.do" />"><fmt:message key="header.dashboard"/></a>
+        	<a href="<html:rewrite page="/Dashboard.do" />">
+                <fmt:message key="header.dashboard"/>
+            </a>
         </div>
+
         <div id="resTab" class="tab">
-        	<a href="<html:rewrite page="/ResourceHub.do"/>" onclick="useBreadcrumbHrefIfAvailable(this);"><fmt:message key="header.resources"/></a>
+        	<a href="<html:rewrite page="/ResourceHub.do"/>" onclick="useBreadcrumbHrefIfAvailable(this);">
+                <fmt:message key="header.resources"/>
+            </a>
         	<ul class="root">
         		<li>
-        			<a href="<html:rewrite page="/ResourceHub.do"/>" onclick="useBreadcrumbHrefIfAvailable(this);"><fmt:message key="header.Browse"/></a>
+        			<a href="<html:rewrite page="/ResourceHub.do"/>" onclick="useBreadcrumbHrefIfAvailable(this);">
+                        <fmt:message key="header.Browse"/>
+                    </a>
         		</li>
                 <tiles:insert definition=".header.optional.tabs">
                 	<tiles:put name="location" value="resources"/>
                 </tiles:insert>
                 <li class="hasSubmenu">
-                	<a href=""><fmt:message key=".dashContent.recentResources"/></a>
+                	<a href="">
+                        <fmt:message key=".dashContent.recentResources"/>
+                    </a>
                   	<ul>
                     	<tiles:insert definition=".toolbar.recentResources"/>
                   	</ul>
                 </li>
         	</ul>
         </div>
+
         <div id="analyzeTab" class="tab">
-        	<a href="#"><fmt:message key="header.analyze"/></a>
+        	<a href="#">
+                <fmt:message key="header.analyze"/>
+            </a>
         	<ul class="root">
               	<tiles:insert definition=".header.optional.tabs">
                   	<tiles:put name="location" value="tracking"/>
               	</tiles:insert>
           	</ul>
         </div>
+
+        <div id="managementTab" class="tab">
+        	<a href="<html:rewrite page="/Management.do" />">
+                <fmt:message key="header.management"/>
+            </a>
+        </div>
+
         <div id="adminTab" class="tab">
-        	<a href="<html:rewrite page="/Admin.do" />"><fmt:message key="header.admin"/></a>
+        	<a href="<html:rewrite page="/Admin.do" />">
+                <fmt:message key="header.admin"/>
+            </a>
         </div>
     </div>
+
     <jsu:script onLoad="true">
     	var menu = hqDojo.byId("navTabContainer");
 	    	

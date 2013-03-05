@@ -33,13 +33,13 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.shared.AIConversionUtil;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQApprovalException;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
 import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformManager;
@@ -55,7 +55,15 @@ import org.hyperic.hq.autoinventory.AIServer;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.vm.VCManager;
+import org.hyperic.hq.vm.VMID;
+import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.EncodingException;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
 /**
@@ -63,7 +71,7 @@ import org.springframework.stereotype.Component;
  * the appdef model. This visitor merges the queued resource into appdef.
  */
 @Component
-public class AIQRV_approve implements AIQResourceVisitor {
+public class AIQRV_approve implements AIQResourceVisitor, ApplicationContextAware {
 
     private final Log log = LogFactory.getLog(AIQRV_approve.class);
     private static final int Q_STATUS_ADDED = AIQueueConstants.Q_STATUS_ADDED;
@@ -75,7 +83,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
     private CPropManager cpropMgr;
     private ServerManager serverManager;
     private ResourceManager resourceManager;
-
+    private ApplicationContext appContext;
     
     @Autowired
     public AIQRV_approve(PlatformManager platformManager, ConfigManager configMgr,
@@ -87,6 +95,11 @@ public class AIQRV_approve implements AIQResourceVisitor {
         this.serverManager = serverManager;
         this.resourceManager = resourceManager;
     }
+    
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.appContext = applicationContext;
+    }
+
 
     public void visitPlatform(AIPlatform aiplatform, AuthzSubject subject, List createdResources)
         throws AIQApprovalException, PermissionException {
@@ -443,9 +456,37 @@ public class AIQRV_approve implements AIQResourceVisitor {
                     }
                 }
             }
-            
-            cpropMgr.setConfigResponse(platform.getEntityId(), typeId, aiplatform
-                .getCustomProperties(),macs);
+                        
+            ConfigResponse cprops = null;
+
+            try {
+                cprops = ConfigResponse.decode(aiplatform.getCustomProperties());
+            } catch (EncodingException e) {
+                throw new SystemException(e);
+            }
+
+            if (macs!=null) {
+                VMID vmid = appContext.getBean(VCManager.class).getVMID(macs);
+                if (vmid!=null) {
+                    cprops.setValue(HQConstants.MOREF, vmid.getMoref());
+                    cprops.setValue(HQConstants.VCUUID, vmid.getVcUUID());
+                }
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("cprops=" + cprops);
+                log.debug("aID=" + platform.getEntityId().toString() + ", typeId=" + typeId);
+            }
+
+            for (Iterator<String> it = cprops.getKeys().iterator(); it.hasNext();) {
+                String key = it.next();
+                String val = cprops.getValue(key);
+
+                try {
+                    cpropMgr.setValue(platform.getEntityId(), typeId, key, val);
+                } catch (CPropKeyNotFoundException e) {
+                    log.error(e.getMessage(), e);
+                }
+            }
         } catch (Exception e) {
             log.warn("Error setting platform custom properties: " + e, e);
         }

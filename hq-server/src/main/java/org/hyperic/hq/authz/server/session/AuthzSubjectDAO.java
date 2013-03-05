@@ -88,7 +88,7 @@ public class AuthzSubjectDAO
         subject.addRole(role);
 
         // Insert an empty config response
-        Crispo c = Crispo.create(new ConfigResponse());
+        Crispo c = Crispo.create(new ConfigResponse(), false);
         crispoDao.save(c);
 
         subject.setPrefs(c);

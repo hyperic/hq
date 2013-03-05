@@ -43,6 +43,15 @@ public interface CrispoManager {
      */
     public Crispo createCrispo(Map<String, String> keyVals);
 
+    /**
+     * Create a new {@link Crispo} from a {@link Map} of {@link String}
+     * key/value pairs
+     * @param override will insert the key/vals even if the val == null or val.length() == 0
+     * <p>XXX not sure why the original design decision was to completely ignore key/vals
+     * where the val == null || val.length() == 0, but didn't want to completely change it
+     */
+    public Crispo createCrispo(Map<String, String> keyVals, boolean override);
+
     public Collection<Crispo> findAll();
 
     public Crispo findById(Integer id);

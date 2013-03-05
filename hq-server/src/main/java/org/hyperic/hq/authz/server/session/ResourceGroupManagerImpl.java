@@ -36,6 +36,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -53,6 +54,7 @@ import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.GroupCreationException;
+import org.hyperic.hq.authz.shared.GroupMembersAddedZevent;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
@@ -72,6 +74,7 @@ import org.hyperic.hq.grouping.CritterTranslator;
 import org.hyperic.hq.grouping.GroupException;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.grouping.shared.GroupEntry;
+import org.hyperic.hq.management.server.session.GroupCriteriaDAO;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -97,8 +100,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     private Pager _groupPager;
     private Pager _ownedGroupPager;
     private static final String GROUP_PAGER = PagerProcessor_resourceGroup.class.getName();
-    private static final String OWNEDGROUP_PAGER = PagerProcessor_ownedResourceGroup.class
-        .getName();
+    private static final String OWNEDGROUP_PAGER = PagerProcessor_ownedResourceGroup.class.getName();
 
     private final ResourceEdgeDAO resourceEdgeDAO;
 
@@ -108,10 +110,14 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     private final Log log = LogFactory.getLog(ResourceGroupManagerImpl.class);
     private final ResourceManager resourceManager;
     private final ResourceGroupDAO resourceGroupDAO;
-    private final ResourceDAO resourceDAO;
+    protected final ResourceDAO resourceDAO;
     private final ResourceRelationDAO resourceRelationDAO;
     private ApplicationContext applicationContext;
     private final CritterTranslator critterTranslator;
+    protected GroupCriteriaDAO groupCriteriaDAO;
+    protected PermissionManager permissionManager;
+    protected ResourceTypeDAO resourceTypeDAO;
+    private ZeventManager zeventManager;
 
     @Autowired
     public ResourceGroupManagerImpl(ResourceEdgeDAO resourceEdgeDAO,
@@ -119,7 +125,11 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
                                     ResourceManager resourceManager,
                                     ResourceGroupDAO resourceGroupDAO, ResourceDAO resourceDAO,
                                     ResourceRelationDAO resourceRelationDAO,
-                                    CritterTranslator critterTranslator) {
+                                    GroupCriteriaDAO groupCriteriaDAO,
+                                    ResourceTypeDAO resourceTypeDAO,
+                                    PermissionManager permissionManager,
+                                    CritterTranslator critterTranslator,
+                                    ZeventManager zeventManager) {
         this.resourceEdgeDAO = resourceEdgeDAO;
         this.authzSubjectManager = authzSubjectManager;
         this.resourceManager = resourceManager;
@@ -127,6 +137,10 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         this.resourceDAO = resourceDAO;
         this.resourceRelationDAO = resourceRelationDAO;
         this.critterTranslator = critterTranslator;
+        this.groupCriteriaDAO = groupCriteriaDAO;
+        this.permissionManager = permissionManager;
+        this.resourceTypeDAO = resourceTypeDAO;
+        this.zeventManager = zeventManager;
     }
 
     @PostConstruct
@@ -375,7 +389,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     /**
      * 
      */
-    public void addResources(AuthzSubject subj, ResourceGroup group, List<Resource> resources)
+    public void addResources(AuthzSubject subj, ResourceGroup group, Collection<Resource> resources)
         throws PermissionException, VetoException {
         checkGroupPermission(subj, group.getId(), AuthzConstants.perm_modifyResourceGroup);
         checkGroupMaintenance(subj, group);
@@ -385,6 +399,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     private void addResources(ResourceGroup group, Collection<Resource> resources) {
         resourceGroupDAO.addMembers(group, resources);
         applicationContext.publishEvent(new GroupMembersChangedEvent(group));
+        zeventManager.enqueueEventAfterCommit(new GroupMembersAddedZevent(group, resources));
     }
 
     /**
@@ -478,13 +493,20 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      * @param resources A list of {@link Resource}s to be in the group
      * 
      */
-    public void setResources(AuthzSubject whoami, ResourceGroup group,
-                             Collection<Resource> resources) throws PermissionException,
-        VetoException {
+    public void setResources(AuthzSubject whoami, ResourceGroup group, Collection<Resource> resources)
+    throws PermissionException, VetoException {
         checkGroupPermission(whoami, group.getId(), AuthzConstants.perm_modifyResourceGroup);
         checkGroupMaintenance(whoami, group);
-        resourceGroupDAO.setMembers(group, resources);
+        final Set<Resource> origMembers = new HashSet<Resource>(resourceGroupDAO.getMembers(group));
         applicationContext.publishEvent(new GroupMembersChangedEvent(group));
+        final Collection<Resource> added = new ArrayList<Resource>();
+        for (final Resource r : resources) {
+            if (!origMembers.contains(r)) {
+                added.add(r);
+            }
+        }
+        resourceGroupDAO.setMembers(group, resources);
+        zeventManager.enqueueEventAfterCommit(new GroupMembersAddedZevent(group, added));
     }
 
     /**
@@ -959,4 +981,17 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         }
         return resourceGroupDAO.get(id);
     }
+    
+    public Collection<ResourceGroup> getAllResourceGroupsWithCriteria() {
+        final Collection<ResourceGroup> list = new ArrayList<ResourceGroup>(resourceGroupDAO.findAll());
+        for (final Iterator<ResourceGroup> it=list.iterator(); it.hasNext(); ) {
+            final ResourceGroup group = it.next();
+// XXX need to check implications of lazy loading here
+            if (group.getGroupCriteria() == null) {
+                it.remove();
+            }
+        }
+        return list;
+    }
+
 }

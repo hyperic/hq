@@ -757,6 +757,11 @@ public class ResourceManagerImpl implements ResourceManager {
         return resourceDAO.findResourcesOfPrototype(proto, pInfo);
     }
 
+    @Transactional(readOnly = true)
+    public Collection<Resource> getResourcesByPrototypeAndRegex(Resource proto, String regex) {
+        return resourceDAO.getResourcesByPrototype(proto, regex);
+    }
+
     /**
      * Get all resources which are prototypes of platforms, servers, and
      * services and have a resource of that type in the inventory.

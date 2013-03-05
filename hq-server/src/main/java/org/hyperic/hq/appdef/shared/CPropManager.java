@@ -177,8 +177,6 @@ public interface CPropManager {
     public void setConfigResponse(AppdefEntityID aID, int typeId, byte[] data)
             throws PermissionException, AppdefEntityNotFoundException;
 
-    public void setConfigResponse(AppdefEntityID aID, int typeId, byte[] data, List<String> macs)
-            throws PermissionException, AppdefEntityNotFoundException;
 
     /**
 	 * Remove custom properties for a given resource.

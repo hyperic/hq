@@ -65,6 +65,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@SuppressWarnings("restriction")
 @Service
 @Transactional
 public class CPropManagerImpl implements CPropManager {
@@ -78,8 +79,6 @@ public class CPropManagerImpl implements CPropManager {
     private PlatformTypeDAO platformTypeDAO;
     private ServerTypeDAO serverTypeDAO;
     private ServiceTypeDAO serviceTypeDAO;
-    @Autowired
-    private VCManager vmMgr;
     
     @Autowired
     public CPropManagerImpl(Messenger sender, CpropDAO cPropDAO, CpropKeyDAO cPropKeyDAO,
@@ -372,11 +371,7 @@ public class CPropManagerImpl implements CPropManager {
      */
     public void setConfigResponse(AppdefEntityID aID, int typeId, byte[] data)
             throws PermissionException, AppdefEntityNotFoundException {
-        setConfigResponse(aID, typeId, data, null);
-    }
-    
-    public void setConfigResponse(AppdefEntityID aID, int typeId, byte[] data, List<String> macs)
-        throws PermissionException, AppdefEntityNotFoundException {
+
         if (data == null) {
             return;
         }
@@ -389,13 +384,7 @@ public class CPropManagerImpl implements CPropManager {
             throw new SystemException(e);
         }
 
-        if (macs!=null) {
-            VMID vmid = this.vmMgr.getVMID(macs);
-            if (vmid!=null) {
-                cprops.setValue(HQConstants.MOREF, vmid.getMoref());
-                cprops.setValue(HQConstants.VCUUID, vmid.getVcUUID());
-            }
-        }
+       
         if (log.isDebugEnabled()) {
             log.debug("cprops=" + cprops);
             log.debug("aID=" + aID.toString() + ", typeId=" + typeId);
@@ -411,7 +400,9 @@ public class CPropManagerImpl implements CPropManager {
                 log.error(e.getMessage(), e);
             }
         }
+    
     }
+    
 
     /**
      * Remove custom properties for a given resource.

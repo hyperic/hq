@@ -150,9 +150,21 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
     }
     
     public void addAgentJob(AgentDataTransferJob agentJob) {
+        addAgentJob(agentJob, false);
+    }
+
+    /**
+     * @param agentJob job to execute in the background
+     * @param isPriority - will add job to the top of the list
+     */
+    public void addAgentJob(AgentDataTransferJob agentJob, boolean isPriority) {
         if (log.isDebugEnabled()) log.debug("adding job=" + agentJob);
         synchronized (agentJobs) {
-            agentJobs.add(new StatefulAgentDataTransferJob(agentJob));
+            if (isPriority) {
+                agentJobs.add(new StatefulAgentDataTransferJob(agentJob));
+            } else {
+                agentJobs.addFirst(new StatefulAgentDataTransferJob(agentJob));
+            }
         }
         concurrentStatsCollector.addStat(1, ConcurrentStatsCollector.AGENT_SYNC_JOB_QUEUE_ADDS);
     }

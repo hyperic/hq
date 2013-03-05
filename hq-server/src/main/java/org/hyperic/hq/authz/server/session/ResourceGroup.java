@@ -52,10 +52,10 @@ import org.hyperic.hq.grouping.CritterList;
 import org.hyperic.hq.grouping.CritterRegistry;
 import org.hyperic.hq.grouping.CritterType;
 import org.hyperic.hq.grouping.GroupException;
+import org.hyperic.hq.management.shared.GroupCriteria;
 
-public class ResourceGroup extends PersistedObject
-    implements ContainerManagedTimestampTrackable
-{
+@SuppressWarnings("serial")
+public class ResourceGroup extends PersistedObject implements ContainerManagedTimestampTrackable {
     private String _description;
     private String _location;
     private boolean _system = false;
@@ -71,6 +71,7 @@ public class ResourceGroup extends PersistedObject
     private List _criteria = new ArrayList();
 
     private ResourceGroupValue _resourceGroupValue = new ResourceGroupValue();
+    private GroupCriteria groupCriteria;
 
     public static class ResourceGroupCreateInfo {
         private String   _name;
@@ -85,8 +86,7 @@ public class ResourceGroup extends PersistedObject
         public ResourceGroupCreateInfo(String name, String description,
                                        int groupType, Resource prototype,
                                        String location, int clusterId,
-                                       boolean system, boolean privateGroup)  
-        {
+                                       boolean system, boolean privateGroup) {
             _name              = name;
             _description       = description;
             _resourcePrototype = prototype;
@@ -105,13 +105,16 @@ public class ResourceGroup extends PersistedObject
         public int getClusterId() { return _clusterId; }
         public boolean isSystem() { return _system; }
         public boolean isPrivateGroup() { return _privateGroup; }
+        public ResourceGroup getResourceGroup(AuthzSubject creator) {
+            return new ResourceGroup(this, creator);
+        }
     }
     
     public ResourceGroup() {
         super();
     }
 
-    ResourceGroup(ResourceGroupCreateInfo cInfo, AuthzSubject creator) {
+    private ResourceGroup(ResourceGroupCreateInfo cInfo, AuthzSubject creator) {
         _clusterId         = new Integer(cInfo.getClusterId());
         _description       = cInfo.getDescription();
         _location          = cInfo.getLocation();
@@ -308,6 +311,14 @@ public class ResourceGroup extends PersistedObject
      */
     public Resource getResourcePrototype() {
         return _resourcePrototype;
+    }
+    
+    public void setGroupCriteria(GroupCriteria groupCriteria) {
+        this.groupCriteria = groupCriteria;
+    }
+    
+    public GroupCriteria getGroupCriteria() {
+        return groupCriteria;
     }
 
     void setResource(Resource r) {
