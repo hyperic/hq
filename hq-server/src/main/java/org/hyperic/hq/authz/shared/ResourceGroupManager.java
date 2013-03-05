@@ -342,7 +342,10 @@ public interface ResourceGroupManager
 
     public ResourceGroup getResourceGroupById(Integer id);
 
-// TODO javadoc!!!
-    public Collection<ResourceGroup> getAllResourceGroupsWithCriteria();
+    /**
+     * Checks if a group name already exists for all group types, bypasses permission checking
+     * @return true if a group name exists, false otherwise
+     */
+    public boolean groupNameExists(String name);
 
 }

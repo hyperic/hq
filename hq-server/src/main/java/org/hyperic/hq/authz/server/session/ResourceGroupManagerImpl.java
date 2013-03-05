@@ -288,6 +288,11 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         checkGroupPermission(whoami, group.getId(), AuthzConstants.perm_viewResourceGroup);
         return group;
     }
+    
+    @Transactional(readOnly = true)
+    public boolean groupNameExists(String name) {
+        return resourceGroupDAO.findByName(name) != null;
+    }
 
     /**
      * 
@@ -980,18 +985,6 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
             return null;
         }
         return resourceGroupDAO.get(id);
-    }
-    
-    public Collection<ResourceGroup> getAllResourceGroupsWithCriteria() {
-        final Collection<ResourceGroup> list = new ArrayList<ResourceGroup>(resourceGroupDAO.findAll());
-        for (final Iterator<ResourceGroup> it=list.iterator(); it.hasNext(); ) {
-            final ResourceGroup group = it.next();
-// XXX need to check implications of lazy loading here
-            if (group.getGroupCriteria() == null) {
-                it.remove();
-            }
-        }
-        return list;
     }
 
 }
