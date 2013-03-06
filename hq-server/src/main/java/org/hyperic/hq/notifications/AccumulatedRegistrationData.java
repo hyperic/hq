@@ -1,6 +1,7 @@
 package org.hyperic.hq.notifications;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledFuture;
 
@@ -67,6 +68,10 @@ public class AccumulatedRegistrationData {
 
     public ScheduledFuture<?> getSchedule() {
         return schedule;
+    }
+
+    public void drainTo(List<BaseNotification> c, int size) {
+        accumulatedNotificationsQueue.drainTo(c, size);
     }
 
 }
