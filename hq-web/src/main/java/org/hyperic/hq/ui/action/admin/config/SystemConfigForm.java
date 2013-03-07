@@ -226,9 +226,9 @@ public class SystemConfigForm
         prop.setProperty(HQConstants.AlertNotificationsEnabled, String.valueOf(_alertNotificationsAllowed));
 
         if (!getvCenterURL().isEmpty() && !getvCenterUser().isEmpty() && !getvCenterPassword().isEmpty()) {
-            prop.setProperty(HQConstants.vCenterURL, getvCenterURL()); 
-            prop.setProperty(HQConstants.vCenterUser, getvCenterUser());
-            prop.setProperty(HQConstants.vCenterPassword, getvCenterPassword()); 
+            prop.setProperty(HQConstants.vCenterURL + "_1", getvCenterURL()); 
+            prop.setProperty(HQConstants.vCenterUser+ "_1", getvCenterUser());
+            prop.setProperty(HQConstants.vCenterPassword+ "_1", getvCenterPassword()); 
         }
         return prop;
     }

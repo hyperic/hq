@@ -2,6 +2,8 @@ package org.hyperic.hq.api.services.impl;
 
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.api.model.NotificationsReport;
 import org.hyperic.hq.api.services.NotificationsService;
 import org.hyperic.hq.api.transfer.NotificationsTransfer;
@@ -12,6 +14,7 @@ import org.hyperic.hq.notifications.UnregisteredException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class NotificationsServiceImpl extends RestApiService implements NotificationsService {
+    private final Log log = LogFactory.getLog(NotificationsServiceImpl.class);
     @Autowired
     protected NotificationsTransfer notificationsTransfer;
     @Autowired
@@ -34,7 +37,10 @@ public class NotificationsServiceImpl extends RestApiService implements Notifica
 
     // temporary method for testing
     public String post(String message) throws SessionNotFoundException, SessionTimeoutException {
-        return message;
+        if (log.isDebugEnabled()) {
+            log.debug("received post body=" + message);
+        }
+        return new Integer(message.length()).toString();
     }
     
 }
