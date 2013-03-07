@@ -36,18 +36,25 @@ import java.lang.reflect.Type;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.auth.AuthScope;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
+import org.apache.http.NoHttpResponseException;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.BasicHttpContext;
 import org.hyperic.hq.agent.AgentKeystoreConfig;
 import org.hyperic.hq.plugin.jboss7.objects.Connector;
@@ -111,29 +118,54 @@ public final class JBossAdminHttp {
         this(props.toProperties());
     }
 
+    private String prepareURL() {
+        String url = targetHost.toURI() + "/management";
+        if (hostName != null) {
+            url += "/host/" + hostName;
+            if (serverName != null) {
+                url += "/server/" + serverName;
+            }
+        }
+        return url;
+    }
+
+    private Object post(String api, Type type, Map args) throws PluginException {
+        GsonBuilder gsb = new GsonBuilder();
+        Gson gson = gsb.create();
+        String argsJson = gson.toJson(args);
+        log.debug("[post] argsJson="+argsJson);
+        
+        HttpPost post = new HttpPost(prepareURL() + api);
+        post.setHeader("Content-Type", "application/json");
+        try {
+            post.setEntity(new StringEntity(argsJson));
+        } catch (UnsupportedEncodingException ex) {
+            log.debug(ex.getMessage(), ex);
+            throw new PluginException(ex.getMessage(), ex);
+        }
+        return query(post, api, type);
+    }
+
     private Object get(String api, Type type) throws PluginException {
+        HttpGet get = new HttpGet(prepareURL() + api);
+        return query(get, api, type);
+    }
+
+    private Object query(HttpRequestBase req, String api, Type type) throws PluginException {
         Object res = null;
         try {
-            String url = targetHost.toURI() + "/management";
-            if (hostName != null) {
-                url += "/host/" + hostName;
-                if (serverName != null) {
-                    url += "/server/" + serverName;
-                }
-            }
-            HttpGet get = new HttpGet(url + api);
-            HttpResponse response = client.execute(get, localcontext);
+            HttpResponse response = client.execute(req, localcontext);
             int statusCode = response.getStatusLine().getStatusCode();
             // response must be read in order to "close" the connection.
             // https://jira.hyperic.com/browse/HHQ-5063#comment-154101
             String responseBody = readInputString(response.getEntity().getContent());
 
             if (log.isDebugEnabled()) {
-                log.debug("[" + api + "] -(" + get.getURI() + ")-> " + responseBody);
+                log.debug("[" + api + "] -(" + req.getURI() + ")-> " + responseBody);
             }
 
             if (statusCode != 200) {
-                throw new PluginException("[" + get.getURI() + "] http error code: '" + statusCode + "' msg='" + response.getStatusLine().getReasonPhrase() + "'");
+                throw new PluginException("[" + req.getURI() + "] http error code: '" + statusCode + "' msg='" + response.getStatusLine().getReasonPhrase() + "'");
             }
 
             GsonBuilder gsb = new GsonBuilder();
@@ -241,6 +273,53 @@ public final class JBossAdminHttp {
         }
         DataSource res = (DataSource) get("/subsystem/datasources/data-source/" + ds, type);
         return res;
+    }
+
+    public void shutdown() throws PluginException {
+       executeCommand("shutdown");
+    }
+    
+    public void stop() throws PluginException {
+       executeCommand("stop");
+    }
+    
+    public void start() throws PluginException {
+       executeCommand("start");
+    }
+    
+    public void restart() throws PluginException {
+       executeCommand("restart");
+    }
+    
+    private void executeCommand(String command) throws PluginException {
+        Type type = new TypeToken<Map>() {
+        }.getType();
+
+        Map address = null;
+        if (hostName != null) {
+            address = new HashMap();
+            address.put("host", hostName);
+            if (serverName != null) {
+                address.put("server-config", serverName);
+            }
+        }
+
+        Map args = new HashMap();
+        args.put("operation", command);
+        if (address != null) {
+            args.put("address", address);
+        }
+
+        try {
+            Map res = (Map) post("", type, args);
+            log.debug("[executeCommand]["+command+"] res=" + res);
+        } catch (PluginException ex) {
+            if ((ex.getCause() instanceof NoHttpResponseException) && (hostName != null)) {
+                log.debug("[executeCommand]["+command+"] executed with execiton '" + ex.getMessage() + "' => maybe a JBoss bug");
+            } else {
+                throw ex;
+            }
+        }
     }
 
     void testConnection() throws PluginException {
