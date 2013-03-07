@@ -65,6 +65,7 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
     protected static final String SERVER = "jboss7.server";
     protected static final String HOST = "jboss7.host";
     protected static final String CONFIG = "jboss7.conf";
+    protected static final String START = "jboss7.start";
 
     abstract String getPidsQuery();
 
@@ -82,7 +83,7 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
                 expectedVersion += ".0";
             }
             boolean validVersion = detectedVersion.startsWith(expectedVersion);
-            log.debug("[getServerResources] pid='" + pid + "' expectedVersion='" + expectedVersion + "' detectedVersion='" + detectedVersion + "' validVersion='" + validVersion+"'");
+            log.debug("[getServerResources] pid='" + pid + "' expectedVersion='" + expectedVersion + "' detectedVersion='" + detectedVersion + "' validVersion='" + validVersion + "'");
             if (validVersion) {
                 File cfgFile = getConfigFile(args);
                 String installPath;
@@ -100,6 +101,7 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
                 ConfigResponse productConfig = getServerProductConfig(args);
                 DetectionUtil.populateListeningPorts(pid, productConfig, true);
                 setProductConfig(server, productConfig);
+                setControlConfig(server, getServerControlConfig(args));
                 server.setName(prepareServerName(server.getProductConfig()));
                 servers.add(server);
             }
@@ -328,6 +330,18 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
             cfg.setValue(ADDR, parseAddress(address, args));
         }
         return cfg;
+    }
+
+    final ConfigResponse getServerControlConfig(Map<String, String> args) {
+        ConfigResponse cf = new ConfigResponse();
+        String baseDir = args.get("jboss.home.dir");
+        String name = args.get("jboss.domain.default.config");
+        if ((name != null) && (baseDir != null)) {
+            name = name.substring(0, name.lastIndexOf(".")) + (isWin32() ? ".bat" : ".sh");
+            File script = new File(new File(baseDir, "bin"), name);
+            cf.setValue(START, script.getAbsolutePath());
+        }
+        return cf;
     }
 
     void setUpExtraProductConfig(ConfigResponse cfg, Document doc) throws XPathException {

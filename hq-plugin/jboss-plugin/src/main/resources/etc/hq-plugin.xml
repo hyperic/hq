@@ -1683,6 +1683,7 @@
         <plugin type="autoinventory" class="org.hyperic.hq.plugin.jboss7.JBossHostControllerDetector"/>
         <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
         <plugin type="collector" class="org.hyperic.hq.plugin.jboss7.JBossHostControllerCollector"/>
+        <plugin type="control" class="org.hyperic.hq.plugin.jboss7.JBoss7Control"/>
 
         <plugin type="config_track" class="org.hyperic.hq.product.FileChangeTrackPlugin">
             <monitored>
@@ -1886,6 +1887,7 @@
     
     <server name="JBoss Managed" version="7" include="JBoss 7">
         <plugin type="autoinventory" class="org.hyperic.hq.plugin.jboss7.JBossManagedDetector"/>
+        <plugin type="control" class="org.hyperic.hq.plugin.jboss7.JBoss7ManagedControl"/>
         <config>
             <option name="jboss7.addr" description="Http Address" default="localhost"/>
             <option name="jboss7.port" description="Http Port" default="9990"/>
