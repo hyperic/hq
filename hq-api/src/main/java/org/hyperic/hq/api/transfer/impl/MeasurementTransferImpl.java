@@ -79,9 +79,9 @@ import org.hyperic.hq.notifications.EndpointQueue;
 import org.hyperic.hq.notifications.HttpEndpoint;
 import org.hyperic.hq.notifications.NotificationEndpoint;
 import org.hyperic.hq.notifications.filtering.AgnosticFilter;
+import org.hyperic.hq.notifications.filtering.DestinationEvaluator;
 import org.hyperic.hq.notifications.filtering.Filter;
 import org.hyperic.hq.notifications.filtering.FilteringCondition;
-import org.hyperic.hq.notifications.filtering.MetricDestinationEvaluator;
 import org.hyperic.hq.notifications.model.MetricNotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -96,16 +96,15 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     protected DataManager dataMgr; 
     protected MeasurementMapper mapper;
     protected ExceptionToErrorCodeMapper errorHandler ;
-    protected MetricDestinationEvaluator evaluator;
-    private NotificationsTransfer notificationsTransfer;
+    protected DestinationEvaluator evaluator;
+    protected NotificationsTransfer notificationsTransfer;
     @javax.ws.rs.core.Context
     protected SearchContext context ;
     protected boolean isRegistered = false;
 
     @Autowired
-    public MeasurementTransferImpl(ResourceManager resourceManager,MeasurementManager measurementMgr,
-                                   TemplateManager tmpltMgr, DataManager dataMgr,  MeasurementMapper mapper,
-                                   ExceptionToErrorCodeMapper errorHandler, MetricDestinationEvaluator evaluator) {
+    public MeasurementTransferImpl(ResourceManager resourceManager,MeasurementManager measurementMgr, TemplateManager tmpltMgr, DataManager dataMgr, 
+            MeasurementMapper mapper, ExceptionToErrorCodeMapper errorHandler, DestinationEvaluator evaluator) {
         super();
         this.resourceManager = resourceManager;
         this.measurementMgr = measurementMgr;
@@ -155,9 +154,9 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.BAD_REQUEST,
                                                           ExceptionToErrorCodeMapper.ErrorCode.BAD_REQ_BODY);
         }
-        List<Filter<MetricNotification,? extends FilteringCondition<?>>> userFilters = mapper.toMetricFilters(request); 
+        List<Filter<? extends BaseNotification,? extends FilteringCondition<?>>> userFilters = this.mapper.toMetricFilters(metricFilterReq); 
         if (userFilters.isEmpty()) {
-            userFilters.add(new AgnosticFilter<MetricNotification,FilteringCondition<?>>());
+            userFilters.add(new AgnosticFilter<FilteringCondition<?>>());
         }
         //TODO~ get the destination from the user
         // not allowing sequential registrations
@@ -172,7 +171,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             new DefaultEndpoint(registrationID.getId()) :
             getHttpEndpoint(registrationID, httpEndpointDefinition);
         notificationsTransfer.register(endpoint, apiMessageContext.getAuthzSubject().getId());
-        evaluator.register(endpoint, userFilters);
+        evaluator.register(MetricNotification.class,endpoint, userFilters);
         return registrationID;
     }
     

@@ -75,6 +75,11 @@ public class MeasurementMapper {
         msmt.setAverage(avg);
         return msmt;
     }
+    public RawMetric toMetricWithId(final MetricNotification mn, Integer regID) {
+        RawMetric metric = toMetricWithId(mn);
+        metric.setRegistrationID(regID);
+        return metric;
+    }
     public RawMetric toMetricWithId(final MetricNotification mn) {
         RawMetric metric = new RawMetric();
         MetricValue hqMetric = mn.getMetricVal();
@@ -124,8 +129,8 @@ public class MeasurementMapper {
         MetricFilter<MetricFilteringCondition> filter = new MetricFilter<MetricFilteringCondition>(this.measurementMgr,cond);
         return filter;
     }
-    public List<Filter<MetricNotification,? extends FilteringCondition<?>>> toMetricFilters(final MetricFilterRequest metricFilterReq) {
-        List<Filter<MetricNotification,? extends FilteringCondition<?>>> userFilters = new ArrayList<Filter<MetricNotification,? extends FilteringCondition<?>>>();
+    public List<Filter<? extends BaseNotification,? extends FilteringCondition<?>>> toMetricFilters(final MetricFilterRequest metricFilterReq) {
+        List<Filter<? extends BaseNotification,? extends FilteringCondition<?>>> userFilters = new ArrayList<Filter<? extends BaseNotification,? extends FilteringCondition<?>>>();
         ResourceFilterDefinitioin rscFilterDef = metricFilterReq.getResourceFilterDefinition();
         MetricFilterByResource<ResourceFilteringCondition<Resource>> metricFilterByRsc = toMetricFilterByResource(rscFilterDef);
         if (metricFilterByRsc!=null) {

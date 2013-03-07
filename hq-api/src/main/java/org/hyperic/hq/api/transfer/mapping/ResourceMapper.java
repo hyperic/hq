@@ -379,17 +379,18 @@ public class ResourceMapper {
 
 
     
-    public ID toResource(RemovedResourceNotification n) {
+    public ID toResource(RemovedResourceNotification n, Integer regID) {
         Integer id = n.getID();
         if (id==null) {
             return null;
         }
         ID removedResourceID = new ID();
         removedResourceID.setId(id);
+        removedResourceID.setRegistrationID(regID);
         return removedResourceID;
     }
     public org.hyperic.hq.api.model.Resource toResource(final AuthzSubject subject, ResourceTransfer resourceTransfer, 
-            ResourceDetailsType resourceDetailsType, CreatedResourceNotification n) throws Throwable {
+            ResourceDetailsType resourceDetailsType, CreatedResourceNotification n, Integer regID) throws Throwable {
         org.hyperic.hq.authz.server.session.Resource backendResource = n.getResource();
         if (backendResource==null) {
             return null;
@@ -409,18 +410,20 @@ public class ResourceMapper {
         Integer parentID = n.getParentID();
         // platforms wont have a parent
         if (parentID==null) {
+            newFrontendResource.setRegistrationID(regID);
             return newFrontendResource;
         }
         Resource parentResource = new Resource(String.valueOf(parentID));
+        parentResource.setRegistrationID(regID);
         parentResource.addSubResource(newFrontendResource);
         return parentResource;
     }
 
     @SuppressWarnings("unchecked")
-    public Resource toChangedResourceContent(ResourceDetailsType resourceDetailsType, ResourceChangedContentNotification n) {
+    public org.hyperic.hq.api.model.Resource toChangedResourceContent(ResourceDetailsType resourceDetailsType, ResourceChangedContentNotification n, Integer regID) {
         Integer rid = n.getResourceID();
-        Resource r = new Resource(String.valueOf(rid));
-        
+        org.hyperic.hq.api.model.Resource r = new org.hyperic.hq.api.model.Resource(String.valueOf(rid));
+        r.setRegistrationID(regID);
         Map<String,String> configValues = n.getChangedProps(); 
         
         final ResourceConfig resourceConfig = new ResourceConfig() ;

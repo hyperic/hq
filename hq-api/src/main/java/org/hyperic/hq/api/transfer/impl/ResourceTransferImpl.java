@@ -81,6 +81,7 @@ import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.notifications.DefaultEndpoint;
 import org.hyperic.hq.notifications.NotificationEndpoint;
+import org.hyperic.hq.notifications.filtering.DestinationEvaluator;
 import org.hyperic.hq.notifications.filtering.Filter;
 import org.hyperic.hq.notifications.filtering.FilteringCondition;
 import org.hyperic.hq.notifications.filtering.ResourceDestinationEvaluator;
@@ -109,7 +110,7 @@ public class ResourceTransferImpl implements ResourceTransfer {
 	private AppdefBoss appdepBoss ;
 	private PlatformManager platformManager ; 
 	private ExceptionToErrorCodeMapper errorHandler ;
-    private ResourceDestinationEvaluator evaluator;
+    private DestinationEvaluator evaluator;
     private ConfigBoss configBoss;
     protected NotificationsTransfer notificationsTransfer;
     protected boolean isRegistered = false;
@@ -646,7 +647,7 @@ public class ResourceTransferImpl implements ResourceTransfer {
             RegistrationID registrationID = new RegistrationID();
             final NotificationEndpoint endpoint = new DefaultEndpoint(registrationID.getId());
             final Integer authzSubjectId = authzSubject.getId();
-            notificationsTransfer.register(endpoint, ResourceDetailsType.valueOf(responseMetadata), authzSubjectId);
+            notificationsTransfer.register(InventoryNotification.class,endpoint, ResourceDetailsType.valueOf(responseMetadata), authzSubjectId);
             evaluator.register(endpoint, userFilters);
             //TODO~ return a valid registration id
             res.setRegId(registrationID);
