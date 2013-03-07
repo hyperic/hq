@@ -148,7 +148,8 @@ public class ExceptionToErrorCodeMapper  {
         CLOUD_RESOURCE_NOT_FOUND("6003"),
         SEQUENTIAL_REGISTRATION("7000"),
         MISSING_MANDATORY_FILTER("7001"),
-        UNREGISTERED_FOR_NOTIFICATIONS("7002");
+        UNREGISTERED_FOR_NOTIFICATIONS("7002"),
+        INTERNAL_SERVER_ERROR("8001");
         
         private final String errorCode;
 
