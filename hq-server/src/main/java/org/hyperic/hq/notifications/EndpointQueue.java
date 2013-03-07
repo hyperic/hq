@@ -26,6 +26,7 @@ package org.hyperic.hq.notifications;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,10 +49,11 @@ import org.springframework.stereotype.Component;
 public class EndpointQueue {
     private final Log log = LogFactory.getLog(EndpointQueue.class);
 // XXX should make this configurable in some way
-    protected final static int QUEUE_LIMIT = 10000;
+    private static final int QUEUE_LIMIT = 100000;
     private static final long TASK_INTERVAL = 30000;
     private static final String MSGS_PUBLISHED_TO_ENDPOINT = ConcurrentStatsCollector.MSGS_PUBLISHED_TO_ENDPOINT;
     private static final String MSGS_PUBLISHED_TO_ENDPOINT_TIME = ConcurrentStatsCollector.MSGS_PUBLISHED_TO_ENDPOINT_TIME;
+    private static final int BATCH_SIZE = 50000;
     @Autowired
     private ThreadPoolTaskScheduler notificationExecutor;
     @Autowired
@@ -107,17 +109,17 @@ public class EndpointQueue {
                 long totalTime = 0;
                 try {
                     final long registrationId = endpoint.getRegistrationId();
-                    final InternalNotificationReport report = poll(registrationId);
-                    if (report.getNotifications().isEmpty()) {
-                        return;
-                    }
+                    InternalNotificationReport report = null;
                     final long start = System.currentTimeMillis();
-                    final String toPublish = transformer.transform(report);
-                    endpoint.publishMessage(toPublish);
-                    // do calculations after the message is successfully sent so that we can get indications of
-                    // errors if something goes wrong
+                    final Collection<String> messages = new ArrayList<String>();
+                    while (report == null || !report.getNotifications().isEmpty()) {
+                        report = poll(registrationId, BATCH_SIZE);
+                        final String toPublish = transformer.transform(report);
+                        messages.add(toPublish);
+                        size += report.getNotifications().size();
+                    }
+                    endpoint.publishMessagesInBatch(messages);
                     totalTime = System.currentTimeMillis() - start;
-                    size = report.getNotifications().size();
                 } catch (Throwable t) {
                     log.error(t, t);
                 } finally {
@@ -126,7 +128,8 @@ public class EndpointQueue {
                 }
             }
         };
-        ScheduledFuture<?> schedule = notificationExecutor.scheduleWithFixedDelay(task, TASK_INTERVAL);
+        final Date start = new Date(System.currentTimeMillis() + TASK_INTERVAL);
+        ScheduledFuture<?> schedule = notificationExecutor.scheduleWithFixedDelay(task, start, TASK_INTERVAL);
         data.setSchedule(schedule);
     }
 
@@ -152,6 +155,10 @@ public class EndpointQueue {
     }
 
     public InternalNotificationReport poll(long registrationId) {
+        return poll(Integer.MAX_VALUE);
+    }
+
+    public InternalNotificationReport poll(long registrationId, int maxSize) {
         final InternalNotificationReport rtn = new InternalNotificationReport();
         final List<BaseNotification> notifications = new ArrayList<BaseNotification>();
         synchronized (registrationData) {
@@ -159,7 +166,7 @@ public class EndpointQueue {
             if (data == null || !data.isValid()) {
                 return rtn;
             }
-            data.drainTo(notifications);
+            data.drainTo(notifications, maxSize);
             rtn.setNotifications(notifications);
             rtn.setResourceDetailsType(data.getResourceContentType());
             return rtn;

@@ -6,13 +6,10 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import org.hyperic.hq.appdef.server.session.ResourceContentChangedEvent;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.bizapp.shared.AllConfigDiff;
 import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.notifications.model.CreatedResourceNotification;
 import org.hyperic.hq.notifications.model.ResourceChangedContentNotification;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.zevents.ZeventListener;
@@ -27,7 +24,7 @@ public class ResourceContentUpdatedNotificationsZeventListener extends Inventory
         concurrentStatsCollector.register(getConcurrentStatsCollectorType());
     }
     @Override
-    protected String getListenersBeanName() {
+    public String getListenersBeanName() {
         return "resourceContentUpdatedNotificationsZeventListener";
     }
     @SuppressWarnings("unchecked")
