@@ -16,6 +16,7 @@ import org.hyperic.hq.api.model.measurements.BulkResourceMeasurementRequest;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.TimeframeBoundriesException;
 import org.hyperic.hq.measurement.server.session.TimeframeSizeException;
+import org.hyperic.hq.notifications.NotificationEndpoint;
 
 /**
  * 
@@ -40,13 +41,13 @@ public interface MeasurementTransfer {
     public MetricResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest measurementRequest,
             final String rscId, final Date begin, final Date end) throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException, TimeframeSizeException;
     
-    public RegistrationID register(final MetricFilterRequest metricFilterReq);
+    public RegistrationID register(final MetricFilterRequest metricFilterReq, ApiMessageContext apiMessageContext);
 
     public ResourceMeasurementBatchResponse getAggregatedMetricData(ApiMessageContext apiMessageContext, final ResourceMeasurementRequests hqMsmtReqs, 
             final Date begin, final Date end) 
             throws PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException, SQLException;
     public ResourceMeasurementBatchResponse getMeasurements(ApiMessageContext apiMessageContext,BulkResourceMeasurementRequest msmtMetaReq);
 
-    public void unregister();
+    public void unregister(NotificationEndpoint endpoint);
 
 }

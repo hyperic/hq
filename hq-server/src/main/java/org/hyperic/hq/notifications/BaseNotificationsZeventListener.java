@@ -1,6 +1,8 @@
 package org.hyperic.hq.notifications;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import javax.jms.ObjectMessage;
 
@@ -22,7 +24,7 @@ public abstract class BaseNotificationsZeventListener<E extends Zevent,N extends
     @Autowired
     protected ZeventEnqueuer zEventManager;
     @Autowired
-    protected Q q;
+    protected EndpointQueue endpointQueue;
 
     protected abstract String getListenersBeanName();
     protected abstract String getConcurrentStatsCollectorType();
@@ -33,26 +35,20 @@ public abstract class BaseNotificationsZeventListener<E extends Zevent,N extends
     protected abstract List<N> extract(List<E> events);
     protected abstract DestinationEvaluator<N> getEvaluator();
     
-//    @Override
     @Transactional(readOnly = true)
     public void processEvents(List<E> events) {
+        if (endpointQueue.getNumConsumers() == 0) {
+            return;
+        }
         if (log.isDebugEnabled()) {
             log.debug(getListenersBeanName() + " got events:\n" + events);
         }
-        
         final long start = System.currentTimeMillis();
-        List<N> ns = extract(events);
-        List<ObjectMessage> msgs = null;
-        try {
-            msgs = this.getEvaluator().evaluate(ns);
-            if (msgs!=null && !msgs.isEmpty()) {
-                this.q.publish(msgs);
-            }
-        }catch(Throwable e) {
-            log.error(e);
-        }
+        final List<N> ns = extract(events);
+        final Map<NotificationEndpoint, Collection<N>> msgs = getEvaluator().evaluate(ns);
         final long end = System.currentTimeMillis();
-        
+        concurrentStatsCollector.addStat(end-start, getConcurrentStatsCollectorType());
+        endpointQueue.publishAsync(msgs);
         if (log.isDebugEnabled()) {
             if (msgs==null) {
                 log.debug(getListenersBeanName() + " did not publish any notifications");
@@ -60,6 +56,5 @@ public abstract class BaseNotificationsZeventListener<E extends Zevent,N extends
                 log.debug(getListenersBeanName() + " published:\n" + msgs);
             }
         }
-        concurrentStatsCollector.addStat(end-start, getConcurrentStatsCollectorType());
     }
 }

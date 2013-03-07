@@ -1,4 +1,3 @@
-/* **********************************************************************
 /*
  * NOTE: This copyright does *not* cover user programs that use Hyperic
  * program services by normal system calls through the application
@@ -32,10 +31,10 @@ import java.util.Properties;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
-import javax.jms.Destination;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.api.model.Resource;
 import org.hyperic.hq.api.model.ResourceConfig;
@@ -54,7 +53,6 @@ import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 import org.hyperic.hq.api.transfer.mapping.ResourceDetailsTypeStrategy;
 import org.hyperic.hq.api.transfer.mapping.ResourceMapper;
 import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.shared.AIQueueManager;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -68,63 +66,60 @@ import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.bizapp.server.session.ProductBossImpl.ConfigSchemaAndBaseResponse;
 import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.ObjectNotFoundException;
+import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.notifications.Q;
-import org.hyperic.hq.notifications.filtering.AgnosticFilter;
+import org.hyperic.hq.notifications.DefaultEndpoint;
+import org.hyperic.hq.notifications.NotificationEndpoint;
 import org.hyperic.hq.notifications.filtering.Filter;
 import org.hyperic.hq.notifications.filtering.FilteringCondition;
-import org.hyperic.hq.notifications.filtering.ResourceContentFilter;
 import org.hyperic.hq.notifications.filtering.ResourceDestinationEvaluator;
-import org.hyperic.hq.notifications.model.InternalResourceDetailsType;
 import org.hyperic.hq.notifications.model.InventoryNotification;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
+import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Transactional;
 
-public class ResourceTransferImpl implements ResourceTransfer{
+public class ResourceTransferImpl implements ResourceTransfer {
+    
+    private static final Log log = LogFactory.getLog(ResourceTransferImpl.class);
 
-    private AIQueueManager aiQueueManager;
 	private ResourceManager resourceManager ; 
-    private AuthzSubjectManager authzSubjectManager;
     private ResourceMapper resourceMapper;
     private ProductBoss productBoss ;
 	private CPropManager cpropManager ;
 	private AppdefBoss appdepBoss ;
 	private PlatformManager platformManager ; 
 	private ExceptionToErrorCodeMapper errorHandler ;
-	private Log log ;
     private ResourceDestinationEvaluator evaluator;
-    private Q q;
+    private ConfigBoss configBoss;
     protected NotificationsTransfer notificationsTransfer;
     protected boolean isRegistered = false;
+    private static final String RESOURCE_URL = "%sresource/%s/monitor/Visibility.do?mode=currentHealth&eid=%d:%d";
 	@Autowired  
-    public ResourceTransferImpl(final AIQueueManager aiQueueManager, final ResourceManager resourceManager, 
-    		final AuthzSubjectManager authzSubjectManager, final ResourceMapper resourceMapper, 
-    		final ProductBoss productBoss, final CPropManager cpropManager, final AppdefBoss appdepBoss, 
-    		final PlatformManager platformManager, final ExceptionToErrorCodeMapper errorHandler, ResourceDestinationEvaluator evaluator, Q q, @Qualifier("restApiLogger")Log log) { 
-    	this.aiQueueManager = aiQueueManager ; 
-    	this.resourceManager = resourceManager ; 
-    	this.authzSubjectManager = authzSubjectManager ; 
+    public ResourceTransferImpl(ResourceManager resourceManager, ResourceMapper resourceMapper,
+                                ProductBoss productBoss, CPropManager cpropManager, AppdefBoss appdepBoss, 
+                                PlatformManager platformManager, ExceptionToErrorCodeMapper errorHandler,
+                                ResourceDestinationEvaluator evaluator, ConfigBoss configBoss) {
+    	this.resourceManager = resourceManager ;
     	this.resourceMapper = resourceMapper ; 
     	this.productBoss = productBoss ; 
     	this.cpropManager = cpropManager ; 
@@ -132,9 +127,9 @@ public class ResourceTransferImpl implements ResourceTransfer{
     	this.platformManager = platformManager ; 
     	this.errorHandler = errorHandler ; 
     	this.evaluator = evaluator;
-    	this.q=q;
-    	this.log = log ;
-    }//EOM 
+        this.configBoss = configBoss;
+    }//EOM
+
     @PostConstruct
     public void init() {
         this.notificationsTransfer = (NotificationsTransfer) Bootstrap.getBean("notificationsTransfer");
@@ -608,24 +603,30 @@ public class ResourceTransferImpl implements ResourceTransfer{
 	}//EO inner class Context 
 
 	@Transactional (readOnly=true)
-    public RegisteredResourceBatchResponse getResources(ApiMessageContext messageContext, ResourceDetailsType responseMetadata, final int hierarchyDepth, 
-            final boolean register,final ResourceFilterRequest resourceFilterRequest) throws PermissionException, NotFoundException {
+    public RegisteredResourceBatchResponse getResources(ApiMessageContext messageContext,
+                                                        ResourceDetailsType responseMetadata,
+                                                        int hierarchyDepth, boolean register,
+                                                        ResourceFilterRequest resourceFilterRequest)
+    throws PermissionException, NotFoundException {
         if (resourceFilterRequest==null) {
             if (log.isDebugEnabled()) {
                 log.debug("illegal request");
             }
-            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.BAD_REQ_BODY);
+            throw errorHandler.newWebApplicationException(
+                new Throwable(), Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.BAD_REQ_BODY);
         }
         AuthzSubject authzSubject = messageContext.getAuthzSubject();
-        final RegisteredResourceBatchResponse res = new RegisteredResourceBatchResponse(this.errorHandler) ; 
+        final RegisteredResourceBatchResponse res = new RegisteredResourceBatchResponse(errorHandler);
         List<Resource> resources = new ArrayList<Resource>();
         PageList<PlatformValue> platforms = this.platformManager.getAllPlatforms(authzSubject, PageControl.PAGE_ALL);
         for(PlatformValue pv:platforms) {
             try {
                 String fqdn = pv.getFqdn();
-                Resource r = this.getResourceInner(new Context(authzSubject, fqdn, ResourceType.PLATFORM, new ResourceDetailsType[] {responseMetadata}, this), hierarchyDepth) ;  
+                final ResourceDetailsType[] array = new ResourceDetailsType[] {responseMetadata};
+                final Context context = new Context(authzSubject, fqdn, ResourceType.PLATFORM, array, this);
+                final Resource r = getResourceInner(context, hierarchyDepth);
                 resources.add(r);
-            } catch (Throwable t) {
+            } catch (ObjectNotFoundException e) {
 //TODO~                res.addFailedResource(resourceID, errorCode, additionalDescription, args)
             }
         }
@@ -633,26 +634,31 @@ public class ResourceTransferImpl implements ResourceTransfer{
         if (register) {
             // not allowing sequential registrations
             if (this.isRegistered) {
-                throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.SEQUENTIAL_REGISTRATION);
+                throw errorHandler.newWebApplicationException(
+                    new Throwable(), Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.SEQUENTIAL_REGISTRATION);
             }
             this.isRegistered=true;
-            List<Filter<InventoryNotification,? extends FilteringCondition<?>>> userFilters = this.resourceMapper.toResourceFilters(resourceFilterRequest, responseMetadata); 
+            List<Filter<InventoryNotification,? extends FilteringCondition<?>>> userFilters = 
+                resourceMapper.toResourceFilters(resourceFilterRequest, responseMetadata); 
 
-            //TODO~ get the destination from the user
-            Destination dest = this.notificationsTransfer.getDummyDestination();
-            this.q.register(dest,ResourceDetailsType.valueOf(responseMetadata));
-            this.evaluator.register(dest,userFilters);
+//TODO~ get the destination from the user
+//            Destination dest = this.notificationsTransfer.getDummyDestination();
+            RegistrationID registrationID = new RegistrationID();
+            final NotificationEndpoint endpoint = new DefaultEndpoint(registrationID.getId());
+            final Integer authzSubjectId = authzSubject.getId();
+            notificationsTransfer.register(endpoint, ResourceDetailsType.valueOf(responseMetadata), authzSubjectId);
+            evaluator.register(endpoint, userFilters);
             //TODO~ return a valid registration id
-            res.setRegId(new RegistrationID(1));
+            res.setRegId(registrationID);
         }
         return res;
     }
-    public void unregister() {
-        Destination dest = this.notificationsTransfer.getDummyDestination();
-        this.q.unregister(dest);
-        this.evaluator.unregisterAll(dest);
-        this.isRegistered=false;
+
+    public void unregister(NotificationEndpoint endpoint) {
+        evaluator.unregisterAll(endpoint);
+        isRegistered=false;
     }
+
     public ResourceMapper getResourceMapper() {
         return this.resourceMapper;
     }
@@ -661,5 +667,21 @@ public class ResourceTransferImpl implements ResourceTransfer{
     }
     public ResourceManager getResourceManager() {
         return this.resourceManager;
+    }
+
+    @Transactional(readOnly = true)
+    public String getResourceUrl(int resourceID) {
+        org.hyperic.hq.authz.server.session.Resource resource = resourceManager.getResourceById(resourceID);
+        if (resource == null) {
+            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID);
+        }
+        String hqBaseUrl = "";
+        try {
+            hqBaseUrl = configBoss.getConfig().getProperty(HQConstants.BaseURL);
+        } catch (ConfigPropertyException e) {
+            log.error("Couldn't get HQ Base Url", e);
+        }
+        org.hyperic.hq.authz.server.session.ResourceType resourceType = resource.getResourceType();
+        return String.format(RESOURCE_URL, hqBaseUrl, resourceType.getLocalizedName(), resourceType.getAppdefType(), resource.getInstanceId());
     }
 }//EOC 

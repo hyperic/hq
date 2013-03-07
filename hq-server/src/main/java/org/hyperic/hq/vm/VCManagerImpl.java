@@ -71,7 +71,7 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
     private ScheduledThreadPoolExecutor executor ; 
     private ApplicationContext appContext;
     private final int SYNC_INTERVAL_MINUTES;
-    private final PlatformManager platformManager;
+    private PlatformManager platformManager;
     
     @Autowired
     public VCManagerImpl(VCDAO vcDao, ServerConfigManager serverConfigManager,
@@ -477,6 +477,4 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
             }
         }
     }
-
-
 }

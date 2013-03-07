@@ -17,12 +17,9 @@ public class MetricFilterByResource<C extends ResourceFilteringCondition<Resourc
     }
     protected MetricNotification filter(MetricNotification metricNotification) {
         Integer mid = metricNotification.getMeasurementId();
-        Measurement msmt = this.measurementManager.getMeasurement(mid);
-        Resource rsc = this.resourceManager.getResourceById(msmt.getResource().getId());
-        if (this.cond.check(rsc)) {
-            return metricNotification;
-        }
-        return null;
+        Measurement msmt = measurementManager.getMeasurement(mid);
+        Resource rsc = resourceManager.getResourceById(msmt.getResource().getId());
+        return (cond.check(rsc)) ? metricNotification : null;
     }
     @Override
     protected Class<? extends MetricNotification> getHandledNotificationClass() {

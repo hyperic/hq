@@ -30,15 +30,28 @@ public class MetricNotification extends BaseNotification {
     public Integer getMeasurementId() {
         return this.measurementID;
     }
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof MetricNotification)) {
-            return false;
+    
+    public String toString() {
+        return new StringBuilder()
+            .append("measurementId=").append(measurementID)
+            .append(",resourceId=").append(resourceID)
+            .append(",timestamp=").append(metricVal.getTimestamp())
+            .append(",value=").append(metricVal.getValue())
+            .toString();
+    }
+    public int hashCode() {
+        Long timestamp = metricVal.getTimestamp();
+        return 7 + (7*measurementID.hashCode()) + (7*timestamp.hashCode());
+    }
+    
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
         }
-        MetricNotification mo = (MetricNotification) obj;
-        return (this.measurementID==null)!=(mo.measurementID==null)?false:((this.measurementID==null&&mo.measurementID==null)?true:this.measurementID.equals(mo.measurementID))
-                && (this.measurementName==null)!=(mo.measurementName==null)?false:((this.measurementName==null&&mo.measurementName==null)?true:this.measurementName.equals(mo.measurementName))
-                        && (this.resourceID==null)!=(mo.resourceID==null)?false:((this.resourceID==null&&mo.resourceID==null)?true:this.resourceID.equals(mo.resourceID))
-                                && (this.metricVal==null)!=(mo.metricVal==null)?false:((this.metricVal==null&&mo.metricVal==null)?true:this.metricVal.equals(mo.metricVal));
+        if (o instanceof MetricNotification) {
+            MetricNotification m = (MetricNotification) o;
+            return m.measurementID.equals(measurementID) && m.metricVal.getTimestamp() == metricVal.getTimestamp();
+        }
+        return false;
     }
 }

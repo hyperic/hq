@@ -8,7 +8,6 @@ import org.hyperic.hq.api.transfer.NotificationsTransfer;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.notifications.UnregisteredException;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -18,16 +17,24 @@ public class NotificationsServiceImpl extends RestApiService implements Notifica
     @Autowired
     protected ExceptionToErrorCodeMapper errorHandler ; 
 
-    public NotificationsReport poll() throws SessionNotFoundException, SessionTimeoutException {
+    public NotificationsReport poll(Long id) throws SessionNotFoundException, SessionTimeoutException {
         try {
             ApiMessageContext apiMessageContext = newApiMessageContext();
-            return notificationsTransfer.poll(apiMessageContext);
+            return notificationsTransfer.poll(id, apiMessageContext);
         } catch (UnregisteredException e) {
             errorHandler.log(e);
-            throw errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.UNREGISTERED_FOR_NOTIFICATIONS, e.getMessage());
+            throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.NOT_FOUND,
+                ExceptionToErrorCodeMapper.ErrorCode.UNREGISTERED_FOR_NOTIFICATIONS, e.getMessage());
         }
     }
-    public void unregister() throws SessionNotFoundException, SessionTimeoutException {
-        notificationsTransfer.unregister();
+
+    public void unregister(Long id) throws SessionNotFoundException, SessionTimeoutException {
+        notificationsTransfer.unregister(id);
     }
+
+    // temporary method for testing
+    public String post(String message) throws SessionNotFoundException, SessionTimeoutException {
+        return message;
+    }
+    
 }

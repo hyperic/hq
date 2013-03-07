@@ -1,35 +1,72 @@
 package org.hyperic.hq.notifications;
 
+import java.util.Collection;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledFuture;
 
 import org.hyperic.hq.notifications.model.BaseNotification;
 import org.hyperic.hq.notifications.model.InternalResourceDetailsType;
 
 public class AccumulatedRegistrationData {
-    protected InternalResourceDetailsType resourceContentType;
-    protected LinkedBlockingQueue<BaseNotification> accumulatedNotificationsQueue;
+    private final InternalResourceDetailsType resourceContentType;
+    private final LinkedBlockingQueue<BaseNotification> accumulatedNotificationsQueue;
+    private final NotificationEndpoint endpoint;
+    private boolean isValid = true;
+    private ScheduledFuture<?> schedule;
 
-    public AccumulatedRegistrationData(int queueLimit, InternalResourceDetailsType resourceDetailsType) {
-        this.accumulatedNotificationsQueue = new LinkedBlockingQueue<BaseNotification>(queueLimit) {
-            public boolean offer(BaseNotification e) {
-                if (this.contains(e)) {
-                    return false;
-                }
-                return super.offer(e);
-            }
-        };
+    public AccumulatedRegistrationData(NotificationEndpoint endpoint, int queueLimit,
+                                       InternalResourceDetailsType resourceDetailsType) {
+        this.accumulatedNotificationsQueue = new LinkedBlockingQueue<BaseNotification>(queueLimit);
         this.resourceContentType = resourceDetailsType;
+        this.endpoint = endpoint;
     }
+    
+    public NotificationEndpoint getNotificationEndpoint() {
+        return endpoint;
+    }
+
     public InternalResourceDetailsType getResourceContentType() {
         return resourceContentType;
     }
-    public void setResourceContentType(InternalResourceDetailsType resourceContentType) {
-        this.resourceContentType = resourceContentType;
-    }
+
+//    public void setResourceContentType(InternalResourceDetailsType resourceContentType) {
+//        this.resourceContentType = resourceContentType;
+//    }
+
     public LinkedBlockingQueue<BaseNotification> getAccumulatedNotificationsQueue() {
         return accumulatedNotificationsQueue;
     }
-    public void setAccumulatedNotificationsQueue(LinkedBlockingQueue<BaseNotification> accumulatedNotificationsQueue) {
-        this.accumulatedNotificationsQueue = accumulatedNotificationsQueue;
+
+//    public void setAccumulatedNotificationsQueue(LinkedBlockingQueue<BaseNotification> accumulatedNotificationsQueue) {
+//        this.accumulatedNotificationsQueue = accumulatedNotificationsQueue;
+//    }
+
+    public <T extends BaseNotification> void addAll(Collection<T> c) {
+        accumulatedNotificationsQueue.addAll(c);
     }
+
+    public void drainTo(Collection<BaseNotification> c) {
+        accumulatedNotificationsQueue.drainTo(c);
+    }
+    
+    public boolean isValid() {
+        return isValid;
+    }
+    
+    public void markInvalid() {
+        isValid = false;
+    }
+
+    public void clear() {
+        accumulatedNotificationsQueue.clear();
+    }
+
+    public void setSchedule(ScheduledFuture<?> schedule) {
+        this.schedule = schedule;
+    }
+
+    public ScheduledFuture<?> getSchedule() {
+        return schedule;
+    }
+
 }

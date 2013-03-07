@@ -25,10 +25,7 @@
  */
 package org.hyperic.hq.api.services.impl;
 
-import javax.ws.rs.DELETE;
-import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
 import org.apache.cxf.jaxrs.ext.search.SearchContext;
@@ -37,6 +34,7 @@ import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourceStatusType;
 import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.api.model.Resources;
+import org.hyperic.hq.api.model.common.RegistrationID;
 import org.hyperic.hq.api.model.resources.RegisteredResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
@@ -48,13 +46,16 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.ObjectNotFoundException;
+import org.hyperic.hq.notifications.EndpointQueue;
+import org.hyperic.hq.notifications.NotificationEndpoint;
 import org.springframework.beans.factory.annotation.Autowired;
 
-//@Component
-public class ResourceServiceImpl extends RestApiService implements ResourceService{
+public class ResourceServiceImpl extends RestApiService implements ResourceService {
 	
 	@Autowired
-	private ResourceTransfer resourceTransfer ; 
+	private ResourceTransfer resourceTransfer;
+	@Autowired
+	private EndpointQueue endpointQueue;
 	
 	
 	public final Resource getResource(final String platformNaturalID, final ResourceType resourceType, final ResourceStatusType resourceStatusType, 
@@ -73,7 +74,11 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
 		return resource;
 	}//EOM 
 
-    public final Resource getResource(final String platformID, final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) throws SessionNotFoundException, SessionTimeoutException {
+    public final Resource getResource(final String platformID,
+                                      final ResourceStatusType resourceStatusType,
+                                      final int hierarchyDepth,
+                                      final ResourceDetailsType[] responseMetadata)
+    throws SessionNotFoundException, SessionTimeoutException {
         ApiMessageContext apiMessageContext = newApiMessageContext();
         Resource resource = null;
         try {
@@ -85,9 +90,13 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
             throw webApplicationException;
         } 
         return resource;
-	}//EOM 
-	
-	public final RegisteredResourceBatchResponse getResources(final ResourceDetailsType responseStructure, final int hierarchyDepth, final boolean register,
+	}//EOM
+
+    public String getResourceUrl(final int resourceID) throws SessionNotFoundException, SessionTimeoutException {
+        return this.resourceTransfer.getResourceUrl(resourceID);
+    }
+
+    public final RegisteredResourceBatchResponse getResources(final ResourceDetailsType responseStructure, final int hierarchyDepth, final boolean register,
 	        final ResourceFilterRequest resourceFilterRequest) throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException { 
         ApiMessageContext apiMessageContext = newApiMessageContext();
         return this.resourceTransfer.getResources(apiMessageContext, responseStructure, hierarchyDepth,register,resourceFilterRequest) ;
@@ -110,7 +119,8 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
 		throw new UnsupportedOperationException() ; 
 	}//EOM 
 	
-	public void unregister() throws SessionNotFoundException, SessionTimeoutException {
-	    this.resourceTransfer.unregister();
+	public void unregister(Long registrationId) throws SessionNotFoundException, SessionTimeoutException {
+	    NotificationEndpoint endpoint = endpointQueue.getEndpoint(registrationId);
+	    resourceTransfer.unregister(endpoint);
 	}
 }//EOC 

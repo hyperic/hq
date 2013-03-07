@@ -1,4 +1,3 @@
-/* **********************************************************************
 /*
  * NOTE: This copyright does *not* cover user programs that use Hyperic
  * program services by normal system calls through the application
@@ -45,6 +44,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.ObjectNotFoundException;
+import org.hyperic.hq.notifications.NotificationEndpoint;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.util.config.EncodingException;
@@ -61,7 +61,7 @@ public interface ResourceTransfer {
 	ResourceBatchResponse approveResource(final ApiMessageContext messageContext, final Resources aiResources) ;
 	ResourceBatchResponse updateResources(final ApiMessageContext messageContext, final Resources resources);
 
-    void unregister();
+    void unregister(NotificationEndpoint endpoint);
 
     PlatformManager getPlatformManager();
 
@@ -70,4 +70,6 @@ public interface ResourceTransfer {
     ResourceMapper getResourceMapper();
 
     Object initResourceConfig(Context flowContext) throws ConfigFetchException, EncodingException, PluginNotFoundException, PluginException, PermissionException, AppdefEntityNotFoundException;
+
+    String getResourceUrl(int resourceID);
 }//EOI 
