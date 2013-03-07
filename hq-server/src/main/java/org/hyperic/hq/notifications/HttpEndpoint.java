@@ -3,6 +3,7 @@ package org.hyperic.hq.notifications;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collection;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -52,8 +53,8 @@ public class HttpEndpoint extends NotificationEndpoint {
             this.port = this.url.getPort();
             this.username = username;
             this.password = password;
-            this.contentType = contentType;
-            this.encoding = encoding;
+            this.contentType = contentType == null ? DEFAULT_CONTENT_TYPE : contentType;
+            this.encoding = encoding == null ? DEFAULT_ENCODING : encoding;
         } catch (MalformedURLException e) {
             throw new SystemException(e);
         }
@@ -72,10 +73,8 @@ public class HttpEndpoint extends NotificationEndpoint {
     }
 
     @Override
-    public void publishMessage(String message) {
+    public void publishMessagesInBatch(Collection<String> messages) {
         DefaultHttpClient client = null;
-        final boolean debug = log.isDebugEnabled();
-        HttpResponse resp = null;
         try {
             if (scheme.equalsIgnoreCase("https")) {
                 client = new HQHttpClient(keystoreConfig, null, true);
@@ -93,24 +92,34 @@ public class HttpEndpoint extends NotificationEndpoint {
             authCache.put(targetHost, basicAuth);
             final BasicHttpContext localcontext = new BasicHttpContext();
             localcontext.setAttribute(ClientContext.AUTH_CACHE, authCache);
-            final HttpPost post = new HttpPost(url.getPath());
-            final HttpEntity entity = new StringEntity(message, contentType, encoding);
-            post.setEntity(entity);
-            if (debug) log.debug(post.getRequestLine());
-            resp = client.execute(targetHost, post, localcontext);
-            if (debug) {
-                try {
-                    String respBuf= EntityUtils.toString(resp.getEntity());
-                    log.debug(resp.getStatusLine() + ", response=[" + respBuf + "]");
-                } catch (Exception e) {
-                    log.debug(e,e);
-                }
+            for (final String message : messages) {
+                publishMessage(client, message, targetHost, localcontext);
             }
         } catch (IOException e) {
 // XXX do we spool messages?  do we retry? do we just drop them :-(
             throw new SystemException(e);
         } finally {
             if (client != null) client.getConnectionManager().shutdown();
+        }
+    }
+
+    private void publishMessage(DefaultHttpClient client, String message, HttpHost targetHost,
+                                BasicHttpContext localcontext) throws IOException {
+        final boolean debug = log.isDebugEnabled();
+        final HttpPost post = new HttpPost(url.getPath());
+        final HttpEntity entity = new StringEntity(message, contentType, encoding);
+        post.setEntity(entity);
+        if (debug) log.debug(post.getRequestLine());
+        final HttpResponse resp = client.execute(targetHost, post, localcontext);
+        // The entire response stream must be read if another connection to the server is made with the current 
+        // client object
+        final String respBuf= EntityUtils.toString(resp.getEntity());
+        if (debug) {
+            try {
+                log.debug(resp.getStatusLine() + ", response=[" + respBuf + "]");
+            } catch (Exception e) {
+                log.debug(e,e);
+            }
         }
     }
 

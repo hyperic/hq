@@ -26,6 +26,7 @@ package org.hyperic.hq.notifications;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -110,14 +111,14 @@ public class EndpointQueue {
                     final long registrationId = endpoint.getRegistrationId();
                     InternalNotificationReport report = null;
                     final long start = System.currentTimeMillis();
+                    final Collection<String> messages = new ArrayList<String>();
                     while (report == null || !report.getNotifications().isEmpty()) {
                         report = poll(registrationId, BATCH_SIZE);
                         final String toPublish = transformer.transform(report);
-                        endpoint.publishMessage(toPublish);
-                        // do calculations after the message is successfully sent so that we can get indications of
-                        // errors if something goes wrong
+                        messages.add(toPublish);
                         size += report.getNotifications().size();
                     }
+                    endpoint.publishMessagesInBatch(messages);
                     totalTime = System.currentTimeMillis() - start;
                 } catch (Throwable t) {
                     log.error(t, t);
@@ -127,7 +128,8 @@ public class EndpointQueue {
                 }
             }
         };
-        ScheduledFuture<?> schedule = notificationExecutor.scheduleWithFixedDelay(task, TASK_INTERVAL);
+        final Date start = new Date(System.currentTimeMillis() + TASK_INTERVAL);
+        ScheduledFuture<?> schedule = notificationExecutor.scheduleWithFixedDelay(task, start, TASK_INTERVAL);
         data.setSchedule(schedule);
     }
 

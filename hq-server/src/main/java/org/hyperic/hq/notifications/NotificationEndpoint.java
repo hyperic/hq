@@ -1,5 +1,7 @@
 package org.hyperic.hq.notifications;
 
+import java.util.Collection;
+
 
 public abstract class NotificationEndpoint {
     
@@ -11,7 +13,7 @@ public abstract class NotificationEndpoint {
     
     public abstract boolean canPublish();
 
-    public abstract void publishMessage(String message);
+    public abstract void publishMessagesInBatch(Collection<String> messages);
     
     public long getRegistrationId() {
         return id;
