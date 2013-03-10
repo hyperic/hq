@@ -613,12 +613,6 @@ start() {
     getpid
     if [ "X$pid" = "X" ]
     then
-        # delete the lock file
-        if [ -f /tmp/agent.encrypt.lock ]
-        then
-            echo "Deleting existing props encryption lock file"
-            rm /tmp/agent.encrypt.lock
-        fi
         # The string passed to eval must handles spaces in paths correctly.
         COMMAND_LINE="$CMDNICE \"$WRAPPER_CMD\" \"$WRAPPER_CONF\" wrapper.syslog.ident=\"$APP_NAME\" wrapper.pidfile=\"$PIDFILE\" wrapper.name=\"$APP_NAME\" wrapper.displayname=\"$APP_LONG_NAME\" wrapper.daemonize=TRUE $ANCHORPROP $IGNOREPROP $STATUSPROP $LOCKPROP"
         eval $COMMAND_LINE
