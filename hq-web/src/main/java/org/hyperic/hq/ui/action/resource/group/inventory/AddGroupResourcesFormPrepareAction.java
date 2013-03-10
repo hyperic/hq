@@ -137,6 +137,20 @@ public class AddGroupResourcesFormPrepareAction
             Constants.PENDING_RESOURCES_SES_ATTR);
 
         String nameFilter = RequestUtils.getStringParameter(request, "nameFilter", null);
+        if (nameFilter != null) {
+            String queryStr = request.getQueryString() ;
+            if (queryStr != null && queryStr.indexOf("nameFilter=") != -1) {
+                // if nameFilter is sent as query param we have an encoding problem and we have to fix it 
+                nameFilter = new String(nameFilter.getBytes("8859_1"),"UTF8");
+                addForm.setNameFilter(nameFilter);
+                request.setAttribute("nameFilter", nameFilter);
+            }
+            else {
+                addForm.setNameFilter(nameFilter);
+                request.setAttribute("nameFilter", nameFilter);
+            }
+        }
+
 
         log.trace("getting pending resources for group [" + groupId + "]");
 

@@ -1,5 +1,7 @@
-<%@ page language="java" %>
+<%@ page pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" %>
 <%@ page errorPage="/common/Error.jsp" %>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
@@ -146,7 +148,7 @@
     <c:param name="scp" value="${param.scp}"/>
   </c:if>
   <c:if test="${not empty param.nameFilter}">
-    <c:param name="nameFilter" value="${param.nameFilter}"/>
+    <c:param name="nameFilter" value=""/>
   </c:if>
 </c:url>
 
@@ -350,8 +352,8 @@
                   </td>
                   <td class="FilterLabelText" valign="bottom">
                       <div style="float:left;display:inline;"><input type="text" name="nameFilter" maxlength="55" size="10"
-                             onKeyPress="if (event.keyCode == 13) return applyNameFilter()"
-                             value="<c:out value="${param.nameFilter}"/>"/></div>
+			     onKeyPress="if (event.keyCode == 13) return applyNameFilter()"
+	                             value="<c:out value="${nameFilter}"/>"/></div>
                       <div style="display:inline;width:17px;padding-left:5px;padding-top:3px;"><html:img page="/images/4.0/icons/accept.png"
                              border="0" onclick="applyNameFilter()"/></div>
                   </td>
@@ -378,8 +380,8 @@ border="0"/></td>
                   <td nowrap class="FilterLabelText" colspan=2>
                       <div style="float:left;display:inline;"><fmt:message key="resource.group.inventory.Edit.FilterByNameLabel"/>&nbsp;
                       <input type="text" name="nameFilter" maxlength="55" size="10"
-                             onKeyPress="if (event.keyCode == 13) return applyNameFilter()"
-                             value="<c:out value="${param.nameFilter}"/>"/></div>
+			     onKeyPress="if (event.keyCode == 13) return applyNameFilter()"
+	                             value="<c:out value="${nameFilter}"/>"/></div>
 
                       <div style="display:inline;width:17px;padding-left:5px;padding-top:3px;"><html:img page="/images/4.0/icons/accept.png"
                              border="0" onclick="applyNameFilter()"/></div>
