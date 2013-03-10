@@ -1,4 +1,5 @@
-<%@ page language="java" %>
+<%@ page pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" %>
 <%@ page errorPage="/common/Error.jsp" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
@@ -290,7 +291,7 @@
           <td class="FilterLabelText">
              <div style="float:left;display:inline;"><input type="text" name="nameFilter" maxlength="55" size="10"
                    onKeyPress="if (event.keyCode == 13) return applyNameFilter()"
-                               value="<c:out value="${param.nameFilter}"/>"/></div>
+                               value="<c:out value="${nameFilter}"/>"/></div>
             <div style="display:inline;width:17px;padding-left:5px;padding-top:3px;"><html:img page="/images/4.0/icons/accept.png"
                       border="0" onclick="applyNameFilter()"/></div>
           </td>
