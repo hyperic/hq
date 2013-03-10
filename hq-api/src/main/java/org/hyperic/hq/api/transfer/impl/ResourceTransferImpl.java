@@ -682,6 +682,12 @@ public class ResourceTransferImpl implements ResourceTransfer {
             log.error("Couldn't get HQ Base Url", e);
         }
         org.hyperic.hq.authz.server.session.ResourceType resourceType = resource.getResourceType();
-        return String.format(RESOURCE_URL, hqBaseUrl, resourceType.getLocalizedName(), resourceType.getAppdefType(), resource.getInstanceId());
+        int appDefType;
+        try {
+            appDefType = resourceType.getAppdefType();
+        } catch (IllegalArgumentException iae) {
+            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID);
+        }
+        return String.format(RESOURCE_URL, hqBaseUrl, resourceType.getLocalizedName(), appDefType, resource.getInstanceId());
     }
 }//EOC 

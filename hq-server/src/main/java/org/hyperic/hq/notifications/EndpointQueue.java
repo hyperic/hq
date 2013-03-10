@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
@@ -41,6 +42,8 @@ import org.hyperic.hq.notifications.model.BaseNotification;
 import org.hyperic.hq.notifications.model.InternalResourceDetailsType;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.util.Transformer;
+import org.hyperic.util.stats.StatCollector;
+import org.hyperic.util.stats.StatUnreachableException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
@@ -51,8 +54,9 @@ public class EndpointQueue {
 // XXX should make this configurable in some way
     private static final int QUEUE_LIMIT = 100000;
     private static final long TASK_INTERVAL = 30000;
-    private static final String MSGS_PUBLISHED_TO_ENDPOINT = ConcurrentStatsCollector.MSGS_PUBLISHED_TO_ENDPOINT;
-    private static final String MSGS_PUBLISHED_TO_ENDPOINT_TIME = ConcurrentStatsCollector.MSGS_PUBLISHED_TO_ENDPOINT_TIME;
+    private static final String NOTIFICATIONS_PUBLISHED_TO_ENDPOINT = ConcurrentStatsCollector.NOTIFICATIONS_PUBLISHED_TO_ENDPOINT;
+    private static final String NOTIFICATIONS_PUBLISHED_TO_ENDPOINT_TIME = ConcurrentStatsCollector.NOTIFICATIONS_PUBLISHED_TO_ENDPOINT_TIME;
+    private static final String NOTIFICATION_TOTAL_QUEUE_SIZE = ConcurrentStatsCollector.NOTIFICATION_TOTAL_QUEUE_SIZE;
     private static final int BATCH_SIZE = 50000;
     @Autowired
     private ThreadPoolTaskScheduler notificationExecutor;
@@ -74,8 +78,24 @@ public class EndpointQueue {
     
     @PostConstruct
     public void init() {
-        concurrentStatsCollector.register(MSGS_PUBLISHED_TO_ENDPOINT);
-        concurrentStatsCollector.register(MSGS_PUBLISHED_TO_ENDPOINT_TIME);
+        concurrentStatsCollector.register(NOTIFICATIONS_PUBLISHED_TO_ENDPOINT);
+        concurrentStatsCollector.register(NOTIFICATIONS_PUBLISHED_TO_ENDPOINT_TIME);
+        concurrentStatsCollector.register(new StatCollector() {
+            public long getVal() throws StatUnreachableException {
+                Collection<AccumulatedRegistrationData> tmp;
+                synchronized (registrationData) {
+                    tmp = new ArrayList<AccumulatedRegistrationData>(registrationData.values());
+                }
+                long rtn = 0;
+                for (final AccumulatedRegistrationData data : tmp) {
+                    rtn += data.getAccumulatedNotificationsQueue().size();
+                }
+                return rtn;
+            }
+            public String getId() {
+                return NOTIFICATION_TOTAL_QUEUE_SIZE;
+            }
+        });
     }
 
     public void register(NotificationEndpoint endpoint, InternalResourceDetailsType resourceDetailsType,
@@ -123,8 +143,8 @@ public class EndpointQueue {
                 } catch (Throwable t) {
                     log.error(t, t);
                 } finally {
-                    concurrentStatsCollector.addStat(size, MSGS_PUBLISHED_TO_ENDPOINT);
-                    concurrentStatsCollector.addStat(totalTime, MSGS_PUBLISHED_TO_ENDPOINT_TIME);
+                    concurrentStatsCollector.addStat(size, NOTIFICATIONS_PUBLISHED_TO_ENDPOINT);
+                    concurrentStatsCollector.addStat(totalTime, NOTIFICATIONS_PUBLISHED_TO_ENDPOINT_TIME);
                 }
             }
         };
