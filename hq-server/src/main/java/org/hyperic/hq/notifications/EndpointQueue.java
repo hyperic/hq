@@ -62,7 +62,8 @@ public class EndpointQueue {
     private ThreadPoolTaskScheduler notificationExecutor;
     @Autowired
     private ConcurrentStatsCollector concurrentStatsCollector;
-
+    @Autowired
+    private ExpirationManager expirationManager;
     // TODO~ change to write through versioning (each node would have versioning -
     // write on one version, read another, then sync between them), w/o will pose problems in scale
     private final Map<Long, AccumulatedRegistrationData> registrationData = new HashMap<Long, AccumulatedRegistrationData>();
@@ -123,6 +124,8 @@ public class EndpointQueue {
         if (!endpoint.canPublish()) {
             return;
         }
+//        final Callable<> task = new Callable<>() {
+//            public Object call() throws Exception {
         final Runnable task = new Runnable() {
             public void run() {
                 int size = 0;
@@ -132,13 +135,36 @@ public class EndpointQueue {
                     InternalNotificationReport report = null;
                     final long start = System.currentTimeMillis();
                     final Collection<String> messages = new ArrayList<String>();
+                    List<InternalNotificationReport> reports = new ArrayList<InternalNotificationReport>();
                     while (report == null || !report.getNotifications().isEmpty()) {
                         report = poll(registrationId, BATCH_SIZE);
+                        reports.add(report);
                         final String toPublish = transformer.transform(report);
                         messages.add(toPublish);
                         size += report.getNotifications().size();
                     }
-                    endpoint.publishMessagesInBatch(messages);
+                    boolean[] successfulPublishments = endpoint.publishMessagesInBatch(messages);
+                    // if a publishing attempt has been made
+                    if (successfulPublishments.length>0) {
+                        // retry the reports which were failed to be published 
+                        List<InternalNotificationReport> failedPublishments = new ArrayList<InternalNotificationReport>();
+                        for(int i=0 ; i<successfulPublishments.length ; i++) {
+                            if (!successfulPublishments[i]) {
+                                failedPublishments.add(reports.get(i));
+                            }
+                        }
+                        for(InternalNotificationReport failedReport:failedPublishments) {
+                            @SuppressWarnings("unchecked")
+                            List<BaseNotification> failedNotifications = (List<BaseNotification>) failedReport.getNotifications();
+                            Map<NotificationEndpoint, Collection<BaseNotification>> map = new HashMap<NotificationEndpoint, Collection<BaseNotification>>();
+                            map.put(endpoint, failedNotifications);
+                            publishAsync(map);
+                        }
+                        // if the last try was a failure, it means that problem sending notifications to the endpoint has happened before finishing the whole messages transmission
+                        if (!successfulPublishments[successfulPublishments.length-1]) {
+                            expirationManager.setForExpiration(endpoint);
+                        }
+                    }
                     totalTime = System.currentTimeMillis() - start;
                 } catch (Throwable t) {
                     log.error(t, t);

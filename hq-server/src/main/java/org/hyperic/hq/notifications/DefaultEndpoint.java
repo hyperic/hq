@@ -2,6 +2,8 @@ package org.hyperic.hq.notifications;
 
 import java.util.Collection;
 
+import edu.emory.mathcs.backport.java.util.Arrays;
+
 
 public class DefaultEndpoint extends NotificationEndpoint {
 
@@ -20,6 +22,10 @@ public class DefaultEndpoint extends NotificationEndpoint {
     }
 
     @Override
-    public void publishMessagesInBatch(Collection<String> messages) {}
+    public boolean[] publishMessagesInBatch(Collection<String> messages) {
+        boolean[] successfulPublishments = new boolean[messages.size()];
+        Arrays.fill(successfulPublishments, true);
+        return successfulPublishments;
+    }
 
 }

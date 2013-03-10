@@ -13,7 +13,7 @@ public abstract class NotificationEndpoint {
     
     public abstract boolean canPublish();
 
-    public abstract void publishMessagesInBatch(Collection<String> messages);
+    public abstract boolean[] publishMessagesInBatch(Collection<String> messages);
     
     public long getRegistrationId() {
         return id;

@@ -3,6 +3,7 @@ package org.hyperic.hq.notifications;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.apache.commons.logging.Log;
@@ -73,7 +74,7 @@ public class HttpEndpoint extends NotificationEndpoint {
     }
 
     @Override
-    public void publishMessagesInBatch(Collection<String> messages) {
+    public boolean[] publishMessagesInBatch(Collection<String> messages) {
         DefaultHttpClient client = null;
         try {
             if (scheme.equalsIgnoreCase("https")) {
@@ -92,9 +93,12 @@ public class HttpEndpoint extends NotificationEndpoint {
             authCache.put(targetHost, basicAuth);
             final BasicHttpContext localcontext = new BasicHttpContext();
             localcontext.setAttribute(ClientContext.AUTH_CACHE, authCache);
+            boolean[] successResponse = new boolean[messages.size()];
+            int i=0;
             for (final String message : messages) {
-                publishMessage(client, message, targetHost, localcontext);
+                successResponse[i++]=publishMessage(client, message, targetHost, localcontext);
             }
+            return successResponse;
         } catch (IOException e) {
 // XXX do we spool messages?  do we retry? do we just drop them :-(
             throw new SystemException(e);
@@ -103,7 +107,7 @@ public class HttpEndpoint extends NotificationEndpoint {
         }
     }
 
-    private void publishMessage(DefaultHttpClient client, String message, HttpHost targetHost,
+    private boolean publishMessage(DefaultHttpClient client, String message, HttpHost targetHost,
                                 BasicHttpContext localcontext) throws IOException {
         final boolean debug = log.isDebugEnabled();
         final HttpPost post = new HttpPost(url.getPath());
@@ -111,9 +115,10 @@ public class HttpEndpoint extends NotificationEndpoint {
         post.setEntity(entity);
         if (debug) log.debug(post.getRequestLine());
         final HttpResponse resp = client.execute(targetHost, post, localcontext);
+        HttpEntity httpRes = resp.getEntity();
         // The entire response stream must be read if another connection to the server is made with the current 
         // client object
-        final String respBuf= EntityUtils.toString(resp.getEntity());
+        final String respBuf= EntityUtils.toString(httpRes);
         if (debug) {
             try {
                 log.debug(resp.getStatusLine() + ", response=[" + respBuf + "]");
@@ -121,6 +126,7 @@ public class HttpEndpoint extends NotificationEndpoint {
                 log.debug(e,e);
             }
         }
+        return true;
     }
 
     @Override
