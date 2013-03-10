@@ -89,8 +89,9 @@ public class ConcurrentStatsCollector extends AbstractStatsCollector {
                                ZEVENT_REGISTERED_BUFFER_SIZE = "ZEVENT_REGISTERED_BUFFER_SIZE",
                                METRIC_NOTIFICATION_FILTERING_TIME = "METRIC_NOTIFICATION_FILTERING_TIME",
                                INVENTORY_NOTIFICATION_FILTERING_TIME = "INVENTORY_NOTIFICATION_FILTERING_TIME",
-                               MSGS_PUBLISHED_TO_ENDPOINT = "MSGS_PUBLISHED_TO_ENDPOINT",
-                               MSGS_PUBLISHED_TO_ENDPOINT_TIME = "MSGS_PUBLISHED_TO_ENDPOINT_TIME";
+                               NOTIFICATIONS_PUBLISHED_TO_ENDPOINT = "NOTIFICATIONS_PUBLISHED_TO_ENDPOINT",
+                               NOTIFICATIONS_PUBLISHED_TO_ENDPOINT_TIME = "NOTIFICATIONS_PUBLISHED_TO_ENDPOINT_TIME",
+                               NOTIFICATION_TOTAL_QUEUE_SIZE = "NOTIFICATION_TOTAL_QUEUE_SIZE";
     private TaskScheduler taskScheduler;
 
     @Override
