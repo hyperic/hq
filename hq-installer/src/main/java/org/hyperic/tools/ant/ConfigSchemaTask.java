@@ -31,7 +31,9 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.security.KeyStoreException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.tools.ant.BuildException;
@@ -71,6 +73,8 @@ public class ConfigSchemaTask
     private ConfigResponse itsResponse;
     private final Getline gl;
 
+    private List<EncryptProperty> encryptProperties = new ArrayList<EncryptProperty>();
+    
     public ConfigSchemaTask () {
         try {
             Sigar.load();
@@ -115,6 +119,11 @@ public class ConfigSchemaTask
     public void setReplaceInstallDir( boolean b ) {
         itsReplaceInstallDir = b;
     }
+    
+    public void addEncryptProperty(EncryptProperty encryptProperty){
+        encryptProperties.add(encryptProperty);
+    }
+    
     @Override
 	public void execute () throws BuildException {
         
@@ -220,6 +229,11 @@ public class ConfigSchemaTask
         while ( iter.hasNext() ) {
             key = (String) iter.next();
             value = mergedResponse.getValue(key);
+            for (EncryptProperty encryptProperty:encryptProperties){
+                if(key.equals(encryptProperty.getProperty())){
+                    value = encryptProperty.encode(value);
+                }
+            }
             props.setProperty(key, value);
         }
         FileOutputStream fos = null;

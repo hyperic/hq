@@ -135,6 +135,20 @@ public class AddResourcesPrepareAction
                                  HttpServletResponse response) throws Exception {
 
         AddResourcesForm addForm = (AddResourcesForm) form;
+        String nameFilter = addForm.getNameFilter();
+        if (nameFilter != null) {
+            String queryStr = request.getQueryString() ;
+            if (queryStr != null && queryStr.indexOf("nameFilter=") != -1) {
+                // if nameFilter is sent as query param we have an encoding problem and we have to fix it 
+                nameFilter = new String(nameFilter.getBytes("8859_1"),"UTF8");
+                addForm.setNameFilter(nameFilter);
+                request.setAttribute("nameFilter", nameFilter);
+            }
+            else {
+                addForm.setNameFilter(nameFilter);
+                request.setAttribute("nameFilter", nameFilter);
+            }
+        }
 
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(session);

@@ -727,9 +727,6 @@ extends BaseConfig {
 					.append("  username: ")
 					.append(config.getValue("server.admin.username"))
 					.append(nl)
-					.append("  password: ")
-					.append(config.getValue("server.admin.password"))
-					.append(nl)
 					.append(nl)
 					.append(
 							" To change your password, log in to the HQ server, click the \"Administration\"")
