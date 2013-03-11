@@ -193,7 +193,7 @@ public class ResourceMapper {
         
         final HashMap<String,String> configValues = new HashMap<String,String>() ; 
         
-        String moRefKey = HQConstants.MOREF;
+        String moRefKey = HQConstants.MORID;
         String moRef = cprops.getProperty(moRefKey);
         if (moRef!=null) {
             configValues.put(moRefKey,moRef);
@@ -228,7 +228,7 @@ public class ResourceMapper {
 				configValues.put(entry.getKey(), value) ;  
 			}//EO while there are more attributes 
 		}//EO while there are more config responses 
-        String moRefKey = HQConstants.MOREF;
+        String moRefKey = HQConstants.MORID;
         String moRef = cprops.getProperty(moRefKey);
         if (moRef!=null) {
             configValues.put(moRefKey,moRef);

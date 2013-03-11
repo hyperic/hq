@@ -34,6 +34,7 @@ import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseValidatorForm;
+import org.hyperic.util.StringUtil;
 
 public class SystemConfigForm
     extends BaseValidatorForm {
@@ -140,19 +141,18 @@ public class SystemConfigForm
 
         String alertNotificationsAllowedStr = prop.getProperty(HQConstants.AlertNotificationsEnabled, "true");
         _alertNotificationsAllowed = Boolean.valueOf(alertNotificationsAllowedStr).booleanValue();
-        
+
         //load vCenter props
-        for (Object property : prop.keySet()) {
-            if (property.toString().startsWith(HQConstants.vCenterURL)) {
-                setvCenterURL(prop.getProperty(property.toString()));
-            }
-            else if (property.toString().startsWith(HQConstants.vCenterUser)) {
-                setvCenterUser(prop.getProperty(property.toString()));
-            }
-            else if (property.toString().startsWith(HQConstants.vCenterPassword)) {
-                setvCenterPassword(prop.getProperty(property.toString()));
-            }
+        if (!StringUtil.isNullOrEmpty(prop.getProperty(HQConstants.vCenterURL + "_0"))) {
+            setvCenterURL(prop.getProperty(HQConstants.vCenterURL + "_0"));
         }
+        if (!StringUtil.isNullOrEmpty(prop.getProperty(HQConstants.vCenterUser + "_0"))) {
+            setvCenterUser(prop.getProperty(HQConstants.vCenterUser + "_0"));
+        }
+        if (!StringUtil.isNullOrEmpty(prop.getProperty(HQConstants.vCenterPassword + "_0"))) {
+            setvCenterPassword(prop.getProperty(HQConstants.vCenterPassword + "_0"));
+        }
+
     }
 
     /**
@@ -225,11 +225,6 @@ public class SystemConfigForm
         prop.setProperty(HQConstants.AlertsEnabled, String.valueOf(_alertsAllowed));
         prop.setProperty(HQConstants.AlertNotificationsEnabled, String.valueOf(_alertNotificationsAllowed));
 
-        if (!getvCenterURL().isEmpty() && !getvCenterUser().isEmpty() && !getvCenterPassword().isEmpty()) {
-            prop.setProperty(HQConstants.vCenterURL + "_1", getvCenterURL()); 
-            prop.setProperty(HQConstants.vCenterUser+ "_1", getvCenterUser());
-            prop.setProperty(HQConstants.vCenterPassword+ "_1", getvCenterPassword()); 
-        }
         return prop;
     }
 

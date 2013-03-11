@@ -35,8 +35,8 @@
     
     <composite-id> 
 	
-	<key-property name="MORef" type="string">
-			<column name="MOREF" not-null="true" length="64"/>
+	<key-property name="morId" type="string">
+			<column name="MORID" not-null="true" length="64"/>
    	 </key-property>
             
 	<key-property name="vcUUID" type="string">
