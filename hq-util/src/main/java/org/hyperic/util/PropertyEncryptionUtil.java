@@ -109,6 +109,7 @@ public class PropertyEncryptionUtil {
         // Wait while another thread is executing this process.
         int tries = 10;
         while (!lock() && tries > 0) {
+	    tries--;
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException ignore) { /* ignore */ }
