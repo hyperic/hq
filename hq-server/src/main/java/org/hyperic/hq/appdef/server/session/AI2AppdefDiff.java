@@ -566,7 +566,7 @@ public class AI2AppdefDiff {
         if (macs!=null) {
             VMID vmid = this.vmMgr.getVMID(macs);
             if (vmid!=null) {
-                aicprops.setValue(HQConstants.MOREF, vmid.getMoref());
+                aicprops.setValue(HQConstants.MORID, vmid.getMoref());
                 aicprops.setValue(HQConstants.VCUUID, vmid.getVcUUID());
             }
         }
