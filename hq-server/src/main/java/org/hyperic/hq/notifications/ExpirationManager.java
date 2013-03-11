@@ -1,125 +1,70 @@
 package org.hyperic.hq.notifications;
 
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
+import javax.annotation.PostConstruct;
+
+import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.notifications.filtering.MetricDestinationEvaluator;
+import org.hyperic.hq.notifications.filtering.ResourceDestinationEvaluator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
+/**
+ * @author yakarn
+ */
 @Component
 public class ExpirationManager {
     protected final static long EXPIRATION_DURATION = /*10*60*/30*1000;
     @Autowired
-    private ThreadPoolTaskScheduler executor;
-    protected Queue<Expiration> expirationCandidates = new ConcurrentLinkedQueue<Expiration>();
-//    protected AtomicReference<NotificationEndpoint> currExpirationCandidate; 
-    protected NotificationEndpoint currExpirationCandidate;
-    protected Object notificationEndpointMonitor = new Object();
-    protected Thread expirationThread;
-    public ExpirationManager() {
-//        executor.execute(
-        expirationThread = new Thread(
-                new Runnable() {
-                    public void run() {
-                        while (true) {
-                            long sleepPeriod;
-                            synchronized (notificationEndpointMonitor) {
-                                Expiration nextExpiration = ExpirationManager.this.expirationCandidates.poll();
-                                if (nextExpiration==null) {
-                                    sleepPeriod = ExpirationManager.EXPIRATION_DURATION; 
-                                } else {
-                                    currExpirationCandidate = nextExpiration.getEndpoint();
-                                    sleepPeriod = nextExpiration.getExpirationTime() - System.currentTimeMillis();
-                                }
-                            }
-                            
-                            try {
-                                Thread.sleep(sleepPeriod);
-                            }catch(InterruptedException e) {
-                                //TODO~ ?
-                            }
-                            
-                            synchronized (notificationEndpointMonitor) {
-                                if (currExpirationCandidate!=null) {
-                                    expire(currExpirationCandidate);    
-                                }
-                            }
-                        }
-                    }
-                });
-        expirationThread.start();
+    private ScheduledThreadPoolExecutor executor;
+    @Autowired
+    MetricDestinationEvaluator metricEvaluator;
+    @Autowired
+    ResourceDestinationEvaluator resourceEvaluator;
+    EndpointQueue endpointQueue;
+    protected Map<NotificationEndpoint,ScheduledFuture<?>> expirationCandidates = new ConcurrentHashMap<NotificationEndpoint,ScheduledFuture<?>>();    
+    
+    @PostConstruct
+    public void init() {
+        endpointQueue = (EndpointQueue) Bootstrap.getBean("endpointQueue");
+        Bootstrap.getBean(EndpointQueue.class);
     }
-    
-    
-    public void addExpiration(NotificationEndpoint endpoint) {
-        Expiration newExpiration = new Expiration(endpoint,System.currentTimeMillis() + ExpirationManager.EXPIRATION_DURATION);
-        synchronized (notificationEndpointMonitor) {
-            if ((this.currExpirationCandidate==null || !this.currExpirationCandidate.equals(endpoint)) && !this.expirationCandidates.contains(newExpiration)) {
-                this.expirationCandidates.add(newExpiration);
-            }
+
+    public void addExpiration(final NotificationEndpoint endpoint) {
+        if (this.expirationCandidates.containsKey(endpoint)) {
+            return;
         }
+        ScheduledFuture<?> future = executor.schedule(new Runnable() {
+            public void run() {
+                expire(endpoint);
+                expirationCandidates.remove(endpoint);
+            }            
+        },ExpirationManager.EXPIRATION_DURATION,TimeUnit.MILLISECONDS);
+        this.expirationCandidates.put(endpoint,future);
     }
-
-
     public void removeExpiration(NotificationEndpoint endpoint) {
-//        boolean isUnExpiredCurrEndpoint = this.currExpirationCandidate.compareAndSet(endpoint, null);
-        synchronized (notificationEndpointMonitor) {
-            if (this.currExpirationCandidate!=null && this.currExpirationCandidate.equals(endpoint)) {
-                this.currExpirationCandidate=null;
-                this.expirationThread.interrupt();
-            }
+        ScheduledFuture<?> future = this.expirationCandidates.get(endpoint);
+        if (future==null) {
+            return;
         }
-        this.expirationCandidates.remove(new Expiration(endpoint,null));
+        if (future.cancel(false)) {
+            this.expirationCandidates.remove(endpoint);
+        }
     }
 
     protected void expire(NotificationEndpoint expirationCandidate) {
-        
-    }
-    
-    protected static class Expiration {
-        protected Long expirationTime;
-        protected NotificationEndpoint endpoint;
-        
-        public Expiration(NotificationEndpoint endpoint, Long expirationTime) {
-            this.expirationTime = expirationTime;
-            this.endpoint = endpoint;
-        }
-        public Long getExpirationTime() {
-            return expirationTime;
-        }
-        public void setExpirationTime(Long expirationTime) {
-            this.expirationTime = expirationTime;
-        }
-        public NotificationEndpoint getEndpoint() {
-            return endpoint;
-        }
-        public void setEndpoint(NotificationEndpoint endpoint) {
-            this.endpoint = endpoint;
-        }
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ((endpoint == null) ? 0 : endpoint.hashCode());
-            return result;
-        }
-        @Override
-        public boolean equals(Object obj) {
-            if(this == obj) return true;
-            if(obj == null) return false;
-            if(getClass() != obj.getClass()) return false;
-            Expiration other = (Expiration) obj;
-            if(endpoint == null) {
-                if(other.endpoint != null) return false;
-            }else if(!endpoint.equals(other.endpoint)) return false;
-            return true;
-        }
+        this.endpointQueue.unregister(expirationCandidate.getRegistrationId());
+        this.metricEvaluator.unregisterAll(expirationCandidate);
+        this.resourceEvaluator.unregisterAll(expirationCandidate);
     }
     
     public static void main(String[] args) throws Throwable {
-        final Long l0 = new Long(3);
+        /*final Long l0 = new Long(3);
         final AtomicReference<Long> l = new AtomicReference<Long>(l0);
         
         Runnable r0= new Runnable() {
@@ -142,5 +87,20 @@ public class ExpirationManager {
         new Thread(r0).start();
         Thread.sleep(1000*2);
         new Thread(r1).start();
+        */
+        
+        ScheduledThreadPoolExecutor e = new ScheduledThreadPoolExecutor(1);
+        ScheduledFuture<?> future = e.schedule(new Runnable() {
+            public void run() {
+                System.out.println("A");
+                while(true) {}
+            }
+        }, 5, TimeUnit.SECONDS);
+        System.out.println();
+//        e.schedule(new Runnable() {
+//            public void run() {
+//                System.out.println("B");
+//            }
+//        }, 1, TimeUnit.SECONDS);
     }//EOM 
 }

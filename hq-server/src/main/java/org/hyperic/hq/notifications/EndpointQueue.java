@@ -48,7 +48,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
-@Component
+@Component("endpointQueue")
 public class EndpointQueue {
     private final Log log = LogFactory.getLog(EndpointQueue.class);
 // XXX should make this configurable in some way
@@ -163,7 +163,7 @@ public class EndpointQueue {
                         // if the last try was a failure, it means that problem sending notifications to the endpoint has happened before finishing the whole messages transmission
                         if (!successfulPublishments[successfulPublishments.length-1]) {
                             expirationManager.addExpiration(endpoint);
-                        } else { // otherwise, a successfull communication has happened, then make sure the registration wont expire
+                        } else { // otherwise, a successful communication has happened, then make sure the registration wont expire
                             expirationManager.removeExpiration(endpoint);
                         }
                     }
