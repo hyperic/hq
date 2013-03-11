@@ -53,7 +53,7 @@ public class EndpointQueue {
     private final Log log = LogFactory.getLog(EndpointQueue.class);
 // XXX should make this configurable in some way
     private static final int QUEUE_LIMIT = 100000;
-    private static final long TASK_INTERVAL = 30000;
+    private static final long TASK_INTERVAL = 5000;//30000;
     private static final String NOTIFICATIONS_PUBLISHED_TO_ENDPOINT = ConcurrentStatsCollector.NOTIFICATIONS_PUBLISHED_TO_ENDPOINT;
     private static final String NOTIFICATIONS_PUBLISHED_TO_ENDPOINT_TIME = ConcurrentStatsCollector.NOTIFICATIONS_PUBLISHED_TO_ENDPOINT_TIME;
     private static final String NOTIFICATION_TOTAL_QUEUE_SIZE = ConcurrentStatsCollector.NOTIFICATION_TOTAL_QUEUE_SIZE;

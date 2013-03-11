@@ -40,7 +40,9 @@ public class ExpirationManager {
         }
         ScheduledFuture<?> future = executor.schedule(new Runnable() {
             public void run() {
-                expire(endpoint);
+                endpointQueue.unregister(endpoint.getRegistrationId());
+                metricEvaluator.unregisterAll(endpoint);
+                resourceEvaluator.unregisterAll(endpoint);
                 expirationCandidates.remove(endpoint);
             }            
         },ExpirationManager.EXPIRATION_DURATION,TimeUnit.MILLISECONDS);
@@ -56,12 +58,6 @@ public class ExpirationManager {
         }
     }
 
-    protected void expire(NotificationEndpoint expirationCandidate) {
-        this.endpointQueue.unregister(expirationCandidate.getRegistrationId());
-        this.metricEvaluator.unregisterAll(expirationCandidate);
-        this.resourceEvaluator.unregisterAll(expirationCandidate);
-    }
-    
     public static void main(String[] args) throws Throwable {
         /*final Long l0 = new Long(3);
         final AtomicReference<Long> l = new AtomicReference<Long>(l0);
