@@ -126,7 +126,8 @@ public class HttpEndpoint extends NotificationEndpoint {
                 log.debug(e,e);
             }
         }
-        return true;
+        int status = resp.getStatusLine().getStatusCode();
+        return status==200;
     }
 
     @Override

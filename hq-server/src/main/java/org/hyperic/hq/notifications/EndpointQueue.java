@@ -162,7 +162,9 @@ public class EndpointQueue {
                         }
                         // if the last try was a failure, it means that problem sending notifications to the endpoint has happened before finishing the whole messages transmission
                         if (!successfulPublishments[successfulPublishments.length-1]) {
-                            expirationManager.setForExpiration(endpoint);
+                            expirationManager.addExpiration(endpoint);
+                        } else { // otherwise, a successfull communication has happened, then make sure the registration wont expire
+                            expirationManager.removeExpiration(endpoint);
                         }
                     }
                     totalTime = System.currentTimeMillis() - start;
