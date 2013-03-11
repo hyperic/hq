@@ -1,5 +1,7 @@
 package org.hyperic.hq.notifications;
 
+import java.util.Collection;
+
 
 public class DefaultEndpoint extends NotificationEndpoint {
 
@@ -18,6 +20,6 @@ public class DefaultEndpoint extends NotificationEndpoint {
     }
 
     @Override
-    public void publishMessage(String message) {}
+    public void publishMessagesInBatch(Collection<String> messages) {}
 
 }

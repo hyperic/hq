@@ -26,12 +26,14 @@ package org.hyperic.hq.notifications;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
@@ -40,6 +42,8 @@ import org.hyperic.hq.notifications.model.BaseNotification;
 import org.hyperic.hq.notifications.model.InternalResourceDetailsType;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.util.Transformer;
+import org.hyperic.util.stats.StatCollector;
+import org.hyperic.util.stats.StatUnreachableException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
@@ -48,10 +52,12 @@ import org.springframework.stereotype.Component;
 public class EndpointQueue {
     private final Log log = LogFactory.getLog(EndpointQueue.class);
 // XXX should make this configurable in some way
-    protected final static int QUEUE_LIMIT = 10000;
+    private static final int QUEUE_LIMIT = 100000;
     private static final long TASK_INTERVAL = 30000;
-    private static final String MSGS_PUBLISHED_TO_ENDPOINT = ConcurrentStatsCollector.MSGS_PUBLISHED_TO_ENDPOINT;
-    private static final String MSGS_PUBLISHED_TO_ENDPOINT_TIME = ConcurrentStatsCollector.MSGS_PUBLISHED_TO_ENDPOINT_TIME;
+    private static final String NOTIFICATIONS_PUBLISHED_TO_ENDPOINT = ConcurrentStatsCollector.NOTIFICATIONS_PUBLISHED_TO_ENDPOINT;
+    private static final String NOTIFICATIONS_PUBLISHED_TO_ENDPOINT_TIME = ConcurrentStatsCollector.NOTIFICATIONS_PUBLISHED_TO_ENDPOINT_TIME;
+    private static final String NOTIFICATION_TOTAL_QUEUE_SIZE = ConcurrentStatsCollector.NOTIFICATION_TOTAL_QUEUE_SIZE;
+    private static final int BATCH_SIZE = 50000;
     @Autowired
     private ThreadPoolTaskScheduler notificationExecutor;
     @Autowired
@@ -72,8 +78,24 @@ public class EndpointQueue {
     
     @PostConstruct
     public void init() {
-        concurrentStatsCollector.register(MSGS_PUBLISHED_TO_ENDPOINT);
-        concurrentStatsCollector.register(MSGS_PUBLISHED_TO_ENDPOINT_TIME);
+        concurrentStatsCollector.register(NOTIFICATIONS_PUBLISHED_TO_ENDPOINT);
+        concurrentStatsCollector.register(NOTIFICATIONS_PUBLISHED_TO_ENDPOINT_TIME);
+        concurrentStatsCollector.register(new StatCollector() {
+            public long getVal() throws StatUnreachableException {
+                Collection<AccumulatedRegistrationData> tmp;
+                synchronized (registrationData) {
+                    tmp = new ArrayList<AccumulatedRegistrationData>(registrationData.values());
+                }
+                long rtn = 0;
+                for (final AccumulatedRegistrationData data : tmp) {
+                    rtn += data.getAccumulatedNotificationsQueue().size();
+                }
+                return rtn;
+            }
+            public String getId() {
+                return NOTIFICATION_TOTAL_QUEUE_SIZE;
+            }
+        });
     }
 
     public void register(NotificationEndpoint endpoint, InternalResourceDetailsType resourceDetailsType,
@@ -107,26 +129,27 @@ public class EndpointQueue {
                 long totalTime = 0;
                 try {
                     final long registrationId = endpoint.getRegistrationId();
-                    final InternalNotificationReport report = poll(registrationId);
-                    if (report.getNotifications().isEmpty()) {
-                        return;
-                    }
+                    InternalNotificationReport report = null;
                     final long start = System.currentTimeMillis();
-                    final String toPublish = transformer.transform(report);
-                    endpoint.publishMessage(toPublish);
-                    // do calculations after the message is successfully sent so that we can get indications of
-                    // errors if something goes wrong
+                    final Collection<String> messages = new ArrayList<String>();
+                    while (report == null || !report.getNotifications().isEmpty()) {
+                        report = poll(registrationId, BATCH_SIZE);
+                        final String toPublish = transformer.transform(report);
+                        messages.add(toPublish);
+                        size += report.getNotifications().size();
+                    }
+                    endpoint.publishMessagesInBatch(messages);
                     totalTime = System.currentTimeMillis() - start;
-                    size = report.getNotifications().size();
                 } catch (Throwable t) {
                     log.error(t, t);
                 } finally {
-                    concurrentStatsCollector.addStat(size, MSGS_PUBLISHED_TO_ENDPOINT);
-                    concurrentStatsCollector.addStat(totalTime, MSGS_PUBLISHED_TO_ENDPOINT_TIME);
+                    concurrentStatsCollector.addStat(size, NOTIFICATIONS_PUBLISHED_TO_ENDPOINT);
+                    concurrentStatsCollector.addStat(totalTime, NOTIFICATIONS_PUBLISHED_TO_ENDPOINT_TIME);
                 }
             }
         };
-        ScheduledFuture<?> schedule = notificationExecutor.scheduleWithFixedDelay(task, TASK_INTERVAL);
+        final Date start = new Date(System.currentTimeMillis() + TASK_INTERVAL);
+        ScheduledFuture<?> schedule = notificationExecutor.scheduleWithFixedDelay(task, start, TASK_INTERVAL);
         data.setSchedule(schedule);
     }
 
@@ -152,6 +175,10 @@ public class EndpointQueue {
     }
 
     public InternalNotificationReport poll(long registrationId) {
+        return poll(Integer.MAX_VALUE);
+    }
+
+    public InternalNotificationReport poll(long registrationId, int maxSize) {
         final InternalNotificationReport rtn = new InternalNotificationReport();
         final List<BaseNotification> notifications = new ArrayList<BaseNotification>();
         synchronized (registrationData) {
@@ -159,7 +186,7 @@ public class EndpointQueue {
             if (data == null || !data.isValid()) {
                 return rtn;
             }
-            data.drainTo(notifications);
+            data.drainTo(notifications, maxSize);
             rtn.setNotifications(notifications);
             rtn.setResourceDetailsType(data.getResourceContentType());
             return rtn;

@@ -12,7 +12,10 @@
            file="${setup}.new"
            completionFile="${setup}.server-summary.txt"
            installDirPropName="installdir"
-           replaceInstallDir="true" />
+           replaceInstallDir="true" >
+       		<encryptProperty property="server.admin.password" strength="256" 
+        	encodeHashAsBase64="true"/>
+        </configSchema>
       </option>
 
       <option name="Hyperic HQ Agent">

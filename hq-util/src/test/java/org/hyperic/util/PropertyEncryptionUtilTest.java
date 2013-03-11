@@ -263,7 +263,7 @@ public class PropertyEncryptionUtilTest extends TestCase {
         super.tearDown();
         try {
             // Ensure unlock.
-            PropertyEncryptionUtil.unlock();
+            PropertyEncryptionUtil.unlock(false);
 
             // Delete existing encryption-key files. Ignore exceptions.
             this.deleteEncryptionKeyFileIfExists(ENCRYPTION_KEY_FILE_NAME);
