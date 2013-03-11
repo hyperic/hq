@@ -19,9 +19,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ExpirationManager {
-    protected final static long EXPIRATION_DURATION = /*10*60*/30*1000;
-    @Autowired
-    private ScheduledThreadPoolExecutor executor;
+    protected final static long EXPIRATION_DURATION = /*10*60*/10*1000;
+    private ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
     @Autowired
     MetricDestinationEvaluator metricEvaluator;
     @Autowired

@@ -1,6 +1,7 @@
 package org.hyperic.hq.notifications;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -99,35 +100,38 @@ public class HttpEndpoint extends NotificationEndpoint {
                 successResponse[i++]=publishMessage(client, message, targetHost, localcontext);
             }
             return successResponse;
-        } catch (IOException e) {
-// XXX do we spool messages?  do we retry? do we just drop them :-(
-            throw new SystemException(e);
         } finally {
             if (client != null) client.getConnectionManager().shutdown();
         }
     }
 
     private boolean publishMessage(DefaultHttpClient client, String message, HttpHost targetHost,
-                                BasicHttpContext localcontext) throws IOException {
+                                BasicHttpContext localcontext) {
         final boolean debug = log.isDebugEnabled();
         final HttpPost post = new HttpPost(url.getPath());
-        final HttpEntity entity = new StringEntity(message, contentType, encoding);
-        post.setEntity(entity);
-        if (debug) log.debug(post.getRequestLine());
-        final HttpResponse resp = client.execute(targetHost, post, localcontext);
-        HttpEntity httpRes = resp.getEntity();
-        // The entire response stream must be read if another connection to the server is made with the current 
-        // client object
-        final String respBuf= EntityUtils.toString(httpRes);
-        if (debug) {
-            try {
-                log.debug(resp.getStatusLine() + ", response=[" + respBuf + "]");
-            } catch (Exception e) {
-                log.debug(e,e);
+        HttpEntity entity;
+        try {
+            entity = new StringEntity(message, contentType, encoding);
+            post.setEntity(entity);
+            if (debug) log.debug(post.getRequestLine());
+            final HttpResponse resp = client.execute(targetHost, post, localcontext);
+            HttpEntity httpRes = resp.getEntity();
+            // The entire response stream must be read if another connection to the server is made with the current 
+            // client object
+            final String respBuf= EntityUtils.toString(httpRes);
+            if (debug) {
+                try {
+                    log.debug(resp.getStatusLine() + ", response=[" + respBuf + "]");
+                } catch (Exception e) {
+                    log.debug(e,e);
+                }
             }
+            int status = resp.getStatusLine().getStatusCode();
+            return status==200;
+        }catch(IOException e1) {
+            log.error(e1,e1);
+            return false;
         }
-        int status = resp.getStatusLine().getStatusCode();
-        return status==200;
     }
 
     @Override
