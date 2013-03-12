@@ -2,9 +2,6 @@ package org.hyperic.hq.notifications;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
@@ -16,48 +13,46 @@ import org.springframework.stereotype.Component;
 
 /**
  * @author yakarn
+ * 
+ * following are the assumptions I relied upon when I wrote this class:
+ * 1. concurrency - only one thread will deal (expire/abort expiration of) 
+ *    with a certain registration at a time
+ * 2. a failure sending a notification would cause it to be added again to
+ *    the endpoint queue of the relevant registration,
+ *    hence, it is reasonable to assume that unless the abortExpiration method would be called,
+ *    the next failure which will exceed the expiration duration taken from the 1st expiration, 
+ *    would trigger the expiration of the relevant registration
  */
 @Component
 public class ExpirationManager {
     protected final static long EXPIRATION_DURATION = /*10*60*/10*1000;
-    private ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
     @Autowired
     MetricDestinationEvaluator metricEvaluator;
     @Autowired
     ResourceDestinationEvaluator resourceEvaluator;
     EndpointQueue endpointQueue;
-    protected Map<NotificationEndpoint,ScheduledFuture<?>> expirationCandidates = new ConcurrentHashMap<NotificationEndpoint,ScheduledFuture<?>>();    
+    protected Map<NotificationEndpoint,Long> expirationCandidates = new ConcurrentHashMap<NotificationEndpoint,Long>();    
     
     @PostConstruct
     public void init() {
         endpointQueue = (EndpointQueue) Bootstrap.getBean("endpointQueue");
-        Bootstrap.getBean(EndpointQueue.class);
     }
     /**
      * start a countdown process regarding the given endpoint
      * @param endpoint
      */
-    public void startExpiration(final NotificationEndpoint endpoint) {
-        if (this.expirationCandidates.containsKey(endpoint)) {
-            return;
-        }
-        ScheduledFuture<?> future = executor.schedule(new Runnable() {
-            public void run() {
-                endpointQueue.unregister(endpoint.getRegistrationId());
-                metricEvaluator.unregisterAll(endpoint);
-                resourceEvaluator.unregisterAll(endpoint);
-                expirationCandidates.remove(endpoint);
-            }            
-        },ExpirationManager.EXPIRATION_DURATION,TimeUnit.MILLISECONDS);
-        this.expirationCandidates.put(endpoint,future);
-    }
-    public void abortExpiration(NotificationEndpoint endpoint) {
-        ScheduledFuture<?> future = this.expirationCandidates.get(endpoint);
-        if (future==null) {
-            return;
-        }
-        if (future.cancel(false)) {
+    public void startExpiration(final NotificationEndpoint endpoint, final long sendingTime) {
+        Long firstFailureTime = this.expirationCandidates.get(endpoint);
+        if (firstFailureTime==null) {
+            this.expirationCandidates.put(endpoint,new Long(sendingTime));
+        } else if (sendingTime-firstFailureTime>=ExpirationManager.EXPIRATION_DURATION) {
+            this.endpointQueue.unregister(endpoint.getRegistrationId());
+            this.metricEvaluator.unregisterAll(endpoint);
+            this.resourceEvaluator.unregisterAll(endpoint);
             this.expirationCandidates.remove(endpoint);
         }
+    }
+    public void abortExpiration(NotificationEndpoint endpoint) {
+        this.expirationCandidates.remove(endpoint);
     }
 }

@@ -75,7 +75,7 @@ public class HttpEndpoint extends NotificationEndpoint {
     }
 
     @Override
-    public boolean[] publishMessagesInBatch(Collection<String> messages) {
+    public BasePostingStatus[] publishMessagesInBatch(Collection<String> messages) {
         DefaultHttpClient client = null;
         try {
             if (scheme.equalsIgnoreCase("https")) {
@@ -94,22 +94,23 @@ public class HttpEndpoint extends NotificationEndpoint {
             authCache.put(targetHost, basicAuth);
             final BasicHttpContext localcontext = new BasicHttpContext();
             localcontext.setAttribute(ClientContext.AUTH_CACHE, authCache);
-            boolean[] successResponse = new boolean[messages.size()];
+            BasePostingStatus[] batchPostingStatus = new PostingStatus[messages.size()];
             int i=0;
             for (final String message : messages) {
-                successResponse[i++]=publishMessage(client, message, targetHost, localcontext);
+                batchPostingStatus[i++]=publishMessage(client, message, targetHost, localcontext);
             }
-            return successResponse;
+            return batchPostingStatus;
         } finally {
             if (client != null) client.getConnectionManager().shutdown();
         }
     }
 
-    private boolean publishMessage(DefaultHttpClient client, String message, HttpHost targetHost,
+    private BasePostingStatus publishMessage(DefaultHttpClient client, String message, HttpHost targetHost,
                                 BasicHttpContext localcontext) {
         final boolean debug = log.isDebugEnabled();
         final HttpPost post = new HttpPost(url.getPath());
         HttpEntity entity;
+        long time = System.currentTimeMillis();
         try {
             entity = new StringEntity(message, contentType, encoding);
             post.setEntity(entity);
@@ -127,10 +128,10 @@ public class HttpEndpoint extends NotificationEndpoint {
                 }
             }
             int status = resp.getStatusLine().getStatusCode();
-            return status==200;
+            return new HTTPStatus(time,status);
         }catch(IOException e1) {
             log.error(e1,e1);
-            return false;
+            return new PostingStatus(time,false);
         }
     }
 

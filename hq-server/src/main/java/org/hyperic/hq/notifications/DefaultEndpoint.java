@@ -22,10 +22,8 @@ public class DefaultEndpoint extends NotificationEndpoint {
     }
 
     @Override
-    public boolean[] publishMessagesInBatch(Collection<String> messages) {
-        boolean[] successfulPublishments = new boolean[messages.size()];
-        Arrays.fill(successfulPublishments, true);
-        return successfulPublishments;
+    public BasePostingStatus[] publishMessagesInBatch(Collection<String> messages) {
+        return null;
     }
 
 }

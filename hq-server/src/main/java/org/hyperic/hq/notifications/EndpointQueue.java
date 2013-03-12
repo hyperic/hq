@@ -119,13 +119,11 @@ public class EndpointQueue {
         }
     }
     
-    private void schedule(final NotificationEndpoint endpoint, AccumulatedRegistrationData data,
+    private void schedule(final NotificationEndpoint endpoint, final AccumulatedRegistrationData data,
                           final Transformer<InternalNotificationReport, String> transformer) {
         if (!endpoint.canPublish()) {
             return;
         }
-//        final Callable<> task = new Callable<>() {
-//            public Object call() throws Exception {
         final Runnable task = new Runnable() {
             public void run() {
                 int size = 0;
@@ -143,13 +141,13 @@ public class EndpointQueue {
                         messages.add(toPublish);
                         size += report.getNotifications().size();
                     }
-                    boolean[] successfulPublishments = endpoint.publishMessagesInBatch(messages);
+                    BasePostingStatus[] batchPostingStatus = endpoint.publishMessagesInBatch(messages);
                     // if a publishing attempt has been made
-                    if (successfulPublishments.length>0) {
+                    if (batchPostingStatus.length>0) {
                         // retry the reports which were failed to be published 
                         List<InternalNotificationReport> failedPublishments = new ArrayList<InternalNotificationReport>();
-                        for(int i=0 ; i<successfulPublishments.length ; i++) {
-                            if (!successfulPublishments[i]) {
+                        for(int i=0 ; i<batchPostingStatus.length ; i++) {
+                            if (!batchPostingStatus[i].isSuccessful()) {
                                 failedPublishments.add(reports.get(i));
                             }
                         }
@@ -160,9 +158,11 @@ public class EndpointQueue {
                             map.put(endpoint, failedNotifications);
                             publishAsync(map);
                         }
+                        
+                        data.set(batchPostingStatus);
                         // if the last try was a failure, it means that problem sending notifications to the endpoint has happened before finishing the whole messages transmission
-                        if (!successfulPublishments[successfulPublishments.length-1]) {
-                            expirationManager.startExpiration(endpoint);
+                        if (!batchPostingStatus[batchPostingStatus.length-1].isSuccessful()) {
+                            expirationManager.startExpiration(endpoint,batchPostingStatus[batchPostingStatus.length-1].getTime());
                         } else { // otherwise, a successful communication has happened, then make sure the registration wont expire
                             expirationManager.abortExpiration(endpoint);
                         }
