@@ -2056,12 +2056,6 @@ public class PlatformManagerImpl implements PlatformManager {
           
             for (Platform platform : platforms) {
                 try {
-                    
-                    for (Ip ip : platform.getIps()) {
-                        ip.setMacAddress("");
-                    }                
-                    platformDAO.save(platform);       
-                    
                     AppdefEntityID id = platform.getEntityId();
                     int typeId = platform.getAppdefResourceType().getId().intValue();                 
                     this.cpropManager.setValue(id, typeId, HQConstants.MORID, "");
