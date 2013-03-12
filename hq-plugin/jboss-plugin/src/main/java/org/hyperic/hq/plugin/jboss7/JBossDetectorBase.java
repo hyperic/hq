@@ -65,7 +65,6 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
     protected static final String SERVER = "jboss7.server";
     protected static final String HOST = "jboss7.host";
     protected static final String CONFIG = "jboss7.conf";
-    protected static final String START = "jboss7.start";
 
     abstract String getPidsQuery();
 
@@ -339,7 +338,7 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
         if ((name != null) && (baseDir != null)) {
             name = name.substring(0, name.lastIndexOf(".")) + (isWin32() ? ".bat" : ".sh");
             File script = new File(new File(baseDir, "bin"), name);
-            cf.setValue(START, script.getAbsolutePath());
+            cf.setValue(JBoss7Control.START_SCRIPT, script.getAbsolutePath());
         }
         return cf;
     }

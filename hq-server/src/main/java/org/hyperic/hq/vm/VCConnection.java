@@ -1,13 +1,14 @@
 package org.hyperic.hq.vm;
 
-public class VCCredentials {
+public class VCConnection {
      
     private String url;
     private String user;
     private String password;
+    private int index;
     private boolean lastSyncSucceeded = false;
     
-    public VCCredentials(String url, String user, String password) {
+    public VCConnection(String url, String user, String password) {
         this.url = url;
         this.user = user;
         this.password = password;
@@ -40,13 +41,13 @@ public class VCCredentials {
         this.lastSyncSucceeded = hasConnectionProblem;
     }
     
+    
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((password == null) ? 0 : password.hashCode());
         result = prime * result + ((url == null) ? 0 : url.hashCode());
-        result = prime * result + ((user == null) ? 0 : user.hashCode());
         return result;
     }
 
@@ -55,22 +56,25 @@ public class VCCredentials {
         if(this == obj) return true;
         if(obj == null) return false;
         if(getClass() != obj.getClass()) return false;
-        VCCredentials other = (VCCredentials) obj;
-        if(password == null) {
-            if(other.password != null) return false;
-        }else if(!password.equals(other.password)) return false;
+        VCConnection other = (VCConnection) obj;
         if(url == null) {
             if(other.url != null) return false;
         }else if(!url.equals(other.url)) return false;
-        if(user == null) {
-            if(other.user != null) return false;
-        }else if(!user.equals(other.user)) return false;
         return true;
     }
-    
+
     @Override
     public String toString() {
-        return "VCCredentials [url=" + url + ", user=" + user + ", password=" + password + "]";
+        return "VCConnection [url=" + url + ", user=" + user + ", password=" + password + ", index=" + index
+                + ", lastSyncSucceeded=" + lastSyncSucceeded + "]";
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
     }
 
 

@@ -109,8 +109,8 @@
 	<bean name="CloudProviderServiceImpl" class="org.hyperic.hq.api.services.impl.CloudProviderServiceImpl" />
 	
 	<bean name="sessionManagementImpl" class="org.hyperic.hq.api.services.impl.SessionManagementServiceImpl" />
-
-    <bean name="adminServiceImpl" class="org.hyperic.hq.api.services.impl.AdminServiceImpl" />
+    
+    <bean name="serverConfigImpl" class="org.hyperic.hq.api.services.impl.ServerConfigImpl" />
 	
 	<jaxrs:server id="resourceService" address="/resource">
 		<jaxrs:serviceBeans>
@@ -178,9 +178,10 @@
         </jaxrs:features>        
     </jaxrs:server>
 
-    <jaxrs:server id="adminService" address="/admin">
+    
+    <jaxrs:server id="serverConfig" address="/serverConfig">
         <jaxrs:serviceBeans>
-            <ref bean="adminServiceImpl" />
+            <ref bean="serverConfigImpl" />
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <ref bean="jaxbProvider" />

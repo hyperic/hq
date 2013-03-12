@@ -130,7 +130,7 @@ public class AgentClient {
 
     private long cmdPing(int numAttempts)
             throws AgentConnectionException, AgentRemoteException
-            {
+    {
         AgentConnectionException lastExc;
 
         lastExc = new AgentConnectionException("Failed to connect to agent");
@@ -150,7 +150,7 @@ public class AgentClient {
             }
         }
         throw lastExc;
-            }
+    }//cmdPing
 
     private void cmdStatus()
             throws AgentConnectionException, AgentRemoteException
@@ -1074,7 +1074,7 @@ public class AgentClient {
 
     private int cmdStart(boolean force) 
             throws AgentInvokeException
-            {
+    {
         ServerSocket startupSock;
         ProviderInfo providerInfo;
         Properties bootProps;
@@ -1147,7 +1147,7 @@ public class AgentClient {
             return 0;            
         }
 
-            }
+    }//cmdStart
 
     private static void cmdSetProp(String propKey, String propVal) throws AgentConfigException {
         ensurePropertiesEncryption();
@@ -1365,6 +1365,7 @@ public class AgentClient {
         AgentClient client;
         try {
             if (args[0].equals(START)) {
+                PropertyEncryptionUtil.unlock(true);//file state should be 'unlocked' when the agent starts.
                 // Only generate tokens on agent startup.
                 client = initializeAgent(true);
             } else {

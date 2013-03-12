@@ -111,7 +111,6 @@ ${line.separator}Press enter to continue...
                   failOnMissing="false"/>
     <available property="user-setup-properties.available"
                file="${setup.absolute}"/>
-    <property file="${setup.absolute}" />
     <msgfail unless="user-setup-properties.available">^^^ERROR:\
        The specified Hyperic HQ install configuration file does not exist:
          ${setup.absolute}
