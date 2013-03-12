@@ -13,7 +13,7 @@
            completionFile="${setup}.server-summary.txt"
            installDirPropName="installdir"
            replaceInstallDir="true" >
-       		<encryptProperty property="server.admin.password" strength="256" 
+       		<encryptProperty property="server.admin.password" targetProperty="server.admin.password.encrypted" strength="256" 
         	encodeHashAsBase64="true"/>
         </configSchema>
       </option>

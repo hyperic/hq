@@ -8,6 +8,16 @@ public class EncryptProperty extends DataType {
 
 
     private String property;
+    private String targetProperty;
+
+    public String getTargetProperty() {
+        return targetProperty;
+    }
+
+    public void setTargetProperty(String targetProperty) {
+        this.targetProperty = targetProperty;
+    }
+
     private int strength = 256;//set 256 as default just in case.
     private boolean encodeHashAsBase64;
 

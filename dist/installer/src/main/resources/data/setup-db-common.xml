@@ -119,7 +119,13 @@
 	<target name="replace-dbservice-values" depends="dbsetup-combine">
 		<echo>using url: ${server.database-url} </echo>
 
-		<property name="server.admin.password.encrypted" value="${server.admin.password}" />
+        <if>
+          <not><isset property="server.admin.password.encrypted"/></not>
+        <then>
+            <crypto value="${server.admin.password}" property="server.admin.password.encrypted" strength="256" encodeHashAsBase64="true" />
+        </then>
+        </if>
+
 		<!-- replace the admin info in dbsetup data file -->
 		<replace file="${data.dir}/data.xml">
 			<replacefilter token="@@@VERSION@@@" value="${hq.version}" />
