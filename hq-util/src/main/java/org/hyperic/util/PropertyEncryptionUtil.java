@@ -107,70 +107,78 @@ public class PropertyEncryptionUtil {
             throws PropertyUtilException {
 
         // Wait while another thread is executing this process.
-        while (!lock()) {
+        int tries = 10;
+        while (!lock() && tries > 0) {
+	    tries--;
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException ignore) { /* ignore */ }
         }
-
-        // Make sure that the properties file exists.
-        if (propsFileName == null || propsFileName.trim().length() < 1) {
-            throw new PropertyUtilException("Illegal Argument: propsFileName [" + propsFileName + "]");
+        if (tries <=0) {
+            throw new PropertyUtilException(LOCK_FILE_NAME + " is locked. can't continue.");
         }
-
-        // Make sure that the encryption key name is valid.
-        if (encryptionKeyFileName == null || encryptionKeyFileName.trim().length() < 1) {
-            throw new PropertyUtilException("Illegal Argument: encryptionKeyFileName [" + encryptionKeyFileName + "]");
-        }
-
-        // If there's nothing to secure then return
-        if (secureProps == null || secureProps.size() < 1) {
-            return;
-        }
-
-        // Load the properties from the filesystem.
-        Properties props = PropertyUtil.loadProperties(propsFileName);
-
-        // Check if the properties are already encrypted.
-        boolean alreadyEncrypted = isAlreadyEncrypted(props);
-
-        // 'Reference' the encryption-key file.
-        File encryptionKeyFile = new File(encryptionKeyFileName);
-
-        // The properties encryption key.
-        String encryptionKey;
-
-        // If the encryption key file exists then load it. If it doesn't exist then create one, only if the properties
-        // aren't already encrypted. If the properties are encrypted then throw an exception (we can't do much with
-        // encrypted properties if the encryption key is missing).
-        if (encryptionKeyFile.exists()) {
-            encryptionKey = getPropertyEncryptionKey(encryptionKeyFileName);
-        } else {
-            if (alreadyEncrypted) {
-                // The encryption key is new, but the properties are already encrypted.
-                throw new PropertyUtilException("The properties are already encrypted, but the encryption key is missing");
+        
+        try {
+    
+            // Make sure that the properties file exists.
+            if (propsFileName == null || propsFileName.trim().length() < 1) {
+                throw new PropertyUtilException("Illegal Argument: propsFileName [" + propsFileName + "]");
             }
-            encryptionKey = createAndStorePropertyEncryptionKey(encryptionKeyFileName);
-        }
-
-        // Collect all the properties that should be encrypted but still aren't
-        Map<String, String> unEncProps = new HashMap<String, String>();
-        for (Enumeration<?> propKeys = props.propertyNames(); propKeys.hasMoreElements(); ) {
-            String key = (String) propKeys.nextElement();
-            String value = props.getProperty(key);
-
-            if (value != null && secureProps.contains(key) && !SecurityUtil.isMarkedEncrypted(value)) {
-                unEncProps.put(key, value);
+    
+            // Make sure that the encryption key name is valid.
+            if (encryptionKeyFileName == null || encryptionKeyFileName.trim().length() < 1) {
+                throw new PropertyUtilException("Illegal Argument: encryptionKeyFileName [" + encryptionKeyFileName + "]");
             }
+    
+            // If there's nothing to secure then return
+            if (secureProps == null || secureProps.size() < 1) {
+                return;
+            }
+    
+            // Load the properties from the filesystem.
+            Properties props = PropertyUtil.loadProperties(propsFileName);
+    
+            // Check if the properties are already encrypted.
+            boolean alreadyEncrypted = isAlreadyEncrypted(props);
+    
+            // 'Reference' the encryption-key file.
+            File encryptionKeyFile = new File(encryptionKeyFileName);
+    
+            // The properties encryption key.
+            String encryptionKey;
+    
+            // If the encryption key file exists then load it. If it doesn't exist then create one, only if the properties
+            // aren't already encrypted. If the properties are encrypted then throw an exception (we can't do much with
+            // encrypted properties if the encryption key is missing).
+            if (encryptionKeyFile.exists()) {
+                encryptionKey = getPropertyEncryptionKey(encryptionKeyFileName);
+            } else {
+                if (alreadyEncrypted) {
+                    // The encryption key is new, but the properties are already encrypted.
+                    throw new PropertyUtilException("The properties are already encrypted, but the encryption key is missing");
+                }
+                encryptionKey = createAndStorePropertyEncryptionKey(encryptionKeyFileName);
+            }
+    
+            // Collect all the properties that should be encrypted but still aren't
+            Map<String, String> unEncProps = new HashMap<String, String>();
+            for (Enumeration<?> propKeys = props.propertyNames(); propKeys.hasMoreElements(); ) {
+                String key = (String) propKeys.nextElement();
+                String value = props.getProperty(key);
+    
+                if (value != null && secureProps.contains(key) && !SecurityUtil.isMarkedEncrypted(value)) {
+                    unEncProps.put(key, value);
+                }
+            }
+    
+            // Encrypt secure properties.
+            if (unEncProps.size() > 0) {
+                PropertyUtil.storeProperties(propsFileName, encryptionKey, unEncProps);
+            }
+        } finally {  
+            //Delete the lock file to lock file that prevent parallel processing.
+            unlock(false);
         }
-
-        // Encrypt secure properties.
-        if (unEncProps.size() > 0) {
-            PropertyUtil.storeProperties(propsFileName, encryptionKey, unEncProps);
-        }
-
-        // Delete the lock file to lock file that prevent parallel processing.
-        unlock();
     } // EOM
 
     /**
@@ -192,9 +200,13 @@ public class PropertyEncryptionUtil {
      *
      * @return true if the lock was successfully removed; false otherwise.
      */
-    static boolean unlock() {
+    public static boolean unlock(boolean shouldLog) {
         File lockFile = new File(LOCK_FILE_NAME);
-        return lockFile.delete();
+        boolean res = lockFile.delete();
+        if (res && shouldLog){
+            System.out.println(LOCK_FILE_NAME + " was deleted.");//not sure we have log file at this stage, so using system.out.
+        }
+        return res;
     }
 
     /**

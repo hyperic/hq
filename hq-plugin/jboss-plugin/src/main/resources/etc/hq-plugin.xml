@@ -1699,8 +1699,12 @@
             <option name="jboss7.user" description="Username" default="guest"/>
             <option name="jboss7.pass" description="Password" default="guest" type="secret"/>
             <option name="jboss7.host" description="Host Name"/>
-            <option name="listen.ports"
-                    description="Listening Ports" optional="true"/>
+            <option name="listen.ports" description="Listening Ports" optional="true"/>
+        </config>
+        
+        <config type="control">
+            <option name="jboss7.start.script" description="Abusulte start script path"/>
+            <option name="jboss7.start.prefix" description="Start script prefix"/>
         </config>
         <help>
             <![CDATA[
@@ -1898,6 +1902,8 @@
             <option name="jboss7.server" description="Server Name"/>
             <option name="listen.ports"
                     description="Listening Ports" optional="true"/>
+        </config>
+        <config type="control">
         </config>
         <help>
             <![CDATA[

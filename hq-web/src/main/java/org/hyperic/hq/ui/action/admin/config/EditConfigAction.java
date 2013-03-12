@@ -55,7 +55,7 @@ import org.hyperic.hq.vm.VMID;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class EditConfigAction
-    extends BaseAction {
+extends BaseAction {
 
     private final Log log = LogFactory.getLog(EditConfigAction.class.getName());
     private ConfigBoss configBoss;
@@ -63,7 +63,7 @@ public class EditConfigAction
     private VCManager vcManager;
     private SessionManager sessionManager;
     private PlatformManager platformMgr;
-    
+
     @Autowired
     public EditConfigAction(ConfigBoss configBoss, UpdateBoss updateBoss, VCManager vcManager, SessionManager sessionManager, PlatformManager platformMgr) {
         super();
@@ -79,7 +79,7 @@ public class EditConfigAction
      * <code>ConfigForm</code>.
      */
     public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
-                                 HttpServletResponse response) throws Exception {
+            HttpServletResponse response) throws Exception {
         ActionForward forward = checkSubmit(request, mapping, form);
         if (forward != null) {
             return forward;
@@ -88,7 +88,7 @@ public class EditConfigAction
         int sessionId = RequestUtils.getSessionIdInt(request);
         SystemConfigForm cForm = (SystemConfigForm) form;
         AuthzSubject subject = sessionManager.getSubject(sessionId);
-        
+
         if (cForm.isOkClicked()) {
             if (log.isTraceEnabled())
                 log.trace("Getting config");
@@ -117,12 +117,16 @@ public class EditConfigAction
 
     //Check that the vCenter attributes are correct, if not - reset the values so they will not get
     //persist in the database, if correct - trigger a collect of the VCManager.
-    private void handleVCenterSettings(SystemConfigForm cForm, AuthzSubject subject) throws RemoteException,
-            MalformedURLException, PermissionException, CPropKeyNotFoundException, AppdefEntityNotFoundException {
-        if (!vcManager.validateVCSettings(cForm.getvCenterURL(), cForm.getvCenterUser(), cForm.getvCenterPassword())) {
-            cForm.resetVCenterValues();
-        }else {
-            vcManager.registerVC(cForm.getvCenterURL(), cForm.getvCenterUser(), cForm.getvCenterPassword());
+    private void handleVCenterSettings(SystemConfigForm cForm, AuthzSubject subject) {    
+        try {
+            if(vcManager.connectionExists(0)) {
+                vcManager.updateConnectionByIndex(cForm.getvCenterURL(), cForm.getvCenterUser(), cForm.getvCenterPassword(), 0);
+            }
+            else {
+                vcManager.registerOrUpdateVC(cForm.getvCenterURL(), cForm.getvCenterUser(), cForm.getvCenterPassword());
+            }
+        }catch(Exception e) {
+            log.error(e,e);
         }
     }
 }
