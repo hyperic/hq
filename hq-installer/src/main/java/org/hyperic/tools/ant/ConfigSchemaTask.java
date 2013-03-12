@@ -231,7 +231,10 @@ public class ConfigSchemaTask
             value = mergedResponse.getValue(key);
             for (EncryptProperty encryptProperty:encryptProperties){
                 if(key.equals(encryptProperty.getProperty())){
+                    props.setProperty(key, "******");
+                    key = encryptProperty.getTargetProperty();
                     value = encryptProperty.encode(value);
+                    break;
                 }
             }
             props.setProperty(key, value);

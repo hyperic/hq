@@ -12,7 +12,7 @@
            loadFile="${setup.absolute}"
            ifDefined="server.installdir"
            completionFile="${setup}.server-summary.txt" >
-   		<encryptProperty property="server.admin.password" strength="256" 
+   		<encryptProperty property="server.admin.password" targetProperty="server.admin.password.encrypted" strength="256" 
     	encodeHashAsBase64="true"/>
     </configSchema>
   </target>
