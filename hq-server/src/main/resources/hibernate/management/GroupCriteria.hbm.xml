@@ -56,7 +56,7 @@
     </property>
 
     <property name="description" type="string">
-      <column name="DESCRIPTION" not-null="true" length="128"/>
+      <column name="DESCRIPTION" not-null="true" length="1024"/>
     </property>
 
     <property name="resourceNameRegex" type="string">

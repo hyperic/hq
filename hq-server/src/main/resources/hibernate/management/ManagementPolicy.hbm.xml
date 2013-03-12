@@ -43,7 +43,7 @@
     </version>
 
     <property name="description" type="string">
-      <column name="DESCRIPTION" not-null="true" length="128"/>
+      <column name="DESCRIPTION" not-null="true" length="1024"/>
     </property>
 
     <many-to-one name="resource" class="org.hyperic.hq.authz.server.session.Resource">
