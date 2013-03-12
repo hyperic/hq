@@ -33,8 +33,11 @@ public class ExpirationManager {
         endpointQueue = (EndpointQueue) Bootstrap.getBean("endpointQueue");
         Bootstrap.getBean(EndpointQueue.class);
     }
-
-    public void addExpiration(final NotificationEndpoint endpoint) {
+    /**
+     * start a countdown process regarding the given endpoint
+     * @param endpoint
+     */
+    public void startExpiration(final NotificationEndpoint endpoint) {
         if (this.expirationCandidates.containsKey(endpoint)) {
             return;
         }
@@ -48,7 +51,7 @@ public class ExpirationManager {
         },ExpirationManager.EXPIRATION_DURATION,TimeUnit.MILLISECONDS);
         this.expirationCandidates.put(endpoint,future);
     }
-    public void removeExpiration(NotificationEndpoint endpoint) {
+    public void abortExpiration(NotificationEndpoint endpoint) {
         ScheduledFuture<?> future = this.expirationCandidates.get(endpoint);
         if (future==null) {
             return;
@@ -57,45 +60,4 @@ public class ExpirationManager {
             this.expirationCandidates.remove(endpoint);
         }
     }
-
-    public static void main(String[] args) throws Throwable {
-        /*final Long l0 = new Long(3);
-        final AtomicReference<Long> l = new AtomicReference<Long>(l0);
-        
-        Runnable r0= new Runnable() {
-            public void run() {
-                synchronized (l0) {
-                    int i=0;
-                    while(true) {
-                        i=1;
-//                        System.out.println(".");
-                    }
-                }
-            }
-        };
-        Runnable r1= new Runnable() {
-            public void run() {
-                l.set(new Long(4));
-                System.out.println(l);
-            }
-        };
-        new Thread(r0).start();
-        Thread.sleep(1000*2);
-        new Thread(r1).start();
-        */
-        
-        ScheduledThreadPoolExecutor e = new ScheduledThreadPoolExecutor(1);
-        ScheduledFuture<?> future = e.schedule(new Runnable() {
-            public void run() {
-                System.out.println("A");
-                while(true) {}
-            }
-        }, 5, TimeUnit.SECONDS);
-        System.out.println();
-//        e.schedule(new Runnable() {
-//            public void run() {
-//                System.out.println("B");
-//            }
-//        }, 1, TimeUnit.SECONDS);
-    }//EOM 
 }
