@@ -54,6 +54,7 @@ import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourcePrototype;
 import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.api.model.resources.ComplexIp;
+import org.hyperic.hq.api.model.resources.ResourceFilterDefinition;
 import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
 import org.hyperic.hq.api.transfer.NotificationsTransfer;
 import org.hyperic.hq.api.transfer.ResourceTransfer;
@@ -431,8 +432,9 @@ public class ResourceMapper {
 
     public List<Filter<InventoryNotification, ? extends FilteringCondition<?>>> toResourceFilters(ResourceFilterRequest resourceFilterRequest,ResourceDetailsType responseMetadata) {
         List<Filter<InventoryNotification,? extends FilteringCondition<?>>> userFilters = new ArrayList<Filter<InventoryNotification,? extends FilteringCondition<?>>>();
+        ResourceFilterDefinition resourceFilterDefinition =  resourceFilterRequest.getResourceFilterDefinition();
         InternalResourceDetailsType resourceDetailsType = ResourceDetailsType.valueOf(responseMetadata);
-        userFilters.add((Filter) new ResourceContentFilter(resourceDetailsType));
+        userFilters.add((Filter) new ResourceContentFilter(resourceDetailsType, resourceFilterDefinition.getResourceIds()));
         return userFilters;
     }
 	

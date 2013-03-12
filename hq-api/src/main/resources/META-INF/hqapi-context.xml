@@ -162,7 +162,7 @@
         </jaxrs:features>        
     </jaxrs:server>
 
-	<jaxrs:server id="metrictService" address="/metric">
+	<jaxrs:server id="metricService" address="/metric">
 		<jaxrs:serviceBeans>
 			<ref bean="metricServiceImpl" />
         </jaxrs:serviceBeans>

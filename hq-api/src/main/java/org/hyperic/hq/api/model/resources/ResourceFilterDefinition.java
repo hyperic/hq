@@ -6,16 +6,17 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.hyperic.hq.api.model.RestApiConstants;
 
+import java.util.Set;
+
 @XmlRootElement(name="resourceFilterDefinition", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 @XmlType(name="ResourceFilterDefinition", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 public class ResourceFilterDefinition {
+
     @XmlAttribute
-    int[] resourceIds;
+    private Set<Integer> resourceIds;
     
-    public int[] getResourceIds() {
+    public Set<Integer> getResourceIds() {
         return resourceIds;
     }
-    public void setResourceIds(int[] resourceIds) {
-        this.resourceIds = resourceIds;
-    }
+
 }

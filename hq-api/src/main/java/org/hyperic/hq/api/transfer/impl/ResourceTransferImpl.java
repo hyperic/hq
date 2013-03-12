@@ -43,6 +43,7 @@ import org.hyperic.hq.api.model.ResourceStatusType;
 import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.api.model.Resources;
 import org.hyperic.hq.api.model.common.RegistrationID;
+import org.hyperic.hq.api.model.measurements.HttpEndpointDefinition;
 import org.hyperic.hq.api.model.resources.RegisteredResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
@@ -79,7 +80,7 @@ import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.ObjectNotFoundException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.notifications.DefaultEndpoint;
+import org.hyperic.hq.notifications.HttpEndpoint;
 import org.hyperic.hq.notifications.NotificationEndpoint;
 import org.hyperic.hq.notifications.filtering.Filter;
 import org.hyperic.hq.notifications.filtering.FilteringCondition;
@@ -166,15 +167,11 @@ public class ResourceTransferImpl implements ResourceTransfer {
 	
 
 	/**
-	 * 
-	 * @param platformID
-	 * @param resourceID if null assumed to be the internal id 
-	 * @param hierarchyDepth
-	 * @param responseMetadata
+     * @param hierarchyDepth
 	 * @return
 	 * @throws ObjectNotFoundException 
 	 */
-	private final Resource getResourceInner(final Context flowContext, int hierarcyDepth) throws ObjectNotFoundException { 
+	private final Resource getResourceInner(final Context flowContext, int hierarchyDepth) throws ObjectNotFoundException {
 		
 		Resource currentResource =  null ; 
 		try{ 
@@ -196,7 +193,7 @@ public class ResourceTransferImpl implements ResourceTransfer {
 			currentResource = flowContext.currResource ; 
 			
 			//starts from 1 
-			if(--hierarcyDepth > 0) {
+			if(--hierarchyDepth > 0) {
 				//populate the resource's children 
 				final List<org.hyperic.hq.authz.server.session.Resource> listBackendResourceChildren =
 								this.resourceManager.findChildren(flowContext.subject, flowContext.backendResource) ; 
@@ -208,7 +205,7 @@ public class ResourceTransferImpl implements ResourceTransfer {
 					//set the child in the flow's backend resource 
 					flowContext.setBackendResource(backendResourceChild) ; 
 					flowContext.resourceType = ResourceType.valueOf(backendResourceChild.getResourceType().getAppdefType())  ; 
-					resourceChild = this.getResourceInner(flowContext, hierarcyDepth) ;
+					resourceChild = this.getResourceInner(flowContext, hierarchyDepth) ;
 					currentResource.addSubResource(resourceChild) ;
 					
 				}//EO while there are more children 
@@ -474,13 +471,7 @@ public class ResourceTransferImpl implements ResourceTransfer {
 			
 		};//EO RESOURCE
 		
-		/**
-		 * 
-		 * @param resourceID naturalID/internal ID 
-		 * @param resourceManager
-		 * @return
-		 */
-		org.hyperic.hq.authz.server.session.Resource getResourceByNaturalID(final Context flowContext) throws Exception{ 
+		org.hyperic.hq.authz.server.session.Resource getResourceByNaturalID(final Context flowContext) throws Exception{
 			throw new UnsupportedOperationException("Resource Of Type " + this.name() + " does not support find by natural ID") ; 
 		}//EOM 
 		
@@ -604,17 +595,9 @@ public class ResourceTransferImpl implements ResourceTransfer {
 
 	@Transactional (readOnly=true)
     public RegisteredResourceBatchResponse getResources(ApiMessageContext messageContext,
-                                                        ResourceDetailsType responseMetadata,
-                                                        int hierarchyDepth, boolean register,
-                                                        ResourceFilterRequest resourceFilterRequest)
+                                                        ResourceDetailsType[] responseMetadata,
+                                                        int hierarchyDepth)
     throws PermissionException, NotFoundException {
-        if (resourceFilterRequest==null) {
-            if (log.isDebugEnabled()) {
-                log.debug("illegal request");
-            }
-            throw errorHandler.newWebApplicationException(
-                new Throwable(), Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.BAD_REQ_BODY);
-        }
         AuthzSubject authzSubject = messageContext.getAuthzSubject();
         final RegisteredResourceBatchResponse res = new RegisteredResourceBatchResponse(errorHandler);
         List<Resource> resources = new ArrayList<Resource>();
@@ -622,8 +605,7 @@ public class ResourceTransferImpl implements ResourceTransfer {
         for(PlatformValue pv:platforms) {
             try {
                 String fqdn = pv.getFqdn();
-                final ResourceDetailsType[] array = new ResourceDetailsType[] {responseMetadata};
-                final Context context = new Context(authzSubject, fqdn, ResourceType.PLATFORM, array, this);
+                final Context context = new Context(authzSubject, fqdn, ResourceType.PLATFORM, responseMetadata, this);
                 final Resource r = getResourceInner(context, hierarchyDepth);
                 resources.add(r);
             } catch (ObjectNotFoundException e) {
@@ -631,27 +613,27 @@ public class ResourceTransferImpl implements ResourceTransfer {
             }
         }
         res.setResources(resources);
-        if (register) {
-            // not allowing sequential registrations
-            if (this.isRegistered) {
-                throw errorHandler.newWebApplicationException(
-                    new Throwable(), Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.SEQUENTIAL_REGISTRATION);
-            }
-            this.isRegistered=true;
-            List<Filter<InventoryNotification,? extends FilteringCondition<?>>> userFilters = 
-                resourceMapper.toResourceFilters(resourceFilterRequest, responseMetadata); 
-
-//TODO~ get the destination from the user
-//            Destination dest = this.notificationsTransfer.getDummyDestination();
-            RegistrationID registrationID = new RegistrationID();
-            final NotificationEndpoint endpoint = new DefaultEndpoint(registrationID.getId());
-            final Integer authzSubjectId = authzSubject.getId();
-            notificationsTransfer.register(endpoint, ResourceDetailsType.valueOf(responseMetadata), authzSubjectId);
-            evaluator.register(endpoint, userFilters);
-            //TODO~ return a valid registration id
-            res.setRegId(registrationID);
-        }
         return res;
+    }
+
+    @Transactional (readOnly=true)
+    public RegistrationID register(ApiMessageContext messageContext, ResourceDetailsType responseMetadata, ResourceFilterRequest resourceFilterRequest)  throws PermissionException, NotFoundException {
+        AuthzSubject authzSubject = messageContext.getAuthzSubject();
+        if (this.isRegistered) {
+            throw errorHandler.newWebApplicationException(
+                    new Throwable(), Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.SEQUENTIAL_REGISTRATION);
+        }
+        this.isRegistered=true;
+        List<Filter<InventoryNotification,? extends FilteringCondition<?>>> userFilters =
+                resourceMapper.toResourceFilters(resourceFilterRequest, responseMetadata);
+
+        RegistrationID registrationID = new RegistrationID();
+        final HttpEndpointDefinition httpEndpointDefinition = resourceFilterRequest.getHttpEndpointDef();
+        final NotificationEndpoint endpoint = getHttpEndpoint(registrationID, httpEndpointDefinition);
+        final Integer authzSubjectId = authzSubject.getId();
+        notificationsTransfer.register(endpoint, ResourceDetailsType.valueOf(responseMetadata), authzSubjectId);
+        evaluator.register(endpoint, userFilters);
+        return registrationID;
     }
 
     public void unregister(NotificationEndpoint endpoint) {
@@ -689,5 +671,10 @@ public class ResourceTransferImpl implements ResourceTransfer {
             throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID);
         }
         return String.format(RESOURCE_URL, hqBaseUrl, resourceType.getLocalizedName(), appDefType, resource.getInstanceId());
+    }
+
+    private HttpEndpoint getHttpEndpoint(RegistrationID registrationID, HttpEndpointDefinition def) {
+        return new HttpEndpoint(registrationID.getId(), def.getUrl(), def.getUsername(), def.getPassword(),
+                def.getContentType(), def.getEncoding());
     }
 }//EOC 

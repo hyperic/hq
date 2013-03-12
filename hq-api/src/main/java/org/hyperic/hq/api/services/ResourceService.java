@@ -78,12 +78,16 @@ public interface ResourceService {
                          @QueryParam("responseStructure") final ResourceDetailsType[] responseStructure)
     throws SessionNotFoundException, SessionTimeoutException ;  
 	
-    @POST
+    @GET
     @Path("/")
-    RegisteredResourceBatchResponse getResources(@QueryParam("responseStructure")  final ResourceDetailsType responseMetadata,
-	        @QueryParam("hierarchyDepth") final int hierarchyDepth, @QueryParam("register") final boolean register, final ResourceFilterRequest resourceFilterRequest) throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException  ;  
-	
-	@POST
+    RegisteredResourceBatchResponse getResources(@QueryParam("responseStructure") final ResourceDetailsType[] responseStructure,
+                                                 @QueryParam("hierarchyDepth") final int hierarchyDepth) throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException;
+
+    @POST
+    @Path("/registration")
+    RegistrationID register(@QueryParam("responseStructure") final ResourceDetailsType responseMetadata, final ResourceFilterRequest resourceFilterRequest) throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException;
+
+    @POST
 	@Path("/approve")
 	ResourceBatchResponse approveResource(final Resources aiResources) throws SessionNotFoundException, SessionTimeoutException ; 
 	

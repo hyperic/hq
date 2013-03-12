@@ -146,8 +146,6 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
 
     @Transactional(readOnly=true)
     public RegistrationID register(final MetricFilterRequest request, ApiMessageContext apiMessageContext) {
-        //TODO~ return failed/successful registration
-        //TODO~ add schema to the xml's which automatically validates legal values (no null / empty name for instance)
         if (request==null) {
             if (log.isDebugEnabled()) {
                 log.debug("illegal request");
@@ -159,7 +157,6 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         if (userFilters.isEmpty()) {
             userFilters.add(new AgnosticFilter<MetricNotification,FilteringCondition<?>>());
         }
-        //TODO~ get the destination from the user
         // not allowing sequential registrations
         if (this.isRegistered) {
             throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.BAD_REQUEST,
