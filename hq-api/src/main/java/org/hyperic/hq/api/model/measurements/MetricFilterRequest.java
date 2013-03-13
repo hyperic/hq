@@ -7,21 +7,21 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.hyperic.hq.api.model.RestApiConstants;
-import org.hyperic.hq.api.model.resources.ResourceFilterDefinitioin;
+import org.hyperic.hq.api.model.resources.ResourceFilterDefinition;
 
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name="metricFilterRequest", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+@XmlRootElement(name="registration", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 @XmlType(name="MetricFilterRequestType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 public class MetricFilterRequest {
     @XmlElement(name="resourceFilter", namespace=RestApiConstants.SCHEMA_NAMESPACE)
-    private ResourceFilterDefinitioin resourceFilterDef;
+    private ResourceFilterDefinition resourceFilterDef;
     @XmlElement(name="metricFilter", namespace=RestApiConstants.SCHEMA_NAMESPACE)
     private MetricFilterDefinition metricFilterDef;
     @XmlElement(name="httpEndpoint", namespace=RestApiConstants.SCHEMA_NAMESPACE)
     private HttpEndpointDefinition httpEndpointDef;
 
-    public ResourceFilterDefinitioin getResourceFilterDefinition() {
+    public ResourceFilterDefinition getResourceFilterDefinition() {
         return resourceFilterDef;
     }
     public MetricFilterDefinition getMetricFilterDefinition() {

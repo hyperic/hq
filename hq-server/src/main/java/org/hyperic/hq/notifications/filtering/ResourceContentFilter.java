@@ -9,11 +9,11 @@ import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.notifications.model.InternalResourceDetailsType;
 import org.hyperic.hq.notifications.model.ResourceChangedContentNotification;
 
-public class ResourceContentFilter extends Filter<ResourceChangedContentNotification,FilteringCondition<?>> {
+public class ResourceContentFilter extends Filter<ResourceChangedContentNotification,FilteringCondition<Integer>> {
     protected InternalResourceDetailsType resourceDetailsType;
-    
-    public ResourceContentFilter(InternalResourceDetailsType internalResourceDetailsType) {
-        super(null);
+
+    public ResourceContentFilter(InternalResourceDetailsType internalResourceDetailsType, Set<Integer> resourceIds) {
+        super(new ResourceFilteringCondition(resourceIds));
         this.resourceDetailsType=internalResourceDetailsType;
     }
     protected static void filter(Map<String,String> props, final String[] propKeysToLeaveIn) {
@@ -44,7 +44,7 @@ public class ResourceContentFilter extends Filter<ResourceChangedContentNotifica
             // leave all props as is
         }
         ResourceChangedContentNotification filteredResourceChangedContentNotification = null;
-        if (!filteredProps.isEmpty()) {
+        if (!filteredProps.isEmpty() && this.cond.check(n.getResourceID())) {
             filteredResourceChangedContentNotification = new ResourceChangedContentNotification(n.getResourceID(),filteredProps);
         }
         return filteredResourceChangedContentNotification;

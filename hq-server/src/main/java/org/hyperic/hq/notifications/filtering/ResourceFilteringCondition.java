@@ -1,34 +1,35 @@
 package org.hyperic.hq.notifications.filtering;
 
-import org.hyperic.hq.authz.server.session.Resource;
+import java.util.Set;
 
-public class ResourceFilteringCondition<E extends Resource> extends FilteringCondition<E> {
-    protected String name;
-    public ResourceFilteringCondition(String name) {
+public class ResourceFilteringCondition extends FilteringCondition<Integer> {
+
+    private Set<Integer> resourceIds;
+
+    public ResourceFilteringCondition(Set<Integer> resourceIds) {
         super();
-        this.name = name;
+        this.resourceIds = resourceIds;
     }
+
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        return result;
-    }
-    @Override
-    public boolean equals(Object obj) {
-        if(this == obj) return true;
-        if(obj == null) return false;
-        if(getClass() != obj.getClass()) return false;
-        ResourceFilteringCondition other = (ResourceFilteringCondition) obj;
-        if(name == null) {
-            if(other.name != null) return false;
-        }else if(!name.equals(other.name)) return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ResourceFilteringCondition that = (ResourceFilteringCondition) o;
+
+        if (resourceIds != null ? !resourceIds.equals(that.resourceIds) : that.resourceIds != null) return false;
+
         return true;
     }
+
     @Override
-    public boolean check(E rsc) {
-        String name = rsc.getName();
-        return name.equals(this.name);
+    public int hashCode() {
+        return resourceIds != null ? resourceIds.hashCode() : 0;
+    }
+
+    @Override
+    public boolean check(Integer resourceId) {
+        return resourceIds == null || resourceIds.isEmpty() || resourceIds.contains(resourceId);
     }
 }
