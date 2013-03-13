@@ -612,16 +612,6 @@ public class ResourceTransferImpl implements ResourceTransfer {
             }
         }
         res.setResources(resources);
-        if (register) {
-            List<Filter<InventoryNotification,? extends FilteringCondition<?>>> userFilters = 
-                resourceMapper.toResourceFilters(resourceFilterRequest, responseMetadata); 
-            RegistrationID registrationID = new RegistrationID();
-            final NotificationEndpoint endpoint = new DefaultEndpoint(registrationID.getId());
-            final Integer authzSubjectId = authzSubject.getId();
-            notificationsTransfer.register(endpoint, ResourceDetailsType.valueOf(responseMetadata), authzSubjectId);
-            evaluator.register(endpoint, userFilters);
-            res.setRegId(registrationID);
-        }
         return res;
     }
 
