@@ -112,7 +112,6 @@ public class ResourceTransferImpl implements ResourceTransfer {
     private ResourceDestinationEvaluator evaluator;
     private ConfigBoss configBoss;
     protected NotificationsTransfer notificationsTransfer;
-    protected boolean isRegistered = false;
     private static final String RESOURCE_URL = "%sresource/%s/monitor/Visibility.do?mode=currentHealth&eid=%d:%d";
 	@Autowired  
     public ResourceTransferImpl(ResourceManager resourceManager, ResourceMapper resourceMapper,
@@ -632,12 +631,6 @@ public class ResourceTransferImpl implements ResourceTransfer {
         }
         res.setResources(resources);
         if (register) {
-            // not allowing sequential registrations
-            if (this.isRegistered) {
-                throw errorHandler.newWebApplicationException(
-                    new Throwable(), Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.SEQUENTIAL_REGISTRATION);
-            }
-            this.isRegistered=true;
             List<Filter<InventoryNotification,? extends FilteringCondition<?>>> userFilters = 
                 resourceMapper.toResourceFilters(resourceFilterRequest, responseMetadata); 
 
@@ -656,7 +649,6 @@ public class ResourceTransferImpl implements ResourceTransfer {
 
     public void unregister(NotificationEndpoint endpoint) {
         evaluator.unregisterAll(endpoint);
-        isRegistered=false;
     }
 
     public ResourceMapper getResourceMapper() {
