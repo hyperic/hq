@@ -6,6 +6,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -75,7 +76,7 @@ public class HttpEndpoint extends NotificationEndpoint {
     }
 
     @Override
-    public BatchPostingStatus publishMessagesInBatch(Collection<InternalAndExternalNotificationReports> messages) {
+    public BatchPostingStatus publishMessagesInBatch(Collection<InternalAndExternalNotificationReports> messages, List<InternalNotificationReport> failedReports) {
         DefaultHttpClient client = null;
         try {
             if (scheme.equalsIgnoreCase("https")) {
@@ -97,8 +98,8 @@ public class HttpEndpoint extends NotificationEndpoint {
             BatchPostingStatus batchPostingStatus = new BatchPostingStatus();
             for (final InternalAndExternalNotificationReports message : messages) {
                 BasePostingStatus status =publishMessage(client, message.getExternalReport(), targetHost, localcontext);
-                status.setInternalReport(message.getInternalReport());
                 batchPostingStatus.add(status);
+                failedReports.add(message.getInternalReport());
             }
             return batchPostingStatus;
         } finally {

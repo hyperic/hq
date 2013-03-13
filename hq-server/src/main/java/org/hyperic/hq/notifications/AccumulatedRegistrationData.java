@@ -82,6 +82,9 @@ public class AccumulatedRegistrationData {
     }
 
     public void merge(BatchPostingStatus batchPostingStatus) {
+        if (this.batchPostingStatus==null) {
+            this.batchPostingStatus=batchPostingStatus;
+        }
         this.batchPostingStatus.merge(batchPostingStatus);
     }
 }

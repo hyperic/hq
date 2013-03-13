@@ -150,19 +150,12 @@ public class EndpointQueue {
                         messages.add(new InternalAndExternalNotificationReports(report,toPublish));
                         size += report.getNotifications().size();
                     }
-                    BatchPostingStatus batchPostingStatus = endpoint.publishMessagesInBatch(messages);
+                    List<InternalNotificationReport> failedReports = new ArrayList<InternalNotificationReport>();
+                    BatchPostingStatus batchPostingStatus = endpoint.publishMessagesInBatch(messages,failedReports);
                     // if a publishing attempt has been made
                     if (!batchPostingStatus.isEmpty()) {
                         // retry the reports which were failed to be published 
-                        List<InternalNotificationReport> failedPublishments = 
-                                new ArrayList<InternalNotificationReport>();
-                        List<BasePostingStatus> failedPostings = batchPostingStatus.getFailures();
-                        if (failedPostings!=null) {
-                            for(BasePostingStatus failedPosting:failedPostings) {
-                                failedPublishments.add(failedPosting.getInternalReport());
-                            }
-                        }
-                        for(InternalNotificationReport failedReport:failedPublishments) {
+                        for(InternalNotificationReport failedReport:failedReports) {
                             @SuppressWarnings("unchecked")
                             List<BaseNotification> failedNotifications = 
                                 (List<BaseNotification>) failedReport.getNotifications();
@@ -176,9 +169,9 @@ public class EndpointQueue {
                         // if the last try was a failure, it means that problem sending notifications
                         // to the endpoint has happened before finishing the whole messages transmission
                         if (!batchPostingStatus.getLast().isSuccessful() 
-                                && batchPostingStatus.getLast().getTime()
-                                    - System.currentTimeMillis() 
-                                    >= ExpirationManager.EXPIRATION_DURATION) {
+                                && System.currentTimeMillis() 
+                                - batchPostingStatus.getLast().getTime()
+                                    >= EXPIRATION_DURATION) {
                             unregister(endpoint.getRegistrationId());
                             metricEvaluator.unregisterAll(endpoint);
                             resourceEvaluator.unregisterAll(endpoint);

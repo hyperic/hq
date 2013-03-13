@@ -1,6 +1,7 @@
 package org.hyperic.hq.notifications;
 
 import java.util.Collection;
+import java.util.List;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
 
@@ -22,7 +23,7 @@ public class DefaultEndpoint extends NotificationEndpoint {
     }
 
     @Override
-    public BatchPostingStatus publishMessagesInBatch(Collection<InternalAndExternalNotificationReports> messages) {
+    public BatchPostingStatus publishMessagesInBatch(Collection<InternalAndExternalNotificationReports> messages, List<InternalNotificationReport> failedReports) {
         return null;
     }
 }

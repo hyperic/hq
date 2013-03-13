@@ -1,42 +1,43 @@
 package org.hyperic.hq.notifications;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class BatchPostingStatus {
-    protected List<BasePostingStatus> successfuls = new ArrayList<BasePostingStatus>();
-    protected List<BasePostingStatus> failures = new ArrayList<BasePostingStatus>();
+    protected BasePostingStatus lastSuccessful;
+    protected BasePostingStatus lastFailure;
+    protected long size=0;
     
     public BasePostingStatus getLastSuccessful() {
-        return this.successfuls==null||this.successfuls.isEmpty()?null:this.successfuls.get(this.successfuls.size()-1);
+        return this.lastSuccessful;
     }
     public BasePostingStatus getLastFailure() {
-        return this.failures==null||this.failures.isEmpty()?null:this.failures.get(this.failures.size()-1);
+        return this.lastFailure;
+    }
+    public void addLastSuccessful(BasePostingStatus otherStatus) {
+        if (otherStatus!=null && (this.lastSuccessful==null || this.lastSuccessful.getTime()<otherStatus.getTime())) {
+            this.lastSuccessful=otherStatus;
+            this.size++;
+        }
+    }
+    public void addLastFailure(BasePostingStatus otherStatus) {
+        if (otherStatus!=null && (this.lastFailure==null || this.lastFailure.getTime()<otherStatus.getTime())) {
+            this.lastFailure=otherStatus;
+            this.size++;
+        }
     }
     public void add(BasePostingStatus status) {
+        if (status==null) {
+            return;
+        }
         if (status.isSuccessful()) {
-            this.successfuls.add(status);
+            addLastSuccessful(status);
         } else {
-            this.failures.add(status);
+            addLastFailure(status);
         }
     }
     public long size() {
-        return (this.successfuls!=null?this.successfuls.size():0) + (this.failures!=null?this.failures.size():0);
+        return this.size;
     }
     public boolean isEmpty() {
         return this.size()==0;
-    }
-    public List<BasePostingStatus> getFailures() {
-        return failures;
-    }
-    public void setFailures(List<BasePostingStatus> failures) {
-        this.failures = failures;
-    }
-    public List<BasePostingStatus> getSuccessfuls() {
-        return successfuls;
-    }
-    public void setSuccessfuls(List<BasePostingStatus> successfuls) {
-        this.successfuls = successfuls;
     }
     public BasePostingStatus getLast() throws IllegalPostingException {
         BasePostingStatus lastFailure = this.getLastFailure();
@@ -52,12 +53,11 @@ public class BatchPostingStatus {
         }
         return lastFailure.getTime()>lastSuccessful.getTime()?lastFailure:lastSuccessful;
     }
-    /**
-     * assumes the input batchPostingStatus is newer than the current one 
-     * @param batchPostingStatus
-     */
-    public void merge(BatchPostingStatus batchPostingStatus) {
-        this.successfuls.addAll(batchPostingStatus.getSuccessfuls());
-        this.failures.addAll(batchPostingStatus.getFailures());
+    public void merge(BatchPostingStatus other) {
+        if (other==null) {
+            return;
+        }
+        this.addLastFailure(other.getLastFailure());
+        this.addLastSuccessful(other.getLastSuccessful());
     }
 }
