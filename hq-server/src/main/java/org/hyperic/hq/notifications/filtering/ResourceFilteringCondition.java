@@ -4,13 +4,14 @@ import java.util.Set;
 
 public class ResourceFilteringCondition extends FilteringCondition<Integer> {
 
-    protected Set<Integer> resourceIds;
+    private Set<Integer> resourceIds;
+
     public ResourceFilteringCondition(Set<Integer> resourceIds) {
         super();
         this.resourceIds = resourceIds;
     }
 
-     @Override
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -29,6 +30,6 @@ public class ResourceFilteringCondition extends FilteringCondition<Integer> {
 
     @Override
     public boolean check(Integer resourceId) {
-        return resourceIds == null || resourceIds.size() == 0 || resourceIds.contains(resourceId);
+        return resourceIds == null || resourceIds.isEmpty() || resourceIds.contains(resourceId);
     }
 }
