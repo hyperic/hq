@@ -132,23 +132,24 @@ public class EndpointQueue {
                     final long registrationId = endpoint.getRegistrationId();
                     InternalNotificationReport report = null;
                     final long start = System.currentTimeMillis();
-                    final Collection<String> messages = new ArrayList<String>();
+                    final Collection<InternalAndExternalNotificationReports> messages = new ArrayList<InternalAndExternalNotificationReports>();
                     List<InternalNotificationReport> reports = new ArrayList<InternalNotificationReport>();
                     while (report == null || !report.getNotifications().isEmpty()) {
                         report = poll(registrationId, BATCH_SIZE);
                         reports.add(report);
                         final String toPublish = transformer.transform(report);
-                        messages.add(toPublish);
+                        messages.add(new InternalAndExternalNotificationReports(report,toPublish));
                         size += report.getNotifications().size();
                     }
-                    BasePostingStatus[] batchPostingStatus = endpoint.publishMessagesInBatch(messages);
+                    BatchPostingStatus batchPostingStatus = endpoint.publishMessagesInBatch(messages);
                     // if a publishing attempt has been made
-                    if (batchPostingStatus.length>0) {
+                    if (!batchPostingStatus.isEmpty()) {
                         // retry the reports which were failed to be published 
                         List<InternalNotificationReport> failedPublishments = new ArrayList<InternalNotificationReport>();
-                        for(int i=0 ; i<batchPostingStatus.length ; i++) {
-                            if (!batchPostingStatus[i].isSuccessful()) {
-                                failedPublishments.add(reports.get(i));
+                        List<BasePostingStatus> failedPostings = batchPostingStatus.getFailures();
+                        if (failedPostings!=null) {
+                            for(BasePostingStatus failedPosting:failedPostings) {
+                                failedPublishments.add(failedPosting.getInternalReport());
                             }
                         }
                         for(InternalNotificationReport failedReport:failedPublishments) {
@@ -161,8 +162,8 @@ public class EndpointQueue {
                         
                         data.set(batchPostingStatus);
                         // if the last try was a failure, it means that problem sending notifications to the endpoint has happened before finishing the whole messages transmission
-                        if (!batchPostingStatus[batchPostingStatus.length-1].isSuccessful()) {
-                            expirationManager.startExpiration(endpoint,batchPostingStatus[batchPostingStatus.length-1].getTime());
+                        if (!batchPostingStatus.getLast().isSuccessful()) {
+                            expirationManager.startExpiration(endpoint,batchPostingStatus.getLast().getTime());
                         } else { // otherwise, a successful communication has happened, then make sure the registration wont expire
                             expirationManager.abortExpiration(endpoint);
                         }

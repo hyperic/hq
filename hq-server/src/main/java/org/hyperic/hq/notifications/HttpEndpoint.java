@@ -75,7 +75,7 @@ public class HttpEndpoint extends NotificationEndpoint {
     }
 
     @Override
-    public BasePostingStatus[] publishMessagesInBatch(Collection<String> messages) {
+    public BatchPostingStatus publishMessagesInBatch(Collection<InternalAndExternalNotificationReports> messages) {
         DefaultHttpClient client = null;
         try {
             if (scheme.equalsIgnoreCase("https")) {
@@ -94,10 +94,11 @@ public class HttpEndpoint extends NotificationEndpoint {
             authCache.put(targetHost, basicAuth);
             final BasicHttpContext localcontext = new BasicHttpContext();
             localcontext.setAttribute(ClientContext.AUTH_CACHE, authCache);
-            BasePostingStatus[] batchPostingStatus = new PostingStatus[messages.size()];
-            int i=0;
-            for (final String message : messages) {
-                batchPostingStatus[i++]=publishMessage(client, message, targetHost, localcontext);
+            BatchPostingStatus batchPostingStatus = new BatchPostingStatus();
+            for (final InternalAndExternalNotificationReports message : messages) {
+                BasePostingStatus status =publishMessage(client, message.getExternalReport(), targetHost, localcontext);
+                status.setInternalReport(message.getInternalReport());
+                batchPostingStatus.add(status);
             }
             return batchPostingStatus;
         } finally {
