@@ -24,6 +24,10 @@
  */
 package org.hyperic.hq.plugin.dotnet;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.*;
@@ -39,12 +43,15 @@ public class DotNetMeasurementPlugin
     private static final String DATA_PREFIX = "SqlClient: ";
     private static final String RUNTIME_NAME = "_Global_";
     private static Log log = LogFactory.getLog(DotNetMeasurementPlugin.class);
+    private static final Map<String, String> sqlPidsCache = new HashMap<String, String>();
 
     @Override
     public MetricValue getValue(Metric metric) throws PluginException, MetricNotFoundException, MetricUnreachableException {
         MetricValue val = null;
         if (metric.getDomainName().equalsIgnoreCase("pdh")) {
             val = getPDHMetric(metric);
+        } else if (metric.getDomainName().equalsIgnoreCase("pdhSQLDP")) {
+            val = getPDHSQLPDMetric(metric);
         } else {
             try {
                 val = super.getValue(metric);
@@ -86,7 +93,7 @@ public class DotNetMeasurementPlugin
         template = super.translate(template, config);
 
         template = StringUtil.replace(template, "__percent__", "%");
-        
+
         // default value for .net server
         final String prop = DotNetDetector.PROP_APP;
         template = StringUtil.replace(template, "${" + prop + "}", config.getValue(prop, RUNTIME_NAME));
@@ -96,26 +103,80 @@ public class DotNetMeasurementPlugin
         return template;
     }
 
-    private MetricValue getPDHMetric(Metric metric) {
+    private MetricValue getPDHSQLPDMetric(Metric metric) {
+        if (sqlPidsCache.isEmpty()) {
+            try {
+                String[] instances = Pdh.getInstances(".NET Data Provider for SqlServer");
+                Pattern regex = Pattern.compile("([^\\[]*)\\[([^\\]]*)\\]"); // name[pid]
+                for (int i = 0; i < instances.length; i++) {
+                    String instance = instances[i];
+                    log.debug("[getPDHSQLPDMetric] instance = " + instance);
+                    Matcher m = regex.matcher(instance);
+                    if (m.find()) {
+                        log.debug("->" + m);
+                        log.debug("->" + m.group());
+                        log.debug("->" + m.group(1));
+                        log.debug("->" + m.group(2));
+                        sqlPidsCache.put(m.group(1), m.group(2));
+                    }
+                }
+            } catch (Win32Exception e) {
+                log.debug("Error getting PIDs data for '.NET Data Provider for SqlServer': " + e, e);
+            }
+        }
+
+        String appName = metric.getObjectPropString();
+        String pid = sqlPidsCache.get(appName);
         MetricValue res;
+        if (pid == null) {
+            sqlPidsCache.clear();
+            if (metric.isAvail()) {
+                res = new MetricValue(Metric.AVAIL_DOWN);
+            } else {
+                res = MetricValue.NONE;
+            }
+        } else {
+            String obj = "\\.NET Data Provider for SqlServer(" + appName + "[" + pid + "])";
+            if (!metric.isAvail()) {
+                obj += "\\" + metric.getAttributeName();
+            } else {
+                obj += "\\HardConnectsPerSecond";
+            }
+            log.debug("[getPDHSQLPDMetric] metric:'" + metric);
+            log.debug("[getPDHSQLPDMetric] obj:'" + obj);
+            res = getPDHMetric(obj, metric.isAvail());
+            if ((res.getValue() == Metric.AVAIL_DOWN) && (metric.isAvail())) {
+                sqlPidsCache.clear();
+            }
+        }
+        return res;
+    }
+
+    private MetricValue getPDHMetric(Metric metric) {
         String obj = "\\" + metric.getObjectPropString();
         if (!metric.isAvail()) {
             obj += "\\" + metric.getAttributeName();
-            log.info("metric:'" + metric);
         }
+        log.debug("[getPDHMetric] metric:'" + metric);
+        log.debug("[getPDHMetric] obj:'" + obj);
+        return getPDHMetric(obj, metric.isAvail());
+    }
+
+    private MetricValue getPDHMetric(String obj, boolean avail) {
+        MetricValue res;
         try {
             Double val = new Pdh().getFormattedValue(obj);
             res = new MetricValue(val);
-            if (metric.isAvail()) {
+            if (avail) {
                 res = new MetricValue(Metric.AVAIL_UP);
             }
         } catch (Win32Exception ex) {
-            if (metric.isAvail()) {
+            if (avail) {
                 res = new MetricValue(Metric.AVAIL_DOWN);
-                log.info("error on mteric:'" + metric + "' :" + ex.getLocalizedMessage(), ex);
+                log.info("error on obj:'" + obj + "' :" + ex.getLocalizedMessage(), ex);
             } else {
                 res = MetricValue.NONE;
-                log.info("error on mteric:'" + metric + "' :" + ex.getLocalizedMessage());
+                log.info("error on obj:'" + obj + "' :" + ex.getLocalizedMessage());
             }
         }
         return res;

@@ -760,6 +760,86 @@
             <include name="clr-data"/>
         </metrics>
 
+        <service name="Data Provider for SqlServer">
+            <filter name="template" value="pdhSQLDP:%app.name%:${alias}"/>
+            <metric name="Availability" 
+                    alias="Availability" 
+                    indicator="true" 
+                    category="AVAILABILITY"/>
+
+            <metric name="Hard Connects Per Second"
+                    alias="HardConnectsPerSecond"
+                    category="UTILIZATION"
+                    indicator="true"
+                    units="none"/>
+
+            <metric name="Hard Disconnects Per Second"
+                    alias="HardDisconnectsPerSecond"
+                    category="UTILIZATION"
+                    indicator="true"
+                    units="none"/>
+
+            <metric name="Soft Connects Per Second"
+                    alias="SoftConnectsPerSecond"
+                    category="UTILIZATION"
+                    indicator="true"
+                    units="none"/>
+
+            <metric name="Soft Disconnects Per Second"
+                    alias="SoftDisconnectsPerSecond"
+                    category="UTILIZATION"
+                    indicator="true"
+                    units="none"/>
+
+            <metric name="Number Of Active Connection Pools"
+                    alias="NumberOfActiveConnectionPools"
+                    category="UTILIZATION"
+                    indicator="true"
+                    units="none"/>
+
+            <metric name="Number Of Active Connections"
+                    alias="NumberOfActiveConnections"
+                    category="UTILIZATION"
+                    indicator="true"
+                    units="none"/>
+
+            <metric name="Number Of Free Connections"
+                    alias="NumberOfFreeConnections"
+                    category="UTILIZATION"
+                    indicator="true"
+                    units="none"/>
+
+            <metric name="Number Of Inactive Connection Pools"
+                    alias="NumberOfInactiveConnectionPools"
+                    category="UTILIZATION"
+                    indicator="true"
+                    units="none"/>
+
+            <metric name="Number Of Pooled Connections"
+                    alias="NumberOfPooledConnections"
+                    category="UTILIZATION"
+                    indicator="true"
+                    units="none"/>
+
+            <metric name="Number Of Non Pooled Connections"
+                    alias="NumberOfNonPooledConnections"
+                    category="UTILIZATION"
+                    indicator="true"
+                    units="none"/>
+
+            <metric name="Number Of Reclaimed Connections"
+                    alias="NumberOfReclaimedConnections"
+                    category="UTILIZATION"
+                    indicator="true"
+                    units="none"/>
+
+            <metric name="Number Of Stasis Connections"
+                    alias="NumberOfStasisConnections"
+                    category="UTILIZATION"
+                    indicator="true"
+                    units="none"/>
+        </service>
+
         <service name="Application">
             <metrics>
                 <include name="dotnet-avail"/>
