@@ -149,7 +149,8 @@ public class ExceptionToErrorCodeMapper  {
         SEQUENTIAL_REGISTRATION("7000"),
         MISSING_MANDATORY_FILTER("7001"),
         UNREGISTERED_FOR_NOTIFICATIONS("7002"),
-        INTERNAL_SERVER_ERROR("8001");
+        INTERNAL_SERVER_ERROR("8001"),
+        REGEX_PATTERN_SYNTAX_ERROR("9001");
         
         private final String errorCode;
 
