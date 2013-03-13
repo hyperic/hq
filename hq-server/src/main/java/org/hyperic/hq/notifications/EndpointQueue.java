@@ -38,6 +38,9 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.notifications.filtering.MetricDestinationEvaluator;
+import org.hyperic.hq.notifications.filtering.ResourceDestinationEvaluator;
 import org.hyperic.hq.notifications.model.BaseNotification;
 import org.hyperic.hq.notifications.model.InternalResourceDetailsType;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
@@ -48,7 +51,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
-@Component("endpointQueue")
+@Component
 public class EndpointQueue {
     private final Log log = LogFactory.getLog(EndpointQueue.class);
 // XXX should make this configurable in some way
@@ -62,8 +65,11 @@ public class EndpointQueue {
     private ThreadPoolTaskScheduler notificationExecutor;
     @Autowired
     private ConcurrentStatsCollector concurrentStatsCollector;
-    @Autowired
-    private ExpirationManager expirationManager;
+    
+    protected final static long EXPIRATION_DURATION = /*10*60*/10*1000;
+    MetricDestinationEvaluator metricEvaluator;
+    ResourceDestinationEvaluator resourceEvaluator;
+    
     // TODO~ change to write through versioning (each node would have versioning -
     // write on one version, read another, then sync between them), w/o will pose problems in scale
     private final Map<Long, AccumulatedRegistrationData> registrationData = new HashMap<Long, AccumulatedRegistrationData>();
@@ -79,6 +85,8 @@ public class EndpointQueue {
     
     @PostConstruct
     public void init() {
+        metricEvaluator = (MetricDestinationEvaluator) Bootstrap.getBean("metricDestinationEvaluator");
+        resourceEvaluator = (ResourceDestinationEvaluator) Bootstrap.getBean("resourceDestinationEvaluator");
         concurrentStatsCollector.register(NOTIFICATIONS_PUBLISHED_TO_ENDPOINT);
         concurrentStatsCollector.register(NOTIFICATIONS_PUBLISHED_TO_ENDPOINT_TIME);
         concurrentStatsCollector.register(new StatCollector() {
@@ -132,7 +140,8 @@ public class EndpointQueue {
                     final long registrationId = endpoint.getRegistrationId();
                     InternalNotificationReport report = null;
                     final long start = System.currentTimeMillis();
-                    final Collection<InternalAndExternalNotificationReports> messages = new ArrayList<InternalAndExternalNotificationReports>();
+                    final Collection<InternalAndExternalNotificationReports> messages =
+                            new ArrayList<InternalAndExternalNotificationReports>();
                     List<InternalNotificationReport> reports = new ArrayList<InternalNotificationReport>();
                     while (report == null || !report.getNotifications().isEmpty()) {
                         report = poll(registrationId, BATCH_SIZE);
@@ -145,7 +154,8 @@ public class EndpointQueue {
                     // if a publishing attempt has been made
                     if (!batchPostingStatus.isEmpty()) {
                         // retry the reports which were failed to be published 
-                        List<InternalNotificationReport> failedPublishments = new ArrayList<InternalNotificationReport>();
+                        List<InternalNotificationReport> failedPublishments = 
+                                new ArrayList<InternalNotificationReport>();
                         List<BasePostingStatus> failedPostings = batchPostingStatus.getFailures();
                         if (failedPostings!=null) {
                             for(BasePostingStatus failedPosting:failedPostings) {
@@ -154,18 +164,24 @@ public class EndpointQueue {
                         }
                         for(InternalNotificationReport failedReport:failedPublishments) {
                             @SuppressWarnings("unchecked")
-                            List<BaseNotification> failedNotifications = (List<BaseNotification>) failedReport.getNotifications();
-                            Map<NotificationEndpoint, Collection<BaseNotification>> map = new HashMap<NotificationEndpoint, Collection<BaseNotification>>();
+                            List<BaseNotification> failedNotifications = 
+                                (List<BaseNotification>) failedReport.getNotifications();
+                            Map<NotificationEndpoint, Collection<BaseNotification>> map = 
+                                    new HashMap<NotificationEndpoint, Collection<BaseNotification>>();
                             map.put(endpoint, failedNotifications);
                             publishAsync(map);
                         }
                         
-                        data.set(batchPostingStatus);
-                        // if the last try was a failure, it means that problem sending notifications to the endpoint has happened before finishing the whole messages transmission
-                        if (!batchPostingStatus.getLast().isSuccessful()) {
-                            expirationManager.startExpiration(endpoint,batchPostingStatus.getLast().getTime());
-                        } else { // otherwise, a successful communication has happened, then make sure the registration wont expire
-                            expirationManager.abortExpiration(endpoint);
+                        data.merge(batchPostingStatus);
+                        // if the last try was a failure, it means that problem sending notifications
+                        // to the endpoint has happened before finishing the whole messages transmission
+                        if (!batchPostingStatus.getLast().isSuccessful() 
+                                && batchPostingStatus.getLast().getTime()
+                                    - System.currentTimeMillis() 
+                                    >= ExpirationManager.EXPIRATION_DURATION) {
+                            unregister(endpoint.getRegistrationId());
+                            metricEvaluator.unregisterAll(endpoint);
+                            resourceEvaluator.unregisterAll(endpoint);
                         }
                     }
                     totalTime = System.currentTimeMillis() - start;

@@ -52,4 +52,12 @@ public class BatchPostingStatus {
         }
         return lastFailure.getTime()>lastSuccessful.getTime()?lastFailure:lastSuccessful;
     }
+    /**
+     * assumes the input batchPostingStatus is newer than the current one 
+     * @param batchPostingStatus
+     */
+    public void merge(BatchPostingStatus batchPostingStatus) {
+        this.successfuls.addAll(batchPostingStatus.getSuccessfuls());
+        this.failures.addAll(batchPostingStatus.getFailures());
+    }
 }
