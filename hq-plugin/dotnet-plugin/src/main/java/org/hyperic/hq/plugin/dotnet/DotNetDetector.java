@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -155,6 +157,37 @@ public class DotNetDetector
     @Override
     protected List discoverServices(ConfigResponse serverConfig) throws PluginException {
         List services = new ArrayList();
+
+        //Data providers.
+        try {
+            String[] instances = Pdh.getInstances(".NET Data Provider for SqlServer");
+            Pattern regex = Pattern.compile("([^\\[]*).*");
+            for (int i = 0; i < instances.length; i++) {
+                String instance = instances[i];
+                log.debug("[discoverServices] instance = " + instance);
+                Matcher m = regex.matcher(instance);
+                if (m.find()) {
+                    log.debug("->" + m);
+                    log.debug("->" + m.group());
+                    log.debug("->" + m.group(1));
+                    String name = m.group(1);
+                    ServiceResource service = new ServiceResource();
+                    service.setType(this, "Data Provider for SqlServer");
+                    service.setServiceName("Data Provider for SqlServer " + name);
+
+                    ConfigResponse pc = new ConfigResponse();
+                    pc.setValue(PROP_APP, name);
+                    service.setProductConfig(pc);
+                    service.setMeasurementConfig();
+                    services.add(service);
+                }
+            }
+            return services;
+        } catch (Win32Exception e) {
+            log.debug("Error getting pdh data for '.NET Data Provider for SqlServer': " + e, e);
+        }
+
+        // apps
         String instancesToSkipStr = getProperties().getProperty("dotnet.instances.to.skip", "_Global_");
         List<String> instancesToSkip = Arrays.asList(instancesToSkipStr.toUpperCase().split(","));
         log.debug("dotnet.instances.to.skip = " + instancesToSkip);
