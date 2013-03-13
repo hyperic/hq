@@ -75,7 +75,6 @@ import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.notifications.DefaultEndpoint;
-import org.hyperic.hq.notifications.EndpointQueue;
 import org.hyperic.hq.notifications.HttpEndpoint;
 import org.hyperic.hq.notifications.NotificationEndpoint;
 import org.hyperic.hq.notifications.filtering.AgnosticFilter;
@@ -100,7 +99,6 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     private NotificationsTransfer notificationsTransfer;
     @javax.ws.rs.core.Context
     protected SearchContext context ;
-    protected boolean isRegistered = false;
 
     @Autowired
     public MeasurementTransferImpl(ResourceManager resourceManager,MeasurementManager measurementMgr,
@@ -157,12 +155,6 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         if (userFilters.isEmpty()) {
             userFilters.add(new AgnosticFilter<MetricNotification,FilteringCondition<?>>());
         }
-        // not allowing sequential registrations
-        if (this.isRegistered) {
-            throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.BAD_REQUEST,
-                                                          ExceptionToErrorCodeMapper.ErrorCode.SEQUENTIAL_REGISTRATION);
-        }
-        this.isRegistered=true;
         RegistrationID registrationID = new RegistrationID();
         final HttpEndpointDefinition httpEndpointDefinition = request.getHttpEndpointDef();
         final NotificationEndpoint endpoint = (httpEndpointDefinition == null) ?
@@ -180,7 +172,6 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
 
     public void unregister(NotificationEndpoint endpoint) {
         evaluator.unregisterAll(endpoint);
-        isRegistered=false;
     }
 
     public MetricResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest request, 
