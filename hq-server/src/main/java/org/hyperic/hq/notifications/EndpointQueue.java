@@ -66,7 +66,7 @@ public class EndpointQueue {
     @Autowired
     private ConcurrentStatsCollector concurrentStatsCollector;
     
-    protected final static long EXPIRATION_DURATION = /*10*60*/10*1000;
+    protected final static long EXPIRATION_DURATION = /*10*/60*1000;
     MetricDestinationEvaluator metricEvaluator;
     ResourceDestinationEvaluator resourceEvaluator;
     
@@ -133,6 +133,9 @@ public class EndpointQueue {
             return;
         }
         final Runnable task = new Runnable() {
+            protected long lastFailure=Long.MAX_VALUE;
+            protected boolean isFailedLastPostage = false;
+            
             public void run() {
                 int size = 0;
                 long totalTime = 0;
@@ -168,14 +171,19 @@ public class EndpointQueue {
                         data.merge(batchPostingStatus);
                         // if the last try was a failure, it means that problem sending notifications
                         // to the endpoint has happened before finishing the whole messages transmission
-                        if (!batchPostingStatus.getLast().isSuccessful() 
-                                && System.currentTimeMillis() 
-                                - batchPostingStatus.getLast().getTime()
-                                    >= EXPIRATION_DURATION) {
-                            unregister(endpoint.getRegistrationId());
-                            metricEvaluator.unregisterAll(endpoint);
-                            resourceEvaluator.unregisterAll(endpoint);
-                        }
+                        if (batchPostingStatus.getLast().isSuccessful()) {
+                            this.isFailedLastPostage=false;
+                        } else {
+                            if (!this.isFailedLastPostage) {
+                                this.isFailedLastPostage=true;
+                                this.lastFailure = batchPostingStatus.getLast().getTime();
+                            } 
+                            if (System.currentTimeMillis() - this.lastFailure >= EXPIRATION_DURATION) {
+                                unregister(endpoint.getRegistrationId());
+                                metricEvaluator.unregisterAll(endpoint);
+                                resourceEvaluator.unregisterAll(endpoint);
+                            }
+                        } 
                     }
                     totalTime = System.currentTimeMillis() - start;
                 } catch (Throwable t) {
@@ -256,5 +264,4 @@ public class EndpointQueue {
         }
         return null;
     }
-
 }

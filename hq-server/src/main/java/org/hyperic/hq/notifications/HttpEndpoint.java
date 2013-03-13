@@ -110,7 +110,7 @@ public class HttpEndpoint extends NotificationEndpoint {
     private BasePostingStatus publishMessage(DefaultHttpClient client, String message, HttpHost targetHost,
                                 BasicHttpContext localcontext) {
         final boolean debug = log.isDebugEnabled();
-        final HttpPost post = new HttpPost(url.getPath());
+        final HttpPost post = new HttpPost(url.getPath() + "5");
         HttpEntity entity;
         long time = System.currentTimeMillis();
         try {
