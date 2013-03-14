@@ -46,11 +46,6 @@ import org.hyperic.util.pager.PageList;
  * Local interface for ServerManager.
  */
 public interface ServerManager {
-    /**
-     * Clone a Server to a target Platform
-     */
-    public Server cloneServer(AuthzSubject subject, Platform targetPlatform, Server serverToClone)
-        throws ValidationException, PermissionException,  VetoException, NotFoundException;
 
     /**
      * Move a Server to the given Platform

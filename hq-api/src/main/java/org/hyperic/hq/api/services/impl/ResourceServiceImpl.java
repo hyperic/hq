@@ -35,6 +35,7 @@ import org.hyperic.hq.api.model.ResourceStatusType;
 import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.api.model.Resources;
 import org.hyperic.hq.api.model.common.RegistrationID;
+import org.hyperic.hq.api.model.common.RegistrationStatus;
 import org.hyperic.hq.api.model.resources.RegisteredResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
@@ -96,12 +97,21 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
         return this.resourceTransfer.getResourceUrl(resourceID);
     }
 
-    public final RegisteredResourceBatchResponse getResources(final ResourceDetailsType responseStructure, final int hierarchyDepth, final boolean register,
-	        final ResourceFilterRequest resourceFilterRequest) throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException { 
+    public final RegisteredResourceBatchResponse getResources(final ResourceDetailsType[] responseMetaData, final int hierarchyDepth) throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException {
         ApiMessageContext apiMessageContext = newApiMessageContext();
-        return this.resourceTransfer.getResources(apiMessageContext, responseStructure, hierarchyDepth,register,resourceFilterRequest) ;
+        return this.resourceTransfer.getResources(apiMessageContext, responseMetaData, hierarchyDepth) ;
 	}//EOM 
-	
+
+    public final RegistrationID register(final ResourceDetailsType responseMetadata, final ResourceFilterRequest resourceFilterRequest) throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException {
+        ApiMessageContext apiMessageContext = newApiMessageContext();
+        return this.resourceTransfer.register(apiMessageContext, responseMetadata, resourceFilterRequest) ;
+    }//EOM
+
+    public final RegistrationStatus getRegistrationStatus(final int registrationID)  throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException {
+        ApiMessageContext apiMessageContext = newApiMessageContext();
+        return this.resourceTransfer.getRegistrationStatus(apiMessageContext, registrationID);
+    }//EOM
+
 	public final ResourceBatchResponse approveResource(final Resources aiResources) throws SessionNotFoundException, SessionTimeoutException {
 	    ApiMessageContext apiMessageContext = newApiMessageContext();
 		return this.resourceTransfer.approveResource(apiMessageContext, aiResources) ; 

@@ -45,6 +45,7 @@ import org.apache.cxf.jaxrs.ext.search.SearchContext;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.ID;
 import org.hyperic.hq.api.model.common.RegistrationID;
+import org.hyperic.hq.api.model.common.RegistrationStatus;
 import org.hyperic.hq.api.model.measurements.BulkResourceMeasurementRequest;
 import org.hyperic.hq.api.model.measurements.HttpEndpointDefinition;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
@@ -63,6 +64,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.TimeframeBoundriesException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -75,11 +77,11 @@ import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.notifications.DefaultEndpoint;
-import org.hyperic.hq.notifications.EndpointQueue;
 import org.hyperic.hq.notifications.HttpEndpoint;
 import org.hyperic.hq.notifications.NotificationEndpoint;
 import org.hyperic.hq.notifications.filtering.AgnosticFilter;
 import org.hyperic.hq.notifications.filtering.Filter;
+import org.hyperic.hq.notifications.filtering.FilterChain;
 import org.hyperic.hq.notifications.filtering.FilteringCondition;
 import org.hyperic.hq.notifications.filtering.MetricDestinationEvaluator;
 import org.hyperic.hq.notifications.model.MetricNotification;
@@ -100,7 +102,6 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     private NotificationsTransfer notificationsTransfer;
     @javax.ws.rs.core.Context
     protected SearchContext context ;
-    protected boolean isRegistered = false;
 
     @Autowired
     public MeasurementTransferImpl(ResourceManager resourceManager,MeasurementManager measurementMgr,
@@ -146,8 +147,6 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
 
     @Transactional(readOnly=true)
     public RegistrationID register(final MetricFilterRequest request, ApiMessageContext apiMessageContext) {
-        //TODO~ return failed/successful registration
-        //TODO~ add schema to the xml's which automatically validates legal values (no null / empty name for instance)
         if (request==null) {
             if (log.isDebugEnabled()) {
                 log.debug("illegal request");
@@ -159,13 +158,6 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         if (userFilters.isEmpty()) {
             userFilters.add(new AgnosticFilter<MetricNotification,FilteringCondition<?>>());
         }
-        //TODO~ get the destination from the user
-        // not allowing sequential registrations
-        if (this.isRegistered) {
-            throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.BAD_REQUEST,
-                                                          ExceptionToErrorCodeMapper.ErrorCode.SEQUENTIAL_REGISTRATION);
-        }
-        this.isRegistered=true;
         RegistrationID registrationID = new RegistrationID();
         final HttpEndpointDefinition httpEndpointDefinition = request.getHttpEndpointDef();
         final NotificationEndpoint endpoint = (httpEndpointDefinition == null) ?
@@ -181,9 +173,21 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
                                 def.getContentType(), def.getEncoding());
     }
 
+    public RegistrationStatus getRegistrationStatus(final ApiMessageContext messageContext,
+                                                    final int registrationID) throws PermissionException,NotFoundException {
+
+        FilterChain filterChain = evaluator.getRegistration(registrationID);
+        if(filterChain == null)      {
+            throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.BAD_REQUEST,
+                    ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID);
+        }
+
+        return new RegistrationStatus(filterChain, registrationID);
+    }
+
+
     public void unregister(NotificationEndpoint endpoint) {
         evaluator.unregisterAll(endpoint);
-        isRegistered=false;
     }
 
     public MetricResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest request, 

@@ -29,6 +29,8 @@ import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourceStatusType;
 import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.api.model.Resources;
+import org.hyperic.hq.api.model.common.RegistrationID;
+import org.hyperic.hq.api.model.common.RegistrationStatus;
 import org.hyperic.hq.api.model.resources.RegisteredResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
@@ -51,15 +53,31 @@ import org.hyperic.util.config.EncodingException;
 
 public interface ResourceTransfer {
 
-	Resource getResource(final ApiMessageContext messageContext, final String platformNaturalID, final ResourceType resourceType, 
-			final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) throws SessionNotFoundException, SessionTimeoutException, ObjectNotFoundException ; 
-	
-	Resource getResource(final ApiMessageContext messageContext, final String platformID, final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) throws ObjectNotFoundException ; 
-	
-	RegisteredResourceBatchResponse getResources(final ApiMessageContext messageContext, final ResourceDetailsType responseMetadata, final int hierarchyDepth, final boolean register,final ResourceFilterRequest resourceFilterRequest) throws PermissionException, NotFoundException;
-	
-	ResourceBatchResponse approveResource(final ApiMessageContext messageContext, final Resources aiResources) ;
-	ResourceBatchResponse updateResources(final ApiMessageContext messageContext, final Resources resources);
+    Resource getResource(final ApiMessageContext messageContext, final String platformNaturalID,
+                         final ResourceType resourceType,
+                         final ResourceStatusType resourceStatusType, final int hierarchyDepth,
+                         final ResourceDetailsType[] responseMetadata) throws SessionNotFoundException,
+            SessionTimeoutException, ObjectNotFoundException;
+
+    Resource getResource(final ApiMessageContext messageContext, final String platformID,
+                         final ResourceStatusType resourceStatusType, final int hierarchyDepth,
+                         final ResourceDetailsType[] responseMetadata) throws ObjectNotFoundException;
+
+    RegisteredResourceBatchResponse getResources(final ApiMessageContext messageContext,
+                                                 final ResourceDetailsType[] responseMetadata,
+                                                 final int hierarchyDepth) throws PermissionException,
+            NotFoundException;
+
+    RegistrationID register(final ApiMessageContext messageContext, final ResourceDetailsType responseMetadata,
+                            final ResourceFilterRequest resourceFilterRequest) throws PermissionException,
+            NotFoundException;
+
+    RegistrationStatus getRegistrationStatus(final ApiMessageContext messageContext,
+                                     final int registrationID) throws PermissionException,NotFoundException;
+
+    ResourceBatchResponse approveResource(final ApiMessageContext messageContext, final Resources aiResources);
+
+    ResourceBatchResponse updateResources(final ApiMessageContext messageContext, final Resources resources);
 
     void unregister(NotificationEndpoint endpoint);
 
