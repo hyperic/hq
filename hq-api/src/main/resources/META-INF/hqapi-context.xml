@@ -96,9 +96,7 @@
 	<bean name="metricServiceImpl" class="org.hyperic.hq.api.services.impl.MetricServiceImpl" />
 
     <bean name="pluginServiceImpl" class="org.hyperic.hq.api.services.impl.PluginServiceImpl" />		
-	
-	<bean name="CloudProviderServiceImpl" class="org.hyperic.hq.api.services.impl.CloudProviderServiceImpl" />
-	
+		
 	<bean name="sessionManagementImpl" class="org.hyperic.hq.api.services.impl.SessionManagementServiceImpl" />
     
     <bean name="serverConfigImpl" class="org.hyperic.hq.api.services.impl.ServerConfigImpl" />
