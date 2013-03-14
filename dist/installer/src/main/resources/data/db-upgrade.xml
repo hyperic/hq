@@ -11809,7 +11809,7 @@ has already been defined.
                 CTIME int8 not null,
                 NAME varchar(128) not null,
                 CREATED_BY varchar(128) not null,
-                DESCRIPTION varchar(1024) not null,
+                DESCRIPTION varchar(128) not null,
                 RESOURCE_NAME_REGEX varchar(128),
                 RESOURCE_PROTOTYPE int4,
                 primary key (ID)
