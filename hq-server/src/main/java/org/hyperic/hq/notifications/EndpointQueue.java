@@ -160,10 +160,8 @@ public class EndpointQueue {
                         // retry the reports which were failed to be published 
                         for(InternalNotificationReport failedReport:failedReports) {
                             @SuppressWarnings("unchecked")
-                            List<BaseNotification> failedNotifications = 
-                                (List<BaseNotification>) failedReport.getNotifications();
-                            Map<NotificationEndpoint, Collection<BaseNotification>> map = 
-                                    new HashMap<NotificationEndpoint, Collection<BaseNotification>>();
+                            List<BaseNotification> failedNotifications = (List<BaseNotification>) failedReport.getNotifications();
+                            Map<NotificationEndpoint, Collection<BaseNotification>> map = new HashMap<NotificationEndpoint, Collection<BaseNotification>>();
                             map.put(endpoint, failedNotifications);
                             publishAsync(map);
                         }
@@ -177,13 +175,13 @@ public class EndpointQueue {
                             if (!this.isFailedLastPostage) {
                                 this.isFailedLastPostage=true;
                                 this.lastFailure = batchPostingStatus.getLast().getTime();
-                            } 
+                            }
                             if (System.currentTimeMillis() - this.lastFailure >= EXPIRATION_DURATION) {
                                 unregister(endpoint.getRegistrationId());
                                 metricEvaluator.unregisterAll(endpoint);
                                 resourceEvaluator.unregisterAll(endpoint);
                             }
-                        } 
+                        }
                     }
                     totalTime = System.currentTimeMillis() - start;
                 } catch (Throwable t) {
