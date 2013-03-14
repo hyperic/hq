@@ -28,6 +28,7 @@ package org.hyperic.hq.authz.shared;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -363,4 +364,18 @@ public interface ResourceManager {
      */
     public Collection<Resource> getDescendantResources(AuthzSubject subj, Collection<Resource> resources,
                                                        ResourceRelation relation, Resource proto, boolean children);
+
+    /**
+     * Returns the associated children which are have a distance = 1 in the ResourceEdge mapping from the parent
+     * resources
+     * @param resources {@link List} of parent {@link Resource}s
+     * @param viewableResourceIds {@link Set} of {@link Resource}Ids.  Ideally the {@link PermissionManager}
+     * would provide these values.
+     * Return {@link Map} will only include resources which are in this {@link Set}
+     * @return {@link Map} of {@link Resource} to its children represented by {@link Collection} of {@link Resource}s.
+     * The returned {@link Resource} objects will be a subset of the includes.
+     */
+    public Map<Resource, Collection<Resource>> findChildResources(List<Resource> resources,
+                                                                  Set<Integer> viewableResourceIds);
+
 }

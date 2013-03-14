@@ -34,7 +34,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.apache.commons.lang.NullArgumentException;
-import org.hyperic.hq.api.model.Resource;
+import org.hyperic.hq.api.model.ResourceModel;
 import org.hyperic.hq.api.model.RestApiConstants;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 import org.hyperic.hq.appdef.shared.BatchResponse;
@@ -42,12 +42,12 @@ import org.hyperic.hq.appdef.shared.BatchResponse;
 @XmlRootElement(name="ResourceResponse", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 @XmlType(name="ResourceResponseType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 public class ResourceBatchResponse extends BatchResponseBase {
-    private List<Resource> resources;
+    private List<ResourceModel> resources;
     
     
     public ResourceBatchResponse() {    }    
 
-    public ResourceBatchResponse(List<Resource> resourcesAddedToInventory, List<FailedResource> failedResources) {
+    public ResourceBatchResponse(List<ResourceModel> resourcesAddedToInventory, List<FailedResource> failedResources) {
         super(failedResources);
         this.resources = resourcesAddedToInventory;
     }
@@ -56,7 +56,7 @@ public class ResourceBatchResponse extends BatchResponseBase {
     	super(exceptionToErrorCodeMapper) ; 
     }//EOM 
     
-    public ResourceBatchResponse(BatchResponse<Resource> batchResponse, ExceptionToErrorCodeMapper exceptionToErrorCodeMapper) {
+    public ResourceBatchResponse(BatchResponse<ResourceModel> batchResponse, ExceptionToErrorCodeMapper exceptionToErrorCodeMapper) {
         if (null == exceptionToErrorCodeMapper) {
             throw new NullArgumentException("exceptionToErrorCodeMap");
         }
@@ -78,11 +78,11 @@ public class ResourceBatchResponse extends BatchResponseBase {
         }
     }
     
-    public List<Resource> getResources() {
+    public List<ResourceModel> getResources() {
         return resources;
     }
 
-    public void setResources(List<Resource> resourcesAddedToInventory) {
+    public void setResources(List<ResourceModel> resourcesAddedToInventory) {
         this.resources = resourcesAddedToInventory;
     }
     

@@ -24,10 +24,10 @@
  */
 package org.hyperic.hq.api.transfer;
 
-import org.hyperic.hq.api.model.Resource;
+import org.hyperic.hq.api.model.ResourceModel;
 import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourceStatusType;
-import org.hyperic.hq.api.model.ResourceType;
+import org.hyperic.hq.api.model.ResourceTypeModel;
 import org.hyperic.hq.api.model.Resources;
 import org.hyperic.hq.api.model.common.RegistrationID;
 import org.hyperic.hq.api.model.common.ExternalRegistrationStatus;

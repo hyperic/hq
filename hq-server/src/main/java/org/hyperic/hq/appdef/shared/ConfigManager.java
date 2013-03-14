@@ -25,10 +25,12 @@
  */
 package org.hyperic.hq.appdef.shared;
 
+import java.util.Collection;
 import java.util.Map;
 
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AllConfigDiff;
 import org.hyperic.hq.bizapp.shared.AllConfigResponses;
@@ -120,4 +122,10 @@ public interface ConfigManager {
         AllConfigDiff getAllConfigDiff();
         void setAllConfigDiff(AllConfigDiff allConfigResponses);
     }
+
+    /**
+     * Fetches all {@link ConfigResponse} objects associated with the resources param
+     * @return {@link Map} of {@link Resource} to its associated {@link ConfigResponse}
+     */
+    public Map<Resource, ConfigResponse> getConfigResponses(Collection<Resource> resources);
 }

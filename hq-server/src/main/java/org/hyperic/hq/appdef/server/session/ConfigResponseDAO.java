@@ -25,8 +25,14 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.hibernate.SessionFactory;
 import org.hyperic.hq.appdef.ConfigResponseDB;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
@@ -94,4 +100,29 @@ public class ConfigResponseDAO extends HibernateDAO<ConfigResponseDB> {
         getSession().createQuery(sql).setString(0, error).setParameter(1, resp.getId())
             .executeUpdate();
     }
+
+    private Map<Resource, ConfigResponseDB> getConfigs(Collection<Resource> list, String table) {
+        String hql = "select t.resource, t.configResponse from :table t where t.resource in (:resources)";
+        hql = hql.replace(":table", table);
+        @SuppressWarnings("unchecked")
+        final List<Object[]> objs = getSession().createQuery(hql).setParameterList("resources", list).list();
+        final Map<Resource, ConfigResponseDB> rtn = new HashMap<Resource, ConfigResponseDB>();
+        for (final Object[] obj : objs) {
+            rtn.put((Resource) obj[0], (ConfigResponseDB) obj[1]);
+        }
+        return rtn;
+    }
+
+    Map<Resource, ConfigResponseDB> getServerConfigs(Collection<Resource> list) {
+        return getConfigs(list, "Server");
+    }
+
+    Map<Resource, ConfigResponseDB> getServiceConfigs(Collection<Resource> list) {
+        return getConfigs(list, "Service");
+    }
+
+    Map<Resource, ConfigResponseDB> getPlatformConfigs(Collection<Resource> list) {
+        return getConfigs(list, "Platform");
+    }
+
 }

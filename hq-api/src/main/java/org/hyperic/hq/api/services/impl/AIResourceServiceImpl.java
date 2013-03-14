@@ -33,8 +33,8 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.hyperic.hq.api.model.AIResource;
-import org.hyperic.hq.api.model.Resource;
-import org.hyperic.hq.api.model.ResourceType;
+import org.hyperic.hq.api.model.ResourceModel;
+import org.hyperic.hq.api.model.ResourceTypeModel;
 import org.hyperic.hq.api.services.AIResourceService;
 import org.hyperic.hq.api.transfer.AIResourceTransfer;
 import org.hyperic.util.config.ConfigOption;
@@ -70,12 +70,12 @@ public class AIResourceServiceImpl implements AIResourceService {
         this.logger = logger;
     }        
     
-    public AIResource getAIResource(String discoveryId, ResourceType type) {        
+    public AIResource getAIResource(String discoveryId, ResourceTypeModel type) {        
         return aiResourceTransfer.getAIResource(discoveryId, type);
     }
     
     
-    public List<Resource> approveAIResource(List<String> ids, ResourceType type) {
+    public List<ResourceModel> approveAIResource(List<String> ids, ResourceTypeModel type) {
         return aiResourceTransfer.approveAIResource(ids, type);
     }
     public List<ConfigOption> getConfigurationSchema() {

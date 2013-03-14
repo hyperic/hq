@@ -50,14 +50,14 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "resource", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 @XmlType(name="ResourceTypeType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
-public class Resource extends Notification {
+public class ResourceModel extends Notification {
 
 	@XmlAttribute
     private String id;
 	@XmlAttribute
     private String name;
 	@XmlAttribute 
-    private ResourceType resourceType;
+    private ResourceTypeModel resourceType;
 	@XmlAttribute
     private ResourceStatusType resourceStatusType ;
 
@@ -68,7 +68,7 @@ public class Resource extends Notification {
 	
 	@XmlElementWrapper(name="subResources", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 	@XmlElement(name = "resource", namespace=RestApiConstants.SCHEMA_NAMESPACE)
-    private List<Resource> subResources;
+    private List<ResourceModel> subResources;
 	
 	@XmlElement(name = "resourceConfig", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 	private ResourceConfig resourceConfig;
@@ -76,9 +76,9 @@ public class Resource extends Notification {
 	//  @XmlElement(name = "ResourceProperty", required = true)
 //	private List<ResourceProperty> resourceProperty;
 
-	public Resource(){}//EOM 
+	public ResourceModel(){}//EOM 
 	
-	public Resource(final String id) { 
+	public ResourceModel(final String id) { 
 		this.id = id ; 
 	}//EOM 
     
@@ -105,22 +105,22 @@ public class Resource extends Notification {
         this.resourcePrototype = new ResourcePrototype(name) ; 
     }//EOM 
     
-    public List<Resource> getSubResources() {
+    public List<ResourceModel> getSubResources() {
         return subResources;
     }
-    public void setSubResources(List<Resource> subResources) {
+    public void setSubResources(List<ResourceModel> subResources) {
         this.subResources = subResources;
     }
     
-    public final void addSubResource(final Resource subResource) { 
-    	if(this.subResources == null) this.subResources = new ArrayList<Resource>() ; 
+    public final void addSubResource(final ResourceModel subResource) { 
+    	if(this.subResources == null) this.subResources = new ArrayList<ResourceModel>() ; 
     	this.subResources.add(subResource) ;
     }//EOM 
     
-    public ResourceType getResourceType() {
+    public ResourceTypeModel getResourceType() {
         return resourceType;
     }
-    public void setResourceType(ResourceType resourceType) {
+    public void setResourceType(ResourceTypeModel resourceType) {
         this.resourceType = resourceType;
     }    
     
@@ -164,7 +164,7 @@ public class Resource extends Notification {
 
 		if(this.subResources != null) { 
 			
-			for(Resource child : this.subResources) {
+			for(ResourceModel child : this.subResources) {
 				child.toString(builder.append("\n"), indentation+"\t").append("\n") ; 
 			}//EO while there are more resources 
 		}//EO if subresources != null 

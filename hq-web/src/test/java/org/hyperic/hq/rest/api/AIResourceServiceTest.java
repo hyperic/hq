@@ -17,12 +17,12 @@ import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.apache.cxf.jaxrs.client.WebClient;
 //import org.apache.http.HttpHeaders;
 import org.hyperic.hq.api.model.AIResource;
-import org.hyperic.hq.api.model.Resource;
+import org.hyperic.hq.api.model.ResourceModel;
 import org.hyperic.hq.api.model.ResourceConfig;
 import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourcePrototype;
 import org.hyperic.hq.api.model.ResourceStatusType;
-import org.hyperic.hq.api.model.ResourceType;
+import org.hyperic.hq.api.model.ResourceTypeModel;
 import org.hyperic.hq.api.model.Resources;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.api.model.PropertyList;
@@ -75,10 +75,10 @@ public class AIResourceServiceTest {
         addAdminAuthorizationHeader(client);
 
         String[] ids = { "ID1", "ID2" };
-        ResourceType type = ResourceType.PLATFORM;
+        ResourceTypeModel type = ResourceTypeModel.PLATFORM;
         ResourceStatusType resourceStatusType = ResourceStatusType.APPROVED;
         ResourceDetailsType[] responseStructure = { ResourceDetailsType.BASIC };
-        Resource result = aiResourceSvc.getResource(ids[1], type, resourceStatusType, 1, responseStructure);
+        ResourceModel result = aiResourceSvc.getResource(ids[1], type, resourceStatusType, 1, responseStructure);
         // assertEquals(type + ids[0] + ids[1], result);
         System.out.println(result.getId());
     }
@@ -93,10 +93,10 @@ public class AIResourceServiceTest {
         client.type("application/json");
 
         String[] ids = { "ID1", "ID2" };
-        ResourceType type = ResourceType.PLATFORM;
+        ResourceTypeModel type = ResourceTypeModel.PLATFORM;
         ResourceStatusType resourceStatusType = ResourceStatusType.APPROVED;
         ResourceDetailsType[] responseStructure = { ResourceDetailsType.BASIC };
-        Resource result = aiResourceSvc.getResource(ids[1], type, resourceStatusType, 1, responseStructure);
+        ResourceModel result = aiResourceSvc.getResource(ids[1], type, resourceStatusType, 1, responseStructure);
         // assertEquals(type + ids[0] + ids[1], result);
         System.out.println(result.getId());
     }
@@ -114,10 +114,10 @@ public class AIResourceServiceTest {
         client.header(HttpHeaders.AUTHORIZATION, authorizationHeader); // "Authorization"
 
         String[] ids = { "ID1", "ID2" };
-        ResourceType type = ResourceType.PLATFORM;
+        ResourceTypeModel type = ResourceTypeModel.PLATFORM;
         ResourceStatusType resourceStatusType = ResourceStatusType.APPROVED;
         ResourceDetailsType[] responseStructure = { ResourceDetailsType.BASIC };
-        Resource result = aiResourceSvc.getResource(ids[1], type, resourceStatusType, 1, responseStructure);
+        ResourceModel result = aiResourceSvc.getResource(ids[1], type, resourceStatusType, 1, responseStructure);
         // assertEquals(type + ids[0] + ids[1], result);
         System.out.println(result.getId());
     }
@@ -164,11 +164,11 @@ public class AIResourceServiceTest {
 
         addAdminAuthorizationHeader(client);
 
-        ResourceType type = ResourceType.SERVER;
+        ResourceTypeModel type = ResourceTypeModel.SERVER;
         ResourceStatusType resourceStatusType = ResourceStatusType.APPROVED;
-        List<Resource> resourceList = new ArrayList<Resource>();
+        List<ResourceModel> resourceList = new ArrayList<ResourceModel>();
 
-        Resource updatedResource = new Resource("1");
+        ResourceModel updatedResource = new ResourceModel("1");
         ResourcePrototype resourcePrototype = new ResourcePrototype("Tomcat 6.0");
         updatedResource.setResourcePrototype(resourcePrototype);
         updatedResource.setResourceStatusType(resourceStatusType);
@@ -204,7 +204,7 @@ public class AIResourceServiceTest {
         addAdminAuthorizationHeader(client);
 
         String[] ids = { "ID1", "ID2" };
-        ResourceType type = ResourceType.PLATFORM;
+        ResourceTypeModel type = ResourceTypeModel.PLATFORM;
         AIResource result = aiResourceSvc.getAIResource(ids[0], type);
         // assertEquals(type + ids[0] + ids[1], result);
         System.out.println(result.getId());
@@ -221,8 +221,8 @@ public class AIResourceServiceTest {
         addAdminAuthorizationHeader(client);
 
         String[] ids = { "ID1", "ID2" };
-        ResourceType type = ResourceType.PLATFORM;
-        List<Resource> result = aiResourceSvc.approveAIResource(Arrays.asList(ids), type);
+        ResourceTypeModel type = ResourceTypeModel.PLATFORM;
+        List<ResourceModel> result = aiResourceSvc.approveAIResource(Arrays.asList(ids), type);
 
         extractAndSetJSessionId(client);
         // response.getMetadata().put(HttpHeaders.COOKIE, cookies);

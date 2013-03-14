@@ -4,7 +4,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.hyperic.hq.api.model.Resource;
+import org.hyperic.hq.api.model.ResourceModel;
 import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.transfer.impl.ResourceTransferImpl.Context;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -13,7 +13,7 @@ import org.hyperic.hq.appdef.shared.AppdefUtil;
 public enum ResourceDetailsTypeStrategy {
     BASIC{ 
         @Override
-        public final Resource populateResource(final Context flowContext) throws Throwable{ 
+        public final ResourceModel populateResource(final Context flowContext) throws Throwable{ 
             return flowContext.currResource = flowContext.getVisitor().getResourceMapper().toResource(flowContext.backendResource) ;
             
         }//EOM 
@@ -28,36 +28,39 @@ public enum ResourceDetailsTypeStrategy {
          * @throws AppdefEntityNotFoundException 
          */
         @Override
-        public final Resource populateResource(final Context flowContext) throws Throwable { 
-            Resource resource = flowContext.currResource ; 
+        public final ResourceModel populateResource(final Context flowContext) throws Throwable { 
+            ResourceModel resource = flowContext.currResource ; 
             if(resource == null) { 
-                resource = flowContext.currResource = new Resource(flowContext.internalID) ; 
+                resource = flowContext.currResource = new ResourceModel(flowContext.internalID) ; 
             }//EO if resource was not initialized yet 
             //init the response config metadata 
             
             flowContext.entityID = AppdefUtil.newAppdefEntityId(flowContext.backendResource) ;
             flowContext.getVisitor().initResourceConfig(flowContext) ;
-            return flowContext.getVisitor().getResourceMapper().mergeConfig(flowContext.resourceType, flowContext.backendResource ,resource, flowContext.configResponses, flowContext.cprops) ; 
+            return flowContext.getVisitor().getResourceMapper().mergeConfig(
+                flowContext.resourceType, flowContext.backendResource, resource,
+                flowContext.configResponses, flowContext.cprops) ; 
         }//EOM 
     },//EO PROPERTIES
     VIRTUALDATA{
         @Override
-        public final Resource populateResource(final Context flowContext) throws Throwable {
+        public final ResourceModel populateResource(final Context flowContext) throws Throwable {
             BASIC.populateResource(flowContext) ;
-            Resource resource = flowContext.currResource ; 
+            ResourceModel resource = flowContext.currResource ; 
             if(resource == null) { 
-                resource = flowContext.currResource = new Resource(flowContext.internalID) ; 
+                resource = flowContext.currResource = new ResourceModel(flowContext.internalID) ; 
             }//EO if resource was not initialized yet 
             //init the response config metadata 
             
             flowContext.entityID = AppdefUtil.newAppdefEntityId(flowContext.backendResource) ;
             flowContext.getVisitor().initResourceConfig(flowContext) ;
-            return flowContext.getVisitor().getResourceMapper().mergeVirtualData(flowContext.resourceType, flowContext.backendResource ,resource, flowContext.cprops) ; 
+            return flowContext.getVisitor().getResourceMapper().mergeVirtualData(
+                flowContext.resourceType, flowContext.backendResource, resource, flowContext.cprops) ; 
         }        
     },
     ALL{ 
         @Override
-        public final Resource populateResource(final Context flowContext) throws Throwable{ 
+        public final ResourceModel populateResource(final Context flowContext) throws Throwable{ 
             BASIC.populateResource(flowContext) ;
             return PROPERTIES.populateResource(flowContext) ;
         }//EOM
@@ -74,7 +77,7 @@ public enum ResourceDetailsTypeStrategy {
         return setUniqueResourceDetails ; 
     }//EOM 
             
-    public abstract Resource populateResource(final Context flowContext) throws Throwable;  
+    public abstract ResourceModel populateResource(final Context flowContext) throws Throwable;  
     
     public static final Set<ResourceDetailsTypeStrategy> valueOf(final ResourceDetailsType[] arrResourceDetailsTypes) { 
         final SortedSet<ResourceDetailsTypeStrategy> setUniqueResourceDetails = new TreeSet<ResourceDetailsTypeStrategy>() ; 

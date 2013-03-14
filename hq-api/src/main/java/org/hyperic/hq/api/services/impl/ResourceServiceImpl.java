@@ -29,10 +29,10 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
 import org.apache.cxf.jaxrs.ext.search.SearchContext;
-import org.hyperic.hq.api.model.Resource;
+import org.hyperic.hq.api.model.ResourceModel;
 import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourceStatusType;
-import org.hyperic.hq.api.model.ResourceType;
+import org.hyperic.hq.api.model.ResourceTypeModel;
 import org.hyperic.hq.api.model.Resources;
 import org.hyperic.hq.api.model.common.RegistrationID;
 import org.hyperic.hq.api.model.common.ExternalRegistrationStatus;
@@ -60,11 +60,11 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
 	private EndpointQueue endpointQueue;
 	
 	
-	public final Resource getResource(final String platformNaturalID, final ResourceType resourceType, final ResourceStatusType resourceStatusType, 
+	public final ResourceModel getResource(final String platformNaturalID, final ResourceTypeModel resourceType, final ResourceStatusType resourceStatusType, 
 			final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) throws SessionNotFoundException, SessionTimeoutException {
 	    ApiMessageContext apiMessageContext = newApiMessageContext();
 	    
-	    Resource resource = null;
+	    ResourceModel resource = null;
 	    try {
 	        resource = this.resourceTransfer.getResource(apiMessageContext, platformNaturalID, resourceType, resourceStatusType, hierarchyDepth, responseMetadata);            
 	    } catch (ObjectNotFoundException e) {
@@ -76,13 +76,13 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
 		return resource;
 	}//EOM 
 
-    public final Resource getResource(final String platformID,
+    public final ResourceModel getResource(final String platformID,
                                       final ResourceStatusType resourceStatusType,
                                       final int hierarchyDepth,
                                       final ResourceDetailsType[] responseMetadata)
     throws SessionNotFoundException, SessionTimeoutException {
         ApiMessageContext apiMessageContext = newApiMessageContext();
-        Resource resource = null;
+        ResourceModel resource = null;
         try {
             resource =  this.resourceTransfer.getResource(apiMessageContext, platformID, resourceStatusType, hierarchyDepth, responseMetadata) ;
         } catch (ObjectNotFoundException e) {
@@ -129,7 +129,7 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
 		return this.resourceTransfer.updateResources(apiMessageContext, resources) ; 
 	}//EOM
 	
-	public final ResourceBatchResponse updateResourcesByCriteria(final Resource updateData) throws SessionNotFoundException, SessionTimeoutException {
+	public final ResourceBatchResponse updateResourcesByCriteria(final ResourceModel updateData) throws SessionNotFoundException, SessionTimeoutException {
 	    ApiMessageContext apiMessageContext = newApiMessageContext();
 		//TODO: NYI 
 		//return this.resourceTransfer.approveResource(cirteria, updateData) ;

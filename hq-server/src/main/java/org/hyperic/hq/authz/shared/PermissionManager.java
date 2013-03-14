@@ -688,10 +688,14 @@ public abstract class PermissionManager {
         throws ApplicationException;
 
     /**
-     * @return {@link Set} of {@link Resource}Ids
+     * @return {@link Set} of viewable {@link Resource}Ids
      */
-    public abstract Set<Integer> findViewableResources(AuthzSubject subj,
-                                                       Collection<ResourceType> resourceTypes);
+    public abstract Set<Integer> findViewableResources(AuthzSubject subj, Collection<ResourceType> resourceTypes);
+
+    /**
+     * @return {@link Set} of viewable {@link Platform}, {@link Server} and {@link Service} {@link Resource}Ids
+     */
+    public abstract Set<Integer> findViewablePSSResources(AuthzSubject subj);
 
     /**
      * Search viewable resources of any type

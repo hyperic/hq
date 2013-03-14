@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,12 +45,14 @@ import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.autoinventory.AICompare;
 import org.hyperic.hq.bizapp.shared.AllConfigDiff;
 import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.util.Classifier;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,13 +92,58 @@ public class ConfigManagerImpl implements ConfigManager {
         cr.setResponseTimeResponse(rtResponse);
         return cr;
     }
+    
+    @Transactional(readOnly=true)
+    public Map<Resource, ConfigResponse> getConfigResponses(Collection<Resource> resources) {
+        final Map<Integer, Collection<Resource>> resourcesByType = new Classifier<Resource, Integer, Resource>() {
+            @Override
+            public NameValue<Integer, Resource> classify(Resource r) {
+                return new NameValue<Integer, Resource>(r.getResourceType().getId(), r);
+            }
+        }.classify(resources);
+        final Map<Resource, ConfigResponseDB> tmp = new HashMap<Resource, ConfigResponseDB>();
+        for (final Entry<Integer, Collection<Resource>> entry : resourcesByType.entrySet()) {
+            final Integer resourceTypeId = entry.getKey();
+            final Collection<Resource> list = entry.getValue();
+            if (resourceTypeId.equals(AuthzConstants.authzPlatform)) {
+                tmp.putAll(configResponseDAO.getPlatformConfigs(list));
+            } else if (resourceTypeId.equals(AuthzConstants.authzServer)) {
+                tmp.putAll(configResponseDAO.getServerConfigs(list));
+            } else if (resourceTypeId.equals(AuthzConstants.authzService)) {
+                tmp.putAll(configResponseDAO.getServiceConfigs(list));
+            }
+        }
+        final Map<Resource, ConfigResponse> rtn = new HashMap<Resource, ConfigResponse>();
+        for (final Entry<Resource, ConfigResponseDB> entry : tmp.entrySet()) {
+            final Resource resource = entry.getKey();
+            final ConfigResponseDB crdb = entry.getValue();
+            final ConfigResponse configResponse = new ConfigResponse();
+            final byte[] productResponse = crdb.getProductResponse();
+            final byte[] controlResponse = crdb.getControlResponse();
+            final byte[] measurementResponse = crdb.getMeasurementResponse();
+            rtn.put(resource, configResponse);
+            try {
+                if (measurementResponse != null && measurementResponse.length > 0) {
+                    configResponse.merge(ConfigResponse.decode(measurementResponse), true);
+                }
+                if (productResponse != null && productResponse.length > 0) {
+                    configResponse.merge(ConfigResponse.decode(productResponse), true);
+                }
+                if (controlResponse != null && controlResponse.length > 0) {
+                    configResponse.merge(ConfigResponse.decode(controlResponse), true);
+                }
+            } catch (EncodingException e) {
+                log.warn("could not decode config associated with resourceId=" + resource.getId());
+                log.debug(e,e);
+            }
+        }
+        return rtn;
+    }
 
     /**
      * 
      * Get the ConfigResponse for the given ID, creating it if it does not
      * already exist.
-     * 
-     * 
      * 
      */
     @Transactional(readOnly=true)
