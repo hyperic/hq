@@ -152,7 +152,8 @@ public class ExceptionToErrorCodeMapper  {
         CANNOT_VERIFY_VC_SETTINGS("8001"),
         CANNOT_UPDATE_SERVER_GUID("8002"),
         VC_CONNECTION_ALREADY_EXISTS("8003"),
-        NO_VC_CONNECTION_EXISTS("8004");
+        NO_VC_CONNECTION_EXISTS("8004"), 
+        UNKNOWN_ENDPOINT("8005");
         
         private final String errorCode;
 

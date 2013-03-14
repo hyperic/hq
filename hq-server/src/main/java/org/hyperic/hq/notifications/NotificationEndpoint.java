@@ -14,7 +14,7 @@ public abstract class NotificationEndpoint {
     
     public abstract boolean canPublish();
 
-    public abstract BatchPostingStatus publishMessagesInBatch(Collection<InternalAndExternalNotificationReports> messages, List<InternalNotificationReport> failedReports);
+    public abstract EndpointStatus publishMessagesInBatch(Collection<InternalAndExternalNotificationReports> messages, List<InternalNotificationReport> failedReports);
     
     public long getRegistrationId() {
         return id;

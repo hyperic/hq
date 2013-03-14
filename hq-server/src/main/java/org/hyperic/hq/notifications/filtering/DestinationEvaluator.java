@@ -11,6 +11,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.notifications.DefaultEndpoint;
 import org.hyperic.hq.notifications.NotificationEndpoint;
 import org.hyperic.hq.notifications.model.BaseNotification;
 
@@ -71,7 +72,12 @@ public abstract class DestinationEvaluator<N extends BaseNotification> {
         }
     }
 
-    /**
+    public FilterChain<N> getRegistration(int registrationID) {
+        FilterChain<N> filterChain = destToFilter.get(new DefaultEndpoint(registrationID));
+        return filterChain;
+    }
+
+     /**
      * 
      * @param dest
      * @param filters

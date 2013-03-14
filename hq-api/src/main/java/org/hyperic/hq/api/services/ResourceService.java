@@ -42,6 +42,7 @@ import org.hyperic.hq.api.model.ResourceStatusType;
 import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.api.model.Resources;
 import org.hyperic.hq.api.model.common.RegistrationID;
+import org.hyperic.hq.api.model.common.RegistrationStatus;
 import org.hyperic.hq.api.model.resources.RegisteredResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
@@ -51,54 +52,67 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.NotFoundException;
 
 
-@Path("/") 
-@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON}) 
+@Path("/")
+@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 public interface ResourceService {
-	
+
 
     @GET
     @Path("/{platformNaturalID}/{resourceType}")
     Resource getResource(@PathParam("platformNaturalID") final String platformNaturalID,
-                         @PathParam("resourceType") final ResourceType resourceType, 
+                         @PathParam("resourceType") final ResourceType resourceType,
                          @QueryParam("status") final ResourceStatusType resourceStatusType,
-                         @QueryParam("hierarchyDepth") final int hierarchyDepth, 
+                         @QueryParam("hierarchyDepth") final int hierarchyDepth,
                          @QueryParam("responseStructure") final ResourceDetailsType[] responseStructure)
-    throws SessionNotFoundException, SessionTimeoutException ;  
-		
+            throws SessionNotFoundException, SessionTimeoutException;
+
     @GET
     @Path("/resourceUrl/{resourceID}")
-    String getResourceUrl(@PathParam("resourceID") final int resourceID) throws SessionNotFoundException, SessionTimeoutException ;
+    String getResourceUrl(@PathParam("resourceID") final int resourceID) throws SessionNotFoundException,
+            SessionTimeoutException;
 
-	@GET
+    @GET
     @Path("/{platformID}")
-	Resource getResource(@PathParam("platformID") final String platformID, 
+    Resource getResource(@PathParam("platformID") final String platformID,
                          @QueryParam("status") final ResourceStatusType resourceStatusType,
-                         @QueryParam("hierarchyDepth") final int hierarchyDepth, 
+                         @QueryParam("hierarchyDepth") final int hierarchyDepth,
                          @QueryParam("responseStructure") final ResourceDetailsType[] responseStructure)
-    throws SessionNotFoundException, SessionTimeoutException ;  
-	
+            throws SessionNotFoundException, SessionTimeoutException;
+
     @GET
     @Path("/")
-    RegisteredResourceBatchResponse getResources(@QueryParam("responseStructure") final ResourceDetailsType[] responseStructure,
-                                                 @QueryParam("hierarchyDepth") final int hierarchyDepth) throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException;
+    RegisteredResourceBatchResponse getResources(@QueryParam("responseStructure") final ResourceDetailsType[]
+                                                         responseStructure,
+                                                 @QueryParam("hierarchyDepth") final int hierarchyDepth) throws
+            SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException;
 
     @POST
     @Path("/registration")
-    RegistrationID register(@QueryParam("responseStructure") final ResourceDetailsType responseMetadata, final ResourceFilterRequest resourceFilterRequest) throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException;
+    RegistrationID register(@QueryParam("responseStructure") final ResourceDetailsType responseMetadata,
+                            final ResourceFilterRequest resourceFilterRequest) throws SessionNotFoundException,
+            SessionTimeoutException, PermissionException, NotFoundException;
+
+    @GET
+    @Path("/registration/{registrationID}")
+    RegistrationStatus getRegistrationStatus(@PathParam("registrationID") final int registrationID) throws
+            SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException;
 
     @POST
-	@Path("/approve")
-	ResourceBatchResponse approveResource(final Resources aiResources) throws SessionNotFoundException, SessionTimeoutException ; 
-	
-	@PUT
-	ResourceBatchResponse updateResources(final Resources resources) throws SessionNotFoundException, SessionTimeoutException ; 
+    @Path("/approve")
+    ResourceBatchResponse approveResource(final Resources aiResources) throws SessionNotFoundException,
+            SessionTimeoutException;
 
-	@PUT
-	@Path("/search")
-	ResourceBatchResponse updateResourcesByCriteria(final Resource updateData) throws SessionNotFoundException, SessionTimeoutException ;
-	
-	@DELETE
-	@Path("/registration")
-	public void unregister(@QueryParam("registrationid") Long registrationId) throws SessionNotFoundException, SessionTimeoutException;
+    @PUT
+    ResourceBatchResponse updateResources(final Resources resources) throws SessionNotFoundException,
+            SessionTimeoutException;
+
+    @PUT
+    @Path("/search")
+    ResourceBatchResponse updateResourcesByCriteria(final Resource updateData) throws SessionNotFoundException,
+            SessionTimeoutException;
+
+    @DELETE
+    @Path("/registration")
+    public void unregister(@QueryParam("registrationid") Long registrationId) throws SessionNotFoundException, SessionTimeoutException;
 }//EOC 

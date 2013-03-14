@@ -76,7 +76,7 @@ public class HttpEndpoint extends NotificationEndpoint {
     }
 
     @Override
-    public BatchPostingStatus publishMessagesInBatch(Collection<InternalAndExternalNotificationReports> messages, List<InternalNotificationReport> failedReports) {
+    public EndpointStatus publishMessagesInBatch(Collection<InternalAndExternalNotificationReports> messages, List<InternalNotificationReport> failedReports) {
         DefaultHttpClient client = null;
         try {
             if (scheme.equalsIgnoreCase("https")) {
@@ -95,7 +95,7 @@ public class HttpEndpoint extends NotificationEndpoint {
             authCache.put(targetHost, basicAuth);
             final BasicHttpContext localcontext = new BasicHttpContext();
             localcontext.setAttribute(ClientContext.AUTH_CACHE, authCache);
-            BatchPostingStatus batchPostingStatus = new BatchPostingStatus();
+            EndpointStatus batchPostingStatus = new EndpointStatus();
             for (final InternalAndExternalNotificationReports message : messages) {
                 BasePostingStatus status =publishMessage(client, message.getExternalReport(), targetHost, localcontext);
                 batchPostingStatus.add(status);
@@ -140,6 +140,78 @@ public class HttpEndpoint extends NotificationEndpoint {
     @Override
     public boolean canPublish() {
         return true;
+    }
+
+    public Integer getPort() {
+        return port;
+    }
+
+    public void setPort(Integer port) {
+        this.port = port;
+    }
+
+    public String getHostname() {
+        return hostname;
+    }
+
+    public void setHostname(String hostname) {
+        this.hostname = hostname;
+    }
+
+    public String getScheme() {
+        return scheme;
+    }
+
+    public void setScheme(String scheme) {
+        this.scheme = scheme;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
+
+    public String getEncoding() {
+        return encoding;
+    }
+
+    public void setEncoding(String encoding) {
+        this.encoding = encoding;
+    }
+
+    public URL getUrl() {
+        return url;
+    }
+
+    public void setUrl(URL url) {
+        this.url = url;
+    }
+
+    public ServerKeystoreConfig getKeystoreConfig() {
+        return keystoreConfig;
+    }
+
+    public void setKeystoreConfig(ServerKeystoreConfig keystoreConfig) {
+        this.keystoreConfig = keystoreConfig;
     }
 
 }

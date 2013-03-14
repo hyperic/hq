@@ -18,7 +18,7 @@ public class AccumulatedRegistrationData {
     private boolean isValid = true;
     private ScheduledFuture<?> schedule;
     private final int queueLimit;
-    protected BatchPostingStatus batchPostingStatus;
+    protected EndpointStatus batchPostingStatus;
     
     public AccumulatedRegistrationData(NotificationEndpoint endpoint, int queueLimit,
                                        InternalResourceDetailsType resourceDetailsType) {
@@ -81,10 +81,14 @@ public class AccumulatedRegistrationData {
         accumulatedNotificationsQueue.drainTo(c, size);
     }
 
-    public void merge(BatchPostingStatus batchPostingStatus) {
+    public void merge(EndpointStatus batchPostingStatus) {
         if (this.batchPostingStatus==null) {
             this.batchPostingStatus=batchPostingStatus;
         }
         this.batchPostingStatus.merge(batchPostingStatus);
+    }
+
+    public EndpointStatus getEndpointStatus() {
+        return this.batchPostingStatus;
     }
 }

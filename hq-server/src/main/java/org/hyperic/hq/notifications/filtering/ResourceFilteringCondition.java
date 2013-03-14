@@ -32,4 +32,9 @@ public class ResourceFilteringCondition extends FilteringCondition<Integer> {
     public boolean check(Integer resourceId) {
         return resourceIds == null || resourceIds.isEmpty() || resourceIds.contains(resourceId);
     }
+
+    @Override
+    public String toString() {
+        return "resourceIds= " + resourceIds;
+    }
 }

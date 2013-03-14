@@ -30,12 +30,14 @@ import org.hyperic.hq.api.model.ResourceStatusType;
 import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.api.model.Resources;
 import org.hyperic.hq.api.model.common.RegistrationID;
+import org.hyperic.hq.api.model.common.RegistrationStatus;
 import org.hyperic.hq.api.model.resources.RegisteredResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
 import org.hyperic.hq.api.services.impl.ApiMessageContext;
 import org.hyperic.hq.api.transfer.impl.ResourceTransferImpl.Context;
 import org.hyperic.hq.api.transfer.mapping.ResourceMapper;
+import org.hyperic.hq.api.transfer.mapping.UnknownEndpointException;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.PlatformManager;
@@ -70,6 +72,9 @@ public interface ResourceTransfer {
     RegistrationID register(final ApiMessageContext messageContext, final ResourceDetailsType responseMetadata,
                             final ResourceFilterRequest resourceFilterRequest) throws PermissionException,
             NotFoundException;
+
+    RegistrationStatus getRegistrationStatus(final ApiMessageContext messageContext,
+                                     final int registrationID) throws PermissionException,NotFoundException, UnknownEndpointException;
 
     ResourceBatchResponse approveResource(final ApiMessageContext messageContext, final Resources aiResources);
 

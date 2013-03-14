@@ -271,11 +271,7 @@ public class DetectionUtil {
 			    Process process = Runtime.getRuntime().exec(cmd);
 			    input = new BufferedReader(new InputStreamReader(process
 						.getInputStream()));
-			    //[HQ-4176] - don't block this thread
-				if (!input.ready()) {
-				    return childPids;
-				}
-			    long lPpid = -1;
+				long lPpid = -1;
 				String sPpid = "";
 				String sCpid = "";
 				long lCpid = -1;

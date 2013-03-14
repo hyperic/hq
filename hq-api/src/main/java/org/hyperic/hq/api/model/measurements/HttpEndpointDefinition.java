@@ -48,6 +48,17 @@ public class HttpEndpointDefinition {
     @XmlAttribute
     private String encoding;
 
+    public HttpEndpointDefinition() {
+        super();
+    }
+    public HttpEndpointDefinition(String url, String username, String password, String contentType, String encoding) {
+        super();
+        this.url = url;
+        this.username = username;
+        this.password = password;
+        this.contentType = contentType;
+        this.encoding = encoding;
+    }
     public String getUrl() {
         return url;
     }
@@ -62,6 +73,21 @@ public class HttpEndpointDefinition {
     }
     public String getEncoding() {
         return encoding;
+    }
+    public void setUrl(String url) {
+        this.url = url;
+    }
+    public void setUsername(String username) {
+        this.username = username;
+    }
+    public void setPassword(String password) {
+        this.password = password;
+    }
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
+    public void setEncoding(String encoding) {
+        this.encoding = encoding;
     }
 
 }

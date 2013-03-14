@@ -154,7 +154,7 @@ public class EndpointQueue {
                         size += report.getNotifications().size();
                     }
                     List<InternalNotificationReport> failedReports = new ArrayList<InternalNotificationReport>();
-                    BatchPostingStatus batchPostingStatus = endpoint.publishMessagesInBatch(messages,failedReports);
+                    EndpointStatus batchPostingStatus = endpoint.publishMessagesInBatch(messages,failedReports);
                     // if a publishing attempt has been made
                     if (!batchPostingStatus.isEmpty()) {
                         // retry the reports which were failed to be published 
@@ -258,6 +258,19 @@ public class EndpointQueue {
             AccumulatedRegistrationData data = registrationData.get(registrationId);
             if (data != null) {
                 return data.getNotificationEndpoint();
+            }
+        }
+        return null;
+    }
+    
+    public EndpointStatus getEndpointStatus(Long registrationID) {
+        if (this.registrationData==null) {
+            return null;
+        }
+        synchronized (registrationData) {
+            AccumulatedRegistrationData ard = this.registrationData.get(registrationID);
+            if (ard!=null) {
+                return ard.getEndpointStatus();
             }
         }
         return null;

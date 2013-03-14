@@ -23,7 +23,7 @@ public class DefaultEndpoint extends NotificationEndpoint {
     }
 
     @Override
-    public BatchPostingStatus publishMessagesInBatch(Collection<InternalAndExternalNotificationReports> messages, List<InternalNotificationReport> failedReports) {
+    public EndpointStatus publishMessagesInBatch(Collection<InternalAndExternalNotificationReports> messages, List<InternalNotificationReport> failedReports) {
         return null;
     }
 }

@@ -42,7 +42,9 @@ import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourceStatusType;
 import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.api.model.Resources;
+import org.hyperic.hq.api.model.common.ExternalEndpointStatus;
 import org.hyperic.hq.api.model.common.RegistrationID;
+import org.hyperic.hq.api.model.common.RegistrationStatus;
 import org.hyperic.hq.api.model.measurements.HttpEndpointDefinition;
 import org.hyperic.hq.api.model.resources.RegisteredResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
@@ -53,6 +55,7 @@ import org.hyperic.hq.api.transfer.ResourceTransfer;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 import org.hyperic.hq.api.transfer.mapping.ResourceDetailsTypeStrategy;
 import org.hyperic.hq.api.transfer.mapping.ResourceMapper;
+import org.hyperic.hq.api.transfer.mapping.UnknownEndpointException;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -83,6 +86,7 @@ import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.notifications.HttpEndpoint;
 import org.hyperic.hq.notifications.NotificationEndpoint;
 import org.hyperic.hq.notifications.filtering.Filter;
+import org.hyperic.hq.notifications.filtering.FilterChain;
 import org.hyperic.hq.notifications.filtering.FilteringCondition;
 import org.hyperic.hq.notifications.filtering.ResourceDestinationEvaluator;
 import org.hyperic.hq.notifications.model.InventoryNotification;
@@ -631,6 +635,20 @@ public class ResourceTransferImpl implements ResourceTransfer {
         evaluator.register(endpoint, userFilters);
         return registrationID;
     }
+
+    public RegistrationStatus getRegistrationStatus(final ApiMessageContext messageContext,
+            final int registrationID) throws PermissionException,NotFoundException, UnknownEndpointException{
+        FilterChain filterChain = evaluator.getRegistration(registrationID);
+        if(filterChain == null)      {
+            throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.BAD_REQUEST,
+                    ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID);
+        }
+        HttpEndpointDefinition endpoint = new HttpEndpointDefinition();
+        ExternalEndpointStatus endpointStatus = new ExternalEndpointStatus();
+        this.notificationsTransfer.getEndointStatus(registrationID, endpoint, endpointStatus);
+        return new RegistrationStatus(endpoint,filterChain, registrationID, endpointStatus);
+    }
+
 
     public void unregister(NotificationEndpoint endpoint) {
         evaluator.unregisterAll(endpoint);
