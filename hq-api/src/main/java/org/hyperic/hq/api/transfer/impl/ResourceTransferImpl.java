@@ -602,13 +602,15 @@ public class ResourceTransferImpl implements ResourceTransfer {
         List<Resource> resources = new ArrayList<Resource>();
         PageList<PlatformValue> platforms = this.platformManager.getAllPlatforms(authzSubject, PageControl.PAGE_ALL);
         for(PlatformValue pv:platforms) {
+            Resource r=null;
             try {
                 String fqdn = pv.getFqdn();
                 final Context context = new Context(authzSubject, fqdn, ResourceType.PLATFORM, responseMetadata, this);
-                final Resource r = getResourceInner(context, hierarchyDepth);
+                r = getResourceInner(context, hierarchyDepth);
                 resources.add(r);
             } catch (ObjectNotFoundException e) {
-//TODO~                res.addFailedResource(resourceID, errorCode, additionalDescription, args)
+                log.error(e,e);
+                res.addFailedResource(r==null?"":r.getId(), ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID.getErrorCode(), null,new Object[] {""});
             }
         }
         res.setResources(resources);
