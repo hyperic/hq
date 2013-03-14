@@ -26,15 +26,19 @@ package org.hyperic.hq.plugin.jboss7;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.logging.Log;
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.product.ControlPlugin;
 import static org.hyperic.hq.product.ControlPlugin.RESULT_FAILURE;
 import static org.hyperic.hq.product.ControlPlugin.RESULT_SUCCESS;
+import static org.hyperic.hq.product.ControlPlugin.STATE_STARTED;
 import static org.hyperic.hq.product.GenericPlugin.getScriptExtension;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPluginManager;
@@ -100,27 +104,17 @@ public class JBoss7Control extends ControlPlugin {
             }
         }
 
-        // find BACKGROUND_SCRIPT
-        Properties props = getManager().getProperties();
-        String home = System.getProperty("user.dir");
-        String dir;
-        try {
-            dir = props.getProperty(AgentConfig.PROP_INSTALLHOME[0]);
-        } catch (java.lang.NoClassDefFoundError e) { // in standalone -> Exception in thread "main" java.lang.NoClassDefFoundError: org/hyperic/hq/agent/AgentConfig
-            dir = props.getProperty("agent.install.home", home);
-        }
 
-        File bg = new File(dir, BACKGROUND_SCRIPT);
-        if (!bg.exists()) {
-            //try relative to pdk.dir for command-line usage
-            File pdk = new File(ProductPluginManager.getPdkDir());
-            if (!pdk.isAbsolute()) {
-                pdk = new File(new File(cwd), ProductPluginManager.getPdkDir());
-            }
-            bg = new File(pdk, "../" + BACKGROUND_SCRIPT);
-        }
+        File agentBundleHome = new File(System.getProperty(AgentConfig.AGENT_BUNDLE_HOME));
+        File bg = new File(agentBundleHome, BACKGROUND_SCRIPT);
+        log.debug("[configure] agentBundleHome =" + agentBundleHome.getAbsolutePath());
+        log.debug("[configure] bg =" + bg.getAbsolutePath());
         if (bg.exists()) {
-            background = bg.getAbsolutePath();
+            try {
+                background = bg.getCanonicalPath();
+            } catch (IOException ex) {
+                background = bg.getAbsolutePath();
+            }
         } else {
             throw new PluginException("Background script '" + bg + "' NOT FOUND");
         }
@@ -134,7 +128,7 @@ public class JBoss7Control extends ControlPlugin {
 
     @Override
     public List<String> getActions() {
-        return Arrays.asList("start", "stop");
+        return Arrays.asList("start", "stop", "restart");
     }
 
     public void stop() throws PluginException {
@@ -143,6 +137,7 @@ public class JBoss7Control extends ControlPlugin {
             throw new PluginException("Server is not running");
         }
         admin.shutdown();
+        waitForState(STATE_STOPPED);
     }
 
     @Override
@@ -159,11 +154,20 @@ public class JBoss7Control extends ControlPlugin {
     }
 
     public void start() throws PluginException {
+        log.debug("[start] config=" + getConfig());
         if (isRunning()) {
             throw new PluginException("Server is running");
         }
         doCommand();
         waitForState(STATE_STARTED);
+    }
+
+    public void restart() throws PluginException {
+        log.debug("[restart]");
+        if (isRunning()) {
+            stop();
+        }
+        start();
     }
 
     protected void doCommand() throws PluginException {
@@ -206,8 +210,9 @@ public class JBoss7Control extends ControlPlugin {
             exitCode = ex.execute();
         } catch (Exception e) {
             getLog().error(e.getMessage(), e);
-            setMessage(e.getMessage());
+            throw new PluginException(e);
         }
+        
         if (exitCode == 0) {
             setResult(RESULT_SUCCESS);
             setMessage("OK");
@@ -226,7 +231,7 @@ public class JBoss7Control extends ControlPlugin {
         }
 
         log.debug("[doCommand] result=" + getResult() + ", exitCode=" + exitCode);
-        if(getResult()==RESULT_FAILURE) {
+        if (getResult() == RESULT_FAILURE) {
             throw new PluginException(getMessage());
         }
     }
