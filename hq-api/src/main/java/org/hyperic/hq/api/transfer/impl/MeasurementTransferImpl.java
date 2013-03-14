@@ -45,6 +45,7 @@ import org.apache.cxf.jaxrs.ext.search.SearchContext;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.ID;
 import org.hyperic.hq.api.model.common.RegistrationID;
+import org.hyperic.hq.api.model.common.RegistrationStatus;
 import org.hyperic.hq.api.model.measurements.BulkResourceMeasurementRequest;
 import org.hyperic.hq.api.model.measurements.HttpEndpointDefinition;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
@@ -63,6 +64,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.TimeframeBoundriesException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -79,6 +81,7 @@ import org.hyperic.hq.notifications.HttpEndpoint;
 import org.hyperic.hq.notifications.NotificationEndpoint;
 import org.hyperic.hq.notifications.filtering.AgnosticFilter;
 import org.hyperic.hq.notifications.filtering.Filter;
+import org.hyperic.hq.notifications.filtering.FilterChain;
 import org.hyperic.hq.notifications.filtering.FilteringCondition;
 import org.hyperic.hq.notifications.filtering.MetricDestinationEvaluator;
 import org.hyperic.hq.notifications.model.MetricNotification;
@@ -169,6 +172,19 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         return new HttpEndpoint(registrationID.getId(), def.getUrl(), def.getUsername(), def.getPassword(),
                                 def.getContentType(), def.getEncoding());
     }
+
+    public RegistrationStatus getRegistrationStatus(final ApiMessageContext messageContext,
+                                                    final int registrationID) throws PermissionException,NotFoundException {
+
+        FilterChain filterChain = evaluator.getRegistration(registrationID);
+        if(filterChain == null)      {
+            throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.BAD_REQUEST,
+                    ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID);
+        }
+
+        return new RegistrationStatus(filterChain, registrationID);
+    }
+
 
     public void unregister(NotificationEndpoint endpoint) {
         evaluator.unregisterAll(endpoint);

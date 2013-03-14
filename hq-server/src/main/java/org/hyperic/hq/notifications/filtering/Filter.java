@@ -56,4 +56,9 @@ public abstract class Filter<N extends BaseNotification, C extends FilteringCond
         }
         return this.cond.equals(other.cond);
     }
+
+    @Override
+    public String toString() {
+        return cond.toString();
+    }
 }

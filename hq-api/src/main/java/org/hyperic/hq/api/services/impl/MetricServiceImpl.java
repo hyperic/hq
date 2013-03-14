@@ -2,6 +2,7 @@ package org.hyperic.hq.api.services.impl;
 
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.common.RegistrationID;
+import org.hyperic.hq.api.model.common.RegistrationStatus;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MetricFilterRequest;
 import org.hyperic.hq.api.model.measurements.MetricResponse;
@@ -13,6 +14,7 @@ import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.TimeframeBoundriesException;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
@@ -85,6 +87,12 @@ public class MetricServiceImpl extends RestApiService implements MetricService {
             SessionTimeoutException {
         ApiMessageContext apiMessageContext = newApiMessageContext();
         return measurementTransfer.register(request, apiMessageContext);
+    }
+
+    public RegistrationStatus getRegistrationStatus(final int registrationID) throws
+            SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException {
+        ApiMessageContext apiMessageContext = newApiMessageContext();
+        return measurementTransfer.getRegistrationStatus(apiMessageContext, registrationID);
     }
 
     public void unregister(Long registrationId) throws SessionNotFoundException, SessionTimeoutException {

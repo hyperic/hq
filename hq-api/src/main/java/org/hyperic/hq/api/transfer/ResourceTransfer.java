@@ -30,6 +30,7 @@ import org.hyperic.hq.api.model.ResourceStatusType;
 import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.api.model.Resources;
 import org.hyperic.hq.api.model.common.RegistrationID;
+import org.hyperic.hq.api.model.common.RegistrationStatus;
 import org.hyperic.hq.api.model.resources.RegisteredResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
@@ -70,6 +71,9 @@ public interface ResourceTransfer {
     RegistrationID register(final ApiMessageContext messageContext, final ResourceDetailsType responseMetadata,
                             final ResourceFilterRequest resourceFilterRequest) throws PermissionException,
             NotFoundException;
+
+    RegistrationStatus getRegistrationStatus(final ApiMessageContext messageContext,
+                                     final int registrationID) throws PermissionException,NotFoundException;
 
     ResourceBatchResponse approveResource(final ApiMessageContext messageContext, final Resources aiResources);
 

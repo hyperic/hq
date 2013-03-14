@@ -43,6 +43,7 @@ import org.hyperic.hq.api.model.ResourceStatusType;
 import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.api.model.Resources;
 import org.hyperic.hq.api.model.common.RegistrationID;
+import org.hyperic.hq.api.model.common.RegistrationStatus;
 import org.hyperic.hq.api.model.measurements.HttpEndpointDefinition;
 import org.hyperic.hq.api.model.resources.RegisteredResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
@@ -83,6 +84,7 @@ import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.notifications.HttpEndpoint;
 import org.hyperic.hq.notifications.NotificationEndpoint;
 import org.hyperic.hq.notifications.filtering.Filter;
+import org.hyperic.hq.notifications.filtering.FilterChain;
 import org.hyperic.hq.notifications.filtering.FilteringCondition;
 import org.hyperic.hq.notifications.filtering.ResourceDestinationEvaluator;
 import org.hyperic.hq.notifications.model.InventoryNotification;
@@ -629,6 +631,18 @@ public class ResourceTransferImpl implements ResourceTransfer {
         evaluator.register(endpoint, userFilters);
         return registrationID;
     }
+
+    public RegistrationStatus getRegistrationStatus(final ApiMessageContext messageContext,
+                                             final int registrationID) throws PermissionException,NotFoundException{
+        FilterChain filterChain = evaluator.getRegistration(registrationID);
+        if(filterChain == null)      {
+            throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.BAD_REQUEST,
+                    ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID);
+       }
+
+      return new RegistrationStatus(filterChain, registrationID);
+    }
+
 
     public void unregister(NotificationEndpoint endpoint) {
         evaluator.unregisterAll(endpoint);
