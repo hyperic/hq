@@ -1,31 +1,12 @@
 /*
- * NOTE: This copyright does *not* cover user programs that use HQ
- * program services by normal system calls through the application
- * program interfaces provided as part of the Hyperic Plug-in Development
- * Kit or the Hyperic Client Development Kit - this is merely considered
- * normal use of the program, and does *not* fall under the heading of
- * "derived work".
- * 
- * Copyright (C) [2004-2013], Hyperic, Inc.
- * This file is part of HQ.
- * 
- * HQ is free software; you can redistribute it and/or modify
- * it under the terms version 2 of the GNU General Public License as
- * published by the Free Software Foundation. This program is distributed
- * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
- * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- * PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- * USA.
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
  */
 package org.hyperic.hq.plugin.jboss7;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -47,6 +28,10 @@ import org.hyperic.util.exec.Execute;
 import org.hyperic.util.exec.ExecuteWatchdog;
 import org.hyperic.util.exec.PumpStreamHandler;
 
+/**
+ *
+ * @author laullon
+ */
 public class JBoss7Control extends ControlPlugin {
 
     private final Log log = getLog();
@@ -56,15 +41,13 @@ public class JBoss7Control extends ControlPlugin {
     private String cwd;
     private String background;
     private List<String> prefix;
-    private List<String> args;
     public static String START_SCRIPT = "jboss7.start.script";
     private String PREFIX = "jboss7.start.prefix";
-    private String ARGS = "jboss7.start.args";
 
     @Override
     public void configure(ConfigResponse config) throws PluginException {
         super.configure(config);
-        log.debug("[configure] config=" + config);
+        log.debug("[__configure] config=" + config);
         admin = new JBossAdminHttp(getConfig().toProperties());
 
         // start script
@@ -76,38 +59,28 @@ public class JBoss7Control extends ControlPlugin {
             throw new PluginException("Start script '" + sh + "' NOT FOUND");
         }
 
-        // parse args
-        String argsStr = getConfig(ARGS);
-        args = new ArrayList<String>();
-        if (argsStr != null && argsStr.length() != 0) {
-            try {
-                String[] argsArgs = StringUtil.explodeQuoted(argsStr);
-                args.addAll(Arrays.asList(argsArgs));
-            } catch (IllegalArgumentException e) {
-                throw new PluginException("Unable to parse arguments: '" + argsStr + "' " + e, e);
-            }
-        }
-
         // parse prefix
         String prefixStr = getConfig(PREFIX);
         prefix = new ArrayList<String>();
         if (prefixStr != null && prefixStr.length() != 0) {
             try {
                 String[] prefixArgs = StringUtil.explodeQuoted(prefixStr);
-                prefix.addAll(Arrays.asList(prefixArgs));
+                for (int i = 0; i < prefixArgs.length; i++) {
+                    prefix.add(prefixArgs[i]);
+                }
             } catch (IllegalArgumentException e) {
-                throw new PluginException("Unable to parse prefix: '" + prefixStr + "' " + e, e);
+                throw new PluginException("Unable to parse arguments: '" + prefix + "' " + e, e);
             }
         }
 
         // find BACKGROUND_SCRIPT
         Properties props = getManager().getProperties();
-        String home = System.getProperty("user.dir");
-        String dir;
+        String cwd = System.getProperty("user.dir");
+        String dir = "";
         try {
             dir = props.getProperty(AgentConfig.PROP_INSTALLHOME[0]);
         } catch (java.lang.NoClassDefFoundError e) { // in standalone -> Exception in thread "main" java.lang.NoClassDefFoundError: org/hyperic/hq/agent/AgentConfig
-            dir = props.getProperty("agent.install.home", home);
+            dir = props.getProperty("agent.install.home", cwd);
         }
 
         File bg = new File(dir, BACKGROUND_SCRIPT);
@@ -127,9 +100,7 @@ public class JBoss7Control extends ControlPlugin {
 
         log.debug("[configure] background =" + background);
         log.debug("[configure] cwd = " + cwd);
-        log.debug("[configure] prefix = " + prefix);
         log.debug("[configure] script = " + script);
-        log.debug("[configure] args = " + args);
     }
 
     @Override
@@ -166,33 +137,31 @@ public class JBoss7Control extends ControlPlugin {
         waitForState(STATE_STARTED);
     }
 
-    protected void doCommand() throws PluginException {
-        List<String> cmd = new ArrayList<String>();
+    protected void doCommand() {
+        List<String> args = new ArrayList<String>();
         ExecuteWatchdog watchdog = new ExecuteWatchdog(getTimeoutMillis());
 
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         Execute ex = new Execute(new PumpStreamHandler(output), watchdog);
         ex.setWorkingDirectory(new File(cwd));
 
-        cmd.addAll(prefix);
-        cmd.add(background);
+        args.addAll(prefix);
+        args.add(background);
 
         if (OperatingSystem.IS_WIN32) {
             //Runtime.exec does not handle file associations
             //such as foo.pl -> perl.exe, foo.py -> python.exe.
             String exe = Win32.findScriptExecutable(script);
             if (exe != null) {
-                cmd.add(exe);
+                args.add(exe);
             }
         } else {
-            cmd.add(script);
+            args.add(script);
         }
 
-        cmd.addAll(args);
+        log.debug("[doCommand] args=" + args);
 
-        log.debug("[doCommand] cmd=" + cmd);
-
-        ex.setCommandline((String[]) cmd.toArray(new String[0]));
+        ex.setCommandline((String[]) args.toArray(new String[0]));
 
         String[] env = {"HQ_CONTROL_WAIT=" + 10};
 
@@ -226,8 +195,5 @@ public class JBoss7Control extends ControlPlugin {
         }
 
         log.debug("[doCommand] result=" + getResult() + ", exitCode=" + exitCode);
-        if(getResult()==RESULT_FAILURE) {
-            throw new PluginException(getMessage());
-        }
     }
 }
