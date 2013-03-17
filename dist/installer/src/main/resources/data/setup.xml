@@ -111,6 +111,16 @@ ${line.separator}Press enter to continue...
                   failOnMissing="false"/>
     <available property="user-setup-properties.available"
                file="${setup.absolute}"/>
+  	
+    <loadproperties srcFile="${setup.absolute}">
+       <filterchain>
+         <linecontains negate="true">
+           <contains value="server.admin.password"/>
+         </linecontains>
+       </filterchain>
+     </loadproperties>
+
+
     <msgfail unless="user-setup-properties.available">^^^ERROR:\
        The specified Hyperic HQ install configuration file does not exist:
          ${setup.absolute}
@@ -125,6 +135,7 @@ ${line.separator}Press enter to continue...
         WARNING: New setup properties file can't be written to %ORIGINALFILE%
         Setup properties will be written to %WRITABLEFILE% instead.
     </findWritable>
+  	
      <delete file="${newSetup}"/>
     <echo>^^^INFO: Loading install configuration...</echo>
     <echo>^^^DEBUG: Loading from ${setup}...</echo>
@@ -771,7 +782,14 @@ ${errMsg}
          installed the server -->
     <echo>^^^DEBUG: Copying server configuration file...</echo>
     <copy tofile="${server.product.dir}/data/hq-server-install.conf"
-          file="${setup.absolute}"/>
+          file="${setup.absolute}">
+     <filterchain>
+      <linecontains negate="true">
+        <contains value="server.admin.password"/>
+      </linecontains>
+     </filterchain>
+    </copy>
+
     <chmod file="${server.product.dir}/data/hq-server-install.conf" perm="go-rwx"/>
 
     <!-- Copy server control file to server's data dir -->
