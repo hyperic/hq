@@ -6,7 +6,7 @@ import java.util.Date;
 
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.common.RegistrationID;
-import org.hyperic.hq.api.model.common.RegistrationStatus;
+import org.hyperic.hq.api.model.common.ExternalRegistrationStatus;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MetricFilterRequest;
 import org.hyperic.hq.api.model.measurements.MetricResponse;
@@ -46,7 +46,7 @@ public interface MeasurementTransfer {
     
     RegistrationID register(final MetricFilterRequest metricFilterReq, ApiMessageContext apiMessageContext);
 
-    RegistrationStatus getRegistrationStatus(final ApiMessageContext messageContext,
+    ExternalRegistrationStatus getRegistrationStatus(final ApiMessageContext messageContext,
                                              final int registrationID) throws PermissionException,NotFoundException, UnknownEndpointException;
 
     ResourceMeasurementBatchResponse getAggregatedMetricData(ApiMessageContext apiMessageContext, final ResourceMeasurementRequests hqMsmtReqs,

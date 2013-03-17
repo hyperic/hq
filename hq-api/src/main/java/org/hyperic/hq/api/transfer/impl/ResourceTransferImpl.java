@@ -44,7 +44,7 @@ import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.api.model.Resources;
 import org.hyperic.hq.api.model.common.ExternalEndpointStatus;
 import org.hyperic.hq.api.model.common.RegistrationID;
-import org.hyperic.hq.api.model.common.RegistrationStatus;
+import org.hyperic.hq.api.model.common.ExternalRegistrationStatus;
 import org.hyperic.hq.api.model.measurements.HttpEndpointDefinition;
 import org.hyperic.hq.api.model.resources.RegisteredResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
@@ -636,7 +636,7 @@ public class ResourceTransferImpl implements ResourceTransfer {
         return registrationID;
     }
 
-    public RegistrationStatus getRegistrationStatus(final ApiMessageContext messageContext,
+    public ExternalRegistrationStatus getRegistrationStatus(final ApiMessageContext messageContext,
             final int registrationID) throws PermissionException,NotFoundException, UnknownEndpointException{
         FilterChain filterChain = evaluator.getRegistration(registrationID);
         if(filterChain == null)      {
@@ -646,7 +646,7 @@ public class ResourceTransferImpl implements ResourceTransfer {
         HttpEndpointDefinition endpoint = new HttpEndpointDefinition();
         ExternalEndpointStatus endpointStatus = new ExternalEndpointStatus();
         this.notificationsTransfer.getEndointStatus(registrationID, endpoint, endpointStatus);
-        return new RegistrationStatus(endpoint,filterChain, registrationID, endpointStatus);
+        return new ExternalRegistrationStatus(endpoint,filterChain, registrationID, endpointStatus);
     }
 
 

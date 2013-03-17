@@ -35,7 +35,7 @@ import org.hyperic.hq.api.model.ResourceStatusType;
 import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.api.model.Resources;
 import org.hyperic.hq.api.model.common.RegistrationID;
-import org.hyperic.hq.api.model.common.RegistrationStatus;
+import org.hyperic.hq.api.model.common.ExternalRegistrationStatus;
 import org.hyperic.hq.api.model.resources.RegisteredResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
@@ -108,7 +108,7 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
         return this.resourceTransfer.register(apiMessageContext, responseMetadata, resourceFilterRequest) ;
     }//EOM
 
-    public final RegistrationStatus getRegistrationStatus(final int registrationID)  throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException {
+    public final ExternalRegistrationStatus getRegistrationStatus(final int registrationID)  throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException {
         ApiMessageContext apiMessageContext = newApiMessageContext();
         try {
             return this.resourceTransfer.getRegistrationStatus(apiMessageContext, registrationID);

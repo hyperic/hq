@@ -60,10 +60,4 @@ public class EndpointStatus {
         this.addLastFailure(other.getLastFailure());
         this.addLastSuccessful(other.getLastSuccessful());
     }
-    public boolean isValid() {
-        return false;//this.isValid;
-    }
-    public long getCreationTime() {
-        return 0;//this.creationTime;
-    }
 }

@@ -2,7 +2,7 @@ package org.hyperic.hq.api.services.impl;
 
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.common.RegistrationID;
-import org.hyperic.hq.api.model.common.RegistrationStatus;
+import org.hyperic.hq.api.model.common.ExternalRegistrationStatus;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MetricFilterRequest;
 import org.hyperic.hq.api.model.measurements.MetricResponse;
@@ -90,7 +90,7 @@ public class MetricServiceImpl extends RestApiService implements MetricService {
         return measurementTransfer.register(request, apiMessageContext);
     }
 
-    public RegistrationStatus getRegistrationStatus(final int registrationID) throws
+    public ExternalRegistrationStatus getRegistrationStatus(final int registrationID) throws
             SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException {
         ApiMessageContext apiMessageContext = newApiMessageContext();
         try {

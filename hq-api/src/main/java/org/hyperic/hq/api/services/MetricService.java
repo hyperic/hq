@@ -20,7 +20,7 @@ import org.apache.cxf.jaxrs.model.wadl.Descriptions;
 import org.apache.cxf.jaxrs.model.wadl.DocTarget;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.common.RegistrationID;
-import org.hyperic.hq.api.model.common.RegistrationStatus;
+import org.hyperic.hq.api.model.common.ExternalRegistrationStatus;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MetricFilterRequest;
 import org.hyperic.hq.api.model.measurements.MetricResponse;
@@ -82,7 +82,7 @@ public interface MetricService {
 
     @GET
     @Path("/registration/{registrationID}")
-    public RegistrationStatus getRegistrationStatus(@PathParam("registrationID") final int registrationID) throws
+    public ExternalRegistrationStatus getRegistrationStatus(@PathParam("registrationID") final int registrationID) throws
             SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException;
 
     @DELETE

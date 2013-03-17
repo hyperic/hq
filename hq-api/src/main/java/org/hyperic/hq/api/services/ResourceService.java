@@ -42,7 +42,7 @@ import org.hyperic.hq.api.model.ResourceStatusType;
 import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.api.model.Resources;
 import org.hyperic.hq.api.model.common.RegistrationID;
-import org.hyperic.hq.api.model.common.RegistrationStatus;
+import org.hyperic.hq.api.model.common.ExternalRegistrationStatus;
 import org.hyperic.hq.api.model.resources.RegisteredResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
@@ -95,7 +95,7 @@ public interface ResourceService {
 
     @GET
     @Path("/registration/{registrationID}")
-    RegistrationStatus getRegistrationStatus(@PathParam("registrationID") final int registrationID) throws
+    ExternalRegistrationStatus getRegistrationStatus(@PathParam("registrationID") final int registrationID) throws
             SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException;
 
     @POST

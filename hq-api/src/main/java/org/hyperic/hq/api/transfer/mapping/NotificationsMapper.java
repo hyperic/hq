@@ -17,6 +17,7 @@ import org.hyperic.hq.notifications.BasePostingStatus;
 import org.hyperic.hq.notifications.EndpointStatus;
 import org.hyperic.hq.notifications.HttpEndpoint;
 import org.hyperic.hq.notifications.NotificationEndpoint;
+import org.hyperic.hq.notifications.RegistrationStatus;
 import org.hyperic.hq.notifications.model.BaseNotification;
 import org.hyperic.hq.notifications.model.CreatedResourceNotification;
 import org.hyperic.hq.notifications.model.MetricNotification;
@@ -100,9 +101,8 @@ public class NotificationsMapper {
         externalEndpoint.setEncoding(backendEndpoint.getEncoding());
     }
 
-    public void toEndpointStatus(EndpointStatus endpointStatus,ExternalEndpointStatus externalEndpointStatus) {
-        externalEndpointStatus.setStatus(endpointStatus.isValid()?"OK":"INVALID");
-        externalEndpointStatus.setCreationTime(endpointStatus.getCreationTime());
+    public void toEndpointStatus(EndpointStatus endpointStatus,ExternalEndpointStatus externalEndpointStatus, RegistrationStatus regStat) {
+        externalEndpointStatus.setStatus(regStat.isValid()?"OK":"INVALID");
         BasePostingStatus lastSuccessful = endpointStatus.getLastSuccessful();
         if (lastSuccessful!=null) {
             externalEndpointStatus.setLastSuccessful(lastSuccessful.getTime());
@@ -111,5 +111,6 @@ public class NotificationsMapper {
         if (lastFailure!=null) {
             externalEndpointStatus.setLastFailure(lastFailure.getTime());
         }
+        externalEndpointStatus.setCreationTime(regStat.getCreationTime());
     }
 }

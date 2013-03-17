@@ -19,6 +19,7 @@ public class AccumulatedRegistrationData {
     private ScheduledFuture<?> schedule;
     private final int queueLimit;
     protected EndpointStatus batchPostingStatus;
+    protected long creationTime;
     
     public AccumulatedRegistrationData(NotificationEndpoint endpoint, int queueLimit,
                                        InternalResourceDetailsType resourceDetailsType) {
@@ -26,6 +27,7 @@ public class AccumulatedRegistrationData {
         this.accumulatedNotificationsQueue = new LinkedBlockingQueue<BaseNotification>(queueLimit);
         this.resourceContentType = resourceDetailsType;
         this.endpoint = endpoint;
+        this.creationTime = System.currentTimeMillis();
     }
     
     public NotificationEndpoint getNotificationEndpoint() {
@@ -90,5 +92,9 @@ public class AccumulatedRegistrationData {
 
     public EndpointStatus getEndpointStatus() {
         return this.batchPostingStatus;
+    }
+
+    public long getCreationTime() {
+        return this.creationTime;
     }
 }

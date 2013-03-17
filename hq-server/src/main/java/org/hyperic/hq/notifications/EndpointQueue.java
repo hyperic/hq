@@ -263,16 +263,17 @@ public class EndpointQueue {
         return null;
     }
     
-    public EndpointStatus getEndpointStatus(Long registrationID) {
+    public void getEndpointAndRegStatus(Long registrationID, EndpointStatus endpointStatus, RegistrationStatus regStat) {
         if (this.registrationData==null) {
-            return null;
+            return;
         }
         synchronized (registrationData) {
             AccumulatedRegistrationData ard = this.registrationData.get(registrationID);
             if (ard!=null) {
-                return ard.getEndpointStatus();
+                endpointStatus.merge(ard.getEndpointStatus());
+                regStat.setCreationTime(ard.getCreationTime());
+                regStat.setValid(ard.isValid());
             }
         }
-        return null;
     }
 }
