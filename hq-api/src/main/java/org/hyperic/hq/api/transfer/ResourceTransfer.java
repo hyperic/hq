@@ -37,6 +37,7 @@ import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
 import org.hyperic.hq.api.services.impl.ApiMessageContext;
 import org.hyperic.hq.api.transfer.impl.ResourceTransferImpl.Context;
 import org.hyperic.hq.api.transfer.mapping.ResourceMapper;
+import org.hyperic.hq.api.transfer.mapping.UnknownEndpointException;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.PlatformManager;
@@ -73,7 +74,7 @@ public interface ResourceTransfer {
             NotFoundException;
 
     RegistrationStatus getRegistrationStatus(final ApiMessageContext messageContext,
-                                     final int registrationID) throws PermissionException,NotFoundException;
+                                     final int registrationID) throws PermissionException,NotFoundException, UnknownEndpointException;
 
     ResourceBatchResponse approveResource(final ApiMessageContext messageContext, final Resources aiResources);
 

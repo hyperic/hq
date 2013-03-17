@@ -42,6 +42,7 @@ import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
 import org.hyperic.hq.api.services.ResourceService;
 import org.hyperic.hq.api.transfer.ResourceTransfer;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
+import org.hyperic.hq.api.transfer.mapping.UnknownEndpointException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -109,7 +110,13 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
 
     public final RegistrationStatus getRegistrationStatus(final int registrationID)  throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException {
         ApiMessageContext apiMessageContext = newApiMessageContext();
-        return this.resourceTransfer.getRegistrationStatus(apiMessageContext, registrationID);
+        try {
+            return this.resourceTransfer.getRegistrationStatus(apiMessageContext, registrationID);
+        }catch(UnknownEndpointException e) {
+            e.printStackTrace();
+            throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.INTERNAL_SERVER_ERROR,
+                    ExceptionToErrorCodeMapper.ErrorCode.UNKNOWN_ENDPOINT, e.getRegistrationID());
+        }
     }//EOM
 
 	public final ResourceBatchResponse approveResource(final Resources aiResources) throws SessionNotFoundException, SessionTimeoutException {

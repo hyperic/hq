@@ -11,6 +11,7 @@ import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequests;
 import org.hyperic.hq.api.services.MetricService;
 import org.hyperic.hq.api.transfer.MeasurementTransfer;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
+import org.hyperic.hq.api.transfer.mapping.UnknownEndpointException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -92,7 +93,13 @@ public class MetricServiceImpl extends RestApiService implements MetricService {
     public RegistrationStatus getRegistrationStatus(final int registrationID) throws
             SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException {
         ApiMessageContext apiMessageContext = newApiMessageContext();
-        return measurementTransfer.getRegistrationStatus(apiMessageContext, registrationID);
+        try {
+            return measurementTransfer.getRegistrationStatus(apiMessageContext, registrationID);
+        }catch(UnknownEndpointException e) {
+            e.printStackTrace();
+            throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.INTERNAL_SERVER_ERROR,
+                    ExceptionToErrorCodeMapper.ErrorCode.UNKNOWN_ENDPOINT, e.getRegistrationID());
+        }
     }
 
     public void unregister(Long registrationId) throws SessionNotFoundException, SessionTimeoutException {

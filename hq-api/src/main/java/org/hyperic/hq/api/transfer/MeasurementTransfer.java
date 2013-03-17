@@ -13,6 +13,7 @@ import org.hyperic.hq.api.model.measurements.MetricResponse;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementBatchResponse;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequests;
 import org.hyperic.hq.api.services.impl.ApiMessageContext;
+import org.hyperic.hq.api.transfer.mapping.UnknownEndpointException;
 import org.hyperic.hq.api.model.measurements.BulkResourceMeasurementRequest;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.NotFoundException;
@@ -46,7 +47,7 @@ public interface MeasurementTransfer {
     RegistrationID register(final MetricFilterRequest metricFilterReq, ApiMessageContext apiMessageContext);
 
     RegistrationStatus getRegistrationStatus(final ApiMessageContext messageContext,
-                                             final int registrationID) throws PermissionException,NotFoundException;
+                                             final int registrationID) throws PermissionException,NotFoundException, UnknownEndpointException;
 
     ResourceMeasurementBatchResponse getAggregatedMetricData(ApiMessageContext apiMessageContext, final ResourceMeasurementRequests hqMsmtReqs,
             final Date begin, final Date end) 

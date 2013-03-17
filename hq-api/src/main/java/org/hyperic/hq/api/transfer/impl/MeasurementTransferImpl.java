@@ -44,6 +44,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.search.SearchContext;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.ID;
+import org.hyperic.hq.api.model.common.ExternalEndpointStatus;
 import org.hyperic.hq.api.model.common.RegistrationID;
 import org.hyperic.hq.api.model.common.RegistrationStatus;
 import org.hyperic.hq.api.model.measurements.BulkResourceMeasurementRequest;
@@ -60,6 +61,7 @@ import org.hyperic.hq.api.transfer.MeasurementTransfer;
 import org.hyperic.hq.api.transfer.NotificationsTransfer;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 import org.hyperic.hq.api.transfer.mapping.MeasurementMapper;
+import org.hyperic.hq.api.transfer.mapping.UnknownEndpointException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -174,15 +176,16 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     }
 
     public RegistrationStatus getRegistrationStatus(final ApiMessageContext messageContext,
-                                                    final int registrationID) throws PermissionException,NotFoundException {
-
+                                                    final int registrationID) throws PermissionException,NotFoundException, UnknownEndpointException {
         FilterChain filterChain = evaluator.getRegistration(registrationID);
         if(filterChain == null)      {
             throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.BAD_REQUEST,
                     ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID);
         }
-
-        return new RegistrationStatus(filterChain, registrationID);
+        HttpEndpointDefinition endpoint = new HttpEndpointDefinition();
+        ExternalEndpointStatus endpointStatus = new ExternalEndpointStatus();
+        this.notificationsTransfer.getEndointStatus(registrationID, endpoint, endpointStatus);
+        return new RegistrationStatus(endpoint,filterChain, registrationID, endpointStatus);
     }
 
 

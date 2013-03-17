@@ -14,7 +14,7 @@ import org.hyperic.hq.notifications.model.MetricNotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Component
+@Component("metricDestinationEvaluator")
 public class MetricDestinationEvaluator extends DestinationEvaluator<MetricNotification> {
     @Override
     protected FilterChain<MetricNotification> instantiateFilterChain(Collection<Filter<MetricNotification,? extends FilteringCondition<?>>> filters) {

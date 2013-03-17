@@ -42,6 +42,7 @@ import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourceStatusType;
 import org.hyperic.hq.api.model.ResourceType;
 import org.hyperic.hq.api.model.Resources;
+import org.hyperic.hq.api.model.common.ExternalEndpointStatus;
 import org.hyperic.hq.api.model.common.RegistrationID;
 import org.hyperic.hq.api.model.common.RegistrationStatus;
 import org.hyperic.hq.api.model.measurements.HttpEndpointDefinition;
@@ -54,6 +55,7 @@ import org.hyperic.hq.api.transfer.ResourceTransfer;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 import org.hyperic.hq.api.transfer.mapping.ResourceDetailsTypeStrategy;
 import org.hyperic.hq.api.transfer.mapping.ResourceMapper;
+import org.hyperic.hq.api.transfer.mapping.UnknownEndpointException;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -142,7 +144,7 @@ public class ResourceTransferImpl implements ResourceTransfer {
 	    AuthzSubject authzSubject = messageContext.getAuthzSubject();
 		if(resourceStatusType == ResourceStatusType.AUTO_DISCOVERED) { 
 			return this.getAIResource(platformNaturalID, resourceType, hierarchyDepth, responseMetadata) ; 
-		}else { 			
+		}else {
             return this.getResourceInner(new Context(authzSubject, platformNaturalID, resourceType, responseMetadata, this), hierarchyDepth) ;  
 		}//EO else if approved resource 
 	}//EOM
@@ -604,13 +606,15 @@ public class ResourceTransferImpl implements ResourceTransfer {
         List<Resource> resources = new ArrayList<Resource>();
         PageList<PlatformValue> platforms = this.platformManager.getAllPlatforms(authzSubject, PageControl.PAGE_ALL);
         for(PlatformValue pv:platforms) {
+            Resource r=null;
             try {
                 String fqdn = pv.getFqdn();
                 final Context context = new Context(authzSubject, fqdn, ResourceType.PLATFORM, responseMetadata, this);
-                final Resource r = getResourceInner(context, hierarchyDepth);
+                r = getResourceInner(context, hierarchyDepth);
                 resources.add(r);
             } catch (ObjectNotFoundException e) {
-//TODO~                res.addFailedResource(resourceID, errorCode, additionalDescription, args)
+                log.error(e,e);
+                res.addFailedResource(r==null?"":r.getId(), ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID.getErrorCode(), null,new Object[] {""});
             }
         }
         res.setResources(resources);
@@ -633,14 +637,16 @@ public class ResourceTransferImpl implements ResourceTransfer {
     }
 
     public RegistrationStatus getRegistrationStatus(final ApiMessageContext messageContext,
-                                             final int registrationID) throws PermissionException,NotFoundException{
+            final int registrationID) throws PermissionException,NotFoundException, UnknownEndpointException{
         FilterChain filterChain = evaluator.getRegistration(registrationID);
         if(filterChain == null)      {
             throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.BAD_REQUEST,
                     ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID);
-       }
-
-      return new RegistrationStatus(filterChain, registrationID);
+        }
+        HttpEndpointDefinition endpoint = new HttpEndpointDefinition();
+        ExternalEndpointStatus endpointStatus = new ExternalEndpointStatus();
+        this.notificationsTransfer.getEndointStatus(registrationID, endpoint, endpointStatus);
+        return new RegistrationStatus(endpoint,filterChain, registrationID, endpointStatus);
     }
 
 

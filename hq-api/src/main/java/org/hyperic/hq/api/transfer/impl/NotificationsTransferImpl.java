@@ -26,6 +26,7 @@ package org.hyperic.hq.api.transfer.impl;
 
 import java.io.StringWriter;
 
+import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 
@@ -33,18 +34,28 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.api.model.NotificationsReport;
 import org.hyperic.hq.api.model.ResourceDetailsType;
+import org.hyperic.hq.api.model.common.ExternalEndpointStatus;
+import org.hyperic.hq.api.model.common.RegistrationStatus;
+import org.hyperic.hq.api.model.measurements.HttpEndpointDefinition;
 import org.hyperic.hq.api.services.impl.ApiMessageContext;
 import org.hyperic.hq.api.transfer.MeasurementTransfer;
 import org.hyperic.hq.api.transfer.NotificationsTransfer;
 import org.hyperic.hq.api.transfer.ResourceTransfer;
+import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 import org.hyperic.hq.api.transfer.mapping.NotificationsMapper;
+import org.hyperic.hq.api.transfer.mapping.UnknownEndpointException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.notifications.EndpointQueue;
+import org.hyperic.hq.notifications.HttpEndpoint;
 import org.hyperic.hq.notifications.InternalNotificationReport;
 import org.hyperic.hq.notifications.NotificationEndpoint;
+import org.hyperic.hq.notifications.EndpointStatus;
 import org.hyperic.hq.notifications.UnregisteredException;
+import org.hyperic.hq.notifications.filtering.FilterChain;
 import org.hyperic.hq.notifications.model.InternalResourceDetailsType;
 import org.hyperic.util.Transformer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,4 +129,15 @@ public class NotificationsTransferImpl implements NotificationsTransfer {
         endpointQueue.register(endpoint, type, t);
     }
 
+    public void getEndointStatus(long registrationID,HttpEndpointDefinition endpoint, ExternalEndpointStatus externalEndpointStatus) throws UnknownEndpointException {
+        NotificationEndpoint backendEndpoint = this.endpointQueue.getEndpoint((long) registrationID);
+        if (backendEndpoint instanceof HttpEndpoint) {
+            this.mapper.toHttpEndpoint((HttpEndpoint) backendEndpoint,endpoint);
+        } else {
+            log.error("registration " + registrationID + " is registered to an unknown type of endpoint");
+            throw new UnknownEndpointException(registrationID);
+        }
+        EndpointStatus endpointStatus = this.endpointQueue.getEndpointStatus(registrationID);
+        this.mapper.toEndpointStatus(endpointStatus,externalEndpointStatus);
+    }
 }
