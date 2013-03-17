@@ -989,4 +989,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         return resourceGroupDAO.get(id);
     }
 
+    public void removeAllMembers(ResourceGroup group) {
+        resourceGroupDAO.removeAllMembers(group);
+    }
 }

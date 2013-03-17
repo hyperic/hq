@@ -347,5 +347,7 @@ public interface ResourceGroupManager
      * @return true if a group name exists, false otherwise
      */
     public boolean groupNameExists(String name);
+    
+    public void removeAllMembers(ResourceGroup group);
 
 }
