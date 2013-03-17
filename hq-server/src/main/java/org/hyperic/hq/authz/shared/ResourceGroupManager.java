@@ -109,7 +109,7 @@ public interface ResourceGroupManager
      * @throws DuplicateObjectException if an attempt to rename the group would
      *         result in a group with the same name.
      */
-    public void updateGroup(AuthzSubject whoami, ResourceGroup group, String name,
+    public ResourceGroup updateGroup(AuthzSubject whoami, ResourceGroup group, String name,
                             String description, String location) throws PermissionException,
         GroupDuplicateNameException;
 

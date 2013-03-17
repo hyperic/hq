@@ -311,7 +311,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      *         result in a group with the same name.
      * 
      */
-    public void updateGroup(AuthzSubject whoami, ResourceGroup group, String name,
+    public ResourceGroup updateGroup(AuthzSubject whoami, ResourceGroup group, String name,
                             String description, String location) throws PermissionException,
         GroupDuplicateNameException {
         checkGroupPermission(whoami, group.getId(), AuthzConstants.perm_modifyResourceGroup);
@@ -335,6 +335,8 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         if (location != null && !location.equals(group.getLocation())) {
             group.setLocation(location);
         }
+        
+        return group;
     }
 
     public void removeGroupsCompatibleWith(String resourceType) throws VetoException {
