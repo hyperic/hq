@@ -39,7 +39,7 @@ public class EndpointStatus {
     public boolean isEmpty() {
         return this.size()==0;
     }
-    public BasePostingStatus getLast() throws IllegalPostingException {
+    public BasePostingStatus getLast() {
         BasePostingStatus lastFailure = this.getLastFailure();
         BasePostingStatus lastSuccessful = this.getLastSuccessful();
         if (lastFailure==null) {

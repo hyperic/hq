@@ -101,7 +101,7 @@ public class NotificationsMapper {
         externalEndpoint.setEncoding(backendEndpoint.getEncoding());
     }
 
-    public void toEndpointStatus(EndpointStatus endpointStatus,ExternalEndpointStatus externalEndpointStatus, RegistrationStatus regStat) throws IllegalPostingException {
+    public void toEndpointStatus(EndpointStatus endpointStatus,ExternalEndpointStatus externalEndpointStatus, RegistrationStatus regStat) {
         String endpointStatusMsg = "OK";
         if (!regStat.isValid()) {
             endpointStatusMsg = "INVALID";
