@@ -32,7 +32,11 @@ public class ExternalRegistrationStatus implements Serializable {
 
     public ExternalRegistrationStatus(HttpEndpointDefinition endpoint, FilterChain filterChain, int registrationID, ExternalEndpointStatus endpointStatus) {
         this.endpoint=endpoint;
-        this.filter = filterChain.toString();
+        if (filterChain!=null) {
+            this.filter = filterChain.toString();
+        } else {
+            this.filter = null;
+        }
         this.id = registrationID;
         this.endpointStatus=endpointStatus;
     }
