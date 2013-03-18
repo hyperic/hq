@@ -102,8 +102,12 @@ public class MetricServiceImpl extends RestApiService implements MetricService {
         }
     }
 
-    public void unregister(Long registrationId) throws SessionNotFoundException, SessionTimeoutException {
-        final NotificationEndpoint endpoint = endpointQueue.getEndpoint(registrationId);
+    public void unregister(final long registrationId) throws SessionNotFoundException, SessionTimeoutException {
+        NotificationEndpoint endpoint = endpointQueue.unregister(registrationId);
+        if (endpoint == null) {
+            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST,
+                    ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID);
+        }
         measurementTransfer.unregister(endpoint);
     }
 }

@@ -68,7 +68,7 @@ public interface ResourceService {
             throws SessionNotFoundException, SessionTimeoutException;
 
     @GET
-    @Path("/resourceUrl/{resourceID}")
+    @Path("/{resourceID}/resourceUrl")
     String getResourceUrl(@PathParam("resourceID") final int resourceID) throws SessionNotFoundException,
             SessionTimeoutException;
 
@@ -113,6 +113,7 @@ public interface ResourceService {
             SessionTimeoutException;
 
     @DELETE
-    @Path("/registration")
-    public void unregister(@QueryParam("registrationid") Long registrationId) throws SessionNotFoundException, SessionTimeoutException;
+    @Path("/registration/{registrationID}")
+    public void unregister(@PathParam("registrationID") final long registrationID) throws SessionNotFoundException,
+            SessionTimeoutException;
 }//EOC 
