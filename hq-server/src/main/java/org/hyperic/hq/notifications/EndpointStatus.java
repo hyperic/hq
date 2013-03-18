@@ -48,9 +48,6 @@ public class EndpointStatus {
         if (lastSuccessful==null) {
             return lastFailure;
         }
-        if (lastFailure.getTime()==lastSuccessful.getTime()) {
-            throw new IllegalPostingException("illegal state - two postings has been made on the same time");
-        }
         return lastFailure.getTime()>lastSuccessful.getTime()?lastFailure:lastSuccessful;
     }
     public void merge(EndpointStatus other) {
