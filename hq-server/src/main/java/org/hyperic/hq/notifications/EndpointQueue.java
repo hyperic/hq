@@ -38,6 +38,9 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.notifications.filtering.MetricDestinationEvaluator;
+import org.hyperic.hq.notifications.filtering.ResourceDestinationEvaluator;
 import org.hyperic.hq.notifications.model.BaseNotification;
 import org.hyperic.hq.notifications.model.InternalResourceDetailsType;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
@@ -62,9 +65,11 @@ public class EndpointQueue {
     private ThreadPoolTaskScheduler notificationExecutor;
     @Autowired
     private ConcurrentStatsCollector concurrentStatsCollector;
-
-    // TODO~ change to write through versioning (each node would have versioning -
-    // write on one version, read another, then sync between them), w/o will pose problems in scale
+    
+    protected final static long EXPIRATION_DURATION = /*10*/60*1000;
+    MetricDestinationEvaluator metricEvaluator;
+    ResourceDestinationEvaluator resourceEvaluator;
+    
     private final Map<Long, AccumulatedRegistrationData> registrationData = new HashMap<Long, AccumulatedRegistrationData>();
     private final AtomicInteger numConsumers = new AtomicInteger(0);
 
@@ -78,6 +83,8 @@ public class EndpointQueue {
     
     @PostConstruct
     public void init() {
+        metricEvaluator = (MetricDestinationEvaluator) Bootstrap.getBean("metricDestinationEvaluator");
+        resourceEvaluator = (ResourceDestinationEvaluator) Bootstrap.getBean("resourceDestinationEvaluator");
         concurrentStatsCollector.register(NOTIFICATIONS_PUBLISHED_TO_ENDPOINT);
         concurrentStatsCollector.register(NOTIFICATIONS_PUBLISHED_TO_ENDPOINT_TIME);
         concurrentStatsCollector.register(new StatCollector() {
@@ -118,12 +125,15 @@ public class EndpointQueue {
         }
     }
     
-    private void schedule(final NotificationEndpoint endpoint, AccumulatedRegistrationData data,
+    private void schedule(final NotificationEndpoint endpoint, final AccumulatedRegistrationData data,
                           final Transformer<InternalNotificationReport, String> transformer) {
         if (!endpoint.canPublish()) {
             return;
         }
         final Runnable task = new Runnable() {
+            protected long lastFailure=Long.MAX_VALUE;
+            protected boolean isFailedLastPostage = false;
+            
             public void run() {
                 int size = 0;
                 long totalTime = 0;
@@ -131,14 +141,46 @@ public class EndpointQueue {
                     final long registrationId = endpoint.getRegistrationId();
                     InternalNotificationReport report = null;
                     final long start = System.currentTimeMillis();
-                    final Collection<String> messages = new ArrayList<String>();
+                    final Collection<InternalAndExternalNotificationReports> messages =
+                            new ArrayList<InternalAndExternalNotificationReports>();
+                    List<InternalNotificationReport> reports = new ArrayList<InternalNotificationReport>();
                     while (report == null || !report.getNotifications().isEmpty()) {
                         report = poll(registrationId, BATCH_SIZE);
+                        reports.add(report);
                         final String toPublish = transformer.transform(report);
-                        messages.add(toPublish);
+                        messages.add(new InternalAndExternalNotificationReports(report,toPublish));
                         size += report.getNotifications().size();
                     }
-                    endpoint.publishMessagesInBatch(messages);
+                    List<InternalNotificationReport> failedReports = new ArrayList<InternalNotificationReport>();
+                    EndpointStatus batchPostingStatus = endpoint.publishMessagesInBatch(messages,failedReports);
+                    // if a publishing attempt has been made
+                    if (!batchPostingStatus.isEmpty()) {
+                        // retry the reports which were failed to be published 
+                        for(InternalNotificationReport failedReport:failedReports) {
+                            @SuppressWarnings("unchecked")
+                            List<BaseNotification> failedNotifications = (List<BaseNotification>) failedReport.getNotifications();
+                            Map<NotificationEndpoint, Collection<BaseNotification>> map = new HashMap<NotificationEndpoint, Collection<BaseNotification>>();
+                            map.put(endpoint, failedNotifications);
+                            publishAsync(map);
+                        }
+                        
+                        data.merge(batchPostingStatus);
+                        // if the last try was a failure, it means that problem sending notifications
+                        // to the endpoint has happened before finishing the whole messages transmission
+                        if (batchPostingStatus.getLast().isSuccessful()) {
+                            this.isFailedLastPostage=false;
+                        } else {
+                            if (!this.isFailedLastPostage) {
+                                this.isFailedLastPostage=true;
+                                this.lastFailure = batchPostingStatus.getLast().getTime();
+                            }
+                            if (System.currentTimeMillis() - this.lastFailure >= EXPIRATION_DURATION) {
+                                unregister(endpoint.getRegistrationId());
+                                metricEvaluator.unregisterAll(endpoint);
+                                resourceEvaluator.unregisterAll(endpoint);
+                            }
+                        }
+                    }
                     totalTime = System.currentTimeMillis() - start;
                 } catch (Throwable t) {
                     log.error(t, t);
@@ -223,5 +265,18 @@ public class EndpointQueue {
         }
         return null;
     }
-
+    
+    public void getEndpointAndRegStatus(Long registrationID, EndpointStatus endpointStatus, RegistrationStatus regStat) {
+        if (this.registrationData==null) {
+            return;
+        }
+        synchronized (registrationData) {
+            AccumulatedRegistrationData ard = this.registrationData.get(registrationID);
+            if (ard!=null) {
+                endpointStatus.merge(ard.getEndpointStatus());
+                regStat.setCreationTime(ard.getCreationTime());
+                regStat.setValid(ard.isValid());
+            }
+        }
+    }
 }

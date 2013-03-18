@@ -8,8 +8,16 @@ import org.hyperic.hq.api.model.NotificationType;
 import org.hyperic.hq.api.model.NotificationsGroup;
 import org.hyperic.hq.api.model.NotificationsReport;
 import org.hyperic.hq.api.model.ResourceDetailsType;
+import org.hyperic.hq.api.model.common.ExternalEndpointStatus;
+import org.hyperic.hq.api.model.measurements.HttpEndpointDefinition;
 import org.hyperic.hq.api.transfer.ResourceTransfer;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.notifications.AccumulatedRegistrationData;
+import org.hyperic.hq.notifications.BasePostingStatus;
+import org.hyperic.hq.notifications.EndpointStatus;
+import org.hyperic.hq.notifications.HttpEndpoint;
+import org.hyperic.hq.notifications.NotificationEndpoint;
+import org.hyperic.hq.notifications.RegistrationStatus;
 import org.hyperic.hq.notifications.model.BaseNotification;
 import org.hyperic.hq.notifications.model.CreatedResourceNotification;
 import org.hyperic.hq.notifications.model.MetricNotification;
@@ -83,5 +91,25 @@ public class NotificationsMapper {
         }
 
         return res;
+    }
+
+    public void toHttpEndpoint(HttpEndpoint backendEndpoint,HttpEndpointDefinition externalEndpoint) {
+        externalEndpoint.setUrl(backendEndpoint.getUrl().getPath());
+        externalEndpoint.setUsername(backendEndpoint.getUsername());
+        externalEndpoint.setContentType(backendEndpoint.getContentType());
+        externalEndpoint.setEncoding(backendEndpoint.getEncoding());
+    }
+
+    public void toEndpointStatus(EndpointStatus endpointStatus,ExternalEndpointStatus externalEndpointStatus, RegistrationStatus regStat) {
+        externalEndpointStatus.setStatus(regStat.isValid()?"OK":"INVALID");
+        BasePostingStatus lastSuccessful = endpointStatus.getLastSuccessful();
+        if (lastSuccessful!=null) {
+            externalEndpointStatus.setLastSuccessful(lastSuccessful.getTime());
+        }
+        BasePostingStatus lastFailure = endpointStatus.getLastFailure();
+        if (lastFailure!=null) {
+            externalEndpointStatus.setLastFailure(lastFailure.getTime());
+        }
+        externalEndpointStatus.setCreationTime(regStat.getCreationTime());
     }
 }

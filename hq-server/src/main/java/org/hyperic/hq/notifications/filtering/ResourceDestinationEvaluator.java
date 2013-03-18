@@ -6,7 +6,7 @@ import java.util.Collection;
 import org.hyperic.hq.notifications.model.InventoryNotification;
 import org.springframework.stereotype.Component;
 
-@Component
+@Component("resourceDestinationEvaluator")
 public class ResourceDestinationEvaluator extends DestinationEvaluator<InventoryNotification> {
 
     @Override

@@ -1,9 +1,12 @@
 package org.hyperic.hq.notifications;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -73,7 +76,7 @@ public class HttpEndpoint extends NotificationEndpoint {
     }
 
     @Override
-    public void publishMessagesInBatch(Collection<String> messages) {
+    public EndpointStatus publishMessagesInBatch(Collection<InternalAndExternalNotificationReports> messages, List<InternalNotificationReport> failedReports) {
         DefaultHttpClient client = null;
         try {
             if (scheme.equalsIgnoreCase("https")) {
@@ -92,40 +95,123 @@ public class HttpEndpoint extends NotificationEndpoint {
             authCache.put(targetHost, basicAuth);
             final BasicHttpContext localcontext = new BasicHttpContext();
             localcontext.setAttribute(ClientContext.AUTH_CACHE, authCache);
-            for (final String message : messages) {
-                publishMessage(client, message, targetHost, localcontext);
+            EndpointStatus batchPostingStatus = new EndpointStatus();
+            for (final InternalAndExternalNotificationReports message : messages) {
+                BasePostingStatus status =publishMessage(client, message.getExternalReport(), targetHost, localcontext);
+                batchPostingStatus.add(status);
+                failedReports.add(message.getInternalReport());
             }
-        } catch (IOException e) {
-// XXX do we spool messages?  do we retry? do we just drop them :-(
-            throw new SystemException(e);
+            return batchPostingStatus;
         } finally {
             if (client != null) client.getConnectionManager().shutdown();
         }
     }
 
-    private void publishMessage(DefaultHttpClient client, String message, HttpHost targetHost,
-                                BasicHttpContext localcontext) throws IOException {
+    private BasePostingStatus publishMessage(DefaultHttpClient client, String message, HttpHost targetHost,
+                                BasicHttpContext localcontext) {
         final boolean debug = log.isDebugEnabled();
-        final HttpPost post = new HttpPost(url.getPath());
-        final HttpEntity entity = new StringEntity(message, contentType, encoding);
-        post.setEntity(entity);
-        if (debug) log.debug(post.getRequestLine());
-        final HttpResponse resp = client.execute(targetHost, post, localcontext);
-        // The entire response stream must be read if another connection to the server is made with the current 
-        // client object
-        final String respBuf= EntityUtils.toString(resp.getEntity());
-        if (debug) {
-            try {
-                log.debug(resp.getStatusLine() + ", response=[" + respBuf + "]");
-            } catch (Exception e) {
-                log.debug(e,e);
+        final HttpPost post = new HttpPost(url.getPath() + "5");
+        HttpEntity entity;
+        long time = System.currentTimeMillis();
+        try {
+            entity = new StringEntity(message, contentType, encoding);
+            post.setEntity(entity);
+            if (debug) log.debug(post.getRequestLine());
+            final HttpResponse resp = client.execute(targetHost, post, localcontext);
+            HttpEntity httpRes = resp.getEntity();
+            // The entire response stream must be read if another connection to the server is made with the current 
+            // client object
+            final String respBuf= EntityUtils.toString(httpRes);
+            if (debug) {
+                try {
+                    log.debug(resp.getStatusLine() + ", response=[" + respBuf + "]");
+                } catch (Exception e) {
+                    log.debug(e,e);
+                }
             }
+            int status = resp.getStatusLine().getStatusCode();
+            return new HTTPStatus(time,status);
+        }catch(IOException e1) {
+            log.error(e1,e1);
+            return new PostingStatus(time,false);
         }
     }
 
     @Override
     public boolean canPublish() {
         return true;
+    }
+
+    public Integer getPort() {
+        return port;
+    }
+
+    public void setPort(Integer port) {
+        this.port = port;
+    }
+
+    public String getHostname() {
+        return hostname;
+    }
+
+    public void setHostname(String hostname) {
+        this.hostname = hostname;
+    }
+
+    public String getScheme() {
+        return scheme;
+    }
+
+    public void setScheme(String scheme) {
+        this.scheme = scheme;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
+
+    public String getEncoding() {
+        return encoding;
+    }
+
+    public void setEncoding(String encoding) {
+        this.encoding = encoding;
+    }
+
+    public URL getUrl() {
+        return url;
+    }
+
+    public void setUrl(URL url) {
+        this.url = url;
+    }
+
+    public ServerKeystoreConfig getKeystoreConfig() {
+        return keystoreConfig;
+    }
+
+    public void setKeystoreConfig(ServerKeystoreConfig keystoreConfig) {
+        this.keystoreConfig = keystoreConfig;
     }
 
 }
