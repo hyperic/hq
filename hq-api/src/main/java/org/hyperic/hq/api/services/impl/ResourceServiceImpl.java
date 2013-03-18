@@ -129,8 +129,12 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
 		throw new UnsupportedOperationException() ; 
 	}//EOM 
 	
-	public void unregister(Long registrationId) throws SessionNotFoundException, SessionTimeoutException {
-	    NotificationEndpoint endpoint = endpointQueue.getEndpoint(registrationId);
+	public void unregister(final long registrationId) throws SessionNotFoundException, SessionTimeoutException {
+        NotificationEndpoint endpoint = endpointQueue.unregister(registrationId);
+        if (endpoint == null) {
+            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST,
+                    ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID);
+        }
 	    resourceTransfer.unregister(endpoint);
 	}
 }//EOC 

@@ -113,6 +113,7 @@ public interface ResourceService {
             SessionTimeoutException;
 
     @DELETE
-    @Path("/registration")
-    public void unregister(@QueryParam("registrationid") Long registrationId) throws SessionNotFoundException, SessionTimeoutException;
+    @Path("/registration/{registrationID}")
+    public void unregister(@PathParam("registrationID") final long registrationID) throws SessionNotFoundException,
+            SessionTimeoutException;
 }//EOC 

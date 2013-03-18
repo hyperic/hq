@@ -86,9 +86,10 @@ public interface MetricService {
             SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException;
 
     @DELETE
-    @Path("/registration")
+    @Path("/registration/{registrationID}")
     @Descriptions({
             @Description(value = "unregister user session and all assigned filters this user destination has", target = DocTarget.METHOD)
     })
-    public void unregister(@QueryParam("registrationid") Long registrationid) throws SessionNotFoundException, SessionTimeoutException;
+    public void unregister(@PathParam("registrationID") final long registrationID) throws
+            SessionNotFoundException, SessionTimeoutException;
 }

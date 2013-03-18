@@ -158,20 +158,25 @@ public class EndpointQueue {
         synchronized (registrationData) {
             // don't delete the data, we want to be able to access the endpoint by registrationId
             data = registrationData.get(registrationID);
+            if (data == null || !data.isValid()) {
+                if(log.isDebugEnabled()){
+                log.debug((data == null ? "No queue assigned" : "Queue is already invalid") + " for regId: " +
+                        registrationID);
+                }
+                return null;
+            }
             numConsumers.decrementAndGet();
             data.markInvalid();
             data.clear();
+            final ScheduledFuture<?> schedule = data.getSchedule();
+            if (schedule != null) {
+                schedule.cancel(true);
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Removing the queue assigned for regId: " + registrationID);
+            }
         }
-        final ScheduledFuture<?> schedule = data.getSchedule();
-        if (schedule != null) {
-            schedule.cancel(true);
-        }
-        if (log.isDebugEnabled()) { 
-            String s =  "there is no queue assigned for destination";
-            String msg = (data == null) ? s : "removing the queue assigned for regId " + registrationID;
-            log.debug(msg);
-        }
-        return data == null ? null : data.getNotificationEndpoint();
+        return data.getNotificationEndpoint();
     }
 
     public InternalNotificationReport poll(long registrationId) {
