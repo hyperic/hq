@@ -70,8 +70,6 @@ public class EndpointQueue {
     MetricDestinationEvaluator metricEvaluator;
     ResourceDestinationEvaluator resourceEvaluator;
     
-    // TODO~ change to write through versioning (each node would have versioning -
-    // write on one version, read another, then sync between them), w/o will pose problems in scale
     private final Map<Long, AccumulatedRegistrationData> registrationData = new HashMap<Long, AccumulatedRegistrationData>();
     private final AtomicInteger numConsumers = new AtomicInteger(0);
 

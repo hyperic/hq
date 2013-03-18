@@ -638,11 +638,7 @@ public class ResourceTransferImpl implements ResourceTransfer {
 
     public ExternalRegistrationStatus getRegistrationStatus(final ApiMessageContext messageContext,
             final int registrationID) throws PermissionException,NotFoundException, UnknownEndpointException{
-        FilterChain filterChain = evaluator.getRegistration(registrationID);
-        if(filterChain == null)      {
-            throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.BAD_REQUEST,
-                    ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID);
-        }
+        FilterChain<InventoryNotification> filterChain = evaluator.getRegistration(registrationID);
         HttpEndpointDefinition endpoint = new HttpEndpointDefinition();
         ExternalEndpointStatus endpointStatus = new ExternalEndpointStatus();
         this.notificationsTransfer.getEndointStatus(registrationID, endpoint, endpointStatus);
