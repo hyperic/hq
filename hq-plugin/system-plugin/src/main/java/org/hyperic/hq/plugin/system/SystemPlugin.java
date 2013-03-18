@@ -278,7 +278,7 @@ public class SystemPlugin extends ProductPlugin {
         { "primaryDNS", "Primary DNS" },
         { "secondaryDNS", "Secondary DNS" },
         { "defaultGateway", "Default Gateway" },
-        { HQConstants.MORID, "MORID" },
+        { HQConstants.MOID, "MOID" },
         { HQConstants.VCUUID, "VCenter UUID" },
         };
 
