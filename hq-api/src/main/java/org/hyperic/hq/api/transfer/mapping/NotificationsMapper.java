@@ -16,6 +16,7 @@ import org.hyperic.hq.notifications.AccumulatedRegistrationData;
 import org.hyperic.hq.notifications.BasePostingStatus;
 import org.hyperic.hq.notifications.EndpointStatus;
 import org.hyperic.hq.notifications.HttpEndpoint;
+import org.hyperic.hq.notifications.IllegalPostingException;
 import org.hyperic.hq.notifications.NotificationEndpoint;
 import org.hyperic.hq.notifications.RegistrationStatus;
 import org.hyperic.hq.notifications.model.BaseNotification;
@@ -101,7 +102,16 @@ public class NotificationsMapper {
     }
 
     public void toEndpointStatus(EndpointStatus endpointStatus,ExternalEndpointStatus externalEndpointStatus, RegistrationStatus regStat) {
-        externalEndpointStatus.setStatus(regStat.isValid()?"OK":"INVALID");
+        String endpointStatusMsg = "OK";
+        if (!regStat.isValid()) {
+            endpointStatusMsg = "INVALID";
+        } else {
+            BasePostingStatus lastPostStatus = endpointStatus.getLast();
+            if (lastPostStatus!=null && !lastPostStatus.isSuccessful()) {
+                endpointStatusMsg = "ERROR";
+            }
+        }
+        externalEndpointStatus.setStatus(endpointStatusMsg);
         BasePostingStatus lastSuccessful = endpointStatus.getLastSuccessful();
         if (lastSuccessful!=null) {
             externalEndpointStatus.setLastSuccessful(lastSuccessful.getTime());

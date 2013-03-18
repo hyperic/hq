@@ -39,7 +39,7 @@ public class EndpointStatus {
     public boolean isEmpty() {
         return this.size()==0;
     }
-    public BasePostingStatus getLast() throws IllegalPostingException {
+    public BasePostingStatus getLast() {
         BasePostingStatus lastFailure = this.getLastFailure();
         BasePostingStatus lastSuccessful = this.getLastSuccessful();
         if (lastFailure==null) {
@@ -47,9 +47,6 @@ public class EndpointStatus {
         }
         if (lastSuccessful==null) {
             return lastFailure;
-        }
-        if (lastFailure.getTime()==lastSuccessful.getTime()) {
-            throw new IllegalPostingException("illegal state - two postings has been made on the same time");
         }
         return lastFailure.getTime()>lastSuccessful.getTime()?lastFailure:lastSuccessful;
     }
