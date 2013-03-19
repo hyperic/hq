@@ -95,7 +95,7 @@ public class NotificationsMapper {
     }
 
     public void toHttpEndpoint(HttpEndpoint backendEndpoint,HttpEndpointDefinition externalEndpoint) {
-        externalEndpoint.setUrl(backendEndpoint.getUrl().getPath());
+        externalEndpoint.setUrl(backendEndpoint.getUrl().toString());
         externalEndpoint.setUsername(backendEndpoint.getUsername());
         externalEndpoint.setContentType(backendEndpoint.getContentType());
         externalEndpoint.setEncoding(backendEndpoint.getEncoding());

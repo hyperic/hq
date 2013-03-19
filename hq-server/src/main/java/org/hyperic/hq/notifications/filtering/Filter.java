@@ -59,6 +59,6 @@ public abstract class Filter<N extends BaseNotification, C extends FilteringCond
 
     @Override
     public String toString() {
-        return cond.toString();
+        return cond == null ? "" : cond.toString();
     }
 }

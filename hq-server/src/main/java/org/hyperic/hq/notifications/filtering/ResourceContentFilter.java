@@ -36,7 +36,7 @@ public class ResourceContentFilter extends Filter<ResourceChangedContentNotifica
             Set<String> filteredPropsKeys = new HashSet<String>(filteredProps.keySet());
             filteredPropsKeys.remove(HQConstants.RESOURCE_NAME);
             filteredPropsKeys.remove(HQConstants.VCUUID);
-            filteredPropsKeys.remove(HQConstants.MORID);
+            filteredPropsKeys.remove(HQConstants.MOID);
             for(String propToExclude:filteredPropsKeys) {
                 filteredProps.remove(propToExclude);
             }
