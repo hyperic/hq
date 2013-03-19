@@ -66,7 +66,7 @@ public class EndpointQueue {
     @Autowired
     private ConcurrentStatsCollector concurrentStatsCollector;
     
-    protected final static long EXPIRATION_DURATION = /*10*/60*1000;
+    protected final static long EXPIRATION_DURATION = 10*60*1000;
     MetricDestinationEvaluator metricEvaluator;
     ResourceDestinationEvaluator resourceEvaluator;
     
@@ -131,7 +131,7 @@ public class EndpointQueue {
             return;
         }
         final Runnable task = new Runnable() {
-            protected long lastFailure=Long.MAX_VALUE;
+            protected long firstFailure=Long.MAX_VALUE;
             protected boolean isFailedLastPostage = false;
             
             public void run() {
@@ -172,9 +172,9 @@ public class EndpointQueue {
                         } else {
                             if (!this.isFailedLastPostage) {
                                 this.isFailedLastPostage=true;
-                                this.lastFailure = batchPostingStatus.getLast().getTime();
+                                this.firstFailure = batchPostingStatus.getLast().getTime();
                             }
-                            if (System.currentTimeMillis() - this.lastFailure >= EXPIRATION_DURATION) {
+                            if (System.currentTimeMillis() - this.firstFailure >= EXPIRATION_DURATION) {
                                 unregister(endpoint.getRegistrationId());
                                 metricEvaluator.unregisterAll(endpoint);
                                 resourceEvaluator.unregisterAll(endpoint);
