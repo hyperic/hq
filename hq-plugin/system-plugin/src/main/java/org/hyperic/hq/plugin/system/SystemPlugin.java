@@ -221,6 +221,7 @@ public class SystemPlugin extends ProductPlugin {
         else if (type.equals(ProductPlugin.TYPE_AUTOINVENTORY)) {
             switch (info.getType()) {
               case TypeInfo.TYPE_PLATFORM:
+                  getLog().error("system plugin getPlugin! autoinventory platform");
                 return new SigarPlatformDetector(this.hasPlatformControlActions());
               case TypeInfo.TYPE_SERVER:
                 if (info.getName().equals(FILE_SERVER_NAME)) {
