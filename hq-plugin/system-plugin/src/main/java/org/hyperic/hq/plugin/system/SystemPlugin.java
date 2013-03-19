@@ -302,7 +302,11 @@ public class SystemPlugin extends ProductPlugin {
         { "primaryDNS", "Primary DNS" },
         { "secondaryDNS", "Secondary DNS" },
         { "defaultGateway", "Default Gateway" },
+<<<<<<< HEAD
 	{ HQConstants.MORID, "MORID" },
+=======
+        { HQConstants.MORID, "MORID" },
+>>>>>>> e46f11b1f55895c75dffede599bc54aa959c01f1
         { HQConstants.VCUUID, "VCenter UUID" },
         };
 

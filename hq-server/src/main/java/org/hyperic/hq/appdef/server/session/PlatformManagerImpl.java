@@ -2056,18 +2056,12 @@ public class PlatformManagerImpl implements PlatformManager {
           
             for (Platform platform : platforms) {
                 try {
-                    
-                    for (Ip ip : platform.getIps()) {
-                        ip.setMacAddress("");
-                    }                
-                    platformDAO.save(platform);       
-                    
                     AppdefEntityID id = platform.getEntityId();
                     int typeId = platform.getAppdefResourceType().getId().intValue();                 
-                    this.cpropManager.setValue(id, typeId, HQConstants.MOREF, "");
+                    this.cpropManager.setValue(id, typeId, HQConstants.MORID, "");
                     this.cpropManager.setValue(id, typeId, HQConstants.VCUUID, "");
                     Map<String,String> changedProps = new HashMap<String,String>();
-                    changedProps.put(HQConstants.MOREF, null);
+                    changedProps.put(HQConstants.MORID, null);
                     changedProps.put(HQConstants.VCUUID, null);
                     ResourceContentChangedEvent contentChangedEvent = new ResourceContentChangedEvent(platform.getId(),null,null,changedProps);
                     events.add(contentChangedEvent);
@@ -2099,12 +2093,12 @@ public class PlatformManagerImpl implements PlatformManager {
                         if (AuthzConstants.platformPrototypeVmwareVsphereVm.equals(platform.getResource().getPrototype().getName())) { continue; }
                         AppdefEntityID id = platform.getEntityId();
                         int typeId = platform.getAppdefResourceType().getId().intValue();
-                        String moref = vmMap.getMORef();
+                        String moref = vmMap.getMorId();
                         String vcUUID = vmMap.getVcUUID();
-                        this.cpropManager.setValue(id, typeId, HQConstants.MOREF, moref);
+                        this.cpropManager.setValue(id, typeId, HQConstants.MORID, moref);
                         this.cpropManager.setValue(id, typeId, HQConstants.VCUUID, vcUUID);
                         Map<String,String> changedProps = new HashMap<String,String>();
-                        changedProps.put(HQConstants.MOREF,moref);
+                        changedProps.put(HQConstants.MORID,moref);
                         changedProps.put(HQConstants.VCUUID,vcUUID);
                         ResourceContentChangedEvent contentChangedEvent = new ResourceContentChangedEvent(platform.getId(),null,null,changedProps);
                         events.add(contentChangedEvent);

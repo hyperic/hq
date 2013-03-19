@@ -96,5 +96,10 @@ public class ConfigBossImpl implements ConfigBoss {
         AuthzSubject subject = sessionManager.getSubject(sessId);
         serverConfigManager.setConfig(subject, prefix, props);
     }
+    
+    public void setConfig(AuthzSubject subject, Properties props) throws ApplicationException, 
+        ConfigPropertyException{
+        serverConfigManager.setConfig(subject, props);
+    }
 
 }

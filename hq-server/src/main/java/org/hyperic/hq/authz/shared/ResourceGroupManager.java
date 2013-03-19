@@ -109,7 +109,7 @@ public interface ResourceGroupManager
      * @throws DuplicateObjectException if an attempt to rename the group would
      *         result in a group with the same name.
      */
-    public void updateGroup(AuthzSubject whoami, ResourceGroup group, String name,
+    public ResourceGroup updateGroup(AuthzSubject whoami, ResourceGroup group, String name,
                             String description, String location) throws PermissionException,
         GroupDuplicateNameException;
 
@@ -347,5 +347,7 @@ public interface ResourceGroupManager
      * @return true if a group name exists, false otherwise
      */
     public boolean groupNameExists(String name);
+    
+    public void removeAllMembers(ResourceGroup group);
 
 }

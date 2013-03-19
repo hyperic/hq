@@ -29,6 +29,7 @@ package org.hyperic.hq.bizapp.shared;
 
 import java.util.Properties;
 
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.util.ConfigPropertyException;
 
@@ -57,5 +58,7 @@ public interface ConfigBoss {
      */
     public void setConfig(int sessId, String prefix, Properties props) throws ApplicationException,
         ConfigPropertyException;
+
+    public void setConfig(AuthzSubject subject, Properties props) throws ApplicationException, ConfigPropertyException;
 
 }

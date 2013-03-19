@@ -11809,7 +11809,7 @@ has already been defined.
                 CTIME int8 not null,
                 NAME varchar(128) not null,
                 CREATED_BY varchar(128) not null,
-                DESCRIPTION varchar(1024) not null,
+                DESCRIPTION varchar(128) not null,
                 RESOURCE_NAME_REGEX varchar(128),
                 RESOURCE_PROTOTYPE int4,
                 primary key (ID)
@@ -11965,11 +11965,11 @@ has already been defined.
             <statement targetDB="postgresql">            	
             	CREATE TABLE if not exists EAM_VM_MAPPING(
             	            	VCUUID VARCHAR(128) NOT NULL,
-            	            	MOREF VARCHAR(64) NOT NULL,
+            	            	MORID VARCHAR(64) NOT NULL,
             	            	MACS_ADDRESS VARCHAR(512) NOT NULL UNIQUE, 
             	            	VM_NAME VARCHAR(128),
             	            	version_col bigint DEFAULT 0 NOT NULL,
-            	            	PRIMARY KEY (VCUUID, MOREF)
+            	            	PRIMARY KEY (VCUUID, MORID)
             	            	)
             </statement>
         </schema-directSQL>
