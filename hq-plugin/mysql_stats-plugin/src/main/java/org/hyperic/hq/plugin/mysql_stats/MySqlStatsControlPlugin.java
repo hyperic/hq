@@ -36,13 +36,14 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
+import org.hyperic.hq.bizapp.shared.lather.ControlSendCommandResult_args;
 import org.hyperic.hq.product.JDBCControlPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.jdbc.DBUtil;
 
 public class MySqlStatsControlPlugin extends JDBCControlPlugin {
 
-    public void doAction(String action) throws PluginException {
+    public void doAction(String action, final ControlSendCommandResult_args resultsMetadata) throws PluginException {
         final String query = getQuery(action);
         Connection conn = null;
         Statement stmt = null;

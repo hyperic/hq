@@ -326,6 +326,8 @@ public class CommandsServer
         this.log.info("Commands Server started up");
     }
 
+    public final void postInitActions() throws AgentStartException { /*do nothing*/ }//EOM
+    
     public void shutdown(){
         this.log.info("Commands Server shut down");
     }

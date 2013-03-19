@@ -30,6 +30,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.bizapp.shared.lather.ControlSendCommandResult_args;
 import org.hyperic.hq.product.JDBCControlPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
@@ -64,7 +65,7 @@ public abstract class ResourceControl extends JDBCControlPlugin {
     }
 
     @Override
-    public final void doAction(String action) throws PluginException {
+    public final void doAction(String action, final ControlSendCommandResult_args resultsMetadata) throws PluginException {
         doAction(action, new String[0]);
     }
 

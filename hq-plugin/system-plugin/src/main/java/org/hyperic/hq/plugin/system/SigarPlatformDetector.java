@@ -37,7 +37,6 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginManager;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
-
 import org.hyperic.sigar.CpuInfo;
 import org.hyperic.sigar.Mem;
 import org.hyperic.sigar.NetFlags;
@@ -46,7 +45,6 @@ import org.hyperic.sigar.NetInterfaceConfig;
 import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
-
 import org.hyperic.util.HostIP;
 import org.hyperic.util.config.ConfigResponse;
 
@@ -62,6 +60,11 @@ public class SigarPlatformDetector extends PlatformDetector {
     private boolean ipDiscover;
     private PluginManager manager;
     private Map ipIgnore = new HashMap();
+    private boolean hasControlActions ; 
+    
+    public SigarPlatformDetector() { super() ; }//EOM 
+    
+    public SigarPlatformDetector(final boolean hasPlatformControlActions) { this.hasControlActions = hasPlatformControlActions ; }//EOM 
 
     public void init(PluginManager manager) throws PluginException {
         super.init(manager);
@@ -144,6 +147,7 @@ public class SigarPlatformDetector extends PlatformDetector {
         OperatingSystem os = OperatingSystem.getInstance();
         
         PlatformResource platform = new PlatformResource();
+        if(this.hasControlActions) platform.setControlConfig() ; 
         ConfigResponse cprops = new ConfigResponse();
 
         platform.setPlatformTypeName(os.getName());

@@ -119,5 +119,7 @@ public class ControlCommandsService implements ControlCommandsClient {
             throw new AgentRemoteException(e.getMessage());
         }
     }
+    
+    public final ControlCallbackClient getClient() { return this._client ; }//EOM 
 
 }
