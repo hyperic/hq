@@ -25,13 +25,18 @@
 
 package org.hyperic.hq.bizapp.shared.lather;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+
 import org.hyperic.hq.bizapp.shared.lather.SecureAgentLatherValue;
 
 import org.hyperic.lather.LatherKeyNotFoundException;
 import org.hyperic.lather.LatherRemoteException;
 
 public class ControlSendCommandResult_args
-    extends SecureAgentLatherValue
+    extends SecureAgentLatherValue implements Externalizable
 {
     private static final String PROP_NAME      = "name";
     private static final String PROP_ID        = "id";
@@ -115,4 +120,21 @@ public class ControlSendCommandResult_args
             throw new LatherRemoteException("All values not set");
         }
     }
+    
+    public final void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
+        this.setId(in.readInt()) ;
+        this.setName((String)in.readObject()) ; 
+        this.setResult(in.readInt()) ; 
+        this.setStartTime(in.readLong()) ; 
+        this.setMessage((String)in.readObject()) ; 
+    }//EOM 
+    
+    public final void writeExternal(final ObjectOutput out) throws IOException {
+        out.writeInt(this.getId()) ; 
+        out.writeObject(this.getName()) ; 
+        out.writeInt(this.getResult()) ; 
+        out.writeLong(this.getStartTime()) ; 
+        out.writeObject(this.getMessage()) ; 
+    }//EOM 
+    
 }

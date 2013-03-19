@@ -43,7 +43,7 @@ public interface ExecutionStrategy {
      * been met
      * @param event An {@link AlertConditionsSatisfiedZEvent} to process
      */
-    void conditionsSatisfied(AlertConditionsSatisfiedZEvent event);
+    boolean conditionsSatisfied(AlertConditionsSatisfiedZEvent event);
 
     /**
      * 

@@ -41,12 +41,14 @@ import org.hyperic.hq.events.TriggerNotFiredEvent;
 import org.hyperic.hq.measurement.ext.MeasurementEvent;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
 import org.hyperic.hq.product.MetricValue;
+import org.junit.Ignore;
 
 /**
  * Unit test of {@link MultiConditionEvaluator}
  * @author jhickey
  *
  */
+@Ignore
 public class MultiConditionEvaluatorTest
     extends TestCase
 {

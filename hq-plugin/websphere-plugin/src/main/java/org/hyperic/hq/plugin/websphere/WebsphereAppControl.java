@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
+import org.hyperic.hq.bizapp.shared.lather.ControlSendCommandResult_args;
 import org.hyperic.hq.product.ControlPlugin;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.PluginException;
@@ -85,7 +86,7 @@ public class WebsphereAppControl
         return false; //XXX
     }
 
-    public void doAction(String action)
+    public void doAction(String action, final ControlSendCommandResult_args resultsMetadata)
         throws PluginException {
         String appManager = getAppManagerName();
 

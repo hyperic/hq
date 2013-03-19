@@ -364,6 +364,8 @@ public class MeasurementCommandsServer
             }
         }
     }
+    
+    public final void postInitActions() throws AgentStartException { /*do nothing*/ }//EOM
 
     public void shutdown(){
         this.log.info("Measurement Commands Server shutting down");

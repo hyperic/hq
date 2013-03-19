@@ -144,11 +144,6 @@ function checkRecover() {
     if (document.forms[0].whenEnabled[1].checked) {
         document.forms[0].whenEnabled[0].checked = true;
     }
-
-    document.forms[0].whenEnabled[1].disabled = true;
-    document.forms[0].numTimesNT.disabled = true;
-    document.forms[0].howLongNT.disabled = true;
-    document.forms[0].howLongUnitsNT.disabled = true;
   }
 }
 

@@ -65,7 +65,7 @@ public class SingleConditionEvaluatorTest
 
         AlertConditionsSatisfiedZEvent event = new AlertConditionsSatisfiedZEvent(TEST_ALERT_DEF_ID,
                                                                                   new TriggerFiredEvent[] { triggerFired });
-        executionStrategy.conditionsSatisfied(event);
+        EasyMock.expect(executionStrategy.conditionsSatisfied(event)).andReturn(true);
         EasyMock.replay(executionStrategy);
         evaluator.triggerFired(triggerFired);
         EasyMock.verify(executionStrategy);

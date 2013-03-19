@@ -961,7 +961,7 @@ public class PluginDumper {
                 System.out.println("   " + resourceName +
                                    " action: " + runAction +
                                    " " + Arrays.asList(args));
-                this.cpm.doAction(resourceName, runAction, args);
+                this.cpm.doAction(resourceName, runAction, args, null/*reusltsMetadata*/);
 
                 String msg = this.cpm.getMessage(resourceName);
                 int result = this.cpm.getResult(resourceName);

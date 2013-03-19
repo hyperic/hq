@@ -807,6 +807,12 @@ public class AgentDaemon
             this.startedHandlers.add(handler);
         }
     }
+    
+    private final void postInitActions() throws AgentStartException { 
+        for(AgentServerHandler handler : this.startedHandlers) { 
+            handler.postInitActions() ; 
+        }//EO while there are more agents 
+    }//EOM 
 
     //these files should have already been deleted on normal
     //jvm shutdown.  however, agent.exe start + CTRL-c on windows
@@ -933,6 +939,7 @@ public class AgentDaemon
             agentStarted = true;
             AgentStatsWriter statsWriter = new AgentStatsWriter(config);
             statsWriter.startWriter();
+	    this.postInitActions() ;
             agentDiagnostics = AgentDiagnostics.getInstance();
             agentDiagnostics.setConfig(config);
             agentDiagnostics.start();

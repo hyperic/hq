@@ -25,7 +25,11 @@
 
 package org.hyperic.hq.control.agent.server;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.util.Properties;
 
@@ -42,6 +46,7 @@ import org.hyperic.hq.agent.server.AgentStorageProvider;
 import org.hyperic.hq.agent.server.AgentTransportLifecycle;
 import org.hyperic.hq.bizapp.client.ControlCallbackClient;
 import org.hyperic.hq.bizapp.client.StorageProviderFetcher;
+import org.hyperic.hq.bizapp.shared.lather.ControlSendCommandResult_args;
 import org.hyperic.hq.control.agent.ControlCommandsAPI;
 import org.hyperic.hq.control.agent.client.ControlCommandsClient;
 import org.hyperic.hq.control.agent.commands.ControlPluginAdd_args;
@@ -52,6 +57,7 @@ import org.hyperic.hq.control.agent.commands.ControlPluginRemove_args;
 import org.hyperic.hq.control.agent.commands.ControlPluginRemove_result;
 import org.hyperic.hq.product.ControlPluginManager;
 import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.util.MultiRuntimeException;
 import org.hyperic.util.config.ConfigResponse;
 
 public class ControlCommandsServer 
@@ -152,9 +158,81 @@ public class ControlCommandsServer
             throw new AgentStartException("Failed to register Control Commands Service.", e);
         }
 
+        
         this.log.info("Control Commands Server started up");
     }
+    
+    
+    public final void postInitActions() throws AgentStartException {
+        try{ 
+            this.processPersistedControlResponses() ;
+        } catch (Exception e) {
+            throw new AgentStartException("Failed to send persisted control response to the server.", e) ; 
+        }//EO catch block 
+    }//EOM 
 
+    private final void processPersistedControlResponses() throws Exception { 
+      //determine whether there are any persisted contorl responses to be posted to the server  
+        final File persistedControlResponsesDir = new File(AgentConfig.PERSISTED_CONTROL_RESPONSES_DIR) ;
+        File[] tempControlResponses = null ;   
+        if(!persistedControlResponsesDir.exists() || (tempControlResponses = persistedControlResponsesDir.listFiles()) == null) { 
+            log.info("No persisted Control responses were found") ; 
+            return ; 
+        }//EO if the the persisted control responses dir exists
+        //else
+        final File[] controlResponses = tempControlResponses ; 
+        
+        final Runnable persistControlResponsesActionSender = new Runnable() { 
+            
+            public final void run() { 
+                MultiRuntimeException thrown = null ;
+                
+                ObjectInputStream ois = null ; 
+                ControlSendCommandResult_args controlResponse = null ;
+                
+                int counter = 0 ; 
+                boolean errorOccured = false; 
+                
+                final ControlCallbackClient client = controlCommandsService.getClient() ; 
+                
+                for(File controlResponseFile : controlResponses) { 
+                    try{ 
+                        ois = new ObjectInputStream(new FileInputStream(controlResponseFile)) ;
+                        controlResponse = (ControlSendCommandResult_args) ois.readObject() ;
+                        
+                        log.info("About to post persisted control response " + controlResponse.getId()) ; 
+                        client.controlSendCommandResult(controlResponse) ;
+                        
+                        counter++ ; 
+                    }catch(Throwable t) { 
+                        t.printStackTrace() ; 
+                        thrown = MultiRuntimeException.newMultiRuntimeException(thrown, t, "Deserialization Error for Persisted Control Response " + controlResponseFile) ;
+                        errorOccured = true ; 
+                    }finally{ 
+                        try{ 
+                            if(ois != null) ois.close() ;
+                        }catch(IOException ioe) { 
+                            thrown = MultiRuntimeException.newMultiRuntimeException(thrown, ioe, "Error while closing FileInputStream" + controlResponseFile) ;
+                        }//EO inner catch block 
+                        
+                        //if no error had occured, delete the file 
+                        if(!errorOccured) { 
+                            log.info("Deleting Persisted Control Response file " + controlResponseFile + ". Delete Successed: " + controlResponseFile.delete()) ; 
+                        }//EO if successful 
+                        errorOccured = false ; 
+                    }//EO catch block 
+                }//EO while there are more control response files 
+                
+                log.info("Successfully sent " + counter + " persisted control response(s), while encountered errors for " + (thrown != null ? thrown.size() : 0)) ;
+                
+                if(thrown != null) log.error(thrown)  ;
+            }//EOM 
+        };//EO anonymous Runnable 
+        
+        final Thread t = new Thread(persistControlResponsesActionSender, "PersistedControlResponses_Sender") ; 
+        t.start() ;
+    }//EOM 
+    
     public void shutdown() {
         this.log.info("Control Commands Server shut down");
     }

@@ -92,6 +92,8 @@ public interface AgentServerHandler {
 
     public void startup(AgentDaemon agent) 
         throws AgentStartException;
+    
+    public void postInitActions() throws AgentStartException ; 
 
     /**
      * inform the plugin that it should shutdown.  When this method is invoked,
