@@ -13,7 +13,7 @@
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-pdk</artifactId>
-			<version>5.1.0</version>
+			<version>BETA.0.0</version>
 		</dependency>
 	</dependencies>
 

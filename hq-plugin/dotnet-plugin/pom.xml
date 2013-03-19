@@ -6,7 +6,7 @@
 	<parent>
         <groupId>org.hyperic.hq.plugin</groupId>
         <artifactId>modules</artifactId>
-       <version>5.1.0</version>
+       <version>BETA.0.0</version>
     </parent>
 
 	<artifactId>dotnet-plugin</artifactId>
