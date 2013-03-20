@@ -64,14 +64,10 @@ public class DbKeyStore extends KeyStore {
             return KeyStore.getInstance(type);
         }
         try {
-            final Method method =
-                Security.class.getDeclaredMethod("getImpl", String.class, String.class, String.class);
-            method.setAccessible(true);
-            final Object[] objs = (Object[]) method.invoke(null, type, "KeyStore", null);
             final DbKeyStoreSpi dbKeyStoreSpi = new DbKeyStoreSpi(dbKeystoreManager);
-            Security.getProviders();
+            final Provider[] providers = Security.getProviders("KeyStore." + type) ;
             isDb.set(true);
-            return new DbKeyStore(dbKeyStoreSpi, (Provider)objs[1], type);
+            return new DbKeyStore(dbKeyStoreSpi, providers[0], type);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
