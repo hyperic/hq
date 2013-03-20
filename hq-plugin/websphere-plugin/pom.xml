@@ -51,7 +51,7 @@
 			<artifactId>sigar</artifactId>
 			<version>${sigar.version}</version>
 			<type>zip</type>
-			<classifier>libs</classifier>
+			<classifier>libs-a</classifier>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
