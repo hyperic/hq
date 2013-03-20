@@ -47,45 +47,56 @@ public class NotificationsMapper {
         List<Notification> removalNotifications = null;
         
         for(BaseNotification bn:ns) {
-            try {
-                // expensive for many notifications, the 'instance of' should be used only in the polling mechanism
-                if (bn instanceof MetricNotification) {
-                    if (creationNotifications==null) {
-                        creationNotifications = new ArrayList<Notification>();
-                    }
-                    creationNotifications.add(this.mtmtMapper.toMetricWithId((MetricNotification)bn));
-                } else if (bn instanceof CreatedResourceNotification) {
-                    if (creationNotifications==null) {
-                        creationNotifications = new ArrayList<Notification>();
-                    }
-                    creationNotifications.add(this.rscMapper.toResource(subject, resourceTransfer, resourceDetailsType,(CreatedResourceNotification )bn));
-                } else if (bn instanceof RemovedResourceNotification) {
-                    if (removalNotifications==null) {
-                        removalNotifications = new ArrayList<Notification>();
-                    }
-                    removalNotifications.add(this.rscMapper.toResource((RemovedResourceNotification) bn));
-                } else if (bn instanceof ResourceChangedContentNotification) {
-                    if (updateNotifications==null) {
-                        updateNotifications = new ArrayList<Notification>();
-                    }
-                    updateNotifications.add(this.rscMapper.toChangedResourceContent(resourceDetailsType, (ResourceChangedContentNotification) bn));
+            if (bn instanceof MetricNotification) {
+                if (creationNotifications==null) {
+                    creationNotifications = new ArrayList<Notification>();
                 }
-            } catch (Throwable t) {
-                //TODO~ put errors in failed resource/failed metrics
+                Notification n = this.mtmtMapper.toMetricWithId((MetricNotification)bn);
+                if (n!=null) {
+                    creationNotifications.add(n);
+                }
+            } else if (bn instanceof CreatedResourceNotification) {
+                if (creationNotifications==null) {
+                    creationNotifications = new ArrayList<Notification>();
+                }
+                try {
+                    Notification n = this.rscMapper.toResource(subject, resourceTransfer, resourceDetailsType,(CreatedResourceNotification )bn);
+                    if (n!=null) {
+                        creationNotifications.add(n);
+                    } 
+                } catch (Throwable t) {
+                    res.addFailedResource(String.valueOf(((CreatedResourceNotification) bn).getResourceID()), ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID.getErrorCode(), null, new Object[] {""});
+                }
+            } else if (bn instanceof RemovedResourceNotification) {
+                if (removalNotifications==null) {
+                    removalNotifications = new ArrayList<Notification>();
+                }
+                Notification n = this.rscMapper.toResource((RemovedResourceNotification) bn);
+                if (n!=null) {
+                    removalNotifications.add(n);
+                }
+            } else if (bn instanceof ResourceChangedContentNotification) {
+                if (updateNotifications==null) {
+                    updateNotifications = new ArrayList<Notification>();
+                }
+                Notification n = this.rscMapper.toChangedResourceContent(resourceDetailsType, (ResourceChangedContentNotification) bn);
+                if (n!=null) {
+                    updateNotifications.add(n);
+                }
             }
         }
         List<NotificationsGroup> ngList = res.getNotificationsGroupList();
-        if (creationNotifications!=null) {
+        if (creationNotifications!=null && !creationNotifications.isEmpty()) {
             NotificationsGroup ng = new NotificationsGroup(NotificationType.Create);
             ng.setNotifications(creationNotifications);
             ngList.add(ng);
         }
-        if (removalNotifications!=null) {
+        if (removalNotifications!=null && !removalNotifications.isEmpty()) {
             NotificationsGroup ng = new NotificationsGroup(NotificationType.Delete);
             ng.setNotifications(removalNotifications);
             ngList.add(ng);
         }
-        if (updateNotifications!=null) {
+        if (updateNotifications!=null && !updateNotifications.isEmpty()) {
             NotificationsGroup ng = new NotificationsGroup(NotificationType.Update);
             ng.setNotifications(updateNotifications);
             ngList.add(ng);
