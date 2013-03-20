@@ -1796,6 +1796,9 @@
                             <li><b>https</b>: Use https/ssl</li>
                             <li><b>user</b>: Administrator User name</li>
                             <li><b>pass</b>: Administrator User password</li>
+                            <li><b>start.script</b>: Absolute path to the JBoss startup stacript (ei. /home/user/jboss-as-7/bin/standalone.sh)</li>
+                            <li><b>start.prefix</b>: Prefix for the startup script (ei. "sudo -s")</li>
+                            <li><b>start.args</b>: Argumnets for the startup script</li>
                         </ol>
                         <h3>SSL Configuration Requirements (Hyperic 4.6 and later)</h3>
                         There are new SSL configuration requirements for secure communication between a Hyperic 4.6 agent and a JBoss.
