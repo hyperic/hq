@@ -65,6 +65,8 @@ import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.notifications.filtering.Filter;
 import org.hyperic.hq.notifications.filtering.FilteringCondition;
 import org.hyperic.hq.notifications.filtering.ResourceContentFilter;
+import org.hyperic.hq.notifications.filtering.ResourceFilter;
+import org.hyperic.hq.notifications.filtering.ResourceFilteringCondition;
 import org.hyperic.hq.notifications.model.CreatedResourceNotification;
 import org.hyperic.hq.notifications.model.InternalResourceDetailsType;
 import org.hyperic.hq.notifications.model.InventoryNotification;
@@ -370,7 +372,7 @@ public class ResourceMapper {
 
     
     public ID toResource(RemovedResourceNotification n) {
-        Integer id = n.getID();
+        Integer id = n.getResourceID();
         if (id==null) {
             return null;
         }
@@ -424,7 +426,8 @@ public class ResourceMapper {
         ResourceFilterDefinition resourceFilterDefinition =  resourceFilterRequest.getResourceFilterDefinition();
         InternalResourceDetailsType resourceDetailsType = ResourceDetailsType.valueOf(responseMetadata);
         Set<Integer> resourceIds = resourceFilterDefinition == null ? null : resourceFilterDefinition.getResourceIds();
-        userFilters.add((Filter) new ResourceContentFilter(resourceDetailsType, resourceIds));
+        userFilters.add(new ResourceFilter<ResourceFilteringCondition>(new ResourceFilteringCondition(resourceIds)));
+        userFilters.add((Filter) new ResourceContentFilter(resourceDetailsType));
       return userFilters;
     }
 

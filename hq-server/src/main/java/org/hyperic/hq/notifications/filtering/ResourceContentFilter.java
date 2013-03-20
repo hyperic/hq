@@ -12,8 +12,8 @@ import org.hyperic.hq.notifications.model.ResourceChangedContentNotification;
 public class ResourceContentFilter extends Filter<ResourceChangedContentNotification,FilteringCondition<Integer>> {
     protected InternalResourceDetailsType resourceDetailsType;
 
-    public ResourceContentFilter(InternalResourceDetailsType internalResourceDetailsType, Set<Integer> resourceIds) {
-        super(new ResourceFilteringCondition(resourceIds));
+    public ResourceContentFilter(InternalResourceDetailsType internalResourceDetailsType) {
+        super(null);
         this.resourceDetailsType=internalResourceDetailsType;
     }
     protected static void filter(Map<String,String> props, final String[] propKeysToLeaveIn) {
@@ -43,11 +43,7 @@ public class ResourceContentFilter extends Filter<ResourceChangedContentNotifica
         } else if (this.resourceDetailsType==InternalResourceDetailsType.ALL) {
             // leave all props as is
         }
-        ResourceChangedContentNotification filteredResourceChangedContentNotification = null;
-        if (!filteredProps.isEmpty() && this.cond.check(n.getResourceID())) {
-            filteredResourceChangedContentNotification = new ResourceChangedContentNotification(n.getResourceID(),filteredProps);
-        }
-        return filteredResourceChangedContentNotification;
+        return filteredProps.isEmpty()?null:new ResourceChangedContentNotification(n.getResourceID(),filteredProps);
     }
     @Override
     protected Class<? extends ResourceChangedContentNotification> getHandledNotificationClass() {
@@ -56,6 +52,6 @@ public class ResourceContentFilter extends Filter<ResourceChangedContentNotifica
 
     @Override
     public String toString() {
-        return super.toString() + " ,resourceDetailsType=" + resourceDetailsType;
+        return "resourceDetailsType=" + resourceDetailsType;
     }
 }
