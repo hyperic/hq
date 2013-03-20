@@ -16,4 +16,11 @@ public class CreatedResourceNotification extends InventoryNotification {
     public Integer getParentID() {
         return parentID;
     }
+    @Override
+    public Integer getResourceID() {
+        if (this.r==null) {
+            return null;
+        }
+        return this.r.getId();
+    }
 }
