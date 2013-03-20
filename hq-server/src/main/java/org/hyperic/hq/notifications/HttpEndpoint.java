@@ -99,7 +99,9 @@ public class HttpEndpoint extends NotificationEndpoint {
             for (final InternalAndExternalNotificationReports message : messages) {
                 BasePostingStatus status =publishMessage(client, message.getExternalReport(), targetHost, localcontext);
                 batchPostingStatus.add(status);
-                failedReports.add(message.getInternalReport());
+                if (!status.isSuccessful()) {
+                    failedReports.add(message.getInternalReport());
+                }
             }
             return batchPostingStatus;
         } finally {
