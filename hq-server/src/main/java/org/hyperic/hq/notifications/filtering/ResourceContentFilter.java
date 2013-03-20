@@ -43,11 +43,7 @@ public class ResourceContentFilter extends Filter<ResourceChangedContentNotifica
         } else if (this.resourceDetailsType==InternalResourceDetailsType.ALL) {
             // leave all props as is
         }
-        ResourceChangedContentNotification filteredResourceChangedContentNotification = null;
-        if (!filteredProps.isEmpty() && this.cond.check(n.getResourceID())) {
-            filteredResourceChangedContentNotification = new ResourceChangedContentNotification(n.getResourceID(),filteredProps);
-        }
-        return filteredResourceChangedContentNotification;
+        return filteredProps.isEmpty()?null:new ResourceChangedContentNotification(n.getResourceID(),filteredProps);
     }
     @Override
     protected Class<? extends ResourceChangedContentNotification> getHandledNotificationClass() {
