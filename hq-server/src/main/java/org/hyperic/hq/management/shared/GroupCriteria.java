@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.management.shared;
 
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.hyperic.hq.authz.server.session.AuthzNamedBean;
@@ -39,7 +40,7 @@ public class GroupCriteria extends AuthzNamedBean {
     private String resourceNameRegex;
     private Pattern resourceNameRegexPattern;
     private String description;
-    private Resource resourcePrototype;
+    private Set<Resource> resourcePrototypes;
 
     public long getCtime() {
         return ctime;
@@ -66,11 +67,11 @@ public class GroupCriteria extends AuthzNamedBean {
     public void setDescription(String description) {
         this.description = description;
     }
-    public Resource getResourcePrototype() {
-        return resourcePrototype;
+    public Set<Resource> getResourcePrototypes() {
+        return resourcePrototypes;
     }
-    public void setResourcePrototype(Resource resourcePrototype) {
-        this.resourcePrototype = resourcePrototype;
+    public void setResourcePrototypes(Set<Resource> resourcePrototypes) {
+        this.resourcePrototypes = resourcePrototypes;
     }
 
     public Pattern getResourceNameRegexPattern() {
@@ -84,7 +85,15 @@ public class GroupCriteria extends AuthzNamedBean {
         int rtn = 17;
         rtn += (name != null) ? name.hashCode() : 0;
         rtn += (resourceNameRegex != null) ? resourceNameRegex.hashCode() : 0;
-        rtn += (resourcePrototype != null && resourcePrototype.getName() != null) ? resourcePrototype.getName().hashCode() : 0;
+
+        if (resourcePrototypes != null) {
+            for (Resource prototype : resourcePrototypes) {
+                rtn += (prototype.getName() != null) ? prototype.getName().hashCode() : 0;
+            }
+        }
+        
+        
+        
         return rtn;
     }
     
@@ -94,8 +103,16 @@ public class GroupCriteria extends AuthzNamedBean {
         rtn.append("resourceNameRegex=");
         rtn.append(resourceNameRegex != null ? resourceNameRegex : "null");
         rtn.append(",resourcePrototype=");
-        rtn.append(resourcePrototype != null ? resourcePrototype : "null");
-        return rtn.toString();
+ 
+        if (resourcePrototypes == null) {
+            rtn.append("null");
+        } else  {
+            for (Resource prototype : resourcePrototypes) {
+                rtn.append(prototype);
+                rtn.append(",");
+            }
+        }
+         return rtn.toString();
     }
 
 }

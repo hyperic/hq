@@ -11,7 +11,10 @@
     	   file="${newSetup}"
            loadFile="${setup.absolute}"
            ifDefined="server.installdir"
-           completionFile="${setup}.server-summary.txt" />
+           completionFile="${setup}.server-summary.txt" >
+   		<encryptProperty property="server.admin.password" targetProperty="server.admin.password.encrypted" strength="256" 
+    	encodeHashAsBase64="true"/>
+    </configSchema>
   </target>
 
   <target name="generate-agent-props">

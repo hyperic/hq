@@ -172,6 +172,12 @@ public class ResourceMapper {
 		return resource ; 
 	}//EOM 
 	
+    public final Resource toPrototype(final org.hyperic.hq.authz.server.session.Resource backendResource) { 
+        final Resource resource = new Resource(backendResource.getId().toString()) ; 
+        resource.setName(backendResource.getName()) ; 
+        return resource ; 
+    }//EOM 	
+	
 	public final void mergeResource(final Resource inputResource, final org.hyperic.hq.authz.server.session.Resource backendResource) { 
 		if(backendResource == null || inputResource == null) return ; 
 		//else 

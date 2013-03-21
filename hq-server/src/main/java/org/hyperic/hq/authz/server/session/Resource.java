@@ -207,6 +207,8 @@ public class Resource extends AuthzNamedBean implements Comparable<Resource> {
 
         return result;
     }
+    
+    
 
     public int compareTo(Resource r) {
         if (getSortName() == null || r.getSortName() == null) {
@@ -214,7 +216,7 @@ public class Resource extends AuthzNamedBean implements Comparable<Resource> {
         } else if (this == r) {
             return 0;
         }
-        return getSortName().compareTo(getSortName());
+        return getSortName().compareTo(r.getSortName());
     }
     
     public String toString() {

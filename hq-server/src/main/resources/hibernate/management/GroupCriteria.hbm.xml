@@ -63,10 +63,12 @@
       <column name="RESOURCE_NAME_REGEX" not-null="false" length="128"/>
     </property>
 
-    <many-to-one name="resourcePrototype" class="org.hyperic.hq.authz.server.session.Resource">
-      <column name="RESOURCE_PROTOTYPE" not-null="false"/>
-    </many-to-one>
-
+    
+    <set name="resourcePrototypes" table="EAM_GROUP_CRITERIA_PROTOTYPE_MAP" cascade="save-update,delete-orphan" >
+    	<key column="CRITERIA_ID" not-null="false" />
+    	<many-to-many class="org.hyperic.hq.authz.server.session.Resource" column="PROTOTYPE_ID" />
+    </set>
   </class>
-
+  
+ 
 </hibernate-mapping>
