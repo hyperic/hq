@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.hyperic.hq.uiplugin</groupId>
 		<artifactId>modules</artifactId>
-		<version>5.1.0</version>
+		<version>5.7.0</version>
 	</parent> 
 
 	<artifactId>hq-uiplugin-parent</artifactId>

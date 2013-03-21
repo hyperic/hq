@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>org.hyperic.hq</groupId>
 		<artifactId>hq-parent</artifactId>
-		<version>5.1.0</version>
+		<version>5.7.0</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
