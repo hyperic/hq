@@ -24,10 +24,7 @@
  */
 package org.hyperic.hq.plugin.dotnet;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -163,6 +160,7 @@ public class DotNetDetector
         try {
             String[] instances = Pdh.getInstances(".NET Data Provider for SqlServer");
             Pattern regex = Pattern.compile("([^\\[]*).*");
+            Set<String> names = new HashSet<String>();
             for (int i = 0; i < instances.length; i++) {
                 String instance = instances[i];
                 log.debug("[discoverServices] instance = " + instance);
@@ -171,7 +169,11 @@ public class DotNetDetector
                     log.debug("->" + m);
                     log.debug("->" + m.group());
                     log.debug("->" + m.group(1));
-                    String name = m.group(1);
+                    names.add(m.group(1));
+                }
+            }
+            for (Iterator<String> it = names.iterator(); it.hasNext();) {
+                String name = it.next();
                     ServiceResource service = new ServiceResource();
                     service.setType(this, "Data Provider for SqlServer");
                     service.setServiceName("Data Provider for SqlServer " + name);
@@ -181,7 +183,6 @@ public class DotNetDetector
                     service.setProductConfig(pc);
                     service.setMeasurementConfig();
                     services.add(service);
-                }
             }
             return services;
         } catch (Win32Exception e) {

@@ -759,13 +759,20 @@
             <include name="clr-net"/>
             <include name="clr-data"/>
         </metrics>
-
+        
+        <!-- http://msdn.microsoft.com/en-us/library/ms254503.aspx -->
         <service name="Data Provider for SqlServer">
             <filter name="template" value="pdhSQLDP:%app.name%:${alias}"/>
             <metric name="Availability" 
                     alias="Availability" 
                     indicator="true" 
                     category="AVAILABILITY"/>
+
+            <metric name="Instances"
+                    alias="instances"
+                    category="UTILIZATION"
+                    indicator="true"
+                    units="none"/>
 
             <metric name="Hard Connects Per Second"
                     alias="HardConnectsPerSecond"
@@ -791,6 +798,12 @@
                     indicator="true"
                     units="none"/>
 
+            <metric name="Number Of Active Connection Pools Groups"
+                    alias="NumberOfActiveConnectionPoolGroups"
+                    category="UTILIZATION"
+                    indicator="true"
+                    units="none"/>
+
             <metric name="Number Of Active Connection Pools"
                     alias="NumberOfActiveConnectionPools"
                     category="UTILIZATION"
@@ -805,6 +818,12 @@
 
             <metric name="Number Of Free Connections"
                     alias="NumberOfFreeConnections"
+                    category="UTILIZATION"
+                    indicator="true"
+                    units="none"/>
+
+            <metric name="Number Of Inactive Connection Pools Groups"
+                    alias="NumberOfInactiveConnectionPoolGroups"
                     category="UTILIZATION"
                     indicator="true"
                     units="none"/>

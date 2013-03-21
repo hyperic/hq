@@ -24,7 +24,9 @@
  */
 package org.hyperic.hq.plugin.dotnet;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -43,7 +45,7 @@ public class DotNetMeasurementPlugin
     private static final String DATA_PREFIX = "SqlClient: ";
     private static final String RUNTIME_NAME = "_Global_";
     private static Log log = LogFactory.getLog(DotNetMeasurementPlugin.class);
-    private static final Map<String, String> sqlPidsCache = new HashMap<String, String>();
+    private static final Map<String, List<String>> sqlPidsCache = new HashMap<String, List<String>>();
 
     @Override
     public MetricValue getValue(Metric metric) throws PluginException, MetricNotFoundException, MetricUnreachableException {
@@ -104,6 +106,9 @@ public class DotNetMeasurementPlugin
     }
 
     private MetricValue getPDHSQLPDMetric(Metric metric) {
+        if (metric.isAvail()) {
+            sqlPidsCache.clear();
+        }
         if (sqlPidsCache.isEmpty()) {
             try {
                 String[] instances = Pdh.getInstances(".NET Data Provider for SqlServer");
@@ -117,18 +122,25 @@ public class DotNetMeasurementPlugin
                         log.debug("->" + m.group());
                         log.debug("->" + m.group(1));
                         log.debug("->" + m.group(2));
-                        sqlPidsCache.put(m.group(1), m.group(2));
+                        List<String> pids = sqlPidsCache.get(m.group(1));
+                        if (pids == null) {
+                            pids = new ArrayList<String>();
+                            sqlPidsCache.put(m.group(1), pids);
+                        }
+                        pids.add(m.group(2));
                     }
                 }
             } catch (Win32Exception e) {
                 log.debug("Error getting PIDs data for '.NET Data Provider for SqlServer': " + e, e);
             }
+            log.debug("[getPDHSQLPDMetric] sqlPidsCache = " + sqlPidsCache);
         }
 
+        log.debug("[getPDHSQLPDMetric] metric:'" + metric);
         String appName = metric.getObjectPropString();
-        String pid = sqlPidsCache.get(appName);
+        List<String> pids = sqlPidsCache.get(appName);
         MetricValue res;
-        if (pid == null) {
+        if (pids == null) {
             sqlPidsCache.clear();
             if (metric.isAvail()) {
                 res = new MetricValue(Metric.AVAIL_DOWN);
@@ -136,17 +148,21 @@ public class DotNetMeasurementPlugin
                 res = MetricValue.NONE;
             }
         } else {
-            String obj = "\\.NET Data Provider for SqlServer(" + appName + "[" + pid + "])";
-            if (!metric.isAvail()) {
-                obj += "\\" + metric.getAttributeName();
+            if (metric.isAvail()) {
+                res = new MetricValue(pids.size() > 0 ? Metric.AVAIL_UP : Metric.AVAIL_DOWN);
+            } else if (metric.getAttributeName().equalsIgnoreCase("instances")) {
+                res = new MetricValue(pids.size());
+            } else if (pids.isEmpty()) {
+                res = MetricValue.NONE;
             } else {
-                obj += "\\HardConnectsPerSecond";
-            }
-            log.debug("[getPDHSQLPDMetric] metric:'" + metric);
-            log.debug("[getPDHSQLPDMetric] obj:'" + obj);
-            res = getPDHMetric(obj, metric.isAvail());
-            if ((res.getValue() == Metric.AVAIL_DOWN) && (metric.isAvail())) {
-                sqlPidsCache.clear();
+                double val = 0;
+                for (int i = 0; i < pids.size(); i++) {
+                    String pid = pids.get(i);
+                    String obj = "\\.NET Data Provider for SqlServer(" + appName + "[" + pid + "])\\" + metric.getAttributeName();
+                    log.debug("[getPDHSQLPDMetric] obj:'" + obj);
+                    val += getPDHMetric(obj, metric.isAvail()).getValue();
+                }
+                res = new MetricValue(val);
             }
         }
         return res;
