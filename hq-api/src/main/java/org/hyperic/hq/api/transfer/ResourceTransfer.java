@@ -54,15 +54,15 @@ import org.hyperic.util.config.EncodingException;
 
 public interface ResourceTransfer {
 
-    Resource getResource(final ApiMessageContext messageContext, final String platformNaturalID,
-                         final ResourceType resourceType,
-                         final ResourceStatusType resourceStatusType, final int hierarchyDepth,
-                         final ResourceDetailsType[] responseMetadata) throws SessionNotFoundException,
+    ResourceModel getResource(final ApiMessageContext messageContext, final String platformNaturalID,
+                             final ResourceTypeModel resourceType,
+                             final ResourceStatusType resourceStatusType, final int hierarchyDepth,
+                             final ResourceDetailsType[] responseMetadata) throws SessionNotFoundException,
             SessionTimeoutException, ObjectNotFoundException;
 
-    Resource getResource(final ApiMessageContext messageContext, final String platformID,
-                         final ResourceStatusType resourceStatusType, final int hierarchyDepth,
-                         final ResourceDetailsType[] responseMetadata) throws ObjectNotFoundException;
+    ResourceModel getResource(final ApiMessageContext messageContext, final String platformID,
+                              final ResourceStatusType resourceStatusType, final int hierarchyDepth,
+                              final ResourceDetailsType[] responseMetadata) throws ObjectNotFoundException;
 
     RegisteredResourceBatchResponse getResources(final ApiMessageContext messageContext,
                                                  final ResourceDetailsType[] responseMetadata,

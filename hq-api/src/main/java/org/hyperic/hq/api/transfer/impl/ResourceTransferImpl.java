@@ -25,6 +25,7 @@
 package org.hyperic.hq.api.transfer.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -39,6 +40,7 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
+import org.hyperic.hq.api.model.ConfigurationValue;
 import org.hyperic.hq.api.model.ResourceConfig;
 import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourceModel;
@@ -46,9 +48,10 @@ import org.hyperic.hq.api.model.ResourceStatusType;
 import org.hyperic.hq.api.model.ResourceTypeModel;
 import org.hyperic.hq.api.model.Resources;
 import org.hyperic.hq.api.model.common.ExternalEndpointStatus;
-import org.hyperic.hq.api.model.common.RegistrationID;
 import org.hyperic.hq.api.model.common.ExternalRegistrationStatus;
+import org.hyperic.hq.api.model.common.RegistrationID;
 import org.hyperic.hq.api.model.measurements.HttpEndpointDefinition;
+import org.hyperic.hq.api.model.resources.ComplexIp;
 import org.hyperic.hq.api.model.resources.RegisteredResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
@@ -59,6 +62,7 @@ import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 import org.hyperic.hq.api.transfer.mapping.ResourceDetailsTypeStrategy;
 import org.hyperic.hq.api.transfer.mapping.ResourceMapper;
 import org.hyperic.hq.api.transfer.mapping.UnknownEndpointException;
+import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -68,6 +72,7 @@ import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
+import org.hyperic.hq.appdef.shared.IpManager;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
@@ -97,6 +102,7 @@ import org.hyperic.hq.notifications.filtering.Filter;
 import org.hyperic.hq.notifications.filtering.FilterChain;
 import org.hyperic.hq.notifications.filtering.FilteringCondition;
 import org.hyperic.hq.notifications.filtering.ResourceDestinationEvaluator;
+import org.hyperic.hq.notifications.model.InventoryNotification;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
@@ -106,6 +112,7 @@ import org.hyperic.util.Transformer;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;
+import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -123,14 +130,16 @@ public class ResourceTransferImpl implements ResourceTransfer {
     private ResourceDestinationEvaluator evaluator;
     private ConfigBoss configBoss;
     private ConfigManager configManager;
+    private IpManager ipManager;
     protected NotificationsTransfer notificationsTransfer;
+
     private static final String RESOURCE_URL = "%sresource/%s/monitor/Visibility.do?mode=currentHealth&eid=%d:%d";
     @Autowired  
     public ResourceTransferImpl(ResourceManager resourceManager, ResourceMapper resourceMapper,
                                 ProductBoss productBoss, CPropManager cpropManager, AppdefBoss appdepBoss, 
                                 PlatformManager platformManager, ExceptionToErrorCodeMapper errorHandler,
                                 ResourceDestinationEvaluator evaluator, ConfigBoss configBoss,
-                                ConfigManager configManager) {
+                                ConfigManager configManager, IpManager ipManager) {
     	this.resourceManager = resourceManager ;
     	this.resourceMapper = resourceMapper ; 
     	this.productBoss = productBoss ; 
@@ -141,6 +150,7 @@ public class ResourceTransferImpl implements ResourceTransfer {
     	this.evaluator = evaluator;
         this.configBoss = configBoss;
         this.configManager = configManager;
+        this.ipManager = ipManager;
     }//EOM
 
     @PostConstruct
@@ -183,7 +193,7 @@ public class ResourceTransferImpl implements ResourceTransfer {
 	 * @return
 	 * @throws ObjectNotFoundException 
 	 */
-	private final ResourceModel getResourceInner(final Context flowContext, int hierarcyDepth) throws ObjectNotFoundException { 
+	private final ResourceModel getResourceInner(final Context flowContext, int hierarchyDepth) throws ObjectNotFoundException { 
 		
 		ResourceModel currentResource =  null ; 
 		try{ 
@@ -217,7 +227,7 @@ public class ResourceTransferImpl implements ResourceTransfer {
 					//set the child in the flow's backend resource 
 					flowContext.setBackendResource(backendResourceChild) ; 
 					flowContext.resourceType = ResourceTypeModel.valueOf(backendResourceChild.getResourceType().getAppdefType())  ; 
-					resourceChild = this.getResourceInner(flowContext, hierarcyDepth) ;
+					resourceChild = this.getResourceInner(flowContext, hierarchyDepth) ;
 					currentResource.addSubResource(resourceChild) ;
 					
 				}//EO while there are more children 
@@ -619,12 +629,15 @@ public class ResourceTransferImpl implements ResourceTransfer {
                                                         ResourceDetailsType[] responseMetadata,
                                                         int hierarchyDepth)
     throws PermissionException, NotFoundException {
+        final boolean debug = log.isDebugEnabled();
+        final StopWatch watch = new StopWatch();
         final RegisteredResourceBatchResponse res = new RegisteredResourceBatchResponse(errorHandler);
-        if (resourceFilterRequest==null) {
+        if (responseMetadata==null) {
             log.warn("illegal request");
             throw errorHandler.newWebApplicationException(
                 Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.BAD_REQ_BODY);
         }
+        final List<ResourceDetailsType> responseMetadataList = Arrays.asList(responseMetadata);
         if (hierarchyDepth < 0) {
             log.warn("hierarchy Depth cannot be < 0");
             throw errorHandler.newWebApplicationException(
@@ -632,24 +645,55 @@ public class ResourceTransferImpl implements ResourceTransfer {
         }
         final AuthzSubject authzSubject = messageContext.getAuthzSubject();
         final PermissionManager permissionManager = PermissionManagerFactory.getInstance();
+        if (debug) watch.markTimeBegin("findViewablePSSResources");
         final Set<Integer> viewable = permissionManager.findViewablePSSResources(authzSubject);
+        if (debug) watch.markTimeEnd("findViewablePSSResources");
         final List<Resource> platformResources = getPlatformsFromResourceIds(viewable);
+        if (debug) watch.markTimeBegin("getResourceToChildren");
         final Map<Resource, Collection<Resource>> resourceToChildren =
             getResourceToChildren(viewable, platformResources, hierarchyDepth);
-        final Map<Resource, ConfigResponse> config = getResourceConfig(responseMetadata, resourceToChildren.keySet());
+        if (debug) watch.markTimeEnd("getResourceToChildren");
+        if (debug) watch.markTimeBegin("getResourceConfig");
+        final Map<Resource, ConfigResponse> config =
+            getResourceConfig(responseMetadataList, resourceToChildren.keySet());
+        if (debug) watch.markTimeEnd("getResourceConfig");
+        final Map<Resource, Collection<Ip>> ipInfo = getIpInfo(responseMetadataList, platformResources);
+        if (debug) watch.markTimeBegin("getResourceConfigProps");
+        final Map<AppdefEntityID, Properties> cProps =
+            getResourceConfigProps(responseMetadataList);
+        if (debug) watch.markTimeEnd("getResourceConfigProps");
         final List<ResourceModel> resources = new ArrayList<ResourceModel>(platformResources.size());
         for (final Resource platformResource : platformResources) {
             ResourceModel model = resourceMapper.toResource(platformResource);
             resources.add(model);
-            setAllChildren(model, platformResource, resourceToChildren, config);
+            setAllChildren(model, platformResource, resourceToChildren, config, cProps, ipInfo);
         }
         res.setResources(resources);
+        if (debug) log.debug(watch);
         return res;
     }
 
-    private Map<Resource, ConfigResponse> getResourceConfig(ResourceDetailsType responseMetadata,
-                                                            Collection<Resource> resources) {
-        if (responseMetadata.equals(ResourceDetailsType.BASIC)) {
+    private Map<AppdefEntityID, Properties> getResourceConfigProps(List<ResourceDetailsType> responseMetadataList) {
+        if (!responseMetadataList.contains(ResourceDetailsType.VIRTUALDATA) &&
+            !responseMetadataList.contains(ResourceDetailsType.ALL)) {
+            return Collections.emptyMap();
+        }
+        return cpropManager.getAllEntries(HQConstants.VCUUID, HQConstants.MORID);
+    }
+    
+    private Map<Resource, Collection<Ip>> getIpInfo(List<ResourceDetailsType> responseMetadataList,
+                                                    Collection<Resource> platformResources) {
+        if (!responseMetadataList.contains(ResourceDetailsType.PROPERTIES) &&
+            !responseMetadataList.contains(ResourceDetailsType.ALL)) {
+            return Collections.emptyMap();
+        }
+        return ipManager.getIps(platformResources);
+    }
+
+    private Map<Resource, ConfigResponse> getResourceConfig(List<ResourceDetailsType> responseMetadataList,
+                                                            Set<Resource> resources) {
+        if (!responseMetadataList.contains(ResourceDetailsType.PROPERTIES) &&
+            !responseMetadataList.contains(ResourceDetailsType.ALL)) {
             return Collections.emptyMap();
         }
         return configManager.getConfigResponses(resources);
@@ -657,29 +701,49 @@ public class ResourceTransferImpl implements ResourceTransfer {
 
     private void setAllChildren(ResourceModel model, Resource platformResource,
                                 Map<Resource, Collection<Resource>> resourceToChildren,
-                                Map<Resource, ConfigResponse> config) {
+                                Map<Resource, ConfigResponse> config, Map<AppdefEntityID, Properties> cProps,
+                                Map<Resource, Collection<Ip>> ipInfo) {
         Collection<Resource> tmp;
+        addResourceConfig(platformResource, model, config, cProps, ipInfo);
         if (null == (tmp = resourceToChildren.get(platformResource)) || tmp.isEmpty()) {
             return;
         }
         for (final Resource child : tmp) {
             final ResourceModel childModel = resourceMapper.toResource(child);
-            addResourceConfig(child, childModel, config);
             model.addSubResource(childModel);
-            setAllChildren(childModel, child, resourceToChildren, config);
+            setAllChildren(childModel, child, resourceToChildren, config, cProps, ipInfo);
         }
     }
 
-	private void addResourceConfig(Resource r, ResourceModel resourceModel, Map<Resource, ConfigResponse> configMap) {
-	    final ConfigResponse configResponse = configMap.get(r);
-	    if (configResponse == null) {
-	        return;
-	    }
-	    @SuppressWarnings("unchecked")
-        final Map<String, String> config = configResponse.getConfig();
-	    final ResourceConfig resourceConfig = new ResourceConfig();
-	    resourceConfig.setMapProps(config);
-	    resourceModel.setResourceConfig(resourceConfig);
+    private void addResourceConfig(Resource r, ResourceModel resourceModel, Map<Resource, ConfigResponse> configMap,
+                                   Map<AppdefEntityID, Properties> cProps, Map<Resource, Collection<Ip>> ipInfo) {
+        final ConfigResponse configResponse = configMap.get(r);
+        @SuppressWarnings("unchecked")
+        final Map<String, String> config = (configResponse == null) ?
+            new HashMap<String, String>() : configResponse.getConfig();
+        final AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(r);
+        Properties properties = cProps.get(aeid);
+        properties = (properties == null) ? new Properties() : properties;
+        Object prop = properties.get(HQConstants.VCUUID);
+        if (prop != null) {
+            config.put(HQConstants.VCUUID, prop.toString());
+        }
+        prop = properties.get(HQConstants.MORID);
+        if (prop != null) {
+            config.put(HQConstants.MORID, prop.toString());
+        }
+        ResourceConfig resourceConfig = resourceModel.getResourceConfig();
+        resourceConfig = (resourceConfig == null) ? new ResourceConfig() : resourceConfig;
+        resourceConfig.setMapProps(config);
+        resourceModel.setResourceConfig(resourceConfig);
+        final Collection<Ip> ips = ipInfo.get(r);
+        if (ips != null && !ips.isEmpty()) {
+            Collection<ConfigurationValue> ipValues = new ArrayList<ConfigurationValue>(ips.size());
+            for (Ip ip : ips) {
+                ipValues.add(new ComplexIp(ip.getNetmask(), ip.getMacAddress(), ip.getAddress()));
+            }
+            resourceConfig.putMapListProps("IP_MAC_ADDRESS", ipValues);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -688,6 +752,9 @@ public class ResourceTransferImpl implements ResourceTransfer {
 	                                                                  int hierarchyDepth) {
         final List<Resource> currResources = new ArrayList<Resource>(platformResources);
         final Map<Resource, Collection<Resource>> rtn = new HashMap<Resource, Collection<Resource>>();
+        for (Resource r : platformResources) {
+            rtn.put(r, Collections.EMPTY_LIST);
+        }
         for (int i=2; i<=hierarchyDepth; i++) {
             final Map<Resource, Collection<Resource>> childResources =
                 resourceManager.findChildResources(currResources, viewable);
@@ -716,7 +783,9 @@ public class ResourceTransferImpl implements ResourceTransfer {
     }
 
     @Transactional (readOnly=true)
-    public RegistrationID register(ApiMessageContext messageContext, ResourceDetailsType responseMetadata, ResourceFilterRequest resourceFilterRequest)  throws PermissionException, NotFoundException {
+    public RegistrationID register(ApiMessageContext messageContext, ResourceDetailsType responseMetadata,
+                                   ResourceFilterRequest resourceFilterRequest)
+    throws PermissionException, NotFoundException {
         AuthzSubject authzSubject = messageContext.getAuthzSubject();
         List<Filter<InventoryNotification,? extends FilteringCondition<?>>> userFilters =
                 resourceMapper.toResourceFilters(resourceFilterRequest, responseMetadata);

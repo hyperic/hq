@@ -60,8 +60,8 @@ public interface ResourceService {
 
     @GET
     @Path("/{platformNaturalID}/{resourceType}")
-    Resource getResource(@PathParam("platformNaturalID") final String platformNaturalID,
-                         @PathParam("resourceType") final ResourceType resourceType,
+    ResourceModel getResource(@PathParam("platformNaturalID") final String platformNaturalID,
+                         @PathParam("resourceType") final ResourceTypeModel resourceType,
                          @QueryParam("status") final ResourceStatusType resourceStatusType,
                          @QueryParam("hierarchyDepth") final int hierarchyDepth,
                          @QueryParam("responseStructure") final ResourceDetailsType[] responseStructure)
@@ -74,7 +74,7 @@ public interface ResourceService {
 
     @GET
     @Path("/{platformID}")
-    Resource getResource(@PathParam("platformID") final String platformID,
+    ResourceModel getResource(@PathParam("platformID") final String platformID,
                          @QueryParam("status") final ResourceStatusType resourceStatusType,
                          @QueryParam("hierarchyDepth") final int hierarchyDepth,
                          @QueryParam("responseStructure") final ResourceDetailsType[] responseStructure)
@@ -109,7 +109,7 @@ public interface ResourceService {
 
     @PUT
     @Path("/search")
-    ResourceBatchResponse updateResourcesByCriteria(final Resource updateData) throws SessionNotFoundException,
+    ResourceBatchResponse updateResourcesByCriteria(final ResourceModel updateData) throws SessionNotFoundException,
             SessionTimeoutException;
 
     @DELETE
