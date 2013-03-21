@@ -159,8 +159,6 @@ public class SystemPlugin extends ProductPlugin {
     public void init(PluginManager manager) throws PluginException {
         super.init(manager);
         
-        getLog().error("system plugin init!");
-
         final String prop = "sigar.mirror.procnet";
         final String enable = manager.getProperty(prop);
         getLog().debug(prop + "=" + enable);
@@ -201,7 +199,6 @@ public class SystemPlugin extends ProductPlugin {
     }
 
     public GenericPlugin getPlugin(String type, TypeInfo info) {
-        getLog().error("system plugin getPlugin!");
         if (type.equals(ProductPlugin.TYPE_MEASUREMENT)) {
             if (info.getName().equals(SVC_NAME)) {
                 return new Win32MeasurementPlugin();
@@ -221,7 +218,6 @@ public class SystemPlugin extends ProductPlugin {
         else if (type.equals(ProductPlugin.TYPE_AUTOINVENTORY)) {
             switch (info.getType()) {
               case TypeInfo.TYPE_PLATFORM:
-                  getLog().error("system plugin getPlugin! autoinventory platform");
                 return new SigarPlatformDetector(this.hasPlatformControlActions());
               case TypeInfo.TYPE_SERVER:
                 if (info.getName().equals(FILE_SERVER_NAME)) {

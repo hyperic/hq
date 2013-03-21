@@ -49,9 +49,6 @@ public class SystemPluginProxy extends ProductPlugin{
     private static final String PRODUCT_PLUGIN_FILE_NAME = "/custom-system-product-plugin.txt" ;
     private SystemPlugin delegate ;
     
-    public SystemPluginProxy() {
-        this.getLog().error("SystemPluginProxy - constructor");
-    }
     
     /**
      * If the {@link #PRODUCT_PLUGIN_FILE_NAME} file exists in classpath of the given system-plugin<br/>
