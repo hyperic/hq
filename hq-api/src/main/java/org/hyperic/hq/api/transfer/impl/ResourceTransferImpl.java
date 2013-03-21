@@ -728,9 +728,9 @@ public class ResourceTransferImpl implements ResourceTransfer {
         if (prop != null) {
             config.put(HQConstants.VCUUID, prop.toString());
         }
-        prop = properties.get(HQConstants.MORID);
+        prop = properties.get(HQConstants.MOID);
         if (prop != null) {
-            config.put(HQConstants.MORID, prop.toString());
+            config.put(HQConstants.MOID, prop.toString());
         }
         ResourceConfig resourceConfig = resourceModel.getResourceConfig();
         resourceConfig = (resourceConfig == null) ? new ResourceConfig() : resourceConfig;
