@@ -678,7 +678,7 @@ public class ResourceTransferImpl implements ResourceTransfer {
             !responseMetadataList.contains(ResourceDetailsType.ALL)) {
             return Collections.emptyMap();
         }
-        return cpropManager.getAllEntries(HQConstants.VCUUID, HQConstants.MORID);
+        return cpropManager.getAllEntries(HQConstants.VCUUID, HQConstants.MOID);
     }
     
     private Map<Resource, Collection<Ip>> getIpInfo(List<ResourceDetailsType> responseMetadataList,
@@ -696,7 +696,7 @@ public class ResourceTransferImpl implements ResourceTransfer {
             !responseMetadataList.contains(ResourceDetailsType.ALL)) {
             return Collections.emptyMap();
         }
-        return configManager.getConfigResponses(resources);
+        return configManager.getConfigResponses(resources, true);
     }
 
     private void setAllChildren(ResourceModel model, Resource platformResource,
