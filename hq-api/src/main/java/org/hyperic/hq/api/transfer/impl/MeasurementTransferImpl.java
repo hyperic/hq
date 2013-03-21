@@ -172,7 +172,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     
     private HttpEndpoint getHttpEndpoint(RegistrationID registrationID, HttpEndpointDefinition def) {
         return new HttpEndpoint(registrationID.getId(), def.getUrl(), def.getUsername(), def.getPassword(),
-                                def.getContentType(), def.getEncoding());
+                                def.getContentType(), def.getEncoding(), def.getBodyPrepend());
     }
 
     public ExternalRegistrationStatus getRegistrationStatus(final ApiMessageContext messageContext,
