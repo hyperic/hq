@@ -47,6 +47,8 @@ public class HttpEndpointDefinition {
     private String contentType;
     @XmlAttribute
     private String encoding;
+    @XmlAttribute
+    private String bodyPrepend;
 
     public HttpEndpointDefinition() {
         super();
@@ -88,6 +90,12 @@ public class HttpEndpointDefinition {
     }
     public void setEncoding(String encoding) {
         this.encoding = encoding;
+    }
+    public String getBodyPrepend() {
+        return bodyPrepend;
+    }
+    public void setBodyPrepend(String bodyPrepend) {
+        this.bodyPrepend = bodyPrepend;
     }
 
 }

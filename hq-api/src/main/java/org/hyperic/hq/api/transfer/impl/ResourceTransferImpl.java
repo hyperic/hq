@@ -847,6 +847,6 @@ public class ResourceTransferImpl implements ResourceTransfer {
 
     private HttpEndpoint getHttpEndpoint(RegistrationID registrationID, HttpEndpointDefinition def) {
         return new HttpEndpoint(registrationID.getId(), def.getUrl(), def.getUsername(), def.getPassword(),
-                def.getContentType(), def.getEncoding());
+                def.getContentType(), def.getEncoding(), def.getBodyPrepend());
     }
 }//EOC 

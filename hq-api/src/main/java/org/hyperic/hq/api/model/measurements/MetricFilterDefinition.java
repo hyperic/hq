@@ -9,8 +9,8 @@ import javax.xml.bind.annotation.XmlType;
 import org.hyperic.hq.api.model.RestApiConstants;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name="metricFilterDefinitioin", namespace=RestApiConstants.SCHEMA_NAMESPACE)
-@XmlType(name="MetricFilterDefinitioin", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+@XmlRootElement(name="metricFilterDefinition", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+@XmlType(name="MetricFilterDefinition", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 public class MetricFilterDefinition {
     @XmlAttribute
     protected Boolean isIndicator = null;
