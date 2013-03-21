@@ -77,15 +77,16 @@ public class DotNetDetector
         RegistryKey key = null;
         List versions = new ArrayList();
 
+        Pattern regex = Pattern.compile("v(\\d*\\.\\d*).*");
         try {
             key = getRegistryKey("SOFTWARE\\Microsoft\\NET Framework Setup\\NDP");
             String[] names = key.getSubKeyNames();
 
             for (int i = 0; i < names.length; i++) {
                 log.debug("[getVersion] names[" + i + "]->" + names[i]);
-                if (names[i].charAt(0) == 'v') {
-                    String version = names[i].substring(1);
-                    versions.add(version);
+                Matcher m = regex.matcher(names[i]+".0"); // for v4
+                if(m.find()) {
+                    versions.add(m.group(1));
                 }
             }
         } catch (Win32Exception e) {
