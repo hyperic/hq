@@ -118,10 +118,6 @@ public class DotNetMeasurementPlugin
                     log.debug("[getPDHSQLPDMetric] instance = " + instance);
                     Matcher m = regex.matcher(instance);
                     if (m.find()) {
-                        log.debug("->" + m);
-                        log.debug("->" + m.group());
-                        log.debug("->" + m.group(1));
-                        log.debug("->" + m.group(2));
                         List<String> pids = sqlPidsCache.get(m.group(1));
                         if (pids == null) {
                             pids = new ArrayList<String>();
@@ -189,10 +185,10 @@ public class DotNetMeasurementPlugin
         } catch (Win32Exception ex) {
             if (avail) {
                 res = new MetricValue(Metric.AVAIL_DOWN);
-                log.info("error on obj:'" + obj + "' :" + ex.getLocalizedMessage(), ex);
+                log.info("[getPDHMetric] error on obj:'" + obj + "' :" + ex.getLocalizedMessage(), ex);
             } else {
                 res = MetricValue.NONE;
-                log.info("error on obj:'" + obj + "' :" + ex.getLocalizedMessage());
+                log.info("[getPDHMetric] error on obj:'" + obj + "' :" + ex.getLocalizedMessage());
             }
         }
         return res;
