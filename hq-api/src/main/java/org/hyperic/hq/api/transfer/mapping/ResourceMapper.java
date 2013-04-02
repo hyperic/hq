@@ -172,9 +172,9 @@ public class ResourceMapper {
 		return resource ; 
 	}//EOM 
 	
-    public final Resource toPrototype(final org.hyperic.hq.authz.server.session.Resource backendResource) { 
-        final Resource resource = new Resource(backendResource.getId().toString()) ; 
-        resource.setName(backendResource.getName()) ; 
+    public final Resource toPrototype(final org.hyperic.hq.authz.server.session.Resource backendPrototype) { 
+        final Resource resource = new Resource(backendPrototype.getId().toString()) ; 
+        resource.setName(backendPrototype.getName()) ; 
         return resource ; 
     }//EOM 	
 	

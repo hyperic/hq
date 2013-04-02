@@ -64,7 +64,7 @@
     </property>
 
     
-    <set name="resourcePrototypes" table="EAM_GROUP_CRITERIA_PROTOTYPE_MAP" cascade="save-update,delete-orphan" >
+    <set name="resourcePrototypes" table="EAM_GROUP_CRITERIA_PROTOTYPE_MAP"  >
     	<key column="CRITERIA_ID" not-null="false" />
     	<many-to-many class="org.hyperic.hq.authz.server.session.Resource" column="PROTOTYPE_ID" />
     </set>
