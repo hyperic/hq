@@ -39,6 +39,24 @@ public class ManagementPolicy extends PersistedObject {
         this.measurementInstructionBag = measurementInstructions;
     }
     
+    public String getName() {
+        if (resource != null)
+            return resource.getName();
+        return "";
+    }
+
+    public void setName(String name) {
+        if (resource != null)
+            resource.setName(name);
+    }
+
+    public long getModifiedDate() {
+        if (resource != null)
+            return resource.getMtime();
+        return -1;// marker for bad date
+    }
+
+    @Override
     public String toString() {
         return new StringBuilder()
             .append("resource=").append(resource).append(",name=").append(resource.getName())
