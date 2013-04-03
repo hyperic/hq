@@ -371,11 +371,14 @@ public interface ResourceManager {
      * @param resources {@link List} of parent {@link Resource}s
      * @param viewableResourceIds {@link Set} of {@link Resource}Ids.  Ideally the {@link PermissionManager}
      * would provide these values.
+     * @param includeSystemResources include child resources which are system resources.  This is mainly for platform
+     * services which have a system server resource as a placeholder in the hierarchy
      * Return {@link Map} will only include resources which are in this {@link Set}
      * @return {@link Map} of {@link Resource} to its children represented by {@link Collection} of {@link Resource}s.
      * The returned {@link Resource} objects will be a subset of the includes.
      */
     public Map<Resource, Collection<Resource>> findChildResources(List<Resource> resources,
-                                                                  Set<Integer> viewableResourceIds);
+                                                                  Set<Integer> viewableResourceIds,
+                                                                  boolean includeSystemResources);
 
 }

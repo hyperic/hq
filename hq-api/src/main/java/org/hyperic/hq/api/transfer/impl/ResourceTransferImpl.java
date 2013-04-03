@@ -29,8 +29,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
@@ -755,16 +757,63 @@ public class ResourceTransferImpl implements ResourceTransfer {
         for (Resource r : platformResources) {
             rtn.put(r, Collections.EMPTY_LIST);
         }
+        final Map<Resource, Resource> systemResources = new HashMap<Resource, Resource>();
         for (int i=2; i<=hierarchyDepth; i++) {
             final Map<Resource, Collection<Resource>> childResources =
-                resourceManager.findChildResources(currResources, viewable);
+                resourceManager.findChildResources(currResources, viewable, true);
             rtn.putAll(childResources);
+            currResources.removeAll(childResources.keySet());
+            for (Resource r : currResources) {
+                rtn.put(r, new ArrayList<Resource>(0));
+            }
             currResources.clear();
-            for (Collection<Resource> children : childResources.values()) {
-                for (Resource child : children) {
+            for (final Entry<Resource, Collection<Resource>> entry : childResources.entrySet()) {
+                final Resource parent = entry.getKey();
+                final Collection<Resource> children = entry.getValue();
+                for (final Iterator<Resource> it=children.iterator(); it.hasNext(); ) {
+                    final Resource child = it.next();
                     currResources.add(child);
+                    // EMPTY_LIST usage is a place holder to avoid extra overhead where resources don't have child
+                    // resources
                     rtn.put(child, Collections.EMPTY_LIST);
+                    // remove place-holder resource so that Platform Services don't expose our internal implementation
+                    // rather than exposing the system resource which is a place-holder
+                    // In other words:
+                    // desired output is "Platform --> Services"
+                    // in HQ we store this relationship as "Platform --> System Server --> Services"
+                    if (child.isSystem()) {
+                        systemResources.put(child, parent);
+                        it.remove();
+                    }
                 }
+            }
+        }
+        // need to post process the data in order to map the platform services correctly
+        final List<Resource> toFetch = new ArrayList<Resource>();
+        for (final Iterator<Entry<Resource, Resource>> it=systemResources.entrySet().iterator(); it.hasNext(); ) {
+            final Entry<Resource, Resource> entry = it.next();
+            final Resource systemResource = entry.getKey();
+            final Resource parent = entry.getValue();
+            final Collection<Resource> children = rtn.remove(systemResource);
+            if (children != null && !children.isEmpty()) {
+                it.remove();
+                final Collection<Resource> collection = rtn.get(parent);
+                if (collection != null) {
+                    collection.addAll(children);
+                }
+            } else if (children != null && children == Collections.EMPTY_LIST) {
+                toFetch.add(systemResource);
+            }
+        }
+        final Map<Resource, Collection<Resource>> systemResourceChildren =
+            resourceManager.findChildResources(toFetch, viewable, true);
+        for (final Entry<Resource, Resource> entry : systemResources.entrySet()) {
+            final Resource systemResource = entry.getKey();
+            final Resource parent = entry.getValue();
+            final Collection<Resource> children = systemResourceChildren.get(systemResource);
+            final Collection<Resource> parentChildren = rtn.get(parent);
+            if (parentChildren != null && children != null) {
+                parentChildren.addAll(children);
             }
         }
         return rtn;

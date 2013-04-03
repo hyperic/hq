@@ -145,6 +145,9 @@ public class ConfigManagerImpl implements ConfigManager {
         final Map<Resource, ConfigResponse> rtn = new HashMap<Resource, ConfigResponse>();
         for (final Entry<Resource, ConfigResponseDB> entry : tmp.entrySet()) {
             final Resource resource = entry.getKey();
+            if (resource == null || resource.isInAsyncDeleteState() || resource.isSystem()) {
+                continue;
+            }
             final ConfigResponseDB crdb = entry.getValue();
             final ConfigResponse configResponse = new ConfigResponse();
             final byte[] productResponse = crdb.getProductResponse();

@@ -671,7 +671,8 @@ public class ResourceManagerImpl implements ResourceManager {
 
     @Transactional(readOnly = true)
     public Map<Resource, Collection<Resource>> findChildResources(List<Resource> resources,
-                                                                  final Set<Integer> viewableResourceIds) {
+                                                                  final Set<Integer> viewableResourceIds,
+                                                                  final boolean includeSystemResources) {
         if (viewableResourceIds == null || viewableResourceIds.isEmpty()) {
             return Collections.emptyMap();
         }
@@ -682,7 +683,7 @@ public class ResourceManagerImpl implements ResourceManager {
             public NameValue<Resource, Resource> classify(ResourceEdge edge) {
                 final Resource parent = edge.getFrom();
                 final Resource child = edge.getTo();
-                if (viewableResourceIds.contains(child.getId())) {
+                if (viewableResourceIds.contains(child.getId()) || (includeSystemResources && child.isSystem())) {
                     return new NameValue<Resource, Resource>(parent, child);
                 }
                 return null;
