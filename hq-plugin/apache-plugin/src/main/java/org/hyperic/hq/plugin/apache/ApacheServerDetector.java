@@ -27,6 +27,7 @@ package org.hyperic.hq.plugin.apache;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -43,7 +44,6 @@ import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.ConfigFileTrackPlugin;
 import org.hyperic.hq.product.DaemonDetector;
-import org.hyperic.hq.product.DetectionUtil;
 import org.hyperic.hq.product.FileServerDetector;
 import org.hyperic.hq.product.LogFileTrackPlugin;
 import org.hyperic.hq.product.PluginException;
@@ -373,7 +373,7 @@ public class ApacheServerDetector
             metricConfig = getSnmpConfig(snmpConfig);
 
             productConfig = getProductConfig(metricConfig);
-            DetectionUtil.populateListeningPorts(binary.pid , productConfig , true);         
+            populateListeningPorts(binary.pid , productConfig , true);         
 
             if (binary.conf == null) {
                 String cfgPath = installpath;
@@ -416,7 +416,7 @@ public class ApacheServerDetector
         			TYPE_HTTPD);
 
         	productConfig = new ConfigResponse();
-        	DetectionUtil.populateListeningPorts(binary.pid , productConfig, true);
+        	populateListeningPorts(binary.pid , productConfig, true);
 
         	//meant for command-line testing: -Dhttpd.url=http://localhost:8080/
         	if (configureURL(getManagerProperty("httpd.url"), productConfig)) {
@@ -977,6 +977,20 @@ public class ApacheServerDetector
 
         public String toString() {
             return this.start + ".." + this.end;
+        }
+    }
+    
+    private void populateListeningPorts(long pid, ConfigResponse productConfig, boolean b) {
+        try {
+            Class du = Class.forName("org.hyperic.hq.product.DetectionUtil");
+            Method plp = du.getMethod("populateListeningPorts", long.class, ConfigResponse.class, boolean.class);
+            plp.invoke(null, pid, productConfig, b);
+        } catch (ClassNotFoundException ex) {
+            log.debug("[populateListeningPorts] Class 'DetectionUtil' not found", ex);
+        } catch (NoSuchMethodException ex) {
+            log.debug("[populateListeningPorts] Method 'populateListeningPorts' not found", ex);
+        } catch (Exception ex) {
+            log.debug("[populateListeningPorts] Problem with Method 'populateListeningPorts'", ex);
         }
     }
 }

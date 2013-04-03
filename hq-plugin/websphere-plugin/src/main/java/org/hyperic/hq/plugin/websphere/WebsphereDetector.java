@@ -31,6 +31,7 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.lang.reflect.Method;
 import java.text.MessageFormat;
 
 import java.util.ArrayList;
@@ -44,7 +45,6 @@ import org.hyperic.util.config.ConfigResponse;
 
 import org.hyperic.hq.plugin.websphere.jmx.WebsphereRuntimeDiscoverer;
 import org.hyperic.hq.product.AutoServerDetector;
-import org.hyperic.hq.product.DetectionUtil;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerControlPlugin;
 import org.hyperic.hq.product.RegistryServerDetector;
@@ -417,7 +417,7 @@ public class WebsphereDetector
         ConfigResponse productConfig =
             new ConfigResponse(getProductConfig(proc));
         
-		DetectionUtil.populateListeningPorts(proc.getPid(), productConfig, true);
+		populateListeningPorts(proc.getPid(), productConfig, true);
         
 		if (WebsphereProductPlugin.isOSGi()) {
             String prop = WebsphereProductPlugin.PROP_INSTALL_ROOT;
@@ -488,5 +488,19 @@ public class WebsphereDetector
         File serverDir = jar.getParentFile().getParentFile();
 
         return getServerList(serverDir, null,null);
+    }
+    
+    private void populateListeningPorts(long pid, ConfigResponse productConfig, boolean b) {
+        try {
+            Class du = Class.forName("org.hyperic.hq.product.DetectionUtil");
+            Method plp = du.getMethod("populateListeningPorts", long.class, ConfigResponse.class, boolean.class);
+            plp.invoke(null, pid, productConfig, b);
+        } catch (ClassNotFoundException ex) {
+            log.debug("[populateListeningPorts] Class 'DetectionUtil' not found", ex);
+        } catch (NoSuchMethodException ex) {
+            log.debug("[populateListeningPorts] Method 'populateListeningPorts' not found", ex);
+        } catch (Exception ex) {
+            log.debug("[populateListeningPorts] Problem with Method 'populateListeningPorts'", ex);
+        }
     }
 }
