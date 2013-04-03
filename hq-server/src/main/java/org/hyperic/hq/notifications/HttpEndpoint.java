@@ -97,7 +97,11 @@ public class HttpEndpoint extends NotificationEndpoint {
             localcontext.setAttribute(ClientContext.AUTH_CACHE, authCache);
             EndpointStatus batchPostingStatus = new EndpointStatus();
             for (final InternalAndExternalNotificationReports message : messages) {
-                BasePostingStatus status = publishMessage(client, message.getExternalReport(), targetHost, localcontext);
+                final String report = message.getExternalReport();
+                if (report.contains("\0")) {
+                    log.warn("message body contains a invalid character, message=\n" + report);
+                }
+                final BasePostingStatus status = publishMessage(client, report, targetHost, localcontext);
                 batchPostingStatus.add(status);
                 if (!status.isSuccessful()) {
                     failedReports.add(message.getInternalReport());
@@ -119,7 +123,7 @@ public class HttpEndpoint extends NotificationEndpoint {
         try {
             entity = new StringEntity(message, contentType, encoding);
             post.setEntity(entity);
-            if (debug) log.debug(post.getRequestLine());
+            if (debug) log.debug(post.getRequestLine() + ", message=" + message);
             final HttpResponse resp = client.execute(targetHost, post, localcontext);
             HttpEntity httpRes = resp.getEntity();
             // The entire response stream must be read if another connection to the server is made with the current 
