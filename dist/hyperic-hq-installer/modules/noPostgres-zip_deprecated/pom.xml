@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.hyperic.hq.dist</groupId>
 		<artifactId>hyperic-hq-installer</artifactId>
-		<version>5.7.0</version>
+		<version>BETA.0.0</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
