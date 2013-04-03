@@ -1,10 +1,8 @@
 package org.hyperic.hq.notifications;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -44,9 +42,10 @@ public class HttpEndpoint extends NotificationEndpoint {
     private String encoding;
     private URL url;
     private ServerKeystoreConfig keystoreConfig;
+    private String bodyPrepend;
 
     public HttpEndpoint(long registrationId, String url, String username, String password, String contentType,
-                        String encoding) {
+                        String encoding, String bodyPrepend) {
         super(registrationId);
         keystoreConfig = Bootstrap.getBean(ServerKeystoreConfig.class);
         try {
@@ -58,6 +57,7 @@ public class HttpEndpoint extends NotificationEndpoint {
             this.password = password;
             this.contentType = contentType == null ? DEFAULT_CONTENT_TYPE : contentType;
             this.encoding = encoding == null ? DEFAULT_ENCODING : encoding;
+            this.bodyPrepend = bodyPrepend == null ? "" : bodyPrepend + "\n";
         } catch (MalformedURLException e) {
             throw new SystemException(e);
         }
@@ -97,7 +97,7 @@ public class HttpEndpoint extends NotificationEndpoint {
             localcontext.setAttribute(ClientContext.AUTH_CACHE, authCache);
             EndpointStatus batchPostingStatus = new EndpointStatus();
             for (final InternalAndExternalNotificationReports message : messages) {
-                BasePostingStatus status =publishMessage(client, message.getExternalReport(), targetHost, localcontext);
+                BasePostingStatus status = publishMessage(client, message.getExternalReport(), targetHost, localcontext);
                 batchPostingStatus.add(status);
                 if (!status.isSuccessful()) {
                     failedReports.add(message.getInternalReport());
@@ -110,9 +110,10 @@ public class HttpEndpoint extends NotificationEndpoint {
     }
 
     private BasePostingStatus publishMessage(DefaultHttpClient client, String message, HttpHost targetHost,
-                                BasicHttpContext localcontext) {
+                                             BasicHttpContext localcontext) {
+        message = bodyPrepend + message;
         final boolean debug = log.isDebugEnabled();
-        final HttpPost post = new HttpPost(url.getPath() + "5");
+        final HttpPost post = new HttpPost(url.getPath());
         HttpEntity entity;
         long time = System.currentTimeMillis();
         try {
