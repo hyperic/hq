@@ -24,10 +24,9 @@
  */
 package org.hyperic.hq.plugin.dotnet;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -75,18 +74,20 @@ public class DotNetDetector
         RegistryKey key = null;
         List versions = new ArrayList();
 
+        Pattern regex = Pattern.compile("v(\\d*\\.\\d*).*");
         try {
             key = getRegistryKey("SOFTWARE\\Microsoft\\NET Framework Setup\\NDP");
             String[] names = key.getSubKeyNames();
 
             for (int i = 0; i < names.length; i++) {
                 log.debug("[getVersion] names[" + i + "]->" + names[i]);
-                if (names[i].charAt(0) == 'v') {
-                    String version = names[i].substring(1);
-                    versions.add(version);
+                Matcher m = regex.matcher(names[i] + ".0"); // for v4
+                if (m.find()) {
+                    versions.add(m.group(1));
                 }
             }
         } catch (Win32Exception e) {
+            log.debug(e,e);
             return null;
         } finally {
             if (key != null) {
@@ -125,19 +126,18 @@ public class DotNetDetector
     public List getServerResources(ConfigResponse platformConfig)
             throws PluginException {
 
-        String thisVersion = getTypeInfo().getVersion();
+        String expectedVersion = getTypeInfo().getVersion();
         String version = getVersion();
         if (version == null) {
             return null;
         }
-        if (!version.startsWith(thisVersion)) {
-            return null;
-        }
 
         String path = getInstallPath();
-        if (path == null) {
-            log.debug("Found .NET version=" + version
-                    + ", path=" + path);
+        boolean valid = ((version.startsWith(expectedVersion)) && (path != null));
+
+        log.debug("Found .NET version=" + version + " (expectedVersion=" + expectedVersion + "), path=" + path + ", valid=" + valid);
+
+        if (!valid) {
             return null;
         }
 
@@ -155,6 +155,41 @@ public class DotNetDetector
     @Override
     protected List discoverServices(ConfigResponse serverConfig) throws PluginException {
         List services = new ArrayList();
+
+        //Data providers.
+        try {
+            String[] instances = Pdh.getInstances(".NET Data Provider for SqlServer");
+            Pattern regex = Pattern.compile("([^\\[]*).*");
+            Set<String> names = new HashSet<String>();
+            for (int i = 0; i < instances.length; i++) {
+                String instance = instances[i];
+                Matcher m = regex.matcher(instance);
+                if (m.find()) {
+                    String n = m.group(1);
+                    log.debug("[discoverServices] instance = " + instance + " (" + n + ") valid.");
+                    names.add(n);
+                } else {
+                    log.debug("[discoverServices] instance = " + instance + " skiped.");
+                }
+            }
+            for (Iterator<String> it = names.iterator(); it.hasNext();) {
+                String name = it.next();
+                ServiceResource service = new ServiceResource();
+                service.setType(this, "Data Provider for SqlServer");
+                service.setServiceName("Data Provider for SqlServer " + name);
+
+                ConfigResponse pc = new ConfigResponse();
+                pc.setValue(PROP_APP, name);
+                service.setProductConfig(pc);
+                service.setMeasurementConfig();
+                services.add(service);
+            }
+            return services;
+        } catch (Win32Exception e) {
+            log.debug("Error getting pdh data for '.NET Data Provider for SqlServer': " + e, e);
+        }
+
+        // apps
         String instancesToSkipStr = getProperties().getProperty("dotnet.instances.to.skip", "_Global_");
         List<String> instancesToSkip = Arrays.asList(instancesToSkipStr.toUpperCase().split(","));
         log.debug("dotnet.instances.to.skip = " + instancesToSkip);
