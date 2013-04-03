@@ -26,6 +26,7 @@
 package org.hyperic.hq.plugin.rabbitmq.detect;
 
 import java.io.*;
+import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -271,7 +272,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         }
         conf.setValue(DetectorConstants.SERVER_NAME, nodeName);
 		
-        DetectionUtil.populateListeningPorts(nodePid , conf, true);
+        populateListeningPorts(nodePid , conf, true);
         
         logger.debug("ProductConfig[" + conf + "]");
 
@@ -398,5 +399,19 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         }
         Collections.sort(names);
         return names.toString();
+    }
+    
+    private void populateListeningPorts(long pid, ConfigResponse productConfig, boolean b) {
+        try {
+            Class du = Class.forName("org.hyperic.hq.product.DetectionUtil");
+            Method plp = du.getMethod("populateListeningPorts", long.class, ConfigResponse.class, boolean.class);
+            plp.invoke(null, pid, productConfig, b);
+        } catch (ClassNotFoundException ex) {
+            logger.debug("[populateListeningPorts] Class 'DetectionUtil' not found", ex);
+        } catch (NoSuchMethodException ex) {
+            logger.debug("[populateListeningPorts] Method 'populateListeningPorts' not found", ex);
+        } catch (Exception ex) {
+            logger.debug("[populateListeningPorts] Problem with Method 'populateListeningPorts'", ex);
+        }
     }
 }

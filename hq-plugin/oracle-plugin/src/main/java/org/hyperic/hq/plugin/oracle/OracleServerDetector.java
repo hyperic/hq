@@ -32,6 +32,7 @@ import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.Reader;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -46,7 +47,6 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.hyperic.hq.product.AutoServerDetector;
-import org.hyperic.hq.product.DetectionUtil;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.FileServerDetector;
 import org.hyperic.hq.product.ProductPlugin;
@@ -255,7 +255,7 @@ public class OracleServerDetector
     	for (long pid : getPids(TNS_PTQL_QUERY)) {
     		allPids.add(pid);
     	}
-    	DetectionUtil.populateListeningPorts(allPids, productConfig);
+    	populateListeningPorts(allPids, productConfig);
     }
 
     // Auto-scan.. Does process scan first, falls back to oratab
@@ -672,6 +672,20 @@ public class OracleServerDetector
             reader.close();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+    
+    private void populateListeningPorts(Set<Long> pids, ConfigResponse productConfig) {
+        try {
+            Class du = Class.forName("org.hyperic.hq.product.DetectionUtil");
+            Method plp = du.getMethod("populateListeningPorts", long.class, ConfigResponse.class);
+            plp.invoke(null, pids, productConfig);
+        } catch (ClassNotFoundException ex) {
+            log.debug("[populateListeningPorts] Class 'DetectionUtil' not found", ex);
+        } catch (NoSuchMethodException ex) {
+            log.debug("[populateListeningPorts] Method 'populateListeningPorts' not found", ex);
+        } catch (Exception ex) {
+            log.debug("[populateListeningPorts] Problem with Method 'populateListeningPorts'", ex);
         }
     }
 }

@@ -28,6 +28,7 @@ package org.hyperic.hq.plugin.mysql_stats;
  
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.ResultSet;
@@ -45,7 +46,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.AutoServerDetector;
-import org.hyperic.hq.product.DetectionUtil;
 import org.hyperic.hq.product.JDBCMeasurementPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerDetector;
@@ -572,7 +572,7 @@ public class MySqlServerDetector
  
         productConfig.setValue("process.query", _validQuery + getPtqlArgs(args));
  
-        DetectionUtil.populateListeningPorts(pid, productConfig, true);
+        populateListeningPorts(pid, productConfig, true);
  
         setProductConfig(server, productConfig);
  
@@ -672,4 +672,18 @@ public class MySqlServerDetector
  
         return null;
 }
+    
+    private void populateListeningPorts(long pid, ConfigResponse productConfig, boolean b) {
+        try {
+            Class du = Class.forName("org.hyperic.hq.product.DetectionUtil");
+            Method plp = du.getMethod("populateListeningPorts", long.class, ConfigResponse.class, boolean.class);
+            plp.invoke(null, pid, productConfig, b);
+        } catch (ClassNotFoundException ex) {
+            _log.debug("[populateListeningPorts] Class 'DetectionUtil' not found", ex);
+        } catch (NoSuchMethodException ex) {
+            _log.debug("[populateListeningPorts] Method 'populateListeningPorts' not found", ex);
+        } catch (Exception ex) {
+            _log.debug("[populateListeningPorts] Problem with Method 'populateListeningPorts'", ex);
+        }
+    }
 }

@@ -26,6 +26,7 @@ package org.hyperic.hq.plugin.jboss;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -48,7 +49,6 @@ import org.hyperic.hq.plugin.jboss.jmx.ServerQuery;
 import org.hyperic.hq.plugin.jboss.jmx.ServiceQuery;
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.DaemonDetector;
-import org.hyperic.hq.product.DetectionUtil;
 import org.hyperic.hq.product.FileServerDetector;
 import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.Log4JLogTrackPlugin;
@@ -515,7 +515,7 @@ public class JBossDetector
                     Context.PROVIDER_URL
                 });
         if (pid>0) {
-            DetectionUtil.populateListeningPorts(pid, _config, true);
+            populateListeningPorts(pid, _config, true);
         }
 
         server.setProductConfig(_config);
@@ -692,4 +692,18 @@ public class JBossDetector
 
         return version;
     }
+      
+    private void populateListeningPorts(long pid, ConfigResponse productConfig, boolean b) {
+        try {
+            Class du = Class.forName("org.hyperic.hq.product.DetectionUtil");
+            Method plp = du.getMethod("populateListeningPorts", long.class, ConfigResponse.class, boolean.class);
+            plp.invoke(null, pid, productConfig, b);
+        } catch (ClassNotFoundException ex) {
+            log.debug("[populateListeningPorts] Class 'DetectionUtil' not found", ex);
+        } catch (NoSuchMethodException ex) {
+            log.debug("[populateListeningPorts] Method 'populateListeningPorts' not found", ex);
+        } catch (Exception ex) {
+            log.debug("[populateListeningPorts] Problem with Method 'populateListeningPorts'", ex);
         }
+    }
+}
