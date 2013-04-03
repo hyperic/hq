@@ -11965,11 +11965,11 @@ has already been defined.
             <statement targetDB="postgresql">            	
             	CREATE TABLE if not exists EAM_VM_MAPPING(
             	            	VCUUID VARCHAR(128) NOT NULL,
-            	            	MORID VARCHAR(64) NOT NULL,
+            	            	MOID VARCHAR(64) NOT NULL,
             	            	MACS_ADDRESS VARCHAR(512) NOT NULL UNIQUE, 
             	            	VM_NAME VARCHAR(128),
             	            	version_col bigint DEFAULT 0 NOT NULL,
-            	            	PRIMARY KEY (VCUUID, MORID)
+            	            	PRIMARY KEY (VCUUID, MOID)
             	            	)
             </statement>
         </schema-directSQL>

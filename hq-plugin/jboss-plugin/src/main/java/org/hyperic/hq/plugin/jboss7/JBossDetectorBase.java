@@ -336,10 +336,20 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
         ConfigResponse cf = new ConfigResponse();
         String baseDir = args.get("jboss.home.dir");
         String name = args.get("jboss.domain.default.config");
+        if (name == null) {
+            name = args.get("server-config");
+            if (name == null) {
+                name = getDefaultConfigName();
+            }
+        }
+        
+        log.debug("[getServerControlConfig] baseDir = " + baseDir);
+        log.debug("[getServerControlConfig] name = " + name);
         if ((name != null) && (baseDir != null)) {
             name = name.substring(0, name.lastIndexOf(".")) + (isWin32() ? ".bat" : ".sh");
             File script = new File(new File(baseDir, "bin"), name);
-            cf.setValue(START, script.getAbsolutePath());
+            cf.setValue(JBoss7Control.START_SCRIPT, script.getAbsolutePath());
+            log.debug("[getServerControlConfig] script = " + script);
         }
         return cf;
     }

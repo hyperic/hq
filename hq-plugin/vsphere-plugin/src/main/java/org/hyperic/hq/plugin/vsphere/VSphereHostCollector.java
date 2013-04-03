@@ -53,8 +53,7 @@ public class VSphereHostCollector extends VSphereCollector {
 
     static final String TYPE = VSphereUtil.HOST_SYSTEM;
 
-    private final Log _log =
-        LogFactory.getLog(this.getClass());
+    private final Log _log = LogFactory.getLog(VSphereHostCollector.class);
 
     private static final Set<String> VALID_UNITS =
         new HashSet<String>(Arrays.asList(MeasurementConstants.VALID_UNITS));

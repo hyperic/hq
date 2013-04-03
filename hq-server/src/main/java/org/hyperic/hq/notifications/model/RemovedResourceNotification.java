@@ -7,7 +7,7 @@ public class RemovedResourceNotification extends InventoryNotification {
     public RemovedResourceNotification(Integer rid) {
         this.rid=rid;
     }
-    public Integer getID() {
+    public Integer getResourceID() {
         return rid;
     }
 }

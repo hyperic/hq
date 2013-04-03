@@ -45,290 +45,290 @@ public class DetectionUtil {
             LogFactory.getLog(DetectionUtil.class.getName());
     private static Sigar sigarImpl = null;
     private static SigarProxy sigar = null;
-	private static final String OS_TYPE;
-	private static final boolean IS_WINDOWS;  
-	private static final boolean IS_UNIX;
-	static {
-		OS_TYPE = System.getProperty("os.name").toLowerCase();
-		IS_WINDOWS = OS_TYPE.contains("win");
-		IS_UNIX = OS_TYPE.contains("nix")
-				|| OS_TYPE.contains("nux")
-				|| OS_TYPE.contains("sunos")
-				|| OS_TYPE.contains("mac os x");
-	}
-	
-	/**
-	 * This method finds all the ports the provided pid listens on and adds them as a list
-	 * to the provided ConfigResponse instance
-	 * @param pid - the process id for which we want to get the listening ports
-	 * @param cf - usually the product config
-	 * @param recursive - if true the population of the listening port will use all the child processes of the pid
-	 */
-	public static void populateListeningPorts(long pid, ConfigResponse cf, boolean recursive){
-		Set<Long> pids = new HashSet<Long>();
-		pids.add(pid);
-		if (recursive) {
-			pids.addAll(getAllChildPid(pid));
-		}
-		populateListeningPorts(pids, cf);
-	}
+    private static final String OS_TYPE;
+    private static final boolean IS_WINDOWS;  
+    private static final boolean IS_UNIX;
+    static {
+        OS_TYPE = System.getProperty("os.name").toLowerCase();
+        IS_WINDOWS = OS_TYPE.contains("win");
+        IS_UNIX = OS_TYPE.contains("nix")
+                || OS_TYPE.contains("nux")
+                || OS_TYPE.contains("sunos")
+                || OS_TYPE.contains("mac os x");
+    }
 
-	/**
-	 * This method finds all the ports the provided pids are listening on and adds them as a list
-	 * to the provided ConfigResponse instance
-	 * @param pids - the ids of the processes we want to get the listening ports for
-	 * @param cf - usually the product config
-	 */
-	public static void populateListeningPorts(Set<Long> pids, ConfigResponse cf){
-		if (pids.isEmpty()) {
-			return;
-		}
-		if (IS_WINDOWS) {
-			populatePortsOnWindows(pids, cf);
-		}
-		else if (IS_UNIX) {
-			populatePortsOnUnix(pids, cf);
-		}
-	}
+    /**
+     * This method finds all the ports the provided pid listens on and adds them as a list
+     * to the provided ConfigResponse instance
+     * @param pid - the process id for which we want to get the listening ports
+     * @param cf - usually the product config
+     * @param recursive - if true the population of the listening port will use all the child processes of the pid
+     */
+    public static void populateListeningPorts(long pid, ConfigResponse cf, boolean recursive){
+        Set<Long> pids = new HashSet<Long>();
+        pids.add(pid);
+        if (recursive) {
+            pids.addAll(getAllChildPid(pid));
+        }
+        populateListeningPorts(pids, cf);
+    }
 
-	/**
-	 * This method finds the listening ports for the provided pids on
-	 * Unix platform by using netstat 
-	 * @param pids
-	 * @param cf
-	 */
-	private static void populatePortsOnUnix(Set<Long> pids, ConfigResponse cf) {
+    /**
+     * This method finds all the ports the provided pids are listening on and adds them as a list
+     * to the provided ConfigResponse instance
+     * @param pids - the ids of the processes we want to get the listening ports for
+     * @param cf - usually the product config
+     */
+    public static void populateListeningPorts(Set<Long> pids, ConfigResponse cf){
+        if (pids.isEmpty()) {
+            return;
+        }
+        if (IS_WINDOWS) {
+            populatePortsOnWindows(pids, cf);
+        }
+        else if (IS_UNIX) {
+            populatePortsOnUnix(pids, cf);
+        }
+    }
 
-		String cmd = "netstat -lnptu";
-		//build a string of all the provided pids
-		StringBuilder pidsStr = new StringBuilder();
-		for (Long pid : pids) {
-			pidsStr.append(',').append(pid);
-		}
-		Set<String> ports = new HashSet<String>();	
-		String line;
-		BufferedReader input = null;
-		try {
-			// Run netstat
-			Process process = Runtime.getRuntime().exec(cmd);
-			input = new BufferedReader(new InputStreamReader(process
-					.getInputStream()));
-	
-			while ((line = input.readLine()) != null) {
-				if (!line.contains("LISTEN")) {
-					continue;
-				}
-				try{
-					line = line.trim();
-					String pid = line.substring(line.lastIndexOf(" "));
-					pid = pid.trim();
-					pid = pid.substring(0, pid.indexOf("/"));
-					//check that the pid that listens on this port is one of the provided pids
-					if (!pids.contains(Long.valueOf(pid))) {
-						continue;
-					}
-					//get the port number
-					line = line.substring(line.indexOf(":"));
-					line = line.substring(0, line.indexOf(" "));
+    /**
+     * This method finds the listening ports for the provided pids on
+     * Unix platform by using netstat 
+     * @param pids
+     * @param cf
+     */
+    private static void populatePortsOnUnix(Set<Long> pids, ConfigResponse cf) {
+
+        String cmd = "netstat -lnptu";
+        //build a string of all the provided pids
+        StringBuilder pidsStr = new StringBuilder();
+        for (Long pid : pids) {
+            pidsStr.append(',').append(pid);
+        }
+        Set<String> ports = new HashSet<String>();	
+        String line;
+        BufferedReader input = null;
+        try {
+            // Run netstat
+            Process process = Runtime.getRuntime().exec(cmd);
+            input = new BufferedReader(new InputStreamReader(process
+                    .getInputStream()));
+
+            while ((line = input.readLine()) != null) {
+                if (!line.contains("LISTEN")) {
+                    continue;
+                }
+                try{
+                    line = line.trim();
+                    String pid = line.substring(line.lastIndexOf(" "));
+                    pid = pid.trim();
+                    pid = pid.substring(0, pid.indexOf("/"));
+                    //check that the pid that listens on this port is one of the provided pids
+                    if (!pids.contains(Long.valueOf(pid))) {
+                        continue;
+                    }
+                    //get the port number
+                    line = line.substring(line.indexOf(":"));
+                    line = line.substring(0, line.indexOf(" "));
                     line = line.substring(line.lastIndexOf(":") + 1);
 
-					line = line.trim();
-					if (isNumber(line)) {
-						ports.add(line);
-					}
-				}
-				catch (Exception e) {
-				    continue;
-				}
-			}
-		} catch (Exception e) {
-			log.warn("Error populating ports for '" + pidsStr + "' ", e);
-		} finally {
+                    line = line.trim();
+                    if (isNumber(line)) {
+                        ports.add(line);
+                    }
+                }
+                catch (Exception e) {
+                    continue;
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Error populating ports for '" + pidsStr + "' ", e);
+        } finally {
             if (input!=null) {
                 try {
-                   input.close();
-               } catch (IOException e) {
-                   log.error(e);
-               }
-           } 
-		}
-		updatePortsInConfigResponse(cf, ports);
-	
-	}
+                    input.close();
+                } catch (IOException e) {
+                    log.error(e);
+                }
+            } 
+        }
+        updatePortsInConfigResponse(cf, ports);
 
-	private static void populatePortsOnWindows(Set<Long> pids, ConfigResponse cf) {
-		String cmd = "netstat -ano";
-		//build a string of all the provided pids
-		StringBuilder pidsStr = new StringBuilder();
-		for (Long pid : pids) {
-			pidsStr.append(',').append(pid);
-		}
-		Set<String> ports = new HashSet<String>();	
-		String line;
-		BufferedReader input = null;
-		try {
-			// Run netstat
-			Process process = Runtime.getRuntime().exec(cmd);
-			input = new BufferedReader(new InputStreamReader(process
-					.getInputStream()));
-	
-			while ((line = input.readLine()) != null) {
-				if (!(line.trim().startsWith("TCP") || line.startsWith("UDP")) 
-						|| !line.contains("LISTENING")) {
-					continue;
-				}
-				try{
-					//check that the pid that listens on this port is one of the provided pids
-					long pid = Long.valueOf(line.trim().substring(line.trim().lastIndexOf(" ")).trim());
-					if (!pids.contains(pid)) {
-						continue;
-					}
-					//get the port number
-					if (line.contains("[::")) {
-						line = line.replaceAll("[::", "").trim();
-					}
-					line = line.substring(line.indexOf(":") + 1);
-					line = line.substring(0, line.indexOf(" "));
-					line = line.trim();
-					if (isNumber(line)) {
-						ports.add(line);
-					}
-				}
-				catch (Exception e) {
-					continue;
-				}
-			}
-		} catch (Exception e) {
-			log.warn("Error populating ports for '" + pidsStr + "' ", e);
-		} finally {
+    }
+
+    private static void populatePortsOnWindows(Set<Long> pids, ConfigResponse cf) {
+        String cmd = "netstat -ano";
+        //build a string of all the provided pids
+        StringBuilder pidsStr = new StringBuilder();
+        for (Long pid : pids) {
+            pidsStr.append(',').append(pid);
+        }
+        Set<String> ports = new HashSet<String>();	
+        String line;
+        BufferedReader input = null;
+        try {
+            // Run netstat
+            Process process = Runtime.getRuntime().exec(cmd);
+            input = new BufferedReader(new InputStreamReader(process
+                    .getInputStream()));
+
+            while ((line = input.readLine()) != null) {
+                if (!(line.trim().startsWith("TCP") || line.startsWith("UDP")) 
+                        || !line.contains("LISTENING")) {
+                    continue;
+                }
+                try{
+                    //check that the pid that listens on this port is one of the provided pids
+                    long pid = Long.valueOf(line.trim().substring(line.trim().lastIndexOf(" ")).trim());
+                    if (!pids.contains(pid)) {
+                        continue;
+                    }
+                    //get the port number
+                    if (line.contains("[::")) {
+                        line = line.replaceAll("[::", "").trim();
+                    }
+                    line = line.substring(line.indexOf(":") + 1);
+                    line = line.substring(0, line.indexOf(" "));
+                    line = line.trim();
+                    if (isNumber(line)) {
+                        ports.add(line);
+                    }
+                }
+                catch (Exception e) {
+                    continue;
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Error populating ports for '" + pidsStr + "' ", e);
+        } finally {
             if (input!=null) {
                 try {
-                   input.close();
-               } catch (IOException e) {
-                   log.error(e);
-               }
-           }
-		}
-		updatePortsInConfigResponse(cf, ports);
-	}
+                    input.close();
+                } catch (IOException e) {
+                    log.error(e);
+                }
+            }
+        }
+        updatePortsInConfigResponse(cf, ports);
+    }
 
-	/**
-	 * This method updates the ConfigResponse with the listening ports (if there are any)
-	 * @param cf
-	 * @param ports
-	 */
-	private static void updatePortsInConfigResponse(ConfigResponse cf, Set<String> ports) {
-		if (!ports.isEmpty()) {
-			StringBuilder portsStr = new StringBuilder();
-			for (String port : ports) {
-				portsStr.append(',').append(port);
-			}
-			cf.setValue(Collector.LISTEN_PORTS, portsStr.substring(1));
-		}
-	}
-	
-	
-	
-	/**
-	 * This method finds all the childs of the provided process
-	 * @param parentPid
-	 */
-	public static Set<Long> getAllChildPid(long parentPid) {
-		Set<Long> childPids = new HashSet<Long>();
+    /**
+     * This method updates the ConfigResponse with the listening ports (if there are any)
+     * @param cf
+     * @param ports
+     */
+    private static void updatePortsInConfigResponse(ConfigResponse cf, Set<String> ports) {
+        if (!ports.isEmpty()) {
+            StringBuilder portsStr = new StringBuilder();
+            for (String port : ports) {
+                portsStr.append(',').append(port);
+            }
+            cf.setValue(Collector.LISTEN_PORTS, portsStr.substring(1));
+        }
+    }
 
-		if (IS_UNIX) {
-			String cmd = "ps -o pid --no-headers --ppid " + String.valueOf(parentPid);
-			String line;
-			BufferedReader input=null;
-			try {
-				Process process = Runtime.getRuntime().exec(cmd);
-				input = new BufferedReader(new InputStreamReader(process
-						.getInputStream()));
-				while ((line = input.readLine()) != null) {
-					line = line.trim();
-					if (!line.equals("") && isNumber(line)) {
-						Long childPid = Long.valueOf(line);
-						childPids.addAll(getAllChildPid(childPid));
-						childPids.add(childPid);
-					}
-				}
-			} catch (Exception e) {
-			} finally {
+
+
+    /**
+     * This method finds all the childs of the provided process
+     * @param parentPid
+     */
+    public static Set<Long> getAllChildPid(long parentPid) {
+        Set<Long> childPids = new HashSet<Long>();
+
+        if (IS_UNIX) {
+            String cmd = "ps -o pid --no-headers --ppid " + String.valueOf(parentPid);
+            String line;
+            BufferedReader input=null;
+            try {
+                Process process = Runtime.getRuntime().exec(cmd);
+                input = new BufferedReader(new InputStreamReader(process
+                        .getInputStream()));
+                while ((line = input.readLine()) != null) {
+                    line = line.trim();
+                    if (!line.equals("") && isNumber(line)) {
+                        Long childPid = Long.valueOf(line);
+                        childPids.addAll(getAllChildPid(childPid));
+                        childPids.add(childPid);
+                    }
+                }
+            } catch (Exception e) {
+            } finally {
                 if (input!=null) {
                     try {
-                       input.close();
-                   } catch (IOException e) {
-                       log.error(e);
-                   }
-               }
-           }
-		}
-		else if (IS_WINDOWS) {
-			final String cmd = "wmic process get processid,parentprocessid";
-			String line;
-			BufferedReader input = null;
-			try {
-			    Process process = Runtime.getRuntime().exec(cmd);
-			    input = new BufferedReader(new InputStreamReader(process
-						.getInputStream()));
-			    //[HQ-4176] - don't block this thread
-				if (!input.ready()) {
-				    return childPids;
-				}
-			    long lPpid = -1;
-				String sPpid = "";
-				String sCpid = "";
-				long lCpid = -1;
-				while ((line = input.readLine()) != null) {
-					try {
-						line = line.trim();
-						sPpid = line.substring(0, line.indexOf(" "));
-						lPpid = Long.valueOf(sPpid);
-						if (parentPid == lPpid) {
-							sCpid = line.substring(line.indexOf(" ")).trim();
-							lCpid = Long.valueOf(sCpid);
-							childPids.addAll(getAllChildPid(lCpid));
-							childPids.add(lCpid);
-						}
-						else {
-							continue;
-						}
-					}
-					catch (Exception e) {
-						continue;
-					}					
-				}
-	
-			} catch (Exception e) {
-                log.error(e);
-			} finally {
-			    if (input!=null) {
-		             try {
                         input.close();
                     } catch (IOException e) {
                         log.error(e);
                     }
-			    }
-			}
-		}
-		return childPids;
-	}
-	
-	/**
-	 * Returns true if the provided string is a number (not a float number)
-	 */
-	private static boolean isNumber(String value) {
-		try {
-			Long.valueOf(value);
-			return true;
-		}
-		catch (Exception e) {
+                }
+            }
+        }
+        else if (IS_WINDOWS) {
+            final String cmd = "wmic process get processid,parentprocessid";
+            String line;
+            BufferedReader input = null;
+            try {
+                Process process = Runtime.getRuntime().exec(cmd);
+                input = new BufferedReader(new InputStreamReader(process
+                        .getInputStream()));
+                //[HQ-4176] - don't block this thread
+                if (!input.ready()) {
+                    return childPids;
+                }
+                long lPpid = -1;
+                String sPpid = "";
+                String sCpid = "";
+                long lCpid = -1;
+                while ((line = input.readLine()) != null) {
+                    try {
+                        line = line.trim();
+                        sPpid = line.substring(0, line.indexOf(" "));
+                        lPpid = Long.valueOf(sPpid);
+                        if (parentPid == lPpid) {
+                            sCpid = line.substring(line.indexOf(" ")).trim();
+                            lCpid = Long.valueOf(sCpid);
+                            childPids.addAll(getAllChildPid(lCpid));
+                            childPids.add(lCpid);
+                        }
+                        else {
+                            continue;
+                        }
+                    }
+                    catch (Exception e) {
+                        continue;
+                    }					
+                }
+
+            } catch (Exception e) {
+                log.error(e);
+            } finally {
+                if (input!=null) {
+                    try {
+                        input.close();
+                    } catch (IOException e) {
+                        log.error(e);
+                    }
+                }
+            }
+        }
+        return childPids;
+    }
+
+    /**
+     * Returns true if the provided string is a number (not a float number)
+     */
+    private static boolean isNumber(String value) {
+        try {
+            Long.valueOf(value);
+            return true;
+        }
+        catch (Exception e) {
             log.error(e);
-			return false;
-		}
-	}
-	
-	protected static SigarProxy getSigar() {
+            return false;
+        }
+    }
+
+    protected static SigarProxy getSigar() {
         if (sigar == null) {
             int timeout = 10 * 60 * 1000; //10 minutes
             sigarImpl = new Sigar();

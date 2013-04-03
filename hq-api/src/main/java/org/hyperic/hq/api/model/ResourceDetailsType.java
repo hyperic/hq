@@ -55,7 +55,7 @@ public enum ResourceDetailsType {
 	}
 
     public static InternalResourceDetailsType valueOf(ResourceDetailsType resourceDetailsType) {
-        InternalResourceDetailsType internalResourceDetailsType=null;
+        InternalResourceDetailsType internalResourceDetailsType=InternalResourceDetailsType.ALL;
         if (resourceDetailsType!=null) {
             if (resourceDetailsType==ResourceDetailsType.BASIC) {
                 internalResourceDetailsType = InternalResourceDetailsType.BASIC;

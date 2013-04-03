@@ -22,17 +22,17 @@ public abstract class InventoryNotificationsZeventListener<E extends InventoryEv
     protected ResourceManager resourceMgr;
 
     @Override
-    protected String getConcurrentStatsCollectorType() {
+    public String getConcurrentStatsCollectorType() {
         return ConcurrentStatsCollector.INVENTORY_NOTIFICATION_FILTERING_TIME;
     }
     @Override
-    protected DestinationEvaluator<InventoryNotification> getEvaluator() {
+    public DestinationEvaluator<InventoryNotification> getEvaluator() {
         return this.evaluator;
     }
     
     protected abstract InventoryNotification createNotification(E event);
 
-    protected List<InventoryNotification> extract(List<E> events) {
+    public List<InventoryNotification> extract(List<E> events) {
         List<InventoryNotification> ns = new ArrayList<InventoryNotification>();
         for(E event:events) {
             InventoryNotification n = createNotification(event);

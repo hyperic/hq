@@ -19,7 +19,7 @@ public class ResourceConfig implements Serializable{
 	private static final long serialVersionUID = 8233944180632888593L;
  	
 	private String resourceID; 
-	private HashMap<String,String> mapProps ; 
+	private Map<String,String> mapProps ; 
 	private Map<String,PropertyList> mapListProps;
 	
 	public ResourceConfig() {}//EOM
@@ -38,12 +38,12 @@ public class ResourceConfig implements Serializable{
 		return this.resourceID ; 
 	}//EOM 
 	
-	public final void setMapProps(final HashMap<String,String> configValues) { 
+	public final void setMapProps(final Map<String,String> configValues) { 
 		this.mapProps= configValues ; 
 	}//EOM 
 	
 	@XmlJavaTypeAdapter(MapPropertiesAdapter.class)
-	public final HashMap<String,String> getMapProps() { 
+	public final Map<String,String> getMapProps() { 
 		return this.mapProps ; 
 	}//EOM 
 

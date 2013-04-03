@@ -44,11 +44,11 @@ import org.easymock.EasyMock;
 import org.hyperic.hq.agent.AgentRemoteValue;
 import org.hyperic.hq.api.model.ConfigurationValue;
 import org.hyperic.hq.api.model.PropertyList;
-import org.hyperic.hq.api.model.Resource;
+import org.hyperic.hq.api.model.ResourceModel;
 import org.hyperic.hq.api.model.ResourceConfig;
 import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourceStatusType;
-import org.hyperic.hq.api.model.ResourceType;
+import org.hyperic.hq.api.model.ResourceTypeModel;
 import org.hyperic.hq.api.model.Resources;
 import org.hyperic.hq.api.model.resources.FailedResource;
 import org.hyperic.hq.api.model.resources.ComplexIp;
@@ -156,11 +156,11 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     	final int hierarchyDepth = 3 ; 
     	
 		//internal id first 
-    	Resource resource = this.getApprovedResource(this.currentPlatform, hierarchyDepth) ;
+    	ResourceModel resource = this.getApprovedResource(this.currentPlatform, hierarchyDepth) ;
 		this.assertResource(resource, this.currentPlatform, hierarchyDepth, this.testBed.persistedConfigAttributes, this.testBed.persistedListConfigAttributes) ; 
 		
 		//now natural ID 
-		resource = this.getApprovedResource(this.currentPlatform.getFqdn(), ResourceType.PLATFORM, hierarchyDepth) ;
+		resource = this.getApprovedResource(this.currentPlatform.getFqdn(), ResourceTypeModel.PLATFORM, hierarchyDepth) ;
 		this.assertResource(resource, this.currentPlatform, hierarchyDepth, this.testBed.persistedConfigAttributes, this.testBed.persistedListConfigAttributes) ; 
 		
 	}//EOM 
@@ -176,11 +176,11 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     	final ResourceDetailsType[] responseStructure = { ResourceDetailsType.BASIC } ; 
     	
 		//internal id first 
-    	Resource resource = this.getApprovedResource(this.currentPlatform.getResource().getId()+"", null/*naturalID*/, null/*resource type*/, hierarchyDepth, responseStructure) ;
+    	ResourceModel resource = this.getApprovedResource(this.currentPlatform.getResource().getId()+"", null/*naturalID*/, null/*resource type*/, hierarchyDepth, responseStructure) ;
 		this.assertResource(resource, this.currentPlatform, hierarchyDepth, null) ; 
 		
 		//now natural ID 
-		resource = this.getApprovedResource(null/*internal id*/, this.currentPlatform.getFqdn()/*naturalID*/,ResourceType.PLATFORM, hierarchyDepth, responseStructure) ;
+		resource = this.getApprovedResource(null/*internal id*/, this.currentPlatform.getFqdn()/*naturalID*/,ResourceTypeModel.PLATFORM, hierarchyDepth, responseStructure) ;
 		this.assertResource(resource, this.currentPlatform, hierarchyDepth, null) ;
     }//EOM 
     
@@ -192,7 +192,7 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     	final ResourceDetailsType[] responseStructure = { ResourceDetailsType.PROPERTIES } ; 
     	
 		//internal id first 
-    	Resource resource = this.getApprovedResource(this.currentPlatform.getResource().getId()+"", null/*naturalID*/, null/*resource type*/,  hierarchyDepth, responseStructure) ;
+    	ResourceModel resource = this.getApprovedResource(this.currentPlatform.getResource().getId()+"", null/*naturalID*/, null/*resource type*/,  hierarchyDepth, responseStructure) ;
     	
 		this.assertResource(resource, this.currentPlatform, hierarchyDepth, this.testBed.persistedConfigAttributes, this.testBed.persistedListConfigAttributes, ResourceDetailsType.PROPERTIES) ; 
     }//EOM   
@@ -206,7 +206,7 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     	final ResourceDetailsType[] responseStructure = { ResourceDetailsType.BASIC } ; 
     	
 		//internal id first 
-    	Resource resource = this.getApprovedResource(this.currentPlatform.getResource().getId()+"", null/*naturalID*/, null/*resource type*/, hierarchyDepth, responseStructure) ;
+    	ResourceModel resource = this.getApprovedResource(this.currentPlatform.getResource().getId()+"", null/*naturalID*/, null/*resource type*/, hierarchyDepth, responseStructure) ;
 		this.assertResource(resource, this.currentPlatform, hierarchyDepth, null) ;
     }//EOM 
     
@@ -216,7 +216,7 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     public final void testGetResourceDepth1() throws Throwable { 
     	final int hierarchyDepth = 2 ;
 		//internal id first 
-    	Resource resource = this.getApprovedResource(this.currentPlatform, hierarchyDepth) ;
+    	ResourceModel resource = this.getApprovedResource(this.currentPlatform, hierarchyDepth) ;
 		this.assertResource(resource, this.currentPlatform, hierarchyDepth, this.testBed.persistedConfigAttributes, this.testBed.persistedListConfigAttributes) ;
     }//EOM 
     
@@ -224,7 +224,7 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     @Test
     public final void testGetResourceDepth5() throws Throwable { 
     	final int hierarchyDepth = 5 ;
-    	Resource resource = this.getApprovedResource(this.currentPlatform, hierarchyDepth) ;
+    	ResourceModel resource = this.getApprovedResource(this.currentPlatform, hierarchyDepth) ;
 		this.assertResource(resource, this.currentPlatform, hierarchyDepth, this.testBed.persistedConfigAttributes, this.testBed.persistedListConfigAttributes) ;
     }//EOM
     
@@ -233,7 +233,7 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     public final void testGetResourceNegativeDepth() throws Throwable { 
     	//should error be raised or should the hierarchy be treated as 0 
     	final int hierarchyDepth = -5 ;
-    	final Resource resource = this.getApprovedResource(this.currentPlatform, hierarchyDepth) ;
+    	final ResourceModel resource = this.getApprovedResource(this.currentPlatform, hierarchyDepth) ;
 		this.assertResource(resource, this.currentPlatform, hierarchyDepth, this.testBed.persistedConfigAttributes, this.testBed.persistedListConfigAttributes) ;
     }//EOM
     
@@ -243,7 +243,7 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     	this.errorInterceptor.expect(ServerWebApplicationException.class) ; 
     	final int hierarchyDepth = 1 ;
     	final ResourceDetailsType[] responseStructure = { ResourceDetailsType.BASIC } ;
-    	this.getApprovedResource(null/*internal id*/, "BOGUS_FQDN234",ResourceType.PLATFORM, hierarchyDepth, responseStructure) ;
+    	this.getApprovedResource(null/*internal id*/, "BOGUS_FQDN234",ResourceTypeModel.PLATFORM, hierarchyDepth, responseStructure) ;
     }//EOM
     
     @PlatformsIteration(noOfPlatforms=1)
@@ -265,7 +265,7 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     	final Server server  = this.currentPlatform.getServers().iterator().next() ; 
     	
 		//internal id first 
-    	Resource resource = this.getApprovedResource(server.getResource().getId()+"", null/*naturalID*/, null/*resource type*/, hierarchyDepth, responseStructure) ;
+    	ResourceModel resource = this.getApprovedResource(server.getResource().getId()+"", null/*naturalID*/, null/*resource type*/, hierarchyDepth, responseStructure) ;
 		this.assertResource(resource, server, hierarchyDepth, this.testBed.persistedConfigAttributes) ; 
     }//EOM 
     
@@ -279,7 +279,7 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     	final Service service = this.currentPlatform.getServers().iterator().next().getServices().iterator().next() ; 
     	
 		//internal id first 
-    	Resource resource = this.getApprovedResource(service.getResource().getId()+"", null/*naturalID*/, null/*resource type*/, hierarchyDepth, responseStructure) ;
+    	ResourceModel resource = this.getApprovedResource(service.getResource().getId()+"", null/*naturalID*/, null/*resource type*/, hierarchyDepth, responseStructure) ;
 		this.assertResource(resource, service, hierarchyDepth, this.testBed.persistedConfigAttributes) ; 
     }//EOM 
     
@@ -339,7 +339,7 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     		//if the USE_NATURAL_ID flag was set on the bit mask for the given platform index use the
     		if ((testHarnessMetadata[i] & USE_NATURAL_ID_FLAG) == USE_NATURAL_ID_FLAG) { 
     			testHarness[i][1] = platformID + platform.getFqdn() ;
-    			testHarness[i][2] = ResourceType.PLATFORM ; 
+    			testHarness[i][2] = ResourceTypeModel.PLATFORM ; 
     		}else { 
     			testHarness[i][0] = platformID + platform.getResource().getId().toString() ; 
     		}//EO else if should use internal id 
@@ -363,17 +363,17 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     }//EOM 
     
     
-  private final void assertResource(final Resource responseResource, final AppdefResource expectedResource, int iHierarchyDepth, final Map<String,String> configMap) {
+  private final void assertResource(final ResourceModel responseResource, final AppdefResource expectedResource, int iHierarchyDepth, final Map<String,String> configMap) {
 	  this.assertResource(responseResource, expectedResource, iHierarchyDepth, configMap, ResourceDetailsType.ALL) ; 
   }//EOM 
     
-  private void assertResource(final Resource responseResource, final AppdefResource expectedResource, int iHierarchyDepth, final Map<String,String> configMap, 
+  private void assertResource(final ResourceModel responseResource, final AppdefResource expectedResource, int iHierarchyDepth, final Map<String,String> configMap, 
           final Map<String, PropertyList> configListsMap) {
       this.assertResource(responseResource, expectedResource, iHierarchyDepth, configMap, configListsMap, ResourceDetailsType.ALL) ;
       
   }
   
-  private final void assertResource(final Resource responseResource, final AppdefResource expectedResource, int iHierarchyDepth, final Map<String,String> configMap, 
+  private final void assertResource(final ResourceModel responseResource, final AppdefResource expectedResource, int iHierarchyDepth, final Map<String,String> configMap, 
           final Map<String, PropertyList> configListsMap, final ResourceDetailsType responseStructure) {
       
       try{ 
@@ -386,7 +386,7 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
         if(responseStructure == ResourceDetailsType.PROPERTIES) { 
             // In PROPERTIES view only ID might be present, without the type 
             if (null == responseResource.getResourceType())  {
-                responseResource.setResourceType(ResourceType.valueOf(expectedResource.getResource().getResourceType().getAppdefType()));
+                responseResource.setResourceType(ResourceTypeModel.valueOf(expectedResource.getResource().getResourceType().getAppdefType()));
             }
         } else {
             Assert.assertEquals(type +" name", expectedResource.getName(), responseResource.getName()) ; 
@@ -394,20 +394,20 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
         
         this.assertConfig(responseResource, configMap, configListsMap) ; 
 
-        final List<Resource> responseChildren = responseResource.getSubResources() ; 
+        final List<ResourceModel> responseChildren = responseResource.getSubResources() ; 
         List<AppdefResource> expectedChildren = null ;
     
         if(--iHierarchyDepth > 0) {
             
-            ResourceType enumChildrenResourceType = null ; 
+            ResourceTypeModel enumChildrenResourceType = null ; 
             switch(responseResource.getResourceType()) { 
                 case PLATFORM : { 
                     expectedChildren = this.testBed.servers.get(expectedResource.getId()) ; 
-                    enumChildrenResourceType = ResourceType.SERVER ; 
+                    enumChildrenResourceType = ResourceTypeModel.SERVER ; 
                 }break ;
                 case SERVER: { 
                     expectedChildren = this.testBed.services.get(expectedResource.getId()) ;
-                    enumChildrenResourceType = ResourceType.SERVICE ; 
+                    enumChildrenResourceType = ResourceTypeModel.SERVICE ; 
                 }break ;
                 case SERVICE: { 
                     return  ;
@@ -418,7 +418,7 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
             final int iNoOfResponseChildren = (responseChildren == null ? 0 : responseChildren.size()) ; 
             Assert.assertEquals("Number Of children", iNoOfExpectedChildren, iNoOfResponseChildren) ; 
             
-            Resource responseChild = null ; 
+            ResourceModel responseChild = null ; 
             int iIndex = 0 ; 
             for(AppdefResource expectedChild : (Collection<AppdefResource>) expectedChildren) {
                 responseChild = responseChildren.get(iIndex++) ; 
@@ -443,19 +443,19 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
       }//eOcatch b lok 
   } //EOM  
   
-  private final void assertResource(final Resource responseResource, final AppdefResource expectedResource, int iHierarchyDepth, final Map<String,String> configMap, 
+  private final void assertResource(final ResourceModel responseResource, final AppdefResource expectedResource, int iHierarchyDepth, final Map<String,String> configMap, 
 		  final ResourceDetailsType responseStructure) { 
           assertResource(responseResource, expectedResource, iHierarchyDepth, configMap, null, responseStructure);
     }//EO while there are more resources to compare  
     
     private final void assertUpdate(final ResourceBatchResponse response, final Resources expectedResources, final Object[][] testHarness, final int[] testHarnessMetadata) throws Throwable { 
-    	Resource responseResource = null; 
+    	ResourceModel responseResource = null; 
     	
-    	final List<Resource> resourceList = expectedResources.getResources() ; 
+    	final List<ResourceModel> resourceList = expectedResources.getResources() ; 
     	if(resourceList == null) return ; 
     	final int iLength =  resourceList.size() ;
     	
-    	Resource resource = null ; 
+    	ResourceModel resource = null ; 
     	String resourceID = null ; 
     	List<FailedResource> failedResources = null ; 
     	boolean bFoundFailedResouceMatch = false ;
@@ -492,11 +492,11 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 		}//EO while there are more resources 
     }//EOM 
     
-    private final void assertConfig(final Resource response, final Map<String,String> expectedConfigMap) {
+    private final void assertConfig(final ResourceModel response, final Map<String,String> expectedConfigMap) {
         assertConfig(response, expectedConfigMap, null);
     }
     
-    private final void assertConfig(final Resource response, final Map<String,String> expectedConfigMap, final Map<String,PropertyList> expectedConfigListMap) { 
+    private final void assertConfig(final ResourceModel response, final Map<String,String> expectedConfigMap, final Map<String,PropertyList> expectedConfigListMap) { 
     	
     	if(response == null) Assert.fail("No Response Resource was found by service"); 
 
@@ -551,25 +551,25 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     }
 
 
-    private final Resource getApprovedResource(final AppdefResource appdefResource, final int hierarchyDepth) throws Throwable {
+    private final ResourceModel getApprovedResource(final AppdefResource appdefResource, final int hierarchyDepth) throws Throwable {
     	return this.getApprovedResource(appdefResource.getResource().getId()+"", hierarchyDepth) ; 
     }//EOM 
     
-    private final Resource getApprovedResource(final String ID, final int hierarchyDepth) throws Throwable {
+    private final ResourceModel getApprovedResource(final String ID, final int hierarchyDepth) throws Throwable {
     	return this.getResource(ID, null /*naturalID*/, null /*resourceType*/, ResourceStatusType.APPROVED, hierarchyDepth, new ResourceDetailsType[]{ ResourceDetailsType.ALL } ) ;
     }//EOM 
     
-    private final Resource getApprovedResource(final String naturalID, final ResourceType enumResourceType, final int hierarchyDepth) throws Throwable {
+    private final ResourceModel getApprovedResource(final String naturalID, final ResourceTypeModel enumResourceType, final int hierarchyDepth) throws Throwable {
     	return this.getResource(null/*ID*/, naturalID, enumResourceType, ResourceStatusType.APPROVED, hierarchyDepth, new ResourceDetailsType[]{ ResourceDetailsType.ALL } ) ;
     }//EOM 
     
-    private final Resource getApprovedResource(final String ID, final String naturalID, final ResourceType enumResourceType, final int hierarchyDepth, final ResourceDetailsType[] responseStructure) throws Throwable { 
+    private final ResourceModel getApprovedResource(final String ID, final String naturalID, final ResourceTypeModel enumResourceType, final int hierarchyDepth, final ResourceDetailsType[] responseStructure) throws Throwable { 
     	return this.getResource(ID, naturalID, enumResourceType, ResourceStatusType.APPROVED, hierarchyDepth, responseStructure) ; 
     }
     
-    private final Resource getResource(final String ID, final String naturalID, final ResourceType enumResourceType, 
+    private final ResourceModel getResource(final String ID, final String naturalID, final ResourceTypeModel enumResourceType, 
     						final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseStructure) throws Throwable {
-    	Resource resource = null;
+    	ResourceModel resource = null;
     	 	
     	if(ID != null) { 
                 resource = service.getResource(ID, resourceStatusType, hierarchyDepth, responseStructure) ;
@@ -585,12 +585,12 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     private final Resources generateResources(final int iNoOfResources, final Object[][] arrResources ) { 
     	final Resources resources = new Resources() ;
     	
-    	Resource resource = null ; 
+    	ResourceModel resource = null ; 
     	for(int i=0; i < iNoOfResources; i++) { 
     		resource = this.generateResource(
     				(String)arrResources[i][0]/*internalID*/, 
     				(String)arrResources[i][1]/*natural ID*/,
-    				(ResourceType)arrResources[i][2], 
+    				(ResourceTypeModel)arrResources[i][2], 
     				(arrResources[i][3] != null /*generate resource*/), 
     				(HashMap<String,String>)arrResources[i][4]) ; 
     		resources.addResource(resource)  ; 
@@ -602,9 +602,9 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     	return new ResourceConfig(null, configMap, null) ; 
     }//EOM 
     
-    private final Resource generateResource(final String ID, final String naturalID, final ResourceType enumResourceType, 
+    private final ResourceModel generateResource(final String ID, final String naturalID, final ResourceTypeModel enumResourceType, 
     														final boolean generateConfig, final HashMap<String,String> configMap) { 
-		final Resource resource = new Resource(ID) ; 
+		final ResourceModel resource = new ResourceModel(ID) ; 
 		resource.setNaturalID(naturalID) ; 
 		resource.setResourceType(enumResourceType); 
 		resource.setResourceStatusType(ResourceStatusType.APPROVED) ; 

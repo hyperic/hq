@@ -1,4 +1,3 @@
-/* **********************************************************************
 /*
  * NOTE: This copyright does *not* cover user programs that use Hyperic
  * program services by normal system calls through the application
@@ -25,17 +24,20 @@
  */
 package org.hyperic.hq.api.transfer;
 
-import org.hyperic.hq.api.model.Resource;
+import org.hyperic.hq.api.model.ResourceModel;
 import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourceStatusType;
-import org.hyperic.hq.api.model.ResourceType;
+import org.hyperic.hq.api.model.ResourceTypeModel;
 import org.hyperic.hq.api.model.Resources;
+import org.hyperic.hq.api.model.common.RegistrationID;
+import org.hyperic.hq.api.model.common.ExternalRegistrationStatus;
 import org.hyperic.hq.api.model.resources.RegisteredResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
 import org.hyperic.hq.api.services.impl.ApiMessageContext;
 import org.hyperic.hq.api.transfer.impl.ResourceTransferImpl.Context;
 import org.hyperic.hq.api.transfer.mapping.ResourceMapper;
+import org.hyperic.hq.api.transfer.mapping.UnknownEndpointException;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.PlatformManager;
@@ -45,23 +47,40 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.ObjectNotFoundException;
+import org.hyperic.hq.notifications.NotificationEndpoint;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.util.config.EncodingException;
 
 public interface ResourceTransfer {
 
-	Resource getResource(final ApiMessageContext messageContext, final String platformNaturalID, final ResourceType resourceType, 
-			final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) throws SessionNotFoundException, SessionTimeoutException, ObjectNotFoundException ; 
-	
-	Resource getResource(final ApiMessageContext messageContext, final String platformID, final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) throws ObjectNotFoundException ; 
-	
-	RegisteredResourceBatchResponse getResources(final ApiMessageContext messageContext, final ResourceDetailsType responseMetadata, final int hierarchyDepth, final boolean register,final ResourceFilterRequest resourceFilterRequest) throws PermissionException, NotFoundException;
-	
-	ResourceBatchResponse approveResource(final ApiMessageContext messageContext, final Resources aiResources) ;
-	ResourceBatchResponse updateResources(final ApiMessageContext messageContext, final Resources resources);
+    ResourceModel getResource(final ApiMessageContext messageContext, final String platformNaturalID,
+                             final ResourceTypeModel resourceType,
+                             final ResourceStatusType resourceStatusType, final int hierarchyDepth,
+                             final ResourceDetailsType[] responseMetadata) throws SessionNotFoundException,
+            SessionTimeoutException, ObjectNotFoundException;
 
-    void unregister();
+    ResourceModel getResource(final ApiMessageContext messageContext, final String platformID,
+                              final ResourceStatusType resourceStatusType, final int hierarchyDepth,
+                              final ResourceDetailsType[] responseMetadata) throws ObjectNotFoundException;
+
+    RegisteredResourceBatchResponse getResources(final ApiMessageContext messageContext,
+                                                 final ResourceDetailsType[] responseMetadata,
+                                                 final int hierarchyDepth) throws PermissionException,
+            NotFoundException;
+
+    RegistrationID register(final ApiMessageContext messageContext, final ResourceDetailsType responseMetadata,
+                            final ResourceFilterRequest resourceFilterRequest) throws PermissionException,
+            NotFoundException;
+
+    ExternalRegistrationStatus getRegistrationStatus(final ApiMessageContext messageContext,
+                                     final int registrationID) throws PermissionException,NotFoundException, UnknownEndpointException;
+
+    ResourceBatchResponse approveResource(final ApiMessageContext messageContext, final Resources aiResources);
+
+    ResourceBatchResponse updateResources(final ApiMessageContext messageContext, final Resources resources);
+
+    void unregister(NotificationEndpoint endpoint);
 
     PlatformManager getPlatformManager();
 
@@ -70,4 +89,6 @@ public interface ResourceTransfer {
     ResourceMapper getResourceMapper();
 
     Object initResourceConfig(Context flowContext) throws ConfigFetchException, EncodingException, PluginNotFoundException, PluginException, PermissionException, AppdefEntityNotFoundException;
+
+    String getResourceUrl(int resourceID);
 }//EOI 

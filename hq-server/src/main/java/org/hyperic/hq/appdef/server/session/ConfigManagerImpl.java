@@ -25,10 +25,14 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,14 +48,32 @@ import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.autoinventory.AICompare;
 import org.hyperic.hq.bizapp.shared.AllConfigDiff;
 import org.hyperic.hq.bizapp.shared.AllConfigResponses;
+import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.measurement.server.session.MonitorableType;
+import org.hyperic.hq.measurement.server.session.MonitorableTypeDAO;
+import org.hyperic.hq.product.PlatformTypeInfo;
+import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.PluginManager;
+import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.hq.product.ProductPluginManager;
+import org.hyperic.hq.product.ServerTypeInfo;
+import org.hyperic.hq.product.ServiceTypeInfo;
+import org.hyperic.hq.product.TypeInfo;
+import org.hyperic.hq.product.server.session.ProductPluginDeployer;
+import org.hyperic.sigar.NetFlags;
+import org.hyperic.util.Classifier;
+import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;
+import org.hyperic.util.config.StringConfigOption;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -61,6 +83,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ConfigManagerImpl implements ConfigManager {
     private static final int MAX_VALIDATION_ERR_LEN = 512;
     protected final Log log = LogFactory.getLog(ConfigManagerImpl.class.getName());
+    private MonitorableTypeDAO monitorableTypeDAO;
     private ConfigResponseDAO configResponseDAO;
     private ServiceDAO serviceDAO;
     private ServerDAO serverDAO;
@@ -69,12 +92,14 @@ public class ConfigManagerImpl implements ConfigManager {
 
     @Autowired
     public ConfigManagerImpl(ConfigResponseDAO configResponseDAO, ServiceDAO serviceDAO,
-                             ServerDAO serverDAO, PlatformDAO platformDAO, ResourceManager resourceManager) {
+                             ServerDAO serverDAO, PlatformDAO platformDAO, ResourceManager resourceManager,
+                             MonitorableTypeDAO monitorableTypeDAO) {
         this.configResponseDAO = configResponseDAO;
         this.serviceDAO = serviceDAO;
         this.serverDAO = serverDAO;
         this.platformDAO = platformDAO;
         this.resourceManager = resourceManager;
+        this.monitorableTypeDAO = monitorableTypeDAO;
     }
 
     /**
@@ -89,13 +114,146 @@ public class ConfigManagerImpl implements ConfigManager {
         cr.setResponseTimeResponse(rtResponse);
         return cr;
     }
+    
+    @Transactional(readOnly=true)
+    public Map<Resource, ConfigResponse> getConfigResponses(Set<Resource> resources, boolean hideSecrets) {
+        final Map<Integer, Collection<Resource>> resourcesByType = new Classifier<Resource, Integer, Resource>() {
+            @Override
+            public NameValue<Integer, Resource> classify(Resource r) {
+                return new NameValue<Integer, Resource>(r.getResourceType().getId(), r);
+            }
+        }.classify(resources);
+        final Map<Resource, ConfigResponseDB> tmp = new HashMap<Resource, ConfigResponseDB>();
+        for (final Entry<Integer, Collection<Resource>> entry : resourcesByType.entrySet()) {
+            final Integer resourceTypeId = entry.getKey();
+            final Collection<Resource> list = entry.getValue();
+            if (resourceTypeId.equals(AuthzConstants.authzPlatform)) {
+                tmp.putAll(configResponseDAO.getPlatformConfigs(list));
+            } else if (resourceTypeId.equals(AuthzConstants.authzServer)) {
+                tmp.putAll(configResponseDAO.getServerConfigs(list));
+            } else if (resourceTypeId.equals(AuthzConstants.authzService)) {
+                tmp.putAll(configResponseDAO.getServiceConfigs(list));
+            }
+        }
+        final List<MonitorableType> all = monitorableTypeDAO.findAll();
+        final Map<String, String> monitorableTypeMap = new Classifier<MonitorableType, String, String>() {
+            @Override
+            public NameValue<String, String> classify(MonitorableType key) {
+                return new NameValue<String, String>(key.getName(), key.getPlugin());
+            }
+        }.classifyUnique(all);
+        final Map<Resource, ConfigResponse> rtn = new HashMap<Resource, ConfigResponse>();
+        for (final Entry<Resource, ConfigResponseDB> entry : tmp.entrySet()) {
+            final Resource resource = entry.getKey();
+            if (resource == null || resource.isInAsyncDeleteState() || resource.isSystem()) {
+                continue;
+            }
+            final ConfigResponseDB crdb = entry.getValue();
+            final ConfigResponse configResponse = new ConfigResponse();
+            final byte[] productResponse = crdb.getProductResponse();
+            final byte[] controlResponse = crdb.getControlResponse();
+            final byte[] measurementResponse = crdb.getMeasurementResponse();
+            rtn.put(resource, configResponse);
+            if (resource.getResourceType().getId().equals(AuthzConstants.authzPlatform)) {
+                final Platform platform = platformDAO.get(resource.getInstanceId());
+                if (platform == null) {
+                    continue;
+                }
+                configResponse.setValue(ProductPlugin.PROP_PLATFORM_NAME, platform.getName());
+                configResponse.setValue(ProductPlugin.PROP_PLATFORM_FQDN, platform.getFqdn());
+                configResponse.setValue(ProductPlugin.PROP_PLATFORM_TYPE, resource.getPrototype().getName());
+                configResponse.setValue(ProductPlugin.PROP_PLATFORM_IP, getIp(platform));
+                configResponse.setValue(ProductPlugin.PROP_PLATFORM_ID, String.valueOf(platform.getId()));
+            }
+            try {
+                if (measurementResponse != null && measurementResponse.length > 0) {
+                    configResponse.merge(ConfigResponse.decode(measurementResponse), true);
+                }
+                if (productResponse != null && productResponse.length > 0) {
+                    configResponse.merge(ConfigResponse.decode(productResponse), true);
+                }
+                if (controlResponse != null && controlResponse.length > 0) {
+                    configResponse.merge(ConfigResponse.decode(controlResponse), true);
+                }
+                mergeWithConfigSchema(resource, configResponse, monitorableTypeMap, hideSecrets);
+            } catch (EncodingException e) {
+                log.warn("could not decode config associated with resourceId=" + resource.getId());
+                log.debug(e,e);
+            }
+        }
+        return rtn;
+    }
+    
+    private void mergeWithConfigSchema(Resource r, ConfigResponse config, Map<String, String> monitorableTypeMap,
+                                       boolean hideSecrets) {
+        final Integer resourceTypeId = r.getResourceType().getId();;
+        final String proto = r.getPrototype().getName();
+        final String plugin = monitorableTypeMap.get(proto);
+        TypeInfo type = null;
+        if (resourceTypeId.equals(AuthzConstants.authzPlatform)) {
+            type = new PlatformTypeInfo(proto);
+        } else if (resourceTypeId.equals(AuthzConstants.authzServer)) {
+            type = new ServerTypeInfo(proto, "", "");
+        } else if (resourceTypeId.equals(AuthzConstants.authzService)) {
+            final Service service = serviceDAO.get(r.getInstanceId());
+            final Server server = service.getServer();
+            final ServerType serverType = server.getServerType();
+            final ServerTypeInfo serverTypeInfo = new ServerTypeInfo(serverType.getName(), serverType.getDescription(), "");
+            type = new ServiceTypeInfo(proto, service.getServiceType().getDescription(), serverTypeInfo);
+        }
+        try {
+            final ProductPluginDeployer productPluginDeployer = Bootstrap.getBean(ProductPluginDeployer.class);
+            final ProductPluginManager productPluginManager = productPluginDeployer.getProductPluginManager();
+            final PluginManager measurementPluginManager = productPluginManager.getPluginManager("measurement");
+            final PluginManager controlPluginManager = productPluginManager.getPluginManager("control");
+            final List<ConfigOption> options = new ArrayList<ConfigOption>();
+            options.addAll(getConfigOptions(productPluginManager, plugin, type, config));
+            options.addAll(getConfigOptions(measurementPluginManager, proto, type, config));
+            options.addAll(getConfigOptions(controlPluginManager, plugin, type, config));
+            final Set<String> keys = config.getKeys();
+            for (final ConfigOption o : options) {
+                final String key = o.getName();
+                if (!keys.contains(key)) {
+                    config.setValue(key, o.getDefault());
+                }
+                if (o instanceof StringConfigOption && ((StringConfigOption) o).isHidden()) {
+                    config.unsetValue(key);
+                } else if (hideSecrets && o instanceof StringConfigOption && ((StringConfigOption) o).isSecret()) {
+                    config.setValue(key, "*********");
+                }
+            }
+        } catch (PluginException e) {
+            log.warn(e);
+            log.debug(e,e);
+        }
+    }
+    
+    private List<ConfigOption> getConfigOptions(PluginManager pluginManager, String key, TypeInfo type,
+                                                ConfigResponse config) {
+        try {
+            ConfigSchema configSchema = pluginManager.getConfigSchema(key, type, config);
+            return configSchema.getOptions();
+        } catch (PluginNotFoundException e) {
+            log.debug(e,e);
+        }
+        return Collections.emptyList();
+    }
+
+    private String getIp(Platform platform) {
+        Collection<Ip> ips = platform.getIps();
+        for (Ip ip : ips) {
+            String address = ip.getAddress();
+            if (!address.equals(NetFlags.LOOPBACK_ADDRESS)) {
+                return address;
+            }
+        }
+        return null;
+    }
 
     /**
      * 
      * Get the ConfigResponse for the given ID, creating it if it does not
      * already exist.
-     * 
-     * 
      * 
      */
     @Transactional(readOnly=true)

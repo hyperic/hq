@@ -29,10 +29,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.TreeMap;
 
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
@@ -47,12 +50,15 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+
+import edu.emory.mathcs.backport.java.util.Arrays;
 
 @Repository
 public class CpropDAO
@@ -216,6 +222,68 @@ public class CpropDAO
         }
 
         return buf.toString();
+    }
+
+    public Map<AppdefEntityID, Properties> getAllEntries(String ... keys) {
+        if (keys == null || keys.length == 0) {
+            return Collections.emptyMap();
+        }
+        final Map<AppdefEntityID, Properties> rtn = new HashMap<AppdefEntityID, Properties>();
+        final String keySql = StringUtil.implode(Arrays.asList(keys), "','");
+        final StringBuilder sql = new StringBuilder()
+            .append("SELECT B.appdef_id, A.appdef_type, A.propkey, B.propvalue, B.value_idx ")
+            .append("FROM ").append(CPROPKEY_TABLE).append(" A, ").append(CPROP_TABLE).append(" B ")
+            .append("WHERE B.keyid=A.id AND A.propkey in ('").append(keySql).append("')");
+        final List<Map<String, Object>> props = jdbcTemplate.queryForList(sql.toString());
+        final Map<AppdefEntityID, Map<String, IndexToChunk>> tmp = new HashMap<AppdefEntityID, Map<String, IndexToChunk>>();
+        for (Map<String,Object> prop: props) {
+            final int id = Integer.valueOf(prop.get("appdef_id").toString());
+            final int appdefType = Integer.valueOf(prop.get("appdef_type").toString());
+            final AppdefEntityID aeid = new AppdefEntityID(appdefType, id);
+            final String keyName = (String) prop.get("propkey");
+            final String chunk = (String) prop.get("propvalue");
+            final int index = Integer.valueOf(prop.get("value_idx").toString());
+            Map<String, IndexToChunk> keyToChunks = tmp.get(aeid);
+            if (keyToChunks == null) {
+                keyToChunks = new HashMap<String, IndexToChunk>();
+                tmp.put(aeid, keyToChunks);
+            }
+            IndexToChunk indexToChunk = keyToChunks.get(keyName);
+            if (indexToChunk == null) {
+                indexToChunk = new IndexToChunk();
+                keyToChunks.put(keyName, indexToChunk);
+            }
+            indexToChunk.add(index, chunk);
+        }
+        for (final Entry<AppdefEntityID, Map<String, IndexToChunk>> entry : tmp.entrySet()) {
+            final AppdefEntityID aeid = entry.getKey();
+            final Map<String, IndexToChunk> value = entry.getValue();
+            for (final Entry<String, IndexToChunk> e : value.entrySet()) {
+                String keyName = e.getKey();
+                String keyValue = e.getValue().toString();
+                Properties properties = rtn.get(aeid);
+                if (properties == null) {
+                    properties = new Properties();
+                    rtn.put(aeid, properties);
+                }
+                properties.setProperty(keyName, keyValue);
+            }
+        }
+        return rtn;
+    }
+    
+    private class IndexToChunk {
+        private Map<Integer, String> indexes = new TreeMap<Integer, String>();
+        private void add(int index, String chunk) {
+            indexes.put(index, chunk);
+        }
+        public String toString() {
+            final StringBuilder rtn = new StringBuilder();
+            for (String chunk : indexes.values()) {
+                rtn.append(chunk);
+            }
+            return rtn.toString();
+        }
     }
 
     public Properties getEntries(AppdefEntityID aID, String column) {

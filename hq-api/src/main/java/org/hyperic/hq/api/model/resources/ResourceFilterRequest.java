@@ -7,17 +7,24 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.hyperic.hq.api.model.RestApiConstants;
-import org.hyperic.hq.api.model.resources.ResourceFilterDefinitioin;
-
+import org.hyperic.hq.api.model.measurements.HttpEndpointDefinition;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name="resourceFilterRequest", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+@XmlRootElement(name="registration", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 @XmlType(name="ResourceFilterRequest", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 public class ResourceFilterRequest {
-    @XmlElement(name="resourceFilter", namespace=RestApiConstants.SCHEMA_NAMESPACE)
-    private ResourceFilterDefinitioin resourceFilterDef;
 
-    public ResourceFilterDefinitioin getResourceFilterDefinition() {
+    @XmlElement(name="resourceFilter", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+    private ResourceFilterDefinition resourceFilterDef;
+
+    @XmlElement(name="httpEndpoint", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+    private HttpEndpointDefinition httpEndpointDef;
+
+    public ResourceFilterDefinition getResourceFilterDefinition() {
         return resourceFilterDef;
+    }
+
+    public HttpEndpointDefinition getHttpEndpointDef() {
+        return httpEndpointDef;
     }
 }

@@ -32,15 +32,10 @@ package org.hyperic.hq.api.transfer.mapping;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
-import javax.annotation.PostConstruct;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.classic.Session;
@@ -48,33 +43,32 @@ import org.hyperic.hq.api.model.AIResource;
 import org.hyperic.hq.api.model.ConfigurationValue;
 import org.hyperic.hq.api.model.ID;
 import org.hyperic.hq.api.model.PropertyList;
-import org.hyperic.hq.api.model.Resource;
+import org.hyperic.hq.api.model.ResourceModel;
 import org.hyperic.hq.api.model.ResourceConfig;
 import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourcePrototype;
-import org.hyperic.hq.api.model.ResourceType;
+import org.hyperic.hq.api.model.ResourceTypeModel;
 import org.hyperic.hq.api.model.resources.ComplexIp;
+import org.hyperic.hq.api.model.resources.ResourceFilterDefinition;
 import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
-import org.hyperic.hq.api.transfer.NotificationsTransfer;
 import org.hyperic.hq.api.transfer.ResourceTransfer;
-import org.hyperic.hq.api.transfer.impl.ResourceTransferImpl;
 import org.hyperic.hq.api.transfer.impl.ResourceTransferImpl.Context;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.bizapp.server.session.ProductBossImpl.ConfigSchemaAndBaseResponse;
-import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.notifications.filtering.Filter;
 import org.hyperic.hq.notifications.filtering.FilteringCondition;
 import org.hyperic.hq.notifications.filtering.ResourceContentFilter;
+import org.hyperic.hq.notifications.filtering.ResourceFilter;
+import org.hyperic.hq.notifications.filtering.ResourceFilteringCondition;
 import org.hyperic.hq.notifications.model.CreatedResourceNotification;
 import org.hyperic.hq.notifications.model.InternalResourceDetailsType;
 import org.hyperic.hq.notifications.model.InventoryNotification;
@@ -115,7 +109,7 @@ public class ResourceMapper {
 		aiResource.setNaturalID(aiPlatform.getFqdn());
 		// aiResource.setId(aiPlatform.get)
 		aiResource.setName(aiPlatform.getName());
-		aiResource.setResourceType(ResourceType.PLATFORM);
+		aiResource.setResourceType(ResourceTypeModel.PLATFORM);
 
 		ResourcePrototype resourcePrototype = new ResourcePrototype();
 		resourcePrototype.setName(aiPlatform.getPlatformTypeName());
@@ -123,7 +117,7 @@ public class ResourceMapper {
 
 		AIServerValue[] aiServerValues = aiPlatform.getAIServerValues();
 		if ((null != aiServerValues) && (aiServerValues.length > 0)) {
-			List<Resource> subResources = new ArrayList<Resource>(aiServerValues.length);
+			List<ResourceModel> subResources = new ArrayList<ResourceModel>(aiServerValues.length);
 			for (int i = 0; i < aiServerValues.length; i++) {
 				AIResource aiServer = mapAIServerValueToAIResource(aiServerValues[i], null);
 				subResources.add(aiServer);
@@ -147,7 +141,7 @@ public class ResourceMapper {
 		aiResource.setNaturalID(aiServerValue.getAutoinventoryIdentifier());
 		aiResource.setId(aiServerValue.getId().toString());
 		aiResource.setName(aiServerValue.getName());
-		aiResource.setResourceType(ResourceType.SERVER);
+		aiResource.setResourceType(ResourceTypeModel.SERVER);
 		ResourcePrototype resourcePrototype = new ResourcePrototype();
 		resourcePrototype.setName(aiServerValue.getServerTypeName());		
 		aiResource.setResourcePrototype(resourcePrototype);		
@@ -156,13 +150,13 @@ public class ResourceMapper {
 	}//EOM
 	
 	
-	public final Resource toResource(final org.hyperic.hq.authz.server.session.Resource backendResource) { 
-		final Resource resource = new Resource(backendResource.getId().toString()) ; 
+	public final ResourceModel toResource(final org.hyperic.hq.authz.server.session.Resource backendResource) { 
+		final ResourceModel resource = new ResourceModel(backendResource.getId().toString()) ; 
 		//TODO: dont know how to map 
 		//resource.setNaturalID(naturalID) ;
 		resource.setName(backendResource.getName()) ; 
 		try{ 
-			resource.setResourceType(ResourceType.valueOf(backendResource.getResourceType().getAppdefType())) ;
+			resource.setResourceType(ResourceTypeModel.valueOf(backendResource.getResourceType().getAppdefType())) ;
 			resource.setResourcePrototype(new ResourcePrototype(backendResource.getPrototype().getName())) ; 
 		}catch(Throwable t) {
 			throw (t instanceof RuntimeException ? (RuntimeException)t : new RuntimeException(t)) ;
@@ -172,13 +166,7 @@ public class ResourceMapper {
 		return resource ; 
 	}//EOM 
 	
-    public final Resource toPrototype(final org.hyperic.hq.authz.server.session.Resource backendPrototype) { 
-        final Resource resource = new Resource(backendPrototype.getId().toString()) ; 
-        resource.setName(backendPrototype.getName()) ; 
-        return resource ; 
-    }//EOM 	
-	
-	public final void mergeResource(final Resource inputResource, final org.hyperic.hq.authz.server.session.Resource backendResource) { 
+	public final void mergeResource(final ResourceModel inputResource, final org.hyperic.hq.authz.server.session.Resource backendResource) { 
 		if(backendResource == null || inputResource == null) return ; 
 		//else 
 		
@@ -195,11 +183,13 @@ public class ResourceMapper {
 	}//EOM 
 	
 	
-    public final Resource mergeVirtualData(ResourceType resourceType, org.hyperic.hq.authz.server.session.Resource backendResource, final Resource resource, Properties cprops) throws AppdefEntityNotFoundException {
+    public final ResourceModel mergeVirtualData(ResourceTypeModel resourceType, Resource backendResource,
+                                                final ResourceModel resource, Properties cprops)
+    throws AppdefEntityNotFoundException {
         
         final HashMap<String,String> configValues = new HashMap<String,String>() ; 
         
-        String moRefKey = HQConstants.MORID;
+        String moRefKey = HQConstants.MOID;
         String moRef = cprops.getProperty(moRefKey);
         if (moRef!=null) {
             configValues.put(moRefKey,moRef);
@@ -216,7 +206,11 @@ public class ResourceMapper {
         return resource ; 
     }//EOM
 
-	public final Resource mergeConfig(ResourceType resourceType, org.hyperic.hq.authz.server.session.Resource backendResource, final Resource resource, final ConfigSchemaAndBaseResponse[] configResponses, Properties cprops) throws AppdefEntityNotFoundException {
+	public final ResourceModel mergeConfig(ResourceTypeModel resourceType, Resource backendResource,
+	                                       final ResourceModel resource,
+	                                       final ConfigSchemaAndBaseResponse[] configResponses,
+	                                       Properties cprops)
+	throws AppdefEntityNotFoundException {
 		if(configResponses == null) return resource ;  
 		
 		final HashMap<String,String> configValues = new HashMap<String,String>() ; 
@@ -234,7 +228,7 @@ public class ResourceMapper {
 				configValues.put(entry.getKey(), value) ;  
 			}//EO while there are more attributes 
 		}//EO while there are more config responses 
-        String moRefKey = HQConstants.MORID;
+        String moRefKey = HQConstants.MOID;
         String moRef = cprops.getProperty(moRefKey);
         if (moRef!=null) {
             configValues.put(moRefKey,moRef);
@@ -254,7 +248,7 @@ public class ResourceMapper {
         //Note: of the resourceType is null, then the generic resource resource type 
         //would be used 
 		if (null == resourceType) {
-		    resourceType = ResourceType.valueOf(backendResource.getResourceType().getAppdefType());
+		    resourceType = ResourceTypeModel.valueOf(backendResource.getResourceType().getAppdefType());
 		}
         final ResourceTypeMapperStrategy resourceTypeStrategy = ResourceTypeMapperStrategy.valueOf(resourceType);        
         MappingContext context = new MappingContext(backendResource, configResponses, this, resourceType, resource);
@@ -282,10 +276,10 @@ public class ResourceMapper {
         PLATFORM(AppdefEntityConstants.APPDEF_TYPE_PLATFORM) { 
 
             @Override
-            final Resource mergeConfig(final MappingContext mappingFlowContext) throws PlatformNotFoundException {
+            final ResourceModel mergeConfig(final MappingContext mappingFlowContext) throws PlatformNotFoundException {
                 org.hyperic.hq.authz.server.session.Resource backendResource = mappingFlowContext.backendResource;
                 Platform platform = mappingFlowContext.visitor.platformManager.findPlatformById(backendResource.getInstanceId());
-                Resource curResource = mappingFlowContext.currResource;
+                ResourceModel curResource = mappingFlowContext.currResource;
 
                 // Add Mac Addresses to the resource multivalue property map
                 Collection<org.hyperic.hq.appdef.Ip> backendMacAddresses = platform.getIps();
@@ -319,7 +313,7 @@ public class ResourceMapper {
          * @return
          * @throws AppdefEntityNotFoundException
          */
-        Resource mergeConfig(final org.hyperic.hq.api.transfer.mapping.ResourceMapper.MappingContext mappingflowContext) throws AppdefEntityNotFoundException {
+        ResourceModel mergeConfig(final org.hyperic.hq.api.transfer.mapping.ResourceMapper.MappingContext mappingflowContext) throws AppdefEntityNotFoundException {
             // Do nothing - just return the same resource
             return mappingflowContext.currResource;
         }
@@ -342,7 +336,7 @@ public class ResourceMapper {
             return (iStrategyType >= iNoOfStrategies ? RESOURCE : cachedValues[iStrategyType]) ; 
         }//EOM 
         
-        static final ResourceTypeMapperStrategy valueOf(final ResourceType enumResourceType) {
+        static final ResourceTypeMapperStrategy valueOf(final ResourceTypeModel enumResourceType) {
             return (enumResourceType == null ? RESOURCE : valueOf(enumResourceType.name()) ) ; 
         }//EOM 
 
@@ -357,16 +351,16 @@ public class ResourceMapper {
         org.hyperic.hq.authz.server.session.Resource backendResource ; 
         ConfigSchemaAndBaseResponse[] configResponses ;         
         ResourceMapper visitor; 
-        ResourceType resourceType;  
-        Resource currResource ;               
+        ResourceTypeModel resourceType;  
+        ResourceModel currResource ;               
         
         public MappingContext() {
             
         }        
 
         public MappingContext(org.hyperic.hq.authz.server.session.Resource backendResource,
-                ConfigSchemaAndBaseResponse[] configResponses, ResourceMapper visitor, ResourceType resourceType,
-                Resource currResource) {
+                ConfigSchemaAndBaseResponse[] configResponses, ResourceMapper visitor, ResourceTypeModel resourceType,
+                ResourceModel currResource) {
             this.backendResource = backendResource;
             this.configResponses = configResponses;
             this.visitor = visitor;
@@ -386,7 +380,7 @@ public class ResourceMapper {
 
     
     public ID toResource(RemovedResourceNotification n) {
-        Integer id = n.getID();
+        Integer id = n.getResourceID();
         if (id==null) {
             return null;
         }
@@ -394,7 +388,7 @@ public class ResourceMapper {
         removedResourceID.setId(id);
         return removedResourceID;
     }
-    public org.hyperic.hq.api.model.Resource toResource(final AuthzSubject subject, ResourceTransfer resourceTransfer, 
+    public org.hyperic.hq.api.model.ResourceModel toResource(final AuthzSubject subject, ResourceTransfer resourceTransfer, 
             ResourceDetailsType resourceDetailsType, CreatedResourceNotification n) throws Throwable {
         org.hyperic.hq.authz.server.session.Resource backendResource = n.getResource();
         if (backendResource==null) {
@@ -402,7 +396,7 @@ public class ResourceMapper {
         }
         Session hSession = f.getCurrentSession();
         hSession.update(backendResource);
-        Resource newFrontendResource = toResource(backendResource);
+        ResourceModel newFrontendResource = toResource(backendResource);
         ResourceDetailsType[] resourceDetailsTypeArr = new ResourceDetailsType[] {resourceDetailsType};
         Context flowContext = new Context(subject, newFrontendResource.getNaturalID(), newFrontendResource.getResourceType(), resourceDetailsTypeArr, resourceTransfer);
         flowContext.setBackendResource(backendResource);
@@ -417,15 +411,15 @@ public class ResourceMapper {
         if (parentID==null) {
             return newFrontendResource;
         }
-        Resource parentResource = new Resource(String.valueOf(parentID));
+        ResourceModel parentResource = new ResourceModel(String.valueOf(parentID));
         parentResource.addSubResource(newFrontendResource);
         return parentResource;
     }
 
     @SuppressWarnings("unchecked")
-    public Resource toChangedResourceContent(ResourceDetailsType resourceDetailsType, ResourceChangedContentNotification n) {
+    public ResourceModel toChangedResourceContent(ResourceDetailsType resourceDetailsType, ResourceChangedContentNotification n) {
         Integer rid = n.getResourceID();
-        Resource r = new Resource(String.valueOf(rid));
+        ResourceModel r = new ResourceModel(String.valueOf(rid));
         
         Map<String,String> configValues = n.getChangedProps(); 
         
@@ -436,8 +430,11 @@ public class ResourceMapper {
     }
     public List<Filter<InventoryNotification, ? extends FilteringCondition<?>>> toResourceFilters(ResourceFilterRequest resourceFilterRequest,ResourceDetailsType responseMetadata) {
         List<Filter<InventoryNotification,? extends FilteringCondition<?>>> userFilters = new ArrayList<Filter<InventoryNotification,? extends FilteringCondition<?>>>();
+        ResourceFilterDefinition resourceFilterDefinition =  resourceFilterRequest.getResourceFilterDefinition();
         InternalResourceDetailsType resourceDetailsType = ResourceDetailsType.valueOf(responseMetadata);
+        Set<Integer> resourceIds = resourceFilterDefinition == null ? null : resourceFilterDefinition.getResourceIds();
+        userFilters.add(new ResourceFilter<ResourceFilteringCondition>(new ResourceFilteringCondition(resourceIds)));
         userFilters.add((Filter) new ResourceContentFilter(resourceDetailsType));
-        return userFilters;
+      return userFilters;
     }
 }//EOC

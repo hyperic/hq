@@ -41,4 +41,4 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author Maya Anderson
  */
 @XmlRootElement(name = "AIResource", namespace=RestApiConstants.SCHEMA_NAMESPACE)
-public class AIResource extends Resource{}
+public class AIResource extends ResourceModel{}

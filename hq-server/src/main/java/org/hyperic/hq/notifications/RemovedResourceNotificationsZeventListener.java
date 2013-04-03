@@ -18,7 +18,7 @@ public class RemovedResourceNotificationsZeventListener extends InventoryNotific
         concurrentStatsCollector.register(getConcurrentStatsCollectorType());
     }
     @Override
-    protected String getListenersBeanName() {
+    public String getListenersBeanName() {
         return "RemovedResourceNotificationsZeventListener";
     }
     @Override

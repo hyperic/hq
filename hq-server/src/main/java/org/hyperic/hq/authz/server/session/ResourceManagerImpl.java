@@ -88,6 +88,7 @@ import org.hyperic.hq.measurement.server.session.MonitorableTypeDAO;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
+import org.hyperic.util.Classifier;
 import org.hyperic.util.IntegerTransformer;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -667,6 +668,29 @@ public class ResourceManagerImpl implements ResourceManager {
         types.add(findResourceTypeById(AuthzConstants.authzGroup));
         types.add(findResourceTypeById(AuthzConstants.authzApplication));
         return types;
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Resource, Collection<Resource>> findChildResources(List<Resource> resources,
+                                                                  final Set<Integer> viewableResourceIds,
+                                                                  final boolean includeSystemResources) {
+        if (viewableResourceIds == null || viewableResourceIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        final Collection<ResourceEdge> edges = resourceEdgeDAO.findChildEdges(resources, getContainmentRelation());
+        final Classifier<ResourceEdge, Resource, Resource> classifier =
+            new Classifier<ResourceEdge, Resource, Resource>() {
+            @Override
+            public NameValue<Resource, Resource> classify(ResourceEdge edge) {
+                final Resource parent = edge.getFrom();
+                final Resource child = edge.getTo();
+                if (viewableResourceIds.contains(child.getId()) || (includeSystemResources && child.isSystem())) {
+                    return new NameValue<Resource, Resource>(parent, child);
+                }
+                return null;
+            }
+        };
+        return classifier.classify(edges);
     }
 
     @Transactional(readOnly = true)

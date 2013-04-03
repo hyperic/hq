@@ -30,4 +30,30 @@ public class MetricNotification extends BaseNotification {
     public Integer getMeasurementId() {
         return this.measurementID;
     }
+    
+    public String toString() {
+        return new StringBuilder()
+            .append("measurementId=").append(measurementID)
+            .append(",resourceId=").append(resourceID)
+            .append(",timestamp=").append(metricVal.getTimestamp())
+            .append(",value=").append(metricVal.getValue())
+            .toString();
+    }
+    
+    public int hashCode() {
+        Long timestamp = metricVal.getTimestamp();
+        return 7 + (7*measurementID.hashCode()) + (7*timestamp.hashCode());
+    }
+    
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o instanceof MetricNotification) {
+            MetricNotification m = (MetricNotification) o;
+            return m.measurementID.equals(measurementID) && m.metricVal.getTimestamp() == metricVal.getTimestamp();
+        }
+        return false;
+    }
+
 }

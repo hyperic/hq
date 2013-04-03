@@ -468,7 +468,7 @@ public class AIQRV_approve implements AIQResourceVisitor, ApplicationContextAwar
             if (macs!=null) {
                 VMID vmid = appContext.getBean(VCManager.class).getVMID(macs);
                 if (vmid!=null) {
-                    cprops.setValue(HQConstants.MORID, vmid.getMoref());
+                    cprops.setValue(HQConstants.MOID, vmid.getMoref());
                     cprops.setValue(HQConstants.VCUUID, vmid.getVcUUID());
                 }
             }
