@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.plugin.mssql;
 
-import org.hyperic.hq.bizapp.shared.lather.ControlSendCommandResult_args;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.Win32ControlPlugin;
 import org.hyperic.sigar.win32.Service;
@@ -39,18 +38,18 @@ import org.hyperic.sigar.win32.Win32Exception;
  *
  */
 public class MsSQLControlPlugin extends Win32ControlPlugin{
-
+ 
     private static final String SQL_AGENT_SERVICE_NAME = "SQLSERVERAGENT";
-
+   
     @Override
-    public void doAction(String action, final ControlSendCommandResult_args resultsMetadata) throws PluginException {
-        
+    public void doAction(String action) throws PluginException {
+
         Service sqlAgent = null;
         try {
             sqlAgent = new Service(SQL_AGENT_SERVICE_NAME);
         }catch(Win32Exception e) {
         }
-       
+
         try {
             if (action.equals("start")) {
                 //starting the SQL agent service will also start the server

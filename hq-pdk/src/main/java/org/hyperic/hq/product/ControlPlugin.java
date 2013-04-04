@@ -89,22 +89,26 @@ public abstract class ControlPlugin extends GenericPlugin {
         setResult(RESULT_FAILURE);
     }
     
+    public void doAction(String action, final ControlSendCommandResult_args resultsMetadata) throws PluginException {
+        doAction(action);
+    }
+      
     public void doAction(String action) throws PluginException {
         doAction(action, new String[0]);
     }
     
-    public void doAction(final String action, final ControlSendCommandResult_args resultsMetadata) throws PluginException{ 
-        this.doAction(action, new String[0], resultsMetadata) ;
+    
+    
+    public void doAction(final String action, final String[] args, final ControlSendCommandResult_args resultsMetadata) throws PluginException{
+        doAction(action, args);
     }
     
-    public void doAction(final String action, final String[] args) throws PluginException{ 
-        this.doAction(action, args, null/*resultsMetadata*/) ;
-    }
+   
     
     /**
      * Invokes plugin method with the name of param action.
      */
-    public void doAction(String action, String[] args, final ControlSendCommandResult_args resultsMetadata) throws PluginException {
+    public void doAction(String action, String[] args) throws PluginException {
         
         setResult(RESULT_SUCCESS); //ControlPluginManager defaults to FAILURE
 

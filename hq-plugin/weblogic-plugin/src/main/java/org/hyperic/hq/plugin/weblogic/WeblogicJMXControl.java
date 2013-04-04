@@ -125,7 +125,7 @@ public abstract class WeblogicJMXControl
         return action;
     }
 
-    public void doAction(String action, final ControlSendCommandResult_args resultsMetadata) throws PluginException{
+    public void doAction(String action) throws PluginException{
         this.authControl.doAction(action);
     }
 

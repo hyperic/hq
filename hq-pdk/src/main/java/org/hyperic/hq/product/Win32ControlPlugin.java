@@ -187,7 +187,7 @@ public class Win32ControlPlugin extends ControlPlugin {
         return commands;
     }
 
-    public void doAction(String action, final ControlSendCommandResult_args resultsMetadata)
+    public void doAction(String action)
         throws PluginException
     {
         try {

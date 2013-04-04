@@ -110,7 +110,6 @@ public abstract class JDBCControlPlugin extends ControlPlugin {
     protected abstract Class getDriver() throws ClassNotFoundException;
 
     public void doAction(String action, String[] args) throws PluginException {
-
         super.doAction(action, args);
     }
 
@@ -121,7 +120,7 @@ public abstract class JDBCControlPlugin extends ControlPlugin {
     protected abstract Connection getConnection(String url, String user,
         String password) throws SQLException;
 
-    public abstract void doAction(String action, final ControlSendCommandResult_args resultsMetadata) throws PluginException;
+    public abstract void doAction(String action) throws PluginException;
 
     public void execute(String query) throws PluginException {
         Connection conn = null;

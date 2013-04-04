@@ -86,7 +86,7 @@ public class WebsphereAppControl
         return false; //XXX
     }
 
-    public void doAction(String action, final ControlSendCommandResult_args resultsMetadata)
+    public void doAction(String action)
         throws PluginException {
         String appManager = getAppManagerName();
 

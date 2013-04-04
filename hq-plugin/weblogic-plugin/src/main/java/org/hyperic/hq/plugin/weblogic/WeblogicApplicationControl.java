@@ -111,10 +111,10 @@ public class WeblogicApplicationControl
         return null; //override to support webapp, ejb, etc.
     }
 
-    public void doAction(String action, final ControlSendCommandResult_args resultsMetadata) throws PluginException {
+    public void doAction(String action) throws PluginException {
         if (!COMMANDS.contains(action)) {
             //e.g. webapp.deleteInvalidSessions
-            super.doAction(action, resultsMetadata);
+            super.doAction(action);
             return;
         }
 

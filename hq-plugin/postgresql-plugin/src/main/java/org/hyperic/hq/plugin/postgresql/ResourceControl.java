@@ -65,7 +65,7 @@ public abstract class ResourceControl extends JDBCControlPlugin {
     }
 
     @Override
-    public final void doAction(String action, final ControlSendCommandResult_args resultsMetadata) throws PluginException {
+    public final void doAction(String action) throws PluginException {
         doAction(action, new String[0]);
     }
 
