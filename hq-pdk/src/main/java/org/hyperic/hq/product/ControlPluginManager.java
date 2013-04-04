@@ -110,7 +110,7 @@ public class ControlPluginManager extends PluginManager {
     {
         LinkedList list;
         synchronized (this.pluginQueue) {
-        	list = (LinkedList) this.pluginQueue.get(name);
+            list = (LinkedList) this.pluginQueue.get(name);
         }
         
         if (list == null)
@@ -147,7 +147,7 @@ public class ControlPluginManager extends PluginManager {
         plugin.setMessage(null);
 
         PluginLoader.setClassLoader(plugin);
-
+      
         try {
             // Do the action
             if (args.length > 0) {

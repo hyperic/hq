@@ -64,7 +64,7 @@ public class OracleControlPlugin extends JDBCControlPlugin
         return DriverManager.getConnection(url, user, password);
     }
 
-    public void doAction(String action, final ControlSendCommandResult_args resultsMetadata)
+    public void doAction(String action)
         throws PluginException
     {
         String query;

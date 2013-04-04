@@ -20,7 +20,7 @@ public class VCenterControlPlugin extends ControlPlugin {
         super.configure(config);
     }
     
-    public void doAction(String action, String[] args, final ControlSendCommandResult_args resultsMetadata) throws PluginException {
+    public void doAction(String action, String[] args) throws PluginException {
         setResult(ControlPlugin.RESULT_FAILURE);
         // We expect to get the vm's moid and the event type. Without these parameters we can't continue
         if(args.length < 3) {
