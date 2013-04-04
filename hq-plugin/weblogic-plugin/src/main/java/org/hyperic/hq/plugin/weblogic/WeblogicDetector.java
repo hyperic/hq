@@ -26,6 +26,7 @@ package org.hyperic.hq.plugin.weblogic;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 import java.util.Arrays;
@@ -38,7 +39,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.weblogic.jmx.ApplicationQuery;
 
 import org.hyperic.hq.product.AutoServerDetector;
-import org.hyperic.hq.product.DetectionUtil;
 import org.hyperic.hq.product.ServerControlPlugin;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
@@ -196,7 +196,7 @@ public abstract class WeblogicDetector extends ServerDetector implements AutoSer
                 hasCreds = false;
             }
         }
-        DetectionUtil.populateListeningPorts(proc.getPid(), productConfig, true);
+        populateListeningPorts(proc.getPid(), productConfig, true);
         if (getLog().isDebugEnabled()) {
             getLog().debug(getName() + " config: " + productConfig);
         }
@@ -502,5 +502,19 @@ public abstract class WeblogicDetector extends ServerDetector implements AutoSer
 
         protected long pid;
         
+    }
+    
+    private void populateListeningPorts(long pid, ConfigResponse productConfig, boolean b) {
+        try {
+            Class du = Class.forName("org.hyperic.hq.product.DetectionUtil");
+            Method plp = du.getMethod("populateListeningPorts", long.class, ConfigResponse.class, boolean.class);
+            plp.invoke(null, pid, productConfig, b);
+        } catch (ClassNotFoundException ex) {
+            log.debug("[populateListeningPorts] Class 'DetectionUtil' not found", ex);
+        } catch (NoSuchMethodException ex) {
+            log.debug("[populateListeningPorts] Method 'populateListeningPorts' not found", ex);
+        } catch (Exception ex) {
+            log.debug("[populateListeningPorts] Problem with Method 'populateListeningPorts'", ex);
+        }
     }
 }

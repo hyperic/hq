@@ -19,6 +19,7 @@ package org.hyperic.hq.plugin.tomcat;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -32,7 +33,6 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.product.DetectionUtil;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.SigarMeasurementPlugin;
@@ -290,7 +290,7 @@ public class TomcatServerDetector
 
     @Override
     protected void setProductConfig(ServerResource server, ConfigResponse config, long pid) {
-        DetectionUtil.populateListeningPorts(pid, config,true);
+        populateListeningPorts(pid, config,true);
         super.setProductConfig(server, config);
     }
     
@@ -335,5 +335,19 @@ public class TomcatServerDetector
             log.debug("Error getting Tomcat version (" + e + ")", e);
         }
         return correctVersion;
+    }
+    
+    private void populateListeningPorts(long pid, ConfigResponse productConfig, boolean b) {
+        try {
+            Class du = Class.forName("org.hyperic.hq.product.DetectionUtil");
+            Method plp = du.getMethod("populateListeningPorts", long.class, ConfigResponse.class, boolean.class);
+            plp.invoke(null, pid, productConfig, b);
+        } catch (ClassNotFoundException ex) {
+            log.debug("[populateListeningPorts] Class 'DetectionUtil' not found", ex);
+        } catch (NoSuchMethodException ex) {
+            log.debug("[populateListeningPorts] Method 'populateListeningPorts' not found", ex);
+        } catch (Exception ex) {
+            log.debug("[populateListeningPorts] Problem with Method 'populateListeningPorts'", ex);
+        }
     }
 }

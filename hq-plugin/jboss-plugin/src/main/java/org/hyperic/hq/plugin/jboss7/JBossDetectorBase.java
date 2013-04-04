@@ -27,12 +27,16 @@ package org.hyperic.hq.plugin.jboss7;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPathConstants;
@@ -46,7 +50,6 @@ import org.hyperic.hq.plugin.jboss7.objects.Deployment;
 import org.hyperic.hq.plugin.jboss7.objects.WebSubsystem;
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.DaemonDetector;
-import org.hyperic.hq.product.DetectionUtil;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
@@ -55,7 +58,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
 public abstract class JBossDetectorBase extends DaemonDetector implements AutoServerDetector {
-
+    
     private final Log log = getLog();
     protected static final String USERNAME = "jboss7.user";
     protected static final String PASSWORD = "jboss7.pass";
@@ -68,11 +71,11 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
     protected static final String START = "jboss7.start";
 
     abstract String getPidsQuery();
-
+    
     @Override
     public List getServerResources(ConfigResponse platformConfig) throws PluginException {
         List<ServerResource> servers = new ArrayList<ServerResource>();
-
+        
         long[] pids = getPids(getPidsQuery());
         log.debug("[getServerResources] pids.length:" + pids.length);
         for (long pid : pids) {
@@ -97,9 +100,9 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
                 }
                 ServerResource server = createServerResource(installPath);
                 server.setIdentifier(AIID);
-
+                
                 ConfigResponse productConfig = getServerProductConfig(args);
-                DetectionUtil.populateListeningPorts(pid, productConfig, true);
+                populateListeningPorts(pid, productConfig, true);
                 setProductConfig(server, productConfig);
                 setControlConfig(server, getServerControlConfig(args));
                 server.setName(prepareServerName(server.getProductConfig()));
@@ -108,7 +111,7 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
         }
         return servers;
     }
-
+    
     @Override
     protected final List discoverServices(ConfigResponse config) {
         List<ServiceResource> services = new ArrayList<ServiceResource>();
@@ -130,14 +133,14 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
                     DataSource datasource = admin.getDatasource(ds, false, getTypeInfo().getVersion());
                     ServiceResource service = createServiceResource("Datasource");
                     service.setName(prepareServerName(config) + " Datasource " + ds);
-
+                    
                     ConfigResponse cp = new ConfigResponse();
                     cp.setValue("jndi", datasource.getJndiName());
                     cp.setValue("driver", datasource.getDriverName());
-
+                    
                     ConfigResponse pc = new ConfigResponse();
                     pc.setValue("name", ds);
-
+                    
                     setProductConfig(service, pc);
                     service.setCustomProperties(cp);
                     service.setMeasurementConfig();
@@ -156,14 +159,14 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
                     Connector connector = ws.getConector().get(name);
                     ServiceResource service = createServiceResource("Connector");
                     service.setName(prepareServerName(config) + " Connector " + name);
-
+                    
                     ConfigResponse cp = new ConfigResponse();
                     cp.setValue("protocol", connector.getProtocol());
                     cp.setValue("scheme", connector.getScheme());
-
+                    
                     ConfigResponse pc = new ConfigResponse();
                     pc.setValue("name", name);
-
+                    
                     setProductConfig(service, pc);
                     service.setCustomProperties(cp);
                     service.setMeasurementConfig();
@@ -180,13 +183,13 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
                 for (Deployment d : deployments) {
                     ServiceResource service = createServiceResource("deployment");
                     service.setName(prepareServerName(config) + " Deployment " + d.getName());
-
+                    
                     ConfigResponse cp = new ConfigResponse();
                     cp.setValue("runtime-name", d.getRuntimeName());
-
+                    
                     ConfigResponse pc = new ConfigResponse();
                     pc.setValue("name", d.getName());
-
+                    
                     setProductConfig(service, pc);
                     service.setCustomProperties(cp);
                     service.setMeasurementConfig();
@@ -199,7 +202,7 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
         }
         return services;
     }
-
+    
     protected String prepareServerName(ConfigResponse cfg) {
         String type = getTypeInfo().getName();
         String name = getPlatformName() + " " + type + " ";
@@ -215,7 +218,7 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
         }
         return name;
     }
-
+    
     final String parseAddress(String address, Map<String, String> args) {
         if (address.startsWith("${")) {
             address = address.substring(2, address.length() - 1);
@@ -231,22 +234,22 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
         }
         return address;
     }
-
+    
     final String getVersion(Map<String, String> args) {
         String version = "not found";
-
+        
         String mp = args.get("mp");
         File serverModule = new File(mp, "org/jboss/as/server/main");
         if (!serverModule.isAbsolute()) {
             serverModule = new File(args.get("jboss.home.dir"), serverModule.getPath());
         }
-
+        
         String jars[] = serverModule.list(new FilenameFilter() {
             public boolean accept(File dir, String name) {
                 return name.startsWith("jboss-as-server") && name.endsWith(".jar");
             }
         });
-
+        
         if ((jars != null) && (jars.length == 1)) {
             try {
                 JarFile jarFile = new JarFile(new File(serverModule, jars[0]));
@@ -261,10 +264,10 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
             log.debug("[getVersion] serverModule=" + serverModule);
             log.debug("[getVersion] 'jboss-as-server.*.jar' not found.");
         }
-
+        
         return version;
     }
-
+    
     private static Map<String, String> parseArgs(String args[]) {
         Map<String, String> props = new HashMap<String, String>();
         for (int n = 0; n < args.length; n++) {
@@ -281,25 +284,25 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
         }
         return props;
     }
-
+    
     final ConfigResponse getServerProductConfig(Map<String, String> args) {
         ConfigResponse cfg = new ConfigResponse();
         String port = null;
         String address = null;
-
+        
         File cfgFile = getConfigFile(args);
-
+        
         try {
             log.debug("[getProductConfig] cfgFile=" + cfgFile.getCanonicalPath());
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = (Document) dBuilder.parse(cfgFile);
-
+            
             XPathFactory factory = XPathFactory.newInstance();
             XPathExpression expr = factory.newXPath().compile(getConfigRoot() + "/management/management-interfaces/http-interface");
             Object result = expr.evaluate(doc, XPathConstants.NODESET);
             NodeList nodeList = (NodeList) result;
-
+            
             String mgntIf = null;
             for (int i = 0; i < nodeList.getLength(); i++) {
                 if (nodeList.item(i).getAttributes().getNamedItem("port") != null) {
@@ -307,23 +310,23 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
                     mgntIf = nodeList.item(i).getAttributes().getNamedItem("interface").getNodeValue();
                 }
             }
-
+            
             if (mgntIf != null) {
                 expr = factory.newXPath().compile(getConfigRoot() + "/interfaces/interface[@name='" + mgntIf + "']/inet-address");
                 result = expr.evaluate(doc, XPathConstants.NODESET);
                 nodeList = (NodeList) result;
-
+                
                 for (int i = 0; i < nodeList.getLength(); i++) {
                     address = nodeList.item(i).getAttributes().getNamedItem("value").getNodeValue();
                 }
             }
-
+            
             setUpExtraProductConfig(cfg, doc);
-
+            
         } catch (Exception ex) {
             log.debug("Error discovering the jmx.url : " + ex, ex);
         }
-
+        
         log.debug("[getProductConfig] address='" + address + "' port='" + port + "'");
         if ((address != null) && (port != null)) {
             cfg.setValue(PORT, port);
@@ -331,7 +334,7 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
         }
         return cfg;
     }
-
+    
     final ConfigResponse getServerControlConfig(Map<String, String> args) {
         ConfigResponse cf = new ConfigResponse();
         String baseDir = args.get("jboss.home.dir");
@@ -353,16 +356,16 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
         }
         return cf;
     }
-
+    
     void setUpExtraProductConfig(ConfigResponse cfg, Document doc) throws XPathException {
     }
-
+    
     final File getConfigFile(Map<String, String> args) {
         String serverConfig = args.get("server-config");
         if (serverConfig == null) {
             serverConfig = getDefaultConfigName();
         }
-
+        
         File cfgFile = new File(serverConfig);
         if (!cfgFile.isAbsolute()) {
             String configDir = args.get("jboss.server.config.dir");
@@ -377,12 +380,26 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
         }
         return cfgFile;
     }
-
+    
     abstract String getConfigRoot();
-
+    
     abstract String getDefaultConfigName();
-
+    
     abstract String getDefaultConfigDir();
-
+    
     abstract boolean haveServices();
+    
+    private void populateListeningPorts(long pid, ConfigResponse productConfig, boolean b) {
+        try {
+            Class du = Class.forName("org.hyperic.hq.product.DetectionUtil");
+            Method plp = du.getMethod("populateListeningPorts", long.class, ConfigResponse.class, boolean.class);
+            plp.invoke(null, pid, productConfig, b);
+        } catch (ClassNotFoundException ex) {
+            log.debug("[populateListeningPorts] Class 'DetectionUtil' not found", ex);
+        } catch (NoSuchMethodException ex) {
+            log.debug("[populateListeningPorts] Method 'populateListeningPorts' not found", ex);
+        } catch (Exception ex) {
+            log.debug("[populateListeningPorts] Problem with Method 'populateListeningPorts'", ex);
+        }
+    }
 }
