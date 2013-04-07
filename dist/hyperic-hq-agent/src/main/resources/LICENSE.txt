@@ -1,14 +1,14 @@
+open_source_license.txt
 
-Hyperic HQ 5.0.0 GA - Open Source Version
+Hyperic HQ 5.7 Beta - Open Source Version
+
 
 ===========================================================================
-VMware makes available all the content in this VMware software product ("Product").  Unless otherwise indicated below, this Product is provided to you 
-
+VMware makes available all the content in this VMware software product ("Product").  
+Unless otherwise indicated below, this Product is provided to you 
 under the terms and conditions of the General Public License Version 2.0 ("GPL").
 
 A copy of the GPL is available in the file called COPYING.txt. 
-
-
 
 The following copyright statements and licenses apply to various open
 source software components (or portions thereof) that are distributed with
@@ -30,10 +30,8 @@ you wish to review the copyright notice(s) and the full text of the license
 associated with each component.
 
 
-
 SECTION 1: BSD-STYLE, MIT-STYLE, OR SIMILAR STYLE LICENSES
 
-   >>> vmware_wsdl4j-1.6.2  
    >>> ant-contrib-1.0b2
    >>> antlr-2.7.6
    >>> antlr.jar-2.7.2
@@ -48,7 +46,7 @@ SECTION 1: BSD-STYLE, MIT-STYLE, OR SIMILAR STYLE LICENSES
    >>> dom4j-1.6.1
    >>> flot-0.6
    >>> flot-0.7
-   >>> freemarker-2.3.4
+   >>> freemarker-2.3.4 
    >>> jakarta-oro-2.0.8
    >>> jdom-1.1
    >>> jline-0.9.94
@@ -68,6 +66,7 @@ SECTION 1: BSD-STYLE, MIT-STYLE, OR SIMILAR STYLE LICENSES
    >>> prototype-1.6.0
    >>> stax2-api-3.1.1
    >>> urlrewritefilter-3.1.0
+   >>> vmware_wsdl4j-1.6.2
    >>> window.js-0.96.2
    >>> wrapper-3.2.3
    >>> xml-apis-1.0b2
@@ -165,12 +164,13 @@ SECTION 2: Apache License, V2.0
 
 SECTION 3: Common Development and Distribution License, V1.0
 
-   >>> jms-api-1.1.0
    >>> activation-1.1
    >>> javamail-1.4
+   >>> jaxb-impl-2.1.12.jar-2.1.12
+   >>> jms-api-1.1.0
    >>> jsr311-api-1.1.1
    >>> jta-1.1
-   
+   >>> stax-api-1.0-2
 
 
 
@@ -182,8 +182,6 @@ SECTION 4: Eclipse Public License, V1.0
 
 SECTION 5: GNU General Public License, V2.0
 
-   >>> stax-api-1.0-2
-   >>> jaxb-impl-2.1.12.jar-2.1.12
    >>> amqp-client-1.8.1
    >>> mysql-connector-java-5.1.10
 
@@ -197,6 +195,7 @@ SECTION 6: GNU Lesser General Public License, V2.1
    >>> jasperreports-2.0.2
    >>> javassist-3.6
    >>> jboss-4.2.3
+   >>> jcifs-1.3.17
    >>> jcommon-1.0.10
    >>> jfreechart-1.0.6
    >>> jna-3.0.9
@@ -233,27 +232,21 @@ APPENDIX. Standard License Files
 
    >>> Eclipse Public License, V1.0
    
-   >>> Creative Commons Attribution, V2.5
-   
    >>> GNU General Public License, V3.0
    
+   >>> Creative Commons Public License 
+   
+   >>> Creative Commons Attribution, V2.5 
+   
    >>> Academic Free License, V2.1
+   
 
 
-
+   
+   
 --------------- SECTION 1:  BSD-STYLE, MIT-STYLE, OR SIMILAR STYLE LICENSES ----------
 
 BSD-STYLE, MIT-STYLE, OR SIMILAR STYLE LICENSES are applicable to the following component(s).
-
-
->>> vmware_wsdl4j-1.6.2
-
-Copyright 2008 VMware, Inc.  All rights reserved.
-
-Attribution Notice:
-
-http://sourceforge.net/projects/wsdl4j/ 
-Copyright IBM Corporation 2003, 2006 – All rights reserved
 
 
 >>> ant-contrib-1.0b2
@@ -823,54 +816,24 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 >>> jakarta-oro-2.0.8
 
-Copyright (c) 2000-2002 The Apache Software Foundation.  All rights
-reserved.
+Copyright (c) 2000-2002 The Apache Software Foundation.  All rights reserved.
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
-1. Redistributions of source code must retain the above copyright
-   notice, this list of conditions and the following disclaimer.
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
 
-2. Redistributions in binary form must reproduce the above copyright
-   notice, this list of conditions and the following disclaimer in
-   the documentation and/or other materials provided with the
-   distribution.
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
 
-3. The end-user documentation included with the redistribution,
-   if any, must include the following acknowledgment:
-      "This product includes software developed by the
-       Apache Software Foundation (http://www.apache.org/)."
-   Alternately, this acknowledgment may appear in the software itself,
-   if and wherever such third-party acknowledgments normally appear.
+3. The end-user documentation included with the redistribution, if any, must include the following acknowledgment: "This product includes software developed by the Apache Software Foundation (http://www.apache.org/)."  Alternately, this acknowledgment may appear in the software itself, if and wherever such third-party acknowledgments normally appear.
 
-4. The names "Apache" and "Apache Software Foundation", "Jakarta-Oro" 
-   must not be used to endorse or promote products derived from this
-   software without prior written permission. For written
-   permission, please contact apache@apache.org.
+4. The names "Apache" and "Apache Software Foundation", "Jakarta-Oro" must not be used to endorse or promote products derived from this software without prior written permission. For written permission, please contact apache@apache.org.
 
-5. Products derived from this software may not be called "Apache" 
-   or "Jakarta-Oro", nor may "Apache" or "Jakarta-Oro" appear in their 
-   name, without prior written permission of the Apache Software Foundation.
+5. Products derived from this software may not be called "Apache" or "Jakarta-Oro", nor may "Apache" or "Jakarta-Oro" appear in their  name, without prior written permission of the Apache Software Foundation.
 
-THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
-WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
-OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED.  IN NO EVENT SHALL THE APACHE SOFTWARE FOUNDATION OR
-ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
-USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
-OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
+THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE APACHE SOFTWARE FOUNDATION OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-This software consists of voluntary contributions made by many
-individuals on behalf of the Apache Software Foundation.  For more
-information on the Apache Software Foundation, please see
-<http://www.apache.org/>.
+This software consists of voluntary contributions made by many individuals on behalf of the Apache Software Foundation.  For more information on the Apache Software Foundation, please see <http://www.apache.org/>.
 
 
 >>> jdom-1.1
@@ -1471,6 +1434,16 @@ POSSIBILITY OF SUCH DAMAGE.
 ====================================================================
 
 
+>>> vmware_wsdl4j-1.6.2
+
+Copyright 2008 VMware, Inc.  All rights reserved.
+
+Attribution Notice:
+
+http://sourceforge.net/projects/wsdl4j/ 
+Copyright IBM Corporation 2003, 2006  All rights reserved
+
+
 >>> window.js-0.96.2
 
 Copyright (c) 2006 Sbastien Gruhier (http://xilinus.com, http://itseb.com)
@@ -1556,8 +1529,7 @@ Additional License Information:
 
 The Apache Software License, Version 1.1
 
-  Copyright (c) 2000 The Apache Software Foundation.  All rights
-  reserved.
+  Copyright (c) 2000 The Apache Software Foundation.  All rights reserved.
  
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions
@@ -1997,151 +1969,150 @@ SOFTWARE.
 == For the common.js library                                           ==
 =========================================================================
 
-<p><em>License</em> </p>
+License
 
-<p>THE WORK (AS DEFINED BELOW) IS PROVIDED UNDER THE TERMS OF THIS CREATIVE COMMONS PUBLIC LICENSE ("CCPL" OR "LICENSE"). THE WORK IS PROTECTED BY COPYRIGHT AND/OR OTHER APPLICABLE LAW. ANY USE OF THE WORK OTHER THAN AS AUTHORIZED UNDER THIS LICENSE OR COPYRIGHT LAW IS PROHIBITED. </p>
+THE WORK (AS DEFINED BELOW) IS PROVIDED UNDER THE TERMS OF THIS CREATIVE COMMONS PUBLIC LICENSE ("CCPL" OR "LICENSE"). THE WORK IS PROTECTED BY COPYRIGHT AND/OR OTHER APPLICABLE LAW. ANY USE OF THE WORK OTHER THAN AS AUTHORIZED UNDER THIS LICENSE OR COPYRIGHT LAW IS PROHIBITED. </p>
 
-<p>BY EXERCISING ANY RIGHTS TO THE WORK PROVIDED HERE, YOU ACCEPT AND AGREE TO BE BOUND BY THE TERMS OF THIS LICENSE. THE LICENSOR GRANTS YOU THE RIGHTS CONTAINED HERE IN CONSIDERATION OF YOUR ACCEPTANCE OF SUCH TERMS AND CONDITIONS. </p>
-
-
-<p><strong>1. Definitions</strong> </p>
-
-<ol type="a">
-
-<li>
-<strong>"Collective Work"</strong> means a work, such as a periodical issue, anthology or encyclopedia, in which the Work in its entirety in unmodified form, along with a number of other contributions, constituting separate and independent works in themselves, are assembled into a collective whole. A work that constitutes a Collective Work will not be considered a Derivative Work (as defined below) for the purposes of this License.
-</li>
-
-<li>
-<strong>"Derivative Work"</strong> means a work based upon the Work or upon the Work and other pre-existing works, such as a translation, musical arrangement, dramatization, fictionalization, motion picture version, sound recording, art reproduction, abridgment, condensation, or any other form in which the Work may be recast, transformed, or adapted, except that a work that constitutes a Collective Work will not be considered a Derivative Work for the purpose of this License. For the avoidance of doubt, where the Work is a musical composition or sound recording, the synchronization of the Work in timed-relation with a moving image ("synching") will be considered a Derivative Work for the purpose of this License.</li>
-
-<li>
-<strong>"Licensor"</strong> means the individual or entity that offers the Work under the terms of this License.
-</li>
-
-<li>
-<strong>"Original Author"</strong> means the individual or entity who created the Work.
-</li>
-
-<li>
-<strong>"Work"</strong> means the copyrightable work of authorship offered under the terms of this License.
-</li>
-
-<li>
-<strong>"You"</strong> means an individual or entity exercising rights under this License who has not previously violated the terms of this License with respect to the Work, or who has received express permission from the Licensor to exercise rights under this License despite a previous violation.
-
-</li>
-</ol>
-
-<p><strong>2. Fair Use Rights.</strong> Nothing in this license is intended to reduce, limit, or restrict any rights arising from fair use, first sale or other limitations on the exclusive rights of the copyright owner under copyright law or other applicable laws. </p>
+BY EXERCISING ANY RIGHTS TO THE WORK PROVIDED HERE, YOU ACCEPT AND AGREE TO BE BOUND BY THE TERMS OF THIS LICENSE. THE LICENSOR GRANTS YOU THE RIGHTS CONTAINED HERE IN CONSIDERATION OF YOUR ACCEPTANCE OF SUCH TERMS AND CONDITIONS. </p>
 
 
-<p><strong>3. License Grant.</strong> Subject to the terms and conditions of this License, Licensor hereby grants You a worldwide, royalty-free, non-exclusive, perpetual (for the duration of the applicable copyright) license to exercise the rights in the Work as stated below: </p>
+1. Definitions
 
 
-<ol type="a">
-<li>
+
+
+"Collective Work" means a work, such as a periodical issue, anthology or encyclopedia, in which the Work in its entirety in unmodified form, along with a number of other contributions, constituting separate and independent works in themselves, are assembled into a collective whole. A work that constitutes a Collective Work will not be considered a Derivative Work (as defined below) for the purposes of this License.
+
+
+
+"Derivative Work" means a work based upon the Work or upon the Work and other pre-existing works, such as a translation, musical arrangement, dramatization, fictionalization, motion picture version, sound recording, art reproduction, abridgment, condensation, or any other form in which the Work may be recast, transformed, or adapted, except that a work that constitutes a Collective Work will not be considered a Derivative Work for the purpose of this License. For the avoidance of doubt, where the Work is a musical composition or sound recording, the synchronization of the Work in timed-relation with a moving image ("synching") will be considered a Derivative Work for the purpose of this License.
+
+
+"Licensor" means the individual or entity that offers the Work under the terms of this License.
+
+
+
+"Original Author" means the individual or entity who created the Work.
+
+
+
+"Work" means the copyrightable work of authorship offered under the terms of this License.
+
+
+
+"You" means an individual or entity exercising rights under this License who has not previously violated the terms of this License with respect to the Work, or who has received express permission from the Licensor to exercise rights under this License despite a previous violation.
+
+
+
+
+2. Fair Use Rights. Nothing in this license is intended to reduce, limit, or restrict any rights arising from fair use, first sale or other limitations on the exclusive rights of the copyright owner under copyright law or other applicable laws. </p>
+
+
+3. License Grant. Subject to the terms and conditions of this License, Licensor hereby grants You a worldwide, royalty-free, non-exclusive, perpetual (for the duration of the applicable copyright) license to exercise the rights in the Work as stated below: </p>
+
+
+
+
 
 to reproduce the Work, to incorporate the Work into one or more Collective Works, and to reproduce the Work as incorporated in the Collective Works;
-</li>
 
-<li>
+
+
 to create and reproduce Derivative Works;
-</li>
 
-<li>
+
+
 to distribute copies or phonorecords of, display publicly, perform publicly, and perform publicly by means of a digital audio transmission the Work including as incorporated in Collective Works;
 
-</li>
 
-<li>
+
+
 to distribute copies or phonorecords of, display publicly, perform publicly, and perform publicly by means of a digital audio transmission Derivative Works.
-</li>
-
-<li><p>For the avoidance of doubt, where the work is a musical composition:</p>
-
-<ol type="i">
-<li><strong>Performance Royalties Under Blanket Licenses</strong>. Licensor waives the exclusive right to collect, whether individually or via a performance rights society (e.g. ASCAP, BMI, SESAC), royalties for the public performance or public digital performance (e.g. webcast) of the Work.</li>
-
-<li><strong>Mechanical Rights and Statutory Royalties</strong>. Licensor waives the exclusive right to collect, whether individually or via a music rights agency or designated agent (e.g. Harry Fox Agency), royalties for any phonorecord You create from the Work ("cover version") and distribute, subject to the compulsory license created by 17 USC Section 115 of the US Copyright Act (or the equivalent in other jurisdictions).</li></ol></li>
-
-<li><strong>Webcasting Rights and Statutory Royalties</strong>. For the avoidance of doubt, where the Work is a sound recording, Licensor waives the exclusive right to collect, whether individually or via a performance-rights society (e.g. SoundExchange), royalties for the public digital performance (e.g. webcast) of the Work, subject to the compulsory license created by 17 USC Section 114 of the US Copyright Act (or the equivalent in other jurisdictions).</li>
-
-</ol>
 
 
-<p>The above rights may be exercised in all media and formats whether now known or hereafter devised. The above rights include the right to make such modifications as are technically necessary to exercise the rights in other media and formats. All rights not expressly granted by Licensor are hereby reserved.</p>
-
-<p><strong>4. Restrictions.</strong>The license granted in Section 3 above is expressly made subject to and limited by the following restrictions: </p>
+For the avoidance of doubt, where the work is a musical composition:</p>
 
 
-<ol type="a">
-<li>
+Performance Royalties Under Blanket Licenses. Licensor waives the exclusive right to collect, whether individually or via a performance rights society (e.g. ASCAP, BMI, SESAC), royalties for the public performance or public digital performance (e.g. webcast) of the Work.
+
+Mechanical Rights and Statutory Royalties. Licensor waives the exclusive right to collect, whether individually or via a music rights agency or designated agent (e.g. Harry Fox Agency), royalties for any phonorecord You create from the Work ("cover version") and distribute, subject to the compulsory license created by 17 USC Section 115 of the US Copyright Act (or the equivalent in other jurisdictions).
+
+Webcasting Rights and Statutory Royalties. For the avoidance of doubt, where the Work is a sound recording, Licensor waives the exclusive right to collect, whether individually or via a performance-rights society (e.g. SoundExchange), royalties for the public digital performance (e.g. webcast) of the Work, subject to the compulsory license created by 17 USC Section 114 of the US Copyright Act (or the equivalent in other jurisdictions).
+
+
+
+
+The above rights may be exercised in all media and formats whether now known or hereafter devised. The above rights include the right to make such modifications as are technically necessary to exercise the rights in other media and formats. All rights not expressly granted by Licensor are hereby reserved.</p>
+
+4. Restrictions.The license granted in Section 3 above is expressly made subject to and limited by the following restrictions: </p>
+
+
+
+
 You may distribute, publicly display, publicly perform, or publicly digitally perform the Work only under the terms of this License, and You must include a copy of, or the Uniform Resource Identifier for, this License with every copy or phonorecord of the Work You distribute, publicly display, publicly perform, or publicly digitally perform. You may not offer or impose any terms on the Work that alter or restrict the terms of this License or the recipients' exercise of the rights granted hereunder. You may not sublicense the Work. You must keep intact all notices that refer to this License and to the disclaimer of warranties. You may not distribute, publicly display, publicly perform, or publicly digitally perform the Work with any technological measures that control access or use of the Work in a manner inconsistent with the terms of this License Agreement. The above applies to the Work as incorporated in a Collective Work, but this does not require the Collective Work apart from the Work itself to be made subject to the terms of this License. If You create a Collective Work, upon notice from any Licensor You must, to the extent practicable, remove from the Collective Work any credit as required by clause 4(b), as requested. If You create a Derivative Work, upon notice from any Licensor You must, to the extent practicable, remove from the Derivative Work any credit as required by clause 4(b), as requested.
-</li>
 
 
-<li>
+
+
 If you distribute, publicly display, publicly perform, or publicly digitally perform the Work or any Derivative Works or Collective Works, You must keep intact all copyright notices for the Work and provide, reasonable to the medium or means You are utilizing: (i) the name of the Original Author (or pseudonym, if applicable) if supplied, and/or (ii) if the Original Author and/or Licensor designate another party or parties (e.g. a sponsor institute, publishing entity, journal) for attribution in Licensor's copyright notice, terms of service or by other reasonable means, the name of such party or parties; the title of the Work if supplied; to the extent reasonably practicable, the Uniform Resource Identifier, if any, that Licensor specifies to be associated with the Work, unless such URI does not refer to the copyright notice or licensing information for the Work; and in the case of a Derivative Work, a credit identifying the use of the Work in the Derivative Work (e.g., "French translation of the Work by Original Author," or "Screenplay based on original Work by Original Author"). Such credit may be implemented in any reasonable manner; provided, however, that in the case of a Derivative Work or Collective Work, at a minimum such credit will appear where any other comparable authorship credit appears and in a manner at least as prominent as such other comparable authorship credit.
-</li>
-
-</ol>
 
 
 
 
 
 
-<p><strong>5. Representations, Warranties and Disclaimer</strong></p>
-
-<p>UNLESS OTHERWISE MUTUALLY AGREED TO BY THE PARTIES IN WRITING, LICENSOR OFFERS THE WORK AS-IS AND MAKES NO REPRESENTATIONS OR WARRANTIES OF ANY KIND CONCERNING THE WORK, EXPRESS, IMPLIED, STATUTORY OR OTHERWISE, INCLUDING, WITHOUT LIMITATION, WARRANTIES OF TITLE, MERCHANTIBILITY, FITNESS FOR A PARTICULAR PURPOSE, NONINFRINGEMENT, OR THE ABSENCE OF LATENT OR OTHER DEFECTS, ACCURACY, OR THE PRESENCE OF ABSENCE OF ERRORS, WHETHER OR NOT DISCOVERABLE. SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OF IMPLIED WARRANTIES, SO SUCH EXCLUSION MAY NOT APPLY TO YOU.</p>
 
 
-<p><strong>6. Limitation on Liability.</strong> EXCEPT TO THE EXTENT REQUIRED BY APPLICABLE LAW, IN NO EVENT WILL LICENSOR BE LIABLE TO YOU ON ANY LEGAL THEORY FOR ANY SPECIAL, INCIDENTAL, CONSEQUENTIAL, PUNITIVE OR EXEMPLARY DAMAGES ARISING OUT OF THIS LICENSE OR THE USE OF THE WORK, EVEN IF LICENSOR HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. </p>
 
-<p><strong>7. Termination</strong> </p>
+5. Representations, Warranties and Disclaimer</p>
 
-<ol type="a">
+UNLESS OTHERWISE MUTUALLY AGREED TO BY THE PARTIES IN WRITING, LICENSOR OFFERS THE WORK AS-IS AND MAKES NO REPRESENTATIONS OR WARRANTIES OF ANY KIND CONCERNING THE WORK, EXPRESS, IMPLIED, STATUTORY OR OTHERWISE, INCLUDING, WITHOUT LIMITATION, WARRANTIES OF TITLE, MERCHANTIBILITY, FITNESS FOR A PARTICULAR PURPOSE, NONINFRINGEMENT, OR THE ABSENCE OF LATENT OR OTHER DEFECTS, ACCURACY, OR THE PRESENCE OF ABSENCE OF ERRORS, WHETHER OR NOT DISCOVERABLE. SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OF IMPLIED WARRANTIES, SO SUCH EXCLUSION MAY NOT APPLY TO YOU.</p>
 
-<li>
+
+6. Limitation on Liability. EXCEPT TO THE EXTENT REQUIRED BY APPLICABLE LAW, IN NO EVENT WILL LICENSOR BE LIABLE TO YOU ON ANY LEGAL THEORY FOR ANY SPECIAL, INCIDENTAL, CONSEQUENTIAL, PUNITIVE OR EXEMPLARY DAMAGES ARISING OUT OF THIS LICENSE OR THE USE OF THE WORK, EVEN IF LICENSOR HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. </p>
+
+7. Termination
+
+
+
+
 This License and the rights granted hereunder will terminate automatically upon any breach by You of the terms of this License. Individuals or entities who have received Derivative Works or Collective Works from You under this License, however, will not have their licenses terminated provided such individuals or entities remain in full compliance with those licenses. Sections 1, 2, 5, 6, 7, and 8 will survive any termination of this License.
-</li>
 
-<li>
+
+
 Subject to the above terms and conditions, the license granted here is perpetual (for the duration of the applicable copyright in the Work). Notwithstanding the above, Licensor reserves the right to release the Work under different license terms or to stop distributing the Work at any time; provided, however that any such election will not serve to withdraw this License (or any other license that has been, or is required to be, granted under the terms of this License), and this License will continue in full force and effect unless terminated as stated above.
-</li>
-</ol>
 
-<p><strong>8. Miscellaneous</strong> </p>
 
-<ol type="a">
 
-<li>
+8. Miscellaneous
+
+
+
+
 Each time You distribute or publicly digitally perform the Work or a Collective Work, the Licensor offers to the recipient a license to the Work on the same terms and conditions as the license granted to You under this License.
-</li>
 
-<li>
+
+
 Each time You distribute or publicly digitally perform a Derivative Work, Licensor offers to the recipient a license to the original Work on the same terms and conditions as the license granted to You under this License.
-</li>
 
-<li>
+
+
 If any provision of this License is invalid or unenforceable under applicable law, it shall not affect the validity or enforceability of the remainder of the terms of this License, and without further action by the parties to this agreement, such provision shall be reformed to the minimum extent necessary to make such provision valid and enforceable.
-</li>
 
-<li>
+
+
 No term or provision of this License shall be deemed waived and no breach consented to unless such waiver or consent shall be in writing and signed by the party to be charged with such waiver or consent.
 
-</li>
 
-<li>
+
+
 This License constitutes the entire agreement between the parties with respect to the Work licensed here. There are no understandings, agreements or representations with respect to the Work not specified here. Licensor shall not be bound by any additional provisions that may appear in any communication from You. This License may not be modified without the mutual written agreement of the Licensor and You.
-</li>
-</ol>
+
+
 
 --activemq-web-console
 
-[PLEASE NOTE:  VMWARE, INC. ELECTS TO USE AND DISTRIBUTE THIS COMPONENT UNDER THE TERMS OF THE MIT LICENSE].  
-PLEASE SEE BELOW FOR THE FULL TEXT OF THE BSD LICENSE.  THE ORIGINAL LICENSE TERMS ARE REPRODUCED BELOW ONLY AS A REFERENCE.] 
+[PLEASE NOTE:  VMWARE, INC. ELECTS TO USE AND DISTRIBUTE THIS COMPONENT UNDER THE TERMS OF THE MIT LICENSE].  PLEASE SEE BELOW FOR THE FULL TEXT OF THE BSD LICENSE.  THE ORIGINAL LICENSE TERMS ARE REPRODUCED BELOW ONLY AS A REFERENCE.] 
 
       =========================================================================
       == For the MochiKit library                                            ==
@@ -2307,146 +2278,146 @@ PLEASE SEE BELOW FOR THE FULL TEXT OF THE BSD LICENSE.  THE ORIGINAL LICENSE TER
       == For the common.js library                                           ==
       =========================================================================
 
-      <p><em>License</em> </p>
+      License
 
-      <p>THE WORK (AS DEFINED BELOW) IS PROVIDED UNDER THE TERMS OF THIS CREATIVE COMMONS PUBLIC LICENSE ("CCPL" OR "LICENSE"). THE WORK IS PROTECTED BY COPYRIGHT AND/OR OTHER APPLICABLE LAW. ANY USE OF THE WORK OTHER THAN AS AUTHORIZED UNDER THIS LICENSE OR COPYRIGHT LAW IS PROHIBITED. </p>
+      THE WORK (AS DEFINED BELOW) IS PROVIDED UNDER THE TERMS OF THIS CREATIVE COMMONS PUBLIC LICENSE ("CCPL" OR "LICENSE"). THE WORK IS PROTECTED BY COPYRIGHT AND/OR OTHER APPLICABLE LAW. ANY USE OF THE WORK OTHER THAN AS AUTHORIZED UNDER THIS LICENSE OR COPYRIGHT LAW IS PROHIBITED. </p>
 
-      <p>BY EXERCISING ANY RIGHTS TO THE WORK PROVIDED HERE, YOU ACCEPT AND AGREE TO BE BOUND BY THE TERMS OF THIS LICENSE. THE LICENSOR GRANTS YOU THE RIGHTS CONTAINED HERE IN CONSIDERATION OF YOUR ACCEPTANCE OF SUCH TERMS AND CONDITIONS. </p>
-
-
-      <p><strong>1. Definitions</strong> </p>
-
-      <ol type="a">
-
-      <li>
-      <strong>"Collective Work"</strong> means a work, such as a periodical issue, anthology or encyclopedia, in which the Work in its entirety in unmodified form, along with a number of other contributions, constituting separate and independent works in themselves, are assembled into a collective whole. A work that constitutes a Collective Work will not be considered a Derivative Work (as defined below) for the purposes of this License.
-      </li>
-
-      <li>
-      <strong>"Derivative Work"</strong> means a work based upon the Work or upon the Work and other pre-existing works, such as a translation, musical arrangement, dramatization, fictionalization, motion picture version, sound recording, art reproduction, abridgment, condensation, or any other form in which the Work may be recast, transformed, or adapted, except that a work that constitutes a Collective Work will not be considered a Derivative Work for the purpose of this License. For the avoidance of doubt, where the Work is a musical composition or sound recording, the synchronization of the Work in timed-relation with a moving image ("synching") will be considered a Derivative Work for the purpose of this License.</li>
-
-      <li>
-      <strong>"Licensor"</strong> means the individual or entity that offers the Work under the terms of this License.
-      </li>
-
-      <li>
-      <strong>"Original Author"</strong> means the individual or entity who created the Work.
-      </li>
-
-      <li>
-      <strong>"Work"</strong> means the copyrightable work of authorship offered under the terms of this License.
-      </li>
-
-      <li>
-      <strong>"You"</strong> means an individual or entity exercising rights under this License who has not previously violated the terms of this License with respect to the Work, or who has received express permission from the Licensor to exercise rights under this License despite a previous violation.
-
-      </li>
-      </ol>
-
-      <p><strong>2. Fair Use Rights.</strong> Nothing in this license is intended to reduce, limit, or restrict any rights arising from fair use, first sale or other limitations on the exclusive rights of the copyright owner under copyright law or other applicable laws. </p>
+      BY EXERCISING ANY RIGHTS TO THE WORK PROVIDED HERE, YOU ACCEPT AND AGREE TO BE BOUND BY THE TERMS OF THIS LICENSE. THE LICENSOR GRANTS YOU THE RIGHTS CONTAINED HERE IN CONSIDERATION OF YOUR ACCEPTANCE OF SUCH TERMS AND CONDITIONS. </p>
 
 
-      <p><strong>3. License Grant.</strong> Subject to the terms and conditions of this License, Licensor hereby grants You a worldwide, royalty-free, non-exclusive, perpetual (for the duration of the applicable copyright) license to exercise the rights in the Work as stated below: </p>
+      1. Definitions
+
+      
+
+      
+      "Collective Work" means a work, such as a periodical issue, anthology or encyclopedia, in which the Work in its entirety in unmodified form, along with a number of other contributions, constituting separate and independent works in themselves, are assembled into a collective whole. A work that constitutes a Collective Work will not be considered a Derivative Work (as defined below) for the purposes of this License.
+      
+
+      
+      "Derivative Work" means a work based upon the Work or upon the Work and other pre-existing works, such as a translation, musical arrangement, dramatization, fictionalization, motion picture version, sound recording, art reproduction, abridgment, condensation, or any other form in which the Work may be recast, transformed, or adapted, except that a work that constitutes a Collective Work will not be considered a Derivative Work for the purpose of this License. For the avoidance of doubt, where the Work is a musical composition or sound recording, the synchronization of the Work in timed-relation with a moving image ("synching") will be considered a Derivative Work for the purpose of this License.
+
+      
+      "Licensor" means the individual or entity that offers the Work under the terms of this License.
+      
+
+      
+      "Original Author" means the individual or entity who created the Work.
+      
+
+      
+      "Work" means the copyrightable work of authorship offered under the terms of this License.
+      
+
+      
+      "You" means an individual or entity exercising rights under this License who has not previously violated the terms of this License with respect to the Work, or who has received express permission from the Licensor to exercise rights under this License despite a previous violation.
+
+      
+      
+
+      2. Fair Use Rights. Nothing in this license is intended to reduce, limit, or restrict any rights arising from fair use, first sale or other limitations on the exclusive rights of the copyright owner under copyright law or other applicable laws. </p>
 
 
-      <ol type="a">
-      <li>
+      3. License Grant. Subject to the terms and conditions of this License, Licensor hereby grants You a worldwide, royalty-free, non-exclusive, perpetual (for the duration of the applicable copyright) license to exercise the rights in the Work as stated below: </p>
+
+
+      
+      
 
       to reproduce the Work, to incorporate the Work into one or more Collective Works, and to reproduce the Work as incorporated in the Collective Works;
-      </li>
+      
 
-      <li>
+      
       to create and reproduce Derivative Works;
-      </li>
+      
 
-      <li>
+      
       to distribute copies or phonorecords of, display publicly, perform publicly, and perform publicly by means of a digital audio transmission the Work including as incorporated in Collective Works;
 
-      </li>
+      
 
-      <li>
+      
       to distribute copies or phonorecords of, display publicly, perform publicly, and perform publicly by means of a digital audio transmission Derivative Works.
-      </li>
+      
 
-      <li><p>For the avoidance of doubt, where the work is a musical composition:</p>
+      For the avoidance of doubt, where the work is a musical composition:</p>
 
-      <ol type="i">
-      <li><strong>Performance Royalties Under Blanket Licenses</strong>. Licensor waives the exclusive right to collect, whether individually or via a performance rights society (e.g. ASCAP, BMI, SESAC), royalties for the public performance or public digital performance (e.g. webcast) of the Work.</li>
+      
+      Performance Royalties Under Blanket Licenses. Licensor waives the exclusive right to collect, whether individually or via a performance rights society (e.g. ASCAP, BMI, SESAC), royalties for the public performance or public digital performance (e.g. webcast) of the Work.
 
-      <li><strong>Mechanical Rights and Statutory Royalties</strong>. Licensor waives the exclusive right to collect, whether individually or via a music rights agency or designated agent (e.g. Harry Fox Agency), royalties for any phonorecord You create from the Work ("cover version") and distribute, subject to the compulsory license created by 17 USC Section 115 of the US Copyright Act (or the equivalent in other jurisdictions).</li></ol></li>
+      Mechanical Rights and Statutory Royalties. Licensor waives the exclusive right to collect, whether individually or via a music rights agency or designated agent (e.g. Harry Fox Agency), royalties for any phonorecord You create from the Work ("cover version") and distribute, subject to the compulsory license created by 17 USC Section 115 of the US Copyright Act (or the equivalent in other jurisdictions).
 
-      <li><strong>Webcasting Rights and Statutory Royalties</strong>. For the avoidance of doubt, where the Work is a sound recording, Licensor waives the exclusive right to collect, whether individually or via a performance-rights society (e.g. SoundExchange), royalties for the public digital performance (e.g. webcast) of the Work, subject to the compulsory license created by 17 USC Section 114 of the US Copyright Act (or the equivalent in other jurisdictions).</li>
+      Webcasting Rights and Statutory Royalties. For the avoidance of doubt, where the Work is a sound recording, Licensor waives the exclusive right to collect, whether individually or via a performance-rights society (e.g. SoundExchange), royalties for the public digital performance (e.g. webcast) of the Work, subject to the compulsory license created by 17 USC Section 114 of the US Copyright Act (or the equivalent in other jurisdictions).
 
-      </ol>
-
-
-      <p>The above rights may be exercised in all media and formats whether now known or hereafter devised. The above rights include the right to make such modifications as are technically necessary to exercise the rights in other media and formats. All rights not expressly granted by Licensor are hereby reserved.</p>
-
-      <p><strong>4. Restrictions.</strong>The license granted in Section 3 above is expressly made subject to and limited by the following restrictions: </p>
+      
 
 
-      <ol type="a">
-      <li>
+      The above rights may be exercised in all media and formats whether now known or hereafter devised. The above rights include the right to make such modifications as are technically necessary to exercise the rights in other media and formats. All rights not expressly granted by Licensor are hereby reserved.</p>
+
+      4. Restrictions.The license granted in Section 3 above is expressly made subject to and limited by the following restrictions: </p>
+
+
+      
+      
       You may distribute, publicly display, publicly perform, or publicly digitally perform the Work only under the terms of this License, and You must include a copy of, or the Uniform Resource Identifier for, this License with every copy or phonorecord of the Work You distribute, publicly display, publicly perform, or publicly digitally perform. You may not offer or impose any terms on the Work that alter or restrict the terms of this License or the recipients' exercise of the rights granted hereunder. You may not sublicense the Work. You must keep intact all notices that refer to this License and to the disclaimer of warranties. You may not distribute, publicly display, publicly perform, or publicly digitally perform the Work with any technological measures that control access or use of the Work in a manner inconsistent with the terms of this License Agreement. The above applies to the Work as incorporated in a Collective Work, but this does not require the Collective Work apart from the Work itself to be made subject to the terms of this License. If You create a Collective Work, upon notice from any Licensor You must, to the extent practicable, remove from the Collective Work any credit as required by clause 4(b), as requested. If You create a Derivative Work, upon notice from any Licensor You must, to the extent practicable, remove from the Derivative Work any credit as required by clause 4(b), as requested.
-      </li>
+      
 
 
-      <li>
+      
       If you distribute, publicly display, publicly perform, or publicly digitally perform the Work or any Derivative Works or Collective Works, You must keep intact all copyright notices for the Work and provide, reasonable to the medium or means You are utilizing: (i) the name of the Original Author (or pseudonym, if applicable) if supplied, and/or (ii) if the Original Author and/or Licensor designate another party or parties (e.g. a sponsor institute, publishing entity, journal) for attribution in Licensor's copyright notice, terms of service or by other reasonable means, the name of such party or parties; the title of the Work if supplied; to the extent reasonably practicable, the Uniform Resource Identifier, if any, that Licensor specifies to be associated with the Work, unless such URI does not refer to the copyright notice or licensing information for the Work; and in the case of a Derivative Work, a credit identifying the use of the Work in the Derivative Work (e.g., "French translation of the Work by Original Author," or "Screenplay based on original Work by Original Author"). Such credit may be implemented in any reasonable manner; provided, however, that in the case of a Derivative Work or Collective Work, at a minimum such credit will appear where any other comparable authorship credit appears and in a manner at least as prominent as such other comparable authorship credit.
-      </li>
+      
 
-      </ol>
-
-
+      
 
 
 
 
-      <p><strong>5. Representations, Warranties and Disclaimer</strong></p>
-
-      <p>UNLESS OTHERWISE MUTUALLY AGREED TO BY THE PARTIES IN WRITING, LICENSOR OFFERS THE WORK AS-IS AND MAKES NO REPRESENTATIONS OR WARRANTIES OF ANY KIND CONCERNING THE WORK, EXPRESS, IMPLIED, STATUTORY OR OTHERWISE, INCLUDING, WITHOUT LIMITATION, WARRANTIES OF TITLE, MERCHANTIBILITY, FITNESS FOR A PARTICULAR PURPOSE, NONINFRINGEMENT, OR THE ABSENCE OF LATENT OR OTHER DEFECTS, ACCURACY, OR THE PRESENCE OF ABSENCE OF ERRORS, WHETHER OR NOT DISCOVERABLE. SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OF IMPLIED WARRANTIES, SO SUCH EXCLUSION MAY NOT APPLY TO YOU.</p>
 
 
-      <p><strong>6. Limitation on Liability.</strong> EXCEPT TO THE EXTENT REQUIRED BY APPLICABLE LAW, IN NO EVENT WILL LICENSOR BE LIABLE TO YOU ON ANY LEGAL THEORY FOR ANY SPECIAL, INCIDENTAL, CONSEQUENTIAL, PUNITIVE OR EXEMPLARY DAMAGES ARISING OUT OF THIS LICENSE OR THE USE OF THE WORK, EVEN IF LICENSOR HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. </p>
+      5. Representations, Warranties and Disclaimer</p>
 
-      <p><strong>7. Termination</strong> </p>
+      UNLESS OTHERWISE MUTUALLY AGREED TO BY THE PARTIES IN WRITING, LICENSOR OFFERS THE WORK AS-IS AND MAKES NO REPRESENTATIONS OR WARRANTIES OF ANY KIND CONCERNING THE WORK, EXPRESS, IMPLIED, STATUTORY OR OTHERWISE, INCLUDING, WITHOUT LIMITATION, WARRANTIES OF TITLE, MERCHANTIBILITY, FITNESS FOR A PARTICULAR PURPOSE, NONINFRINGEMENT, OR THE ABSENCE OF LATENT OR OTHER DEFECTS, ACCURACY, OR THE PRESENCE OF ABSENCE OF ERRORS, WHETHER OR NOT DISCOVERABLE. SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OF IMPLIED WARRANTIES, SO SUCH EXCLUSION MAY NOT APPLY TO YOU.</p>
 
-      <ol type="a">
 
-      <li>
+      6. Limitation on Liability. EXCEPT TO THE EXTENT REQUIRED BY APPLICABLE LAW, IN NO EVENT WILL LICENSOR BE LIABLE TO YOU ON ANY LEGAL THEORY FOR ANY SPECIAL, INCIDENTAL, CONSEQUENTIAL, PUNITIVE OR EXEMPLARY DAMAGES ARISING OUT OF THIS LICENSE OR THE USE OF THE WORK, EVEN IF LICENSOR HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. </p>
+
+      7. Termination
+
+      
+
+      
       This License and the rights granted hereunder will terminate automatically upon any breach by You of the terms of this License. Individuals or entities who have received Derivative Works or Collective Works from You under this License, however, will not have their licenses terminated provided such individuals or entities remain in full compliance with those licenses. Sections 1, 2, 5, 6, 7, and 8 will survive any termination of this License.
-      </li>
+      
 
-      <li>
+      
       Subject to the above terms and conditions, the license granted here is perpetual (for the duration of the applicable copyright in the Work). Notwithstanding the above, Licensor reserves the right to release the Work under different license terms or to stop distributing the Work at any time; provided, however that any such election will not serve to withdraw this License (or any other license that has been, or is required to be, granted under the terms of this License), and this License will continue in full force and effect unless terminated as stated above.
-      </li>
-      </ol>
+      
+      
 
-      <p><strong>8. Miscellaneous</strong> </p>
+      8. Miscellaneous
 
-      <ol type="a">
+      
 
-      <li>
+      
       Each time You distribute or publicly digitally perform the Work or a Collective Work, the Licensor offers to the recipient a license to the Work on the same terms and conditions as the license granted to You under this License.
-      </li>
+      
 
-      <li>
+      
       Each time You distribute or publicly digitally perform a Derivative Work, Licensor offers to the recipient a license to the original Work on the same terms and conditions as the license granted to You under this License.
-      </li>
+      
 
-      <li>
+      
       If any provision of this License is invalid or unenforceable under applicable law, it shall not affect the validity or enforceability of the remainder of the terms of this License, and without further action by the parties to this agreement, such provision shall be reformed to the minimum extent necessary to make such provision valid and enforceable.
-      </li>
+      
 
-      <li>
+      
       No term or provision of this License shall be deemed waived and no breach consented to unless such waiver or consent shall be in writing and signed by the party to be charged with such waiver or consent.
 
-      </li>
+      
 
-      <li>
+      
       This License constitutes the entire agreement between the parties with respect to the Work licensed here. There are no understandings, agreements or representations with respect to the Work not specified here. Licensor shall not be bound by any additional provisions that may appear in any communication from You. This License may not be modified without the mutual written agreement of the Licensor and You.
-      </li>
-      </ol>
+      
+      
 
 
 >>> ant-1.7.1
@@ -2670,7 +2641,7 @@ For the Windows Installer component:
     * The lzma compression module for NSIS is licensed under the Common Public
        License version 1.0. 
 
-******[VMWARE DOES NOT DISTRIBUTE THE LZMA COMPRESSION MODULE; THUS, THE FULL TEXT OF THE COMMON PUBLIC LICENSE 1.0 HAS BEEN OMITTED.]******
+[VMWARE DOES NOT DISTRIBUTE THE LZMA COMPRESSION MODULE; THUS, THE FULL TEXT OF THE COMMON PUBLIC LICENSE 1.0 HAS BEEN OMITTED.]
 
 zlib/libpng license
 
@@ -2971,7 +2942,7 @@ Apache CXF
 
 > CPL 1.0
 
-******[VMWARE DOES NOT DISTRIBUTE WSDL4J]******
+***[VMWARE DOES NOT DISTRIBUTE WSDL4J]***
 
 
 From: 'an unknown organization'
@@ -3072,7 +3043,7 @@ Apache CXF
 
 > CPL 1.0
 
-******[VMWARE DOES NOT DISTRIBUTE WSDL4J]******
+[VMWARE DOES NOT DISTRIBUTE WSDL4J]
 
 From: 'an unknown organization'
 - WSDL4J (http://sf.net/projects/wsdl4j) wsdl4j:wsdl4j:jar:1.6.2
@@ -3241,7 +3212,7 @@ Apache CXF
 
 > CPL 1.0
 
-******[VMWARE DOES NOT DISTRIBUTE WSDL4J]******
+[VMWARE DOES NOT DISTRIBUTE WSDL4J]
 
 From: 'an unknown organization'
 - WSDL4J (http://sf.net/projects/wsdl4j) wsdl4j:wsdl4j:jar:1.6.2
@@ -4191,13 +4162,13 @@ Copyright 2001-2007 The Apache Software Foundation
 This product includes software developed by
 The Apache Software Foundation (http://www.apache.org/).
 
-******[VMware Inc. does not distribute JUnit; thus, the full text of the Common Public License 1.0 has been omitted.]******
 
 JUnit testing support is provided by JUnit, under the 
 Common Public License Version 1.0: 
 	http://www.opensource.org/licenses/cpl.php
 See http://www.junit.org/
 
+[VMware Inc. does not distribute JUnit; thus, the full text of the Common Public License 1.0 has been omitted.]
 
 Small parts of the POI component HDGF are based on VSDump,
 and are under the GNU General Public Licence version 3 (GPL v3):
@@ -5034,9 +5005,7 @@ The Apache Software Foundation (http://www.apache.org/).
 Portions of this software were originally based on the following:
      - software copyright (c) 1999, IBM Corporation., http://www.ibm.com.
      - software copyright (c) 1999, Sun Microsystems., http://www.sun.com.
-     - voluntary contributions made by Paul Eng on behalf of the 
-       Apache Software Foundation that were originally developed at iClick, Inc.,
-       software copyright (c) 1999.
+     - voluntary contributions made by Paul Eng on behalf of the Apache Software Foundation that were originally developed at iClick, Inc., software copyright (c) 1999.
 
 
 >>> xml-apis-1.3.04
@@ -5170,11 +5139,6 @@ three-part BSD license.
 Common Development and Distribution License, V1.0 is applicable to the following component(s).
 
 
->>> jms-api-1.1.0
-
-License : CDDL 1.0
-
-
 >>> activation-1.1
 
 License  :  CDDL 1.0
@@ -5185,162 +5149,9 @@ License  :  CDDL 1.0
 License: CDDL 1.0
 
 
->>> jsr311-api-1.1.1
-
-The contents of this file are subject to the terms
-of the Common Development and Distribution License
-(the "License").  You may not use this file except
-in compliance with the License.
-
-You can obtain a copy of the license at
-http://www.opensource.org/licenses/cddl1.php
-See the License for the specific language governing
-permissions and limitations under the License.
-
-
-ADDITIONAL LICENSE INFORMATION:
-
-
-> Apache 2.0
-
-jsr311-api-1.1.1-sources.jar\javax\ws\rs\core\GenericEntity.java
-
-This file incorporates work covered by the following copyright and
-permission notice:
-
-Copyright (C) 2006 Google Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-
->>> jta-1.1
-
-The contents of this file are subject to the terms 
-of the Common Development and Distribution License 
-(the License).  You may not use this file except in
-compliance with the License.
-
-You can obtain a copy of the license at 
-https://glassfish.dev.java.net/public/CDDLv1.0.html or
-glassfish/bootstrap/legal/CDDLv1.0.txt.
-See the License for the specific language governing 
-permissions and limitations under the License.
-
-When distributing Covered Code, include this CDDL 
-Header Notice in each file and include the License file 
-at glassfish/bootstrap/legal/CDDLv1.0.txt.  
-If applicable, add the following below the CDDL Header, 
-with the fields enclosed by brackets [] replaced by
-you own identifying information: 
-"Portions Copyrighted [year] [name of copyright owner]"
-
-Copyright 2006 Sun Microsystems, Inc. All rights reserved.
-
-
-
-
-
---------------- SECTION 4: Eclipse Public License, V1.0 ----------
-
-Eclipse Public License, V1.0 is applicable to the following component(s).
-
-
->>> aspectj-1.6.8
-
-Copyright (c) 2006 Contributors.
-All rights reserved.
-
-This program and the accompanying materials are made available
-under the terms of the Eclipse Public License v1.0
-which accompanies this distribution and is available at
-http://eclipse.org/legal/epl-v10.html
-
-
-ADDITIONAL LICENSE INFORMATION:
-
-
-Portions Licensed:
-
-
-  The Apache Software License, Version 1.1
- 
-  Copyright (c) 2001 The Apache Software Foundation.  All rights
-  reserved.
- 
-  Redistribution and use in source and binary forms, with or without
-  modification, are permitted provided that the following conditions
-  are met:
- 
-  1. Redistributions of source code must retain the above copyright
-     notice, this list of conditions and the following disclaimer.
- 
-  2. Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in
-     the documentation and/or other materials provided with the
-     distribution.
- 
-  3. The end-user documentation included with the redistribution,
-     if any, must include the following acknowledgment:
-        "This product includes software developed by the
-         Apache Software Foundation (http://www.apache.org/)."
-     Alternately, this acknowledgment may appear in the software itself,
-     if and wherever such third-party acknowledgments normally appear.
- 
-  4. The names "Apache" and "Apache Software Foundation" and
-     "Apache BCEL" must not be used to endorse or promote products
-     derived from this software without prior written permission. For
-     written permission, please contact apache@apache.org.
- 
-  5. Products derived from this software may not be called "Apache",
-     "Apache BCEL", nor may "Apache" appear in their name, without
-     prior written permission of the Apache Software Foundation.
- 
-  THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
-  WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
-  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-  DISCLAIMED.  IN NO EVENT SHALL THE APACHE SOFTWARE FOUNDATION OR
-  ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
-  USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
-  OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
-  SUCH DAMAGE.
-  
-  This software consists of voluntary contributions made by many
-  individuals on behalf of the Apache Software Foundation.  For more
-  information on the Apache Software Foundation, please see
-  <http://www.apache.org/>.
-
-
---------------- SECTION 5: GNU General Public License, V2.0 ----------
-
-GNU General Public License, V2.0 is applicable to the following component(s).
-
-
-
->>> stax-api-1.0-2
-
-[PLEASE NOTE:  VMWARE, INC. ELECTS TO USE AND DISTRIBUTE THIS COMPONENT UNDER THE TERMS OF THE GPL 2.0.  PLEASE SEE THE APPENDIX TO REVIEW THE FULL TEXT OF THE GPL 2.0.  THE ORIGINAL LICENSE TERMS ARE REPRODUCED BELOW ONLY AS A REFERENCE.]
-
-THIS SOFTWARE IS AVAILABLE UNDER A DUAL LICENSE MODEL: CDDL 1.0 and GPL v2.
-
-
-
 >>> jaxb-impl-2.1.12.jar-2.1.12
 
-[PLEASE NOTE:  VMWARE, INC. ELECTS TO USE AND DISTRIBUTE THIS COMPONENT UNDER THE TERMS OF THE GPL 2.0.  PLEASE SEE THE APPENDIX TO REVIEW THE FULL TEXT OF THE GPL 2.0.  THE ORIGINAL LICENSE TERMS ARE REPRODUCED BELOW ONLY AS A REFERENCE.]
+[PLEASE NOTE:  VMWARE, INC. ELECTS TO USE AND DISTRIBUTE THIS COMPONENT UNDER THE TERMS OF THE CDDL 1.0.  PLEASE SEE THE APPENDIX TO REVIEW THE FULL TEXT OF THE CDDL 1.0.  THE ORIGINAL LICENSE TERMS ARE REPRODUCED BELOW ONLY AS A REFERENCE.]
 
 Licenses: Dual license consisting of the CDDL v1.0 and GPL v2.
 
@@ -6095,6 +5906,157 @@ I grep-ed the source. GNU and GPL has no hits, '?' yieds 11 hits but none of the
 are license related. "copyright" and "license" yield no hits either.
 
 
+>>> jms-api-1.1.0
+
+License: CDDL 1.0
+
+
+>>> jsr311-api-1.1.1
+
+The contents of this file are subject to the terms
+of the Common Development and Distribution License
+(the "License").  You may not use this file except
+in compliance with the License.
+
+You can obtain a copy of the license at
+http://www.opensource.org/licenses/cddl1.php
+See the License for the specific language governing
+permissions and limitations under the License.
+
+
+ADDITIONAL LICENSE INFORMATION:
+
+
+> Apache 2.0
+
+jsr311-api-1.1.1-sources.jar\javax\ws\rs\core\GenericEntity.java
+
+This file incorporates work covered by the following copyright and
+permission notice:
+
+Copyright (C) 2006 Google Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+
+>>> jta-1.1
+
+The contents of this file are subject to the terms 
+of the Common Development and Distribution License 
+(the License).  You may not use this file except in
+compliance with the License.
+
+You can obtain a copy of the license at 
+https://glassfish.dev.java.net/public/CDDLv1.0.html or
+glassfish/bootstrap/legal/CDDLv1.0.txt.
+See the License for the specific language governing 
+permissions and limitations under the License.
+
+When distributing Covered Code, include this CDDL 
+Header Notice in each file and include the License file 
+at glassfish/bootstrap/legal/CDDLv1.0.txt.  
+If applicable, add the following below the CDDL Header, 
+with the fields enclosed by brackets [] replaced by
+you own identifying information: 
+"Portions Copyrighted [year] [name of copyright owner]"
+
+Copyright 2006 Sun Microsystems, Inc. All rights reserved.
+
+
+>>> stax-api-1.0-2
+
+[PLEASE NOTE:  VMWARE, INC. ELECTS TO USE AND DISTRIBUTE THIS COMPONENT UNDER THE TERMS OF THE CDDL 1.0.  PLEASE SEE THE APPENDIX TO REVIEW THE FULL TEXT OF THE CDDL 1.0.  THE ORIGINAL LICENSE TERMS ARE REPRODUCED BELOW ONLY AS A REFERENCE.]
+
+THIS SOFTWARE IS AVAILABLE UNDER A DUAL LICENSE MODEL: CDDL 1.0 and GPL v2.
+
+
+--------------- SECTION 4: Eclipse Public License, V1.0 ----------
+
+Eclipse Public License, V1.0 is applicable to the following component(s).
+
+
+>>> aspectj-1.6.8
+
+Copyright (c) 2006 Contributors.
+All rights reserved.
+
+This program and the accompanying materials are made available
+under the terms of the Eclipse Public License v1.0
+which accompanies this distribution and is available at
+http://eclipse.org/legal/epl-v10.html
+
+
+ADDITIONAL LICENSE INFORMATION:
+
+
+Portions Licensed:
+
+
+  The Apache Software License, Version 1.1
+ 
+  Copyright (c) 2001 The Apache Software Foundation.  All rights
+  reserved.
+ 
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions
+  are met:
+ 
+  1. Redistributions of source code must retain the above copyright
+     notice, this list of conditions and the following disclaimer.
+ 
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
+     the documentation and/or other materials provided with the
+     distribution.
+ 
+  3. The end-user documentation included with the redistribution,
+     if any, must include the following acknowledgment:
+        "This product includes software developed by the
+         Apache Software Foundation (http://www.apache.org/)."
+     Alternately, this acknowledgment may appear in the software itself,
+     if and wherever such third-party acknowledgments normally appear.
+ 
+  4. The names "Apache" and "Apache Software Foundation" and
+     "Apache BCEL" must not be used to endorse or promote products
+     derived from this software without prior written permission. For
+     written permission, please contact apache@apache.org.
+ 
+  5. Products derived from this software may not be called "Apache",
+     "Apache BCEL", nor may "Apache" appear in their name, without
+     prior written permission of the Apache Software Foundation.
+ 
+  THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
+  WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED.  IN NO EVENT SHALL THE APACHE SOFTWARE FOUNDATION OR
+  ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
+  USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+  OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+  SUCH DAMAGE.
+  
+  This software consists of voluntary contributions made by many
+  individuals on behalf of the Apache Software Foundation.  For more
+  information on the Apache Software Foundation, please see
+  <http://www.apache.org/>.
+
+
+--------------- SECTION 5: GNU General Public License, V2.0 ----------
+
+GNU General Public License, V2.0 is applicable to the following component(s).
 
 
 >>> amqp-client-1.8.1
@@ -6530,6 +6492,111 @@ Luc Boudreau(JIRA)      Luc Boudreau
 
 -------------------------------------------------------------------------------
 * JBoss is a registered trademark of Red Hat Middleware LLC.
+
+
+>>> jcifs-1.3.17
+
+jcifs msrpc client library in Java
+
+Copyright (C) 2007  "Michael B. Allen" <jcifs at samba dot org>
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+
+
+ADDITIONAL LICENSE INFORMATION:
+
+
+> GPL 2.0
+
+jcifs-1.3.17.tgz\jcifs-1.3.17.tar\jcifs_1.3.17\examples\pipes\ reatenp.c
+
+examples for the jcifs smb client library in Java
+Copyright (C) 2000  "Michael B. Allen" <jcifs at samba dot org>
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+
+> MIT
+
+jcifs-1.3.17.tgz\jcifs-1.3.17.tar\jcifs_1.3.17\src\jcifs\util\ DES.java
+
+The meat of this code is by Dave Zimmerman <dzimm@widget.com>, and is:
+
+Copyright (c) 1996 Widget Workshop, Inc. All Rights Reserved.
+
+Permission to use, copy, modify, and distribute this software
+and its documentation for NON-COMMERCIAL or COMMERCIAL purposes and
+without fee is hereby granted, provided that this copyright notice is kept
+intact.
+
+WIDGET WORKSHOP MAKES NO REPRESENTATIONS OR WARRANTIES ABOUT THE SUITABILITY
+OF THE SOFTWARE, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+TO THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE, OR NON-INFRINGEMENT. WIDGET WORKSHOP SHALL NOT BE LIABLE
+FOR ANY DAMAGES SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR
+DISTRIBUTING THIS SOFTWARE OR ITS DERIVATIVES.
+
+THIS SOFTWARE IS NOT DESIGNED OR INTENDED FOR USE OR RESALE AS ON-LINE
+CONTROL EQUIPMENT IN HAZARDOUS ENVIRONMENTS REQUIRING FAIL-SAFE
+PERFORMANCE, SUCH AS IN THE OPERATION OF NUCLEAR FACILITIES, AIRCRAFT
+NAVIGATION OR COMMUNICATION SYSTEMS, AIR TRAFFIC CONTROL, DIRECT LIFE
+SUPPORT MACHINES, OR WEAPONS SYSTEMS, IN WHICH THE FAILURE OF THE
+SOFTWARE COULD LEAD DIRECTLY TO DEATH, PERSONAL INJURY, OR SEVERE
+PHYSICAL OR ENVIRONMENTAL DAMAGE ("HIGH RISK ACTIVITIES").  WIDGET WORKSHOP
+SPECIFICALLY DISCLAIMS ANY EXPRESS OR IMPLIED WARRANTY OF FITNESS FOR
+HIGH RISK ACTIVITIES.
+
+
+> LGPL 2.0
+
+jcifs-1.3.17.tgz\jcifs-1.3.17.tar\jcifs_1.3.17\src\jcifs\util\Encdec.java
+
+encdec - encode and decode integers, times, and
+internationalized strings to and from popular binary formats
+http://www.ioplex.com/~miallen/encdec/
+Copyright (c) 2003 Michael B. Allen <mballen@erols.com>
+
+The GNU Library General Public License
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Library General Public
+License as published by the Free Software Foundation; either
+version 2 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Library General Public License for more details.
+
+You should have received a copy of the GNU Library General Public
+License along with this library; if not, write to the Free
+Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
+MA 02111-1307, USA
 
 
 >>> jcommon-1.0.10
@@ -8269,7 +8336,7 @@ That's all there is to it!
 
 --------------- SECTION 5: GNU Lesser General Public License, V3.0 -----------
 
-		   GNU LESSER GENERAL PUBLIC LICENSE
+				 GNU LESSER GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
 
  Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
@@ -9005,254 +9072,7 @@ one year after the cause of action arose. Each party waives its rights
 to a jury trial in any resulting litigation.
 
 
---------------- SECTION 8: Creative Commons Attribution License, V2.5 -----------
-
-Creative Commons Attribution 2.5
-
-CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND DOES NOT PROVIDE
-LEGAL SERVICES. DISTRIBUTION OF THIS LICENSE DOES NOT CREATE AN
-ATTORNEY-CLIENT RELATIONSHIP. CREATIVE COMMONS PROVIDES THIS INFORMATION
-ON AN "AS-IS" BASIS. CREATIVE COMMONS MAKES NO WARRANTIES REGARDING THE
-INFORMATION PROVIDED, AND DISCLAIMS LIABILITY FOR DAMAGES RESULTING FROM
-ITS USE.
-
-License
-
-THE WORK (AS DEFINED BELOW) IS PROVIDED UNDER THE TERMS OF THIS CREATIVE
-COMMONS PUBLIC LICENSE ("CCPL" OR "LICENSE"). THE WORK IS PROTECTED BY
-COPYRIGHT AND/OR OTHER APPLICABLE LAW. ANY USE OF THE WORK OTHER THAN AS
-AUTHORIZED UNDER THIS LICENSE OR COPYRIGHT LAW IS PROHIBITED.
-
-BY EXERCISING ANY RIGHTS TO THE WORK PROVIDED HERE, YOU ACCEPT AND AGREE
-TO BE BOUND BY THE TERMS OF THIS LICENSE. THE LICENSOR GRANTS YOU THE
-RIGHTS CONTAINED HERE IN CONSIDERATION OF YOUR ACCEPTANCE OF SUCH TERMS
-AND CONDITIONS.
-
-1. Definitions
-
-a. "Collective Work" means a work, such as a periodical issue, anthology
-or encyclopedia, in which the Work in its entirety in unmodified form,
-along with a number of other contributions, constituting separate and
-independent works in themselves, are assembled into a collective whole.
-A work that constitutes a Collective Work will not be considered a
-Derivative Work (as defined below) for the purposes of this License.
-
-b. "Derivative Work" means a work based upon the Work or upon the Work
-and other pre-existing works, such as a translation, musical
-arrangement, dramatization, fictionalization, motion picture version,
-sound recording, art reproduction, abridgment, condensation, or any
-other form in which the Work may be recast, transformed, or adapted,
-except that a work that constitutes a Collective Work will not be
-considered a Derivative Work for the purpose of this License. For the
-avoidance of doubt, where the Work is a musical composition or sound
-recording, the synchronization of the Work in timed-relation with a
-moving image ("synching") will be considered a Derivative Work for the
-purpose of this License.
-
-c. "Licensor" means the individual or entity that offers the Work under
-the terms of this License.
-
-d. "Original Author" means the individual or entity who created the
-Work.
-
-e. "Work" means the copyrightable work of authorship offered under the
-terms of this License.
-
-f. "You" means an individual or entity exercising rights under this
-License who has not previously violated the terms of this License with
-respect to the Work, or who has received express permission from the
-Licensor to exercise rights under this License despite a previous
-violation.
-
-2. Fair Use Rights. Nothing in this license is intended to reduce,
-limit, or restrict any rights arising from fair use, first sale or other
-limitations on the exclusive rights of the copyright owner under
-copyright law or other applicable laws.
-
-3. License Grant. Subject to the terms and conditions of this License,
-Licensor hereby grants You a worldwide, royalty-free, non-exclusive,
-perpetual (for the duration of the applicable copyright) license to
-exercise the rights in the Work as stated below:
-
-a. to reproduce the Work, to incorporate the Work into one or more
-Collective Works, and to reproduce the Work as incorporated in the
-Collective Works;
-
-b. to create and reproduce Derivative Works;
-
-c. to distribute copies or phonorecords of, display publicly, perform
-publicly, and perform publicly by means of a digital audio transmission
-the Work including as incorporated in Collective Works;
-
-d. to distribute copies or phonorecords of, display publicly, perform
-publicly, and perform publicly by means of a digital audio transmission
-Derivative Works.
-
-e. For the avoidance of doubt, where the work is a musical composition:
-
-i. Performance Royalties Under Blanket Licenses. Licensor waives the
-exclusive right to collect, whether individually or via a performance
-rights society (e.g. ASCAP, BMI, SESAC), royalties for the public
-performance or public digital performance (e.g. webcast) of the Work.
-
-ii. Mechanical Rights and Statutory Royalties. Licensor waives the
-exclusive right to collect, whether individually or via a music rights
-agency or designated agent (e.g. Harry Fox Agency), royalties for any
-phonorecord You create from the Work ("cover version") and distribute,
-subject to the compulsory license created by 17 USC Section 115 of the
-US Copyright Act (or the equivalent in other jurisdictions).
-
-f. Webcasting Rights and Statutory Royalties. For the avoidance of
-doubt, where the Work is a sound recording, Licensor waives the
-exclusive right to collect, whether individually or via a
-performance-rights society (e.g. SoundExchange), royalties for the
-public digital performance (e.g. webcast) of the Work, subject to the
-compulsory license created by 17 USC Section 114 of the US Copyright Act
-(or the equivalent in other jurisdictions).
-
-
-The above rights may be exercised in all media and formats whether now
-known or hereafter devised. The above rights include the right to make
-such modifications as are technically necessary to exercise the rights
-in other media and formats. All rights not expressly granted by Licensor
-are hereby reserved.
-
-4. Restrictions. The license granted in Section 3 above is expressly
-made subject to and limited by the following restrictions:
-
-a. You may distribute, publicly display, publicly perform, or publicly
-digitally perform the Work only under the terms of this License, and You
-must include a copy of, or the Uniform Resource Identifier for, this
-License with every copy or phonorecord of the Work You distribute,
-publicly display, publicly perform, or publicly digitally perform. You
-may not offer or impose any terms on the Work that alter or restrict the
-terms of this License or the recipients' exercise of the rights granted
-hereunder. You may not sublicense the Work. You must keep intact all
-notices that refer to this License and to the disclaimer of warranties.
-You may not distribute, publicly display, publicly perform, or publicly
-digitally perform the Work with any technological measures that control
-access or use of the Work in a manner inconsistent with the terms of
-this License Agreement. The above applies to the Work as incorporated in
-a Collective Work, but this does not require the Collective Work apart
-from the Work itself to be made subject to the terms of this License. If
-You create a Collective Work, upon notice from any Licensor You must, to
-the extent practicable, remove from the Collective Work any credit as
-required by clause 4(b), as requested. If You create a Derivative Work,
-upon notice from any Licensor You must, to the extent practicable,
-remove from the Derivative Work any credit as required by clause 4(b),
-as requested.
-
-b. If you distribute, publicly display, publicly perform, or publicly
-digitally perform the Work or any Derivative Works or Collective Works,
-You must keep intact all copyright notices for the Work and provide,
-reasonable to the medium or means You are utilizing: (i) the name of the
-Original Author (or pseudonym, if applicable) if supplied, and/or (ii)
-if the Original Author and/or Licensor designate another party or
-parties (e.g. a sponsor institute, publishing entity, journal) for
-attribution in Licensor's copyright notice, terms of service or by other
-reasonable means, the name of such party or parties; the title of the
-Work if supplied; to the extent reasonably practicable, the Uniform
-Resource Identifier, if any, that Licensor specifies to be associated
-with the Work, unless such URI does not refer to the copyright notice or
-licensing information for the Work; and in the case of a Derivative
-Work, a credit identifying the use of the Work in the Derivative Work
-(e.g., "French translation of the Work by Original Author," or
-"Screenplay based on original Work by Original Author"). Such credit may
-be implemented in any reasonable manner; provided, however, that in the
-case of a Derivative Work or Collective Work, at a minimum such credit
-will appear where any other comparable authorship credit appears and in
-a manner at least as prominent as such other comparable authorship
-credit.
-
-5. Representations, Warranties and Disclaimer
-
-UNLESS OTHERWISE MUTUALLY AGREED TO BY THE PARTIES IN WRITING, LICENSOR
-OFFERS THE WORK AS-IS AND MAKES NO REPRESENTATIONS OR WARRANTIES OF ANY
-KIND CONCERNING THE WORK, EXPRESS, IMPLIED, STATUTORY OR OTHERWISE,
-INCLUDING, WITHOUT LIMITATION, WARRANTIES OF TITLE, MERCHANTIBILITY,
-FITNESS FOR A PARTICULAR PURPOSE, NONINFRINGEMENT, OR THE ABSENCE OF
-LATENT OR OTHER DEFECTS, ACCURACY, OR THE PRESENCE OF ABSENCE OF ERRORS,
-WHETHER OR NOT DISCOVERABLE. SOME JURISDICTIONS DO NOT ALLOW THE
-EXCLUSION OF IMPLIED WARRANTIES, SO SUCH EXCLUSION MAY NOT APPLY TO YOU.
-
-6. Limitation on Liability. EXCEPT TO THE EXTENT REQUIRED BY APPLICABLE
-LAW, IN NO EVENT WILL LICENSOR BE LIABLE TO YOU ON ANY LEGAL THEORY FOR
-ANY SPECIAL, INCIDENTAL, CONSEQUENTIAL, PUNITIVE OR EXEMPLARY DAMAGES
-ARISING OUT OF THIS LICENSE OR THE USE OF THE WORK, EVEN IF LICENSOR HAS
-BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-
-7. Termination
-
-a. This License and the rights granted hereunder will terminate
-automatically upon any breach by You of the terms of this License.
-Individuals or entities who have received Derivative Works or Collective
-Works from You under this License, however, will not have their licenses
-terminated provided such individuals or entities remain in full
-compliance with those licenses. Sections 1, 2, 5, 6, 7, and 8 will
-survive any termination of this License.
-
-b. Subject to the above terms and conditions, the license granted here
-is perpetual (for the duration of the applicable copyright in the Work).
-Notwithstanding the above, Licensor reserves the right to release the
-Work under different license terms or to stop distributing the Work at
-any time; provided, however that any such election will not serve to
-withdraw this License (or any other license that has been, or is
-required to be, granted under the terms of this License), and this
-License will continue in full force and effect unless terminated as
-stated above.
-
-8. Miscellaneous
-
-a. Each time You distribute or publicly digitally perform the Work or a
-Collective Work, the Licensor offers to the recipient a license to the
-Work on the same terms and conditions as the license granted to You
-under this License.
-
-b. Each time You distribute or publicly digitally perform a Derivative
-Work, Licensor offers to the recipient a license to the original Work on
-the same terms and conditions as the license granted to You under this
-License.
-
-c. If any provision of this License is invalid or unenforceable under
-applicable law, it shall not affect the validity or enforceability of
-the remainder of the terms of this License, and without further action
-by the parties to this agreement, such provision shall be reformed to
-the minimum extent necessary to make such provision valid and
-enforceable.
-
-d. No term or provision of this License shall be deemed waived and no
-breach consented to unless such waiver or consent shall be in writing
-and signed by the party to be charged with such waiver or consent.
-
-e. This License constitutes the entire agreement between the parties
-with respect to the Work licensed here. There are no understandings,
-agreements or representations with respect to the Work not specified
-here. Licensor shall not be bound by any additional provisions that may
-appear in any communication from You. This License may not be modified
-without the mutual written agreement of the Licensor and You.
-
-
-Creative Commons is not a party to this License, and makes no warranty
-whatsoever in connection with the Work. Creative Commons will not be
-liable to You or any party on any legal theory for any damages
-whatsoever, including without limitation any general, special,
-incidental or consequential damages arising in connection to this
-license. Notwithstanding the foregoing two (2) sentences, if Creative
-Commons has expressly identified itself as the Licensor hereunder, it
-shall have all rights and obligations of Licensor.
-
-Except for the limited purpose of indicating to the public that the Work
-is licensed under the CCPL, neither party will use the trademark
-"Creative Commons" or any related trademark or logo of Creative Commons
-without the prior written consent of Creative Commons. Any permitted use
-will be in compliance with Creative Commons' then-current trademark
-usage guidelines, as may be published on its website or otherwise made
-available upon request from time to time.
-
-Creative Commons may be contacted at http://creativecommons.org/. 
-
-
---------------- SECTION 9: GNU General Public License, V3.0 -----------
+--------------- SECTION 8: GNU General Public License, V3.0 -----------
 
                     GNU GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
@@ -9930,9 +9750,153 @@ Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 
 
---------------- SECTION 10: Academic Free License, V2.1 -----------
+--------------- SECTION 9: Creative Commons Attribution, V1.0 -----------
 
-				  The Academic Free License v. 2.1
+Creative Commons Attribution 1.0
+
+CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND DOES NOT PROVIDE LEGAL SERVICES. DISTRIBUTION OF THIS DRAFT LICENSE DOES NOT CREATE AN ATTORNEY-CLIENT RELATIONSHIP. CREATIVE COMMONS PROVIDES THIS INFORMATION ON AN "AS-IS" BASIS. CREATIVE COMMONS MAKES NO WARRANTIES REGARDING THE INFORMATION PROVIDED, AND DISCLAIMS LIABILITY FOR DAMAGES RESULTING FROM ITS USE.
+License
+
+THE WORK (AS DEFINED BELOW) IS PROVIDED UNDER THE TERMS OF THIS CREATIVE COMMONS PUBLIC LICENSE ("CCPL" OR "LICENSE"). THE WORK IS PROTECTED BY COPYRIGHT AND/OR OTHER APPLICABLE LAW. ANY USE OF THE WORK OTHER THAN AS AUTHORIZED UNDER THIS LICENSE IS PROHIBITED.
+
+BY EXERCISING ANY RIGHTS TO THE WORK PROVIDED HERE, YOU ACCEPT AND AGREE TO BE BOUND BY THE TERMS OF THIS LICENSE. THE LICENSOR GRANTS YOU THE RIGHTS CONTAINED HERE IN CONSIDERATION OF YOUR ACCEPTANCE OF SUCH TERMS AND CONDITIONS.
+
+1. Definitions
+
+a. "Collective Work" means a work, such as a periodical issue, anthology or encyclopedia, in which the Work in its entirety in unmodified form, along with a number of other contributions, constituting separate and independent works in themselves, are assembled into a collective whole. A work that constitutes a Collective Work will not be considered a Derivative Work (as defined below) for the purposes of this License.
+
+b. "Derivative Work" means a work based upon the Work or upon the Work and other pre-existing works, such as a translation, musical arrangement, dramatization, fictionalization, motion picture version, sound recording, art reproduction, abridgment, condensation, or any other form in which the Work may be recast, transformed, or adapted, except that a work that constitutes a Collective Work will not be considered a Derivative Work for the purpose of this License.
+
+c. "Licensor" means the individual or entity that offers the Work under the terms of this License.
+
+d. "Original Author" means the individual or entity who created the Work.
+
+e. "Work" means the copyrightable work of authorship offered under the terms of this License.
+
+f. "You" means an individual or entity exercising rights under this License who has not previously violated the terms of this License with respect to the Work, or who has received express permission from the Licensor to exercise rights under this License despite a previous violation.
+
+2. Fair Use Rights. Nothing in this license is intended to reduce, limit, or restrict any rights arising from fair use, first sale or other limitations on the exclusive rights of the copyright owner under copyright law or other applicable laws.
+
+3. License Grant. Subject to the terms and conditions of this License, Licensor hereby grants You a worldwide, royalty-free, non-exclusive, perpetual (for the duration of the applicable copyright) license to exercise the rights in the Work as stated below:
+
+a. to reproduce the Work, to incorporate the Work into one or more Collective Works, and to reproduce the Work as incorporated in the Collective Works;
+
+b. to create and reproduce Derivative Works;
+
+c. to distribute copies or phonorecords of, display publicly, perform publicly, and perform publicly by means of a digital audio transmission the Work including as incorporated in Collective Works;
+
+d. to distribute copies or phonorecords of, display publicly, perform publicly, and perform publicly by means of a digital audio transmission Derivative Works;
+
+The above rights may be exercised in all media and formats whether now known or hereafter devised. The above rights include the right to make such modifications as are technically necessary to exercise the rights in other media and formats. All rights not expressly granted by Licensor are hereby reserved.
+
+4. Restrictions. The license granted in Section 3 above is expressly made subject to and limited by the following restrictions:
+
+a. You may distribute, publicly display, publicly perform, or publicly digitally perform the Work only under the terms of this License, and You must include a copy of, or the Uniform Resource Identifier for, this License with every copy or phonorecord of the Work You distribute, publicly display, publicly perform, or publicly digitally perform. You may not offer or impose any terms on the Work that alter or restrict the terms of this License or the recipients' exercise of the rights granted hereunder. You may not sublicense the Work. You must keep intact all notices that refer to this License and to the disclaimer of warranties. You may not distribute, publicly display, publicly perform, or publicly digitally perform the Work with any technological measures that control access or use of the Work in a manner inconsistent with the terms of this License Agreement. The above applies to the Work as incorporated in a Collective Work, but this does not require the Collective Work apart from the Work itself to be made subject to the terms of this License. If You create a Collective Work, upon notice from any Licensor You must, to the extent practicable, remove from the Collective Work any reference to such Licensor or the Original Author, as requested. If You create a Derivative Work, upon notice from any Licensor You must, to the extent practicable, remove from the Derivative Work any reference to such Licensor or the Original Author, as requested.
+
+b. If you distribute, publicly display, publicly perform, or publicly digitally perform the Work or any Derivative Works or Collective Works, You must keep intact all copyright notices for the Work and give the Original Author credit reasonable to the medium or means You are utilizing by conveying the name (or pseudonym if applicable) of the Original Author if supplied; the title of the Work if supplied; in the case of a Derivative Work, a credit identifying the use of the Work in the Derivative Work (e.g., "French translation of the Work by Original Author," or "Screenplay based on original Work by Original Author"). Such credit may be implemented in any reasonable manner; provided, however, that in the case of a Derivative Work or Collective Work, at a minimum such credit will appear where any other comparable authorship credit appears and in a manner at least as prominent as such other comparable authorship credit.
+
+
+5. Representations, Warranties and Disclaimer
+
+a. By offering the Work for public release under this License, Licensor represents and warrants that, to the best of Licensor's knowledge after reasonable inquiry:
+
+i. Licensor has secured all rights in the Work necessary to grant the license rights hereunder and to permit the lawful exercise of the rights granted hereunder without You having any obligation to pay any royalties, compulsory license fees, residuals or any other payments;
+
+ii. The Work does not infringe the copyright, trademark, publicity rights, common law rights or any other right of any third party or constitute defamation, invasion of privacy or other tortious injury to any third party.
+
+b. EXCEPT AS EXPRESSLY STATED IN THIS LICENSE OR OTHERWISE AGREED IN WRITING OR REQUIRED BY APPLICABLE LAW, THE WORK IS LICENSED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED INCLUDING, WITHOUT LIMITATION, ANY WARRANTIES REGARDING THE CONTENTS OR ACCURACY OF THE WORK.
+
+6. Limitation on Liability. EXCEPT TO THE EXTENT REQUIRED BY APPLICABLE LAW, AND EXCEPT FOR DAMAGES ARISING FROM LIABILITY TO 
+
+A THIRD PARTY RESULTING FROM BREACH OF THE WARRANTIES IN SECTION 5, IN NO EVENT WILL LICENSOR BE LIABLE TO YOU ON ANY LEGAL THEORY FOR ANY SPECIAL, INCIDENTAL, CONSEQUENTIAL, PUNITIVE OR EXEMPLARY DAMAGES ARISING OUT OF THIS LICENSE OR THE USE OF THE WORK, EVEN IF LICENSOR HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+7. Termination
+
+a. This License and the rights granted hereunder will terminate automatically upon any breach by You of the terms of this License. Individuals or entities who have received Derivative Works or Collective Works from You under this License, however, will not have their licenses terminated provided such individuals or entities remain in full compliance with those licenses. Sections 1, 2, 5, 6, 7, and 8 will survive any termination of this License.
+
+b. Subject to the above terms and conditions, the license granted here is perpetual (for the duration of the applicable copyright in the Work). Notwithstanding the above, Licensor reserves the right to release the Work under different license terms or to stop distributing the Work at any time; provided, however that any such election will not serve to withdraw this License (or any other license that has been, or is required to be, granted under the terms of this License), and this License will continue in full force and effect unless terminated as stated above.
+
+8. Miscellaneous
+
+a. Each time You distribute or publicly digitally perform the Work or a Collective Work, the Licensor offers to the recipient a license to the Work on the same terms and conditions as the license granted to You under this License.
+
+b. Each time You distribute or publicly digitally perform a Derivative Work, Licensor offers to the recipient a license to the original Work on the same terms and conditions as the license granted to You under this License.
+
+c. If any provision of this License is invalid or unenforceable under applicable law, it shall not affect the validity or enforceability of the remainder of the terms of this License, and without further action by the parties to this agreement, such provision shall be reformed to the minimum extent necessary to make such provision valid and enforceable.
+
+d. No term or provision of this License shall be deemed waived and no breach consented to unless such waiver or consent shall be in writing and signed by the party to be charged with such waiver or consent.
+
+e. This License constitutes the entire agreement between the parties with respect to the Work licensed here. There are no understandings, agreements or representations with respect to the Work not specified here. Licensor shall not be bound by any additional provisions that may appear in any communication from You. This License may not be modified without the mutual written agreement of the Licensor and You.
+
+
+--------------- SECTION 10: Creative Commons Attribution, V2.5  -----------
+
+CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND DOES NOT PROVIDE LEGAL SERVICES. DISTRIBUTION OF THIS LICENSE DOES NOT CREATE AN ATTORNEY-CLIENT RELATIONSHIP. CREATIVE COMMONS PROVIDES THIS INFORMATION ON AN "AS-IS" BASIS. CREATIVE COMMONS MAKES NO WARRANTIES REGARDING THE INFORMATION PROVIDED, AND DISCLAIMS LIABILITY FOR DAMAGES RESULTING FROM ITS USE.
+
+License
+
+THE WORK (AS DEFINED BELOW) IS PROVIDED UNDER THE TERMS OF THIS CREATIVE COMMONS PUBLIC LICENSE ("CCPL" OR "LICENSE"). THE WORK IS PROTECTED BY COPYRIGHT AND/OR OTHER APPLICABLE LAW. ANY USE OF THE WORK OTHER THAN AS AUTHORIZED UNDER THIS LICENSE OR COPYRIGHT LAW IS PROHIBITED.
+
+BY EXERCISING ANY RIGHTS TO THE WORK PROVIDED HERE, YOU ACCEPT AND AGREE TO BE BOUND BY THE TERMS OF THIS LICENSE. THE LICENSOR GRANTS YOU THE RIGHTS CONTAINED HERE IN CONSIDERATION OF YOUR ACCEPTANCE OF SUCH TERMS AND CONDITIONS.
+
+1. Definitions
+
+"Collective Work" means a work, such as a periodical issue, anthology or encyclopedia, in which the Work in its entirety in unmodified form, along with a number of other contributions, constituting separate and independent works in themselves, are assembled into a collective whole. A work that constitutes a Collective Work will not be considered a Derivative Work (as defined below) for the purposes of this License.
+
+"Derivative Work" means a work based upon the Work or upon the Work and other pre-existing works, such as a translation, musical arrangement, dramatization, fictionalization, motion picture version, sound recording, art reproduction, abridgment, condensation, or any other form in which the Work may be recast, transformed, or adapted, except that a work that constitutes a Collective Work will not be considered a Derivative Work for the purpose of this License. For the avoidance of doubt, where the Work is a musical composition or sound recording, the synchronization of the Work in timed-relation with a moving image ("synching") will be considered a Derivative Work for the purpose of this License.
+
+"Licensor" means the individual or entity that offers the Work under the terms of this License.
+
+"Original Author" means the individual or entity who created the Work.
+
+"Work" means the copyrightable work of authorship offered under the terms of this License.
+
+"You" means an individual or entity exercising rights under this License who has not previously violated the terms of this License with respect to the Work, or who has received express permission from the Licensor to exercise rights under this License despite a previous violation.
+
+2. Fair Use Rights. Nothing in this license is intended to reduce, limit, or restrict any rights arising from fair use, first sale or other limitations on the exclusive rights of the copyright owner under copyright law or other applicable laws.
+
+3. License Grant. Subject to the terms and conditions of this License, Licensor hereby grants You a worldwide, royalty-free, non-exclusive, perpetual (for the duration of the applicable copyright) license to exercise the rights in the Work as stated below:
+
+    to reproduce the Work, to incorporate the Work into one or more Collective Works, and to   reproduce the Work as incorporated in the Collective Works;
+    to create and reproduce Derivative Works;
+    to distribute copies or phonorecords of, display publicly, perform publicly, and perform publicly by means of a digital audio transmission the Work including as incorporated in Collective Works;
+    to distribute copies or phonorecords of, display publicly, perform publicly, and perform publicly by means of a digital audio transmission Derivative Works.
+
+For the avoidance of doubt, where the work is a musical composition:
+     Performance Royalties Under Blanket Licenses. Licensor waives the exclusive right to collect, whether individually or via a performance rights society (e.g. ASCAP, BMI, SESAC), royalties for the public performance or public digital performance (e.g. webcast) of the Work.
+     Mechanical Rights and Statutory Royalties. Licensor waives the exclusive right to collect, whether individually or via a music rights agency or designated agent (e.g. Harry Fox Agency), royalties for any phonorecord You create from the Work ("cover version") and distribute, subject to the compulsory license created by 17 USC Section 115 of the US Copyright Act (or the equivalent in other jurisdictions).
+    Webcasting Rights and Statutory Royalties. For the avoidance of doubt, where the Work is a sound recording, Licensor waives the exclusive right to collect, whether individually or via a performance-rights society (e.g. SoundExchange), royalties for the public digital performance (e.g. webcast) of the Work, subject to the compulsory license created by 17 USC Section 114 of the US Copyright Act (or the equivalent in other jurisdictions).
+
+The above rights may be exercised in all media and formats whether now known or hereafter devised. The above rights include the right to make such modifications as are technically necessary to exercise the rights in other media and formats. All rights not expressly granted by Licensor are hereby reserved.
+
+4. Restrictions.The license granted in Section 3 above is expressly made subject to and limited by the following restrictions:
+
+    You may distribute, publicly display, publicly perform, or publicly digitally perform the Work only under the terms of this License, and You must include a copy of, or the Uniform Resource Identifier for, this License with every copy or phonorecord of the Work You distribute, publicly display, publicly perform, or publicly digitally perform. You may not offer or impose any terms on the Work that alter or restrict the terms of this License or the recipients' exercise of the rights granted hereunder. You may not sublicense the Work. You must keep intact all notices that refer to this License and to the disclaimer of warranties. You may not distribute, publicly display, publicly perform, or publicly digitally perform the Work with any technological measures that control access or use of the Work in a manner inconsistent with the terms of this License Agreement. The above applies to the Work as incorporated in a Collective Work, but this does not require the Collective Work apart from the Work itself to be made subject to the terms of this License. If You create a Collective Work, upon notice from any Licensor You must, to the extent practicable, remove from the Collective Work any credit as required by clause 4(b), as requested. If You create a Derivative Work, upon notice from any Licensor You must, to the extent practicable, remove from the Derivative Work any credit as required by clause 4(b), as requested.
+    If you distribute, publicly display, publicly perform, or publicly digitally perform the Work or any Derivative Works or Collective Works, You must keep intact all copyright notices for the Work and provide, reasonable to the medium or means You are utilizing: (i) the name of the Original Author (or pseudonym, if applicable) if supplied, and/or (ii) if the Original Author and/or Licensor designate another party or parties (e.g. a sponsor institute, publishing entity, journal) for attribution in Licensor's copyright notice, terms of service or by other reasonable means, the name of such party or parties; the title of the Work if supplied; to the extent reasonably practicable, the Uniform Resource Identifier, if any, that Licensor specifies to be associated with the Work, unless such URI does not refer to the copyright notice or licensing information for the Work; and in the case of a Derivative Work, a credit identifying the use of the Work in the Derivative Work (e.g., "French translation of the Work by Original Author," or "Screenplay based on original Work by Original Author"). Such credit may be implemented in any reasonable manner; provided, however, that in the case of a Derivative Work or Collective Work, at a minimum such credit will appear where any other comparable authorship credit appears and in a manner at least as prominent as such other comparable authorship credit.
+
+5. Representations, Warranties and Disclaimer
+
+UNLESS OTHERWISE MUTUALLY AGREED TO BY THE PARTIES IN WRITING, LICENSOR OFFERS THE WORK AS-IS AND MAKES NO REPRESENTATIONS OR WARRANTIES OF ANY KIND CONCERNING THE WORK, EXPRESS, IMPLIED, STATUTORY OR OTHERWISE, INCLUDING, WITHOUT LIMITATION, WARRANTIES OF TITLE, MERCHANTIBILITY, FITNESS FOR A PARTICULAR PURPOSE, NONINFRINGEMENT, OR THE ABSENCE OF LATENT OR OTHER DEFECTS, ACCURACY, OR THE PRESENCE OF ABSENCE OF ERRORS, WHETHER OR NOT DISCOVERABLE. SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OF IMPLIED WARRANTIES, SO SUCH EXCLUSION MAY NOT APPLY TO YOU.
+
+6. Limitation on Liability. EXCEPT TO THE EXTENT REQUIRED BY APPLICABLE LAW, IN NO EVENT WILL LICENSOR BE LIABLE TO YOU ON ANY LEGAL THEORY FOR ANY SPECIAL, INCIDENTAL, CONSEQUENTIAL, PUNITIVE OR EXEMPLARY DAMAGES ARISING OUT OF THIS LICENSE OR THE USE OF THE WORK, EVEN IF LICENSOR HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+7. Termination
+
+    This License and the rights granted hereunder will terminate automatically upon any breach by You of the terms of this License. Individuals or entities who have received Derivative Works or Collective Works from You under this License, however, will not have their licenses terminated provided such individuals or entities remain in full compliance with those licenses. Sections 1, 2, 5, 6, 7, and 8 will survive any termination of this License.
+    Subject to the above terms and conditions, the license granted here is perpetual (for the duration of the applicable copyright in the Work). Notwithstanding the above, Licensor reserves the right to release the Work under different license terms or to stop distributing the Work at any time; provided, however that any such election will not serve to withdraw this License (or any other license that has been, or is required to be, granted under the terms of this License), and this License will continue in full force and effect unless terminated as stated above.
+
+8. Miscellaneous
+
+    Each time You distribute or publicly digitally perform the Work or a Collective Work, the Licensor offers to the recipient a license to the Work on the same terms and conditions as the license granted to You under this License.
+    Each time You distribute or publicly digitally perform a Derivative Work, Licensor offers to the recipient a license to the original Work on the same terms and conditions as the license granted to You under this License.
+    If any provision of this License is invalid or unenforceable under applicable law, it shall not affect the validity or enforceability of the remainder of the terms of this License, and without further action by the parties to this agreement, such provision shall be reformed to the minimum extent necessary to make such provision valid and enforceable.
+    No term or provision of this License shall be deemed waived and no breach consented to unless such waiver or consent shall be in writing and signed by the party to be charged with such waiver or consent.
+    This License constitutes the entire agreement between the parties with respect to the Work licensed here. There are no understandings, agreements or representations with respect to the Work not specified here. Licensor shall not be bound by any additional provisions that may appear in any communication from You. This License may not be modified without the mutual written agreement of the Licensor and You.
+
+	
+--------------- SECTION 11: Academic Free License, V2.1 -----------
+
+The Academic Free License v. 2.1
 
 This Academic Free License (the "License") applies to any original work of 
 authorship (the "Original Work") whose owner (the "Licensor") has placed the 
@@ -10063,7 +10027,7 @@ of the United Nations Convention on Contracts for the International Sale
 of Goods is expressly excluded. Any use of the Original Work outside
 the scope of this License or after its termination shall be subject
 to the requirements and penalties of the U.S. Copyright Act, 17 U.S.C.
-§ 101 et seq., the equivalent laws of other countries, and international
+ 101 et seq., the equivalent laws of other countries, and international
 treaty. This section shall survive the termination of this License.
 
 12) Attorneys Fees.
@@ -10102,8 +10066,6 @@ license without modification. This license may not be modified without
 the express written permission of its copyright owner.
 
 
-
-
 ===========================================================================
 
 To the extent any open source components are licensed under the
@@ -10124,4 +10086,4 @@ years from the date you acquired this Software product. Alternatively,
 the Source Files may accompany the VMware product.
 
 
-[HYPERICHQ50RCSV101712]
+[HYPERICHQ57BNV040413]
