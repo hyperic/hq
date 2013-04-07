@@ -42,6 +42,7 @@
 		<module>jvm-plugin</module>
 		<module>memcached-plugin</module>
 		<module>mssql-plugin</module>
+		<module>multilogtrack-plugin</module>
 		<module>mysql-plugin</module>
 		<module>mysql_stats-plugin</module>
 		<module>nagios-plugin</module>
