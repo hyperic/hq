@@ -84,15 +84,15 @@ public class NotificationsTransferImpl implements NotificationsTransfer {
     @Transactional (readOnly=true)
     public NotificationsReport poll(long registrationId, Integer subjectId) throws UnregisteredException {
         final InternalNotificationReport report = endpointQueue.poll(registrationId);
-        return getNotificationReport(subjectId, report);
+        return getNotificationReport(registrationId, subjectId, report);
     }
 
-    private NotificationsReport getNotificationReport(Integer subjectId, InternalNotificationReport report) {
+    private NotificationsReport getNotificationReport(long regId, Integer subjectId, InternalNotificationReport report) {
         AuthzSubject subject = authzSubjectManager.getSubjectById(subjectId);
         InternalResourceDetailsType internalResourceDetailsType = report.getResourceDetailsType();
         ResourceDetailsType resourceDetailsType = null;
         resourceDetailsType = ResourceDetailsType.valueOf(internalResourceDetailsType);
-        return mapper.toNotificationsReport(subject, rscTransfer, resourceDetailsType, report.getNotifications());
+        return mapper.toNotificationsReport(subject, regId, rscTransfer, resourceDetailsType, report.getNotifications());
     }
 
     @Transactional (readOnly=true)
@@ -113,12 +113,14 @@ public class NotificationsTransferImpl implements NotificationsTransfer {
         register(endpoint, null, authzSubjectId);
     }
 
-    public void register(NotificationEndpoint endpoint, InternalResourceDetailsType type, final int authzSubjectId) {
+    public void register(final NotificationEndpoint endpoint, InternalResourceDetailsType type,
+                         final int authzSubjectId) {
         final Transformer<InternalNotificationReport, String> t = new Transformer<InternalNotificationReport, String>() {
             @Override
             public String transform(InternalNotificationReport internalReport) {
                 try {
-                    final NotificationsReport report = getNotificationReport(authzSubjectId, internalReport);
+                    final long regId = endpoint.getRegistrationId();
+                    final NotificationsReport report = getNotificationReport(regId, authzSubjectId, internalReport);
 	                final JAXBContext context = JAXBContext.newInstance(NotificationsReport.class);
 	                final StringWriter writer = new StringWriter();
 	                context.createMarshaller().marshal(report, writer);
@@ -131,7 +133,9 @@ public class NotificationsTransferImpl implements NotificationsTransfer {
         endpointQueue.register(endpoint, type, t);
     }
 
-    public void getEndointStatus(long registrationID,HttpEndpointDefinition endpoint, ExternalEndpointStatus externalEndpointStatus) throws UnknownEndpointException {
+    public void getEndointStatus(long registrationID,HttpEndpointDefinition endpoint,
+                                 ExternalEndpointStatus externalEndpointStatus)
+    throws UnknownEndpointException {
         NotificationEndpoint backendEndpoint = this.endpointQueue.getEndpoint((long) registrationID);
         if (backendEndpoint instanceof HttpEndpoint) {
             this.mapper.toHttpEndpoint((HttpEndpoint) backendEndpoint,endpoint);

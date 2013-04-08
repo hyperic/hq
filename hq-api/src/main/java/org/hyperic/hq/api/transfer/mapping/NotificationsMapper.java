@@ -12,12 +12,9 @@ import org.hyperic.hq.api.model.common.ExternalEndpointStatus;
 import org.hyperic.hq.api.model.measurements.HttpEndpointDefinition;
 import org.hyperic.hq.api.transfer.ResourceTransfer;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.notifications.AccumulatedRegistrationData;
 import org.hyperic.hq.notifications.BasePostingStatus;
 import org.hyperic.hq.notifications.EndpointStatus;
 import org.hyperic.hq.notifications.HttpEndpoint;
-import org.hyperic.hq.notifications.IllegalPostingException;
-import org.hyperic.hq.notifications.NotificationEndpoint;
 import org.hyperic.hq.notifications.RegistrationStatus;
 import org.hyperic.hq.notifications.model.BaseNotification;
 import org.hyperic.hq.notifications.model.CreatedResourceNotification;
@@ -36,11 +33,13 @@ public class NotificationsMapper {
     @Autowired
     protected ExceptionToErrorCodeMapper errorHandler ;
 
-    public NotificationsReport toNotificationsReport(final AuthzSubject subject, ResourceTransfer resourceTransfer, ResourceDetailsType resourceDetailsType,
-            List<? extends BaseNotification> ns) {
-        NotificationsReport res = new NotificationsReport(this.errorHandler);
+    public NotificationsReport toNotificationsReport(AuthzSubject subject, long registrationId,
+                                                     ResourceTransfer resourceTransfer,
+                                                     ResourceDetailsType resourceDetailsType,
+                                                     List<? extends BaseNotification> ns) {
+        NotificationsReport res = new NotificationsReport(this.errorHandler, registrationId);
         if (ns==null || ns.isEmpty()) {
-            return new NotificationsReport(null);
+            return new NotificationsReport(null, registrationId);
         }
         List<Notification> creationNotifications = null;
         List<Notification> updateNotifications = null;
@@ -65,7 +64,8 @@ public class NotificationsMapper {
                         creationNotifications.add(n);
                     } 
                 } catch (Throwable t) {
-                    res.addFailedResource(String.valueOf(((CreatedResourceNotification) bn).getResourceID()), ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID.getErrorCode(), null, new Object[] {""});
+                    String resId = String.valueOf(((CreatedResourceNotification) bn).getResourceID());
+                    res.addFailedResource(resId, ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID.getErrorCode(), null, new Object[] {""});
                 }
             } else if (bn instanceof RemovedResourceNotification) {
                 if (removalNotifications==null) {
