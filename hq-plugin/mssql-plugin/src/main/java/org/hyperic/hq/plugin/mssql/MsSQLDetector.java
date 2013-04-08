@@ -40,8 +40,8 @@ public class MsSQLDetector
 
     static final String PROP_DB = "db.name";
     private static final String DB_NAME = "Database";
-    private static final String DEFAULT_NAME = "MSSQL";
-    static final String DEFAULT_SERVICE_NAME = DEFAULT_NAME + "SERVER";
+    static final String DEFAULT_SQLSERVER_SERVICE_NAME = "MSSQLSERVER";
+    static final String DEFAULT_SQLAGENT_SERVICE_NAME = "SQLSERVERAGENT";
     private static final Log log = LogFactory.getLog(MsSQLDetector.class);
 
     public List getServerResources(ConfigResponse platformConfig) throws PluginException {
@@ -135,9 +135,9 @@ public class MsSQLDetector
 
         String serviceName =
                 serverConfig.getValue(Win32ControlPlugin.PROP_SERVICENAME,
-                DEFAULT_SERVICE_NAME);
+                DEFAULT_SQLSERVER_SERVICE_NAME);
 
-        if (serviceName.equals(DEFAULT_SERVICE_NAME)) {
+        if (serviceName.equals(DEFAULT_SQLSERVER_SERVICE_NAME)) {
             // not sure why they drop the 'MS' from the service name
             // in the default case.
             serviceName = "SQLServer";

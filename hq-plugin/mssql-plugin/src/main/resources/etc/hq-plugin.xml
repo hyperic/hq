@@ -519,6 +519,7 @@ drop table #tTables
             group="Resource Utilization"
             collectionType="trendsup"
             units="none"/>
+            
     <metric name="SQL Re-Compilations"
             alias="SQLReCompilations"
             template="SQL Statistics:Platform=Win32:SQL Re-Compilations/Sec"
@@ -610,6 +611,73 @@ drop table #tTables
   -->
 
     <metrics name="mssql-cache"/>
+
+    <metrics name="mssql-broker-activation">
+
+        <metric name="Stored Procedures Invoked"
+            alias="StoredProceduresInvoked"
+            template="Broker Activation(_Total):Platform=Win32:Stored Procedures Invoked/sec"
+            indicator="true"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            collectionType="trendsup"
+            units="none"/>
+
+    </metrics>
+ 
+     <metrics name="mssql-agent-jobs">
+
+        <metric name="Active jobs"
+            alias="ActiveJobs"
+            template="Jobs(_Total):Platform=Win32,Prefix=SQLAgent:Active jobs"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            collectionType="dynamic"
+            units="none"/>
+
+        <metric name="Successful jobs"
+            alias="SuccessfulJobs"
+            template="Jobs(_Total):Platform=Win32,Prefix=SQLAgent:Successful jobs"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            collectionType="dynamic"
+            units="none"/>
+
+        <metric name="Failed jobs"
+            alias="FailedJobs"
+            template="Jobs(_Total):Platform=Win32,Prefix=SQLAgent:Failed jobs"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            collectionType="dynamic"
+            units="none"/>
+
+        <metric name="Job success rate"
+            alias="JobSuccessRate"
+            template="Jobs(_Total):Platform=Win32,Type=Formatted,Prefix=SQLAgent:Job success rate"
+            indicator="true"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            collectionType="dynamic"
+            units="none"/>
+
+        <metric name="Jobs activated"
+            alias="JobsActivatedPerMinute"
+            template="Jobs(_Total):Platform=Win32,Prefix=SQLAgent:Jobs activated/minute"
+            indicator="true"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            collectionType="trendsup"
+            units="none"/>
+
+        <metric name="Queued jobs"
+            alias="QueuedJobs"
+            template="Jobs(_Total):Platform=Win32,Prefix=SQLAgent:Queued jobs"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            collectionType="dynamic"
+            units="none"/>
+
+    </metrics>
     
     <server name="MsSQL"
           version="2000"
@@ -640,11 +708,14 @@ drop table #tTables
             <include name="mssql-access"/>
             <include name="mssql-general"/>
             <include name="mssql-memory"/>
+            <include name="mssql-stats"/>
             <include name="mssql-locks"/>
             <include name="mssql-latches"/>
             <include name="mssql-cache"/>
             <include name="Buffer-Manager"/>
-        </metrics>
+            <include name="mssql-broker-activation"/>
+            <include name="mssql-agent-jobs"/>
+         </metrics>
 
         <config>
             <option name="service_name"
@@ -741,10 +812,13 @@ drop table #tTables
             <include name="mssql-access"/>
             <include name="mssql-general"/>
             <include name="mssql-memory"/>
+            <include name="mssql-stats"/>
             <include name="mssql-locks"/>
             <include name="mssql-latches"/>
             <include name="mssql-cache"/>
             <include name="Buffer-Manager_2012"/>
+            <include name="mssql-broker-activation"/>
+            <include name="mssql-agent-jobs"/>
         </metrics>
     </server>
 </plugin>
