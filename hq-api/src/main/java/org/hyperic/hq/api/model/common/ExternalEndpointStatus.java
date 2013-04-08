@@ -17,13 +17,13 @@ public class ExternalEndpointStatus {
     public static final String INVALID = "INVALID";
     
     @XmlAttribute(name="creationTime")
-    protected long creationTime;
+    protected Long creationTime;
     @XmlAttribute(name="status")
     protected String status;
     @XmlAttribute(name="last-successful")
-    protected long successfulTime;
+    protected Long successfulTime;
     @XmlAttribute(name="last-failure")
-    protected long failureTime;
+    protected Long failureTime;
     @XmlAttribute (name="message")
     protected String message;
     
