@@ -113,13 +113,13 @@ public class NotificationsMapper {
     }
 
     public void toEndpointStatus(EndpointStatus endpointStatus,ExternalEndpointStatus externalEndpointStatus, RegistrationStatus regStat) {
-        String endpointStatusMsg = "OK";
+        String endpointStatusMsg = ExternalEndpointStatus.OK;
         if (!regStat.isValid()) {
-            endpointStatusMsg = "INVALID";
+            endpointStatusMsg = ExternalEndpointStatus.INVALID;
         } else {
             BasePostingStatus lastPostStatus = endpointStatus.getLast();
             if (lastPostStatus!=null && !lastPostStatus.isSuccessful()) {
-                endpointStatusMsg = "ERROR";
+                endpointStatusMsg = ExternalEndpointStatus.ERROR;
             }
         }
         externalEndpointStatus.setStatus(endpointStatusMsg);

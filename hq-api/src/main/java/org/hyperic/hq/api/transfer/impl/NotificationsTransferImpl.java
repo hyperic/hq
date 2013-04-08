@@ -131,17 +131,44 @@ public class NotificationsTransferImpl implements NotificationsTransfer {
         endpointQueue.register(endpoint, type, t);
     }
 
-    public void getEndointStatus(long registrationID,HttpEndpointDefinition endpoint, ExternalEndpointStatus externalEndpointStatus) throws UnknownEndpointException {
+    public EndpointStatusAndDefinition getEndointStatus(long registrationID) {
         NotificationEndpoint backendEndpoint = this.endpointQueue.getEndpoint((long) registrationID);
-        if (backendEndpoint instanceof HttpEndpoint) {
-            this.mapper.toHttpEndpoint((HttpEndpoint) backendEndpoint,endpoint);
-        } else {
-            log.error("registration " + registrationID + " is registered to an unknown type of endpoint");
-            throw new UnknownEndpointException(registrationID);
+        if (backendEndpoint==null) {
+            ExternalEndpointStatus externalEndpointStatus = new ExternalEndpointStatus();
+            externalEndpointStatus.setStatus(ExternalEndpointStatus.INVALID);
+            externalEndpointStatus.setMessage("registration " + registrationID + " does not exist");
+            return new EndpointStatusAndDefinition(null,externalEndpointStatus);
         }
+        if (!(backendEndpoint instanceof HttpEndpoint)) {
+            ExternalEndpointStatus externalEndpointStatus = new ExternalEndpointStatus();
+            externalEndpointStatus.setStatus(ExternalEndpointStatus.INVALID);
+            externalEndpointStatus.setMessage("registration " + registrationID + " exists but is not registered to an endpoint");
+            return new EndpointStatusAndDefinition(null,externalEndpointStatus);
+        }
+        HttpEndpointDefinition endpoint = new HttpEndpointDefinition();
+        this.mapper.toHttpEndpoint((HttpEndpoint) backendEndpoint,endpoint);
         RegistrationStatus regStat = new RegistrationStatus();
         EndpointStatus endpointStatus = new EndpointStatus();
         this.endpointQueue.getEndpointAndRegStatus(registrationID,endpointStatus,regStat);
+        ExternalEndpointStatus externalEndpointStatus = new ExternalEndpointStatus();
         this.mapper.toEndpointStatus(endpointStatus,externalEndpointStatus, regStat);
+        return new EndpointStatusAndDefinition(endpoint,externalEndpointStatus);
+    }
+    
+    public static class EndpointStatusAndDefinition {
+        protected HttpEndpointDefinition endpoint;
+        protected ExternalEndpointStatus externalEndpointStatus;
+        
+        public EndpointStatusAndDefinition(HttpEndpointDefinition endpoint,
+                ExternalEndpointStatus externalEndpointStatus) {
+            this.endpoint = endpoint;
+            this.externalEndpointStatus = externalEndpointStatus;
+        }
+        public HttpEndpointDefinition getEndpoint() {
+            return endpoint;
+        }
+        public ExternalEndpointStatus getExternalEndpointStatus() {
+            return externalEndpointStatus;
+        }
     }
 }

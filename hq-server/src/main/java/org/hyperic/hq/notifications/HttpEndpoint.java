@@ -137,10 +137,10 @@ public class HttpEndpoint extends NotificationEndpoint {
                 }
             }
             int status = resp.getStatusLine().getStatusCode();
-            return new HTTPStatus(time,status);
+            return new HTTPStatus(time,status,respBuf);
         }catch(IOException e1) {
             log.error(e1,e1);
-            return new PostingStatus(time,false);
+            return new PostingStatus(time,false,e1.getMessage());
         }
     }
 

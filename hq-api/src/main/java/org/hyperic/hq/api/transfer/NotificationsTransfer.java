@@ -28,6 +28,7 @@ import org.hyperic.hq.api.model.NotificationsReport;
 import org.hyperic.hq.api.model.common.ExternalEndpointStatus;
 import org.hyperic.hq.api.model.measurements.HttpEndpointDefinition;
 import org.hyperic.hq.api.services.impl.ApiMessageContext;
+import org.hyperic.hq.api.transfer.impl.NotificationsTransferImpl.EndpointStatusAndDefinition;
 import org.hyperic.hq.api.transfer.mapping.UnknownEndpointException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.NotFoundException;
@@ -40,6 +41,5 @@ public interface NotificationsTransfer {
     public void unregister(long id);
     public void register(NotificationEndpoint endpoint, InternalResourceDetailsType type, int authzSubjectId);
     public void register(NotificationEndpoint endpoint, int authzSubjectId);
-    public void getEndointStatus(long registrationID, HttpEndpointDefinition endpoint, ExternalEndpointStatus endpointStatus) 
-            throws UnknownEndpointException, PermissionException, NotFoundException;
+    public EndpointStatusAndDefinition getEndointStatus(long registrationID) throws PermissionException, NotFoundException;
 }
