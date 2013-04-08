@@ -1,0 +1,44 @@
+#! /bin/sh
+#
+# chkconfig: 2345 80 30
+# description: Starts and stops the hyperic agent.
+#
+# /etc/init.d/hyperic-hqee-agent
+#
+### BEGIN INIT INFO
+# Provides:          hyperic-hqee-agent
+# Required-Start:    $network
+# X-UnitedLinux-Should-Start: $time 
+# Required-Stop:     
+# X-UnitedLinux-Should-Stop: 
+# Default-Start:     3 5
+# Default-Stop:      0 1 2 6
+# Short-Description: hyperic-hqee-agent init
+# Description:       Starts Hyperic HQ Agent, located by default in
+#		/opt/hyperic/hyperic-hqee-agent directory.
+### END INIT INFO
+
+export JAVA_HOME=/usr/lib/jvm/java-6-openjdk/jre
+AGENT_DIR=/opt/hyperic/hyperic-hqee-agent/bin/hq-agent.sh
+case "$1" in
+  start)
+ printf "Starting the hyperic agent...\n"
+ $AGENT_DIR start
+;;
+  stop)
+ printf "Stopping the hyperic agent...\n"
+ $AGENT_DIR stop
+;;
+  restart)
+ printf "Restarting the hyperic agent...\n"
+ $AGENT_DIR restart
+;;
+ status)
+ $AGENT_DIR status
+;;
+  *)
+    echo "Usage: $0 {start|stop|restart|status}"
+    exit 1
+  ;;
+esac
+

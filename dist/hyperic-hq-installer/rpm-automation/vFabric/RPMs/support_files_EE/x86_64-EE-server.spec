@@ -1,15 +1,15 @@
 %define HQ_Component_Name       hyperic-hqee-installer
-%define HQ_Component_Version    @hq.version@
-%define HQ_Component_Edition    EE
-%define HQ_Component_Build  x86-linux
-%define HQ_Component_Release    1 
+%define HQ_Component_Version    5.1.0
+%define HQ_Component_Edition	EE
+%define HQ_Component_Build	x86-64-linux
+%define HQ_Component_Release   	1 
 
-%define HQ_User         hyperic
-%define HQ_Group        vfabric
-%define HQ_User_Home        /opt/hyperic
+%define HQ_User			hyperic
+%define HQ_Group		vfabric
+%define HQ_User_Home		/opt/hyperic
 
-%define HQ_SERVER_PROPERTIES_FILE   vfabric_hyperic_server.properties
-%define HQ_SERVER_PROPERTIES_DIR    /etc/vmware/vfabric/hyperic
+%define HQ_SERVER_PROPERTIES_FILE	vfabric_hyperic_server.properties
+%define HQ_SERVER_PROPERTIES_DIR	/etc/vmware/vfabric/hyperic
 %define __spec_install_post /usr/lib/rpm/brp-compress
 %define __os_install_post /usr/lib/rpm/brp-compress
 
@@ -25,14 +25,14 @@ Version:        %{HQ_Component_Version}.%{HQ_Component_Edition}
 Release:        %{HQ_Component_Release}
 Summary:        VMware vFabric Hyperic Server
 Source0:        %{HQ_Component_Name}-%{HQ_Component_Version}-%{HQ_Component_Build}.tar.gz
-Vendor:     VMware, Inc.
+Vendor:		VMware, Inc.
 License:        Commercial
 BuildRoot:      %{_tmppath}/%{name}-%{HQ_Component_Version}.%{HQ_Component_Edition}-%{release}-root
 Group:          Applications/Monitoring
-Prefix:     %{HQ_User_Home}
-Url:        http://www.vmware.com/products/vfabric-hyperic/overview.html
-ExclusiveArch:  i386
-ExclusiveOS:    linux
+Prefix:		%{HQ_User_Home}
+Url: 		http://www.vmware.com/products/vfabric-hyperic/overview.html
+ExclusiveArch:	x86_64
+ExclusiveOS:	linux
 
 %description
 
@@ -116,7 +116,6 @@ if [[ ! -f %{HQ_SERVER_PROPERTIES_DIR} ]]; then
        mkdir -p %{HQ_SERVER_PROPERTIES_DIR} > /dev/null 2>&1
 fi
 
-
 if [ -d /opt/hyperic/server-current ] && cd /opt/hyperic/server-current; then
    cd %{prefix}/%{HQ_Component_Name}
    printf "export HQ_SERVER_INSTALL_PATH=%{prefix}\n" >> /etc/bashrc
@@ -144,11 +143,11 @@ fi
 
 if [ ! -f /etc/init.d/hyperic-hq-server ]; then
     source /etc/bashrc
-    %{__rm} -Rf $HQ_SERVER_INSTALL_PATH/server-%{HQ_Component_Version}-%{HQ_Component_Edition}
-    %{__rm} -Rf $HQ_SERVER_INSTALL_PATH/hq-plugins
-    %{__rm} -Rf %{prefix}/server-current
-    %{__rm} -Rf %{prefix}/%{HQ_Component_Name}
-     echo "The HQ Server has been removed successfully"
+	%{__rm} -Rf $HQ_SERVER_INSTALL_PATH/server-%{HQ_Component_Version}-%{HQ_Component_Edition}
+	%{__rm} -Rf $HQ_SERVER_INSTALL_PATH/hq-plugins
+	%{__rm} -Rf %{prefix}/server-current
+	%{__rm} -Rf %{prefix}/%{HQ_Component_Name}
+	 echo "The HQ Server has been removed successfully"
 fi
 
 %posttrans

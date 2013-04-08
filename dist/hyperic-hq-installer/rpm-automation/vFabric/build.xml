@@ -46,7 +46,7 @@
 
     <mkdir dir="${bundle.src.dir}" />
     <mkdir dir="${rpm.build.home}/BUILD" />
-    <mkdir dir="${rpm.build.home}/RPMS/i386" />
+    <!--<mkdir dir="${rpm.build.home}/RPMS/i386" />-->
     <mkdir dir="${rpm.build.home}/RPMS/noarch" />
     <mkdir dir="${rpm.build.home}/RPMS/x86_64" />
     <mkdir dir="${rpm.build.home}/SOURCES" />
@@ -100,7 +100,7 @@
     <echo message="Copying sources bundles..." />
 
     <copy file="${bundle.src.dir}/${hq.ee.agent.nojre}" todir="${build.base}/${hq.version}-EE" />
-    <copy file="${bundle.src.dir}/${hq.ee.installer.linux}" todir="${build.base}/${hq.version}-EE-server" />
+    <!--<copy file="${bundle.src.dir}/${hq.ee.installer.linux}" todir="${build.base}/${hq.version}-EE-server" />-->
     <copy file="${bundle.src.dir}/${hq.ee.installer.linux64}" todir="${build.base}/${hq.version}-EE-server" />
   </target>
 
@@ -157,12 +157,12 @@
       build.subfolder="${hq.ee.agent.subfolder}"
       tarball.name="${hq.ee.agent.nojre}"
       spec.file.name="noarch-EE.spec"
-      init.file.name="${init.files}/hyperic-hqee-agent.init.rh" 
+      init.file.name="${init.files}/hyperic-hqee-agent.init" 
       eula.file.name="${vfabric.eula}" />
   </target>
 
 <!-- Build server RPM's. -->
-  <target name="build-x86-EE" depends="build-noarch-EE" 
+ <!-- <target name="build-x86-EE" depends="build-noarch-EE" 
     description="Build x86 EE RPM" >
     <echo message="Building x86 EE RPM..." />
 
@@ -172,12 +172,12 @@
       build.subfolder="${hq.ee.installer.subfolder}"
       tarball.name="${hq.ee.installer.linux}"
       spec.file.name="x86-EE-server.spec"
-      init.file.name="${init.files}/hyperic-hq-server.init.rh"
-      rpm.command="-tb --target=i386" />
+      init.file.name="${init.files}/hyperic-hq-server.init"
+      rpm.command="-tb target=i386" />
 
-  </target>
+  </target>-->
 
-  <target name="build-clean-server-dir" depends="build-x86-EE"
+  <target name="build-clean-server-dir" depends="build-noarch-EE"
     description="Clean server build dir to fix double jre issue" >
     <echo message="Cleaning server build dir..." />
     <delete dir="${build.base}/${hq.version}-EE-server" /> 
@@ -197,7 +197,7 @@
       build.subfolder="${hq.ee.installer.subfolder}"
       tarball.name="${hq.ee.installer.linux64}"
       spec.file.name="x86_64-EE-server.spec"
-      init.file.name="${init.files}/hyperic-hq-server.init.rh" />
+      init.file.name="${init.files}/hyperic-hq-server.init" />
 
   </target>
 
@@ -241,7 +241,7 @@
 
     </copy>
 
-    <chmod perm="+x" dir="${support.files}" includes="*.rh,*.suse,*.spec" />
+    <chmod perm="+x" dir="${support.files}" includes="*.init,*.suse,*.spec" />
     <chmod perm="+x" dir="${support.files}/properties" includes="*" />
 
     <tar destfile="${rpm.dest.dir}/rpm_support_files-${hq.version}.tgz"
@@ -250,7 +250,7 @@
 
       <tarfileset dir="${support.files}" includes="properties/" />
       <tarfileset dir="${support.files}"
-        includes="*.spec,*.rh,*.suse"
+        includes="*.spec,*.init,*.suse"
         filemode="755" />
     </tar>
 
@@ -267,7 +267,7 @@
 
     </copy>
 
-    <chmod perm="+x" dir="${support.files.EE}" includes="*.rh,*.suse,*.spec" />
+    <chmod perm="+x" dir="${support.files.EE}" includes="*.init,*.suse,*.spec" />
     <chmod perm="+x" dir="${support.files.EE}/properties" includes="*" />
 
     <tar destfile="${rpm.dest.dir}/rpm_support_files-${hq.version}-EE.tgz"
@@ -276,7 +276,7 @@
 
       <tarfileset dir="${support.files.EE}" includes="properties/" />
       <tarfileset dir="${support.files.EE}"
-        includes="*.spec,*.rh,*.suse"
+        includes="*.spec,*.init,*.suse"
         filemode="755" />
     </tar>
 
@@ -303,7 +303,7 @@
 
     <delete dir="${build.base}/${hq.version}" />
     <delete dir="${build.base}/${hq.version}-EE" />
-    <delete dir="${build.base}/${hq.version}-server" />
+    <!--<delete dir="${build.base}/${hq.version}-server" />-->
     <delete dir="${build.base}/${hq.version}-EE-server" /> 
   </target>
 

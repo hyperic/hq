@@ -7,8 +7,8 @@
 %define HQ_User			hyperic
 %define HQ_Group		vfabric
 %define HQ_User_Home		/opt/hyperic
- %define __spec_install_post /usr/lib/rpm/brp-compress
-    %define __os_install_post /usr/lib/rpm/brp-compress
+%define __spec_install_post /usr/lib/rpm/brp-compress
+%define __os_install_post /usr/lib/rpm/brp-compress
 
 AutoReqProv:    no
 
@@ -89,7 +89,7 @@ chkconfig --del %{HQ_Component_Name}
 %{__install} -d -m 755 $RPM_BUILD_ROOT/etc/init.d
 %{__install} -d -m 755 $RPM_BUILD_ROOT/%{prefix}/%{HQ_Component_Name}
 %{__install} -d -m 755 $RPM_BUILD_ROOT/%{prefix}/hq-plugins
-%{__install} -m 755 rcfiles/%{HQ_Component_Name}.init.rh $RPM_BUILD_ROOT/etc/init.d/%{HQ_Component_Name}
+%{__install} -m 755 rcfiles/%{HQ_Component_Name}.init $RPM_BUILD_ROOT/etc/init.d/%{HQ_Component_Name}
 
 # clean up files not related to linux
 %{__rm} -f bin/hq-agent.bat

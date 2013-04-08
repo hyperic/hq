@@ -1,5 +1,5 @@
 %define HQ_Component_Name       hyperic-hqee-installer
-%define HQ_Component_Version    @hq.version@
+%define HQ_Component_Version    5.1.0
 %define HQ_Component_Edition    EE
 %define HQ_Component_Build  x86-linux
 %define HQ_Component_Release    1 

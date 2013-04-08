@@ -1,13 +1,14 @@
 %define HQ_Component_Name       hyperic-hqee-agent 
-%define HQ_Component_Version    @hq.version@
+%define HQ_Component_Version    5.1.0
 %define HQ_Component_Edition	EE
-%define HQ_Component_Build	@hq.ee.build.agent@-noJRE
+%define HQ_Component_Build	noJRE
 %define HQ_Component_Release   	1
-%define HQ_Component_Build_Type @hq.build.type@
 
 %define HQ_User			hyperic
-%define HQ_Group		hyperic
+%define HQ_Group		vfabric
 %define HQ_User_Home		/opt/hyperic
+%define __spec_install_post /usr/lib/rpm/brp-compress
+%define __os_install_post /usr/lib/rpm/brp-compress
 
 AutoReqProv:    no
 
@@ -19,7 +20,7 @@ Name:           vfabric-hyperic-agent
 Version:        %{HQ_Component_Version}.%{HQ_Component_Edition}
 Release:        %{HQ_Component_Release}
 Summary:        VMware vFabric Hyperic Agent
-Source0:        %{HQ_Component_Name}-%{HQ_Component_Version}.%{HQ_Component_Build}.tar.gz
+Source0:        %{HQ_Component_Name}-%{HQ_Component_Version}-%{HQ_Component_Build}.tar.gz
 Vendor:		VMware, Inc.
 License:        Commercial
 BuildRoot:      %{_tmppath}/%{HQ_Component_Name}-%{version}-%{release}-root
@@ -27,8 +28,6 @@ Group:          Applications/Monitoring
 Prefix:		%{HQ_User_Home}
 Url: 		http://www.vmware.com/products/vfabric-hyperic/
 BuildArch:	noarch
-
-Requires:	vfabric-eula
 
 %description
 
@@ -38,32 +37,9 @@ Agent for the vFabric Hyperic HQ systems management system.
 
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
 
-%setup -T -D -b 0 -n %{HQ_Component_Name}-%{HQ_Component_Version}.%{HQ_Component_Build_Type}
+%setup -T -D -b 0 -n %{HQ_Component_Name}-%{HQ_Component_Version}
 
 %pre
-
-eula_file="/etc/vmware/vfabric/accept-vfabric-eula.txt"
-eula_file_text="I_ACCEPT_EULA_LOCATED_AT"
-eula_url="http://www.vmware.com/download/eula/vfabric_app-platform_eula.html"
-
-if [ ! -f "$eula_file" ]
-then
-   echo
-   echo "Cancelling install."
-   echo "vFabric EULA acceptance file, $eula_file, not found."
-   echo "Please install or reinstall vfabric-eula RPM file."
-   exit 1
-fi
-
-if [ `grep -c "${eula_file_text}=${eula_url}" "$eula_file"` -eq "0" ]
-then
-   echo
-   echo "Cancelling install."
-   echo "Invalid vFabric EULA acceptance file, $eula_file."
-   echo "Please install or reinstall vfabric-eula RPM file."
-   exit 1
-fi
-
 
 # If hq-agent is already installed and running (whether installed by RPM
 # or not), then kill it, but remember that it was running.
@@ -109,18 +85,18 @@ chkconfig --del %{HQ_Component_Name}
 
 %install
 
-# Current pwd is ${RPM_BUILD_ROOT}/%{HQ_Component_Name}-%{HQ_Component_Version}.%{HQ_Component_Build_Type}
+# Current pwd is ${RPM_BUILD_ROOT}/%{HQ_Component_Name}-%{HQ_Component_Version}
 %{__install} -d -m 755 $RPM_BUILD_ROOT/etc/init.d
 %{__install} -d -m 755 $RPM_BUILD_ROOT/%{prefix}/%{HQ_Component_Name}
 %{__install} -d -m 755 $RPM_BUILD_ROOT/%{prefix}/hq-plugins
-%{__install} -m 755 rcfiles/%{HQ_Component_Name}.init.rh $RPM_BUILD_ROOT/etc/init.d/%{HQ_Component_Name}
+%{__install} -m 755 rcfiles/%{HQ_Component_Name}.init $RPM_BUILD_ROOT/etc/init.d/%{HQ_Component_Name}
 
 # clean up files not related to linux
 %{__rm} -f bin/hq-agent.bat
-%{__rm} -f bundles/agent-%{HQ_Component_Version}.%{HQ_Component_Build_Type}/background.bat
-%{__rm} -rf bundles/agent-%{HQ_Component_Version}.%{HQ_Component_Build_Type}/rcfiles
-%{__rm} -f bundles/agent-%{HQ_Component_Version}.%{HQ_Component_Build_Type}/pdk/lib/sigar-x86-winnt.lib
-%{__rm} -f bundles/agent-%{HQ_Component_Version}.%{HQ_Component_Build_Type}/bin/*.bat
+%{__rm} -f bundles/agent-%{HQ_Component_Version}/background.bat
+%{__rm} -rf bundles/agent-%{HQ_Component_Version}/rcfiles
+%{__rm} -f bundles/agent-%{HQ_Component_Version}/pdk/lib/sigar-x86-winnt.lib
+%{__rm} -f bundles/agent-%{HQ_Component_Version}/bin/*.bat
 %{__rm} -f wrapper/sbin/wrapper-windows-x86-32.exe
 %{__rm} -f wrapper/sbin/wrapper-aix-ppc-64
 %{__rm} -f wrapper/sbin/wrapper-aix-ppc-32
@@ -142,7 +118,6 @@ chkconfig --del %{HQ_Component_Name}
 %{__rm} -f wrapper/lib/libwrapper-solaris-x86-32.so
 %{__rm} -f wrapper/lib/wrapper-windows-x86-32.dll
 %{__rm} -rf rcfiles
-
 
 %{__mv} -f * $RPM_BUILD_ROOT/%{prefix}/%{HQ_Component_Name}
 
@@ -204,5 +179,3 @@ exit 0
 %{prefix}/%{HQ_Component_Name}
 %config %{prefix}/%{HQ_Component_Name}/conf/*
 %config %{prefix}/hq-plugins
-
-
