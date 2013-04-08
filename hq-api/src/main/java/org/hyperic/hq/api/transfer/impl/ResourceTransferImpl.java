@@ -130,18 +130,16 @@ public class ResourceTransferImpl implements ResourceTransfer {
     private PlatformManager platformManager ; 
     private ExceptionToErrorCodeMapper errorHandler ;
     private ResourceDestinationEvaluator evaluator;
-    private ConfigBoss configBoss;
     private ConfigManager configManager;
     private IpManager ipManager;
     protected NotificationsTransfer notificationsTransfer;
 
-    private static final String RESOURCE_URL = "%sresource/%s/monitor/Visibility.do?mode=currentHealth&eid=%d:%d";
-    @Autowired  
+    @Autowired
     public ResourceTransferImpl(ResourceManager resourceManager, ResourceMapper resourceMapper,
                                 ProductBoss productBoss, CPropManager cpropManager, AppdefBoss appdepBoss, 
                                 PlatformManager platformManager, ExceptionToErrorCodeMapper errorHandler,
-                                ResourceDestinationEvaluator evaluator, ConfigBoss configBoss,
-                                ConfigManager configManager, IpManager ipManager) {
+                                ResourceDestinationEvaluator evaluator, ConfigManager configManager,
+                                IpManager ipManager) {
     	this.resourceManager = resourceManager ;
     	this.resourceMapper = resourceMapper ; 
     	this.productBoss = productBoss ; 
@@ -150,7 +148,6 @@ public class ResourceTransferImpl implements ResourceTransfer {
     	this.platformManager = platformManager ; 
     	this.errorHandler = errorHandler ; 
     	this.evaluator = evaluator;
-        this.configBoss = configBoss;
         this.configManager = configManager;
         this.ipManager = ipManager;
     }//EOM
@@ -857,7 +854,6 @@ public class ResourceTransferImpl implements ResourceTransfer {
         return new ExternalRegistrationStatus(endpoint,filterChain, registrationID, endpointStatus);
     }
 
-
     public void unregister(NotificationEndpoint endpoint) {
         evaluator.unregisterAll(endpoint);
     }
@@ -870,28 +866,6 @@ public class ResourceTransferImpl implements ResourceTransfer {
     }
     public ResourceManager getResourceManager() {
         return this.resourceManager;
-    }
-
-    @Transactional(readOnly = true)
-    public String getResourceUrl(int resourceID) {
-        Resource resource = resourceManager.getResourceById(resourceID);
-        if (resource == null) {
-            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID);
-        }
-        String hqBaseUrl = "";
-        try {
-            hqBaseUrl = configBoss.getConfig().getProperty(HQConstants.BaseURL);
-        } catch (ConfigPropertyException e) {
-            log.error("Couldn't get HQ Base Url", e);
-        }
-        ResourceType resourceType = resource.getResourceType();
-        int appDefType;
-        try {
-            appDefType = resourceType.getAppdefType();
-        } catch (IllegalArgumentException iae) {
-            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID);
-        }
-        return String.format(RESOURCE_URL, hqBaseUrl, resourceType.getLocalizedName(), appDefType, resource.getInstanceId());
     }
 
     private HttpEndpoint getHttpEndpoint(RegistrationID registrationID, HttpEndpointDefinition def) {

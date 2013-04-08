@@ -53,8 +53,12 @@ import org.hyperic.hq.api.services.impl.RestApiService;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceType;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.ui.AttrConstants;
 import org.hyperic.hq.ui.Constants;
+import static org.hyperic.hq.ui.ParamConstants.APPDEF_KEY;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.util.pager.PageControl;
@@ -307,9 +311,14 @@ public class RequestUtils {
      * Get the appdefEntityID value of the eid param from the http request
      * also works with rid/type attribute combination
      */
-    public static AppdefEntityID getEntityId(HttpServletRequest req)
+    public static AppdefEntityID getEntityId(HttpServletRequest req, ResourceManager resourceManager)
         throws ParameterNotFoundException {
-        return getEntityIds(req)[0];
+        return getEntityIds(req, resourceManager)[0];
+    }
+
+    public static AppdefEntityID getEntityId(HttpServletRequest req)
+            throws ParameterNotFoundException {
+        return getEntityIds(req, null)[0];
     }
     
     /** 
@@ -320,7 +329,7 @@ public class RequestUtils {
      * well.
      * @exception ParameterNotFoundException if the parameter was not specified
      */
-    public static AppdefEntityID[] getEntityIds(HttpServletRequest request)
+    public static AppdefEntityID[] getEntityIds(HttpServletRequest request, ResourceManager resourceManager)
         throws ParameterNotFoundException {
         String[] vals = new String[0];
         if (parameterExists(request, Constants.ENTITY_ID_PARAM)) {
@@ -334,10 +343,25 @@ public class RequestUtils {
             
             if (appdefKey.equals("0:0")) // Not really a valid key
                 throw new ParameterNotFoundException("rid and type empty");
-            
-            vals = new String[] { appdefKey };            
+
+            vals = new String[]{appdefKey};
+
+        } else if (parameterExists(request, Constants.RESOURCE_PARAM)) {
+            if (resourceManager == null) {
+                if (request.getAttribute(APPDEF_KEY) == null) {
+                    throw new ParameterNotFoundException("appdefKey not found");
+                }
+                vals = new String[]{(String) request.getAttribute(APPDEF_KEY)};
+            } else {
+                Resource resource = resourceManager.getResourceById(getIntParameter(request, Constants.RESOURCE_PARAM));
+                ResourceType resourceType = resource.getResourceType();
+                int appDefType = resourceType.getAppdefType();
+                String appdefKey = appDefType + ":" + resource.getInstanceId();
+                request.setAttribute(APPDEF_KEY, appdefKey);
+                vals = new String[]{appdefKey};
+            }
         }
-        
+
         if (vals == null || vals.length == 0) {
             throw new ParameterNotFoundException("entity ids not found");        
         }
@@ -358,6 +382,10 @@ public class RequestUtils {
         }
 
         return (AppdefEntityID[]) rv.toArray(new AppdefEntityID[0]);
+    }
+
+    public static AppdefEntityID[] getEntityIds(HttpServletRequest request)  throws ParameterNotFoundException {
+        return getEntityIds(request, null);
     }
 
     /** Retrieve the <code>Integer</code> value of the

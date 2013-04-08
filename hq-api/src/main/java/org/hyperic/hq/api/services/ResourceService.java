@@ -68,11 +68,6 @@ public interface ResourceService {
             throws SessionNotFoundException, SessionTimeoutException;
 
     @GET
-    @Path("/{resourceID}/resourceUrl")
-    String getResourceUrl(@PathParam("resourceID") final int resourceID) throws SessionNotFoundException,
-            SessionTimeoutException;
-
-    @GET
     @Path("/{platformID}")
     ResourceModel getResource(@PathParam("platformID") final String platformID,
                          @QueryParam("status") final ResourceStatusType resourceStatusType,

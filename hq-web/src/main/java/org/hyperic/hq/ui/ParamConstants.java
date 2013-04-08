@@ -255,7 +255,12 @@ public interface ParamConstants {
      * The request parameter that specifies the id of the resource to fetch.
      */
     public static final String RESOURCE_PARAM = "rid";
-    
+
+    /**
+     * appDefType : instanceId
+     */
+    public static final String APPDEF_KEY = "appdefKey";
+
     /**
      * The request parameter that specifies the type of the resource to fetch.
      */

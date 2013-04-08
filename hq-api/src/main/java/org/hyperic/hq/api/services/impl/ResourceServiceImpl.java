@@ -28,7 +28,6 @@ package org.hyperic.hq.api.services.impl;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
-import org.apache.cxf.jaxrs.ext.search.SearchContext;
 import org.hyperic.hq.api.model.ResourceModel;
 import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourceStatusType;
@@ -93,10 +92,6 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
         } 
         return resource;
 	}//EOM
-
-    public String getResourceUrl(final int resourceID) throws SessionNotFoundException, SessionTimeoutException {
-        return this.resourceTransfer.getResourceUrl(resourceID);
-    }
 
     public final RegisteredResourceBatchResponse getResources(final ResourceDetailsType[] responseMetaData, final int hierarchyDepth) throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException {
         ApiMessageContext apiMessageContext = newApiMessageContext();
