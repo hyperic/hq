@@ -118,28 +118,32 @@ public class NotificationsMapper {
     public ExternalEndpointStatus toEndpointStatus(EndpointQueue.EndpointAndRegStatus endpointAndRegStatus) {
         EndpointStatus endpointStatus = endpointAndRegStatus.getEndpointStatus();
         RegistrationStatus regStat = endpointAndRegStatus.getRegStatus();
-        
-        String endpointStatusMsg = ExternalEndpointStatus.OK;
-        BasePostingStatus lastPostStatus = endpointStatus.getLast();
         ExternalEndpointStatus externalEndpointStatus = new ExternalEndpointStatus();
-        if (!regStat.isValid()) {
-            endpointStatusMsg = ExternalEndpointStatus.INVALID;
-            // the lastPostStatus must exist and be a failure if the registration status is invalid
-            externalEndpointStatus.setMessage(lastPostStatus.getMessage());
-        } else if (lastPostStatus!=null && !lastPostStatus.isSuccessful()) {
-            endpointStatusMsg = ExternalEndpointStatus.ERROR;
-            externalEndpointStatus.setMessage(lastPostStatus.getMessage());
-        }
-        externalEndpointStatus.setStatus(endpointStatusMsg);
-        BasePostingStatus lastSuccessful = endpointStatus.getLastSuccessful();
-        if (lastSuccessful!=null) {
-            externalEndpointStatus.setLastSuccessful(lastSuccessful.getTime());
-        }
-        BasePostingStatus lastFailure = endpointStatus.getLastFailure();
-        if (lastFailure!=null) {
-            externalEndpointStatus.setLastFailure(lastFailure.getTime());
-        }
         externalEndpointStatus.setCreationTime(regStat.getCreationTime());
+        externalEndpointStatus.setStatus(ExternalEndpointStatus.OK);
+
+        if (endpointStatus!=null) {
+            BasePostingStatus lastPostStatus = endpointStatus.getLast();
+            if (!regStat.isValid()) {
+                externalEndpointStatus.setStatus(ExternalEndpointStatus.INVALID);
+                // the lastPostStatus must exist and be a failure if the registration status is invalid
+                externalEndpointStatus.setMessage(lastPostStatus.getMessage());
+            } else if (lastPostStatus!=null && !lastPostStatus.isSuccessful()) {
+                externalEndpointStatus.setStatus(ExternalEndpointStatus.ERROR);
+                externalEndpointStatus.setMessage(lastPostStatus.getMessage());
+            }
+
+            BasePostingStatus lastSuccessful = endpointStatus.getLastSuccessful();
+            if (lastSuccessful!=null) {
+                externalEndpointStatus.setLastSuccessful(lastSuccessful.getTime());
+            }
+            
+            BasePostingStatus lastFailure = endpointStatus.getLastFailure();
+            if (lastFailure!=null) {
+                externalEndpointStatus.setLastFailure(lastFailure.getTime());
+            }
+        }
+
         return externalEndpointStatus;
     }
 }

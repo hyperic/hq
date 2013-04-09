@@ -5,6 +5,7 @@ public class EndpointStatus {
     protected BasePostingStatus lastFailure;
     protected long size=0;
     
+    public EndpointStatus() {}
     public EndpointStatus(BasePostingStatus lastSuccessful, BasePostingStatus lastFailure) {
         this.addLastFailure(lastSuccessful);
         this.addLastSuccessful(lastFailure);
