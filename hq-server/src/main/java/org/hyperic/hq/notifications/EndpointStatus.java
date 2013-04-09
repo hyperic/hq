@@ -7,8 +7,8 @@ public class EndpointStatus {
     
     public EndpointStatus() {}
     public EndpointStatus(BasePostingStatus lastSuccessful, BasePostingStatus lastFailure) {
-        this.addLastFailure(lastSuccessful);
-        this.addLastSuccessful(lastFailure);
+        this.addLastFailure(lastFailure);
+        this.addLastSuccessful(lastSuccessful);
     }
     public EndpointStatus(EndpointStatus other) {
         this(other.getLastSuccessful(),other.getLastFailure());
