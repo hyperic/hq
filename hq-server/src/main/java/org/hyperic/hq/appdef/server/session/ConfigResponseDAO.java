@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -101,11 +102,18 @@ public class ConfigResponseDAO extends HibernateDAO<ConfigResponseDB> {
             .executeUpdate();
     }
 
-    private Map<Resource, ConfigResponseDB> getConfigs(Collection<Resource> list, String table) {
+    @SuppressWarnings("unchecked")
+    private Map<Resource, ConfigResponseDB> getConfigs(List<Resource> list, String table) {
         String hql = "select t.resource, t.configResponse from :table t where t.resource in (:resources)";
         hql = hql.replace(":table", table);
-        @SuppressWarnings("unchecked")
-        final List<Object[]> objs = getSession().createQuery(hql).setParameterList("resources", list).list();
+        final List<Object[]> objs = new ArrayList<Object[]>();
+        final int size = list.size();
+        for (int ii=0; ii<size; ii+=BATCH_SIZE) {
+            final int end = Math.min(size, ii+BATCH_SIZE);
+            final List<Resource> sublist = list.subList(ii, end);
+            final List<Object[]> result = getSession().createQuery(hql).setParameterList("resources", sublist).list();
+            objs.addAll(result);
+        }
         final Map<Resource, ConfigResponseDB> rtn = new HashMap<Resource, ConfigResponseDB>();
         for (final Object[] obj : objs) {
             rtn.put((Resource) obj[0], (ConfigResponseDB) obj[1]);
@@ -113,15 +121,15 @@ public class ConfigResponseDAO extends HibernateDAO<ConfigResponseDB> {
         return rtn;
     }
 
-    Map<Resource, ConfigResponseDB> getServerConfigs(Collection<Resource> list) {
+    Map<Resource, ConfigResponseDB> getServerConfigs(List<Resource> list) {
         return getConfigs(list, "Server");
     }
 
-    Map<Resource, ConfigResponseDB> getServiceConfigs(Collection<Resource> list) {
+    Map<Resource, ConfigResponseDB> getServiceConfigs(List<Resource> list) {
         return getConfigs(list, "Service");
     }
 
-    Map<Resource, ConfigResponseDB> getPlatformConfigs(Collection<Resource> list) {
+    Map<Resource, ConfigResponseDB> getPlatformConfigs(List<Resource> list) {
         return getConfigs(list, "Platform");
     }
 
