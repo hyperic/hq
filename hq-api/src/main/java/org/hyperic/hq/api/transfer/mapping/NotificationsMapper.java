@@ -14,6 +14,7 @@ import org.hyperic.hq.api.transfer.ResourceTransfer;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.notifications.AccumulatedRegistrationData;
 import org.hyperic.hq.notifications.BasePostingStatus;
+import org.hyperic.hq.notifications.EndpointQueue;
 import org.hyperic.hq.notifications.EndpointStatus;
 import org.hyperic.hq.notifications.HttpEndpoint;
 import org.hyperic.hq.notifications.IllegalPostingException;
@@ -105,22 +106,29 @@ public class NotificationsMapper {
         return res;
     }
 
-    public void toHttpEndpoint(HttpEndpoint backendEndpoint,HttpEndpointDefinition externalEndpoint) {
+    public HttpEndpointDefinition toHttpEndpoint(final HttpEndpoint backendEndpoint) {
+        HttpEndpointDefinition externalEndpoint = new HttpEndpointDefinition();
         externalEndpoint.setUrl(backendEndpoint.getUrl().toString());
         externalEndpoint.setUsername(backendEndpoint.getUsername());
         externalEndpoint.setContentType(backendEndpoint.getContentType());
         externalEndpoint.setEncoding(backendEndpoint.getEncoding());
+        return externalEndpoint;
     }
 
-    public void toEndpointStatus(EndpointStatus endpointStatus,ExternalEndpointStatus externalEndpointStatus, RegistrationStatus regStat) {
+    public ExternalEndpointStatus toEndpointStatus(EndpointQueue.EndpointAndRegStatus endpointAndRegStatus) {
+        EndpointStatus endpointStatus = endpointAndRegStatus.getEndpointStatus();
+        RegistrationStatus regStat = endpointAndRegStatus.getRegStatus();
+        
         String endpointStatusMsg = ExternalEndpointStatus.OK;
+        BasePostingStatus lastPostStatus = endpointStatus.getLast();
+        ExternalEndpointStatus externalEndpointStatus = new ExternalEndpointStatus();
         if (!regStat.isValid()) {
             endpointStatusMsg = ExternalEndpointStatus.INVALID;
-        } else {
-            BasePostingStatus lastPostStatus = endpointStatus.getLast();
-            if (lastPostStatus!=null && !lastPostStatus.isSuccessful()) {
-                endpointStatusMsg = ExternalEndpointStatus.ERROR;
-            }
+            // the lastPostStatus must exist and be a failure if the registration status is invalid
+            externalEndpointStatus.setMessage(lastPostStatus.getMessage());
+        } else if (lastPostStatus!=null && !lastPostStatus.isSuccessful()) {
+            endpointStatusMsg = ExternalEndpointStatus.ERROR;
+            externalEndpointStatus.setMessage(lastPostStatus.getMessage());
         }
         externalEndpointStatus.setStatus(endpointStatusMsg);
         BasePostingStatus lastSuccessful = endpointStatus.getLastSuccessful();
@@ -132,5 +140,6 @@ public class NotificationsMapper {
             externalEndpointStatus.setLastFailure(lastFailure.getTime());
         }
         externalEndpointStatus.setCreationTime(regStat.getCreationTime());
+        return externalEndpointStatus;
     }
 }

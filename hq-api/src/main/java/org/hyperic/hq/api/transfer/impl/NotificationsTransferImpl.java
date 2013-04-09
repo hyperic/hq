@@ -56,6 +56,7 @@ import org.hyperic.hq.notifications.NotificationEndpoint;
 import org.hyperic.hq.notifications.EndpointStatus;
 import org.hyperic.hq.notifications.RegistrationStatus;
 import org.hyperic.hq.notifications.UnregisteredException;
+import org.hyperic.hq.notifications.EndpointQueue.EndpointAndRegStatus;
 import org.hyperic.hq.notifications.filtering.FilterChain;
 import org.hyperic.hq.notifications.model.InternalResourceDetailsType;
 import org.hyperic.util.Transformer;
@@ -133,26 +134,27 @@ public class NotificationsTransferImpl implements NotificationsTransfer {
 
     public EndpointStatusAndDefinition getEndointStatus(long registrationID) {
         NotificationEndpoint backendEndpoint = this.endpointQueue.getEndpoint((long) registrationID);
+        EndpointStatusAndDefinition endpointStatusAndDefinition = null;
+        
         if (backendEndpoint==null) {
             ExternalEndpointStatus externalEndpointStatus = new ExternalEndpointStatus();
             externalEndpointStatus.setStatus(ExternalEndpointStatus.INVALID);
             externalEndpointStatus.setMessage("registration " + registrationID + " does not exist");
-            return new EndpointStatusAndDefinition(null,externalEndpointStatus);
-        }
-        if (!(backendEndpoint instanceof HttpEndpoint)) {
+            endpointStatusAndDefinition = new EndpointStatusAndDefinition(null,externalEndpointStatus);
+        } else if (!(backendEndpoint instanceof HttpEndpoint)) {
             ExternalEndpointStatus externalEndpointStatus = new ExternalEndpointStatus();
             externalEndpointStatus.setStatus(ExternalEndpointStatus.INVALID);
             externalEndpointStatus.setMessage("registration " + registrationID + " exists but is not registered to an endpoint");
-            return new EndpointStatusAndDefinition(null,externalEndpointStatus);
+            endpointStatusAndDefinition = new EndpointStatusAndDefinition(null,externalEndpointStatus);
+        } else {
+            HttpEndpointDefinition endpoint = this.mapper.toHttpEndpoint((HttpEndpoint) backendEndpoint);
+            EndpointQueue.EndpointAndRegStatus endpointAndRegStatus = this.endpointQueue.getEndpointAndRegStatus(registrationID);
+            // endpointAndRegStatus would never be null at this point, since there if no AccumulatedRegistrationData is 
+            // affiliated with the regID in the endpoint queue, it would have been caught in the 1st 'if'
+            ExternalEndpointStatus externalEndpointStatus = this.mapper.toEndpointStatus(endpointAndRegStatus);
+            endpointStatusAndDefinition = new EndpointStatusAndDefinition(endpoint,externalEndpointStatus);
         }
-        HttpEndpointDefinition endpoint = new HttpEndpointDefinition();
-        this.mapper.toHttpEndpoint((HttpEndpoint) backendEndpoint,endpoint);
-        RegistrationStatus regStat = new RegistrationStatus();
-        EndpointStatus endpointStatus = new EndpointStatus();
-        this.endpointQueue.getEndpointAndRegStatus(registrationID,endpointStatus,regStat);
-        ExternalEndpointStatus externalEndpointStatus = new ExternalEndpointStatus();
-        this.mapper.toEndpointStatus(endpointStatus,externalEndpointStatus, regStat);
-        return new EndpointStatusAndDefinition(endpoint,externalEndpointStatus);
+        return endpointStatusAndDefinition;
     }
     
     public static class EndpointStatusAndDefinition {
