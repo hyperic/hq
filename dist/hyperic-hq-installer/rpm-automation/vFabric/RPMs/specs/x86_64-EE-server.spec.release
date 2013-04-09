@@ -94,7 +94,7 @@ chkconfig --del hyperic-hq-server
 %{__install} -d -m 755 $RPM_BUILD_ROOT/etc/init.d
 %{__install} -d -m 755 $RPM_BUILD_ROOT%{prefix}/%{HQ_Component_Name}
 %{__install} -d -m 755 $RPM_BUILD_ROOT/%{prefix}/hq-plugins
-%{__install} -m 755 rcfiles/hyperic-hq-server.init.rh $RPM_BUILD_ROOT/etc/init.d/hyperic-hq-server
+%{__install} -m 755 rcfiles/hyperic-hq-server.init $RPM_BUILD_ROOT/etc/init.d/hyperic-hq-server
 
 %{__rm} -f installer/lib/sigar-x86-winnt.lib
 %{__rm} -f rpm.spec

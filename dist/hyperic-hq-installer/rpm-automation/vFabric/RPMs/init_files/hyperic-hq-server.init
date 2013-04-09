@@ -1,0 +1,44 @@
+#! /bin/sh
+#
+# chkconfig: 2345 60 40
+# description: Starts and stops the hyperic server.
+#
+# /etc/init.d/hyperic-hq-server
+#
+### BEGIN INIT INFO
+# Provides:          hyperic-hq-server
+# Required-Start:    $network
+# X-UnitedLinux-Should-Start: $time
+# Required-Stop:
+# X-UnitedLinux-Should-Stop:
+# Default-Start:     3 5
+# Default-Stop:      0 1 2 6
+# Short-Description: hyperic-hqee-server init
+# Description:       Starts Hyperic HQ Server, located by default in
+#               /opt/hyperic/server-current directory.
+### END INIT INFO
+
+USER=hyperic
+SERVER_DIR=/opt/hyperic/server-current/bin/hq-server.sh
+case "$1" in
+  start)
+ printf "Starting the hyperic server...\n"
+ /bin/su $USER -c "$SERVER_DIR start"
+;;
+  stop)
+ printf "Stopping the hyperic server...\n"
+ /bin/su $USER -c "$SERVER_DIR stop"
+;;
+  restart)
+ printf "Restarting the hyperic agent...\n"
+ /bin/su $USER -c "$SERVER_DIR restart"
+;;
+ status)
+ /bin/su $USER -c "$SERVER_DIR status"
+;;
+  *)
+    echo "Usage: $0 {start|stop|restart|status}"
+    exit 1
+  ;;
+esac
+
