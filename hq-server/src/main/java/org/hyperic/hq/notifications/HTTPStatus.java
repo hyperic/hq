@@ -3,8 +3,8 @@ package org.hyperic.hq.notifications;
 public class HTTPStatus extends BasePostingStatus {
     protected int code;
     
-    public HTTPStatus(long time, int code) {
-        super(time);
+    public HTTPStatus(long time, int code, String respBuf) {
+        super(time,respBuf);
         this.code=code;
     }
 

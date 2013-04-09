@@ -13,6 +13,7 @@ import org.hyperic.hq.api.model.measurements.HttpEndpointDefinition;
 import org.hyperic.hq.api.transfer.ResourceTransfer;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.notifications.BasePostingStatus;
+import org.hyperic.hq.notifications.EndpointQueue;
 import org.hyperic.hq.notifications.EndpointStatus;
 import org.hyperic.hq.notifications.HttpEndpoint;
 import org.hyperic.hq.notifications.RegistrationStatus;
@@ -105,32 +106,44 @@ public class NotificationsMapper {
         return res;
     }
 
-    public void toHttpEndpoint(HttpEndpoint backendEndpoint,HttpEndpointDefinition externalEndpoint) {
+    public HttpEndpointDefinition toHttpEndpoint(final HttpEndpoint backendEndpoint) {
+        HttpEndpointDefinition externalEndpoint = new HttpEndpointDefinition();
         externalEndpoint.setUrl(backendEndpoint.getUrl().toString());
         externalEndpoint.setUsername(backendEndpoint.getUsername());
         externalEndpoint.setContentType(backendEndpoint.getContentType());
         externalEndpoint.setEncoding(backendEndpoint.getEncoding());
+        return externalEndpoint;
     }
 
-    public void toEndpointStatus(EndpointStatus endpointStatus,ExternalEndpointStatus externalEndpointStatus, RegistrationStatus regStat) {
-        String endpointStatusMsg = "OK";
-        if (!regStat.isValid()) {
-            endpointStatusMsg = "INVALID";
-        } else {
+    public ExternalEndpointStatus toEndpointStatus(EndpointQueue.EndpointAndRegStatus endpointAndRegStatus) {
+        EndpointStatus endpointStatus = endpointAndRegStatus.getEndpointStatus();
+        RegistrationStatus regStat = endpointAndRegStatus.getRegStatus();
+        ExternalEndpointStatus externalEndpointStatus = new ExternalEndpointStatus();
+        externalEndpointStatus.setCreationTime(regStat.getCreationTime());
+        externalEndpointStatus.setStatus(ExternalEndpointStatus.OK);
+
+        if (endpointStatus!=null) {
             BasePostingStatus lastPostStatus = endpointStatus.getLast();
-            if (lastPostStatus!=null && !lastPostStatus.isSuccessful()) {
-                endpointStatusMsg = "ERROR";
+            if (!regStat.isValid()) {
+                externalEndpointStatus.setStatus(ExternalEndpointStatus.INVALID);
+                // the lastPostStatus must exist and be a failure if the registration status is invalid
+                externalEndpointStatus.setMessage(lastPostStatus.getMessage());
+            } else if (lastPostStatus!=null && !lastPostStatus.isSuccessful()) {
+                externalEndpointStatus.setStatus(ExternalEndpointStatus.ERROR);
+                externalEndpointStatus.setMessage(lastPostStatus.getMessage());
+            }
+
+            BasePostingStatus lastSuccessful = endpointStatus.getLastSuccessful();
+            if (lastSuccessful!=null) {
+                externalEndpointStatus.setLastSuccessful(lastSuccessful.getTime());
+            }
+            
+            BasePostingStatus lastFailure = endpointStatus.getLastFailure();
+            if (lastFailure!=null) {
+                externalEndpointStatus.setLastFailure(lastFailure.getTime());
             }
         }
-        externalEndpointStatus.setStatus(endpointStatusMsg);
-        BasePostingStatus lastSuccessful = endpointStatus.getLastSuccessful();
-        if (lastSuccessful!=null) {
-            externalEndpointStatus.setLastSuccessful(lastSuccessful.getTime());
-        }
-        BasePostingStatus lastFailure = endpointStatus.getLastFailure();
-        if (lastFailure!=null) {
-            externalEndpointStatus.setLastFailure(lastFailure.getTime());
-        }
-        externalEndpointStatus.setCreationTime(regStat.getCreationTime());
+
+        return externalEndpointStatus;
     }
 }

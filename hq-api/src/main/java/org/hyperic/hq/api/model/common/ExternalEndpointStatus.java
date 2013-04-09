@@ -12,14 +12,20 @@ import org.hyperic.hq.api.model.RestApiConstants;
 @XmlRootElement(name="EndpointStatus", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 @XmlType(name="ExternalEndpointStatus", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 public class ExternalEndpointStatus {
+    public static final String OK = "OK";
+    public static final String ERROR = "ERROR";
+    public static final String INVALID = "INVALID";
+    
     @XmlAttribute(name="creationTime")
-    protected long creationTime;
+    protected Long creationTime;
     @XmlAttribute(name="status")
     protected String status;
     @XmlAttribute(name="last-successful")
-    protected long successfulTime;
+    protected Long successfulTime;
     @XmlAttribute(name="last-failure")
-    protected long failureTime;
+    protected Long failureTime;
+    @XmlAttribute (name="message")
+    protected String message;
     
     public void setLastSuccessful(long time) {
         this.successfulTime=time;
@@ -32,5 +38,8 @@ public class ExternalEndpointStatus {
     }
     public void setCreationTime(long creationTime) {
         this.creationTime = creationTime;
+    }
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

@@ -266,17 +266,39 @@ public class EndpointQueue {
         return null;
     }
     
-    public void getEndpointAndRegStatus(Long registrationID, EndpointStatus endpointStatus, RegistrationStatus regStat) {
-        if (this.registrationData==null) {
-            return;
-        }
+    public EndpointAndRegStatus getEndpointAndRegStatus(Long registrationID) {
         synchronized (registrationData) {
             AccumulatedRegistrationData ard = this.registrationData.get(registrationID);
             if (ard!=null) {
-                endpointStatus.merge(ard.getEndpointStatus());
+                RegistrationStatus regStat = new RegistrationStatus();
                 regStat.setCreationTime(ard.getCreationTime());
                 regStat.setValid(ard.isValid());
+                EndpointStatus endpointStatus = null;
+                EndpointStatus ardStatus = ard.getEndpointStatus();
+                if (ardStatus!=null) {
+                    endpointStatus = new EndpointStatus(ardStatus);
+                }
+                return new EndpointAndRegStatus(endpointStatus,regStat);
+            } else {
+                this.log.error("there is no AccumulatedRegistrationData for registration " + registrationID);
             }
+        }
+        return null;
+    }
+    
+    public static class EndpointAndRegStatus {
+        protected EndpointStatus endpointStatus;
+        protected RegistrationStatus regStat;
+        public EndpointAndRegStatus(EndpointStatus endpointStatus, RegistrationStatus regStat) {
+            super();
+            this.endpointStatus = endpointStatus;
+            this.regStat = regStat;
+        }
+        public EndpointStatus getEndpointStatus() {
+            return endpointStatus;
+        }
+        public RegistrationStatus getRegStatus() {
+            return regStat;
         }
     }
 }
