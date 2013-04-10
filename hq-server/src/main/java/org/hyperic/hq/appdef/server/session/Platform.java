@@ -228,14 +228,11 @@ public class Platform extends PlatformBase
         if (!ObjectUtils.equals(getLocation(), platformValue.getLocation())) {
             changedProps.put("Location", platformValue.getLocation());
         }
-        if (!platformValue.getAddedIpValues().isEmpty()) {
-            changedProps.put("IpValues:Added", platformValue.getAddedIpValues().toString());
+        if (!platformValue.getUpdatedIpValues().isEmpty()) {
+            changedProps.put("IpValues", platformValue.getUpdatedIpValues().toString());
         }
         if (!platformValue.getRemovedIpValues().isEmpty()) {
             changedProps.put("IpValues:Removed", platformValue.getRemovedIpValues().toString());
-        }
-        if (!platformValue.getUpdatedIpValues().isEmpty()) {
-            changedProps.put("IpValues:Updated", platformValue.getUpdatedIpValues().toString());
         }
         if (!ObjectUtils.equals(getAgent(), platformValue.getAgent())) {
             changedProps.put("Agent", String.valueOf((platformValue.getAgent())));

@@ -237,7 +237,8 @@ public class PlatformForm
                 dbNewIp.setAddress(newAddedIp.getAddress());
                 dbNewIp.setMACAddress(newAddedIp.getMACAddress());
                 dbNewIp.setNetmask(newAddedIp.getNetmask());
-                platform.addIpValue(dbNewIp, true);
+                platform.updateIpValue(dbNewIp);
+                platform.addIpValue(dbNewIp);
             }
         }
 

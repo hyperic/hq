@@ -406,13 +406,8 @@ public class PlatformValue extends AppdefResourceValue
 
     public void addIpValue(org.hyperic.hq.appdef.shared.IpValue added)
     {
-        addIpValue(added, false);
-    }
-
-    public void addIpValue(org.hyperic.hq.appdef.shared.IpValue added, boolean isNewIp)
-    {
         this.IpValues.add(added);
-        if ( ! this.addedIpValues.contains(added) && isNewIp)
+        if ( ! this.addedIpValues.contains(added))
             this.addedIpValues.add(added);
     }
 
