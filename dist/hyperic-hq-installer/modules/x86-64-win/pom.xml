@@ -18,8 +18,8 @@
 		<dependency>
 			<groupId>postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>9.1.7</version>
-			<classifier>x86-win32</classifier>
+			<version>9.1.9</version>
+			<classifier>x86-64-win</classifier>
 			<type>zip</type>
 		</dependency>
 		<dependency>
@@ -39,7 +39,7 @@
 	<properties> 
 		<jre.classifier>x86_64-win</jre.classifier>
 		<agent.classifier>x86-64-win</agent.classifier> 
-		<postgres.classifier>x86-win32</postgres.classifier> 
+		<postgres.classifier>x86-64-win</postgres.classifier> 
 		<packaging.type>zip</packaging.type>
 	</properties>
 
