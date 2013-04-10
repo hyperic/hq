@@ -132,7 +132,7 @@ public abstract class AppdefBean
      */
     public Map<String, String> changedProperties(AppdefResourceValue appdefResourceValue) {
         Map<String, String> changedProps = new TreeMap<String, String>();
-        if (!ObjectUtils.equals(getId(), appdefResourceValue.getId())) {
+        if (appdefResourceValue.getId() != null && !appdefResourceValue.getId().equals(getId())) {
             changedProps.put("id", String.valueOf(appdefResourceValue.getId()));
         }
         if (appdefResourceValue.getCTime() != null && !appdefResourceValue.getCTime().equals(getCTime())) {
