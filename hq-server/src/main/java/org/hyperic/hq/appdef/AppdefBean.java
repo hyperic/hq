@@ -25,9 +25,12 @@
 
 package org.hyperic.hq.appdef;
 
+import org.apache.commons.lang.ObjectUtils;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 
 import java.io.Serializable;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
 import org.hyperic.hibernate.PersistedObject;
@@ -123,35 +126,32 @@ public abstract class AppdefBean
 
     /**
      * legacy entity bean code
-     * @param obj
+     *
+     * @param appdefResourceValue
      * @return
      */
-    public boolean matchesValueObject(AppdefResourceValue obj)
-    {
-        boolean matches = true;
-        if (obj.getId() != null) {
-            matches = (obj.getId().intValue() == this.getId().intValue());
-        } else {
-            matches = (this.getId() == null);
+    public Map<String, String> changedProperties(AppdefResourceValue appdefResourceValue) {
+        Map<String, String> changedProps = new TreeMap<String, String>();
+        if (appdefResourceValue.getId() != null && !appdefResourceValue.getId().equals(getId())) {
+            changedProps.put("id", String.valueOf(appdefResourceValue.getId()));
         }
-        if (obj.getCTime() != null) {
-            matches = (obj.getCTime().floatValue() == getCTime().floatValue());
-        } else {
-            matches = (this.getCreationTime() == 0);
+        if (appdefResourceValue.getCTime() != null && !appdefResourceValue.getCTime().equals(getCTime())) {
+            changedProps.put("CreationTime", String.valueOf(appdefResourceValue.getCTime()));
         }
-        return matches;
+        return changedProps;
     }
 
-    public boolean equals(Object obj)
-    {
+    public boolean matchesValueObject(AppdefResourceValue appdefResourceValue) {
+        return changedProperties(appdefResourceValue).isEmpty();
+    }
+
+    public boolean equals(Object obj) {
         if (!(obj instanceof AppdefBean) || !super.equals(obj)) {
             return false;
         }
-        AppdefBean o = (AppdefBean)obj;
-        return
-            ((creationTime == o.getCTime()) ||
-             (creationTime!=null && o.getCTime()!=null &&
-              creationTime.equals(o.getCTime())));
+        AppdefBean o = (AppdefBean) obj;
+        return ((creationTime == o.getCTime()) || (creationTime != null && o.getCTime() != null &&
+                creationTime.equals(o.getCTime())));
     }
 
     public int hashCode()

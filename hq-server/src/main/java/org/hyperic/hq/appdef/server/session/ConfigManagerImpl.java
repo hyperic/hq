@@ -74,6 +74,7 @@ import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.config.StringConfigOption;
+import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -117,6 +118,8 @@ public class ConfigManagerImpl implements ConfigManager {
     
     @Transactional(readOnly=true)
     public Map<Resource, ConfigResponse> getConfigResponses(Set<Resource> resources, boolean hideSecrets) {
+        final boolean debug = log.isDebugEnabled();
+        final StopWatch watch = new StopWatch();
         final Map<Integer, Collection<Resource>> resourcesByType = new Classifier<Resource, Integer, Resource>() {
             @Override
             public NameValue<Integer, Resource> classify(Resource r) {
@@ -124,9 +127,11 @@ public class ConfigManagerImpl implements ConfigManager {
             }
         }.classify(resources);
         final Map<Resource, ConfigResponseDB> tmp = new HashMap<Resource, ConfigResponseDB>();
+        final ProductPluginDeployer productPluginDeployer = Bootstrap.getBean(ProductPluginDeployer.class);
+        if (debug) watch.markTimeBegin("getResourceConfigs");
         for (final Entry<Integer, Collection<Resource>> entry : resourcesByType.entrySet()) {
             final Integer resourceTypeId = entry.getKey();
-            final Collection<Resource> list = entry.getValue();
+            final List<Resource> list = new ArrayList<Resource>(entry.getValue());
             if (resourceTypeId.equals(AuthzConstants.authzPlatform)) {
                 tmp.putAll(configResponseDAO.getPlatformConfigs(list));
             } else if (resourceTypeId.equals(AuthzConstants.authzServer)) {
@@ -135,6 +140,7 @@ public class ConfigManagerImpl implements ConfigManager {
                 tmp.putAll(configResponseDAO.getServiceConfigs(list));
             }
         }
+        if (debug) watch.markTimeEnd("getResourceConfigs");
         final List<MonitorableType> all = monitorableTypeDAO.findAll();
         final Map<String, String> monitorableTypeMap = new Classifier<MonitorableType, String, String>() {
             @Override
@@ -175,17 +181,21 @@ public class ConfigManagerImpl implements ConfigManager {
                 if (controlResponse != null && controlResponse.length > 0) {
                     configResponse.merge(ConfigResponse.decode(controlResponse), true);
                 }
-                mergeWithConfigSchema(resource, configResponse, monitorableTypeMap, hideSecrets);
+                // This is the bottleneck of this method
+                if (debug) watch.markTimeBegin("mergeWithConfigSchema");
+                mergeWithConfigSchema(resource, configResponse, monitorableTypeMap, hideSecrets, productPluginDeployer);
+                if (debug) watch.markTimeEnd("mergeWithConfigSchema");
             } catch (EncodingException e) {
                 log.warn("could not decode config associated with resourceId=" + resource.getId());
                 log.debug(e,e);
             }
         }
+        if (debug) log.debug(watch);
         return rtn;
     }
     
     private void mergeWithConfigSchema(Resource r, ConfigResponse config, Map<String, String> monitorableTypeMap,
-                                       boolean hideSecrets) {
+                                       boolean hideSecrets, ProductPluginDeployer productPluginDeployer) {
         final Integer resourceTypeId = r.getResourceType().getId();;
         final String proto = r.getPrototype().getName();
         final String plugin = monitorableTypeMap.get(proto);
@@ -202,7 +212,6 @@ public class ConfigManagerImpl implements ConfigManager {
             type = new ServiceTypeInfo(proto, service.getServiceType().getDescription(), serverTypeInfo);
         }
         try {
-            final ProductPluginDeployer productPluginDeployer = Bootstrap.getBean(ProductPluginDeployer.class);
             final ProductPluginManager productPluginManager = productPluginDeployer.getProductPluginManager();
             final PluginManager measurementPluginManager = productPluginManager.getPluginManager("measurement");
             final PluginManager controlPluginManager = productPluginManager.getPluginManager("control");
@@ -234,7 +243,11 @@ public class ConfigManagerImpl implements ConfigManager {
             ConfigSchema configSchema = pluginManager.getConfigSchema(key, type, config);
             return configSchema.getOptions();
         } catch (PluginNotFoundException e) {
-            log.debug(e,e);
+            // normally log.debug with the stack is fine, but it is a very common scenario where a plugin
+            // does not support a certain type.  This api should probably return null instead of throwing
+            // an exception.  The stacktrace is really not helpful
+            log.debug(e);
+            log.trace(e,e);
         }
         return Collections.emptyList();
     }

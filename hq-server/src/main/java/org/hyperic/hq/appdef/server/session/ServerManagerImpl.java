@@ -1226,13 +1226,14 @@ public class ServerManagerImpl implements ServerManager {
             existing.setMTime(new Long(System.currentTimeMillis()));
             trimStrings(existing);
 
-            if (server.matchesValueObject(existing)) {
+            Map<String, String> changedProps = server.changedProperties(existing);
+            if (changedProps.isEmpty()) {
                 log.debug("No changes found between value object and entity");
             } else {
                 if (!existing.getName().equals(server.getName())) {
                     Resource rv = server.getResource();
                     rv.setName(existing.getName());
-                    this.zeventManager.enqueueEventAfterCommit(new ResourceContentChangedEvent(rv.getId(),rv.getName(), null, null));
+                    this.zeventManager.enqueueEventAfterCommit(new ResourceContentChangedEvent(rv.getId(),rv.getName(), null, changedProps));
                 }
 
                 server.updateServer(existing);

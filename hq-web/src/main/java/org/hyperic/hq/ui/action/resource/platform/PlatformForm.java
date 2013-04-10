@@ -222,10 +222,14 @@ public class PlatformForm
             IpValue newIp = getIp(i);
             if (newIp.getId() != null && newIp.getId().intValue() > 0) {
                 IpValue oldIp = (IpValue) oldIpsMap.remove(newIp.getId());
-                oldIp.setAddress(newIp.getAddress());
-                oldIp.setMACAddress(newIp.getMACAddress());
-                oldIp.setNetmask(newIp.getNetmask());
-                platform.updateIpValue(oldIp);
+                if (!newIp.getAddress().equals(oldIp.getAddress()) ||
+                        !newIp.getNetmask().equals(oldIp.getNetmask()) ||
+                        !newIp.getMACAddress().equals(oldIp.getMACAddress())) {
+                    oldIp.setAddress(newIp.getAddress());
+                    oldIp.setMACAddress(newIp.getMACAddress());
+                    oldIp.setNetmask(newIp.getNetmask());
+                    platform.updateIpValue(oldIp);
+                }
             } else {
                 // we're into the land of new ips- use the form one
                 IpValue newAddedIp = getIp(i);
@@ -233,6 +237,7 @@ public class PlatformForm
                 dbNewIp.setAddress(newAddedIp.getAddress());
                 dbNewIp.setMACAddress(newAddedIp.getMACAddress());
                 dbNewIp.setNetmask(newAddedIp.getNetmask());
+                platform.updateIpValue(dbNewIp);
                 platform.addIpValue(dbNewIp);
             }
         }

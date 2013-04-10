@@ -34,6 +34,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.ObjectUtils;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.ServerBase;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
@@ -238,67 +239,32 @@ public class Server extends ServerBase
         return suppSvcTypes;
     }
 
-    public boolean matchesValueObject(ServerValue obj)
-    {
-        return super.matchesValueObject(obj) &&
-            nameMatches(obj) &&
-            descriptionMatches(obj) &&
-            locationMatches(obj) &&
-            runtimeAutoDiscoveryMatches(obj) &&
-            installPathMatches(obj) &&
-            autoInventoryIdentifierMatches(obj);
-    }
-    
-    private boolean nameMatches(ServerValue obj)
-    {
-        if (getName() == null) {
-            return obj.getName() == null;
-        } else {
-            return getName().equals(obj.getName());
-        }
-    }
-    
-    private boolean descriptionMatches(ServerValue obj)
-    {
-        if (getDescription() == null) {
-            return obj.getDescription() == null;
-        } else {
-            return getDescription().equals(obj.getDescription());
-        }
-    }
-    
-    private boolean locationMatches(ServerValue obj)
-    {
-        if (getLocation() == null) {
-            return obj.getLocation() == null;
-        } else {
-            return getLocation().equals(obj.getLocation());
-        }
-    }
-    
-    private boolean runtimeAutoDiscoveryMatches(ServerValue obj)
-    {
-        return isRuntimeAutodiscovery() == obj.getRuntimeAutodiscovery();
-    }
-    
-    private boolean installPathMatches(ServerValue obj)
-    {
-        if (getInstallPath() == null) {
-            return obj.getInstallPath() == null;
-        } else {
-            return getInstallPath().equals(obj.getInstallPath());
-        }
-    }
-    
-    private boolean autoInventoryIdentifierMatches(ServerValue obj)
-    {
-        if (getAutoinventoryIdentifier() == null) {
-            return obj.getAutoinventoryIdentifier() == null;
-        } else {
-            return getAutoinventoryIdentifier().equals(obj.getAutoinventoryIdentifier());
-        }
-    }
+    @Override
+    public Map<String, String> changedProperties(AppdefResourceValue appdefResourceValue) {
 
+        ServerValue serverValue = (ServerValue) appdefResourceValue;
+        Map<String, String> changedProps = super.changedProperties(serverValue);
+
+        if (!ObjectUtils.equals(getName(), serverValue.getName())) {
+            changedProps.put("Name", serverValue.getName());
+        }
+        if (!ObjectUtils.equals(getDescription(), serverValue.getDescription())) {
+            changedProps.put("Description", serverValue.getDescription());
+        }
+        if (!ObjectUtils.equals(getLocation(), serverValue.getLocation())) {
+            changedProps.put("Location", serverValue.getLocation());
+        }
+        if (!ObjectUtils.equals(isRuntimeAutodiscovery(), serverValue.getRuntimeAutodiscovery())) {
+            changedProps.put("RuntimeAutodiscovery", String.valueOf(serverValue.getRuntimeAutodiscovery()));
+        }
+        if (!ObjectUtils.equals(getInstallPath(), serverValue.getInstallPath())) {
+            changedProps.put("InstallPath", serverValue.getInstallPath());
+        }
+        if (!ObjectUtils.equals(getAutoinventoryIdentifier(), serverValue.getAutoinventoryIdentifier())) {
+            changedProps.put("AutoinventoryIdentifier", serverValue.getAutoinventoryIdentifier());
+        }
+        return changedProps;
+    }
 
     /**
      * Validate a new service value object to be hosted by this server

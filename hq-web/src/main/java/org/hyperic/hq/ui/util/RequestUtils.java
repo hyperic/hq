@@ -323,7 +323,8 @@ public class RequestUtils {
     
     /** 
      * Retrieve the <code>AppdefEntityID[]</code> value of the
-     * <strong>ENTITY_ID_PARAM</strong> ("eid") parameters from the HTTP request.
+     * <strong>ENTITY_ID_PARAM</strong> ("eid") or <strong>RESOURCE_PARAM</strong> ("rid") parameters from the HTTP
+     * request.
      * For backwards compatibility, <strong>RESOURCE_TYPE_ID_PARAM</strong> ("type")
      * and <strong>RESOURCE_PARAM</strong> ("rid") are also acceptable parameters as
      * well.

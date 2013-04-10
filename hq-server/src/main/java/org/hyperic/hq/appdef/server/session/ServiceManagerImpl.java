@@ -1313,12 +1313,13 @@ public class ServiceManagerImpl implements ServiceManager {
         if (existing.getName() != null)
             existing.setName(existing.getName().trim());
 
-        if (service.matchesValueObject(existing)) {
+        Map<String, String> changedProps = service.changedProperties(existing);
+        if (changedProps.isEmpty()) {
             log.debug("No changes found between value object and entity");
         } else {
             service.updateService(existing);
             Resource r = service.getResource();
-            this.zeventManager.enqueueEventAfterCommit(new ResourceContentChangedEvent(r.getId(),r.getName(), null, null));
+            this.zeventManager.enqueueEventAfterCommit(new ResourceContentChangedEvent(r.getId(),r.getName(), null, changedProps));
         }
         return service;
     }
