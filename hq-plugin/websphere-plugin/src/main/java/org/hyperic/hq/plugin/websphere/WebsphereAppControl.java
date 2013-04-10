@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
+import org.hyperic.hq.bizapp.shared.lather.ControlSendCommandResult_args;
 import org.hyperic.hq.product.ControlPlugin;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.PluginException;

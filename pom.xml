@@ -33,7 +33,7 @@
 		<groovy.version>1.7.0</groovy.version> 
 		<hibernate.version>3.2.6.ga</hibernate.version>
 		<hibernate-tools.version>3.2.3.GA</hibernate-tools.version>
-	        <hqapi.version>5.0.0-oem-integration</hqapi.version>
+	        <hqapi.version>6.0.0</hqapi.version>
 		<httpclient.version>4.1.1</httpclient.version>
 		<j2ee-management.version>1.1</j2ee-management.version>
      	<jackson-mapper-asl.version>1.8.6</jackson-mapper-asl.version>
@@ -1259,25 +1259,9 @@
 			</snapshots>
 		</repository>
 		<repository>
-			<id>hqapi-snapshot</id>
-			<name>HQApi Snapshot Repository</name>
-			<url>http://maven.hyperic.org/hqapi/snapshot</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-		<repository>
 			<id>hqapi-release</id>
 			<name>HQApi Release Repository</name>
 			<url>http://maven.hyperic.org/hqapi/release</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>hqapi-milestone</id>
-			<name>HQApi Milestone Repository</name>
-			<url>http://maven.hyperic.org/hqapi/milestone</url>
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>

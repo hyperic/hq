@@ -109,6 +109,8 @@ public class LiveDataCommandsServer implements AgentServerHandler {
         _log.info("Live Data Commands Server started up");
     }
 
+    public final void postInitActions() throws AgentStartException { /*do nothing*/ }//EOM
+    
     public void shutdown() {
     }
 

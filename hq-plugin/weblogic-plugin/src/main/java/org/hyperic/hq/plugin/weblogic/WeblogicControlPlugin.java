@@ -30,6 +30,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Arrays;
 
+import org.hyperic.hq.bizapp.shared.lather.ControlSendCommandResult_args;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricNotFoundException;
 import org.hyperic.hq.product.MetricUnreachableException;
@@ -41,6 +42,7 @@ import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
+import org.hyperic.hq.product.PluginException;
 
 public class WeblogicControlPlugin
     extends ServerControlPlugin
@@ -258,7 +260,7 @@ public class WeblogicControlPlugin
         return null;
     }
 
-    public void doAction(String action) {
+    public void doAction(String action) throws PluginException{
         this.authControl.doAction(action);
     }
 

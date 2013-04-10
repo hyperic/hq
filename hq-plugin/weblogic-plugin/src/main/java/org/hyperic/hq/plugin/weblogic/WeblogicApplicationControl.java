@@ -28,6 +28,7 @@ package org.hyperic.hq.plugin.weblogic;
 import java.util.List;
 import java.util.Arrays;
 
+import org.hyperic.hq.bizapp.shared.lather.ControlSendCommandResult_args;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.PluginException;
 
@@ -110,7 +111,7 @@ public class WeblogicApplicationControl
         return null; //override to support webapp, ejb, etc.
     }
 
-    public void doAction(String action) {
+    public void doAction(String action) throws PluginException {
         if (!COMMANDS.contains(action)) {
             //e.g. webapp.deleteInvalidSessions
             super.doAction(action);

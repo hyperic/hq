@@ -42,6 +42,8 @@ public class MultiRuntimeException extends RuntimeException {
   public final boolean isEmpty() { 
       return (this.nestedExceptions == null || nestedExceptions.isEmpty()) ; 
   }//EOM 
+  
+  public final int size() { return (this.isEmpty() ? 0 : this.nestedExceptions.size()) ;  }//EOM 
 
   public String getMessage() {
       final String msg = super.getMessage() ; 
@@ -133,11 +135,15 @@ public class MultiRuntimeException extends RuntimeException {
       this.printStackTrace(pw, StreamHandlerInterface.printWriterStrategy) ; 
   }//EOM 
    
-  public static final MultiRuntimeException newMultiRuntimeException(MultiRuntimeException multiException, final Throwable t) {
+  public static final MultiRuntimeException newMultiRuntimeException(MultiRuntimeException multiException, final Throwable t) { 
+      return newMultiRuntimeException(multiException, t, null/*message*/) ; 
+  }//EOM 
+  
+  public static final MultiRuntimeException newMultiRuntimeException(MultiRuntimeException multiException, final Throwable t, final String nestedExcpetionMessage) {
     if (multiException == null) {
       if ((t instanceof MultiRuntimeException)) multiException = (MultiRuntimeException)t; else
         multiException = new MultiRuntimeException(t);
-    }else multiException.addThrowable(t);
+    }else multiException.addThrowable(t, nestedExcpetionMessage);
 
     return multiException;
   }//EOM

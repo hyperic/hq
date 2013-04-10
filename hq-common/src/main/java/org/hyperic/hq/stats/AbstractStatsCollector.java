@@ -222,14 +222,14 @@ public abstract class AbstractStatsCollector {
                 return SIGAR_TCP_RETRANS;
             }
             public long getVal() throws StatUnreachableException {
-                if (isFirst) {
-                    isFirst = false;
-                    throw new StatUnreachableException("don't collect first value");
-                }
                 try {
                     long curr = sigar.getTcp().getRetransSegs();
                     long rtn = curr - last;
                     last = curr;
+                    if (isFirst) {
+                        isFirst = false;
+                        throw new StatUnreachableException("don't return first value");
+                    }
                     return rtn;
                 } catch (SigarException e) {
                     throw new StatUnreachableException(e.getMessage(), e);
@@ -243,14 +243,14 @@ public abstract class AbstractStatsCollector {
                 return SIGAR_PAGEOUT;
             }
             public long getVal() throws StatUnreachableException {
-                if (isFirst) {
-                    isFirst = false;
-                    throw new StatUnreachableException("don't collect first value");
-                }
                 try {
                     long curr = sigar.getSwap().getPageOut();
                     long rtn = curr - last;
                     last = curr;
+                    if (isFirst) {
+                        isFirst = false;
+                        throw new StatUnreachableException("don't return first value");
+                    }
                     return rtn;
                 } catch (SigarException e) {
                     throw new StatUnreachableException(e.getMessage(), e);
@@ -264,14 +264,14 @@ public abstract class AbstractStatsCollector {
                 return SIGAR_PAGEIN;
             }
             public long getVal() throws StatUnreachableException {
-                if (isFirst) {
-                    isFirst = false;
-                    throw new StatUnreachableException("don't collect first value");
-                }
                 try {
                     long curr = sigar.getSwap().getPageIn();
                     long rtn = curr - last;
                     last = curr;
+                    if (isFirst) {
+                        isFirst = false;
+                        throw new StatUnreachableException("don't return first value");
+                    }
                     return rtn;
                 } catch (SigarException e) {
                     throw new StatUnreachableException(e.getMessage(), e);

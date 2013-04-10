@@ -10,6 +10,14 @@
 #-----------------------------------------------------------------------------
 # These settings can be modified to fit the needs of your application
 
+if [ "$USER" = "root" -o "$UID" = "0" -o "$EUID" = "0" ]; then 
+    echo ""
+    echo "Execution of HQ server not allowed as the root user."
+    echo "Please log in as a different user and re-run $0 start"
+    echo ""
+    exit 1;
+fi
+
 # Application
 APP_NAME="hq-server"
 APP_LONG_NAME="HQ Server"

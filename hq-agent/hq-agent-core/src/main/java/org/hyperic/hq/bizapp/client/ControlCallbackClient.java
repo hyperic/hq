@@ -62,6 +62,26 @@ public class ControlCallbackClient
         return res.getConfig();
     }
 
+    public final void controlSendCommandResult(final ControlSendCommandResult_args contorlCommandResults, 
+            final int result, final String errorMsg) throws AgentCallbackClientException{
+        contorlCommandResults.setResult(result) ; 
+        contorlCommandResults.setMessage(errorMsg) ; 
+        this.controlSendCommandResult(contorlCommandResults) ; 
+    }//EOM
+    
+    public final void controlSendCommandResult(final ControlSendCommandResult_args contorlCommandResults) throws AgentCallbackClientException{
+        contorlCommandResults.setEndTime(System.currentTimeMillis()) ; 
+        this.invokeLatherCall(this.getProvider(), CommandInfo.CMD_CONTROL_SEND_COMMAND_RESULT, contorlCommandResults) ; 
+    }//EOM 
+    
+    public ControlSendCommandResult_args newResultsMetadata(String pluginName, int id, long startTime) { 
+        final ControlSendCommandResult_args args = new ControlSendCommandResult_args();
+        args.setName(pluginName);
+        args.setId(id);
+        args.setStartTime(startTime);
+        return args ; 
+    }//EOM 
+    
     public void controlSendCommandResult(String pluginName, int id, int result,
                                          long startTime, long endTime, 
                                          String message)

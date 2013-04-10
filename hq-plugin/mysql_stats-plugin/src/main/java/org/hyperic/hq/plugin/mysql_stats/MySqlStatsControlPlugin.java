@@ -36,6 +36,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
+import org.hyperic.hq.bizapp.shared.lather.ControlSendCommandResult_args;
 import org.hyperic.hq.product.JDBCControlPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.jdbc.DBUtil;

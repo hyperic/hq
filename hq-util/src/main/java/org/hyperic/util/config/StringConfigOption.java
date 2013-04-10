@@ -60,11 +60,11 @@ public class StringConfigOption extends ConfigOption implements Serializable {
     	//      It doesn't so if an option is optional but null is the value
     	//      this method throws an exception.  this doesn't seem right to me
     	//      but needs more investigation...
-    	/*
+    	
+        
     	if (isOptional() && value == null) {
     		return;
     	}
-    	*/
     	
         int min = getMinLength();
 

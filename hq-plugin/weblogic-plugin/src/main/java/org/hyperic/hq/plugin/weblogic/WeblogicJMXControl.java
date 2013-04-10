@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.plugin.weblogic;
 
+import org.hyperic.hq.bizapp.shared.lather.ControlSendCommandResult_args;
 import org.hyperic.hq.product.ControlPlugin;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.PluginException;
@@ -124,7 +125,7 @@ public abstract class WeblogicJMXControl
         return action;
     }
 
-    public void doAction(String action) {
+    public void doAction(String action) throws PluginException{
         this.authControl.doAction(action);
     }
 

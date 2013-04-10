@@ -56,6 +56,7 @@ import org.hyperic.hq.notifications.NotificationEndpoint;
 import org.hyperic.hq.notifications.EndpointStatus;
 import org.hyperic.hq.notifications.RegistrationStatus;
 import org.hyperic.hq.notifications.UnregisteredException;
+import org.hyperic.hq.notifications.EndpointQueue.EndpointAndRegStatus;
 import org.hyperic.hq.notifications.filtering.FilterChain;
 import org.hyperic.hq.notifications.model.InternalResourceDetailsType;
 import org.hyperic.util.Transformer;
@@ -84,15 +85,15 @@ public class NotificationsTransferImpl implements NotificationsTransfer {
     @Transactional (readOnly=true)
     public NotificationsReport poll(long registrationId, Integer subjectId) throws UnregisteredException {
         final InternalNotificationReport report = endpointQueue.poll(registrationId);
-        return getNotificationReport(subjectId, report);
+        return getNotificationReport(registrationId, subjectId, report);
     }
 
-    private NotificationsReport getNotificationReport(Integer subjectId, InternalNotificationReport report) {
+    private NotificationsReport getNotificationReport(long regId, Integer subjectId, InternalNotificationReport report) {
         AuthzSubject subject = authzSubjectManager.getSubjectById(subjectId);
         InternalResourceDetailsType internalResourceDetailsType = report.getResourceDetailsType();
         ResourceDetailsType resourceDetailsType = null;
         resourceDetailsType = ResourceDetailsType.valueOf(internalResourceDetailsType);
-        return mapper.toNotificationsReport(subject, rscTransfer, resourceDetailsType, report.getNotifications());
+        return mapper.toNotificationsReport(subject, regId, rscTransfer, resourceDetailsType, report.getNotifications());
     }
 
     @Transactional (readOnly=true)
@@ -113,12 +114,14 @@ public class NotificationsTransferImpl implements NotificationsTransfer {
         register(endpoint, null, authzSubjectId);
     }
 
-    public void register(NotificationEndpoint endpoint, InternalResourceDetailsType type, final int authzSubjectId) {
+    public void register(final NotificationEndpoint endpoint, InternalResourceDetailsType type,
+                         final int authzSubjectId) {
         final Transformer<InternalNotificationReport, String> t = new Transformer<InternalNotificationReport, String>() {
             @Override
             public String transform(InternalNotificationReport internalReport) {
                 try {
-                    final NotificationsReport report = getNotificationReport(authzSubjectId, internalReport);
+                    final long regId = endpoint.getRegistrationId();
+                    final NotificationsReport report = getNotificationReport(regId, authzSubjectId, internalReport);
 	                final JAXBContext context = JAXBContext.newInstance(NotificationsReport.class);
 	                final StringWriter writer = new StringWriter();
 	                context.createMarshaller().marshal(report, writer);
@@ -131,17 +134,45 @@ public class NotificationsTransferImpl implements NotificationsTransfer {
         endpointQueue.register(endpoint, type, t);
     }
 
-    public void getEndointStatus(long registrationID,HttpEndpointDefinition endpoint, ExternalEndpointStatus externalEndpointStatus) throws UnknownEndpointException {
+    public EndpointStatusAndDefinition getEndointStatus(long registrationID) {
         NotificationEndpoint backendEndpoint = this.endpointQueue.getEndpoint((long) registrationID);
-        if (backendEndpoint instanceof HttpEndpoint) {
-            this.mapper.toHttpEndpoint((HttpEndpoint) backendEndpoint,endpoint);
+        EndpointStatusAndDefinition endpointStatusAndDefinition = null;
+        
+        if (backendEndpoint==null) {
+            ExternalEndpointStatus externalEndpointStatus = new ExternalEndpointStatus();
+            externalEndpointStatus.setStatus(ExternalEndpointStatus.INVALID);
+            externalEndpointStatus.setMessage("registration " + registrationID + " does not exist");
+            endpointStatusAndDefinition = new EndpointStatusAndDefinition(null,externalEndpointStatus);
+        } else if (!(backendEndpoint instanceof HttpEndpoint)) {
+            ExternalEndpointStatus externalEndpointStatus = new ExternalEndpointStatus();
+            externalEndpointStatus.setStatus(ExternalEndpointStatus.INVALID);
+            externalEndpointStatus.setMessage("registration " + registrationID + " exists but is not registered to an endpoint");
+            endpointStatusAndDefinition = new EndpointStatusAndDefinition(null,externalEndpointStatus);
         } else {
-            log.error("registration " + registrationID + " is registered to an unknown type of endpoint");
-            throw new UnknownEndpointException(registrationID);
+            HttpEndpointDefinition endpoint = this.mapper.toHttpEndpoint((HttpEndpoint) backendEndpoint);
+            EndpointQueue.EndpointAndRegStatus endpointAndRegStatus = this.endpointQueue.getEndpointAndRegStatus(registrationID);
+            // endpointAndRegStatus would never be null at this point, since there if no AccumulatedRegistrationData is 
+            // affiliated with the regID in the endpoint queue, it would have been caught in the 1st 'if'
+            ExternalEndpointStatus externalEndpointStatus = this.mapper.toEndpointStatus(endpointAndRegStatus);
+            endpointStatusAndDefinition = new EndpointStatusAndDefinition(endpoint,externalEndpointStatus);
         }
-        RegistrationStatus regStat = new RegistrationStatus();
-        EndpointStatus endpointStatus = new EndpointStatus();
-        this.endpointQueue.getEndpointAndRegStatus(registrationID,endpointStatus,regStat);
-        this.mapper.toEndpointStatus(endpointStatus,externalEndpointStatus, regStat);
+        return endpointStatusAndDefinition;
+    }
+    
+    public static class EndpointStatusAndDefinition {
+        protected HttpEndpointDefinition endpoint;
+        protected ExternalEndpointStatus externalEndpointStatus;
+        
+        public EndpointStatusAndDefinition(HttpEndpointDefinition endpoint,
+                ExternalEndpointStatus externalEndpointStatus) {
+            this.endpoint = endpoint;
+            this.externalEndpointStatus = externalEndpointStatus;
+        }
+        public HttpEndpointDefinition getEndpoint() {
+            return endpoint;
+        }
+        public ExternalEndpointStatus getExternalEndpointStatus() {
+            return externalEndpointStatus;
+        }
     }
 }

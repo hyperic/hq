@@ -30,6 +30,7 @@ import java.util.List;
 
 import org.hyperic.util.config.ConfigResponse;
 
+import org.hyperic.hq.bizapp.shared.lather.ControlSendCommandResult_args;
 import org.hyperic.sigar.win32.Service;
 import org.hyperic.sigar.win32.Win32Exception;
 

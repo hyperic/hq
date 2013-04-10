@@ -29,6 +29,7 @@ import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.SQLException;
 
+import org.hyperic.hq.bizapp.shared.lather.ControlSendCommandResult_args;
 import org.hyperic.hq.product.ControlPlugin;
 import org.hyperic.hq.product.PluginException;
 
@@ -109,8 +110,7 @@ public abstract class JDBCControlPlugin extends ControlPlugin {
     protected abstract Class getDriver() throws ClassNotFoundException;
 
     public void doAction(String action, String[] args) throws PluginException {
-
-        doAction(action);
+        super.doAction(action, args);
     }
 
     /**

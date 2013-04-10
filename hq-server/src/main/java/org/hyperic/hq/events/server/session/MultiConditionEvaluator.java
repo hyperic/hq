@@ -236,9 +236,9 @@ public class MultiConditionEvaluator implements AlertConditionEvaluator {
         return getFulfillingConditions();
     }
 
-    protected void fireConditionsSatisfied(Collection fulfilled) {
+    protected boolean fireConditionsSatisfied(Collection fulfilled) {
         events.clear();
-        executionStrategy.conditionsSatisfied(new AlertConditionsSatisfiedZEvent(alertDefinitionId.intValue(),
+        return executionStrategy.conditionsSatisfied(new AlertConditionsSatisfiedZEvent(alertDefinitionId.intValue(),
                                                                                  (TriggerFiredEvent[]) fulfilled.toArray(new TriggerFiredEvent[fulfilled.size()])));
     }
 

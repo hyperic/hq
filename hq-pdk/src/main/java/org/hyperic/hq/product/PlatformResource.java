@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.product;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.hyperic.hq.appdef.shared.AIIpValue;
@@ -128,6 +129,10 @@ public class PlatformResource extends AIPlatformValue {
 
     public void setControlConfig(Map config) {
         setControlConfig(new ConfigResponse(config));
+    }
+    
+    public void setControlConfig() {
+        this.setControlConfig(new HashMap()) ;
     }
 
     public void setCustomProperties(Map props) {

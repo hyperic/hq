@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 
+import org.hyperic.hq.bizapp.shared.lather.ControlSendCommandResult_args;
 import org.hyperic.util.PluginLoader;
 
 import org.hyperic.util.config.ConfigResponse;
@@ -109,7 +110,7 @@ public class ControlPluginManager extends PluginManager {
     {
         LinkedList list;
         synchronized (this.pluginQueue) {
-        	list = (LinkedList) this.pluginQueue.get(name);
+            list = (LinkedList) this.pluginQueue.get(name);
         }
         
         if (list == null)
@@ -130,7 +131,7 @@ public class ControlPluginManager extends PluginManager {
         }
     }
 
-    public void doAction(String name, String action, String[] args)
+    public void doAction(String name, String action, String[] args, final ControlSendCommandResult_args resultsMetadata)
         throws PluginNotFoundException,
                PluginException
     {
@@ -146,15 +147,15 @@ public class ControlPluginManager extends PluginManager {
         plugin.setMessage(null);
 
         PluginLoader.setClassLoader(plugin);
-
+      
         try {
             // Do the action
             if (args.length > 0) {
-                plugin.doAction(action, args);
+                plugin.doAction(action, args, resultsMetadata);
             }
             else {
                 //XXX deprecate this too?
-                plugin.doAction(action);
+                plugin.doAction(action, resultsMetadata);
             }
         } finally {
             PluginLoader.resetClassLoader(plugin);

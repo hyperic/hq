@@ -36,7 +36,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
@@ -600,4 +602,26 @@ public class FileUtil {
         }
         return success;
     }
+    
+    public static final void persistObject(final Serializable obj, final String destDir, final String fileName) throws Throwable{
+        persistObject(obj, new File(destDir + File.separator + fileName)) ; 
+    }//EOM 
+    
+    public static final void persistObject(final Serializable obj, final File destFile) throws Throwable{ 
+        ObjectOutputStream oos = null ; 
+         
+        //destFile.createNewFile() ;
+        FileOutputStream fos = null ; 
+        try{ 
+            fos = new FileOutputStream(destFile) ; 
+            oos = new ObjectOutputStream(fos) ; 
+            oos.writeObject(obj) ; 
+        }finally{   
+            if(oos != null) { 
+                oos.flush() ; 
+                fos.getFD().sync() ; 
+                oos.close() ; 
+            }//EO if OOS not null 
+        }//EO catch block 
+    }//EOM 
 }

@@ -30,6 +30,7 @@ import java.util.NoSuchElementException;
 
 import org.hyperic.hq.bizapp.client.AgentCallbackClientException;
 import org.hyperic.hq.bizapp.client.ControlCallbackClient;
+import org.hyperic.hq.bizapp.shared.lather.ControlSendCommandResult_args;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ControlPluginManager;
@@ -105,9 +106,13 @@ class ActionThread extends Thread {
 
         this.log.debug("Running job " + id);
         long startTime = System.currentTimeMillis();
+        
+        final ControlSendCommandResult_args resultsMetadata = 
+                this.client.newResultsMetadata(this.pluginName,
+                        Integer.parseInt(id), startTime) ;
 
         try {
-            this.manager.doAction(this.pluginName, this.action, this.args);
+            this.manager.doAction(this.pluginName, this.action, this.args, resultsMetadata);
             result = this.manager.getResult(this.pluginName);
             errMsg = this.manager.getMessage(this.pluginName);
         } catch (PluginNotFoundException e) {
@@ -133,7 +138,7 @@ class ActionThread extends Thread {
                 this.log.info("Config finished, running control action");
                 this.manager.createControlPlugin(this.pluginName,
                                                  this.pluginType, config);
-                this.manager.doAction(this.pluginName, this.action, this.args);
+                this.manager.doAction(this.pluginName, this.action, this.args, resultsMetadata);
                 result = this.manager.getResult(this.pluginName);
                 errMsg = this.manager.getMessage(this.pluginName);
             } catch (Exception exc) {
@@ -156,11 +161,7 @@ class ActionThread extends Thread {
 
             // Lastly, send the status back to the server
             try {
-                this.client.controlSendCommandResult(this.pluginName,
-                                                     Integer.parseInt(id),
-                                                     result, startTime,
-                                                     System.currentTimeMillis(),
-                                                     errMsg);
+                this.client.controlSendCommandResult(resultsMetadata, result, errMsg);
             } catch (AgentCallbackClientException e) {
                 this.log.error("Unable to send command result: " +
                                e.getMessage());
