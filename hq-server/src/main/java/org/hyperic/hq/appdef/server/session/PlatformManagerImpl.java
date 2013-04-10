@@ -377,7 +377,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * Delete a platform
      * 
      * @param subject The user performing the delete operation.
-     * @param id - The id of the Platform
+     * @param platform - The Platform
      * 
      */
     public void removePlatform(AuthzSubject subject, Platform platform)
@@ -1344,7 +1344,6 @@ public class PlatformManagerImpl implements PlatformManager {
      * 
      * 
      * @param subject The subject trying to list servers.
-     * @param pc The page control.
      * @return A PageList of ServerValue objects representing servers on the
      *         specified platform that the subject is allowed to view.
      */
@@ -1455,7 +1454,7 @@ public class PlatformManagerImpl implements PlatformManager {
     /**
      * @param subj
      * @param pType platform type
-     * @param nameRegEx regex which matches either the platform fqdn or the
+     * @param regEx regex which matches either the platform fqdn or the
      *        resource sortname XXX scottmf need to add permission checking
      * 
      */
@@ -1584,7 +1583,8 @@ public class PlatformManagerImpl implements PlatformManager {
             existing.setCpuCount(plat.getCpuCount());
         }
 
-        if (plat.matchesValueObject(existing)) {
+        Map<String, String> changedProps = plat.changedProperties(existing);
+        if (changedProps.isEmpty()) {
             log.debug("No changes found between value object and entity");
             return plat;
         } else {
@@ -1631,7 +1631,8 @@ public class PlatformManagerImpl implements PlatformManager {
                 }
             }
             Resource r = plat.getResource();
-            this.zeventManager.enqueueEventAfterCommit(new ResourceContentChangedEvent(r.getId(),existing.getName(), null, null));
+            this.zeventManager.enqueueEventAfterCommit(new ResourceContentChangedEvent(r.getId(),existing.getName(),
+                    null, changedProps));
             platformDAO.updatePlatform(plat, existing);
             return plat;
         }
