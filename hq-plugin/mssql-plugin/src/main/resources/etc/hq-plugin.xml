@@ -750,10 +750,16 @@ drop table #tTables
         </properties>
 
         <service name="SQLAgent">
+              <plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin"/>
               <metrics>
             	 <include name="mssql-agent-avail"/>
             	 <include name="mssql-agent-jobs"/>
               </metrics>
+              <config>
+                 <option name="service_name"
+                  description="Service Name"
+                  default="SQLSERVERAGENT"/>
+              </config>          
         </service>
 
         <service name="Database">
@@ -783,10 +789,16 @@ drop table #tTables
         <property name="mssql.version.file" value="sqlsvc90.dll"/>
     
         <service name="SQLAgent">
+              <plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin"/>
               <metrics>
             	 <include name="mssql-agent-avail"/>
             	 <include name="mssql-agent-jobs"/>
               </metrics>
+              <config>
+                 <option name="service_name"
+                  description="Service Name"
+                  default="SQLSERVERAGENT"/>
+              </config>          
         </service>
         
         <service name="Database">

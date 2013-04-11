@@ -73,10 +73,12 @@ public class MsSQLControlPlugin extends Win32ControlPlugin{
                 return;
             }
             if (action.equals("stop")) {
-                if (null != sqlAgent) {
+                if (null != sqlAgent && isRunning(sqlAgent)) {  
                     sqlAgent.stop((long)getTimeoutMillis());
                 }
-                svc.stop();
+                if (isRunning()){
+                    svc.stop();
+                }
                 setResult(RESULT_SUCCESS);
                 return;
             }

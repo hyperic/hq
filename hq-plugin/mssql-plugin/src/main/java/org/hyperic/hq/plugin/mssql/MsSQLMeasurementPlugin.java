@@ -26,15 +26,10 @@
 package org.hyperic.hq.plugin.mssql;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.List;
@@ -54,9 +49,6 @@ import org.hyperic.sigar.win32.Service;
 import org.hyperic.sigar.win32.Win32Exception;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.exec.Execute;
-import org.hyperic.util.exec.ExecuteWatchdog;
-import org.hyperic.util.exec.PumpStreamHandler;
 
 public class MsSQLMeasurementPlugin
     extends Win32MeasurementPlugin {
@@ -76,48 +68,20 @@ public class MsSQLMeasurementPlugin
 
     private String getServiceName(Metric metric) {
 
-        Properties props = metric.getProperties();
+        // For the SQLServer: 
         // the sqlServerServiceName will be "MSSQLSERVER" (for default instance name)
         // or "MSSQL$<given_instance_name>" (for given instance name)
-        String sqlServerServiceName = props.getProperty(Win32ControlPlugin.PROP_SERVICENAME,
+
+        // For the SQLAgent:
+        // the service name will be "SQLSERVERAGENT" (for default instance name)
+        // or "SQLAgent$<given_instance_name>" (for given instance name)
+        Properties props = metric.getProperties();
+        String sqlServiceName = props.getProperty(Win32ControlPlugin.PROP_SERVICENAME,
             MsSQLDetector.DEFAULT_SQLSERVER_SERVICE_NAME);
         
-        String sqlServiceType = getSqlServiceType(metric); // one of "SQLServer" or "SQLAgent"
-        String ret = "";
-        if (sqlServiceType.equals(DEFAULT_SQLSERVER_METRIC_PREFIX)){
-            // the service type is "SQLServer"
-            // so the service name will be the value of sqlServerServiceName
-               ret = sqlServerServiceName; 
-        } else { 
-             if (sqlServiceType.equals(DEFAULT_SQLAGENT_METRIC_PREFIX)){
-              // the service type is "SQLServer"
-              // so the service name will be "SQLSERVERAGENT" (for default instance name)
-              // or "SQLAgent$<given_instance_name>" (for given instance name)
-                  if  (sqlServerServiceName.equals(MsSQLDetector.DEFAULT_SQLSERVER_SERVICE_NAME)){
-                      ret=MsSQLDetector.DEFAULT_SQLAGENT_SERVICE_NAME;
-                  } else {
-                      ret = sqlServerServiceName.replaceFirst("MSSQL", "SQLAgent");
-                  }
-               }
-           }
-
-        return ret;
+        return sqlServiceName;
     }
 
-    /**
-     * Retrieves the sql service type
-     * one of "SQLServer" or "SQLAgent" 
-     * @param metric
-     * @return the sql service type
-     */
-    private String getSqlServiceType(Metric metric){
-        String prefix = metric.getObjectProperty("Prefix");
-        if (prefix == null || prefix.length() == 0){
-            prefix=DEFAULT_SQLSERVER_METRIC_PREFIX;
-        }
-        return prefix;
-        
-    }
 
     protected String getDomainName(Metric metric) {        
         String fullPrefix ="";

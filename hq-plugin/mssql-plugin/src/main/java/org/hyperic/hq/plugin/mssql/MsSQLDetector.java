@@ -162,8 +162,13 @@ public class MsSQLDetector
             ServiceResource agentService = new ServiceResource();
             agentService.setType(this, "SQLAgent");
             agentService.setServiceName(sqlAgentServiceName);
-            agentService.setProductConfig();
+
+            ConfigResponse config = new ConfigResponse();
+            config.setValue(Win32ControlPlugin.PROP_SERVICENAME, sqlAgentServiceName);
+     
+            agentService.setProductConfig(config);
             agentService.setMeasurementConfig();
+            agentService.setControlConfig();
             services.add(agentService);
         }
         
