@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.plugin.mssql;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.Win32ControlPlugin;
 import org.hyperic.sigar.win32.Service;
@@ -38,18 +40,26 @@ import org.hyperic.sigar.win32.Win32Exception;
  *
  */
 public class MsSQLControlPlugin extends Win32ControlPlugin{
- 
-    private static final String SQL_AGENT_SERVICE_NAME = "SQLSERVERAGENT";
-   
+
+    private static final String DEFAULT_SQLSERVER_SERVICE_NAME = "MSSQLSERVER";
+    private static final String DEFAULT_SQLAGENT_SERVICE_NAME = "SQLSERVERAGENT";
+    private static final Log log = LogFactory.getLog(MsSQLControlPlugin.class);
+
     @Override
     public void doAction(String action) throws PluginException {
-
+        String sqlAgentServiceName = DEFAULT_SQLAGENT_SERVICE_NAME;
+        String sqlServerServiceName = getServiceName();
+        if (!sqlServerServiceName.equals(DEFAULT_SQLSERVER_SERVICE_NAME)) {
+            sqlAgentServiceName = sqlServerServiceName.replaceFirst("MSSQL", "SQLAgent");
+        }
         Service sqlAgent = null;
         try {
-            sqlAgent = new Service(SQL_AGENT_SERVICE_NAME);
+            sqlAgent = new Service(sqlAgentServiceName);
         }catch(Win32Exception e) {
-        }
+            log.debug("Could not find SqlAgent service "+sqlAgentServiceName +": " + e, e);
 
+        }
+       
         try {
             if (action.equals("start")) {
                 //starting the SQL agent service will also start the server
