@@ -127,25 +127,50 @@ public class MsSQLDetector
         return instance;
     }
 
+    private static int getServiceStatus(String name) {
+        Service svc = null;
+        try {
+            svc = new Service(name);
+            return svc.getStatus();
+        } catch (Win32Exception e) {
+            return Service.SERVICE_STOPPED;
+        } finally {
+            if (svc != null) {
+                svc.close();
+            }
+        }
+    }
     @Override
     protected List discoverServices(ConfigResponse serverConfig)
             throws PluginException {
 
         ArrayList services = new ArrayList();
-
-        String serviceName =
+        
+        String sqlServerServiceName =
                 serverConfig.getValue(Win32ControlPlugin.PROP_SERVICENAME,
                 DEFAULT_SQLSERVER_SERVICE_NAME);
 
-        if (serviceName.equals(DEFAULT_SQLSERVER_SERVICE_NAME)) {
-            // not sure why they drop the 'MS' from the service name
-            // in the default case.
-            serviceName = "SQLServer";
-        }
+        String sqlServerMetricPrefix = "SQLServer"; //  metric prefix in case of default instance 
+        String sqlAgentServiceName=MsSQLDetector.DEFAULT_SQLAGENT_SERVICE_NAME; //agent name in case of default instance
 
+        if (!sqlServerServiceName.equals(DEFAULT_SQLSERVER_SERVICE_NAME)) {
+            sqlServerMetricPrefix = sqlServerServiceName;
+            sqlAgentServiceName = sqlServerServiceName.replaceFirst("MSSQL", "SQLAgent");
+       }
+        // creating agent service
+        if (getServiceStatus(sqlAgentServiceName) != Service.SERVICE_STOPPED) { 
+            ServiceResource agentService = new ServiceResource();
+            agentService.setType(this, "SQLAgent");
+            agentService.setServiceName(sqlAgentServiceName);
+            agentService.setProductConfig();
+            agentService.setMeasurementConfig();
+            services.add(agentService);
+        }
+        
+        // creating Database services
         try {
             String[] instances =
-                    Pdh.getInstances(serviceName + ":Databases");
+                    Pdh.getInstances(sqlServerMetricPrefix + ":Databases");
 
             for (int i = 0; i < instances.length; i++) {
                 String name = instances[i];
@@ -165,11 +190,12 @@ public class MsSQLDetector
                 //service.setControlConfig(...); XXX?
 
                 services.add(service);
+              
             }
         } catch (Win32Exception e) {
             String msg =
                     "Error getting pdh data for '" +
-                    serviceName + "': " + e.getMessage();
+                    sqlServerServiceName + "': " + e.getMessage();
             throw new PluginException(msg, e);
         }
 

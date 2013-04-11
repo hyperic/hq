@@ -625,6 +625,16 @@ drop table #tTables
 
     </metrics>
  
+     <metrics name="mssql-agent-avail">
+        <metric name="Agent Availability"
+            alias="Availability"
+            template="Jobs(_Total):Type=Availability,Prefix=SQLAgent:Active jobs"
+            category="AVAILABILITY"
+            group="Reliability"
+            indicator="true"
+            collectionType="dynamic"
+            units="percentage"/>
+    </metrics>
      <metrics name="mssql-agent-jobs">
 
         <metric name="Active jobs"
@@ -714,7 +724,6 @@ drop table #tTables
             <include name="mssql-cache"/>
             <include name="Buffer-Manager"/>
             <include name="mssql-broker-activation"/>
-            <include name="mssql-agent-jobs"/>
          </metrics>
 
         <config>
@@ -739,6 +748,13 @@ drop table #tTables
             <property name="version"
                  description="SQL Server Version"/>
         </properties>
+
+        <service name="SQLAgent">
+              <metrics>
+            	 <include name="mssql-agent-avail"/>
+            	 <include name="mssql-agent-jobs"/>
+              </metrics>
+        </service>
 
         <service name="Database">
             <metrics>
@@ -765,6 +781,13 @@ drop table #tTables
 
         <property name="mssql.version" value="9"/>
         <property name="mssql.version.file" value="sqlsvc90.dll"/>
+    
+        <service name="SQLAgent">
+              <metrics>
+            	 <include name="mssql-agent-avail"/>
+            	 <include name="mssql-agent-jobs"/>
+              </metrics>
+        </service>
         
         <service name="Database">
             <metrics>
