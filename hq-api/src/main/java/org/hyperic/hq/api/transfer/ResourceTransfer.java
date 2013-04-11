@@ -74,7 +74,7 @@ public interface ResourceTransfer {
             NotFoundException;
 
     ExternalRegistrationStatus getRegistrationStatus(final ApiMessageContext messageContext,
-                                     final int registrationID) throws PermissionException,NotFoundException, UnknownEndpointException;
+                                     final String registrationID) throws PermissionException,NotFoundException, UnknownEndpointException;
 
     ResourceBatchResponse approveResource(final ApiMessageContext messageContext, final Resources aiResources);
 

@@ -72,7 +72,7 @@ public abstract class DestinationEvaluator<N extends BaseNotification> {
         }
     }
 
-    public FilterChain<N> getRegistration(int registrationID) {
+    public FilterChain<N> getRegistration(String registrationID) {
         FilterChain<N> filterChain = destToFilter.get(new DefaultEndpoint(registrationID));
         return filterChain;
     }

@@ -47,7 +47,7 @@ public interface MeasurementTransfer {
     RegistrationID register(final MetricFilterRequest metricFilterReq, ApiMessageContext apiMessageContext);
 
     ExternalRegistrationStatus getRegistrationStatus(final ApiMessageContext messageContext,
-                                             final int registrationID) throws PermissionException,NotFoundException, UnknownEndpointException;
+                                             final String registrationID) throws PermissionException,NotFoundException, UnknownEndpointException;
 
     ResourceMeasurementBatchResponse getAggregatedMetricData(ApiMessageContext apiMessageContext, final ResourceMeasurementRequests hqMsmtReqs,
             final Date begin, final Date end) 

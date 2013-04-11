@@ -83,12 +83,12 @@ public class NotificationsTransferImpl implements NotificationsTransfer {
     // will be replaced by the destinations the invokers of this API will pass when registering
 
     @Transactional (readOnly=true)
-    public NotificationsReport poll(long registrationId, Integer subjectId) throws UnregisteredException {
+    public NotificationsReport poll(String registrationId, Integer subjectId) throws UnregisteredException {
         final InternalNotificationReport report = endpointQueue.poll(registrationId);
         return getNotificationReport(registrationId, subjectId, report);
     }
 
-    private NotificationsReport getNotificationReport(long regId, Integer subjectId, InternalNotificationReport report) {
+    private NotificationsReport getNotificationReport(String regId, Integer subjectId, InternalNotificationReport report) {
         AuthzSubject subject = authzSubjectManager.getSubjectById(subjectId);
         InternalResourceDetailsType internalResourceDetailsType = report.getResourceDetailsType();
         ResourceDetailsType resourceDetailsType = null;
@@ -97,14 +97,14 @@ public class NotificationsTransferImpl implements NotificationsTransfer {
     }
 
     @Transactional (readOnly=true)
-    public NotificationsReport poll(long registrationId, ApiMessageContext apiMessageContext)
+    public NotificationsReport poll(String registrationId, ApiMessageContext apiMessageContext)
     throws UnregisteredException {
         AuthzSubject subject = apiMessageContext.getAuthzSubject();
         return poll(registrationId, subject.getId());
     }
 
     @Transactional (readOnly=false)
-    public void unregister(long registrationId) {
+    public void unregister(String registrationId) {
         NotificationEndpoint endpoint = endpointQueue.unregister(registrationId);
         rscTransfer.unregister(endpoint);
         msmtTransfer.unregister(endpoint);
@@ -120,7 +120,7 @@ public class NotificationsTransferImpl implements NotificationsTransfer {
             @Override
             public String transform(InternalNotificationReport internalReport) {
                 try {
-                    final long regId = endpoint.getRegistrationId();
+                    final String regId = endpoint.getRegistrationId();
                     final NotificationsReport report = getNotificationReport(regId, authzSubjectId, internalReport);
 	                final JAXBContext context = JAXBContext.newInstance(NotificationsReport.class);
 	                final StringWriter writer = new StringWriter();
@@ -134,8 +134,8 @@ public class NotificationsTransferImpl implements NotificationsTransfer {
         endpointQueue.register(endpoint, type, t);
     }
 
-    public EndpointStatusAndDefinition getEndointStatus(long registrationID) {
-        NotificationEndpoint backendEndpoint = this.endpointQueue.getEndpoint((long) registrationID);
+    public EndpointStatusAndDefinition getEndointStatus(String registrationID) {
+        NotificationEndpoint backendEndpoint = this.endpointQueue.getEndpoint(registrationID);
         EndpointStatusAndDefinition endpointStatusAndDefinition = null;
         
         if (backendEndpoint==null) {

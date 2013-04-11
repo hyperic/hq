@@ -19,11 +19,11 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 public interface NotificationsService {
     @GET
     @Path("/")
-    public NotificationsReport poll(@QueryParam("registrationid") Long id) throws SessionNotFoundException, SessionTimeoutException;
+    public NotificationsReport poll(@QueryParam("registrationid") String id) throws SessionNotFoundException, SessionTimeoutException;
 
     @DELETE
     @Path("/")
-    public void unregister(@QueryParam("registrationid") Long id) throws SessionNotFoundException, SessionTimeoutException;
+    public void unregister(@QueryParam("registrationid") String id) throws SessionNotFoundException, SessionTimeoutException;
 
     @POST
     @Path("/post")

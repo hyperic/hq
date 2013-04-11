@@ -70,7 +70,7 @@ public class EndpointQueue {
     MetricDestinationEvaluator metricEvaluator;
     ResourceDestinationEvaluator resourceEvaluator;
     
-    private final Map<Long, AccumulatedRegistrationData> registrationData = new HashMap<Long, AccumulatedRegistrationData>();
+    private final Map<String, AccumulatedRegistrationData> registrationData = new HashMap<String, AccumulatedRegistrationData>();
     private final AtomicInteger numConsumers = new AtomicInteger(0);
 
     public void register(NotificationEndpoint endpoint, Transformer<InternalNotificationReport, String> transformer) {
@@ -115,7 +115,7 @@ public class EndpointQueue {
                 if (debug) log.debug("can not register endpoint=" + endpoint + " twice");
                 return;
             }
-            final long regId = endpoint.getRegistrationId();
+            final String regId = endpoint.getRegistrationId();
             registrationData.put(regId, data);
             numConsumers.incrementAndGet();
             schedule(endpoint, data, transformer);
@@ -138,7 +138,7 @@ public class EndpointQueue {
                 int size = 0;
                 long totalTime = 0;
                 try {
-                    final long registrationId = endpoint.getRegistrationId();
+                    final String registrationId = endpoint.getRegistrationId();
                     InternalNotificationReport report = null;
                     final long start = System.currentTimeMillis();
                     final Collection<InternalAndExternalNotificationReports> messages =
@@ -195,15 +195,15 @@ public class EndpointQueue {
         data.setSchedule(schedule);
     }
 
-    public NotificationEndpoint unregister(long registrationID) {
+    public NotificationEndpoint unregister(String regID) {
         AccumulatedRegistrationData data = null;
         synchronized (registrationData) {
             // don't delete the data, we want to be able to access the endpoint by registrationId
-            data = registrationData.get(registrationID);
+            data = registrationData.get(regID);
             if (data == null || !data.isValid()) {
                 if(log.isDebugEnabled()){
                 log.debug((data == null ? "No queue assigned" : "Queue is already invalid") + " for regId: " +
-                        registrationID);
+                        regID);
                 }
                 return null;
             }
@@ -215,17 +215,17 @@ public class EndpointQueue {
                 schedule.cancel(true);
             }
             if (log.isDebugEnabled()) {
-                log.debug("Removing the queue assigned for regId: " + registrationID);
+                log.debug("Removing the queue assigned for regId: " + regID);
             }
         }
         return data.getNotificationEndpoint();
     }
 
-    public InternalNotificationReport poll(long registrationId) {
-        return poll(Integer.MAX_VALUE);
+    public InternalNotificationReport poll(String registrationId) {
+        return poll(registrationId,Integer.MAX_VALUE);
     }
 
-    public InternalNotificationReport poll(long registrationId, int maxSize) {
+    public InternalNotificationReport poll(String registrationId, int maxSize) {
         final InternalNotificationReport rtn = new InternalNotificationReport();
         final List<BaseNotification> notifications = new ArrayList<BaseNotification>();
         synchronized (registrationData) {
@@ -253,12 +253,12 @@ public class EndpointQueue {
         }
     }
     
-    public NotificationEndpoint getEndpoint(Long registrationId) {
-        if (registrationId == null) {
+    public NotificationEndpoint getEndpoint(String registrationID) {
+        if (registrationID == null) {
             return null;
         }
         synchronized (registrationData) {
-            AccumulatedRegistrationData data = registrationData.get(registrationId);
+            AccumulatedRegistrationData data = registrationData.get(registrationID);
             if (data != null) {
                 return data.getNotificationEndpoint();
             }
@@ -266,7 +266,7 @@ public class EndpointQueue {
         return null;
     }
     
-    public EndpointAndRegStatus getEndpointAndRegStatus(Long registrationID) {
+    public EndpointAndRegStatus getEndpointAndRegStatus(String registrationID) {
         synchronized (registrationData) {
             AccumulatedRegistrationData ard = this.registrationData.get(registrationID);
             if (ard!=null) {

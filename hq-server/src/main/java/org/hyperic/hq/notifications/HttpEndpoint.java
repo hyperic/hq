@@ -44,9 +44,9 @@ public class HttpEndpoint extends NotificationEndpoint {
     private ServerKeystoreConfig keystoreConfig;
     private String bodyPrepend;
 
-    public HttpEndpoint(long registrationId, String url, String username, String password, String contentType,
+    public HttpEndpoint(String regID, String url, String username, String password, String contentType,
                         String encoding, String bodyPrepend) {
-        super(registrationId);
+        super(regID);
         keystoreConfig = Bootstrap.getBean(ServerKeystoreConfig.class);
         try {
             this.url = new URL(url);

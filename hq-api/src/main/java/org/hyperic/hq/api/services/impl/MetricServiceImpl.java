@@ -90,7 +90,7 @@ public class MetricServiceImpl extends RestApiService implements MetricService {
         return measurementTransfer.register(request, apiMessageContext);
     }
 
-    public ExternalRegistrationStatus getRegistrationStatus(final int registrationID) throws
+    public ExternalRegistrationStatus getRegistrationStatus(final String registrationID) throws
             SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException {
         ApiMessageContext apiMessageContext = newApiMessageContext();
         try {
@@ -102,7 +102,7 @@ public class MetricServiceImpl extends RestApiService implements MetricService {
         }
     }
 
-    public void unregister(final long registrationId) throws SessionNotFoundException, SessionTimeoutException {
+    public void unregister(final String registrationId) throws SessionNotFoundException, SessionTimeoutException {
         NotificationEndpoint endpoint = endpointQueue.unregister(registrationId);
         if (endpoint == null) {
             throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST,

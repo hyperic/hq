@@ -18,12 +18,12 @@ import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 public class NotificationsReport extends BatchResponseBase {
     protected List<NotificationsGroup> notifications;
     @XmlAttribute(namespace=RestApiConstants.SCHEMA_NAMESPACE)
-    private long registrationId = -1;
+    private String registrationId;
 
-    public NotificationsReport(final ExceptionToErrorCodeMapper exceptionToErrorCodeMapper, long registrationId) {
+    public NotificationsReport(final ExceptionToErrorCodeMapper exceptionToErrorCodeMapper, String regId) {
         super(exceptionToErrorCodeMapper) ;
         this.notifications = new ArrayList<NotificationsGroup>();
-        this.registrationId = registrationId;
+        this.registrationId = regId;
     }
 
     public NotificationsReport() {
@@ -38,11 +38,11 @@ public class NotificationsReport extends BatchResponseBase {
         this.notifications = notificationsGroupList;
     }
 
-    public long getRegistrationId() {
+    public String getRegistrationId() {
         return registrationId;
     }
 
-    public void setRegistrationId(long registrationId) {
+    public void setRegistrationId(String registrationId) {
         this.registrationId = registrationId;
     }
 

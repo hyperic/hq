@@ -103,7 +103,7 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
         return this.resourceTransfer.register(apiMessageContext, responseMetadata, resourceFilterRequest) ;
     }//EOM
 
-    public final ExternalRegistrationStatus getRegistrationStatus(final int registrationID)  throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException {
+    public final ExternalRegistrationStatus getRegistrationStatus(final String registrationID)  throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException {
         ApiMessageContext apiMessageContext = newApiMessageContext();
         try {
             return this.resourceTransfer.getRegistrationStatus(apiMessageContext, registrationID);
@@ -131,7 +131,7 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
 		throw new UnsupportedOperationException() ; 
 	}//EOM 
 	
-	public void unregister(final long registrationId) throws SessionNotFoundException, SessionTimeoutException {
+	public void unregister(final String registrationId) throws SessionNotFoundException, SessionTimeoutException {
         NotificationEndpoint endpoint = endpointQueue.unregister(registrationId);
         if (endpoint == null) {
             throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST,

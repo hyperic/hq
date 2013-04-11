@@ -37,9 +37,9 @@ import org.hyperic.hq.notifications.UnregisteredException;
 import org.hyperic.hq.notifications.model.InternalResourceDetailsType;
 
 public interface NotificationsTransfer {
-    public NotificationsReport poll(long id, ApiMessageContext apiMessageContext) throws UnregisteredException;
-    public void unregister(long id);
+    public NotificationsReport poll(String id, ApiMessageContext apiMessageContext) throws UnregisteredException;
+    public void unregister(String id);
     public void register(NotificationEndpoint endpoint, InternalResourceDetailsType type, int authzSubjectId);
     public void register(NotificationEndpoint endpoint, int authzSubjectId);
-    public EndpointStatusAndDefinition getEndointStatus(long registrationID) throws PermissionException, NotFoundException;
+    public EndpointStatusAndDefinition getEndointStatus(String registrationID) throws PermissionException, NotFoundException;
 }

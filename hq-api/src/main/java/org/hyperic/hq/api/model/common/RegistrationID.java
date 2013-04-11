@@ -18,17 +18,17 @@ public class RegistrationID implements Serializable {
     private static final long serialVersionUID = 56150331462303510L;
     private static final AtomicLong idGenerator = new AtomicLong();
     @XmlElement(namespace=RestApiConstants.SCHEMA_NAMESPACE)
-    private long id;
+    private String id;
 
     public RegistrationID() {
-        this.id = idGenerator.getAndIncrement();
+        this.id = String.valueOf(System.currentTimeMillis()) + '_' + String.valueOf(idGenerator.getAndIncrement());
     } 
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 }

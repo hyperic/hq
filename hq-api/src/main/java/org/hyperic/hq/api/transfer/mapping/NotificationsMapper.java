@@ -34,13 +34,13 @@ public class NotificationsMapper {
     @Autowired
     protected ExceptionToErrorCodeMapper errorHandler ;
 
-    public NotificationsReport toNotificationsReport(AuthzSubject subject, long registrationId,
+    public NotificationsReport toNotificationsReport(AuthzSubject subject, String regId,
                                                      ResourceTransfer resourceTransfer,
                                                      ResourceDetailsType resourceDetailsType,
                                                      List<? extends BaseNotification> ns) {
-        NotificationsReport res = new NotificationsReport(this.errorHandler, registrationId);
+        NotificationsReport res = new NotificationsReport(this.errorHandler, regId);
         if (ns==null || ns.isEmpty()) {
-            return new NotificationsReport(null, registrationId);
+            return new NotificationsReport(null, regId);
         }
         List<Notification> creationNotifications = null;
         List<Notification> updateNotifications = null;

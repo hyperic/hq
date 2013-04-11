@@ -20,7 +20,7 @@ public class NotificationsServiceImpl extends RestApiService implements Notifica
     @Autowired
     protected ExceptionToErrorCodeMapper errorHandler ; 
 
-    public NotificationsReport poll(Long id) throws SessionNotFoundException, SessionTimeoutException {
+    public NotificationsReport poll(String id) throws SessionNotFoundException, SessionTimeoutException {
         try {
             ApiMessageContext apiMessageContext = newApiMessageContext();
             return notificationsTransfer.poll(id, apiMessageContext);
@@ -31,7 +31,7 @@ public class NotificationsServiceImpl extends RestApiService implements Notifica
         }
     }
 
-    public void unregister(Long id) throws SessionNotFoundException, SessionTimeoutException {
+    public void unregister(String id) throws SessionNotFoundException, SessionTimeoutException {
         notificationsTransfer.unregister(id);
     }
 

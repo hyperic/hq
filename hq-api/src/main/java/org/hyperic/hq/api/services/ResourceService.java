@@ -90,7 +90,7 @@ public interface ResourceService {
 
     @GET
     @Path("/registration/{registrationID}")
-    ExternalRegistrationStatus getRegistrationStatus(@PathParam("registrationID") final int registrationID) throws
+    ExternalRegistrationStatus getRegistrationStatus(@PathParam("registrationID") final String registrationID) throws
             SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException;
 
     @POST
@@ -109,6 +109,6 @@ public interface ResourceService {
 
     @DELETE
     @Path("/registration/{registrationID}")
-    public void unregister(@PathParam("registrationID") final long registrationID) throws SessionNotFoundException,
+    public void unregister(@PathParam("registrationID") final String registrationID) throws SessionNotFoundException,
             SessionTimeoutException;
 }//EOC 

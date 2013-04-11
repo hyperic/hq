@@ -21,7 +21,7 @@ public class ExternalRegistrationStatus implements Serializable {
     private String filter;
 
     @XmlElement(namespace = RestApiConstants.SCHEMA_NAMESPACE)
-    private long id;
+    private String id;
     @XmlElement(name = "httpEndpoint")
     protected HttpEndpointDefinition endpoint;
     @XmlElement
@@ -30,7 +30,7 @@ public class ExternalRegistrationStatus implements Serializable {
     public ExternalRegistrationStatus() {
     }
 
-    public ExternalRegistrationStatus(HttpEndpointDefinition endpoint, FilterChain filterChain, int registrationID, ExternalEndpointStatus endpointStatus) {
+    public ExternalRegistrationStatus(HttpEndpointDefinition endpoint, FilterChain filterChain, String registrationID, ExternalEndpointStatus endpointStatus) {
         this.endpoint=endpoint;
         if (filterChain!=null) {
             this.filter = filterChain.toString();
@@ -41,11 +41,11 @@ public class ExternalRegistrationStatus implements Serializable {
         this.endpointStatus=endpointStatus;
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

@@ -8,8 +8,8 @@ import edu.emory.mathcs.backport.java.util.Arrays;
 
 public class DefaultEndpoint extends NotificationEndpoint {
 
-    public DefaultEndpoint(long registrationId) {
-        super(registrationId);
+    public DefaultEndpoint(String regID) {
+        super(regID);
     }
 
     @Override

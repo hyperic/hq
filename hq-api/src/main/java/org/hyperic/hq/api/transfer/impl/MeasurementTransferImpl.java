@@ -176,7 +176,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     }
 
     public ExternalRegistrationStatus getRegistrationStatus(final ApiMessageContext messageContext,
-                                                    final int registrationID) throws PermissionException,NotFoundException, UnknownEndpointException {
+                                                    final String registrationID) throws PermissionException,NotFoundException, UnknownEndpointException {
         FilterChain<MetricNotification> filterChain = evaluator.getRegistration(registrationID);
         NotificationsTransferImpl.EndpointStatusAndDefinition endpointStatusAndDefinition = this.notificationsTransfer.getEndointStatus(registrationID);
         return new ExternalRegistrationStatus(endpointStatusAndDefinition.getEndpoint(),filterChain, registrationID, endpointStatusAndDefinition.getExternalEndpointStatus());

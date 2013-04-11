@@ -82,7 +82,7 @@ public interface MetricService {
 
     @GET
     @Path("/registration/{registrationID}")
-    public ExternalRegistrationStatus getRegistrationStatus(@PathParam("registrationID") final int registrationID) throws
+    public ExternalRegistrationStatus getRegistrationStatus(@PathParam("registrationID") final String registrationID) throws
             SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException;
 
     @DELETE
@@ -90,6 +90,6 @@ public interface MetricService {
     @Descriptions({
             @Description(value = "unregister user session and all assigned filters this user destination has", target = DocTarget.METHOD)
     })
-    public void unregister(@PathParam("registrationID") final long registrationID) throws
+    public void unregister(@PathParam("registrationID") final String registrationID) throws
             SessionNotFoundException, SessionTimeoutException;
 }

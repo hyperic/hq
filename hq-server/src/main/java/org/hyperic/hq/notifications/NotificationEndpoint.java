@@ -6,17 +6,17 @@ import java.util.List;
 
 public abstract class NotificationEndpoint {
     
-    protected final Long id;
+    protected final String id;
 
-    public NotificationEndpoint(long registrationId) {
-        this.id = registrationId;
+    public NotificationEndpoint(String regID) {
+        this.id = regID;
     }
     
     public abstract boolean canPublish();
 
     public abstract EndpointStatus publishMessagesInBatch(Collection<InternalAndExternalNotificationReports> messages, List<InternalNotificationReport> failedReports);
     
-    public long getRegistrationId() {
+    public String getRegistrationId() {
         return id;
     }
     
