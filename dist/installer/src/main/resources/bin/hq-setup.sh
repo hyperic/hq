@@ -38,8 +38,6 @@ case "$platform" in
     Linux )
         if [ "${machine}" = "x86_64" ]; then
             JRE_NAME=amd64-linux-1.7_9.tar.gz
-        else
-            JRE_NAME=x86-linux-1.7_9.tar.gz
         fi
         ;;
     SunOS )
