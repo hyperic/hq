@@ -25,13 +25,14 @@
  */
 package org.hyperic.hq.api.services.impl;
 
-import javax.ws.rs.DELETE;
-import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
-import org.apache.cxf.jaxrs.ext.search.SearchContext;
+import org.hyperic.hq.api.model.ConfigurationOption;
+import org.hyperic.hq.api.model.ConfigurationTemplate;
 import org.hyperic.hq.api.model.Resource;
 import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourceStatusType;
@@ -54,7 +55,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class ResourceServiceImpl extends RestApiService implements ResourceService{
 	
 	@Autowired
-	private ResourceTransfer resourceTransfer ; 
+	private ResourceTransfer resourceTransfer;
+	
+//	@Autowired
+//	private ConfigurationTransfer configurationTransfer;
 	
 	
 	public final Resource getResource(final String platformNaturalID, final ResourceType resourceType, final ResourceStatusType resourceStatusType, 
@@ -65,9 +69,7 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
 	    try {
 	        resource = this.resourceTransfer.getResource(apiMessageContext, platformNaturalID, resourceType, resourceStatusType, hierarchyDepth, responseMetadata);            
 	    } catch (ObjectNotFoundException e) {
-            logger.warn("Resource with the natural ID " + platformNaturalID + " not found.");
-            WebApplicationException webApplicationException = 
-                    errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID, platformNaturalID);            
+            WebApplicationException webApplicationException = createResourceNotFoundWAException(platformNaturalID, "natural");            
             throw webApplicationException;	        
 	    }
 		return resource;
@@ -79,9 +81,7 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
         try {
             resource =  this.resourceTransfer.getResource(apiMessageContext, platformID, resourceStatusType, hierarchyDepth, responseMetadata) ;
         } catch (ObjectNotFoundException e) {
-            logger.warn("Resource with the natural ID " + platformID + " not found.");
-            WebApplicationException webApplicationException = 
-                    errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID, platformID);            
+            WebApplicationException webApplicationException = createResourceNotFoundWAException(platformID, "");            
             throw webApplicationException;
         } 
         return resource;
@@ -113,4 +113,20 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
 	public void unregister() throws SessionNotFoundException, SessionTimeoutException {
 	    this.resourceTransfer.unregister();
 	}
+
+	// TODO: Implement
+    public ConfigurationTemplate getConfigurationTemplate(final String resourceID) {
+        ConfigurationTemplate configTemplate = new ConfigurationTemplate();
+        List<ConfigurationOption> configOptions = new ArrayList<ConfigurationOption>();
+        configTemplate.setConfigurationOptions(configOptions);
+        return configTemplate;
+    }//EOM
+    
+    
+    private WebApplicationException createResourceNotFoundWAException(final String resourceID, final String idType) {
+        logger.warn("Resource with the " + idType + " ID " + resourceID + " not found.");
+        WebApplicationException webApplicationException = 
+                errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID, resourceID);
+        return webApplicationException;
+    }    
 }//EOC 

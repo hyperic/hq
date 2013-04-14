@@ -29,6 +29,95 @@
  * *********************************************************************/
 package org.hyperic.hq.api.model;
 
+import java.util.List;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement(name = "configurationOption", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+@XmlType(name="ConfigurationOptionType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 public class ConfigurationOption {
+
+    private String     name;    
+    private String     description;  
+    private String     category;          
+    private String     defaultValue;   
+    private String     confirmWithValue;    // The value to double check on
+    private Boolean    isOptional;  
+    private String     type;    // { int, double, boolean, long, string, ip, enum, secret, hidden, port, macaddress, stringarray};
+    
+    @XmlElementWrapper(name="enumValues", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+    @XmlElement(name = "enumValue", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+    private List<String> enumValues;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getDefaultValue() {
+        return defaultValue;
+    }
+
+    public void setDefaultValue(String defaultValue) {
+        this.defaultValue = defaultValue;
+    }
+
+    public String getConfirmWithValue() {
+        return confirmWithValue;
+    }
+
+    public void setConfirmWithValue(String confirmWithValue) {
+        this.confirmWithValue = confirmWithValue;
+    }
+
+    public Boolean getIsOptional() {
+        return isOptional;
+    }
+
+    public void setIsOptional(Boolean isOptional) {
+        this.isOptional = isOptional;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public List<String> getEnumValues() {
+        return enumValues;
+    }
+
+    public void setEnumValues(List<String> enumValues) {
+        this.enumValues = enumValues;
+    }    
+ 
 
 }
