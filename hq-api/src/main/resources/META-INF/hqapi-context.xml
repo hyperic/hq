@@ -60,6 +60,8 @@
 	<bean id="timeProvider" class="org.hyperic.hq.api.common.DateParameterProvider">
 	</bean>
 
+	<bean id="searchContextProvider" class="org.apache.cxf.jaxrs.ext.search.SearchContextProvider"/>
+
 	 <bean name="restApiLogger" class="org.apache.commons.logging.LogFactory" 
       factory-method="getLog" >
        <constructor-arg type="java.lang.String" value="org.hyperic.hq.api.rest" />
@@ -158,6 +160,7 @@
             <ref bean="jaxbProvider" />
 			<ref bean="jsonProvider" />
 			<ref bean="timeProvider" />
+			<ref bean="searchContextProvider" />
         </jaxrs:providers>
     </jaxrs:server>
 
