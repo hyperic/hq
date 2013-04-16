@@ -99,7 +99,9 @@ public class PostgreSQLServerDetector extends ServerDetector implements AutoServ
                 if (correctVersion) {
                 	ServerResource server = createServerResource(exe);
                     server.setMeasurementConfig();
-                    server.setControlConfig();
+                    if (!isHQ) {
+                        server.setControlConfig();
+                    }
                 	server.setIdentifier(server.getIdentifier() + "$" + pgData);
                 	ConfigResponse cprop = new ConfigResponse();
                 	cprop.setValue("version", version);
