@@ -40,13 +40,11 @@ public interface MetricService {
             @Description(value = "Get metric data/availability for measurements for a given time frame",
                     target = DocTarget.METHOD),
             @Description(value = "Requested metric data per measuremet", target = DocTarget.RETURN),
-            @Description(value = "ID of the Resource over which the measurements which are requested on the message " +
-                    "body are defined, and the time frame for which the metric data is requested",
+            @Description(value = "The time frame for which the metric data is requested",
                     target = DocTarget.REQUEST),
             @Description(value = "Requested metric data per measuremet per resource", target = DocTarget.RESPONSE),
     })
-    MetricResponse getMetrics(@QueryParam("resourceId") final String resourceId,
-                              @QueryParam("begin") final Date begin,
+    MetricResponse getMetrics(@QueryParam("begin") final Date begin,
                               @QueryParam("end") final Date end)
             throws PermissionException, SessionNotFoundException, SessionTimeoutException, Throwable;
 
