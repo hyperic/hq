@@ -1,7 +1,9 @@
 package org.hyperic.hq.api.services.impl;
 
 import org.apache.cxf.jaxrs.ext.search.ConditionType;
+import org.apache.cxf.jaxrs.ext.search.PrimitiveStatement;
 import org.apache.cxf.jaxrs.ext.search.SearchCondition;
+import org.apache.cxf.jaxrs.ext.search.SearchConditionVisitor;
 import org.apache.cxf.jaxrs.ext.search.SearchContext;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.common.RegistrationID;
@@ -12,6 +14,7 @@ import org.hyperic.hq.api.model.measurements.MetricFilterRequest;
 import org.hyperic.hq.api.model.measurements.MetricResponse;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurement;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementBatchResponse;
+import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequest;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurementRequests;
 import org.hyperic.hq.api.services.MetricService;
 import org.hyperic.hq.api.transfer.MeasurementTransfer;
@@ -38,6 +41,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Stack;
 
 public class MetricServiceImpl extends RestApiService implements MetricService {
     public static class A implements Serializable {
@@ -129,7 +133,6 @@ public class MetricServiceImpl extends RestApiService implements MetricService {
                     ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID);
         }
     }
-
     public ResourceMeasurementBatchResponse getAggregatedMetricData(Date begin, Date end) throws ParseException,
             PermissionException, SessionNotFoundException, SessionTimeoutException, ObjectNotFoundException,
             UnsupportedOperationException, SQLException {
@@ -139,11 +142,16 @@ public class MetricServiceImpl extends RestApiService implements MetricService {
                 throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.BAD_REQUEST,
                         ExceptionToErrorCodeMapper.ErrorCode.ILLEGAL_FILTER, "");
             }
-            create a visitor which returns a flat list of lists when it gets the tree:    (ResourceMeasurement.rscID0 & (ResourceMeasurement.alias0 | ResourceMeasurement.alias1 | ResourceMeasurement.alias2 | ...)) | (ResourceMeasurement.rscID1 & ...)
+            GetAggregatedFIQLVisitor visitor = new GetAggregatedFIQLVisitor();
+            try {
+                scRoot.accept(visitor);
+            } catch (IllegalFIQLStructure e) {
+                throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.BAD_REQUEST,
+                        ExceptionToErrorCodeMapper.ErrorCode.ILLEGAL_FILTER, e.getMessage());
+            }
+            ResourceMeasurementRequests hqMsmtReqs = visitor.getResourceMeasurementRequests();
             ApiMessageContext apiMessageContext = newApiMessageContext();
-            //XXX  
-//            return measurementTransfer.getAggregatedMetricData(apiMessageContext, hqMsmtReqs, begin, end);
-            return measurementTransfer.getAggregatedMetricData(apiMessageContext, null, begin, end);
+            return measurementTransfer.getAggregatedMetricData(apiMessageContext, hqMsmtReqs, begin, end);
         } catch (TimeframeBoundriesException e) {
             throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.BAD_REQUEST,
                     ExceptionToErrorCodeMapper.ErrorCode.WRONG_DATE_VALUES, e.getMessage());
@@ -175,5 +183,114 @@ public class MetricServiceImpl extends RestApiService implements MetricService {
                     ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID);
         }
         measurementTransfer.unregister(endpoint);
+    }
+    
+    static class GetAggregatedFIQLVisitor implements SearchConditionVisitor<ResourceMeasurement> {//extends AbstractSearchConditionVisitor<T, String> {
+        protected Stack<Object> s = new Stack<Object>();
+        
+        @SuppressWarnings("unchecked")
+        public void visit(SearchCondition<ResourceMeasurement> sc) {
+            if (sc==null) {
+                throw new RuntimeException();
+            } 
+            ConditionType ct = sc.getConditionType();
+
+            if (ct.equals(ConditionType.OR)) {
+                this.s.add(ConditionType.OR);
+                List<SearchCondition<ResourceMeasurement>> scChildren = sc.getSearchConditions();
+                for(SearchCondition<ResourceMeasurement> scChild:scChildren) {
+                    scChild.accept(this);
+                }
+
+                Object o = this.s.pop();
+                List l = new ArrayList<Object>();
+                boolean childrenRepresentsAlias = false;
+                while (!ConditionType.OR.equals(o)) {
+                    if (o instanceof String[]) {
+                        if (!l.isEmpty() && !childrenRepresentsAlias) {
+                            throw new IllegalFIQLStructure("the following filter structure form is illegal: resourceid==<string>,measurementalias==<string>");
+                        }
+                        String[] kv = (String[]) o;
+                        if ("measurementalias".equals(kv[0])) {
+                            l.add((String)kv[1]);
+                        } else {
+                            throw new IllegalFIQLStructure("in a filter, only 'measurementalias' fields and elements of the form '(resourceid==<string>;(measurementalias==<string>,measurementalias==<string>,..))' may be seperated with ','");
+                        }
+                        childrenRepresentsAlias=true;
+                    } else if (o instanceof ResourceMeasurementRequest) {
+                        if (!l.isEmpty() && childrenRepresentsAlias) {
+                            throw new IllegalFIQLStructure("the following filter structure form is illegal: measurementalias==<string>,resourceid==<string>");
+                        }
+                        l.add(o);
+                        childrenRepresentsAlias=false;
+                    } else {
+                        throw new IllegalFIQLStructure("the following element was found next to a ',': " + o);
+                    }
+                    o = this.s.pop();
+                }
+                if (childrenRepresentsAlias) {
+                    this.s.add(l);
+                } else {
+                    ResourceMeasurementRequests rs = new ResourceMeasurementRequests();
+                    rs.setMeasurementRequests(l);
+                    this.s.add(rs);
+                }
+            } else if (ct.equals(ConditionType.AND)) {
+                this.s.add(ConditionType.AND);
+                List<SearchCondition<ResourceMeasurement>> scChildren = sc.getSearchConditions();
+                for(SearchCondition<ResourceMeasurement> scChild:scChildren) {
+                    scChild.accept(this);
+                }
+                Object o = this.s.pop();
+                ResourceMeasurementRequest r = new ResourceMeasurementRequest();
+                boolean listMet = false;
+                while (!ConditionType.AND.equals(o)) {
+                    if (o instanceof List) {
+                        if (listMet) {
+                            throw new IllegalFIQLStructure("the following filter structure form is illegal: measurementalias==<string>;measurementalias==<string>");
+                        }
+                        r.setMeasurementTemplateNames((List<String>) o);
+                        listMet = true;
+                    } else if (o instanceof String[]){
+                        String[] kv = (String[]) o;
+                        if ("resourceid".equals(kv[0])) {
+                            r.setRscId((String)kv[1]);
+                        } else if ("measurementalias".equals(kv[0])) {
+                            if (listMet) {
+                                throw new IllegalFIQLStructure("the following filter structure form is illegal: measurementalias==<string>;measurementalias==<string>");
+                            }
+                            List<String> aliases = new ArrayList<String>();
+                            aliases.add((String) kv[1]);
+                            r.setMeasurementTemplateNames(aliases);
+                        } else {
+                            throw new IllegalFIQLStructure("illegal property name. Only resourceid and measurementalias are allowed");
+                        }
+                    } else {
+                        throw new IllegalFIQLStructure("in a filter, ';' can only come between 'resourceid==<string>' and 'measurementalias==<string>', or between 'resourceid==<string>' and '(measurementalias==<string>,measurementalias==<string>,..)'");
+                    }
+                    o = this.s.pop();
+                }
+                this.s.add(r);
+            } else if (ct.equals(ConditionType.EQUALS)) {
+                PrimitiveStatement ps = sc.getStatement();
+                String[] kv = new String[2];
+                kv[0] = ps.getProperty();
+                kv[1] = (String) ps.getValue();
+              this.s.add(kv);
+            }
+        }
+        public ResourceMeasurementRequests getResourceMeasurementRequests() {
+            return (ResourceMeasurementRequests) this.s.pop();
+        }
+        public String getResult() {
+            return null;
+        }
+    }
+    
+    protected static class IllegalFIQLStructure extends RuntimeException {
+        private static final long serialVersionUID = -2683108375142690198L;
+        public IllegalFIQLStructure(String msg) {
+            super(msg);
+        }
     }
 }
