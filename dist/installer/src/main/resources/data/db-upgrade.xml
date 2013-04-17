@@ -11765,10 +11765,10 @@ has already been defined.
 	
 	  <schemaSpec version="3.213">
 		       <schema-directSQL>  	
-    <!--add org\ prefix to the existing organization user's name and sort name, this SQL statement is for vPostger since it's the only supported 
+    <!--add org/ prefix to the existing organization user's name and sort name, this SQL statement is for vPostger since it's the only supported 
     	database in Hyperic 5.0 (organization users are users we authenticate with the organization ldap/kerberos -->
 		        <statement>
-		       	    update EAM_SUBJECT set SORT_NAME = 'org\' || SORT_NAME, NAME = 'org\' || NAME where NAME not in (Select PRINCIPAL from EAM_PRINCIPAL) and EAM_SUBJECT.SORT_NAME IS NOT NULL 
+		       	    update EAM_SUBJECT set SORT_NAME = 'ORG/' || SORT_NAME, NAME = 'org/' || NAME where NAME not in (Select PRINCIPAL from EAM_PRINCIPAL) and EAM_SUBJECT.SORT_NAME IS NOT NULL and EAM_SUBJECT.NAME not like 'org%'
 		       	</statement>	 
 		       </schema-directSQL>  
 		    </schemaSpec>
@@ -11974,6 +11974,19 @@ has already been defined.
             </statement>
         </schema-directSQL>
     </schemaSpec>
+
+    <schemaSpec version="3.220">
+	 	<!-- [HQ-4315] - we change the prefix of the existing organization user's name and sort name due to a javascript issue -->
+	<schema-directSQL>  	
+		<statement>
+			update EAM_SUBJECT set NAME = replace(NAME,'org\','org/'), SORT_NAME = replace(SORT_NAME,'ORG\','ORG/') where NAME like 'org%'
+		</statement>	 
+		<statement>
+			update EAM_ROLE set NAME = replace(NAME,'org\','org/'), SORT_NAME = replace(SORT_NAME,'ORG\','ORG/') where NAME like 'org%'
+		</statement>	 
+	</schema-directSQL>  
+	
+   </schemaSpec>
 
 </dbupgrade>
 </target>
