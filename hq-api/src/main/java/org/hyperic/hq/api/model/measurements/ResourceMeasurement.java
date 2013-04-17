@@ -4,6 +4,9 @@ import java.io.Serializable;
 
 public class ResourceMeasurement implements Serializable {
     private static final long serialVersionUID = -1470027516055434586L;
+    public static final String RESOURCE_ID = "resourceid";
+    public static final String MEASUREMENT_ALIAS = "measurementalias";
+    
     private String resourceid;
     private String measurementalias;
     
