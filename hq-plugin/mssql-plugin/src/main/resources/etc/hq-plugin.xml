@@ -853,7 +853,6 @@ drop table #tTables
             <include name="mssql-cache"/>
             <include name="Buffer-Manager_2012"/>
             <include name="mssql-broker-activation"/>
-            <include name="mssql-agent-jobs"/>
         </metrics>
     </server>
 </plugin>
