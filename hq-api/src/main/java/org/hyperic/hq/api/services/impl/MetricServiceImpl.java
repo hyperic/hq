@@ -61,14 +61,17 @@ public class MetricServiceImpl extends RestApiService implements MetricService {
         return ma;
     }
     
-    public MetricResponse getMetrics(final String resourceId,
-                                     final Date begin, final Date end) throws Throwable {
+    public MetricResponse getMetrics(final Date begin, final Date end) throws Throwable {
         try {
             try {
-                SearchCondition<MeasurementAlias> scRoot = this.searchContext.getCondition(MeasurementAlias.class);
-                if (scRoot==null || !ConditionType.OR.equals(scRoot.getCondition())) {
+                /*SearchCondition<MeasurementAlias> scRoot = this.searchContext.getCondition(MeasurementAlias.class);
+                if (scRoot==null) {
                     throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.BAD_REQUEST,
                             ExceptionToErrorCodeMapper.ErrorCode.ILLEGAL_FILTER, " (most likley that the supplied field name is not measurementalias, the comparator type is unrecognized or that the value it is compared against is empty)\n Only the following filter form is acceptable: measurementalias=<string>,measurementalias=<string>,...");
+                }
+                if (!ConditionType.AND.equals(scRoot.getCondition())) {
+                    throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.BAD_REQUEST,
+                            ExceptionToErrorCodeMapper.ErrorCode.ILLEGAL_FILTER, " (Only the following filter form is acceptable: resourceid=<number>;(measurementalias=<string>,measurementalias=<string>,...)");
                 }
                 List<String> templateNames = new ArrayList<String>();
                 List<SearchCondition<MeasurementAlias>> scs = scRoot.getSearchConditions();
@@ -78,9 +81,26 @@ public class MetricServiceImpl extends RestApiService implements MetricService {
                     for(SearchCondition<MeasurementAlias> sc:scs) {
                         templateNames.add(extractAliases(sc));
                     }
+                }*/
+
+                SearchCondition<ResourceMeasurement> scRoot = this.searchContext.getCondition(ResourceMeasurement.class);
+                if (scRoot==null) {
+                    throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.BAD_REQUEST,
+                            ExceptionToErrorCodeMapper.ErrorCode.ILLEGAL_FILTER, " (most likley that the supplied field name is not measurementalias, the comparator type is unrecognized or that the value it is compared against is empty)\n Only the following filter form is acceptable: measurementalias=<string>,measurementalias=<string>,...");
                 }
-                ApiMessageContext apiMessageContext = newApiMessageContext();
-                return measurementTransfer.getMetrics(apiMessageContext, templateNames, resourceId, begin, end);
+                GetMetricFIQLVisitor visitor = new GetMetricFIQLVisitor();
+                try {
+                    scRoot.accept(visitor);
+                } catch (IllegalFIQLStructure e) {
+                    throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.BAD_REQUEST,
+                            ExceptionToErrorCodeMapper.ErrorCode.ILLEGAL_FILTER, e.getMessage());
+                }
+//                String resourceId = visitor.getResourceID();
+//                List<String> templateNames = visitor.getAliases();
+//                
+//                ApiMessageContext apiMessageContext = newApiMessageContext();
+//                return measurementTransfer.getMetrics(apiMessageContext, templateNames, resourceId, begin, end);
+                return null;
             } catch (Throwable t) {
                 errorHandler.log(t);
                 throw t;
@@ -117,7 +137,7 @@ public class MetricServiceImpl extends RestApiService implements MetricService {
                 throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.BAD_REQUEST,
                         ExceptionToErrorCodeMapper.ErrorCode.ILLEGAL_AGG_FILTER, " (most likley that one of the supplied field names is not recognized, a needed field name is missing, the comparator type is unrecognized or that the value it is compared against is empty)");
             }
-            GetAggregatedFIQLVisitor visitor = new GetAggregatedFIQLVisitor();
+            ResourceMeasurementFIQLVisitor visitor = new ResourceMeasurementFIQLVisitor();
             try {
                 scRoot.accept(visitor);
             } catch (IllegalFIQLStructure e) {
@@ -160,7 +180,118 @@ public class MetricServiceImpl extends RestApiService implements MetricService {
         measurementTransfer.unregister(endpoint);
     }
     
-    protected static class GetAggregatedFIQLVisitor implements SearchConditionVisitor<ResourceMeasurement> {//extends AbstractSearchConditionVisitor<T, String> {
+    protected static class ResourceMeasurementFIQLVisitor implements SearchConditionVisitor<ResourceMeasurement> {//extends AbstractSearchConditionVisitor<T, String> {
+        protected Stack<Object> s = new Stack<Object>();
+        
+        @SuppressWarnings("unchecked")
+        public void visit(SearchCondition<ResourceMeasurement> sc) {
+            if (sc==null) {
+                throw new IllegalFIQLStructure("no filter supplied");
+            } 
+            ConditionType ct = sc.getConditionType();
+
+            if (ct.equals(ConditionType.OR)) {
+                this.s.add(ConditionType.OR);
+                List<SearchCondition<ResourceMeasurement>> scChildren = sc.getSearchConditions();
+                for(SearchCondition<ResourceMeasurement> scChild:scChildren) {
+                    scChild.accept(this);
+                }
+
+                Object o = this.s.pop();
+                List l = new ArrayList<Object>();
+                boolean childrenRepresentsAlias = false;
+                while (!ConditionType.OR.equals(o)) {
+                    if (o instanceof String[]) {
+                        if (!l.isEmpty() && !childrenRepresentsAlias) {
+                            throw new IllegalFIQLStructure("the following filter structure form is illegal: "+
+                                    "resourceid==<string>,measurementalias==<string>");
+                        }
+                        String[] kv = (String[]) o;
+                        if ("measurementalias".equals(kv[0])) {
+                            l.add((String)kv[1]);
+                        } else {
+                            throw new IllegalFIQLStructure("in a filter, only 'measurementalias' fields and elements of the form"+
+                                    "'(resourceid==<string>;(measurementalias==<string>,measurementalias==<string>,..))' may be seperated with ','");
+                        }
+                        childrenRepresentsAlias=true;
+                    } else if (o instanceof ResourceMeasurementRequest) {
+                        if (!l.isEmpty() && childrenRepresentsAlias) {
+                            throw new IllegalFIQLStructure("the following filter structure form is illegal: "+
+                                    "measurementalias==<string>,resourceid==<string>");
+                        }
+                        l.add(o);
+                        childrenRepresentsAlias=false;
+                    } else {
+                        throw new IllegalFIQLStructure("the following element was found next to a ',': " + o);
+                    }
+                    o = this.s.pop();
+                }
+                if (childrenRepresentsAlias) {
+                    this.s.add(l);
+                } else {
+                    ResourceMeasurementRequests rs = new ResourceMeasurementRequests();
+                    rs.setMeasurementRequests(l);
+                    this.s.add(rs);
+                }
+            } else if (ct.equals(ConditionType.AND)) {
+                this.s.add(ConditionType.AND);
+                List<SearchCondition<ResourceMeasurement>> scChildren = sc.getSearchConditions();
+                for(SearchCondition<ResourceMeasurement> scChild:scChildren) {
+                    scChild.accept(this);
+                }
+                Object o = this.s.pop();
+                ResourceMeasurementRequest r = new ResourceMeasurementRequest();
+                boolean listMet = false;
+                while (!ConditionType.AND.equals(o)) {
+                    if (o instanceof List) {
+                        if (listMet) {
+                            throw new IllegalFIQLStructure("the following filter structure form is illegal: "+
+                                    "measurementalias==<string>;measurementalias==<string>");
+                        }
+                        r.setMeasurementTemplateNames((List<String>) o);
+                        listMet = true;
+                    } else if (o instanceof String[]){
+                        String[] kv = (String[]) o;
+                        if ("resourceid".equals(kv[0])) {
+                            r.setRscId((String)kv[1]);
+                        } else if ("measurementalias".equals(kv[0])) {
+                            if (listMet) {
+                                throw new IllegalFIQLStructure("the following filter structure form is illegal: "+
+                                        "measurementalias==<string>;measurementalias==<string>");
+                            }
+                            List<String> aliases = new ArrayList<String>();
+                            aliases.add((String) kv[1]);
+                            r.setMeasurementTemplateNames(aliases);
+                        } else {
+                            throw new IllegalFIQLStructure("illegal property name. Only resourceid and measurementalias are allowed");
+                        }
+                    } else {
+                        throw new IllegalFIQLStructure("in a filter, ';' can only come between 'resourceid==<string>' and "+
+                                "'measurementalias==<string>', or between 'resourceid==<string>' and "+
+                                "'(measurementalias==<string>,measurementalias==<string>,..)'");
+                    }
+                    o = this.s.pop();
+                }
+                this.s.add(r);
+            } else if (ct.equals(ConditionType.EQUALS)) {
+                PrimitiveStatement ps = sc.getStatement();
+                String[] kv = new String[2];
+                kv[0] = ps.getProperty();
+                kv[1] = (String) ps.getValue();
+              this.s.add(kv);
+            } else {
+                throw new IllegalFIQLStructure("unexpected filter element " + ct);
+            }
+        }
+        public ResourceMeasurementRequests getResourceMeasurementRequests() {
+            return (ResourceMeasurementRequests) this.s.pop();
+        }
+        public String getResult() {
+            return null;
+        }
+    }
+    
+    protected static class GetMetricFIQLVisitor implements SearchConditionVisitor<ResourceMeasurement> {//extends AbstractSearchConditionVisitor<T, String> {
         protected Stack<Object> s = new Stack<Object>();
         
         @SuppressWarnings("unchecked")
@@ -211,7 +342,6 @@ public class MetricServiceImpl extends RestApiService implements MetricService {
                     this.s.add(rs);
                 }
             } else if (ct.equals(ConditionType.AND)) {
-                this.s.add(ConditionType.AND);
                 List<SearchCondition<ResourceMeasurement>> scChildren = sc.getSearchConditions();
                 for(SearchCondition<ResourceMeasurement> scChild:scChildren) {
                     scChild.accept(this);
@@ -261,6 +391,7 @@ public class MetricServiceImpl extends RestApiService implements MetricService {
             return null;
         }
     }
+
     
     protected static class IllegalFIQLStructure extends RuntimeException {
         private static final long serialVersionUID = -2683108375142690198L;

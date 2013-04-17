@@ -4,7 +4,6 @@ import org.apache.cxf.jaxrs.ext.search.ConditionType;
 import org.apache.cxf.jaxrs.ext.search.SearchCondition;
 import org.apache.cxf.jaxrs.ext.search.SearchContext;
 import org.hyperic.hq.api.services.MeasurementService;
-import org.hyperic.hq.api.services.impl.MetricServiceImpl.GetAggregatedFIQLVisitor;
 import org.hyperic.hq.api.services.impl.MetricServiceImpl.IllegalFIQLStructure;
 import org.hyperic.hq.api.transfer.MeasurementTransfer;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
