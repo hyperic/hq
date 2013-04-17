@@ -64,26 +64,30 @@ public class MsSQLControlPlugin extends Win32ControlPlugin{
             if (action.equals("start")) {
                 //starting the SQL agent service will also start the server
                 if (null != sqlAgent) {
+                    log.debug("About to start SqlAgent service "+sqlAgentServiceName);
                     sqlAgent.start();
                 }
                 else {
+                    log.debug("About to start SqlServer service "+sqlServerServiceName);
                     svc.start();
                 }
                 setResult(RESULT_SUCCESS);
                 return;
             }
             if (action.equals("stop")) {
-                if (null != sqlAgent && isRunning(sqlAgent)) {  
+                if (null != sqlAgent && isServiceRunning(sqlAgent)) {  
+                    log.debug("About to stop SqlAgent service "+sqlAgentServiceName);
                     sqlAgent.stop((long)getTimeoutMillis());
                 }
                 if (isRunning()){
+                    log.debug("About to stop SqlServer service "+sqlServerServiceName);
                     svc.stop();
                 }
                 setResult(RESULT_SUCCESS);
                 return;
             }
             if (action.equals("restart")) {
-                if (null != sqlAgent && isRunning(sqlAgent)) {              
+                if (null != sqlAgent && isServiceRunning(sqlAgent)) {              
                     sqlAgent.stop((long)getTimeoutMillis());
                 }
                 if (isRunning()){
@@ -108,4 +112,14 @@ public class MsSQLControlPlugin extends Win32ControlPlugin{
                 "' not supported");
     }
 
+    private boolean isServiceRunning(Service service) {
+        int status = service.getStatus();
+        if (status == Service.SERVICE_START_PENDING || 
+            status == Service.SERVICE_RUNNING || 
+            status == Service.SERVICE_STOP_PENDING) {
+           return true;
+        }
+        return false;
+
+    }
 }
