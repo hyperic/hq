@@ -143,6 +143,7 @@ public abstract class SharePointServerDetectorDefault extends ServerDetector imp
                             pc.setValue("service_name", name);
                             setProductConfig(service, pc);
                             service.setMeasurementConfig();
+                            service.setControlConfig();
                         } else {
                             log.debug(fullName + " (" + name + ") is NOT running");
                         }
