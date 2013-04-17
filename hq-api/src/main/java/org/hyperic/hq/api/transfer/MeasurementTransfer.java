@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.hibernate.ObjectNotFoundException;
+import org.hyperic.hq.api.model.ID;
 import org.hyperic.hq.api.model.common.RegistrationID;
 import org.hyperic.hq.api.model.common.ExternalRegistrationStatus;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
@@ -54,7 +55,7 @@ public interface MeasurementTransfer {
             final Date begin, final Date end) 
             throws PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException, SQLException;
 
-    ResourceMeasurementBatchResponse getMeasurements(ApiMessageContext apiMessageContext,BulkResourceMeasurementRequest msmtMetaReq);
+    ResourceMeasurementBatchResponse getMeasurements(ApiMessageContext apiMessageContext,List<ID> ids);
 
     void unregister(NotificationEndpoint endpoint);
 

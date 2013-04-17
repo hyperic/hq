@@ -372,10 +372,9 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     }
 
     @Transactional(readOnly = true)
-    public ResourceMeasurementBatchResponse getMeasurements(ApiMessageContext apiMessageContext, BulkResourceMeasurementRequest rcsMsmtReq) {
+    public ResourceMeasurementBatchResponse getMeasurements(ApiMessageContext apiMessageContext, List<ID> ids) {
         ResourceMeasurementBatchResponse res = new ResourceMeasurementBatchResponse(this.errorHandler);
         AuthzSubject authzSubject = apiMessageContext.getAuthzSubject();
-        List<ID> ids = rcsMsmtReq.getRids();
         List<Integer> rids = this.mapper.toIds(ids);
         for(Integer rid:rids) {
             Resource rsc = this.resourceManager.findResourceById(rid);

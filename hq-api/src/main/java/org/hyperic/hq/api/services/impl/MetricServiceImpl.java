@@ -9,7 +9,6 @@ import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.api.model.common.RegistrationID;
 import org.hyperic.hq.api.model.common.ExternalRegistrationStatus;
 import org.hyperic.hq.api.model.measurements.MeasurementAlias;
-import org.hyperic.hq.api.model.measurements.MeasurementRequest;
 import org.hyperic.hq.api.model.measurements.MetricFilterRequest;
 import org.hyperic.hq.api.model.measurements.MetricResponse;
 import org.hyperic.hq.api.model.measurements.ResourceMeasurement;
@@ -35,7 +34,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
-import java.io.Serializable;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -44,23 +42,6 @@ import java.util.List;
 import java.util.Stack;
 
 public class MetricServiceImpl extends RestApiService implements MetricService {
-    public static class A implements Serializable {
-        private static final long serialVersionUID = -3952973670560385315L;
-        public int a;
-        public int b;
-        public int getA() {
-            return a;
-        }
-        public void setA(int a) {
-            this.a = a;
-        }
-        public int getB() {
-            return b;
-        }
-        public void setB(int b) {
-            this.b = b;
-        }
-    }
     @Autowired
     protected MeasurementTransfer measurementTransfer;
     @Autowired
@@ -69,12 +50,6 @@ public class MetricServiceImpl extends RestApiService implements MetricService {
     private EndpointQueue endpointQueue;
     @Context
     private SearchContext searchContext;
-    
-    public void f() {
-        SearchCondition<A> sc = this.searchContext.getCondition(MetricServiceImpl.A.class);
-        System.out.println(sc);
-
-    }
     
     protected String extractAliases(SearchCondition<MeasurementAlias> sc) {
         String ma = sc.getCondition().getMeasurementAlias();
@@ -91,9 +66,9 @@ public class MetricServiceImpl extends RestApiService implements MetricService {
         try {
             try {
                 SearchCondition<MeasurementAlias> scRoot = this.searchContext.getCondition(MeasurementAlias.class);
-                if (scRoot==null) {
+                if (scRoot==null || !ConditionType.OR.equals(scRoot.getCondition())) {
                     throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.BAD_REQUEST,
-                            ExceptionToErrorCodeMapper.ErrorCode.ILLEGAL_FILTER, " (most likley that the supplied field name is not measurementalias, the comparator tyepe is unrecognized or that the value it is compared against is empty)");
+                            ExceptionToErrorCodeMapper.ErrorCode.ILLEGAL_FILTER, " (most likley that the supplied field name is not measurementalias, the comparator type is unrecognized or that the value it is compared against is empty)\n Only the following filter form is acceptable: measurementalias=<string>,measurementalias=<string>,...");
                 }
                 List<String> templateNames = new ArrayList<String>();
                 List<SearchCondition<MeasurementAlias>> scs = scRoot.getSearchConditions();
@@ -140,14 +115,14 @@ public class MetricServiceImpl extends RestApiService implements MetricService {
             SearchCondition<ResourceMeasurement> scRoot = this.searchContext.getCondition(ResourceMeasurement.class);
             if (scRoot==null) {
                 throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.BAD_REQUEST,
-                        ExceptionToErrorCodeMapper.ErrorCode.ILLEGAL_FILTER, "");
+                        ExceptionToErrorCodeMapper.ErrorCode.ILLEGAL_AGG_FILTER, " (most likley that one of the supplied field names is not recognized, a needed field name is missing, the comparator type is unrecognized or that the value it is compared against is empty)");
             }
             GetAggregatedFIQLVisitor visitor = new GetAggregatedFIQLVisitor();
             try {
                 scRoot.accept(visitor);
             } catch (IllegalFIQLStructure e) {
                 throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.BAD_REQUEST,
-                        ExceptionToErrorCodeMapper.ErrorCode.ILLEGAL_FILTER, e.getMessage());
+                        ExceptionToErrorCodeMapper.ErrorCode.ILLEGAL_AGG_FILTER, e.getMessage());
             }
             ResourceMeasurementRequests hqMsmtReqs = visitor.getResourceMeasurementRequests();
             ApiMessageContext apiMessageContext = newApiMessageContext();
@@ -185,7 +160,7 @@ public class MetricServiceImpl extends RestApiService implements MetricService {
         measurementTransfer.unregister(endpoint);
     }
     
-    static class GetAggregatedFIQLVisitor implements SearchConditionVisitor<ResourceMeasurement> {//extends AbstractSearchConditionVisitor<T, String> {
+    protected static class GetAggregatedFIQLVisitor implements SearchConditionVisitor<ResourceMeasurement> {//extends AbstractSearchConditionVisitor<T, String> {
         protected Stack<Object> s = new Stack<Object>();
         
         @SuppressWarnings("unchecked")

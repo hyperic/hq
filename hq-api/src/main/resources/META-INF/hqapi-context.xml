@@ -149,6 +149,7 @@
         <jaxrs:providers>
             <ref bean="jaxbProvider" />
 			<ref bean="jsonProvider" />
+			<ref bean="searchContextProvider" />
         </jaxrs:providers>
     </jaxrs:server>
 

@@ -34,12 +34,6 @@ import org.hyperic.hq.common.NotFoundException;
 @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 public interface MetricService {
-
-    @GET
-    @Path("/f")
-    public void f();
-
-    
     @GET
     @Path("/")
     @Descriptions({

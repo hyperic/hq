@@ -155,7 +155,8 @@ public class ExceptionToErrorCodeMapper  {
         NO_VC_CONNECTION_EXISTS("8004"), 
         UNKNOWN_ENDPOINT("8005"), 
         ILLEGAL_FILTER("8100"), 
-        ILLEGAL_FILTER_COMPARATOR("8101");
+        ILLEGAL_FILTER_COMPARATOR("8101"), 
+        ILLEGAL_AGG_FILTER("8102");
         
         private final String errorCode;
 
