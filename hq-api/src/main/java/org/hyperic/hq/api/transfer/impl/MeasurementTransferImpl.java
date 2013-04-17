@@ -253,7 +253,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         ResourceMeasurementBatchResponse res = new ResourceMeasurementBatchResponse(this.errorHandler);
         List<ResourceMeasurementRequest> measRequests;
         if (requests==null || (measRequests = requests.getMeasurementRequests()) == null || measRequests.isEmpty()) {
-            throw new UnsupportedOperationException("message body is missing or corrupted"); 
+            throw new UnsupportedOperationException("failed parsing the supplied filter"); 
         }
         validateTimeFrame(begin,end);
         AuthzSubject authzSubject = apiMessageContext.getAuthzSubject();
