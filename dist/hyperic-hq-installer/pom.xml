@@ -40,9 +40,7 @@
 				<module>modules/hyperic-hq-installer-parent</module>
 				<module>modules/noJRE-tar</module>
 				<module>modules/noJRE-zip</module>
-				<module>modules/win32</module>
-		        <module>modules/x86-64-win</module> 
-				<module>modules/x86-linux</module> 
+		        	<module>modules/x86-64-win</module> 
 				<module>modules/x86-64-linux</module>
 			</modules> 
 		</profile>
@@ -53,7 +51,6 @@
    			</activation>
 			<modules> 
 				<!--<module>modules/hyperic-hq-installer-parent</module>
-				<module>modules/win32</module>
 				<module>modules/x86-64-linux</module> -->
 			</modules> 
 		</profile>  
@@ -66,8 +63,6 @@
 				<!-- no jre-tar -->
 				<!--<module>modules/hyperic-hq-installer-parent</module>
 				<module>modules/noJRE-zip</module>
-				<module>modules/win32</module>
-				<module>modules/x86-linux</module> 
 				<module>modules/x86-64-linux</module> -->
 			</modules> 
 		</profile>  

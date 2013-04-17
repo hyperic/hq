@@ -94,8 +94,6 @@
 	<bean name="measurementServiceImpl" class="org.hyperic.hq.api.services.impl.MeasurementServiceImpl" />
 	
 	<bean name="metricServiceImpl" class="org.hyperic.hq.api.services.impl.MetricServiceImpl" />
-
-    <bean name="pluginServiceImpl" class="org.hyperic.hq.api.services.impl.PluginServiceImpl" />		
 		
 	<bean name="sessionManagementImpl" class="org.hyperic.hq.api.services.impl.SessionManagementServiceImpl" />
     

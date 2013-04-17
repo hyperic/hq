@@ -11783,7 +11783,7 @@ has already been defined.
 	 		<statement>alter table eam_keystore alter column cert_chain type varchar(10000)</statement> 
 	 	</schema-directSQL>
 	</schemaSpec>
-	
+
 	<schemaSpec version="3.216" alwaysExecute="true">
 	 	<schema-directSQL>  
 	 		<statement>create table if not exists EAM_ENCRYPTION_KEYS (encryption_key varchar(2000) not null, creation_date timestamp primary key default now()) </statement>
@@ -11810,8 +11810,7 @@ has already been defined.
                 NAME varchar(128) not null,
                 CREATED_BY varchar(128) not null,
                 DESCRIPTION varchar(128) not null,
-                RESOURCE_NAME_REGEX varchar(128),
-                RESOURCE_PROTOTYPE int4,
+                RESOURCE_NAME_REGEX varchar(128),                
                 primary key (ID)
             )
         </statement>
@@ -11824,6 +11823,25 @@ has already been defined.
         <statement targetDB="postgresql">
             create sequence EAM_GROUP_CRITERIA_ID_SEQ start 10001 increment 1
         </statement>
+        <statement targetDB="postgresql">
+            create table EAM_GROUP_CRITERIA_PROTOTYPE_MAP ( 
+                CRITERIA_ID int4 not null, 
+                PROTOTYPE_ID int4 not null, 
+                primary key (CRITERIA_ID, PROTOTYPE_ID) 
+            ); 
+        </statement>
+        <statement targetDB="postgresql">
+            alter table EAM_GROUP_CRITERIA_PROTOTYPE_MAP 
+                add constraint FKE111ABCDEE4336A8 
+                foreign key (CRITERIA_ID) 
+                references EAM_GROUP_CRITERIA; 
+        </statement>
+        <statement targetDB="postgresql">
+            alter table EAM_GROUP_CRITERIA_PROTOTYPE_MAP 
+                add constraint FKE111ABCD645F8D1A 
+                foreign key (PROTOTYPE_ID) 
+                references EAM_RESOURCE; 
+        </statement>				              
         <statement targetDB="postgresql">
             create table EAM_MGMT_POLICY (
                 ID int4 not null,

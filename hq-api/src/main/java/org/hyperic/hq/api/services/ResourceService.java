@@ -25,6 +25,8 @@
  */
 package org.hyperic.hq.api.services;
 
+import java.util.List;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -36,6 +38,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import org.hyperic.hq.api.model.ConfigurationOption;
+import org.hyperic.hq.api.model.ConfigurationTemplate;
 import org.hyperic.hq.api.model.Resource;
 import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourceStatusType;
@@ -44,6 +48,7 @@ import org.hyperic.hq.api.model.Resources;
 import org.hyperic.hq.api.model.resources.RegisteredResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
+import org.hyperic.hq.api.services.impl.ApiMessageContext;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -87,4 +92,8 @@ public interface ResourceService {
 	@DELETE
 	@Path("/registration")
 	public void unregister() throws SessionNotFoundException, SessionTimeoutException;
+	
+	@GET
+	@Path("/{resourceID}/configuration-template")
+	public ConfigurationTemplate getConfigurationTemplate(@PathParam("resourceID") final String resourceID);
 }//EOC 

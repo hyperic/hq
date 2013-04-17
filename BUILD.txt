@@ -23,7 +23,7 @@ Common usages:
     $ mvn -P[apple-osx|noJRE|hpux-11|ppc-aix|sparc-solaris|win32|x86-linux|x86-64-linux] assembly:directory 
 
     Build a specific installer bundle (from dist/hyperic-hqee-installer)
-    $ mvn -P[apple-osx|noJRE|sparc-solaris|win32|x86-linux|x86-64-linux] assembly:directory  
+    $ mvn -P[noJRE|x86-64-linux] assembly:directory  
 
     Build modules (excluding installer and agent bundles) and run integration tests:
     $ mvn -Pintegration-test package
