@@ -26,15 +26,10 @@
 package org.hyperic.hq.plugin.mssql;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.List;
@@ -49,13 +44,11 @@ import org.hyperic.hq.product.ProductPluginManager;
 import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.hq.product.Win32ControlPlugin;
 import org.hyperic.hq.product.Win32MeasurementPlugin;
+import org.hyperic.sigar.win32.Pdh;
 import org.hyperic.sigar.win32.Service;
 import org.hyperic.sigar.win32.Win32Exception;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.exec.Execute;
-import org.hyperic.util.exec.ExecuteWatchdog;
-import org.hyperic.util.exec.PumpStreamHandler;
 
 public class MsSQLMeasurementPlugin
     extends Win32MeasurementPlugin {
@@ -70,23 +63,49 @@ public class MsSQLMeasurementPlugin
 
     private static final String TOTAL_NAME = "_Total";
 
-    private String getServiceName(Metric metric) {
-        Properties props = metric.getProperties();
+    static final String DEFAULT_SQLSERVER_METRIC_PREFIX = "SQLServer";
+    static final String DEFAULT_SQLAGENT_METRIC_PREFIX = "SQLAgent";
 
-        return props.getProperty(Win32ControlPlugin.PROP_SERVICENAME,
-            MsSQLDetector.DEFAULT_SERVICE_NAME);
+    private String getServiceName(Metric metric) {
+
+        // For the SQLServer: 
+        // the sqlServerServiceName will be "MSSQLSERVER" (for default instance name)
+        // or "MSSQL$<given_instance_name>" (for given instance name)
+
+        // For the SQLAgent:
+        // the service name will be "SQLSERVERAGENT" (for default instance name)
+        // or "SQLAgent$<given_instance_name>" (for given instance name)
+        Properties props = metric.getProperties();
+        String sqlServiceName = props.getProperty(Win32ControlPlugin.PROP_SERVICENAME,
+            MsSQLDetector.DEFAULT_SQLSERVER_SERVICE_NAME);
+        
+        return sqlServiceName;
     }
 
-    protected String getDomainName(Metric metric) {
+
+    protected String getDomainName(Metric metric) {        
+        String fullPrefix ="";
         String serviceName = getServiceName(metric);
 
-        if (serviceName.equalsIgnoreCase(MsSQLDetector.DEFAULT_SERVICE_NAME)) {
-            // not sure why they drop the 'MS' from the service name
-            // in the default case.
-            serviceName = "SQLServer";
+        if (serviceName.equalsIgnoreCase(MsSQLDetector.DEFAULT_SQLSERVER_SERVICE_NAME)) {
+            // service name is "MSSQLSERVER"  so this is a default instance and  
+            // the perfmon metric name will be prefixed by "SQLSERVER:"
+            fullPrefix = DEFAULT_SQLSERVER_METRIC_PREFIX;  
+        } else {
+            if (serviceName.equalsIgnoreCase(MsSQLDetector.DEFAULT_SQLAGENT_SERVICE_NAME)) {
+                // service name is "SQLSERVERAGENT"  so this is a default instance and  
+                // the perfmon metric name will be prefixed by "SQLAgent:"
+                fullPrefix = DEFAULT_SQLAGENT_METRIC_PREFIX; 
+            }
+            else{
+                // service name is not one of the above so this is not a default instance
+                // the perfmon metric name will be prefixed by the service name
+                // i.e. something like "MSSQL$<instance_name>" or "SQLAgent$<instance_name>
+                fullPrefix = serviceName; 
+            }
         }
 
-        return serviceName + ":" + metric.getDomainName();
+        return fullPrefix + ":" + metric.getDomainName();
     }
 
     protected double adjustValue(Metric metric, double value) {
@@ -142,7 +161,6 @@ public class MsSQLMeasurementPlugin
 
     public MetricValue getValue(Metric metric) throws PluginException, MetricNotFoundException,
         MetricUnreachableException {
-        String name = getServiceName(metric);
 
         // This metric requires SQL query, not available via perflib
         if (metric.getAttributeName().startsWith(ATTR_NAME_DATABASE_FREE_PERCENT)) {
@@ -155,13 +173,13 @@ public class MsSQLMeasurementPlugin
             	return getUnallocatedSpace(metric, MDF_FREE_SPACE_PCT2005_SQL);
             }
         }
-
+        String name = getServiceName(metric);
         if (getServiceStatus(name) != Service.SERVICE_STOPPED) {
-            return super.getValue(metric);
+            return getValueCompat(metric);
         }
         // XXX should not have to do this, but pdh.dll seems to cache last
         // value in some environments
-        if (metric.isAvail() || metric.getObjectPropString().equals("Type=Availability")) // XXX
+        if (metric.isAvail() || ("Availability").equals(metric.getObjectProperty("Type"))) // XXX
 
         {
             return new MetricValue(Metric.AVAIL_DOWN);
@@ -363,4 +381,70 @@ public class MsSQLMeasurementPlugin
 			return stringBuilder.toString();
 		}
 	}
+	
+    private MetricValue getValueCompat(Metric metric)
+            throws PluginException,
+                   MetricNotFoundException,
+                   MetricUnreachableException {
+            
+            String domain = getDomainName(metric);
+            String attr   = getAttributeName(metric);
+
+            StringBuffer name = new StringBuffer();
+
+            if (domain.charAt(0) != '\\') {
+                name.append("\\");
+            }
+            name.append(domain);
+            if (domain.charAt(domain.length()-1) != '\\') {
+                name.append("\\");
+            }
+            name.append(attr);
+
+            String typeProp = metric.getObjectProperty("Type");
+            boolean isFormatted=false, isAvail=false;
+            
+            if (("Formatted").equals(typeProp)) {
+                isFormatted = true;
+            }
+            else if (("Availability").equals(typeProp)) {
+                isAvail = true;
+            }
+            
+            return getPdhValue(metric, name.toString(),
+                               isAvail, isFormatted);
+        }
+
+    private MetricValue getPdhValue(Metric metric,
+            String counter,
+            boolean isAvail,
+            boolean isFormatted)
+                    throws MetricNotFoundException {
+
+            Pdh pdh = null;
+
+            try {
+                pdh = new Pdh();
+                double value;
+                //default is raw
+                if (isFormatted) {
+                    value = pdh.getFormattedValue(counter);    
+                }
+                else {
+                    value = pdh.getRawValue(counter);    
+                }
+
+                if (isAvail) {
+                    return new MetricValue(Metric.AVAIL_UP);
+                }
+                return new MetricValue(adjustValue(metric, value),
+                        System.currentTimeMillis());
+            } catch (Win32Exception e) {
+                throw new MetricNotFoundException(counter);
+            } finally {
+                if (pdh != null) {
+                    try { pdh.close(); } catch (Win32Exception e) {}
+                }
+            }
+    }
 }
