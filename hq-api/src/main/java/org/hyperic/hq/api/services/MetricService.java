@@ -42,7 +42,7 @@ public interface MetricService {
             @Description(value = "Requested metric data per measuremet", target = DocTarget.RETURN),
             @Description(value = "The time frame for which the metric data is requested",
                     target = DocTarget.REQUEST),
-            @Description(value = "Requested metric data per measuremet per resource", target = DocTarget.RESPONSE),
+            @Description(value = "Requested metric data per measuremet per resource", target = DocTarget.RESPONSE)
     })
     MetricResponse getMetrics(@QueryParam("begin") final Date begin,
                               @QueryParam("end") final Date end)
