@@ -106,8 +106,7 @@ public class TomcatServerDetector
         config.setValue(PTQL_CONFIG_OPTION, PTQL_QUERY_WIN32);
         server.setName(server.getName() + " " + win32Service);
         server.setProductConfig(config);
-        server.setMeasurementConfig();
-        server.setControlConfig();
+        server.setMeasurementConfig();        
         return server;
     }
 
@@ -260,6 +259,14 @@ public class TomcatServerDetector
                 }
             }
         }
+        
+        //set control config for all servers
+        if (servers != null ){
+            for (Object server: servers) {
+               ((ServerResource)server).setControlConfig();
+            }
+        }
+        
         return servers;
     }
 
