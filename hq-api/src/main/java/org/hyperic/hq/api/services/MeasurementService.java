@@ -29,7 +29,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON}) 
 @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 public interface MeasurementService {
-    @POST
+    @GET
     @Path("/")
-    public ResourceMeasurementBatchResponse getMeasurements(BulkResourceMeasurementRequest msmtMetaReq) throws SessionNotFoundException, SessionTimeoutException;
+    public ResourceMeasurementBatchResponse getMeasurements() throws SessionNotFoundException, SessionTimeoutException;
 }

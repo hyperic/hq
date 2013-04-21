@@ -141,7 +141,7 @@ public class ExceptionToErrorCodeMapper  {
         MEASUREMENT_NOT_FOUND("3003"),
         WRONG_DATE_FORMAT("4001"),
         WRONG_DATE_VALUES("4002"),
-        BAD_MEASUREMENT_REQ("5001"),
+        BAD_MEASUREMENT_REQ("582001"),
         BAD_REQ_BODY("5002"),
         CLOUD_PROVIDER_NOT_CONFIGURED("6001"),
         BAD_CLOUD_PROVIDER_CONFIGURATION("6002"),
@@ -153,7 +153,10 @@ public class ExceptionToErrorCodeMapper  {
         CANNOT_UPDATE_SERVER_GUID("8002"),
         VC_CONNECTION_ALREADY_EXISTS("8003"),
         NO_VC_CONNECTION_EXISTS("8004"), 
-        UNKNOWN_ENDPOINT("8005");
+        UNKNOWN_ENDPOINT("8005"), 
+        ILLEGAL_FILTER("8100"), 
+        ILLEGAL_FILTER_COMPARATOR("8101"), 
+        ILLEGAL_AGG_FILTER("8102");
         
         private final String errorCode;
 

@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.plugin.mssql;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.Win32ControlPlugin;
 import org.hyperic.sigar.win32.Service;
@@ -38,40 +40,54 @@ import org.hyperic.sigar.win32.Win32Exception;
  *
  */
 public class MsSQLControlPlugin extends Win32ControlPlugin{
- 
-    private static final String SQL_AGENT_SERVICE_NAME = "SQLSERVERAGENT";
-   
+
+    private static final String DEFAULT_SQLSERVER_SERVICE_NAME = "MSSQLSERVER";
+    private static final String DEFAULT_SQLAGENT_SERVICE_NAME = "SQLSERVERAGENT";
+    private static final Log log = LogFactory.getLog(MsSQLControlPlugin.class);
+
     @Override
     public void doAction(String action) throws PluginException {
-
+        String sqlAgentServiceName = DEFAULT_SQLAGENT_SERVICE_NAME;
+        String sqlServerServiceName = getServiceName();
+        if (!sqlServerServiceName.equals(DEFAULT_SQLSERVER_SERVICE_NAME)) {
+            sqlAgentServiceName = sqlServerServiceName.replaceFirst("MSSQL", "SQLAgent");
+        }
         Service sqlAgent = null;
         try {
-            sqlAgent = new Service(SQL_AGENT_SERVICE_NAME);
+            sqlAgent = new Service(sqlAgentServiceName);
         }catch(Win32Exception e) {
-        }
+            log.debug("Could not find SqlAgent service "+sqlAgentServiceName +": " + e, e);
 
+        }
+       
         try {
             if (action.equals("start")) {
                 //starting the SQL agent service will also start the server
                 if (null != sqlAgent) {
+                    log.debug("About to start SqlAgent service "+sqlAgentServiceName);
                     sqlAgent.start();
                 }
                 else {
+                    log.debug("About to start SqlServer service "+sqlServerServiceName);
                     svc.start();
                 }
                 setResult(RESULT_SUCCESS);
                 return;
             }
             if (action.equals("stop")) {
-                if (null != sqlAgent) {
+                if (null != sqlAgent && isServiceRunning(sqlAgent)) {  
+                    log.debug("About to stop SqlAgent service "+sqlAgentServiceName);
                     sqlAgent.stop((long)getTimeoutMillis());
                 }
-                svc.stop();
+                if (isRunning()){
+                    log.debug("About to stop SqlServer service "+sqlServerServiceName);
+                    svc.stop();
+                }
                 setResult(RESULT_SUCCESS);
                 return;
             }
             if (action.equals("restart")) {
-                if (null != sqlAgent && isRunning(sqlAgent)) {              
+                if (null != sqlAgent && isServiceRunning(sqlAgent)) {              
                     sqlAgent.stop((long)getTimeoutMillis());
                 }
                 if (isRunning()){
@@ -96,4 +112,14 @@ public class MsSQLControlPlugin extends Win32ControlPlugin{
                 "' not supported");
     }
 
+    private boolean isServiceRunning(Service service) {
+        int status = service.getStatus();
+        if (status == Service.SERVICE_START_PENDING || 
+            status == Service.SERVICE_RUNNING || 
+            status == Service.SERVICE_STOP_PENDING) {
+           return true;
+        }
+        return false;
+
+    }
 }

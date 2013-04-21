@@ -3,8 +3,10 @@ package org.hyperic.hq.api.transfer;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.List;
 
 import org.hibernate.ObjectNotFoundException;
+import org.hyperic.hq.api.model.ID;
 import org.hyperic.hq.api.model.common.RegistrationID;
 import org.hyperic.hq.api.model.common.ExternalRegistrationStatus;
 import org.hyperic.hq.api.model.measurements.MeasurementRequest;
@@ -41,7 +43,7 @@ public interface MeasurementTransfer {
 	 * @throws TimeframeSizeException 
 	 * @throws IllegalArgumentException 
 	 */
-    MetricResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest measurementRequest,
+    MetricResponse getMetrics(ApiMessageContext apiMessageContext, final List<String> templateNames,
             final String rscId, final Date begin, final Date end) throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException, TimeframeSizeException;
     
     RegistrationID register(final MetricFilterRequest metricFilterReq, ApiMessageContext apiMessageContext);
@@ -53,7 +55,7 @@ public interface MeasurementTransfer {
             final Date begin, final Date end) 
             throws PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException, SQLException;
 
-    ResourceMeasurementBatchResponse getMeasurements(ApiMessageContext apiMessageContext,BulkResourceMeasurementRequest msmtMetaReq);
+    ResourceMeasurementBatchResponse getMeasurements(ApiMessageContext apiMessageContext,List<ID> ids);
 
     void unregister(NotificationEndpoint endpoint);
 

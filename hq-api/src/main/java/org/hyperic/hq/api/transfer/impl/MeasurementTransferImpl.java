@@ -186,13 +186,12 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         evaluator.unregisterAll(endpoint);
     }
 
-    public MetricResponse getMetrics(ApiMessageContext apiMessageContext, final MeasurementRequest request, 
+    public MetricResponse getMetrics(ApiMessageContext apiMessageContext, List<String> templateNames, 
                                      final String rscId, final Date begin, final Date end) 
     throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException,
            TimeframeBoundriesException, TimeframeSizeException {
         MetricResponse res = new MetricResponse();
-        List<String> templateNames;
-        if (request==null || (templateNames = request.getMeasurementTemplateNames()) == null || templateNames.isEmpty()) {
+        if (templateNames.isEmpty()) {
             throw new UnsupportedOperationException("message body is missing or corrupted"); 
         }
         validateTimeFrame(begin,end);
@@ -201,10 +200,9 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         }
         AuthzSubject authzSubject = apiMessageContext.getAuthzSubject();
         // extract all input measurement templates
-        List<String> tmpNames = request.getMeasurementTemplateNames();
-        List<MeasurementTemplate> tmps = tmpltMgr.findTemplatesByName(tmpNames);
+        List<MeasurementTemplate> tmps = tmpltMgr.findTemplatesByName(templateNames);
         if (tmps==null || tmps.isEmpty()) {
-            throw new ObjectNotFoundException(tmpNames.toString(), MeasurementTemplate.class.getName());
+            throw new ObjectNotFoundException(templateNames.toString(), MeasurementTemplate.class.getName());
         }
         List<Measurement> hqMsmts = getMeasurements(rscId, tmps,authzSubject);
         // get metrics
@@ -255,7 +253,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
         ResourceMeasurementBatchResponse res = new ResourceMeasurementBatchResponse(this.errorHandler);
         List<ResourceMeasurementRequest> measRequests;
         if (requests==null || (measRequests = requests.getMeasurementRequests()) == null || measRequests.isEmpty()) {
-            throw new UnsupportedOperationException("message body is missing or corrupted"); 
+            throw new UnsupportedOperationException("failed parsing the supplied filter"); 
         }
         validateTimeFrame(begin,end);
         AuthzSubject authzSubject = apiMessageContext.getAuthzSubject();
@@ -374,10 +372,9 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     }
 
     @Transactional(readOnly = true)
-    public ResourceMeasurementBatchResponse getMeasurements(ApiMessageContext apiMessageContext, BulkResourceMeasurementRequest rcsMsmtReq) {
+    public ResourceMeasurementBatchResponse getMeasurements(ApiMessageContext apiMessageContext, List<ID> ids) {
         ResourceMeasurementBatchResponse res = new ResourceMeasurementBatchResponse(this.errorHandler);
         AuthzSubject authzSubject = apiMessageContext.getAuthzSubject();
-        List<ID> ids = rcsMsmtReq.getRids();
         List<Integer> rids = this.mapper.toIds(ids);
         for(Integer rid:rids) {
             Resource rsc = this.resourceManager.findResourceById(rid);
