@@ -84,12 +84,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class ConfigManagerImpl implements ConfigManager {
     private static final int MAX_VALIDATION_ERR_LEN = 512;
     protected final Log log = LogFactory.getLog(ConfigManagerImpl.class.getName());
-    private MonitorableTypeDAO monitorableTypeDAO;
-    private ConfigResponseDAO configResponseDAO;
-    private ServiceDAO serviceDAO;
-    private ServerDAO serverDAO;
-    private PlatformDAO platformDAO;
-    private ResourceManager resourceManager;
+    private final MonitorableTypeDAO monitorableTypeDAO;
+    private final ConfigResponseDAO configResponseDAO;
+    private final ServiceDAO serviceDAO;
+    private final ServerDAO serverDAO;
+    private final PlatformDAO platformDAO;
+    private final ResourceManager resourceManager;
 
     @Autowired
     public ConfigManagerImpl(ConfigResponseDAO configResponseDAO, ServiceDAO serviceDAO,
@@ -128,7 +128,9 @@ public class ConfigManagerImpl implements ConfigManager {
         }.classify(resources);
         final Map<Resource, ConfigResponseDB> tmp = new HashMap<Resource, ConfigResponseDB>();
         final ProductPluginDeployer productPluginDeployer = Bootstrap.getBean(ProductPluginDeployer.class);
-        if (debug) watch.markTimeBegin("getResourceConfigs");
+        if (debug) {
+            watch.markTimeBegin("getResourceConfigs");
+        }
         for (final Entry<Integer, Collection<Resource>> entry : resourcesByType.entrySet()) {
             final Integer resourceTypeId = entry.getKey();
             final List<Resource> list = new ArrayList<Resource>(entry.getValue());
@@ -140,7 +142,9 @@ public class ConfigManagerImpl implements ConfigManager {
                 tmp.putAll(configResponseDAO.getServiceConfigs(list));
             }
         }
-        if (debug) watch.markTimeEnd("getResourceConfigs");
+        if (debug) {
+            watch.markTimeEnd("getResourceConfigs");
+        }
         final List<MonitorableType> all = monitorableTypeDAO.findAll();
         final Map<String, String> monitorableTypeMap = new Classifier<MonitorableType, String, String>() {
             @Override
@@ -151,7 +155,7 @@ public class ConfigManagerImpl implements ConfigManager {
         final Map<Resource, ConfigResponse> rtn = new HashMap<Resource, ConfigResponse>();
         for (final Entry<Resource, ConfigResponseDB> entry : tmp.entrySet()) {
             final Resource resource = entry.getKey();
-            if (resource == null || resource.isInAsyncDeleteState() || resource.isSystem()) {
+            if ((resource == null) || resource.isInAsyncDeleteState() || resource.isSystem()) {
                 continue;
             }
             final ConfigResponseDB crdb = entry.getValue();
@@ -172,25 +176,31 @@ public class ConfigManagerImpl implements ConfigManager {
                 configResponse.setValue(ProductPlugin.PROP_PLATFORM_ID, String.valueOf(platform.getId()));
             }
             try {
-                if (measurementResponse != null && measurementResponse.length > 0) {
+                if ((measurementResponse != null) && (measurementResponse.length > 0)) {
                     configResponse.merge(ConfigResponse.decode(measurementResponse), true);
                 }
-                if (productResponse != null && productResponse.length > 0) {
+                if ((productResponse != null) && (productResponse.length > 0)) {
                     configResponse.merge(ConfigResponse.decode(productResponse), true);
                 }
-                if (controlResponse != null && controlResponse.length > 0) {
+                if ((controlResponse != null) && (controlResponse.length > 0)) {
                     configResponse.merge(ConfigResponse.decode(controlResponse), true);
                 }
                 // This is the bottleneck of this method
-                if (debug) watch.markTimeBegin("mergeWithConfigSchema");
+                if (debug) {
+                    watch.markTimeBegin("mergeWithConfigSchema");
+                }
                 mergeWithConfigSchema(resource, configResponse, monitorableTypeMap, hideSecrets, productPluginDeployer);
-                if (debug) watch.markTimeEnd("mergeWithConfigSchema");
+                if (debug) {
+                    watch.markTimeEnd("mergeWithConfigSchema");
+                }
             } catch (EncodingException e) {
                 log.warn("could not decode config associated with resourceId=" + resource.getId());
                 log.debug(e,e);
             }
         }
-        if (debug) log.debug(watch);
+        if (debug) {
+            log.debug(watch);
+        }
         return rtn;
     }
     
@@ -225,9 +235,9 @@ public class ConfigManagerImpl implements ConfigManager {
                 if (!keys.contains(key)) {
                     config.setValue(key, o.getDefault());
                 }
-                if (o instanceof StringConfigOption && ((StringConfigOption) o).isHidden()) {
+                if ((o instanceof StringConfigOption) && ((StringConfigOption) o).isHidden()) {
                     config.unsetValue(key);
-                } else if (hideSecrets && o instanceof StringConfigOption && ((StringConfigOption) o).isSecret()) {
+                } else if (hideSecrets && (o instanceof StringConfigOption) && ((StringConfigOption) o).isSecret()) {
                     config.setValue(key, "*********");
                 }
             }
@@ -407,9 +417,9 @@ public class ConfigManagerImpl implements ConfigManager {
         boolean isServerOrService = false;
         boolean isProductType = productType.equals(ProductPlugin.TYPE_PRODUCT);
 
-        if (id.getType() != AppdefEntityConstants.APPDEF_TYPE_PLATFORM &&
-            id.getType() != AppdefEntityConstants.APPDEF_TYPE_SERVER &&
-            id.getType() != AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
+        if ((id.getType() != AppdefEntityConstants.APPDEF_TYPE_PLATFORM) &&
+            (id.getType() != AppdefEntityConstants.APPDEF_TYPE_SERVER) &&
+            (id.getType() != AppdefEntityConstants.APPDEF_TYPE_SERVICE)) {
             throw new IllegalArgumentException(id + " doesn't support " + "config merging");
         }
 
@@ -467,8 +477,9 @@ public class ConfigManagerImpl implements ConfigManager {
 
         // Server config (if necessary)
         if (serverId != null) {
-            if (id.isServer())
+            if (id.isServer()) {
                 required = isProductType ? origReq : false;
+            }
 
             configValue = getConfigResponse(serverId);
             data = getConfigForType(configValue, ProductPlugin.TYPE_PRODUCT, serverId, required);
@@ -505,7 +516,7 @@ public class ConfigManagerImpl implements ConfigManager {
         // Merge everything together
         res = new ConfigResponse();
         for (int i = 0; i < responseIdx; i++) {
-            if (responseList[i] == null || responseList[i].length == 0) {
+            if ((responseList[i] == null) || (responseList[i].length == 0)) {
                 continue;
             }
 
@@ -526,7 +537,7 @@ public class ConfigManagerImpl implements ConfigManager {
         }
 
         // Set installpath attribute for server and service types.
-        if (isServerOrService && server != null) {
+        if (isServerOrService && (server != null)) {
             try {
                 res.setValue(ProductPlugin.PROP_INSTALLPATH, server.installPath);
             } catch (Exception exc) {
@@ -693,7 +704,7 @@ public class ConfigManagerImpl implements ConfigManager {
             wasUpdated = true;
         }
 
-        if (userManaged != null && existingConfig.getUserManaged() != userManaged.booleanValue()) {
+        if ((userManaged != null) && (existingConfig.getUserManaged() != userManaged.booleanValue())) {
             existingConfig.setUserManaged(userManaged.booleanValue());
             wasUpdated = true;
         }
@@ -741,7 +752,9 @@ public class ConfigManagerImpl implements ConfigManager {
 
         configBytes = mergeConfig(existingConfig.getProductResponse(), productConfig, overwrite, force);
         AICompare.ConfigDiff productDiffs = AICompare.configsDiff(configBytes, existingConfig.getProductResponse());
-        if (productDiffs!=null && (productDiffs.getNewConf().size()>0 || productDiffs.getChangedConf().size()>0 || productDiffs.getDeletedConf().size()>0)) {
+        if (((null == existingConfig.getProductResponse()) && (null != configBytes))
+                || ((productDiffs != null) && ((productDiffs.getNewConf().size() > 0)
+                        || (productDiffs.getChangedConf().size() > 0) || (productDiffs.getDeletedConf().size() > 0)))) {
             existingConfig.setProductResponse(configBytes);
             allNewConfigResponses.setConfig(ProductPlugin.CFGTYPE_IDX_PRODUCT, productDiffs.getNewConf());
             allChangedConfigResponses.setConfig(ProductPlugin.CFGTYPE_IDX_PRODUCT, productDiffs.getChangedConf());
@@ -751,7 +764,9 @@ public class ConfigManagerImpl implements ConfigManager {
 
         configBytes = mergeConfig(existingConfig.getMeasurementResponse(), measurementConfig, overwrite, force);
         AICompare.ConfigDiff msmtDiffs = AICompare.configsDiff(configBytes, existingConfig.getMeasurementResponse());
-        if (msmtDiffs!=null && (msmtDiffs.getNewConf().size()>0 || msmtDiffs.getChangedConf().size()>0 || msmtDiffs.getDeletedConf().size()>0)) {
+        if (((null == existingConfig.getMeasurementResponse()) && (null != configBytes))
+                || ((msmtDiffs != null) && ((msmtDiffs.getNewConf().size() > 0)
+                        || (msmtDiffs.getChangedConf().size() > 0) || (msmtDiffs.getDeletedConf().size() > 0)))) {
             existingConfig.setMeasurementResponse(configBytes);
             allNewConfigResponses.setConfig(ProductPlugin.CFGTYPE_IDX_MEASUREMENT, msmtDiffs.getNewConf());
             allChangedConfigResponses.setConfig(ProductPlugin.CFGTYPE_IDX_MEASUREMENT, msmtDiffs.getChangedConf());
@@ -761,7 +776,9 @@ public class ConfigManagerImpl implements ConfigManager {
 
         configBytes = mergeConfig(existingConfig.getControlResponse(), controlConfig, overwrite, false);
         AICompare.ConfigDiff controlDiffs = AICompare.configsDiff(configBytes, existingConfig.getControlResponse());
-        if (controlDiffs!=null && (controlDiffs.getNewConf().size()>0 || controlDiffs.getChangedConf().size()>0 || controlDiffs.getDeletedConf().size()>0)) {
+        if (((null == existingConfig.getControlResponse()) && (null != configBytes))
+                || ((controlDiffs != null) && ((controlDiffs.getNewConf().size() > 0)
+                        || (controlDiffs.getChangedConf().size() > 0) || (controlDiffs.getDeletedConf().size() > 0)))) {
             existingConfig.setControlResponse(configBytes);
             allNewConfigResponses.setConfig(ProductPlugin.CFGTYPE_IDX_CONTROL, controlDiffs.getNewConf());
             allChangedConfigResponses.setConfig(ProductPlugin.CFGTYPE_IDX_CONTROL, controlDiffs.getChangedConf());
@@ -771,7 +788,10 @@ public class ConfigManagerImpl implements ConfigManager {
 
         configBytes = mergeConfig(existingConfig.getResponseTimeResponse(), rtConfig, overwrite, false);
         AICompare.ConfigDiff responseTimeDiffs = AICompare.configsDiff(configBytes, existingConfig.getResponseTimeResponse());
-        if (responseTimeDiffs!=null && (responseTimeDiffs.getNewConf().size()>0 || responseTimeDiffs.getChangedConf().size()>0 || responseTimeDiffs.getDeletedConf().size()>0)) {
+        if (((null == existingConfig.getResponseTimeResponse()) && (null != configBytes))
+                || ((responseTimeDiffs != null) && ((responseTimeDiffs.getNewConf().size() > 0)
+                        || (responseTimeDiffs.getChangedConf().size() > 0) || (responseTimeDiffs.getDeletedConf()
+                        .size() > 0)))) {
             existingConfig.setResponseTimeResponse(configBytes);
             allNewConfigResponses.setConfig(ProductPlugin.CFGTYPE_IDX_RESPONSE_TIME, responseTimeDiffs.getNewConf());
             allChangedConfigResponses.setConfig(ProductPlugin.CFGTYPE_IDX_RESPONSE_TIME, responseTimeDiffs.getChangedConf());
@@ -779,7 +799,7 @@ public class ConfigManagerImpl implements ConfigManager {
             diffs.setWasUpdated(true);
         }
 
-        if (userManaged != null && existingConfig.getUserManaged() != userManaged.booleanValue()) {
+        if ((userManaged != null) && (existingConfig.getUserManaged() != userManaged.booleanValue())) {
             existingConfig.setUserManaged(userManaged.booleanValue());
             diffs.setWasUpdated(true);
         }
@@ -806,7 +826,7 @@ public class ConfigManagerImpl implements ConfigManager {
             throw new IllegalArgumentException("Unknown product type");
         }
 
-        if ((res == null || res.length == 0) && fail) {
+        if (((res == null) || (res.length == 0)) && fail) {
             throw new ConfigFetchException(productType, id);
         }
         return res;
