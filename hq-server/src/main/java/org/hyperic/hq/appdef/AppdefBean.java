@@ -128,7 +128,7 @@ public abstract class AppdefBean
      * legacy entity bean code
      *
      * @param appdefResourceValue
-     * @return
+     * @return The changed properties map, ordered by key name, Empty if no changed properties exist.
      */
     public Map<String, String> changedProperties(AppdefResourceValue appdefResourceValue) {
         Map<String, String> changedProps = new TreeMap<String, String>();
