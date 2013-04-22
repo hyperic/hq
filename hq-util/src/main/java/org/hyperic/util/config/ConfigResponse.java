@@ -45,6 +45,7 @@ import org.hyperic.util.StringUtil;
 
 public class ConfigResponse implements GenericValueMap, Serializable  {
 
+    public static final String CONCEALED_SECRET_VALUE = "#CONCEALED_SECRET_VALUE#";
             Map          attributes;
     private Map          schemaOptionsMap;
     private ConfigSchema schema = null;
@@ -179,7 +180,14 @@ public class ConfigResponse implements GenericValueMap, Serializable  {
     }
 
     public String getValue(String key){
-        return (String)this.attributes.get(key);
+        return this.getValue(key, false);
+    }
+
+    public String getValue(String key, boolean concealSecretValues){
+        if (concealSecretValues && ConfigSchema.isSecret(key)) {
+            return CONCEALED_SECRET_VALUE;
+        }
+        return (String) this.attributes.get(key);
     }
 
     public String getValue(String key, String defaultValue){
