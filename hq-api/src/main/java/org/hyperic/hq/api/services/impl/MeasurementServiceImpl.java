@@ -44,7 +44,8 @@ public class MeasurementServiceImpl extends RestApiService implements Measuremen
             throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.BAD_REQUEST,
                     ExceptionToErrorCodeMapper.ErrorCode.ILLEGAL_FILTER, " (most likley that one of the supplied field names is not recognized, a needed field name is missing, the comparator type is unrecognized or that the value it is compared against is empty)");
         }
-        if (!ConditionType.OR.equals(scRoot.getConditionType())) {
+        int x = 2;
+        if (!(ConditionType.OR.equals(scRoot.getConditionType()) || ConditionType.EQUALS.equals(scRoot.getConditionType()))) {
             throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.BAD_REQUEST,
                     ExceptionToErrorCodeMapper.ErrorCode.ILLEGAL_FILTER, " (only the following filter form is acceptable: id==<number>,id==<number>,...)");
         }
