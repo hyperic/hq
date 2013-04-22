@@ -120,6 +120,9 @@
 			<ref bean="jaxbProvider" />
 			<ref bean="jsonProvider" />
 		</jaxrs:providers>
+        <jaxrs:features>
+            <cxf:logging />
+        </jaxrs:features>              
 	</jaxrs:server>
 	
 	<jaxrs:server id="sessionService" address="/session">
@@ -130,6 +133,9 @@
 			<ref bean="jaxbProvider" />
 			<ref bean="jsonProvider" />
 		</jaxrs:providers>
+        <jaxrs:features>
+            <cxf:logging />
+        </jaxrs:features>              
 	</jaxrs:server>	
 
 	<jaxrs:server id="notificationsService" address="/notification">
@@ -140,6 +146,9 @@
             <ref bean="jaxbProvider" />
 			<ref bean="jsonProvider" />
         </jaxrs:providers>
+        <jaxrs:features>
+            <cxf:logging />
+        </jaxrs:features>              
     </jaxrs:server>
     
 	<jaxrs:server id="measurementService" address="/measurement">
@@ -151,6 +160,9 @@
 			<ref bean="jsonProvider" />
 			<ref bean="searchContextProvider" />
         </jaxrs:providers>
+        <jaxrs:features>
+            <cxf:logging />
+        </jaxrs:features>              
     </jaxrs:server>
 
 	<jaxrs:server id="metricService" address="/metric">
@@ -163,6 +175,9 @@
 			<ref bean="timeProvider" />
 			<ref bean="searchContextProvider" />
         </jaxrs:providers>
+        <jaxrs:features>
+            <cxf:logging />
+        </jaxrs:features>              
     </jaxrs:server>
 
     
@@ -174,6 +189,8 @@
             <ref bean="jaxbProvider" />
             <ref bean="jsonProvider" />
         </jaxrs:providers>
+        <jaxrs:features>
+            <cxf:logging />
+        </jaxrs:features>              
     </jaxrs:server>
-
 </beans>

@@ -207,7 +207,10 @@
     <logger name="org.hyperic.hq.autoinventory.server.session.ServiceMergerImpl">
         <level value="INFO"/>
     </logger>
-
+	<logger name="org.apache.cxf" >
+	    <level value="DEBUG" />
+	</logger>
+	
 	<!--
 		Subsystems. Uncomment individual subsystems to see debug messages.
 	-->
