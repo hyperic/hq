@@ -106,10 +106,14 @@ public class SaveAction extends BaseAction {
     {
         String address = ((String[])p.get("snmpIP"))[0];
         String oid     = ((String[])p.get("snmpOID"))[0];
+        String snmpTrapOID = null;
+        if ((String[])p.get("snmpTrapOID") != null){
+        	snmpTrapOID = ((String[])p.get("snmpTrapOID"))[0];
+        }
         String snmpNotificationMechanism = ((String[])p.get("snmpNotificationMechanism"))[0];
         String variableBindings = ((String[])p.get("variableBindings"))[0];
         
-        return new SnmpActionConfig(snmpNotificationMechanism, address, oid,variableBindings);
+        return new SnmpActionConfig(snmpNotificationMechanism, address, snmpTrapOID, oid,variableBindings);
     }
     
     private ActionConfigInterface 
