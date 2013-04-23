@@ -496,7 +496,7 @@
         <plugin type="autoinventory" class="PostgreSQLServerDetector"/>
         <plugin type="config_track" class="org.hyperic.hq.product.FileChangeTrackPlugin"/>
 
-        <plugin type="config_track" platform="unix" class="org.hyperic.hq.product.FileChangeTrackPlugin">
+        <plugin type="config_track" class="org.hyperic.hq.product.FileChangeTrackPlugin">
             <monitored>
                 <folder path="data" recursive="false" filter=".*\.conf"/>
                 <!-- system variable PGDATA -->
@@ -579,7 +579,7 @@
 
     <server name="PostgreSQL" version="7.4" include="HQ PostgreSQL 9.x">
         <property name="version" value="7\.4"/>
-        <config type ="control" platform="Unix">
+        <config type ="control">
             <option name="postgresql.program" description="Absoulte path to control command" default="/etc/init.d/postgres"/>
             <option name="postgresql.prefix" description="Control command prefix" optional="true"/>
             <option name="postgresql.timeout" description="Control action timeout" default="30"/>
@@ -587,7 +587,7 @@
         <config type ="control" platform="Win32">
             <option name="service_name" description="PostgreSQL Service name"/>
         </config>
-        <plugin type="control" class="ServerControl" platform="Unix"/>
+        <plugin type="control" class="ServerControl"/>
         <plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin" platform="Win32"/>        
         <actions include="stop,start"/>
     </server>
