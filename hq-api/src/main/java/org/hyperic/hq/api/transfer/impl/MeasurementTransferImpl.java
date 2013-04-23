@@ -65,6 +65,7 @@ import org.hyperic.hq.api.transfer.mapping.UnknownEndpointException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.TimeframeBoundriesException;
@@ -102,6 +103,8 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     protected ExceptionToErrorCodeMapper errorHandler ;
     protected MetricDestinationEvaluator evaluator;
     private NotificationsTransfer notificationsTransfer;
+    @Autowired
+    protected PermissionManager permissionManager;
     @javax.ws.rs.core.Context
     protected SearchContext context ;
 
@@ -148,7 +151,7 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
     }
 
     @Transactional(readOnly=true)
-    public RegistrationID register(final MetricFilterRequest request, ApiMessageContext apiMessageContext) {
+    public RegistrationID register(final ApiMessageContext messageContext,final MetricFilterRequest request, ApiMessageContext apiMessageContext) throws PermissionException {
         if (request==null) {
             if (log.isDebugEnabled()) {
                 log.debug("illegal request");
@@ -156,6 +159,8 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
             throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.BAD_REQUEST,
                                                           ExceptionToErrorCodeMapper.ErrorCode.BAD_REQ_BODY);
         }
+        AuthzSubject authzSubject = messageContext.getAuthzSubject();
+        this.permissionManager.checkIsSuperUser(authzSubject);
         List<Filter<MetricNotification,? extends FilteringCondition<?>>> userFilters = mapper.toMetricFilters(request); 
         if (userFilters.isEmpty()) {
             userFilters.add(new AgnosticFilter<MetricNotification,FilteringCondition<?>>());
@@ -177,12 +182,14 @@ public class MeasurementTransferImpl implements MeasurementTransfer {
 
     public ExternalRegistrationStatus getRegistrationStatus(final ApiMessageContext messageContext,
                                                     final String registrationID) throws PermissionException,NotFoundException, UnknownEndpointException {
+        AuthzSubject authzSubject = messageContext.getAuthzSubject();
+        this.permissionManager.checkIsSuperUser(authzSubject);
         FilterChain<MetricNotification> filterChain = evaluator.getRegistration(registrationID);
         NotificationsTransferImpl.EndpointStatusAndDefinition endpointStatusAndDefinition = this.notificationsTransfer.getEndointStatus(registrationID);
         return new ExternalRegistrationStatus(endpointStatusAndDefinition.getEndpoint(),filterChain, registrationID, endpointStatusAndDefinition.getExternalEndpointStatus());
     }
 
-    public void unregister(NotificationEndpoint endpoint) {
+    public void unregister(final ApiMessageContext apiMessageContext, NotificationEndpoint endpoint) throws PermissionException {
         evaluator.unregisterAll(endpoint);
     }
 
