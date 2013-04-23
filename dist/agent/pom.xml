@@ -303,6 +303,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>multilogtrack-plugin</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>mysql-plugin</artifactId>
 			<version>${project.version}</version>
 		</dependency>

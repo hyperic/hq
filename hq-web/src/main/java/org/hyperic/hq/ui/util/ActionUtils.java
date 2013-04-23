@@ -168,7 +168,7 @@ public class ActionUtils {
 
         for (int i=0; i<size; i++) {
             ConfigOption option = (ConfigOption)options.get(i);
-            String value = config.getValue(option.getName());
+            String value = config.getValue(option.getName(), true);
 
             if (option instanceof StringConfigOption) {
                 StringConfigOption strOption =
@@ -176,9 +176,6 @@ public class ActionUtils {
                 
                 if (strOption.isHidden()) {
                     continue; //Ignore
-                }
-                if (strOption.isSecret()) {
-                    value = "*******";
                 }
             }
             else if (option instanceof BooleanConfigOption) {
