@@ -8,7 +8,6 @@ import javax.annotation.PostConstruct;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.server.session.Measurement;
-import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZeventPayload;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZeventSource;
@@ -52,8 +51,7 @@ public class OutgoingMetricZeventListener extends BaseNotificationsZeventListene
             // TODO~ black list should be here
             
             Resource rsc = msmt.getResource();
-            MeasurementTemplate t = msmt.getTemplate();
-            MetricNotification n = new MetricNotification(rsc.getId(),mid,t.getName(),t.getAlias(),metricVal);
+            MetricNotification n = new MetricNotification(rsc.getId(),mid,msmt.getTemplate().getName(),metricVal);
             ns.add(n);
         }
         return ns;

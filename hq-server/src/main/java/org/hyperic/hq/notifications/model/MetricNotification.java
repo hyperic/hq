@@ -7,15 +7,13 @@ public class MetricNotification extends BaseNotification {
     protected Integer measurementID;
     protected MetricValue metricVal;
     protected String measurementName;
-    protected String measurementAlias;
     
-    public MetricNotification(Integer resourceID,Integer measurementID, String measurementName, String measurementAlias, MetricValue metricVal) {
+    public MetricNotification(Integer resourceID,Integer measurementID, String measurementName, MetricValue metricVal) {
         super();
         this.resourceID = resourceID;
         this.measurementID=measurementID;
         this.metricVal = metricVal;
         this.measurementName=measurementName;
-        this.measurementAlias = measurementAlias;
     }
     public MetricValue getMetricVal() {
         return metricVal;
@@ -25,9 +23,6 @@ public class MetricNotification extends BaseNotification {
     }
     public String getMeasurementName() {
         return this.measurementName;
-    }
-    public String getMeasurementAlias() {
-        return measurementAlias;
     }
     public Integer getResourceID() {
         return this.resourceID;
