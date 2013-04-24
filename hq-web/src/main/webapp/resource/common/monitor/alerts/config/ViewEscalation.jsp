@@ -77,6 +77,7 @@
 		      var configProduct = actionConfig.product;
 		      var configSnmpOID = actionConfig.oid;
 		      var configSnmpIP = actionConfig.address;
+		      var configSnmpTrapOID = actionConfig.snmpTrapOID;
 		      var configSnmpNotificationMechanism = actionConfig.snmpNotificationMechanism;
 		      var configSnmpVarBinds = eval(actionConfig.variableBindings);
 		      var actionId = actions[i].action.id;
@@ -162,10 +163,16 @@
 		            usersTextDiv.innerHTML = 'Suppress duplicate alerts for: ' + actionWaitTime;
 		            waitDiv.innerHTML = "&nbsp;";
 		            } else if (actionClass[d] == "SnmpAction") {
+		                /* Set default value for SNMP Trap OID */
+                        if ((configSnmpTrapOID == null) || (configSnmpTrapOID.lenght < 1)) {
+                            configSnmpTrapOID = '<fmt:message key="admin.settings.snmp.default"/>';
+                        }
+                         
 		            	var snmpInnerHTML =
 		                	'<table cellpadding="0" cellspacing="0" border="0">' 
 		                	+ '<tr><td rowSpan="4" vAlign="top" style="padding-right:3px;"><fmt:message key="alert.config.escalation.action.snmp.notification"/>:</td>'
 		                	+ '<td colspan="2" style="padding:2px;"><fmt:message key="resource.autodiscovery.server.IPAddressTH"/>: ' + configSnmpIP + '</td></tr>'
+		                	+ '<td colspan="2" style="padding:2px;"><fmt:message key="admin.settings.SNMPTrapOID"/> ' + configSnmpTrapOID + '</td></tr>'
 		                	+ '<tr><td colspan="2" style="padding:0px 2px 2px 2px;"><fmt:message key="admin.settings.SNMPNotificationMechanism"/> ' + configSnmpNotificationMechanism + '</td></tr>'
 		                	+ '<tr><td vAlign="top" style="padding:2px;" nowrap="nowrap"><fmt:message key="alert.config.escalation.action.snmp.varbinds"/>: </td>'
 		                		+ '<td style="padding:2px;"><table>'
