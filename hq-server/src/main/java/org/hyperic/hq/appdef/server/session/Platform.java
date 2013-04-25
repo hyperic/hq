@@ -31,6 +31,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.commons.lang.ObjectUtils;
 import org.hyperic.hq.appdef.Agent;
@@ -236,6 +237,37 @@ public class Platform extends PlatformBase
         }
         if (!ObjectUtils.equals(getAgent(), platformValue.getAgent())) {
             changedProps.put("Agent", String.valueOf((platformValue.getAgent())));
+        }
+        return changedProps;
+    }
+
+    public Map<String, String> changedProperties(AIPlatformValue aiPlatformValue) {
+
+       Map<String, String> changedProps = new TreeMap<String, String>();
+
+        if (!ObjectUtils.equals(getName(), aiPlatformValue.getName())) {
+            changedProps.put("Name", aiPlatformValue.getName());
+        }
+        if (!ObjectUtils.equals(getDescription(), aiPlatformValue.getDescription())) {
+            changedProps.put("Description", aiPlatformValue.getDescription());
+        }
+        if (!ObjectUtils.equals(getCertdn(), aiPlatformValue.getCertdn())) {
+            changedProps.put("Certdn", aiPlatformValue.getCertdn());
+        }
+        if (!ObjectUtils.equals(getCpuCount(), aiPlatformValue.getCpuCount())) {
+            changedProps.put("CpuCount", String.valueOf(aiPlatformValue.getCpuCount()));
+        }
+        if (!ObjectUtils.equals(getFqdn(), aiPlatformValue.getFqdn())) {
+            changedProps.put("Fqdn", aiPlatformValue.getFqdn());
+        }
+        if (!aiPlatformValue.getAddedAIIpValues().isEmpty()) {
+            changedProps.put("IpValues:Added", aiPlatformValue.getAddedAIIpValues().toString());
+        }
+        if (!aiPlatformValue.getUpdatedAIIpValues().isEmpty()) {
+            changedProps.put("IpValues:Changed", aiPlatformValue.getUpdatedAIIpValues().toString());
+        }
+        if (!aiPlatformValue.getRemovedAIIpValues().isEmpty()) {
+            changedProps.put("IpValues:Removed", aiPlatformValue.getRemovedAIIpValues().toString());
         }
         return changedProps;
     }
