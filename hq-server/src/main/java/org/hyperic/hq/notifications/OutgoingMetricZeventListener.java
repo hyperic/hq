@@ -8,6 +8,7 @@ import javax.annotation.PostConstruct;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.server.session.Measurement;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZeventPayload;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZeventSource;
@@ -15,6 +16,7 @@ import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.notifications.filtering.DestinationEvaluator;
 import org.hyperic.hq.notifications.filtering.MetricDestinationEvaluator;
 import org.hyperic.hq.notifications.model.MetricNotification;
+import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.hq.zevents.ZeventListener;
@@ -48,10 +50,12 @@ public class OutgoingMetricZeventListener extends BaseNotificationsZeventListene
             }
             Integer mid = Integer.valueOf(measurementId);
             Measurement msmt = this.msmtMgr.getMeasurement(mid);
+            MeasurementTemplate tmpl = msmt.getTemplate();
+            String msmtType = tmpl.getAlias().equals(Metric.ATTR_AVAIL)?Metric.ATTR_AVAIL:null;
             // TODO~ black list should be here
             
             Resource rsc = msmt.getResource();
-            MetricNotification n = new MetricNotification(rsc.getId(),mid,msmt.getTemplate().getName(),metricVal);
+            MetricNotification n = new MetricNotification(rsc.getId(),mid,msmt.getTemplate().getName(),msmtType,metricVal);
             ns.add(n);
         }
         return ns;
