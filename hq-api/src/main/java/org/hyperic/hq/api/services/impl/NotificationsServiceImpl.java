@@ -10,6 +10,7 @@ import org.hyperic.hq.api.transfer.NotificationsTransfer;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.notifications.UnregisteredException;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -28,11 +29,20 @@ public class NotificationsServiceImpl extends RestApiService implements Notifica
             errorHandler.log(e);
             throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.NOT_FOUND,
                 ExceptionToErrorCodeMapper.ErrorCode.UNREGISTERED_FOR_NOTIFICATIONS, e.getMessage());
+        } catch (PermissionException e) {
+            throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.UNAUTHORIZED,
+                    ExceptionToErrorCodeMapper.ErrorCode.NON_ADMIN_ERR, "");
         }
     }
 
     public void unregister(String id) throws SessionNotFoundException, SessionTimeoutException {
-        notificationsTransfer.unregister(id);
+        try {
+            ApiMessageContext apiMessageContext = newApiMessageContext();
+            notificationsTransfer.unregister(apiMessageContext,id);
+        } catch (PermissionException e) {
+            throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.UNAUTHORIZED,
+                    ExceptionToErrorCodeMapper.ErrorCode.NON_ADMIN_ERR, "");
+        }
     }
 
     // temporary method for testing

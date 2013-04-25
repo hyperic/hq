@@ -153,6 +153,9 @@ public class CompositeRuntimeResourceReport {
             rstr.append("\n\tReport #").append(i).append(" from reporting server=")
                 .append(_serverReports[i].getServerId()).append(": ");
             final AIPlatformValue[] platforms = _serverReports[i].getAIPlatforms();
+            if (platforms == null) {
+                continue;
+            }
             for (int j=0; j<platforms.length; j++ ) {
                 final AIPlatformValue platform = platforms[j];
                 final Integer platformId = platform.getId();
@@ -183,6 +186,9 @@ public class CompositeRuntimeResourceReport {
                     }
                     final AIServiceValue[] services = ((AIServerExtValue) servers[k]).getAIServiceValues();
                     rstr.append(" serviceCount=").append((services != null) ? services.length : -1);
+                    if (services == null) {
+                        continue;
+                    }
                     for (int m=0; m<services.length; m++) {
                         final AIServiceValue service = services[m];
                         final Integer serviceId = service.getId();
@@ -192,10 +198,10 @@ public class CompositeRuntimeResourceReport {
                             .append(" ID=").append(serviceId)
                             .append(" Name=").append(serviceName)
                             .append(" Type=").append(serviceType);
-                    }
-                }
-            }
-        }
+                    }//loop services
+                }//loop servers
+            }//loop platforms
+        }//loop serverReports
         rstr.append("\n]");
         return rstr.toString();
     }

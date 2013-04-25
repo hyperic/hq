@@ -133,6 +133,8 @@ public class ResourceTransferImpl implements ResourceTransfer {
     private ConfigManager configManager;
     private IpManager ipManager;
     protected NotificationsTransfer notificationsTransfer;
+    @Autowired
+    protected PermissionManager permissionManager;
 
     @Autowired
     public ResourceTransferImpl(ResourceManager resourceManager, ResourceMapper resourceMapper,
@@ -831,8 +833,9 @@ public class ResourceTransferImpl implements ResourceTransfer {
     @Transactional (readOnly=true)
     public RegistrationID register(ApiMessageContext messageContext, ResourceDetailsType responseMetadata,
                                    ResourceFilterRequest resourceFilterRequest)
-    throws PermissionException, NotFoundException {
+                                           throws PermissionException, NotFoundException {
         AuthzSubject authzSubject = messageContext.getAuthzSubject();
+        this.permissionManager.checkIsSuperUser(authzSubject);
         List<Filter<InventoryNotification,? extends FilteringCondition<?>>> userFilters =
                 resourceMapper.toResourceFilters(resourceFilterRequest, responseMetadata);
 
@@ -847,12 +850,16 @@ public class ResourceTransferImpl implements ResourceTransfer {
 
     public ExternalRegistrationStatus getRegistrationStatus(final ApiMessageContext messageContext,
             final String registrationID) throws PermissionException,NotFoundException, UnknownEndpointException{
+        AuthzSubject authzSubject = messageContext.getAuthzSubject();
+        this.permissionManager.checkIsSuperUser(authzSubject);
         FilterChain<InventoryNotification> filterChain = evaluator.getRegistration(registrationID);
         NotificationsTransferImpl.EndpointStatusAndDefinition endpointStatusAndDefinition = this.notificationsTransfer.getEndointStatus(registrationID);
         return new ExternalRegistrationStatus(endpointStatusAndDefinition.getEndpoint(),filterChain, registrationID, endpointStatusAndDefinition.getExternalEndpointStatus());
     }
 
-    public void unregister(NotificationEndpoint endpoint) {
+    public void unregister(final ApiMessageContext messageContext,NotificationEndpoint endpoint) throws PermissionException {
+        AuthzSubject authzSubject = messageContext.getAuthzSubject();
+        this.permissionManager.checkIsSuperUser(authzSubject);
         evaluator.unregisterAll(endpoint);
     }
 
