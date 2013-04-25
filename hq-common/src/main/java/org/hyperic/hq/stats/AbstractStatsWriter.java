@@ -26,13 +26,13 @@
 package org.hyperic.hq.stats;
 
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -181,12 +181,13 @@ public abstract class AbstractStatsWriter {
                 FileOutputStream gfile = null;
                 GZIPOutputStream gstream = null;
                 PrintStream pstream = null;
+                BufferedReader reader = null;
                 boolean succeed = false;
                 try {
                     gfile = new FileOutputStream(filename + ".gz");
                     gstream = new GZIPOutputStream(gfile);
                     pstream = new PrintStream(gstream);
-                    BufferedReader reader = new BufferedReader(new FileReader(filename));
+                    reader = new BufferedReader(new FileReader(filename));
                     String tmp;
                     while (null != (tmp = reader.readLine())) {
                         pstream.append(tmp).append("\n");
@@ -195,10 +196,11 @@ public abstract class AbstractStatsWriter {
                     succeed = true;
                 } catch (IOException e) {
                     log.warn(e.getMessage(), e);
-                } finally {
+                } finally {    
                     close(gfile);
                     close(gstream);
                     close(pstream);
+                    close(reader);
                     if (succeed) {
                         new File(filename).delete();
                     } else {
@@ -206,7 +208,7 @@ public abstract class AbstractStatsWriter {
                     }
                 }
             }
-            private void close(OutputStream s) {
+            private void close(Closeable s) {
                 if (s != null) {
                     try {
                         s.close();
