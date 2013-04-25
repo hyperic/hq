@@ -50,10 +50,11 @@ public class OutgoingMetricZeventListener extends BaseNotificationsZeventListene
             }
             Integer mid = Integer.valueOf(measurementId);
             Measurement msmt = this.msmtMgr.getMeasurement(mid);
+            if (msmt==null) { // the measurement was erased since the event was sent
+                continue;
+            }
             MeasurementTemplate tmpl = msmt.getTemplate();
             String msmtType = tmpl.getAlias().equals(Metric.ATTR_AVAIL)?Metric.ATTR_AVAIL:null;
-            // TODO~ black list should be here
-            
             Resource rsc = msmt.getResource();
             MetricNotification n = new MetricNotification(rsc.getId(),mid,msmt.getTemplate().getName(),msmtType,metricVal);
             ns.add(n);
