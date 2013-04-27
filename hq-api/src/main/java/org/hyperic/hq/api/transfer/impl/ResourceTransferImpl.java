@@ -822,7 +822,8 @@ public class ResourceTransferImpl implements ResourceTransfer {
         return new Transformer<Integer, Resource>() {
             public Resource transform(Integer resourceId) {
                 final Resource r = resourceManager.getResourceById(resourceId);
-                if (r != null && r.getResourceType().getId().equals(AuthzConstants.authzPlatform)) {
+                if (r != null && !r.isInAsyncDeleteState() && AuthzConstants.authzPlatform.equals(r.getResourceType()
+                        .getId())) {
                     return r;
                 }
                 return null;
