@@ -240,7 +240,7 @@
   <filter name="template" value="${web}:${name} (total)"/>
   <metrics name="Web">
     <metric name="Availability"
-            template="HTTP:hostname=localhost,port=80,path=/exchange:${alias}"
+            template="${http.template}:${alias}"
             category="AVAILABILITY"
             indicator="true"/>
 
@@ -1166,22 +1166,60 @@
       <plugin type="measurement"/>
       <plugin type="log_track"/>
       <property name="EVENT_LOG_SOURCE_FILTER" value="POP3SVC"/>
+      <plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin"/>
+      <config>
+          <option name="service_name" description="Service name"/>
+      </config>
     </service>
 
     <service name="IMAP4" internal="true">
       <plugin type="measurement"/>
       <plugin type="log_track"/>
       <property name="EVENT_LOG_SOURCE_FILTER" value="IMAP4SVC"/>
+      <plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin"/>
+      <config>
+          <option name="service_name" description="Service name"/>
+      </config>
     </service>
 
     <service name="MTA" internal="true">
       <plugin type="measurement"/>
       <plugin type="log_track"/>
       <property name="EVENT_LOG_SOURCE_FILTER" value="MSExchangeMTA"/>
+      <plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin"/>
+      <config>
+          <option name="service_name" description="Service name"/>
+      </config>
     </service>
 
     <service name="Web">
-      <plugin type="measurement"/>
+        <plugin type="measurement"/>
+        <config type="measurement">
+            <option name="hostname" description="Hostname" default="localhost"/>
+            <option name="port" description="Port" type="port" default="80"/>
+            <option name="sotimeout" description="Socket Timeout (in seconds)" default="10" type="int"/>
+            <option name="path" description="Path" default="/owa"/>
+            <option name="user" description="Username" optional="true"/>
+            <option name="pass" type="secret" description="Password" optional="true"/>  
+            <option name="realm" description="Realm" optional="true"/>
+            <option name="ssl" description="Use SSL" type="boolean" optional="true" default="true"/>
+            <option name="sslprotocol" type="enum" description="SSL Protocol">
+                <include name="None"/>
+                <include name="SSL"/>
+                <include name="TLS"/>
+            </option>
+            <option name="method" type="enum" description="Request Method">
+                <include name="HEAD"/>
+                <include name="GET"/>
+            </option>
+            <option name="hostheader" description="Host Header" optional="true"/>
+            <option name="follow" description="Follow Redirects" type="boolean" default="false"/>
+            <option name="pattern" description="Response Match (substring or regex)" optional="true"/>   
+        </config>
+        <plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin"/>
+        <config type="control">
+            <option name="service_name" description="Service name"/>
+        </config>
     </service>
   </server>
 
@@ -1231,16 +1269,50 @@
       <plugin type="measurement"/>
       <plugin type="log_track"/>
       <property name="EVENT_LOG_SOURCE_FILTER" value="MSExchangePOP3"/>
+      <plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin"/>
+      <config>
+          <option name="service_name" description="Service name"/>
+      </config>
     </service>
 
     <service name="IMAP4" internal="true">
       <plugin type="measurement"/>
       <plugin type="log_track"/>
       <property name="EVENT_LOG_SOURCE_FILTER" value="MSExchangeIMAP4"/>
+      <plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin"/>
+      <config>
+          <option name="service_name" description="Service name"/>
+      </config>
     </service>
 
     <service name="Web">
-      <plugin type="measurement"/>
+        <plugin type="measurement"/>
+        <config type="measurement">
+            <option name="hostname" description="Hostname" default="localhost"/>
+            <option name="port" description="Port" type="port" default="80"/>
+            <option name="sotimeout" description="Socket Timeout (in seconds)" default="10" type="int"/>
+            <option name="path" description="Path" default="/owa"/>
+            <option name="user" description="Username" optional="true"/>
+            <option name="pass" type="secret" description="Password" optional="true"/>  
+            <option name="realm" description="Realm" optional="true"/>
+            <option name="ssl" description="Use SSL" type="boolean" optional="true" default="true"/>
+            <option name="sslprotocol" type="enum" description="SSL Protocol">
+                <include name="None"/>
+                <include name="SSL"/>
+                <include name="TLS"/>
+            </option>
+            <option name="method" type="enum" description="Request Method">
+                <include name="HEAD"/>
+                <include name="GET"/>
+            </option>
+            <option name="hostheader" description="Host Header" optional="true"/>
+            <option name="follow" description="Follow Redirects" type="boolean" default="false"/>
+            <option name="pattern" description="Response Match (substring or regex)" optional="true"/>   
+        </config>
+        <plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin"/>
+        <config type="control">
+            <option name="service_name" description="Service name"/>
+        </config>
     </service>
   </server>
 
