@@ -77,11 +77,27 @@ public class ExchangeDetector
     }
 
     private ServiceResource createService(String name) {
+        String svcName = name;
+        if (name.equals(MTA_NAME)) {
+            svcName = EX + "MTA";
+        } else if (isWin32ServiceRunning(name + "Svc")) {
+            svcName = name + "Svc";
+        } else if (isWin32ServiceRunning(EX + name)) { //changed in 2007 
+            svcName = EX + name;
+        } else {
+            svcName = EX + name;
+        }
+
+        ConfigResponse cfg = new ConfigResponse();
+        cfg.setValue("service_name", svcName);
+
         ServiceResource service = new ServiceResource();
         service.setType(this, name);
         service.setServiceName(name);
-        service.setProductConfig();
-        service.setMeasurementConfig();
+        setProductConfig(service, new ConfigResponse());
+        setMeasurementConfig(service, new ConfigResponse());
+        setControlConfig(service, cfg);
+        log.debug("="+svcName+"=> "+service.getProductConfig());
         return service;
     }
 
