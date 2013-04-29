@@ -208,7 +208,7 @@
         <level value="INFO"/>
     </logger>
 	<logger name="org.apache.cxf" >
-	    <level value="DEBUG" />
+	    <level value="ERROR" />
 	</logger>
 	
 	<!--
