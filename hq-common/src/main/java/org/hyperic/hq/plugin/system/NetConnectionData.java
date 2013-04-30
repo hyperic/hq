@@ -46,6 +46,9 @@ public class NetConnectionData {
     private long _processPid = -1;
     private String _processName;
 
+    public NetConnectionData() {
+    }
+
     public NetConnectionData(SigarProxy sigar,
                              NetConnection conn,
                              boolean isNumericHosts,
