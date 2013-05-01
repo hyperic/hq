@@ -314,6 +314,7 @@ public class ServerValue extends AppdefResourceValue
         return this.installPath;
     }
 
+    @Property("installpath")
     public void setInstallPath( String installPath )
     {
         this.installPath = installPath;
@@ -329,6 +330,7 @@ public class ServerValue extends AppdefResourceValue
         return this.description;
     }
 
+    @Property("server.description")
     public void setDescription( String description )
     {
         this.description = description;

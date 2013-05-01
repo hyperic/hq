@@ -885,7 +885,8 @@ public class AppdefBossImpl implements AppdefBoss {
      * caller to know the instance-id's corresponding type. Similarly, the
      * return value is upcasted.
      */
-    private AppdefResourceValue findById(AuthzSubject subject, AppdefEntityID entityId)
+    @Transactional(readOnly = true)
+    public AppdefResourceValue findById(AuthzSubject subject, AppdefEntityID entityId)
     throws AppdefEntityNotFoundException, PermissionException, SessionTimeoutException, SessionNotFoundException {
         AppdefEntityValue aeval = new AppdefEntityValue(entityId, subject);
         AppdefResourceValue retVal = aeval.getResourceValue();
@@ -1515,20 +1516,25 @@ public class AppdefBossImpl implements AppdefBoss {
             throw new SystemException("Error updating no properties.", exc);
         }
     }
+    
+    public ServerValue updateServer(int sessionId, ServerValue aServer, Map<String, String> cProps)
+            throws ValidationException, SessionTimeoutException, SessionNotFoundException,
+            PermissionException, UpdateException, AppdefDuplicateNameException,
+            CPropKeyNotFoundException {
+        return this.updateServer(sessionManager.getSubject(sessionId), aServer, cProps) ;
+    }//EOM 
 
     /**
      * Update a server with cprops.
      * @param cProps - the map with Custom Properties for the server
      * 
      */
-    public ServerValue updateServer(int sessionId, ServerValue aServer, Map<String, String> cProps)
+    public ServerValue updateServer(final AuthzSubject subject, ServerValue aServer, Map<String, String> cProps)
         throws ValidationException, SessionTimeoutException, SessionNotFoundException,
         PermissionException, UpdateException, AppdefDuplicateNameException,
         CPropKeyNotFoundException {
         try {
             try {
-                AuthzSubject subject = sessionManager.getSubject(sessionId);
-
                 Server updated = serverManager.updateServer(subject, aServer);
 
                 if (cProps != null) {

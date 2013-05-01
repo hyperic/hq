@@ -54,14 +54,19 @@ public class IpValue
    {
    }
 
+   public IpValue(final String address,final String netmask, final String mACAddress) {
+       this.address = address;
+       addressHasBeenSet = true;
+       this.netmask = netmask;
+       netmaskHasBeenSet = true;
+       this.mACAddress = mACAddress;
+       mACAddressHasBeenSet = true;  
+   }//EOM 
+   
+   
    public IpValue( java.lang.String address,java.lang.String netmask,java.lang.String mACAddress,java.lang.Integer id,java.lang.Long mTime,java.lang.Long cTime )
    {
-	  this.address = address;
-	  addressHasBeenSet = true;
-	  this.netmask = netmask;
-	  netmaskHasBeenSet = true;
-	  this.mACAddress = mACAddress;
-	  mACAddressHasBeenSet = true;
+      this(address, netmask, mACAddress) ; 
 	  this.id = id;
 	  idHasBeenSet = true;
 	  this.mTime = mTime;
