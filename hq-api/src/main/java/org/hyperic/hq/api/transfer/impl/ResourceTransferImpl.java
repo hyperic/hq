@@ -24,6 +24,7 @@
  */
 package org.hyperic.hq.api.transfer.impl;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -35,6 +36,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
 import javax.ws.rs.core.Response;
@@ -43,13 +45,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.api.model.ConfigurationValue;
+import org.hyperic.hq.api.model.PropertyList;
 import org.hyperic.hq.api.model.ResourceConfig;
 import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourceModel;
 import org.hyperic.hq.api.model.ResourceStatusType;
 import org.hyperic.hq.api.model.ResourceTypeModel;
 import org.hyperic.hq.api.model.Resources;
-import org.hyperic.hq.api.model.common.ExternalEndpointStatus;
 import org.hyperic.hq.api.model.common.ExternalRegistrationStatus;
 import org.hyperic.hq.api.model.common.RegistrationID;
 import org.hyperic.hq.api.model.measurements.HttpEndpointDefinition;
@@ -65,10 +67,13 @@ import org.hyperic.hq.api.transfer.mapping.ResourceDetailsTypeStrategy;
 import org.hyperic.hq.api.transfer.mapping.ResourceMapper;
 import org.hyperic.hq.api.transfer.mapping.UnknownEndpointException;
 import org.hyperic.hq.appdef.Ip;
+import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
@@ -77,11 +82,14 @@ import org.hyperic.hq.appdef.shared.InvalidConfigException;
 import org.hyperic.hq.appdef.shared.IpManager;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
+import org.hyperic.hq.appdef.shared.PlatformValue;
+import org.hyperic.hq.appdef.shared.Property;
+import org.hyperic.hq.appdef.shared.ServerValue;
+import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
@@ -91,7 +99,6 @@ import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.bizapp.server.session.ProductBossImpl.ConfigSchemaAndBaseResponse;
 import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
@@ -109,18 +116,22 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
-import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.Transformer;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.support.ConversionServiceFactory;
+import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.transaction.annotation.Transactional;
 
 public class ResourceTransferImpl implements ResourceTransfer {
     
     private static final Log log = LogFactory.getLog(ResourceTransferImpl.class);
+    
+    private static final String IP_MAC_ADDRESS_KEY = "IP_MAC_ADDRESS" ; 
 
     private ResourceManager resourceManager ; 
     private ResourceMapper resourceMapper;
@@ -276,6 +287,7 @@ public class ResourceTransferImpl implements ResourceTransfer {
 		AuthzSubject authzSubject = messageContext.getAuthzSubject();
 		final Context flowContext = new Context(authzSubject, this) ; 
 		
+		int failureCounter =  0 ; 
 		for(int i=0; i < noOfInputResources; i++) { 
 			
 			try{ 
@@ -287,21 +299,22 @@ public class ResourceTransferImpl implements ResourceTransfer {
 				//could not have been loaded
 				final ResourceTypeStrategy resourceTypeStrategy = ResourceTypeStrategy.valueOf(inputResource.getResourceType()) ;
 				
-				flowContext.setBackendResource(resourceTypeStrategy.getResource(flowContext)) ;  
+				flowContext.setBackendResource(resourceTypeStrategy.getResource(flowContext)) ;
+				flowContext.resourceTypeStrategy = resourceTypeStrategy ; 
 				
 				//map the input into the backend resource (resource metadata update
-				this.resourceMapper.mergeResource(inputResource, flowContext.backendResource) ; 
+				this.resourceMapper.mergeResource(inputResource, flowContext.backendResource, flowContext) ; 
 				
 				//if there are properties to update do so now
 				resourceConfig = inputResource.getResourceConfig() ; 
-				if(resourceConfig !=  null) this.updateResourceConfig(flowContext, resourceConfig) ; 
+				if(resourceConfig !=  null && resourceConfig.getMapProps() != null) this.updateResourceConfig(flowContext, resourceConfig) ; 
 				
 			}catch(Throwable t) { 
 				this.errorHandler.log(t) ; 
 
 				resourceID = ResourceTypeStrategy.getResourceIdentifier(flowContext.currResource) ; 
-				
 				String description = resourceID, additionalDescription = null ; 
+				
 				if(t instanceof NumberFormatException) {
 					description = "Resource ID " + resourceID ; 
 				}//EO if number format 
@@ -311,11 +324,18 @@ public class ResourceTransferImpl implements ResourceTransfer {
 				
 				response.addFailedResource(t,resourceID, additionalDescription /*additional Description*/, description) ;
 				resourceID = null  ;
+				failureCounter++ ; 
 			} finally { //EO catch block
                 flowContext.reset() ; 
-			}
+			}//EO catch block 
 			
 		}//EO while there are more resources
+		
+		//if the failure counter == no of input resources, raise an error rather than returning success with failed resources section 
+		if(failureCounter == noOfInputResources) { 
+		    throw this.errorHandler.newWebApplicationException(new Throwable(), Response.Status.INTERNAL_SERVER_ERROR,
+                    ExceptionToErrorCodeMapper.ErrorCode.UPDATE_FAILURE, ". Failed to update all " + noOfInputResources + " input resources.");
+		}//EO if overall update failuer 
 		
 		return response ; 
 	}//EOM 
@@ -350,7 +370,7 @@ public class ResourceTransferImpl implements ResourceTransfer {
 		
 		Object oldValue = null ; 
 		String sKey = null, sNewValue = null ;
-		
+		  
 		//iterate over the new config properties and search for a match in the following config sub systems 
 		// - cprops 
 		// - config response 
@@ -476,22 +496,92 @@ public class ResourceTransferImpl implements ResourceTransfer {
 	}//EOM 
 		
 	
+	
 	public enum ResourceTypeStrategy { 
 		
-		PLATFORM(AppdefEntityConstants.APPDEF_TYPE_PLATFORM) { 
+		PLATFORM(AppdefEntityConstants.APPDEF_TYPE_PLATFORM, PlatformValue.class) { 
 			
 			@Override
 			final Resource getResourceByNaturalID(final Context flowContext) throws PlatformNotFoundException, PermissionException {
-				final Platform platform = flowContext.visitor.getPlatformManager().findPlatformByFqdn(flowContext.subject, flowContext.naturalID);  
+				final Platform platform = flowContext.visitor.getPlatformManager().findPlatformByFqdn(flowContext.subject, flowContext.naturalID);
+				flowContext.resourceInstance = platform  ; 
 				return platform.getResource() ;  
 			}//EOM 
 			
+			@Override
+			protected final AppdefResourceValue loadExistingDTO(final AppdefBoss appdefBoss, final Context flowContext) throws Exception{
+			    Platform platform = (Platform) flowContext.resourceInstance ; 
+			    
+			    if(platform == null) {  
+			        flowContext.resourceInstance = platform = flowContext.getVisitor().getPlatformManager().
+			                                findPlatformById(flowContext.backendResource.getInstanceId()) ; 
+			    }//EO else if platform was not yet loaded
+			    
+			    final PlatformValue platformDTO = new PlatformValue() ; 
+			    platformDTO.setId(platform.getId()) ; 
+			    platformDTO.setFqdn(platform.getFqdn()) ;
+			    platformDTO.setName(platform.getName()) ;  
+			    return platformDTO ; 
+			}//EOM 
+	        
+			@Override
+	        protected final AppdefResourceValue mergeResource(final Map<String,String> inputProps,  Map<String,PropertyList> oneToManyProps, 
+	                AppdefResourceValue existingDTO, final Context flowContext) throws Exception { 
+	            
+	            PropertyList requetsIps = null ;
+                
+                if( (requetsIps = oneToManyProps.get(IP_MAC_ADDRESS_KEY)) != null) {
+                    if(requetsIps != null) { 
+                        //else determine whether the ips have changed
+                        Platform platform =  (Platform) flowContext.resourceInstance ; 
+                                               
+                        existingDTO = flowContext.visitor.getResourceMapper().mergePlatformIPs(existingDTO, requetsIps.getProperties(), platform) ; 
+                        
+                    }//EO if ips were provided 
+                }//EO if propertyList was defined 
+                
+                return existingDTO ; 
+	        }//EOM 
+	        
+	        @Override
+	        protected final void updateResourceInstance(final AppdefResourceValue newDTO, 
+	                    final AppdefBoss appdefBoss, final AuthzSubject subject) throws Exception{ 
+	            appdefBoss.updatePlatform(subject, (PlatformValue) newDTO) ; 
+	        }//EOM 
+	        
+			
 		},//EO PLATFORM
-		SERVER(AppdefEntityConstants.APPDEF_TYPE_SERVER) {
-			
-		},//EO SERVER
-		SERVICE(AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
-			
+		SERVER(AppdefEntityConstants.APPDEF_TYPE_SERVER, ServerValue.class) {
+		   
+		    @Override
+		    protected final AppdefResourceValue loadExistingDTO(final AppdefBoss appdefBoss, final Context flowContext) throws Exception {
+		        AppdefResourceValue existingDTO = null ; 
+		        
+		        if(flowContext.resourceInstance == null) { 
+		            final Integer serverId = flowContext.backendResource.getInstanceId() ; 
+		            existingDTO = appdefBoss.findById(flowContext.subject, AppdefEntityID.newServerID(serverId));
+		        }else { 
+		            existingDTO = ((Server)flowContext.resourceInstance).getServerValue() ; 
+		        }//EO else if the backend resource was loaded 
+		        
+		        return existingDTO ; 
+		    }//EOM 
+	        
+	        protected final void updateResourceInstance(final AppdefResourceValue newDTO, final AppdefBoss appdefBoss, final AuthzSubject subject) throws Exception { 
+	            appdefBoss.updateServer(subject, (ServerValue)newDTO, null/*cprops*/) ;  
+	        }//EOM 
+
+		    
+		},//EO SERVER 
+		SERVICE(AppdefEntityConstants.APPDEF_TYPE_SERVICE, ServiceValue.class) {
+		    protected AppdefResourceValue loadExistingDTO(final AppdefBoss appdefBoss, final Context flowContext) throws Exception {  
+		        final Integer serviceId = flowContext.backendResource.getInstanceId() ; 
+                return appdefBoss.findById(flowContext.subject, AppdefEntityID.newServiceID(serviceId)) ;  
+	        }//EOM 
+		    
+		    protected final void updateResourceInstance(final AppdefResourceValue newDTO, final AppdefBoss appdefBoss, final AuthzSubject subject) throws Exception { 
+                appdefBoss.updateService(subject, (ServiceValue)newDTO, null/*cprops*/) ;  
+            }//EOM
 		},//EO SERVER
 		RESOURCE(-999){
 			
@@ -526,15 +616,117 @@ public class ResourceTransferImpl implements ResourceTransfer {
 			return resource ;
 		}//EOM
 		
+		public void mergeResource(final Context flowContext) throws Exception {
+		    final ResourceConfig resourceConfig = flowContext.currResource.getResourceConfig() ; 
+		    if(this.clsAppdefResourceValue == null || resourceConfig == null) return ;
+		    
+		    final AppdefBoss appdefBoss = flowContext.getVisitor().getAppdefBoss() ; 
+		    
+		    //else if the resource config section was provided in the request
+		    AppdefResourceValue existingDTO = null ;  
+		    final Map<String,String> inputProps = resourceConfig.getMapProps() ;
+		    
+		    if(inputProps != null) { 
+
+		        //load the existing AppdefResourceValue 
+		        existingDTO = this.loadExistingDTO(appdefBoss, flowContext) ;
+		                        
+                String value = null ; 
+                Object oValue = null ;;
+                Object[] metadata = null ;  
+                Method method = null ; 
+                
+                for(Map.Entry<String,Object[]> entry : this.cachedPropertiesMutators.entrySet()) {
+                    
+                    if((value = inputProps.get(entry.getKey()))  != null ) {
+                        metadata = entry.getValue() ; 
+                        method = (Method) metadata[0] ; 
+                        
+                        //convert the value into the target type 
+                        oValue = conversionService.convert(value, STRING_DESCRIPTOR, (TypeDescriptor)metadata[1]); 
+                        method.invoke(existingDTO, oValue) ;
+                        
+                    }//EO if input was provided for the given attribute  
+                }//EO while there are more attributes to check 
+                
+		    }//EO if the inputProps was not null 
+		    	    
+		    //now check whether there are multi-property section in the request and if 
+		    //so delegate to sub-classes 
+		    final Map<String,PropertyList> oneToManyProps = resourceConfig.getMapListProps() ; 
+		    if(oneToManyProps != null) {
+		        
+		        //if the existingDTO was not yet loaded (i.e. no one-one properties 
+		        //do so now 
+		        if(existingDTO == null) { 
+		            existingDTO = this.loadExistingDTO(appdefBoss, flowContext) ;
+		        }//EO the dtos were not yet initialized 
+		        
+		        this.mergeResource(inputProps, oneToManyProps, existingDTO, flowContext) ; 
+		    }//EO if there were oneToManyProps for the given resource in the request
+		    
+		    
+		    //finally, if a DTO was created (i.e. potential modifications were found) 
+		    //invoke the respective udpateXXX 
+		    if(existingDTO != null) this.updateResourceInstance(existingDTO, appdefBoss, flowContext.subject); 
+		    
+		}//EOM
+		
+		protected AppdefResourceValue loadExistingDTO(final AppdefBoss appdefBoss, final Context flowContext) throws Exception {  
+		    throw new UnsupportedOperationException() ; 
+        }//EOM 
+		
+		protected AppdefResourceValue mergeResource(final Map<String,String> inputProps,  Map<String,PropertyList> oneToManyProps, 
+		        final AppdefResourceValue existingDTO, final Context flowContext) throws Exception { 
+		    return existingDTO ; 
+		}//EOM 
+		
+		protected void updateResourceInstance(final AppdefResourceValue newDTO, final AppdefBoss appdefBoss, final AuthzSubject subject) throws Exception { 
+		   throw new UnsupportedOperationException() ; 
+		}//EOM 
+		
+		
+		private final static GenericConversionService conversionService = ConversionServiceFactory.createDefaultConversionService() ;
+		private final static TypeDescriptor STRING_DESCRIPTOR = TypeDescriptor.valueOf(String.class) ; 
 		private static final ResourceTypeStrategy[] cachedValues ; 
 		private static final int iNoOfStrategies ;
 		
 		private int appdefEntityType ;  
+		private Class<? extends AppdefResourceValue> clsAppdefResourceValue ;
+		private Map<String,Object[]> cachedPropertiesMutators ; 
+		
 		
 		static{ 
 			cachedValues = values() ; 
-			iNoOfStrategies = cachedValues.length ; 
+			iNoOfStrategies = cachedValues.length ;
 		}//EO static block
+		
+		private final void initCachedPropertiesMutators() { 
+		    final Method[] methods = this.clsAppdefResourceValue.getDeclaredMethods() ;
+		    Property propertyMetadata = null ; 
+		    
+		    try{ 
+    		    for(Method method : methods) { 
+    		        propertyMetadata = method.getAnnotation(Property.class) ;
+    		        if(propertyMetadata != null) { 
+    		            method.setAccessible(true) ;
+    		            this.cachedPropertiesMutators.put(propertyMetadata.value(), new Object[]{ method, TypeDescriptor.valueOf(method.getParameterTypes()[0]) }) ;  
+    		        }//EO if defined 
+    		    }//EO while there are more declared methods
+		    }catch(Throwable t) { 
+		        t.printStackTrace() ; 
+		        throw new Error("Failed to initialize cachedPropertiesMutators for type " + this.name() + " from class " + this.clsAppdefResourceValue, t) ; 
+		    }//EO catch block 
+		}//EOM 
+		
+		private ResourceTypeStrategy(final int appdefEntityType, final Class<? extends AppdefResourceValue> clsAppdefResourceValue) { 
+		    this(appdefEntityType) ; 
+		    this.clsAppdefResourceValue = clsAppdefResourceValue  ;
+		    if(clsAppdefResourceValue != null) { 
+		        this.cachedPropertiesMutators = new ConcurrentHashMap<String,Object[]>() ;
+		        this.initCachedPropertiesMutators() ; 
+		    }//EO if the clsAppdefesourceValue was not null 
+		}//EOM 
 		
 		private ResourceTypeStrategy(final int appdefEntityType) { 
 			this.appdefEntityType = appdefEntityType ; 
@@ -556,7 +748,6 @@ public class ResourceTransferImpl implements ResourceTransfer {
 		
 	}//EOE 
 	
-	
 	private final ResourceModel getAIResource(final String platformNaturalID, final ResourceTypeModel resourceType, 
 			final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) { 
 		//TODO: NYI 
@@ -566,10 +757,12 @@ public class ResourceTransferImpl implements ResourceTransfer {
 	
 	public final static class Context  { 
 	    public Resource backendResource ; 
-		public AppdefEntityID entityID ; 
+	    public AppdefResource resourceInstance ; 
+		public AppdefEntityID entityID ;
 		public AuthzSubject subject ;
 		public ConfigSchemaAndBaseResponse[] configResponses ; 
 		public Properties cprops ; 
+		public ResourceTypeStrategy resourceTypeStrategy ; 
 		
 		public ResourceTransfer visitor ; 
 		public String internalID ;  
@@ -617,6 +810,8 @@ public class ResourceTransferImpl implements ResourceTransfer {
 			this.resourceType = null ; 
 			this.naturalID = null ; 
 			this.currResource = null  ;
+			this.resourceInstance = null ; 
+			this.resourceTypeStrategy = null ; 
 		}//EOM 
 
         public ResourceTransfer getVisitor() {
@@ -743,7 +938,7 @@ public class ResourceTransferImpl implements ResourceTransfer {
             for (Ip ip : ips) {
                 ipValues.add(new ComplexIp(ip.getNetmask(), ip.getMacAddress(), ip.getAddress()));
             }
-            resourceConfig.putMapListProps("IP_MAC_ADDRESS", ipValues);
+            resourceConfig.putMapListProps(IP_MAC_ADDRESS_KEY, ipValues);
         }
     }
 
@@ -873,6 +1068,8 @@ public class ResourceTransferImpl implements ResourceTransfer {
     public ResourceManager getResourceManager() {
         return this.resourceManager;
     }
+    
+    public final AppdefBoss getAppdefBoss() { return this.appdepBoss ; }//EOM 
 
     private HttpEndpoint getHttpEndpoint(RegistrationID registrationID, HttpEndpointDefinition def) {
         return new HttpEndpoint(registrationID.getId(), def.getUrl(), def.getUsername(), def.getPassword(),

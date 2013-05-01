@@ -191,6 +191,7 @@ public class PlatformValue extends AppdefResourceValue
         return this.commentText;
     }
 
+    @Property("platform.comment_text")
     public void setCommentText( String commentText )
     {
         this.commentText = commentText;
@@ -270,6 +271,7 @@ public class PlatformValue extends AppdefResourceValue
         return this.fqdn;
     }
 
+    @Property("platform.fqdn") 
     public void setFqdn( String fqdn )
     {
         this.fqdn = fqdn;
@@ -303,6 +305,7 @@ public class PlatformValue extends AppdefResourceValue
         return this.location;
     }
 
+    @Property("platform.location")
     @Override
 	public void setLocation( String location )
     {
@@ -320,6 +323,7 @@ public class PlatformValue extends AppdefResourceValue
         return this.description;
     }
 
+    @Property("platform.description") 
     @Override
 	public void setDescription( String description )
     {

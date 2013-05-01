@@ -55,7 +55,6 @@ public class ComplexIp extends ConfigurationValue implements Serializable  {
         int result = 7;
         result = 31 * result + (null == this.address ? 1 : this.address.hashCode());
         result = 31 * result + (null == this.mac ? 1 : this.mac.hashCode());
-        result = 31 * (null == this.address ? 1 : this.address.hashCode());
         return result;
     }
 
