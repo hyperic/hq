@@ -15,6 +15,7 @@ import org.hyperic.hq.api.model.measurements.RawMetric;
 import org.hyperic.hq.api.model.resources.ResourceFilterDefinition;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.measurement.server.session.Category;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
@@ -78,6 +79,7 @@ public class MeasurementMapper {
         metric.setMeasurementID(mn.getMeasurementId());
         metric.setMeasurementName(mn.getMeasurementName());
         metric.setMeasurementType(mn.getMeasurementType());
+        metric.setCategory(mn.getCategory());
         return metric;
     }
     public List<RawMetric> toMetricsWithId(final List<MetricNotification> mns) {
