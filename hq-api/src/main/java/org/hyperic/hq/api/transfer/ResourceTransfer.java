@@ -45,6 +45,7 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.ObjectNotFoundException;
 import org.hyperic.hq.notifications.NotificationEndpoint;
@@ -83,10 +84,9 @@ public interface ResourceTransfer {
     void unregister(NotificationEndpoint endpoint);
 
     PlatformManager getPlatformManager();
-
     ResourceManager getResourceManager();
-
     ResourceMapper getResourceMapper();
+    AppdefBoss getAppdefBoss() ; 
 
     Object initResourceConfig(Context flowContext) throws ConfigFetchException, EncodingException, PluginNotFoundException, PluginException, PermissionException, AppdefEntityNotFoundException;
 

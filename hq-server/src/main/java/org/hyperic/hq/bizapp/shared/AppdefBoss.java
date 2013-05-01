@@ -279,6 +279,14 @@ public interface AppdefBoss {
      */
     public AppdefResourceValue findById(int sessionId, AppdefEntityID entityId) throws AppdefEntityNotFoundException,
         PermissionException, SessionTimeoutException, SessionNotFoundException;
+    /**
+     * Looks up and returns a value object corresponding to the appdef entity
+     * represented by the instance id passed in. The method does not require the
+     * caller to know the instance-id's corresponding type. Similarly, the
+     * return value is upcasted.
+     */
+    public AppdefResourceValue findById(AuthzSubject subject, AppdefEntityID entityId)
+            throws AppdefEntityNotFoundException, PermissionException, SessionTimeoutException, SessionNotFoundException ;
 
     public PlatformValue findPlatformById(int sessionID, Integer id) throws AppdefEntityNotFoundException,
         SessionTimeoutException, SessionNotFoundException, PermissionException;
@@ -395,6 +403,10 @@ public interface AppdefBoss {
     public ServerValue updateServer(int sessionId, ServerValue aServer, Map<String, String> cProps)
         throws ValidationException, SessionTimeoutException, SessionNotFoundException, PermissionException,
         UpdateException, AppdefDuplicateNameException, CPropKeyNotFoundException;
+    
+    public ServerValue updateServer(AuthzSubject subject, ServerValue aServer, Map<String, String> cProps)
+            throws ValidationException, SessionTimeoutException, SessionNotFoundException, PermissionException,
+            UpdateException, AppdefDuplicateNameException, CPropKeyNotFoundException;
 
     public ServiceValue updateService(int sessionId, ServiceValue aService) throws PermissionException,
         ValidationException, SessionTimeoutException, SessionNotFoundException, UpdateException,
