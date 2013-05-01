@@ -75,7 +75,7 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
     private ScheduledThreadPoolExecutor executor ; 
     private ApplicationContext appContext;
     private final int SYNC_INTERVAL_MINUTES;
-    private PlatformManager platformManager;
+    private final PlatformManager platformManager;
 
 
     @Autowired
@@ -238,7 +238,7 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
             String vCenterURL = conf.getProperty(HQConstants.vCenterURL + "_" + i);
             String vCenterUser = conf.getProperty(HQConstants.vCenterUser+ "_" + i);
             String vCenterPassword = conf.getProperty(HQConstants.vCenterPassword+ "_" + i);
-            if (null == vCenterURL || null == vCenterUser || null == vCenterPassword) {
+            if ((null == vCenterURL) || (null == vCenterUser) || (null == vCenterPassword)) {
                 break;
             }
             VCConnection cred = new VCConnection(vCenterURL, vCenterUser, vCenterPassword);
@@ -272,7 +272,7 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
             }
 
             nics = guest.getNet();
-            if (nics == null || nics.length==0) {
+            if ((nics == null) || (nics.length==0)) {
                 log.debug("no nics defined on vm " + vmName);
             }
 
@@ -310,7 +310,7 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
                         continue;
                     }
                     String mac = vmMapping.getGuestNicInfo()[i].getMacAddress();
-                    if (mac==null || "00:00:00:00:00:00".equals(mac)) {
+                    if ((mac==null) || "00:00:00:00:00:00".equals(mac)) {
                         log.debug("no mac address / mac address is 00:00:00:00:00:00 on nic" + vmMapping.getGuestNicInfo()[i] + " of vm " + vmMapping);
                         continue;
                     }
@@ -387,7 +387,7 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
         String vcUUID = si.getServiceContent().getAbout().getInstanceUuid();
         Folder rootFolder = si.getRootFolder();
         ManagedEntity[] me = new InventoryNavigator(rootFolder).searchManagedEntities("VirtualMachine");
-        if(me==null || me.length==0){
+        if((me==null) || (me.length==0)){
             if (log.isDebugEnabled()) {
                 log.debug("no virtual machines were discovered on " + vcUUID);
             }
@@ -460,9 +460,37 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
                 break;
             }
         }
-        connection.setPassword(password);
+        if (!connection.getUrl().equalsIgnoreCase(url)) {
+            ServiceInstance si = null;
+            String vcUuid = null;
+            try {
+                si = new ServiceInstance(new URL(connection.getUrl()), connection.getUser(), connection.getPassword(),
+                        true);
+                vcUuid = si.getServiceContent().getAbout().getInstanceUuid();
+            } catch (Throwable t) {
+                log.warn(t, t);
+            } finally {
+                if (si != null) {
+                    ServerConnection sc = si.getServerConnection();
+                    if (sc != null) {
+                        sc.logout();
+                    }
+                }
+            }
+            if (null != vcUuid) {
+                List<VmMapping> deletedVms = new ArrayList<VmMapping>();
+                for (VmMapping mapping : vcDao.findVcUUID(vcUuid)) {
+                    deletedVms.add(mapping);
+                }
+                vcDao.getSession().clear();
+                persistMapping(null, deletedVms);
+            }
+        }
+
         connection.setUrl(url);
+        connection.setPassword(password);
         connection.setUser(user);
+        connection.setLastSyncSucceeded(false);
         try{
             Properties props = configBoss.getConfig();
             props.setProperty(HQConstants.vCenterURL + "_" + index, url); 
