@@ -142,8 +142,18 @@ public class EditConfigPropertiesAction
                         oldCfgBytes = oldConfig.getProductResponse();
                     } else if (cfgTypes[i].equals(ProductPlugin.TYPE_MEASUREMENT)) {
                         oldCfgBytes = oldConfig.getMeasurementResponse();
-                    } else if (cfgTypes[i].equals(ProductPlugin.TYPE_CONTROL)) {
-                        oldCfgBytes = oldConfig.getControlResponse();
+                    } else if (cfgTypes[i].equals(ProductPlugin.TYPE_CONTROL)) {		
+                         oldCfgBytes = oldConfig.getControlResponse();
+            			 if ( (aeid.isPlatform()) && (oldCfgBytes == null)) {
+            				// in case of platform if there is no control config - control actions are not supported
+            				// notice - empty control response is created for server/service (not too good - we rely that in this case getPlugin of control
+            				// manager will return no supported - better not to create control plugin - in this case too.) -change for 6.0??
+            				blankoutConfig(i, allConfigs, allConfigsRollback);
+            				if (log.isDebugEnabled()) {
+            				    log.debug("Blanking for " + cfgTypes[i] + "->(not supported)")	;
+            				}
+            				continue;
+            			 }
                     } else if (cfgTypes[i].equals(ProductPlugin.TYPE_RESPONSE_TIME)) {
                         oldCfgBytes = oldConfig.getResponseTimeResponse();
                     }

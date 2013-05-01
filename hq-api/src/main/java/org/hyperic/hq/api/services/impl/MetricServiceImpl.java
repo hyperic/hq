@@ -143,7 +143,12 @@ public class MetricServiceImpl extends RestApiService implements MetricService {
     public RegistrationID register(final MetricFilterRequest request) throws SessionNotFoundException,
             SessionTimeoutException {
         ApiMessageContext apiMessageContext = newApiMessageContext();
-        return measurementTransfer.register(request, apiMessageContext);
+        try {
+            return measurementTransfer.register(apiMessageContext, request, apiMessageContext);
+        } catch (PermissionException e) {
+            throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.UNAUTHORIZED,
+                    ExceptionToErrorCodeMapper.ErrorCode.NON_ADMIN_ERR, "");
+        }
     }
 
     public ExternalRegistrationStatus getRegistrationStatus(final String registrationID) throws
@@ -155,6 +160,9 @@ public class MetricServiceImpl extends RestApiService implements MetricService {
             e.printStackTrace();
             throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.INTERNAL_SERVER_ERROR,
                     ExceptionToErrorCodeMapper.ErrorCode.UNKNOWN_ENDPOINT, e.getRegistrationID());
+        } catch (PermissionException e) {
+            throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.UNAUTHORIZED,
+                    ExceptionToErrorCodeMapper.ErrorCode.NON_ADMIN_ERR, "");
         }
     }
 
@@ -164,7 +172,13 @@ public class MetricServiceImpl extends RestApiService implements MetricService {
             throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST,
                     ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID);
         }
-        measurementTransfer.unregister(endpoint);
+        try {
+            ApiMessageContext apiMessageContext = newApiMessageContext();
+            measurementTransfer.unregister(apiMessageContext,endpoint);
+        } catch (PermissionException e) {
+            throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.UNAUTHORIZED,
+                    ExceptionToErrorCodeMapper.ErrorCode.NON_ADMIN_ERR, "");
+        }
     }
     
     protected static class ResourceMeasurementFIQLVisitor implements SearchConditionVisitor<ResourceMeasurement> {

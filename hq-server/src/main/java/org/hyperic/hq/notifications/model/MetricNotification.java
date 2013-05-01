@@ -7,15 +7,15 @@ public class MetricNotification extends BaseNotification {
     protected Integer measurementID;
     protected MetricValue metricVal;
     protected String measurementName;
-    protected String measurementAlias;
+    protected String msmtType;
     
-    public MetricNotification(Integer resourceID,Integer measurementID, String measurementName, String measurementAlias, MetricValue metricVal) {
+    public MetricNotification(Integer resourceID,Integer measurementID, String measurementName, String msmtType, MetricValue metricVal) {
         super();
         this.resourceID = resourceID;
         this.measurementID=measurementID;
         this.metricVal = metricVal;
         this.measurementName=measurementName;
-        this.measurementAlias = measurementAlias;
+        this.msmtType = msmtType;
     }
     public MetricValue getMetricVal() {
         return metricVal;
@@ -26,16 +26,15 @@ public class MetricNotification extends BaseNotification {
     public String getMeasurementName() {
         return this.measurementName;
     }
-    public String getMeasurementAlias() {
-        return measurementAlias;
-    }
     public Integer getResourceID() {
         return this.resourceID;
     }
     public Integer getMeasurementId() {
         return this.measurementID;
     }
-    
+    public String getMeasurementType() {
+        return msmtType;
+    }    
     public String toString() {
         return new StringBuilder()
             .append("measurementId=").append(measurementID)
@@ -60,5 +59,4 @@ public class MetricNotification extends BaseNotification {
         }
         return false;
     }
-
 }

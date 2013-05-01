@@ -46,7 +46,7 @@ public interface MeasurementTransfer {
     MetricResponse getMetrics(ApiMessageContext apiMessageContext, final List<String> templateNames,
             final String rscId, final Date begin, final Date end) throws ParseException, PermissionException, UnsupportedOperationException, ObjectNotFoundException, TimeframeBoundriesException, TimeframeSizeException;
     
-    RegistrationID register(final MetricFilterRequest metricFilterReq, ApiMessageContext apiMessageContext);
+    RegistrationID register(final ApiMessageContext messageContext, final MetricFilterRequest metricFilterReq, ApiMessageContext apiMessageContext) throws PermissionException;
 
     ExternalRegistrationStatus getRegistrationStatus(final ApiMessageContext messageContext,
                                              final String registrationID) throws PermissionException,NotFoundException, UnknownEndpointException;
@@ -57,6 +57,6 @@ public interface MeasurementTransfer {
 
     ResourceMeasurementBatchResponse getMeasurements(ApiMessageContext apiMessageContext,List<ID> ids);
 
-    void unregister(NotificationEndpoint endpoint);
+    void unregister(final ApiMessageContext messageContext,NotificationEndpoint endpoint) throws PermissionException;
 
 }

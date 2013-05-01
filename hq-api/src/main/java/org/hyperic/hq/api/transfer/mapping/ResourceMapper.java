@@ -279,9 +279,10 @@ public class ResourceMapper {
 			if(configMetadata == null) continue ; 
 			configResponse = configMetadata.getResponse() ; 
 			
-			for(Map.Entry<String,String> entry : (Set<Map.Entry<String,String>>) configResponse.getConfig().entrySet() ) { 
-				if( (value = entry.getValue()) == null || value.isEmpty()) continue ;
-				configValues.put(entry.getKey(), value) ;  
+			for(String key : (Set<String>) configResponse.getConfig().keySet() ) {
+			    value = configResponse.getValue(key, true);
+			    if (value == null || value.isEmpty()) continue;
+			    configValues.put(key, value);
 			}//EO while there are more attributes 
 		}//EO while there are more config responses 
         String moRefKey = HQConstants.MOID;

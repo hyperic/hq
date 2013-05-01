@@ -75,8 +75,9 @@ public class MeasurementMapper {
         metric.setValue(Double.valueOf(df.format(hqMetric.getValue())));
         metric.setTimestamp(hqMetric.getTimestamp());
         metric.setResourceID(mn.getResourceID());
+        metric.setMeasurementID(mn.getMeasurementId());
         metric.setMeasurementName(mn.getMeasurementName());
-        metric.setMeasurementAlias(mn.getMeasurementAlias());
+        metric.setMeasurementType(mn.getMeasurementType());
         return metric;
     }
     public List<RawMetric> toMetricsWithId(final List<MetricNotification> mns) {

@@ -93,7 +93,6 @@ import org.springframework.transaction.annotation.Transactional;
  * to retrieve Availability Data RLE points
  * 
  */
-@SuppressWarnings("restriction")
 @Service
 @Transactional
 public class AvailabilityManagerImpl implements AvailabilityManager {
@@ -189,7 +188,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
 
     
     public AvailabilityFallbackCheckQue getFallbackCheckQue() {
-        return this.fallbackCheckQue;
+    	return this.fallbackCheckQue;
     }
     
     
@@ -596,10 +595,10 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     }
 
     @Transactional(readOnly = true)
-    public Map<Integer, double[]> getAggregateDataAndAvailUpByMetric(final List<Integer> mids, long begin, long end) throws SQLException {
+    public Map<Integer, double[]> getAggregateDataAndAvailUpByMetric(final List<Integer> mids, long begin, long end)
+    throws SQLException {
         Map<Integer,Double> avails = availabilityDataDAO.findAggregateAvailabilityUp(mids, begin, end);
         Map<Integer, double[]> msmtToAvg = new HashMap<Integer, double[]>();
-        long timeFrame = end - begin;
         Set<Integer> unavailMsmtsIds = new HashSet<Integer>(mids);
         if (null != avails) {
             for (Map.Entry<Integer, Double> availIdToAvg : avails.entrySet()) {
@@ -945,7 +944,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         }
     }
 
-    private void flushCreateAndRemoves(Map<DataPoint, AvailabilityDataRLE> createMap,
+	private void flushCreateAndRemoves(Map<DataPoint, AvailabilityDataRLE> createMap,
                                        Map<DataPoint, AvailabilityDataRLE> removeMap) {
         final StopWatch watch = new StopWatch();
         final boolean debug = log.isDebugEnabled();
@@ -1529,38 +1528,34 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         }
     }
 
-    private void checkAvailabilityState(List<DataPoint> availPoints) {
-        // The following code (until the creation of the StopWatch) is a fix for
-        // Jira issue [HHQ-5524].
-        // There is a strange scenario where the cache holds an availability
-        // metric with 'available' value while
-        // in the database the same availability metric value is 'not available'
-        // (in the HQ_AVAIL_DATA_RLE table).
-        // In that case we need to clear the availability cache because it is
-        // out of sync with the database.
-        // It is very hard to understand what causes this issue but it happens a
-        // lot in scale environments.
+	private void checkAvailabilityState(List<DataPoint> availPoints) {
+		// The following code (until the creation of the StopWatch) is a fix for Jira issue [HHQ-5524].
+        // There is a strange scenario where the cache holds an availability metric with 'available' value while
+        // in the database the same availability metric value is 'not available' (in the HQ_AVAIL_DATA_RLE table).
+        // In that case we need to clear the availability cache because it is out of sync with the database.
+        // It is very hard to understand what causes this issue but it happens a lot in scale environments.
         // If we don't clear the cache the resource which this availability
         // metric belongs to will appear to be 'down' while it is not,
-        // clearing the cache causes the metric to be updated in the database to
-        // the correct value.
-        List<Integer> includes = new ArrayList<Integer>(availPoints.size());
-        for (DataPoint point : availPoints) {
+        // clearing the cache causes the metric to be updated in the database to the correct value.
+        final List<Integer> includes = new ArrayList<Integer>(availPoints.size());
+        for (final DataPoint point : availPoints) {
             includes.add(point.getMeasurementId());
         }
-        // Find out which of the availPoints is marked as 'not available' in the
-        // database and check
-        // if the same point is marked as 'available' in the cache -> cache is
-        // out of sync!
-        List<AvailabilityDataRLE> downList = availabilityDataDAO.getDownMeasurements(includes);
-        for (AvailabilityDataRLE data : downList) {
-            DataPoint stateInCache = availabilityCache.get(data.getMeasurement().getId());
-            if (null != stateInCache && (stateInCache.getValue() != MeasurementConstants.AVAIL_DOWN)) {
-                log.info("The state of the Availability cache is out of sync with the database for measurement id '"
-                        + data.getMeasurement().getId() + "' , clearing this metric from the Availability cache");
-                availabilityCache.remove(data.getMeasurement().getId());
-                continue;
+        // Find all of the availPoints in the database and check if the same datapoint 
+        // is not in sync with the cache
+        final List<AvailabilityDataRLE> avails = availabilityDataDAO.findLastAvail(includes);
+        final List<Integer> mids = new ArrayList<Integer>();
+        for (final AvailabilityDataRLE data : avails) {
+            final Integer mid = data.getMeasurement().getId();
+            final DataPoint stateInCache = availabilityCache.get(mid);
+            if (null != stateInCache && (stateInCache.getValue() != data.getAvailVal())) {
+                availabilityCache.remove(mid);
+                mids.add(mid);
             }
+        }
+        if (!mids.isEmpty()) {
+            log.info("The state of the Availability cache is out of sync with the database for measurementIds='" + mids +
+                     "', clearing these metrics from the Availability cache");
         }
     }
 

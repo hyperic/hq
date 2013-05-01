@@ -84,6 +84,9 @@ public class AgentDiagnostics extends Thread {
             currFile = new FileWriter(filename, true);
             currFilename = filename;
         } else if (!filename.equals(currFilename)) {
+            if (currFile!=null){
+                currFile.close();
+            }
             AbstractStatsWriter.gzipFile(currFilename);
             currFile = new FileWriter(filename, true);
             currFilename = filename;

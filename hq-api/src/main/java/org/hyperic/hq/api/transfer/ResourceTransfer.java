@@ -81,7 +81,7 @@ public interface ResourceTransfer {
 
     ResourceBatchResponse updateResources(final ApiMessageContext messageContext, final Resources resources);
 
-    void unregister(NotificationEndpoint endpoint);
+    void unregister(final ApiMessageContext messageContext, NotificationEndpoint endpoint) throws PermissionException;
 
     PlatformManager getPlatformManager();
     ResourceManager getResourceManager();

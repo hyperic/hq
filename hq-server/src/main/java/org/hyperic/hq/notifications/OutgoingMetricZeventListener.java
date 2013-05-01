@@ -16,6 +16,7 @@ import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.notifications.filtering.DestinationEvaluator;
 import org.hyperic.hq.notifications.filtering.MetricDestinationEvaluator;
 import org.hyperic.hq.notifications.model.MetricNotification;
+import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.hq.zevents.ZeventListener;
@@ -49,11 +50,13 @@ public class OutgoingMetricZeventListener extends BaseNotificationsZeventListene
             }
             Integer mid = Integer.valueOf(measurementId);
             Measurement msmt = this.msmtMgr.getMeasurement(mid);
-            // TODO~ black list should be here
-            
+            if (msmt==null) { // the measurement was erased since the event was sent
+                continue;
+            }
+            MeasurementTemplate tmpl = msmt.getTemplate();
+            String msmtType = tmpl.getAlias().equals(Metric.ATTR_AVAIL)?Metric.ATTR_AVAIL:null;
             Resource rsc = msmt.getResource();
-            MeasurementTemplate t = msmt.getTemplate();
-            MetricNotification n = new MetricNotification(rsc.getId(),mid,t.getName(),t.getAlias(),metricVal);
+            MetricNotification n = new MetricNotification(rsc.getId(),mid,msmt.getTemplate().getName(),msmtType,metricVal);
             ns.add(n);
         }
         return ns;

@@ -47,6 +47,7 @@ import org.hyperic.hq.api.transfer.mapping.UnknownEndpointException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.notifications.EndpointQueue;
@@ -79,6 +80,8 @@ public class NotificationsTransferImpl implements NotificationsTransfer {
     private MeasurementTransfer msmtTransfer;
     @Autowired
     private AuthzSubjectManager authzSubjectManager;
+    @Autowired
+    protected PermissionManager permissionManager;
 
     // will be replaced by the destinations the invokers of this API will pass when registering
 
@@ -98,16 +101,17 @@ public class NotificationsTransferImpl implements NotificationsTransfer {
 
     @Transactional (readOnly=true)
     public NotificationsReport poll(String registrationId, ApiMessageContext apiMessageContext)
-    throws UnregisteredException {
+    throws UnregisteredException, PermissionException {
         AuthzSubject subject = apiMessageContext.getAuthzSubject();
+        this.permissionManager.checkIsSuperUser(subject);
         return poll(registrationId, subject.getId());
     }
 
     @Transactional (readOnly=false)
-    public void unregister(String registrationId) {
+    public void unregister(final ApiMessageContext messageContext, String registrationId) throws PermissionException {
         NotificationEndpoint endpoint = endpointQueue.unregister(registrationId);
-        rscTransfer.unregister(endpoint);
-        msmtTransfer.unregister(endpoint);
+        rscTransfer.unregister(messageContext, endpoint);
+        msmtTransfer.unregister(messageContext, endpoint);
     }
 
     public void register(NotificationEndpoint endpoint, final int authzSubjectId) {

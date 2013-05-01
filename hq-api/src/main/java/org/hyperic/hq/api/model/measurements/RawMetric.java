@@ -20,9 +20,11 @@ public class RawMetric extends Notification {
     @XmlAttribute
     protected String measurementName;
     @XmlAttribute
-    protected String measurementAlias;
-    @XmlAttribute
     protected Integer resourceID;
+    @XmlAttribute
+    protected Integer measurementID;
+    @XmlAttribute
+    protected String measurementType;
     
     public double getValue() {
         return value;
@@ -48,10 +50,10 @@ public class RawMetric extends Notification {
     public void setMeasurementName(String measurementName) {
         this.measurementName = measurementName;
     }
-    public String getMeasurementAlias() {
-        return this.measurementAlias;
+    public void setMeasurementID(Integer measurementId) {
+        this.measurementID = measurementId;
     }
-    public void setMeasurementAlias(String measurementAlias) {
-        this.measurementAlias = measurementAlias;
+    public void setMeasurementType(String measurementType) {
+        this.measurementType = measurementType;
     }
 }

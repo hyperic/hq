@@ -100,7 +100,12 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
 
     public final RegistrationID register(final ResourceDetailsType responseMetadata, final ResourceFilterRequest resourceFilterRequest) throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException {
         ApiMessageContext apiMessageContext = newApiMessageContext();
-        return this.resourceTransfer.register(apiMessageContext, responseMetadata, resourceFilterRequest) ;
+        try {
+            return this.resourceTransfer.register(apiMessageContext, responseMetadata, resourceFilterRequest) ;
+        } catch (PermissionException e) {
+            throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.UNAUTHORIZED,
+                    ExceptionToErrorCodeMapper.ErrorCode.NON_ADMIN_ERR, "");
+        }
     }//EOM
 
     public final ExternalRegistrationStatus getRegistrationStatus(final String registrationID)  throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException {
@@ -111,6 +116,9 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
             e.printStackTrace();
             throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.INTERNAL_SERVER_ERROR,
                     ExceptionToErrorCodeMapper.ErrorCode.UNKNOWN_ENDPOINT, e.getRegistrationID());
+        } catch (PermissionException e) {
+            throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.UNAUTHORIZED,
+                    ExceptionToErrorCodeMapper.ErrorCode.NON_ADMIN_ERR, "");
         }
     }//EOM
 
@@ -137,6 +145,12 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
             throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST,
                     ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID);
         }
-	    resourceTransfer.unregister(endpoint);
+        try {
+            ApiMessageContext apiMessageContext = newApiMessageContext();
+            resourceTransfer.unregister(apiMessageContext,endpoint);
+        } catch (PermissionException e) {
+            throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.UNAUTHORIZED,
+                    ExceptionToErrorCodeMapper.ErrorCode.NON_ADMIN_ERR, "");
+        }
 	}
 }//EOC 

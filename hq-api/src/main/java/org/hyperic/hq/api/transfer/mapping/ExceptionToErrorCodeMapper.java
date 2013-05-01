@@ -138,6 +138,7 @@ public class ExceptionToErrorCodeMapper  {
         RESOURCE_NOT_FOUND_BY_ID("1001"),
         INVALID_SESSION("2001"),
         SESSION_TIMEOUT("2002"),
+        NON_ADMIN_ERR("2003"),
         TEMPLATE_NOT_FOUND("3002"),
         MEASUREMENT_NOT_FOUND("3003"),
         WRONG_DATE_FORMAT("4001"),
@@ -158,7 +159,7 @@ public class ExceptionToErrorCodeMapper  {
         UNKNOWN_ENDPOINT("8005"), 
         ILLEGAL_FILTER("8100"), 
         ILLEGAL_FILTER_COMPARATOR("8101"), 
-        ILLEGAL_AGG_FILTER("8102");
+        ILLEGAL_AGG_FILTER("8102"); 
         
         
         

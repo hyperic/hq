@@ -1810,12 +1810,12 @@ public class PlatformManagerImpl implements PlatformManager {
 
         // Get the FQDN before we update
         String prevFqdn = platform.getFqdn();
-
-        Resource changedResource = platform.updateWithAI(aiplatform, subj.getName(), platform.getResource());
-        if (changedResource!=null) {
-            this.zeventManager.enqueueEventAfterCommit(new ResourceContentChangedEvent(changedResource.getId(), changedResource.getName(), null, null));
+        platform.updateWithAI(aiplatform, subj.getName(), platform.getResource());
+        Map<String, String> changedProperties = platform.changedProperties(aiplatform);
+        if (!changedProperties.isEmpty()) {
+            this.zeventManager.enqueueEventAfterCommit(new ResourceContentChangedEvent(aiplatform.getId(),
+                    aiplatform.getName(), null, changedProperties));
         }
-        
         // If FQDN has changed, we need to update servers' auto-inventory tokens
         if (!prevFqdn.equals(platform.getFqdn())) {
             for (Server server : platform.getServers()) {
