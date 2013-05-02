@@ -134,6 +134,7 @@ public class ExceptionToErrorCodeMapper  {
     }//EOM 
     
     public enum ErrorCode {
+        
         RESOURCE_NOT_FOUND_BY_ID("1001"),
         INVALID_SESSION("2001"),
         SESSION_TIMEOUT("2002"),
@@ -144,6 +145,7 @@ public class ExceptionToErrorCodeMapper  {
         WRONG_DATE_VALUES("4002"),
         BAD_MEASUREMENT_REQ("582001"),
         BAD_REQ_BODY("5002"),
+        UPDATE_FAILURE("5003"),
         CLOUD_PROVIDER_NOT_CONFIGURED("6001"),
         BAD_CLOUD_PROVIDER_CONFIGURATION("6002"),
         CLOUD_RESOURCE_NOT_FOUND("6003"),
@@ -158,6 +160,8 @@ public class ExceptionToErrorCodeMapper  {
         ILLEGAL_FILTER("8100"), 
         ILLEGAL_FILTER_COMPARATOR("8101"), 
         ILLEGAL_AGG_FILTER("8102"); 
+        
+        
         
         private final String errorCode;
 

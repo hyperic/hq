@@ -7,6 +7,7 @@ import javax.annotation.PostConstruct;
 
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.measurement.server.session.Category;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent;
@@ -55,8 +56,13 @@ public class OutgoingMetricZeventListener extends BaseNotificationsZeventListene
             }
             MeasurementTemplate tmpl = msmt.getTemplate();
             String msmtType = tmpl.getAlias().equals(Metric.ATTR_AVAIL)?Metric.ATTR_AVAIL:null;
+            Category cat = tmpl.getCategory();
+            String catName = null;
+            if (cat!=null) {
+                catName=cat.getName();
+            }
             Resource rsc = msmt.getResource();
-            MetricNotification n = new MetricNotification(rsc.getId(),mid,msmt.getTemplate().getName(),msmtType,metricVal);
+            MetricNotification n = new MetricNotification(rsc.getId(),mid,msmt.getTemplate().getName(),msmtType,catName,metricVal);
             ns.add(n);
         }
         return ns;

@@ -42,10 +42,9 @@ import org.hibernate.classic.Session;
 import org.hyperic.hq.api.model.AIResource;
 import org.hyperic.hq.api.model.ConfigurationValue;
 import org.hyperic.hq.api.model.ID;
-import org.hyperic.hq.api.model.PropertyList;
-import org.hyperic.hq.api.model.ResourceModel;
 import org.hyperic.hq.api.model.ResourceConfig;
 import org.hyperic.hq.api.model.ResourceDetailsType;
+import org.hyperic.hq.api.model.ResourceModel;
 import org.hyperic.hq.api.model.ResourcePrototype;
 import org.hyperic.hq.api.model.ResourceTypeModel;
 import org.hyperic.hq.api.model.resources.ComplexIp;
@@ -53,13 +52,17 @@ import org.hyperic.hq.api.model.resources.ResourceFilterDefinition;
 import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
 import org.hyperic.hq.api.transfer.ResourceTransfer;
 import org.hyperic.hq.api.transfer.impl.ResourceTransferImpl.Context;
+import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.appdef.shared.IpValue;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
+import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.bizapp.server.session.ProductBossImpl.ConfigSchemaAndBaseResponse;
@@ -149,6 +152,58 @@ public class ResourceMapper {
 		return aiResource;
 	}//EOM
 	
+	public final PlatformValue mergePlatformIPs(AppdefResourceValue existingDTO, final List<ConfigurationValue> ips, final Platform platform) { 
+	    PlatformValue platformDTO = (PlatformValue) existingDTO ; 
+	    
+	    if(ips == null || ips.isEmpty()) return null ;  
+	    //else 
+	    
+	    final Map<String,Ip> existingIpsMap = new HashMap<String,Ip>() ; 
+	    
+	    for(Ip existingIp : platform.getIps()) { 
+            existingIpsMap.put(existingIp.getAddress(), existingIp) ; 
+        }//EO while there are more existing ips 
+	    
+	    String address = null ;
+	    ComplexIp inputIp = null ;
+	    Ip existingIp = null ; 
+	    IpValue IpDto = null ; 
+	    
+	    for(ConfigurationValue property : ips) {
+	        inputIp = (ComplexIp) property  ; 
+	        address = inputIp.getAddress() ; 
+	        existingIp = existingIpsMap.get(address)  ; 
+	        
+	        if(existingIp == null || this.ipHashCode(existingIp) != inputIp.hashCode()) { 
+	            
+	            IpDto = new IpValue(address, inputIp.getNetmask(), inputIp.getMac()) ; 
+	          
+	            if(platformDTO == null) platformDTO = new PlatformValue() ;
+	            
+	            if(existingIp != null) { 
+	                IpDto.setId(existingIp.getId()); 
+	            }//EO if new ip 
+	            
+                platformDTO.updateIpValue(IpDto) ;
+                platformDTO.addIpValue(IpDto) ;
+	        }//EO if new ip or ip was already defined but had different attribute values  
+	    }//EO while there are morre input ips 
+	    
+	    return platformDTO ; 
+	}//EOM 
+	
+	private final int ipHashCode(final Ip ip) { 
+	    int result = 7;
+	   
+	    final String address = ip.getAddress(), 
+	                 mac = ip.getMacAddress(), 
+	                 mask = ip.getNetmask() ; 
+	    
+        result = 31 * result + (null == address ? 1 : address.hashCode());
+        result = 31 * result + (null == mac ? 1 : mac.hashCode());
+        result = 31 * result + (null == mask ? 1 : mask.hashCode());
+        return result;
+	}//EOM 
 	
 	public final ResourceModel toResource(final org.hyperic.hq.authz.server.session.Resource backendResource) { 
 		final ResourceModel resource = new ResourceModel(backendResource.getId().toString()) ; 
@@ -166,15 +221,16 @@ public class ResourceMapper {
 		return resource ; 
 	}//EOM 
 	
-	public final void mergeResource(final ResourceModel inputResource, final org.hyperic.hq.authz.server.session.Resource backendResource) { 
+	public final void mergeResource(final ResourceModel inputResource, final org.hyperic.hq.authz.server.session.Resource backendResource, 
+	        final Context flowContext) throws Throwable{ 
 		if(backendResource == null || inputResource == null) return ; 
 		//else 
 		
 		//name 
 		final String name = inputResource.getName() ; 
-		if(this.compare(backendResource.getName(), name)) backendResource.setName(name) ; 
+		if(!this.compare(backendResource.getName(), name)) backendResource.setName(name) ; 
 		
-		//TODO: implement more attributes 
+		flowContext.resourceTypeStrategy.mergeResource(flowContext) ; 
 			
 	}//EOM 
 	

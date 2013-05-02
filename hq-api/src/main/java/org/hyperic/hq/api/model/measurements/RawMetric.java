@@ -25,6 +25,8 @@ public class RawMetric extends Notification {
     protected Integer measurementID;
     @XmlAttribute
     protected String measurementType;
+    @XmlAttribute
+    protected String category;
     
     public double getValue() {
         return value;
@@ -55,5 +57,8 @@ public class RawMetric extends Notification {
     }
     public void setMeasurementType(String measurementType) {
         this.measurementType = measurementType;
+    }
+    public void setCategory(String category) {
+        this.category = category;
     }
 }
