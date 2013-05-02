@@ -38,6 +38,10 @@ class StatusController
      * Indicates if this node is the master node.
      */
     def nodeStatus(params) {
+       def response = invokeArgs.response
+        if (!HAUtil.isMasterNode()){
+                response.status = 404
+        }
         render(inline: "master=" + HAUtil.isMasterNode())
         return true
     }    
