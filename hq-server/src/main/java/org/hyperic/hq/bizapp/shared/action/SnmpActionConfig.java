@@ -110,8 +110,8 @@ public class SnmpActionConfig implements ActionConfigInterface {
      */
     public void setVariableBindings(String variableBindings) {
         try {
-            if (variableBindings != null
-                    && variableBindings.length() > 0) {
+            if ((variableBindings != null)
+                    && (variableBindings.length() > 0)) {
 
                 // validate that the variable bindings is in JSONArray format
                 JSONArray j = new JSONArray(variableBindings);
@@ -137,7 +137,7 @@ public class SnmpActionConfig implements ActionConfigInterface {
         address.setMinLength(1);
         res.addOption(address);
     
-        StringConfigOption snmpTrapOID = new StringConfigOption(CFG_TRAP_OID, "SNMP Trap OID", "1.2.3.4");
+        StringConfigOption snmpTrapOID = new StringConfigOption(CFG_TRAP_OID, "SNMP Trap OID", "");
         snmpTrapOID.setMinLength(1);
         snmpTrapOID.setOptional(true);
         res.addOption(snmpTrapOID);
