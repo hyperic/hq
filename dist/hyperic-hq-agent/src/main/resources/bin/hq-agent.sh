@@ -24,6 +24,8 @@ if test -d "./bundles/$AGENT_BUNDLE"; then
   chmod -R +x ./bundles/$AGENT_BUNDLE/bin/* > /dev/null 2>&1
   # Fix permissions issues on HPUX
   chmod -R +x ./bundles/$AGENT_BUNDLE/pdk/lib/*.sl > /dev/null 2>&1
+  #also for backround.sh which is in different folder
+  chmod  +x ./bundles/$AGENT_BUNDLE/* > /dev/null 2>&1
   # pass on the command to the bundle
   #echo "Invoking agent bundle $AGENT_BUNDLE"
   if [ $1 = "set-property" ]

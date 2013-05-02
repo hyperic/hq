@@ -251,6 +251,7 @@ public class ServiceValue extends AppdefResourceValue
         return this.location;
     }
 
+    @Property("service.location")
     public void setLocation( String location )
     {
         this.location = location;
@@ -325,6 +326,7 @@ public class ServiceValue extends AppdefResourceValue
         return this.description;
     }
 
+    @Property("service.description")
     public void setDescription( String description )
     {
         this.description = description;

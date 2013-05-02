@@ -307,6 +307,9 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
     }//EOM
     @Test
     public final void testUpdateResources2Resources2Failures() throws Throwable{
+        this.errorInterceptor.expect(ServerWebApplicationException.class) ;
+        this.errorInterceptor.expectMessage("Error on HTTP request: 500 Internal Error [http://localhost/tests/rest/resource]");
+
     	this.innerTestUpdateResources(new int[]{ 
     			(USE_NATURAL_ID_FLAG | GENERATE_CONFIG_FLAG | FAILED_RESOURCE_FLAG), 
     			(GENERATE_CONFIG_FLAG | FAILED_RESOURCE_FLAG)

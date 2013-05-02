@@ -134,6 +134,7 @@ public class ExceptionToErrorCodeMapper  {
     }//EOM 
     
     public enum ErrorCode {
+        
         RESOURCE_NOT_FOUND_BY_ID("1001"),
         INVALID_SESSION("2001"),
         SESSION_TIMEOUT("2002"),
@@ -143,6 +144,7 @@ public class ExceptionToErrorCodeMapper  {
         WRONG_DATE_VALUES("4002"),
         BAD_MEASUREMENT_REQ("5001"),
         BAD_REQ_BODY("5002"),
+        UPDATE_FAILURE("5003"),
         CANNOT_VERIFY_VC_SETTINGS("6001"),
         CANNOT_UPDATE_SERVER_GUID("6002"),
         VC_CONNECTION_ALREADY_EXISTS("6003"),
@@ -152,6 +154,7 @@ public class ExceptionToErrorCodeMapper  {
         UNREGISTERED_FOR_NOTIFICATIONS("7002"),
         INTERNAL_SERVER_ERROR("8001"),
         REGEX_PATTERN_SYNTAX_ERROR("9001");
+        
         
         private final String errorCode;
 
