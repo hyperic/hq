@@ -64,37 +64,31 @@ public class ActiveDirectoryDetector
         /**
          * HHQ-5553
          */
-        String winVersionStr = org.hyperic.sigar.OperatingSystem.getInstance().getVendorVersion();
+//        String winVersionStr = org.hyperic.sigar.OperatingSystem.getInstance().getVendorVersion();
         String pluginServerVersionStr = getTypeInfo().getVersion();
-        boolean isWinVersion2008 = false;
-        if (winVersionStr!=null) {
-            try {
-                int winVersion = Integer.valueOf(winVersionStr);
-                isWinVersion2008 = winVersion>=2008;
-            } catch (NumberFormatException e) {
-                log.debug("ActiveDirectoryDetector was not able to parse the windows version identification");
-            }
-        }
-        boolean isPluginServerVersion2008 = false;
+//        int winVersion=-1;
+        int pluginServerVersion=-1;
+//        if (winVersionStr!=null) {
+//            try {
+//                winVersion = Integer.valueOf(winVersionStr);
+//            } catch (NumberFormatException e) {
+//                log.debug("ActiveDirectoryDetector was not able to parse the windows version identification");
+//            }
+//        }
         if (pluginServerVersionStr!=null) {
             try {
-                int pluginServerVersion = Integer.valueOf(pluginServerVersionStr);
-                isPluginServerVersion2008 = pluginServerVersion>=2008;
+                pluginServerVersion = Integer.valueOf(pluginServerVersionStr);
             } catch (NumberFormatException e) {
             }
         }
-        if ((!isWinVersion2008 && isPluginServerVersion2008) || (isWinVersion2008 && !isPluginServerVersion2008)) {
-            return null;
-        }
+//        if (winVersion!=pluginServerVersion && (pluginServerVersion!=-1 || winVersion>=2008)) {
+//            return null;
+//        }
         
         if (!new File(path).exists()) {
             log.debug(path + " does not exist");
             return null;
         }
-
-        ServerResource server = createServerResource(path);
-        server.setProductConfig();
-        server.setMeasurementConfig();
 
         ConfigResponse cprops = new ConfigResponse();
         List cpropKeys = getCustomPropertiesSchema().getOptions();
@@ -116,6 +110,47 @@ public class ActiveDirectoryDetector
             cprops.setValue(key, value);
         }
         
+//        String activeDirectoryName = getTypeInfo().getName();
+//        StringBuilder activeDirectoryNameAndVersion = new StringBuilder();
+//        if (activeDirectoryName!=null) {
+//            activeDirectoryNameAndVersion.append(activeDirectoryName.subSequence(0, activeDirectoryName.indexOf(pluginServerVersionStr)).toString());
+//            activeDirectoryNameAndVersion.append(" ");
+//        } else {
+//            log.error("a nameless server entry exists in the active directory plugin");
+//        }
+        
+        // we use the AD schema version to decide which server plugin to use, because of a bug in sigar which causes it to identify win 2012 as win 2008
+        int schemaVersion = -1;
+        try {
+            schemaVersion = Integer.valueOf(cprops.getValue("Schema Version"));
+        } catch (NumberFormatException e) {
+        }
+        switch (schemaVersion) {
+        case 13:    // 2000
+        case 30:    // 2003 RTM
+        case 31:    // 2003 R2
+            if (pluginServerVersion!=-1) { // base plugin
+                return null;
+            }
+            break;
+        case 44:    // 2008 RTM
+        case 47:    // 2008 R2
+        case 52:
+            if (pluginServerVersion!=2008) {
+                return null;
+            }
+            break;
+        case 56:    // 2012 RTM
+            if (pluginServerVersion!=2012) {
+                return null;
+            }
+            break;
+        default:
+            log.error("unknown AD schema version number - " + schemaVersion);
+        }
+        ServerResource server = createServerResource(path);
+        server.setProductConfig();
+        server.setMeasurementConfig();
         server.setCustomProperties(cprops);
 
         List servers = new ArrayList();
