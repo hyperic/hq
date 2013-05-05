@@ -64,26 +64,14 @@ public class ActiveDirectoryDetector
         /**
          * HHQ-5553
          */
-//        String winVersionStr = org.hyperic.sigar.OperatingSystem.getInstance().getVendorVersion();
         String pluginServerVersionStr = getTypeInfo().getVersion();
-//        int winVersion=-1;
         int pluginServerVersion=-1;
-//        if (winVersionStr!=null) {
-//            try {
-//                winVersion = Integer.valueOf(winVersionStr);
-//            } catch (NumberFormatException e) {
-//                log.debug("ActiveDirectoryDetector was not able to parse the windows version identification");
-//            }
-//        }
         if (pluginServerVersionStr!=null) {
             try {
                 pluginServerVersion = Integer.valueOf(pluginServerVersionStr);
             } catch (NumberFormatException e) {
             }
         }
-//        if (winVersion!=pluginServerVersion && (pluginServerVersion!=-1 || winVersion>=2008)) {
-//            return null;
-//        }
         
         if (!new File(path).exists()) {
             log.debug(path + " does not exist");
@@ -109,15 +97,6 @@ public class ActiveDirectoryDetector
             }
             cprops.setValue(key, value);
         }
-        
-//        String activeDirectoryName = getTypeInfo().getName();
-//        StringBuilder activeDirectoryNameAndVersion = new StringBuilder();
-//        if (activeDirectoryName!=null) {
-//            activeDirectoryNameAndVersion.append(activeDirectoryName.subSequence(0, activeDirectoryName.indexOf(pluginServerVersionStr)).toString());
-//            activeDirectoryNameAndVersion.append(" ");
-//        } else {
-//            log.error("a nameless server entry exists in the active directory plugin");
-//        }
         
         // we use the AD schema version to decide which server plugin to use, because of a bug in sigar which causes it to identify win 2012 as win 2008
         int schemaVersion = -1;
