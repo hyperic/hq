@@ -105,6 +105,7 @@ import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.ObjectNotFoundException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.notifications.DefaultEndpoint;
 import org.hyperic.hq.notifications.HttpEndpoint;
 import org.hyperic.hq.notifications.NotificationEndpoint;
 import org.hyperic.hq.notifications.filtering.Filter;
@@ -1037,7 +1038,8 @@ public class ResourceTransferImpl implements ResourceTransfer {
 
         RegistrationID registrationID = new RegistrationID();
         final HttpEndpointDefinition httpEndpointDefinition = resourceFilterRequest.getHttpEndpointDef();
-        final NotificationEndpoint endpoint = getHttpEndpoint(registrationID, httpEndpointDefinition);
+        final NotificationEndpoint endpoint = (httpEndpointDefinition == null) ? new DefaultEndpoint(registrationID
+                .getId()) : getHttpEndpoint(registrationID, httpEndpointDefinition);
         final Integer authzSubjectId = authzSubject.getId();
         notificationsTransfer.register(endpoint, ResourceDetailsType.valueOf(responseMetadata), authzSubjectId);
         evaluator.register(endpoint, userFilters);
