@@ -402,15 +402,23 @@ public class ControlManagerImpl implements ControlManager {
 
                 if (members.isEmpty()) {
                     return false;
+                } 
+                AppdefEntityID groupMemberID = (AppdefEntityID) members.get(0);
+                checkControlPermission(subject, groupMemberID);
+                // HHQ-5788 - we dont display control tab for compatible groups of type "platform"
+                if (groupMemberID.getType() == AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
+                    return false;
                 }
-
-                checkControlPermission(subject, (AppdefEntityID) members.get(0));
+                // Check with the plugin manager whether resource provides support for control
+                controlPluginManager.getPlugin(resType);
             } else {
                 checkControlPermission(subject, id);
+                // Check with the plugin manager whether resource provides support for control
+                controlPluginManager.getPlugin(resType);
+                // Check if an entity has been enabled for control
+                // f.e some of the platforms have a "reset vm" control action and some do not  
+                checkControlEnabled(subject, id) ; 
             }
-            controlPluginManager.getPlugin(resType);
-             
-            checkControlEnabled(subject, id) ; 
             return true;
         } catch (PluginNotFoundException e) {
             // return false
