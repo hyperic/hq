@@ -11,6 +11,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
@@ -129,17 +130,14 @@ public class HttpEndpoint extends NotificationEndpoint {
             // The entire response stream must be read if another connection to the server is made with the current 
             // client object
             final String respBuf= EntityUtils.toString(httpRes);
+            final StatusLine statusLine = resp.getStatusLine();
             if (debug) {
-                try {
-                    log.debug(resp.getStatusLine() + ", response=[" + respBuf + "]");
-                } catch (Exception e) {
-                    log.debug(e,e);
-                }
+                log.debug(statusLine + ", response=[" + respBuf + "]");
             }
-            int status = resp.getStatusLine().getStatusCode();
+            final int status = statusLine.getStatusCode();
             return new HTTPStatus(time,status,respBuf);
-        }catch(IOException e1) {
-            log.error(e1,e1);
+        } catch (IOException e1) {
+            log.error("cannot publish to endpoint=" + toString() + ": " + e1,e1);
             return new PostingStatus(time,false,e1.getMessage());
         }
     }
