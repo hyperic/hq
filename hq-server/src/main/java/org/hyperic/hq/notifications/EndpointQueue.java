@@ -60,7 +60,8 @@ public class EndpointQueue {
     private static final String NOTIFICATIONS_PUBLISHED_TO_ENDPOINT = ConcurrentStatsCollector.NOTIFICATIONS_PUBLISHED_TO_ENDPOINT;
     private static final String NOTIFICATIONS_PUBLISHED_TO_ENDPOINT_TIME = ConcurrentStatsCollector.NOTIFICATIONS_PUBLISHED_TO_ENDPOINT_TIME;
     private static final String NOTIFICATION_TOTAL_QUEUE_SIZE = ConcurrentStatsCollector.NOTIFICATION_TOTAL_QUEUE_SIZE;
-    private static final int BATCH_SIZE = 50000;
+// XXX should make this configurable in some way
+    private static final int BATCH_SIZE = 25000;
     @Autowired
     private ThreadPoolTaskScheduler notificationExecutor;
     @Autowired
@@ -89,15 +90,13 @@ public class EndpointQueue {
         concurrentStatsCollector.register(NOTIFICATIONS_PUBLISHED_TO_ENDPOINT_TIME);
         concurrentStatsCollector.register(new StatCollector() {
             public long getVal() throws StatUnreachableException {
-                Collection<AccumulatedRegistrationData> tmp;
                 synchronized (registrationData) {
-                    tmp = new ArrayList<AccumulatedRegistrationData>(registrationData.values());
+                    long rtn = 0;
+                    for (final AccumulatedRegistrationData data : registrationData.values()) {
+                        rtn += data.getAccumulatedNotificationsQueue().size();
+                    }
+                    return rtn;
                 }
-                long rtn = 0;
-                for (final AccumulatedRegistrationData data : tmp) {
-                    rtn += data.getAccumulatedNotificationsQueue().size();
-                }
-                return rtn;
             }
             public String getId() {
                 return NOTIFICATION_TOTAL_QUEUE_SIZE;
@@ -109,7 +108,7 @@ public class EndpointQueue {
                          Transformer<InternalNotificationReport, String> transformer) {
         final boolean debug = log.isDebugEnabled();
         final AccumulatedRegistrationData data =
-            new AccumulatedRegistrationData(endpoint, QUEUE_LIMIT, resourceDetailsType);
+            new AccumulatedRegistrationData(endpoint, QUEUE_LIMIT, resourceDetailsType, registrationData);
         synchronized (registrationData) {
             if (registrationData.containsKey(endpoint.getRegistrationId())) {
                 if (debug) log.debug("can not register endpoint=" + endpoint + " twice");
@@ -133,7 +132,6 @@ public class EndpointQueue {
         final Runnable task = new Runnable() {
             protected long firstFailure=Long.MAX_VALUE;
             protected boolean isFailedLastPostage = false;
-            
             public void run() {
                 int size = 0;
                 long totalTime = 0;
@@ -153,40 +151,42 @@ public class EndpointQueue {
                     }
                     List<InternalNotificationReport> failedReports = new ArrayList<InternalNotificationReport>();
                     EndpointStatus batchPostingStatus = endpoint.publishMessagesInBatch(messages,failedReports);
-                    // if a publishing attempt has been made
-                    if (!batchPostingStatus.isEmpty()) {
-                        // retry the reports which were failed to be published 
-                        for(InternalNotificationReport failedReport:failedReports) {
-                            @SuppressWarnings("unchecked")
-                            List<BaseNotification> failedNotifications = (List<BaseNotification>) failedReport.getNotifications();
-                            Map<NotificationEndpoint, Collection<BaseNotification>> map = new HashMap<NotificationEndpoint, Collection<BaseNotification>>();
-                            map.put(endpoint, failedNotifications);
-                            publishAsync(map);
-                        }
-                        
-                        data.merge(batchPostingStatus);
-                        // if the last try was a failure, it means that problem sending notifications
-                        // to the endpoint has happened before finishing the whole messages transmission
-                        if (batchPostingStatus.getLast().isSuccessful()) {
-                            this.isFailedLastPostage=false;
-                        } else {
-                            if (!this.isFailedLastPostage) {
-                                this.isFailedLastPostage=true;
-                                this.firstFailure = batchPostingStatus.getLast().getTime();
-                            }
-                            if (System.currentTimeMillis() - this.firstFailure >= EXPIRATION_DURATION) {
-                                unregister(endpoint.getRegistrationId());
-                                metricEvaluator.unregisterAll(endpoint);
-                                resourceEvaluator.unregisterAll(endpoint);
-                            }
-                        }
-                    }
+                    checkResultStatus(batchPostingStatus, failedReports);
                     totalTime = System.currentTimeMillis() - start;
                 } catch (Throwable t) {
                     log.error(t, t);
                 } finally {
                     concurrentStatsCollector.addStat(size, NOTIFICATIONS_PUBLISHED_TO_ENDPOINT);
                     concurrentStatsCollector.addStat(totalTime, NOTIFICATIONS_PUBLISHED_TO_ENDPOINT_TIME);
+                }
+            }
+            private void checkResultStatus(EndpointStatus batchPostingStatus,
+                                           List<InternalNotificationReport> failedReports) {
+                if (!batchPostingStatus.isEmpty()) {
+                    // retry the reports which were failed to be published 
+                    for(InternalNotificationReport failedReport:failedReports) {
+                        @SuppressWarnings("unchecked")
+                        List<BaseNotification> failedNotifications = (List<BaseNotification>) failedReport.getNotifications();
+                        Map<NotificationEndpoint, Collection<BaseNotification>> map = new HashMap<NotificationEndpoint, Collection<BaseNotification>>();
+                        map.put(endpoint, failedNotifications);
+                        publishAsync(map);
+                    }
+                    data.merge(batchPostingStatus);
+                    // if the last try was a failure, it means that problem sending notifications
+                    // to the endpoint has happened before finishing the whole messages transmission
+                    if (batchPostingStatus.getLast().isSuccessful()) {
+                        this.isFailedLastPostage=false;
+                    } else {
+                        if (!this.isFailedLastPostage) {
+                            this.isFailedLastPostage=true;
+                            this.firstFailure = batchPostingStatus.getLast().getTime();
+                        }
+                        if (System.currentTimeMillis() - this.firstFailure >= EXPIRATION_DURATION) {
+                            unregister(endpoint.getRegistrationId());
+                            metricEvaluator.unregisterAll(endpoint);
+                            resourceEvaluator.unregisterAll(endpoint);
+                        }
+                    }
                 }
             }
         };

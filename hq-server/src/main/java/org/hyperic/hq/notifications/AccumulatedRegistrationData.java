@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -15,19 +16,22 @@ public class AccumulatedRegistrationData {
     private final InternalResourceDetailsType resourceContentType;
     private final LinkedBlockingQueue<BaseNotification> accumulatedNotificationsQueue;
     private final NotificationEndpoint endpoint;
-    private boolean isValid = true;
+    private AtomicBoolean isValid = new AtomicBoolean(true);
     private ScheduledFuture<?> schedule;
     private final int queueLimit;
     protected EndpointStatus batchPostingStatus;
     protected long creationTime;
+    private Object lock;
     
     public AccumulatedRegistrationData(NotificationEndpoint endpoint, int queueLimit,
-                                       InternalResourceDetailsType resourceDetailsType) {
+                                       InternalResourceDetailsType resourceDetailsType,
+                                       Object lock) {
         this.queueLimit = queueLimit;
         this.accumulatedNotificationsQueue = new LinkedBlockingQueue<BaseNotification>(queueLimit);
         this.resourceContentType = resourceDetailsType;
         this.endpoint = endpoint;
         this.creationTime = System.currentTimeMillis();
+        this.lock = lock;
     }
     
     public NotificationEndpoint getNotificationEndpoint() {
@@ -43,7 +47,10 @@ public class AccumulatedRegistrationData {
     }
 
     public <T extends BaseNotification> void addAll(Collection<T> c) {
-        synchronized (accumulatedNotificationsQueue) {
+        if (!isValid()) {
+            return;
+        }
+        synchronized (lock) {
             final int size = accumulatedNotificationsQueue.size();
             if ((c.size() + size) > queueLimit) {
                 if (log.isDebugEnabled()) {
@@ -56,19 +63,23 @@ public class AccumulatedRegistrationData {
     }
 
     public void drainTo(Collection<BaseNotification> c) {
-        accumulatedNotificationsQueue.drainTo(c);
+        synchronized (lock) {
+            accumulatedNotificationsQueue.drainTo(c);
+        }
     }
     
     public boolean isValid() {
-        return isValid;
+        return isValid.get();
     }
     
     public void markInvalid() {
-        isValid = false;
+        isValid.set(false);
     }
 
     public void clear() {
-        accumulatedNotificationsQueue.clear();
+        synchronized (lock) {
+            accumulatedNotificationsQueue.clear();
+        }
     }
 
     public void setSchedule(ScheduledFuture<?> schedule) {
