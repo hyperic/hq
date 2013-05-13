@@ -44,8 +44,11 @@ import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.server.session.AttachType;
 import org.hyperic.hq.hqu.server.session.View;
 import org.hyperic.hq.hqu.server.session.ViewResourceCategory;
+import org.hyperic.hq.measurement.server.session.MonitorableTypeDAO;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
+import org.hyperic.hq.product.TypeInfo;
+import org.hyperic.hq.product.server.session.ProductPluginDeployer;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;
@@ -114,6 +117,11 @@ public interface ProductBoss {
         EncodingException, PluginNotFoundException, PluginException, SessionTimeoutException, SessionNotFoundException,
         PermissionException, AppdefEntityNotFoundException;
 
+    
+    public ConfigSchema getConfigSchema(ConfigResponse config, String platformName, TypeInfo resourceTypeInfo, String configType) throws PluginException; 
+    
+    public Map<String, ConfigSchema> getConfigSchemas(String prototypeName, String configType) throws PluginException;
+    
     /**
      * Get a configuration schema.
      * @param id Entity to be configured

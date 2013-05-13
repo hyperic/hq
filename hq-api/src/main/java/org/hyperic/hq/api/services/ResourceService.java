@@ -94,6 +94,6 @@ public interface ResourceService {
 	public void unregister() throws SessionNotFoundException, SessionTimeoutException;
 	
 	@GET
-	@Path("/{resourceID}/configuration-template")
-	public ConfigurationTemplate getConfigurationTemplate(@PathParam("resourceID") final String resourceID);
+	@Path("/{resourceID}/configurationTemplate")
+	public ConfigurationTemplate getConfigurationTemplate(@PathParam("resourceID") final String resourceID) throws SessionNotFoundException, SessionTimeoutException;
 }//EOC 

@@ -25,6 +25,7 @@
  */
 package org.hyperic.hq.api.transfer;
 
+import org.hyperic.hq.api.model.ConfigurationTemplate;
 import org.hyperic.hq.api.model.Resource;
 import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourceStatusType;
@@ -70,4 +71,6 @@ public interface ResourceTransfer {
     AppdefBoss getAppdefBoss() ; 
 
     Object initResourceConfig(Context flowContext) throws ConfigFetchException, EncodingException, PluginNotFoundException, PluginException, PermissionException, AppdefEntityNotFoundException;
+
+    ConfigurationTemplate getConfigurationTemplate(ApiMessageContext apiMessageContext, String resourceID) throws PluginException, SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException, ConfigFetchException, PermissionException, EncodingException;
 }//EOI 

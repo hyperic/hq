@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -53,6 +54,8 @@ import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.util.PluginLoader;
 import org.hyperic.util.PluginLoaderException;
 import org.hyperic.util.StringUtil;
+import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.security.MD5;
 
 /**
@@ -207,10 +210,33 @@ public class ProductPluginManager
         return platforms.get(name);
     }
 
+    // assumes type names are unique across plugins,
+    // which they should be. if needed we could index on
+    // product name too.
+    /**
+     * Find TypeInfo's accross all platforms for the given type name.
+     * @param name The type name, e.g. "Apache 2.0"
+     * @return  map<platformName, typeInfo> the type per platform
+     */    
+    public Map<String, TypeInfo> getTypeInfo(String typeName)  {
+        Map<String, TypeInfo> typeInfos = null;
+        
+        if((null != typeName) && (typeName.length() > 0)) {
+            typeInfos = new HashMap<String, TypeInfo>(8);
+            final Map<String, Map<String, TypeInfo>> types = getTypes();
+            for(final Entry<String, Map<String, TypeInfo>> platform:types.entrySet()) {
+                final TypeInfo typeInfo = platform.getValue().get(typeName);
+                if (null != typeInfo)
+                    typeInfos.put(platform.getKey(), typeInfo);
+            }
+        }
+        return typeInfos;
+    }        
+    
     public Map<String, Map<String, TypeInfo>> getTypes() {
         return Collections.unmodifiableMap(types);
     }
-
+    
     protected void setTypeInfo(String platform, String name, TypeInfo info) {
 
         Map<String, TypeInfo> platforms = this.types.get(platform);
@@ -1131,4 +1157,14 @@ public class ProductPluginManager
     public boolean isClient() {
         return this.client;
     }
+    
+    public ConfigSchema getConfigSchema(String pluginName, 
+            String platformName, 
+            String typeName, 
+            TypeInfo info,
+            ConfigResponse config) 
+                    throws PluginNotFoundException {
+
+        return getConfigSchema(pluginName, info, config);
+    }       
 }

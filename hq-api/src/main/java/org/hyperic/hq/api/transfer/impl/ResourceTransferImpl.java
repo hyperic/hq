@@ -40,6 +40,7 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.logging.Log;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.api.model.PropertyList;
+import org.hyperic.hq.api.model.ConfigurationTemplate;
 import org.hyperic.hq.api.model.Resource;
 import org.hyperic.hq.api.model.ResourceConfig;
 import org.hyperic.hq.api.model.ResourceDetailsType;
@@ -53,6 +54,7 @@ import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
 import org.hyperic.hq.api.services.impl.ApiMessageContext;
 import org.hyperic.hq.api.transfer.NotificationsTransfer;
 import org.hyperic.hq.api.transfer.ResourceTransfer;
+import org.hyperic.hq.api.transfer.mapping.ConfigurationTemplateMapper;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 import org.hyperic.hq.api.transfer.mapping.ResourceDetailsTypeStrategy;
 import org.hyperic.hq.api.transfer.mapping.ResourceMapper;
@@ -77,6 +79,7 @@ import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
@@ -90,9 +93,12 @@ import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.ObjectNotFoundException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.notifications.Q;
+import org.hyperic.hq.notifications.filtering.AgnosticFilter;
 import org.hyperic.hq.notifications.filtering.Filter;
 import org.hyperic.hq.notifications.filtering.FilteringCondition;
+import org.hyperic.hq.notifications.filtering.ResourceContentFilter;
 import org.hyperic.hq.notifications.filtering.ResourceDestinationEvaluator;
+import org.hyperic.hq.notifications.model.InternalResourceDetailsType;
 import org.hyperic.hq.notifications.model.InventoryNotification;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
@@ -122,6 +128,7 @@ public class ResourceTransferImpl implements ResourceTransfer{
 	private CPropManager cpropManager ;
 	private AppdefBoss appdepBoss ;
 	private PlatformManager platformManager ; 
+	private ConfigurationTemplateMapper configTemplateMapper;
 	private ExceptionToErrorCodeMapper errorHandler ;
 	private Log log ;
     private ResourceDestinationEvaluator evaluator;
@@ -132,7 +139,9 @@ public class ResourceTransferImpl implements ResourceTransfer{
     public ResourceTransferImpl(final AIQueueManager aiQueueManager, final ResourceManager resourceManager, 
     		final AuthzSubjectManager authzSubjectManager, final ResourceMapper resourceMapper, 
     		final ProductBoss productBoss, final CPropManager cpropManager, final AppdefBoss appdepBoss, 
-    		final PlatformManager platformManager, final ExceptionToErrorCodeMapper errorHandler, ResourceDestinationEvaluator evaluator, Q q, @Qualifier("restApiLogger")Log log) { 
+    		final PlatformManager platformManager, 
+    		final ConfigurationTemplateMapper configTemplateMapper, 
+            final ExceptionToErrorCodeMapper errorHandler, ResourceDestinationEvaluator evaluator, Q q, @Qualifier("restApiLogger")Log log) { 
     	this.aiQueueManager = aiQueueManager ; 
     	this.resourceManager = resourceManager ; 
     	this.authzSubjectManager = authzSubjectManager ; 
@@ -141,6 +150,7 @@ public class ResourceTransferImpl implements ResourceTransfer{
     	this.cpropManager = cpropManager ; 
     	this.appdepBoss = appdepBoss ;
     	this.platformManager = platformManager ; 
+    	this.configTemplateMapper = configTemplateMapper;
     	this.errorHandler = errorHandler ; 
     	this.evaluator = evaluator;
     	this.q=q;
@@ -477,6 +487,45 @@ public class ResourceTransferImpl implements ResourceTransfer{
         return null ; 
 	}//EOM 
 		
+    public ConfigurationTemplate getConfigurationTemplate(ApiMessageContext apiMessageContext, String resourceID) throws PluginException, SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException, ConfigFetchException, PermissionException, EncodingException {
+        
+        final ResourceDetailsType[] detailsType =  { ResourceDetailsType.BASIC };
+        final org.hyperic.hq.authz.server.session.Resource resource = 
+                ResourceTypeStrategy.RESOURCE.getResourceByInternalID(new Context(apiMessageContext.getAuthzSubject(), resourceID, detailsType , this));
+        
+        
+        final String[] configTypes = {ProductPlugin.TYPE_MEASUREMENT, ProductPlugin.TYPE_PRODUCT, ProductPlugin.TYPE_CONTROL};
+        final Integer sessionId = apiMessageContext.getSessionId();
+        ConfigurationTemplate configTemplate = null;
+        if (resourceIsPrototype(resource)) {
+            final String protototypeName = resource.getName();                       
+            
+            for(String configType:configTypes) {
+                Map<String,ConfigSchema> configurations = this.productBoss.getConfigSchemas(protototypeName, configType);
+                // Add to the existing configTemplate
+                configTemplate = this.configTemplateMapper.toConfigurationTemplate(configurations, configType, configTemplate);
+            }
+        } else {
+            final AppdefEntityID entityID = AppdefUtil.newAppdefEntityId(resource) ; 
+            for(String configType:configTypes) {
+                ConfigSchema config = this.productBoss.getConfigSchema(sessionId, entityID, configType);
+                // Add to the existing configTemplate
+                configTemplate = this.configTemplateMapper.toConfigurationTemplate(config, configType, configTemplate);
+            }            
+        }
+        
+        return configTemplate;
+                
+    }
+    private boolean resourceIsPrototype(final org.hyperic.hq.authz.server.session.Resource resource) {
+
+            String name = resource.getResourceType().getName();
+
+            return name.equals(AuthzConstants.platformPrototypeTypeName) ||
+                name.equals(AuthzConstants.serverPrototypeTypeName) ||
+                name.equals(AuthzConstants.servicePrototypeTypeName);
+
+    }	
 	
 	public enum ResourceTypeStrategy { 
 		

@@ -86,9 +86,16 @@ import org.hyperic.hq.measurement.server.session.MeasurementTemplateDAO;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
 import org.hyperic.hq.measurement.server.session.MonitorableTypeDAO;
 import org.hyperic.hq.product.Plugin;
+import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.PluginManager;
+import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.hq.product.ProductPluginManager;
+import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.IntegerTransformer;
+import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -1084,6 +1091,28 @@ public class ResourceManagerImpl implements ResourceManager {
 
         return config;
     }
+    
+
+//    private ConfigSchema getConfigSchema(ConfigResponse config, String configType, String typeName, String platformName, TypeInfo resourceTypeInfo)
+//            throws PluginException {
+//
+//        if ((null == config) || (null == configType) || (null == typeName) || (null == resourceTypeInfo))
+//                return null;
+//        
+//        // XXX this is seriously flawed,
+//        // if I call getConfigSchema() for TYPE_MEASUREMENT
+//        // or TYPE_CONTROL the plugin arg is the prototypename,
+//        // but for TYPE_PRODUCT it is pluginName
+//        String fullTypeName = typeName.equals(platformName) ? platformName : (platformName + " " + typeName);
+//        String plugin = configType.equals(ProductPlugin.TYPE_PRODUCT) ? monitorableTypeDAO.findByName(
+//                typeName).getPlugin() : fullTypeName;
+//                
+//        final ProductPluginManager pluginManager = productPluginDeployer.getProductPluginManager();                
+//        final PluginManager pm = pluginManager.getPluginManager(configType);
+//        final ConfigSchema configSchema = pm.getConfigSchema(plugin, resourceTypeInfo, config);
+//        return configSchema;
+//
+//    }   
 
     /**
      *
