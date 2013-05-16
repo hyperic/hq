@@ -117,7 +117,9 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
 	// TODO: Implement
     public ConfigurationTemplate getConfigurationTemplate(final String resourceID) throws SessionNotFoundException, SessionTimeoutException {
 
-        ApiMessageContext apiMessageContext = newApiMessageContext();
+//        ApiMessageContext apiMessageContext = newApiMessageContext();
+        // TODO remove patch and get real session context
+        ApiMessageContext apiMessageContext = null;        
         
         try {
             return this.resourceTransfer.getConfigurationTemplate(apiMessageContext, resourceID);

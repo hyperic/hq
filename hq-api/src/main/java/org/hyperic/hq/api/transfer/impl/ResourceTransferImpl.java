@@ -491,8 +491,11 @@ public class ResourceTransferImpl implements ResourceTransfer{
         
         final ResourceDetailsType[] detailsType =  { ResourceDetailsType.BASIC };
         
-        final AuthzSubject authzSubject = apiMessageContext.getAuthzSubject();
-        final Integer sessionId = apiMessageContext.getSessionId();
+        // TODO !!!!!! return this code when session is valid !!!!!!!!!!!!!
+//      final AuthzSubject authzSubject = apiMessageContext.getAuthzSubject();
+//      final Integer sessionId = apiMessageContext.getSessionId();
+      final AuthzSubject authzSubject = this.authzSubjectManager.getOverlordPojo();
+      final Integer sessionId = 0;  
                     
         final org.hyperic.hq.authz.server.session.Resource resource = 
                 ResourceTypeStrategy.RESOURCE.getResourceByInternalID(new Context(authzSubject, resourceID, detailsType , this));
