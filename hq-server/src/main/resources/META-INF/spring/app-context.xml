@@ -107,6 +107,7 @@
                 <prop key="vfabric.licenseServer.url"></prop>
                 <prop key="vcops.license.key"></prop>
                 <prop key="vcloud.license.key"></prop>
+                <prop key="vsphere.license.key"></prop>
                 <prop key="vc.sync.interval.minutes">2</prop>
 				<prop key="server.keystore.path">hyperic.keystore</prop>
 				<prop key="server.keystore.password">hyperic</prop>
