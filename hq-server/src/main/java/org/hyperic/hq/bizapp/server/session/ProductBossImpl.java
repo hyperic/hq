@@ -371,14 +371,6 @@ public class ProductBossImpl implements ProductBoss {
 
     }  
     
-    /**
-     * Get configuration schemas of the specified prototype
-     * per platform for the given configuration type
-     * @param prototypeName
-     * @param configType ProductPlugin.TYPE_PRODUCT or ProductPlugin.TYPE_MEASUREMENT or ProductPlugin.TYPE_CONTROL
-     * @return configuration schema per platform
-     * @throws PluginException 
-     */
     @Transactional(readOnly=true)
     public Map<String, ConfigSchema> getConfigSchemas(String prototypeName, String configType) throws PluginException {
 //        AuthzSubject subject = sessionManager.getSubject(sessionId);

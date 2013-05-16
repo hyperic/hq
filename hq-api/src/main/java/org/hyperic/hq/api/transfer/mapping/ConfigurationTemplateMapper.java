@@ -77,7 +77,7 @@ public class ConfigurationTemplateMapper {
             EnumerationConfigOption enumConfigOption = (EnumerationConfigOption)configOption;
             enumValues = enumConfigOption.getValues();
         }        
-        // TODO check about configType, whether different from category
+        // configType is used instead of category
         ConfigurationOption apiConfigurationOption = new ConfigurationOption(configOption.getName(), configOption.getDescription(), configType,// configOption.getCategory(), 
                 configOption.getDefault(), configOption.getConfirm(), configOption.isOptional(), toType(configOption), enumValues);
         return apiConfigurationOption;
@@ -87,11 +87,17 @@ public class ConfigurationTemplateMapper {
     
     private String toType(ConfigOption configOption) {
         final String className = configOption.getClass().getSimpleName();
-        final String typeName = StringUtils.removeEnd(className, ConfigOption.class.getSimpleName()).toLowerCase();
+        String typeName = StringUtils.removeEnd(className, ConfigOption.class.getSimpleName()).toLowerCase();
         // { int, double, boolean, long, string, ip, enum, secret, hidden, port, macaddress, stringarray};
-        // integer - int, ipaddress - ip, enumeration - enum
-
         
+        // integer - int, ipaddress - ip, enumeration - enum
+        if ("integer".equals(typeName))
+            typeName = "int";
+        else if ("ipaddress".equals(typeName))
+            typeName = "ip";
+        else if ("enumeration".equals(typeName))
+            typeName = "enum";
+                    
         return typeName;                
     }   
     

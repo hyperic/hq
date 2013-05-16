@@ -127,7 +127,8 @@ public class ConfigSchema implements Serializable {
 
     /**
      * @param name ConfigOption.getName() value
-     * @return ConfigOption that matches the name param
+     * @return ConfigOption that matches the name param, 
+     * or null if there is no such option
      */
     public ConfigOption getOption(String name) {
         return (ConfigOption) this.getOptionsMap().get(name);

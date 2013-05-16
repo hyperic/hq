@@ -25,13 +25,9 @@
  */
 package org.hyperic.hq.api.services.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
-import org.hyperic.hq.api.model.ConfigurationOption;
 import org.hyperic.hq.api.model.ConfigurationTemplate;
 import org.hyperic.hq.api.model.Resource;
 import org.hyperic.hq.api.model.ResourceDetailsType;
@@ -54,9 +50,6 @@ import org.hyperic.hq.common.ObjectNotFoundException;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.EncodingException;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import edu.emory.mathcs.backport.java.util.Arrays;
-import edu.emory.mathcs.backport.java.util.Collections;
 
 //@Component
 public class ResourceServiceImpl extends RestApiService implements ResourceService{
@@ -123,47 +116,38 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
 
 	// TODO: Implement
     public ConfigurationTemplate getConfigurationTemplate(final String resourceID) throws SessionNotFoundException, SessionTimeoutException {
-        
-        // TODO: implement error handling!!!
+
         ApiMessageContext apiMessageContext = newApiMessageContext();
+        
         try {
             return this.resourceTransfer.getConfigurationTemplate(apiMessageContext, resourceID);
         }catch(AppdefEntityNotFoundException e) {
-            WebApplicationException webApplicationException = createResourceNotFoundWAException(resourceID, "");            
+            final WebApplicationException webApplicationException = createResourceNotFoundWAException(resourceID, "");            
             throw webApplicationException;
         }catch(ConfigFetchException e) {
-            // TODO Auto-generated catch block
-            throw new WebApplicationException(e);
+            final WebApplicationException webApplicationException = 
+                    errorHandler.newWebApplicationException(Response.Status.INTERNAL_SERVER_ERROR, ExceptionToErrorCodeMapper.ErrorCode.INTERNAL_SERVER_ERROR, resourceID);
+            throw webApplicationException;
         }catch(PermissionException e) {
-            // TODO Auto-generated catch block
-            throw new WebApplicationException(e);
+            final WebApplicationException webApplicationException = 
+                    new WebApplicationException(e, Response.Status.FORBIDDEN);
+            throw webApplicationException;
         }catch(PluginException e) {
-            // TODO Auto-generated catch block
-            throw new WebApplicationException(e);
+            final WebApplicationException webApplicationException = 
+                    new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
+            throw webApplicationException;
         }catch(EncodingException e) {
-            // TODO Auto-generated catch block
-            throw new WebApplicationException(e);
+            final WebApplicationException webApplicationException = 
+                    new WebApplicationException(e, Response.Status.BAD_REQUEST);
+            throw webApplicationException;
         }
         
-//        ConfigurationTemplate configTemplate = new ConfigurationTemplate();
-//        List<ConfigurationOption> configOptions = new ArrayList<ConfigurationOption>();
-//        configTemplate.setConfigurationOptions(configOptions);
-//        
-//        // int, double, boolean, long, string, ip, enum, secret, hidden, port, macaddress, stringarray
-//        configOptions.add(new ConfigurationOption("optionalInt", "an int", "measurement", "0", null, true, "int", null));
-//        configOptions.add(new ConfigurationOption("mandatoryIp", "an IP", "measurement", "0.0.0.0", null, false, "int", null));
-//        String[] enumValues = {"ONE", "TWO", "THREE"};
-//        configOptions.add(new ConfigurationOption("anEnum", "an enum", "measurement", "ONE", null, false, "enum", Arrays.asList(enumValues)));
-//        
-//            
-//        
-//        return configTemplate;
     }//EOM
     
     
     private WebApplicationException createResourceNotFoundWAException(final String resourceID, final String idType) {
         logger.warn("Resource with the " + idType + " ID " + resourceID + " not found.");
-        WebApplicationException webApplicationException = 
+        final WebApplicationException webApplicationException = 
                 errorHandler.newWebApplicationException(Response.Status.NOT_FOUND, ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID, resourceID);
         return webApplicationException;
     }    

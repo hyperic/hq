@@ -120,6 +120,14 @@ public interface ProductBoss {
     
     public ConfigSchema getConfigSchema(ConfigResponse config, String platformName, TypeInfo resourceTypeInfo, String configType) throws PluginException; 
     
+    /**
+     * Get configuration schemas of the specified prototype
+     * per platform for the given configuration type
+     * @param prototypeName
+     * @param configType ProductPlugin.TYPE_PRODUCT or ProductPlugin.TYPE_MEASUREMENT or ProductPlugin.TYPE_CONTROL
+     * @return configuration schema per platform
+     * @throws PluginException 
+     */
     public Map<String, ConfigSchema> getConfigSchemas(String prototypeName, String configType) throws PluginException;
     
     /**
