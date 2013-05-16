@@ -32,12 +32,10 @@ import java.util.ResourceBundle;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.logging.Log;
 import org.apache.cxf.jaxrs.impl.ResponseBuilderImpl;
 import org.hyperic.hq.api.model.resources.FailedResource;
-import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper.ErrorCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -86,10 +84,10 @@ public class ExceptionToErrorCodeMapper  {
     	String description = null ;  
     	try{ 
     		description = errorCodesBundle.getString(errorCode) ;
-    		if (description == null || description.isEmpty()) {
+    		if ((description == null) || description.isEmpty()) {
     		    return null;
     		}
-    		if (args==null || args.length==0) {
+    		if ((args==null) || (args.length==0)) {
     		    return description.replace("%s", "");
     		}
     		return String.format(description, args); 
@@ -103,7 +101,9 @@ public class ExceptionToErrorCodeMapper  {
     }//EOM
     
     public final FailedResource newFailedResource(final String resourceID, final String errorCode, String additionalDescription, final Object...args) {
-    	if(additionalDescription == null) additionalDescription =  this.getDescription(errorCode, args) ; 
+    	if(additionalDescription == null) {
+            additionalDescription =  this.getDescription(errorCode, args) ;
+        } 
     	return new FailedResource(resourceID, errorCode, additionalDescription) ;
     }//EOM 
       
@@ -153,7 +153,8 @@ public class ExceptionToErrorCodeMapper  {
         MISSING_MANDATORY_FILTER("7001"),
         UNREGISTERED_FOR_NOTIFICATIONS("7002"),
         INTERNAL_SERVER_ERROR("8001"),
-        REGEX_PATTERN_SYNTAX_ERROR("9001");
+        REGEX_PATTERN_SYNTAX_ERROR("9001"),
+        MULTIPLE_POLICIES_TYPES_MAPPED("9500");
         
         
         private final String errorCode;
