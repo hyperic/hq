@@ -378,7 +378,9 @@ public class ProductBossImpl implements ProductBoss {
         Map<String, ConfigSchema> configurationSchemas = new HashMap<String, ConfigSchema>(10);
         
         final ProductPluginManager pluginManager = productPluginDeployer.getProductPluginManager();
-        final Map<String, TypeInfo> prototypeTypeInfos = pluginManager.getTypeInfo(prototypeName);               
+        final Map<String, TypeInfo> prototypeTypeInfos = pluginManager.getTypeInfo(prototypeName);   
+        if ((null == prototypeTypeInfos) || prototypeTypeInfos.isEmpty())
+            return null;
         for(Map.Entry<String, TypeInfo> prototypeTypeInfo:prototypeTypeInfos.entrySet()) {
             ConfigSchema configSchema = null;
             try {
