@@ -55,7 +55,11 @@
 																basicAuthenticationExceptionTranslationFilter,
 																basicSessionManagementFilter,
 			    	                                     		filterSecurityInterceptor" /> 
-             <!-- TODO: change to correct filters -->
+             <sec:filter-chain pattern="/rest/management/**" filters="securityContextPersistenceFilter,
+                                                                basicAuthenticationFilter,
+                                                                basicAuthenticationExceptionTranslationFilter,
+                                                                basicSessionManagementFilter,
+                                                                filterSecurityInterceptor"/>
              <sec:filter-chain pattern="/rest/**" filters="securityContextPersistenceFilter,
 																basicAuthenticationFilter,
 																basicAuthenticationExceptionTranslationFilter,

@@ -487,26 +487,25 @@ public class ResourceTransferImpl implements ResourceTransfer{
         return null ; 
 	}//EOM 
 		
-    public ConfigurationTemplate getConfigurationTemplate(ApiMessageContext apiMessageContext, String resourceID) throws SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException, ConfigFetchException, PermissionException, EncodingException, PluginException {
-        
-        final ResourceDetailsType[] detailsType =  { ResourceDetailsType.BASIC };
-        
-        // TODO !!!!!! return this code when session is valid !!!!!!!!!!!!!
-//      final AuthzSubject authzSubject = apiMessageContext.getAuthzSubject();
-//      final Integer sessionId = apiMessageContext.getSessionId();
-      final AuthzSubject authzSubject = this.authzSubjectManager.getOverlordPojo();
-      final Integer sessionId = 0;  
-                    
-        final org.hyperic.hq.authz.server.session.Resource resource = 
-                ResourceTypeStrategy.RESOURCE.getResourceByInternalID(new Context(authzSubject, resourceID, detailsType , this));
-                
-        final int numConfigTypes = ProductPlugin.CONFIGURABLE_TYPES.length;         
-                
+    public ConfigurationTemplate getConfigurationTemplate(ApiMessageContext apiMessageContext, String resourceID)
+            throws SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException,
+            ConfigFetchException, PermissionException, EncodingException, PluginException {
+
+        final ResourceDetailsType[] detailsType = { ResourceDetailsType.BASIC };
+
+        final AuthzSubject authzSubject = apiMessageContext.getAuthzSubject();
+        final Integer sessionId = apiMessageContext.getSessionId();
+
+        final org.hyperic.hq.authz.server.session.Resource resource = ResourceTypeStrategy.RESOURCE
+                .getResourceByInternalID(new Context(authzSubject, resourceID, detailsType, this));
+
+        final int numConfigTypes = ProductPlugin.CONFIGURABLE_TYPES.length;
+
         ConfigurationTemplate configTemplate = null;
-      //load all prototype related config metadata
-        String configurableType = null; 
-        for(int i=0; i < numConfigTypes; i++) { 
-            configurableType = ProductPlugin.CONFIGURABLE_TYPES[i]; 
+        // load all prototype related config metadata
+        String configurableType = null;
+        for(int i = 0;i < numConfigTypes;i++) {
+            configurableType = ProductPlugin.CONFIGURABLE_TYPES[i];
             try {
                 if(resourceIsPrototype(resource)) {
                     final String protototypeName = resource.getName();
@@ -514,12 +513,12 @@ public class ResourceTransferImpl implements ResourceTransfer{
                     final Map<String, ConfigSchema> configurations = this.productBoss.getConfigSchemas(protototypeName,
                             configurableType);
                     // Add to the existing configTemplate
-                    configTemplate = this.configTemplateMapper.toConfigurationTemplate(configurations, configurableType,
-                            configTemplate);
-                } else {//if resource is not a prototype
-                    
+                    configTemplate = this.configTemplateMapper.toConfigurationTemplate(configurations,
+                            configurableType, configTemplate);
+                }else {// if resource is not a prototype
+
                     final AppdefEntityID entityID = AppdefUtil.newAppdefEntityId(resource);
-                    
+
                     final ConfigSchema config = this.productBoss.getConfigSchema(sessionId, entityID, configurableType);
                     // Add to the existing configTemplate
                     configTemplate = this.configTemplateMapper.toConfigurationTemplate(config, configurableType,
@@ -527,16 +526,16 @@ public class ResourceTransferImpl implements ResourceTransfer{
 
                 }// EO if resource is not a prototype
             }catch(PluginException e) {
-                if (ProductPlugin.TYPE_CONTROL.equals(configurableType)) {
-                    log.debug("Plugin config not found for config type " + configurableType, e);                    
-                } else {// not all plugins have control config
+                if(ProductPlugin.TYPE_CONTROL.equals(configurableType)) {
+                    log.debug("Plugin config not found for config type " + configurableType, e);
+                }else {// not all plugins have control config
                     throw e;
-                }               
-                
+                }
+
             }
-        }// EO while there are more configTypes              
-        return configTemplate;                
-    }//EOM
+        }// EO while there are more configTypes
+        return configTemplate;
+    }// EOM
     
     private boolean resourceIsPrototype(final org.hyperic.hq.authz.server.session.Resource resource) {
 
