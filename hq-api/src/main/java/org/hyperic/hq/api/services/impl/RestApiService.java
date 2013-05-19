@@ -37,6 +37,9 @@ public class RestApiService {
      * for the currently logged in user is stored.
      */
     public static final String APIUSER_SES_ATTR = "apiUser";   
+    
+    // If the request is from the UI, then it is web user, and not api
+    public static final String WEBUSER_SES_ATTR = "webUser";
    
     
     public RestApiService() {
@@ -78,6 +81,9 @@ public class RestApiService {
         }
 
         InterfaceUser apiUser = getApiUser(session);
+        // If request comes from UI, no API user, but web user
+        apiUser = (null == apiUser ? getWebUser(session) : apiUser);
+        
         if (null == apiUser) {
             logger.error("Missing user and session details on the web session.");
             WebApplicationException webApplicationException = 
@@ -108,6 +114,14 @@ public class RestApiService {
         }
         return (InterfaceUser) attr;
     }  
+    
+    private static InterfaceUser getWebUser(HttpSession session) {
+        if (session == null) {
+            return null;
+        }
+        Object attr = session.getAttribute(WEBUSER_SES_ATTR);
+        return (attr == null) ? null : (InterfaceUser) attr;
+    }    
     
     public static Integer getSessionId(HttpSession session) {
         InterfaceUser user = getApiUser(session);
