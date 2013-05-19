@@ -303,7 +303,7 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
                 if (null == vmMapping.getGuestNicInfo()) {
                     continue;
                 }
-
+                boolean foundDupMacOnCurrVM = false;
                 for (int i=0; i<vmMapping.getGuestNicInfo().length ; i++) {
                     if (vmMapping.getGuestNicInfo()[i]==null)  {
                         log.debug("nic no." + i + " is null on " + vmMapping);
@@ -320,19 +320,21 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
                     if (dupMacVM!=null) {
                         // remove the other VM with the duplicate mac from the response object, as this is illegal
                         mapping.remove(dupMacVM);
+                        foundDupMacOnCurrVM = true;
                         continue;
                     }else {
                         overallMacsSet.put(mac,vmMapping);
                     }
                 }
-                String macsString = "";
-                for(String mac : macs) {
-                    macsString += mac;
-                    macsString += ";";
+                if (!foundDupMacOnCurrVM) {
+                    String macsString = "";
+                    for(String mac : macs) {
+                        macsString += mac;
+                        macsString += ";";
+                    }
+                    vmMapping.setMacs(macsString);
+                    mapping.add(vmMapping);
                 }
-                vmMapping.setMacs(macsString);
-                mapping.add(vmMapping);
-
             } catch (Throwable e) {
                 log.error(e);
             }
