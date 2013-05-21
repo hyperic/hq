@@ -44,8 +44,8 @@ import org.apache.cxf.jaxrs.model.wadl.Description;
 import org.apache.cxf.jaxrs.model.wadl.Descriptions;
 import org.apache.cxf.jaxrs.model.wadl.DocTarget;
 import org.hyperic.hq.api.model.AIResource;
-import org.hyperic.hq.api.model.Resource;
-import org.hyperic.hq.api.model.ResourceType;
+import org.hyperic.hq.api.model.ResourceModel;
+import org.hyperic.hq.api.model.ResourceTypeModel;
 import org.hyperic.util.config.ConfigOption;
 
 
@@ -70,7 +70,7 @@ public interface AIResourceService {
            @Description(value = "Requested discovered resource", target = DocTarget.RESPONSE),
            @Description(value = "Discovered resource", target = DocTarget.RESOURCE)
         })
-    public AIResource getAIResource(@PathParam("discovery-id") String discoveryId, @QueryParam("type") ResourceType type);
+    public AIResource getAIResource(@PathParam("discovery-id") String discoveryId, @QueryParam("type") ResourceTypeModel type);
 
     @POST
     @Path("/approve")
@@ -81,7 +81,7 @@ public interface AIResourceService {
        @Description(value = "List of approved Resources", target = DocTarget.RESPONSE),
        @Description(value = "Discovered Resource", target = DocTarget.RESOURCE)
     })    
-    public List<Resource> approveAIResource(@QueryParam("id") List<String> ids, @QueryParam("type") ResourceType type);
+    public List<ResourceModel> approveAIResource(@QueryParam("id") List<String> ids, @QueryParam("type") ResourceTypeModel type);
     
     public List<ConfigOption> getConfigurationSchema();    
 //    

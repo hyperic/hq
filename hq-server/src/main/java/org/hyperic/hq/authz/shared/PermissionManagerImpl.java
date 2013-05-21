@@ -440,6 +440,16 @@ public class PermissionManagerImpl extends PermissionManager {
         return (HierarchicalAlertingManager) Bootstrap.getBean("HierarchicalAlertingManager");
     }
 
+    @Override
+    public Set<Integer> findViewablePSSResources(AuthzSubject subj) {
+        final Collection<ResourceType> types = new ArrayList<ResourceType>();
+        final ResourceManager resourceManager = Bootstrap.getBean(ResourceManager.class);
+        types.add(resourceManager.getResourceTypeById(AuthzConstants.authzPlatform));
+        types.add(resourceManager.getResourceTypeById(AuthzConstants.authzServer));
+        types.add(resourceManager.getResourceTypeById(AuthzConstants.authzService));
+        return findViewableResources(subj, types);
+    }
+
     public List<AppdefEntityID> findViewableInstances(AuthzSubject subj,
                                                       Collection<ResourceType> resourceTypes) {
         if (resourceTypes.isEmpty()) {

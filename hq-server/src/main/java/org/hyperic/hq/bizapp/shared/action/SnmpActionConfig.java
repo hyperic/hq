@@ -40,11 +40,13 @@ public class SnmpActionConfig implements ActionConfigInterface {
 
     protected static final String CFG_OID = "oid";
     protected static final String CFG_ADDRESS = "address";
+    protected static final String CFG_TRAP_OID = "snmpTrapOID";
     protected static final String CFG_NOTIFICATION_MECHANISM = "snmpNotificationMechanism";
     protected static final String CFG_VARIABLE_BINDINGS = "variableBindings";
     
     protected String oid;
     protected String address;
+    protected String snmpTrapOID;
     protected String snmpNotificationMechanism;
     protected String variableBindings;  // in JSONArray format
     
@@ -55,10 +57,11 @@ public class SnmpActionConfig implements ActionConfigInterface {
     }
     
     public SnmpActionConfig(String snmpNotificationMechanism,
-                            String address, String oid,
+                            String address, String snmpTrapOID, String oid,
                             String variableBindings) {
         this.snmpNotificationMechanism = snmpNotificationMechanism;
         this.address = address;
+        this.snmpTrapOID = snmpTrapOID;
         this.oid = oid;
         this.variableBindings = variableBindings;
     }
@@ -79,6 +82,14 @@ public class SnmpActionConfig implements ActionConfigInterface {
         return address;
     }
 
+    public void setSnmpTrapOID(String snmpTrapOID) {
+        this.snmpTrapOID = snmpTrapOID;
+    }
+
+    public String getSnmpTrapOID() {
+        return snmpTrapOID;
+    }
+    
     public String getSnmpNotificationMechanism() {
         return snmpNotificationMechanism;
     }
@@ -99,8 +110,8 @@ public class SnmpActionConfig implements ActionConfigInterface {
      */
     public void setVariableBindings(String variableBindings) {
         try {
-            if (variableBindings != null
-                    && variableBindings.length() > 0) {
+            if ((variableBindings != null)
+                    && (variableBindings.length() > 0)) {
 
                 // validate that the variable bindings is in JSONArray format
                 JSONArray j = new JSONArray(variableBindings);
@@ -115,7 +126,7 @@ public class SnmpActionConfig implements ActionConfigInterface {
         }
     }
     
-    /* (non-Javadoc)
+	/* (non-Javadoc)
      * @see org.hyperic.hq.events.ActionConfigInterface#getConfigSchema()
      */
     public ConfigSchema getConfigSchema() {
@@ -126,6 +137,11 @@ public class SnmpActionConfig implements ActionConfigInterface {
         address.setMinLength(1);
         res.addOption(address);
     
+        StringConfigOption snmpTrapOID = new StringConfigOption(CFG_TRAP_OID, "SNMP Trap OID", "");
+        snmpTrapOID.setMinLength(1);
+        snmpTrapOID.setOptional(true);
+        res.addOption(snmpTrapOID);
+        
         StringConfigOption oid = new StringConfigOption(CFG_OID, "OID", "1.3.6");
         oid.setMinLength(1);
         res.addOption(oid);
@@ -139,7 +155,7 @@ public class SnmpActionConfig implements ActionConfigInterface {
             new StringConfigOption(CFG_VARIABLE_BINDINGS, "User Variable Bindings", "[]");
         variableBindings.setOptional(true);
         res.addOption(variableBindings);
-        
+            
         return res;
     }
 
@@ -149,6 +165,7 @@ public class SnmpActionConfig implements ActionConfigInterface {
         
         response.setValue(CFG_ADDRESS, this.getAddress());
         response.setValue(CFG_OID, this.getOid());
+        response.setValue(CFG_TRAP_OID, this.getSnmpTrapOID());
         response.setValue(CFG_NOTIFICATION_MECHANISM, this.getSnmpNotificationMechanism());
         response.setValue(CFG_VARIABLE_BINDINGS, this.getVariableBindings());
         
@@ -159,6 +176,7 @@ public class SnmpActionConfig implements ActionConfigInterface {
         try {
             setAddress(config.getValue(CFG_ADDRESS));
             setOid(config.getValue(CFG_OID));
+            setSnmpTrapOID(config.getValue(CFG_TRAP_OID));
             setSnmpNotificationMechanism(config.getValue(CFG_NOTIFICATION_MECHANISM, "v2c Trap"));
             setVariableBindings(config.getValue(CFG_VARIABLE_BINDINGS, "[]"));
         } catch (IllegalArgumentException ex) {

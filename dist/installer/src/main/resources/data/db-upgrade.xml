@@ -11983,29 +11983,30 @@ has already been defined.
             <statement targetDB="postgresql">            	
             	CREATE TABLE if not exists EAM_VM_MAPPING(
             	            	VCUUID VARCHAR(128) NOT NULL,
-            	            	MORID VARCHAR(64) NOT NULL,
+            	            	MOID VARCHAR(64) NOT NULL,
             	            	MACS_ADDRESS VARCHAR(512) NOT NULL UNIQUE, 
             	            	VM_NAME VARCHAR(128),
             	            	version_col bigint DEFAULT 0 NOT NULL,
-            	            	PRIMARY KEY (VCUUID, MORID)
+            	            	PRIMARY KEY (VCUUID, MOID)
             	            	)
             </statement>
         </schema-directSQL>
     </schemaSpec>
-
-    <schemaSpec version="3.220">
-	 	<!-- [HQ-4315] - we change the prefix of the existing organization user's name and sort name due to a javascript issue -->
-	<schema-directSQL>  	
-		<statement>
-			update EAM_SUBJECT set NAME = replace(NAME,'org\','org/'), SORT_NAME = replace(SORT_NAME,'ORG\','ORG/') where NAME like 'org%'
-		</statement>	 
-		<statement>
-			update EAM_ROLE set NAME = replace(NAME,'org\','org/'), SORT_NAME = replace(SORT_NAME,'ORG\','ORG/') where NAME like 'org%'
-		</statement>	 
-	</schema-directSQL>  
+	<schemaSpec version="3.218" >
+	  	<user-password-upgrader encryption="EAM_PRINCIPAL.PASSWORD" strength="256" encodeHashAsBase64="true" />
+	</schemaSpec>
 	
-   </schemaSpec>
-
+	 <schemaSpec version="3.219">
+	 	<!-- [HQ-4315] - we change the prefix of the existing organization user's name and sort name due to a javascript issue -->
+			       <schema-directSQL>  	
+			        <statement>
+			        	update EAM_SUBJECT set NAME = replace(NAME,'org\','org/'), SORT_NAME = replace(SORT_NAME,'ORG\','ORG/') where NAME like 'org%'
+			        </statement>	 
+			        <statement>
+			        	update EAM_ROLE set NAME = replace(NAME,'org\','org/'), SORT_NAME = replace(SORT_NAME,'ORG\','ORG/') where NAME like 'org%'
+			       	</statement>	 
+			       </schema-directSQL>  
+			    </schemaSpec>
 </dbupgrade>
 </target>
 </project>

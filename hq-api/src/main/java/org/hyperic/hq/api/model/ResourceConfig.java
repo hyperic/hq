@@ -17,9 +17,9 @@ import org.hyperic.hq.api.model.common.PropertyListMapAdapter;
 	
 public class ResourceConfig implements Serializable{
 
-    private static final long serialVersionUID = 8233944180632888593L;
-    
-    private String resourceID; 
+	private static final long serialVersionUID = 8233944180632888593L;
+ 	
+	private String resourceID; 
 	private Map<String,String> mapProps ; 
 	private Map<String,PropertyList> mapListProps;
 	

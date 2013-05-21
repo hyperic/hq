@@ -29,11 +29,16 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
 import org.hyperic.hq.api.model.ConfigurationTemplate;
-import org.hyperic.hq.api.model.Resource;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
+
+import org.hyperic.hq.api.model.ResourceModel;
 import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourceStatusType;
-import org.hyperic.hq.api.model.ResourceType;
+import org.hyperic.hq.api.model.ResourceTypeModel;
 import org.hyperic.hq.api.model.Resources;
+import org.hyperic.hq.api.model.common.RegistrationID;
+import org.hyperic.hq.api.model.common.ExternalRegistrationStatus;
 import org.hyperic.hq.api.model.resources.RegisteredResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
@@ -42,6 +47,7 @@ import org.hyperic.hq.api.transfer.ResourceTransfer;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
+import org.hyperic.hq.api.transfer.mapping.UnknownEndpointException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -49,23 +55,23 @@ import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.ObjectNotFoundException;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.EncodingException;
+import org.hyperic.hq.notifications.EndpointQueue;
+import org.hyperic.hq.notifications.NotificationEndpoint;
 import org.springframework.beans.factory.annotation.Autowired;
 
-//@Component
-public class ResourceServiceImpl extends RestApiService implements ResourceService{
+public class ResourceServiceImpl extends RestApiService implements ResourceService {
 	
 	@Autowired
 	private ResourceTransfer resourceTransfer;
+	@Autowired
+	private EndpointQueue endpointQueue;
 	
-//	@Autowired
-//	private ConfigurationTransfer configurationTransfer;
 	
-	
-	public final Resource getResource(final String platformNaturalID, final ResourceType resourceType, final ResourceStatusType resourceStatusType, 
+	public final ResourceModel getResource(final String platformNaturalID, final ResourceTypeModel resourceType, final ResourceStatusType resourceStatusType, 
 			final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) throws SessionNotFoundException, SessionTimeoutException {
 	    ApiMessageContext apiMessageContext = newApiMessageContext();
 	    
-	    Resource resource = null;
+	    ResourceModel resource = null;
 	    try {
 	        resource = this.resourceTransfer.getResource(apiMessageContext, platformNaturalID, resourceType, resourceStatusType, hierarchyDepth, responseMetadata);            
 	    } catch (ObjectNotFoundException e) {
@@ -75,9 +81,13 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
 		return resource;
 	}//EOM 
 
-    public final Resource getResource(final String platformID, final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) throws SessionNotFoundException, SessionTimeoutException {
+    public final ResourceModel getResource(final String platformID,
+                                      final ResourceStatusType resourceStatusType,
+                                      final int hierarchyDepth,
+                                      final ResourceDetailsType[] responseMetadata)
+    throws SessionNotFoundException, SessionTimeoutException {
         ApiMessageContext apiMessageContext = newApiMessageContext();
-        Resource resource = null;
+        ResourceModel resource = null;
         try {
             resource =  this.resourceTransfer.getResource(apiMessageContext, platformID, resourceStatusType, hierarchyDepth, responseMetadata) ;
         } catch (ObjectNotFoundException e) {
@@ -85,14 +95,37 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
             throw webApplicationException;
         } 
         return resource;
-	}//EOM 
-	
-	public final RegisteredResourceBatchResponse getResources(final ResourceDetailsType responseStructure, final int hierarchyDepth, final boolean register,
-	        final ResourceFilterRequest resourceFilterRequest) throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException { 
+	}//EOM
+
+    public final RegisteredResourceBatchResponse getResources(final ResourceDetailsType[] responseMetaData, final int hierarchyDepth) throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException {
         ApiMessageContext apiMessageContext = newApiMessageContext();
-        return this.resourceTransfer.getResources(apiMessageContext, responseStructure, hierarchyDepth,register,resourceFilterRequest) ;
+        return this.resourceTransfer.getResources(apiMessageContext, responseMetaData, hierarchyDepth) ;
 	}//EOM 
-	
+
+    public final RegistrationID register(final ResourceDetailsType responseMetadata, final ResourceFilterRequest resourceFilterRequest) throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException {
+        ApiMessageContext apiMessageContext = newApiMessageContext();
+        try {
+            return this.resourceTransfer.register(apiMessageContext, responseMetadata, resourceFilterRequest) ;
+        } catch (PermissionException e) {
+            throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.UNAUTHORIZED,
+                    ExceptionToErrorCodeMapper.ErrorCode.NON_ADMIN_ERR, "");
+        }
+    }//EOM
+
+    public final ExternalRegistrationStatus getRegistrationStatus(final String registrationID)  throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException {
+        ApiMessageContext apiMessageContext = newApiMessageContext();
+        try {
+            return this.resourceTransfer.getRegistrationStatus(apiMessageContext, registrationID);
+        }catch(UnknownEndpointException e) {
+            e.printStackTrace();
+            throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.INTERNAL_SERVER_ERROR,
+                    ExceptionToErrorCodeMapper.ErrorCode.UNKNOWN_ENDPOINT, e.getRegistrationID());
+        } catch (PermissionException e) {
+            throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.UNAUTHORIZED,
+                    ExceptionToErrorCodeMapper.ErrorCode.NON_ADMIN_ERR, "");
+        }
+    }//EOM
+
 	public final ResourceBatchResponse approveResource(final Resources aiResources) throws SessionNotFoundException, SessionTimeoutException {
 	    ApiMessageContext apiMessageContext = newApiMessageContext();
 		return this.resourceTransfer.approveResource(apiMessageContext, aiResources) ; 
@@ -103,15 +136,26 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
 		return this.resourceTransfer.updateResources(apiMessageContext, resources) ; 
 	}//EOM
 	
-	public final ResourceBatchResponse updateResourcesByCriteria(final Resource updateData) throws SessionNotFoundException, SessionTimeoutException {
+	public final ResourceBatchResponse updateResourcesByCriteria(final ResourceModel updateData) throws SessionNotFoundException, SessionTimeoutException {
 	    ApiMessageContext apiMessageContext = newApiMessageContext();
 		//TODO: NYI 
 		//return this.resourceTransfer.approveResource(cirteria, updateData) ;
 		throw new UnsupportedOperationException() ; 
 	}//EOM 
 	
-	public void unregister() throws SessionNotFoundException, SessionTimeoutException {
-	    this.resourceTransfer.unregister();
+	public void unregister(final String registrationId) throws SessionNotFoundException, SessionTimeoutException {
+        NotificationEndpoint endpoint = endpointQueue.unregister(registrationId);
+        if (endpoint == null) {
+            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST,
+                    ExceptionToErrorCodeMapper.ErrorCode.RESOURCE_NOT_FOUND_BY_ID);
+        }
+        try {
+            ApiMessageContext apiMessageContext = newApiMessageContext();
+            resourceTransfer.unregister(apiMessageContext,endpoint);
+        } catch (PermissionException e) {
+            throw errorHandler.newWebApplicationException(new Throwable(), Response.Status.UNAUTHORIZED,
+                    ExceptionToErrorCodeMapper.ErrorCode.NON_ADMIN_ERR, "");
+        }
 	}
 
     public ConfigurationTemplate getConfigurationTemplate(final String resourceID) throws SessionNotFoundException, SessionTimeoutException {

@@ -34,6 +34,7 @@ import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
@@ -47,11 +48,13 @@ public class DetermineLocationAction
     extends BaseAction {
 
     private AppdefBoss appdefBoss;
+    private ResourceManager resourceManager;
 
     @Autowired
-    public DetermineLocationAction(AppdefBoss appdefBoss) {
+    public DetermineLocationAction(AppdefBoss appdefBoss, ResourceManager resourceManager) {
         super();
         this.appdefBoss = appdefBoss;
+        this.resourceManager = resourceManager;
     }
 
     /**
@@ -67,7 +70,7 @@ public class DetermineLocationAction
         String type = null;
         if (null == ctype) {
             // non-autogroup
-            AppdefEntityID aeid = RequestUtils.getEntityId(request);
+            AppdefEntityID aeid = RequestUtils.getEntityId(request, resourceManager);
 
             type = AppdefEntityConstants.typeToString(aeid.getType());
 

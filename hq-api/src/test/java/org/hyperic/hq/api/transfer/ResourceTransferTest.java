@@ -8,8 +8,8 @@ import java.util.List;
 
 import org.easymock.EasyMock;
 import org.hyperic.hq.api.model.AIResource;
-import org.hyperic.hq.api.model.Resource;
-import org.hyperic.hq.api.model.ResourceType;
+import org.hyperic.hq.api.model.ResourceModel;
+import org.hyperic.hq.api.model.ResourceTypeModel;
 import org.hyperic.hq.api.transfer.impl.ResourceTransferImpl;
 import org.hyperic.hq.appdef.server.session.AIQueueManagerImpl;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;

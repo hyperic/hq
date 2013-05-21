@@ -32,6 +32,9 @@ package org.hyperic.hq.appdef.shared;
 import java.util.Collection;
 
 import org.hyperic.hq.product.PlatformDetector;
+import static org.hyperic.hq.appdef.shared.AIQueueConstants.Q_STATUS_ADDED;
+import static org.hyperic.hq.appdef.shared.AIQueueConstants.Q_STATUS_CHANGED;
+import static org.hyperic.hq.appdef.shared.AIQueueConstants.Q_STATUS_REMOVED;
 
 /**
  * Value object for AIPlatform.
@@ -474,14 +477,19 @@ public class AIPlatformValue
 	  return (org.hyperic.hq.appdef.shared.AIIpValue[])this.AIIpValues.toArray(new org.hyperic.hq.appdef.shared.AIIpValue[AIIpValues.size()]);
    }
 
-   public void addAIIpValue(org.hyperic.hq.appdef.shared.AIIpValue added)
-   {
-	  if ( ! this.AIIpValues.contains(added)) {
-	      this.AIIpValues.add(added);
-	  }
-	  if ( ! this.addedAIIpValues.contains(added))
-		 this.addedAIIpValues.add(added);
-   }
+    public void addAIIpValue(org.hyperic.hq.appdef.shared.AIIpValue added) {
+        if (!this.AIIpValues.contains(added)) {
+            this.AIIpValues.add(added);
+        }
+        int ipStatus = added.getQueueStatus();
+        if (ipStatus == Q_STATUS_ADDED) {
+            this.addedAIIpValues.add(added);
+        } else if (ipStatus == Q_STATUS_CHANGED) {
+            this.updatedAIIpValues.add(added);
+        } else if (ipStatus == Q_STATUS_REMOVED) {
+            this.removedAIIpValues.add(added);
+        }
+    }
 
    public void removeAIIpValue(org.hyperic.hq.appdef.shared.AIIpValue removed)
    {

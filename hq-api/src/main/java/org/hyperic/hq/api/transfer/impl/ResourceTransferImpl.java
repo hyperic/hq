@@ -1,4 +1,3 @@
-/* **********************************************************************
 /*
  * NOTE: This copyright does *not* cover user programs that use Hyperic
  * program services by normal system calls through the application
@@ -27,27 +26,38 @@ package org.hyperic.hq.api.transfer.impl;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
-import javax.jms.Destination;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.api.model.PropertyList;
 import org.hyperic.hq.api.model.ConfigurationTemplate;
-import org.hyperic.hq.api.model.Resource;
+import org.hyperic.hq.api.model.ConfigurationValue;
+import org.hyperic.hq.api.model.PropertyList;
 import org.hyperic.hq.api.model.ResourceConfig;
 import org.hyperic.hq.api.model.ResourceDetailsType;
+import org.hyperic.hq.api.model.ResourceModel;
 import org.hyperic.hq.api.model.ResourceStatusType;
-import org.hyperic.hq.api.model.ResourceType;
+import org.hyperic.hq.api.model.ResourceTypeModel;
 import org.hyperic.hq.api.model.Resources;
+import org.hyperic.hq.api.model.common.ExternalRegistrationStatus;
 import org.hyperic.hq.api.model.common.RegistrationID;
+import org.hyperic.hq.api.model.measurements.HttpEndpointDefinition;
+import org.hyperic.hq.api.model.resources.ComplexIp;
 import org.hyperic.hq.api.model.resources.RegisteredResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
@@ -62,6 +72,11 @@ import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.shared.AIQueueManager;
+import org.hyperic.hq.api.transfer.mapping.UnknownEndpointException;
+import org.hyperic.hq.appdef.Ip;
+import org.hyperic.hq.appdef.server.session.AppdefResource;
+import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -69,7 +84,9 @@ import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
+import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
+import org.hyperic.hq.appdef.shared.IpManager;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
@@ -81,7 +98,11 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.PermissionManager;
+import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.bizapp.server.session.ProductBossImpl.ConfigSchemaAndBaseResponse;
@@ -91,24 +112,25 @@ import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.ObjectNotFoundException;
+import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.notifications.Q;
-import org.hyperic.hq.notifications.filtering.AgnosticFilter;
+import org.hyperic.hq.notifications.DefaultEndpoint;
+import org.hyperic.hq.notifications.HttpEndpoint;
+import org.hyperic.hq.notifications.NotificationEndpoint;
 import org.hyperic.hq.notifications.filtering.Filter;
+import org.hyperic.hq.notifications.filtering.FilterChain;
 import org.hyperic.hq.notifications.filtering.FilteringCondition;
-import org.hyperic.hq.notifications.filtering.ResourceContentFilter;
 import org.hyperic.hq.notifications.filtering.ResourceDestinationEvaluator;
-import org.hyperic.hq.notifications.model.InternalResourceDetailsType;
 import org.hyperic.hq.notifications.model.InventoryNotification;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
+import org.hyperic.util.Transformer;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;
-import org.hyperic.util.pager.PageControl;
-import org.hyperic.util.pager.PageList;
+import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.TypeDescriptor;
@@ -116,35 +138,35 @@ import org.springframework.core.convert.support.ConversionServiceFactory;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.transaction.annotation.Transactional;
 
-public class ResourceTransferImpl implements ResourceTransfer{
-
+public class ResourceTransferImpl implements ResourceTransfer {
+    
+    private static final Log log = LogFactory.getLog(ResourceTransferImpl.class);
+    
     private static final String IP_MAC_ADDRESS_KEY = "IP_MAC_ADDRESS" ; 
 
-    private AIQueueManager aiQueueManager;
-	private ResourceManager resourceManager ; 
-    private AuthzSubjectManager authzSubjectManager;
+
+	private ConfigurationTemplateMapper configTemplateMapper;
+    private ResourceManager resourceManager ; 
     private ResourceMapper resourceMapper;
     private ProductBoss productBoss ;
-	private CPropManager cpropManager ;
-	private AppdefBoss appdepBoss ;
-	private PlatformManager platformManager ; 
-	private ConfigurationTemplateMapper configTemplateMapper;
-	private ExceptionToErrorCodeMapper errorHandler ;
-	private Log log ;
+    private CPropManager cpropManager ;
+    private AppdefBoss appdepBoss ;
+    private PlatformManager platformManager ; 
+    private ExceptionToErrorCodeMapper errorHandler ;
     private ResourceDestinationEvaluator evaluator;
-    private Q q;
+    private ConfigManager configManager;
+    private IpManager ipManager;
     protected NotificationsTransfer notificationsTransfer;
-    protected boolean isRegistered = false;
-	@Autowired  
-    public ResourceTransferImpl(final AIQueueManager aiQueueManager, final ResourceManager resourceManager, 
-    		final AuthzSubjectManager authzSubjectManager, final ResourceMapper resourceMapper, 
-    		final ProductBoss productBoss, final CPropManager cpropManager, final AppdefBoss appdepBoss, 
-    		final PlatformManager platformManager, 
-    		final ConfigurationTemplateMapper configTemplateMapper, 
-            final ExceptionToErrorCodeMapper errorHandler, ResourceDestinationEvaluator evaluator, Q q, @Qualifier("restApiLogger")Log log) { 
-    	this.aiQueueManager = aiQueueManager ; 
-    	this.resourceManager = resourceManager ; 
-    	this.authzSubjectManager = authzSubjectManager ; 
+    @Autowired
+    protected PermissionManager permissionManager;
+
+    @Autowired
+    public ResourceTransferImpl(ResourceManager resourceManager, ResourceMapper resourceMapper,
+                                ProductBoss productBoss, CPropManager cpropManager, AppdefBoss appdepBoss, 
+                                PlatformManager platformManager, final ConfigurationTemplateMapper configTemplateMapper, ExceptionToErrorCodeMapper errorHandler,
+                                ResourceDestinationEvaluator evaluator, ConfigManager configManager,
+                                IpManager ipManager) {
+    	this.resourceManager = resourceManager ;
     	this.resourceMapper = resourceMapper ; 
     	this.productBoss = productBoss ; 
     	this.cpropManager = cpropManager ; 
@@ -153,20 +175,21 @@ public class ResourceTransferImpl implements ResourceTransfer{
     	this.configTemplateMapper = configTemplateMapper;
     	this.errorHandler = errorHandler ; 
     	this.evaluator = evaluator;
-    	this.q=q;
-    	this.log = log ;
-    }//EOM 
+        this.configManager = configManager;
+        this.ipManager = ipManager;
+    }//EOM
+
     @PostConstruct
     public void init() {
         this.notificationsTransfer = (NotificationsTransfer) Bootstrap.getBean("notificationsTransfer");
     }
     
-	public final Resource getResource(ApiMessageContext messageContext, final String platformNaturalID, final ResourceType resourceType, 
+	public final ResourceModel getResource(ApiMessageContext messageContext, final String platformNaturalID, final ResourceTypeModel resourceType, 
 			final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) throws SessionNotFoundException, SessionTimeoutException, ObjectNotFoundException {
 	    AuthzSubject authzSubject = messageContext.getAuthzSubject();
 		if(resourceStatusType == ResourceStatusType.AUTO_DISCOVERED) { 
 			return this.getAIResource(platformNaturalID, resourceType, hierarchyDepth, responseMetadata) ; 
-		}else { 			
+		}else {
             return this.getResourceInner(new Context(authzSubject, platformNaturalID, resourceType, responseMetadata, this), hierarchyDepth) ;  
 		}//EO else if approved resource 
 	}//EOM
@@ -180,7 +203,7 @@ public class ResourceTransferImpl implements ResourceTransfer{
 	 * @return
 	 * @throws ObjectNotFoundException 
 	 */
-	public final Resource getResource(ApiMessageContext messageContext, final String platformID, final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) throws ObjectNotFoundException {
+	public final ResourceModel getResource(ApiMessageContext messageContext, final String platformID, final ResourceStatusType resourceStatusType, final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) throws ObjectNotFoundException {
 	    AuthzSubject authzSubject = messageContext.getAuthzSubject();
 		if(resourceStatusType == ResourceStatusType.AUTO_DISCOVERED) { 
 			throw new UnsupportedOperationException("AI Resource load by internal ID is unsupported") ; 
@@ -192,17 +215,13 @@ public class ResourceTransferImpl implements ResourceTransfer{
 	
 
 	/**
-	 * 
-	 * @param platformID
-	 * @param resourceID if null assumed to be the internal id 
-	 * @param hierarchyDepth
-	 * @param responseMetadata
+     * @param hierarchyDepth
 	 * @return
 	 * @throws ObjectNotFoundException 
 	 */
-	private final Resource getResourceInner(final Context flowContext, int hierarcyDepth) throws ObjectNotFoundException { 
+	private final ResourceModel getResourceInner(final Context flowContext, int hierarchyDepth) throws ObjectNotFoundException { 
 		
-		Resource currentResource =  null ; 
+		ResourceModel currentResource =  null ; 
 		try{ 
 			//derive the resource type load strategy using the resource type enum 
 			//Note: of the resourceType is null, then the generic resource resource type 
@@ -222,19 +241,19 @@ public class ResourceTransferImpl implements ResourceTransfer{
 			currentResource = flowContext.currResource ; 
 			
 			//starts from 1 
-			if(--hierarcyDepth > 0) {
+			if(--hierarchyDepth > 0) {
 				//populate the resource's children 
-				final List<org.hyperic.hq.authz.server.session.Resource> listBackendResourceChildren =
+				final List<Resource> listBackendResourceChildren =
 								this.resourceManager.findChildren(flowContext.subject, flowContext.backendResource) ; 
 				
-				Resource resourceChild = null ; 
-				for(org.hyperic.hq.authz.server.session.Resource backendResourceChild : listBackendResourceChildren) { 
+				ResourceModel resourceChild = null ; 
+				for(Resource backendResourceChild : listBackendResourceChildren) { 
 					flowContext.reset() ; 
 					
 					//set the child in the flow's backend resource 
 					flowContext.setBackendResource(backendResourceChild) ; 
-					flowContext.resourceType = ResourceType.valueOf(backendResourceChild.getResourceType().getAppdefType())  ; 
-					resourceChild = this.getResourceInner(flowContext, hierarcyDepth) ;
+					flowContext.resourceType = ResourceTypeModel.valueOf(backendResourceChild.getResourceType().getAppdefType())  ; 
+					resourceChild = this.getResourceInner(flowContext, hierarchyDepth) ;
 					currentResource.addSubResource(resourceChild) ;
 					
 				}//EO while there are more children 
@@ -257,13 +276,6 @@ public class ResourceTransferImpl implements ResourceTransfer{
 		return null; 
 	}//EOM 
 	
-//	private final AuthzSubject getAuthzSubject() {
-//		//TODO: replace with actual subject once security layer is implemented 
-//		//return authzSubjectManager.getOverlordPojo();
-//		AuthzSubject subject = authzSubjectManager.findSubjectByName("hqadmin") ;
-//		return (subject != null ? subject : authzSubjectManager.getOverlordPojo()) ; 
-//	}//EOM
-	
 	
 	@Transactional(readOnly=false)
 	public final ResourceBatchResponse updateResources(ApiMessageContext messageContext, final Resources resources) {
@@ -272,11 +284,11 @@ public class ResourceTransferImpl implements ResourceTransfer{
 		
 		//iterate over the resources and for each resource, update the following metadata if exists and changed:
 		//TODO: if no resources where provided (null or empty) should an excpetion be thrown? 
-		final List<Resource> resourcesList = resources.getResources() ; 
+		final List<ResourceModel> resourcesList = resources.getResources() ; 
 		if(resourcesList == null) return response ; 
 		String resourceID = null ;
 		final int noOfInputResources = resourcesList.size() ; 
-		Resource inputResource = null ; 
+		ResourceModel inputResource = null ; 
 		ResourceConfig resourceConfig = null ; 
 		
 		AuthzSubject authzSubject = messageContext.getAuthzSubject();
@@ -353,19 +365,19 @@ public class ResourceTransferImpl implements ResourceTransfer{
 	private final void updateResourceConfig(final Context flowContext, final ResourceConfig resourceConfig) throws 
 		EncodingException, PluginNotFoundException, PluginException, ScheduleWillNeverFireException, ApplicationException, AutoinventoryException, AgentConnectionException { 
 		
-		final org.hyperic.hq.authz.server.session.Resource resource = flowContext.backendResource  ; 
+		final Resource resource = flowContext.backendResource  ; 
 		final AppdefEntityID entityID = flowContext.entityID = AppdefUtil.newAppdefEntityId(resource) ;  
 		
 		//load existing resource config data 
 		this.initResourceConfig(flowContext) ; 
 		
 		//merge cprops 
-		final org.hyperic.hq.authz.server.session.Resource prototype = resource.getPrototype() ; 
+		final Resource prototype = resource.getPrototype() ; 
 		final int appdefTypeID = resource.getResourceType().getAppdefType() ; 
 		
 		Object oldValue = null ; 
 		String sKey = null, sNewValue = null ;
-		
+		  
 		//iterate over the new config properties and search for a match in the following config sub systems 
 		// - cprops 
 		// - config response 
@@ -456,7 +468,8 @@ public class ResourceTransferImpl implements ResourceTransfer{
     }
 
 	public final Object initResourceConfig(final Context flowContext)  
-		throws ConfigFetchException, EncodingException, PluginNotFoundException, PluginException, PermissionException, AppdefEntityNotFoundException {
+	throws ConfigFetchException, EncodingException, PluginNotFoundException, PluginException, PermissionException,
+           AppdefEntityNotFoundException {
 		
 		final int iNoOfConfigTypes = ProductPlugin.CONFIGURABLE_TYPES.length ;
 		ConfigSchemaAndBaseResponse configMetadata = null ; 
@@ -465,20 +478,22 @@ public class ResourceTransferImpl implements ResourceTransfer{
 		String configurableType = null ; 
 		for(int i=0; i < iNoOfConfigTypes; i++) { 
 			configurableType = ProductPlugin.CONFIGURABLE_TYPES[i] ; 
-			try{ 
-				flowContext.configResponses[i] = configMetadata = this.productBoss.getConfigSchemaAndBaseResponse(flowContext.subject, flowContext.entityID, configurableType, false/*validateFlow*/) ; 
+			try {
+				flowContext.configResponses[i] = configMetadata = productBoss.getConfigSchemaAndBaseResponse(
+				    flowContext.subject, flowContext.entityID, configurableType, false/*validateFlow*/) ; 
 				//init the schema map in the config response so as to support key recognition validation 
 				configMetadata.getResponse().setSchema(configMetadata.getSchema()) ; 
 			}catch(PluginNotFoundException pnfe) { 
 				log.debug("Plugin Config Schema of type: " + configurableType + " was not defined for resource " + flowContext.entityID) ;	
 			}//EO catch block 
+			// XXX why are we catching an NPE???
 			catch(NullPointerException npe) { 
 				npe.printStackTrace() ; 
 			}
 		}//EO while there are more configurable types
 		
 		//load all cprop metadata
-		final org.hyperic.hq.authz.server.session.Resource prototype = flowContext.backendResource.getPrototype() ; 
+		final Resource prototype = flowContext.backendResource.getPrototype() ; 
 		
 		flowContext.cprops = cpropManager.getEntries(flowContext.entityID) ; 
 		
@@ -547,17 +562,60 @@ public class ResourceTransferImpl implements ResourceTransfer{
 
     }//EOM
 	
+	
 	public enum ResourceTypeStrategy { 
 		
 		PLATFORM(AppdefEntityConstants.APPDEF_TYPE_PLATFORM, PlatformValue.class) { 
 			
 			@Override
-			final org.hyperic.hq.authz.server.session.Resource getResourceByNaturalID(final Context flowContext) throws PlatformNotFoundException, PermissionException {
-				final Platform platform = flowContext.visitor.getPlatformManager().findPlatformByFqdn(flowContext.subject, flowContext.naturalID);  
-				flowContext.resourceInstance = platform  ;
+			final Resource getResourceByNaturalID(final Context flowContext) throws PlatformNotFoundException, PermissionException {
+				final Platform platform = flowContext.visitor.getPlatformManager().findPlatformByFqdn(flowContext.subject, flowContext.naturalID);
+				flowContext.resourceInstance = platform  ; 
 				return platform.getResource() ;  
 			}//EOM 
 
+			@Override
+			protected final AppdefResourceValue loadExistingDTO(final AppdefBoss appdefBoss, final Context flowContext) throws Exception{
+			    Platform platform = (Platform) flowContext.resourceInstance ; 
+			    
+			    if(platform == null) {  
+			        flowContext.resourceInstance = platform = flowContext.getVisitor().getPlatformManager().
+			                                findPlatformById(flowContext.backendResource.getInstanceId()) ; 
+			    }//EO else if platform was not yet loaded
+			    
+			    final PlatformValue platformDTO = new PlatformValue() ; 
+			    platformDTO.setId(platform.getId()) ; 
+			    platformDTO.setFqdn(platform.getFqdn()) ;
+			    platformDTO.setName(platform.getName()) ;  
+			    return platformDTO ; 
+			}//EOM 
+	        
+			@Override
+	        protected final AppdefResourceValue mergeResource(final Map<String,String> inputProps,  Map<String,PropertyList> oneToManyProps, 
+	                AppdefResourceValue existingDTO, final Context flowContext) throws Exception { 
+	            
+	            PropertyList requetsIps = null ;
+                
+                if( (requetsIps = oneToManyProps.get(IP_MAC_ADDRESS_KEY)) != null) {
+                    if(requetsIps != null) { 
+                        //else determine whether the ips have changed
+                        Platform platform =  (Platform) flowContext.resourceInstance ; 
+                                               
+                        existingDTO = flowContext.visitor.getResourceMapper().mergePlatformIPs(existingDTO, requetsIps.getProperties(), platform) ; 
+                        
+                    }//EO if ips were provided 
+                }//EO if propertyList was defined 
+                
+                return existingDTO ; 
+	        }//EOM 
+	        
+	        @Override
+	        protected final void updateResourceInstance(final AppdefResourceValue newDTO, 
+	                    final AppdefBoss appdefBoss, final AuthzSubject subject) throws Exception{ 
+	            appdefBoss.updatePlatform(subject, (PlatformValue) newDTO) ; 
+	        }//EOM 
+	        
+			
 			@Override
 			protected final AppdefResourceValue loadExistingDTO(final AppdefBoss appdefBoss, final Context flowContext) throws Exception{
 			    Platform platform = (Platform) flowContext.resourceInstance ; 
@@ -643,17 +701,17 @@ public class ResourceTransferImpl implements ResourceTransfer{
 		 * @param resourceManager
 		 * @return
 		 */
-		org.hyperic.hq.authz.server.session.Resource getResourceByNaturalID(final Context flowContext) throws Exception{ 
+		Resource getResourceByNaturalID(final Context flowContext) throws Exception{ 
 			throw new UnsupportedOperationException("Resource Of Type " + this.name() + " does not support find by natural ID") ; 
 		}//EOM 
 		
-		org.hyperic.hq.authz.server.session.Resource getResourceByInternalID(final Context flowContext) { 
+		Resource getResourceByInternalID(final Context flowContext) { 
 			final int iInternalResourceID = Integer.parseInt(flowContext.internalID) ; 
 			return flowContext.visitor.getResourceManager().findResourceById(iInternalResourceID) ; 
 		}//EOM
 		
-		org.hyperic.hq.authz.server.session.Resource getResource(final Context flowContext) throws Exception{ 
-			org.hyperic.hq.authz.server.session.Resource resource = null ;  
+		Resource getResource(final Context flowContext) throws Exception{ 
+			Resource resource = null ;  
 			
 			if(flowContext.backendResource != null) { 
 				resource = flowContext.backendResource ; 
@@ -697,7 +755,6 @@ public class ResourceTransferImpl implements ResourceTransfer{
                         method.invoke(existingDTO, oValue) ;
                         
                     }//EO if input was provided for the given attribute  
-                }//EO while there are more attributes to check 
                 
 		    }//EO if the inputProps was not null 
 		    	    
@@ -786,11 +843,11 @@ public class ResourceTransferImpl implements ResourceTransfer{
 			return (iStrategyType >= iNoOfStrategies ? RESOURCE : cachedValues[iStrategyType]) ; 
 		}//EOM 
 		
-		static final ResourceTypeStrategy valueOf(final ResourceType enumResourceType) {
+		static final ResourceTypeStrategy valueOf(final ResourceTypeModel enumResourceType) {
 			return (enumResourceType == null ? RESOURCE : valueOf(enumResourceType.name()) ) ; 
 		}//EOM 
 		
-		static final String getResourceIdentifier(final Resource resource) {
+		static final String getResourceIdentifier(final ResourceModel resource) {
 			final String resourceIdentifier = resource.getId() ; 
 			return (resourceIdentifier == null || resourceIdentifier.isEmpty() ? resource.getNaturalID() : resourceIdentifier) ; 
 		}//EOM 
@@ -798,8 +855,7 @@ public class ResourceTransferImpl implements ResourceTransfer{
 		
 	}//EOE 
 	
-	
-	private final Resource getAIResource(final String platformNaturalID, final ResourceType resourceType, 
+	private final ResourceModel getAIResource(final String platformNaturalID, final ResourceTypeModel resourceType, 
 			final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) { 
 		//TODO: NYI 
 		return null ; 
@@ -807,9 +863,9 @@ public class ResourceTransferImpl implements ResourceTransfer{
 	
 	
 	public final static class Context  { 
-	    public org.hyperic.hq.authz.server.session.Resource backendResource ; 
+	    public Resource backendResource ; 
 	    public AppdefResource resourceInstance ; 
-		public AppdefEntityID entityID ; 
+		public AppdefEntityID entityID ;
 		public AuthzSubject subject ;
 		public ConfigSchemaAndBaseResponse[] configResponses ; 
 		public Properties cprops ; 
@@ -818,12 +874,12 @@ public class ResourceTransferImpl implements ResourceTransfer{
 		public ResourceTransfer visitor ; 
 		public String internalID ;  
 		public String naturalID ; 
-		public ResourceType resourceType ;  
+		public ResourceTypeModel resourceType ;  
 		public Set<ResourceDetailsTypeStrategy> resourceDetails ;  
-		public Resource currResource ;
+		public ResourceModel currResource ;
 		//Resource resourceRoot ; 
 		
-		public Context(final AuthzSubject subject, final String naturalID, final ResourceType resourceType, final ResourceDetailsType[] responseMetadata, final ResourceTransfer visitor)  { 
+		public Context(final AuthzSubject subject, final String naturalID, final ResourceTypeModel resourceType, final ResourceDetailsType[] responseMetadata, final ResourceTransfer visitor)  { 
 			this(subject, null/*internalID*/,responseMetadata, visitor) ;  
 			this.naturalID = naturalID ; 
 			this.resourceType = resourceType ; 
@@ -841,12 +897,12 @@ public class ResourceTransferImpl implements ResourceTransfer{
 			this.configResponses = new ConfigSchemaAndBaseResponse[ProductPlugin.CONFIGURABLE_TYPES.length] ; 
 		}//EOM
 		
-		public final void setBackendResource(final org.hyperic.hq.authz.server.session.Resource backendResource ) {
+		public final void setBackendResource(final Resource backendResource ) {
 			this.backendResource  = backendResource  ;
 			this.internalID = backendResource.getId() + "" ; 
 		}//EOM 
 		
-		public final void setInputResource(final Resource inputResource)  {
+		public final void setInputResource(final ResourceModel inputResource)  {
 			this.currResource = inputResource ; 
 			this.internalID = inputResource.getId() ; 
 			this.naturalID = inputResource.getNaturalID() ; 
@@ -871,52 +927,246 @@ public class ResourceTransferImpl implements ResourceTransfer{
 		
 	}//EO inner class Context 
 
-	@Transactional (readOnly=true)
-    public RegisteredResourceBatchResponse getResources(ApiMessageContext messageContext, ResourceDetailsType responseMetadata, final int hierarchyDepth, 
-            final boolean register,final ResourceFilterRequest resourceFilterRequest) throws PermissionException, NotFoundException {
-        if (resourceFilterRequest==null) {
-            if (log.isDebugEnabled()) {
-                log.debug("illegal request");
-            }
-            throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.BAD_REQ_BODY);
+    @Transactional (readOnly=true)
+    public RegisteredResourceBatchResponse getResources(ApiMessageContext messageContext,
+                                                        ResourceDetailsType[] responseMetadata,
+                                                        int hierarchyDepth)
+    throws PermissionException, NotFoundException {
+        final boolean debug = log.isDebugEnabled();
+        final StopWatch watch = new StopWatch();
+        final RegisteredResourceBatchResponse res = new RegisteredResourceBatchResponse(errorHandler);
+        if (responseMetadata==null) {
+            log.warn("illegal request");
+            throw errorHandler.newWebApplicationException(
+                Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.BAD_REQ_BODY);
         }
-        AuthzSubject authzSubject = messageContext.getAuthzSubject();
-        final RegisteredResourceBatchResponse res = new RegisteredResourceBatchResponse(this.errorHandler) ; 
-        List<Resource> resources = new ArrayList<Resource>();
-        PageList<PlatformValue> platforms = this.platformManager.getAllPlatforms(authzSubject, PageControl.PAGE_ALL);
-        for(PlatformValue pv:platforms) {
-            try {
-                String fqdn = pv.getFqdn();
-                Resource r = this.getResourceInner(new Context(authzSubject, fqdn, ResourceType.PLATFORM, new ResourceDetailsType[] {responseMetadata}, this), hierarchyDepth) ;  
-                resources.add(r);
-            } catch (Throwable t) {
-//TODO~                res.addFailedResource(resourceID, errorCode, additionalDescription, args)
-            }
+        final List<ResourceDetailsType> responseMetadataList = Arrays.asList(responseMetadata);
+        if (hierarchyDepth < 0) {
+            log.warn("hierarchy Depth cannot be < 0");
+            throw errorHandler.newWebApplicationException(
+                Response.Status.NOT_ACCEPTABLE, ExceptionToErrorCodeMapper.ErrorCode.BAD_REQ_BODY);
+        }
+        final AuthzSubject authzSubject = messageContext.getAuthzSubject();
+        final PermissionManager permissionManager = PermissionManagerFactory.getInstance();
+        if (debug) watch.markTimeBegin("findViewablePSSResources");
+        final Set<Integer> viewable = permissionManager.findViewablePSSResources(authzSubject);
+        if (debug) watch.markTimeEnd("findViewablePSSResources");
+        final List<Resource> platformResources = getPlatformsFromResourceIds(viewable);
+        if (debug) watch.markTimeBegin("getResourceToChildren");
+        final Map<Resource, Collection<Resource>> resourceToChildren =
+            getResourceToChildren(viewable, platformResources, hierarchyDepth);
+        if (debug) watch.markTimeEnd("getResourceToChildren");
+        if (debug) watch.markTimeBegin("getResourceConfig");
+        final Map<Resource, ConfigResponse> config =
+            getResourceConfig(responseMetadataList, resourceToChildren.keySet());
+        if (debug) watch.markTimeEnd("getResourceConfig");
+        final Map<Resource, Collection<Ip>> ipInfo = getIpInfo(responseMetadataList, platformResources);
+        if (debug) watch.markTimeBegin("getResourceConfigProps");
+        final Map<AppdefEntityID, Properties> cProps =
+            getResourceConfigProps(responseMetadataList);
+        if (debug) watch.markTimeEnd("getResourceConfigProps");
+        final List<ResourceModel> resources = new ArrayList<ResourceModel>(platformResources.size());
+        for (final Resource platformResource : platformResources) {
+            ResourceModel model = resourceMapper.toResource(platformResource);
+            resources.add(model);
+            setAllChildren(model, platformResource, resourceToChildren, config, cProps, ipInfo);
         }
         res.setResources(resources);
-        if (register) {
-            // not allowing sequential registrations
-            if (this.isRegistered) {
-                throw errorHandler.newWebApplicationException(Response.Status.BAD_REQUEST, ExceptionToErrorCodeMapper.ErrorCode.SEQUENTIAL_REGISTRATION);
-            }
-            this.isRegistered=true;
-            List<Filter<InventoryNotification,? extends FilteringCondition<?>>> userFilters = this.resourceMapper.toResourceFilters(resourceFilterRequest, responseMetadata); 
-
-            //TODO~ get the destination from the user
-            Destination dest = this.notificationsTransfer.getDummyDestination();
-            this.q.register(dest,ResourceDetailsType.valueOf(responseMetadata));
-            this.evaluator.register(dest,userFilters);
-            //TODO~ return a valid registration id
-            res.setRegId(new RegistrationID(1));
-        }
+        if (debug) log.debug(watch);
         return res;
     }
-    public void unregister() {
-        Destination dest = this.notificationsTransfer.getDummyDestination();
-        this.q.unregister(dest);
-        this.evaluator.unregisterAll(dest);
-        this.isRegistered=false;
+
+    private Map<AppdefEntityID, Properties> getResourceConfigProps(List<ResourceDetailsType> responseMetadataList) {
+        if (!responseMetadataList.contains(ResourceDetailsType.VIRTUALDATA) &&
+            !responseMetadataList.contains(ResourceDetailsType.ALL)) {
+            return Collections.emptyMap();
+        }
+        return cpropManager.getAllEntries(HQConstants.VCUUID, HQConstants.MOID);
     }
+    
+    private Map<Resource, Collection<Ip>> getIpInfo(List<ResourceDetailsType> responseMetadataList,
+                                                    Collection<Resource> platformResources) {
+        if (!responseMetadataList.contains(ResourceDetailsType.PROPERTIES) &&
+            !responseMetadataList.contains(ResourceDetailsType.ALL)) {
+            return Collections.emptyMap();
+        }
+        return ipManager.getIps(platformResources);
+    }
+
+    private Map<Resource, ConfigResponse> getResourceConfig(List<ResourceDetailsType> responseMetadataList,
+                                                            Set<Resource> resources) {
+        if (!responseMetadataList.contains(ResourceDetailsType.PROPERTIES) &&
+            !responseMetadataList.contains(ResourceDetailsType.ALL)) {
+            return Collections.emptyMap();
+        }
+        return configManager.getConfigResponses(resources, true);
+    }
+
+    private void setAllChildren(ResourceModel model, Resource platformResource,
+                                Map<Resource, Collection<Resource>> resourceToChildren,
+                                Map<Resource, ConfigResponse> config, Map<AppdefEntityID, Properties> cProps,
+                                Map<Resource, Collection<Ip>> ipInfo) {
+        Collection<Resource> tmp;
+        addResourceConfig(platformResource, model, config, cProps, ipInfo);
+        if (null == (tmp = resourceToChildren.get(platformResource)) || tmp.isEmpty()) {
+            return;
+        }
+        for (final Resource child : tmp) {
+            final ResourceModel childModel = resourceMapper.toResource(child);
+            model.addSubResource(childModel);
+            setAllChildren(childModel, child, resourceToChildren, config, cProps, ipInfo);
+        }
+    }
+
+    private void addResourceConfig(Resource r, ResourceModel resourceModel, Map<Resource, ConfigResponse> configMap,
+                                   Map<AppdefEntityID, Properties> cProps, Map<Resource, Collection<Ip>> ipInfo) {
+        final ConfigResponse configResponse = configMap.get(r);
+        @SuppressWarnings("unchecked")
+        final Map<String, String> config = (configResponse == null) ?
+            new HashMap<String, String>() : configResponse.getConfig();
+        final AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(r);
+        Properties properties = cProps.get(aeid);
+        properties = (properties == null) ? new Properties() : properties;
+        Object prop = properties.get(HQConstants.VCUUID);
+        if (prop != null) {
+            config.put(HQConstants.VCUUID, prop.toString());
+        }
+        prop = properties.get(HQConstants.MOID);
+        if (prop != null) {
+            config.put(HQConstants.MOID, prop.toString());
+        }
+        ResourceConfig resourceConfig = resourceModel.getResourceConfig();
+        resourceConfig = (resourceConfig == null) ? new ResourceConfig() : resourceConfig;
+        resourceConfig.setMapProps(config);
+        resourceModel.setResourceConfig(resourceConfig);
+        final Collection<Ip> ips = ipInfo.get(r);
+        if (ips != null && !ips.isEmpty()) {
+            Collection<ConfigurationValue> ipValues = new ArrayList<ConfigurationValue>(ips.size());
+            for (Ip ip : ips) {
+                ipValues.add(new ComplexIp(ip.getNetmask(), ip.getMacAddress(), ip.getAddress()));
+            }
+            resourceConfig.putMapListProps(IP_MAC_ADDRESS_KEY, ipValues);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<Resource, Collection<Resource>> getResourceToChildren(Set<Integer> viewable,
+	                                                                  List<Resource> platformResources,
+	                                                                  int hierarchyDepth) {
+        final List<Resource> currResources = new ArrayList<Resource>(platformResources);
+        final Map<Resource, Collection<Resource>> rtn = new HashMap<Resource, Collection<Resource>>();
+        for (Resource r : platformResources) {
+            rtn.put(r, Collections.EMPTY_LIST);
+        }
+        final Map<Resource, Resource> systemResources = new HashMap<Resource, Resource>();
+        for (int i=2; i<=hierarchyDepth; i++) {
+            final Map<Resource, Collection<Resource>> childResources =
+                resourceManager.findChildResources(currResources, viewable, true);
+            rtn.putAll(childResources);
+            currResources.removeAll(childResources.keySet());
+            for (Resource r : currResources) {
+                rtn.put(r, new ArrayList<Resource>(0));
+            }
+            currResources.clear();
+            for (final Entry<Resource, Collection<Resource>> entry : childResources.entrySet()) {
+                final Resource parent = entry.getKey();
+                final Collection<Resource> children = entry.getValue();
+                for (final Iterator<Resource> it=children.iterator(); it.hasNext(); ) {
+                    final Resource child = it.next();
+                    currResources.add(child);
+                    // EMPTY_LIST usage is a place holder to avoid extra overhead where resources don't have child
+                    // resources
+                    rtn.put(child, Collections.EMPTY_LIST);
+                    // remove place-holder resource so that Platform Services don't expose our internal implementation
+                    // rather than exposing the system resource which is a place-holder
+                    // In other words:
+                    // desired output is "Platform --> Services"
+                    // in HQ we store this relationship as "Platform --> System Server --> Services"
+                    if (child.isSystem()) {
+                        systemResources.put(child, parent);
+                        it.remove();
+                    }
+                }
+            }
+        }
+        // need to post process the data in order to map the platform services correctly
+        final List<Resource> toFetch = new ArrayList<Resource>();
+        for (final Iterator<Entry<Resource, Resource>> it=systemResources.entrySet().iterator(); it.hasNext(); ) {
+            final Entry<Resource, Resource> entry = it.next();
+            final Resource systemResource = entry.getKey();
+            final Resource parent = entry.getValue();
+            final Collection<Resource> children = rtn.remove(systemResource);
+            if (children != null && !children.isEmpty()) {
+                it.remove();
+                final Collection<Resource> collection = rtn.get(parent);
+                if (collection != null) {
+                    collection.addAll(children);
+                }
+            } else if (children != null && children == Collections.EMPTY_LIST) {
+                toFetch.add(systemResource);
+            }
+        }
+        final Map<Resource, Collection<Resource>> systemResourceChildren =
+            resourceManager.findChildResources(toFetch, viewable, true);
+        for (final Entry<Resource, Resource> entry : systemResources.entrySet()) {
+            final Resource systemResource = entry.getKey();
+            final Resource parent = entry.getValue();
+            final Collection<Resource> children = systemResourceChildren.get(systemResource);
+            final Collection<Resource> parentChildren = rtn.get(parent);
+            if (parentChildren != null && children != null) {
+                parentChildren.addAll(children);
+            }
+        }
+        return rtn;
+    }
+
+    private List<Resource> getPlatformsFromResourceIds(Set<Integer> viewable) {
+        return new Transformer<Integer, Resource>() {
+            public Resource transform(Integer resourceId) {
+                final Resource r = resourceManager.getResourceById(resourceId);
+                if (r != null && !r.isInAsyncDeleteState() && AuthzConstants.authzPlatform.equals(r.getResourceType()
+                        .getId())) {
+                    return r;
+                }
+                return null;
+            }
+        }.transform(viewable);
+    }
+
+    @Transactional (readOnly=true)
+    public RegistrationID register(ApiMessageContext messageContext, ResourceDetailsType responseMetadata,
+                                   ResourceFilterRequest resourceFilterRequest)
+                                           throws PermissionException, NotFoundException {
+        AuthzSubject authzSubject = messageContext.getAuthzSubject();
+        this.permissionManager.checkIsSuperUser(authzSubject);
+        List<Filter<InventoryNotification,? extends FilteringCondition<?>>> userFilters =
+                resourceMapper.toResourceFilters(resourceFilterRequest, responseMetadata);
+
+        RegistrationID registrationID = new RegistrationID();
+        final HttpEndpointDefinition httpEndpointDefinition = resourceFilterRequest.getHttpEndpointDef();
+        final NotificationEndpoint endpoint = (httpEndpointDefinition == null) ? new DefaultEndpoint(registrationID
+                .getId()) : getHttpEndpoint(registrationID, httpEndpointDefinition);
+        final Integer authzSubjectId = authzSubject.getId();
+        notificationsTransfer.register(endpoint, ResourceDetailsType.valueOf(responseMetadata), authzSubjectId);
+        evaluator.register(endpoint, userFilters);
+        return registrationID;
+    }
+
+    public ExternalRegistrationStatus getRegistrationStatus(final ApiMessageContext messageContext,
+            final String registrationID) throws PermissionException,NotFoundException, UnknownEndpointException{
+        AuthzSubject authzSubject = messageContext.getAuthzSubject();
+        this.permissionManager.checkIsSuperUser(authzSubject);
+        FilterChain<InventoryNotification> filterChain = evaluator.getRegistration(registrationID);
+        NotificationsTransferImpl.EndpointStatusAndDefinition endpointStatusAndDefinition = this.notificationsTransfer.getEndointStatus(registrationID);
+        return new ExternalRegistrationStatus(endpointStatusAndDefinition.getEndpoint(),filterChain, registrationID, endpointStatusAndDefinition.getExternalEndpointStatus());
+    }
+
+    public void unregister(final ApiMessageContext messageContext,NotificationEndpoint endpoint) throws PermissionException {
+        AuthzSubject authzSubject = messageContext.getAuthzSubject();
+        this.permissionManager.checkIsSuperUser(authzSubject);
+        evaluator.unregisterAll(endpoint);
+    }
+
     public ResourceMapper getResourceMapper() {
         return this.resourceMapper;
     }
@@ -926,6 +1176,11 @@ public class ResourceTransferImpl implements ResourceTransfer{
     public ResourceManager getResourceManager() {
         return this.resourceManager;
     }
+    
+    public final AppdefBoss getAppdefBoss() { return this.appdepBoss ; }//EOM 
 
-    public final AppdefBoss getAppdefBoss() { return this.appdepBoss ; }//EOM
+    private HttpEndpoint getHttpEndpoint(RegistrationID registrationID, HttpEndpointDefinition def) {
+        return new HttpEndpoint(registrationID.getId(), def.getUrl(), def.getUsername(), def.getPassword(),
+                def.getContentType(), def.getEncoding(), def.getBodyPrepend());
+    }
 }//EOC 

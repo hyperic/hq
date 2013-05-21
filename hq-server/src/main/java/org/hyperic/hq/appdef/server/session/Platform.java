@@ -31,7 +31,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeMap;
 
+import org.apache.commons.lang.ObjectUtils;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.Ip;
@@ -196,49 +198,78 @@ public class Platform extends PlatformBase
     /**
      * Compare this entity to a value object
      * (legacy code from entity bean)
-     * @return true if this platform is the same as the one in the val obj
+     *
+     * @return changedProps The changed properties or an empty map if this platform is the same as the one in the val
+     * obj
      */
-    public boolean matchesValueObject(PlatformValue obj) {
-        boolean matches;
+    @Override
+    public Map<String, String> changedProperties(AppdefResourceValue appdefResourceValue) {
 
-        matches = super.matchesValueObject(obj) ;
-        matches &=
-            (this.getName() != null ? this.getName().equals(obj.getName())
-                : (obj.getName() == null)) ;
-        matches &=
-            (this.getDescription() != null ?
-                this.getDescription().equals(obj.getDescription())
-                : (obj.getDescription() == null)) ;
-        matches &=
-            (this.getCertdn() != null ? this.getCertdn().equals(obj.getCertdn())
-                : (obj.getCertdn() == null)) ;
-        matches &=
-            (this.getCommentText() != null ?
-                this.getCommentText().equals(obj.getCommentText())
-                : (obj.getCommentText() == null)) ;
-        matches &=
-            (this.getCpuCount() != null ?
-                this.getCpuCount().equals(obj.getCpuCount())
-                : (obj.getCpuCount() == null)) ;
-        matches &=
-            (this.getFqdn() != null ? this.getFqdn().equals(obj.getFqdn())
-                : (obj.getFqdn() == null)) ;
-        matches &=
-            (this.getLocation() != null ?
-                this.getLocation().equals(obj.getLocation())
-                : (obj.getLocation() == null)) ;
-        // now for the IP's
-        // if there's any in the addedIp's collection, it was messed with
-        // which means the match fails
-        matches &=
-            (obj.getAddedIpValues().size() == 0) ;
-        matches &=
-            (obj.getRemovedIpValues().size() == 0) ;
-        // check to see if we have changed the agent
-        matches &=
-            (this.getAgent() != null ? this.getAgent().equals(obj.getAgent())
-                : (obj.getAgent() == null));
-        return matches;
+        PlatformValue platformValue = (PlatformValue) appdefResourceValue;
+        Map<String, String> changedProps = super.changedProperties(platformValue);
+
+        if (!ObjectUtils.equals(getName(), platformValue.getName())) {
+            changedProps.put("Name", platformValue.getName());
+        }
+        if (!ObjectUtils.equals(getDescription(), platformValue.getDescription())) {
+            changedProps.put("Description", platformValue.getDescription());
+        }
+        if (!ObjectUtils.equals(getCertdn(), platformValue.getCertdn())) {
+            changedProps.put("Certdn", platformValue.getCertdn());
+        }
+        if (!ObjectUtils.equals(getCommentText(), platformValue.getCommentText())) {
+            changedProps.put("CommentText", platformValue.getCommentText());
+        }
+        if (!ObjectUtils.equals(getCpuCount(), platformValue.getCpuCount())) {
+            changedProps.put("CpuCount", String.valueOf(platformValue.getCpuCount()));
+        }
+        if (!ObjectUtils.equals(getFqdn(), platformValue.getFqdn())) {
+            changedProps.put("Fqdn", platformValue.getFqdn());
+        }
+        if (!ObjectUtils.equals(getLocation(), platformValue.getLocation())) {
+            changedProps.put("Location", platformValue.getLocation());
+        }
+        if (!platformValue.getUpdatedIpValues().isEmpty()) {
+            changedProps.put("IpValues", platformValue.getUpdatedIpValues().toString());
+        }
+        if (!platformValue.getRemovedIpValues().isEmpty()) {
+            changedProps.put("IpValues:Removed", platformValue.getRemovedIpValues().toString());
+        }
+        if (!ObjectUtils.equals(getAgent(), platformValue.getAgent())) {
+            changedProps.put("Agent", String.valueOf((platformValue.getAgent())));
+        }
+        return changedProps;
+    }
+
+    public Map<String, String> changedProperties(AIPlatformValue aiPlatformValue) {
+
+       Map<String, String> changedProps = new TreeMap<String, String>();
+
+        if (!ObjectUtils.equals(getName(), aiPlatformValue.getName())) {
+            changedProps.put("Name", aiPlatformValue.getName());
+        }
+        if (!ObjectUtils.equals(getDescription(), aiPlatformValue.getDescription())) {
+            changedProps.put("Description", aiPlatformValue.getDescription());
+        }
+        if (!ObjectUtils.equals(getCertdn(), aiPlatformValue.getCertdn())) {
+            changedProps.put("Certdn", aiPlatformValue.getCertdn());
+        }
+        if (!ObjectUtils.equals(getCpuCount(), aiPlatformValue.getCpuCount())) {
+            changedProps.put("CpuCount", String.valueOf(aiPlatformValue.getCpuCount()));
+        }
+        if (!ObjectUtils.equals(getFqdn(), aiPlatformValue.getFqdn())) {
+            changedProps.put("Fqdn", aiPlatformValue.getFqdn());
+        }
+        if (!aiPlatformValue.getAddedAIIpValues().isEmpty()) {
+            changedProps.put("IpValues:Added", aiPlatformValue.getAddedAIIpValues().toString());
+        }
+        if (!aiPlatformValue.getUpdatedAIIpValues().isEmpty()) {
+            changedProps.put("IpValues:Changed", aiPlatformValue.getUpdatedAIIpValues().toString());
+        }
+        if (!aiPlatformValue.getRemovedAIIpValues().isEmpty()) {
+            changedProps.put("IpValues:Removed", aiPlatformValue.getRemovedAIIpValues().toString());
+        }
+        return changedProps;
     }
 
     private PlatformValue _platformValue = new PlatformValue();

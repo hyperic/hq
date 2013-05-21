@@ -7,13 +7,17 @@ public class MetricNotification extends BaseNotification {
     protected Integer measurementID;
     protected MetricValue metricVal;
     protected String measurementName;
+    protected String msmtType;
+    protected String catName;
     
-    public MetricNotification(Integer resourceID,Integer measurementID, String measurementName, MetricValue metricVal) {
+    public MetricNotification(Integer resourceID,Integer measurementID, String measurementName, String msmtType, String catName, MetricValue metricVal) {
         super();
         this.resourceID = resourceID;
         this.measurementID=measurementID;
         this.metricVal = metricVal;
         this.measurementName=measurementName;
+        this.msmtType = msmtType;
+        this.catName = catName;
     }
     public MetricValue getMetricVal() {
         return metricVal;
@@ -29,5 +33,35 @@ public class MetricNotification extends BaseNotification {
     }
     public Integer getMeasurementId() {
         return this.measurementID;
+    }
+    public String getMeasurementType() {
+        return msmtType;
+    }    
+    public String getCategory() {
+        return this.catName;
+    }
+    public String toString() {
+        return new StringBuilder()
+            .append("measurementId=").append(measurementID)
+            .append(",resourceId=").append(resourceID)
+            .append(",timestamp=").append(metricVal.getTimestamp())
+            .append(",value=").append(metricVal.getValue())
+            .toString();
+    }
+    
+    public int hashCode() {
+        Long timestamp = metricVal.getTimestamp();
+        return 7 + (7*measurementID.hashCode()) + (7*timestamp.hashCode());
+    }
+    
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o instanceof MetricNotification) {
+            MetricNotification m = (MetricNotification) o;
+            return m.measurementID.equals(measurementID) && m.metricVal.getTimestamp() == metricVal.getTimestamp();
+        }
+        return false;
     }
 }

@@ -40,11 +40,13 @@ import javax.ws.rs.core.MediaType;
 
 import org.hyperic.hq.api.model.ConfigurationOption;
 import org.hyperic.hq.api.model.ConfigurationTemplate;
-import org.hyperic.hq.api.model.Resource;
+import org.hyperic.hq.api.model.ResourceModel;
 import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourceStatusType;
-import org.hyperic.hq.api.model.ResourceType;
+import org.hyperic.hq.api.model.ResourceTypeModel;
 import org.hyperic.hq.api.model.Resources;
+import org.hyperic.hq.api.model.common.RegistrationID;
+import org.hyperic.hq.api.model.common.ExternalRegistrationStatus;
 import org.hyperic.hq.api.model.resources.RegisteredResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
@@ -55,45 +57,66 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.NotFoundException;
 
 
-@Path("/") 
-@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON}) 
+@Path("/")
+@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 public interface ResourceService {
-	
+
 
     @GET
     @Path("/{platformNaturalID}/{resourceType}")
-    Resource getResource(@PathParam("platformNaturalID") final String platformNaturalID, @PathParam("resourceType") final ResourceType resourceType, 
-			@QueryParam("status") final ResourceStatusType resourceStatusType, @QueryParam("hierarchyDepth") final int hierarchyDepth, 
-			@QueryParam("responseStructure") final ResourceDetailsType[] responseStructure) throws SessionNotFoundException, SessionTimeoutException ;  
-		
-    @GET
-	@Path("/{platformID}")
-	Resource getResource(@PathParam("platformID") final String platformID, 
-			@QueryParam("status") final ResourceStatusType resourceStatusType, @QueryParam("hierarchyDepth") final int hierarchyDepth, 
-			@QueryParam("responseStructure") final ResourceDetailsType[] responseStructure) throws SessionNotFoundException, SessionTimeoutException ;  
-	
-    @POST
-    @Path("/")
-    RegisteredResourceBatchResponse getResources(@QueryParam("responseStructure")  final ResourceDetailsType responseMetadata,
-	        @QueryParam("hierarchyDepth") final int hierarchyDepth, @QueryParam("register") final boolean register, final ResourceFilterRequest resourceFilterRequest) throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException  ;  
-	
-	@POST
-	@Path("/approve")
-	ResourceBatchResponse approveResource(final Resources aiResources) throws SessionNotFoundException, SessionTimeoutException ; 
-	
-	@PUT
-	ResourceBatchResponse updateResources(final Resources resources) throws SessionNotFoundException, SessionTimeoutException ; 
+    ResourceModel getResource(@PathParam("platformNaturalID") final String platformNaturalID,
+                         @PathParam("resourceType") final ResourceTypeModel resourceType,
+                         @QueryParam("status") final ResourceStatusType resourceStatusType,
+                         @QueryParam("hierarchyDepth") final int hierarchyDepth,
+                         @QueryParam("responseStructure") final ResourceDetailsType[] responseStructure)
+            throws SessionNotFoundException, SessionTimeoutException;
 
-	@PUT
-	@Path("/search")
-	ResourceBatchResponse updateResourcesByCriteria(final Resource updateData) throws SessionNotFoundException, SessionTimeoutException ;
-	
-	@DELETE
-	@Path("/registration")
-	public void unregister() throws SessionNotFoundException, SessionTimeoutException;
-	
+    @GET
+    @Path("/{platformID}")
+    ResourceModel getResource(@PathParam("platformID") final String platformID,
+                         @QueryParam("status") final ResourceStatusType resourceStatusType,
+                         @QueryParam("hierarchyDepth") final int hierarchyDepth,
+                         @QueryParam("responseStructure") final ResourceDetailsType[] responseStructure)
+            throws SessionNotFoundException, SessionTimeoutException;
+
+    @GET
+    @Path("/")
+    RegisteredResourceBatchResponse getResources(@QueryParam("responseStructure") final ResourceDetailsType[]
+                                                         responseStructure,
+                                                 @QueryParam("hierarchyDepth") final int hierarchyDepth) throws
+            SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException;
+
+    @POST
+    @Path("/registration")
+    RegistrationID register(@QueryParam("responseStructure") final ResourceDetailsType responseMetadata,
+                            final ResourceFilterRequest resourceFilterRequest) throws SessionNotFoundException,
+            SessionTimeoutException, PermissionException, NotFoundException;
+
+    @GET
+    @Path("/registration/{registrationID}")
+    ExternalRegistrationStatus getRegistrationStatus(@PathParam("registrationID") final String registrationID) throws
+            SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException;
+
+    @POST
+    @Path("/approve")
+    ResourceBatchResponse approveResource(final Resources aiResources) throws SessionNotFoundException,
+            SessionTimeoutException;
+
+    @PUT
+    ResourceBatchResponse updateResources(final Resources resources) throws SessionNotFoundException,
+            SessionTimeoutException;
+
+    @PUT
+    @Path("/search")
+    ResourceBatchResponse updateResourcesByCriteria(final ResourceModel updateData) throws SessionNotFoundException,
+            SessionTimeoutException;
+
 	@GET
 	@Path("/{resourceID}/configuration-template")
 	public ConfigurationTemplate getConfigurationTemplate(@PathParam("resourceID") final String resourceID) throws SessionNotFoundException, SessionTimeoutException;
+    @DELETE
+    @Path("/registration/{registrationID}")
+    public void unregister(@PathParam("registrationID") final String registrationID) throws SessionNotFoundException,
+            SessionTimeoutException;
 }//EOC 

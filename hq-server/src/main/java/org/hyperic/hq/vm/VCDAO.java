@@ -54,6 +54,6 @@ public class VCDAO extends HibernateDAO<VmMapping> {
         }
         
         VmMapping macToUUID = rs.iterator().next();
-        return new VMID(macToUUID.getMorId(),macToUUID.getVcUUID());
+        return new VMID(macToUUID.getMoId(),macToUUID.getVcUUID());
     }
 }

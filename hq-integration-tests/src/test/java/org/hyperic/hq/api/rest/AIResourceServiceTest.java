@@ -7,8 +7,8 @@ import java.util.List;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.hyperic.hq.api.model.AIResource;
-import org.hyperic.hq.api.model.Resource;
-import org.hyperic.hq.api.model.ResourceType;
+import org.hyperic.hq.api.model.ResourceModel;
+import org.hyperic.hq.api.model.ResourceTypeModel;
 import org.hyperic.hq.api.services.AIResourceService;
 import org.hyperic.hq.context.IntegrationTestContextLoader;
 import org.hyperic.hq.context.IntegrationTestSpringJUnit4ClassRunner;
@@ -59,14 +59,14 @@ public class AIResourceServiceTest {
 //    @Test
     public final void testGetAIResource() {
         String discoveryId = "ubuntu.eng.vmware.com";
-        AIResource aiResource = proxy.getAIResource(discoveryId, ResourceType.PLATFORM);
+        AIResource aiResource = proxy.getAIResource(discoveryId, ResourceTypeModel.PLATFORM);
         Assert.assertNotNull("Haven't received the requested aiResource", aiResource);
     }
 
  //   @Test
     public final void testGetAIResourceNonExisting() {
         String discoveryId = "id1";
-        AIResource aiResource = proxy.getAIResource(discoveryId, ResourceType.PLATFORM);
+        AIResource aiResource = proxy.getAIResource(discoveryId, ResourceTypeModel.PLATFORM);
         Assert.assertNull("Have a non-existent aiResource", aiResource);
     }    
     
@@ -75,7 +75,7 @@ public class AIResourceServiceTest {
         List<String> ids = new ArrayList<String>(2);
         ids.add("1");
         ids.add("2");
-        List<Resource> resources = proxy.approveAIResource(ids, ResourceType.PLATFORM);
+        List<ResourceModel> resources = proxy.approveAIResource(ids, ResourceTypeModel.PLATFORM);
         Assert.assertNotNull("Haven't received the requested Resource", resources);
     }
 

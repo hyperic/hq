@@ -337,12 +337,12 @@ public class AIPlatform extends PlatformBase
         aipValue.setMTime(getMTime());
         aipValue.setCTime(getCTime());
         aipValue.removeAllAIIpValues();
+        aipValue.cleanAIIpValue();
         Iterator iAIIpValue = getAIIps().iterator();
         while (iAIIpValue.hasNext()){
             aipValue.addAIIpValue(
                 ((AIIp)iAIIpValue.next()).getAIIpValue() );
         }
-        aipValue.cleanAIIpValue();
         aipValue.removeAllAIServerValues();
         Iterator iAIServerValue = getAIServers().iterator();
         while (iAIServerValue.hasNext()){

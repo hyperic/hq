@@ -1,15 +1,15 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>vFabric Hyperic 5.0 : Migrate v4 Hyperic Server and Database to v5</title>
+        <title>vFabric Hyperic 5.7 : Migrate v4 Hyperic Server and Database to v5</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
-<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
- - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
- -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+<b><a href="vFabric Hyperic 5.7.html" title="vFabric Hyperic 5.7 Documentation Home">vFabric Hyperic 5.7 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.7 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.7.html">Hyperic 5.7 Release Notes</a> </b>
  <p>
  <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
@@ -17,7 +17,7 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 5.0 : Migrate v4 Hyperic Server and Database to v5
+                            vFabric Hyperic 5.7 : Migrate v4 Hyperic Server and Database to v5
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
@@ -43,7 +43,7 @@ div.rbtoc1351540730673 li {margin-left: 0px;padding-left: 0px;}
 </ul>
     <li><a href='#Migratev4HypericServerandDatabasetov5-TwoStepMigrationProcedure'>Two-Step Migration Procedure</a></li>
 <ul>
-    <li><a href='#Migratev4HypericServerandDatabasetov5-Step1%3AInstallvFabricHyperic5.0ServerandvPostgreSQL'>Step 1: Install vFabric Hyperic 5.0 Server and vPostgreSQL</a></li>
+    <li><a href='#Migratev4HypericServerandDatabasetov5-Step1%3AInstallvFabricHyperic5.0ServerandvPostgreSQL'>Step 1: Install vFabric Hyperic 5.7 Server and vPostgreSQL</a></li>
     <li><a href='#Migratev4HypericServerandDatabasetov5-Step2%3AExportExistingDatabaseandServerConfiguration'>Step 2: Export Existing Database and Server Configuration</a></li>
     <li><a href='#Migratev4HypericServerandDatabasetov5-Step3%3AImportServerConfigurationandDatabase'>Step 3: Import Server Configuration and Database</a></li>
 </ul>
@@ -93,7 +93,7 @@ This page has instructions for upgrading the Hyperic Server and database to 5.0.
 </ul>
 
 
-<p>The Hyperic 5.0 installer contains a&nbsp;migration package for performing the upgrade. The migration package,&nbsp;<tt>hq-migrate-5.0.zip</tt>&nbsp;is in&nbsp;<tt>InstallerHome/installer/bin</tt>. It contains a migration script,&nbsp;<tt>hq-migrate/bin/hq-migrate.sh</tt>&nbsp;(or .bat).&nbsp;</p>
+<p>The Hyperic 5.7 installer contains a&nbsp;migration package for performing the upgrade. The migration package,&nbsp;<tt>hq-migrate-5.0.zip</tt>&nbsp;is in&nbsp;<tt>InstallerHome/installer/bin</tt>. It contains a migration script,&nbsp;<tt>hq-migrate/bin/hq-migrate.sh</tt>&nbsp;(or .bat).&nbsp;</p>
 
 <p>By default, the migration utility exports your monitoring configuration (alert definitions, resource groups, escalation schemes, and so on) and metric data. If desired, you can run the script with an option that causes only the monitoring configuration data to be exported.</p>
 
@@ -132,7 +132,7 @@ This page has instructions for upgrading the Hyperic Server and database to 5.0.
 
 <h2><a name="Migratev4HypericServerandDatabasetov5-AccountPermissionRequirements"></a>Account Permission Requirements</h2>
 
-<p>The user account under which the import process runs should be the same as the one used to install and run the target Hyperic 5.0 Server to avoid startup errors resulting from file permission issues.</p>
+<p>The user account under which the import process runs should be the same as the one used to install and run the target Hyperic 5.7 Server to avoid startup errors resulting from file permission issues.</p>
 
 <p>The database user account that the import process runs under must have superuser permissions.</p>
 
@@ -142,17 +142,17 @@ This page has instructions for upgrading the Hyperic Server and database to 5.0.
 
 <p>The two-step upgrade process consists of these steps:</p>
 <ol>
-	<li><a href="#Migratev4HypericServerandDatabasetov5-step1">Install Hyperic 5.0 and vPostgreSQL</a></li>
+	<li><a href="#Migratev4HypericServerandDatabasetov5-step1">Install Hyperic 5.7 and vPostgreSQL</a></li>
 	<li><a href="#Migratev4HypericServerandDatabasetov5-step2">Export Data from Hyperic 4.x</a></li>
-	<li><a href="#Migratev4HypericServerandDatabasetov5-step3">Import Data to Hyperic 5.0</a></li>
+	<li><a href="#Migratev4HypericServerandDatabasetov5-step3">Import Data to Hyperic 5.7</a></li>
 </ol>
 
 
 <p><a name="Migratev4HypericServerandDatabasetov5-Step1"></a></p>
 
-<h2><a name="Migratev4HypericServerandDatabasetov5-Step1%3AInstallvFabricHyperic5.0ServerandvPostgreSQL"></a>Step 1: Install vFabric Hyperic 5.0 Server and vPostgreSQL</h2>
+<h2><a name="Migratev4HypericServerandDatabasetov5-Step1%3AInstallvFabricHyperic5.0ServerandvPostgreSQL"></a>Step 1: Install vFabric Hyperic 5.7 Server and vPostgreSQL</h2>
 
-<p>In this step, you install the Hyperic 5.0 Server and database. As noted above in <a href="#Migratev4HypericServerandDatabasetov5-permissions">Account Permission Requirements</a>, install the Hyperic Server under the same account that you will run the import process.</p>
+<p>In this step, you install the Hyperic 5.7 Server and database. As noted above in <a href="#Migratev4HypericServerandDatabasetov5-permissions">Account Permission Requirements</a>, install the Hyperic Server under the same account that you will run the import process.</p>
 
 <p>If you plan to run the components in VMs, follow the instructions on <a href="Install Hyperic vApp.html" title="Install Hyperic vApp">Install Hyperic vApp</a>.</p>
 
@@ -172,7 +172,7 @@ This page has instructions for upgrading the Hyperic Server and database to 5.0.
 		<li>Note that if the server is running when you execute the migration script, the migration process will will stop the Hyperic Server.</li>
 	</ul>
 	</li>
-	<li>Copy the migration package, <tt>hq-migration-5.0.zip</tt> from the Hyperic 5.0 installer to the 4.x Hyperic Server host.
+	<li>Copy the migration package, <tt>hq-migration-5.0.zip</tt> from the Hyperic 5.7 installer to the 4.x Hyperic Server host.
 	<ul>
 		<li>The package is located in the <tt>installer/bin</tt> directory of the 5.0 installer home directory.</li>
 	</ul>
@@ -218,7 +218,7 @@ This page has instructions for upgrading the Hyperic Server and database to 5.0.
 <p>The import process must run under an database account with superuser permissions. By default, the process will use the database credentials defined by the <tt>server.database-user</tt> and <tt>server.database-password</tt> properties in <tt>hq-server.conf</tt>. If the database user account defined in <tt>hq-server.conf</tt> is not a superuser, you must supply a superuser account's credentials at the the command line using <tt>&#45;Dtarget.database.username</tt> and <tt>&#45;Dtarget.database.password</tt> (or in a properties file using <tt>target.database.username</tt> and <tt>target.database.password</tt>).</p>
 
 <ol>
-	<li>Copy the export tarball to the the Hyperic 5.0 Server host, or make it available to the machine on which the 5.0 server is installed. In the latter case, expect some network latency overhead.</li>
+	<li>Copy the export tarball to the the Hyperic 5.7 Server host, or make it available to the machine on which the 5.0 server is installed. In the latter case, expect some network latency overhead.</li>
 	<li>Run the migration script with the import option.
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
@@ -244,9 +244,9 @@ This page has instructions for upgrading the Hyperic Server and database to 5.0.
 
 <p>If both the source and destination directories and databases are accessible from a single machine, either because they physically reside there, or are mounted on your file system, you can perform a <em>one-step-migration</em>, in which you initiate export and import with a single command.</p>
 
-<p>As noted above in <a href="#Migratev4HypericServerandDatabasetov5-permissions">Account Permission Requirements</a> execute the migration process under the same user account used to install the Hyperic 5.0 Server. Note also the database user requirements described in <a href="#Migratev4HypericServerandDatabasetov5-step3">Step 3: Import Server Configuration and Database</a>.</p>
+<p>As noted above in <a href="#Migratev4HypericServerandDatabasetov5-permissions">Account Permission Requirements</a> execute the migration process under the same user account used to install the Hyperic 5.7 Server. Note also the database user requirements described in <a href="#Migratev4HypericServerandDatabasetov5-step3">Step 3: Import Server Configuration and Database</a>.</p>
 
-<p>After performimg <a href="#Migratev4HypericServerandDatabasetov5-step1">Step 1: Install vFabric Hyperic 5.0 Server and vPostgreSQL</a> you can run a one-step-migration, supplying arguments at the command line, with a command in this form:</p>
+<p>After performimg <a href="#Migratev4HypericServerandDatabasetov5-step1">Step 1: Install vFabric Hyperic 5.7 Server and vPostgreSQL</a> you can run a one-step-migration, supplying arguments at the command line, with a command in this form:</p>
 
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
@@ -413,7 +413,7 @@ It causes the import process to run without pauses. </td>
 </tr>
 <tr>
 <td class='confluenceTd'> <tt>scale</tt> </td>
-<td class='confluenceTd'> This optional <tt>hq-export</tt> argument indicates that the scale of the Hyperic environment environment is "large", causing the Hyperic Server and database to be configured accordingly. Note that use of this argument requires that the Hyperic 5.0 is configured with the "large" sizing profile. <br class="atl-forced-newline" />
+<td class='confluenceTd'> This optional <tt>hq-export</tt> argument indicates that the scale of the Hyperic environment environment is "large", causing the Hyperic Server and database to be configured accordingly. Note that use of this argument requires that the Hyperic 5.7 is configured with the "large" sizing profile. <br class="atl-forced-newline" />
 <br class="atl-forced-newline" />
 For more information about sizing profiles, see <a href="About Sizing Profiles in vFabric Hyperic.html" title="About Sizing Profiles in vFabric Hyperic">About Sizing Profiles in vFabric Hyperic</a>. </td>
 <td class='confluenceTd'>&nbsp;</td>

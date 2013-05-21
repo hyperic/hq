@@ -377,7 +377,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * Delete a platform
      * 
      * @param subject The user performing the delete operation.
-     * @param id - The id of the Platform
+     * @param platform - The Platform
      * 
      */
     public void removePlatform(AuthzSubject subject, Platform platform)
@@ -1344,7 +1344,6 @@ public class PlatformManagerImpl implements PlatformManager {
      * 
      * 
      * @param subject The subject trying to list servers.
-     * @param pc The page control.
      * @return A PageList of ServerValue objects representing servers on the
      *         specified platform that the subject is allowed to view.
      */
@@ -1455,7 +1454,7 @@ public class PlatformManagerImpl implements PlatformManager {
     /**
      * @param subj
      * @param pType platform type
-     * @param nameRegEx regex which matches either the platform fqdn or the
+     * @param regEx regex which matches either the platform fqdn or the
      *        resource sortname XXX scottmf need to add permission checking
      * 
      */
@@ -1584,7 +1583,8 @@ public class PlatformManagerImpl implements PlatformManager {
             existing.setCpuCount(plat.getCpuCount());
         }
 
-        if (plat.matchesValueObject(existing)) {
+        Map<String, String> changedProps = plat.changedProperties(existing);
+        if (changedProps.isEmpty()) {
             log.debug("No changes found between value object and entity");
             return plat;
         } else {
@@ -1631,7 +1631,8 @@ public class PlatformManagerImpl implements PlatformManager {
                 }
             }
             Resource r = plat.getResource();
-            this.zeventManager.enqueueEventAfterCommit(new ResourceContentChangedEvent(r.getId(),existing.getName(), null, null));
+            this.zeventManager.enqueueEventAfterCommit(new ResourceContentChangedEvent(r.getId(),existing.getName(),
+                    null, changedProps));
             platformDAO.updatePlatform(plat, existing);
             return plat;
         }
@@ -1809,12 +1810,12 @@ public class PlatformManagerImpl implements PlatformManager {
 
         // Get the FQDN before we update
         String prevFqdn = platform.getFqdn();
-
-        Resource changedResource = platform.updateWithAI(aiplatform, subj.getName(), platform.getResource());
-        if (changedResource!=null) {
-            this.zeventManager.enqueueEventAfterCommit(new ResourceContentChangedEvent(changedResource.getId(), changedResource.getName(), null, null));
+        platform.updateWithAI(aiplatform, subj.getName(), platform.getResource());
+        Map<String, String> changedProperties = platform.changedProperties(aiplatform);
+        if (!changedProperties.isEmpty()) {
+            this.zeventManager.enqueueEventAfterCommit(new ResourceContentChangedEvent(aiplatform.getId(),
+                    aiplatform.getName(), null, changedProperties));
         }
-        
         // If FQDN has changed, we need to update servers' auto-inventory tokens
         if (!prevFqdn.equals(platform.getFqdn())) {
             for (Server server : platform.getServers()) {
@@ -2058,10 +2059,10 @@ public class PlatformManagerImpl implements PlatformManager {
                 try {
                     AppdefEntityID id = platform.getEntityId();
                     int typeId = platform.getAppdefResourceType().getId().intValue();                 
-                    this.cpropManager.setValue(id, typeId, HQConstants.MORID, "");
+                    this.cpropManager.setValue(id, typeId, HQConstants.MOID, "");
                     this.cpropManager.setValue(id, typeId, HQConstants.VCUUID, "");
                     Map<String,String> changedProps = new HashMap<String,String>();
-                    changedProps.put(HQConstants.MORID, null);
+                    changedProps.put(HQConstants.MOID, null);
                     changedProps.put(HQConstants.VCUUID, null);
                     ResourceContentChangedEvent contentChangedEvent = new ResourceContentChangedEvent(platform.getId(),null,null,changedProps);
                     events.add(contentChangedEvent);
@@ -2093,12 +2094,12 @@ public class PlatformManagerImpl implements PlatformManager {
                         if (AuthzConstants.platformPrototypeVmwareVsphereVm.equals(platform.getResource().getPrototype().getName())) { continue; }
                         AppdefEntityID id = platform.getEntityId();
                         int typeId = platform.getAppdefResourceType().getId().intValue();
-                        String moref = vmMap.getMorId();
+                        String moref = vmMap.getMoId();
                         String vcUUID = vmMap.getVcUUID();
-                        this.cpropManager.setValue(id, typeId, HQConstants.MORID, moref);
+                        this.cpropManager.setValue(id, typeId, HQConstants.MOID, moref);
                         this.cpropManager.setValue(id, typeId, HQConstants.VCUUID, vcUUID);
                         Map<String,String> changedProps = new HashMap<String,String>();
-                        changedProps.put(HQConstants.MORID,moref);
+                        changedProps.put(HQConstants.MOID,moref);
                         changedProps.put(HQConstants.VCUUID,vcUUID);
                         ResourceContentChangedEvent contentChangedEvent = new ResourceContentChangedEvent(platform.getId(),null,null,changedProps);
                         events.add(contentChangedEvent);

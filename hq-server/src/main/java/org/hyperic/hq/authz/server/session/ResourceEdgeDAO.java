@@ -91,6 +91,29 @@ public class ResourceEdgeDAO
      * @return {@link Collection} of {@link ResourceEdge}s
      */
     @SuppressWarnings("unchecked")
+    Collection<ResourceEdge> findChildEdges(List<Resource> resources, ResourceRelation rel) {
+        String sql = "from ResourceEdge e " +
+                     "where e.from in (:resources) " +
+                     "and distance = 1 " +
+                     "and rel_id = :rel_id ";
+        final List<ResourceEdge> rtn = new ArrayList<ResourceEdge>(resources.size());
+        final Query query = getSession().createQuery(sql);
+        int size = resources.size();
+        for (int i = 0; i < size; i += BATCH_SIZE) {
+            int end = Math.min(i + BATCH_SIZE, size);
+            final List<ResourceEdge> edges =
+                query.setParameterList("resources", resources.subList(i, end))
+                     .setInteger("rel_id", rel.getId().intValue())
+                     .list();
+            rtn.addAll(edges);
+        }
+        return rtn;
+    }
+
+    /**
+     * @return {@link Collection} of {@link ResourceEdge}s
+     */
+    @SuppressWarnings("unchecked")
     Collection<ResourceEdge> findDescendantEdges(List<Resource> resources, ResourceRelation rel) {
         String sql = "from ResourceEdge e " + "where e.from in (:resources) "
                      + "and distance > :distance " + "and rel_id = :rel_id ";
