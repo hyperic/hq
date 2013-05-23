@@ -3,7 +3,7 @@ package org.hyperic.hq.util.properties;
 public class PropertiesUtil {
 
     public static Boolean getBooleanValue(String property) {
-        if ((null == property) || property.isEmpty()) {
+        if ((null == property) || property.equalsIgnoreCase("")) {
             return null;
         }
         if (property.equalsIgnoreCase("true") || property.equalsIgnoreCase("yes")) {
