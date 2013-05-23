@@ -2,10 +2,7 @@ package org.hyperic.hq.notifications;
 
 import java.util.List;
 
-import javax.jms.ObjectMessage;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.notifications.filtering.DestinationEvaluator;
 import org.hyperic.hq.notifications.model.BaseNotification;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
@@ -13,53 +10,45 @@ import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
-public abstract class BaseNotificationsZeventListener<E extends Zevent,N extends BaseNotification> implements ZeventListener<E> {
-    private final Log log = LogFactory.getLog(BaseNotificationsZeventListener.class);
+public abstract class BaseNotificationsZeventListener<E extends Zevent,N extends BaseNotification>
+implements ZeventListener<E> {
+    private static final int BATCH_SIZE = 10000;
     @Autowired
     protected ConcurrentStatsCollector concurrentStatsCollector;
     @Autowired
     protected ZeventEnqueuer zEventManager;
     @Autowired
-    protected Q q;
+    protected EndpointQueue endpointQueue;
+    @Autowired
+    private ThreadPoolTaskScheduler notificationFilterExecutor;
 
-    protected abstract String getListenersBeanName();
-    protected abstract String getConcurrentStatsCollectorType();
+    public abstract String getListenersBeanName();
+    public abstract String getConcurrentStatsCollectorType();
     /**
      * @param events
      * @return data which is needed for filtering, extracted per the events data
      */
-    protected abstract List<N> extract(List<E> events);
-    protected abstract DestinationEvaluator<N> getEvaluator();
+    public abstract List<N> extract(List<E> events);
+    public abstract DestinationEvaluator<N> getEvaluator();
     
-//    @Override
-    @Transactional(readOnly = true)
-    public void processEvents(List<E> events) {
-        if (log.isDebugEnabled()) {
-            log.debug(getListenersBeanName() + " got events:\n" + events);
+    public void processEvents(final List<E> events) {
+        if (endpointQueue.getNumConsumers() == 0) {
+            return;
         }
-        
-        final long start = System.currentTimeMillis();
-        List<N> ns = extract(events);
-        List<ObjectMessage> msgs = null;
-        try {
-            msgs = this.getEvaluator().evaluate(ns);
-            if (msgs!=null && !msgs.isEmpty()) {
-                this.q.publish(msgs);
-            }
-        }catch(Throwable e) {
-            log.error(e);
+        // execute in batches to avoid session bloat.
+        // to increase the throughput of this mechanism we could add more threads to the notificationFilterExecutor
+        // bean.  Making it configurable would be nice too.
+        final int size = events.size();
+        for (int i=0; i<size; i+=BATCH_SIZE) {
+            final int end = Math.min(size, i+BATCH_SIZE);
+            @SuppressWarnings("unchecked")
+            final NotificationFilterExecutorRunner<E,N> runner = Bootstrap.getBean(NotificationFilterExecutorRunner.class);
+            runner.setEvents(events.subList(i, end));
+            runner.setListener(this);
+            notificationFilterExecutor.execute(runner);
         }
-        final long end = System.currentTimeMillis();
-        
-        if (log.isDebugEnabled()) {
-            if (msgs==null) {
-                log.debug(getListenersBeanName() + " did not publish any notifications");
-            } else {
-                log.debug(getListenersBeanName() + " published:\n" + msgs);
-            }
-        }
-        concurrentStatsCollector.addStat(end-start, getConcurrentStatsCollectorType());
     }
+
 }

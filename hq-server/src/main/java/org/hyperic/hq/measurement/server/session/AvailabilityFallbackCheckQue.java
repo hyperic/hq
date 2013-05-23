@@ -70,19 +70,19 @@ public class AvailabilityFallbackCheckQue {
     private final Log log = LogFactory.getLog(AvailabilityFallbackCheckQue.class);
     
     // a que holding the platforms pending recheck
-    private ConcurrentLinkedQueue<ResourceDataPoint> platformsRecheckQue;
+    private final ConcurrentLinkedQueue<ResourceDataPoint> platformsRecheckQue;
     
     // Map:PlatformID->latest availability ResourceDataPoint>, for quick-access of platformsRecheckQue items. 
-    private Map<Integer, ResourceDataPoint> currentPlatformsInQue;
+    private final Map<Integer, ResourceDataPoint> currentPlatformsInQue;
 
     // Set of Platform IDs, for platforms whose status is currently checked by AvailabilityFallbackChecker.
-    private Set<Integer> platformsRecheckInProgress;
+    private final Set<Integer> platformsRecheckInProgress;
     
     // Set of Platform IDs, for platforms currently rechecked, which agent information was sent.
-    private Set<Integer> platformsPendingQueRemoval;
+    private final Set<Integer> platformsPendingQueRemoval;
     
     // Map: MeasurementID->PlatformID for quick-access
-    private Map<Integer,Integer> measurementIdToPlatformId;
+    private final Map<Integer,Integer> measurementIdToPlatformId;
 
     
     
@@ -131,6 +131,10 @@ public class AvailabilityFallbackCheckQue {
            log.debug("addToQue: start resourcePlatformId=" + platformId+ ", curQueSize: " + getSize());
         }
         if (this.currentPlatformsInQue.containsKey(platformId)) {
+            // fix for jira issue HQ-4325 - keep the existing platform down data
+            // point timestamp updated to the last availability check time
+            ResourceDataPoint existingDataPoint = this.currentPlatformsInQue.get(platformId);
+            existingDataPoint.getMetricValue().setTimestamp(dataPoint.getTimestamp());
             // in case there was an agent update in the middle, we do not want to remove it from the recheck que.
             //this.platformsPendingQueRemoval.remove(platformId);
             return false;
@@ -221,7 +225,9 @@ public class AvailabilityFallbackCheckQue {
                     this.platformsRecheckQue.remove(platformDataPoint);
                     this.measurementIdToPlatformId.remove(measurementId);
                     this.currentPlatformsInQue.remove(platformId);
-                    if (debug) removed.add(dataPoint);
+                    if (debug) {
+                        removed.add(dataPoint);
+                    }
                 } else {
                     res.add(dataPoint);
                     ResourceDataPoint queDataPoint = this.currentPlatformsInQue.get(platformId);
@@ -288,12 +294,13 @@ public class AvailabilityFallbackCheckQue {
                 res++;
                 pointsToDel.add(dp);
                 Integer platformId = removeFromCurrentPlatformsInQue(dp);
-                if (platformId != null)
+                if (platformId != null) {
                     removeFromMeasIdToPlatId(platformId);
+                }
             }            
         }
         platformsRecheckQue.removeAll(pointsToDel);
-        if (res != 0 && log.isDebugEnabled()) {
+        if ((res != 0) && log.isDebugEnabled()) {
             log.debug("cleanQueFromNonExistant: removing " + res + " platforms.");
         }
         return res;

@@ -32,7 +32,16 @@
   xmlns:cxf="http://cxf.apache.org/core"    
   xmlns:util="http://www.springframework.org/schema/util"   
   xmlns:context="http://www.springframework.org/schema/context"
-  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd http://cxf.apache.org/core http://cxf.apache.org/schemas/core.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd ">
+  xsi:schemaLocation="http://www.springframework.org/schema/beans
+                      http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+                      http://www.springframework.org/schema/context
+                      http://www.springframework.org/schema/context/spring-context-3.0.xsd
+                      http://cxf.apache.org/jaxrs
+                      http://cxf.apache.org/schemas/jaxrs.xsd
+                      http://cxf.apache.org/core
+                      http://cxf.apache.org/schemas/core.xsd
+                      http://www.springframework.org/schema/util
+                      http://www.springframework.org/schema/util/spring-util.xsd ">
 
 	<import resource="classpath:META-INF/cxf/cxf.xml" />
 	<import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
@@ -50,6 +59,8 @@
 
 	<bean id="timeProvider" class="org.hyperic.hq.api.common.DateParameterProvider">
 	</bean>
+
+	<bean id="searchContextProvider" class="org.apache.cxf.jaxrs.ext.search.SearchContextProvider"/>
 
 	 <bean name="restApiLogger" class="org.apache.commons.logging.LogFactory" 
       factory-method="getLog" >
@@ -109,7 +120,7 @@
 		</jaxrs:providers>
         <jaxrs:features>
             <cxf:logging />
-        </jaxrs:features>		
+        </jaxrs:features>              
 	</jaxrs:server>
 	
 	<jaxrs:server id="sessionService" address="/session">
@@ -122,7 +133,7 @@
 		</jaxrs:providers>
         <jaxrs:features>
             <cxf:logging />
-        </jaxrs:features>		
+        </jaxrs:features>              
 	</jaxrs:server>	
 
 	<jaxrs:server id="notificationsService" address="/notification">
@@ -135,7 +146,7 @@
         </jaxrs:providers>
         <jaxrs:features>
             <cxf:logging />
-        </jaxrs:features>        
+        </jaxrs:features>              
     </jaxrs:server>
     
 	<jaxrs:server id="measurementService" address="/measurement">
@@ -145,13 +156,14 @@
         <jaxrs:providers>
             <ref bean="jaxbProvider" />
 			<ref bean="jsonProvider" />
+			<ref bean="searchContextProvider" />
         </jaxrs:providers>
         <jaxrs:features>
             <cxf:logging />
-        </jaxrs:features>        
+        </jaxrs:features>              
     </jaxrs:server>
 
-	<jaxrs:server id="metrictService" address="/metric">
+	<jaxrs:server id="metricService" address="/metric">
 		<jaxrs:serviceBeans>
 			<ref bean="metricServiceImpl" />
         </jaxrs:serviceBeans>
@@ -159,11 +171,13 @@
             <ref bean="jaxbProvider" />
 			<ref bean="jsonProvider" />
 			<ref bean="timeProvider" />
+			<ref bean="searchContextProvider" />
         </jaxrs:providers>
         <jaxrs:features>
             <cxf:logging />
-        </jaxrs:features>        
+        </jaxrs:features>              
     </jaxrs:server>
+
     
     <jaxrs:server id="serverConfig" address="/serverConfig">
         <jaxrs:serviceBeans>
@@ -175,7 +189,6 @@
         </jaxrs:providers>
         <jaxrs:features>
             <cxf:logging />
-        </jaxrs:features>
+        </jaxrs:features>              
     </jaxrs:server>
-
 </beans>

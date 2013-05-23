@@ -33,6 +33,7 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -43,18 +44,40 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name="ConfigurationOptionType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 public class ConfigurationOption {
 
-    private String     name;    
+    @XmlAttribute
+    private String     name;
+    @XmlAttribute
     private String     description;  
-    private String     category;          
-    private String     defaultValue;   
+    @XmlAttribute
+    private String     category; 
+    @XmlAttribute    
+    private String     defaultValue;
+    @XmlAttribute
     private String     confirmWithValue;    // The value to double check on
-    private Boolean    isOptional;  
+    @XmlAttribute
+    private Boolean    isOptional;
+    @XmlAttribute
     private String     type;    // { int, double, boolean, long, string, ip, enum, secret, hidden, port, macaddress, stringarray};
     
     @XmlElementWrapper(name="enumValues", namespace=RestApiConstants.SCHEMA_NAMESPACE)
-    @XmlElement(name = "enumValue", namespace=RestApiConstants.SCHEMA_NAMESPACE)
+    @XmlElement(name = "enumValue", namespace=RestApiConstants.SCHEMA_NAMESPACE, nillable=true)
     private List<String> enumValues;
 
+    public ConfigurationOption() {
+    }
+
+    public ConfigurationOption(String name, String description, String category, String defaultValue,
+            String confirmWithValue, Boolean isOptional, String type, List<String> enumValues) {
+        this.name = name;
+        this.description = description;
+        this.category = category;
+        this.defaultValue = defaultValue;
+        this.confirmWithValue = confirmWithValue;
+        this.isOptional = isOptional;
+        this.type = type;
+        this.enumValues = enumValues;
+    }    
+    
     public String getName() {
         return name;
     }

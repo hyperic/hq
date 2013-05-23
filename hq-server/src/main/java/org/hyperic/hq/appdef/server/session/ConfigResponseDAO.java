@@ -25,8 +25,15 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.hibernate.SessionFactory;
 import org.hyperic.hq.appdef.ConfigResponseDB;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
@@ -94,4 +101,36 @@ public class ConfigResponseDAO extends HibernateDAO<ConfigResponseDB> {
         getSession().createQuery(sql).setString(0, error).setParameter(1, resp.getId())
             .executeUpdate();
     }
+
+    @SuppressWarnings("unchecked")
+    private Map<Resource, ConfigResponseDB> getConfigs(List<Resource> list, String table) {
+        String hql = "select t.resource, t.configResponse from :table t where t.resource in (:resources)";
+        hql = hql.replace(":table", table);
+        final List<Object[]> objs = new ArrayList<Object[]>();
+        final int size = list.size();
+        for (int ii=0; ii<size; ii+=BATCH_SIZE) {
+            final int end = Math.min(size, ii+BATCH_SIZE);
+            final List<Resource> sublist = list.subList(ii, end);
+            final List<Object[]> result = getSession().createQuery(hql).setParameterList("resources", sublist).list();
+            objs.addAll(result);
+        }
+        final Map<Resource, ConfigResponseDB> rtn = new HashMap<Resource, ConfigResponseDB>();
+        for (final Object[] obj : objs) {
+            rtn.put((Resource) obj[0], (ConfigResponseDB) obj[1]);
+        }
+        return rtn;
+    }
+
+    Map<Resource, ConfigResponseDB> getServerConfigs(List<Resource> list) {
+        return getConfigs(list, "Server");
+    }
+
+    Map<Resource, ConfigResponseDB> getServiceConfigs(List<Resource> list) {
+        return getConfigs(list, "Service");
+    }
+
+    Map<Resource, ConfigResponseDB> getPlatformConfigs(List<Resource> list) {
+        return getConfigs(list, "Platform");
+    }
+
 }

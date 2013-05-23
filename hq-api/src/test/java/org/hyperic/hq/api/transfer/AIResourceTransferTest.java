@@ -8,8 +8,8 @@ import java.util.List;
 
 import org.easymock.EasyMock;
 import org.hyperic.hq.api.model.AIResource;
-import org.hyperic.hq.api.model.Resource;
-import org.hyperic.hq.api.model.ResourceType;
+import org.hyperic.hq.api.model.ResourceModel;
+import org.hyperic.hq.api.model.ResourceTypeModel;
 import org.hyperic.hq.appdef.server.session.AIQueueManagerImpl;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueManager;
@@ -72,7 +72,7 @@ public class AIResourceTransferTest extends AIResourceTransfer {
         EasyMock.expect(sessionManager.getSubject(1)).andReturn(authzSubjectManager.getOverlordPojo());
         EasyMock.replay(aiQueueManager, sessionManager);        
         
-        ResourceType type = ResourceType.PLATFORM;
+        ResourceTypeModel type = ResourceTypeModel.PLATFORM;
         AIResource aiResource = resourceTransfer.getAIResource(discoveryId, type);
         assertNotNull("aiResource hasn't been found", aiResource);
         assertEquals("Returned ai resource of incorrect type", type, aiResource.getResourceType());
@@ -91,7 +91,7 @@ public class AIResourceTransferTest extends AIResourceTransfer {
         EasyMock.expect(sessionManager.getSubject(1)).andReturn(authzSubjectManager.getOverlordPojo());
         EasyMock.replay(aiQueueManager, sessionManager);       
         
-        ResourceType type = ResourceType.SERVER;
+        ResourceTypeModel type = ResourceTypeModel.SERVER;
         AIResource aiResource = resourceTransfer.getAIResource(discoveryId, type);
         assertNotNull("aiResource hasn't been found", aiResource);
         assertEquals("Returned ai resource of incorrect type", type, aiResource.getResourceType());
@@ -114,11 +114,11 @@ public class AIResourceTransferTest extends AIResourceTransfer {
     public final void testApproveAIResource() {
         AIResourceTransfer resourceTransfer = new AIResourceTransfer();
       
-        ResourceType type = ResourceType.PLATFORM;
+        ResourceTypeModel type = ResourceTypeModel.PLATFORM;
         List<String> ids = new ArrayList<String>(2);
         ids.add("1");
         ids.add("2");
-        List<Resource> approvedResource = resourceTransfer.approveAIResource(ids, type);
+        List<ResourceModel> approvedResource = resourceTransfer.approveAIResource(ids, type);
         assertEquals("Number of approved resources doesn't match that of the discovered resources.", ids.size(), approvedResource.size());
         
     }

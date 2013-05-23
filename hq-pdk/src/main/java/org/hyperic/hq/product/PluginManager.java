@@ -151,6 +151,18 @@ public abstract class PluginManager {
         return getPlugin(plugin).getConfigSchema(info, config);
     }
 
+    public ConfigSchema getConfigSchema(String pluginName, 
+            String platformName, 
+            String typeName, 
+            TypeInfo info,
+            ConfigResponse config) 
+                    throws PluginNotFoundException {
+
+        String fullTypeName = typeName.equals(platformName) ? platformName : (typeName + " " + platformName);
+
+        return getConfigSchema(fullTypeName, info, config);
+    }   
+    
     private String getServicePluginImpl(GenericPlugin plugin) {
         return plugin.getTypeProperty("SERVICE_" +
                                       getName().toUpperCase() +

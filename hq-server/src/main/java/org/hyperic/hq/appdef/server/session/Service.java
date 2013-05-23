@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang.ObjectUtils;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
@@ -208,27 +209,33 @@ public class Service extends AppdefResource
     /**
      * legacy DTO pattern.
      * Compare this entity bean to a value object
-     * @deprecated should use (this) Service object and hibernate dirty() check
-     * @return true if the service value matches this entity
+     * @return changedProps The changed properties or an empty map if the service value matches this entity
      */
-    public boolean matchesValueObject(ServiceValue obj)
-    {
-        boolean matches;
-        matches = super.matchesValueObject(obj) &&
-            (getName() != null ? getName().equals(obj.getName())
-                : (obj.getName() == null)) &&
-            (getDescription() != null ?
-                getDescription().equals(obj.getDescription())
-                : (obj.getDescription() == null)) &&
-            (getLocation() != null ?
-                getLocation().equals(obj.getLocation())
-                : (obj.getLocation() == null)) &&
-            (getAutoinventoryIdentifier() != null ?
-                getAutoinventoryIdentifier().equals(obj.getAutoinventoryIdentifier())
-                : (obj.getAutoinventoryIdentifier() == null)) &&
-            (isEndUserRt() == obj.getEndUserRt()) &&
-            (isServiceRt() == obj.getServiceRt());
-        return matches;
+    @Override
+    public Map<String, String> changedProperties(AppdefResourceValue appdefResourceValue) {
+
+        ServiceValue serviceValue = (ServiceValue) appdefResourceValue;
+        Map<String, String> changedProps = super.changedProperties(serviceValue);
+
+        if (!ObjectUtils.equals(getName(), serviceValue.getName())) {
+            changedProps.put("Name", serviceValue.getName());
+        }
+        if (!ObjectUtils.equals(getDescription(), serviceValue.getDescription())) {
+            changedProps.put("Description", serviceValue.getDescription());
+        }
+        if (!ObjectUtils.equals(getLocation(), serviceValue.getLocation())) {
+            changedProps.put("Location", serviceValue.getLocation());
+        }
+        if (!ObjectUtils.equals(getAutoinventoryIdentifier(), serviceValue.getAutoinventoryIdentifier())) {
+            changedProps.put("AutoinventoryIdentifier", serviceValue.getAutoinventoryIdentifier());
+        }
+        if (!ObjectUtils.equals(isEndUserRt(), serviceValue.getEndUserRt())) {
+            changedProps.put("EndUserRt", String.valueOf(serviceValue.getEndUserRt()));
+        }
+        if (!ObjectUtils.equals(isServiceRt(), serviceValue.getServiceRt())) {
+            changedProps.put("ServiceRt", String.valueOf(serviceValue.getServiceRt()));
+        }
+        return changedProps;
     }
 
     /**

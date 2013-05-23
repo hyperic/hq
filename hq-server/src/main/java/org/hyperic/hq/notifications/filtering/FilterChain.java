@@ -56,9 +56,9 @@ public class FilterChain<N extends BaseNotification> extends AbstractCollection<
         return filteredEntities;
         
     }
+
     @Override
     public String toString() {
-        return super.toString();
-        // TODO~ print internal filters list and see debug logs that prints this class are fine
+        return filters.toString();
     }
 }

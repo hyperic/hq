@@ -47,4 +47,9 @@ public class MetricFilteringCondition extends FilteringCondition<Measurement> {
     public void setIsIndicator(Boolean isIndicator) {
         this.isIndicator = isIndicator;
     }
+
+    @Override
+    public String toString() {
+        return "isIndicator=" + isIndicator;
+    }
 }

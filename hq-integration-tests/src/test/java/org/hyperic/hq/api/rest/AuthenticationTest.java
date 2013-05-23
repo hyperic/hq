@@ -5,7 +5,7 @@ import java.util.List;
 
 import javax.ws.rs.WebApplicationException;
 
-import org.hyperic.hq.api.model.Resource;
+import org.hyperic.hq.api.model.ResourceModel;
 import org.hyperic.hq.api.model.Resources;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.api.resources.ResourceServiceTest;
@@ -61,7 +61,7 @@ public class AuthenticationTest extends RestTestCaseBase<ResourceService, EmptyR
 
 
     private void updateEmptyResources(int[] is) throws Throwable {        
-        List<Resource> resourceList = new ArrayList<Resource>(0);
+        List<ResourceModel> resourceList = new ArrayList<ResourceModel>(0);
         final Resources resources = new Resources(resourceList );        
         ResourceBatchResponse response = null ;
         try{ 

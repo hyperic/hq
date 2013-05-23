@@ -8,7 +8,7 @@ import javax.xml.bind.annotation.XmlType;
 import org.hyperic.hq.api.model.measurements.RawMetric;
 
 
-@XmlSeeAlso({ID.class,Resource.class,RawMetric.class})
+@XmlSeeAlso({ID.class,ResourceModel.class,RawMetric.class})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name="NotificationType", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 public class Notification {

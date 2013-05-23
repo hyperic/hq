@@ -193,4 +193,10 @@ public interface CPropManager {
      * @return {@link Map} of {@link String} to {@link AppdefResourceType}s
      */
     public Map<String, AppdefResourceType> findResourceType(Collection<TypeInfo> typeInfos);
+
+    /**
+     * @param keys - keys to search for in the propkey field, must be specified or not values will be returned
+     * @return {@link Map} of {@link AppdefEntityID} to {@link Properties}
+     */
+    public Map<AppdefEntityID, Properties> getAllEntries(String ... keys);
 }

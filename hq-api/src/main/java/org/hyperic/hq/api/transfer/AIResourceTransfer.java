@@ -35,9 +35,9 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.hyperic.hq.api.model.AIResource;
-import org.hyperic.hq.api.model.Resource;
+import org.hyperic.hq.api.model.ResourceModel;
 import org.hyperic.hq.api.model.ResourcePrototype;
-import org.hyperic.hq.api.model.ResourceType;
+import org.hyperic.hq.api.model.ResourceTypeModel;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueManager;
 import org.hyperic.hq.appdef.shared.AIServerValue;
@@ -102,7 +102,7 @@ public class AIResourceTransfer {
         this.sessionManager = sessionManager;
     }
 
-    public AIResource getAIResource(String discoveryId, ResourceType type) {
+    public AIResource getAIResource(String discoveryId, ResourceTypeModel type) {
         //TODO Maya replace with correct identity after implementing security 
 //        AuthzSubject authzSubject = authzSubjectManager.getOverlordPojo();
         AuthzSubject authzSubject = null;
@@ -117,35 +117,35 @@ public class AIResourceTransfer {
         }
         
         AIResource aiResource = null;
-        if (ResourceType.PLATFORM == type) {
+        if (ResourceTypeModel.PLATFORM == type) {
             AIPlatformValue aiPlatform = this.aiQueueManager.findAIPlatformByFqdn(
                     authzSubject, discoveryId);
             aiResource = this.aiResourceMapper.mapAIPLarformValueToAIResource(aiPlatform, aiResource);
-        } else if (ResourceType.SERVER == type) {
+        } else if (ResourceTypeModel.SERVER == type) {
             AIServerValue aiServer = this.aiQueueManager.findAIServerByName(authzSubject, discoveryId);
             aiResource = this.aiResourceMapper.mapAIServerValueToAIResource(aiServer, aiResource);
         }
         return aiResource;
     }
 
-    public List<Resource> approveAIResource(List<String> ids, ResourceType type) {
+    public List<ResourceModel> approveAIResource(List<String> ids, ResourceTypeModel type) {
         // TODO method stub
-        List<Resource> approvedResources = new ArrayList<Resource>();
+        List<ResourceModel> approvedResources = new ArrayList<ResourceModel>();
         for (String aiServerId : ids) {
-            Resource server1 = createMockServer(aiServerId);
+            ResourceModel server1 = createMockServer(aiServerId);
             approvedResources.add(server1);
         }
         return approvedResources;
     }
 
-    private Resource createMockServer(String aiServerId) {
-        Resource server = new Resource();
+    private ResourceModel createMockServer(String aiServerId) {
+        ResourceModel server = new ResourceModel();
         server.setNaturalID(aiServerId + "-" + aiServerId);
         server.setName("Server " + aiServerId);
         ResourcePrototype serverPrototype = new ResourcePrototype();
         serverPrototype.setName("A server");
         serverPrototype.setId("aServer");
-        server.setResourceType(ResourceType.SERVER);
+        server.setResourceType(ResourceTypeModel.SERVER);
         server.setResourcePrototype(serverPrototype);
         return server;
     }
@@ -170,7 +170,7 @@ public class AIResourceTransfer {
         serverResourcePrototype.setName("Tomcat 6.0");
         serverResourcePrototype.setId("tomcatID");
         server.setResourcePrototype(serverResourcePrototype);
-        server.setResourceType(ResourceType.SERVER);
+        server.setResourceType(ResourceTypeModel.SERVER);
         server.setNaturalID(id);
         server.setId(id + id);
         server.setName("Server " + id);

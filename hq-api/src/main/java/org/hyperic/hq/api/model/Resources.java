@@ -44,24 +44,24 @@ public class Resources implements Serializable{
 	private static final long serialVersionUID = -7751427064022499930L;
  
 	@XmlElement(name="resource", namespace=RestApiConstants.SCHEMA_NAMESPACE) 
-	private List<Resource> resources ; 
+	private List<ResourceModel> resources ; 
 	
 	public Resources(){}//EOM  
 	
-	public Resources(final List<Resource> resources) { 
+	public Resources(final List<ResourceModel> resources) { 
 		this.resources = resources ;  
 	}//EOM 
 	
-	public final void setResources(final List<Resource> resources) { 
+	public final void setResources(final List<ResourceModel> resources) { 
 		this.resources = resources ; 
 	}//EOM 
 	
-	public final List<Resource> getResources() { 
+	public final List<ResourceModel> getResources() { 
 		return this.resources ;  
 	}//EOM
 	
-	public final void addResource(final Resource resource) { 
-		if(this.resources == null) this.resources = new ArrayList<Resource>() ; 
+	public final void addResource(final ResourceModel resource) { 
+		if(this.resources == null) this.resources = new ArrayList<ResourceModel>() ; 
 		this.resources.add(resource) ;
 	}//EOM 
 	

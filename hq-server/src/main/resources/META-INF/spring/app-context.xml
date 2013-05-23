@@ -107,6 +107,7 @@
                 <prop key="vfabric.licenseServer.url"></prop>
                 <prop key="vcops.license.key"></prop>
                 <prop key="vcloud.license.key"></prop>
+                <prop key="vsphere.license.key"></prop>
                 <prop key="vc.sync.interval.minutes">2</prop>
 				<prop key="server.keystore.path">hyperic.keystore</prop>
 				<prop key="server.keystore.password">hyperic</prop>
@@ -300,9 +301,27 @@
 	
 	<task:scheduler id="scheduler" pool-size="8"/>
 	
+    <bean class="org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler" id="notificationFilterExecutor" p:poolSize="1">
+        <property name="threadFactory">
+            <bean class="org.springframework.scheduling.concurrent.CustomizableThreadFactory" p:daemon="true">
+                <constructor-arg value="notification-filter-exec-"/>
+            </bean>
+        </property>
+    </bean>
+	
+    <bean class="org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler" id="notificationExecutor" p:poolSize="2">
+        <property name="threadFactory">
+            <bean class="org.springframework.scheduling.concurrent.CustomizableThreadFactory" p:daemon="true">
+                <constructor-arg value="notification-endpoint-exec-"/>
+            </bean>
+        </property>
+    </bean>
+	
 	<bean class="org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler" id="concurrentStatsScheduler" p:poolSize="2">
 		<property name="threadFactory">
-			<bean class="org.hyperic.hq.stats.ConcurrentStatsCollectorThreadFactory"/>
+            <bean class="org.springframework.scheduling.concurrent.CustomizableThreadFactory" p:daemon="true">
+                <constructor-arg value="hqstats-sampler-"/>
+            </bean>
 		</property>
 	</bean>
 	

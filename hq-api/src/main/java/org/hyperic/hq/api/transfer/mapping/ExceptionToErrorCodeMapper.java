@@ -32,12 +32,10 @@ import java.util.ResourceBundle;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.logging.Log;
 import org.apache.cxf.jaxrs.impl.ResponseBuilderImpl;
 import org.hyperic.hq.api.model.resources.FailedResource;
-import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper.ErrorCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -86,10 +84,10 @@ public class ExceptionToErrorCodeMapper  {
     	String description = null ;  
     	try{ 
     		description = errorCodesBundle.getString(errorCode) ;
-    		if (description == null || description.isEmpty()) {
+    		if ((description == null) || description.isEmpty()) {
     		    return null;
     		}
-    		if (args==null || args.length==0) {
+    		if ((args==null) || (args.length==0)) {
     		    return description.replace("%s", "");
     		}
     		return String.format(description, args); 
@@ -103,7 +101,9 @@ public class ExceptionToErrorCodeMapper  {
     }//EOM
     
     public final FailedResource newFailedResource(final String resourceID, final String errorCode, String additionalDescription, final Object...args) {
-    	if(additionalDescription == null) additionalDescription =  this.getDescription(errorCode, args) ; 
+    	if(additionalDescription == null) {
+            additionalDescription =  this.getDescription(errorCode, args) ;
+        } 
     	return new FailedResource(resourceID, errorCode, additionalDescription) ;
     }//EOM 
       
@@ -138,6 +138,7 @@ public class ExceptionToErrorCodeMapper  {
         RESOURCE_NOT_FOUND_BY_ID("1001"),
         INVALID_SESSION("2001"),
         SESSION_TIMEOUT("2002"),
+        NON_ADMIN_ERR("2003"),
         TEMPLATE_NOT_FOUND("3002"),
         MEASUREMENT_NOT_FOUND("3003"),
         WRONG_DATE_FORMAT("4001"),
@@ -145,15 +146,23 @@ public class ExceptionToErrorCodeMapper  {
         BAD_MEASUREMENT_REQ("5001"),
         BAD_REQ_BODY("5002"),
         UPDATE_FAILURE("5003"),
-        CANNOT_VERIFY_VC_SETTINGS("6001"),
-        CANNOT_UPDATE_SERVER_GUID("6002"),
-        VC_CONNECTION_ALREADY_EXISTS("6003"),
-        NO_VC_CONNECTION_EXISTS("6004"),
+        CLOUD_PROVIDER_NOT_CONFIGURED("6001"),
+        BAD_CLOUD_PROVIDER_CONFIGURATION("6002"),
+        CLOUD_RESOURCE_NOT_FOUND("6003"),
         SEQUENTIAL_REGISTRATION("7000"),
         MISSING_MANDATORY_FILTER("7001"),
         UNREGISTERED_FOR_NOTIFICATIONS("7002"),
-        INTERNAL_SERVER_ERROR("8001"),
-        REGEX_PATTERN_SYNTAX_ERROR("9001");
+        CANNOT_VERIFY_VC_SETTINGS("8001"),
+        CANNOT_UPDATE_SERVER_GUID("8002"),
+        VC_CONNECTION_ALREADY_EXISTS("8003"),
+        NO_VC_CONNECTION_EXISTS("8004"), 
+        UNKNOWN_ENDPOINT("8005"), 
+        ILLEGAL_FILTER("8100"), 
+        ILLEGAL_FILTER_COMPARATOR("8101"), 
+        ILLEGAL_AGG_FILTER("8102"),
+        INTERNAL_SERVER_ERROR("9000"),
+        REGEX_PATTERN_SYNTAX_ERROR("9001"),
+        MULTIPLE_POLICIES_TYPES_MAPPED("9002");
         
         
         private final String errorCode;

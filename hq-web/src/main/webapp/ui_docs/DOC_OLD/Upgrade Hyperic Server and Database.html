@@ -1,15 +1,15 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>vFabric Hyperic 5.0 : Upgrade Hyperic Server and Database</title>
+        <title>vFabric Hyperic 5.7 : Upgrade Hyperic Server and Database</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
 
     <body>
-<b><a href="vFabric Hyperic 5.0.html" title="vFabric Hyperic 5.0 Documentation Home">vFabric Hyperic 5.0 Documentation Home (Internal)</a>
- - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.0 Documentation Home (Online)</a>
- -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.0.html">Hyperic 5.0 Release Notes</a> </b>
+<b><a href="vFabric Hyperic 5.7.html" title="vFabric Hyperic 5.7 Documentation Home">vFabric Hyperic 5.7 Documentation Home (Internal)</a>
+ - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 5.7 Documentation Home (Online)</a>
+ -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-5.7.html">Hyperic 5.7 Release Notes</a> </b>
  <p>
  <p>
 	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
@@ -17,7 +17,7 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 5.0 : Upgrade Hyperic Server and Database
+                            vFabric Hyperic 5.7 : Upgrade Hyperic Server and Database
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
@@ -42,7 +42,7 @@ div.rbtoc1348862657763 li {margin-left: 0px;padding-left: 0px;}
 </ul>
     <li><a href='#UpgradeHypericServerandDatabase-MigrationProcedure'>Migration Procedure</a></li>
 <ul>
-    <li><a href='#UpgradeHypericServerandDatabase-Step1%3AInstallvFabricHyperic5.0ServerandvPostgreSQL'>Step 1: Install vFabric Hyperic 5.0 Server and vPostgreSQL</a></li>
+    <li><a href='#UpgradeHypericServerandDatabase-Step1%3AInstallvFabricHyperic5.0ServerandvPostgreSQL'>Step 1: Install vFabric Hyperic 5.7 Server and vPostgreSQL</a></li>
     <li><a href='#UpgradeHypericServerandDatabase-Step2%3AExportExistingDatabaseandServerConfiguration'>Step 2: Export Existing Database and Server Configuration</a></li>
     <li><a href='#UpgradeHypericServerandDatabase-Step3%3AImportServerConfigurationandDatabase'>Step 3: Import Server Configuration and Database</a></li>
 </ul>
@@ -84,7 +84,7 @@ This page has instructions for upgrading the Hyperic Server and database to 5.0.
 </ul>
 
 
-<p>The Hyperic 5.0 installer contains a&nbsp;migration package for performing the upgrade. The migration package,&nbsp;<tt>hq-migrate-5.0.zip</tt>&nbsp;is in&nbsp;<tt>InstallerHome/installer/bin</tt>. It contains a migration script,&nbsp;<tt>hq-migrate/bin/hq-migrate.sh</tt>&nbsp;(or .bat).&nbsp;</p>
+<p>The Hyperic 5.7 installer contains a&nbsp;migration package for performing the upgrade. The migration package,&nbsp;<tt>hq-migrate-5.0.zip</tt>&nbsp;is in&nbsp;<tt>InstallerHome/installer/bin</tt>. It contains a migration script,&nbsp;<tt>hq-migrate/bin/hq-migrate.sh</tt>&nbsp;(or .bat).&nbsp;</p>
 
 <p>By default, the migration utility exports your monitoring configuration (alert definitions, resource groups, escalation schemes, and so on) and metric data. If desired, you can run the script with an option that causes only the monitoring configuration data to be exported.</p>
 
@@ -117,9 +117,9 @@ This page has instructions for upgrading the Hyperic Server and database to 5.0.
 
 <p>The upgrade process consists of these steps:</p>
 <ol>
-	<li><a href="#UpgradeHypericServerandDatabase-step1">Install Hyperic 5.0 and vPostgreSQL</a></li>
+	<li><a href="#UpgradeHypericServerandDatabase-step1">Install Hyperic 5.7 and vPostgreSQL</a></li>
 	<li><a href="#UpgradeHypericServerandDatabase-step2">Export Data from Hyperic 4.x</a></li>
-	<li><a href="#UpgradeHypericServerandDatabase-step3">Import Data to Hyperic 5.0</a></li>
+	<li><a href="#UpgradeHypericServerandDatabase-step3">Import Data to Hyperic 5.7</a></li>
 </ol>
 
 
@@ -127,9 +127,9 @@ This page has instructions for upgrading the Hyperic Server and database to 5.0.
 
 <p>Before performing the migration procedure, review <a href="#UpgradeHypericServerandDatabase-MigrationDefaultsandOptions">Migration Defaults and Options</a> below, which describes migration behavior, required and optional command options, and default settings.</p>
 
-<h2><a name="UpgradeHypericServerandDatabase-Step1%3AInstallvFabricHyperic5.0ServerandvPostgreSQL"></a>Step 1: Install vFabric Hyperic 5.0 Server and vPostgreSQL</h2>
+<h2><a name="UpgradeHypericServerandDatabase-Step1%3AInstallvFabricHyperic5.0ServerandvPostgreSQL"></a>Step 1: Install vFabric Hyperic 5.7 Server and vPostgreSQL</h2>
 
-<p>In this step, you install the Hyperic 5.0 Server and database.</p>
+<p>In this step, you install the Hyperic 5.7 Server and database.</p>
 
 <p>If you plan to run the components in VMs, follow the instructions on <a href="Install Hyperic vApp.html" title="Install Hyperic vApp">Install Hyperic vApp</a>.</p>
 
@@ -143,7 +143,7 @@ This page has instructions for upgrading the Hyperic Server and database to 5.0.
 
 <ol>
 	<li>Shut down the 4.5 (or later) Hyperic Server</li>
-	<li>Copy the migration package, hq-migration-5.0.zip from the Hyperic 5.0 installer to the 4.x Hyperic Server host.
+	<li>Copy the migration package, hq-migration-5.0.zip from the Hyperic 5.7 installer to the 4.x Hyperic Server host.
 	<ul>
 		<li>The package is located in the <tt>installer/bin</tt> directory of the 5.0 installer home directory.</li>
 	</ul>
@@ -182,7 +182,7 @@ This page has instructions for upgrading the Hyperic Server and database to 5.0.
 <h2><a name="UpgradeHypericServerandDatabase-Step3%3AImportServerConfigurationandDatabase"></a>Step 3: Import Server Configuration and Database</h2>
 
 <ol>
-	<li>Copy the export tarball to the the Hyperic 5.0 Server host, or make it available to the machine on which the 5.0 server is installed. In the latter case, expect some network latency overhead.</li>
+	<li>Copy the export tarball to the the Hyperic 5.7 Server host, or make it available to the machine on which the 5.0 server is installed. In the latter case, expect some network latency overhead.</li>
 	<li>Run the migration script with the import option.
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">

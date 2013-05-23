@@ -4,6 +4,7 @@
   <property name="oss.license.file" value="${install.dir}/../LICENSE.txt"/>    
   <property name="oss.gpl.license.file" value="${install.dir}/../COPYING.txt"/>    
   <property name="oss.ee.license.file" value="${install.dir}/../open_source_licenses.txt"/>    
+  <property name="vfabric.license.jar.name" value="client-parent-1.2.0-bin.jar"/>
 
   <!-- true for text based installs -->
   <available property="server.pgsql.available"
@@ -765,6 +766,7 @@ ${errMsg}
     <echo>^^^INFO: Creating server configuration files...</echo>
     <property name="conf-dir" value="${server.product.dir}/conf"/>
     <antcall target="copy-license"/>
+  	<antcall target="update-jars"/>
     <antcall target="copy-keystore" />
     <antcall target="install-hq-server-profile"/>
     <property name="tomcat.home"
@@ -962,6 +964,13 @@ ${errMsg}
      <copy file="${oss.gpl.license.file}" todir="${oss.license.to.dir}" failonerror="false"/>
      <copy file="${oss.ee.license.file}" todir="${oss.license.to.dir}" failonerror="false"/>
   </target>
+	
+ <target name="update-jars">
+	<move file="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/lib/${vfabric.license.jar.name}"
+	tofile="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/lib/zvfabric-client-parent.jar"
+	failonerror="false" />
+ </target>
+
 
   <target name="chmod-exec">
     <chmod perm="750">

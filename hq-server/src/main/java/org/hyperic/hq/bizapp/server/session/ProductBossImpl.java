@@ -54,16 +54,23 @@ import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.server.session.AttachType;
 import org.hyperic.hq.hqu.server.session.View;
 import org.hyperic.hq.hqu.server.session.ViewResourceCategory;
 import org.hyperic.hq.hqu.shared.UIPluginManager;
+import org.hyperic.hq.measurement.server.session.MonitorableTypeDAO;
 import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.PluginManager;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.hq.product.ProductPluginManager;
+import org.hyperic.hq.product.TypeInfo;
+import org.hyperic.hq.product.server.session.ProductPluginDeployer;
 import org.hyperic.hq.product.shared.ProductManager;
+import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;
@@ -84,6 +91,8 @@ public class ProductBossImpl implements ProductBoss {
     private UIPluginManager uiPluginManager;
     private AuthzSubjectManager authzSubjectManager;
     private SessionManager sessionManager;
+    private ProductPluginDeployer productPluginDeployer;
+    private MonitorableTypeDAO monitorableTypeDAO;    
     
 
     @Autowired
@@ -91,7 +100,8 @@ public class ProductBossImpl implements ProductBoss {
                            PlatformManager platformManager, ConfigManager configManager,
                            UIPluginManager uiPluginManager, AuthzSubjectManager authzSubjectManager,
                            SessionManager sessionManager,
-                           ProductManager productManager) {
+                           ProductManager productManager,
+                           ProductPluginDeployer productPluginDeployer, MonitorableTypeDAO monitorableTypeDAO) {
         this.resourceGroupManager = resourceGroupManager;
         this.platformManager = platformManager;
         this.configManager = configManager;
@@ -99,6 +109,8 @@ public class ProductBossImpl implements ProductBoss {
         this.authzSubjectManager = authzSubjectManager;
         this.sessionManager = sessionManager;
         this.productManager = productManager;
+        this.productPluginDeployer = productPluginDeployer;
+        this.monitorableTypeDAO = monitorableTypeDAO;
     }
 
     private AuthzSubject getOverlord() {
@@ -338,8 +350,53 @@ public class ProductBossImpl implements ProductBoss {
         AppdefEntityValue aval = new AppdefEntityValue(id, getOverlord());
 
         return productManager.getConfigSchema(type, name, aval, baseResponse);
-    }
+    }  
+          
+    @Transactional(readOnly=true)
+    public ConfigSchema getConfigSchema(ConfigResponse config, String platformName, TypeInfo resourceTypeInfo, String configType)
+            throws PluginException {
+        
+        if ((null == configType) || (null == resourceTypeInfo))
+                return null;
+        
+        final String typeName = resourceTypeInfo.getName();
+        
+        String pluginName =  monitorableTypeDAO.findByName(typeName).getPlugin() ;
+                
+        final ProductPluginManager pluginManager = productPluginDeployer.getProductPluginManager();                
+        final PluginManager pm = pluginManager.getPluginManager(configType);
+        
+        final ConfigSchema configSchema = pm.getConfigSchema(pluginName, platformName, typeName, resourceTypeInfo, config);
+        return configSchema;
 
+    }  
+    
+    @Transactional(readOnly=true)
+    public Map<String, ConfigSchema> getConfigSchemas(String prototypeName, String configType) throws PluginException {
+//        AuthzSubject subject = sessionManager.getSubject(sessionId);
+//        
+        Map<String, ConfigSchema> configurationSchemas = new HashMap<String, ConfigSchema>(10);
+        
+        final ProductPluginManager pluginManager = productPluginDeployer.getProductPluginManager();
+        final Map<String, TypeInfo> prototypeTypeInfos = pluginManager.getTypeInfo(prototypeName);   
+        if ((null == prototypeTypeInfos) || prototypeTypeInfos.isEmpty())
+            return null;
+        for(Map.Entry<String, TypeInfo> prototypeTypeInfo:prototypeTypeInfos.entrySet()) {
+            ConfigSchema configSchema = null;
+            try {
+                final String platformName = prototypeTypeInfo.getKey();
+                configSchema = getConfigSchema(new ConfigResponse(), platformName, prototypeTypeInfo.getValue(), configType);
+                configurationSchemas.put(platformName, configSchema);
+                
+            } catch (PluginNotFoundException e) {
+                // TODO write to log
+            }
+
+        }            
+        return configurationSchemas;        
+    }
+    
+    
     /**
      * Set the config response for an entity/type combination. Note that setting
      * the config response for any entity may cause a chain reaction of things

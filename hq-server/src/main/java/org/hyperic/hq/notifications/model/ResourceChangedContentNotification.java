@@ -10,6 +10,7 @@ public class ResourceChangedContentNotification extends InventoryNotification {
         this.resourceID=rid;
         this.changedProps=changedProps;
     }
+    @Override
     public Integer getResourceID() {
         return resourceID;
     }

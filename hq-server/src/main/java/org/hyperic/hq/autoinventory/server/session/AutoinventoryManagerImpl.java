@@ -35,6 +35,7 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
@@ -42,7 +43,6 @@ import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.*;
 import org.hyperic.hq.appdef.shared.AIAppdefResourceValue;
-import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIQueueManager;
@@ -97,8 +97,6 @@ import org.hyperic.hq.scheduler.ScheduleValue;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.pager.PageControl;
-import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -588,14 +586,6 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
         return ids;
     }
 
-    private String getIps(Collection<AIIpValue> aiipValues) {
-        StringBuilder rtn = new StringBuilder();
-        for (AIIpValue aiip : aiipValues) {
-            rtn.append(aiip.getAddress()).append(',');
-        }
-        return rtn.substring(0, rtn.length() - 1);
-    }
-
     /**
      * Called by agents to report platforms, servers, and services detected via
      * autoinventory scans.
@@ -620,7 +610,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
 
         // TODO: G
         log.info("Received auto-inventory report from " + aiPlatform.getFqdn() + "; IPs -> " +
-                 getIps(aiPlatform.getAddedAIIpValues()) + "; CertDN -> " + aiPlatform.getCertdn() +
+                ArrayUtils.toString(aiPlatform.getAIIpValues()) + "; CertDN -> " + aiPlatform.getCertdn() +
                  "; (" + state.getAllServers().size() + " servers)");
 
         if (debug) {

@@ -26,12 +26,13 @@
 package org.hyperic.hq.appdef.shared;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AllConfigDiff;
-import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 
@@ -120,4 +121,11 @@ public interface ConfigManager {
         AllConfigDiff getAllConfigDiff();
         void setAllConfigDiff(AllConfigDiff allConfigResponses);
     }
+
+    /**
+     * Fetches all {@link ConfigResponse} objects associated with the resources param
+     * @param hideSecrets ***s out config values which are marked as secret=true
+     * @return {@link Map} of {@link Resource} to its associated {@link ConfigResponse}
+     */
+    public Map<Resource, ConfigResponse> getConfigResponses(Set<Resource> resources, boolean hideSecrets);
 }
