@@ -581,7 +581,7 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable, Age
                 data = manager.getValue(dsn.plugin, dsn.metric);
 
                 if (deductServerTimeDiff) {
-                    if (ServerTimeDiff.getInstance().getServerTimeDiff() > ServerTimeDiff.MIN_OFFSET_FOR_DEDUCTION) {
+                    if (Math.abs(ServerTimeDiff.getInstance().getServerTimeDiff()) > ServerTimeDiff.MIN_OFFSET_FOR_DEDUCTION) {
                         // deduct the server time offset from the metric
                         // value time stamp
                         data.setTimestamp(data.getTimestamp() + ServerTimeDiff.getInstance().getServerTimeDiff());
