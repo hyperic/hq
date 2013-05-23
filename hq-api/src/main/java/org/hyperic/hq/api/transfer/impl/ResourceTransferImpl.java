@@ -592,7 +592,7 @@ public class ResourceTransferImpl implements ResourceTransfer {
 	        
 			@Override
 	        protected final AppdefResourceValue mergeResource(final Map<String,String> inputProps,  Map<String,PropertyList> oneToManyProps, 
-	                AppdefResourceValue existingDTO, final Context flowContext) throws Exception { 
+	                AppdefResourceValue existingDTO, final Context flowContext) throws Exception {
 	            
 	            PropertyList requetsIps = null ;
                 
@@ -614,50 +614,7 @@ public class ResourceTransferImpl implements ResourceTransfer {
 	                    final AppdefBoss appdefBoss, final AuthzSubject subject) throws Exception{ 
 	            appdefBoss.updatePlatform(subject, (PlatformValue) newDTO) ; 
 	        }//EOM 
-	        
-			
-			@Override
-			protected final AppdefResourceValue loadExistingDTO(final AppdefBoss appdefBoss, final Context flowContext) throws Exception{
-			    Platform platform = (Platform) flowContext.resourceInstance ; 
-			    
-			    if(platform == null) {  
-			        flowContext.resourceInstance = platform = flowContext.getVisitor().getPlatformManager().
-			                                findPlatformById(flowContext.backendResource.getInstanceId()) ; 
-			    }//EO else if platform was not yet loaded
-			    
-			    final PlatformValue platformDTO = new PlatformValue() ; 
-			    platformDTO.setId(platform.getId()) ; 
-			    platformDTO.setFqdn(platform.getFqdn()) ;
-			    platformDTO.setName(platform.getName()) ;  
-			    return platformDTO ; 
-			}//EOM 
-	        
-			@Override
-	        protected final AppdefResourceValue mergeResource(final Map<String,String> inputProps,  Map<String,PropertyList> oneToManyProps, 
-	                AppdefResourceValue existingDTO, final Context flowContext) throws Exception { 
-	            
-	            PropertyList requetsIps = null ;
-                
-                if( (requetsIps = oneToManyProps.get(IP_MAC_ADDRESS_KEY)) != null) {
-                    if(requetsIps != null) { 
-                        //else determine whether the ips have changed
-                        Platform platform =  (Platform) flowContext.resourceInstance ; 
-                                               
-                        existingDTO = flowContext.visitor.getResourceMapper().mergePlatformIPs(existingDTO, requetsIps.getProperties(), platform) ; 
-                        
-                    }//EO if ips were provided 
-                }//EO if propertyList was defined 
-                
-                return existingDTO ; 
-	        }//EOM 
-	        
-	        @Override
-	        protected final void updateResourceInstance(final AppdefResourceValue newDTO, 
-	                    final AppdefBoss appdefBoss, final AuthzSubject subject) throws Exception{ 
-	            appdefBoss.updatePlatform(subject, (PlatformValue) newDTO) ; 
-	        }//EOM 
-	        
-			
+
 		},//EO PLATFORM
 		SERVER(AppdefEntityConstants.APPDEF_TYPE_SERVER, ServerValue.class) {
 		   
@@ -755,7 +712,7 @@ public class ResourceTransferImpl implements ResourceTransfer {
                         method.invoke(existingDTO, oValue) ;
                         
                     }//EO if input was provided for the given attribute  
-                
+                }
 		    }//EO if the inputProps was not null 
 		    	    
 		    //now check whether there are multi-property section in the request and if 

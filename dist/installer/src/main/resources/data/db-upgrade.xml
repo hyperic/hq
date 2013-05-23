@@ -11992,11 +11992,8 @@ has already been defined.
             </statement>
         </schema-directSQL>
     </schemaSpec>
-	<schemaSpec version="3.218" >
-	  	<user-password-upgrader encryption="EAM_PRINCIPAL.PASSWORD" strength="256" encodeHashAsBase64="true" />
-	</schemaSpec>
 	
-	 <schemaSpec version="3.219">
+	 <schemaSpec version="3.220">
 	 	<!-- [HQ-4315] - we change the prefix of the existing organization user's name and sort name due to a javascript issue -->
 			       <schema-directSQL>  	
 			        <statement>
