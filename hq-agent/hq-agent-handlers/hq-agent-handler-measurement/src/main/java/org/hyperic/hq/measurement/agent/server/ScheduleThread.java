@@ -70,6 +70,7 @@ import org.hyperic.hq.product.MetricUnreachableException;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
+import org.hyperic.hq.util.properties.PropertiesUtil;
 import org.hyperic.util.TimeUtil;
 import org.hyperic.util.collection.IntHashMap;
 import org.hyperic.util.schedule.EmptyScheduleException;
@@ -94,6 +95,9 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable, Age
     static final String PROP_FETCH_LOG_TIMEOUT = "scheduleThread.fetchLogTimeout";
     static final String PROP_CANCEL_TIMEOUT = "scheduleThread.cancelTimeout";
     static final String PROP_QUEUE_SIZE = "scheduleThread.queuesize.";
+    static final String PROP_DEDUCT_SERVER_TIME_DIFF = "agent.deductServerTimeDiff";
+
+    private boolean deductServerTimeDiff = true;
 
     // How often we check schedules when we think they are empty.
     private static final int ONE_SECOND = 1000;
@@ -191,6 +195,14 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable, Age
         metricLoggingTask = metricVerificationService.scheduleAtFixedRate(new MetricLoggingTask(),
                                                                           1, 600, TimeUnit.SECONDS);
         AgentDiagnostics.getInstance().addDiagnostic(this);
+
+        Boolean deductServerOffset = PropertiesUtil.getBooleanValue(agentConfig
+                .getProperty(PROP_DEDUCT_SERVER_TIME_DIFF));
+
+        // by default we the deduction feature is on
+        if (null != deductServerOffset) {
+            deductServerTimeDiff = deductServerOffset;
+        }
     }
 
     /**
@@ -224,7 +236,7 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable, Age
         public void run() {
             boolean isDebugEnabled = log.isDebugEnabled();
             synchronized (metricCollections) {
-                if (isDebugEnabled && metricCollections.size() > 0) {
+                if (isDebugEnabled && (metricCollections.size() > 0)) {
                     log.debug(metricCollections.size() + " metrics to validate.");
                 }
                 for (Iterator<Future<?>> i = metricCollections.keySet().iterator(); i.hasNext();) {
@@ -262,11 +274,11 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable, Age
     }
 
     private static class ResourceSchedule {
-        private Schedule       schedule = new Schedule();
+        private final Schedule       schedule = new Schedule();
         private AppdefEntityID id;
         private long           lastUnreachble = 0;
-        private List<ScheduledMeasurement> retry = new ArrayList<ScheduledMeasurement>();
-        private IntHashMap collected = new IntHashMap();
+        private final List<ScheduledMeasurement> retry = new ArrayList<ScheduledMeasurement>();
+        private final IntHashMap collected = new IntHashMap();
     }
 
     private ResourceSchedule getSchedule(ScheduledMeasurement meas) {
@@ -332,7 +344,9 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable, Age
         }
 
         if (rs == null) {
-            if (log.isDebugEnabled()) log.debug("No measurement schedule for: " + key);
+            if (log.isDebugEnabled()) {
+                log.debug("No measurement schedule for: " + key);
+            }
             return;
         }
         setDiagScheduled(rs, false);
@@ -350,7 +364,7 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable, Age
                 scheduled.remove(meas.getDerivedID());
                 //For plugin/Collector awareness
                 ParsedTemplate tmpl = getParsedTemplate(meas);
-                if (tmpl == null || tmpl.metric == null) {
+                if ((tmpl == null) || (tmpl.metric == null)) {
                     continue;
                 }
                 tmpl.metric.setInterval(-1);
@@ -405,7 +419,7 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable, Age
             oldMsg = errors.get(tmpl.metric.toString());
         }
 
-        if(!isDebug && oldMsg != null && oldMsg.equals(msg)){
+        if(!isDebug && (oldMsg != null) && oldMsg.equals(msg)){
             return;
         }
 
@@ -446,6 +460,7 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable, Age
         String plugin;
         Metric metric;
         
+        @Override
         public String toString() {
             return plugin + ":" + metric.toDebugString();
         }
@@ -474,7 +489,7 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable, Age
         int id = aid.getID();
         int type = aid.getType();
         ParsedTemplate tmpl = getParsedTemplate(meas);
-        if (tmpl == null || tmpl.metric == null) {
+        if ((tmpl == null) || (tmpl.metric == null)) {
             return null;
         }
         tmpl.metric.setId(type, id);
@@ -497,6 +512,7 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable, Age
         /**
          * @return The string representing this metric.
          */
+        @Override
         public String toString() {
             return getParsedTemplate(meas).metric.toDebugString();
         }
@@ -553,7 +569,7 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable, Age
                 long nowRounded = TimingVoodoo.roundDownTime(now, 60000);
                 // HHQ-5483 - agent is collecting metrics too frequently.  I don't want to mess with the scheduling
                 // algorithm at this time, so I am simply putting checks in to prevent this scenario from occurring
-                if (lastCollected + meas.getInterval() > nowRounded) {
+                if ((lastCollected + meas.getInterval()) > nowRounded) {
                     if (isDebug) {
                         log.debug("ALREADY COLLECTED meas=" + meas + " @ " + TimeUtil.toString(lastCollected));
                     }
@@ -563,6 +579,14 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable, Age
                     log.debug("collecting data for meas=" + meas);
                 }
                 data = manager.getValue(dsn.plugin, dsn.metric);
+
+                if (deductServerTimeDiff) {
+                    if (ServerTimeDiff.getInstance().getServerTimeDiff() > ServerTimeDiff.MIN_OFFSET_FOR_DEDUCTION) {
+                        // deduct the server time offset from the metric
+                        // value time stamp
+                        data.setTimestamp(data.getTimestamp() + ServerTimeDiff.getInstance().getServerTimeDiff());
+                    }
+                }
                 long time = TimingVoodoo.roundDownTime(now, meas.getInterval());
                 meas.setLastCollected(time);
                 if (data == null) {
@@ -710,7 +734,7 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable, Age
 
     private void collect(ResourceSchedule rs, List<ScheduledMeasurement> items) {
         final boolean debug = log.isDebugEnabled();
-        for (int i=0; i<items.size() && (!shouldDie.get()); i++) {
+        for (int i=0; (i<items.size()) && (!shouldDie.get()); i++) {
             ScheduledMeasurement meas = items.get(i);
             ParsedTemplate tmpl = toParsedTemplate(meas);
             if (tmpl == null) {
@@ -969,7 +993,7 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable, Age
     private static final SimpleDateFormat diagInfoTimeFormat = new SimpleDateFormat("HH:mm");
     private class DiagInfo {
         @SuppressWarnings("unused")
-        private AppdefEntityID aeid;
+        private final AppdefEntityID aeid;
         private final List<MetricValuePlusId> collected = new ArrayList<MetricValuePlusId>();
         private int numSchedules = 0;
         private int numUnSchedules = 0;
@@ -990,6 +1014,7 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable, Age
         private void incrementSchedules() {
             numSchedules++;
         }
+        @Override
         public String toString() {
             final StringBuilder rtn = new StringBuilder();
             rtn.append("(").append(numSchedules).append("-").append(numUnSchedules).append(")");

@@ -89,16 +89,16 @@ public class SenderThread
     private static final String AVAILABILITY_LISTNAME = "availability_spool";
     
     private volatile boolean                   shouldDie;
-    private          Log                       log;
-    private          MeasurementCallbackClient client;
-    private          AgentStorageProvider      storage;
+    private final          Log                       log;
+    private final          MeasurementCallbackClient client;
+    private final          AgentStorageProvider      storage;
     private          String                    agentToken;
-    private          LinkedList<Record>        transitionQueue;
+    private final          LinkedList<Record>        transitionQueue;
     // This toggle will avoid displaying non-stop messages about server down 
     private          int                       metricDup = 0;
     private          int                       maxBatchSize = MAX_BATCHSIZE;
-    private          Set                       metricDebug;
-    private          MeasurementSchedule       schedule;
+    private final          Set                       metricDebug;
+    private final          MeasurementSchedule       schedule;
 
     // Current difference time between the server and agent in ns.
     // Update on each call to sendMeasurementReport().
@@ -108,6 +108,8 @@ public class SenderThread
     private long stat_numBatchesSent     = 0;
     private long stat_totBatchSendTime   = 0;
     private long stat_totMetricsSent     = 0;
+
+
 
     SenderThread(Properties bootProps, AgentStorageProvider storage, MeasurementSchedule schedule)
     throws AgentStartException {
@@ -167,10 +169,8 @@ public class SenderThread
         sMetricDebug = bootProps.getProperty(PROP_METRICDEBUG);
         if(sMetricDebug != null){
             try {
-                for(Iterator i=StringUtil.explode(sMetricDebug, " ").iterator();
-                    i.hasNext();)
-                {
-                    Integer metId = new Integer((String)i.next());
+                for (Object element : StringUtil.explode(sMetricDebug, " ")) {
+                    Integer metId = new Integer((String)element);
 
                     this.metricDebug.add(metId);
                     this.log.info("metricDebug:  Enabling special debugging " +
@@ -207,7 +207,7 @@ public class SenderThread
         final MetricValue data;
         private Integer hashCode = null;
         //This field is not serialized 
-        private boolean isAvail;
+        private final boolean isAvail;
 
         private Record(int dsnId, MetricValue data, int derivedID, boolean isAvail){
             this.dsnId     = dsnId;
@@ -218,7 +218,8 @@ public class SenderThread
         public Record(int dsnID, MetricValue measVal, int derivedID) {
 			this (dsnID, measVal, derivedID, false);
 		}
-		public int hashCode() {
+		@Override
+        public int hashCode() {
             if (hashCode != null) {
                 return hashCode.intValue();
             }
@@ -228,17 +229,19 @@ public class SenderThread
                 new Integer(7 + (timestamp.hashCode()*71) + (mId.hashCode()*71));
             return hashCode.intValue();
         }
+        @Override
         public boolean equals(Object rhs) {
             if (this == rhs) {
                 return true;
             }
             if (rhs instanceof Record) {
                 Record r = (Record)rhs;
-                return (r.derivedID           == derivedID &&
-                        r.data.getTimestamp() == data.getTimestamp());
+                return ((r.derivedID           == derivedID) &&
+                        (r.data.getTimestamp() == data.getTimestamp()));
             }
             return false;
         }
+        @Override
         public String toString() {
             return "mId="+derivedID+",timestamp="+data.getTimestamp()+
                 ",value="+data.getValue()+",isAvail="+isAvail;
@@ -323,8 +326,7 @@ public class SenderThread
     private void processTransitionQueue(){
     	String encodedRec;
     	synchronized(this.transitionQueue){
-    		for (Iterator<Record> i=this.transitionQueue.iterator(); i.hasNext(); ){
-    			Record rec = i.next();
+    		for (Record rec : this.transitionQueue) {
     			try {
     				encodedRec = encodeRecord(rec);
     				if (rec.isAvail) {
@@ -377,13 +379,15 @@ public class SenderThread
         Set<Record> records = new HashSet<Record>();
         // first we are going to ensure that all the data points that
         // we send over to the server are unique
-        for (Iterator<String> it=storage.getListIterator(listName); it!=null && it.hasNext() && numUsed < maxBatchSize; numUsed++) {
+        for (Iterator<String> it=storage.getListIterator(listName); (it!=null) && it.hasNext() && (numUsed < maxBatchSize); numUsed++) {
             try {
                 Record r = SenderThread.decodeRecord(it.next());
                 boolean didNotAlreadyExist = records.add(r); 
                 if (!didNotAlreadyExist) {
                     // nuke the dup
-                    if (debug) log.debug("Dropping duplicate entry for " + r);
+                    if (debug) {
+                        log.debug("Dropping duplicate entry for " + r);
+                    }
                     numUsed--;
                 }
             } catch(IOException exc){
@@ -434,8 +438,8 @@ public class SenderThread
             }
             
             if(log.isDebugEnabled()){
-                for(int i=0; i<srnList.length; i++){
-                    this.log.debug("    SRN: " + srnList[i].getEntity() +  "=" + srnList[i].getRevisionNumber());
+                for (SRN element : srnList) {
+                    this.log.debug("    SRN: " + element.getEntity() +  "=" + element.getRevisionNumber());
                 }
             }
 
@@ -456,17 +460,23 @@ public class SenderThread
 
             // Compute offset from server (will include network latency)
             this.serverDiff = Math.abs(serverTime - batchEnd);
+
+            // Update the ServerTimeDiff object with the time offset between the
+            // agent and the server and update the last sync time to now
+            ServerTimeDiff.getInstance().setServerTimeDiff(serverTime - batchEnd);
+            ServerTimeDiff.getInstance().setLastSync(batchEnd);
+
             if (this.serverDiff > MAX_SERVERDIFF) {
                 // Complain if we are ahead or behind.  This may be a bit
                 // too excessive.
                 if (serverTime < batchEnd) {
-                    this.log.error("Agent is " + this.serverDiff / 1000 + 
+                    this.log.error("Agent is " + (this.serverDiff / 1000) + 
                                    " seconds ahead of the server.  To " +
                                    "ensure accuracy of the charting and " +
                                    "alerting make sure the agent and server " +
                                    "clocks are syncronized");
                 } else {
-                    this.log.error("Agent is " + this.serverDiff / 1000 + 
+                    this.log.error("Agent is " + (this.serverDiff / 1000) + 
                                    " seconds behind the server.  To " +
                                    "ensure accuracy of the charting and " +
                                    "alerting make sure the agent and server " +
@@ -519,7 +529,7 @@ public class SenderThread
         int j = 0;
 
         for (Iterator i = this.storage.getListIterator(listName);
-             i != null && i.hasNext() && j < num;
+             (i != null) && i.hasNext() && (j < num);
              j++) {
             i.next();
             i.remove();
@@ -629,7 +639,7 @@ public class SenderThread
                 long now = System.currentTimeMillis();
                 long tDiff = now - lastMetricTime.longValue();
                 String backlog = Long.toString(tDiff / (60 * 1000));
-                if(tDiff / (60 * 1000) > 1 && backlog.equals(backlogNum) == false) {
+                if(((tDiff / (60 * 1000)) > 1) && (backlog.equals(backlogNum) == false)) {
                     backlogNum = backlog;
                     this.log.info(backlog +  " minute(s) of metrics backlogged");
                 }
