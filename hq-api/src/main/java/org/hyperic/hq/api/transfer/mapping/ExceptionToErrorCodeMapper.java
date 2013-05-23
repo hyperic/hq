@@ -146,9 +146,6 @@ public class ExceptionToErrorCodeMapper  {
         BAD_MEASUREMENT_REQ("5001"),
         BAD_REQ_BODY("5002"),
         UPDATE_FAILURE("5003"),
-        INTERNAL_SERVER_ERROR("8001"),
-        REGEX_PATTERN_SYNTAX_ERROR("9001"),
-        MULTIPLE_POLICIES_TYPES_MAPPED("9500"),
         CLOUD_PROVIDER_NOT_CONFIGURED("6001"),
         BAD_CLOUD_PROVIDER_CONFIGURATION("6002"),
         CLOUD_RESOURCE_NOT_FOUND("6003"),
@@ -162,7 +159,10 @@ public class ExceptionToErrorCodeMapper  {
         UNKNOWN_ENDPOINT("8005"), 
         ILLEGAL_FILTER("8100"), 
         ILLEGAL_FILTER_COMPARATOR("8101"), 
-        ILLEGAL_AGG_FILTER("8102"); 
+        ILLEGAL_AGG_FILTER("8102"),
+        INTERNAL_SERVER_ERROR("9000"),
+        REGEX_PATTERN_SYNTAX_ERROR("9001"),
+        MULTIPLE_POLICIES_TYPES_MAPPED("9002");
         
         
         private final String errorCode;
