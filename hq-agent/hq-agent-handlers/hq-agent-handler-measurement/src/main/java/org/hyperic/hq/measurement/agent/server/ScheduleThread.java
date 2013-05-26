@@ -196,13 +196,11 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable, Age
                                                                           1, 600, TimeUnit.SECONDS);
         AgentDiagnostics.getInstance().addDiagnostic(this);
 
-        Boolean deductServerOffset = PropertiesUtil.getBooleanValue(agentConfig
-                .getProperty(PROP_DEDUCT_SERVER_TIME_DIFF));
-
         // by default we the deduction feature is on
-        if (null != deductServerOffset) {
-            deductServerTimeDiff = deductServerOffset;
-        }
+        Boolean deductServerOffset = PropertiesUtil.getBooleanValue(
+                agentConfig.getProperty(PROP_DEDUCT_SERVER_TIME_DIFF), true);
+
+        deductServerTimeDiff = deductServerOffset;
     }
 
     /**

@@ -2,9 +2,9 @@ package org.hyperic.hq.util.properties;
 
 public class PropertiesUtil {
 
-    public static Boolean getBooleanValue(String property) {
+    public static Boolean getBooleanValue(String property, boolean defaultValue) {
         if ((null == property) || property.equalsIgnoreCase("")) {
-            return null;
+            return defaultValue;
         }
         if (property.equalsIgnoreCase("true") || property.equalsIgnoreCase("yes")) {
             return true;
@@ -12,7 +12,7 @@ public class PropertiesUtil {
         if (property.equalsIgnoreCase("false") || property.equalsIgnoreCase("no")) {
             return false;
         }
-        return null;
+        return defaultValue;
     }
 
 }
