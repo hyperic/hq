@@ -29,6 +29,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.AutoServerDetector;
@@ -42,49 +43,47 @@ import org.hyperic.sigar.win32.Service;
 import org.hyperic.sigar.win32.Win32Exception;
 import org.hyperic.util.config.ConfigResponse;
 
-public class ExchangeDetector
-    extends ServerDetector
-    implements AutoServerDetector {
+import java.util.Arrays;
+import java.util.Collections;
 
-    private static final String IMAP4_NAME   = "IMAP4";
-    private static final String POP3_NAME    = "POP3";
-    private static final String MTA_NAME     = "MTA";
-    private static final String WEB_NAME     = "Web";
+public class ExchangeDetector extends ServerDetector implements AutoServerDetector {
 
-    private static final String[] SERVICES = {
-        IMAP4_NAME,
-        POP3_NAME,
-        MTA_NAME,
-    };
+    private static final String IMAP4_NAME = "IMAP4";
+    private static final String POP3_NAME = "POP3";
+    private static final String MTA_NAME = "MTA";
+    private static final String WEB_NAME = "Web";
 
-    private static final String EXCHANGE_KEY =
-        "SOFTWARE\\Microsoft\\Exchange\\Setup";
+    // private List<String> SERVICES = new ArrayList<String>(3);
+    /*
+     * IMAP4_NAME, POP3_NAME, MTA_NAME, };
+     */
+
+    private static final String EXCHANGE_KEY = "SOFTWARE\\Microsoft\\Exchange\\Setup";
 
     static final String EX = "MSExchange";
     private static final String WEBMAIL = EX + " Web Mail";
     private static final String EXCHANGE_IS = EX + "IS";
 
-    private static final Log log =
-        LogFactory.getLog(ExchangeDetector.class.getName());
+    private static final Log log = LogFactory.getLog(ExchangeDetector.class.getName());
 
     private boolean isExchangeServiceRunning(String name) {
-        if (name.equals(MTA_NAME)) {
+        if(name.equals(MTA_NAME)) {
             return isWin32ServiceRunning(EX + "MTA");
         }
-        return
-            isWin32ServiceRunning(name + "Svc") ||
-            isWin32ServiceRunning(EX + name); //changed in 2007 
+        return isWin32ServiceRunning(name + "Svc") || isWin32ServiceRunning(EX + name); // changed
+                                                                                        // in
+                                                                                        // 2007
     }
 
     private ServiceResource createService(String name) {
         String svcName = name;
-        if (name.equals(MTA_NAME)) {
+        if(name.equals(MTA_NAME)) {
             svcName = EX + "MTA";
-        } else if (isWin32ServiceRunning(name + "Svc")) {
+        }else if(isWin32ServiceRunning(name + "Svc")) {
             svcName = name + "Svc";
-        } else if (isWin32ServiceRunning(EX + name)) { //changed in 2007 
+        }else if(isWin32ServiceRunning(EX + name)) { // changed in 2007
             svcName = EX + name;
-        } else {
+        }else {
             svcName = EX + name;
         }
 
@@ -97,12 +96,11 @@ public class ExchangeDetector
         setProductConfig(service, new ConfigResponse());
         setMeasurementConfig(service, new ConfigResponse());
         setControlConfig(service, cfg);
-        log.debug("="+svcName+"=> "+service.getProductConfig());
+        log.debug("=" + svcName + "=> " + service.getProductConfig());
         return service;
     }
 
-    public List getServerResources(ConfigResponse platformConfig)
-        throws PluginException {
+    public List getServerResources(ConfigResponse platformConfig) throws PluginException {
 
         List servers = new ArrayList();
 
@@ -110,53 +108,51 @@ public class ExchangeDetector
         Service exch = null;
         try {
             exch = new Service(EXCHANGE_IS);
-            if (exch.getStatus() != Service.SERVICE_RUNNING) {
-                log.debug("[getServerResources] service '" + EXCHANGE_IS
-                        + "' is not RUNNING (status='"+exch.getStatusString()+"')");
+            if(exch.getStatus() != Service.SERVICE_RUNNING) {
+                log.debug("[getServerResources] service '" + EXCHANGE_IS + "' is not RUNNING (status='"
+                        + exch.getStatusString() + "')");
                 return null;
             }
             exe = exch.getConfig().getExe().trim();
-        } catch (Win32Exception e) {
-            log.debug("[getServerResources] Error getting '" + EXCHANGE_IS
-                    + "' service information " + e, e);
+        }catch(Win32Exception e) {
+            log.debug("[getServerResources] Error getting '" + EXCHANGE_IS + "' service information " + e, e);
             return null;
-        } finally {
-            if (exch != null) {
+        }finally {
+            if(exch != null) {
                 exch.close();
             }
         }
 
         File bin = new File(exe).getParentFile();
         installpath = bin.getParent();
-        if (!isInstallTypeVersion(bin.getPath())) {
-            log.debug("[getServerResources] exchange on '" + bin
-                    + "' is not a " + getTypeInfo().getName());
+        if(!isInstallTypeVersion(bin.getPath())) {
+            log.debug("[getServerResources] exchange on '" + bin + "' is not a " + getTypeInfo().getName());
             return null;
         }
 
-        ServerResource server = createServerResource(installpath);
+        // check role
 
-        RegistryKey key = null;
-        try {
-            //XXX does not work for 64-bit exchange running 32-bit agent
-            key = RegistryKey.LocalMachine.openSubKey(EXCHANGE_KEY);
-            ConfigResponse cprops = new ConfigResponse();
-            try {
-                cprops.setValue("version",
-                                key.getStringValue("Services Version"));
-                cprops.setValue("build",
-                                key.getStringValue("NewestBuild"));
-                server.setCustomProperties(cprops);
-            } catch (Win32Exception e) {
-                log.debug(e,e);
+        // if role property exists (version 2007 and up - role must be
+        // configured as well - in registry)
+        ServerResource server = createServerResource(installpath);
+        ConfigResponse cprops = new ConfigResponse();
+
+        String roleRegKeyStr = getTypeProperty(ExchangeUtils.EXCHANGE_ROLE_REG_KEY);
+        if(roleRegKeyStr != null) {
+            if(!ExchangeUtils.checkRoleConfiguredAndSetVersion(roleRegKeyStr, cprops)) {
+                if(log.isDebugEnabled()) {
+                    log.debug("role configured  - but not found in registry - ignoring server:" + roleRegKeyStr);
+                }
+                return null;
             }
-        } catch (Win32Exception e) {
-            log.debug(e,e);
-        } finally {
-            if (key != null) {
-                key.close();
-            }
+        }else {
+            // role does not exist - old exchange?
+            setExchangeVersion(cprops);
         }
+
+        // XXX does not work for 64-bit exchange running 32-bit agent
+
+        server.setCustomProperties(cprops);
 
         server.setProductConfig();
         server.setMeasurementConfig();
@@ -164,35 +160,62 @@ public class ExchangeDetector
         return servers;
     }
 
+    protected void setExchangeVersion(ConfigResponse cprops) {
+        RegistryKey key = null;
+        try {
+            key = RegistryKey.LocalMachine.openSubKey(EXCHANGE_KEY);
+
+            // if "configured version exists - just set it (exchange 2010..)
+            // otherwise set version and build
+            cprops.setValue("version", key.getStringValue("Services Version"));
+            cprops.setValue("build", key.getStringValue("NewestBuild"));
+        }catch(Win32Exception e) {
+            log.debug(e, e);
+        }finally {
+            if(key != null) {
+                key.close();
+            }
+        }
+    }
+
+    private List<String> getServicesNames() {
+        String roleRegKeyStr = getTypeProperty(ExchangeUtils.EXCHANGE_ROLE_REG_KEY);
+        if(roleRegKeyStr != null) {
+            // only MTA
+            // pop3 and imap are in client access server
+            return Collections.singletonList(MTA_NAME);
+        }
+
+        return Arrays.asList(MTA_NAME, POP3_NAME, IMAP4_NAME);
+    }
+
     @Override
-    protected List discoverServices(ConfigResponse config)
-        throws PluginException {
+    protected List discoverServices(ConfigResponse config) throws PluginException {
 
-        List services = new ArrayList();
+        List<ServiceResource> actualServices = new ArrayList<ServiceResource>();
 
-        //POP3 + IMAP4 are disabled by default, only report the services
-        //if they are enabled and running.
-        for (int i=0; i<SERVICES.length; i++) {
-            String name = SERVICES[i];
-            if (!isExchangeServiceRunning(name)) {
+        // POP3 + IMAP4 are disabled by default, only report the services
+        // if they are enabled and running.
+        List<String> servicesNames = getServicesNames();
+        for(String name:servicesNames) {
+            if(!isExchangeServiceRunning(name)) {
                 log.debug(name + " is not running");
                 continue;
-            }
-            else {
+            }else {
                 log.debug(name + " is running, adding to inventory");
             }
-            services.add(createService(name));
+            actualServices.add(createService(name));
         }
 
         try {
             String[] web = Pdh.getInstances(WEBMAIL);
-            if (web.length != 0) {
-                services.add(createService(WEB_NAME));
-            } //else not enabled if no counters
-        } catch (Win32Exception e) {
-            log.debug(e,e);
+            if(web.length != 0) {
+                actualServices.add(createService(WEB_NAME));
+            } // else not enabled if no counters
+        }catch(Win32Exception e) {
+            log.debug(e, e);
         }
 
-        return services;
+        return actualServices;
     }
 }

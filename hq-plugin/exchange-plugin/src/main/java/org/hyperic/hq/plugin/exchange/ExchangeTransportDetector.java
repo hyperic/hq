@@ -93,7 +93,19 @@ public class ExchangeTransportDetector
                     + "' IS a " + getTypeInfo().getName());
         }
         
+        ConfigResponse cprops = new ConfigResponse();
+        String roleRegKeyStr = getTypeProperty(ExchangeUtils.EXCHANGE_ROLE_REG_KEY);
+        if (roleRegKeyStr != null) {
+            if (!ExchangeUtils.checkRoleConfiguredAndSetVersion(roleRegKeyStr, cprops)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("role configured  - but not found in registry - ignoring server:" + roleRegKeyStr);
+                }
+                return null;
+            }
+        }
+        
         ServerResource server = createServerResource(exe);
+        server.setCustomProperties(cprops);
         server.setIdentifier(TRANSPORT);
         server.setProductConfig();
         server.setMeasurementConfig();
