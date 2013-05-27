@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2013], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -55,18 +55,18 @@ public class IisMetaBase {
     private static final String IIS_MKEY = "/LM/W3SVC";
     private static final int MD_SSL_ACCESS_PERM = 6030;
     private static final int MD_ACCESS_SSL = 0x00000008;
-    private static final String APPCMD =
-            "C:/Windows/System32/inetsrv/appcmd.exe";
+    protected static final String APPCMD = "C:/Windows/System32/inetsrv/appcmd.exe";
     private String id;
     private String ip;
     private String hostname;
     private String port;
     private String path;
     private boolean requireSSL = false;
+    private String name;
 
     @Override
     public String toString() {
-        return "IisMetaBase{" + "id=" + id + ", ip=" + ip + ", hostname=" + hostname + ", port=" + port + ", path=" + path + ", requireSSL=" + requireSSL + '}';
+        return "IisMetaBase{" + "id=" + id + ", name=" + name + ", ip=" + ip + ", hostname=" + hostname + ", port=" + port + ", path=" + path + ", requireSSL=" + requireSSL + '}';
     }
 
     public String toUrlString() throws MalformedURLException {
@@ -274,6 +274,7 @@ public class IisMetaBase {
                 }
                 String name =
                         srv.getStringValue(MetaBase.MD_SERVER_COMMENT);
+                info.setName(name);
 
                 websites.put(name, info);
 
@@ -301,5 +302,13 @@ public class IisMetaBase {
     public static void main(String[] args) throws Exception {
         Map websites = IisMetaBase.getWebSites();
         System.out.println(websites);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
