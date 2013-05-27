@@ -95,7 +95,7 @@ public abstract class SharePointServerDetectorDefault extends ServerDetector imp
                     websNames += ", ";
                 }
                 websNames += web.getName();
-                log.error(" => "+web.getName());
+                log.debug(" => "+web.getName());
             }
 
             String serviceNames = "";
@@ -106,15 +106,15 @@ public abstract class SharePointServerDetectorDefault extends ServerDetector imp
                     serviceNames += ", ";
                 }
                 try {
-                    log.error(" *> "+service.getConfig().getName());
+                    log.debug(" *> "+service.getConfig().getName());
                     serviceNames += service.getConfig().getName();
                 } catch (Win32Exception ex) {
-                    log.error("Error", ex);
+                    log.debug("Error", ex);
                 }
             }
 
-            log.error(" -> websNames = "+websNames);
-            log.error(" -> serviceNames = "+serviceNames);
+            log.debug(" -> websNames = "+websNames);
+            log.debug(" -> serviceNames = "+serviceNames);
             ConfigResponse cc = new ConfigResponse();
             cc.setValue(SharePoint.PROP_C_WEBS, websNames);
             cc.setValue(SharePoint.PROP_C_SERVICES, serviceNames);
@@ -196,6 +196,7 @@ public abstract class SharePointServerDetectorDefault extends ServerDetector imp
             try {
                 ConfigResponse pc = new ConfigResponse();
                 pc.setValue("url", web.toUrlString());
+                pc.setValue("name", web.getName());
                 setProductConfig(service, pc);
             } catch (MalformedURLException ex) {
                 log.debug("Error formating URL for Webserver '" + web.getName() + "':'" + web + "'", ex);

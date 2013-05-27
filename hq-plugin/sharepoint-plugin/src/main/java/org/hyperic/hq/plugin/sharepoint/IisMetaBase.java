@@ -84,7 +84,7 @@ public class IisMetaBase {
             try {
                 return getWebSitesViaAppCmd(); //IIS7
             } catch (Exception e) {
-                log.error(APPCMD + ": " + e, e);
+                log.debug(APPCMD + ": " + e, e);
                 throw new Win32Exception(e.getMessage());
             }
         } else {
@@ -151,11 +151,11 @@ public class IisMetaBase {
         try {
             int exitStatus = exec.execute();
             if (exitStatus != 0 || wdog.killedProcess()) {
-                log.error(Arrays.asList(cmd) + ": " + output);
+                log.debug(Arrays.asList(cmd) + ": " + output);
                 return websites;
             }
         } catch (Exception e) {
-            log.error(Arrays.asList(cmd) + ": " + e);
+            log.debug(Arrays.asList(cmd) + ": " + e);
             return websites;
         }
 
