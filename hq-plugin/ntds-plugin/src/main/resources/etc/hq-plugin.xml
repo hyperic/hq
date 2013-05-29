@@ -145,7 +145,7 @@
   </metrics>
 
   <server name="Active Directory"
-          version="base"
+          version="2000"
           platforms="Win32">
 <!--
     <property name="EVENT_LOG_SOURCE_FILTER"
@@ -191,8 +191,12 @@
   </server>
 
   <server name="Active Directory"
+          version="2003"
+          include="2000"/>
+
+  <server name="Active Directory"
           version="2008"
-          include="base"
+          include="2003"
           platforms="Win32">
     
     <filter name="domain2008" value="Security System-Wide Statistics"/>
