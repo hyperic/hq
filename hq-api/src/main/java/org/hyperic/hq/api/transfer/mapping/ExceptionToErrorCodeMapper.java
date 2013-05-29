@@ -136,6 +136,7 @@ public class ExceptionToErrorCodeMapper  {
     public enum ErrorCode {
         
         RESOURCE_NOT_FOUND_BY_ID("1001"),
+        POLICY_NOT_FOUND_BY_ID("1002"),
         INVALID_SESSION("2001"),
         SESSION_TIMEOUT("2002"),
         NON_ADMIN_ERR("2003"),
