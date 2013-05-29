@@ -51,7 +51,7 @@ import org.hyperic.util.config.ConfigResponse;
  */
 public class Configurator implements ServletContextListener {
 
-    private Log log;
+    private final Log log;
     
     public Configurator() {
         log = LogFactory.getLog(Configurator.class.getName());    
@@ -119,10 +119,11 @@ public class Configurator implements ServletContextListener {
         Enumeration names = props.propertyNames();
         while (names.hasMoreElements()) {
             String name = (String) names.nextElement();
-            if (name.startsWith(Constants.SYSTEM_VARIABLE_PATH))
+            if (name.startsWith(Constants.SYSTEM_VARIABLE_PATH)) {
                 System.setProperty(name,props.getProperty(name));
-            else
+            } else {
                 ctx.setAttribute(name, props.getProperty(name));
+            }
         }
 
         debug("loaded application configuration [" +
@@ -251,6 +252,7 @@ public class Configurator implements ServletContextListener {
 			}
 
 			ctx.setAttribute(Constants.APP_VERSION, version);
+            ctx.setAttribute(Constants.APP_BUILD, ProductProperties.getBuildNumber());
 		} catch (Exception e) {
 			error("Unable to load product version", e);
 		}
