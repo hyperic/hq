@@ -54,13 +54,13 @@ import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.server.session.AttachType;
 import org.hyperic.hq.hqu.server.session.View;
 import org.hyperic.hq.hqu.server.session.ViewResourceCategory;
 import org.hyperic.hq.hqu.shared.UIPluginManager;
+import org.hyperic.hq.measurement.server.session.MonitorableType;
 import org.hyperic.hq.measurement.server.session.MonitorableTypeDAO;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginManager;
@@ -70,7 +70,6 @@ import org.hyperic.hq.product.ProductPluginManager;
 import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.hq.product.server.session.ProductPluginDeployer;
 import org.hyperic.hq.product.shared.ProductManager;
-import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;
@@ -140,8 +139,8 @@ public class ProductBossImpl implements ProductBoss {
         String[] caches = cacheManager.getCacheNames();
         List<Cache> res = new ArrayList<Cache>(caches.length);
         
-        for (int i=0; i<caches.length; i++) {
-            res.add(cacheManager.getCache(caches[i]));
+        for (String cache : caches) {
+            res.add(cacheManager.getCache(cache));
         }
         return res;
     }
@@ -313,8 +312,9 @@ public class ProductBossImpl implements ProductBoss {
             }
         }
 
-        if (baseResponse == null)
+        if (baseResponse == null) {
             baseResponse = configManager.getMergedConfigResponse(overlord, type, id, false);
+        }
 
         return new ConfigSchemaAndBaseResponse(getConfigSchema(id, type, baseResponse), baseResponse);
     }
@@ -356,12 +356,13 @@ public class ProductBossImpl implements ProductBoss {
     public ConfigSchema getConfigSchema(ConfigResponse config, String platformName, TypeInfo resourceTypeInfo, String configType)
             throws PluginException {
         
-        if ((null == configType) || (null == resourceTypeInfo))
-                return null;
+        if ((null == configType) || (null == resourceTypeInfo)) {
+            return null;
+        }
         
         final String typeName = resourceTypeInfo.getName();
-        
-        String pluginName =  monitorableTypeDAO.findByName(typeName).getPlugin() ;
+        MonitorableType pluginByName = monitorableTypeDAO.findByName(typeName);
+        String pluginName = ((pluginByName == null) ? "" : pluginByName.getPlugin());
                 
         final ProductPluginManager pluginManager = productPluginDeployer.getProductPluginManager();                
         final PluginManager pm = pluginManager.getPluginManager(configType);
@@ -379,8 +380,9 @@ public class ProductBossImpl implements ProductBoss {
         
         final ProductPluginManager pluginManager = productPluginDeployer.getProductPluginManager();
         final Map<String, TypeInfo> prototypeTypeInfos = pluginManager.getTypeInfo(prototypeName);   
-        if ((null == prototypeTypeInfos) || prototypeTypeInfos.isEmpty())
+        if ((null == prototypeTypeInfos) || prototypeTypeInfos.isEmpty()) {
             return null;
+        }
         for(Map.Entry<String, TypeInfo> prototypeTypeInfo:prototypeTypeInfos.entrySet()) {
             ConfigSchema configSchema = null;
             try {
