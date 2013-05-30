@@ -32,6 +32,7 @@ import java.util.Properties;
 public class ProductProperties {
     private static final String PROP_VERSION = "version";
     private static final String PROP_BUILD_DATE = "build.date";
+    private static final String PROP_BUILD_NUMBER = "build.number";
     private static final String PROP_FLAVOUR = "hq.flavour";
 
     private static Properties _props;
@@ -50,6 +51,10 @@ public class ProductProperties {
 
     public static String getFlavour() {
         return getRequiredProperty(PROP_FLAVOUR);
+    }
+
+    public static String getBuildNumber() {
+        return getRequiredProperty(PROP_BUILD_NUMBER);
     }
 
    
@@ -91,8 +96,9 @@ public class ProductProperties {
     private static String getRequiredProperty(String prop) {
         String res;
 
-        if ((res = getProperty(prop)) == null)
+        if ((res = getProperty(prop)) == null) {
             throw new IllegalStateException("Failed to find " + prop);
+        }
 
         return res;
     }

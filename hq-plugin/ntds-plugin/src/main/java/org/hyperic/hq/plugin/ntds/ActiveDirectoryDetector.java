@@ -106,9 +106,13 @@ public class ActiveDirectoryDetector
         }
         switch (schemaVersion) {
         case 13:    // 2000
+            if (pluginServerVersion!=2000) {
+                return null;
+            }
+            break;
         case 30:    // 2003 RTM
         case 31:    // 2003 R2
-            if (pluginServerVersion!=-1) { // base plugin
+            if (pluginServerVersion!=2003) {
                 return null;
             }
             break;
