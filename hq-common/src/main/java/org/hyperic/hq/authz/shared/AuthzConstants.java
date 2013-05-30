@@ -49,7 +49,7 @@ public final class AuthzConstants {
     public static final String serviceResType = "covalentEAMService";
     public static final String applicationResType = "covalentEAMApplication";
     public static final String groupResType = "covalentAuthzResourceGroup";
-    public static final String profileResType = "groupProfileResourceType";
+    public static final String policyResType = "groupPolicyResourceType";
 
     // Appdef Operations
 
@@ -181,10 +181,18 @@ public final class AuthzConstants {
     public static final String escOpModifyEscalation = "modifyEscalation";
     public static final String escOpRemoveEscalation = "removeEscalation";
 
-    public static final String profileOpCreateProfile = "createProfile";
-    public static final String profileOpViewProfile = VIEW_PREFIX + "Profile";
-    public static final String profileOpModifyProfile = "modifyProfile";
-    public static final String profileOpRemoveProfile = "removeProfile";
+    public static final String policyOpCreatePolicy = "createPolicy";
+    public static final String policyOpViewPolicy = VIEW_PREFIX + "Policy";
+    public static final String policyOpModifyPolicy = "modifyPolicy";
+    public static final String policyOpRemovePolicy = "removePolicy";
+
+    
+    public static final Integer perm_createPolicy   = new Integer(430);
+    public static final Integer perm_modifyPolicy   = new Integer(431);
+    public static final Integer perm_removePolicy   = new Integer(432);
+    public static final Integer perm_viewPolicy     = new Integer(433);
+    
+    public static final Integer perm_createGroup    = new Integer(29);//used for dynamicGroup
 
     public static final String privateRoleGroupName = "camPrivateRoleGroup:";
     public static final int authzDefaultResourceGroupType = 13;

@@ -45,7 +45,9 @@ public class ResourceOperationsHelper {
     public final static int USER = 5 * MULTIPLIER;
     public final static int ROLE = 6 * MULTIPLIER;
     public final static int ESCALATION = 7 * MULTIPLIER;
-    public final static int PROFILE = 8 * MULTIPLIER;
+    public final static int POLICY = 8 * MULTIPLIER;
+    
+    
     
     // Operation codes...these are added to the resource type code to get the actual operation
     public final static int CREATE = 0;
@@ -118,10 +120,10 @@ public class ResourceOperationsHelper {
         operationsList.add(AuthzConstants.escOpRemoveEscalation);
         operationsList.add(null);
         operationsList.add(null);       
-        operationsList.add(AuthzConstants.profileOpCreateProfile);
-        operationsList.add(AuthzConstants.profileOpModifyProfile);
-        operationsList.add(AuthzConstants.profileOpRemoveProfile);
-        operationsList.add(AuthzConstants.profileOpViewProfile);
+        operationsList.add(AuthzConstants.policyOpCreatePolicy);
+        operationsList.add(AuthzConstants.policyOpViewPolicy);
+        operationsList.add(AuthzConstants.policyOpModifyPolicy);
+        operationsList.add(AuthzConstants.policyOpRemovePolicy);
         operationsList.add(null);
         operationsList.add(null);       
     }
@@ -245,7 +247,7 @@ public class ResourceOperationsHelper {
                 resourceTypeCode = APPLICATION;
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_POLICY:
-                resourceTypeCode = PROFILE;
+                resourceTypeCode = POLICY;
                 break;
             default:
                 resourceTypeCode = -1;

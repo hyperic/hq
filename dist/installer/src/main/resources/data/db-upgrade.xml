@@ -11799,7 +11799,7 @@ has already been defined.
     <schema-insert table="EAM_RESOURCE"
                    insertCmd="(id,version_col,resource_type_id,instance_id,subject_id,proto_id,name,sort_name,fsystem,mtime) values (701,0,0,701,0,0,'','','1',0)"/>
     <schema-insert table="EAM_RESOURCE_TYPE"
-                   insertCmd="(id,version_col,name,resource_id,fsystem) values (701,0,'groupProfileResourceType',701,'0')"/>
+                   insertCmd="(id,version_col,name,resource_id,fsystem) values (701,0,'groupPolicyResourceType',701,'0')"/>
 
     <schema-directSQL>  
         <statement targetDB="postgresql">
@@ -11971,9 +11971,28 @@ has already been defined.
                 foreign key (GROUP_CRITERIA_ID)
                 references EAM_GROUP_CRITERIA(id)
         </statement>
-    </schema-directSQL>  
+    </schema-directSQL>
+    
+	<schema-insert table="EAM_OPERATION"
+					insertCmd="(ID, NAME, RESOURCE_TYPE_ID) VALUES (430, 'createPolicy', 701)"/>
+	<schema-insert table="EAM_OPERATION"
+					insertCmd="(ID, NAME, RESOURCE_TYPE_ID) VALUES (431, 'modifyPolicy', 701)"/>
+	<schema-insert table="EAM_OPERATION"
+					insertCmd="(ID, NAME, RESOURCE_TYPE_ID) VALUES (432, 'removePolicy', 701)"/>
+	<schema-insert table="EAM_OPERATION"
+					insertCmd="(ID, NAME, RESOURCE_TYPE_ID) VALUES (433, 'viewPolicy', 701)"/>
+					
+	<schema-insert table="EAM_ROLE_OPERATION_MAP"
+  		   			 insertCmd="(OPERATION_ID, ROLE_ID) VALUES (430, 0)"/>
+  	<schema-insert table="EAM_ROLE_OPERATION_MAP"
+  		   			 insertCmd="(OPERATION_ID, ROLE_ID) VALUES (431, 0)"/>
+  	<schema-insert table="EAM_ROLE_OPERATION_MAP"
+  		   			 insertCmd="(OPERATION_ID, ROLE_ID) VALUES (432, 0)"/>
+  	<schema-insert table="EAM_ROLE_OPERATION_MAP"
+  		   			 insertCmd="(OPERATION_ID, ROLE_ID) VALUES (433, 0)"/>
   </schemaSpec>
-	
+
+
     <schemaSpec version="3.218" >
         <user-password-upgrader encryption="EAM_PRINCIPAL.PASSWORD" strength="256" encodeHashAsBase64="true" />
     </schemaSpec>

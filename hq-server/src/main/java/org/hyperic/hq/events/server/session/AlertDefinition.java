@@ -224,7 +224,7 @@ public class AlertDefinition
             return AppdefEntityConstants.APPDEF_TYPE_SERVER;
         } else if (rtName.equals(AuthzConstants.serviceResType)) {
             return AppdefEntityConstants.APPDEF_TYPE_SERVICE;
-        } else if (rtName.equals(AuthzConstants.profileResType)) {
+        } else if (rtName.equals(AuthzConstants.policyResType)) {
             return AppdefEntityConstants.APPDEF_TYPE_POLICY;
         } else if (rtName.equals(AuthzConstants.applicationResType)) {
             return AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
