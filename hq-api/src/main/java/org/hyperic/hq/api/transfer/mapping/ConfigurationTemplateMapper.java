@@ -13,6 +13,7 @@ import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EnumerationConfigOption;
+import org.hyperic.util.config.StringConfigOption;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -115,18 +116,27 @@ public class ConfigurationTemplateMapper {
      * @return
      */
     private String toType(ConfigOption configOption) {
+       
         final String className = configOption.getClass().getSimpleName();
         
         // IntegerConfigOption -> integer, BooleanConfigOption -> boolean, ...
         String typeName = StringUtils.removeEnd(className, ConfigOption.class.getSimpleName()).toLowerCase();        
         
-        // integer - int, ipaddress - ip, enumeration - enum
+        // integer->int, ipaddress->ip, enumeration->enum, 
+        // string.isSecret->secret, string.isHidden->hidden
         if ("integer".equals(typeName))
             typeName = CONFIG_OPTION_TYPE_INT;
         else if ("ipaddress".equals(typeName))
             typeName = CONFIG_OPTION_TYPE_IP;
         else if ("enumeration".equals(typeName))
-            typeName = "enum";
+            typeName = "enum";        
+        else if (configOption instanceof StringConfigOption) {
+            StringConfigOption strConfigOption = (StringConfigOption) configOption;
+            if (strConfigOption.isSecret())
+                typeName = "secret";
+            else if (strConfigOption.isHidden())
+                typeName = "hidden";
+        }        
                     
         return typeName;                
     }   
