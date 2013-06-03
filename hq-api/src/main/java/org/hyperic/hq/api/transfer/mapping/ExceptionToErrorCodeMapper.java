@@ -136,7 +136,7 @@ public class ExceptionToErrorCodeMapper  {
     public enum ErrorCode {
         
         RESOURCE_NOT_FOUND_BY_ID("1001"),
-        POLICY_NOT_FOUND_BY_ID("1002"),
+        DUPLICATE_RESOURCE_ID("1002"),
         INVALID_SESSION("2001"),
         SESSION_TIMEOUT("2002"),
         NON_ADMIN_ERR("2003"),
@@ -163,7 +163,11 @@ public class ExceptionToErrorCodeMapper  {
         ILLEGAL_AGG_FILTER("8102"),
         INTERNAL_SERVER_ERROR("9000"),
         REGEX_PATTERN_SYNTAX_ERROR("9001"),
-        MULTIPLE_POLICIES_TYPES_MAPPED("9002");
+        MULTIPLE_POLICIES_TYPES_MAPPED("9002"),
+        POLICY_NOT_FOUND_BY_ID("9003"), 
+        FAILED_TO_FETCH_CONFIGURATION("9505"), 
+        ALERT_CREATION_ERROR("9506"), 
+        PLUGIN_ERROR("9507");
         
         
         private final String errorCode;

@@ -1116,28 +1116,6 @@ public class ResourceManagerImpl implements ResourceManager {
         return config;
     }
     
-
-//    private ConfigSchema getConfigSchema(ConfigResponse config, String configType, String typeName, String platformName, TypeInfo resourceTypeInfo)
-//            throws PluginException {
-//
-//        if ((null == config) || (null == configType) || (null == typeName) || (null == resourceTypeInfo))
-//                return null;
-//        
-//        // XXX this is seriously flawed,
-//        // if I call getConfigSchema() for TYPE_MEASUREMENT
-//        // or TYPE_CONTROL the plugin arg is the prototypename,
-//        // but for TYPE_PRODUCT it is pluginName
-//        String fullTypeName = typeName.equals(platformName) ? platformName : (platformName + " " + typeName);
-//        String plugin = configType.equals(ProductPlugin.TYPE_PRODUCT) ? monitorableTypeDAO.findByName(
-//                typeName).getPlugin() : fullTypeName;
-//                
-//        final ProductPluginManager pluginManager = productPluginDeployer.getProductPluginManager();                
-//        final PluginManager pm = pluginManager.getPluginManager(configType);
-//        final ConfigSchema configSchema = pm.getConfigSchema(plugin, resourceTypeInfo, config);
-//        return configSchema;
-//
-//    }   
-
     /**
      *
      * 

@@ -37,12 +37,21 @@ public class ConfigFetchException extends ApplicationException {
      * which has not yet been filled out.
      */
     public ConfigFetchException(String productType, AppdefEntityID id) {
+        this(null, productType, id);
+    }
+
+    /**
+     * Indicate that the specified appdef entity needs a config response
+     * which has not yet been filled out.
+     */
+    public ConfigFetchException(Throwable e, String productType, AppdefEntityID id) {
+        super(e);        
         this.culprit     = id;
         this.productType = productType;
         this.msg         = productType + " configuration has not yet been " +
             "setup for " + id;
-    }
-
+    }    
+    
     public ConfigFetchException(String productType, AppdefResourceValue ent){
         AppdefEntityID id;
 

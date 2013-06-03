@@ -504,14 +504,14 @@ public class ResourceTransferImpl implements ResourceTransfer {
 		
     public ConfigurationTemplate getConfigurationTemplate(ApiMessageContext apiMessageContext, String resourceID)
             throws SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException,
-            ConfigFetchException, PermissionException, EncodingException, PluginException {
+            ConfigFetchException, PermissionException {
 
         final ResourceDetailsType[] detailsType = { ResourceDetailsType.BASIC };
 
         final AuthzSubject authzSubject = apiMessageContext.getAuthzSubject();
         final Integer sessionId = apiMessageContext.getSessionId();
 
-        final org.hyperic.hq.authz.server.session.Resource resource = ResourceTypeStrategy.RESOURCE
+        final Resource resource = ResourceTypeStrategy.RESOURCE
                 .getResourceByInternalID(new Context(authzSubject, resourceID, detailsType, this));
 
         final int numConfigTypes = ProductPlugin.CONFIGURABLE_TYPES.length;
@@ -533,20 +533,20 @@ public class ResourceTransferImpl implements ResourceTransfer {
                 }else {// if resource is not a prototype
 
                     final AppdefEntityID entityID = AppdefUtil.newAppdefEntityId(resource);
-
-                    final ConfigSchema config = this.productBoss.getConfigSchema(sessionId, entityID, configurableType);
-                    // Add to the existing configTemplate
-                    configTemplate = this.configTemplateMapper.toConfigurationTemplate(config, configurableType,
-                            configTemplate);
+                    
+                    try {
+                        ConfigSchema config = this.productBoss.getConfigSchema(sessionId, entityID, configurableType);
+                        // Add to the existing configTemplate
+                        configTemplate = this.configTemplateMapper.toConfigurationTemplate(config, configurableType,
+                                configTemplate);
+                    } catch(EncodingException e) {
+                        throw new ConfigFetchException(e, ProductPlugin.CONFIGURABLE_TYPES[i], entityID);
+                    }
 
                 }// EO if resource is not a prototype
             }catch(PluginException e) {
-                if(ProductPlugin.TYPE_CONTROL.equals(configurableType)) {
-                    log.debug("Plugin config not found for config type " + configurableType, e);
-                }else {// not all plugins have control config
-                    throw e;
-                }
-
+                // not all plugins have all config types
+                log.debug("Plugin config not found for config type " + configurableType, e);
             }
         }// EO while there are more configTypes
         return configTemplate;

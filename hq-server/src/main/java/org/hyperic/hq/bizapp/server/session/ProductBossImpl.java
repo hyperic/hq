@@ -27,6 +27,7 @@ package org.hyperic.hq.bizapp.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,8 @@ import java.util.Map;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -76,6 +79,8 @@ import org.hyperic.util.config.EncodingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+
 
 /**
  * The Product Boss
@@ -92,6 +97,8 @@ public class ProductBossImpl implements ProductBoss {
     private SessionManager sessionManager;
     private ProductPluginDeployer productPluginDeployer;
     private MonitorableTypeDAO monitorableTypeDAO;    
+    
+    protected Log log = LogFactory.getLog(ProductBossImpl.class.getName());    
     
 
     @Autowired
@@ -375,26 +382,32 @@ public class ProductBossImpl implements ProductBoss {
     @Transactional(readOnly=true)
     public Map<String, ConfigSchema> getConfigSchemas(String prototypeName, String configType) throws PluginException {
 //        AuthzSubject subject = sessionManager.getSubject(sessionId);
-//        
-        Map<String, ConfigSchema> configurationSchemas = new HashMap<String, ConfigSchema>(10);
-        
+//                        
         final ProductPluginManager pluginManager = productPluginDeployer.getProductPluginManager();
         final Map<String, TypeInfo> prototypeTypeInfos = pluginManager.getTypeInfo(prototypeName);   
-        if ((null == prototypeTypeInfos) || prototypeTypeInfos.isEmpty()) {
-            return null;
+        if (CollectionUtils.isEmpty(prototypeTypeInfos)) {            
+            return Collections.emptyMap();
         }
+        Map<String, ConfigSchema> configurationSchemas = new HashMap<String, ConfigSchema>(10);
+        boolean noPluginsFound = true;
+        PluginNotFoundException pluginNotFoundExceptionCaught = null;
         for(Map.Entry<String, TypeInfo> prototypeTypeInfo:prototypeTypeInfos.entrySet()) {
-            ConfigSchema configSchema = null;
             try {
                 final String platformName = prototypeTypeInfo.getKey();
-                configSchema = getConfigSchema(new ConfigResponse(), platformName, prototypeTypeInfo.getValue(), configType);
-                configurationSchemas.put(platformName, configSchema);
-                
+                final ConfigSchema configSchema = getConfigSchema(new ConfigResponse(), platformName, 
+                                                                    prototypeTypeInfo.getValue(), configType);
+                configurationSchemas.put(platformName, configSchema); 
+                noPluginsFound = false;
             } catch (PluginNotFoundException e) {
-                // TODO write to log
+                // not all plugins exist for all platforms
+                pluginNotFoundExceptionCaught = e;
+                log.debug("Plugin not found for prototype " + prototypeName + " for configType " + configType, e);
             }
 
         }            
+        if ((null != pluginNotFoundExceptionCaught) && noPluginsFound) {
+            throw pluginNotFoundExceptionCaught;
+        }
         return configurationSchemas;        
     }
     

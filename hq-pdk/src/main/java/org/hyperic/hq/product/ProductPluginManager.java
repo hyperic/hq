@@ -210,19 +210,16 @@ public class ProductPluginManager
         return platforms.get(name);
     }
 
-    // assumes type names are unique across plugins,
-    // which they should be. if needed we could index on
-    // product name too.
     /**
      * Find TypeInfo's accross all platforms for the given type name.
      * @param name The type name, e.g. "Apache 2.0"
      * @return  map<platformName, typeInfo> the type per platform
      */    
     public Map<String, TypeInfo> getTypeInfo(String typeName)  {
-        Map<String, TypeInfo> typeInfos = null;
+        Map<String, TypeInfo> typeInfos = Collections.emptyMap();
         
         if((null != typeName) && (typeName.length() > 0)) {
-            typeInfos = new HashMap<String, TypeInfo>(8);
+            typeInfos = new HashMap<String, TypeInfo>(10);
             final Map<String, Map<String, TypeInfo>> types = getTypes();
             for(final Entry<String, Map<String, TypeInfo>> platform:types.entrySet()) {
                 final TypeInfo typeInfo = platform.getValue().get(typeName);
@@ -1158,13 +1155,18 @@ public class ProductPluginManager
         return this.client;
     }
     
+    /**
+     * As opposed to other plugins, product plugins
+     * are fetched by plugin name 
+     */
+    @Override
     public ConfigSchema getConfigSchema(String pluginName, 
             String platformName, 
             String typeName, 
             TypeInfo info,
             ConfigResponse config) 
                     throws PluginNotFoundException {
-
+        
         return getConfigSchema(pluginName, info, config);
     }       
 }

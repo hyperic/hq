@@ -91,5 +91,19 @@ public interface ResourceTransfer {
 
     Object initResourceConfig(Context flowContext) throws ConfigFetchException, EncodingException, PluginNotFoundException, PluginException, PermissionException, AppdefEntityNotFoundException;
 
-    ConfigurationTemplate getConfigurationTemplate(ApiMessageContext apiMessageContext, String resourceID) throws PluginException, SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException, ConfigFetchException, PermissionException, EncodingException;
+    /**
+     * Get resource configuration template with default values for the specified 
+     * resource or resource prototype
+     * @param apiMessageContext
+     * @param resourceID id of the resource or of a resource prototype, e.g. the resourceID of Apache Tomcat 6.0
+     * @return
+     * @throws SessionTimeoutException
+     * @throws SessionNotFoundException
+     * @throws AppdefEntityNotFoundException
+     * @throws ConfigFetchException
+     * @throws PermissionException
+     */
+    ConfigurationTemplate getConfigurationTemplate(ApiMessageContext apiMessageContext, String resourceID) 
+            throws SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException, 
+            ConfigFetchException, PermissionException;
 }//EOI 
