@@ -118,7 +118,9 @@ public abstract class SharePointServerDetectorDefault extends ServerDetector imp
             ConfigResponse cc = new ConfigResponse();
             cc.setValue(SharePoint.PROP_C_WEBS, websNames);
             cc.setValue(SharePoint.PROP_C_SERVICES, serviceNames);
-            setControlConfig(server, cc);
+            setProductConfig(server, cc);
+
+            setControlConfig(server, new ConfigResponse());
 
             servers.add(server);
         }

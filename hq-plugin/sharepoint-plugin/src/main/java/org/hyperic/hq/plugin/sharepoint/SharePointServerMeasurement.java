@@ -117,7 +117,6 @@ public class SharePointServerMeasurement extends Win32MeasurementPlugin {
             res = checkServiceAvail(service);
         }
 
-        System.exit(-1);
         return new MetricValue(res);
     }
 
@@ -199,7 +198,7 @@ public class SharePointServerMeasurement extends Win32MeasurementPlugin {
             HttpResponse response = client.execute(get, new BasicHttpContext());
             int r = response.getStatusLine().getStatusCode();
             log.debug("[testWebServer] url='" + get.getURI() + "' statusCode='" + r + "' " + response.getStatusLine().getReasonPhrase());
-            if (r < 500) {
+            if (r >= 500) {
                 throw new PluginException("[testWebServer] error=" + r);
             }
         } catch (IOException ex) {
