@@ -222,7 +222,7 @@
         <data ID="303" NAME="covalentEAMServer" FSYSTEM="FALSE"/>
         <data ID="305" NAME="covalentEAMService" FSYSTEM="FALSE"/>
         <data ID="308" NAME="covalentEAMApplication" FSYSTEM="FALSE"/>
-        <data ID="701" NAME="groupProfileResourceType" FSYSTEM="FALSE"/>
+        <data ID="701" NAME="groupPolicyResourceType" FSYSTEM="FALSE"/>
     </table>
 
     <table name="EAM_RESOURCE">
@@ -351,6 +351,16 @@
         <data ID="415" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
             NAME="viewEscalation"/>
 
+
+        <!-- Policy -->
+        <data ID="430" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:701"
+            NAME="createPolicy"/>
+        <data ID="431" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:701"
+            NAME="modifyPolicy"/>
+        <data ID="432" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:701"
+            NAME="removePolicy"/>
+        <data ID="433" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:701"
+            NAME="viewPolicy"/>
     </table>
 
 
@@ -501,6 +511,10 @@
         <data OPERATION_ID="%EAM_OPERATION.ID:413" ROLE_ID="%EAM_ROLE.ID:0"/>
         <data OPERATION_ID="%EAM_OPERATION.ID:414" ROLE_ID="%EAM_ROLE.ID:0"/>
         <data OPERATION_ID="%EAM_OPERATION.ID:415" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data OPERATION_ID="%EAM_OPERATION.ID:430" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data OPERATION_ID="%EAM_OPERATION.ID:431" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data OPERATION_ID="%EAM_OPERATION.ID:432" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data OPERATION_ID="%EAM_OPERATION.ID:433" ROLE_ID="%EAM_ROLE.ID:0"/>
     </table>
 
     <!-- RESOURCE CREATOR ROLE DEFINITION STUFF. The entries here

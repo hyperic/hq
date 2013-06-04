@@ -626,6 +626,22 @@ public abstract class PermissionManager {
      */
     public abstract void check(Integer subjectId, Integer typeId, Integer instanceId,
                                Integer operationId) throws PermissionException;
+    
+
+    /**
+     * Check permission.
+     * 
+     * @param subjectId ID of the subject.
+     * @param typeId ID of the type of the resource.
+     * @param operationId ID of the operation that the subject may want to
+     *        perform.
+     * @exception PermissionException If subject is not authorized to perform
+     *            the given operation on the resource of the given type whose id
+     *            is instanceId.
+     */
+    public abstract void check(Integer subjectId, Integer typeId, 
+                               Integer operationId) throws PermissionException;
+    
 
     /**
      * Check permission.

@@ -126,6 +126,11 @@ public class PermissionManagerImpl extends PermissionManager {
     public void check(Integer subjectId, String resType, Integer instanceId, String operation)
         throws PermissionException {
     }
+    
+    public void check(Integer subjectId, Integer typeId, Integer operationId) 
+            throws PermissionException{
+    }
+    
 
     public boolean hasAdminPermission(Integer who) {
         return true;

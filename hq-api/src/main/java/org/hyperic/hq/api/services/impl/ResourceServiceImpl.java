@@ -28,33 +28,30 @@ package org.hyperic.hq.api.services.impl;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.api.model.ConfigurationTemplate;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
-
-import org.hyperic.hq.api.model.ResourceModel;
 import org.hyperic.hq.api.model.ResourceDetailsType;
+import org.hyperic.hq.api.model.ResourceModel;
 import org.hyperic.hq.api.model.ResourceStatusType;
 import org.hyperic.hq.api.model.ResourceTypeModel;
 import org.hyperic.hq.api.model.Resources;
-import org.hyperic.hq.api.model.common.RegistrationID;
 import org.hyperic.hq.api.model.common.ExternalRegistrationStatus;
+import org.hyperic.hq.api.model.common.RegistrationID;
 import org.hyperic.hq.api.model.resources.RegisteredResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
 import org.hyperic.hq.api.services.ResourceService;
 import org.hyperic.hq.api.transfer.ResourceTransfer;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
+import org.hyperic.hq.api.transfer.mapping.UnknownEndpointException;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
-import org.hyperic.hq.api.transfer.mapping.UnknownEndpointException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.ObjectNotFoundException;
-import org.hyperic.hq.product.PluginException;
-import org.hyperic.util.config.EncodingException;
 import org.hyperic.hq.notifications.EndpointQueue;
 import org.hyperic.hq.notifications.NotificationEndpoint;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,9 +60,14 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
 	
 	@Autowired
 	private ResourceTransfer resourceTransfer;
+
 	@Autowired
-	private EndpointQueue endpointQueue;
+	private EndpointQueue endpointQueue;	
 	
+	protected Log log = LogFactory.getLog(ResourceServiceImpl.class.getName());
+	
+//	@Autowired
+//	private ConfigurationTransfer configurationTransfer;
 	
 	public final ResourceModel getResource(final String platformNaturalID, final ResourceTypeModel resourceType, final ResourceStatusType resourceStatusType, 
 			final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) throws SessionNotFoundException, SessionTimeoutException {
@@ -158,35 +160,32 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
         }
 	}
 
-    public ConfigurationTemplate getConfigurationTemplate(final String resourceID) throws SessionNotFoundException, SessionTimeoutException {
+    public ConfigurationTemplate getConfigurationTemplate(final String resourceID) throws SessionNotFoundException,
+            SessionTimeoutException {
 
         ApiMessageContext apiMessageContext = newApiMessageContext();
-        
+
         try {
             return this.resourceTransfer.getConfigurationTemplate(apiMessageContext, resourceID);
+        }catch(WebApplicationException e) {
+            throw e;
         }catch(AppdefEntityNotFoundException e) {
-            final WebApplicationException webApplicationException = createResourceNotFoundWAException(resourceID, "");            
-            throw webApplicationException;
-        }catch(ConfigFetchException e) {
-            final WebApplicationException webApplicationException = 
-                    errorHandler.newWebApplicationException(Response.Status.INTERNAL_SERVER_ERROR, ExceptionToErrorCodeMapper.ErrorCode.INTERNAL_SERVER_ERROR, resourceID);
+            log.error("Resource " + resourceID + " not found.", e);
+            final WebApplicationException webApplicationException = createResourceNotFoundWAException(resourceID, "");
             throw webApplicationException;
         }catch(PermissionException e) {
-            final WebApplicationException webApplicationException = 
-                    new WebApplicationException(e, Response.Status.FORBIDDEN);
+            log.error("Insufficient permissions for the action", e);
+            final WebApplicationException webApplicationException = new WebApplicationException(e,
+                    Response.Status.FORBIDDEN);
             throw webApplicationException;
-        }catch(PluginException e) {
-            final WebApplicationException webApplicationException = 
-                    new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
-            throw webApplicationException;
-        }catch(EncodingException e) {
-            final WebApplicationException webApplicationException = 
-                    new WebApplicationException(e, Response.Status.BAD_REQUEST);
+        }catch(ConfigFetchException e) {
+            log.error("Failed to fetch exception", e);
+            final WebApplicationException webApplicationException = errorHandler.newWebApplicationException(e,
+                    Response.Status.INTERNAL_SERVER_ERROR, ExceptionToErrorCodeMapper.ErrorCode.FAILED_TO_FETCH_CONFIGURATION);
             throw webApplicationException;
         }
-        
-    }//EOM
-    
+
+    }// EOM
     
     private WebApplicationException createResourceNotFoundWAException(final String resourceID, final String idType) {
         logger.warn("Resource with the " + idType + " ID " + resourceID + " not found.");

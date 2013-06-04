@@ -35,9 +35,15 @@
     <server name="SharePoint" version="2010" platforms="Win32">
         <property name="version" value="SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\14.0"/>
         <plugin type="measurement" class="SharePointServerMeasurement"/>
+        <plugin type="control" class="SharePointServerControl"/>
         <plugin type="autoinventory" class="SharePointServerDetector2010"/>
         
-        <metric name="Availability" alias="Availability" template="pdh:SharePoint Foundation(_total)\Process ID:${alias}" indicator="true" category="AVAILABILITY"/>
+        <config>
+            <option name="sharepoint.control.webs" description="Webs apps to control"/>
+            <option name="sharepoint.control.services" description="Windows Serices to control"/>
+        </config>
+                    
+        <metric name="Availability" alias="Availability" template="server:webs=%sharepoint.control.webs%,services=%sharepoint.control.services%:Availability" indicator="true" category="AVAILABILITY"/>
         <filter name="template" value="pdh:SharePoint Foundation(_total):${name}"/>
         <metric name="Template Cache Average Record Age"/>
         <metric name="Template Cache Total Records Evicted"/>
@@ -82,9 +88,10 @@
         <service name="Webserver">
             <plugin type="measurement" class="SharePointServerMeasurement"/>
             <config>
-                <option name="url" description="Webserver URL" default="http://localhost:80/"/>
+                <option name="name" description="IIS site Name" default="SharePoint - 80"/>
+                <option name="url" description="IIS site URL" default="http://localhost:80/"/>
             </config>
-            <metric name="Availability" alias="Availability" template="web:url=%url%:${alias}" indicator="true"/>
+            <metric name="Availability" alias="Availability" template="web:name=%name%:${alias}" indicator="true"/>
             <metric name="Response Time" alias="responsetime" template="web:url=%url%:${alias}" indicator="true"/>
         </service>
         

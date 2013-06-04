@@ -27,6 +27,7 @@ package org.hyperic.hq.bizapp.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,8 @@ import java.util.Map;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -54,13 +57,13 @@ import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.server.session.AttachType;
 import org.hyperic.hq.hqu.server.session.View;
 import org.hyperic.hq.hqu.server.session.ViewResourceCategory;
 import org.hyperic.hq.hqu.shared.UIPluginManager;
+import org.hyperic.hq.measurement.server.session.MonitorableType;
 import org.hyperic.hq.measurement.server.session.MonitorableTypeDAO;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginManager;
@@ -70,13 +73,14 @@ import org.hyperic.hq.product.ProductPluginManager;
 import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.hq.product.server.session.ProductPluginDeployer;
 import org.hyperic.hq.product.shared.ProductManager;
-import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+
 
 /**
  * The Product Boss
@@ -93,6 +97,8 @@ public class ProductBossImpl implements ProductBoss {
     private SessionManager sessionManager;
     private ProductPluginDeployer productPluginDeployer;
     private MonitorableTypeDAO monitorableTypeDAO;    
+    
+    protected Log log = LogFactory.getLog(ProductBossImpl.class.getName());    
     
 
     @Autowired
@@ -140,8 +146,8 @@ public class ProductBossImpl implements ProductBoss {
         String[] caches = cacheManager.getCacheNames();
         List<Cache> res = new ArrayList<Cache>(caches.length);
         
-        for (int i=0; i<caches.length; i++) {
-            res.add(cacheManager.getCache(caches[i]));
+        for (String cache : caches) {
+            res.add(cacheManager.getCache(cache));
         }
         return res;
     }
@@ -313,8 +319,9 @@ public class ProductBossImpl implements ProductBoss {
             }
         }
 
-        if (baseResponse == null)
+        if (baseResponse == null) {
             baseResponse = configManager.getMergedConfigResponse(overlord, type, id, false);
+        }
 
         return new ConfigSchemaAndBaseResponse(getConfigSchema(id, type, baseResponse), baseResponse);
     }
@@ -356,12 +363,13 @@ public class ProductBossImpl implements ProductBoss {
     public ConfigSchema getConfigSchema(ConfigResponse config, String platformName, TypeInfo resourceTypeInfo, String configType)
             throws PluginException {
         
-        if ((null == configType) || (null == resourceTypeInfo))
-                return null;
+        if ((null == configType) || (null == resourceTypeInfo)) {
+            return null;
+        }
         
         final String typeName = resourceTypeInfo.getName();
-        
-        String pluginName =  monitorableTypeDAO.findByName(typeName).getPlugin() ;
+        MonitorableType pluginByName = monitorableTypeDAO.findByName(typeName);
+        String pluginName = ((pluginByName == null) ? "" : pluginByName.getPlugin());
                 
         final ProductPluginManager pluginManager = productPluginDeployer.getProductPluginManager();                
         final PluginManager pm = pluginManager.getPluginManager(configType);
@@ -374,25 +382,32 @@ public class ProductBossImpl implements ProductBoss {
     @Transactional(readOnly=true)
     public Map<String, ConfigSchema> getConfigSchemas(String prototypeName, String configType) throws PluginException {
 //        AuthzSubject subject = sessionManager.getSubject(sessionId);
-//        
-        Map<String, ConfigSchema> configurationSchemas = new HashMap<String, ConfigSchema>(10);
-        
+//                        
         final ProductPluginManager pluginManager = productPluginDeployer.getProductPluginManager();
         final Map<String, TypeInfo> prototypeTypeInfos = pluginManager.getTypeInfo(prototypeName);   
-        if ((null == prototypeTypeInfos) || prototypeTypeInfos.isEmpty())
-            return null;
+        if (CollectionUtils.isEmpty(prototypeTypeInfos)) {            
+            return Collections.emptyMap();
+        }
+        Map<String, ConfigSchema> configurationSchemas = new HashMap<String, ConfigSchema>(10);
+        boolean noPluginsFound = true;
+        PluginNotFoundException pluginNotFoundExceptionCaught = null;
         for(Map.Entry<String, TypeInfo> prototypeTypeInfo:prototypeTypeInfos.entrySet()) {
-            ConfigSchema configSchema = null;
             try {
                 final String platformName = prototypeTypeInfo.getKey();
-                configSchema = getConfigSchema(new ConfigResponse(), platformName, prototypeTypeInfo.getValue(), configType);
-                configurationSchemas.put(platformName, configSchema);
-                
+                final ConfigSchema configSchema = getConfigSchema(new ConfigResponse(), platformName, 
+                                                                    prototypeTypeInfo.getValue(), configType);
+                configurationSchemas.put(platformName, configSchema); 
+                noPluginsFound = false;
             } catch (PluginNotFoundException e) {
-                // TODO write to log
+                // not all plugins exist for all platforms
+                pluginNotFoundExceptionCaught = e;
+                log.debug("Plugin not found for prototype " + prototypeName + " for configType " + configType, e);
             }
 
         }            
+        if ((null != pluginNotFoundExceptionCaught) && noPluginsFound) {
+            throw pluginNotFoundExceptionCaught;
+        }
         return configurationSchemas;        
     }
     

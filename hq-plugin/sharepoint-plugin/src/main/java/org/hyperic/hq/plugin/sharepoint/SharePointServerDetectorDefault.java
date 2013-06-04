@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2013], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -69,32 +69,67 @@ public abstract class SharePointServerDetectorDefault extends ServerDetector imp
         log.debug("[discoverServices] config=" + platformConfig);
         List<ServerResource> servers = new ArrayList();
 
+        String installPath = null;
         String versionKey = getTypeProperty("version");
         try {
             RegistryKey key = RegistryKey.LocalMachine.openSubKey(versionKey);
+            installPath = key.getStringValue("Location");
+            key.close();
+        } catch (Win32Exception ex) {
+            log.debug("version registy key '" + versionKey + "' not found.", ex);
+        }
 
-            String installPath = key.getStringValue("Location");
+        if (installPath != null) {
             ServerResource server = createServerResource(installPath);
-
             ConfigResponse pc = new ConfigResponse();
             pc.setValue(SharePoint.PROP_MAINURL, getMainUrl());
             setProductConfig(server, pc);
             setMeasurementConfig(server, new ConfigResponse());
 
-            servers.add(server);
 
-            key.close();
-        } catch (Win32Exception ex) {
-            log.debug("version registy key '" + versionKey + "' not found.", ex);
+            String websNames = "";
+            List<IisMetaBase> webs = getWebServersNames();
+            for (int i = 0; i < webs.size(); i++) {
+                IisMetaBase web = webs.get(i);
+                if (websNames.length() > 0) {
+                    websNames += ", ";
+                }
+                websNames += web.getName();
+                log.debug(" => "+web.getName());
+            }
+
+            String serviceNames = "";
+            List<Service> winServices = getWinServiceList();
+            for (int i = 0; i < winServices.size(); i++) {
+                Service service = winServices.get(i);
+                if (serviceNames.length() > 0) {
+                    serviceNames += ", ";
+                }
+                try {
+                    log.debug(" *> "+service.getConfig().getName());
+                    serviceNames += service.getConfig().getName();
+                } catch (Win32Exception ex) {
+                    log.debug("Error", ex);
+                }
+            }
+
+            log.debug(" -> websNames = "+websNames);
+            log.debug(" -> serviceNames = "+serviceNames);
+            ConfigResponse cc = new ConfigResponse();
+            cc.setValue(SharePoint.PROP_C_WEBS, websNames);
+            cc.setValue(SharePoint.PROP_C_SERVICES, serviceNames);
+            setProductConfig(server, cc);
+
+            setControlConfig(server, new ConfigResponse());
+
+            servers.add(server);
         }
+
         return servers;
     }
 
-    @Override
-    protected final List discoverServices(ConfigResponse serverConfig) throws PluginException {
-        log.debug("[discoverServices] config=" + serverConfig);
-        ArrayList<ServiceResource> services = new ArrayList();
-
+    private List<IisMetaBase> getWebServersNames() {
+        List<IisMetaBase> list = new ArrayList<IisMetaBase>();
         try {
             Map<String, IisMetaBase> websites = IisMetaBase.getWebSites();
             for (Iterator<String> it = websites.keySet().iterator(); it.hasNext();) {
@@ -104,15 +139,8 @@ public abstract class SharePointServerDetectorDefault extends ServerDetector imp
                     try {
                         if (testWebServer(web.toUrlString())) {
                             log.debug("web '" + siteName + "' is Running");
-                            ServiceResource service = new ServiceResource();
-                            service.setType(this, "Webserver");
-                            service.setServiceName("Webserver " + siteName);
-                            services.add(service);
-
-                            ConfigResponse pc = new ConfigResponse();
-                            pc.setValue("url", web.toUrlString());
-                            setProductConfig(service, pc);
-                            setMeasurementConfig(service, new ConfigResponse());
+                            web.setName(siteName);
+                            list.add(web);
                         } else {
                             log.debug("web '" + siteName + "' is NOT running");
                         }
@@ -124,7 +152,11 @@ public abstract class SharePointServerDetectorDefault extends ServerDetector imp
         } catch (Win32Exception ex) {
             log.debug("Error looking for Webservers", ex);
         }
+        return list;
+    }
 
+    private List<Service> getWinServiceList() {
+        List<Service> services = new ArrayList<Service>();
         try {
             List<String> winServices = Service.getServiceNames();
             for (int i = 0; i < winServices.size(); i++) {
@@ -135,15 +167,7 @@ public abstract class SharePointServerDetectorDefault extends ServerDetector imp
                     if (fullName.startsWith(servicesPrefix())) {
                         if (winService.getStatus() == Service.SERVICE_RUNNING) {
                             log.debug(fullName + " (" + name + ") is RUNNING");
-                            ServiceResource service = new ServiceResource();
-                            service.setType(this, "WindowsService");
-                            service.setServiceName("Windows Service " + fullName);
-                            services.add(service);
-                            ConfigResponse pc = new ConfigResponse();
-                            pc.setValue("service_name", name);
-                            setProductConfig(service, pc);
-                            service.setMeasurementConfig();
-                            service.setControlConfig();
+                            services.add(winService);
                         } else {
                             log.debug(fullName + " (" + name + ") is NOT running");
                         }
@@ -153,7 +177,51 @@ public abstract class SharePointServerDetectorDefault extends ServerDetector imp
                 }
             }
         } catch (Win32Exception ex) {
-            log.debug("Error looking for Windows Services :"+ex, ex);
+            log.debug("Error looking for Windows Services :" + ex, ex);
+        }
+        return services;
+    }
+
+    @Override
+    protected final List discoverServices(ConfigResponse serverConfig) throws PluginException {
+        log.debug("[discoverServices] config=" + serverConfig);
+        ArrayList<ServiceResource> services = new ArrayList();
+
+        List<IisMetaBase> webs = getWebServersNames();
+        for (int i = 0; i < webs.size(); i++) {
+            IisMetaBase web = webs.get(i);
+            ServiceResource service = new ServiceResource();
+            service.setType(this, "Webserver");
+            service.setServiceName("Webserver " + web.getName());
+            services.add(service);
+
+            try {
+                ConfigResponse pc = new ConfigResponse();
+                pc.setValue("url", web.toUrlString());
+                pc.setValue("name", web.getName());
+                setProductConfig(service, pc);
+            } catch (MalformedURLException ex) {
+                log.debug("Error formating URL for Webserver '" + web.getName() + "':'" + web + "'", ex);
+            }
+            setMeasurementConfig(service, new ConfigResponse());
+        }
+
+        List<Service> winServices = getWinServiceList();
+        for (int i = 0; i < winServices.size(); i++) {
+            try {
+                Service winService = winServices.get(i);
+                ServiceResource service = new ServiceResource();
+                service.setType(this, "WindowsService");
+                service.setServiceName("Windows Service " + winService.getConfig().getDisplayName());
+                ConfigResponse pc = new ConfigResponse();
+                pc.setValue("service_name", winService.getConfig().getName());
+                setProductConfig(service, pc);
+                service.setMeasurementConfig();
+                service.setControlConfig();
+                services.add(service);
+            } catch (Win32Exception ex) {
+                log.debug("Error creating Window Service :" + ex, ex);
+            }
         }
 
         try {
@@ -211,17 +279,17 @@ public abstract class SharePointServerDetectorDefault extends ServerDetector imp
 
     private boolean testWebServer(String url) {
         boolean res = false;
-//        HttpGet get = new HttpGet(url);
-//        AgentKeystoreConfig ksConfig = new AgentKeystoreConfig();
-//        HQHttpClient client = new HQHttpClient(ksConfig, new HttpConfig(5000, 5000, null, 0), ksConfig.isAcceptUnverifiedCert());
-//        try {
-//            HttpResponse response = client.execute(get, new BasicHttpContext());
-//            int r = response.getStatusLine().getStatusCode();
-//            log.debug("[testWebServer] url='" + get.getURI() + "' statusCode='" + r + "' " + response.getStatusLine().getReasonPhrase());
-//            res = (r < 500);
-//        } catch (IOException ex) {
-//            log.debug(ex.getMessage(), ex);
-//        }
+        HttpGet get = new HttpGet(url);
+        AgentKeystoreConfig ksConfig = new AgentKeystoreConfig();
+        HQHttpClient client = new HQHttpClient(ksConfig, new HttpConfig(5000, 5000, null, 0), ksConfig.isAcceptUnverifiedCert());
+        try {
+            HttpResponse response = client.execute(get, new BasicHttpContext());
+            int r = response.getStatusLine().getStatusCode();
+            log.debug("[testWebServer] url='" + get.getURI() + "' statusCode='" + r + "' " + response.getStatusLine().getReasonPhrase());
+            res = (r < 500);
+        } catch (IOException ex) {
+            log.debug(ex.getMessage(), ex);
+        }
         return res;
     }
 
