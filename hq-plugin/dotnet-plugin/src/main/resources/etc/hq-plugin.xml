@@ -735,35 +735,10 @@
                 collectionType="dynamic"
                 units="none"/>
     </metrics>
-
-    <server name=".NET"
-            version="1.1"
-            platforms="Win32">
-
-        <plugin type="measurement"
-                class="DotNetMeasurementPlugin"/>
-
-        <plugin type="autoinventory"
-                class="DotNetDetector"/>
-
-        <metrics>
-            <include name="dotnet-avail"/>
-            <include name="clr-memory"/>
-            <include name="clr-loading"/>
-            <include name="clr-ex"/>
-            <include name="clr-jit"/>
-            <include name="clr-threads"/>
-            <include name="clr-security"/>
-            <include name="clr-remote"/>
-            <!-- server only -->
-            <include name="clr-net"/>
-            <include name="clr-data"/>
-        </metrics>
-        
-        <!-- http://msdn.microsoft.com/en-us/library/ms254503.aspx -->
-        <service name="Data Provider for SqlServer">
-            <filter name="template" value="pdhSQLDP:%app.name%:${alias}"/>
-            <metric name="Availability" 
+    
+    <filter name="template" value="${pdhDP}:%app.name%:${alias}"/>
+    <metrics name="database-data-provider">    	
+ 			<metric name="Availability" 
                     alias="Availability" 
                     indicator="true" 
                     category="AVAILABILITY"/>
@@ -857,6 +832,46 @@
                     category="UTILIZATION"
                     indicator="true"
                     units="none"/>
+    </metrics>
+    
+
+    <server name=".NET"
+            version="1.1"
+            platforms="Win32">
+
+        <plugin type="measurement"
+                class="DotNetMeasurementPlugin"/>
+
+        <plugin type="autoinventory"
+                class="DotNetDetector"/>
+
+        <metrics>
+            <include name="dotnet-avail"/>
+            <include name="clr-memory"/>
+            <include name="clr-loading"/>
+            <include name="clr-ex"/>
+            <include name="clr-jit"/>
+            <include name="clr-threads"/>
+            <include name="clr-security"/>
+            <include name="clr-remote"/>
+            <!-- server only -->
+            <include name="clr-net"/>
+            <include name="clr-data"/>
+        </metrics>
+        
+        <!-- http://msdn.microsoft.com/en-us/library/ms254503.aspx -->
+        <service name="Data Provider for SqlServer">
+        	<property name="pdhDP" value="pdhSQLDP"/>    		        
+            <metrics>            	
+            	<include name="database-data-provider"/>
+           	</metrics>
+        </service>
+
+        <service name="Data Provider for Oracle">
+		   	<property name="pdhDP" value="pdhOracleDP"/>            
+            <metrics>            	            	
+            	<include name="database-data-provider"/>
+           	</metrics>
         </service>
 
         <service name="Application">
