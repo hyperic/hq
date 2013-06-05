@@ -167,9 +167,10 @@ public class ExceptionToErrorCodeMapper  {
         POLICY_NOT_FOUND_BY_ID("9003"), 
         FAILED_TO_FETCH_CONFIGURATION("9505"), 
         ALERT_CREATION_ERROR("9506"), 
-        PLUGIN_ERROR("9507");
+        PLUGIN_ERROR("9507"), 
+        USER_NOT_AUTHORIZED_POLICY("9508");
         
-        
+         
         private final String errorCode;
 
         // Constructor

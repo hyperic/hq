@@ -45,7 +45,6 @@ public class ResourceOperationsHelper {
     public final static int USER = 5 * MULTIPLIER;
     public final static int ROLE = 6 * MULTIPLIER;
     public final static int ESCALATION = 7 * MULTIPLIER;
-    public final static int POLICY = 8 * MULTIPLIER;
     
     
     
@@ -119,11 +118,7 @@ public class ResourceOperationsHelper {
         operationsList.add(AuthzConstants.escOpModifyEscalation);
         operationsList.add(AuthzConstants.escOpRemoveEscalation);
         operationsList.add(null);
-        operationsList.add(null);       
-        operationsList.add(AuthzConstants.policyOpCreatePolicy);
-        operationsList.add(AuthzConstants.policyOpViewPolicy);
-        operationsList.add(AuthzConstants.policyOpModifyPolicy);
-        operationsList.add(AuthzConstants.policyOpRemovePolicy);
+        operationsList.add(null);
         operationsList.add(null);
         operationsList.add(null);       
     }
@@ -194,7 +189,7 @@ public class ResourceOperationsHelper {
    
     public static String getResourceType(Resource resource)
     throws IllegalArgumentException, UnsupportedOperationException {
-        if (resource == null || resource.getResourceType() == null) {
+        if ((resource == null) || (resource.getResourceType() == null)) {
             throw new IllegalArgumentException("resource must be not be null and must have a valid resource type.");
         }
         
@@ -245,9 +240,6 @@ public class ResourceOperationsHelper {
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
                 resourceTypeCode = APPLICATION;
-                break;
-            case AppdefEntityConstants.APPDEF_TYPE_POLICY:
-                resourceTypeCode = POLICY;
                 break;
             default:
                 resourceTypeCode = -1;
