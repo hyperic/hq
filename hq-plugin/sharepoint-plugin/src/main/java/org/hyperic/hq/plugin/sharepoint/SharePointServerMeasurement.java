@@ -70,9 +70,7 @@ public class SharePointServerMeasurement extends Win32MeasurementPlugin {
                 }
             }
         } else if (metric.getDomainName().equalsIgnoreCase("pdh")) {
-            if (metric.isAvail()) {
-                res = new MetricValue(checkServiceAvail(metric.getObjectProperty("name")));
-            } else if (metric.getAttributeName().equalsIgnoreCase("Object Cache Hit %")) {
+            if (metric.getAttributeName().equalsIgnoreCase("Object Cache Hit %")) {
                 double hits = getPDHMetric("\\" + metric.getObjectPropString() + "\\Object Cache Hit Count");
                 double miss = getPDHMetric("\\" + metric.getObjectPropString() + "\\Object Cache Miss Count");
                 if ((hits >= 0) && (miss >= 0) && ((hits + miss) > 0)) {
@@ -121,13 +119,16 @@ public class SharePointServerMeasurement extends Win32MeasurementPlugin {
     }
 
     private double checkServiceAvail(String service) {
+        log.debug("[checkServiceAvail] * service='" + service + "'");
         double res = Metric.AVAIL_DOWN;
         try {
-            Service s = new Service(service);
-            if (s.getStatus() == Service.SERVICE_RUNNING) {
-                res = Metric.AVAIL_UP;
+            if (service != null) {
+                Service s = new Service(service);
+                if (s.getStatus() == Service.SERVICE_RUNNING) {
+                    res = Metric.AVAIL_UP;
+                }
+                log.debug("[checkServiceAvail] service='" + service + "' res=" + res);
             }
-            log.debug("[checkServiceAvail] service='" + service + "' res=" + res);
         } catch (Win32Exception ex) {
             log.debug("[checkServiceAvail] error. service='" + service + "'", ex);
         }
