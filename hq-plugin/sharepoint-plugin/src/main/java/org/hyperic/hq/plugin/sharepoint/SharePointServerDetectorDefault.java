@@ -122,7 +122,9 @@ public abstract class SharePointServerDetectorDefault extends ServerDetector imp
 
             setControlConfig(server, new ConfigResponse());
 
-            servers.add(server);
+            if ((webs.size() > 0) || (winServices.size() > 0)) {
+                servers.add(server);
+            }
         }
 
         return servers;
