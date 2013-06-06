@@ -737,6 +737,22 @@
     </metrics>
     
     <filter name="template" value="${pdhDP}:%app.name%:${alias}"/>
+    <metrics name="database-data-provider-sql-server">    	
+ 		<metric name="Number Of Active Connection Pools Groups"
+                    alias="NumberOfActiveConnectionPoolGroups"
+                    category="UTILIZATION"
+                    indicator="true"
+                    units="none"/>
+                    
+        <metric name="Number Of Inactive Connection Pools Groups"
+                    alias="NumberOfInactiveConnectionPoolGroups"
+                    category="UTILIZATION"
+                    indicator="true"
+                    units="none"/> 
+     </metrics>
+    
+    
+    <filter name="template" value="${pdhDP}:%app.name%:${alias}"/>
     <metrics name="database-data-provider">    	
  			<metric name="Availability" 
                     alias="Availability" 
@@ -772,12 +788,7 @@
                     category="UTILIZATION"
                     indicator="true"
                     units="none"/>
-
-            <metric name="Number Of Active Connection Pools Groups"
-                    alias="NumberOfActiveConnectionPoolGroups"
-                    category="UTILIZATION"
-                    indicator="true"
-                    units="none"/>
+           
 
             <metric name="Number Of Active Connection Pools"
                     alias="NumberOfActiveConnectionPools"
@@ -795,13 +806,7 @@
                     alias="NumberOfFreeConnections"
                     category="UTILIZATION"
                     indicator="true"
-                    units="none"/>
-
-            <metric name="Number Of Inactive Connection Pools Groups"
-                    alias="NumberOfInactiveConnectionPoolGroups"
-                    category="UTILIZATION"
-                    indicator="true"
-                    units="none"/>
+                    units="none"/>            
 
             <metric name="Number Of Inactive Connection Pools"
                     alias="NumberOfInactiveConnectionPools"
@@ -864,6 +869,7 @@
         	<property name="pdhDP" value="pdhSQLDP"/>    		        
             <metrics>            	
             	<include name="database-data-provider"/>
+            	<include name="database-data-provider-sql-server"/>
            	</metrics>
         </service>
 
