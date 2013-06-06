@@ -32,7 +32,6 @@
 <%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <html>
 	<head>
-	    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
 		<tiles:insert attribute="head" />
 		<title>
 			<fmt:message key="${portal.name}">
