@@ -1562,10 +1562,10 @@ public class DataManagerImpl implements DataManager {
             amv = rtn[bucket];
         } catch (NullPointerException e) {
             log.error("Error has occured in Merge function, bucket size[" + bucket + "] " +
-                    "but AggMetricValue array size is [" + rtn.length +"] ," + e, e);
+                    "but AggMetricValue array is null, " + e, e); 
         } catch (ArrayIndexOutOfBoundsException e){
             log.error("Error has occured in Merge function, bucket size[" + bucket + "] " +
-                    "but AggMetricValue array is null, " + e, e); 
+                    "but AggMetricValue array size is [" + rtn.length +"] ," + e, e);
         }
 
         if (amv == null) {
