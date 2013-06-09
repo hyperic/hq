@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.hibernate.Query;
+import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -223,6 +224,7 @@ public abstract class PermissionManager {
      * @deprecated Use the individual check*Permission methods instead.
      * 
      */
+    @Deprecated
     public AppdefResourcePermissions getResourcePermissions(AuthzSubject who, AppdefEntityID eid) {
         boolean canView = false;
         boolean canModify = false;
@@ -721,6 +723,7 @@ public abstract class PermissionManager {
      * @return a list of Integers representing instance ids
      * @deprecated
      */
+    @Deprecated
     public abstract List<Integer> findViewableResources(AuthzSubject subj, String searchFor,
                                                         PageControl pc);
 
@@ -853,11 +856,18 @@ public abstract class PermissionManager {
      */
     public abstract HierarchicalAlertingManager getHierarchicalAlertingManager();
 
-    private boolean isSuperUser(AuthzSubject subject) {
-        if (subject.getId().equals(AuthzConstants.overlordId)) {
+    /**
+     * @return true if the subj either overlord, hqadmin or associated with a
+     *         superuser role
+     */
+    public boolean isSuperUser(AuthzSubject subj) {
+        if (subj.getId().equals(AuthzConstants.overlordId)) {
             return true;
         }
-        final Collection<Role> roles = subject.getRoles();
+        // may not be in a transaction, so need to make sure that we have a
+        // hibernate session by going into the manager
+        final RoleManager roleManager = Bootstrap.getBean(RoleManager.class);
+        final Collection<Role> roles = roleManager.getRoles(subj);
         for (final Role role : roles) {
             if (role.getId().equals(AuthzConstants.rootRoleId)) {
                 return true;

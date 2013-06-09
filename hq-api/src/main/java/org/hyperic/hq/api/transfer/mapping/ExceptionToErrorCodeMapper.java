@@ -168,7 +168,8 @@ public class ExceptionToErrorCodeMapper  {
         FAILED_TO_FETCH_CONFIGURATION("9505"), 
         ALERT_CREATION_ERROR("9506"), 
         PLUGIN_ERROR("9507"), 
-        USER_NOT_AUTHORIZED_POLICY("9508");
+        USER_NOT_AUTHORIZED_POLICY("9508"),
+        GROUP_NOT_FOUND_BY_ID("9509");
         
          
         private final String errorCode;
