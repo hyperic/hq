@@ -161,15 +161,18 @@ public class DotNetDetector
     private Collection<ServiceResource>  addDataProvidersServices(String dataProviderStr, String dataProviderTypeStr) {
         try {            
             String[] instances = Pdh.getInstances(dataProviderStr);
-            Pattern regex = Pattern.compile("([^\\[]*).*");
+            Pattern regex = Pattern.compile("([^\\[]*).*");                                        
             Set<String> names = new HashSet<String>();
             for (int i = 0; i < instances.length; i++) {
                 String instance = instances[i];
                 Matcher m = regex.matcher(instance);
-                if (m.find()) {
-                    String n = m.group(1);
-                    log.debug("[discoverServices] instance = " + instance + " (" + n + ") valid.");
-                    names.add(n);
+                if (m.find()) {                    
+                    String n = m.group(1).trim();
+                    log.debug("[discoverServices] instance = " + instance + " (" + n + ")");                    
+                    if (n.length() > 0) {
+                        log.debug("[discoverServices] instance = " + instance + " (" + n + ") valid.");
+                        names.add(n);
+                    }
                 } else {
                     log.debug("[discoverServices] instance = " + instance + " skiped.");
                 }

@@ -185,7 +185,7 @@
 			indicator="true" />
 
 		<metric name="RPC Averaged Latency" category="THROUGHPUT" />
-		<metric name="RPC Connection Count" category="THROUGHPUT" />
+		<metric name="RPC Connection Count" template="${template}Connection Count" category="THROUGHPUT" />
 		<metric name="RPC User Count" template="${template}User Count" />
 		<metric name="RPC Active User Count" template="${template}Active User Count" />
 	</metrics>

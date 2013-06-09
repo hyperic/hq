@@ -47,6 +47,7 @@ public class DotNetMeasurementPlugin
     private static Log log = LogFactory.getLog(DotNetMeasurementPlugin.class);
     private static final Map<String, List<String>> sqlPidsCache = new HashMap<String, List<String>>();
     private static final Map<String, List<String>> oraclePidsCache = new HashMap<String, List<String>>();
+    
     @Override
     public MetricValue getValue(Metric metric) throws PluginException, MetricNotFoundException, MetricUnreachableException {
         MetricValue val = null;
@@ -121,18 +122,30 @@ public class DotNetMeasurementPlugin
                     log.debug("[getPDHSQLPDMetric] " + providerStr  + " instance = " + instance);
                     Matcher m = regex.matcher(instance);
                     if (m.find()) {
-                        List<String> pids = pidsCache.get(m.group(1));
+                        String nonTrimmedName = m.group(1);
+                        String name = nonTrimmedName.trim();
+                        if (name.length() == 0) {
+                            continue;
+                        }
+                        List<String> pids = pidsCache.get(name);
                         if (pids == null) {
                             pids = new ArrayList<String>();
-                            pidsCache.put(m.group(1), pids);
+                            pidsCache.put(name, pids);
                         }
-                        pids.add(m.group(2));
+                        // nira  oracle is of the form "app [x,y]"
+                        //sql is of the form "app[x]
+                        // if there are spaces in between we will include them in the pid
+                        //(so pid of oracle will be " [x,y]")
+                        // the pid of sql server will be "[x]"
+                        String spaces = nonTrimmedName.substring(nonTrimmedName.indexOf(name)+name.length());
+                        String pid = spaces+"["+m.group(2)+"]";
+                        pids.add(pid);                        
                     }
                 }
             } catch (Win32Exception e) {
                 log.debug("Error getting PIDs data for '.NET Data Provider for SqlServer': " + e, e);
             }
-            log.debug("[getPDHSQLPDMetric] pidsCache = " + pidsCache);
+            log.debug("[getPDHSQLPDMetric] pidsCache = " + pidsCache);            
         }
 
         log.debug("[getPDHSQLPDMetric] metric:'" + metric);
@@ -156,8 +169,8 @@ public class DotNetMeasurementPlugin
             } else {
                 double val = 0;
                 for (int i = 0; i < pids.size(); i++) {
-                    String pid = pids.get(i);
-                    String obj = "\\" + providerStr + "(" + appName + "[" + pid + "])\\" + metric.getAttributeName();
+                    String pid = pids.get(i); 
+                    String obj = "\\" + providerStr + "(" + appName +  pid + ")\\" + metric.getAttributeName();
                     log.debug("[getPDHSQLPDMetric] obj:'" + obj);
                     val += getPDHMetric(obj, metric.isAvail()).getValue();
                 }
