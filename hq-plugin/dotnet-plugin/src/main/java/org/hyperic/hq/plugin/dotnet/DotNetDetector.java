@@ -73,7 +73,7 @@ public class DotNetDetector
     protected final static String ORACLE_PROVIDER_STR = "Oracle Data Provider for .NET";
     protected final static String SQL_SERVER_PROVIDER_STR = ".NET Data Provider for SqlServer";
     protected final static String SQL_SERVER_PROVIDER_TYPE_STR = "Data Provider for SqlServer";
-    protected final static String ORACLE_SERVER_PROVIDER_TYPE_STR = "Data Provider for Oracle";
+    protected final static String ORACLE_SERVER_PROVIDER_TYPE_STR = "Oracle Data Provider for .Net";
     
 
     private String getVersion() {

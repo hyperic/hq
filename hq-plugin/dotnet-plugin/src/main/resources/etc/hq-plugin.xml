@@ -873,7 +873,7 @@
            	</metrics>
         </service>
 
-        <service name="Data Provider for Oracle">
+        <service name="Oracle Data Provider for .Net">
 		   	<property name="pdhDP" value="pdhOracleDP"/>            
             <metrics>            	            	
             	<include name="database-data-provider"/>
