@@ -169,7 +169,8 @@ public class ExceptionToErrorCodeMapper  {
         ALERT_CREATION_ERROR("9506"), 
         PLUGIN_ERROR("9507"), 
         USER_NOT_AUTHORIZED_POLICY("9508"),
-        GROUP_NOT_FOUND_BY_ID("9509");
+        GROUP_NOT_FOUND_BY_ID("9509"),
+        USER_NOT_AUTHORIZED_MODIFY_ROLE("9510");
         
          
         private final String errorCode;
