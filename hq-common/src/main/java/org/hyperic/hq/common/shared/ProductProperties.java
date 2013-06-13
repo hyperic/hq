@@ -28,6 +28,8 @@ package org.hyperic.hq.common.shared;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ProductProperties {
     private static final String PROP_VERSION = "version";
@@ -54,7 +56,19 @@ public class ProductProperties {
     }
 
     public static String getBuildNumber() {
-        return getRequiredProperty(PROP_BUILD_NUMBER);
+        String build =  getRequiredProperty(PROP_BUILD_NUMBER);
+        Pattern p = Pattern.compile("(.*-)(\\d+)");
+        Matcher m = p.matcher(build);
+        if (m.matches()) {
+            if (build.toLowerCase().contains("ci")) {
+                return "CI-" + m.group(2);
+            } 
+            if (build.toLowerCase().contains("daily")) {
+                return "Daily-" + m.group(2);
+            } 
+            return m.group(2);
+        }
+        return build;
     }
 
    

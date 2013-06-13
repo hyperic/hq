@@ -47,7 +47,8 @@
   		<td valign="top" class="DisplaySubhead" colspan="2" style="padding-top:5px;">
   			<br />
   			<fmt:message key="footer.version" /> <c:out value="${HQVersion}" />
-  			- Build <c:out value="${HQBuild}" />
+  			<br />
+  			Build <c:out value="${HQBuild}" />
             <br />&nbsp;
   		</td>
   	</tr>
