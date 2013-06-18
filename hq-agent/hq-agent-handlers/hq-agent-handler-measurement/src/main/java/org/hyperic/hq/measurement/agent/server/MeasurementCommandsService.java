@@ -37,6 +37,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.PropertyPair;
 import org.hyperic.hq.agent.server.AgentStorageException;
@@ -49,6 +50,7 @@ import org.hyperic.hq.measurement.agent.commands.GetMeasurements_args;
 import org.hyperic.hq.measurement.agent.commands.GetMeasurements_result;
 import org.hyperic.hq.measurement.agent.commands.ScheduleMeasurements_args;
 import org.hyperic.hq.measurement.agent.commands.ScheduleMeasurements_metric;
+import org.hyperic.hq.measurement.agent.commands.ScheduleTopn_args;
 import org.hyperic.hq.measurement.agent.commands.SetProperties_args;
 import org.hyperic.hq.measurement.agent.commands.TrackPluginAdd_args;
 import org.hyperic.hq.measurement.agent.commands.TrackPluginRemove_args;
@@ -88,7 +90,7 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
     private final ScheduleThread _scheduleObject;
     private final LinkedBlockingQueue<ScheduleMeasurements_args> argQueue =
         new LinkedBlockingQueue<ScheduleMeasurements_args>();
-    private Scheduler _scheduler;
+    private final Scheduler _scheduler;
     
     public MeasurementCommandsService(AgentStorageProvider storage, 
                                       Map validProps, 
@@ -180,10 +182,11 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
 
         // Validate all properties before doing any deleting
         for(i=0; i<nProps; i++){
-            if(_validProps.get(args.getPropertyName(i)) == null)
+            if(_validProps.get(args.getPropertyName(i)) == null) {
                 throw new AgentRemoteException("Unknown measurement " +
                                                "property name, '" + 
                                                args.getPropertyName(i) +"'");
+            }
         }
 
         for(i=0; i<nProps; i++){
@@ -262,12 +265,13 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
         throws AgentRemoteException {
 
         try {
-            if (pluginType.equals(ProductPlugin.TYPE_LOG_TRACK))
+            if (pluginType.equals(ProductPlugin.TYPE_LOG_TRACK)) {
                 _ltPluginManager.removePlugin(id);
-            else if (pluginType.equals(ProductPlugin.TYPE_CONFIG_TRACK))
+            } else if (pluginType.equals(ProductPlugin.TYPE_CONFIG_TRACK)) {
                 _ctPluginManager.removePlugin(id);
-            else
+            } else {
                 throw new AgentRemoteException("Unknown plugin type");
+            }
         } catch (PluginNotFoundException e) {
             // Ok if the plugin no longer exists.
         } catch (PluginException e) {
@@ -296,6 +300,7 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
             super("MeasurementSchedulerThread");
             setDaemon(true);
         }
+        @Override
         public void run() {
             try {
                 while (!shutdown.get()) {
@@ -324,7 +329,9 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
         final StopWatch watch = new StopWatch();
         final List<ScheduledMeasurement> metrics = new ArrayList<ScheduledMeasurement>(args.size());
         final boolean debug = _log.isDebugEnabled();
-        if (debug) watch.markTimeBegin("unscheduleMeasurements");
+        if (debug) {
+            watch.markTimeBegin("unscheduleMeasurements");
+        }
         for (final ScheduleMeasurements_args arg : args) {
             final SRN srn = arg.getSRN();
             final AppdefEntityID aeid = srn.getEntity();
@@ -336,17 +343,25 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
                 _log.debug(e,e);
             }
         }
-        if (debug) watch.markTimeEnd("unscheduleMeasurements");
-        if (debug) watch.markTimeBegin("deleteMeasurements");
+        if (debug) {
+            watch.markTimeEnd("unscheduleMeasurements");
+        }
+        if (debug) {
+            watch.markTimeBegin("deleteMeasurements");
+        }
         try {
             _schedStorage.deleteMeasurements(aeids.keySet());
         } catch(AgentStorageException exc){
             _log.error("Failed to delete from measurement storage: " +  exc, exc);
         }
-        if (debug) watch.markTimeEnd("deleteMeasurements");
+        if (debug) {
+            watch.markTimeEnd("deleteMeasurements");
+        }
         // this looks weird since the loops are so similar, but they can't be consolidated unless the entire
         // flow is reworked down to the srn
-        if (debug) watch.markTimeBegin("updateSRN");
+        if (debug) {
+            watch.markTimeBegin("updateSRN");
+        }
         for (final ScheduleMeasurements_args arg : args) {
             int numMeasurements = arg.getNumMeasurements();
             final SRN srn = arg.getSRN();
@@ -367,20 +382,32 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
                 _log.error("Unable to update SRN in storage: " + e, e);
             }
         }
-        if (debug) watch.markTimeEnd("updateSRN");
-        if (debug) watch.markTimeBegin("storeMeasurements");
+        if (debug) {
+            watch.markTimeEnd("updateSRN");
+        }
+        if (debug) {
+            watch.markTimeBegin("storeMeasurements");
+        }
         try {
             _schedStorage.storeMeasurements(metrics);
         } catch(AgentStorageException exc){
             _log.error("Failed to store measurements: " +  exc, exc);
         }
-        if (debug) watch.markTimeEnd("storeMeasurements");
-        if (debug) watch.markTimeBegin("scheduleMeasurement");
+        if (debug) {
+            watch.markTimeEnd("storeMeasurements");
+        }
+        if (debug) {
+            watch.markTimeBegin("scheduleMeasurement");
+        }
         for (ScheduledMeasurement m : metrics) {
             _scheduleObject.scheduleMeasurement(m);
         }
-        if (debug) watch.markTimeEnd("scheduleMeasurement");
-        if (debug) _log.debug("scheduled " + metrics.size() + " measurements, " + watch);
+        if (debug) {
+            watch.markTimeEnd("scheduleMeasurement");
+        }
+        if (debug) {
+            _log.debug("scheduled " + metrics.size() + " measurements, " + watch);
+        }
     }
     
     void scheduleMeasurement(ScheduledMeasurement m) {
@@ -398,10 +425,11 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
         for(i=0; i<nProps; i++){
             PropertyPair pp = args.getProperty(i);
 
-            if(_validProps.get(pp.getName()) == null)
+            if(_validProps.get(pp.getName()) == null) {
                 throw new AgentRemoteException("Unknown measurement " +
                                                "property name, '" + 
                                                pp.getName() +"'");
+            }
             tmpVec.add(pp);
         }
 
@@ -455,6 +483,12 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
     private void unscheduleMeasurements(AppdefEntityID id)
         throws UnscheduledItemException {
         _scheduleObject.unscheduleMeasurements(id);
+    }
+
+    public void scheduleTopn(ScheduleTopn_args args) throws AgentRemoteException, AgentConnectionException {
+    }
+
+    public void unscheduleTopn(ScheduleTopn_args args) throws AgentRemoteException, AgentConnectionException {
     }
 
 }
