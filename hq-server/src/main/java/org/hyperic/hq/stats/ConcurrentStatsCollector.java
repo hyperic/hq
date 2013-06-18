@@ -91,7 +91,8 @@ public class ConcurrentStatsCollector extends AbstractStatsCollector {
                                INVENTORY_NOTIFICATION_FILTERING_TIME = "INVENTORY_NOTIFICATION_FILTERING_TIME",
                                NOTIFICATIONS_PUBLISHED_TO_ENDPOINT = "NOTIFICATIONS_PUBLISHED_TO_ENDPOINT",
                                NOTIFICATIONS_PUBLISHED_TO_ENDPOINT_TIME = "NOTIFICATIONS_PUBLISHED_TO_ENDPOINT_TIME",
-                               NOTIFICATION_TOTAL_QUEUE_SIZE = "NOTIFICATION_TOTAL_QUEUE_SIZE";
+                               NOTIFICATION_TOTAL_QUEUE_SIZE = "NOTIFICATION_TOTAL_QUEUE_SIZE",
+                               CMD_TOPN_SEND_REPORT = "LATHER_" + CommandInfo.CMD_TOPN_SEND_REPORT.toUpperCase();
     private TaskScheduler taskScheduler;
 
     @Override

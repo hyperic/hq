@@ -40,6 +40,7 @@ public class CommandInfo {
     public static final String CMD_CONTROL_GET_PLUGIN_CONFIG = "controlGetPluginConfig";
     public static final String CMD_CONTROL_SEND_COMMAND_RESULT = "controlSendCommandResult";
     public static final String CMD_PLUGIN_SEND_REPORT = "pluginSendReport";
+    public static final String CMD_TOPN_SEND_REPORT = "topNSendReport";
     
     public static final String[] ALL_COMMANDS = {
         CMD_PING,
@@ -56,6 +57,7 @@ public class CommandInfo {
         CMD_CONTROL_GET_PLUGIN_CONFIG,
         CMD_CONTROL_SEND_COMMAND_RESULT,
         CMD_PLUGIN_SEND_REPORT,
+            CMD_TOPN_SEND_REPORT,
     };
 
     public static final String[] SECURE_COMMANDS = {

@@ -47,7 +47,17 @@ import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.Service;
-import org.hyperic.hq.appdef.shared.*;
+import org.hyperic.hq.appdef.shared.AIPlatformValue;
+import org.hyperic.hq.appdef.shared.AgentCreateException;
+import org.hyperic.hq.appdef.shared.AgentManager;
+import org.hyperic.hq.appdef.shared.AgentNotFoundException;
+import org.hyperic.hq.appdef.shared.AgentUnauthorizedException;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityValue;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.appdef.shared.ConfigManager;
+import org.hyperic.hq.appdef.shared.PlatformManager;
+import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.resourceTree.PlatformNode;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.appdef.shared.resourceTree.ServerNode;
@@ -60,7 +70,27 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.ScanStateCore;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
-import org.hyperic.hq.bizapp.shared.lather.*;
+import org.hyperic.hq.bizapp.shared.lather.AiPlatformLatherValue;
+import org.hyperic.hq.bizapp.shared.lather.AiSendReport_args;
+import org.hyperic.hq.bizapp.shared.lather.AiSendRuntimeReport_args;
+import org.hyperic.hq.bizapp.shared.lather.CommandInfo;
+import org.hyperic.hq.bizapp.shared.lather.ControlGetPluginConfig_args;
+import org.hyperic.hq.bizapp.shared.lather.ControlGetPluginConfig_result;
+import org.hyperic.hq.bizapp.shared.lather.ControlSendCommandResult_args;
+import org.hyperic.hq.bizapp.shared.lather.MeasurementGetConfigs_args;
+import org.hyperic.hq.bizapp.shared.lather.MeasurementGetConfigs_result;
+import org.hyperic.hq.bizapp.shared.lather.MeasurementSendReport_args;
+import org.hyperic.hq.bizapp.shared.lather.MeasurementSendReport_result;
+import org.hyperic.hq.bizapp.shared.lather.PluginReport_args;
+import org.hyperic.hq.bizapp.shared.lather.RegisterAgent_args;
+import org.hyperic.hq.bizapp.shared.lather.RegisterAgent_result;
+import org.hyperic.hq.bizapp.shared.lather.SecureAgentLatherValue;
+import org.hyperic.hq.bizapp.shared.lather.TopNSendReport_args;
+import org.hyperic.hq.bizapp.shared.lather.TrackSend_args;
+import org.hyperic.hq.bizapp.shared.lather.UpdateAgent_args;
+import org.hyperic.hq.bizapp.shared.lather.UpdateAgent_result;
+import org.hyperic.hq.bizapp.shared.lather.UserIsValid_args;
+import org.hyperic.hq.bizapp.shared.lather.UserIsValid_result;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
@@ -88,7 +118,6 @@ import org.hyperic.lather.LatherContext;
 import org.hyperic.lather.LatherRemoteException;
 import org.hyperic.lather.LatherValue;
 import org.hyperic.lather.NullLatherValue;
-import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.security.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,26 +129,26 @@ import org.springframework.transaction.annotation.Transactional;
 public class LatherDispatcherImpl implements LatherDispatcher {
     private final Log log = LogFactory.getLog(LatherDispatcherImpl.class.getName());
 
-    private HashSet<String> secureCommands = new HashSet<String>();
+    private final HashSet<String> secureCommands = new HashSet<String>();
 
     private static final String LATHER_RUN_COMMAND_TIME = ConcurrentStatsCollector.LATHER_RUN_COMMAND_TIME;
     private static final String LATHER_REMOTE_EXCEPTION = ConcurrentStatsCollector.LATHER_REMOTE_EXCEPTION;
 
-    private AgentManager agentManager;
-    private AuthManager authManager;
-    private AuthzSubjectManager authzSubjectManager;
-    private AutoinventoryManager autoinventoryManager;
-    private ConfigManager configManager;
-    private ControlManager controlManager;
-    private MeasurementManager measurementManager;
-    private PlatformManager platformManager;
-    private ReportProcessor reportProcessor;
-    private PermissionManager permissionManager;
-    private ZeventEnqueuer zeventManager;
-    private MessagePublisher messagePublisher;
-    private AgentCommandsClientFactory agentCommandsClientFactory;
-    private ConcurrentStatsCollector concurrentStatsCollector;
-    private HAService haService;
+    private final AgentManager agentManager;
+    private final AuthManager authManager;
+    private final AuthzSubjectManager authzSubjectManager;
+    private final AutoinventoryManager autoinventoryManager;
+    private final ConfigManager configManager;
+    private final ControlManager controlManager;
+    private final MeasurementManager measurementManager;
+    private final PlatformManager platformManager;
+    private final ReportProcessor reportProcessor;
+    private final PermissionManager permissionManager;
+    private final ZeventEnqueuer zeventManager;
+    private final MessagePublisher messagePublisher;
+    private final AgentCommandsClientFactory agentCommandsClientFactory;
+    private final ConcurrentStatsCollector concurrentStatsCollector;
+    private final HAService haService;
 
     @Autowired
     public LatherDispatcherImpl(AgentManager agentManager, AuthManager authManager,
@@ -145,8 +174,8 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         this.permissionManager = permissionManager;
         this.zeventManager = zeventManager;
         this.agentCommandsClientFactory = agentCommandsClientFactory;
-        for (int i = 0; i < CommandInfo.SECURE_COMMANDS.length; i++) {
-            secureCommands.add(CommandInfo.SECURE_COMMANDS[i]);
+        for (String element : CommandInfo.SECURE_COMMANDS) {
+            secureCommands.add(element);
         }
         this.messagePublisher = messagePublisher;
         this.concurrentStatsCollector = concurrentStatsCollector;
@@ -561,7 +590,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         }
 
         MeasurementConfigList cList = new MeasurementConfigList();
-        cList.setEntities((MeasurementConfigEntity[]) ents.toArray(new MeasurementConfigEntity[ents
+        cList.setEntities(ents.toArray(new MeasurementConfigEntity[ents
             .size()]));
         MeasurementGetConfigs_result res = new MeasurementGetConfigs_result();
         res.setConfigs(cList);
@@ -613,10 +642,10 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         if (events.length > 0) {
             ArrayList<ResourceLogEvent> logEvents = new ArrayList<ResourceLogEvent>(events.length);
 
-            for (int i = 0; i < events.length; i++) {
+            for (TrackEvent event : events) {
                 // Create a ResourceLogEvent to send
-                log.debug("TrackEvent: " + events[i]);
-                ResourceLogEvent rle = new ResourceLogEvent(events[i]);
+                log.debug("TrackEvent: " + event);
+                ResourceLogEvent rle = new ResourceLogEvent(event);
                 logEvents.add(rle);
             }
 
@@ -638,10 +667,10 @@ public class LatherDispatcherImpl implements LatherDispatcher {
             ArrayList<ConfigChangedEvent> ccEvents = new ArrayList<ConfigChangedEvent>(
                 events.length);
 
-            for (int i = 0; i < events.length; i++) {
+            for (TrackEvent event : events) {
                 // Create a ConfigChangedEvent to send
-                log.debug("TrackEvent: " + events[i]);
-                ConfigChangedEvent cce = new ConfigChangedEvent(events[i]);
+                log.debug("TrackEvent: " + event);
+                ConfigChangedEvent cce = new ConfigChangedEvent(event);
                 ccEvents.add(cce);
             }
 
@@ -763,6 +792,8 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         } else if (method.equals(CommandInfo.CMD_PLUGIN_SEND_REPORT)) {
             rtn = cmdAgentPluginReport((PluginReport_args) arg);
             concurrentStatsCollector.addStat(now()-start, ConcurrentStatsCollector.CMD_PLUGIN_SEND_REPORT);
+        } else if (method.equals(CommandInfo.CMD_TOPN_SEND_REPORT)) {
+            rtn = cmdTopNSendReport((TopNSendReport_args) arg);
         } else {
             log.warn(ctx.getCallerIP() + " attempted to invoke '" + method +
                      "' which could not be found");
@@ -773,6 +804,11 @@ public class LatherDispatcherImpl implements LatherDispatcher {
     
     private long now() {
         return System.currentTimeMillis();
+    }
+
+    private LatherValue cmdTopNSendReport(TopNSendReport_args arg) {
+        // agentManager.updateAgentPluginStatusInBackground(arg);
+        return new NullLatherValue();
     }
 
     private LatherValue cmdAgentPluginReport(PluginReport_args arg) {
