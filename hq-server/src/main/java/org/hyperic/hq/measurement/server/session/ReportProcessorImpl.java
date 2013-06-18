@@ -65,6 +65,7 @@ import org.hyperic.hq.measurement.data.ValueList;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.ReportProcessor;
 import org.hyperic.hq.measurement.shared.SRNManager;
+import org.hyperic.hq.plugin.system.TopReport;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
@@ -329,6 +330,19 @@ public class ReportProcessorImpl implements ReportProcessor {
         if (platformRes != null && setPlatformAvail) {
             zEventManager.enqueueEventAfterCommit(new PlatformAvailZevent(platformRes.getId()));
         }
+    }
+
+    public void handleTopNReport(List<TopReport> reports) throws DataInserterException {
+        final boolean debug = log.isDebugEnabled();
+        final StopWatch watch = new StopWatch();
+        DataInserter d = measurementInserterManager.getDataInserter();
+        if (debug) watch.markTimeBegin("insertTopNToDB");
+        try {
+            d.insertTopN(reports);
+        } catch (InterruptedException e) {
+            throw new SystemException("Interrupted while attempting to " + "insert topN data");
+        }
+        if (debug) watch.markTimeEnd("insertTopNToDB");
     }
 
     private Measurement getMeasurement(Integer mid, Map<Integer, Measurement> measMap) {

@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import org.hyperic.hq.plugin.system.TopReport;
+
 import java.util.List;
 
 /**
@@ -40,6 +42,8 @@ public interface DataInserter {
      */
     public void insertMetrics(List<DataPoint> metricData)
         throws InterruptedException, DataInserterException;
+
+    public void insertTopN(List<TopReport> reports) throws InterruptedException, DataInserterException;
 
     /**
      * Insert priority data into the DB, possibly blocking.  This may or may not
