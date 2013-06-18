@@ -1,9 +1,9 @@
 package org.hyperic.hq.measurement.agent.server;
 
 import java.io.IOException;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -12,29 +12,35 @@ import org.hyperic.hq.agent.server.AgentStartException;
 import org.hyperic.hq.agent.server.AgentStorageException;
 import org.hyperic.hq.agent.server.AgentStorageProvider;
 import org.hyperic.hq.bizapp.client.AgentCallbackClientException;
+import org.hyperic.hq.bizapp.client.MeasurementCallbackClient;
 import org.hyperic.hq.bizapp.client.StorageProviderFetcher;
-import org.hyperic.hq.product.RtStat;
+import org.hyperic.hq.bizapp.shared.lather.TopNSendReport_args;
+import org.hyperic.hq.plugin.system.TopData;
+import org.hyperic.hq.plugin.system.TopReport;
 
-public class TOPNSenderThread {
+import com.thoughtworks.xstream.XStream;
+
+public class TOPNSenderThread implements Runnable {
 
     private static final int PROP_RECSIZE = 2048; // 2k records.
     private static final int SEND_INTERVAL = 60000;
     private static final int MAX_BATCHSIZE = 1000;
-    private static final String DATA_LISTNAME = "rt_spool";
+    private static final String DATA_LISTNAME = "topn_spool";
 
     private volatile boolean _shouldDie; // Should I shut down?
-    private Log _log;
-    private RtCallbackClient _client;
-    private AgentStorageProvider _storage;
-    private LinkedList _transitionQueue;
+    private final Log _log;
+    private final AgentStorageProvider _storage;
+    private final List<TopReport> _transitionQueue;
+    private final MeasurementCallbackClient client;
 
-    RtSenderThread(Properties bootProps, AgentStorageProvider storage) throws AgentStartException {
-        _log = LogFactory.getLog(RtSenderThread.class);
+
+    TOPNSenderThread(Properties bootProps, AgentStorageProvider storage)
+            throws AgentStartException {
+        _log = LogFactory.getLog(TOPNSenderThread.class);
         _shouldDie = false;
         _storage = storage;
-        _client = setupClient();
-        _transitionQueue = new LinkedList();
-
+        _transitionQueue = new ArrayList<TopReport>();
+        this.client = setupClient();
         String info = bootProps.getProperty(DATA_LISTNAME);
         if (info != null) {
             _storage.addOverloadedInfo(DATA_LISTNAME, info);
@@ -44,40 +50,34 @@ public class TOPNSenderThread {
             // Create list early since we want a larger record size.
             _storage.createList(DATA_LISTNAME, PROP_RECSIZE);
         } catch (AgentStorageException ignore) {
-            // Most likely an agent update where the existing rt schedule
-            // already exists. Will fall back to the old 1k size.
         }
     }
 
-    private RtCallbackClient setupClient() throws AgentStartException {
-        StorageProviderFetcher fetcher;
 
+    private MeasurementCallbackClient setupClient() throws AgentStartException {
+        StorageProviderFetcher fetcher;
         fetcher = new StorageProviderFetcher(_storage);
-        return new RtCallbackClient(fetcher);
+        return new MeasurementCallbackClient(fetcher);
     }
 
     void die() {
         _shouldDie = true;
     }
 
-    void processData(Collection lst) {
-        Iterator i = lst.iterator();
+    void processData(TopData data) {
 
-        while (i.hasNext()) {
-            RtStat rec = (RtStat) i.next();
-            String encoded;
+        String xml;
+        TopReport report = new TopReport();
+        report.setCreatTime(System.currentTimeMillis());
+        XStream xstream = new XStream();
+        xml = xstream.toXML(data);
+        report.setXmlData(xml);
 
-            try {
-                encoded = rec.encode();
-            } catch (IOException e) {
-                _log.error("Unable to encode data: " + e);
-                continue;
-            }
-            synchronized (_transitionQueue) {
-                _transitionQueue.add(encoded);
-            }
+        synchronized (_transitionQueue) {
+            _transitionQueue.add(report);
         }
     }
+
 
     /**
      * This routine moves all the data from the transition queue into the
@@ -85,17 +85,13 @@ public class TOPNSenderThread {
      */
     private void processTransitionQueue() {
         synchronized (_transitionQueue) {
-            for (Iterator i = _transitionQueue.iterator(); i.hasNext();) {
-                String val = (String) i.next();
-
-                i.remove();
+            for (TopReport report : _transitionQueue) {
                 try {
-                    _storage.addToList(DATA_LISTNAME, val);
+                    _storage.addToList(DATA_LISTNAME, report.encode());
                 } catch (Exception exc) {
                     _log.error("Unable to store data", exc);
                 }
             }
-
             try {
                 _storage.flush();
             } catch (Exception exc) {
@@ -110,9 +106,9 @@ public class TOPNSenderThread {
             int numUsed;
 
             try {
-                Thread.sleep(RtSenderThread.SEND_INTERVAL);
+                Thread.sleep(SEND_INTERVAL);
             } catch (InterruptedException exc) {
-                _log.info("Rt sender interrupted");
+                _log.info("TopN sender interrupted");
                 return;
             }
 
@@ -122,19 +118,18 @@ public class TOPNSenderThread {
             this.processTransitionQueue();
 
             numUsed = 0;
-            LinkedList lst = new LinkedList();
+            List<TopReport> lst = new ArrayList<TopReport>();
             for (Iterator i = _storage.getListIterator(DATA_LISTNAME); (i != null) && i.hasNext()
                     && (numUsed < MAX_BATCHSIZE); numUsed++) {
-                RtStat rec;
-
+                TopReport report;
                 try {
-                    rec = RtStat.decode((String) i.next());
+                    report = TopReport.decode((String) i.next());
                 } catch (IOException exc) {
                     _log.error("Error accessing record -- deleting: " + exc);
                     continue;
                 }
 
-                lst.add(rec);
+                lst.add(report);
             }
 
             // If we don't have anything to send -- move along
@@ -145,7 +140,9 @@ public class TOPNSenderThread {
             _log.debug("Sending " + numUsed + " Response time entries " + "to server");
             success = false;
             try {
-                _client.RtSendReport(lst);
+                TopNSendReport_args report = new TopNSendReport_args();
+                report.setTopReports(lst);
+                this.client.topNSendReport(report);
                 success = true;
             } catch (AgentCallbackClientException exc) {
                 // Don't dump stack trace, it's a normal condition

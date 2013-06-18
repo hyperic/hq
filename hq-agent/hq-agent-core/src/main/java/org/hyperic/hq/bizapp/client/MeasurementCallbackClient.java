@@ -25,18 +25,18 @@
 
 package org.hyperic.hq.bizapp.client;
 
-import org.hyperic.lather.LatherRemoteException;
-
 import org.hyperic.hq.bizapp.agent.ProviderInfo;
 import org.hyperic.hq.bizapp.shared.lather.CommandInfo;
 import org.hyperic.hq.bizapp.shared.lather.MeasurementGetConfigs_args;
 import org.hyperic.hq.bizapp.shared.lather.MeasurementGetConfigs_result;
 import org.hyperic.hq.bizapp.shared.lather.MeasurementSendReport_args;
 import org.hyperic.hq.bizapp.shared.lather.MeasurementSendReport_result;
+import org.hyperic.hq.bizapp.shared.lather.TopNSendReport_args;
 import org.hyperic.hq.bizapp.shared.lather.TrackSend_args;
 import org.hyperic.hq.measurement.data.MeasurementReport;
 import org.hyperic.hq.measurement.data.TrackEventReport;
 import org.hyperic.hq.measurement.shared.MeasurementConfigList;
+import org.hyperic.lather.LatherRemoteException;
 
 public class MeasurementCallbackClient 
     extends AgentCallbackClient
@@ -112,5 +112,10 @@ public class MeasurementCallbackClient
         } catch(LatherRemoteException exc){
             throw new AgentCallbackClientException("Error getting plugin configs: " + exc, exc);
         }
+    }
+
+    public void topNSendReport(TopNSendReport_args report) throws AgentCallbackClientException {
+        ProviderInfo provider = this.getProvider();
+        this.invokeLatherCall(provider, CommandInfo.CMD_TOPN_SEND_REPORT, report);
     }
 }
