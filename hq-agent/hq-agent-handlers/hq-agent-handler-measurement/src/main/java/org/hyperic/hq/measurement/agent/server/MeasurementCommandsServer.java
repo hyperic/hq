@@ -94,10 +94,7 @@ public class MeasurementCommandsServer
     private Thread                   trackerThread;  // Config and Log tracker thread
     private TrackerThread            trackerObject;  // Config and Log tracker object
     
-    private Thread topnScheduleThread;
-    private TOPNScheduleThread topnScheduleObject;
-    private Thread topNsenderThread; // Thread of sender
-    private TOPNSenderThread topNsenderObject; // Our sender
+    private TopNScheduler topnScheduler;
 
     private MeasurementCommandsService measurementCommandsService;
 
@@ -121,8 +118,7 @@ public class MeasurementCommandsServer
         this.trackerThread    = null;
         this.trackerObject    = null;
         
-        this.topnScheduleThread = null;
-        this.topnScheduleObject = null;
+        this.topnScheduler = null;
 
         for (String element : this.verAPI.propSet) {
             // Simply setup true object values for properties we know about
@@ -131,9 +127,7 @@ public class MeasurementCommandsServer
     }
 
     private void spawnThreads(SenderThread senderObject, 
-                              ScheduleThread scheduleObject, 
- TrackerThread trackerObject,
-            TOPNScheduleThread topNScheduleObject, TOPNSenderThread topNSenderObject)
+ ScheduleThread scheduleObject, TrackerThread trackerObject)
         throws AgentStartException 
     {
         this.senderThread   = new Thread(senderObject, "SenderThread");
@@ -144,14 +138,9 @@ public class MeasurementCommandsServer
         this.trackerThread.setDaemon(true);
         this.collectorThread = CollectorThread.getInstance(pluginManager);
 
-        this.topnScheduleThread = new Thread(topNScheduleObject, "TopNScheduleThread");
-        this.topNsenderThread = new Thread(topNSenderObject, "TopNSenderThread");
-
         this.senderThread.start();
         this.scheduleThread.start();
         this.trackerThread.start();
-        this.topnScheduleThread.start();
-        this.topNsenderThread.start();
         this.collectorThread.doStart();
     }
 
@@ -261,10 +250,7 @@ public class MeasurementCommandsServer
                               this.storage,
                               this.bootConfig.getBootProperties());
         
-        this.topNsenderObject = new TOPNSenderThread(this.bootConfig.getBootProperties(),
-                this.storage);
-        
-        this.topnScheduleObject = new TOPNScheduleThread(this.storage);
+        this.topnScheduler = new TopNScheduler(this.storage);
         
         this.measurementCommandsService = 
                 new MeasurementCommandsService(this.storage, 
@@ -293,8 +279,7 @@ public class MeasurementCommandsServer
             throw new AgentStartException("Failed to register Measurement Commands Service.", e);
         }
 
-        spawnThreads(this.senderObject, this.scheduleObject, this.trackerObject, this.topnScheduleObject,
-                this.topNsenderObject);
+        spawnThreads(this.senderObject, this.scheduleObject, this.trackerObject);
 
         try {
         	i = this.schedStorage.getMeasurementList();
@@ -394,6 +379,7 @@ public class MeasurementCommandsServer
         this.scheduleObject.die();
         this.collectorThread.doStop();
         this.senderObject.die();
+        this.topnScheduler.die();
 
         try {
             this.interruptThread(this.senderThread);

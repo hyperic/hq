@@ -457,16 +457,34 @@ public class AgentDListProvider implements AgentStorageProvider {
         }
     }
 
+    public void deleteObjectsFromFolder(String folderName, String... objects) {
+        String folder = this.writeDir + System.getProperty("file.separator") + folderName;
+        for (String object : objects) {
+            File file = new File(folder + System.getProperty("file.separator") + object);
+            if (!file.exists()) {
+                log.warn("Cannot find file '" + object + "' to delete");
+                continue;
+            }
+            if (!file.delete()) {
+                log.warn("Cannot delete '" + object);
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
     public <T> List<T> getObjectsFromFolder(String folderName) {
         List<T> objects = new ArrayList<T>();
         File folder = new File(this.writeDir + System.getProperty("file.separator") + folderName);
+        if (!folder.exists()) {
+            return objects;
+        }
         for (final File fileEntry : folder.listFiles()) {
             ObjectInputStream inputStream = null;
             try {
                 inputStream = new ObjectInputStream(new FileInputStream(fileEntry));
                 objects.add((T) inputStream.readObject());
             } catch (Exception ex) {
-                log.error(ex.getMessage());
+                log.error("Cannot read objects from '" + folderName + "'" + ex.getMessage());
             } finally {
                 try {
                     inputStream.close();
@@ -477,6 +495,50 @@ public class AgentDListProvider implements AgentStorageProvider {
 
         }
         return objects;
+    }
+
+    public void saveObject(Object obj, String objectName) {
+        File file = new File(this.writeDir + System.getProperty("file.separator") + objectName);
+        ObjectOutputStream outputStream = null;
+        try {
+            outputStream = new ObjectOutputStream(new FileOutputStream(file));
+            outputStream.writeObject(obj);
+        } catch (Exception ex) {
+            log.error("Cannot save object '" + objectName + "'", ex);
+        } finally {
+            try {
+                if (outputStream != null) {
+                    outputStream.flush();
+                    outputStream.close();
+                }
+            } catch (IOException ex) {
+                log.error(ex);
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T getObject(String objectName) {
+        File file = new File(this.writeDir + System.getProperty("file.separator") + objectName);
+        if (!file.exists()) {
+            log.info("Did not find object '" + objectName + "' in the local storage");
+            return null;
+        }
+        ObjectInputStream inputStream = null;
+        try {
+            inputStream = new ObjectInputStream(new FileInputStream(file));
+            Object result = (inputStream.readObject());
+            return (T) result;
+        } catch (Exception ex) {
+            log.error("Cannot read object '" + objectName + "'" + ex.getMessage());
+        } finally {
+            try {
+                inputStream.close();
+            } catch (IOException e) {
+                log.error(e.getMessage());
+            }
+        }
+        return null;
     }
 
     private void close(FileInputStream fIs) {
@@ -655,3 +717,4 @@ public class AgentDListProvider implements AgentStorageProvider {
     }
     
 }
+

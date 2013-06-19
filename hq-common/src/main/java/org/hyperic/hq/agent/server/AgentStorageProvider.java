@@ -42,9 +42,36 @@ import org.hyperic.util.GenericValueMap;
 
 public interface AgentStorageProvider extends GenericValueMap {
 
+    /**
+     * @param folderName
+     * @param obj
+     * @param createTime
+     */
     void addObjectToFolder(String folderName, Object obj, long createTime);
 
+    /**
+     * @param folderName
+     * @return
+     */
     <T> List<T> getObjectsFromFolder(String folderName);
+
+    /**
+     * @param folderName
+     * @param objects
+     */
+    void deleteObjectsFromFolder(String folderName, String... objects);
+
+    /**
+     * @param obj
+     * @param objectName
+     */
+    void saveObject(Object obj, String objectName);
+
+    /**
+     * @param objectName
+     * @return
+     */
+    <T> T getObject(String objectName);
 
     /**
      * Get information about the storage provider.
