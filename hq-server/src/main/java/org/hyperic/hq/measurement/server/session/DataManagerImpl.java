@@ -73,6 +73,7 @@ import org.hyperic.hq.measurement.shared.MeasRange;
 import org.hyperic.hq.measurement.shared.MeasRangeObj;
 import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
+import org.hyperic.hq.plugin.system.TopReport;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
@@ -245,7 +246,7 @@ public class DataManagerImpl implements DataManager {
     /**
      * Save the new MetricValue to the database
      * 
-     * @param dp the new MetricValue
+     * @param mv the new MetricValue
      * @throws NumberFormatException if the value from the
      *         DataPoint.getMetricValue() cannot instantiate a BigDecimal
      * 
@@ -308,10 +309,17 @@ public class DataManagerImpl implements DataManager {
     public boolean addData(List<DataPoint> data) {
         return this._addData(data,safeGetConnection());
     }
-    
+
     public boolean addData(List<DataPoint> data, Connection conn) {
         return this._addData(data,safeGetConnection());
     }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public boolean addTopData(List<TopReport> reports) {
+        return this._addTopData(reports, safeGetConnection());
+    }
+
+
     
     /**
      * Write metric data points to the DB with transaction
@@ -391,6 +399,59 @@ public class DataManagerImpl implements DataManager {
         }
         return succeeded;
     }
+
+
+    protected boolean _addTopData(List<TopReport> reports, Connection conn) {
+
+        log.debug("Attempting to insert topN data in a single transaction.");
+
+        boolean succeeded = false;
+        final boolean debug = log.isDebugEnabled();
+
+        if (conn == null) {
+            return false;
+        }
+
+        try {
+            boolean autocommit = conn.getAutoCommit();
+
+            try {
+                final long start = System.currentTimeMillis();
+                conn.setAutoCommit(false);
+
+                succeeded = insertTopData(conn, reports, false);
+
+                if (succeeded) {
+                    conn.commit();
+                    final long end = System.currentTimeMillis();
+                    if (debug) {
+                        log.debug("Inserting TopN data in a single transaction " + "succeeded");
+                        log.debug("TopN Data Insertion process took " + (end - start) + " ms");
+                    }
+
+                    concurrentStatsCollector.addStat(end - start, DATA_MANAGER_INSERT_TIME);
+                     } else {
+                    if (debug) {
+                        log.debug("Inserting TopN data in a single transaction failed." + "  Rolling back transaction" +
+                                ".");
+                    }
+                    conn.rollback();
+                }
+
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(autocommit);
+            }
+        } catch (SQLException e) {
+            log.debug("Transaction failed around inserting TopN data.", e);
+        } finally {
+            DBUtil.closeConnection(LOG_CTX, conn);
+        }
+        return succeeded;
+    }
+
 
     /**
      * Write metric datapoints to the DB without transaction
@@ -888,6 +949,33 @@ public class DataManagerImpl implements DataManager {
         return left;
     }
 
+    private boolean insertTopData(Connection conn, List<TopReport> reports, boolean continueOnSQLException) throws
+            SQLException {
+        PreparedStatement stmt = null;
+        final StringBuilder buf = new StringBuilder();
+        try {
+
+            stmt = conn.prepareStatement(buf.append("INSERT INTO X").append(" (measurement_id, timestamp, " +
+                    "" + "value) VALUES (?, ?, ?)").toString());
+            stmt.execute();
+        } catch (BatchUpdateException e) {
+            if (!continueOnSQLException) {
+                throw e;
+            }
+        } catch (SQLException e) {
+            if (!continueOnSQLException) {
+                throw e;
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("A general SQLException occurred during the insert of TopN. ", e);
+            }
+        } finally {
+            DBUtil.closeStatement(LOG_CTX, stmt);
+        }
+        return true;
+    }
+
+
     /**
      * This method is called to perform 'updates' for any inserts that failed.
      * 
@@ -1120,7 +1208,7 @@ public class DataManagerImpl implements DataManager {
      * @param m The Measurement
      * @param begin the start of the time range
      * @param end the end of the time range
-     * @param prependUnknowns determines whether to prepend AVAIL_UNKNOWN if the
+     * @param prependAvailUnknowns determines whether to prepend AVAIL_UNKNOWN if the
      *        corresponding time window is not accounted for in the database.
      *        Since availability is contiguous this will not occur unless the
      *        time range precedes the first availability point.
@@ -1959,7 +2047,7 @@ public class DataManagerImpl implements DataManager {
     /**
      * Fetch the most recent data point for particular Measurements.
      * 
-     * @param measurements The List of Measurements to query. In the list of
+     * @param mids The List of Measurements to query. In the list of
      *        Measurements null values are allowed as placeholders.
      * @param timestamp Only use data points with collection times greater than
      *        the given timestamp.

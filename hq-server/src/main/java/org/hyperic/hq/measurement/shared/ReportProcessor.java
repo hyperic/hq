@@ -27,6 +27,9 @@ package org.hyperic.hq.measurement.shared;
 
 import org.hyperic.hq.measurement.data.MeasurementReport;
 import org.hyperic.hq.measurement.server.session.DataInserterException;
+import org.hyperic.hq.plugin.system.TopReport;
+
+import java.util.List;
 
 /**
  * Local interface for ReportProcessor.
@@ -38,4 +41,5 @@ public interface ReportProcessor {
      */
     public void handleMeasurementReport(MeasurementReport report) throws DataInserterException;
 
+    public void handleTopNReport(List<TopReport> reports) throws DataInserterException;
 }
