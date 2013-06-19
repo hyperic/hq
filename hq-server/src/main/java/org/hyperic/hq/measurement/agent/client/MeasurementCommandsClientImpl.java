@@ -33,6 +33,7 @@ import org.hyperic.hq.measurement.agent.commands.DeleteProperties_args;
 import org.hyperic.hq.measurement.agent.commands.GetMeasurements_args;
 import org.hyperic.hq.measurement.agent.commands.GetMeasurements_result;
 import org.hyperic.hq.measurement.agent.commands.ScheduleMeasurements_args;
+import org.hyperic.hq.measurement.agent.commands.ScheduleTopn_args;
 import org.hyperic.hq.measurement.agent.commands.SetProperties_args;
 import org.hyperic.hq.measurement.agent.commands.UnscheduleMeasurements_args;
 import org.hyperic.hq.transport.AgentProxyFactory;
@@ -162,6 +163,12 @@ public class MeasurementCommandsClientImpl
         } finally {
             safeDestroyService(proxy);
         }
+    }
+
+    public void scheduleTopn(ScheduleTopn_args args) throws AgentRemoteException, AgentConnectionException {
+    }
+
+    public void unscheduleTopn(ScheduleTopn_args args) throws AgentRemoteException, AgentConnectionException {
     }
 
 }

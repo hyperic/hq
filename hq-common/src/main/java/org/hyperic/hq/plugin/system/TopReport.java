@@ -1,19 +1,25 @@
 package org.hyperic.hq.plugin.system;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
-
-import org.hyperic.util.encoding.Base64;
+import java.util.HashSet;
+import java.util.Set;
 
 public class TopReport implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private long creatTime;
-    private String xmlData;
+    private String upTime;
+    private String cpu;
+    private String mem;
+    private String swap;
+    private Set<ProcessReport> processes = new HashSet<ProcessReport>();
+
+    public TopReport() {
+    }
+
 
     public long getCreatTime() {
         return creatTime;
@@ -23,48 +29,73 @@ public class TopReport implements Serializable {
         this.creatTime = creatTime;
     }
 
-    public String getXmlData() {
-        return xmlData;
+    public String getUpTime() {
+        return upTime;
     }
 
-    public void setXmlData(String xmlData) {
-        this.xmlData = xmlData;
+    public void setUpTime(String upTime) {
+        this.upTime = upTime;
     }
 
-    public String encode() throws IOException {
-
-        ByteArrayOutputStream bOs = null;
-        DataOutputStream dOs = null;
-
-        try {
-            bOs = new ByteArrayOutputStream();
-            dOs = new DataOutputStream(bOs);
-            dOs.writeUTF(getXmlData());
-            dOs.writeLong(getCreatTime());
-            return Base64.encode(bOs.toByteArray());
-
-        } finally {
-            dOs.close();
-            bOs.close();
-        }
+    public String getCpu() {
+        return cpu;
     }
 
-    public static TopReport decode(String val) throws IOException {
+    public void setCpu(String cpu) {
+        this.cpu = cpu;
+    }
 
-        ByteArrayInputStream bIs = null;
-        DataInputStream dIs = null;
-        TopReport report = new TopReport();
-        try {
-            bIs = new ByteArrayInputStream(Base64.decode(val));
-            dIs = new DataInputStream(bIs);
-            report.xmlData = dIs.readUTF();
-            report.creatTime = dIs.readLong();
-            return report;
+    public String getMem() {
+        return mem;
+    }
 
-        } finally {
-            dIs.close();
-            bIs.close();
-        }
+    public void setMem(String mem) {
+        this.mem = mem;
+    }
+
+    public String getSwap() {
+        return swap;
+    }
+
+    public void setSwap(String swap) {
+        this.swap = swap;
+    }
+
+    public Set<ProcessReport> getProcesses() {
+        return processes;
+    }
+
+    public void setProcesses(Set<ProcessReport> processes) {
+        this.processes = processes;
+    }
+
+    public void addProcess(ProcessReport process) {
+        this.processes.add(process);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        creatTime = in.readLong();
+        upTime = in.readUTF();
+        cpu = in.readUTF();
+        mem = in.readUTF();
+        swap = in.readUTF();
+        processes = (Set<ProcessReport>) in.readObject();
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.writeLong(creatTime);
+        out.writeUTF(upTime);
+        out.writeUTF(cpu);
+        out.writeUTF(mem);
+        out.writeUTF(swap);
+        out.writeObject(processes);
+    }
+
+    @Override
+    public String toString() {
+        return "TopReport [creatTime=" + creatTime + ", upTime=" + upTime + ", cpu=" + cpu + ", mem=" + mem + ", swap="
+                + swap + ", processes=" + processes + "]";
     }
 
 }

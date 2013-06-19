@@ -34,6 +34,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.UTFDataFormatException;
 import java.nio.ByteBuffer;
@@ -43,9 +45,11 @@ import java.security.KeyStore.PrivateKeyEntry;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableEntryException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -72,7 +76,7 @@ public class AgentDListProvider implements AgentStorageProvider {
     private static final int CHKPERC  = 50; // Only allow < 50% free
 
     private final AgentStatsCollector agentStatsCollector = AgentStatsCollector.getInstance();
-    private AtomicBoolean shutdown = new AtomicBoolean(false);
+    private final AtomicBoolean shutdown = new AtomicBoolean(false);
     private HashMap<EncVal, EncVal>  keyVals;
     private HashMap<String, DiskList>  lists;
     private HashMap<String, ListInfo> overloads;
@@ -82,7 +86,7 @@ public class AgentDListProvider implements AgentStorageProvider {
     
     // Dirty flag for when writing to keyvals.  Set to true at startup
     // to force an initial flush.
-    private AtomicBoolean keyValDirty = new AtomicBoolean(true);      // Dirty flag for when writing to keyvals
+    private final AtomicBoolean keyValDirty = new AtomicBoolean(true);      // Dirty flag for when writing to keyvals
 
     private long maxSize = MAXSIZE;
     private long chkSize = CHKSIZE;
@@ -121,7 +125,7 @@ public class AgentDListProvider implements AgentStorageProvider {
         long _maxSize = maxSize;
         long _chkSize = chkSize;
         int _chkPerc = chkPerc;
-        ListInfo info = (ListInfo) overloads.get(name);
+        ListInfo info = overloads.get(name);
         if (info != null) {
             _maxSize = info.maxSize;
             _chkSize = info.chkSize;
@@ -187,12 +191,16 @@ public class AgentDListProvider implements AgentStorageProvider {
     public void setValue(String key, String value) {
         final boolean debug = log.isDebugEnabled();
         if(value == null) {
-            if (debug) log.debug("Removing '" + key + "' from storage");
+            if (debug) {
+                log.debug("Removing '" + key + "' from storage");
+            }
             synchronized(keyVals){
                 keyVals.remove(key);
             }
         } else {
-            if (debug) log.debug("Setting '" + key + "' to '" + value + "'");
+            if (debug) {
+                log.debug("Setting '" + key + "' to '" + value + "'");
+            }
             synchronized(keyVals){
                 keyVals.put(new EncVal(encryptor, key), new EncVal(encryptor, value));
             }
@@ -427,6 +435,50 @@ public class AgentDListProvider implements AgentStorageProvider {
         }
     }
 
+    public void addObjectToFolder(String folderName, Object obj, long createTime) {
+        File folder = new File(this.writeDir + System.getProperty("file.separator") + folderName);
+        if (!folder.exists()) {
+            folder.mkdir();
+        }
+        ObjectOutputStream outputStream = null;
+        try {
+            outputStream = new ObjectOutputStream(new FileOutputStream(folder.getAbsolutePath()
+                    + System.getProperty("file.separator") + createTime));
+            outputStream.writeObject(obj);
+        } catch (Exception ex) {
+        } finally {
+            try {
+                if (outputStream != null) {
+                    outputStream.flush();
+                    outputStream.close();
+                }
+            } catch (IOException ex) {
+            }
+        }
+    }
+
+    public <T> List<T> getObjectsFromFolder(String folderName) {
+        List<T> objects = new ArrayList<T>();
+        File folder = new File(this.writeDir + System.getProperty("file.separator") + folderName);
+        for (final File fileEntry : folder.listFiles()) {
+            ObjectInputStream inputStream = null;
+            try {
+                inputStream = new ObjectInputStream(new FileInputStream(fileEntry));
+                objects.add((T) inputStream.readObject());
+            } catch (Exception ex) {
+                log.error(ex.getMessage());
+            } finally {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    log.error(e.getMessage());
+                }
+            }
+
+        }
+        return objects;
+    }
+
     private void close(FileInputStream fIs) {
         try {
             if(fIs != null) {
@@ -538,7 +590,7 @@ public class AgentDListProvider implements AgentStorageProvider {
         DiskList dList;
 
         synchronized(this.lists){
-            dList = (DiskList)this.lists.get(listName);
+            dList = this.lists.get(listName);
 
             if(dList == null){
                 try {
@@ -581,9 +633,11 @@ public class AgentDListProvider implements AgentStorageProvider {
             }
             return encrypted;
         }
+        @Override
         public String toString() {
             return val;
         }
+        @Override
         public boolean equals(Object o) {
             if (this == o) {
                 return true;
@@ -594,6 +648,7 @@ public class AgentDListProvider implements AgentStorageProvider {
             }
             return false;
         }
+        @Override
         public int hashCode() {
             return val.hashCode();
         }

@@ -33,8 +33,8 @@ import org.hyperic.sigar.CpuPerc;
 import org.hyperic.sigar.Mem;
 import org.hyperic.sigar.ProcStat;
 import org.hyperic.sigar.Sigar;
-import org.hyperic.sigar.SigarProxy;
 import org.hyperic.sigar.SigarException;
+import org.hyperic.sigar.SigarProxy;
 import org.hyperic.sigar.Swap;
 import org.hyperic.sigar.ptql.ProcessFinder;
 
@@ -45,7 +45,7 @@ public class TopData {
     private CpuPerc _cpu;
     private Mem _mem;
     private Swap _swap;
-    private List _processes;
+    private List<ProcessData> _processes;
 
     public TopData() {}
 
@@ -62,7 +62,7 @@ public class TopData {
     }
 
     private void ps(SigarProxy sigar, String filter) throws SigarException {
-        _processes = new ArrayList();
+        _processes = new ArrayList<ProcessData>();
         long[] pids;
 
         if (filter == null) {
@@ -72,8 +72,7 @@ public class TopData {
             pids = ProcessFinder.find(sigar, filter);
         }
 
-        for (int i=0; i<pids.length; i++) {
-            long pid = pids[i];
+        for (long pid : pids) {
             try {
                 _processes.add(ProcessData.gather(sigar, pid));
             } catch (SigarException e) {
@@ -110,7 +109,7 @@ public class TopData {
         return _swap;
     }
 
-    public List getProcesses() {
+    public List<ProcessData> getProcesses() {
         return _processes;
     }
 
@@ -122,9 +121,9 @@ public class TopData {
         out.println(getSwap());
         out.println();
         out.println(ProcessData.PS_HEADER);
-        List processes = getProcesses();
+        List<ProcessData> processes = getProcesses();
         for (int i=0; i<processes.size(); i++) {
-            ProcessData process = (ProcessData)processes.get(i);
+            ProcessData process = processes.get(i);
             out.println(process.toString("\t"));
         }
     }

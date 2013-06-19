@@ -27,6 +27,7 @@ package org.hyperic.hq.agent.server;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.hyperic.util.GenericValueMap;
@@ -40,6 +41,11 @@ import org.hyperic.util.GenericValueMap;
  */
 
 public interface AgentStorageProvider extends GenericValueMap {
+
+    void addObjectToFolder(String folderName, Object obj, long createTime);
+
+    <T> List<T> getObjectsFromFolder(String folderName);
+
     /**
      * Get information about the storage provider.
      *

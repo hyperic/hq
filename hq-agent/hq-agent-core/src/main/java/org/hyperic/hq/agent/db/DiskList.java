@@ -156,7 +156,7 @@ public class DiskList {
         double dataBytes = this.dataFile.length();
         double freeBytes = (this.freeList.size() * this.recordSize);
 
-        return Math.round(freeBytes*100/dataBytes);
+        return Math.round((freeBytes * 100) / dataBytes);
     }
 
     /**
@@ -175,16 +175,18 @@ public class DiskList {
 
         // Nothing we can do if the last block in the 
         // file is not free
-        if (lastData != lastFree + 1)
+        if (lastData != (lastFree + 1)) {
             return;
+        }
         
         // Simple iteration of the list.  May be faster to do a
         // binary search using freeList.size() to determine if all
         // blocks are free, but this is more readable, and we are
         // dealing with small numbers (< a few million)
         long firstFree = lastFree;
-        while (this.freeList.contains(new Long(firstFree - 1)))
+        while (this.freeList.contains(new Long(firstFree - 1))) {
             firstFree--;
+        }
         
         synchronized(this.dataFile) {
             // Truncate the data file
@@ -200,8 +202,8 @@ public class DiskList {
             this.freeList = new TreeSet(subset);
         }
         
-        long num = lastFree - firstFree + 1;
-        this.log.info("Deleted " + num * this.recordSize + 
+        long num = (lastFree - firstFree) + 1;
+        this.log.info("Deleted " + (num * this.recordSize) +
                       " bytes from " + this.fileName + 
                       " (" + num  + " blocks)");
     }
@@ -250,17 +252,24 @@ public class DiskList {
                 if(used == false){
                     this.freeList.add(new Long(idx));
                 } else {
-                    if(prev == -1)
+                    if (prev == -1) {
                         this.firstRec = idx;
+                    }
                 
-                    if(next == -1)
+                    if (next == -1) {
                         this.lastRec = idx;
+                    }
                 }
             }
         } catch(FileNotFoundException exc){
             return;
         } finally {
-            try {if(fIs != null)fIs.close();} catch(IOException exc){}
+            try {
+                if (fIs != null) {
+                    fIs.close();
+                }
+            } catch (IOException exc) {
+            }
         }
     }
 
@@ -315,7 +324,7 @@ public class DiskList {
 
             // Update the previous 'last' record to point to us
             if(this.lastRec != -1){
-                this.indexFile.seek(this.lastRec * IDX_REC_LEN + 1 + 8);
+                this.indexFile.seek((this.lastRec * IDX_REC_LEN) + 1 + 8);
                 this.indexFile.writeLong(firstFree);
             } 
 
@@ -440,38 +449,38 @@ public class DiskList {
                     this.lastRec  = -1;
                 } else {
                     // It's the first in the list, but not the last
-                    this.indexFile.seek(recNo * IDX_REC_LEN + 1 + 8);
+                    this.indexFile.seek((recNo * IDX_REC_LEN) + 1 + 8);
                     nextIdx = this.indexFile.readLong();
                     
                     // Set next->prev to -1
-                    this.indexFile.seek(nextIdx * IDX_REC_LEN + 1);
+                    this.indexFile.seek((nextIdx * IDX_REC_LEN) + 1);
                     this.indexFile.writeLong(-1);
                     
                     this.firstRec = nextIdx;
                 }
             } else if(recNo == this.lastRec){
                 // It's the last in the list, but not the first
-                this.indexFile.seek(recNo * IDX_REC_LEN + 1);
+                this.indexFile.seek((recNo * IDX_REC_LEN) + 1);
                 prevIdx = this.indexFile.readLong();
                 
                 // Set prev->next to -1
-                this.indexFile.seek(prevIdx * IDX_REC_LEN + 1 + 8);
+                this.indexFile.seek((prevIdx * IDX_REC_LEN) + 1 + 8);
                 this.indexFile.writeLong(-1);
                 
                 this.lastRec = prevIdx;
             } else {
                 // Otherwise, it's somewhere in the middle, so we have to
                 // update both the previous and next
-                this.indexFile.seek(recNo * IDX_REC_LEN + 1);
+                this.indexFile.seek((recNo * IDX_REC_LEN) + 1);
                 prevIdx = this.indexFile.readLong();
                 nextIdx = this.indexFile.readLong();
                 
                 // Set prev->next = next
-                this.indexFile.seek(prevIdx * IDX_REC_LEN + 1 + 8);
+                this.indexFile.seek((prevIdx * IDX_REC_LEN) + 1 + 8);
                 this.indexFile.writeLong(nextIdx);
 
                 // Set next->prev = prev
-                this.indexFile.seek(nextIdx * IDX_REC_LEN + 1);
+                this.indexFile.seek((nextIdx * IDX_REC_LEN) + 1);
                 this.indexFile.writeLong(prevIdx);
             }
 
@@ -548,7 +557,7 @@ public class DiskList {
         this.recordSize = oldSize;
         Collection<String> records = new ArrayList<String>();
         Iterator<String> iter = getListIterator();
-        for(; iter != null && iter.hasNext(); ){
+        for (; (iter != null) && iter.hasNext();) {
             String data = iter.next();
             records.add(data);
         }
@@ -679,28 +688,28 @@ public class DiskList {
         // Remove 1/2 of the data
         count = NUM/2;
         System.out.println("Removing " + (NUM/2) + " records..");
-        for(Iterator i=d.getListIterator(); i.hasNext() && count > 0; count--){
+        for (Iterator i = d.getListIterator(); i.hasNext() && (count > 0); count--) {
             String val = (String)i.next();
             i.remove();
         }
 
         // Add back 1/4 of the data
         System.out.println("Adding " + (NUM/4) + " records..");
-        for (int i=0; i<NUM/4; i++){
+        for (int i = 0; i < (NUM / 4); i++) {
             d.addToList("two " + i);
         }
 
         // Remove 1/2 of the data
         count = NUM/2;
         System.out.println("Removing " + (NUM/2) + " records..");
-        for(Iterator i=d.getListIterator(); i.hasNext() && count > 0; count--){
+        for (Iterator i = d.getListIterator(); i.hasNext() && (count > 0); count--) {
             String val = (String)i.next();
             i.remove();
         }
 
         // Add back 1/4 of the data
         System.out.println("Adding " + (NUM/4) + " records..");
-        for (int i=0; i<NUM/4; i++){
+        for (int i = 0; i < (NUM / 4); i++) {
             d.addToList("three " + i);
         }
 
@@ -713,7 +722,7 @@ public class DiskList {
 
         // Add back 1/16 of the data
         System.out.println("Adding " + (NUM/16) + " records..");
-        for (int i=0; i<NUM/4; i++){
+        for (int i = 0; i < (NUM / 4); i++) {
             d.addToList("three " + i);
         }
 

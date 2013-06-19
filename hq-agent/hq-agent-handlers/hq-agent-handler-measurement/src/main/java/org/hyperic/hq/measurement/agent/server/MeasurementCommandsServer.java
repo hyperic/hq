@@ -264,7 +264,7 @@ public class MeasurementCommandsServer
         this.topNsenderObject = new TOPNSenderThread(this.bootConfig.getBootProperties(),
                 this.storage);
         
-        this.topnScheduleObject = new TOPNScheduleThread(topNsenderObject, this.storage);
+        this.topnScheduleObject = new TOPNScheduleThread(this.storage);
         
         this.measurementCommandsService = 
                 new MeasurementCommandsService(this.storage, 

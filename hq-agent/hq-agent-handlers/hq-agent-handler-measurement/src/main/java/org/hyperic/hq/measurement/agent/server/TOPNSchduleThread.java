@@ -6,7 +6,10 @@ import org.hyperic.hq.agent.AgentAssertionException;
 import org.hyperic.hq.agent.server.AgentStartException;
 import org.hyperic.hq.agent.server.AgentStorageProvider;
 import org.hyperic.hq.measurement.agent.commands.ScheduleTopn_args;
+import org.hyperic.hq.plugin.system.ProcessData;
+import org.hyperic.hq.plugin.system.ProcessReport;
 import org.hyperic.hq.plugin.system.TopData;
+import org.hyperic.hq.plugin.system.TopReport;
 import org.hyperic.hq.product.SigarMeasurementPlugin;
 import org.hyperic.sigar.Humidor;
 import org.hyperic.sigar.Sigar;
@@ -20,27 +23,25 @@ import org.hyperic.util.schedule.UnscheduledItemException;
 
 
 class TOPNScheduleThread implements Runnable {
-
-
     private final          Schedule   schedule;    // Internal schedule of DSNs, etc
     private volatile boolean    shouldDie;   // Should I shut down?
-    private volatile Thread     myThread;    // Thread the 'run' is running in
     private final          Object     interrupter; // Interrupt object
 
     private final AgentStorageProvider storage;       // Place to store data
     private final Log                  log;
-    private final TOPNSenderThread sender; // Guy handling the results
     private Sigar _sigarImpl;
     private Humidor _humidor;
 
-    TOPNScheduleThread(TOPNSenderThread sender, AgentStorageProvider storage) throws AgentStartException {
+    TOPNScheduleThread(AgentStorageProvider storage) throws AgentStartException {
         this.schedule        = new Schedule();
         this.shouldDie       = false;
-        this.myThread        = null;
         this.interrupter     = new Object();
         this.log             = LogFactory.getLog(TOPNScheduleThread.class);
-        this.sender          = sender;
         this.storage         = storage;
+        ScheduleTopn_args args = new ScheduleTopn_args();
+        args.setConfig(new ConfigResponse());
+        args.setInterval(1);
+        scheduleRt(args);
     }
 
     private void interruptMe(){
@@ -101,8 +102,6 @@ class TOPNScheduleThread implements Runnable {
      */
 
     public void run(){
-        this.myThread = Thread.currentThread();
-
         while(this.shouldDie == false){
             long timeToNext = -1;
             try {
@@ -110,6 +109,11 @@ class TOPNScheduleThread implements Runnable {
                         System.currentTimeMillis();
 
             } catch(EmptyScheduleException exc){
+                try {
+                    Thread.sleep(60000);
+                } catch (InterruptedException e) {
+                }
+                continue;
             }
 
             if(timeToNext > 0){
@@ -139,10 +143,34 @@ class TOPNScheduleThread implements Runnable {
 
             }
             if (null != data) {
-                this.sender.processData(data);
+                TopReport report = generateTopReport(data);
+                try {
+                    storage.addObjectToFolder(TOPNSenderThread.DATA_FOLDERNAME, report, report.getCreatTime());
+                } catch (Exception exc) {
+                    log.error("Unable to store data", exc);
+                }
+            }
+
+            try {
+                Thread.sleep(60000);
+            } catch (InterruptedException e) {
             }
 
         }
+    }
+
+    private TopReport generateTopReport(TopData data) {
+        TopReport report = new TopReport();
+        report.setCreatTime(System.currentTimeMillis());
+        report.setUpTime(data.getUptime().toString());
+        report.setCpu(data.getCpu().toString());
+        report.setMem(data.getMem().toString());
+        report.setSwap(data.getSwap().toString());
+        for (ProcessData process : data.getProcesses()) {
+            ProcessReport processReport = new ProcessReport(process);
+            report.addProcess(processReport);
+        }
+        return report;
     }
 
     private synchronized SigarProxy getSigar() {

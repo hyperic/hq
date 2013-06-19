@@ -34,23 +34,23 @@ import org.hyperic.hq.measurement.agent.commands.DeleteProperties_args;
 import org.hyperic.hq.measurement.agent.commands.DeleteProperties_result;
 import org.hyperic.hq.measurement.agent.commands.GetMeasurements_args;
 import org.hyperic.hq.measurement.agent.commands.GetMeasurements_result;
-import org.hyperic.hq.measurement.agent.commands.TrackPluginAdd_args;
-import org.hyperic.hq.measurement.agent.commands.TrackPluginRemove_args;
 import org.hyperic.hq.measurement.agent.commands.ScheduleMeasurements_args;
 import org.hyperic.hq.measurement.agent.commands.ScheduleMeasurements_result;
+import org.hyperic.hq.measurement.agent.commands.ScheduleTopn_args;
 import org.hyperic.hq.measurement.agent.commands.SetProperties_args;
 import org.hyperic.hq.measurement.agent.commands.SetProperties_result;
+import org.hyperic.hq.measurement.agent.commands.TrackPluginAdd_args;
+import org.hyperic.hq.measurement.agent.commands.TrackPluginRemove_args;
 import org.hyperic.hq.measurement.agent.commands.UnscheduleMeasurements_args;
 import org.hyperic.hq.measurement.agent.commands.UnscheduleMeasurements_result;
-
 import org.hyperic.util.config.ConfigResponse;
 
 /**
  * The Measurement Commands client that uses the legacy transport.
  */
 public class LegacyMeasurementCommandsClientImpl implements MeasurementCommandsClient {
-    private AgentConnection        agentConn;
-    private MeasurementCommandsAPI verAPI;
+    private final AgentConnection        agentConn;
+    private final MeasurementCommandsAPI verAPI;
 
     /**
      * Creates a new MeasurementCommandsClient object which should communicate
@@ -169,5 +169,11 @@ public class LegacyMeasurementCommandsClientImpl implements MeasurementCommandsC
         AgentRemoteValue val = this.agentConn.sendCommand(
                                    this.verAPI.command_trackRemove,
                                    this.verAPI.getVersion(), args);
+    }
+
+    public void scheduleTopn(ScheduleTopn_args args) throws AgentRemoteException, AgentConnectionException {
+    }
+
+    public void unscheduleTopn(ScheduleTopn_args args) throws AgentRemoteException, AgentConnectionException {
     }
 }
