@@ -8,7 +8,7 @@
     normal use of the program, and does *not* fall under the heading of
      "derived work".
 
-     Copyright (C) [2004-2010], VMware, Inc.
+     Copyright (C) [2004-2013], VMware, Inc.
      This file is part of HQ.
 
      HQ is free software; you can redistribute it and/or modify
@@ -232,89 +232,55 @@
             units="percent"/>
   </metrics>
 
-<metrics name="ActiveMQ 5.3 Topic">
-    <metric name="Availability"
-            template="${TOPIC_OBJECT_NAME}:${alias}"
-            indicator="true"/>
-
-    <metric name="Enqueue Count"
-            template="${TOPIC_OBJECT_NAME}:${alias}"
-            indicator="true"
-            collectionType="trendsup"/>
-
-    <metric name="Dequeue Count"
-            template="${TOPIC_OBJECT_NAME}:${alias}"
-            indicator="true"
-            collectionType="trendsup"/>
-
-    <metric name="Consumer Count"
-            template="${TOPIC_OBJECT_NAME}:${alias}"/>
-
-    <metric name="Queue Size"
-            template="${TOPIC_OBJECT_NAME}:${alias}"
-            indicator="true"/>
-
-    <metric name="Memory Percent Usage"
-            template="${TOPIC_OBJECT_NAME}:${alias}"
-            units="percent"/>
+      <filter name="template" value="${TOPIC_OBJECT_NAME}:${alias}"/>
+  <metrics name="ActiveMQ 5.3 Topic">
+      <metric name="Availability" indicator="true"/>
+      <metric name="Enqueue Count" indicator="true" collectionType="trendsup"/>
+      <metric name="Dequeue Count" indicator="true" collectionType="trendsup"/>
+      <metric name="Dispatch Count" indicator="true" collectionType="trendsup"/>
+      <metric name="Expired Count" indicator="true" collectionType="trendsup"/>
+      <metric name="In Flight Count" indicator="true" collectionType="trendsup"/>
+      <metric name="Average Enqueue Time" units="sec"/>
+      <metric name="Producer Count"/>
+      <metric name="Consumer Count"/>
+      <metric name="Queue Size" indicator="true"/>
+      <metric name="Memory Limit" units="b"/>
+      <metric name="Memory Percent Usage" units="percent"/>
+      <metric name="Memory Usage Portion" units="percent"/>
   </metrics>
 
+      <filter name="template" value="${QUEUE_OBJECT_NAME}:${alias}"/>
   <metrics name="ActiveMQ 5.3 Queue">
-    <metric name="Availability"
-            template="${QUEUE_OBJECT_NAME}:${alias}"
-            indicator="true"/>
-
-    <metric name="Enqueue Count"
-            template="${QUEUE_OBJECT_NAME}:${alias}"
-            indicator="true"
-            collectionType="trendsup"/>
-
-    <metric name="Dequeue Count"
-            template="${QUEUE_OBJECT_NAME}:${alias}"
-            indicator="true"
-            collectionType="trendsup"/>
-
-    <metric name="Consumer Count"
-            template="${QUEUE_OBJECT_NAME}:${alias}"/>
-
-    <metric name="Queue Size"
-            template="${QUEUE_OBJECT_NAME}:${alias}"
-            indicator="true"/>
-
-    <metric name="Memory Percent Usage"
-            template="${QUEUE_OBJECT_NAME}:${alias}"
-            units="percent"/>
+      <metric name="Availability" indicator="true"/>
+      <metric name="Enqueue Count" indicator="true" collectionType="trendsup"/>
+      <metric name="Dequeue Count" indicator="true" collectionType="trendsup"/>
+      <metric name="Dispatch Count" indicator="true" collectionType="trendsup"/>
+      <metric name="Expired Count" indicator="true" collectionType="trendsup"/>
+      <metric name="In Flight Count" indicator="true" collectionType="trendsup"/>
+      <metric name="Average Enqueue Time" units="sec"/>
+      <metric name="Producer Count"/>
+      <metric name="Consumer Count"/>
+      <metric name="Queue Size" indicator="true"/>
+      <metric name="Memory Limit" units="b"/>
+      <metric name="Memory Percent Usage" units="percent"/>
+      <metric name="Memory Usage Portion" units="percent"/>
+      <metric name="Cursor Memory Usage" units="b"/>
+      <metric name="Cursor Percent Usage" units="percent"/>
   </metrics>
 
+      <filter name="template" value="${BROKER_OBJECT_NAME}:${alias}"/>
   <metrics name="ActiveMQ 5.3 Broker">
-    <metric name="Availability"
-            template="${BROKER_OBJECT_NAME}:${alias}"
-            indicator="true"/>
-
-    <metric name="Total Consumer Count"
-            template="${BROKER_OBJECT_NAME}:${alias}"/>
-
-    <metric name="Total Enqueue Count"
-            template="${BROKER_OBJECT_NAME}:${alias}"
-            indicator="true"
-            collectionType="trendsup"/>
-
-    <metric name="Total Dequeue Count"
-            template="${BROKER_OBJECT_NAME}:${alias}"
-            collectionType="trendsup"/>
-
-    <metric name="Total Message Count"
-            template="${BROKER_OBJECT_NAME}:${alias}"
-            indicator="true"
-            collectionType="trendsup"/>
-
-    <metric name="Memory Limit"
-            template="${BROKER_OBJECT_NAME}:${alias}"
-            units="B"/>
-
-    <metric name="Memory Percent Usage"
-            template="${BROKER_OBJECT_NAME}:${alias}"
-            units="percent"/>
+      <metric name="Availability" indicator="true"/>
+      <metric name="Total Consumer Count"/>
+      <metric name="Total Enqueue Count" indicator="true" collectionType="trendsup"/>
+      <metric name="Total Dequeue Count" collectionType="trendsup"/>
+      <metric name="Total Message Count" indicator="true" collectionType="trendsup"/>
+      <metric name="Memory Limit" units="B"/>
+      <metric name="Memory Percent Usage" units="percent"/>
+      <metric name="Store Limit" units="b"/>
+      <metric name="Store Percent Usage" indicator="true" units="percent"/>
+      <metric name="Temp Limit" units="b"/>
+      <metric name="Temp Percent Usage" indicator="true" units="percent"/> 
   </metrics>
   
   <metrics name="ActiveMQ 4.0 Connector">
@@ -354,10 +320,6 @@
   <server name="ActiveMQ"
           version="4.0">
 
-    <!-- derive installpath from -Dactivemq.home=... -->
-    <property name="PROC_HOME_PROPERTY"
-              value="activemq.home"/>
-
     <property name="DEFAULT_CONF"
               value="conf/activemq.xml"/>
 
@@ -385,7 +347,7 @@
     </config>
 
     <plugin type="autoinventory"
-            class="org.hyperic.hq.product.jmx.MxServerDetector"/>
+            class="org.hyperic.hq.plugin.activemq.ActiveMQServerDetector"/>
 
     <plugin type="measurement"
             class="org.hyperic.hq.product.jmx.MxMeasurementPlugin"/>
@@ -497,10 +459,6 @@
   </server>
 
   <server name="ActiveMQ" version="5.3">    
-	 <!-- derive installpath from -Dactivemq.home=... -->
-    <property name="PROC_HOME_PROPERTY"
-              value="activemq.home"/>
-
     <property name="DEFAULT_CONF"
               value="conf/activemq.xml"/>
 
@@ -527,8 +485,8 @@
               default="service:jmx:rmi:///jndi/rmi://localhost:1099/jmxrmi"/>
     </config>
 
-    <plugin type="autoinventory"
-            class="org.hyperic.hq.product.jmx.MxServerDetector"/>
+   <plugin type="autoinventory"
+            class="org.hyperic.hq.plugin.activemq.ActiveMQServerDetector"/>
 
     <plugin type="measurement"
             class="org.hyperic.hq.product.jmx.MxMeasurementPlugin"/>
@@ -620,6 +578,138 @@
           include="5.3">
   </server>
 
+  <server name="ActiveMQ" version="5.5" include="5.3"/>
+
+  <server name="ActiveMQ" version="5.6" include="5.3"/>
+
+  <server name="ActiveMQ" version="5.7" include="5.3"/>
+
+  <server name="ActiveMQ" version="5.8">    
+      <property name="DEFAULT_CONF" value="conf/activemq.xml"/>
+      <property name="DEFAULT_LOG_FILE" value="var/activemq.log"/>
+      <property name="VERSION_FILE" value="**/.*activemq-.*-(5.\d*).*.jar"/>
+
+      <config>
+          <option name="process.query" description="Process Query"/>
+          <option name="jmx.username" description="JMX Username" optional="true" default=""/>
+          <option name="jmx.password" description="JMX Password" optional="true" default=""/>
+          <option name="jmx.url" description="The JMX service URL" optional="true" default="service:jmx:rmi:///jndi/rmi://localhost:1099/jmxrmi"/>
+      </config>
+
+      <plugin type="autoinventory" class="org.hyperic.hq.plugin.activemq.ActiveMQServerDetector"/>
+      <plugin type="measurement" class="org.hyperic.hq.product.jmx.MxMeasurementPlugin"/>
+      <plugin type="log_track" class="org.hyperic.hq.product.Log4JLogTrackPlugin"/>
+      <plugin type="config_track" class="org.hyperic.hq.product.ConfigFileTrackPlugin"/>
+
+      <metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State" indicator="true"/>
+    &process-metrics;
+
+      <service name="Connector">
+          <property name="OBJECT_NAME" value="${domain}:type=Broker,connector=clientConnectors,brokerName=*,connectorName=*"/>
+
+          <config>
+              <option name="brokerName" description="Broker Name" default=""/>
+              <option name="connectorName" description="Connector Name" default=""/>
+          </config>
+
+          <plugin type="autoinventory"/>
+          <plugin type="control" class="org.hyperic.hq.product.jmx.MxControlPlugin"/>
+          <actions include="start,stop"/>
+
+          <metric name="Availability"  template="${OBJECT_NAME}:${alias}" indicator="true"/>
+      </service>
+
+      <service name="Broker">
+          <property name="OBJECT_NAME" value="${domain}:type=Broker,brokerName=*"/>
+
+          <config>
+              <option name="brokerName" description="Broker Name" default=""/>
+          </config>
+
+          <plugin type="autoinventory"/>
+          <plugin type="control" class="org.hyperic.hq.product.jmx.MxControlPlugin"/>
+
+          <actions include="start,stop,gc,removeTopic,removeQueue"/>
+
+          <filter name="template" value="${OBJECT_NAME}:${alias}"/>
+          <metric name="Availability" indicator="true"/>
+          <metric name="Total Consumer Count"/>
+          <metric name="Total Enqueue Count" indicator="true" collectionType="trendsup"/>
+          <metric name="Total Dequeue Count" collectionType="trendsup"/>
+          <metric name="Total Message Count" indicator="true" collectionType="trendsup"/>
+          <metric name="Memory Limit" units="B"/>
+          <metric name="Memory Percent Usage" units="percent"/>
+          <metric name="Store Limit" units="b"/>
+          <metric name="Store Percent Usage" indicator="true" units="percent"/>
+          <metric name="Temp Limit" units="b"/>
+          <metric name="Temp Percent Usage" indicator="true" units="percent"/> 
+      </service>
+
+      <service name="Queue">
+          <property name="OBJECT_NAME" value="${domain}:destinationType=Queue,type=Broker,brokerName=*,destinationName=*"/>
+
+          <config>
+              <option name="brokerName" description="Broker Name" default=""/>
+              <option name="destinationName" description="Destination" default=""/>
+          </config>
+
+          <plugin type="autoinventory"/>
+          <plugin type="control" class="org.hyperic.hq.product.jmx.MxControlPlugin"/>
+
+          <actions include="sendTextMessage"/>
+          
+          <filter name="template" value="${OBJECT_NAME}:${alias}"/>
+          <metric name="Availability" indicator="true"/>
+          <metric name="Enqueue Count" indicator="true" collectionType="trendsup"/>
+          <metric name="Dequeue Count" indicator="true" collectionType="trendsup"/>
+          <metric name="Dispatch Count" indicator="true" collectionType="trendsup"/>
+          <metric name="Expired Count" indicator="true" collectionType="trendsup"/>
+          <metric name="In Flight Count" indicator="true" collectionType="trendsup"/>
+          <metric name="Average Enqueue Time" units="sec"/>
+          <metric name="Producer Count"/>
+          <metric name="Consumer Count"/>
+          <metric name="Queue Size" indicator="true"/>
+          <metric name="Memory Limit" units="b"/>
+          <metric name="Memory Percent Usage" units="percent"/>
+          <metric name="Memory Usage Byte Count" units="b"/>
+          <metric name="Memory Usage Portion" units="percent"/>
+          <metric name="Cursor Memory Usage" units="b"/>
+          <metric name="Cursor Percent Usage" units="percent"/>
+      </service>
+
+      <service name="Topic">
+          <property name="OBJECT_NAME" value="${domain}:type=Broker,destinationType=Topic,brokerName=*,destinationName=*"/>
+
+          <config>
+              <option name="brokerName" description="Broker Name" default=""/>
+              <option name="destinationName" description="Destination" default=""/>
+          </config>
+
+          <plugin type="autoinventory"/>
+          <plugin type="control" class="org.hyperic.hq.product.jmx.MxControlPlugin"/>
+
+          <actions include="sendTextMessage"/>
+          
+          <filter name="template" value="${OBJECT_NAME}:${alias}"/>
+          <metric name="Availability" indicator="true"/>
+          <metric name="Enqueue Count" indicator="true" collectionType="trendsup"/>
+          <metric name="Dequeue Count" indicator="true" collectionType="trendsup"/>
+          <metric name="Dispatch Count" indicator="true" collectionType="trendsup"/>
+          <metric name="Expired Count" indicator="true" collectionType="trendsup"/>
+          <metric name="In Flight Count" indicator="true" collectionType="trendsup"/>
+          <metric name="Average Enqueue Time" units="sec"/>
+          <metric name="Producer Count"/>
+          <metric name="Consumer Count"/>
+          <metric name="Queue Size" indicator="true"/>
+          <metric name="Memory Limit" units="b"/>
+          <metric name="Memory Percent Usage" units="percent"/>
+          <metric name="Memory Usage Byte Count" units="b"/>
+          <metric name="Memory Usage Portion" units="percent"/>
+      </service> 
+
+      <!-- &sun-jvm-service; -->    
+  </server>
+  
   <server name="ActiveMQ Embedded"
           version="5.0"
           include="ActiveMQ 5.0">
