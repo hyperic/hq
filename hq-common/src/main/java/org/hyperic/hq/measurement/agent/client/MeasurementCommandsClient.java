@@ -96,6 +96,6 @@ public interface MeasurementCommandsClient {
     
     void scheduleTopn(ScheduleTopn_args args) throws AgentRemoteException, AgentConnectionException;
 
-    void unscheduleTopn(ScheduleTopn_args args) throws AgentRemoteException, AgentConnectionException;
+    void unscheduleTopn() throws AgentRemoteException, AgentConnectionException;
 
 }

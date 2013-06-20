@@ -66,7 +66,7 @@ public final class MeasurementCommandsAPI extends AgentAPIInfo {
 
     // Commands for enabling and disabling topN
     public static final String topNPrefix = "topN:";
-    public static final String command_scheduleTopN = topNPrefix + "scheduleTopn";
+    public static final String command_scheduleTopn = topNPrefix + "scheduleTopn";
     public static final String command_unscheduleTopn = topNPrefix + "unscheduleTopn";
 
     public static final String[] commandSet = {
@@ -76,7 +76,7 @@ public final class MeasurementCommandsAPI extends AgentAPIInfo {
         command_setProperties,
         command_deleteProperties,
         command_trackAdd,
-            command_trackRemove, command_scheduleTopN, command_unscheduleTopn
+            command_trackRemove, command_scheduleTopn, command_unscheduleTopn
     };
 
     public MeasurementCommandsAPI(){

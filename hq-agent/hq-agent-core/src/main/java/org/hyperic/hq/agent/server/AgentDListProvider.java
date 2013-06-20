@@ -46,6 +46,8 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableEntryException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -93,7 +95,7 @@ public class AgentDListProvider implements AgentStorageProvider {
     private int chkPerc = CHKPERC;
 
     private final PooledPBEStringEncryptor encryptor;
-    
+
     public AgentDListProvider() {
         keyVals = null;
         lists   = null;
@@ -472,13 +474,25 @@ public class AgentDListProvider implements AgentStorageProvider {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> List<T> getObjectsFromFolder(String folderName) {
+    public <T> List<T> getObjectsFromFolder(String folderName, int maxNumOfObjects) {
         List<T> objects = new ArrayList<T>();
         File folder = new File(this.writeDir + System.getProperty("file.separator") + folderName);
         if (!folder.exists()) {
             return objects;
         }
-        for (final File fileEntry : folder.listFiles()) {
+
+        File[] files = folder.listFiles();
+        // sort the files by create time
+        Arrays.sort(files, new Comparator<File>() {
+            public int compare(File f1, File f2) {
+                return Long.valueOf(f1.lastModified()).compareTo(f2.lastModified());
+            }
+        });
+
+        for (final File fileEntry : files) {
+            if (maxNumOfObjects <= 0) {
+                break;
+            }
             ObjectInputStream inputStream = null;
             try {
                 inputStream = new ObjectInputStream(new FileInputStream(fileEntry));
@@ -486,6 +500,7 @@ public class AgentDListProvider implements AgentStorageProvider {
             } catch (Exception ex) {
                 log.error("Cannot read objects from '" + folderName + "'" + ex.getMessage());
             } finally {
+                maxNumOfObjects--;
                 try {
                     inputStream.close();
                 } catch (IOException e) {
@@ -495,6 +510,17 @@ public class AgentDListProvider implements AgentStorageProvider {
 
         }
         return objects;
+    }
+
+    public void deleteObject(String objectName) {
+        File file = new File(this.writeDir + System.getProperty("file.separator") + objectName);
+        if (file.exists()) {
+            if (!file.delete()) {
+                log.warn("Cannot delete '" + objectName + "'");
+            }
+        } else {
+            log.warn("File does not exists '" + objectName + "'");
+        }
     }
 
     public void saveObject(Object obj, String objectName) {

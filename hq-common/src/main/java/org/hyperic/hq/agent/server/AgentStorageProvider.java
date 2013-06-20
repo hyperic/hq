@@ -51,9 +51,10 @@ public interface AgentStorageProvider extends GenericValueMap {
 
     /**
      * @param folderName
+     * @param maxNumOfObjects
      * @return
      */
-    <T> List<T> getObjectsFromFolder(String folderName);
+    <T> List<T> getObjectsFromFolder(String folderName, int maxNumOfObjects);
 
     /**
      * @param folderName
@@ -73,6 +74,11 @@ public interface AgentStorageProvider extends GenericValueMap {
      */
     <T> T getObject(String objectName);
 
+    /**
+     * @param objectName
+     */
+    void deleteObject(String objectName);
+    
     /**
      * Get information about the storage provider.
      *

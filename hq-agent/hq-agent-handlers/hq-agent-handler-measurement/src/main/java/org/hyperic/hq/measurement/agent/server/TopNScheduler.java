@@ -22,13 +22,10 @@ import org.hyperic.hq.plugin.system.ProcessData;
 import org.hyperic.hq.plugin.system.ProcessReport;
 import org.hyperic.hq.plugin.system.TopData;
 import org.hyperic.hq.plugin.system.TopReport;
-import org.hyperic.hq.product.SigarMeasurementPlugin;
 import org.hyperic.sigar.Humidor;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
 import org.hyperic.sigar.SigarProxy;
-import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.schedule.UnscheduledItemException;
 
 
 class TopNScheduler {
@@ -51,7 +48,7 @@ class TopNScheduler {
         this.log             = LogFactory.getLog(TopNScheduler.class);
         this.storage         = storage;
         this.client = setupClient();
-        createExecutors();
+        createSender();
         loadScheduleData();
     }
 
@@ -60,24 +57,11 @@ class TopNScheduler {
         TopNSchedule schedule = null;
         if (null != (schedule = storage.<TopNSchedule> getObject(SCHEDULE_FILE))) {
             scheduleTopN(schedule);
-        } else {
-            ScheduleTopn_args args = new ScheduleTopn_args();
-            args.setConfig(new ConfigResponse());
-            args.setInterval(1);
-            scheduleTopN(args);
         }
-
     }
 
 
-    private void createExecutors() {
-        scheduler = Executors.newScheduledThreadPool(1, new ThreadFactory() {
-            private final AtomicLong i = new AtomicLong(0);
-            public Thread newThread(Runnable r) {
-                return new Thread(r, "TopNScheduler" + i.getAndIncrement());
-            }
-        });
-
+    private void createSender() {
         sender = Executors.newScheduledThreadPool(1, new ThreadFactory() {
             private final AtomicLong i = new AtomicLong(0);
             public Thread newThread(Runnable r) {
@@ -89,11 +73,9 @@ class TopNScheduler {
             public void run() {
                 boolean success;
                 List<TopReport> reports = new ArrayList<TopReport>();
-                for (TopReport report : storage.<TopReport> getObjectsFromFolder(DATA_FOLDERNAME)) {
+                for (TopReport report : storage.<TopReport> getObjectsFromFolder(DATA_FOLDERNAME, MAX_BATCHSIZE)) {
                     reports.add(report);
-                    if (reports.size() >= MAX_BATCHSIZE) {
-                        break;
-                    }
+
                 }
                 // If we don't have anything to send -- move along
                 if (reports.isEmpty()) {
@@ -113,12 +95,12 @@ class TopNScheduler {
 
                 // delete the records we sent from the storage
                 if (success) {
-                    String[] fileNames = new String[reports.size()];
-                    int i = 0;
+                    List<String> filesToDelete = new ArrayList<String>();
                     for (TopReport report : reports) {
-                        fileNames[i++] = String.valueOf(report.getCreatTime());
+                        filesToDelete.add(String.valueOf(report.getCreatTime()));
                     }
-                    storage.deleteObjectsFromFolder(DATA_FOLDERNAME, fileNames);
+                    storage.deleteObjectsFromFolder(DATA_FOLDERNAME,
+                            filesToDelete.toArray(new String[filesToDelete.size()]));
                 }
             }
             // TimeUnit.MINUTE does not work on java5
@@ -127,15 +109,24 @@ class TopNScheduler {
     }
 
 
-    public void unscheduleTopN(ScheduleTopn_args args) throws UnscheduledItemException {
+    private void createScheduler() {
+        scheduler = Executors.newScheduledThreadPool(1, new ThreadFactory() {
+            private final AtomicLong i = new AtomicLong(0);
 
+            public Thread newThread(Runnable r) {
+                return new Thread(r, "TopNScheduler" + i.getAndIncrement());
+            }
+        });
+    }
+
+    public void unscheduleTopN() {
+        scheduler.shutdown();
+        storage.deleteObject(SCHEDULE_FILE);
     }
 
     public void scheduleTopN(final ScheduleTopn_args args) {
         TopNSchedule schedule = new TopNSchedule();
-        if (null != args.getConfig()) {
-            schedule.setQueryFilter(args.getConfig().getValue(SigarMeasurementPlugin.PTQL_CONFIG));
-        }
+        schedule.setQueryFilter(args.getQueryFilter());
         schedule.setInterval(args.getInterval());
         schedule.setLastUpdateTime(System.currentTimeMillis());
 
@@ -147,6 +138,12 @@ class TopNScheduler {
 
     private void scheduleTopN(final TopNSchedule schedule) {
         log.info("Scheduling TopN gethering task at interval of " + schedule.getInterval() + " minutes");
+        // If the scheduler is alive we need to kill it and create a new one
+        // with the new scheduling data
+        if ((null != scheduler) && !scheduler.isShutdown()) {
+            scheduler.shutdown();
+        }
+        createScheduler();
         scheduler.scheduleAtFixedRate(new Runnable() {
             public void run() {
                 TopData data = null;

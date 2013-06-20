@@ -58,6 +58,7 @@ import org.hyperic.hq.measurement.agent.commands.DeleteProperties_result;
 import org.hyperic.hq.measurement.agent.commands.GetMeasurements_args;
 import org.hyperic.hq.measurement.agent.commands.ScheduleMeasurements_args;
 import org.hyperic.hq.measurement.agent.commands.ScheduleMeasurements_result;
+import org.hyperic.hq.measurement.agent.commands.ScheduleTopn_args;
 import org.hyperic.hq.measurement.agent.commands.SetProperties_args;
 import org.hyperic.hq.measurement.agent.commands.SetProperties_result;
 import org.hyperic.hq.measurement.agent.commands.TrackPluginAdd_args;
@@ -66,6 +67,7 @@ import org.hyperic.hq.measurement.agent.commands.TrackPluginRemove_args;
 import org.hyperic.hq.measurement.agent.commands.TrackPluginRemove_result;
 import org.hyperic.hq.measurement.agent.commands.UnscheduleMeasurements_args;
 import org.hyperic.hq.measurement.agent.commands.UnscheduleMeasurements_result;
+import org.hyperic.hq.measurement.agent.commands.UnscheduleTopn_result;
 import org.hyperic.hq.measurement.agent.server.ScheduleThread.ParsedTemplate;
 import org.hyperic.hq.product.ConfigTrackPluginManager;
 import org.hyperic.hq.product.LogTrackPluginManager;
@@ -156,52 +158,64 @@ public class MeasurementCommandsServer
                                             InputStream in, OutputStream out)
         throws AgentRemoteException 
     {
-        if(cmd.equals(this.verAPI.command_scheduleMeasurements)){            
+        if (cmd.equals(MeasurementCommandsAPI.command_scheduleMeasurements)) {
             ScheduleMeasurements_args sa = 
                 new ScheduleMeasurements_args(args);
-
             measurementCommandsService.scheduleMeasurements(sa);
-
             return new ScheduleMeasurements_result();
-        } else if(cmd.equals(this.verAPI.command_unscheduleMeasurements)){
+        }
+
+        else if (cmd.equals(MeasurementCommandsAPI.command_unscheduleMeasurements)) {
             UnscheduleMeasurements_args sa = 
                 new UnscheduleMeasurements_args(args);
-
             measurementCommandsService.unscheduleMeasurements(sa);
-            
             return new UnscheduleMeasurements_result();
-        } else if(cmd.equals(this.verAPI.command_getMeasurements)){
+        }
+
+        else if (cmd.equals(MeasurementCommandsAPI.command_getMeasurements)) {
             GetMeasurements_args sa = 
                 new GetMeasurements_args(args);
-
             return measurementCommandsService.getMeasurements(sa);
-        } else if(cmd.equals(this.verAPI.command_setProperties)){
+        }
+
+        else if (cmd.equals(MeasurementCommandsAPI.command_setProperties)) {
             SetProperties_args sa = 
                 new SetProperties_args(args);
-
             measurementCommandsService.setProperties(sa);
-            
             return new SetProperties_result();
-        } else if(cmd.equals(this.verAPI.command_deleteProperties)){
+        }
+
+        else if (cmd.equals(MeasurementCommandsAPI.command_deleteProperties)) {
             DeleteProperties_args sa = 
                 new DeleteProperties_args(args);
-
             measurementCommandsService.deleteProperties(sa);
-            
             return new DeleteProperties_result();
-        } else if(cmd.equals(this.verAPI.command_trackAdd)) {
+        }
+
+        else if (cmd.equals(MeasurementCommandsAPI.command_trackAdd)) {
             TrackPluginAdd_args ta = new TrackPluginAdd_args(args);
-            
             measurementCommandsService.addTrackPlugin(ta);
-
             return new TrackPluginAdd_result();
-        } else if(cmd.equals(this.verAPI.command_trackRemove)) {
-            TrackPluginRemove_args ta = new TrackPluginRemove_args(args);
+        }
 
+        else if (cmd.equals(MeasurementCommandsAPI.command_trackRemove)) {
+            TrackPluginRemove_args ta = new TrackPluginRemove_args(args);
             measurementCommandsService.removeTrackPlugin(ta);
-            
             return new TrackPluginRemove_result();
-        } else {
+        }
+
+        else if (cmd.equals(MeasurementCommandsAPI.command_scheduleTopn)) {
+            ScheduleTopn_args topnArgs = new ScheduleTopn_args(args);
+            measurementCommandsService.scheduleTopn(topnArgs);
+            return new TrackPluginRemove_result();
+        }
+
+        else if (cmd.equals(MeasurementCommandsAPI.command_unscheduleTopn)) {
+            measurementCommandsService.unscheduleTopn();
+            return new UnscheduleTopn_result();
+        }
+
+        else {
             throw new AgentRemoteException("Unknown command: " + cmd);
         }
     }
@@ -252,14 +266,9 @@ public class MeasurementCommandsServer
         
         this.topnScheduler = new TopNScheduler(this.storage);
         
-        this.measurementCommandsService = 
-                new MeasurementCommandsService(this.storage, 
-                                               this.validProps,
-                                               this.schedStorage, 
-                                               this.pluginManager, 
-                                               this.ltPluginManager,
-                                               this.ctPluginManager,
-                                               this.scheduleObject);
+        this.measurementCommandsService = new MeasurementCommandsService(this.storage, this.validProps,
+                this.schedStorage, this.pluginManager, this.ltPluginManager, this.ctPluginManager, this.scheduleObject,
+                this.topnScheduler);
         
         AgentTransportLifecycle agentTransportLifecycle;
         

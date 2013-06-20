@@ -37,7 +37,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.PropertyPair;
 import org.hyperic.hq.agent.server.AgentStorageException;
@@ -88,6 +87,7 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
     private final LogTrackPluginManager _ltPluginManager;
     private final ConfigTrackPluginManager _ctPluginManager;
     private final ScheduleThread _scheduleObject;
+    private final TopNScheduler _topNScheduler;
     private final LinkedBlockingQueue<ScheduleMeasurements_args> argQueue =
         new LinkedBlockingQueue<ScheduleMeasurements_args>();
     private final Scheduler _scheduler;
@@ -98,7 +98,7 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
                                       MeasurementPluginManager pluginManager, 
                                       LogTrackPluginManager ltPluginManager, 
                                       ConfigTrackPluginManager ctPluginManager, 
-                                      ScheduleThread scheduleObject) {
+ ScheduleThread scheduleObject, TopNScheduler topNScheduler) {
         _storage = storage;
         _validProps = validProps;
         _schedStorage = schedStorage;
@@ -106,6 +106,7 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
         _ltPluginManager = ltPluginManager;
         _ctPluginManager = ctPluginManager;
         _scheduleObject = scheduleObject;
+        _topNScheduler = topNScheduler;
         _scheduler = new Scheduler();
         _scheduler.start();
     }
@@ -485,10 +486,12 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
         _scheduleObject.unscheduleMeasurements(id);
     }
 
-    public void scheduleTopn(ScheduleTopn_args args) throws AgentRemoteException, AgentConnectionException {
+    public void scheduleTopn(ScheduleTopn_args args) throws AgentRemoteException {
+        _topNScheduler.scheduleTopN(args);
     }
 
-    public void unscheduleTopn(ScheduleTopn_args args) throws AgentRemoteException, AgentConnectionException {
+    public void unscheduleTopn() throws AgentRemoteException {
+        _topNScheduler.unscheduleTopN();
     }
 
 }
