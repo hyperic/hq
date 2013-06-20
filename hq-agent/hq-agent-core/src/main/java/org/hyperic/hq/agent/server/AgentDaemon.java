@@ -186,7 +186,7 @@ public class AgentDaemon
     public static AgentDaemon newInstance(AgentConfig cfg) throws AgentConfigException {
         AgentDaemon res = new AgentDaemon(cfg);
         try {
-            res.configure(cfg);
+            res.configure();
             AgentCallbackClient.setAgentConfig(cfg);
         } catch(AgentRunningException exc){
             throw new AgentAssertionException("New agent should not be running", exc);
@@ -387,7 +387,7 @@ public class AgentDaemon
 
         try {
             provider = (AgentStorageProvider)storageClass.newInstance();
-            provider.init(cfg.getStorageProviderInfo());
+            provider.init(cfg);
         } catch(IllegalAccessException exc){
             throw new AgentConfigException("Unable to access storage " +
                                            "provider '" + 
@@ -942,21 +942,27 @@ public class AgentDaemon
             this.sendNotification(NOTIFY_AGENT_UP, "we're up, baby!");
             agentStarted = true;
             AgentStatsWriter statsWriter = new AgentStatsWriter(config);
-            statsWriter.startWriter();
+            if (!Boolean.getBoolean("disableStats")) {
+                statsWriter.startWriter();
+            }
 	    this.postInitActions() ;
-            agentDiagnostics = AgentDiagnostics.getInstance();
-            agentDiagnostics.setConfig(config);
-            agentDiagnostics.start();
+            if (!Boolean.getBoolean("disableStats")) {
+                agentDiagnostics = AgentDiagnostics.getInstance();
+                agentDiagnostics.setConfig(config);
+                agentDiagnostics.start();
+            }
             this.listener.listenLoop();
             this.sendNotification(NOTIFY_AGENT_DOWN, "goin' down, baby!");
-            statsWriter.stopWriter();
+            if (!Boolean.getBoolean("disableStats")) {
+                statsWriter.stopWriter();
+            }
         } catch(AgentStartException exc){
             logger.error(exc.getMessage(), exc);
             throw exc;
         } catch(Exception exc){
             logger.error("Error running agent", exc);
             throw new AgentStartException("Error running agent: " +
-                                          exc.getMessage());
+                                          exc.getMessage(), exc);
         } catch(Throwable exc){
             logger.error("Critical error running agent", exc);
             // We don't flush the storage here, since we may be out of

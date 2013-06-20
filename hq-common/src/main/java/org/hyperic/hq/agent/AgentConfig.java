@@ -119,6 +119,8 @@ public class AgentConfig {
     { "agent.logDir", System.getProperty("agent.logDir", PROP_INSTALLHOME[1] + "/log") };
     public static final String[] PROP_DATADIR = 
     { "agent.dataDir", System.getProperty("agent.dataDir", PROP_INSTALLHOME[1] + "/data") };
+    public static final String[] PROP_CONFDIR = 
+    { "agent.confDir", System.getProperty("agent.confDir", PROP_INSTALLHOME[1] + "/conf") };
     public static final String[] PROP_KEYSTORE_ACCEPT_UNVERIFIED_CERT = 
     { SSL_KEYSTORE_ACCEPT_UNVERIFIED_CERT, "true" }; //for pre-4.6 version upgrade only. Should be changed to "false" once pre-4.6 is not supported. 
     public static final String[] PROP_KEYSTORE_PATH = 
@@ -133,6 +135,8 @@ public class AgentConfig {
     { PDK_DIR_KEY, System.getProperty(PDK_DIR_KEY, PROP_BUNDLEHOME[1] + "/pdk") };
     public static final String[] PROP_PDK_LIB_DIR = 
     { PDK_LIB_DIR_KEY, System.getProperty(PDK_LIB_DIR_KEY, PROP_PDK_DIR[1] + "/lib") };    
+    public static final String[] PROP_SSL_KEYSTORE_ALIAS =
+    { SSL_KEYSTORE_ALIAS, System.getProperty(SSL_KEYSTORE_ALIAS, DEFAULT_SSL_KEYSTORE_ALIAS) };    
     public static final String[] PROP_PDK_PLUGIN_DIR = 
     { PDK_PLUGIN_DIR_KEY, 
         System.getProperty(PDK_PLUGIN_DIR_KEY, PROP_PDK_DIR[1] + "/plugins") };  
@@ -161,9 +165,9 @@ public class AgentConfig {
     
     public static final String DEFAULT_AGENT_PROPFILE_NAME = "agent.properties";
     
-    public static final String AGENT_CONF_DIR = PROP_INSTALLHOME[1] + "/conf/";
+    public static final String AGENT_CONF_DIR = PROP_CONFDIR[1];
 
-    public static final String DEFAULT_PROPFILE = AGENT_CONF_DIR + DEFAULT_AGENT_PROPFILE_NAME;
+    public static final String DEFAULT_PROPFILE = AGENT_CONF_DIR + "/" + DEFAULT_AGENT_PROPFILE_NAME;
 
     public static final String ROLLBACK_PROPFILE = "agent.rollbackPropFile";
 
@@ -183,6 +187,9 @@ public class AgentConfig {
     }
     
     private static final String[][] propertyList = {
+        PROP_SSL_KEYSTORE_ALIAS,
+        PROP_KEYSTORE_PATH,
+        PROP_KEYSTORE_PASSWORD,
         PROP_LISTENPORT,
         PROP_PROXYHOST, 
         PROP_PROXYPORT,
@@ -279,7 +286,9 @@ public class AgentConfig {
         try {
             tmpProps = PropertyUtil.loadProperties(propFile.getPath());
         } catch (PropertyUtilException exc) {
-            throw new AgentConfigException(exc.getMessage());
+            AgentConfigException ex = new AgentConfigException(exc.getMessage());
+            ex.initCause(exc);
+            throw ex;
         }
         if (!propFile.exists()) {
             logger.error(propFile + " does not exist");

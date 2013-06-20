@@ -59,6 +59,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.agent.AgentKeystoreConfig;
 import org.hyperic.hq.agent.db.DiskList;
 import org.hyperic.hq.agent.stats.AgentStatsCollector;
@@ -85,6 +86,7 @@ public class AgentDListProvider implements AgentStorageProvider {
     private File writeDir;
     private File keyValFile;
     private File keyValFileBackup; 
+    private AgentConfig cfg;
     
     // Dirty flag for when writing to keyvals.  Set to true at startup
     // to force an initial flush.
@@ -242,7 +244,7 @@ public class AgentDListProvider implements AgentStorageProvider {
     }
 
     protected String getKeyvalsPass() throws KeyStoreException, IOException, NoSuchAlgorithmException, UnrecoverableEntryException {
-        KeystoreConfig keystoreConfig = new AgentKeystoreConfig();
+        KeystoreConfig keystoreConfig = new AgentKeystoreConfig(cfg);
         KeyStore keystore = KeystoreManager.getKeystoreManager().getKeyStore(keystoreConfig);
         KeyStore.Entry e = keystore.getEntry(keystoreConfig.getAlias(), new KeyStore.PasswordProtection(keystoreConfig.getFilePassword().toCharArray()));
         if (e == null) { 
@@ -345,7 +347,16 @@ public class AgentDListProvider implements AgentStorageProvider {
      *
      * Default is 'data|20|50'
      */
-    public void init(String info) throws AgentStorageException  {
+    public void init(AgentConfig cfg) throws AgentStorageException  {
+        this.cfg = cfg;
+        keyVals = null;
+        lists   = null;
+        try {
+            encryptor = createEncryptor();
+        } catch (Exception e) {
+            throw new SystemException(e);
+        }
+        String info = cfg.getStorageProviderInfo();
         BufferedInputStream bIs;
         FileInputStream fIs = null;
         DataInputStream dIs;

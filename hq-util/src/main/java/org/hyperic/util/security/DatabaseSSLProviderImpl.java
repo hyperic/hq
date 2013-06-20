@@ -220,35 +220,26 @@ public class DatabaseSSLProviderImpl implements SSLProvider {
                     for (X509Certificate cert : chain) {
                         String[] cnValues = AbstractVerifier.getCNs(cert);
                         String alias;
-                        
                         if (cnValues != null && cnValues.length > 0) {
                             alias = cnValues[0];
                         } else {
                             alias = "UnknownCN";
                         }
-                        
                         alias += "-ts=" + System.currentTimeMillis();
-                        
                         trustStore.setCertificateEntry(alias, cert);
                     }
                     KEYSTORE_WRITER_LOCK.lockInterruptibly();
                     hasLock = true;
                     keyStoreFileOutputStream = new FileOutputStream(keystoreConfig.getFilePath());
-                    trustStore.store(keyStoreFileOutputStream, keystoreConfig
-                        .getFilePassword().toCharArray());
+                    trustStore.store(keyStoreFileOutputStream, keystoreConfig.getFilePassword().toCharArray());
                 } catch (FileNotFoundException e) {
                     // Can't find the keystore in the path
-                    log.error(
-                        "Can't find the keystore in "
-                            + keystoreConfig.getFilePath() + ". Error message:"
-                            + e.getMessage(), e);
+                    log.error("Can't find the keystore in " + keystoreConfig.getFilePath() + ". Error message:" + e, e);
                 } catch (NoSuchAlgorithmException e) {
-                    log.error("The algorithm is not supported. Error message:"
-                        + e.getMessage(), e);
+                    log.error("The algorithm is not supported. Error message:" + e, e);
                 } catch (Exception e) {
                     // expect KeyStoreException, IOException
-                    log.error("Exception when trying to import certificate: "
-                        + e.getMessage(), e);
+                    log.error("Exception when trying to import certificate: " + e, e);
                 } finally {
                     close(keyStoreFileOutputStream);
                     keyStoreFileOutputStream = null;

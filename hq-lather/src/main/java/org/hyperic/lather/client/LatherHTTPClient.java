@@ -38,6 +38,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.util.EntityUtils;
+import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.agent.AgentKeystoreConfig;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.lather.LatherRemoteException;

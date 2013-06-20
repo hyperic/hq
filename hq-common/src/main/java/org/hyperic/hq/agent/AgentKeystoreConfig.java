@@ -41,18 +41,30 @@ public class AgentKeystoreConfig extends KeystoreConfig {
     private static final String SSL_KEYSTORE_ALIAS = AgentConfig.SSL_KEYSTORE_ALIAS;
     private Log log = LogFactory.getLog(AgentKeystoreConfig.class);
     private boolean acceptUnverifiedCert;
+    public AgentKeystoreConfig() {
+        AgentConfig cfg;
+        final String propFile = System.getProperty(AgentConfig.PROP_PROPFILE,AgentConfig.PROP_INSTALLHOME[1] + "/" + AgentConfig.DEFAULT_PROPFILE);
+        try {
+            cfg = AgentConfig.newInstance(propFile);
+            super.setFilePath(cfg.getBootProperties().getProperty(AgentConfig.SSL_KEYSTORE_PATH));
+            super.setFilePassword(cfg.getBootProperties().getProperty(AgentConfig.SSL_KEYSTORE_PASSWORD));
+            super.setAlias(cfg.getBootProperties().getProperty(SSL_KEYSTORE_ALIAS, DEFAULT_SSL_KEYSTORE_ALIAS));
+            super.setHqDefault(AgentConfig.PROP_KEYSTORE_PATH[1].equals(getFilePath()));
+            String prop = cfg.getBootProperties().getProperty(AgentConfig.SSL_KEYSTORE_ACCEPT_UNVERIFIED_CERT);
+            this.acceptUnverifiedCert = Boolean.parseBoolean(prop);
+            String address = "";
+            try {
+                address = InetAddress.getLocalHost().getCanonicalHostName();
+            } catch (UnknownHostException e) {
+                log.error(e,e);
+            }
+            super.setKeyCN("Hyperic Agent_"+address);
+        } catch(Exception exc){
+            log.error("Error: " + exc, exc);
+        }
+    }
+
     public AgentKeystoreConfig(AgentConfig cfg){
-//        AgentConfig cfg;
-//        final String propFile = System.getProperty(AgentConfig.PROP_PROPFILE,AgentConfig.DEFAULT_PROPFILE);
-//        try {
-//            cfg = AgentConfig.newInstance(propFile);
-//        } catch(IOException exc){
-//            log.error("Error: " + exc);
-//            return ;
-//        } catch(AgentConfigException exc){
-//            log.error("Agent Properties error: " + exc.getMessage());
-//            return ;
-//        }
         super.setFilePath(cfg.getBootProperties().getProperty(AgentConfig.SSL_KEYSTORE_PATH));
         super.setFilePassword(cfg.getBootProperties().getProperty(AgentConfig.SSL_KEYSTORE_PASSWORD));
         super.setAlias(cfg.getBootProperties().getProperty(SSL_KEYSTORE_ALIAS, DEFAULT_SSL_KEYSTORE_ALIAS));
@@ -67,6 +79,7 @@ public class AgentKeystoreConfig extends KeystoreConfig {
         }
         super.setKeyCN("Hyperic Agent_"+address);
     }
+
     public boolean isAcceptUnverifiedCert() {
         return acceptUnverifiedCert;
     }

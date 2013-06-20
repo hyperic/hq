@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.util.GenericValueMap;
 
 /**
@@ -130,7 +131,7 @@ public interface AgentStorageProvider extends GenericValueMap {
      * @param info parameters for the StorageProvider to store data and index files
      */
 
-    public void init(String info) throws AgentStorageException;
+    public void init(AgentConfig cfg) throws AgentStorageException;
 
     /**
      * Perform any cleanup that the storage provider requires.
@@ -174,23 +175,24 @@ public interface AgentStorageProvider extends GenericValueMap {
 
     public void addOverloadedInfo(String listName, String info);
 
-	/**
-	 * This method converts lists from the old record size to the current one -
-	 * should be used when starting the first time after an upgrade. In version
-	 * 4.6.5 the default record size was changed from 1024 to 4000 and when we
-	 * will try to read the records with size 4000 we will get an exception because the
-	 * records size is 1024, when that happens we should call this method in order
-	 * to covert the records to the new size and then read again. This is a fix for Jira bug [HHQ-5387].
-	 * @param listName - name of the list
-	 * @throws IOException 
-	 */
-	public void convertListToCurrentRecordSize(String listName) throws IOException;
-	
-	/**
-	 * Removes a record from the list
-	 * @param listName - name of the list
-	 * @param recNumber - index of the record to remove
-	 * @throws AgentStorageException
-	 */
-	public void removeFromList(String listName, long recNumber) throws AgentStorageException;
+    /**
+     * This method converts lists from the old record size to the current one -
+     * should be used when starting the first time after an upgrade. In version
+     * 4.6.5 the default record size was changed from 1024 to 4000 and when we
+     * will try to read the records with size 4000 we will get an exception because the
+     * records size is 1024, when that happens we should call this method in order
+     * to covert the records to the new size and then read again. This is a fix for Jira bug [HHQ-5387].
+     * @param listName - name of the list
+     * @throws IOException 
+     */
+    public void convertListToCurrentRecordSize(String listName) throws IOException;
+    
+    /**
+     * Removes a record from the list
+     * @param listName - name of the list
+     * @param recNumber - index of the record to remove
+     * @throws AgentStorageException
+     */
+    public void removeFromList(String listName, long recNumber) throws AgentStorageException;
+
 }

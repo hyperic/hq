@@ -1273,7 +1273,7 @@ public class AgentClient {
                     listenIp + "'");
             return null;
         }
-        AgentKeystoreConfig keystoreConfig =new AgentKeystoreConfig();
+        AgentKeystoreConfig keystoreConfig =new AgentKeystoreConfig(cfg);
         String tokenFile = cfg.getTokenFile();
         if (generateToken) {
             try {
