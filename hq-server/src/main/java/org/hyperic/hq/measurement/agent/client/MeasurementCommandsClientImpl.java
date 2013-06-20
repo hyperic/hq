@@ -168,7 +168,7 @@ public class MeasurementCommandsClientImpl
     public void scheduleTopn(ScheduleTopn_args args) throws AgentRemoteException, AgentConnectionException {
     }
 
-    public void unscheduleTopn(ScheduleTopn_args args) throws AgentRemoteException, AgentConnectionException {
+    public void unscheduleTopn() throws AgentRemoteException, AgentConnectionException {
     }
 
 }

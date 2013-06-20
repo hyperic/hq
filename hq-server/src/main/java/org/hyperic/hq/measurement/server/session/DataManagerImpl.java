@@ -28,6 +28,7 @@ package org.hyperic.hq.measurement.server.session;
 import java.math.BigDecimal;
 import java.sql.BatchUpdateException;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -52,7 +53,6 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.event.AutoFlushEvent;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.common.ProductProperties;
 import org.hyperic.hq.common.SystemException;
@@ -73,7 +73,6 @@ import org.hyperic.hq.measurement.shared.MeasRange;
 import org.hyperic.hq.measurement.shared.MeasRangeObj;
 import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
-import org.hyperic.hq.plugin.system.TopReport;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
@@ -315,8 +314,8 @@ public class DataManagerImpl implements DataManager {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public boolean addTopData(List<TopReport> reports) {
-        return this._addTopData(reports, safeGetConnection());
+    public boolean addTopData(List<TopNData> topNData) {
+        return this._addTopData(topNData, safeGetConnection());
     }
 
 
@@ -401,7 +400,7 @@ public class DataManagerImpl implements DataManager {
     }
 
 
-    protected boolean _addTopData(List<TopReport> reports, Connection conn) {
+    protected boolean _addTopData(List<TopNData> topNData, Connection conn) {
 
         log.debug("Attempting to insert topN data in a single transaction.");
 
@@ -419,7 +418,7 @@ public class DataManagerImpl implements DataManager {
                 final long start = System.currentTimeMillis();
                 conn.setAutoCommit(false);
 
-                succeeded = insertTopData(conn, reports, false);
+                succeeded = insertTopData(conn, topNData, false);
 
                 if (succeeded) {
                     conn.commit();
@@ -949,15 +948,23 @@ public class DataManagerImpl implements DataManager {
         return left;
     }
 
-    private boolean insertTopData(Connection conn, List<TopReport> reports, boolean continueOnSQLException) throws
+    private boolean insertTopData(Connection conn, List<TopNData> topNData, boolean continueOnSQLException) throws
             SQLException {
         PreparedStatement stmt = null;
         final StringBuilder buf = new StringBuilder();
         try {
 
-            stmt = conn.prepareStatement(buf.append("INSERT INTO X").append(" (measurement_id, timestamp, " +
-                    "" + "value) VALUES (?, ?, ?)").toString());
-            stmt.execute();
+            stmt = conn.prepareStatement(buf.append("INSERT INTO HQ_TOPN_DATA").
+                    append(" (resourceId, time, data) VALUES (?, ?, ?)").toString());
+
+            for (TopNData data : topNData) {
+                stmt.setInt(1, data.getResourceId());
+                stmt.setDate(2, new Date(data.getTime().getTime()));
+                stmt.setBytes(3, data.getData());
+                stmt.addBatch();
+            }
+            int[] execInfo = stmt.executeBatch();
+
         } catch (BatchUpdateException e) {
             if (!continueOnSQLException) {
                 throw e;

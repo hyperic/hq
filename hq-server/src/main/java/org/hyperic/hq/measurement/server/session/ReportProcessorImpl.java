@@ -25,18 +25,23 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.Agent;
@@ -332,13 +337,43 @@ public class ReportProcessorImpl implements ReportProcessor {
         }
     }
 
-    public void handleTopNReport(List<TopReport> reports) throws DataInserterException {
+    public void handleTopNReport(List<TopReport> reports, String agentToken) throws DataInserterException {
         final boolean debug = log.isDebugEnabled();
         final StopWatch watch = new StopWatch();
         DataInserter d = measurementInserterManager.getDataInserter();
+        List<TopNData> topNs = new LinkedList<TopNData>();
+        Agent agent = null;
+        try {
+            agent = agentManager.getAgent(agentToken);
+        } catch (AgentNotFoundException e) {
+            log.error(e,e);
+            return;
+        }
+        if (agent == null) {
+            log.error("agent associated with token=" + agentToken + " is null, ignoring report");
+            return;
+        }
+        final Platform platform = platformManager.getPlatformByAgentId(agent.getId());
+        final Resource platformRes = (platform == null) ? null : platform.getResource();
+        if (platformRes == null) return;
+        int resourceId = platformRes.getId();
+        for (TopReport report : reports) {
+
+            Date time = new Date(report.getCreateTime());
+            DateUtils.round(time, Calendar.MINUTE);
+            TopNData topNData = null;
+            try {
+                topNData = new TopNData(resourceId, time, report.toSerializedForm());
+            } catch (IOException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
+            topNs.add(topNData);
+        }
+
+
         if (debug) watch.markTimeBegin("insertTopNToDB");
         try {
-            d.insertTopN(reports);
+            d.insertTopN(topNs);
         } catch (InterruptedException e) {
             throw new SystemException("Interrupted while attempting to " + "insert topN data");
         }

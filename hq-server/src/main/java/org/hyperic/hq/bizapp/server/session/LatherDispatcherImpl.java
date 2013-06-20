@@ -809,7 +809,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
 
     private LatherValue cmdTopNSendReport(TopNSendReport_args args) throws LatherRemoteException {
         try {
-            reportProcessor.handleTopNReport(args.getTopReports());
+            reportProcessor.handleTopNReport(args.getTopReports(), args.getAgentToken());
         } catch (DataInserterException e) {
             throw new LatherRemoteException("Unable to insert TopN data " + e, e);
         }

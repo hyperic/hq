@@ -1,16 +1,21 @@
 package org.hyperic.hq.plugin.system;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class TopReport implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    private long creatTime;
+    private long createTime;
     private String upTime;
     private String cpu;
     private String mem;
@@ -21,12 +26,12 @@ public class TopReport implements Serializable {
     }
 
 
-    public long getCreatTime() {
-        return creatTime;
+    public long getCreateTime() {
+        return createTime;
     }
 
-    public void setCreatTime(long creatTime) {
-        this.creatTime = creatTime;
+    public void setCreateTime(long creatTime) {
+        this.createTime = creatTime;
     }
 
     public String getUpTime() {
@@ -75,7 +80,7 @@ public class TopReport implements Serializable {
 
     @SuppressWarnings("unchecked")
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        creatTime = in.readLong();
+        createTime = in.readLong();
         upTime = in.readUTF();
         cpu = in.readUTF();
         mem = in.readUTF();
@@ -84,7 +89,7 @@ public class TopReport implements Serializable {
     }
 
     private void writeObject(ObjectOutputStream out) throws IOException {
-        out.writeLong(creatTime);
+        out.writeLong(createTime);
         out.writeUTF(upTime);
         out.writeUTF(cpu);
         out.writeUTF(mem);
@@ -92,10 +97,34 @@ public class TopReport implements Serializable {
         out.writeObject(processes);
     }
 
+    public byte[] toSerializedForm() throws IOException {
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        final ObjectOutputStream objStream = new ObjectOutputStream(outputStream);
+        objStream.writeObject(this);
+        objStream.close();
+        return outputStream.toByteArray();
+    }
+
+    public static final TopReport fromSerializedForm(final byte[] data, final int startPos,
+                                                     final int length) throws IOException, ClassNotFoundException {
+        final ByteArrayInputStream inStream = new ByteArrayInputStream(data, startPos, length);
+        final ObjectInputStream objStream = new ObjectInputStream(inStream);
+        return (TopReport) objStream.readObject();
+    }
+
+    public static final TopReport fromSerializedForm(final byte[] data) throws IOException, ClassNotFoundException {
+        return fromSerializedForm(data, 0, data.length);
+    }
+
     @Override
     public String toString() {
-        return "TopReport [creatTime=" + creatTime + ", upTime=" + upTime + ", cpu=" + cpu + ", mem=" + mem + ", swap="
+        return "TopReport [createTime=" + createTime + ", upTime=" + upTime + ", cpu=" + cpu + ", mem=" + mem + ", " +
+                "swap="
                 + swap + ", processes=" + processes + "]";
     }
+
+    /*public void insertTopN(List topNData) throws InterruptedException{
+        throw new NotImplementedException();
+    } */
 
 }

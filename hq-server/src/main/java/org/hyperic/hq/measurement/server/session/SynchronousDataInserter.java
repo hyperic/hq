@@ -28,7 +28,6 @@ package org.hyperic.hq.measurement.server.session;
 import java.util.List;
 
 import org.hyperic.hq.measurement.shared.DataManager;
-import org.hyperic.hq.plugin.system.TopReport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -57,8 +56,8 @@ public class SynchronousDataInserter
         dataManager.addData(metricData);
     }
 
-    public void insertTopN(List<TopReport> reports) throws InterruptedException {
-        dataManager.addTopData(reports);
+    public void insertTopN(List<TopNData> topNData) throws InterruptedException {
+        dataManager.addTopData(topNData);
     }
 
     public Object getLock() {

@@ -43,7 +43,7 @@ public interface DataInserter {
     public void insertMetrics(List<DataPoint> metricData)
         throws InterruptedException, DataInserterException;
 
-    public void insertTopN(List<TopReport> reports) throws InterruptedException, DataInserterException;
+    public void insertTopN(List<TopNData> topNData) throws InterruptedException, DataInserterException;
 
     /**
      * Insert priority data into the DB, possibly blocking.  This may or may not

@@ -27,38 +27,25 @@
 
 -->
 
-<hibernate-mapping package="org.hyperic.hq.vm">
+<hibernate-mapping package="org.hyperic.hq.measurement.server.session">
 
-    <class name="TopN" table="EAM_TOP_DATA">
+    <class name="TopNData" table="HQ_TOPN_DATA">
 
         <cache usage="read-write"/>
 
         <composite-id>
-
-            <key-property name="moId" type="string">
-                <column name="MOID" not-null="true" length="64"/>
+          <key-property name="resourceId" type="int">
+                <column name="resourceId" not-null="true" length="64"/>
             </key-property>
-
-            <key-property name="vcUUID" type="string">
-                <column name="VCUUID" not-null="true" length="128"/>
+           <key-property name="time" type="date">
+                <column name="time" not-null="true"/>
             </key-property>
-
         </composite-id>
-
-        <version name="_version_" type="long">
-            <column name="VERSION_COL" default="0"/>
-        </version>
-
-        <property name="macs" type="string">
-            <column name="MACS_ADDRESS" not-null="true" length="512" unique="true"/>
+       <property name="data" type="byte[]">
+            <column name="data" not-null="true"/>
         </property>
-
-
-        <property name="name" type="string">
-            <column name="VM_NAME" not-null="false" length="128"/>
-        </property>
-
 
     </class>
+
 
 </hibernate-mapping>

@@ -41,5 +41,5 @@ public interface ReportProcessor {
      */
     public void handleMeasurementReport(MeasurementReport report) throws DataInserterException;
 
-    public void handleTopNReport(List<TopReport> reports) throws DataInserterException;
+    public void handleTopNReport(List<TopReport> reports, String agentToken) throws DataInserterException;
 }

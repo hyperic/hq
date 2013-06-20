@@ -36,6 +36,7 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.TimeframeSizeException;
+import org.hyperic.hq.measurement.server.session.TopNData;
 import org.hyperic.hq.plugin.system.TopReport;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.pager.PageControl;
@@ -78,7 +79,7 @@ public interface DataManager {
 
     public void addData(List<DataPoint> data, String aggTable, Connection conn) throws Exception;
 
-    public boolean addTopData(List<TopReport> reports);
+    public boolean addTopData(List<TopNData> topNData);
 
     /**
      * Fetch the list of historical data points given a begin and end time
