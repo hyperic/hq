@@ -350,4 +350,14 @@ public interface ResourceGroupManager
     
     public void removeAllMembers(ResourceGroup group);
 
+    /**
+     * @param groupResource - Typically this param is null and the behavior is that a resource is create of authzGroup
+     *  type. Only used when associating a group with an existing resource.
+     */
+    public ResourceGroup createResourceGroup(AuthzSubject subj, ResourceGroupCreateInfo cInfo, Resource groupResource,
+                                             Collection<Role> roles)
+    throws GroupCreationException, GroupDuplicateNameException;
+
+    public List<ResourceGroup> getResourceGroupsByType(int groupType);
+
 }

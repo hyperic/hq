@@ -165,38 +165,55 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         return res;
     }
 
+    public ResourceGroup createResourceGroup(AuthzSubject whoami, ResourceGroupCreateInfo cInfo, Resource groupResource,
+                                             Collection<Role> roles)
+    throws GroupCreationException, GroupDuplicateNameException {
+        final ResourceGroup res = createGroup(whoami, cInfo, groupResource, roles);
+        return res;
+    }
+
     public ResourceGroup createResourceGroup(AuthzSubject whoami, ResourceGroupCreateInfo cInfo,
                                              Collection<Role> roles,
                                              Collection<Resource> resources,
                                              CritterList criteriaList)
-        throws GroupCreationException, GroupDuplicateNameException {
+    throws GroupCreationException, GroupDuplicateNameException {
         ResourceGroup group = createGroup(whoami, cInfo, roles, resources);
         try {
             setCriteria(whoami, group, criteriaList);
         } catch (PermissionException e) {
-            throw new GroupCreationException(
-                "Error creating group.  Unable to set group criteria.", e);
+            throw new GroupCreationException("Error creating group.  Unable to set group criteria.", e);
         } catch (GroupException e) {
-            throw new GroupCreationException(
-                "Error creating group.  Unable to set group criteria.", e);
+            throw new GroupCreationException("Error creating group.  Unable to set group criteria.", e);
         }
         applicationContext.publishEvent(new GroupCreatedEvent(group));
         return group;
     }
 
+    @SuppressWarnings("unchecked")
+    private ResourceGroup createGroup(AuthzSubject whoami, ResourceGroupCreateInfo cInfo, Resource groupResource,
+                                      Collection<Role> roles)
+    throws GroupDuplicateNameException, GroupCreationException {
+        return createGroup(whoami, cInfo, roles, Collections.EMPTY_LIST, groupResource);
+    }
+    
     private ResourceGroup createGroup(AuthzSubject whoami, ResourceGroupCreateInfo cInfo,
                                       Collection<Role> roles, Collection<Resource> resources)
         throws GroupDuplicateNameException, GroupCreationException {
+        return createGroup(whoami, cInfo, roles, resources, null);
+    }
+    
+    private ResourceGroup createGroup(AuthzSubject whoami, ResourceGroupCreateInfo cInfo, Collection<Role> roles,
+                                      Collection<Resource> resources, Resource groupResource)
+    throws GroupDuplicateNameException, GroupCreationException {
         ResourceGroup existing = resourceGroupDAO.findByName(cInfo.getName());
-
         if (existing != null) {
-            throw new GroupDuplicateNameException("Group by the name [" + cInfo.getName() +
-                                                  "] already exists");
+            throw new GroupDuplicateNameException("Group by the name [" + cInfo.getName() + "] already exists");
         }
-
-        ResourceGroup res = resourceGroupDAO.create(whoami, cInfo, resources, roles);
-
-        resourceEdgeDAO.create(res.getResource(), res.getResource(), 0, resourceRelationDAO.findById(AuthzConstants.RELATION_CONTAINMENT_ID)); // Self-edge
+        ResourceGroup res = resourceGroupDAO.create(whoami, cInfo, resources, roles, groupResource);
+        ResourceRelation relation = resourceRelationDAO.findById(AuthzConstants.RELATION_CONTAINMENT_ID); // Self-edge
+        if (groupResource == null) {
+            resourceEdgeDAO.create(res.getResource(), res.getResource(), 0, relation);
+        }
         applicationContext.publishEvent(new GroupCreatedEvent(res));
         return res;
     }
@@ -378,13 +395,14 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         // TODO scottmf, this should be invoking a pre-transaction callback
         eventLogManager.deleteLogs(group.getResource());
         applicationContext.publishEvent(new GroupDeleteRequestedEvent(group));
-        resourceGroupDAO.remove(group);
-
+        final Resource resource = group.getResource();
+        // if the group.id != resource.instanceId that means the resource should not be deleted since it is
+        // associated with another first class object
+        boolean removeResource = group.getId().equals(resource.getInstanceId()) ? true : false;
+        resourceGroupDAO.remove(group, removeResource);
         resourceGroupDAO.getSession().flush();
-
         // Send resource delete event
-        ResourceDeletedZevent zevent = new ResourceDeletedZevent(whoami, AppdefEntityID
-            .newGroupID(group.getId()));
+        ResourceDeletedZevent zevent = new ResourceDeletedZevent(whoami, AppdefEntityID.newGroupID(group.getId()));
         ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
     }
     
@@ -991,5 +1009,10 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
 
     public void removeAllMembers(ResourceGroup group) {
         resourceGroupDAO.removeAllMembers(group);
+    }
+    
+    @Transactional(readOnly=true)
+    public List<ResourceGroup> getResourceGroupsByType(int groupType) {
+        return resourceGroupDAO.getGroupsByType(groupType);
     }
 }

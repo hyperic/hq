@@ -916,5 +916,8 @@ public abstract class PermissionManager {
     public abstract <T> Set<T> findViewableResources(AuthzSubject subject, Collection<ResourceType> types,
                                                      int sortName, IntegerTransformer<T> transformer,
                                                      Comparator<T> comparator);
+    
+    public abstract <T> Set<T> findResourcesByOperationIds(AuthzSubject subj, Collection<Integer> operationIds,
+                                                           IntegerTransformer<T> transformer);
 
 }
