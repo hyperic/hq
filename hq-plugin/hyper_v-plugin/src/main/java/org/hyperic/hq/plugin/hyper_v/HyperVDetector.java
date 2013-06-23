@@ -26,8 +26,15 @@
 package org.hyperic.hq.plugin.hyper_v;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,12 +43,14 @@ import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.IntegerConfigOption;
 
+import org.hyperic.hq.product.DetectionUtil;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.RegistryServerDetector;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
 
+import org.hyperic.sigar.win32.Pdh;
 import org.hyperic.sigar.win32.RegistryKey;
 import org.hyperic.sigar.win32.Win32Exception;
 
@@ -60,24 +69,6 @@ public class HyperVDetector
         }
 
         ConfigResponse cprops = new ConfigResponse();
-//        List cpropKeys = getCustomPropertiesSchema().getOptions();
-
-//        for (int i=0; i<cpropKeys.size(); i++) {
-//            ConfigOption option = (ConfigOption)cpropKeys.get(i);
-//            String key = option.getName();
-//            String value;
-//            try {
-//                if (option instanceof IntegerConfigOption) {
-//                    value = String.valueOf(current.getIntValue(key));
-//                }
-//                else {
-//                    value = current.getStringValue(key).trim();
-//                }
-//            } catch (Win32Exception e) {
-//                continue;
-//            }
-//            cprops.setValue(key, value);
-//        }
         ServerResource server = createServerResource(path);
         server.setProductConfig();
         server.setMeasurementConfig();
@@ -86,5 +77,40 @@ public class HyperVDetector
         List servers = new ArrayList();
         servers.add(server);
         return servers;
+    }
+
+    @Override
+    protected List discoverServices(ConfigResponse serverConfig) throws PluginException {
+        List services = new ArrayList();
+
+        try {
+            String[] instances = Pdh.getInstances("Hyper-V Hypervisor Partition");
+            Set<String> names = new HashSet<String>();
+            for (int i = 0; i < instances.length; i++) {
+                String instance = instances[i];
+                if ("_Total".equals(instance) || "<All instances>".equals(instance)) {
+                    continue;
+                }
+                StringTokenizer st = new StringTokenizer(instance,":");
+                String vmName = (String) st.nextElement();
+                names.add(vmName);
+            }
+            for (Iterator<String> it = names.iterator(); it.hasNext();) {
+                String name = it.next();
+                ServiceResource service = new ServiceResource();
+                service.setType(this, "Hyper-V VM");
+                service.setServiceName("Hyper-V VM - " + name);
+
+                ConfigResponse conf = new ConfigResponse();
+                conf.setValue("vm.name", name);
+                service.setProductConfig(conf);
+                service.setMeasurementConfig();
+                services.add(service);
+            }
+            return services;
+        } catch (Win32Exception e) {
+            log.debug("Error getting pdh data for 'Hyper-V Hypervisor Partition': " + e, e);
+            return null;
+        }
     }
 }

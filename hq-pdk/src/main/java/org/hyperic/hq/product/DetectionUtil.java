@@ -27,8 +27,11 @@ package org.hyperic.hq.product;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -336,4 +339,74 @@ public class DetectionUtil {
         }
         return sigar;
     }
+
+    public static String getMacs(String name) throws IOException {
+        //String cmd = "cmd /C powershell Get-VMNetworkAdapter " + name;
+        String cmd = "@echo Name            IsManagementOs VMName SwitchName                                                                 MacAddress   Status      IPAddresses";
+        
+        String line;
+        BufferedReader input = null;
+        List<String> macs = new ArrayList<String>();
+        try {
+            Process process = Runtime.getRuntime().exec(cmd);
+            input = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+            int i=-1;
+            while ((line = input.readLine()) != null) {
+                line = line.trim();
+                if ("".equals(line)) {
+                    continue;
+                }
+                if (i==-1) {
+                    i = line.indexOf("MacAddress");
+                } else {
+                    macs.add(line.substring(i,line.indexOf(" ", i)));
+                }
+            }
+            StringBuilder sb = new StringBuilder();
+            for(String mac:macs) {
+                sb.append(',').append(mac);
+            }
+            return sb.toString().substring(1);
+        } catch (Exception e) {
+            log.error(e);
+            return null;
+        } finally {
+            if (input!=null) {
+                try {
+                    input.close();
+                } catch (IOException e) {
+                    log.error(e);
+                }
+            }
+        }
+    }
+    public static void main(String[] args) throws Throwable {
+        final String in = "Name            IsManagementOs VMName SwitchName                                                                 MacAddress   Status      IPAddresses";
+        
+        String line;
+        BufferedReader input = null;
+        List<String> macs = new ArrayList<String>();
+        Process process = Runtime.getRuntime().exec("@echo Name            IsManagementOs VMName SwitchName                                                                 MacAddress   Status      IPAddresses");
+
+        try {
+            input = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+            int i=-1;
+            while ((line = input.readLine()) != null) {
+                line = line.trim();
+                System.out.println(line);
+            }
+        } catch (Exception e) {
+            log.error(e);
+        } finally {
+            if (input!=null) {
+                try {
+                    input.close();
+                } catch (IOException e) {
+                    log.error(e);
+                }
+            }
+        }
+    }//EOM 
 }

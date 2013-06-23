@@ -27,7 +27,6 @@
 <plugin name="hyper_v">
   <property name="PLUGIN_VERSION" value="@project.version@"/>
 
-
   <server name="Hyper-V"
           platforms="Win32">
 
@@ -40,14 +39,13 @@
     <plugin type="autoinventory"
             class="HyperVDetector"/>
 
-    <!--scan registry="SOFTWARE\Microsoft\Windows NT\CurrentVersion\Virtualization\GuestInstaller\Version">
-      <include name="Microsoft-Hyper-V-Guest-Installer-Win60-Package"/-->
     <scan registry="SYSTEM\CurrentControlSet\Services\vmms">
       <include name="ImagePath"/>
     </scan>
     
     <filter name="hyper-v_hypervisor" value="Hyper-V Hypervisor"/>
     <filter name="hyper-v_virtual_machine_health_summary" value="Hyper-V Virtual Machine Health Summary"/>
+    <filter name="Hyper-V_VM_Vid_Partition" value="Hyper-V VM Vid Partition"/>
     <metric name="Availability"
             template="ServiceAvail:Platform=Win32:vmms"
             category="AVAILABILITY"
@@ -80,6 +78,30 @@
 			indicator="true"
 			defaultOn="true"
 		    collectionType="dynamic"/>
+		    
+	<service name="Hyper-V VM">
+	    <plugin type="measurement" class="HyperVMeasurementPlugin"/>
+        <plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>
+    	<plugin type="autoinventory" class="HyperVDetector"/>
+            
+		<filter name="template"
+				value="${Hyper-V_VM_Vid_Partition}(%vm.name%):${name}"/>
+		<metric name="Availability"
+            template="PowerShell:command=Get-VM,columns=state:%vm.name%"
+            category="AVAILABILITY"
+            indicator="true"
+			defaultOn="true"
+            collectionType="dynamic"
+            units="percentage"/>
+		<metric name="Physical Pages Allocated"
+				indicator="true"
+				defaultOn="true"
+			    collectionType="dynamic"/>
+		<metric name="Remote Physical Pages"
+				indicator="true"
+				defaultOn="true"
+			    collectionType="dynamic"/>
+	</service>
   </server>
 
 
