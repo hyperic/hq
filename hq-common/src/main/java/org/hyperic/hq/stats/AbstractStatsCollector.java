@@ -127,6 +127,9 @@ public abstract class AbstractStatsCollector {
     }
 
     public void addStat(final long value, final String id) {
+        if (!hasStarted.get()) {
+            return;
+        }
         if (!statKeys.containsKey(id)) {
             return;
         }
