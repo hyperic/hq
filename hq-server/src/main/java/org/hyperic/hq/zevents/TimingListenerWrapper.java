@@ -26,7 +26,12 @@ package org.hyperic.hq.zevents;
 
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.jdbc.UncategorizedSQLException;
+
 public class TimingListenerWrapper<T extends Zevent>  implements ZeventListener<T> {
+    private final Log log = LogFactory.getLog(TimingListenerWrapper.class);
     private ZeventListener _target;
     private long           _maxTime   = 0;
     private long           _totTime   = 0;
@@ -40,6 +45,8 @@ public class TimingListenerWrapper<T extends Zevent>  implements ZeventListener<
         long time, start = System.currentTimeMillis();
         try {
             _target.processEvents(events);
+        } catch (UncategorizedSQLException ex) {
+            log.debug("UncategorizedSQLException caught.", ex);
         } finally {
             time = System.currentTimeMillis() - start;
             if (time > _maxTime) {
@@ -55,8 +62,9 @@ public class TimingListenerWrapper<T extends Zevent>  implements ZeventListener<
     }
 
     public double getAverageTime() {
-        if (_numEvents == 0)
+        if (_numEvents == 0) {
             return Double.NaN;
+        }
         return (double)_totTime / (double)_numEvents;
     }
 
@@ -64,14 +72,17 @@ public class TimingListenerWrapper<T extends Zevent>  implements ZeventListener<
         return _numEvents;
     }
 
+    @Override
     public boolean equals(Object obj) {
         return _target.equals(obj);
     }
 
+    @Override
     public int hashCode() {
         return _target.hashCode();
     }
 
+    @Override
     public String toString() {
         return _target.toString();
     }
