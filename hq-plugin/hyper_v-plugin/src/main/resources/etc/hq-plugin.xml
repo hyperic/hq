@@ -91,6 +91,7 @@
 	<service name="Network Interface">
 	    <plugin type="autoinventory" class="HyperVDetector"/>
 		<plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>
+	    <plugin type="measurement" class="org.hyperic.hq.product.Win32MeasurementPlugin"/>
 	    
 	    <metric name="Availability"
 	            template="ServiceAvail:Platform=Win32:vmms"
@@ -115,12 +116,12 @@
 				defaultOn="true"
 			    collectionType="dynamic"/>
 		<metric name="Network - Packet Outbound Errors"
-				template="${network_interface}:Packet Outbound Errors"
+				template="${network_interface}:Packets Outbound Errors"
 				indicator="true"
 				defaultOn="true"
 			    collectionType="dynamic"/>
 		<metric name="Network - Packet Receive Errors"
-				template="${network_interface}:Packet Receive Errors"
+				template="${network_interface}:Packets Received Errors"
 				indicator="true"
 				defaultOn="true"
 			    collectionType="dynamic"/>
@@ -129,6 +130,7 @@
 	<service name="PhysicalDisk">
 		<plugin type="autoinventory" class="HyperVDetector"/>
 		<plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>
+		<plugin type="measurement" class="org.hyperic.hq.product.Win32MeasurementPlugin"/>
 		
 		<metric name="Availability"
             template="ServiceAvail:Platform=Win32:vmms"
