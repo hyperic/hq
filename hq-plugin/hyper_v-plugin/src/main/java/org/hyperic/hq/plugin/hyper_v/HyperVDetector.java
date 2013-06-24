@@ -78,13 +78,12 @@ public class HyperVDetector
         servers.add(server);
         return servers;
     }
-
-    @Override
-    protected List discoverServices(ConfigResponse serverConfig) throws PluginException {
-        List services = new ArrayList();
+    
+    protected List<ServiceResource> discoverServices(String propertySet, String type, String namePrefix) {
+        List<ServiceResource> services = new ArrayList<ServiceResource>();
 
         try {
-            String[] instances = Pdh.getInstances("Hyper-V Hypervisor Partition");
+            String[] instances = Pdh.getInstances(propertySet);
             Set<String> names = new HashSet<String>();
             for (int i = 0; i < instances.length; i++) {
                 String instance = instances[i];
@@ -98,8 +97,8 @@ public class HyperVDetector
             for (Iterator<String> it = names.iterator(); it.hasNext();) {
                 String name = it.next();
                 ServiceResource service = new ServiceResource();
-                service.setType(this, "Hyper-V VM");
-                service.setServiceName("Hyper-V VM - " + name);
+                service.setType(this, type);
+                service.setServiceName(namePrefix + name);
 
                 ConfigResponse conf = new ConfigResponse();
                 conf.setValue("vm.name", name);
@@ -109,8 +108,31 @@ public class HyperVDetector
             }
             return services;
         } catch (Win32Exception e) {
-            log.debug("Error getting pdh data for 'Hyper-V Hypervisor Partition': " + e, e);
+            log.debug("Error getting pdh data for " + propertySet + ": " + e, e);
             return null;
         }
+    }
+
+    @Override
+    protected List discoverServices(ConfigResponse serverConfig) throws PluginException {
+        List<ServiceResource> services = new ArrayList();
+
+        List<ServiceResource> vmServices = discoverServices("Hyper-V Hypervisor Partition","Hyper-V VM","Hyper-V VM - ");
+        if (vmServices!=null&&!vmServices.isEmpty()) {
+            services.addAll(vmServices);
+        }
+
+        List<ServiceResource> netServices = discoverServices("Network Interface","Network Interface","Network Interface - ");
+        if (netServices!=null&&!netServices.isEmpty()) {
+            services.addAll(netServices);
+        }
+
+        List<ServiceResource> diskServices = discoverServices("PhysicalDisk","PhysicalDisk","PhysicalDisk - ");
+        if (diskServices!=null&&!diskServices.isEmpty()) {
+            services.addAll(diskServices);
+        }
+
+
+        return services;
     }
 }

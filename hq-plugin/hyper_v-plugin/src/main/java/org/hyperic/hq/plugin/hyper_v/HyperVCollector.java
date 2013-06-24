@@ -17,36 +17,40 @@ public class HyperVCollector extends Collector {
     
     @Override
     public void collect() {
+        Pdh pdh;
         try {
-            String[] instances = Pdh.getInstances("Hyper-V Hypervisor Logical Processor");
-            Set<String> lpNames = new HashSet<String>();
-            for (int i = 0; i < instances.length; i++) {
-                String instance = instances[i];
-                if ("_Total".equals(instance) || "<All instances>".equals(instance)) {
-                    continue;
-                }
-                StringTokenizer st = new StringTokenizer(instance,":");
-                String lpName = (String) st.nextElement();
-                lpNames.add(lpName);
-            }
-            Pdh pdh;
             pdh = new Pdh();
-            for (Iterator<String> it = lpNames.iterator(); it.hasNext();) {
-                setLPMetricVal(pdh,it.next(),"% Guest Run Time");
-                setLPMetricVal(pdh,it.next(),"% Hypervisor Run Time");
-                setLPMetricVal(pdh,it.next(),"% Idle Time");
-                setLPMetricVal(pdh,it.next(),"% Total Run Time");
-            }
+            collectAllInstances(pdh,"Hyper-V Hypervisor Logical Processor","% Guest Run Time","% Hypervisor Run Time","% Idle Time","% Total Run Time");
+            collectAllInstances(pdh,"Network Interface","Bytes Total/sec","Offloaded Connections","Packets/sec","Packet Outbound Errors","Packet Receive Errors");
+            collectAllInstances(pdh,"PhysicalDisk","Current Disk Queue Length","Disk Bytes/sec","Disk Transfers/sec");
         }catch(Win32Exception e) {
-//~~~~~~~~~~~~~~~~
+          //~~~~~~~~~~~~~~~~
             e.printStackTrace();
         }
     }
+    protected void collectAllInstances(Pdh pdh, String propertySet, String ... metricNames) throws Win32Exception {
+        String[] instances = Pdh.getInstances(propertySet);
+        Set<String> instancesNames = new HashSet<String>();
+        for (int i = 0; i < instances.length; i++) {
+            String instance = instances[i];
+            if ("_Total".equals(instance) || "<All instances>".equals(instance)) {
+                continue;
+            }
+            StringTokenizer st = new StringTokenizer(instance,":");
+            String instanceName = (String) st.nextElement();
+            instancesNames.add(instanceName);
+        }
+        for (Iterator<String> it = instancesNames.iterator(); it.hasNext();) {
+            String instanceName = it.next();
+            for(String metricName:metricNames) {
+                setLPMetricVal(pdh,propertySet,instanceName,metricName);
+            }
+        }
+    }
 
-
-    private void setLPMetricVal(Pdh pdh,String lpName, String metricName) throws Win32Exception {
-        String lpPath = "\\Hyper-V Hypervisor Logical Processor(" + lpName + ")\\";
-        double val = pdh.getFormattedValue(lpPath + metricName);
+    private void setLPMetricVal(Pdh pdh,String propertySet,String instanceName, String metricName) throws Win32Exception {
+        String metricFullPath = "\\"+propertySet+"(" + instanceName + ")\\";
+        double val = pdh.getFormattedValue(metricFullPath + metricName);
         setValue(metricName, val);
     }
 }

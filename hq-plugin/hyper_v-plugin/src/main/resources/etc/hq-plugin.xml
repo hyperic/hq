@@ -33,7 +33,7 @@
     <plugin type="measurement" class="org.hyperic.hq.product.Win32MeasurementPlugin"/>
     <plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>
     <plugin type="autoinventory" class="HyperVDetector"/>
-    <plugin type="collector" class="HyperVCollector"/>
+    <!--plugin type="collector" class="HyperVCollector"/-->
 
     <scan registry="SYSTEM\CurrentControlSet\Services\vmms">
       <include name="ImagePath"/>
@@ -43,8 +43,8 @@
     <filter name="hyper-v_virtual_machine_health_summary" value="Hyper-V Virtual Machine Health Summary"/>
     <filter name="Hyper-V_VM_Vid_Partition" value="Hyper-V VM Vid Partition"/>
     <filter name="memory" value="Memory"/>
-    <filter name="network_interface" value="Network Interface(_Total)"/>
-    <filter name="physical_disk" value="PhysicalDisk(_Total)"/>
+    <!--filter name="network_interface" value="Network Interface(All instances)"/>
+    <filter name="physical_disk" value="PhysicalDisk(_Total)"/-->
     <metric name="Availability"
             template="ServiceAvail:Platform=Win32:vmms"
             category="AVAILABILITY"
@@ -87,48 +87,73 @@
 			indicator="true"
 			defaultOn="true"
 		    collectionType="dynamic"/>
-	<metric name="Network - Bytes Total/sec"
-			template="${network_interface}:Bytes Total/sec"
-			indicator="true"
-			defaultOn="true"
-		    collectionType="dynamic"/>
-	<metric name="Network - Offloaded Connections"
-			template="${network_interface}:Offloaded Connections"
-			indicator="true"
-			defaultOn="true"
-		    collectionType="dynamic"/>
-	<metric name="Network - Packets/sec"
-			template="${network_interface}(_Total):Packets/sec"
-			indicator="true"
-			defaultOn="true"
-		    collectionType="dynamic"/>
-	<metric name="Network - Packet Outbound Errors"
-			template="${network_interface}:Packet Outbound Errors"
-			indicator="true"
-			defaultOn="true"
-		    collectionType="dynamic"/>
-	<metric name="Network - Packet Receive Errors"
-			template="${network_interface}:Packet Receive Errors"
-			indicator="true"
-			defaultOn="true"
-		    collectionType="dynamic"/>
-	<metric name="Storage - Current Disk Queue Length"
-			template="${physical_disk}:Current Disk Queue Length"
-			indicator="true"
-			defaultOn="true"
-		    collectionType="dynamic"/>
-	<metric name="Storage - Disk Bytes/sec"
-			template="${physical_disk}:Disk Bytes/sec"
-			indicator="true"
-			defaultOn="true"
-		    collectionType="dynamic"/>
-	<metric name="Storage - Disk Transfers/sec"
-			template="${physical_disk}:Disk Transfers/sec"
-			indicator="true"
-			defaultOn="true"
-		    collectionType="dynamic"/>
 
+	<service name="Network Interface">
+	    <plugin type="autoinventory" class="HyperVDetector"/>
+		<plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>
+	    
+	    <metric name="Availability"
+	            template="ServiceAvail:Platform=Win32:vmms"
+	            category="AVAILABILITY"
+	            indicator="true"
+				defaultOn="true"
+	            collectionType="dynamic"
+	            units="percentage"/>
+		<metric name="Network - Bytes Total/sec"
+				template="${network_interface}:Bytes Total/sec"
+				indicator="true"
+				defaultOn="true"
+			    collectionType="dynamic"/>
+		<metric name="Network - Offloaded Connections"
+				template="${network_interface}:Offloaded Connections"
+				indicator="true"
+				defaultOn="true"
+			    collectionType="dynamic"/>
+		<metric name="Network - Packets/sec"
+				template="${network_interface}:Packets/sec"
+				indicator="true"
+				defaultOn="true"
+			    collectionType="dynamic"/>
+		<metric name="Network - Packet Outbound Errors"
+				template="${network_interface}:Packet Outbound Errors"
+				indicator="true"
+				defaultOn="true"
+			    collectionType="dynamic"/>
+		<metric name="Network - Packet Receive Errors"
+				template="${network_interface}:Packet Receive Errors"
+				indicator="true"
+				defaultOn="true"
+			    collectionType="dynamic"/>
+	</service>
 		    
+	<service name="PhysicalDisk">
+		<plugin type="autoinventory" class="HyperVDetector"/>
+		<plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>
+		
+		<metric name="Availability"
+            template="ServiceAvail:Platform=Win32:vmms"
+            category="AVAILABILITY"
+            indicator="true"
+			defaultOn="true"
+            collectionType="dynamic"
+            units="percentage"/>
+		<metric name="Storage - Current Disk Queue Length"
+				template="${physical_disk}:Current Disk Queue Length"
+				indicator="true"
+				defaultOn="true"
+			    collectionType="dynamic"/>
+		<metric name="Storage - Disk Bytes/sec"
+				template="${physical_disk}:Disk Bytes/sec"
+				indicator="true"
+				defaultOn="true"
+			    collectionType="dynamic"/>
+		<metric name="Storage - Disk Transfers/sec"
+				template="${physical_disk}:Disk Transfers/sec"
+				indicator="true"
+				defaultOn="true"
+			    collectionType="dynamic"/>
+	</service>
+
 	<service name="Hyper-V VM">
 	    <plugin type="measurement" class="HyperVMeasurementPlugin"/>
         <plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>
