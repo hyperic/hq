@@ -42,10 +42,9 @@
     <filter name="hyper-v_hypervisor" value="Hyper-V Hypervisor"/>
     <filter name="hyper-v_virtual_machine_health_summary" value="Hyper-V Virtual Machine Health Summary"/>
     <filter name="Hyper-V_VM_Vid_Partition" value="Hyper-V VM Vid Partition"/>
-    <filter name="hyper-v_hypervisor_logical_processor" value="Hyper-V Hypervisor Logical Processor"/>
     <filter name="memory" value="Memory"/>
-    <filter name="network_interface" value="Network Interface"/>
-    <filter name="physical_disk" value="PhysicalDisk"/>
+    <filter name="network_interface" value="Network Interface(_Total)"/>
+    <filter name="physical_disk" value="PhysicalDisk(_Total)"/>
     <metric name="Availability"
             template="ServiceAvail:Platform=Win32:vmms"
             category="AVAILABILITY"
@@ -99,7 +98,7 @@
 			defaultOn="true"
 		    collectionType="dynamic"/>
 	<metric name="Network - Packets/sec"
-			template="${network_interface}:Packets/sec"
+			template="${network_interface}(_Total):Packets/sec"
 			indicator="true"
 			defaultOn="true"
 		    collectionType="dynamic"/>
