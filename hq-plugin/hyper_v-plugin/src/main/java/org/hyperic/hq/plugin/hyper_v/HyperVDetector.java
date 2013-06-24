@@ -101,7 +101,7 @@ public class HyperVDetector
                 service.setServiceName(namePrefix + name);
 
                 ConfigResponse conf = new ConfigResponse();
-                conf.setValue("vm.name", name);
+                conf.setValue("instance.name", name);
                 service.setProductConfig(conf);
                 service.setMeasurementConfig();
                 services.add(service);

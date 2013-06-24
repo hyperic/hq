@@ -41,10 +41,10 @@
     
     <filter name="hyper-v_hypervisor" value="Hyper-V Hypervisor"/>
     <filter name="hyper-v_virtual_machine_health_summary" value="Hyper-V Virtual Machine Health Summary"/>
-    <filter name="Hyper-V_VM_Vid_Partition" value="Hyper-V VM Vid Partition"/>
+    <filter name="Hyper-V_VM_Vid_Partition" value="Hyper-V VM Vid Partition(%instance.name%)"/>
     <filter name="memory" value="Memory"/>
-    <!--filter name="network_interface" value="Network Interface(All instances)"/>
-    <filter name="physical_disk" value="PhysicalDisk(_Total)"/-->
+    <filter name="network_interface" value="Network Interface(%instance.name%)"/>
+    <filter name="physical_disk" value="PhysicalDisk(instance.name)"/-->
     <metric name="Availability"
             template="ServiceAvail:Platform=Win32:vmms"
             category="AVAILABILITY"
@@ -167,12 +167,12 @@
             collectionType="dynamic"
             units="percentage"/>
 		<metric name="Memory - Physical Pages Allocated"
-				template="${Hyper-V_VM_Vid_Partition}(%vm.name%):Physical Pages Allocated"
+				template="${Hyper-V_VM_Vid_Partition}:Physical Pages Allocated"
 				indicator="true"
 				defaultOn="true"
 			    collectionType="dynamic"/>
 		<metric name="Memory - Remote Physical Pages"
-				template="${Hyper-V_VM_Vid_Partition}(%vm.name%):Remote Physical Pages"
+				template="${Hyper-V_VM_Vid_Partition}:Remote Physical Pages"
 				indicator="true"
 				defaultOn="true"
 			    collectionType="dynamic"/>
