@@ -44,7 +44,7 @@
     <filter name="Hyper-V_VM_Vid_Partition" value="Hyper-V VM Vid Partition(%instance.name%)"/>
     <filter name="memory" value="Memory"/>
     <filter name="network_interface" value="Network Interface(%instance.name%)"/>
-    <filter name="physical_disk" value="PhysicalDisk(instance.name)"/-->
+    <filter name="physical_disk" value="PhysicalDisk(%instance.name%)"/>
     <metric name="Availability"
             template="ServiceAvail:Platform=Win32:vmms"
             category="AVAILABILITY"
