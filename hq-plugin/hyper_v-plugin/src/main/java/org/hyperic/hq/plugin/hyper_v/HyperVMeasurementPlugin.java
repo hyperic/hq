@@ -13,6 +13,8 @@ import org.hyperic.hq.product.MetricUnreachableException;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.Win32MeasurementPlugin;
+import org.hyperic.sigar.win32.Pdh;
+import org.hyperic.sigar.win32.Win32Exception;
 
 public class HyperVMeasurementPlugin extends Win32MeasurementPlugin {
     
@@ -38,21 +40,6 @@ public class HyperVMeasurementPlugin extends Win32MeasurementPlugin {
             input = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
             String line;
-            //                Set<Map<String,String>> objects = new HashSet<Map<String,String>>();
-            //                Map<String,String> obj = null;
-            //                while ((line = input.readLine()) != null) {
-            //                    line = line.trim();
-            //                    if (line.isEmpty()||line.isEmpty()||obj==null) {
-            //                        obj = new HashMap<String,String>();
-            //                        objects.add(obj);
-            //                    }
-            //                    StringTokenizer st = new StringTokenizer(line,":");
-            //                    while (st.hasMoreElements()) {
-            //                        String k = ((String) st.nextElement()).trim();
-            //                        String v = ((String) st.nextElement()).trim();
-            //                        obj.put(k,v);
-            //                    }
-            //                }
             Map<String,String> obj = new HashMap<String,String>();
             while ((line = input.readLine()) != null) {
                 line = line.trim();
@@ -86,6 +73,15 @@ public class HyperVMeasurementPlugin extends Win32MeasurementPlugin {
                 return new MetricValue(Metric.AVAIL_UP);
             } else {
                 return new MetricValue(Metric.AVAIL_DOWN);
+            }
+        } else if ("pdh".equals(metric.getDomainName())) {
+            String obj = "\\" + metric.getObjectPropString() + "\\" + metric.getAttributeName();
+            Double val;
+            try {
+                val = new Pdh().getFormattedValue(obj.replaceAll("%3A", ":"));
+                return new MetricValue(val);
+            }catch(Win32Exception e) {
+                throw new PluginException(e);
             }
         } else {
             return super.getValue(metric);

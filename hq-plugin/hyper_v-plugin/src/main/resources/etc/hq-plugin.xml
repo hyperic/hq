@@ -130,7 +130,7 @@
 	<service name="PhysicalDisk">
 		<plugin type="autoinventory" class="HyperVDetector"/>
 		<plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>
-		<plugin type="measurement" class="org.hyperic.hq.product.Win32MeasurementPlugin"/>
+		<plugin type="measurement" class="HyperVMeasurementPlugin"/>
 		
 		<metric name="Availability"
             template="ServiceAvail:Platform=Win32:vmms"
@@ -140,17 +140,17 @@
             collectionType="dynamic"
             units="percentage"/>
 		<metric name="Storage - Current Disk Queue Length"
-				template="${physical_disk}:Current Disk Queue Length"
+				template="pdh:${physical_disk}:Current Disk Queue Length"
 				indicator="true"
 				defaultOn="true"
 			    collectionType="dynamic"/>
 		<metric name="Storage - Disk Bytes/sec"
-				template="${physical_disk}:Disk Bytes/sec"
+				template="pdh:${physical_disk}:Disk Bytes/sec"
 				indicator="true"
 				defaultOn="true"
 			    collectionType="dynamic"/>
 		<metric name="Storage - Disk Transfers/sec"
-				template="${physical_disk}:Disk Transfers/sec"
+				template="pdh:${physical_disk}:Disk Transfers/sec"
 				indicator="true"
 				defaultOn="true"
 			    collectionType="dynamic"/>
@@ -162,7 +162,7 @@
     	<plugin type="autoinventory" class="HyperVDetector"/>
             
 		<metric name="Availability"
-            template="PowerShell:command=Get-VM,columns=state:%vm.name%"
+            template="PowerShell:command=Get-VM,columns=state:%instance.name%"
             category="AVAILABILITY"
             indicator="true"
 			defaultOn="true"
