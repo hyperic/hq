@@ -79,7 +79,7 @@ public class HyperVDetector
         return servers;
     }
     
-    protected List<ServiceResource> discoverServices(String propertySet, String type, String namePrefix) {
+    protected List<ServiceResource> discoverServices(String propertySet, String type, String namePrefix, String token) {
         List<ServiceResource> services = new ArrayList<ServiceResource>();
 
         try {
@@ -90,7 +90,7 @@ public class HyperVDetector
                 if ("_Total".equals(instance) || "<All instances>".equals(instance)) {
                     continue;
                 }
-                StringTokenizer st = new StringTokenizer(instance,":");
+                StringTokenizer st = new StringTokenizer(instance,token);
                 String vmName = (String) st.nextElement();
                 names.add(vmName);
             }
@@ -115,24 +115,22 @@ public class HyperVDetector
 
     @Override
     protected List discoverServices(ConfigResponse serverConfig) throws PluginException {
-        List<ServiceResource> services = new ArrayList();
+        List<ServiceResource> services = new ArrayList<ServiceResource>();
 
-        List<ServiceResource> vmServices = discoverServices("Hyper-V Hypervisor Partition","Hyper-V VM","Hyper-V VM - ");
+        List<ServiceResource> vmServices = discoverServices("Hyper-V Hypervisor Partition","Hyper-V VM","Hyper-V VM - ",":");
         if (vmServices!=null&&!vmServices.isEmpty()) {
             services.addAll(vmServices);
         }
 
-        List<ServiceResource> netServices = discoverServices("Network Interface","Network Interface","Network Interface - ");
+        List<ServiceResource> netServices = discoverServices("Network Interface","Network Interface","Network Interface - ","");
         if (netServices!=null&&!netServices.isEmpty()) {
             services.addAll(netServices);
         }
 
-        List<ServiceResource> diskServices = discoverServices("PhysicalDisk","PhysicalDisk","PhysicalDisk - ");
+        List<ServiceResource> diskServices = discoverServices("PhysicalDisk","PhysicalDisk","PhysicalDisk - ","");
         if (diskServices!=null&&!diskServices.isEmpty()) {
             services.addAll(diskServices);
         }
-
-
         return services;
     }
 }
