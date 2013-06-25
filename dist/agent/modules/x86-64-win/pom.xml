@@ -5,8 +5,9 @@
 
 	<parent>
 		<groupId>org.hyperic.hq.dist</groupId>
-		<artifactId>agent-parent</artifactId>
+		<artifactId>hq-agent-bundle-parent</artifactId>
 		<version>6.0.0</version>
+		<relativePath>../hq-agent-bundle-parent/pom.xml</relativePath>
 	</parent>
 
 	<artifactId>agent-x86-64-win</artifactId>
