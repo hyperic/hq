@@ -306,9 +306,14 @@ public class ResourceGroupDAO
     }
 
     public ResourceGroup findByName(String name) {
-        String sql = "from ResourceGroup g where lower(g.resource.name) = lower(?)";
-        return (ResourceGroup) getSession().createQuery(sql).setString(0, name).setCacheable(true)
-            .setCacheRegion("ResourceGroup.findByName").uniqueResult();
+        String sql = "from ResourceGroup g where lower(g.resource.name) = lower(?) " +
+                     "AND g.resource.resourceType.id = :groupType";
+        return (ResourceGroup) getSession().createQuery(sql)
+                                           .setString(0, name).setCacheable(true)
+                                           .setInteger("groupType", AuthzConstants.authzGroup)
+                                           .setCacheable(true)
+                                           .setCacheRegion("ResourceGroup.findByName")
+                                           .uniqueResult();
     }
 
     @SuppressWarnings("unchecked")
