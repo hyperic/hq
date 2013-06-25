@@ -95,6 +95,8 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable, Age
     static final String PROP_FETCH_LOG_TIMEOUT = "scheduleThread.fetchLogTimeout";
     static final String PROP_CANCEL_TIMEOUT = "scheduleThread.cancelTimeout";
     static final String PROP_QUEUE_SIZE = "scheduleThread.queuesize.";
+    static final String PROP_DEDUCT_SERVER_TIME_DIFF = "agent.deductServerTimeDiff";
+    static final String PROP_DISABLE_DIAG_INFO = "agent.disableScheduleThreadDiag";
 
     private boolean deductServerTimeDiff = true;
 
@@ -148,6 +150,7 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable, Age
     private final Random rand = new Random();
     private final int offset;
     private final Map<AppdefEntityID, DiagInfo> diagInfo = new HashMap<AppdefEntityID, DiagInfo>();
+    private final boolean disableDiag;
 
     ScheduleThread(Sender sender, MeasurementValueGetter manager, Properties config) throws AgentStartException {
         this.statsCollector = AgentStatsCollector.getInstance();
@@ -155,6 +158,8 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable, Age
         this.statsCollector.register(SCHEDULE_THREAD_METRIC_TASKS_SUBMITTED);
         this.statsCollector.register(SCHEDULE_THREAD_METRICS_COLLECTED_TIME);
         this.agentConfig = config;
+        this.disableDiag = PropertiesUtil.getBooleanValue(agentConfig.getProperty(PROP_DISABLE_DIAG_INFO), false);
+        if (disableDiag) log.info("Disabling ScheduleThread Diagnostics");
         this.manager = manager;
         this.sender = sender;
         int tmp = getFudgeFactor();
@@ -675,6 +680,9 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable, Age
     }
 
     private void setDiagInfo(MetricValue data, ParsedTemplate dsn, ResourceSchedule rs, int mid) {
+        if (disableDiag) {
+            return;
+        }
         final AppdefEntityID aeid = rs.id;
         synchronized (diagInfo) {
             DiagInfo tmp = diagInfo.get(aeid);
