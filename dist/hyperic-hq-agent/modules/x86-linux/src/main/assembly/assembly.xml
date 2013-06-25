@@ -11,17 +11,19 @@
     	<componentDescriptor>../../src/main/assembly/component.xml</componentDescriptor>
     </componentDescriptors>
 
-     <dependencySets>
-		<dependencySet>
-			<useProjectArtifact>false</useProjectArtifact>
-			<useTransitiveDependencies>false</useTransitiveDependencies>
-			 <unpack>true</unpack>
+
+   <fileSets>
+	<fileSet>
+			<directory>src/main/resources</directory>
+			<outputDirectory>/</outputDirectory>
+			<filtered>true</filtered>
+		</fileSet>
+		<fileSet>
+			<directory>${project.build.directory}/generated-resources/agent-x86-linux-${project.version}</directory>
+			<outputDirectory>/bundles/agent-x86-linux-${project.version}</outputDirectory>
 			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
-			<includes>
-				<include>org.hyperic.jre:x86-linux</include>
-			</includes>
-		</dependencySet>
-	</dependencySets>
+		</fileSet>
+	</fileSets>
 	
 </assembly>

@@ -11,24 +11,13 @@
 	</parent>
 
 	<groupId>org.hyperic.hq.dist</groupId>
-	<artifactId>agent</artifactId>
+	<artifactId>agent-parent</artifactId>
 	<packaging>pom</packaging>
 	<name>Hyperic HQ Distribution - Hyperic HQ Agent Bundle</name>
 
-	<build>
-		<plugins>
-			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<configuration>
-					<descriptors>
-						<descriptor>src/main/assembly/assembly.xml</descriptor>
-					</descriptors>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
 
 	<dependencies>
+	
 		<dependency>
 			<!-- Making hqapi jar available to plugins on agent side only for now, due to issues with Spring app context being loaded when hqapi jar is in server lib.  
 			     May make this a dependency of hq-pdk once that is fixed-->
@@ -548,5 +537,59 @@
 				<enabled>false</enabled>
 			</snapshots>
 		</repository>
+		<repository>
+                        <id>hyperic-jres</id>
+                        <name>Hyperic JREs Repository</name>
+                        <url>http://maven.hyperic.org/jres</url>
+                </repository>
+
 	</repositories>
+	
+<profiles> 	
+	<profile> 
+		<id>All-Installers</id> 
+		<activation>
+		<property><name>all-installers</name></property>
+		</activation>
+		<modules> 
+		   <module>modules/x86-64-win</module> 
+		   <module>modules/x86-64-linux</module> 
+		   <module>modules/x86-linux</module> 
+		   <module>modules/hpux-11</module> 
+		   <module>modules/ppc-aix</module> 
+		   <module>modules/sparc-solaris</module> 
+		   <module>modules/win-32</module> 
+		   <module>modules/noJRE</module>   
+		</modules> 
+	    </profile> 
+		<profile> 
+			<id>CI-Build</id> 
+			<activation>
+        		<property><name>CI-build</name></property>
+   			</activation>
+			<modules> 
+			    <module>modules/noJRE</module>   
+			</modules> 
+		</profile>  
+		<profile> 
+			<id>Daily-Build</id> 
+			<activation>
+        		<property><name>daily-build</name></property>
+   			</activation>
+			<modules> 
+			   <module>modules/noJRE</module>   
+			</modules> 
+		</profile>  
+		<profile> 
+		    <id>no-JRE</id> 
+		    <activation>
+       			<activeByDefault>true</activeByDefault>
+		    </activation>
+		    <modules> 
+				<module>modules/noJRE</module>   
+		    </modules> 
+		</profile> 
+
+	</profiles> 	
+	
 </project>

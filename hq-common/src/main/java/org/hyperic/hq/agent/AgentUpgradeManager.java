@@ -70,7 +70,6 @@ public class AgentUpgradeManager {
             //sequence so as to ensure that the 'Wrapper-Restarter' will handle the JVM's 
             //shutdown hook properly rather than treating it as a stop command.
             WrapperManager.restartAndReturn(); 
-            
             if (agent.get() != null) {
                 agent.get().shutdown();
             }
@@ -145,6 +144,10 @@ public class AgentUpgradeManager {
         return props.getProperty(AgentConfig.JSW_PROP_AGENT_ROLLBACK_BUNDLE);
     }
     
+    private static void setJavaHome(Properties props, String javaHome) {
+        props.setProperty(AgentConfig.JSW_PROP_AGENT_JAVA_HOME, javaHome);
+    }
+
     private static void setRollbackBundle(Properties props, String rollbackHome) {
         props.setProperty(AgentConfig.JSW_PROP_AGENT_ROLLBACK_BUNDLE, rollbackHome);
     }
@@ -209,14 +212,14 @@ public class AgentUpgradeManager {
         if (children != null) {
             // we want to remove all plugins, then update
             // this is just in case there are duplicates
-            for (int i=0; i<children.length; i++) {
-                if (children[i].indexOf(REMOVED_PLUGIN_EXTENSION) > 0) {
-                    removePlugin(children[i], tmpDir, pluginsDir, updatedPlugins);
+            for (String element : children) {
+                if (element.indexOf(REMOVED_PLUGIN_EXTENSION) > 0) {
+                    removePlugin(element, tmpDir, pluginsDir, updatedPlugins);
                 }
             }
-            for (int i=0; i<children.length; i++) {
-                if (children[i].indexOf(UPDATED_PLUGIN_EXTENSION) > 0) {
-                    movePlugin(children[i], tmpDir, pluginsDir, updatedPlugins);
+            for (String element : children) {
+                if (element.indexOf(UPDATED_PLUGIN_EXTENSION) > 0) {
+                    movePlugin(element, tmpDir, pluginsDir, updatedPlugins);
                 }
             }
         }

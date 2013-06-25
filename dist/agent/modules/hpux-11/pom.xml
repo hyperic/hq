@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.hyperic.hq.dist</groupId>
+		<artifactId>agent-parent</artifactId>
+		<version>6.0.0</version>
+	</parent>
+
+	<artifactId>agent-hpux-11</artifactId>
+	<name>Hyperic HQ Distribution - Hyperic HQ Agent Bundle hpux-11</name>
+	<packaging>pom</packaging>
+
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<descriptors>
+						<descriptor>src/main/assembly/assembly.xml</descriptor>
+					</descriptors>
+				</configuration>
+			</plugin>
+			<plugin>
+	            <groupId>org.apache.maven.plugins</groupId>
+	            <artifactId>maven-dependency-plugin</artifactId>
+	            <executions>
+	                <execution>
+	                        <id>unpack-jre</id>
+	                        <goals>
+	                                <goal>unpack-dependencies</goal>
+	                        </goals>
+	                        <phase>generate-resources</phase>
+	                        <configuration>
+	                                <outputDirectory>${project.build.directory}/generated-resources</outputDirectory>
+	                                <includeGroupIds>org.hyperic.jre</includeGroupIds>
+	                                <includeArtifactIds>hpux-11-risc</includeArtifactIds>
+	                                <includeTypes>tar.gz</includeTypes>
+	                                <excludeTransitive>true</excludeTransitive>
+	                        </configuration>
+	                </execution>
+	            </executions>
+	        </plugin>
+		</plugins>
+	</build>
+	
+	
+	
+	<dependencies> 
+			<dependency>
+				<groupId>org.hyperic.jre</groupId>
+				<artifactId>hpux-11-risc</artifactId>
+				<version>1.6_012</version>
+				<type>tar.gz</type>
+			</dependency>
+	</dependencies>
+
+
+</project> 

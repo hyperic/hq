@@ -203,7 +203,7 @@ public class AgentCommandsService implements AgentCommandsClient {
         for(int j=i; j<fList.size(); j++){
             // if the failure occurred because of the md5 check sum, we don't 
             // need to chomp the first stream
-            if (checkSumFailed && j==i) {
+            if (checkSumFailed && (j==i)) {
                 continue;
             }
 
@@ -408,16 +408,26 @@ public class AgentCommandsService implements AgentCommandsClient {
             if (!JDK.IS_WIN32) {
                 File pdkdir = new File(bundleDir, "pdk");
                 File pdklibdir = new File(pdkdir, "lib");
+                File jredir = new File(pdkdir, "jre");
                 if (!pdklibdir.exists()) {
                     throw new AgentRemoteException("Invalid PDK library directory " +
                             pdklibdir.getAbsolutePath());
                 }
 
                 File[] libs = pdklibdir.listFiles();
-                for (int i = 0; i < libs.length; i++) {
-                    if (libs[i].getName().endsWith("sl")) {
+                for (File lib : libs) {
+                    if (lib.getName().endsWith("sl")) {
                         // chmod +x ./bundles/$AGENT_BUNDLE/pdk/lib/*.sl
-                        setExecuteBit(libs[i]);
+                        setExecuteBit(lib);
+                    }
+                }
+
+                if (jredir.exists()) {
+                    File jrebin = new File(jredir, "bin");
+                    File[] bins = jrebin.listFiles();
+                    // chmod +x ./bundles/$AGENT_BUNDLE/jre/bin/*
+                    for (File bin : bins) {
+                        setExecuteBit(bin);
                     }
                 }
 
@@ -428,9 +438,9 @@ public class AgentCommandsService implements AgentCommandsClient {
                 }
 
                 File[] scripts = pdkscriptsdir.listFiles();
-                for (int i = 0; i < scripts.length; i++) {
+                for (File script : scripts) {
                     // chmod +x ./bundles/$AGENT_BUNDLE/pdk/scripts/*
-                    setExecuteBit(scripts[i]);
+                    setExecuteBit(script);
                 }
             }
             
@@ -520,7 +530,9 @@ public class AgentCommandsService implements AgentCommandsClient {
             try {
                 final File file = new File(resolveAgentBundleHomePath(filename));
                 file.createNewFile();
-                if (debug) _log.debug("removing file=" + file.getAbsolutePath());
+                if (debug) {
+                    _log.debug("removing file=" + file.getAbsolutePath());
+                }
                 rtn.put(filename, file.exists());
             } catch (Exception e) {
                 _log.warn("could not remove file " + filename + ": " + e);
