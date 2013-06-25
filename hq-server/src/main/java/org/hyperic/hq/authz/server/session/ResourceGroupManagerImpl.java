@@ -398,7 +398,8 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         final Resource resource = group.getResource();
         // if the group.id != resource.instanceId that means the resource should not be deleted since it is
         // associated with another first class object
-        boolean removeResource = group.getId().equals(resource.getInstanceId()) ? true : false;
+        final boolean removeResource =
+            group.getId().equals(resource.getResourceType().getId().equals(AuthzConstants.authzGroup)) ? true : false;
         resourceGroupDAO.remove(group, removeResource);
         resourceGroupDAO.getSession().flush();
         // Send resource delete event
