@@ -695,6 +695,9 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable, Age
     }
 
     private void setDiagScheduled(ResourceSchedule rs, boolean incrementSchedules) {
+        if (disableDiag) {
+            return;
+        }
         synchronized(diagInfo) {
             DiagInfo tmp = diagInfo.get(rs.id);
             if (tmp == null) {
@@ -983,6 +986,9 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable, Age
     }
     
     public String getDiagStatus() {
+        if (disableDiag) {
+            return "";
+        }
         StringBuilder rtn = new StringBuilder();
         synchronized (diagInfo) {
             for (Entry<AppdefEntityID, DiagInfo> entry : diagInfo.entrySet()) {
