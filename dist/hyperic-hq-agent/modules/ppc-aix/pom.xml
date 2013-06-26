@@ -16,19 +16,40 @@
 
 
 	<build>
-	  <plugins>
-	      <plugin>
-		      <artifactId>maven-assembly-plugin</artifactId>
-	      </plugin>
-	  </plugins>
+		<plugins>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+			</plugin>
+			<plugin>
+	            <groupId>org.apache.maven.plugins</groupId>
+	            <artifactId>maven-dependency-plugin</artifactId>
+	            <executions>
+	                <execution>
+	                        <id>unpack-agent</id>
+	                        <goals>
+	                                <goal>unpack-dependencies</goal>
+	                        </goals>
+	                        <phase>generate-resources</phase>
+	                        <configuration>
+	                                <outputDirectory>${project.build.directory}/generated-resources</outputDirectory>
+	                                <includeGroupIds>org.hyperic.hq.dist</includeGroupIds>
+	                                <includeArtifactIds>agent-ppc-aix</includeArtifactIds>
+	                                <includeTypes>tar.gz</includeTypes>
+	                                <excludeTransitive>true</excludeTransitive>
+	                        </configuration>
+	                </execution>
+	            </executions>
+	        </plugin>
+		</plugins>
 	</build>
-	<dependencies> 
-	    <dependency>
-	      <groupId>org.hyperic.jre</groupId>
-	      <artifactId>ppc-aix32</artifactId>
-	      <version>1.6_29</version>
-	      <type>tar.gz</type>
-	    </dependency>
+	
+<dependencies>
+		<dependency>
+			<groupId>org.hyperic.hq.dist</groupId>
+			<artifactId>agent-ppc-aix</artifactId>
+			<version>${project.version}</version>
+			<type>tar.gz</type>
+		</dependency>
 	</dependencies>
 
 </project> 

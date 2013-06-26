@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assembly>
+	<id>x86-64-win</id>
+	<formats>
+		<format>zip</format>
+	</formats>
+
+	
+	<componentDescriptors>
+    	<componentDescriptor>../../src/main/assembly/component.xml</componentDescriptor>
+    </componentDescriptors>
+
+     <dependencySets>
+		<dependencySet>
+			<useProjectArtifact>false</useProjectArtifact>
+			<useTransitiveDependencies>false</useTransitiveDependencies>
+			 <unpack>true</unpack>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
+			<includes>
+				<include>org.hyperic.jre:x86-win32</include>
+			</includes>
+		</dependencySet>
+	</dependencySets>
+	
+    <fileSets>
+		<fileSet>
+			<directory>src/main/resources</directory>
+			<outputDirectory>/</outputDirectory>
+		</fileSet>
+	</fileSets>
+	
+</assembly>

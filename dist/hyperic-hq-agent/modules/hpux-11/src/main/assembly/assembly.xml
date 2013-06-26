@@ -11,25 +11,18 @@
     	<componentDescriptor>../../src/main/assembly/component.xml</componentDescriptor>
     </componentDescriptors>
 
-	<fileSets>
+  <fileSets>
+	<fileSet>
+			<directory>src/main/resources</directory>
+			<outputDirectory>/</outputDirectory>
+			<filtered>true</filtered>
+		</fileSet>
 		<fileSet>
-	            <directory>${project.build.directory}/generated-resources/jre</directory>
-	            <outputDirectory>/jre</outputDirectory>
-	            <includes>
-	                    <include>**/*.sl</include>
-	            </includes>
-	            <fileMode>0755</fileMode>
-	            <directoryMode>0755</directoryMode>
-	    </fileSet>
-	    <fileSet>
-	            <directory>${project.build.directory}/generated-resources/jre</directory>
-	            <outputDirectory>/jre</outputDirectory>
-	            <excludes>
-	                    <exclude>**/*.sl</exclude>
-	            </excludes>
-				<fileMode>0644</fileMode>
-	            <directoryMode>0755</directoryMode>
-	    </fileSet>
+			<directory>${project.build.directory}/generated-resources/agent-hpux-11-${project.version}</directory>
+			<outputDirectory>/bundles/agent-hpux-11-${project.version}</outputDirectory>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
+		</fileSet>
 	</fileSets>
 	
 </assembly>

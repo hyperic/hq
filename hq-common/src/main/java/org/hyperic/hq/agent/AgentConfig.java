@@ -70,6 +70,7 @@ public class AgentConfig {
     public static final String JSW_PROP_AGENT_BUNDLE = "set.HQ_AGENT_BUNDLE";
     public static final String JSW_PROP_AGENT_ROLLBACK_BUNDLE = 
         "set.HQ_AGENT_ROLLBACK_BUNDLE";
+    public static final String JSW_PROP_AGENT_JAVA_HOME = "set.HQ_JAVA_HOME";
     
     public static final String PROP_LATHER_PROXYHOST = "lather.proxyHost";
     public static final String PROP_LATHER_PROXYPORT = "lather.proxyPort";
@@ -415,9 +416,9 @@ public class AgentConfig {
         Properties defaultProps = new Properties();
 
         // Setup default properties
-        for(int i=0; i < AgentConfig.propertyList.length; i++){
-                defaultProps.setProperty(AgentConfig.propertyList[i][0],
-                    AgentConfig.propertyList[i][1]);
+        for (String[] element : AgentConfig.propertyList) {
+                defaultProps.setProperty(element[0],
+                    element[1]);
         }
         return defaultProps;
     }
@@ -616,7 +617,7 @@ public class AgentConfig {
      *         <code>false</code> otherwise.
      */
     public boolean isProxyServerSet() {
-        return this.getProxyPort() != AgentConfig.DEFAULT_PROXY_PORT && 
+        return (this.getProxyPort() != AgentConfig.DEFAULT_PROXY_PORT) && 
                !AgentConfig.DEFAULT_PROXY_HOST.equals(this.getProxyIp());
     }
     
@@ -748,9 +749,10 @@ public class AgentConfig {
     }
     
     private void verifyValidPortRange(int port) throws AgentConfigException {
-        if(port < 1 || port > 65535)
+        if((port < 1) || (port > 65535)) {
             throw new AgentConfigException("Invalid port (not in range " +
-                                           "1->65535)");        
+                                           "1->65535)");
+        }        
     }
 
     public String[] getEnabledCiphers() {

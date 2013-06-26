@@ -14,20 +14,44 @@
 	<name>Hyperic HQ Distribution - Hyperic hq Agent x86-64-win</name>
 	<packaging>pom</packaging>
 
-	<build>
-	  <plugins>
-	      <plugin>
-		      <artifactId>maven-assembly-plugin</artifactId>
-	      </plugin>
-	  </plugins>
+<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+			</plugin>
+			<plugin>
+	            <groupId>org.apache.maven.plugins</groupId>
+	            <artifactId>maven-dependency-plugin</artifactId>
+	            <executions>
+	                <execution>
+	                        <id>unpack-agent</id>
+	                        <goals>
+	                                <goal>unpack-dependencies</goal>
+	                        </goals>
+	                        <phase>generate-resources</phase>
+	                        <configuration>
+	                                <outputDirectory>${project.build.directory}/generated-resources</outputDirectory>
+	                                <includeGroupIds>org.hyperic.hq.dist</includeGroupIds>
+	                                <includeArtifactIds>agent-x86-64-win</includeArtifactIds>
+	                                <includeTypes>zip</includeTypes>
+	                                <excludeTransitive>true</excludeTransitive>
+	                        </configuration>
+	                </execution>
+	            </executions>
+	        </plugin>
+		</plugins>
 	</build>
-	<dependencies> 
-	    <dependency>
-		<groupId>org.hyperic.jre</groupId>
-		<artifactId>x86_64-win</artifactId>
-		<version>1.7_9</version>
-		<type>zip</type>
-	    </dependency>
+	
+
+	
+<dependencies>
+		<dependency>
+			<groupId>org.hyperic.hq.dist</groupId>
+			<artifactId>agent-x86-64-win</artifactId>
+			<version>${project.version}</version>
+			<type>zip</type>
+		</dependency>
 	</dependencies>
+
 
 </project> 

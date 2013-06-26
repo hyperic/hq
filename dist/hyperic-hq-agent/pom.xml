@@ -17,15 +17,7 @@
 	<packaging>pom</packaging>
 	<name>Hyperic HQ Distribution - Hyperic HQ Agent Modules</name>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.hyperic.hq.dist</groupId>
-			<artifactId>agent</artifactId>
-			<version>${project.version}</version>
-			<type>tar.gz</type>
-		</dependency>
-	</dependencies>
-
+	
 	<build>
 		<pluginManagement>
 			<plugins>

@@ -96,22 +96,22 @@ public class AgentDaemon
     private static AgentDaemon mainInstance;
     private static Object      mainInstanceLock = new Object();
 
-    private double               startTime;
+    private final double               startTime;
     private final static Log                  logger = LogFactory.getLog(AgentDaemon.class);
-    private ServerHandlerLoader  handlerLoader;
-    private PluginLoader         handlerClassLoader;
+    private final ServerHandlerLoader  handlerLoader;
+    private final PluginLoader         handlerClassLoader;
     private CommandDispatcher    dispatcher;
     private AgentStorageProvider storageProvider;
     private CommandListener      listener;
     private AgentTransportLifecycle agentTransportLifecycle;
     private Vector<AgentServerHandler>               serverHandlers;
     private Vector<AgentServerHandler>               startedHandlers = new Vector<AgentServerHandler>();
-    private Hashtable<String, Vector<AgentNotificationHandler>>            notifyHandlers = new Hashtable<String, Vector<AgentNotificationHandler>>();
+    private final Hashtable<String, Vector<AgentNotificationHandler>>            notifyHandlers = new Hashtable<String, Vector<AgentNotificationHandler>>();
     private Hashtable<String, AgentMonitorInterface>            monitorClients;
-    private AtomicBoolean running = new AtomicBoolean(false);
+    private final AtomicBoolean running = new AtomicBoolean(false);
 
     private ProductPluginManager ppm;
-    private AgentConfig config;
+    private final AgentConfig config;
     private AgentDiagnostics agentDiagnostics;
     
     public static AgentDaemon getMainInstance(){
@@ -151,7 +151,7 @@ public class AgentDaemon
             }
         });
 
-        if (jars == null || jars.length != 1) {
+        if ((jars == null) || (jars.length != 1)) {
             throw new FileNotFoundException(AGENT_COMMANDS_SERVER_JAR_NAME+" jar is not optional");
         }
         
@@ -337,7 +337,7 @@ public class AgentDaemon
         if (this.startedHandlers != null){
             for(int i=0; i < this.startedHandlers.size(); i++){
                 AgentServerHandler handler = 
-                    (AgentServerHandler)this.startedHandlers.get(i);
+                    this.startedHandlers.get(i);
                 
                 handler.shutdown();
             }
@@ -442,7 +442,7 @@ public class AgentDaemon
             GenericPlugin.getPlatformName());
 
         String storedHost = this.storageProvider.getValue(PROP_HOSTNAME);
-        if (storedHost == null || storedHost.length() == 0) {
+        if ((storedHost == null) || (storedHost.length() == 0)) {
             this.storageProvider.setValue(PROP_HOSTNAME, currentHost);
         } else {
             // Validate
@@ -498,7 +498,7 @@ public class AgentDaemon
         // Make sure the storage provider has a certificate DN.
         // If not, create one
         String certDN = this.storageProvider.getValue(PROP_CERTDN);
-        if ( certDN == null || certDN.length() == 0 ) {
+        if ( (certDN == null) || (certDN.length() == 0) ) {
             certDN = generateCertDN();
             this.storageProvider.setValue(PROP_CERTDN, certDN);
             try {
@@ -517,14 +517,14 @@ public class AgentDaemon
         // Save the current context loader, and reset after we load plugin jars
         ClassLoader currentContext = Thread.currentThread().getContextClassLoader();
         
-        for (int i=0; i<libJars.length; i++) {
+        for (File libJar : libJars) {
             try {
-                JarFile jarFile = new JarFile(libJars[i]);
+                JarFile jarFile = new JarFile(libJar);
                 Manifest manifest = jarFile.getManifest();
                 String mainClass = manifest.getMainAttributes().
                     getValue("Main-Class");
                 if (mainClass != null) {
-                    String jarPath = libJars[i].getAbsolutePath();
+                    String jarPath = libJar.getAbsolutePath();
                     loadedHandler = 
                         this.handlerLoader.loadServerHandler(jarPath);
                     this.serverHandlers.add(loadedHandler);
@@ -533,7 +533,7 @@ public class AgentDaemon
                 jarFile.close();
             } catch (Exception e) {
                 throw new AgentConfigException("Failed to load " +
-                                               "'" + libJars[i] + 
+                                               "'" + libJar + 
                                                "': " +
                                                e.getMessage());
             }
@@ -755,6 +755,7 @@ public class AgentDaemon
         // server may be down or Provider may not be setup.  Either way we want to retry until
         // the data is sent
         Thread thread = new Thread("PluginStatusSender") {
+            @Override
             public void run() {
                 while (true) {
                     try {
@@ -793,7 +794,7 @@ public class AgentDaemon
         for(int i=0; i<this.serverHandlers.size(); i++){
             AgentServerHandler handler;
             
-            handler = (AgentServerHandler) this.serverHandlers.get(i);
+            handler = this.serverHandlers.get(i);
             try {
                 handler.startup(this);
             } catch(AgentStartException exc){
@@ -826,9 +827,9 @@ public class AgentDaemon
         if (files == null) {
             return;
         }
-        for (int i=0; i<files.length; i++) {
+        for (File file : files) {
             try {
-                files[i].delete();
+                file.delete();
             } catch (SecurityException e) { }
         }
     }
@@ -986,6 +987,7 @@ public class AgentDaemon
             }
             
             logger.info("Agent shut down");
+            System.exit(0);
         }
     }
     

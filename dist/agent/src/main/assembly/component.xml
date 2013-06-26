@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<assembly>
-	<id>agent-dist-assembly</id>
-	<formats>
-		<format>tar.gz</format>
-	</formats>
+<component>
 
 	<fileSets>
 		<fileSet>
-			<directory>src/main/resources</directory>
+			<directory>../../src/main/resources</directory>
 			<outputDirectory>/</outputDirectory>
 			<excludes>
 				<exclude>**/*.sh</exclude>
@@ -20,7 +16,7 @@
 			<directoryMode>0755</directoryMode>
 		</fileSet>
 		<fileSet>
-			<directory>src/main/resources</directory>
+			<directory>../../src/main/resources</directory>
 			<outputDirectory>/</outputDirectory>
 			<includes>
 				<include>**/*.sh</include>
@@ -31,7 +27,7 @@
 			<directoryMode>0755</directoryMode>
 		</fileSet>
 		<fileSet>
-			<directory>src/main/resources</directory>
+			<directory>../../src/main/resources</directory>
 			<outputDirectory>/</outputDirectory>
 			<includes>
 				<include>**/*.tar.gz</include>
@@ -183,7 +179,9 @@
 		</dependencySet>
 		
 		
-		<dependencySet>
+
+	
+<dependencySet>	
 				<useProjectArtifact>false</useProjectArtifact>
 				<useTransitiveDependencies>true</useTransitiveDependencies>
 				<useTransitiveFiltering>false</useTransitiveFiltering>
@@ -216,4 +214,4 @@
 		</dependencySet>
 	</dependencySets>
 
-</assembly>
+</component>

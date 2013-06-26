@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assembly>
+	<id>x86-64-linux</id>
+	<formats>
+		<format>tar.gz</format>
+	</formats>
+	
+	<componentDescriptors>
+    	<componentDescriptor>../../src/main/assembly/component.xml</componentDescriptor>
+    </componentDescriptors>
+
+    <dependencySets>
+		<dependencySet>
+			<useProjectArtifact>false</useProjectArtifact>
+			<useTransitiveDependencies>false</useTransitiveDependencies>
+			 <unpack>true</unpack>
+			
+			<includes>
+				<include>org.hyperic.jre:amd64-linux</include>
+			</includes>
+		</dependencySet>
+	</dependencySets>
+	
+</assembly>

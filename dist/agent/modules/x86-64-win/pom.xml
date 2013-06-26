@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.hyperic.hq.dist</groupId>
+		<artifactId>hq-agent-bundle-parent</artifactId>
+		<version>6.0.0</version>
+		<relativePath>../hq-agent-bundle-parent/pom.xml</relativePath>
+	</parent>
+
+	<artifactId>agent-x86-64-win</artifactId>
+	<name>Hyperic HQ Distribution - Hyperic HQ Agent Bundle x86-64-win</name>
+	<packaging>pom</packaging>
+
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<descriptors>
+						<descriptor>src/main/assembly/assembly.xml</descriptor>
+					</descriptors>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies> 
+	    <dependency>
+		<groupId>org.hyperic.jre</groupId>
+		<artifactId>x86_64-win</artifactId>
+		<version>1.7_9</version>
+		<type>zip</type>
+	    </dependency>
+	</dependencies>
+
+</project> 

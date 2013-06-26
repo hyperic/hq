@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assembly>
+	<id>hpux-11</id>
+	<formats>
+		<format>tar.gz</format>
+	</formats>
+	
+	<componentDescriptors>
+    	<componentDescriptor>../../src/main/assembly/component.xml</componentDescriptor>
+    </componentDescriptors>
+
+   <fileSets>
+		<fileSet>
+	            <directory>${project.build.directory}/generated-resources/jre</directory>
+	            <outputDirectory>/jre</outputDirectory>
+	            <includes>
+	                    <include>**/*.sl</include>
+      	        </includes>	      
+	    </fileSet>
+	    <fileSet>
+	            <directory>${project.build.directory}/generated-resources/jre</directory>
+	            <outputDirectory>/jre</outputDirectory>
+	            <excludes>
+	                    <exclude>**/*.sl</exclude>
+	            </excludes>
+	    </fileSet>
+	 </fileSets>
+	
+</assembly>

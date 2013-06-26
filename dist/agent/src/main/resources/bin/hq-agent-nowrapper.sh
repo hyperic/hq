@@ -1,5 +1,5 @@
 #!/bin/sh
-
+AGENT_BUNDLE_HOME_PROP=agent.bundle.home
 AGENTPROPFILE_PROP=agent.propFile
 AGENT_PROPS=../../conf/agent.properties
 AGENTLOGDIR_PROP=agent.logDir
@@ -28,6 +28,10 @@ fi
 
 if [ "x${HQ_JAVA_HOME}" != "x" ] ; then
     HQ_JAVA_HOME=${HQ_JAVA_HOME}
+elif [ -d "${AGENT_BUNDLE_HOME}"/jre ]; then
+    HQ_JAVA_HOME="${AGENT_BUNDLE_HOME}"/jre
+    # Just in case
+    chmod -R +x "${AGENT_BUNDLE_HOME}"/jre/bin/* > /dev/null 2>&1
 elif [ -d jre ]; then
     HQ_JAVA_HOME=jre
     # Just in case

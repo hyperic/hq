@@ -15,21 +15,44 @@
 	<packaging>pom</packaging>
 
 
-    			<build>
-					<plugins>
-						<plugin>
-							<artifactId>maven-assembly-plugin</artifactId>
-						</plugin>
-					</plugins>
-				</build>
+    
+    <build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+			</plugin>
+			<plugin>
+	            <groupId>org.apache.maven.plugins</groupId>
+	            <artifactId>maven-dependency-plugin</artifactId>
+	            <executions>
+	                <execution>
+	                        <id>unpack-agent</id>
+	                        <goals>
+	                                <goal>unpack-dependencies</goal>
+	                        </goals>
+	                        <phase>generate-resources</phase>
+	                        <configuration>
+	                                <outputDirectory>${project.build.directory}/generated-resources</outputDirectory>
+	                                <includeGroupIds>org.hyperic.hq.dist</includeGroupIds>
+	                                <includeArtifactIds>agent-x86-linux</includeArtifactIds>
+	                                <includeTypes>tar.gz</includeTypes>
+	                                <excludeTransitive>true</excludeTransitive>
+	                        </configuration>
+	                </execution>
+	            </executions>
+	        </plugin>
+		</plugins>
+	</build>
+	
 
-	<dependencies> 
+	
+<dependencies>
 		<dependency>
-							<groupId>org.hyperic.jre</groupId>
-							<artifactId>x86-linux</artifactId>
-							<version>1.7_9</version>
-							<type>tar.gz</type>
-						</dependency>
+			<groupId>org.hyperic.hq.dist</groupId>
+			<artifactId>agent-x86-linux</artifactId>
+			<version>${project.version}</version>
+			<type>tar.gz</type>
+		</dependency>
 	</dependencies>
-
+	
 </project> 

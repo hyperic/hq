@@ -110,8 +110,7 @@ public class RoleDAO
 
         ResourceGroup group;
         try {
-            group = resourceGroupDAO.create(creator, cInfo, Collections.EMPTY_LIST,
-                Collections.EMPTY_LIST);
+            group = resourceGroupDAO.create(creator, cInfo, Collections.EMPTY_LIST, Collections.EMPTY_LIST, null);
         } catch (GroupCreationException e) {
             throw new SystemException("Should always be able to create a "
                                       + "group for roles, but got exceptin", e);

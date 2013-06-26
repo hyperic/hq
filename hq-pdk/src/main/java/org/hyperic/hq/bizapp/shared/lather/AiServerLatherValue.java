@@ -66,11 +66,11 @@ public class AiServerLatherValue extends AiLatherValue {
 	public AiServerLatherValue(AIServerValue v) {
 		this();
 
-		if (v.cTimeHasBeenSet()) {
+		if (v.cTimeHasBeenSet() && v.getCTime() != null) {
 			this.setDoubleValue(PROP_CTIME, (double) v.getCTime().longValue());
 		}
 
-		if (v.mTimeHasBeenSet()) {
+		if (v.mTimeHasBeenSet()  && v.getMTime() != null) {
 			this.setDoubleValue(PROP_MTIME, (double) v.getMTime().longValue());
 		}
 

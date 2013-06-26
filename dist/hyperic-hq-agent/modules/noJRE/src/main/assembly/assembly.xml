@@ -13,4 +13,18 @@
     </componentDescriptors>
     
 
+  <fileSets>
+	<fileSet>
+			<directory>src/main/resources</directory>
+			<outputDirectory>/</outputDirectory>
+			<filtered>true</filtered>
+		</fileSet>
+		<fileSet>
+			<directory>${project.build.directory}/generated-resources/agent-${project.version}</directory>
+			<outputDirectory>/bundles/agent-${project.version}</outputDirectory>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
+		</fileSet>
+	</fileSets>
+	
 </assembly>
