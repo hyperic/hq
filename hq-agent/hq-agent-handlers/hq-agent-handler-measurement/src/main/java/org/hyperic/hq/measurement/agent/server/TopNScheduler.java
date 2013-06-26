@@ -12,6 +12,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.server.AgentStartException;
 import org.hyperic.hq.agent.server.AgentStorageProvider;
+import org.hyperic.hq.bizapp.agent.CommandsAPIInfo;
 import org.hyperic.hq.bizapp.client.AgentCallbackClientException;
 import org.hyperic.hq.bizapp.client.MeasurementCallbackClient;
 import org.hyperic.hq.bizapp.client.StorageProviderFetcher;
@@ -42,9 +43,10 @@ class TopNScheduler {
     private ScheduledExecutorService scheduler;
     private ScheduledExecutorService sender;
     private final MeasurementCallbackClient client;
+    private String agentToken;
 
 
-    TopNScheduler(AgentStorageProvider storage) throws AgentStartException {
+         TopNScheduler(AgentStorageProvider storage) throws AgentStartException {
         this.log             = LogFactory.getLog(TopNScheduler.class);
         this.storage         = storage;
         this.client = setupClient();
@@ -86,6 +88,10 @@ class TopNScheduler {
                 success = false;
                 try {
                     TopNSendReport_args report = new TopNSendReport_args();
+                    if (agentToken == null) {
+                        agentToken = storage.getValue(CommandsAPIInfo.PROP_AGENT_TOKEN);
+                    }
+                    report.setAgentToken(agentToken);
                     report.setTopReports(reports);
                     client.topNSendReport(report);
                     success = true;
@@ -97,7 +103,7 @@ class TopNScheduler {
                 if (success) {
                     List<String> filesToDelete = new ArrayList<String>();
                     for (TopReport report : reports) {
-                        filesToDelete.add(String.valueOf(report.getCreatTime()));
+                        filesToDelete.add(String.valueOf(report.getCreateTime()));
                     }
                     storage.deleteObjectsFromFolder(DATA_FOLDERNAME,
                             filesToDelete.toArray(new String[filesToDelete.size()]));
@@ -137,7 +143,7 @@ class TopNScheduler {
     }
 
     private void scheduleTopN(final TopNSchedule schedule) {
-        log.info("Scheduling TopN gethering task at interval of " + schedule.getInterval() + " minutes");
+        log.info("Scheduling TopN gathering task at interval of " + schedule.getInterval() + " minutes");
         // If the scheduler is alive we need to kill it and create a new one
         // with the new scheduling data
         if ((null != scheduler) && !scheduler.isShutdown()) {
@@ -150,12 +156,12 @@ class TopNScheduler {
                 try {
                     data = TopData.gather(getSigar(), schedule.getQueryFilter());
                 } catch (SigarException e) {
-                    log.error("Unable to gether Top data", e);
+                    log.error("Unable to gather Top data", e);
                 }
                 if (null != data) {
                     TopReport report = generateTopReport(data);
                     try {
-                        storage.addObjectToFolder(DATA_FOLDERNAME, report, report.getCreatTime());
+                        storage.addObjectToFolder(DATA_FOLDERNAME, report, report.getCreateTime());
                     } catch (Exception ex) {
                         log.error("Unable to store TopN data", ex);
                     }
@@ -171,9 +177,13 @@ class TopNScheduler {
      * Shut down the schedule thread.
      */
 
-    void die(){
-        sender.shutdown();
-        scheduler.shutdown();
+    void die() {
+        if (sender != null) {
+            sender.shutdown();
+        }
+        if (scheduler != null) {
+            scheduler.shutdown();
+        }
         if (_sigarImpl != null) {
             _sigarImpl.close();
             _sigarImpl = null;
@@ -183,7 +193,7 @@ class TopNScheduler {
 
     private TopReport generateTopReport(TopData data) {
         TopReport report = new TopReport();
-        report.setCreatTime(System.currentTimeMillis());
+        report.setCreateTime(System.currentTimeMillis());
         report.setUpTime(data.getUptime().toString());
         report.setCpu(data.getCpu().toString());
         report.setMem(data.getMem().toString());

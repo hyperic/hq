@@ -121,7 +121,7 @@ public class ScanStateCoreLatherValue
             ScanMethodState[] states;
             LatherValue[] lstates;
 
-            lstates = this.getObjectList(PROP_SCANMETHODSTATES);
+            lstates =  (LatherValue[])this.getObjectList(PROP_SCANMETHODSTATES);
             states  = new ScanMethodState[lstates.length];
             for(int i=0; i<lstates.length; i++){
                 ScanMethodStateLatherValue lState;

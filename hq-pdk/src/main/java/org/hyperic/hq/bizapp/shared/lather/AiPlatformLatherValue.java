@@ -242,7 +242,7 @@ public class AiPlatformLatherValue extends AiLatherValue {
         } catch (LatherKeyNotFoundException exc) { /* ignore */ }
 
         try {
-            LatherValue[] ips = this.getObjectList(PROP_AIIPVALUES);
+            LatherValue[] ips = (LatherValue[])this.getObjectList(PROP_AIIPVALUES);
 
             for (LatherValue ip : ips) {
                 AiIpLatherValue ipVal = (AiIpLatherValue) ip;
@@ -251,7 +251,7 @@ public class AiPlatformLatherValue extends AiLatherValue {
         } catch (LatherKeyNotFoundException exc) { /* ignore */ }
 
         try {
-            LatherValue[] svrs = this.getObjectList(PROP_AISERVERVALUES);
+            LatherValue[] svrs =  (LatherValue[])this.getObjectList(PROP_AISERVERVALUES);
 
             for (LatherValue svr : svrs) {
                 AiServerLatherValue svVal = (AiServerLatherValue) svr;

@@ -119,7 +119,7 @@ public class PassThroughLatherValue
     }
 
     public LatherValue[] getObjectList(String listName){
-        return super.getObjectList(listName);
+        return  (LatherValue[])super.getObjectList(listName);
     }
 
     public void validate(){

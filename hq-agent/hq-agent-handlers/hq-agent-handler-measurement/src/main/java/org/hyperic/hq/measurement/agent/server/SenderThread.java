@@ -474,13 +474,13 @@ public class SenderThread
                                    " seconds ahead of the server.  To " +
                                    "ensure accuracy of the charting and " +
                                    "alerting make sure the agent and server " +
-                                   "clocks are syncronized");
+                                   "clocks are synchronized");
                 } else {
                     this.log.error("Agent is " + (this.serverDiff / 1000) + 
                                    " seconds behind the server.  To " +
                                    "ensure accuracy of the charting and " +
                                    "alerting make sure the agent and server " +
-                                   "clocks are syncronized");
+                                   "clocks are synchronized");
                 }
             }
             success = true;

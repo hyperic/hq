@@ -37,6 +37,7 @@ import org.hyperic.hq.measurement.agent.commands.GetMeasurements_result;
 import org.hyperic.hq.measurement.agent.commands.ScheduleMeasurements_args;
 import org.hyperic.hq.measurement.agent.commands.ScheduleMeasurements_result;
 import org.hyperic.hq.measurement.agent.commands.ScheduleTopn_args;
+import org.hyperic.hq.measurement.agent.commands.ScheduleTopn_result;
 import org.hyperic.hq.measurement.agent.commands.SetProperties_args;
 import org.hyperic.hq.measurement.agent.commands.SetProperties_result;
 import org.hyperic.hq.measurement.agent.commands.TrackPluginAdd_args;
@@ -78,6 +79,11 @@ public class LegacyMeasurementCommandsClientImpl implements MeasurementCommandsC
            this.agentConn.sendCommand(this.verAPI.command_scheduleMeasurements,
                                       this.verAPI.getVersion(), args);
         result = new ScheduleMeasurements_result(rval);
+
+        boolean flag=false;
+        if(flag)
+            this.agentConn.sendCommand(this.verAPI.command_scheduleTopn,this.verAPI.getVersion(),
+                    new ScheduleTopn_args(1,null));
     }
 
     /**
@@ -172,6 +178,11 @@ public class LegacyMeasurementCommandsClientImpl implements MeasurementCommandsC
     }
 
     public void scheduleTopn(ScheduleTopn_args args) throws AgentRemoteException, AgentConnectionException {
+        ScheduleTopn_result result;
+        AgentRemoteValue rval;
+
+        rval = this.agentConn.sendCommand(this.verAPI.command_scheduleTopn, this.verAPI.getVersion(), args);
+        result = new ScheduleTopn_result(rval);
     }
 
     public void unscheduleTopn() throws AgentRemoteException, AgentConnectionException {

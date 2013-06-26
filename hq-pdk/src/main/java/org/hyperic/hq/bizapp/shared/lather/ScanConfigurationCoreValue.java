@@ -89,7 +89,7 @@ public class ScanConfigurationCoreValue
         LatherValue[] lVals;
 
         if(this.getIntValue(PROP_NSCANCONFIGS) != 0){
-            lVals   = this.getObjectList(PROP_SCANCONFIGS);
+            lVals   =  (LatherValue[])this.getObjectList(PROP_SCANCONFIGS);
             configs = new ScanMethodConfig[lVals.length];
             for(int i=0; i<lVals.length; i++){
                 ScanMethodConfigValue scVal = (ScanMethodConfigValue)lVals[i];
@@ -103,7 +103,7 @@ public class ScanConfigurationCoreValue
         }
 
         if(this.getIntValue(PROP_NSERVERSIGS) != 0){
-            lVals = this.getObjectList(PROP_SERVERSIGS);
+            lVals =  (LatherValue[])this.getObjectList(PROP_SERVERSIGS);
             sigs = new ServerSignature[lVals.length];
             for(int i=0; i<lVals.length; i++){
                 ServerSignatureValue svVal = (ServerSignatureValue)lVals[i];

@@ -264,7 +264,7 @@ public class AiServerLatherValue extends AiLatherValue {
 			svExt.setMetricConnectHashCode(this.getIntValue(PROP_MCONNECT_HASH));
 
 			try {
-				LatherValue[] services = this.getObjectList(PROP_SERVICES);
+				LatherValue[] services =  (LatherValue[])this.getObjectList(PROP_SERVICES);
                 for (LatherValue service : services) {
                     AiServiceLatherValue svc;
                     svc = (AiServiceLatherValue) service;
@@ -276,7 +276,7 @@ public class AiServerLatherValue extends AiLatherValue {
 			}
 			LatherValue[] serviceTypes = null;
 			try {
-				serviceTypes = this.getObjectList(PROP_SERVICE_TYPES);
+				serviceTypes =  (LatherValue[])this.getObjectList(PROP_SERVICE_TYPES);
 			} catch (LatherKeyNotFoundException exc) {
 				//No service types were found which could be expected
 				svExt.setAiServiceTypes(new AIServiceTypeValue[0]);

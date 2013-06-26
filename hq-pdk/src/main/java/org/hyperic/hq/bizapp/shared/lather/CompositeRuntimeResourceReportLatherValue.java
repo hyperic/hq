@@ -62,7 +62,7 @@ public class CompositeRuntimeResourceReportLatherValue
             RuntimeResourceReport[] reports;
             LatherValue[] lReports;
 
-            lReports = this.getObjectList(PROP_REPORTS);
+            lReports =  (LatherValue[])this.getObjectList(PROP_REPORTS);
             reports  = new RuntimeResourceReport[lReports.length];
             for(int i=0; i<reports.length; i++){
                 reports[i] = ((RuntimeResourceReportLatherValue)

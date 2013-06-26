@@ -87,7 +87,7 @@ public class ScanMethodStateLatherValue
 
         try {
             StringifiedException[] excs;
-            LatherValue[] lexcs = this.getObjectList(PROP_EXCEPTIONS);
+            LatherValue[] lexcs =  (LatherValue[])this.getObjectList(PROP_EXCEPTIONS);
 
             excs = new StringifiedException[lexcs.length];
             for(int i=0; i<lexcs.length; i++){
@@ -101,7 +101,7 @@ public class ScanMethodStateLatherValue
 
         try {
             AIServerValue[] svrs;
-            LatherValue[] lsvrs = this.getObjectList(PROP_SERVERS);
+            LatherValue[] lsvrs =  (LatherValue[])this.getObjectList(PROP_SERVERS);
 
             svrs = new AIServerValue[lsvrs.length];
             for(int i=0; i<lsvrs.length; i++){

@@ -63,7 +63,7 @@ public class RuntimeResourceReportLatherValue
             AIPlatformValue[] plats;
             LatherValue[] lPlats;
 
-            lPlats = this.getObjectList(PROP_PLATFORM);
+            lPlats =  (LatherValue[])this.getObjectList(PROP_PLATFORM);
             plats  = new AIPlatformValue[lPlats.length];
             for(int i=0; i<plats.length; i++){
                 plats[i] = ((AiPlatformLatherValue)

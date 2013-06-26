@@ -287,17 +287,17 @@ public abstract class LatherValue {
         return (byte[][])list.toArray(new byte[0][]);
     }
 
-    protected void addObjectToList(String listName, LatherValue value){
+    protected void addObjectToList(String listName, Object value){
         List list = this.getListValueForAdd(this.objectLists, listName);
 
         this.checkArg(value);
         list.add(value);
     }
 
-    protected LatherValue[] getObjectList(String listName){
+    protected Object[] getObjectList(String listName){
         List list = this.getListValueForGet(this.objectLists, listName);
         
-        return (LatherValue[])list.toArray(new LatherValue[0]);
+        return list.toArray(new LatherValue[0]);
     }
 
     public Map getStringVals(){

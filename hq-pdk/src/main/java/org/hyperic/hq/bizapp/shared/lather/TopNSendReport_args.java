@@ -7,18 +7,15 @@ import org.hyperic.hq.plugin.system.TopReport;
 
 public class TopNSendReport_args extends SecureAgentLatherValue {
 
-    private List<TopReport> topReports = new ArrayList<TopReport>();
+    public static String topNReports="topReports";
 
-    public void addReport(TopReport report) {
-        this.topReports.add(report);
-    }
 
     public List<TopReport> getTopReports() {
-        return topReports;
+        return (List<TopReport>) getObjectList(topNReports)[0];
     }
 
     public void setTopReports(List<TopReport> topReports) {
-        this.topReports = topReports;
+        addObjectToList(topNReports, topReports);
     }
 
 }
