@@ -30,10 +30,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.hyperic.lather.LatherRemoteException;
 import org.hyperic.lather.LatherValue;
@@ -45,29 +49,32 @@ import org.hyperic.lather.LatherValue;
  *                  for speed purposes.
  */
 public class LatherXCoder {
-    private int HAS_STRINGS  = 1 << 0;
-    private int HAS_INTS     = 1 << 1;
-    private int HAS_DOUBLES  = 1 << 2;
-    private int HAS_BYTEAS   = 1 << 3;
-    private int HAS_STRINGLS = 1 << 4;
-    private int HAS_INTLS    = 1 << 5;
-    private int HAS_DOUBLELS = 1 << 6;
-    private int HAS_BYTEALS  = 1 << 7;
-    private int HAS_OBJECTS  = 1 << 8;
-    private int HAS_OBJECTLS = 1 << 9;
-    private int HAS_LONGS    = 1 << 10;
+    private final int HAS_STRINGS = 1 << 0;
+    private final int HAS_INTS = 1 << 1;
+    private final int HAS_DOUBLES = 1 << 2;
+    private final int HAS_BYTEAS = 1 << 3;
+    private final int HAS_STRINGLS = 1 << 4;
+    private final int HAS_INTLS = 1 << 5;
+    private final int HAS_DOUBLELS = 1 << 6;
+    private final int HAS_BYTEALS = 1 << 7;
+    private final int HAS_OBJECTS = 1 << 8;
+    private final int HAS_OBJECTLS = 1 << 9;
+    private final int HAS_LONGS = 1 << 10;
+    private final int HAS_SERIALAIZABLES = 1 << 11;
 
     /**
      * Encode the given value object into a stream.
-     *
-     * @param value Value to encode
-     * @param out   Stream to write the encoded representation of 'value' to
+     * 
+     * @param value
+     *            Value to encode
+     * @param out
+     *            Stream to write the encoded representation of 'value' to
      */
     public void encode(LatherValue value, DataOutputStream out)
         throws IOException
     {
         Map stringVals, intVals, doubleVals, longVals, byteaVals, objectVals,
-            stringLists, intLists, doubleLists, byteaLists, objectLists;
+ stringLists, intLists, doubleLists, byteaLists, objectLists;
             
         int contents = 0;
 
@@ -83,17 +90,42 @@ public class LatherXCoder {
         byteaLists  = value.getByteALists();
         objectLists = value.getObjectLists();
 
-        if(stringVals.size() > 0)  contents |= HAS_STRINGS;
-        if(intVals.size() > 0)     contents |= HAS_INTS;
-        if(longVals.size() > 0)    contents |= HAS_LONGS;
-        if(doubleVals.size() > 0)  contents |= HAS_DOUBLES;
-        if(byteaVals.size() > 0)   contents |= HAS_BYTEAS;
-        if(stringLists.size() > 0) contents |= HAS_STRINGLS;
-        if(intLists.size() > 0)    contents |= HAS_INTLS;
-        if(doubleLists.size() > 0) contents |= HAS_DOUBLELS;
-        if(byteaLists.size() > 0)  contents |= HAS_BYTEALS;
-        if(objectVals.size() > 0)  contents |= HAS_OBJECTS;
-        if(objectLists.size() > 0) contents |= HAS_OBJECTLS;
+        if (stringVals.size() > 0) {
+            contents |= HAS_STRINGS;
+        }
+        if (intVals.size() > 0) {
+            contents |= HAS_INTS;
+        }
+        if (longVals.size() > 0) {
+            contents |= HAS_LONGS;
+        }
+        if (doubleVals.size() > 0) {
+            contents |= HAS_DOUBLES;
+        }
+        if (byteaVals.size() > 0) {
+            contents |= HAS_BYTEAS;
+        }
+        if (stringLists.size() > 0) {
+            contents |= HAS_STRINGLS;
+        }
+        if (intLists.size() > 0) {
+            contents |= HAS_INTLS;
+        }
+        if (doubleLists.size() > 0) {
+            contents |= HAS_DOUBLELS;
+        }
+        if (byteaLists.size() > 0) {
+            contents |= HAS_BYTEALS;
+        }
+        if (objectVals.size() > 0) {
+            contents |= HAS_OBJECTS;
+        }
+        if (objectLists.size() > 0) {
+            contents |= HAS_OBJECTLS;
+        }
+        if (value.getSerializableMap().size() > 0) {
+            contents |= HAS_SERIALAIZABLES;
+        }
 
         // The first thing we write is the type of data that will be
         // sent -- this makes the minimum packet size == 4 bytes
@@ -220,7 +252,7 @@ public class LatherXCoder {
                 )
             {
                 Map.Entry ent = (Map.Entry)i.next();
-                List vals = (List)ent.getValue();
+                List vals = (List) ent.getValue();
 
                 out.writeUTF((String)ent.getKey());
                 out.writeInt(vals.size());
@@ -299,6 +331,30 @@ public class LatherXCoder {
                 out.writeUTF((String)ent.getKey());
                 out.writeLong(((Long)ent.getValue()).longValue());
             }
+        }
+        if ((contents & HAS_SERIALAIZABLES) != 0) {
+            out.writeInt(value.getSerializableMap().size());
+            byte[] data;
+            ByteArrayOutputStream b;
+            ObjectOutputStream oos;
+            for (Entry<String, Serializable> entry : value.getSerializableMap().entrySet()) {
+                // Write Object name
+                out.writeUTF(entry.getKey());
+
+                // Turn the Object to byte array
+                b = new ByteArrayOutputStream();
+                oos = new ObjectOutputStream(b);
+                oos.writeObject(entry.getValue());
+                data = b.toByteArray();
+
+                // Write Object size
+                out.writeInt(data.length);
+
+                // Write the actual Object as byte array
+                out.write(data);
+
+            }
+
         }
     }
 
@@ -511,6 +567,29 @@ public class LatherXCoder {
                 String key = in.readUTF();
                 Long test = new Long(in.readLong());
                 map.put(key, test);
+            }
+        }
+
+        if ((contents & HAS_SERIALAIZABLES) != 0) {
+            ObjectInputStream ois;
+            ByteArrayInputStream b;
+            nVals = in.readInt();
+            byte[] bytes;
+            map = res.getSerializableMap();
+            for (int i = 0; i < nVals; i++) {
+                String key = in.readUTF();
+                Serializable obj;
+                try {
+                    bytes = new byte[in.readInt()];
+                    b = new ByteArrayInputStream(bytes);
+                    in.readFully(bytes);
+                    ois = new ObjectInputStream(b);
+                    obj = (Serializable) ois.readObject();
+                    map.put(key, obj);
+                } catch (ClassNotFoundException e) {
+                    // Should not ever get here..
+                }
+
             }
         }
 

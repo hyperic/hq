@@ -33,6 +33,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.util.EntityUtils;
 import org.hyperic.hq.agent.AgentKeystoreConfig;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.lather.LatherRemoteException;
@@ -41,12 +46,6 @@ import org.hyperic.lather.xcode.LatherXCoder;
 import org.hyperic.util.encoding.Base64;
 import org.hyperic.util.http.HQHttpClient;
 import org.hyperic.util.http.HttpConfig;
-
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.util.EntityUtils;
 
 /**
  * The LatherClient is the base object which is used to invoke
@@ -111,7 +110,7 @@ public class LatherHTTPClient
         
         HttpResponse response = client.post(baseURL, postParams);
         
-        if (response != null && response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+        if ((response != null) && (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)) {
             ByteArrayInputStream bIs;
             DataInputStream dIs;
             Header errHeader = response.getFirstHeader(HDR_ERROR);

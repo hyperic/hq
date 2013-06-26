@@ -1,21 +1,24 @@
 package org.hyperic.hq.bizapp.shared.lather;
 
-import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.List;
 
 import org.hyperic.hq.plugin.system.TopReport;
 
 public class TopNSendReport_args extends SecureAgentLatherValue {
 
-    public static String topNReports="topReports";
+    public static String TOP_REPORTS = "topReports";
 
 
     public List<TopReport> getTopReports() {
-        return (List<TopReport>) getObjectList(topNReports)[0];
+        if (null != getObject(TOP_REPORTS)) {
+            return (List<TopReport>) getObject(TOP_REPORTS);
+        }
+        return null;
     }
 
     public void setTopReports(List<TopReport> topReports) {
-        addObjectToList(topNReports, topReports);
+        addObject(TOP_REPORTS, (Serializable) topReports);
     }
 
 }

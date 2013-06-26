@@ -25,6 +25,7 @@
 
 package org.hyperic.lather;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -53,12 +54,14 @@ public abstract class LatherValue {
     private Map longVals;    // Strings -> Longs
     private Map byteaVals;   // Strings -> byte[]s
     private Map objectVals;  // Strings -> LatherValues
+    private Map javaObjectVals; // Strings -> Object
 
     private Map stringLists; // Strings -> List of Strings
     private Map intLists;    // Strings -> List of Integers
     private Map doubleLists; // Strings -> List of Doubles
     private Map byteaLists;  // Strings -> List of byte[]s
     private Map objectLists; // Strings -> List of LatherValues
+    private final Map<String, Serializable> serializableMap = new HashMap<String, Serializable>();
 
     private boolean ensureOrder;
 
@@ -67,9 +70,9 @@ public abstract class LatherValue {
      * setStringVals, etc.)
      */
     private Map createStorageMap(){
-        if(this.ensureOrder)
+        if (this.ensureOrder) {
             return new TreeMap();
-
+        }
         return new HashMap();
     }
 
@@ -300,6 +303,14 @@ public abstract class LatherValue {
         return list.toArray(new LatherValue[0]);
     }
 
+    protected Serializable getObject(String objectName) {
+        return serializableMap.get(objectName);
+    }
+
+    protected void addObject(String objectName, Serializable object) {
+        serializableMap.put(objectName, object);
+    }
+
     public Map getStringVals(){
         return this.stringVals;
     }
@@ -342,6 +353,10 @@ public abstract class LatherValue {
 
     public Map getObjectLists(){
         return this.objectLists;
+    }
+
+    public Map<String, Serializable> getSerializableMap() {
+        return this.serializableMap;
     }
 
     /**
