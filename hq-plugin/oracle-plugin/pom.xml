@@ -28,6 +28,14 @@
        </dependency>
 	</dependencies>
 	-->
+	<dependencies>
+	 <dependency>
+           <groupId>com.oracle</groupId>
+           <artifactId>ojdbc5</artifactId>
+           <version>11.2.0.2.0</version>
+     </dependency>
+	</dependencies>
+	
 	<build>
 		<plugins>
 		<plugin>
