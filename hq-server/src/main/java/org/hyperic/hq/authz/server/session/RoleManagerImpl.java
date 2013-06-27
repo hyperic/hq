@@ -1435,4 +1435,8 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
        this.applicationContext = applicationContext;
     }
 
+    public void checkCanModify(AuthzSubject authzSubject) throws PermissionException {
+        permissionManager.check(authzSubject.getId(), AuthzConstants.authzRole, AuthzConstants.perm_modifyRole);
+    }
+
 }

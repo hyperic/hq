@@ -462,4 +462,6 @@ public interface RoleManager {
 
     public Collection<Role> getRoles(AuthzSubject subj);
 
+    public void checkCanModify(AuthzSubject authzSubject) throws PermissionException;
+
 }
