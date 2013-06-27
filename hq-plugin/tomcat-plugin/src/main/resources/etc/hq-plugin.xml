@@ -243,7 +243,7 @@
     <config type="control" platform="Win32">
       <option name="service_name"
               default="Apache Tomcat"
-              description="Tomcat Service Name"/>
+              description="Tomcat Service Name  (Relevant to Windows only, does not affect other platforms)"/>
     </config>
 
     <config>
