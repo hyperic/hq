@@ -79,11 +79,6 @@ public class LegacyMeasurementCommandsClientImpl implements MeasurementCommandsC
            this.agentConn.sendCommand(this.verAPI.command_scheduleMeasurements,
                                       this.verAPI.getVersion(), args);
         result = new ScheduleMeasurements_result(rval);
-
-        boolean flag=false;
-        if(flag)
-            this.agentConn.sendCommand(this.verAPI.command_scheduleTopn,this.verAPI.getVersion(),
-                    new ScheduleTopn_args(1,null));
     }
 
     /**
