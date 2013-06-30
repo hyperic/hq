@@ -19,7 +19,7 @@
 
 	
 	<build>
-		<pluginManagement>
+	<!--	<pluginManagement>
 			<plugins>
 				<plugin>
 					<artifactId>maven-deploy-plugin</artifactId>
@@ -28,7 +28,7 @@
 					</configuration>
 				</plugin>
 			</plugins>
-   		</pluginManagement>
+   		</pluginManagement>-->
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
