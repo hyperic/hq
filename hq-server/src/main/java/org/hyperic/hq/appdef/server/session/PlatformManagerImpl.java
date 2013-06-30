@@ -46,6 +46,7 @@ import org.hibernate.NonUniqueObjectException;
 import org.hibernate.NonUniqueResultException;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.agent.AgentConnectionException;
+import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.ConfigResponseDB;
@@ -95,6 +96,9 @@ import org.hyperic.hq.common.server.session.ResourceAuditFactory;
 import org.hyperic.hq.common.shared.AuditManager;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.measurement.agent.client.MeasurementCommandsClient;
+import org.hyperic.hq.measurement.agent.client.MeasurementCommandsClientFactory;
+import org.hyperic.hq.measurement.agent.commands.ScheduleTopn_args;
 import org.hyperic.hq.measurement.shared.SRNManager;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.PlatformTypeInfo;
@@ -162,6 +166,8 @@ public class PlatformManagerImpl implements PlatformManager {
 
     private SRNManager srnManager;
 
+    private final MeasurementCommandsClientFactory measurementCommandsClientFactory;
+
     @Autowired
     public PlatformManagerImpl(PlatformTypeDAO platformTypeDAO,
                                PermissionManager permissionManager, AgentDAO agentDAO,
@@ -174,7 +180,8 @@ public class PlatformManagerImpl implements PlatformManager {
                                ServerDAO serverDAO, ServiceDAO serviceDAO,
                                AuditManager auditManager, AgentManager agentManager,
                                ZeventEnqueuer zeventManager, SRNManager srnManager,
-                               ResourceAuditFactory resourceAuditFactory) {
+                               ResourceAuditFactory resourceAuditFactory,
+                               MeasurementCommandsClientFactory measurementCommandsClientFactory) {
         this.platformTypeDAO = platformTypeDAO;
         this.permissionManager = permissionManager;
         this.agentDAO = agentDAO;
@@ -194,6 +201,7 @@ public class PlatformManagerImpl implements PlatformManager {
         this.zeventManager = zeventManager;
         this.resourceAuditFactory = resourceAuditFactory;
         this.srnManager = srnManager;
+        this.measurementCommandsClientFactory = measurementCommandsClientFactory;
     }
 
     // TODO resolve circular dependency
@@ -562,15 +570,13 @@ public class PlatformManagerImpl implements PlatformManager {
      * @param aipValue the AIPlatform to create as a regular appdef platform.
      * 
      */
-    public Platform createPlatform(AuthzSubject subject, AIPlatformValue aipValue)
-        throws ApplicationException {
+    public Platform createPlatform(AuthzSubject subject, AIPlatformValue aipValue) throws ApplicationException {
         PlatformType platType = platformTypeDAO.findByName(aipValue.getPlatformTypeName());
 
         if (platType == null) {
             throw new SystemException("Unable to find PlatformType [" +
-                                      aipValue.getPlatformTypeName() + "]");
+                    aipValue.getPlatformTypeName() + "]");
         }
-
         Platform checkP = platformDAO.findByName(aipValue.getName());
         if (checkP != null) {
             throwDupPlatform(checkP.getId(), aipValue.getName());
@@ -581,6 +587,19 @@ public class PlatformManagerImpl implements PlatformManager {
         if (agent == null) {
             throw new ApplicationException("Unable to find agent: " + aipValue.getAgentToken());
         }
+
+        if (platType.getPlugin().equalsIgnoreCase("system")) {
+            MeasurementCommandsClient client = measurementCommandsClientFactory.getClient(agent);
+            try {
+                client.scheduleTopn(new ScheduleTopn_args(1, null));
+            } catch (AgentRemoteException e) {
+                log.error("Error while scheduling TopN for new platform", e);
+            } catch (AgentConnectionException e) {
+                log.error("Error while scheduling TopN for new platform", e);
+            }
+        }
+
+
         ConfigResponseDB config = configResponseDAO.createPlatform();
 
         Platform platform = platType.create(aipValue, subject.getName(), config, agent);
