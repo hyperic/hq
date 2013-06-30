@@ -31,13 +31,13 @@
 
     <class name="TopNData" table="HQ_TOPN_DATA">
 
-        <cache usage="read-write"/>
+        <cache usage="read-only"/>
 
         <composite-id>
           <key-property name="resourceId" type="int">
                 <column name="resourceId" not-null="true" length="64"/>
             </key-property>
-           <key-property name="time" type="date">
+           <key-property name="time" type="timestamp">
                 <column name="time" not-null="true"/>
             </key-property>
         </composite-id>

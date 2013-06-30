@@ -959,7 +959,7 @@ public class DataManagerImpl implements DataManager {
 
             for (TopNData data : topNData) {
                 stmt.setInt(1, data.getResourceId());
-                stmt.setDate(2, new Date(data.getTime().getTime()));
+                stmt.setTimestamp(2, new java.sql.Timestamp(data.getTime().getTime()));
                 stmt.setBytes(3, data.getData());
                 stmt.addBatch();
             }

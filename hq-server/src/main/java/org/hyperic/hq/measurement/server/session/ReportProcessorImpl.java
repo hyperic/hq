@@ -359,8 +359,7 @@ public class ReportProcessorImpl implements ReportProcessor {
         int resourceId = platformRes.getId();
         for (TopReport report : reports) {
 
-            Date time = new Date(report.getCreateTime());
-            DateUtils.round(time, Calendar.MINUTE);
+            Date time = DateUtils.round(new Date(report.getCreateTime()), Calendar.MINUTE);
             TopNData topNData = null;
             try {
                 topNData = new TopNData(resourceId, time, report.toSerializedForm());
