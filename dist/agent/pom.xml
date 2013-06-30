@@ -27,12 +27,12 @@
 		   <module>modules/hq-agent-bundle-parent</module> 
 		   <module>modules/x86-64-win</module> 
 		   <module>modules/x86-64-linux</module> 
-		   <module>modules/x86-linux</module> 
-		   <module>modules/hpux-11</module> 
-		   <module>modules/ppc-aix</module> 
-		   <module>modules/sparc-solaris</module> 
+		   <module>modules/x86-linux</module>
 		   <module>modules/win-32</module> 
 		   <module>modules/noJRE</module>   
+		   <!--  <module>modules/hpux-11</module> 
+		   <module>modules/ppc-aix</module> 
+		   <module>modules/sparc-solaris</module> -->
 		</modules> 
 	    </profile> 
 		<profile> 
@@ -41,8 +41,12 @@
         		<property><name>CI-build</name></property>
    			</activation>
 			<modules> 
-			   <module>modules/hq-agent-bundle-parent</module> 
-			    <module>modules/noJRE</module>   
+			    <module>modules/hqee-agent-bundle-parent</module> 
+		   	    <module>modules/x86-64-win</module> 
+		   	    <module>modules/x86-64-linux</module> 
+		   		<module>modules/x86-linux</module> 
+		   		<module>modules/win-32</module> 
+		  		<module>modules/noJRE</module>      
 			</modules> 
 		</profile>  
 		<profile> 
@@ -51,8 +55,12 @@
         		<property><name>daily-build</name></property>
    			</activation>
 			<modules> 
-			     <module>modules/hq-agent-bundle-parent</module> 
-			   <module>modules/noJRE</module>   
+			      <module>modules/hq-agent-bundle-parent</module> 
+			      <module>modules/x86-64-win</module> 
+		 	   	  <module>modules/x86-64-linux</module> 
+		 		  <module>modules/x86-linux</module>
+		 		  <module>modules/win-32</module> 
+		 		  <module>modules/noJRE</module>   
 			</modules> 
 		</profile>  
 		<profile> 
