@@ -41,7 +41,7 @@
         		<property><name>CI-build</name></property>
    			</activation>
 			<modules> 
-			    <module>modules/hqee-agent-bundle-parent</module> 
+			    <module>modules/hq-agent-bundle-parent</module> 
 		   	    <module>modules/x86-64-win</module> 
 		   	    <module>modules/x86-64-linux</module> 
 		   		<module>modules/x86-linux</module> 
