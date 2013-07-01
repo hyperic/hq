@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
@@ -74,9 +75,23 @@ public class HyperVDetector
         server.setMeasurementConfig();
         server.setCustomProperties(cprops);
 
-        List servers = new ArrayList();
+        List<ServerResource> servers = new ArrayList<ServerResource>();
         servers.add(server);
         return servers;
+    }
+    
+    protected List<ServiceResource> discoverServices(String type, String name) {
+        List<ServiceResource> services = new ArrayList<ServiceResource>();
+
+        ServiceResource service = new ServiceResource();
+        service.setType(this, type);
+        service.setServiceName(name);
+
+        ConfigResponse conf = new ConfigResponse();
+        service.setProductConfig(conf);
+        service.setMeasurementConfig();
+        services.add(service);
+        return services;
     }
     
     protected List<ServiceResource> discoverServices(String propertySet, String type, String namePrefix, String token) {
@@ -113,11 +128,29 @@ public class HyperVDetector
         }
     }
 
+    protected List<ServiceResource> discoverServicesWMI(String wmiObjName, String filter, String col, String type, String namePrefix) throws PluginException {
+        Map<String,String> wmiObjs = DetectionUtil.getWMIObj(wmiObjName, filter, col, "");
+        List<ServiceResource> services = new ArrayList<ServiceResource>();
+        for(String name:wmiObjs.values()) {
+            ServiceResource service = new ServiceResource();
+            service.setType(this, type);
+            service.setServiceName(namePrefix + name);
+
+            ConfigResponse conf = new ConfigResponse();
+            conf.setValue("instance.name", name);
+            service.setProductConfig(conf);
+            service.setMeasurementConfig();
+            services.add(service);
+        }
+        return services;
+    }
+
     @Override
     protected List discoverServices(ConfigResponse serverConfig) throws PluginException {
         List<ServiceResource> services = new ArrayList<ServiceResource>();
 
-        List<ServiceResource> vmServices = discoverServices("Hyper-V Hypervisor Partition","Hyper-V VM","Hyper-V VM - ",":");
+        // VMs
+        List<ServiceResource> vmServices = discoverServicesWMI("Msvm_ComputerSystem","Caption-\"Virtual Machine\"","ElementName","Hyper-V VM","Hyper-V VM - ");
         if (vmServices!=null&&!vmServices.isEmpty()) {
             services.addAll(vmServices);
         }
@@ -130,6 +163,16 @@ public class HyperVDetector
         List<ServiceResource> diskServices = discoverServices("PhysicalDisk","PhysicalDisk","PhysicalDisk - ","");
         if (diskServices!=null&&!diskServices.isEmpty()) {
             services.addAll(diskServices);
+        }
+
+        List<ServiceResource> memServices = discoverServices("Memory","Memory");
+        if (memServices!=null&&!memServices.isEmpty()) {
+            services.addAll(memServices);
+        }
+
+        List<ServiceResource> cpuServices = discoverServices("Hyper-V Hypervisor Logical Processor","Logical Processor","Logical Processor - ","");
+        if (cpuServices!=null&&!cpuServices.isEmpty()) {
+            services.addAll(cpuServices);
         }
         return services;
     }

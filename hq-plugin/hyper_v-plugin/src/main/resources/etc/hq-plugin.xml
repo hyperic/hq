@@ -41,6 +41,7 @@
     
     <filter name="hyper-v_hypervisor" value="Hyper-V Hypervisor"/>
     <filter name="hyper-v_virtual_machine_health_summary" value="Hyper-V Virtual Machine Health Summary"/>
+    <filter name="hyper-v_hypervisor_logical-processor" value="Hyper-V Hypervisor Logical Processor(%instance.name%)"/>
     <filter name="Hyper-V_VM_Vid_Partition" value="Hyper-V VM Vid Partition(%instance.name%)"/>
     <filter name="memory" value="Memory"/>
     <filter name="network_interface" value="Network Interface(%instance.name%)"/>
@@ -77,17 +78,65 @@
 			indicator="true"
 			defaultOn="true"
 		    collectionType="dynamic"/>
-	<metric name="Memory - Available Bytes"
-			template="${memory}:Available Bytes"
-			indicator="true"
-			defaultOn="true"
-		    collectionType="dynamic"/>
-	<metric name="Memory - Pages/sec"
-			template="${memory}:Pages/sec"
-			indicator="true"
-			defaultOn="true"
-		    collectionType="dynamic"/>
+	
+	<service name="Memory">
+	    <plugin type="autoinventory" class="HyperVDetector"/>
+		<plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>
+	    <plugin type="measurement" class="org.hyperic.hq.product.Win32MeasurementPlugin"/>
 
+		<metric name="Availability"
+            template="ServiceAvail:Platform=Win32:vmms"
+            category="AVAILABILITY"
+            indicator="true"
+			defaultOn="true"
+            collectionType="dynamic"
+            units="percentage"/>
+		<metric name="Available Bytes"
+				template="${memory}:Available Bytes"
+				indicator="true"
+				defaultOn="true"
+			    collectionType="dynamic"/>
+		<metric name="Pages/sec"
+				template="${memory}:Pages/sec"
+				indicator="true"
+				defaultOn="true"
+			    collectionType="dynamic"/>
+	</service>
+	
+	<service name="Logical Processor">
+	    <plugin type="autoinventory" class="HyperVDetector"/>
+		<plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>
+	    <plugin type="measurement" class="org.hyperic.hq.product.Win32MeasurementPlugin"/>
+
+		<metric name="Availability"
+            template="ServiceAvail:Platform=Win32:vmms"
+            category="AVAILABILITY"
+            indicator="true"
+			defaultOn="true"
+            collectionType="dynamic"
+            units="percentage"/>
+		<metric name="% Guest Run Time"
+				template="${hyper-v_hypervisor_logical-processor}:% Guest Run Time"
+				indicator="true"
+				defaultOn="true"
+			    collectionType="dynamic"/>
+		<metric name="% Hypervisor Run Time"
+				template="${hyper-v_hypervisor_logical-processor}:% Hypervisor Run Time"
+				indicator="true"
+				defaultOn="true"
+			    collectionType="dynamic"/>
+		<metric name="% Idle Time"
+				template="${hyper-v_hypervisor_logical-processor}:% Idle Time"
+				indicator="true"
+				defaultOn="true"
+			    collectionType="dynamic"/>
+		<metric name="% Total Run Time"
+				template="${hyper-v_hypervisor_logical-processor}:% Total Run Time"
+				indicator="true"
+				defaultOn="true"
+			    collectionType="dynamic"/>
+	</service>
+	
 	<service name="Network Interface">
 	    <plugin type="autoinventory" class="HyperVDetector"/>
 		<plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>
@@ -139,17 +188,17 @@
 			defaultOn="true"
             collectionType="dynamic"
             units="percentage"/>
-		<metric name="Storage - Current Disk Queue Length"
+		<metric name="Current Disk Queue Length"
 				template="pdh:${physical_disk}:Current Disk Queue Length"
 				indicator="true"
 				defaultOn="true"
 			    collectionType="dynamic"/>
-		<metric name="Storage - Disk Bytes/sec"
+		<metric name="Disk Bytes/sec"
 				template="pdh:${physical_disk}:Disk Bytes/sec"
 				indicator="true"
 				defaultOn="true"
 			    collectionType="dynamic"/>
-		<metric name="Storage - Disk Transfers/sec"
+		<metric name="Disk Transfers/sec"
 				template="pdh:${physical_disk}:Disk Transfers/sec"
 				indicator="true"
 				defaultOn="true"
@@ -162,7 +211,7 @@
     	<plugin type="autoinventory" class="HyperVDetector"/>
             
 		<metric name="Availability"
-            template="PowerShell:command=Get-VM,columns=state:%instance.name%"
+            template="wmic:object=Msvm_ComputerSystem,column=enabledstate:ElementName-%instance.name%"
             category="AVAILABILITY"
             indicator="true"
 			defaultOn="true"
