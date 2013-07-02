@@ -120,9 +120,15 @@ public class TopReport implements Externalizable {
 
     @Override
     public String toString() {
-        return "TopReport [createTime=" + createTime + ", upTime=" + upTime + ", cpu=" + cpu + ", mem=" + mem + ", " +
-                "swap="
-                + swap + ", processes=" + processes + "]";
+        StringBuilder sb = new StringBuilder();
+        sb.append("TopReport\n").append("------------------------------\n").append("createTime=").append(createTime)
+                .append("\n").append("upTime=").append(upTime).append("\n").append("cpu=").append(cpu).append("\n")
+                .append("mem=").append(mem).append("\n").append("swap=").append(swap).append("\n\n")
+                .append("processes\n").append("------------------------------\n");
+        for (ProcessReport process : processes) {
+            sb.append(process.toString()).append("\n");
+        }
+        return sb.toString();
     }
 
 
