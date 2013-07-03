@@ -30,9 +30,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -409,4 +412,53 @@ public class DetectionUtil {
             }
         }
     }//EOM 
+    
+    public static Map<String,String> getWMIObj(String wmiObjName, String filter, String col, String name) throws PluginException {
+        if (wmiObjName==null||"".equals(wmiObjName)) {
+            throw new PluginException("object property not specified in the template of " + name);
+        }
+        StringBuilder sb = new StringBuilder().append("wmic /NAMESPACE:\\\\root\\virtualization path ").append(wmiObjName);
+
+        if (filter!=null&&!"".equals(filter)) {
+            StringTokenizer s = new StringTokenizer(filter,"-");
+            sb.append(" WHERE ").append(s.nextElement()).append("='").append(s.nextElement()).append("'");
+        }
+        
+        sb.append(" get");
+        if (col!=null&&!"".equals(col)) {
+            sb.append(" " + col);
+        }
+
+
+        sb.append(" /format:textvaluelist.xsl");
+        String cmd = sb.toString();
+        BufferedReader input = null;
+        try {
+            Process process = Runtime.getRuntime().exec(cmd);
+            input = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+            String line;
+            Map<String,String> obj = new HashMap<String,String>();
+            while ((line = input.readLine()) != null) {
+                line = line.trim();
+                StringTokenizer st = new StringTokenizer(line,"=");
+                while (st.hasMoreElements()) {
+                    String k = ((String) st.nextElement()).trim();
+                    String v = ((String) st.nextElement()).trim();
+                    obj.put(k,v);
+                }
+            }
+            return obj;
+        }catch(IOException e) {
+            throw new PluginException(e);
+        } finally {
+            if (input!=null) {
+                try {
+                    input.close();
+                } catch (IOException e) {
+                    throw new PluginException(e);
+                }
+            }
+        }
+    }
 }
