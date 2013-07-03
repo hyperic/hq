@@ -36,7 +36,6 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.pluginxml.PluginData;
-import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.util.PluginLoader;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
@@ -64,7 +63,7 @@ public abstract class PluginManager {
     public PluginManager(Properties props) {
         log = LogFactory.getLog(this.getClass().getName());
         this.props = props;
-        OS = OperatingSystem.getInstance().getName();
+        OS = HypericOperatingSystem.getInstance().getName();
         OS_SUFFIX = " " + OS;        
     }
 

@@ -33,9 +33,9 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.util.AutoApproveConfig;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.hq.product.HypericOperatingSystem;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.PlatformResource;
 import org.hyperic.hq.product.PluginException;
@@ -86,12 +86,14 @@ public class Scanner {
     }
 
     public boolean getIsInterrupted () { return _isInterrupted; }
+    
+   
 
     public static PlatformResource detectPlatform(AutoinventoryPluginManager apm,
                                                   ConfigResponse config)
         throws AutoinventoryException {
-
-        String platformType = OperatingSystem.getInstance().getName(); 
+       
+        String platformType = HypericOperatingSystem.getInstance().getName();
         PlatformDetector detector;
         String type=null;
         boolean isDevice;
@@ -102,7 +104,10 @@ public class Scanner {
         if (type == null) {
             type = platformType;
         }
-        isDevice = !type.equals(platformType); 
+        isDevice = !type.equals(platformType);
+       
+        
+        _log.error("type=" + type + " platformType=" + platformType);
 
         if (isDevice && _log.isDebugEnabled() && config != null) {
             String fqdn = config.getValue(ProductPlugin.PROP_PLATFORM_FQDN);
@@ -246,7 +251,7 @@ public class Scanner {
         try {
             for ( i=0; i<serverSigs.length; i++ ) {
                 pluginName = serverSigs[i].getServerTypeName();
-
+                _log.error("pluginName=" + pluginName);
                 try {
                     detector = (ServerDetector)_pluginManager.getPlatformPlugin(type, pluginName);
                     detector.setAutoApproveConfig(_autoApproveConfig);

@@ -27,17 +27,8 @@
 <plugin name="hyper_v">
   <property name="PLUGIN_VERSION" value="@project.version@"/>
 
-  <server name="Hyper-V"
-          platforms="Win32">
+    
 
-    <plugin type="measurement" class="org.hyperic.hq.product.Win32MeasurementPlugin"/>
-    <plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>
-    <plugin type="autoinventory" class="HyperVDetector"/>
-    <!--plugin type="collector" class="HyperVCollector"/-->
-
-    <scan registry="SYSTEM\CurrentControlSet\Services\vmms">
-      <include name="ImagePath"/>
-    </scan>
     
     <filter name="hyper-v_hypervisor" value="Hyper-V Hypervisor"/>
     <filter name="hyper-v_virtual_machine_health_summary" value="Hyper-V Virtual Machine Health Summary"/>
@@ -45,7 +36,7 @@
     <filter name="memory" value="Memory"/>
     <filter name="network_interface" value="Network Interface(%instance.name%)"/>
     <filter name="physical_disk" value="PhysicalDisk(%instance.name%)"/>
-    <metric name="Availability"
+<!--    <metric name="Availability"
             template="ServiceAvail:Platform=Win32:vmms"
             category="AVAILABILITY"
             indicator="true"
@@ -87,8 +78,8 @@
 			indicator="true"
 			defaultOn="true"
 		    collectionType="dynamic"/>
-
-	<service name="Network Interface">
+-->
+<!--	<server name="Network Interface">
 	    <plugin type="autoinventory" class="HyperVDetector"/>
 		<plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>
 	    <plugin type="measurement" class="org.hyperic.hq.product.Win32MeasurementPlugin"/>
@@ -125,9 +116,9 @@
 				indicator="true"
 				defaultOn="true"
 			    collectionType="dynamic"/>
-	</service>
+	</server>
 		    
-	<service name="PhysicalDisk">
+	<server name="PhysicalDisk">
 		<plugin type="autoinventory" class="HyperVDetector"/>
 		<plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>
 		<plugin type="measurement" class="org.hyperic.hq.product.Win32MeasurementPlugin"/>
@@ -154,9 +145,13 @@
 				indicator="true"
 				defaultOn="true"
 			    collectionType="dynamic"/>
-	</service>
+	</server>
+-->
+	<server name="Hyper-V VM" platforms="Win32-HYPER-V">
+	  <scan registry="SYSTEM\CurrentControlSet\Services\vmms">
+	      <include name="ImagePath"/>
+    	</scan>
 
-	<service name="Hyper-V VM">
 	    <plugin type="measurement" class="HyperVMeasurementPlugin"/>
         <plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>
     	<plugin type="autoinventory" class="HyperVDetector"/>
@@ -178,8 +173,7 @@
 				indicator="true"
 				defaultOn="true"
 			    collectionType="dynamic"/>
-	</service>
-  </server>
-
+	</server>
+ 
 
 </plugin>

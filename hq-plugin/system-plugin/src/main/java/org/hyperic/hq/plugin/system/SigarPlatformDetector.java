@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+import org.hyperic.hq.product.HypericOperatingSystem;
 import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.PlatformResource;
@@ -42,11 +43,11 @@ import org.hyperic.sigar.Mem;
 import org.hyperic.sigar.NetFlags;
 import org.hyperic.sigar.NetInfo;
 import org.hyperic.sigar.NetInterfaceConfig;
-import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
 import org.hyperic.util.HostIP;
 import org.hyperic.util.config.ConfigResponse;
+
 
 public class SigarPlatformDetector extends PlatformDetector {
 
@@ -136,6 +137,7 @@ public class SigarPlatformDetector extends PlatformDetector {
             " (VM Guest of " + href + ")";
         platform.setDescription(description);
     }
+    
 
     /**
      * Performs all the actual platform detection.
@@ -144,17 +146,22 @@ public class SigarPlatformDetector extends PlatformDetector {
     public PlatformResource getPlatformResource(ConfigResponse config) 
         throws PluginException {
 
-        OperatingSystem os = OperatingSystem.getInstance();
+        HypericOperatingSystem os = HypericOperatingSystem.getInstance();
         
         PlatformResource platform = new PlatformResource();
         if(this.hasControlActions) platform.setControlConfig() ; 
         ConfigResponse cprops = new ConfigResponse();
 
         platform.setPlatformTypeName(os.getName());
-        platform.setDescription(os.getDescription());
+        
+        
 
         Sigar sigar = new Sigar();
         HashMap ips = new HashMap();
+        
+        platform.setDescription(os.getDescription());
+               
+        
         String fqdn = this.fqdn;
         String ip = null;
 
@@ -327,7 +334,7 @@ public class SigarPlatformDetector extends PlatformDetector {
         cprops.setValue("version", os.getVersion());
         cprops.setValue("vendor", os.getVendor());
         cprops.setValue("vendorVersion", os.getVendorVersion());
-
+        getLog().error("cprops=" + cprops);
         platform.setCustomProperties(cprops);
 
         ConfigResponse mconfig = new ConfigResponse();

@@ -50,12 +50,12 @@ import org.hyperic.hq.autoinventory.scanimpl.WindowsRegistryScan;
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.AutoinventoryPluginManager;
 import org.hyperic.hq.product.GenericPlugin;
+import org.hyperic.hq.product.HypericOperatingSystem;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.RegistryServerDetector;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.TypeInfo;
-import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.util.ArrayUtil;
 import org.hyperic.util.config.ConfigResponse;
 
@@ -191,7 +191,7 @@ public class AICommandsService implements AICommandsClient {
                 platformConfig.getValue(ProductPlugin.PROP_PLATFORM_TYPE);
         }
         if (platformType == null) {
-            platformType = OperatingSystem.getInstance().getName();
+            platformType = HypericOperatingSystem.getInstance().getName();
         }
 
         boolean isWin32 = PlatformDetector.isWin32(platformType);

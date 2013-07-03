@@ -36,7 +36,6 @@ import java.util.ArrayList;
 import java.util.Properties;
 
 import org.hyperic.hq.agent.AgentConfig;
-import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.sigar.ProcState;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
@@ -470,7 +469,7 @@ public abstract class ServerControlPlugin extends ControlPlugin {
             }
         }
 
-        if (OperatingSystem.IS_WIN32) {
+        if (HypericOperatingSystem.IS_WIN32) {
             //Runtime.exec does not handle file associations
             //such as foo.pl -> perl.exe, foo.py -> python.exe.
             String exe = Win32.findScriptExecutable(program);

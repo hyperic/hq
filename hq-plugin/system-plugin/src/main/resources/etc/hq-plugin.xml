@@ -506,6 +506,57 @@
             script="pdk/scripts/windows_updates.vbs"
             template="exec:file=${script}:ResultValue"/>
   </metrics>
+   <filter name="hyper-v_hypervisor" value="Hyper-V Hypervisor"/>
+    <filter name="hyper-v_virtual_machine_health_summary" value="Hyper-V Virtual Machine Health Summary"/>
+    <filter name="Hyper-V_VM_Vid_Partition" value="Hyper-V VM Vid Partition(%instance.name%)"/>
+    <filter name="memory" value="Memory"/>
+
+<metrics name="Win32-HYPER-V"  include="Win32">
+	  <!-- <metric name="Availability"
+            template="ServiceAvail:Platform=Win32:vmms"
+            category="AVAILABILITY"
+            indicator="true"
+                        defaultOn="true"
+            collectionType="dynamic"
+            units="percentage"/>
+        <metric name="Health Ok"
+                        template="${hyper-v_virtual_machine_health_summary}:${name}"
+                        indicator="true"
+                        defaultOn="true"
+                    collectionType="dynamic"/>
+        <metric name="Health Critical"
+                        template="${hyper-v_virtual_machine_health_summary}:${name}"
+                        indicator="true"
+                        defaultOn="true"
+                    collectionType="dynamic"/>
+        <metric name="Logical Processors"
+                        template="${hyper-v_hypervisor}:${name}"
+                        indicator="true"
+                        defaultOn="true"
+                    collectionType="dynamic"/>
+        <metric name="Partitions"
+                        template="${hyper-v_hypervisor}:${name}"
+                        indicator="true"
+                        defaultOn="true"
+                    collectionType="dynamic"/>
+        <metric name="Total Pages"
+                        template="${hyper-v_hypervisor}:${name}"
+                        indicator="true"
+                        defaultOn="true"
+                    collectionType="dynamic"/>
+        <metric name="Memory - Available Bytes"
+                        template="${memory}:Available Bytes"
+                        indicator="true"
+                        defaultOn="true"
+                    collectionType="dynamic"/>
+        <metric name="Memory - Pages/sec"
+                        template="${memory}:Pages/sec"
+                        indicator="true"
+                        defaultOn="true"
+                    collectionType="dynamic"/>-->
+
+  </metrics>
+
 
   <metrics name="FileServer Mount">
     <metric name="Availability"
@@ -976,6 +1027,84 @@
             collectionType="trendsup"
             units="ms"/>
   </metrics>
+  
+   <filter name="physical_disk" value="PhysicalDisk(%instance.name%:)"/>
+  <metrics name="HyperV Physical Disk">  
+<!--              <metric name="Availability"
+            template="ServiceAvail:Platform=Win32:vmms"
+            category="AVAILABILITY"
+            indicator="true"
+                        defaultOn="true"
+            collectionType="dynamic"
+            units="percentage"/>
+     -->       
+            <metric name="Availability"
+            	alias="Availability"
+            	template="win32:Service=vmms:${alias}"
+            	category="AVAILABILITY"
+            	indicator="true"
+            	units="percentage"
+            	collectionType="dynamic"/>
+                <metric name="Storage - Current Disk Queue Length"
+                                template="${physical_disk}:Current Disk Queue Length"
+                                indicator="true"
+                                defaultOn="true"
+                            collectionType="dynamic"/>
+                <metric name="Storage - Disk Bytes/sec"
+                                template="${physical_disk}:Disk Bytes/sec"
+                                indicator="true"
+                                defaultOn="true"
+                            collectionType="dynamic"/>
+                <metric name="Storage - Disk Transfers/sec"
+                                template="${physical_disk}:Disk Transfers/sec"
+                                indicator="true"
+                                defaultOn="true"
+                            collectionType="dynamic"/>
+    </metrics>
+   <filter name="network_interface" value="Network Interface(%instance.name%)"/>
+   
+  
+  <metrics name="HyperV Network Interface">  
+       <!-- <metric name="Availability"
+              template="ServiceAvail:Platform=Win32:vmms"
+              category="AVAILABILITY"
+                  indicator="true"
+                 defaultOn="true"
+                  collectionType="dynamic"
+                  units="percentage"/>-->
+            <metric name="Availability"
+            	alias="Availability"
+            	template="win32:Service=vmms:${alias}"
+            	category="AVAILABILITY"
+            	indicator="true"
+            	units="percentage"
+            	collectionType="dynamic"/>
+       <metric name="Network - Bytes Total/sec"
+                   template="${network_interface}:Bytes Total/sec"
+                           indicator="true"
+                                defaultOn="true"
+                            collectionType="dynamic"/>
+                <metric name="Network - Offloaded Connections"
+                                template="${network_interface}:Offloaded Connections"
+                                indicator="true"
+                                defaultOn="true"
+                            collectionType="dynamic"/>
+                <metric name="Network - Packets/sec"
+                                template="${network_interface}:Packets/sec"
+                                indicator="true"
+                                defaultOn="true"
+                            collectionType="dynamic"/>
+        <metric name="Network - Packet Outbound Errors"
+                      template="${network_interface}:Packets Outbound Errors"
+                      indicator="true"
+                      defaultOn="true"
+                      collectionType="dynamic"/>
+        <metric name="Network - Packet Receive Errors"
+                       template="${network_interface}:Packets Received Errors"
+                       indicator="true"
+                       defaultOn="true"
+                       collectionType="dynamic"/>
+  </metrics>
 
   <metrics name="Process">
     <metric name="Availability"
@@ -1195,6 +1324,7 @@
     <metric name="Threads"
             template="sigar:Type=ProcState,Arg=${service.ptql}:Threads"/>
   </metrics>
+  
 
   <help name="AIX">
   <![CDATA[

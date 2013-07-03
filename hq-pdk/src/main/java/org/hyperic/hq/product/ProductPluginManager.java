@@ -50,7 +50,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.product.pluginxml.PluginData;
-import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.util.PluginLoader;
 import org.hyperic.util.PluginLoaderException;
 import org.hyperic.util.StringUtil;
@@ -569,7 +568,7 @@ public class ProductPluginManager
         ServiceTypeInfo service;
         ServerTypeInfo server = null;
         String[] platforms = null;
-        String thisPlatform = OperatingSystem.getInstance().getName();
+        String thisPlatform = HypericOperatingSystem.getInstance().getName();
         String name = plugin.getName();
         String skipMsg = null;
 

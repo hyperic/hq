@@ -444,6 +444,10 @@ class ServerTag
                 offset = 1;
                 this.platformTypes[0] = TypeBuilder.UNIX_PLATFORM_NAMES;
             }
+	    else if (platformList.remove("Win32")) {
+		offset = 1;
+                this.platformTypes[0] = TypeBuilder.WIN32_PLATFORM_NAMES;
+	    }
             for (int i=0; i<platformList.size(); i++) {
                 this.platformTypes[i+offset] =
                     new String[] { (String)platformList.get(i) };
