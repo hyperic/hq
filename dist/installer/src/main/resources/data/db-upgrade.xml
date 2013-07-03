@@ -12023,6 +12023,70 @@ has already been defined.
 			       	</statement>	 
 			       </schema-directSQL>  
 			    </schemaSpec>
+
+    <schemaSpec version="3.221">
+        <schema-insert table="EAM_CONFIG_PROPS"
+                       insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES ('71', 'TOPN_PURGE', '8', '8', %%FALSE%%)"/>
+        <schema-directSQL>
+            <statement>
+                CREATE TABLE IF NOT EXISTS TopNData(
+                resourceId integer NOT NULL,
+                "time" timestamp without time zone,
+                data bytea
+                )
+            </statement>
+            <statement>
+                CREATE OR REPLACE FUNCTION get_and_create_partition(table_name character varying, start_time timestamp without time zone)
+                RETURNS character varying AS
+                $BODY$
+                DECLARE
+                partition VARCHAR(25);
+                end_time timestamp without time zone;
+                BEGIN
+                set local schema 'public';
+                partition := table_name || to_char(start_time, '_YYYY_MM_DD');
+                start_time := date_trunc('day', start_time);
+                end_time := start_time + interval '1 day';
+                EXECUTE
+                'CREATE TABLE IF NOT EXISTS ' || partition || ' (like ' || table_name || ' including all' ||
+                ', check (time >= ''' || start_time || ''' and time < ''' || end_time || '''))' ||
+                ' INHERITS (' || table_name || ')';
+                RETURN partition;
+                END;
+                $BODY$
+                LANGUAGE plpgsql VOLATILE
+                COST 100;
+            </statement>
+            <statement>
+               CREATE OR REPLACE FUNCTION drop_old_partitions(days_to_keep int, table_name varchar(10)) RETURNS int AS
+                $BODY$
+                DECLARE
+                partition VARCHAR(25);
+                min_time timestamp without time zone;
+                time_to_keep timestamp without time zone;
+                deleted_rows int;
+                total_deleted_rows int;
+                BEGIN
+                set local schema 'public';
+                total_deleted_rows := 0;
+                time_to_keep := now() - days_to_keep *'1 day'::interval;
+                EXECUTE 'SELECT MIN(time) FROM ' || table_name INTO min_time;
+                WHILE min_time< time_to_keep LOOP
+                    partition := table_name || to_char(min_time,'_YYYY_MM_DD');
+                    EXECUTE 'SELECT count(*) FROM '|| partition INTO deleted_rows;
+                    total_deleted_rows := total_deleted_rows + deleted_rows;
+                    RAISE NOTICE 'Dropping old partition: %',partition;
+                    EXECUTE 'DROP TABLE '|| partition || ';';
+                    EXECUTE 'SELECT MIN(time) FROM ' || table_name INTO min_time;
+                    END LOOP;
+                RETURN total_deleted_rows;
+                END;
+                $BODY$
+                LANGUAGE plpgsql VOLATILE
+                COST 100;
+            </statement>
+        </schema-directSQL>
+    </schemaSpec>
 </dbupgrade>
 </target>
 </project>

@@ -29,7 +29,7 @@
 
 <hibernate-mapping package="org.hyperic.hq.measurement.server.session">
 
-    <class name="TopNData" table="HQ_TOPN_DATA">
+    <class name="TopNData" table="TopNData">
 
         <cache usage="read-only"/>
 

@@ -74,6 +74,9 @@ public class HQConstants {
     // How long do we keep alerts
     public static final String AlertPurge = "ALERT_PURGE";
 
+    // How long do we keep TopN
+    public static final String TopNPurge = "TOPN_PURGE";
+
     // Are alerts globally enabled?
     public static final String AlertsEnabled = "HQ_ALERTS_ENABLED";
 

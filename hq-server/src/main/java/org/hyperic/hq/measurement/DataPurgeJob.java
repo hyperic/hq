@@ -26,10 +26,12 @@
 package org.hyperic.hq.measurement;
 
 import java.beans.Introspector;
+import java.util.Date;
 import java.util.Properties;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
@@ -72,6 +74,7 @@ public class DataPurgeJob implements Runnable {
     private final Object compressRunningLock = new Object();
     private boolean compressRunning = false;
     private long purgeRaw, purge1h, purge6h, purge1d, purgeAlert;
+    private int purgeTopN;
     private final Log log = LogFactory.getLog(DataPurgeJob.class);
 
     @Autowired
@@ -119,6 +122,7 @@ public class DataPurgeJob implements Runnable {
         String purge6hString = conf.getProperty(HQConstants.DataPurge6Hour);
         String purge1dString = conf.getProperty(HQConstants.DataPurge1Day);
         String purgeAlertString = conf.getProperty(HQConstants.AlertPurge);
+        String purgeTopNString = conf.getProperty(HQConstants.TopNPurge);
 
         try {
             this.purgeRaw = Long.parseLong(purgeRawString);
@@ -126,6 +130,7 @@ public class DataPurgeJob implements Runnable {
             this.purge6h = Long.parseLong(purge6hString);
             this.purge1d = Long.parseLong(purge1dString);
             this.purgeAlert = Long.parseLong(purgeAlertString);
+            this.purgeTopN = Integer.parseInt(purgeTopNString);
         } catch (NumberFormatException e) {
             // Shouldn't happen unless manual edit of config table
             throw new IllegalArgumentException("Invalid purge interval: " + e);
@@ -214,8 +219,9 @@ public class DataPurgeJob implements Runnable {
 
             purgeAlerts(now);
 
-            concurrentStatsCollector.addStat((now() - start),
-                ConcurrentStatsCollector.METRIC_DATA_COMPRESS_TIME);
+            purgeTopNData(now);
+
+            concurrentStatsCollector.addStat((now() - start), ConcurrentStatsCollector.METRIC_DATA_COMPRESS_TIME);
 
         } finally {
             synchronized (compressRunningLock) {
@@ -239,6 +245,20 @@ public class DataPurgeJob implements Runnable {
             alertsDeleted = alertManager.deleteAlerts(now - this.purgeAlert, maxBatch);
             totalDeleted += alertsDeleted;
         } while (alertsDeleted >= maxBatch);
+        log.info("Done (Deleted " + totalDeleted + " alerts)");
+    }
+
+    private void purgeTopNData(long now) {
+        log.info("Purging TopNData older than " + DateUtils.addDays(new Date(now), -this.purgeTopN));
+        int topNDeleted = -1;
+        int totalDeleted = 0;
+        // HQ-2731 - want to batch this 10,000 rows at a time
+        // this avoids the session getting too large and will (hopefully) avoid transaction timeouts
+        int maxBatch = 10000;
+        do {
+            //alertsDeleted = alertManager.deleteAlerts(now - this.purgeAlert, maxBatch);
+            totalDeleted += topNDeleted;
+        } while (topNDeleted >= maxBatch);
         log.info("Done (Deleted " + totalDeleted + " alerts)");
     }
 

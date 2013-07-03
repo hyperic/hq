@@ -28,11 +28,12 @@ package org.hyperic.hq.measurement.server.session;
 import java.math.BigDecimal;
 import java.sql.BatchUpdateException;
 import java.sql.Connection;
-import java.sql.Date;
+import java.util.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -40,6 +41,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -952,34 +954,65 @@ public class DataManagerImpl implements DataManager {
             SQLException {
         PreparedStatement stmt = null;
         final StringBuilder buf = new StringBuilder();
-        try {
 
-            stmt = conn.prepareStatement(buf.append("INSERT INTO HQ_TOPN_DATA").
-                    append(" (resourceId, time, data) VALUES (?, ?, ?)").toString());
+        Map<Date, List<TopNData>> timeToDataMap = new HashMap<Date, List<TopNData>>();
+        for (TopNData data : topNData) {
+            List<TopNData> datas = timeToDataMap.get(data.getTime());
+            if (datas == null) {
+                timeToDataMap.put(data.getTime(), new LinkedList<TopNData>());
+            }
+            timeToDataMap.get(data.getTime()).add(data);
+        }
 
-            for (TopNData data : topNData) {
-                stmt.setInt(1, data.getResourceId());
-                stmt.setTimestamp(2, new java.sql.Timestamp(data.getTime().getTime()));
-                stmt.setBytes(3, data.getData());
-                stmt.addBatch();
-            }
-            int[] execInfo = stmt.executeBatch();
+        for (Entry<Date, List<TopNData>> entry : timeToDataMap.entrySet()) {
+            try {
 
-        } catch (BatchUpdateException e) {
-            if (!continueOnSQLException) {
-                throw e;
+                String tableName = getAndCreatePartition(TopNData.class.getSimpleName(), entry.getKey(), conn);
+                stmt = conn.prepareStatement(buf.append("INSERT INTO ").append(tableName).
+                        append(" (resourceId, time, data) VALUES (?, ?, ?)").toString());
+
+                for (TopNData data : entry.getValue()) {
+                    stmt.setInt(1, data.getResourceId());
+                    stmt.setTimestamp(2, new java.sql.Timestamp(data.getTime().getTime()));
+                    stmt.setBytes(3, data.getData());
+                    stmt.addBatch();
+                }
+                int[] execInfo = stmt.executeBatch();
+
+            } catch (BatchUpdateException e) {
+                if (!continueOnSQLException) {
+                    throw e;
+                }
+            } catch (SQLException e) {
+                if (!continueOnSQLException) {
+                    throw e;
+                }
+                if (log.isDebugEnabled()) {
+                    log.debug("A general SQLException occurred during the insert of TopN. ", e);
+                }
+
+
+            } finally {
+                DBUtil.closeStatement(LOG_CTX, stmt);
             }
-        } catch (SQLException e) {
-            if (!continueOnSQLException) {
-                throw e;
-            }
-            if (log.isDebugEnabled()) {
-                log.debug("A general SQLException occurred during the insert of TopN. ", e);
-            }
-        } finally {
-            DBUtil.closeStatement(LOG_CTX, stmt);
+
         }
         return true;
+    }
+
+    private String getAndCreatePartition(final String tableName, final Date time,
+                                         final Connection conn) throws SQLException {
+        PreparedStatement ps = null;
+        try {
+            ps = conn.prepareStatement("select get_and_create_partition(?,?);");
+            ps.setString(1, tableName);
+            ps.setTimestamp(2, new Timestamp(time.getTime()));
+            final ResultSet rs = ps.executeQuery();
+            rs.next();
+            return rs.getString(1);
+        } finally {
+            DBUtil.closeStatement(LOG_CTX, ps);
+        }
     }
 
 
