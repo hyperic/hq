@@ -25,6 +25,7 @@
  */
 package org.hyperic.hq.measurement.shared;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
@@ -37,11 +38,9 @@ import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.TimeframeSizeException;
 import org.hyperic.hq.measurement.server.session.TopNData;
-import org.hyperic.hq.plugin.system.TopReport;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
-import java.sql.Connection;
 
 /**
  * Local interface for DataManager.
@@ -236,5 +235,34 @@ public interface DataManager {
 
     public Map<Integer, double[]> getAggregateDataAndAvailUpByMetric(final List<Measurement> hqMsmts, long beginMilli,
             long endMilli) throws SQLException;
+
+    /**
+     * @param resourceId
+     * @param from
+     * @param to
+     * @return
+     */
+    List<Long> getAvailableTopDataTimes(int resourceId, long from, long to);
+
+    /**
+     * @param resourceId
+     * @param time
+     * @return
+     */
+    TopNData getTopNData(int resourceId, long time);
+
+    /**
+     * @param resourceId
+     * @param time
+     * @return
+     */
+    String getTopNDataAsString(int resourceId, long time);
+
+    /**
+     * @param resourceId
+     * @param count
+     * @return
+     */
+    List<Long> getLatestAvailableTopDataTimes(int resourceId, int count);
 
 }

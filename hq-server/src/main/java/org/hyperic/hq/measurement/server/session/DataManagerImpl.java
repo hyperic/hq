@@ -75,6 +75,7 @@ import org.hyperic.hq.measurement.shared.MeasRange;
 import org.hyperic.hq.measurement.shared.MeasRangeObj;
 import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
+import org.hyperic.hq.plugin.system.TopReport;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
@@ -228,8 +229,8 @@ public class DataManagerImpl implements DataManager {
         throws SQLException {
         // Set ID's
         int i = start;
-        for (int ind = 0; ind < ids.length; ind++) {
-            stmt.setInt(i++, ids[ind].intValue());
+        for (Integer id : ids) {
+            stmt.setInt(i++, id.intValue());
         }
 
         return i;
@@ -240,8 +241,9 @@ public class DataManagerImpl implements DataManager {
 
         checkTimeArguments(begin, end);
 
-        if (interval > (end - begin))
+        if (interval > (end - begin)) {
             throw new IllegalArgumentException(ERR_INTERVAL);
+        }
     }
 
     /**
@@ -280,8 +282,7 @@ public class DataManagerImpl implements DataManager {
         ResultSet rs = null;
         try {
             StringBuilder values = new StringBuilder();
-            for (Iterator<DataPoint> i = dpts.iterator(); i.hasNext();) {
-                DataPoint pt = i.next();
+            for (DataPoint pt : dpts) {
                 Integer metricId = pt.getMeasurementId();
                 HighLowMetricValue metricVal = (HighLowMetricValue) pt.getMetricValue();
                 BigDecimal val = new BigDecimal(metricVal.getValue());
@@ -534,8 +535,9 @@ public class DataManagerImpl implements DataManager {
                 log.debug("Num left = " + left.size());
             }
 
-            if (left.isEmpty())
+            if (left.isEmpty()) {
                 break;
+            }
 
             if (!overwrite) {
                 if (log.isDebugEnabled()) {
@@ -553,8 +555,9 @@ public class DataManagerImpl implements DataManager {
 
             left = updateData(conn, left);
 
-            if (left.isEmpty())
+            if (left.isEmpty()) {
                 break;
+            }
 
             if (log.isDebugEnabled()) {
                 log.debug("Update left " + left.size() + " points to process");
@@ -691,8 +694,9 @@ public class DataManagerImpl implements DataManager {
         int idx = 0;
 
         // this is the case for mysql
-        if (execInfo.length == 0)
+        if (execInfo.length == 0) {
             return res;
+        }
 
         for (Iterator<DataPoint> i = data.iterator(); i.hasNext(); idx++) {
             DataPoint pt = i.next();
@@ -905,8 +909,7 @@ public class DataManagerImpl implements DataManager {
                            .toString());
                 }
                 // TODO need to set synchronous commit to off
-                for (Iterator<DataPoint> i = dpts.iterator(); i.hasNext();) {
-                    DataPoint pt = i.next();
+                for (DataPoint pt : dpts) {
                     Integer metricId = pt.getMeasurementId();
                     MetricValue val = pt.getMetricValue();
                     BigDecimal bigDec;
@@ -948,6 +951,121 @@ public class DataManagerImpl implements DataManager {
             }
         }
         return left;
+    }
+    
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.hyperic.hq.measurement.shared.DataManager#getTopNData(int, long)
+     */
+    public TopNData getTopNData(int resourceId, long time) {
+        Statement stmt = null;
+        Connection conn = safeGetConnection();
+        StringBuilder builder = new StringBuilder();
+        try {
+            builder.append("SELECT data FROM TOPNDATA TOP WHERE TOP.resourceid='").append(resourceId)
+                    .append("' AND TOP.time = '").append(new java.sql.Timestamp(time)).append("'");
+
+            stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(builder.toString());
+            while (rs.next()) {
+                TopNData data = new TopNData();
+                data.setData(rs.getBytes("data"));
+                data.setResourceId(resourceId);
+                data.setTime(new Date(time));
+                return data;
+            }
+
+        } catch (SQLException e) {
+            log.error("Problem fetching TOP data", e);
+        } finally {
+            DBUtil.closeStatement(LOG_CTX, stmt);
+        }
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.hyperic.hq.measurement.shared.DataManager#getTopNDataAsString(int,
+     * long)
+     */
+    @Transactional(readOnly = true)
+    public String getTopNDataAsString(int resourceId, long time) {
+        TopNData data = getTopNData(resourceId, time);
+        try {
+            return TopReport.fromSerializedForm(data.getData()).toString();
+        } catch (Exception e) {
+        }
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.hyperic.hq.measurement.shared.DataManager#getLatestAvailableTopDataTimes
+     * (int, int)
+     */
+    @Transactional(readOnly = true)
+    public List<Long> getLatestAvailableTopDataTimes(int resourceId, int count) {
+        List<Long> times = new ArrayList<Long>();
+        Statement stmt = null;
+        Connection conn = safeGetConnection();
+        StringBuilder builder = new StringBuilder();
+        try {
+            builder.append("SELECT TIME FROM TOPNDATA TOP WHERE TOP.resourceid='").append(resourceId)
+                    .append("' ORDER BY time DESC LIMIT ").append(count);
+
+            stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(builder.toString());
+            while (rs.next()) {
+                times.add(rs.getTimestamp("time").getTime());
+            }
+
+        } catch (SQLException e) {
+            log.error("Problem fetching TOP data", e);
+            return times;
+        } finally {
+            DBUtil.closeStatement(LOG_CTX, stmt);
+        }
+        return times;
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.hyperic.hq.measurement.shared.DataManager#getAvailableTopDataTimes
+     * (int, long, long)
+     */
+    @Transactional(readOnly=true)
+    public List<Long> getAvailableTopDataTimes(int resourceId, long from, long to) {
+        List<Long> times = new ArrayList<Long>();
+        Statement stmt = null;
+        Connection conn = safeGetConnection();
+        StringBuilder builder = new StringBuilder();
+        try {
+            builder.append("SELECT TIME FROM TOPNDATA TOP WHERE TOP.resourceid='").append(resourceId)
+                    .append("' AND TOP.time BETWEEN '").append(new java.sql.Timestamp(from)).append("' AND '")
+                    .append(new java.sql.Timestamp(to)).append("'");
+
+            stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(builder.toString());
+            while (rs.next()) {
+                times.add(rs.getTimestamp("time").getTime());
+            }
+
+        } catch (SQLException e) {
+            log.error("Problem fetching TOP data", e);
+            return times;
+        } finally {
+            DBUtil.closeStatement(LOG_CTX, stmt);
+        }
+        return times;
+        
     }
 
     private boolean insertTopData(Connection conn, List<TopNData> topNData, boolean continueOnSQLException) throws
@@ -1027,47 +1145,44 @@ public class DataManagerImpl implements DataManager {
         List<DataPoint> left = new ArrayList<DataPoint>();
         Map<String, List<DataPoint>> buckets = MeasRangeObj.getInstance().bucketData(data);
 
-        for (Iterator<Map.Entry<String, List<DataPoint>>> it = buckets.entrySet().iterator(); it
-            .hasNext();) {
-            Map.Entry<String, List<DataPoint>> entry = it.next();
-            String table = entry.getKey();
-            List<DataPoint> dpts = entry.getValue();
+        for (Entry<String, List<DataPoint>> entry : buckets.entrySet()) {
+        String table = entry.getKey();
+        List<DataPoint> dpts = entry.getValue();
 
-            try {
-                // TODO need to set synchronous commit to off
-                stmt = conn.prepareStatement("UPDATE " + table + 
-                                             " SET value = ? WHERE timestamp = ? AND measurement_id = ?");
-                for (Iterator<DataPoint> i = dpts.iterator(); i.hasNext();) {
-                    DataPoint pt = i.next();
-                    Integer metricId = pt.getMeasurementId();
-                    MetricValue val = pt.getMetricValue();
-                    BigDecimal bigDec;
-                    bigDec = new BigDecimal(val.getValue());
-                    stmt.setBigDecimal(1, getDecimalInRange(bigDec, metricId));
-                    stmt.setLong(2, val.getTimestamp());
-                    stmt.setInt(3, metricId.intValue());
-                    stmt.addBatch();
-                }
-
-                int[] execInfo = stmt.executeBatch();
-                left.addAll(getRemainingDataPoints(dpts, execInfo));
-            } catch (BatchUpdateException e) {
-                left.addAll(getRemainingDataPointsAfterBatchFail(dpts, e.getUpdateCounts()));
-            } catch (SQLException e) {
-                // If the batch update is not within a transaction, then we
-                // don't know which of the updates completed successfully.
-                // Assume they all failed.
-                left.addAll(dpts);
-
-                if (log.isDebugEnabled()) {
-                    log.debug("A general SQLException occurred during the update. " +
-                              "Assuming that none of the " + dpts.size() +
-                              " data points were updated.", e);
-                }
-            } finally {
-                DBUtil.closeStatement(LOG_CTX, stmt);
+        try {
+            // TODO need to set synchronous commit to off
+            stmt = conn.prepareStatement("UPDATE " + table + 
+                                         " SET value = ? WHERE timestamp = ? AND measurement_id = ?");
+            for (DataPoint pt : dpts) {
+                Integer metricId = pt.getMeasurementId();
+                MetricValue val = pt.getMetricValue();
+                BigDecimal bigDec;
+                bigDec = new BigDecimal(val.getValue());
+                stmt.setBigDecimal(1, getDecimalInRange(bigDec, metricId));
+                stmt.setLong(2, val.getTimestamp());
+                stmt.setInt(3, metricId.intValue());
+                stmt.addBatch();
             }
+
+            int[] execInfo = stmt.executeBatch();
+            left.addAll(getRemainingDataPoints(dpts, execInfo));
+        } catch (BatchUpdateException e) {
+            left.addAll(getRemainingDataPointsAfterBatchFail(dpts, e.getUpdateCounts()));
+        } catch (SQLException e) {
+            // If the batch update is not within a transaction, then we
+            // don't know which of the updates completed successfully.
+            // Assume they all failed.
+            left.addAll(dpts);
+
+            if (log.isDebugEnabled()) {
+                log.debug("A general SQLException occurred during the update. " +
+                          "Assuming that none of the " + dpts.size() +
+                          " data points were updated.", e);
+            }
+        } finally {
+            DBUtil.closeStatement(LOG_CTX, stmt);
         }
+      }
         return left;
     }
 
@@ -1118,7 +1233,7 @@ public class DataManagerImpl implements DataManager {
             throw new TimeframeSizeException("The requested time frame is of size " + tf + " milliseconds, which is smaller than the time interval of the measurement" + (tmp!=null?(" "+tmp.getName()):"") + " which is " + msmtInterval + " milliseconds");
         }
         long now = System.currentTimeMillis();
-        if (end>now || end<begin) {
+        if ((end>now) || (end<begin)) {
             throw new TimeframeBoundriesException("The requested time frame"
                     + (end>now?" ends in the future":(end<begin?" and":""))
                     + (end<begin?" ends before it starts":""));
@@ -1126,21 +1241,21 @@ public class DataManagerImpl implements DataManager {
         if (!confDefaultsLoaded) {
             loadConfigDefaults();
         }
-        if (msmtInterval>=maxInterval && begin>=now-DataManagerImpl.this.purgeRaw) {
+        if ((msmtInterval>=maxInterval) && (begin>=(now-DataManagerImpl.this.purgeRaw))) {
             return MeasurementUnionStatementBuilder.getUnionStatement(begin, end, msmt.getId().intValue(), measurementDAO.getHQDialect());
         }
         if (tf<HOUR_IN_MILLI) {
             MeasurementTemplate tmp = msmt.getTemplate();
             throw new TimeframeSizeException("The requested time frame is of size " + tf + " milliseconds, which is smaller than the hourly aggregated time interval of the measurement " + (tmp!=null?tmp.getName():""));
         }
-        if (HOUR_IN_MILLI>=maxInterval && begin>=now-DataManagerImpl.this.purge1h) {
+        if ((HOUR_IN_MILLI>=maxInterval) && (begin>=(now-DataManagerImpl.this.purge1h))) {
             return MeasurementConstants.TAB_DATA_1H;
         }
         if (tf<SIX_HOURS_IN_MILLI) { 
             MeasurementTemplate tmp = msmt.getTemplate();
             throw new TimeframeSizeException("The requested time frame is of size " + tf + " milliseconds, which is smaller than the 6-hourly aggregated time interval of the measurement " + (tmp!=null?tmp.getName():""));
         }
-        if (SIX_HOURS_IN_MILLI>=maxInterval && begin>=now-DataManagerImpl.this.purge6h) {
+        if ((SIX_HOURS_IN_MILLI>=maxInterval) && (begin>=(now-DataManagerImpl.this.purge6h))) {
             return MeasurementConstants.TAB_DATA_6H;
         }
         if (tf<DAY_IN_MILLI) { 
@@ -1168,8 +1283,8 @@ public class DataManagerImpl implements DataManager {
     }
 
     private boolean usesMetricUnion(long begin, long end, boolean useAggressiveRollup) {
-        if (!useAggressiveRollup && usesMetricUnion(begin) ||
-            (useAggressiveRollup && ((end - begin) / HOUR) < HOURS_PER_MEAS_TAB)) {
+        if ((!useAggressiveRollup && usesMetricUnion(begin)) ||
+            (useAggressiveRollup && (((end - begin) / HOUR) < HOURS_PER_MEAS_TAB))) {
             return true;
         }
         return false;
@@ -1193,9 +1308,9 @@ public class DataManagerImpl implements DataManager {
         }
         if (usesMetricUnion(begin, end, useAggressiveRollup)) {
             return MeasTabManagerUtil.getMetricTables(begin, end);
-        } else if (now - this.purge1h < begin) {
+        } else if ((now - this.purge1h) < begin) {
             return new String[] { TAB_DATA_1H };
-        } else if (now - this.purge6h < begin) {
+        } else if ((now - this.purge6h) < begin) {
             return new String[] { TAB_DATA_6H };
         } else {
             return new String[] { TAB_DATA_1D };
@@ -1220,9 +1335,9 @@ public class DataManagerImpl implements DataManager {
         if (usesMetricUnion(begin, end, useAggressiveRollup)) {
             return MeasurementUnionStatementBuilder.getUnionStatement(begin, end, measIds,
                 measurementDAO.getHQDialect());
-        } else if (now - this.purge1h < begin) {
+        } else if ((now - this.purge1h) < begin) {
             return TAB_DATA_1H;
-        } else if (now - this.purge6h < begin) {
+        } else if ((now - this.purge6h) < begin) {
             return TAB_DATA_6H;
         } else {
             return TAB_DATA_1D;
@@ -1713,7 +1828,7 @@ public class DataManagerImpl implements DataManager {
                 windowSize, returnNulls, publishedInterval);
         for (int ii = 0; ii < values.length; ii++) {
             final AggMetricValue val = values[ii];
-            if (null == val && returnNulls) {
+            if ((null == val) && returnNulls) {
                 rtn.add(new HighLowMetricValue(Double.NaN, tmp + (ii * windowSize)));
                 continue;
             } else if (null == val) {
@@ -1763,7 +1878,7 @@ public class DataManagerImpl implements DataManager {
     
     private CharSequence getRawDataSql(Integer[] mids, long begin, long end,
                                        AtomicLong publishedInterval) {
-        if (mids == null || mids.length == 0) {
+        if ((mids == null) || (mids.length == 0)) {
             return "";
         }
         if (log.isDebugEnabled()) {
@@ -1778,7 +1893,7 @@ public class DataManagerImpl implements DataManager {
         // 2) we only want to use the primary key for bigger queries.  Our tests show
         //    that the primary key performance is very consistent for large queries and smaller
         //    queries.  But for smaller queries the measurement_id index is more effective
-        final String hint = (dialect.getMetricDataHint().isEmpty() || mids.length < 1000) ?
+        final String hint = (dialect.getMetricDataHint().isEmpty() || (mids.length < 1000)) ?
             "" : " " + dialect.getMetricDataHint();
         final String sql = new StringBuilder(1024 + (mids.length * 5))
             .append("SELECT count(*) as cnt, sum(value) as sumvalue, ")
@@ -1789,7 +1904,7 @@ public class DataManagerImpl implements DataManager {
             .append(" GROUP BY timestamp")
             .toString();
         final String[] tables = getDataTables(begin, end, false);
-        if (publishedInterval != null && tables.length == 1) {
+        if ((publishedInterval != null) && (tables.length == 1)) {
             if (tables[0].equals(TAB_DATA_1H)) {
                 publishedInterval.set(HOUR);
             } else if (tables[0].equals(TAB_DATA_6H)) {
@@ -1830,8 +1945,7 @@ public class DataManagerImpl implements DataManager {
         // start                                                                    finish
         // <----------------------------------------------------------------------------->
         // (begin-end)(begin-end)(begin-end)(begin-end)(begin-end)(begin-end)(begin-end)..
-        for (int ii = 0; ii < ranges.length; ii++) {
-            final MeasRange range = ranges[ii];
+        for (final MeasRange range : ranges) {
             final long min = range.getMinTimestamp();
             final long max = range.getMaxTimestamp();
             final long begin = (min < start) ? start : min;
@@ -1917,7 +2031,7 @@ public class DataManagerImpl implements DataManager {
                 final long timestamp = rs.getLong(timestampCol);
                 final AggMetricValue val = new AggMetricValue(timestamp, sum,
                         max, min, count);
-                if (timestamp < start || timestamp > finish) {
+                if ((timestamp < start) || (timestamp > finish)) {
                     continue;
                 }
                 final int bucket = (int) (buckets - ((finish - timestamp) / (float) windowSize));
@@ -1967,12 +2081,12 @@ public class DataManagerImpl implements DataManager {
     }
 
     private void waitForThreads(List<Thread> threads, int maxThreads) {
-        if (threads.isEmpty() || threads.size() < maxThreads) {
+        if (threads.isEmpty() || (threads.size() < maxThreads)) {
             return;
         }
         int i=0;
         while (threads.size() >= maxThreads) {
-            i = (i >= threads.size() || i < 0) ? 0 : i;
+            i = ((i >= threads.size()) || (i < 0)) ? 0 : i;
             final Thread thread = threads.get(i);
             try {
                 if (thread.isAlive()) {
@@ -2120,22 +2234,32 @@ public class DataManagerImpl implements DataManager {
         final Integer[] avIds = availIds.toArray(new Integer[0]);
         final StopWatch watch = new StopWatch();
         final boolean debug = log.isDebugEnabled();
-        if (debug) watch.markTimeBegin("getLastDataPts");
-        final Map<Integer, MetricValue> data = getLastDataPts(measurementIds, timestamp);
-        if (debug) watch.markTimeEnd("getLastDataPts");
-        if (availIds.size() > 0) {
-            if (debug) watch.markTimeBegin("getLastAvail");
-            data.putAll(availabilityManager.getLastAvail(avIds));
-            if (debug) watch.markTimeEnd("getLastAvail");
+        if (debug) {
+            watch.markTimeBegin("getLastDataPts");
         }
-        if (debug) log.debug(watch);
+        final Map<Integer, MetricValue> data = getLastDataPts(measurementIds, timestamp);
+        if (debug) {
+            watch.markTimeEnd("getLastDataPts");
+        }
+        if (availIds.size() > 0) {
+            if (debug) {
+                watch.markTimeBegin("getLastAvail");
+            }
+            data.putAll(availabilityManager.getLastAvail(avIds));
+            if (debug) {
+                watch.markTimeEnd("getLastAvail");
+            }
+        }
+        if (debug) {
+            log.debug(watch);
+        }
         return data;
     }
 
     private Map<Integer, MetricValue> getLastDataPts(Collection<Integer> mids, long timestamp) {
         final int BATCH_SIZE = 500;
         final Map<Integer, MetricValue> rtn = new HashMap<Integer, MetricValue>(mids.size());
-        if (mids == null || mids.isEmpty()) {
+        if ((mids == null) || mids.isEmpty()) {
             return rtn;
         }
         // all cached values are inserted into rtn
@@ -2144,7 +2268,9 @@ public class DataManagerImpl implements DataManager {
         ArrayList<Integer> ids = null;
         final boolean debug = log.isDebugEnabled();
         if (nodata.isEmpty()) {
-            if (debug) log.debug("got data from cache");
+            if (debug) {
+                log.debug("got data from cache");
+            }
             // since we have all the data from cache (nodata is empty), just return it
             return rtn;
         } else {
@@ -2160,15 +2286,21 @@ public class DataManagerImpl implements DataManager {
                 final int max = Math.min(ids.size(), i+BATCH_SIZE);
                 // Create sub array
                 Collection<Integer> subids = ids.subList(i, max);
-                if (debug) watch.markTimeBegin("setDataPoints");
+                if (debug) {
+                    watch.markTimeBegin("setDataPoints");
+                }
                 setDataPoints(rtn, timestamp, subids, stmt);
-                if (debug) watch.markTimeEnd("setDataPoints");
+                if (debug) {
+                    watch.markTimeEnd("setDataPoints");
+                }
             }
         } catch (SQLException e) {
             throw new SystemException("Cannot get last values", e);
         } finally {
             DBUtil.closeJDBCObjects(LOG_CTX, conn, stmt, null);
-            if (debug) log.debug(watch);
+            if (debug) {
+                log.debug(watch);
+            }
         }
         List<DataPoint> dataPoints = convertMetricId2MetricValueMapToDataPoints(rtn);
         updateMetricDataCache(dataPoints);
@@ -2233,8 +2365,9 @@ public class DataManagerImpl implements DataManager {
                 "(SELECT measurement_id AS id, MAX(timestamp) AS maxt" + " FROM " + tables +
                 " WHERE ").append(MeasTabManagerUtil.getMeasInStmt(measIds, false));
 
-        if (timestamp != MeasurementConstants.TIMERANGE_UNLIMITED)
+        if (timestamp != MeasurementConstants.TIMERANGE_UNLIMITED) {
             ;
+        }
         sqlBuf.append(" AND timestamp >= ").append(timestamp);
 
         sqlBuf.append(" GROUP BY measurement_id) mt").append(
@@ -2256,13 +2389,11 @@ public class DataManagerImpl implements DataManager {
 
         List<DataPoint> dataPoints = new ArrayList<DataPoint>(metricId2MetricValueMap.size());
 
-        for (Iterator<Map.Entry<Integer, MetricValue>> i = metricId2MetricValueMap.entrySet()
-            .iterator(); i.hasNext();) {
-            Map.Entry<Integer, MetricValue> entry = i.next();
-            Integer mid = entry.getKey();
-            MetricValue mval = entry.getValue();
-            dataPoints.add(new DataPoint(mid, mval));
-        }
+        for (Entry<Integer, MetricValue> entry : metricId2MetricValueMap.entrySet()) {
+        Integer mid = entry.getKey();
+        MetricValue mval = entry.getValue();
+        dataPoints.add(new DataPoint(mid, mval));
+      }
 
         return dataPoints;
     }
@@ -2363,8 +2494,9 @@ public class DataManagerImpl implements DataManager {
         // Result set
         HashMap<Integer, double[]> resMap = new HashMap<Integer, double[]>();
 
-        if (tids.length == 0 || iids.length == 0)
+        if ((tids.length == 0) || (iids.length == 0)) {
             return resMap;
+        }
 
         // Get the data points and add to the ArrayList
         Connection conn = null;
@@ -2489,8 +2621,9 @@ public class DataManagerImpl implements DataManager {
         // Result set
         HashMap<Integer, double[]> resMap = new HashMap<Integer, double[]>();
 
-        if (mids.length == 0)
+        if (mids.length == 0) {
             return resMap;
+        }
 
         // Get the data points and add to the ArrayList
         Connection conn = null;
@@ -2518,8 +2651,9 @@ public class DataManagerImpl implements DataManager {
         try {
             conn = dbUtil.getConnection();
 
-            if (log.isTraceEnabled())
+            if (log.isTraceEnabled()) {
                 log.trace("getAggregateDataByMetric(): " + aggregateSQL);
+            }
 
             stmt = conn.prepareStatement(aggregateSQL);
 
@@ -2545,9 +2679,10 @@ public class DataManagerImpl implements DataManager {
                 DBUtil.closeResultSet(LOG_CTX, rs);
             }
 
-            if (log.isTraceEnabled())
+            if (log.isTraceEnabled()) {
                 log.trace("getAggregateDataByMetric(): Statement query elapsed " + "time: " +
                           timer.getElapsed());
+            }
 
             return resMap;
         } catch (SQLException e) {

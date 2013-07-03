@@ -1,11 +1,11 @@
 package org.hyperic.hq.plugin.system;
 
+import java.io.Externalizable;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 
-public class ProcessReport implements Serializable {
+public class ProcessReport implements Externalizable {
 
     private static final long serialVersionUID = 1L;
     private long pid;
@@ -105,19 +105,7 @@ public class ProcessReport implements Serializable {
         this.startTime = startTime;
     }
 
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        pid = in.readLong();
-        owner = in.readUTF();
-        size = in.readLong();
-        resident = in.readLong();
-        share = in.readLong();
-        cpuTotal = in.readLong();
-        cpuPerc = in.readDouble();
-        baseName = in.readUTF();
-        startTime = in.readLong();
-    }
-
-    private void writeObject(ObjectOutputStream out) throws IOException {
+    public void writeExternal(ObjectOutput out) throws IOException {
         out.writeLong(pid);
         out.writeUTF(owner);
         out.writeLong(size);
@@ -129,12 +117,25 @@ public class ProcessReport implements Serializable {
         out.writeLong(startTime);
     }
 
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        pid = in.readLong();
+        owner = in.readUTF();
+        size = in.readLong();
+        resident = in.readLong();
+        share = in.readLong();
+        cpuTotal = in.readLong();
+        cpuPerc = in.readDouble();
+        baseName = in.readUTF();
+        startTime = in.readLong();
+    }
+
     @Override
     public String toString() {
         return "ProcessReport [pid=" + pid + ", owner=" + owner + ", size=" + size + ", resident=" + resident
                 + ", share=" + share + ", cpuTotal=" + cpuTotal + ", cpuPerc=" + cpuPerc + ", baseName=" + baseName
                 + ", startTime=" + startTime + "]";
     }
+
 
 
 }

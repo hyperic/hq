@@ -1,18 +1,17 @@
 package org.hyperic.hq.plugin.system;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.Externalizable;
 import java.io.IOException;
+import java.io.ObjectInput;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-public class TopReport implements Serializable {
+public class TopReport implements Externalizable {
 
     private static final long serialVersionUID = 1L;
     private long createTime;
@@ -78,23 +77,26 @@ public class TopReport implements Serializable {
         this.processes.add(process);
     }
 
-    @SuppressWarnings("unchecked")
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        createTime = in.readLong();
-        upTime = in.readUTF();
-        cpu = in.readUTF();
-        mem = in.readUTF();
-        swap = in.readUTF();
-        processes = (Set<ProcessReport>) in.readObject();
-    }
 
-    private void writeObject(ObjectOutputStream out) throws IOException {
+
+    public void writeExternal(ObjectOutput out) throws IOException {
         out.writeLong(createTime);
         out.writeUTF(upTime);
         out.writeUTF(cpu);
         out.writeUTF(mem);
         out.writeUTF(swap);
         out.writeObject(processes);
+
+    }
+
+    @SuppressWarnings("unchecked")
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        createTime = in.readLong();
+        upTime = in.readUTF();
+        cpu = in.readUTF();
+        mem = in.readUTF();
+        swap = in.readUTF();
+        processes = ((Set<ProcessReport>) in.readObject());
     }
 
     public byte[] toSerializedForm() throws IOException {
@@ -118,10 +120,17 @@ public class TopReport implements Serializable {
 
     @Override
     public String toString() {
-        return "TopReport [createTime=" + createTime + ", upTime=" + upTime + ", cpu=" + cpu + ", mem=" + mem + ", " +
-                "swap="
-                + swap + ", processes=" + processes + "]";
+        StringBuilder sb = new StringBuilder();
+        sb.append("TopReport\n").append("------------------------------\n").append("createTime=").append(createTime)
+                .append("\n").append("upTime=").append(upTime).append("\n").append("cpu=").append(cpu).append("\n")
+                .append("mem=").append(mem).append("\n").append("swap=").append(swap).append("\n\n")
+                .append("processes\n").append("------------------------------\n");
+        for (ProcessReport process : processes) {
+            sb.append(process.toString()).append("\n");
+        }
+        return sb.toString();
     }
+
 
     /*public void insertTopN(List topNData) throws InterruptedException{
         throw new NotImplementedException();
