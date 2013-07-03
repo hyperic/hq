@@ -57,10 +57,13 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.security.HQUserDetails;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.session.SessionAuthenticationException;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.stereotype.Component;
@@ -87,9 +90,10 @@ public class BaseSessionInitializationStrategy implements SessionAuthenticationS
     	this.userAuditFactory = userAuditFactory;
     	this.roleManager = roleManager;
     }
-    
+       
+
     public void onAuthentication(Authentication authentication, HttpServletRequest request,
-    		                     HttpServletResponse response)
+                                 HttpServletResponse response)
     throws SessionAuthenticationException {
         final boolean debug = log.isDebugEnabled();
 
@@ -99,18 +103,17 @@ public class BaseSessionInitializationStrategy implements SessionAuthenticationS
         
         // The following is logic taken from the old HQ Authentication Filter
         try {
-            int sessionId = sessionManager.put(authzSubjectManager.findSubjectByName(username));
+            AuthzSubject authzSubject = authzSubjectManager.findSubjectByName(username);
+                        
             HttpSession session = request.getSession();
             ServletContext ctx = session.getServletContext();
-            
-            // look up the subject record
-            AuthzSubject subj = authzBoss.getCurrentSubject(sessionId);
+                        
             boolean needsRegistration = false;
             
-            if (subj == null) {
+            if (authzSubject == null) {
                 try {
                     AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
-                    subj = authzSubjectManager.createSubject(
+                    authzSubject = authzSubjectManager.createSubject(
                         overlord, username, true, HQConstants.ApplicationName, "", "", "", "",
                         "", "", false);
                     //every user has ROLE_HQ_USER.  If other roles assigned, automatically assign them to new user
@@ -123,7 +126,7 @@ public class BaseSessionInitializationStrategy implements SessionAuthenticationS
                             for(Role role: roles) {
                                 if(("ROLE_" + role.getName()).equalsIgnoreCase(authority.getAuthority())) {
                                     roleManager.addSubjects(authzSubjectManager.getOverlordPojo(), role.getId(), 
-                                        new Integer[] {subj.getId()});
+                                        new Integer[] {authzSubject.getId()});
                                 }
                             }
                         }
@@ -134,20 +137,24 @@ public class BaseSessionInitializationStrategy implements SessionAuthenticationS
                 }
                 
                 needsRegistration = true;
-                sessionId = sessionManager.put(subj);
             } else {
-                needsRegistration = subj.getEmailAddress() == null ||
-                                    subj.getEmailAddress().length() == 0;
+                needsRegistration = authzSubject.getEmailAddress() == null ||
+                        authzSubject.getEmailAddress().length() == 0;
             }
 
-            userAuditFactory.loginAudit(subj);
-            AuthzSubjectValue subject = subj.getAuthzSubjectValue();
+            userAuditFactory.loginAudit(authzSubject);
+//            HQUserDetails userDetails = new HQUserDetails(authzSubject, "", authentication.getAuthorities());
+//            UsernamePasswordAuthenticationToken newAuthentication = new UsernamePasswordAuthenticationToken(userDetails, authentication.getCredentials(), authentication.getAuthorities());
+//            newAuthentication.setDetails(authentication.getDetails());
+            SecurityContextHolder.getContext().setAuthentication(authentication);               
             
+            int sessionId = 1;            
             // figure out if the user has a principal
-            boolean hasPrincipal = authBoss.isUser(sessionId, subject.getName());
+            boolean hasPrincipal = authBoss.isUser(sessionId, username);
             ConfigResponse preferences = needsRegistration ?
-                new ConfigResponse() : getUserPreferences(ctx, sessionId, subject.getId(), authzBoss);
-            WebUser webUser = new WebUser(subject, sessionId, preferences, hasPrincipal);
+                new ConfigResponse() : getUserPreferences(ctx, sessionId, authzSubject.getId(), authzBoss);
+            WebUser webUser = new WebUser(authzSubject, sessionId, preferences, hasPrincipal);
+                        
 
             // Add WebUser to Session
             session.setAttribute(Constants.WEBUSER_SES_ATTR, webUser);
@@ -167,9 +174,9 @@ public class BaseSessionInitializationStrategy implements SessionAuthenticationS
             if (debug) log.debug("Stashing user operations in the session");
 
             if (debug && needsRegistration) {
-            	log.debug("Authentic user but no HQ entity, must have authenticated outside of " +
+                log.debug("Authentic user but no HQ entity, must have authenticated outside of " +
                           "HQ...needs registration");
-            }
+            }                     
         } catch (SessionException e) {
             if (debug) {
                 log.debug("Authentication of user {" + username + "} failed due to an session error.");
@@ -183,7 +190,107 @@ public class BaseSessionInitializationStrategy implements SessionAuthenticationS
             
             throw new SessionAuthenticationException("login.error.application");
         }
-    }
+    }    
+    
+//    
+//    public void onAuthentication(Authentication authentication, HttpServletRequest request,
+//    		                     HttpServletResponse response)
+//    throws SessionAuthenticationException {
+//        final boolean debug = log.isDebugEnabled();
+//
+//        if (debug) log.debug("Initializing UI session parameters...");
+//
+//        String username = authentication.getName();
+//        
+//        // The following is logic taken from the old HQ Authentication Filter
+//        try {
+//            int sessionId = sessionManager.put(authzSubjectManager.findSubjectByName(username));
+//            HttpSession session = request.getSession();
+//            ServletContext ctx = session.getServletContext();
+//            
+//            // look up the subject record
+//            AuthzSubject subj = authzBoss.getCurrentSubject(sessionId);
+//            boolean needsRegistration = false;
+//            
+//            if (subj == null) {
+//                try {
+//                    AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
+//                    subj = authzSubjectManager.createSubject(
+//                        overlord, username, true, HQConstants.ApplicationName, "", "", "", "",
+//                        "", "", false);
+//                    //every user has ROLE_HQ_USER.  If other roles assigned, automatically assign them to new user
+//                    if(authentication.getAuthorities().size() > 1) {
+//                        Collection<Role> roles = roleManager.getAllRoles();
+//                        for(GrantedAuthority authority: authentication.getAuthorities()) {
+//                            if(authority.getAuthority().equals("ROLE_HQ_USER")) {
+//                                continue;
+//                            }
+//                            for(Role role: roles) {
+//                                if(("ROLE_" + role.getName()).equalsIgnoreCase(authority.getAuthority())) {
+//                                    roleManager.addSubjects(authzSubjectManager.getOverlordPojo(), role.getId(), 
+//                                        new Integer[] {subj.getId()});
+//                                }
+//                            }
+//                        }
+//                    }
+//                } catch (ApplicationException e) {
+//                    throw new SessionAuthenticationException(
+//                        "Unable to add user to authorization system");
+//                }
+//                
+//                needsRegistration = true;
+//                sessionId = sessionManager.put(subj);
+//            } else {
+//                needsRegistration = subj.getEmailAddress() == null ||
+//                                    subj.getEmailAddress().length() == 0;
+//            }
+//
+//            userAuditFactory.loginAudit(subj);
+//            AuthzSubjectValue subject = subj.getAuthzSubjectValue();
+//            
+//            // figure out if the user has a principal
+//            boolean hasPrincipal = authBoss.isUser(sessionId, subject.getName());
+//            ConfigResponse preferences = needsRegistration ?
+//                new ConfigResponse() : getUserPreferences(ctx, sessionId, subject.getId(), authzBoss);
+//            WebUser webUser = new WebUser(subject, sessionId, preferences, hasPrincipal);
+//            
+//            
+//
+//            // Add WebUser to Session
+//            session.setAttribute(Constants.WEBUSER_SES_ATTR, webUser);
+//
+//            if (debug) log.debug("WebUser object created and stashed in the session");
+//            
+//            // TODO - We should use Spring Security for handling user
+//            // permissions...
+//            Map<String, Boolean> userOperationsMap = new HashMap<String, Boolean>();
+//
+//            if (webUser.getPreferences().getKeys().size() > 0) {
+//                userOperationsMap = loadUserPermissions(webUser.getSessionId(), authzBoss);
+//            }
+//
+//            session.setAttribute(Constants.USER_OPERATIONS_ATTR, userOperationsMap);
+//
+//            if (debug) log.debug("Stashing user operations in the session");
+//
+//            if (debug && needsRegistration) {
+//            	log.debug("Authentic user but no HQ entity, must have authenticated outside of " +
+//                          "HQ...needs registration");
+//            }
+//        } catch (SessionException e) {
+//            if (debug) {
+//                log.debug("Authentication of user {" + username + "} failed due to an session error.");
+//            }
+//            
+//            throw new SessionAuthenticationException("login.error.application");
+//        } catch (PermissionException e) {
+//            if (debug) {
+//                log.debug("Authentication of user {" + username + "} failed due to an permissions error.");
+//            }
+//            
+//            throw new SessionAuthenticationException("login.error.application");
+//        }
+//    }
 
 	protected static Map<String, Boolean> loadUserPermissions(Integer sessionId, AuthzBoss authzBoss) 
     throws SessionTimeoutException, SessionNotFoundException, PermissionException {

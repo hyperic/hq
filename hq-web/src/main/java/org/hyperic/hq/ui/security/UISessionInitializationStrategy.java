@@ -47,6 +47,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.RoleManager;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.security.HQUserDetails;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.server.session.UserDashboardConfig;
@@ -54,7 +55,9 @@ import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.image.widget.ResourceTree;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.session.SessionAuthenticationException;
 import org.springframework.stereotype.Component;
 
@@ -91,7 +94,7 @@ public class UISessionInitializationStrategy extends BaseSessionInitializationSt
         HttpSession session = request.getSession();
         WebUser webUser = (WebUser) session.getAttribute(Constants.WEBUSER_SES_ATTR);
         
-        assert(webUser != null); // At this point webUser should never be null
+        assert(webUser != null); // At this point webUser should never be null         
         
         if (webUser.getPreferences().getKeys().size() == 0) {
             // will be cleaned out during registration

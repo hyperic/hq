@@ -46,6 +46,7 @@ import org.springframework.security.authentication.encoding.PasswordEncoder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.GrantedAuthorityImpl;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 /**
@@ -74,11 +75,13 @@ public class JdbcHQAuthenticationProvider implements HQAuthenticationProvider {
 
     public Authentication authenticate(String username, String password) {
         final boolean debug = log.isDebugEnabled();
+        
+        AuthzSubject subject = null;
         try {
             // TODO We shouldn't have to make two calls here...
-            AuthzSubject subject = authzSubjectManager.findSubjectByAuth(username,
+            subject = authzSubjectManager.findSubjectByAuth(username,
                 HQConstants.ApplicationName);
-            Principal principal = principalDao.findByUsername(username);
+            Principal principal = principalDao.findByUsername(username);           
 
             if (password == null || principal == null) {
                 if (debug) {
@@ -105,7 +108,7 @@ public class JdbcHQAuthenticationProvider implements HQAuthenticationProvider {
 
             if (debug) {
                 log.debug("Logged in as [" + username + "]");
-            }
+            }                                       
         } catch (SubjectNotFoundException e) {
             if (debug) {
                 log.debug("Authentication of user {" + username + "} failed due to a login error.",
@@ -120,9 +123,12 @@ public class JdbcHQAuthenticationProvider implements HQAuthenticationProvider {
         // ...TODO right now, every user is given the "ROLE HQ USER" grant
         // authority, once we fully integrate with
         // spring security this should be updated with a better approach...
-        grantedAuthorities.add(new GrantedAuthorityImpl("ROLE_HQ_USER"));
-
-        return new UsernamePasswordAuthenticationToken(username, password, grantedAuthorities);
+        grantedAuthorities.add(new GrantedAuthorityImpl("ROLE_HQ_USER"));        
+        System.out.println("hooray");
+        
+        HQUserDetails userDetails =  new HQUserDetails(subject, "", grantedAuthorities); 
+ 
+        return new UsernamePasswordAuthenticationToken(userDetails, password, grantedAuthorities);
     }
 
     public boolean supports(Properties serverConfigProps) {
