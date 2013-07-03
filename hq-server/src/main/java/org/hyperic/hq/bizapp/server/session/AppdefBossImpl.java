@@ -2624,10 +2624,19 @@ public class AppdefBossImpl implements AppdefBoss {
     private Comparator<AppdefResourceValue> getNameComparator(final int sortOrder) {
         return new Comparator<AppdefResourceValue>() {
             public int compare(AppdefResourceValue o1, AppdefResourceValue o2) {
+                if (o1 == o2) {
+                    return 0;
+                }
+                int rtn;
                 if (sortOrder == PageControl.SORT_ASC) {
-                    return o1.getName().toLowerCase().compareTo(o2.getName().toLowerCase());
+                    rtn = o1.getName().toLowerCase().compareTo(o2.getName().toLowerCase());
                 } else {
-                    return o2.getName().toLowerCase().compareTo(o1.getName().toLowerCase());
+                    rtn = o2.getName().toLowerCase().compareTo(o1.getName().toLowerCase());
+                }
+                if (rtn != 0) {
+                    return rtn;
+                } else {
+                    return o1.getId().compareTo(o2.getId());
                 }
             }
         };
