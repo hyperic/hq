@@ -490,6 +490,7 @@ public class SenderThread
             log.error("Error sending measurements: " +  exc.getMessage(), exc);
             // return this so that the caller will attempt a retry on everything except Connection refused
             if (!exc.getMessage().toLowerCase().endsWith("refused")) {
+                log.info("retrying measurement send");
                 return firstMetricTime;
             }
         } finally {
