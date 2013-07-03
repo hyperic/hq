@@ -45,6 +45,7 @@ import org.hyperic.hq.events.shared.AlertManager;
 import org.hyperic.hq.events.shared.EventLogManager;
 import org.hyperic.hq.ha.HAUtil;
 import org.hyperic.hq.measurement.shared.DataCompress;
+import org.hyperic.hq.measurement.shared.DataManager;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.util.ConfigPropertyException;
@@ -61,6 +62,7 @@ public class DataPurgeJob implements Runnable {
     private EventLogManager eventLogManager;
     private DataCompress dataCompress;
     private AlertManager alertManager;
+    private DataManager dataManager;
     private ConcurrentStatsCollector concurrentStatsCollector;
     private long _lastAnalyze = 0l;
     private static final long ANALYZE_INTERVAL = Integer.parseInt(System.getProperty(
@@ -81,13 +83,15 @@ public class DataPurgeJob implements Runnable {
     public DataPurgeJob(ServerConfigManager serverConfigManager,
                         MeasurementManager measurementManager, EventLogManager eventLogManager,
                         DataCompress dataCompress,
-                        ConcurrentStatsCollector concurrentStatsCollector, AlertManager alertManager) {
+                        ConcurrentStatsCollector concurrentStatsCollector, AlertManager alertManager,
+                        DataManager dataManager) {
         this.serverConfigManager = serverConfigManager;
         this.measurementManager = measurementManager;
         this.eventLogManager = eventLogManager;
         this.dataCompress = dataCompress;
         this.concurrentStatsCollector = concurrentStatsCollector;
         this.alertManager = alertManager;
+        this.dataManager = dataManager;
     }
 
     @PostConstruct
@@ -249,17 +253,10 @@ public class DataPurgeJob implements Runnable {
     }
 
     private void purgeTopNData(long now) {
-        log.info("Purging TopNData older than " + DateUtils.addDays(new Date(now), -this.purgeTopN));
-        int topNDeleted = -1;
-        int totalDeleted = 0;
-        // HQ-2731 - want to batch this 10,000 rows at a time
-        // this avoids the session getting too large and will (hopefully) avoid transaction timeouts
-        int maxBatch = 10000;
-        do {
-            //alertsDeleted = alertManager.deleteAlerts(now - this.purgeAlert, maxBatch);
-            totalDeleted += topNDeleted;
-        } while (topNDeleted >= maxBatch);
-        log.info("Done (Deleted " + totalDeleted + " alerts)");
+        Date timeToKeep = DateUtils.addDays(new Date(now), -this.purgeTopN);
+        log.info("Purging TopNData older than " + timeToKeep);
+        int topNDeleted = dataManager.purgeTopNData(timeToKeep);
+        log.info("Done (Deleted " + topNDeleted + " TopNData rows)");
     }
 
     long compressData(long toInterval, long now) {

@@ -952,7 +952,26 @@ public class DataManagerImpl implements DataManager {
         }
         return left;
     }
-    
+
+    public int purgeTopNData(Date timeToKeep) {
+        PreparedStatement ps = null;
+        int topNDeleted = -1;
+        Connection conn = safeGetConnection();
+        try {
+            ps = conn.prepareStatement("select drop_old_partition(?, ?);");
+            ps.setString(1, TopNData.class.getSimpleName());
+            ps.setTimestamp(2, new Timestamp(timeToKeep.getTime()));
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            topNDeleted = rs.getInt(1);
+        } catch (SQLException e) {
+            log.error("Problem purging old TopN Data", e);
+        } finally {
+            DBUtil.closeStatement(LOG_CTX, ps);
+        }
+        return topNDeleted;
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -1073,14 +1092,7 @@ public class DataManagerImpl implements DataManager {
         PreparedStatement stmt = null;
         final StringBuilder buf = new StringBuilder();
 
-        Map<Date, List<TopNData>> timeToDataMap = new HashMap<Date, List<TopNData>>();
-        for (TopNData data : topNData) {
-            List<TopNData> datas = timeToDataMap.get(data.getTime());
-            if (datas == null) {
-                timeToDataMap.put(data.getTime(), new LinkedList<TopNData>());
-            }
-            timeToDataMap.get(data.getTime()).add(data);
-        }
+        Map<Date, List<TopNData>> timeToDataMap = mapTimeToData(topNData);
 
         for (Entry<Date, List<TopNData>> entry : timeToDataMap.entrySet()) {
             try {
@@ -1116,6 +1128,18 @@ public class DataManagerImpl implements DataManager {
 
         }
         return true;
+    }
+
+    private Map<Date, List<TopNData>> mapTimeToData(List<TopNData> topNData) {
+        Map<Date, List<TopNData>> timeToDataMap = new HashMap<Date, List<TopNData>>();
+        for (TopNData data : topNData) {
+            List<TopNData> datas = timeToDataMap.get(data.getTime());
+            if (datas == null) {
+                timeToDataMap.put(data.getTime(), new LinkedList<TopNData>());
+            }
+            timeToDataMap.get(data.getTime()).add(data);
+        }
+        return timeToDataMap;
     }
 
     private String getAndCreatePartition(final String tableName, final Date time,

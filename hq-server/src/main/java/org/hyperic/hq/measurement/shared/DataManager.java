@@ -28,6 +28,7 @@ package org.hyperic.hq.measurement.shared;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -265,4 +266,5 @@ public interface DataManager {
      */
     List<Long> getLatestAvailableTopDataTimes(int resourceId, int count);
 
+    int purgeTopNData(Date timeToKeep);
 }
