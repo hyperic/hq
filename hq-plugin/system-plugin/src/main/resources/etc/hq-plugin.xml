@@ -1,4 +1,4 @@
-<?xml version="1.0"?> 
+	<?xml version="1.0"?> 
 <!--
 
     NOTE: This copyright does *not* cover user programs that use HQ
@@ -507,19 +507,11 @@
             template="exec:file=${script}:ResultValue"/>
   </metrics>
    <filter name="hyper-v_hypervisor" value="Hyper-V Hypervisor"/>
-    <filter name="hyper-v_virtual_machine_health_summary" value="Hyper-V Virtual Machine Health Summary"/>
-    <filter name="Hyper-V_VM_Vid_Partition" value="Hyper-V VM Vid Partition(%instance.name%)"/>
-    <filter name="memory" value="Memory"/>
+    <filter name="hyper-v_virtual_machine_health_summary" value="Hyper-V Virtual Machine Health Summary"/>        
+    
 
 <metrics name="Win32-HYPER-V"  include="Win32">
-	  <!-- <metric name="Availability"
-            template="ServiceAvail:Platform=Win32:vmms"
-            category="AVAILABILITY"
-            indicator="true"
-                        defaultOn="true"
-            collectionType="dynamic"
-            units="percentage"/>
-        <metric name="Health Ok"
+	  <!--    <metric name="Health Ok"
                         template="${hyper-v_virtual_machine_health_summary}:${name}"
                         indicator="true"
                         defaultOn="true"
@@ -543,18 +535,7 @@
                         template="${hyper-v_hypervisor}:${name}"
                         indicator="true"
                         defaultOn="true"
-                    collectionType="dynamic"/>
-        <metric name="Memory - Available Bytes"
-                        template="${memory}:Available Bytes"
-                        indicator="true"
-                        defaultOn="true"
-                    collectionType="dynamic"/>
-        <metric name="Memory - Pages/sec"
-                        template="${memory}:Pages/sec"
-                        indicator="true"
-                        defaultOn="true"
                     collectionType="dynamic"/>-->
-
   </metrics>
 
 
@@ -1029,15 +1010,7 @@
   </metrics>
   
    <filter name="physical_disk" value="PhysicalDisk(%instance.name%:)"/>
-  <metrics name="HyperV Physical Disk">  
-<!--              <metric name="Availability"
-            template="ServiceAvail:Platform=Win32:vmms"
-            category="AVAILABILITY"
-            indicator="true"
-                        defaultOn="true"
-            collectionType="dynamic"
-            units="percentage"/>
-     -->       
+  <metrics name="HyperV Physical Disk">
             <metric name="Availability"
             	alias="Availability"
             	template="win32:Service=vmms:${alias}"
@@ -1045,33 +1018,25 @@
             	indicator="true"
             	units="percentage"
             	collectionType="dynamic"/>
-                <metric name="Storage - Current Disk Queue Length"
-                                template="${physical_disk}:Current Disk Queue Length"
+                 <metric name="Current Disk Queue Length"
+                                template="pdh:${physical_disk}:Current Disk Queue Length"
                                 indicator="true"
                                 defaultOn="true"
                             collectionType="dynamic"/>
-                <metric name="Storage - Disk Bytes/sec"
-                                template="${physical_disk}:Disk Bytes/sec"
+                <metric name="Disk Bytes/sec"
+                                template="pdh:${physical_disk}:Disk Bytes/sec"
                                 indicator="true"
                                 defaultOn="true"
                             collectionType="dynamic"/>
                 <metric name="Storage - Disk Transfers/sec"
-                                template="${physical_disk}:Disk Transfers/sec"
+                                template="pdh:${physical_disk}:Disk Transfers/sec"
                                 indicator="true"
                                 defaultOn="true"
                             collectionType="dynamic"/>
     </metrics>
+    
    <filter name="network_interface" value="Network Interface(%instance.name%)"/>
-   
-  
   <metrics name="HyperV Network Interface">  
-       <!-- <metric name="Availability"
-              template="ServiceAvail:Platform=Win32:vmms"
-              category="AVAILABILITY"
-                  indicator="true"
-                 defaultOn="true"
-                  collectionType="dynamic"
-                  units="percentage"/>-->
             <metric name="Availability"
             	alias="Availability"
             	template="win32:Service=vmms:${alias}"
@@ -1104,6 +1069,60 @@
                        indicator="true"
                        defaultOn="true"
                        collectionType="dynamic"/>
+  </metrics>
+  
+  <filter name="hyper_v_memory" value="Memory"/>
+  <metrics Hyper-V Memory>
+        <metric name="Availability"
+            	alias="Availability"
+            	template="win32:Service=vmms:${alias}"
+            	category="AVAILABILITY"
+            	indicator="true"
+            	units="percentage"
+            	collectionType="dynamic"/>
+        <metric name="Available Bytes"
+                    template="${hyper_v_memory}:Available Bytes"
+                    indicator="true"
+                    defaultOn="true"
+                    collectionType="dynamic"/>
+        <metric name="Pages/sec"
+                  template="${hyper_v_memory}:Pages/sec"
+        <metric name="Disk Transfers/sec"
+                  template="pdh:${physical_disk}:Disk Transfers/sec"
+                  indicator="true"
+                   defaultOn="true"
+                   collectionType="dynamic"/>
+  </metrics>
+  
+  <filter name="hyper-v_hypervisor_logical-processor" value="Hyper-V Hypervisor Logical Processor(%instance.name%)"/>
+  <metrics>
+  	<metric name="Availability"
+            	alias="Availability"
+            	template="win32:Service=vmms:${alias}"
+            	category="AVAILABILITY"
+            	indicator="true"
+            	units="percentage"
+            	collectionType="dynamic"/>
+	<metric name="% Guest Run Time"
+					template="${hyper-v_hypervisor_logical-processor}:% Guest Run Time"
+					indicator="true"
+					defaultOn="true"
+				collectionType="dynamic"/>
+	<metric name="% Hypervisor Run Time"
+					template="${hyper-v_hypervisor_logical-processor}:% Hypervisor Run Time"
+					indicator="true"
+					defaultOn="true"
+				collectionType="dynamic"/>
+	<metric name="% Idle Time"
+					template="${hyper-v_hypervisor_logical-processor}:% Idle Time"
+					indicator="true"
+					defaultOn="true"
+				collectionType="dynamic"/>
+	<metric name="% Total Run Time"
+					template="${hyper-v_hypervisor_logical-processor}:% Total Run Time"
+					indicator="true"
+					defaultOn="true"
+				collectionType="dynamic"/>
   </metrics>
 
   <metrics name="Process">

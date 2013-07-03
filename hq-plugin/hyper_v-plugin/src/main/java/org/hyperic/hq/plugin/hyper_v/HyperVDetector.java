@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
@@ -73,14 +74,12 @@ public class HyperVDetector
             return null;
         }
 
-        List<ServerResource> servers= discoverServers("Hyper-V Hypervisor Partition","Hyper-V VM","Hyper-V VM - ",":");
+        List<ServerResource> servers= discoverServersWMI("Msvm_ComputerSystem","Caption-\"Virtual Machine\"","ElementName","Hyper-V VM","Hyper-V VM - ");
 
         return servers;
     }
     
-
-    
-    protected List<ServerResource> discoverServers(String propertySet, String type, String namePrefix, String token) {
+/*    protected List<ServerResource> discoverServers(String propertySet, String type, String namePrefix, String token) {
         List<ServerResource> servers = new ArrayList<ServerResource>();
         log.error("discoverServers");
         try {
@@ -131,40 +130,36 @@ public class HyperVDetector
             return null;
         }
     }
+*/
+    protected List<ServerResource> discoverServersWMI(String wmiObjName, String filter, String col, String type, String namePrefix) throws PluginException {
+        Map<String,String> wmiObjs = DetectionUtil.getWMIObj(wmiObjName, filter, col, "");
+        List<ServerResource> servers = new ArrayList<ServerResource>();
+        for(String name:wmiObjs.values()) {
+            ServerResource server = new ServerResource();
+            
+            ConfigResponse conf = new ConfigResponse();
+            conf.setValue("instance.name", name);
+            server.setProductConfig(conf);
+                        
+            ConfigResponse cprops = new ConfigResponse();
+            server.setProductConfig(conf);
+            server.setMeasurementConfig();
+            server.setCustomProperties(cprops);           
+            server.setName(getPlatformName() + " " +  " " +namePrefix + name);
+            server.setDescription("");
+            server.setInstallPath(name); //XXX
+            server.setIdentifier(name);
+            servers.add(server);
+            server.setType(type);
+            servers.add(server);
+        }
+        return servers;
+    }
 
     @Override
     protected List discoverServices(ConfigResponse config) throws PluginException {
         return null;
     }
 
-   /* @Override
-    protected List discoverServices(ConfigResponse serverConfig) throws PluginException {
-        List<ServiceResource> services = new ArrayList<ServiceResource>();
-
-        List<ServiceResource> vmServices = discoverServices("Hyper-V Hypervisor Partition","Hyper-V VM","Hyper-V VM - ",":");
-        if (vmServices!=null&&!vmServices.isEmpty()) {
-            services.addAll(vmServices);
-        }
-
-        List<ServiceResource> netServices = discoverServices("Network Interface","Network Interface","Network Interface - ","");
-        if (netServices!=null&&!netServices.isEmpty()) {
-            services.addAll(netServices);
-        }
-
-        List<ServiceResource> diskServices = discoverServices("PhysicalDisk","PhysicalDisk","PhysicalDisk - ","");
-        if (diskServices!=null&&!diskServices.isEmpty()) {
-            services.addAll(diskServices);
-        }
-        return services;
-    }*/
-    
-    @Override
-    public RuntimeResourceReport discoverResources(int serverId,
-            AIPlatformValue aiplatform,
-            ConfigResponse config) {
-        return null;
-    }
-
-    
 
 }
