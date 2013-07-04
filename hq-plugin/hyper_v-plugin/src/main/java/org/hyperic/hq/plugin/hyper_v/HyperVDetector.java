@@ -46,6 +46,7 @@ import org.hyperic.util.config.IntegerConfigOption;
 
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.autoinventory.ServerSignature;
+import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.DetectionUtil;
 import org.hyperic.hq.product.PlatformServiceDetector;
 import org.hyperic.hq.product.PluginException;
@@ -60,21 +61,15 @@ import org.hyperic.sigar.win32.RegistryKey;
 import org.hyperic.sigar.win32.Win32Exception;
 
 public class HyperVDetector
-    extends  ServerDetector
-    implements RegistryServerDetector {
+    extends  ServerDetector implements AutoServerDetector   {
 
     private static Log log =
         LogFactory.getLog("HyperVDetector");
 
-    public List getServerResources(ConfigResponse platformConfig,
-                                   String path, RegistryKey current) throws PluginException {
-        log.error("getServerResources");
-        if (!new File(path).exists()) {
-            log.error(path + " does not exist");
-            return null;
-        }
-
-        List<ServerResource> servers= discoverServersWMI("Msvm_ComputerSystem","Caption-\"Virtual Machine\"","ElementName","Hyper-V VM","Hyper-V VM - ");
+    
+    public List getServerResources(ConfigResponse platformConfig) throws PluginException {
+        log.error("hypervdector get servers");
+        List<ServerResource> servers= discoverServersWMI("Msvm_ComputerSystem","Caption-Virtual Machine","ElementName","Hyper-V VM","Hyper-V VM - ");
 
         return servers;
     }
@@ -133,6 +128,7 @@ public class HyperVDetector
 */
     protected List<ServerResource> discoverServersWMI(String wmiObjName, String filter, String col, String type, String namePrefix) throws PluginException {
         Map<String,String> wmiObjs = DetectionUtil.getWMIObj(wmiObjName, filter, col, "");
+        log.error ("getWMIObj: returned=" + wmiObjs);
         List<ServerResource> servers = new ArrayList<ServerResource>();
         for(String name:wmiObjs.values()) {
             ServerResource server = new ServerResource();
@@ -153,6 +149,7 @@ public class HyperVDetector
             server.setType(type);
             servers.add(server);
         }
+        log.error("discoverServersWMI: returned=" + servers);
         return servers;
     }
 

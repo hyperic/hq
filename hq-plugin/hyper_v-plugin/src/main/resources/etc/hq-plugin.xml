@@ -30,26 +30,26 @@
     <filter name="Hyper-V_VM_Vid_Partition" value="Hyper-V VM Vid Partition(%instance.name%)"/>
     <filter name="memory" value="Memory"/>
     <server name="Hyper-V VM" platforms="Win32-HYPER-V">
-	<plugin type="measurement" class="HyperVMeasurementPlugin"/>
-        <plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>
-    	<plugin type="autoinventory" class="HyperVDetector"/>
- 	<metric name="Availability"
-        	template="wmic:object=Msvm_ComputerSystem,column=enabledstate:ElementName-%instance.name%"
-	    category="AVAILABILITY"
-	    indicator="true"
-	    defaultOn="true"
-	    collectionType="dynamic"
-	    units="percentage"/>
-	<metric name="Memory - Physical Pages Allocated"
-       		template="${Hyper-V_VM_Vid_Partition}:Physical Pages Allocated"
-	       indicator="true"
-        	defaultOn="true"
-	        collectionType="dynamic"/>
-	<metric name="Memory - Remote Physical Pages"
-        	template="${Hyper-V_VM_Vid_Partition}:Remote Physical Pages"
-	        indicator="true"
-         	defaultOn="true"
-	        collectionType="dynamic"/>
+		<plugin type="measurement" class="HyperVMeasurementPlugin"/>
+	        <plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>
+	    	<plugin type="autoinventory" class="HyperVDetector"/>
+	 	<metric name="Availability"
+	        	template="wmic:object=Msvm_ComputerSystem,column=enabledstate:ElementName-%instance.name%"
+		    category="AVAILABILITY"
+		    indicator="true"
+		    defaultOn="true"
+		    collectionType="dynamic"
+		    units="percentage"/>
+		<metric name="Memory - Physical Pages Allocated"
+	       		template="${Hyper-V_VM_Vid_Partition}:Physical Pages Allocated"
+		       indicator="true"
+	        	defaultOn="true"
+		        collectionType="dynamic"/>
+		<metric name="Memory - Remote Physical Pages"
+	        	template="${Hyper-V_VM_Vid_Partition}:Remote Physical Pages"
+		        indicator="true"
+	         	defaultOn="true"
+		        collectionType="dynamic"/>
     </server>
 
 </plugin>

@@ -22,7 +22,7 @@ public class HypervDetector extends   SystemServerDetector  {
         return SystemPlugin.HYPERV_SERVER_NAME;
     }
     
-    protected ArrayList<AIServiceValue> getHyperVServices(String propertySet, String type, String namePrefix, String token, String suffix) {
+    protected ArrayList<AIServiceValue> getHyperVServices(String propertySet, String type, String namePrefix, String token) {
         ArrayList<AIServiceValue> services = new ArrayList<AIServiceValue>();
         log.error("discoverServers");
         try {
@@ -52,15 +52,9 @@ public class HypervDetector extends   SystemServerDetector  {
                     ConfigResponse cprops = new ConfigResponse();
                     svc.setCustomProperties(cprops.encode());
                     ConfigResponse conf = new ConfigResponse();
-                    String instanceName = name;
-                    if (suffix != null) {
-                        if (instanceName.endsWith(suffix)) {
-                            instanceName = instanceName.substring(0, instanceName.length()-suffix.length()); 
-                        }
-                    }
-                    log.error("name=<" + name + ">");
-                    log.error("instanceName=<" + instanceName + ">");
-                    conf.setValue("instance.name", instanceName);
+                    
+                    log.error("name=<" + name + ">");                    
+                    conf.setValue("instance.name", name);
                     conf.setValue(propertySet, name);
                     svc.setProductConfig(conf.encode());
                     svc.setMeasurementConfig(ConfigResponse.EMPTY_CONFIG);
@@ -90,13 +84,13 @@ public class HypervDetector extends   SystemServerDetector  {
         }
         ArrayList<AIServiceValue>  services = new ArrayList<AIServiceValue>();
         
-        ArrayList<AIServiceValue> netServices = getHyperVServices(SystemPlugin.PROP_HYPERV_NETWORK_INTERFACE, SystemPlugin.HYPERV_NETWORK_INTERFACE, "Network Interface - ","", null);
+        ArrayList<AIServiceValue> netServices = getHyperVServices(SystemPlugin.PROP_HYPERV_NETWORK_INTERFACE, SystemPlugin.HYPERV_NETWORK_INTERFACE, "Network Interface - ","");
         if (netServices!=null&&!netServices.isEmpty()) {
             services.addAll(netServices);
         }
 
         
-        ArrayList<AIServiceValue> diskServices = getHyperVServices(SystemPlugin.PROP_HYPERV_PHYSICAL_DISK, SystemPlugin.HYPERV_PHYSICAL_DISK, "PhysicalDisk - ","", ":");
+        ArrayList<AIServiceValue> diskServices = getHyperVServices(SystemPlugin.PROP_HYPERV_PHYSICAL_DISK, SystemPlugin.HYPERV_PHYSICAL_DISK, "PhysicalDisk - ","");
         if (diskServices!=null&&!diskServices.isEmpty()) {
             services.addAll(diskServices);
         }

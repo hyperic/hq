@@ -251,7 +251,6 @@ public class Scanner {
         try {
             for ( i=0; i<serverSigs.length; i++ ) {
                 pluginName = serverSigs[i].getServerTypeName();
-                _log.error("pluginName=" + pluginName);
                 try {
                     detector = (ServerDetector)_pluginManager.getPlatformPlugin(type, pluginName);
                     detector.setAutoApproveConfig(_autoApproveConfig);

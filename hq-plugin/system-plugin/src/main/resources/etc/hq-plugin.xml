@@ -1,4 +1,4 @@
-	<?xml version="1.0"?> 
+<?xml version="1.0"?> 
 <!--
 
     NOTE: This copyright does *not* cover user programs that use HQ
@@ -1009,7 +1009,7 @@
             units="ms"/>
   </metrics>
   
-   <filter name="physical_disk" value="PhysicalDisk(%instance.name%:)"/>
+   <filter name="physical_disk" value="PhysicalDisk(%instance.name%)"/>
   <metrics name="HyperV Physical Disk">
             <metric name="Availability"
             	alias="Availability"
@@ -1071,8 +1071,8 @@
                        collectionType="dynamic"/>
   </metrics>
   
-  <filter name="hyper_v_memory" value="Memory"/>
-  <metrics Hyper-V Memory>
+<!--   <filter name="hyper_v_memory" value="Memory"/>
+  <metrics name="Hyper-V Memory">
         <metric name="Availability"
             	alias="Availability"
             	template="win32:Service=vmms:${alias}"
@@ -1095,7 +1095,7 @@
   </metrics>
   
   <filter name="hyper-v_hypervisor_logical-processor" value="Hyper-V Hypervisor Logical Processor(%instance.name%)"/>
-  <metrics>
+  <metrics name="Logical Processor">
   	<metric name="Availability"
             	alias="Availability"
             	template="win32:Service=vmms:${alias}"
@@ -1124,7 +1124,7 @@
 					defaultOn="true"
 				collectionType="dynamic"/>
   </metrics>
-
+-->
   <metrics name="Process">
     <metric name="Availability"
             alias="Availability"

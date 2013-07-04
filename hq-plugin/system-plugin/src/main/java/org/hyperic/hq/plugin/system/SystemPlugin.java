@@ -226,11 +226,13 @@ public class SystemPlugin extends ProductPlugin {
             }
             if (info.getName().equals(HYPERV_PHYSICAL_DISK)) {
                
-                return new Win32MeasurementPlugin();
+                return new HyperVMeasurementPlugin();
             }
             if ((info.getType() == TypeInfo.TYPE_SERVER) &&
                      ((ServerTypeInfo)info).isVirtual()) {
                 //virtual server, no metrics.
+                return null;
+                
             }
             if (info.getName().equals(SCRIPT_NAME)) {
                 return new ExecutableMeasurementPlugin();
