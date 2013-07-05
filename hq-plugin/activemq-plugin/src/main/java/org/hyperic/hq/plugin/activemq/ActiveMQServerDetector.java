@@ -21,11 +21,28 @@
  */
 package org.hyperic.hq.plugin.activemq;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.management.MBeanServerConnection;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.ServerResource;
+import org.hyperic.hq.product.ServiceResource;
 import org.hyperic.hq.product.jmx.MxServerDetector;
+import org.hyperic.util.config.ConfigResponse;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
 
 public class ActiveMQServerDetector extends MxServerDetector {
 
@@ -69,6 +86,39 @@ public class ActiveMQServerDetector extends MxServerDetector {
         }
 
         return procs;
+    }
+
+    @Override
+    protected ServerResource createServerResource(String installpath) {
+        ServerResource server = super.createServerResource(installpath);
+        log.debug("[createServerResource] installpath=" + installpath);
+        XPathFactory xpathFactory = XPathFactory.newInstance();
+        XPath xpath = xpathFactory.newXPath();
+
+        try {
+            File cfg = new File(installpath, "conf/activemq.xml");
+            log.debug("[createServerResource] cfg=" + cfg);
+            DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            Document document = builder.parse(cfg);
+            String bName = xpath.evaluate("/beans/broker/@brokerName", document);
+            System.out.println("bName=" + bName);
+            server.setName(server.getName() + " " + bName);
+        } catch (Exception ex) {
+            log.debug("[createServerResource] Error when looking for the broker name: " + ex.getMessage(), ex);
+        }
+        return server;
+    }
+
+    @Override
+    protected List discoverMxServices(MBeanServerConnection mServer, ConfigResponse serverConfig) throws PluginException {
+        List<ServiceResource> services = super.discoverMxServices(mServer, serverConfig);
+        String type = getTypeInfo().getName();
+        String serverName = getPlatformName() + " " + type;
+        for (int i = 0; i < services.size(); i++) {
+            ServiceResource service = services.get(i);
+            service.setName(service.getName().replaceAll("%serverName%", serverName));
+        }
+        return services;
     }
 
     @Override

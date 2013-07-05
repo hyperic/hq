@@ -339,6 +339,7 @@
       <option name="jmx.password"
               description="JMX Password"
               optional="true"
+              type="secret"
               default=""/>
       <option name="jmx.url"
               description="The JMX service URL"
@@ -478,6 +479,7 @@
       <option name="jmx.password"
               description="JMX Password"
               optional="true"
+              type="secret"
               default=""/>
       <option name="jmx.url"
               description="The JMX service URL"
@@ -592,7 +594,7 @@
       <config>
           <option name="process.query" description="Process Query"/>
           <option name="jmx.username" description="JMX Username" optional="true" default=""/>
-          <option name="jmx.password" description="JMX Password" optional="true" default=""/>
+          <option name="jmx.password" description="JMX Password" optional="true" type="secret" default=""/>
           <option name="jmx.url" description="The JMX service URL" optional="true" default="service:jmx:rmi:///jndi/rmi://localhost:1099/jmxrmi"/>
       </config>
 
@@ -747,4 +749,27 @@
          include="5.3">
    </server>
 
+  <server name="ActiveMQ Embedded" 
+         version="5.5"
+         include="5.3">
+   </server>
+
+  <server name="ActiveMQ Embedded" 
+         version="5.6"
+         include="5.3">
+   </server>
+
+  <server name="ActiveMQ Embedded" 
+         version="5.7"
+         include="5.3">
+   </server>
+
+  <server name="ActiveMQ Embedded" 
+         version="5.8" 
+         include="ActiveMQ 5.8">
+   <property name="PROC_HOME_PROPERTY"
+              value="catalina.base"/>
+   <plugin type="autoinventory"
+            class="org.hyperic.hq.plugin.activemq.EmbeddedActiveMQServerDetector"/>
+  </server>
 </plugin>
