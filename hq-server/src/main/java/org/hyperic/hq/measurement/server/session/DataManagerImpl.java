@@ -960,7 +960,7 @@ public class DataManagerImpl implements DataManager {
         int topNDeleted = -1;
         Connection conn = safeGetConnection();
         try {
-            ps = conn.prepareStatement("select drop_old_partition(?, ?);");
+            ps = conn.prepareStatement("select drop_old_partitions(?, ?);");
             ps.setString(1, TopNData.class.getSimpleName());
             ps.setTimestamp(2, new Timestamp(timeToKeep.getTime()));
             ResultSet rs = ps.executeQuery();
