@@ -12058,7 +12058,6 @@ has already been defined.
                 COST 100;
             </statement>
             <statement targetDB="postgresql">
-
                 CREATE OR REPLACE FUNCTION drop_old_partitions(table_name character varying, time_to_keep timestamp without time zone)
                 RETURNS integer AS
                 $BODY$
