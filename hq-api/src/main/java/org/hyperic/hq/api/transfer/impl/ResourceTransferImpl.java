@@ -952,10 +952,16 @@ public class ResourceTransferImpl implements ResourceTransfer {
             ConfigSchemaAndBaseResponse[] confSchemaAndBaseResponse = new ConfigSchemaAndBaseResponse[iNoOfConfigTypes];
 
             for(int i=0; i < iNoOfConfigTypes; i++) {
-                String configurableType = null ; 
-                ConfigSchemaAndBaseResponse configMetadata = productBoss.getConfigSchemaAndBaseResponse(authzSubject, entityID, configurableType, false) ; 
-                configMetadata.getResponse().setSchema(configMetadata.getSchema());
-                confSchemaAndBaseResponse[i]=configMetadata;
+                String configurableType=null;
+                try {
+                    configurableType = ProductPlugin.CONFIGURABLE_TYPES[i] ; 
+                    ConfigSchemaAndBaseResponse configMetadata = productBoss.getConfigSchemaAndBaseResponse(authzSubject, entityID, configurableType, false) ; 
+                    configMetadata.getResponse().setSchema(configMetadata.getSchema());
+                    confSchemaAndBaseResponse[i]=configMetadata;
+                }catch(PluginNotFoundException pnfe) { 
+                    log.debug("Plugin Config Schema of type: " + configurableType + " was not defined for resource " + entityID) ;  
+                } 
+
             }
             resourceConfigAndDefaults.put(r, confSchemaAndBaseResponse);
         }
