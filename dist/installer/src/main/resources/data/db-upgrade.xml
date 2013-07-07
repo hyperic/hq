@@ -12028,14 +12028,15 @@ has already been defined.
         <schema-insert table="EAM_CONFIG_PROPS"
                        insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES ('71', 'TOPN_PURGE', '8', '8', %%FALSE%%)"/>
         <schema-directSQL>
-            <statement>
+            <statement targetDB="postgresql">
                 CREATE TABLE IF NOT EXISTS TopNData(
                 resourceId integer NOT NULL,
                 "time" timestamp without time zone,
-                data bytea
+                data bytea,
+                PRIMARY KEY (resourceId, "time")
                 )
             </statement>
-            <statement>
+            <statement targetDB="postgresql">
                 CREATE OR REPLACE FUNCTION get_and_create_partition(table_name character varying, start_time timestamp without time zone)
                 RETURNS character varying AS
                 $BODY$
@@ -12056,7 +12057,7 @@ has already been defined.
                 LANGUAGE plpgsql VOLATILE
                 COST 100;
             </statement>
-            <statement>
+            <statement targetDB="postgresql">
 
                 CREATE OR REPLACE FUNCTION drop_old_partitions(table_name character varying, time_to_keep timestamp without time zone)
                 RETURNS integer AS
