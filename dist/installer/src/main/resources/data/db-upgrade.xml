@@ -12049,7 +12049,7 @@ has already been defined.
                 end_time := start_time + interval '1 day';
                 EXECUTE
                 'CREATE TABLE IF NOT EXISTS ' || partition || ' (like ' || table_name || ' including all' ||
-                ', check (time >= ''' || start_time || ''' and time < ''' || end_time || '''))' ||
+                ', check (time >= ''' || start_time || ''' and time &lt; ''' || end_time || '''))' ||
                 ' INHERITS (' || table_name || ')';
                 RETURN partition;
                 END;
@@ -12070,7 +12070,7 @@ has already been defined.
                 BEGIN
                 total_deleted_rows := 0;
                 EXECUTE 'SELECT MIN(time) FROM ' || table_name INTO min_time;
-                WHILE min_starttime < time_to_keep LOOP
+                WHILE min_time &lt; time_to_keep LOOP
                     partition := table_name || to_char(min_starttime,'_YYYY_MM_DD');
                     EXECUTE 'SELECT count(*) FROM '|| partition INTO deleted_rows;
                     total_deleted_rows := total_deleted_rows + deleted_rows;
