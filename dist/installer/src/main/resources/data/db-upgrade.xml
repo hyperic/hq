@@ -12043,7 +12043,6 @@ has already been defined.
                 partition VARCHAR(25);
                 end_time timestamp without time zone;
                 BEGIN
-                set local schema 'public';
                 partition := table_name || to_char(start_time, '_YYYY_MM_DD');
                 start_time := date_trunc('day', start_time);
                 end_time := start_time + interval '1 day';
@@ -12071,7 +12070,7 @@ has already been defined.
                 total_deleted_rows := 0;
                 EXECUTE 'SELECT MIN(time) FROM ' || table_name INTO min_time;
                 WHILE min_time &lt; time_to_keep LOOP
-                    partition := table_name || to_char(min_starttime,'_YYYY_MM_DD');
+                    partition := table_name || to_char(min_time,'_YYYY_MM_DD');
                     EXECUTE 'SELECT count(*) FROM '|| partition INTO deleted_rows;
                     total_deleted_rows := total_deleted_rows + deleted_rows;
                     RAISE NOTICE 'Dropping old partition: %',partition;
