@@ -358,11 +358,10 @@ public class ReportProcessorImpl implements ReportProcessor {
         if (platformRes == null) return;
         int resourceId = platformRes.getId();
         for (TopReport report : reports) {
-
-            Date time = DateUtils.round(new Date(report.getCreateTime()), Calendar.MINUTE);
+             Date minute = DateUtils.truncate(new Date(report.getCreateTime()), Calendar.MINUTE);
             TopNData topNData = null;
             try {
-                topNData = new TopNData(resourceId, time, report.toSerializedForm());
+                topNData = new TopNData(resourceId, minute, report.toSerializedForm());
             } catch (IOException e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }

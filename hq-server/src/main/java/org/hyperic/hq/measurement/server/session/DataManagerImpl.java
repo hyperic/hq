@@ -28,6 +28,7 @@ package org.hyperic.hq.measurement.server.session;
 import java.math.BigDecimal;
 import java.sql.BatchUpdateException;
 import java.sql.Connection;
+import java.util.Calendar;
 import java.util.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -53,6 +54,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.dialect.HQDialect;
@@ -1092,13 +1094,13 @@ public class DataManagerImpl implements DataManager {
         PreparedStatement stmt = null;
         final StringBuilder buf = new StringBuilder();
 
-        Map<Date, List<TopNData>> timeToDataMap = mapTimeToData(topNData);
+        Map<Date, List<TopNData>> dayToDataMap = mapDayToData(topNData);
 
-        for (Entry<Date, List<TopNData>> entry : timeToDataMap.entrySet()) {
+        for (Entry<Date, List<TopNData>> entry : dayToDataMap.entrySet()) {
             try {
 
-                String tableName = getAndCreatePartition(TopNData.class.getSimpleName(), entry.getKey(), conn);
-                stmt = conn.prepareStatement(buf.append("INSERT INTO ").append(tableName).
+                String partitionName = getAndCreatePartition(TopNData.class.getSimpleName(), entry.getKey(), conn);
+                stmt = conn.prepareStatement(buf.append("INSERT INTO ").append(partitionName).
                         append(" (resourceId, time, data) VALUES (?, ?, ?)").toString());
 
                 for (TopNData data : entry.getValue()) {
@@ -1130,16 +1132,17 @@ public class DataManagerImpl implements DataManager {
         return true;
     }
 
-    private Map<Date, List<TopNData>> mapTimeToData(List<TopNData> topNData) {
-        Map<Date, List<TopNData>> timeToDataMap = new HashMap<Date, List<TopNData>>();
+    private Map<Date, List<TopNData>> mapDayToData(List<TopNData> topNData) {
+        Map<Date, List<TopNData>> dayToDataMap = new HashMap<Date, List<TopNData>>();
         for (TopNData data : topNData) {
-            List<TopNData> datas = timeToDataMap.get(data.getTime());
+            Date day = DateUtils.truncate(data.getTime(), Calendar.DAY_OF_MONTH);
+            List<TopNData> datas = dayToDataMap.get(day);
             if (datas == null) {
-                timeToDataMap.put(data.getTime(), new LinkedList<TopNData>());
+                dayToDataMap.put(day, new LinkedList<TopNData>());
             }
-            timeToDataMap.get(data.getTime()).add(data);
+            dayToDataMap.get(day).add(data);
         }
-        return timeToDataMap;
+        return dayToDataMap;
     }
 
     private String getAndCreatePartition(final String tableName, final Date time,

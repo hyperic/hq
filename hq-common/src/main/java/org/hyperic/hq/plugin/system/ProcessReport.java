@@ -1,11 +1,11 @@
 package org.hyperic.hq.plugin.system;
 
-import java.io.Externalizable;
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 
-public class ProcessReport implements Externalizable {
+public class ProcessReport implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private long pid;
@@ -105,19 +105,7 @@ public class ProcessReport implements Externalizable {
         this.startTime = startTime;
     }
 
-    public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeLong(pid);
-        out.writeUTF(owner);
-        out.writeLong(size);
-        out.writeLong(resident);
-        out.writeLong(share);
-        out.writeLong(cpuTotal);
-        out.writeDouble(cpuPerc);
-        out.writeUTF(baseName);
-        out.writeLong(startTime);
-    }
-
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         pid = in.readLong();
         owner = in.readUTF();
         size = in.readLong();
@@ -129,13 +117,24 @@ public class ProcessReport implements Externalizable {
         startTime = in.readLong();
     }
 
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.writeLong(pid);
+        out.writeUTF(owner);
+        out.writeLong(size);
+        out.writeLong(resident);
+        out.writeLong(share);
+        out.writeLong(cpuTotal);
+        out.writeDouble(cpuPerc);
+        out.writeUTF(baseName);
+        out.writeLong(startTime);
+    }
+
     @Override
     public String toString() {
         return "ProcessReport [pid=" + pid + ", owner=" + owner + ", size=" + size + ", resident=" + resident
                 + ", share=" + share + ", cpuTotal=" + cpuTotal + ", cpuPerc=" + cpuPerc + ", baseName=" + baseName
                 + ", startTime=" + startTime + "]";
     }
-
 
 
 }
