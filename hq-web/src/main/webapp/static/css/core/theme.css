@@ -1,4 +1,7 @@
-body { background: #EFEFEF; }
+body { 
+	background: #EFEFEF;
+	min-width: 1090px;
+}
 
 #header { 
 	background: #000 url('../../images/header_background.jpg') repeat-x scroll;
