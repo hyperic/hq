@@ -334,7 +334,6 @@ public class SigarPlatformDetector extends PlatformDetector {
         cprops.setValue("version", os.getVersion());
         cprops.setValue("vendor", os.getVendor());
         cprops.setValue("vendorVersion", os.getVendorVersion());
-        getLog().error("cprops=" + cprops);
         platform.setCustomProperties(cprops);
 
         ConfigResponse mconfig = new ConfigResponse();

@@ -103,6 +103,8 @@ public class SystemPlugin extends ProductPlugin {
     public static final String SVC_NAME   = "Windows Service";
     public static final String HYPERV_NETWORK_INTERFACE =   "HyperV Network Interface";
     public static final String HYPERV_PHYSICAL_DISK =   "HyperV Physical Disk";
+    public static final String HYPERV_MEMORY =   "Hyper-V Memory";
+    public static final String HYPERV_LOGICAL_PROCESSOR = "Hyper-V Logical Processor";
     
 
     public static final String[] FILE_SERVICES = {
@@ -124,7 +126,9 @@ public class SystemPlugin extends ProductPlugin {
 
     public static final String[] HYPERV_SERVICES = {
         HYPERV_NETWORK_INTERFACE,
-        HYPERV_PHYSICAL_DISK        
+        HYPERV_PHYSICAL_DISK,
+        HYPERV_MEMORY,
+        HYPERV_LOGICAL_PROCESSOR
     };
 
     
@@ -160,6 +164,8 @@ public class SystemPlugin extends ProductPlugin {
     
     public static final String PROP_HYPERV_NETWORK_INTERFACE   = "Network Interface";
     public static final String PROP_HYPERV_PHYSICAL_DISK   = "PhysicalDisk";
+    public static final String PROP_HYPERV_LOGICAL_PROCESSOR   = "Hyper-V Hypervisor Logical Processor";
+    
 
     public static final String PROP_ENABLE_USER_AI = "autodiscover.users";
     
@@ -216,7 +222,6 @@ public class SystemPlugin extends ProductPlugin {
 
     public GenericPlugin getPlugin(String type, TypeInfo info) {
         if (type.equals(ProductPlugin.TYPE_MEASUREMENT)) {
-            getLog().error("measurment - name=" + info.getName() + " type=" + info.getType() + " typestr=" + type);
             if (info.getName().equals(SVC_NAME)) {
                 return new Win32MeasurementPlugin();
             }
@@ -226,6 +231,12 @@ public class SystemPlugin extends ProductPlugin {
             }
             if (info.getName().equals(HYPERV_PHYSICAL_DISK)) {
                
+                return new HyperVMeasurementPlugin();
+            }
+            if (info.getName().equals(HYPERV_MEMORY)) {
+                return new Win32MeasurementPlugin();
+            }
+            if (info.getName().equals(HYPERV_LOGICAL_PROCESSOR)) {
                 return new HyperVMeasurementPlugin();
             }
             if ((info.getType() == TypeInfo.TYPE_SERVER) &&
@@ -558,6 +569,11 @@ public class SystemPlugin extends ProductPlugin {
             else if (info.getName().equals(HYPERV_PHYSICAL_DISK) ) {
                 schema.add(PROP_HYPERV_PHYSICAL_DISK,
                         HYPERV_PHYSICAL_DISK + " Name",
+                           "/");
+            }
+            else if (info.getName().equals(HYPERV_LOGICAL_PROCESSOR) ) {
+                schema.add(PROP_HYPERV_LOGICAL_PROCESSOR,
+                        HYPERV_LOGICAL_PROCESSOR + " Name",
                            "/");
             }
             else if (info.getName().equals(SVC_NAME)) {

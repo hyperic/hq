@@ -413,7 +413,7 @@ public class DetectionUtil {
         }
     }//EOM 
     
-    public static Map<String,String> getWMIObj(String wmiObjName, String filter, String col, String name) throws PluginException {
+    public static Set<String> getWMIObj(String wmiObjName, String filter, String col, String name) throws PluginException {
         if (wmiObjName==null||"".equals(wmiObjName)) {
             throw new PluginException("object property not specified in the template of " + name);
         }
@@ -432,20 +432,23 @@ public class DetectionUtil {
 
         sb.append(" /format:textvaluelist.xsl");
         String cmd = sb.toString();
+        if (log.isDebugEnabled()) {
+            log.debug("cmd=" + cmd);
+        }
         BufferedReader input = null;
         try {
             Process process = Runtime.getRuntime().exec(cmd);
             input = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
             String line;
-            Map<String,String> obj = new HashMap<String,String>();
-            while ((line = input.readLine()) != null) {
+            Set<String> obj = new HashSet<String>();
+            while ((line = input.readLine()) != null) {                
                 line = line.trim();
                 StringTokenizer st = new StringTokenizer(line,"=");
-                while (st.hasMoreElements()) {
+                while (st.hasMoreElements()) {                    
                     String k = ((String) st.nextElement()).trim();
-                    String v = ((String) st.nextElement()).trim();
-                    obj.put(k,v);
+                    String v = ((String) st.nextElement()).trim();                    
+                    obj.add(v);
                 }
             }
             return obj;

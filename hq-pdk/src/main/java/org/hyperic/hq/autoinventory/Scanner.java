@@ -105,9 +105,6 @@ public class Scanner {
             type = platformType;
         }
         isDevice = !type.equals(platformType);
-       
-        
-        _log.error("type=" + type + " platformType=" + platformType);
 
         if (isDevice && _log.isDebugEnabled() && config != null) {
             String fqdn = config.getValue(ProductPlugin.PROP_PLATFORM_FQDN);

@@ -127,10 +127,9 @@ public class HyperVDetector
     }
 */
     protected List<ServerResource> discoverServersWMI(String wmiObjName, String filter, String col, String type, String namePrefix) throws PluginException {
-        Map<String,String> wmiObjs = DetectionUtil.getWMIObj(wmiObjName, filter, col, "");
-        log.error ("getWMIObj: returned=" + wmiObjs);
+        Set<String> wmiObjs = DetectionUtil.getWMIObj(wmiObjName, filter, col, "");
         List<ServerResource> servers = new ArrayList<ServerResource>();
-        for(String name:wmiObjs.values()) {
+        for(String name:wmiObjs) {
             ServerResource server = new ServerResource();
             
             ConfigResponse conf = new ConfigResponse();
@@ -149,7 +148,6 @@ public class HyperVDetector
             server.setType(type);
             servers.add(server);
         }
-        log.error("discoverServersWMI: returned=" + servers);
         return servers;
     }
 

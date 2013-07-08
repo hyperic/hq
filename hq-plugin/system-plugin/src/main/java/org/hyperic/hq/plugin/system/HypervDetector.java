@@ -22,9 +22,9 @@ public class HypervDetector extends   SystemServerDetector  {
         return SystemPlugin.HYPERV_SERVER_NAME;
     }
     
-    protected ArrayList<AIServiceValue> getHyperVServices(String propertySet, String type, String namePrefix, String token) {
+    protected ArrayList<AIServiceValue> getHyperVServices(String propertySet, String type, String namePrefix, String token, boolean toLower) {
         ArrayList<AIServiceValue> services = new ArrayList<AIServiceValue>();
-        log.error("discoverServers");
+        log.error("discoverServices");
         try {
             String[] instances = Pdh.getInstances(propertySet);
             log.error("num of instances found=" + instances.length);
@@ -84,17 +84,38 @@ public class HypervDetector extends   SystemServerDetector  {
         }
         ArrayList<AIServiceValue>  services = new ArrayList<AIServiceValue>();
         
-        ArrayList<AIServiceValue> netServices = getHyperVServices(SystemPlugin.PROP_HYPERV_NETWORK_INTERFACE, SystemPlugin.HYPERV_NETWORK_INTERFACE, "Network Interface - ","");
+        ArrayList<AIServiceValue> netServices = getHyperVServices(SystemPlugin.PROP_HYPERV_NETWORK_INTERFACE, SystemPlugin.HYPERV_NETWORK_INTERFACE, "Network Interface - ","", false);
         if (netServices!=null&&!netServices.isEmpty()) {
             services.addAll(netServices);
         }
 
         
-        ArrayList<AIServiceValue> diskServices = getHyperVServices(SystemPlugin.PROP_HYPERV_PHYSICAL_DISK, SystemPlugin.HYPERV_PHYSICAL_DISK, "PhysicalDisk - ","");
+        ArrayList<AIServiceValue> diskServices = getHyperVServices(SystemPlugin.PROP_HYPERV_PHYSICAL_DISK, SystemPlugin.HYPERV_PHYSICAL_DISK, "PhysicalDisk - ","", true);
         if (diskServices!=null&&!diskServices.isEmpty()) {
             services.addAll(diskServices);
         }
+        
+        ArrayList<AIServiceValue> logicalProcessorServices = getHyperVServices(SystemPlugin.PROP_HYPERV_LOGICAL_PROCESSOR, SystemPlugin.HYPERV_LOGICAL_PROCESSOR, "Logical Processor - ","", false);
+        if (logicalProcessorServices!=null&&!logicalProcessorServices.isEmpty()) {
+            services.addAll(logicalProcessorServices);
+        }
+        
+        AIServiceValue memoryServices = getHyperVMemoryService();
+        if (memoryServices != null) {
+            services.add(memoryServices);
+        }
+
         return services;
+    }
+
+    private AIServiceValue getHyperVMemoryService() {
+        String info =  SystemPlugin.HYPERV_MEMORY;
+        AIServiceValue svc = 
+            createSystemService(SystemPlugin.HYPERV_MEMORY,
+                                 getFullServiceName(info));
+        svc.setMeasurementConfig(ConfigResponse.EMPTY_CONFIG);
+        svc.setProductConfig(ConfigResponse.EMPTY_CONFIG);
+        return svc;
     }
     
  

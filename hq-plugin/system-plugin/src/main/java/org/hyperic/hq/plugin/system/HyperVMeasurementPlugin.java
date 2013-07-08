@@ -15,16 +15,24 @@ public class HyperVMeasurementPlugin extends Win32MeasurementPlugin {
     @Override
     public MetricValue getValue(Metric metric) throws PluginException, MetricNotFoundException, MetricUnreachableException {
 
-        if ("pdh".equals(metric.getDomainName())) {
+        if ( ("pdh".equals(metric.getDomainName())) || ("pdh_formatted".equals(metric.getDomainName())) ) {
             String obj = "\\" + metric.getObjectPropString() + "\\" + metric.getAttributeName();
             Double val;
-            try {
-                val = new Pdh().getFormattedValue(obj.replaceAll("%3A", ":"));
+            try 
+            {          
+                obj = obj.replaceAll("%3A", ":").toLowerCase();
+                if ( ("pdh".equals(metric.getDomainName()))) {
+                    val = new Pdh().getRawValue(obj);
+                }
+                else {
+                    val = new Pdh().getFormattedValue(obj);
+                }
                 return new MetricValue(val);
             }catch(Win32Exception e) {
                 throw new PluginException(e);
             }
-        } else {
+        }
+        else {
             return super.getValue(metric);
         }
     }
