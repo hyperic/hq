@@ -279,7 +279,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         try {
             return generator.generate(platIds, ResourceTreeGenerator.TRAVERSE_UP);
         } catch (AppdefEntityNotFoundException exc) {
-            throw new SystemException("Internal inconsistancy finding " + "resources for agent");
+            throw new SystemException("Internal inconsistency finding " + "resources for agent");
         }
     }
 
