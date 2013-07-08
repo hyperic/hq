@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004 - 2013], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -24,32 +24,24 @@
  */
 package org.hyperic.hq.plugin.sharepoint;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.URL;
-import java.util.Properties;
-import jcifs.ntlmssp.NtlmFlags;
-import jcifs.ntlmssp.Type1Message;
-import jcifs.ntlmssp.Type2Message;
-import jcifs.ntlmssp.Type3Message;
-import jcifs.util.Base64;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
-import org.apache.http.auth.AuthScheme;
-import org.apache.http.auth.AuthSchemeFactory;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.NTCredentials;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.auth.NTLMEngine;
-import org.apache.http.impl.auth.NTLMEngineException;
-import org.apache.http.impl.auth.NTLMScheme;
-import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.BasicHttpContext;
 import org.hyperic.hq.agent.AgentKeystoreConfig;
 import org.hyperic.hq.product.*;
 import org.hyperic.sigar.win32.Pdh;
+import org.hyperic.sigar.win32.Service;
 import org.hyperic.sigar.win32.Win32Exception;
+import org.hyperic.util.exec.Execute;
+import org.hyperic.util.exec.ExecuteWatchdog;
+import org.hyperic.util.exec.PumpStreamHandler;
 import org.hyperic.util.http.HQHttpClient;
 import org.hyperic.util.http.HttpConfig;
 
@@ -61,21 +53,19 @@ public class SharePointServerMeasurement extends Win32MeasurementPlugin {
     public MetricValue getValue(Metric metric) throws PluginException, MetricNotFoundException, MetricUnreachableException {
         MetricValue res;
         log.debug("[getValue] metric=" + metric);
-        if (metric.getDomainName().equalsIgnoreCase("web")) {
-            try {
-                long rt = System.currentTimeMillis();
-                testWebServer(metric.getObjectProperties());
-                rt = System.currentTimeMillis() - rt;
-                if (metric.isAvail()) {
-                    res = new MetricValue(Metric.AVAIL_UP);
-                } else {
+        if (metric.getDomainName().equalsIgnoreCase("server")) {
+            res = checkServerAvail(metric);
+        } else if (metric.getDomainName().equalsIgnoreCase("web")) {
+            if (metric.isAvail()) {
+                res = new MetricValue(checkWebAvail(metric.getObjectProperty("name")));
+            } else {
+                try {
+                    long rt = System.currentTimeMillis();
+                    testWebServer(metric.getObjectProperty("url"));
+                    rt = System.currentTimeMillis() - rt;
                     res = new MetricValue(rt);
-                }
-            } catch (PluginException ex) {
-                log.debug(ex, ex);
-                if (metric.isAvail()) {
-                    res = new MetricValue(Metric.AVAIL_DOWN);
-                } else {
+                } catch (PluginException ex) {
+                    log.debug(ex, ex);
                     throw ex;
                 }
             }
@@ -83,7 +73,7 @@ public class SharePointServerMeasurement extends Win32MeasurementPlugin {
             if (metric.getAttributeName().equalsIgnoreCase("Object Cache Hit %")) {
                 double hits = getPDHMetric("\\" + metric.getObjectPropString() + "\\Object Cache Hit Count");
                 double miss = getPDHMetric("\\" + metric.getObjectPropString() + "\\Object Cache Miss Count");
-                if ((hits >= 0) && (miss >= 0) && ((hits+miss)>0)) {
+                if ((hits >= 0) && (miss >= 0) && ((hits + miss) > 0)) {
                     res = new MetricValue(hits / (hits + miss));
                 } else {
                     res = MetricValue.NONE;
@@ -93,6 +83,76 @@ public class SharePointServerMeasurement extends Win32MeasurementPlugin {
             }
         } else {
             throw new PluginException("incorrect domain '" + metric.getDomainName() + "'");
+        }
+        return res;
+    }
+
+    private MetricValue checkServerAvail(Metric metric) {
+        double res = Metric.AVAIL_UP;
+
+        List<String> services, webs;
+        String w = metric.getObjectProperty("webs");
+        if (w != null) {
+            webs = Arrays.asList(w.split(","));
+        } else {
+            webs = new ArrayList<String>();
+        }
+
+        String s = metric.getObjectProperty("services");
+        if (s != null) {
+            services = Arrays.asList(s.split(","));
+        } else {
+            services = new ArrayList<String>();
+        }
+
+        for (int i = 0; (i < webs.size()) && (res == Metric.AVAIL_UP); i++) {
+            String web = webs.get(i).trim();
+            res = checkWebAvail(web);
+        }
+
+        for (int i = 0; (i < services.size()) && (res == Metric.AVAIL_UP); i++) {
+            String service = services.get(i).trim();
+            res = checkServiceAvail(service);
+        }
+
+        return new MetricValue(res);
+    }
+
+    private double checkServiceAvail(String service) {
+        log.debug("[checkServiceAvail] * service='" + service + "'");
+        double res = Metric.AVAIL_DOWN;
+        try {
+            if (service != null) {
+                Service s = new Service(service);
+                if (s.getStatus() == Service.SERVICE_RUNNING) {
+                    res = Metric.AVAIL_UP;
+                }
+                log.debug("[checkServiceAvail] service='" + service + "' res=" + res);
+            }
+        } catch (Win32Exception ex) {
+            log.debug("[checkServiceAvail] error. service='" + service + "'", ex);
+        }
+        return res;
+    }
+
+    private double checkWebAvail(String webserver) {
+        double res = Metric.AVAIL_DOWN;
+        String[] cmd = {IisMetaBase.APPCMD, "list", "site", webserver};
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        ExecuteWatchdog wdog = new ExecuteWatchdog(60 * 1000);
+        Execute exec = new Execute(new PumpStreamHandler(output), wdog);
+        exec.setCommandline(cmd);
+        try {
+            int exitStatus = exec.execute();
+            log.debug("[checkWebAvail] webserver=" + webserver + ",exitStatus:" + exitStatus + ", output=" + output.toString());
+            if (exitStatus == 0 || !wdog.killedProcess()) {
+                log.debug("[checkWebAvail] webserver=" + webserver + ", output=" + output);
+                if (output.toString().toLowerCase().contains(":started")) {
+                    res = Metric.AVAIL_UP;
+                }
+            }
+        } catch (Exception e) {
+            log.debug("[checkWebAvail] webserver=" + webserver + ", error=" + e.getMessage(), e);
         }
         return res;
     }
@@ -131,81 +191,19 @@ public class SharePointServerMeasurement extends Win32MeasurementPlugin {
         return res;
     }
 
-    protected static void testWebServer(Properties props) throws PluginException {
-
-        String user = props.getProperty("user");
-        String pass = props.getProperty("password");
-        URL url;
-        try {
-            url = new URL(props.getProperty("url"));
-        } catch (IOException ex) {
-            throw new PluginException("Bad Main URL", ex);
-        }
-
-        HttpHost targetHost = new HttpHost(url.getHost(), url.getPort(), url.getProtocol());
-        HttpGet get = new HttpGet(targetHost.toURI() + url.getPath());
+    private void testWebServer(String url) throws PluginException {
+        HttpGet get = new HttpGet(url);
         AgentKeystoreConfig ksConfig = new AgentKeystoreConfig();
         HQHttpClient client = new HQHttpClient(ksConfig, new HttpConfig(5000, 5000, null, 0), ksConfig.isAcceptUnverifiedCert());
-        if ((user != null) && (pass != null)) {
-            client.getAuthSchemes().register("NTLM", new NTLMJCIFSSchemeFactory());
-            client.getAuthSchemes().unregister("NEGOTIATE");
-            NTCredentials creds = new NTCredentials(user, pass, "", "");
-            client.getCredentialsProvider().setCredentials(AuthScope.ANY, creds);
-        }
-
         try {
             HttpResponse response = client.execute(get, new BasicHttpContext());
             int r = response.getStatusLine().getStatusCode();
-            log.debug("[testWebServer] url='" + get.getURI() + "' user='" + user + "' statusCode='" + r + "' (" + response.getStatusLine().getReasonPhrase() + ")");
+            log.debug("[testWebServer] url='" + get.getURI() + "' statusCode='" + r + "' " + response.getStatusLine().getReasonPhrase());
             if (r >= 500) {
-                throw new PluginException(response.getStatusLine().getReasonPhrase());
+                throw new PluginException("[testWebServer] error=" + r);
             }
         } catch (IOException ex) {
-            log.debug(ex.getMessage(), ex);
             throw new PluginException(ex.getMessage(), ex);
-        }
-    }
-
-    /**
-     * http://hc.apache.org/httpcomponents-client-ga/ntlm.html
-     */
-    public static final class JCIFSEngine implements NTLMEngine {
-
-        private static final int TYPE_1_FLAGS =
-                NtlmFlags.NTLMSSP_NEGOTIATE_56
-                | NtlmFlags.NTLMSSP_NEGOTIATE_128
-                | NtlmFlags.NTLMSSP_NEGOTIATE_NTLM2
-                | NtlmFlags.NTLMSSP_NEGOTIATE_ALWAYS_SIGN
-                | NtlmFlags.NTLMSSP_REQUEST_TARGET;
-
-        public String generateType1Msg(final String domain, final String workstation)
-                throws NTLMEngineException {
-            final Type1Message type1Message = new Type1Message(TYPE_1_FLAGS, domain, workstation);
-            return Base64.encode(type1Message.toByteArray());
-        }
-
-        public String generateType3Msg(final String username, final String password,
-                final String domain, final String workstation, final String challenge)
-                throws NTLMEngineException {
-            Type2Message type2Message;
-            try {
-                type2Message = new Type2Message(Base64.decode(challenge));
-            } catch (final IOException exception) {
-                throw new NTLMEngineException("Invalid NTLM type 2 message", exception);
-            }
-            final int type2Flags = type2Message.getFlags();
-            final int type3Flags = type2Flags
-                    & (0xffffffff ^ (NtlmFlags.NTLMSSP_TARGET_TYPE_DOMAIN | NtlmFlags.NTLMSSP_TARGET_TYPE_SERVER));
-            final Type3Message type3Message = new Type3Message(type2Message, password, domain,
-                    username, workstation, type3Flags);
-            return Base64.encode(type3Message.toByteArray());
-        }
-    }
-
-    public static class NTLMJCIFSSchemeFactory implements AuthSchemeFactory {
-
-        public AuthScheme newInstance(final HttpParams params) {
-            return new NTLMScheme(new JCIFSEngine());
         }
     }
 }
