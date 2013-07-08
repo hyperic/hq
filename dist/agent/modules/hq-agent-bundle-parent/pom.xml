@@ -236,6 +236,11 @@
 			<artifactId>hqagent-plugin</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+ 		<dependency>
+                        <groupId>org.hyperic.hq.plugin</groupId>
+                        <artifactId>hyper_v-plugin</artifactId>
+                        <version>${project.version}</version>
+                </dependency>
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>iis-plugin</artifactId>
