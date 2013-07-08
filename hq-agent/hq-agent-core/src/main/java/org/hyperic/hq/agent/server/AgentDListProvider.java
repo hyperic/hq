@@ -497,10 +497,10 @@ public class AgentDListProvider implements AgentStorageProvider {
             try {
                 inputStream = new ObjectInputStream(new FileInputStream(fileEntry));
                 objects.add((T) inputStream.readObject());
+                maxNumOfObjects--;
             } catch (Exception ex) {
                 log.error("Cannot read objects from '" + folderName + "'" + ex.getMessage());
             } finally {
-                maxNumOfObjects--;
                 try {
                     inputStream.close();
                 } catch (IOException e) {

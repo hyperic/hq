@@ -17,6 +17,7 @@ public class ProcessReport implements Serializable {
     private double cpuPerc;
     private String baseName;
     private long startTime;
+    private String[] args;
 
     public ProcessReport() {
     }
@@ -31,6 +32,7 @@ public class ProcessReport implements Serializable {
         this.cpuPerc = process.getCpuPerc();
         this.baseName = process.getBaseName();
         this.startTime = process.getStartTime();
+        this.setArgs(process.getProcArgs());
     }
 
     public long getPid() {
@@ -105,6 +107,14 @@ public class ProcessReport implements Serializable {
         this.startTime = startTime;
     }
 
+    public String[] getArgs() {
+        return args;
+    }
+
+    public void setArgs(String[] args) {
+        this.args = args;
+    }
+
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         pid = in.readLong();
         owner = in.readUTF();
@@ -115,6 +125,7 @@ public class ProcessReport implements Serializable {
         cpuPerc = in.readDouble();
         baseName = in.readUTF();
         startTime = in.readLong();
+        args = (String[]) in.readObject();
     }
 
     private void writeObject(ObjectOutputStream out) throws IOException {
@@ -127,13 +138,23 @@ public class ProcessReport implements Serializable {
         out.writeDouble(cpuPerc);
         out.writeUTF(baseName);
         out.writeLong(startTime);
+        out.writeObject(args);
     }
 
     @Override
     public String toString() {
-        return "ProcessReport [pid=" + pid + ", owner=" + owner + ", size=" + size + ", resident=" + resident
-                + ", share=" + share + ", cpuTotal=" + cpuTotal + ", cpuPerc=" + cpuPerc + ", baseName=" + baseName
-                + ", startTime=" + startTime + "]";
+        StringBuilder sb = new StringBuilder();
+        sb.append("pid=").append(pid).append(", owner=").append(owner).append(", size=").append(size)
+                .append(", resident=").append(resident).append(", share=").append(share).append(", cpuTotal=")
+                .append(cpuTotal).append(", cpuPerc=").append(cpuPerc).append(", baseName=").append(baseName)
+                .append(", startTime=").append(startTime).append(", args=");
+        for (String arg : args) {
+            if (!arg.equalsIgnoreCase("")) {
+                sb.append(arg).append(",");
+            }
+        }
+        sb.setLength(sb.length() - 1);
+        return sb.toString();
     }
 
 
