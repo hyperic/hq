@@ -76,6 +76,7 @@
 		<module>websphere-plugin</module>
 		<module>xen-plugin</module>
 		<module>zimbra-plugin</module>
+                <module>hyper_v-plugin</module>
 	</modules>
 
 	<dependencies>

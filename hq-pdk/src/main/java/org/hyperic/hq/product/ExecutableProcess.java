@@ -34,7 +34,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.hyperic.hq.agent.AgentConfig;
-import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.sigar.win32.Win32;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.exec.Execute;
@@ -130,7 +129,7 @@ public class ExecutableProcess extends Collector {
         
         ArrayList argv = new ArrayList();
 
-        if (OperatingSystem.IS_WIN32 && (exec == null)) {
+        if (HypericOperatingSystem.IS_WIN32 && (exec == null)) {
             //Runtime.exec does not handle file associations
             //such as foo.pl -> perl.exe, foo.py -> python.exe.
             String exe = Win32.findScriptExecutable(name);

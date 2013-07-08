@@ -46,7 +46,7 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.WorkflowPrepareAction;
 import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.sigar.OperatingSystem;
+import org.hyperic.hq.product.HypericOperatingSystem;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,7 +110,7 @@ public class NewAutoDiscoveryPrepAction
     protected static final String FILESCAN_NAME = FILESCAN_UNIX.getName();
 
     private static boolean isWindows(String osName) {
-        return osName.equals(OperatingSystem.NAME_WIN32);
+        return HypericOperatingSystem.isWin32(osName);
     }
 
     protected static ScanMethod getScanMethod(String osName) {

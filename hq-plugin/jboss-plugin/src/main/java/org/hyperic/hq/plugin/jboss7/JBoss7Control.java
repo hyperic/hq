@@ -40,9 +40,10 @@ import static org.hyperic.hq.product.ControlPlugin.RESULT_FAILURE;
 import static org.hyperic.hq.product.ControlPlugin.RESULT_SUCCESS;
 import static org.hyperic.hq.product.ControlPlugin.STATE_STARTED;
 import static org.hyperic.hq.product.GenericPlugin.getScriptExtension;
+
+import org.hyperic.hq.product.HypericOperatingSystem;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPluginManager;
-import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.sigar.win32.Win32;
 import org.hyperic.util.ArrayUtil;
 import org.hyperic.util.StringUtil;
@@ -181,7 +182,7 @@ public class JBoss7Control extends ControlPlugin {
         cmd.addAll(prefix);
         cmd.add(background);
 
-        if (OperatingSystem.IS_WIN32) {
+        if (HypericOperatingSystem.IS_WIN32) {
             //Runtime.exec does not handle file associations
             //such as foo.pl -> perl.exe, foo.py -> python.exe.
             String exe = Win32.findScriptExecutable(script);
