@@ -12051,7 +12051,10 @@ has already been defined.
         	                PRIMARY KEY (resourceId)
         	                )
         	</statement>
-
+        </schema-directSQL>
+    </schemaSpec>
+    <schemaSpec version="3.222" alwaysExecute="true">
+        <schema-directSQL>
             <statement targetDB="postgresql">
                 CREATE OR REPLACE FUNCTION get_and_create_partition(table_name character varying, start_time timestamp without time zone)
                 RETURNS character varying AS
