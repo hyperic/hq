@@ -31,7 +31,7 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hyperic.hq.product.HypericOperatingSystem;
+
 import org.hyperic.hq.product.ProductPlugin;
 
 import org.hyperic.sigar.Sigar;
@@ -42,7 +42,7 @@ public class VMwareGuestInfo {
 
     private static final String PTQL_QUERY =
         "State.Name.eq=" +
-        (HypericOperatingSystem.IS_WIN32 ?
+        (OperatingSystemReflection.IS_WIN32() ?
          "VMwareService" : "vmware-guestd");
 
     private static String findGuestd(Sigar sigar) {

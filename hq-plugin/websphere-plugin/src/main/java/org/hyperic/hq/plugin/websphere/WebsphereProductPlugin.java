@@ -44,7 +44,6 @@ import java.util.jar.JarOutputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.product.HypericOperatingSystem;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ProductPluginManager;
 import org.hyperic.sigar.OperatingSystem;
@@ -441,7 +440,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
     public String[] getClassPath(ProductPluginManager manager) {
         OperatingSystem os = OperatingSystem.getInstance();
         boolean testIBMJDK = (os.getName().equals(OperatingSystem.NAME_LINUX)
-                || os.getName().equals(OperatingSystem.NAME_WIN32) || os.getName().equals(HypericOperatingSystem.NAME_HYPER_V_WIN32));
+                || os.getName().equals(OperatingSystem.NAME_WIN32) );
         //assert testIBMJDK : os.getName();
         if (testIBMJDK) {
             VALID_JVM = System.getProperty("java.vm.vendor").toUpperCase().indexOf("IBM") != -1;

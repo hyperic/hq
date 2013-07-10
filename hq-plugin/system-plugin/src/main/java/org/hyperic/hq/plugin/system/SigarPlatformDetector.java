@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
-import org.hyperic.hq.product.HypericOperatingSystem;
 import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.PlatformResource;
@@ -144,22 +143,19 @@ public class SigarPlatformDetector extends PlatformDetector {
      * @param platformConfig ConfigResponse for the existing platform, if any.
      */
     public PlatformResource getPlatformResource(ConfigResponse config) 
-        throws PluginException {
-
-        HypericOperatingSystem os = HypericOperatingSystem.getInstance();
-        
+        throws PluginException {        
         PlatformResource platform = new PlatformResource();
         if(this.hasControlActions) platform.setControlConfig() ; 
         ConfigResponse cprops = new ConfigResponse();
 
-        platform.setPlatformTypeName(os.getName());
+        platform.setPlatformTypeName(OperatingSystemReflection.getName());
         
         
 
         Sigar sigar = new Sigar();
         HashMap ips = new HashMap();
         
-        platform.setDescription(os.getDescription());
+        platform.setDescription(OperatingSystemReflection.getDescription());
                
         
         String fqdn = this.fqdn;
@@ -330,10 +326,10 @@ public class SigarPlatformDetector extends PlatformDetector {
             sigar.close();
         }
 
-        cprops.setValue("arch", os.getArch());
-        cprops.setValue("version", os.getVersion());
-        cprops.setValue("vendor", os.getVendor());
-        cprops.setValue("vendorVersion", os.getVendorVersion());
+        cprops.setValue("arch", OperatingSystemReflection.getArch());
+        cprops.setValue("version", OperatingSystemReflection.getVersion());
+        cprops.setValue("vendor", OperatingSystemReflection.getVendor());
+        cprops.setValue("vendorVersion", OperatingSystemReflection.getVendorVersion());
         platform.setCustomProperties(cprops);
 
         ConfigResponse mconfig = new ConfigResponse();

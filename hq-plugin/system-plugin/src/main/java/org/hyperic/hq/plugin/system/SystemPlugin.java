@@ -51,7 +51,6 @@ import org.hyperic.hq.product.ControlPlugin;
 import org.hyperic.hq.product.ExecutableMeasurementPlugin;
 import org.hyperic.hq.product.ExecutableProcess;
 import org.hyperic.hq.product.GenericPlugin;
-import org.hyperic.hq.product.HypericOperatingSystem;
 import org.hyperic.hq.product.LogFileTailPlugin;
 import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.PluginException;

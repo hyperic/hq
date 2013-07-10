@@ -68,7 +68,6 @@ public class HyperVDetector
 
     
     public List getServerResources(ConfigResponse platformConfig) throws PluginException {
-        log.error("hypervdector get servers");
         List<ServerResource> servers= discoverServersWMI("Msvm_ComputerSystem","Caption-Virtual Machine","ElementName","Hyper-V VM","Hyper-V VM - ");
 
         return servers;

@@ -113,12 +113,10 @@ public class HypericOperatingSystem {
         }
         try {
              String path = rootReg.getStringValue("ImagePath");
-             
-             if (!new File(path).exists()) {             
-                return false;
-             }             
-             
-             return true;
+             if (path != null && path.length() > 0) {             
+                 return true;
+             }
+             return false;
         }catch(Exception e) {               
              return false;
          }

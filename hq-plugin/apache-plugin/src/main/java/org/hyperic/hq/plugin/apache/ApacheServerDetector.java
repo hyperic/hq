@@ -45,7 +45,6 @@ import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.ConfigFileTrackPlugin;
 import org.hyperic.hq.product.DaemonDetector;
 import org.hyperic.hq.product.FileServerDetector;
-import org.hyperic.hq.product.HypericOperatingSystem;
 import org.hyperic.hq.product.LogFileTrackPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginManager;
@@ -164,7 +163,7 @@ public class ApacheServerDetector
         OperatingSystem os = OperatingSystem.getInstance();
         String[] prefix = {
            os.getVendor(),
-           HypericOperatingSystem.getInstance().getName()
+           os.getName()
         };
         for (int i=0; i<prefix.length; i++) {
             key = prefix[i] + "." + name;

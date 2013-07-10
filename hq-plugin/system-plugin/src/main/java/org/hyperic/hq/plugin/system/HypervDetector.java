@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.hyperic.hq.appdef.shared.AIServiceValue;
-import org.hyperic.hq.product.HypericOperatingSystem;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
 import org.hyperic.sigar.win32.Pdh;
@@ -79,7 +78,7 @@ public class HypervDetector extends   SystemServerDetector  {
 
     @Override
     protected ArrayList<AIServiceValue> getSystemServiceValues(Sigar sigar, ConfigResponse config) throws SigarException {
-        if (!HypericOperatingSystem.IS_HYPER_V) {
+        if (!OperatingSystemReflection.IS_HYPER_V()) {
             return null;
         }
         ArrayList<AIServiceValue>  services = new ArrayList<AIServiceValue>();
