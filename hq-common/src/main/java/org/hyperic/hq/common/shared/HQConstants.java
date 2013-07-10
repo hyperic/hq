@@ -150,4 +150,8 @@ public class HQConstants {
     public static final String RESOURCE_NAME = "resource name";
     
     public static final String HQ_GUID = "HQ_GUID";
+
+    public static final String TOPN_PURGE = "TOPN_PURGE";
+    public static final String TOPN_DEFAULT_INTERVAL = "TOPN_DEFAULT_INTERVAL";
+
 }

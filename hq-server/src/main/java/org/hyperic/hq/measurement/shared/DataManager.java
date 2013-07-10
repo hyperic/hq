@@ -266,5 +266,10 @@ public interface DataManager {
      */
     List<Long> getLatestAvailableTopDataTimes(int resourceId, int count);
 
+    /**
+     * @param timeToKeep
+     * @return
+     */
     int purgeTopNData(Date timeToKeep);
+
 }

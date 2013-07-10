@@ -208,7 +208,15 @@
          <data ID="70" PROPKEY="LDAP_GROUP_SEARCH_SUBTREE"
               PROPVALUE="@@@LDAPGROUPSEARCHSUBTREE@@@" DEFAULT_PROPVALUE="false"
               FREAD_ONLY="FALSE"/>
-                     
+              
+              
+         <data ID="71" PROPKEY="TOPN_PURGE"
+              PROPVALUE="8" DEFAULT_PROPVALUE="8"
+              FREAD_ONLY="FALSE"/>
+          <data ID="72" PROPKEY="TOPN_DEFAULT_INTERVAL"
+              PROPVALUE="1" DEFAULT_PROPVALUE="1"
+              FREAD_ONLY="FALSE"/>  
+                                   
     </table>
 
 </Covalent.DBSetup>

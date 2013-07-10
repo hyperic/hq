@@ -27,8 +27,6 @@ package org.hyperic.hq.appdef.shared;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.Ip;
@@ -40,7 +38,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
-import org.hyperic.hq.vm.VMID;
+import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.vm.VmMapping;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -417,4 +415,6 @@ public interface PlatformManager {
     void mapUUIDToPlatforms(AuthzSubject subject, List<VmMapping> mapping) throws PermissionException, CPropKeyNotFoundException;
 
     void removePlatformVmMapping(AuthzSubject subject, List<String> macAddresses) throws PermissionException;
+
+    Platform getPlatformByResourceId(int id);
 }

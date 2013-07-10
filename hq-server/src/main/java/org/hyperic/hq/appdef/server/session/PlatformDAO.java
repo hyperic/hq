@@ -53,7 +53,7 @@ import org.springframework.stereotype.Repository;
 public class PlatformDAO
     extends HibernateDAO<Platform> {
 
-    private VirtualDAO virtualDAO;
+    private final VirtualDAO virtualDAO;
 
     @Autowired
     public PlatformDAO(SessionFactory f, VirtualDAO virtualDAO) {
@@ -62,13 +62,14 @@ public class PlatformDAO
     }
 
     public Platform findById(Integer id) {
-        return (Platform) super.findById(id);
+        return super.findById(id);
     }
 
     public Platform get(Integer id) {
-        return (Platform) super.get(id);
+        return super.get(id);
     }
 
+    @Override
     public void save(Platform entity) {
         super.save(entity);
         getSession().flush();
@@ -103,8 +104,8 @@ public class PlatformDAO
         }
 
         // first remove any which were in the removedIp collection
-        for (Iterator i = existing.getRemovedIpValues().iterator(); i.hasNext();) {
-            IpValue aIp = (IpValue) i.next();
+        for (Object element : existing.getRemovedIpValues()) {
+            IpValue aIp = (IpValue) element;
             if (aIp.idHasBeenSet()) {
                 removeAIp(curips, aIp);
             }
@@ -193,6 +194,11 @@ public class PlatformDAO
             Order.desc("creationTime")).list();
     }
 
+    public Platform findByResourceId(int id) {
+        String sql = "from Platform where resource.id=?";
+        return (Platform) getSession().createQuery(sql).setInteger(0, id).uniqueResult();
+    }
+
     public Platform findByName(String name) {
         String sql = "from Platform where resource.name=?";
         return (Platform) getSession().createQuery(sql).setString(0, name).uniqueResult();
@@ -232,12 +238,12 @@ public class PlatformDAO
                 AuthzConstants.RELATION_NETWORK_ID).append(" and e.distance = 0) ");
         }
 
-        if (platformTypeIds != null && !platformTypeIds.isEmpty()) {
+        if ((platformTypeIds != null) && !platformTypeIds.isEmpty()) {
             whereClause.append((whereClause.length() > 0) ? " and" : "").append(
                 " p.platform_type_id in (:ids) ");
         }
 
-        if (platformName != null && platformName.trim().length() > 0) {
+        if ((platformName != null) && (platformName.trim().length() > 0)) {
             HQDialect dialect = getHQDialect();
             nameEx = dialect.getRegExSQL("r.sort_name", ":regex", true, false);
 
@@ -253,7 +259,7 @@ public class PlatformDAO
 
         Query query = getSession().createSQLQuery(sql.toString()).addEntity("p", Platform.class);
 
-        if (platformTypeIds != null && !platformTypeIds.isEmpty()) {
+        if ((platformTypeIds != null) && !platformTypeIds.isEmpty()) {
             query.setParameterList("ids", platformTypeIds, new IntegerType());
         }
 
@@ -273,7 +279,7 @@ public class PlatformDAO
                      " select from_id from EAM_RESOURCE_EDGE e " + " where e.rel_id = " +
                      AuthzConstants.RELATION_NETWORK_ID + " and e.to_id = p.resource_id ) ";
 
-        if (platformName != null && platformName.trim().length() > 0) {
+        if ((platformName != null) && (platformName.trim().length() > 0)) {
             HQDialect dialect = getHQDialect();
             nameEx = dialect.getRegExSQL("r.sort_name", ":regex", true, false);
             String fqdnEx = dialect.getRegExSQL("p.fqdn", ":regex", true, false);
@@ -288,18 +294,18 @@ public class PlatformDAO
             query.setString("regex", platformName);
         }
 
-        return (List<Platform>) query.list();
+        return query.list();
     }
 
     @SuppressWarnings("unchecked")
     public List<Platform> findByType(Integer pid) {
         String sql = "select distinct p from Platform p " + "where p.platformType.id=?";
-        return (List<Platform>) getSession().createQuery(sql).setInteger(0, pid.intValue()).list();
+        return getSession().createQuery(sql).setInteger(0, pid.intValue()).list();
     }
 
     @SuppressWarnings("unchecked")
     public List<Platform> findByServers(Integer[] ids) {
-        return (List<Platform>) createCriteria().createAlias("resource", "r").createAlias(
+        return createCriteria().createAlias("resource", "r").createAlias(
             "serversBag", "s").add(Restrictions.in("s.id", ids)).addOrder(Order.asc("r.sortName"))
             .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list();
     }
@@ -326,7 +332,7 @@ public class PlatformDAO
     @SuppressWarnings("unchecked")
     public Collection<Platform> findByAgent(Agent agt) {
         String sql = "from Platform where agent.id=?";
-        return (Collection<Platform>) getSession()
+        return getSession()
             .createQuery(sql)
             .setCacheable(true)
             .setCacheRegion("Platform.findByAgent")
@@ -337,7 +343,7 @@ public class PlatformDAO
     @SuppressWarnings("unchecked")
     public Collection<Platform> findByAgentToken(String token) {
         String sql = "select p from Platform p join fetch p.agent a " + "where a.agentToken=?";
-        return (Collection<Platform>) getSession().createQuery(sql).setString(0, token).list();
+        return getSession().createQuery(sql).setString(0, token).list();
     }
 
     @SuppressWarnings("unchecked")
@@ -349,7 +355,7 @@ public class PlatformDAO
         // That entry being the the row from eam_ip table with eam_ip.address
         // to the 'addr' passed to this method.
         String sql = "select distinct p from Platform p " + "join p.ips ip where ip.address=?";
-        return (Collection<Platform>) getSession().createQuery(sql).setString(0, addr).list();
+        return getSession().createQuery(sql).setString(0, addr).list();
     }
     
     @SuppressWarnings("unchecked")

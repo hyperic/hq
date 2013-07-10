@@ -46,7 +46,6 @@ import org.hibernate.NonUniqueObjectException;
 import org.hibernate.NonUniqueResultException;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.agent.AgentConnectionException;
-import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.ConfigResponseDB;
@@ -96,9 +95,6 @@ import org.hyperic.hq.common.server.session.ResourceAuditFactory;
 import org.hyperic.hq.common.shared.AuditManager;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.measurement.agent.client.MeasurementCommandsClient;
-import org.hyperic.hq.measurement.agent.client.MeasurementCommandsClientFactory;
-import org.hyperic.hq.measurement.agent.commands.ScheduleTopn_args;
 import org.hyperic.hq.measurement.shared.SRNManager;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.PlatformTypeInfo;
@@ -128,45 +124,43 @@ public class PlatformManagerImpl implements PlatformManager {
 
     private Pager valuePager;
 
-    private PlatformTypeDAO platformTypeDAO;
+    private final PlatformTypeDAO platformTypeDAO;
 
-    private PermissionManager permissionManager;
+    private final PermissionManager permissionManager;
 
-    private AgentDAO agentDAO;
+    private final AgentDAO agentDAO;
 
-    private ServerManager serverManager;
+    private final ServerManager serverManager;
 
-    private CPropManager cpropManager;
+    private final CPropManager cpropManager;
 
-    private ResourceManager resourceManager;
+    private final ResourceManager resourceManager;
 
-    private ResourceGroupManager resourceGroupManager;
+    private final ResourceGroupManager resourceGroupManager;
 
-    private AuthzSubjectManager authzSubjectManager;
+    private final AuthzSubjectManager authzSubjectManager;
 
-    private ServiceManager serviceManager;
+    private final ServiceManager serviceManager;
 
-    private ApplicationDAO applicationDAO;
+    private final ApplicationDAO applicationDAO;
 
-    private ConfigResponseDAO configResponseDAO;
+    private final ConfigResponseDAO configResponseDAO;
 
-    private PlatformDAO platformDAO;
+    private final PlatformDAO platformDAO;
 
-    private ServerDAO serverDAO;
+    private final ServerDAO serverDAO;
 
-    private ServiceDAO serviceDAO;
+    private final ServiceDAO serviceDAO;
 
-    private AuditManager auditManager;
+    private final AuditManager auditManager;
 
-    private AgentManager agentManager;
+    private final AgentManager agentManager;
 
-    private ZeventEnqueuer zeventManager;
+    private final ZeventEnqueuer zeventManager;
 
-    private ResourceAuditFactory resourceAuditFactory;
+    private final ResourceAuditFactory resourceAuditFactory;
 
-    private SRNManager srnManager;
-
-    private final MeasurementCommandsClientFactory measurementCommandsClientFactory;
+    private final SRNManager srnManager;
 
     @Autowired
     public PlatformManagerImpl(PlatformTypeDAO platformTypeDAO,
@@ -180,8 +174,7 @@ public class PlatformManagerImpl implements PlatformManager {
                                ServerDAO serverDAO, ServiceDAO serviceDAO,
                                AuditManager auditManager, AgentManager agentManager,
                                ZeventEnqueuer zeventManager, SRNManager srnManager,
-                               ResourceAuditFactory resourceAuditFactory,
-                               MeasurementCommandsClientFactory measurementCommandsClientFactory) {
+            ResourceAuditFactory resourceAuditFactory) {
         this.platformTypeDAO = platformTypeDAO;
         this.permissionManager = permissionManager;
         this.agentDAO = agentDAO;
@@ -201,7 +194,6 @@ public class PlatformManagerImpl implements PlatformManager {
         this.zeventManager = zeventManager;
         this.resourceAuditFactory = resourceAuditFactory;
         this.srnManager = srnManager;
-        this.measurementCommandsClientFactory = measurementCommandsClientFactory;
     }
 
     // TODO resolve circular dependency
@@ -397,7 +389,7 @@ public class PlatformManagerImpl implements PlatformManager {
         boolean pushed = false;
         final Agent agent = platform.getAgent();
         try {
-        	auditManager.pushContainer(audit);
+            auditManager.pushContainer(audit);
             pushed = true;
             permissionManager.checkRemovePermission(subject, platform.getEntityId());
             // keep the configresponseId so we can remove it later
@@ -425,13 +417,15 @@ public class PlatformManagerImpl implements PlatformManager {
                 agentManager.removeAgent(agent);
             }
 
+
         } catch (PermissionException e) {
             log.debug("Error while removing Platform");
 
             throw e;
         } finally {
-            if (pushed)
+            if (pushed) {
                 auditManager.popContainer(false);
+            }
         }
     }
 
@@ -588,18 +582,6 @@ public class PlatformManagerImpl implements PlatformManager {
             throw new ApplicationException("Unable to find agent: " + aipValue.getAgentToken());
         }
 
-        if (platType.getPlugin().equalsIgnoreCase("system")) {
-            MeasurementCommandsClient client = measurementCommandsClientFactory.getClient(agent);
-            try {
-                client.scheduleTopn(new ScheduleTopn_args(1, null));
-            } catch (AgentRemoteException e) {
-                log.error("Error while scheduling TopN for new platform", e);
-            } catch (AgentConnectionException e) {
-                log.error("Error while scheduling TopN for new platform", e);
-            }
-        }
-
-
         ConfigResponseDB config = configResponseDAO.createPlatform();
 
         Platform platform = platType.create(aipValue, subject.getName(), config, agent);
@@ -733,9 +715,7 @@ public class PlatformManagerImpl implements PlatformManager {
             // match (and it isn't localhost), we assume that it is
             // the same platform. In the future, we are probably going
             // to need to do better.
-            for (int i = 0; i < ipvals.length; i++) {
-                AIIpValue qip = ipvals[i];
-    
+            for (AIIpValue qip : ipvals) {
                 String address = qip.getAddress();
                 // XXX This is a hack that we need to get rid of
                 // at some point. The idea is simple. Every platform
@@ -744,7 +724,7 @@ public class PlatformManagerImpl implements PlatformManager {
                 // localhost doesn't give us any information. Long
                 // term, when we are trying to match all addresses,
                 // this can go away.
-                if (address.equals(NetFlags.LOOPBACK_ADDRESS) && ipvals.length > 1) {
+                if (address.equals(NetFlags.LOOPBACK_ADDRESS) && (ipvals.length > 1)) {
                     continue;
                 }
     
@@ -822,7 +802,7 @@ public class PlatformManagerImpl implements PlatformManager {
                 // localhost doesn't give us any information. Long
                 // term, when we are trying to match all addresses,
                 // this can go away.
-                if (address.equals(NetFlags.LOOPBACK_ADDRESS) && i < (ipvals.length - 1)) {
+                if (address.equals(NetFlags.LOOPBACK_ADDRESS) && (i < (ipvals.length - 1))) {
                     continue;
                 }
 
@@ -982,6 +962,14 @@ public class PlatformManagerImpl implements PlatformManager {
     }
 
     /**
+     * 
+     */
+    @Transactional(readOnly = true)
+    public Platform getPlatformByResourceId(int id) {
+        return platformDAO.findByResourceId(id);
+    }
+
+    /**
      * Get the Platform that has the specified Fqdn
      * 
      * 
@@ -1029,7 +1017,7 @@ public class PlatformManagerImpl implements PlatformManager {
         // TODO: Add permission check
 
         ResourceType rt = r.getResourceType();
-        if (rt != null && !rt.getId().equals(AuthzConstants.authzPlatform)) {
+        if ((rt != null) && !rt.getId().equals(AuthzConstants.authzPlatform)) {
             throw new PlatformNotFoundException("Invalid resource type = " + rt.getName());
         }
 
@@ -1080,7 +1068,7 @@ public class PlatformManagerImpl implements PlatformManager {
     public Collection<Integer> getPlatformPksByAgentToken(AuthzSubject subject, String agentToken)
         throws PlatformNotFoundException {
         Collection<Platform> platforms = platformDAO.findByAgentToken(agentToken);
-        if (platforms == null || platforms.size() == 0) {
+        if ((platforms == null) || (platforms.size() == 0)) {
             throw new PlatformNotFoundException("Platform with agent token " + agentToken +
                                                 " not found");
         }
@@ -1142,7 +1130,7 @@ public class PlatformManagerImpl implements PlatformManager {
         throws PlatformNotFoundException, PermissionException {
         Server server = serverDAO.get(serverId);
 
-        if (server == null || server.getPlatform() == null) {
+        if ((server == null) || (server.getPlatform() == null)) {
             // This should throw server not found. Servers always have
             // platforms..
             throw new PlatformNotFoundException("platform for server " + serverId + " not found");
@@ -1163,8 +1151,9 @@ public class PlatformManagerImpl implements PlatformManager {
     public Integer getPlatformIdByServer(Integer serverId) throws PlatformNotFoundException {
         Server server = serverDAO.get(serverId);
 
-        if (server == null)
+        if (server == null) {
             throw new PlatformNotFoundException("platform for server " + serverId + " not found");
+        }
 
         return server.getPlatform().getId();
     }
@@ -1235,7 +1224,7 @@ public class PlatformManagerImpl implements PlatformManager {
 
         Collection<AppService> serviceCollection = appLocal.getAppServices();
         Iterator<AppService> it = serviceCollection.iterator();
-        while (it != null && it.hasNext()) {
+        while ((it != null) && it.hasNext()) {
             AppService appService = it.next();
 
             if (appService.isIsGroup()) {
@@ -1285,7 +1274,7 @@ public class PlatformManagerImpl implements PlatformManager {
         Collections.sort(rtn, new Comparator<AppdefResourceType>() {
             private String getName(AppdefResourceType obj) {
 
-                return ((AppdefResourceType) obj).getSortName();
+                return obj.getSortName();
 
             }
 
@@ -1350,7 +1339,7 @@ public class PlatformManagerImpl implements PlatformManager {
                 }
             }
 
-            return (Integer[]) platIds.toArray(new Integer[0]);
+            return platIds.toArray(new Integer[0]);
         } catch (NotFoundException e) {
             // There are no viewable platforms
             return new Integer[0];
@@ -1501,7 +1490,7 @@ public class PlatformManagerImpl implements PlatformManager {
             findUnsupportedPlatformTypes());
         List<Integer> pTypeIds = new ArrayList<Integer>();
 
-        if (platformTypeIds != null && !platformTypeIds.isEmpty()) {
+        if ((platformTypeIds != null) && !platformTypeIds.isEmpty()) {
             for (Integer pTypeId : platformTypeIds) {
 
                 PlatformType pType = findPlatformType(pTypeId);
@@ -1538,7 +1527,7 @@ public class PlatformManagerImpl implements PlatformManager {
             findSupportedPlatformTypes());
         List<Integer> pTypeIds = new ArrayList<Integer>();
 
-        if (platformTypeIds != null && !platformTypeIds.isEmpty()) {
+        if ((platformTypeIds != null) && !platformTypeIds.isEmpty()) {
             for (Integer pTypeId : platformTypeIds) {
 
                 PlatformType pType = findPlatformType(pTypeId);
@@ -1608,15 +1597,17 @@ public class PlatformManagerImpl implements PlatformManager {
             return plat;
         } else {
             if (!(existing.getName().equals(plat.getName()))) {
-                if (platformDAO.findByName(existing.getName()) != null)
+                if (platformDAO.findByName(existing.getName()) != null) {
                     // duplicate found, throw a duplicate object exception
                     throw new AppdefDuplicateNameException();
+                }
             }
 
             if (!(existing.getFqdn().equals(plat.getFqdn()))) {
-                if (platformDAO.findByFQDN(existing.getFqdn()) != null)
+                if (platformDAO.findByFQDN(existing.getFqdn()) != null) {
                     // duplicate found, throw a duplicate object exception
                     throw new AppdefDuplicateFQDNException();
+                }
             }
 
             // See if we need to create an AIPlatform
@@ -1633,11 +1624,11 @@ public class PlatformManagerImpl implements PlatformManager {
                     aiPlatform.setAgentToken(existing.getAgent().getAgentToken());
 
                     IpValue[] ipVals = existing.getIpValues();
-                    for (int i = 0; i < ipVals.length; i++) {
+                    for (IpValue ipVal : ipVals) {
                         AIIpValue aiIpVal = new AIIpValue();
-                        aiIpVal.setAddress(ipVals[i].getAddress());
-                        aiIpVal.setNetmask(ipVals[i].getNetmask());
-                        aiIpVal.setMACAddress(ipVals[i].getMACAddress());
+                        aiIpVal.setAddress(ipVal.getAddress());
+                        aiIpVal.setNetmask(ipVal.getNetmask());
+                        aiIpVal.setMACAddress(ipVal.getMACAddress());
                         aiPlatform.addAIIpValue(aiIpVal);
                     }
 
@@ -1766,8 +1757,8 @@ public class PlatformManagerImpl implements PlatformManager {
         NotFoundException {
         // First, put all of the infos into a Hash
         HashMap<String, PlatformTypeInfo> infoMap = new HashMap<String, PlatformTypeInfo>();
-        for (int i = 0; i < infos.length; i++) {
-            infoMap.put(infos[i].getName(), infos[i]);
+        for (PlatformTypeInfo info : infos) {
+            infoMap.put(info.getName(), info);
         }
 
         Collection<PlatformType> curPlatforms = platformTypeDAO.findByPlugin(plugin);
@@ -1775,7 +1766,7 @@ public class PlatformManagerImpl implements PlatformManager {
         for (PlatformType ptlocal : curPlatforms) {
 
             String localName = ptlocal.getName();
-            PlatformTypeInfo pinfo = (PlatformTypeInfo) infoMap.remove(localName);
+            PlatformTypeInfo pinfo = infoMap.remove(localName);
 
             // See if this exists
             if (pinfo == null) {
@@ -1787,8 +1778,9 @@ public class PlatformManagerImpl implements PlatformManager {
                 // Just update it
                 log.debug("Updating PlatformType: " + localName);
 
-                if (!newName.equals(curName))
+                if (!newName.equals(curName)) {
                     ptlocal.setName(newName);
+                }
             }
         }
 
@@ -1869,7 +1861,7 @@ public class PlatformManagerImpl implements PlatformManager {
 
         for (AIIpValue ip : ips) {
 
-            if (ip.getQueueStatus() == AIQueueConstants.Q_STATUS_REMOVED &&
+            if ((ip.getQueueStatus() == AIQueueConstants.Q_STATUS_REMOVED) &&
                 agent.getAddress().equals(ip.getAddress())) {
                 changeAgentIp = true;
             }
@@ -1885,11 +1877,11 @@ public class PlatformManagerImpl implements PlatformManager {
             // code flow. Since ips contains new and current IP addresses
             // of the platform it works.
             for (AIIpValue ip : ips) {
-                if (ip.getQueueStatus() != AIQueueConstants.Q_STATUS_ADDED &&
-                // Q_STATUS_PLACEHOLDER in this context simply means that
-                    // the ip is already associated with the platform and there
-                    // is no change. Therefore it needs to be part of our checks
-                    ip.getQueueStatus() != AIQueueConstants.Q_STATUS_PLACEHOLDER) {
+                if ((ip.getQueueStatus() != AIQueueConstants.Q_STATUS_ADDED) &&
+                (// Q_STATUS_PLACEHOLDER in this context simply means that
+                // the ip is already associated with the platform and there
+                // is no change. Therefore it needs to be part of our checks
+                ip.getQueueStatus() != AIQueueConstants.Q_STATUS_PLACEHOLDER)) {
                     continue;
                 }
                 try {
@@ -2051,24 +2043,24 @@ public class PlatformManagerImpl implements PlatformManager {
 
     @Transactional(readOnly = true)
     public Platform getPlatformByAgentId(Integer agentId) {
-    	final Agent agent = agentDAO.get(agentId);
-    	if (agent == null) {
-    		return null;
-    	}
-    	final Collection<Platform> platforms = agent.getPlatforms();
-    	for (final Platform platform : platforms) {
-    		final Resource resource = platform.getResource();
-    		if (PlatformDetector.isSupportedPlatform(resource.getPrototype().getName())) {
-    			return platform;
-    		}
-    	}
-    	return null;
+        final Agent agent = agentDAO.get(agentId);
+        if (agent == null) {
+            return null;
+        }
+        final Collection<Platform> platforms = agent.getPlatforms();
+        for (final Platform platform : platforms) {
+            final Resource resource = platform.getResource();
+            if (PlatformDetector.isSupportedPlatform(resource.getPrototype().getName())) {
+                return platform;
+            }
+        }
+        return null;
     }
     
     public void removePlatformVmMapping(AuthzSubject subject, List<String> macAddresses) throws PermissionException {
         for (String mac : macAddresses) {
             Collection<Platform> platforms = this.getPlatformByMacAddr(subject, mac);
-            if (platforms==null || platforms.isEmpty()) {
+            if ((platforms==null) || platforms.isEmpty()) {
                 if (log.isDebugEnabled()) { log.debug("no platform in the system is assosiated to the " + mac + " mac address"); }
                 continue;
             }
@@ -2099,7 +2091,7 @@ public class PlatformManagerImpl implements PlatformManager {
             for (String mac : vmMap.getMacs().split(";")) {
                 if ("00:00:00:00:00:00".equals(mac)) { continue; }
                 Collection<Platform> platforms = this.getPlatformByMacAddr(subject, mac);
-                if (platforms==null || platforms.isEmpty()) {
+                if ((platforms==null) || platforms.isEmpty()) {
                     if (log.isDebugEnabled()) { log.debug("no platform in the system is assosiated to the " + mac + " mac address"); }
                     continue;
                 }

@@ -28,17 +28,17 @@ package org.hyperic.hq.measurement.server.session;
 import java.math.BigDecimal;
 import java.sql.BatchUpdateException;
 import java.sql.Connection;
-import java.util.Calendar;
-import java.util.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -1159,6 +1159,7 @@ public class DataManagerImpl implements DataManager {
             DBUtil.closeStatement(LOG_CTX, ps);
         }
     }
+
 
 
     /**
