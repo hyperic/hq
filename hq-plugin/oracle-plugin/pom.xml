@@ -28,6 +28,14 @@
        </dependency>
 	</dependencies>
 	-->
+	<dependencies>
+	 <dependency>
+           <groupId>com.oracle</groupId>
+           <artifactId>ojdbc5</artifactId>
+           <version>11.2.0.2.0</version>
+     </dependency>
+	</dependencies>
+	
 	<build>
 		<plugins>
 		<plugin>
@@ -164,6 +172,17 @@
 				<enabled>false</enabled>
 			</snapshots>
 		</repository>
+
+                <repository>
+                        <id>hyperic-external-private</id>
+                        <name>Private Hyperic External Dependencies Repository</name>
+                        <url>http://private.maven.hyperic.com/external</url>
+                        <snapshots>
+                                <enabled>false</enabled>
+                        </snapshots>
+                </repository>
+
+
 	</repositories>
 
 	<distributionManagement>

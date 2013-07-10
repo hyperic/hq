@@ -69,6 +69,12 @@ public class DotNetDetector
 
         return RegistryKey.LocalMachine.openSubKey(path);
     }
+    
+    protected final static String ORACLE_PROVIDER_STR = "Oracle Data Provider for .NET";
+    protected final static String SQL_SERVER_PROVIDER_STR = ".NET Data Provider for SqlServer";
+    protected final static String SQL_SERVER_PROVIDER_TYPE_STR = "Data Provider for SqlServer";
+    protected final static String ORACLE_SERVER_PROVIDER_TYPE_STR = "Oracle Data Provider for .Net";
+    
 
     private String getVersion() {
         RegistryKey key = null;
@@ -151,32 +157,32 @@ public class DotNetDetector
         servers.add(server);
         return servers;
     }
-
-    @Override
-    protected List discoverServices(ConfigResponse serverConfig) throws PluginException {
-        List services = new ArrayList();
-
-        //Data providers.
-        try {
-            String[] instances = Pdh.getInstances(".NET Data Provider for SqlServer");
-            Pattern regex = Pattern.compile("([^\\[]*).*");
+    
+    private Collection<ServiceResource>  addDataProvidersServices(String dataProviderStr, String dataProviderTypeStr) {
+        try {            
+            String[] instances = Pdh.getInstances(dataProviderStr);
+            Pattern regex = Pattern.compile("([^\\[]*).*");                                        
             Set<String> names = new HashSet<String>();
             for (int i = 0; i < instances.length; i++) {
                 String instance = instances[i];
                 Matcher m = regex.matcher(instance);
-                if (m.find()) {
-                    String n = m.group(1);
-                    log.debug("[discoverServices] instance = " + instance + " (" + n + ") valid.");
-                    names.add(n);
+                if (m.find()) {                    
+                    String n = m.group(1).trim();
+                    log.debug("[discoverServices] instance = " + instance + " (" + n + ")");                    
+                    if (n.length() > 0) {
+                        log.debug("[discoverServices] instance = " + instance + " (" + n + ") valid.");
+                        names.add(n);
+                    }
                 } else {
                     log.debug("[discoverServices] instance = " + instance + " skiped.");
                 }
             }
+            List<ServiceResource> services = new ArrayList<ServiceResource>();
             for (Iterator<String> it = names.iterator(); it.hasNext();) {
                 String name = it.next();
                 ServiceResource service = new ServiceResource();
-                service.setType(this, "Data Provider for SqlServer");
-                service.setServiceName("Data Provider for SqlServer " + name);
+                service.setType(this, dataProviderTypeStr);
+                service.setServiceName(dataProviderTypeStr + " " + name);
 
                 ConfigResponse pc = new ConfigResponse();
                 pc.setValue(PROP_APP, name);
@@ -186,8 +192,19 @@ public class DotNetDetector
             }
             return services;
         } catch (Win32Exception e) {
-            log.debug("Error getting pdh data for '.NET Data Provider for SqlServer': " + e, e);
+            log.debug("Error getting pdh data for '.NET Data Provider for:" + dataProviderStr + ":"  + e, e);
+            return Collections.emptyList();
         }
+        
+    }
+
+    @Override
+    protected List discoverServices(ConfigResponse serverConfig) throws PluginException {
+        List<ServiceResource> services = new ArrayList<ServiceResource>();
+
+        //Data providers.
+        services.addAll(addDataProvidersServices(SQL_SERVER_PROVIDER_STR, SQL_SERVER_PROVIDER_TYPE_STR));
+        services.addAll(addDataProvidersServices(ORACLE_PROVIDER_STR, ORACLE_SERVER_PROVIDER_TYPE_STR));
 
         // apps
         String instancesToSkipStr = getProperties().getProperty("dotnet.instances.to.skip", "_Global_");
