@@ -46,14 +46,18 @@ public class DotNetMeasurementPlugin
     private static final String RUNTIME_NAME = "_Global_";
     private static Log log = LogFactory.getLog(DotNetMeasurementPlugin.class);
     private static final Map<String, List<String>> sqlPidsCache = new HashMap<String, List<String>>();
-
+    private static final Map<String, List<String>> oraclePidsCache = new HashMap<String, List<String>>();
+    
     @Override
     public MetricValue getValue(Metric metric) throws PluginException, MetricNotFoundException, MetricUnreachableException {
         MetricValue val = null;
         if (metric.getDomainName().equalsIgnoreCase("pdh")) {
             val = getPDHMetric(metric);
         } else if (metric.getDomainName().equalsIgnoreCase("pdhSQLDP")) {
-            val = getPDHSQLPDMetric(metric);
+            val = getPDHSQLPDMetric(metric, sqlPidsCache, DotNetDetector.SQL_SERVER_PROVIDER_STR);
+        } else if (metric.getDomainName().equalsIgnoreCase("pdhOracleDP")) {
+            val = getPDHSQLPDMetric(metric, oraclePidsCache, DotNetDetector.ORACLE_PROVIDER_STR);
+
         } else {
             try {
                 val = super.getValue(metric);
@@ -105,39 +109,51 @@ public class DotNetMeasurementPlugin
         return template;
     }
 
-    private MetricValue getPDHSQLPDMetric(Metric metric) {
+    private MetricValue getPDHSQLPDMetric(Metric metric, Map<String, List<String>> pidsCache, String providerStr) {
         if (metric.isAvail()) {
-            sqlPidsCache.clear();
+            pidsCache.clear();
         }
-        if (sqlPidsCache.isEmpty()) {
+        if (pidsCache.isEmpty()) {
             try {
-                String[] instances = Pdh.getInstances(".NET Data Provider for SqlServer");
+                String[] instances = Pdh.getInstances(providerStr);
                 Pattern regex = Pattern.compile("([^\\[]*)\\[([^\\]]*)\\]"); // name[pid]
                 for (int i = 0; i < instances.length; i++) {
                     String instance = instances[i];
-                    log.debug("[getPDHSQLPDMetric] instance = " + instance);
+                    log.debug("[getPDHSQLPDMetric] " + providerStr  + " instance = " + instance);
                     Matcher m = regex.matcher(instance);
                     if (m.find()) {
-                        List<String> pids = sqlPidsCache.get(m.group(1));
+                        String nonTrimmedName = m.group(1);
+                        String name = nonTrimmedName.trim();
+                        if (name.length() == 0) {
+                            continue;
+                        }
+                        List<String> pids = pidsCache.get(name);
                         if (pids == null) {
                             pids = new ArrayList<String>();
-                            sqlPidsCache.put(m.group(1), pids);
+                            pidsCache.put(name, pids);
                         }
-                        pids.add(m.group(2));
+                        // nira  oracle is of the form "app [x,y]"
+                        //sql is of the form "app[x]
+                        // if there are spaces in between we will include them in the pid
+                        //(so pid of oracle will be " [x,y]")
+                        // the pid of sql server will be "[x]"
+                        String spaces = nonTrimmedName.substring(nonTrimmedName.indexOf(name)+name.length());
+                        String pid = spaces+"["+m.group(2)+"]";
+                        pids.add(pid);                        
                     }
                 }
             } catch (Win32Exception e) {
                 log.debug("Error getting PIDs data for '.NET Data Provider for SqlServer': " + e, e);
             }
-            log.debug("[getPDHSQLPDMetric] sqlPidsCache = " + sqlPidsCache);
+            log.debug("[getPDHSQLPDMetric] pidsCache = " + pidsCache);            
         }
 
         log.debug("[getPDHSQLPDMetric] metric:'" + metric);
         String appName = metric.getObjectPropString();
-        List<String> pids = sqlPidsCache.get(appName);
+        List<String> pids = pidsCache.get(appName);
         MetricValue res;
         if (pids == null) {
-            sqlPidsCache.clear();
+            pidsCache.clear();
             if (metric.isAvail()) {
                 res = new MetricValue(Metric.AVAIL_DOWN);
             } else {
@@ -153,8 +169,8 @@ public class DotNetMeasurementPlugin
             } else {
                 double val = 0;
                 for (int i = 0; i < pids.size(); i++) {
-                    String pid = pids.get(i);
-                    String obj = "\\.NET Data Provider for SqlServer(" + appName + "[" + pid + "])\\" + metric.getAttributeName();
+                    String pid = pids.get(i); 
+                    String obj = "\\" + providerStr + "(" + appName +  pid + ")\\" + metric.getAttributeName();
                     log.debug("[getPDHSQLPDMetric] obj:'" + obj);
                     val += getPDHMetric(obj, metric.isAvail()).getValue();
                 }

@@ -590,6 +590,9 @@ fi
 
   <server name="Oracle" version="10g"
           include="9i">
+          
+    <plugin type="control"
+           class="OracleServerControl"/>
 
     <!-- Define user service -->
     <service name="Segment">
@@ -625,7 +628,7 @@ fi
   </server>
 
   <server name="Oracle" version="11g"
-          include="10g"/>
+          include="10g"/>         
 
   <!-- ==================== Plugin Help =========================== -->
 
