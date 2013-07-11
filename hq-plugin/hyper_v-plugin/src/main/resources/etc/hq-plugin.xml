@@ -33,6 +33,10 @@
 		<plugin type="measurement" class="HyperVMeasurementPlugin"/>
 	        <plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>
 	    	<plugin type="autoinventory" class="HyperVDetector"/>
+		<config>
+      		<option name="GUID" description="GUID" optional="true"/>
+      		<option name="Mac" description="Mac Adress" optional="true"/>
+    	</config>
 	 	<metric name="Availability"
 	        	template="wmic:object=Msvm_ComputerSystem,column=enabledstate:ElementName-%instance.name%"
 		    category="AVAILABILITY"

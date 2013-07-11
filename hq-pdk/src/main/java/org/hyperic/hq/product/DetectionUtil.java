@@ -446,7 +446,6 @@ public class DetectionUtil {
                 line = line.trim();
                 StringTokenizer st = new StringTokenizer(line,"=");
                 while (st.hasMoreElements()) {                    
-                    String k = ((String) st.nextElement()).trim();
                     String v = ((String) st.nextElement()).trim();                    
                     obj.add(v);
                 }

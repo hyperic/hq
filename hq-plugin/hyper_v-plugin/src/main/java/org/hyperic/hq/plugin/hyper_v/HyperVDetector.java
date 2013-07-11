@@ -47,6 +47,7 @@ import org.hyperic.util.config.IntegerConfigOption;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.autoinventory.ServerSignature;
 import org.hyperic.hq.product.AutoServerDetector;
+import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.DetectionUtil;
 import org.hyperic.hq.product.PlatformServiceDetector;
 import org.hyperic.hq.product.PluginException;
@@ -72,7 +73,27 @@ public class HyperVDetector
 
         return servers;
     }
-    
+  
+    @Override
+    protected void setProductConfig(ServerResource server, ConfigResponse config) {
+        try {
+            Set<String> guids = DetectionUtil.getWMIObj("Msvm_ComputerSystem", "ElementName-"+server.getIdentifier(), "Name", "");
+            if (guids==null||guids.isEmpty()) {
+                return;
+            }
+            String guid = guids.iterator().next();
+            config.setValue(Collector.GUID, guid);
+            Set<String> macs = DetectionUtil.getWMIObj("Msvm_SyntheticEthernetPort", "SystemName-"+guid, "PermanentAddress", "");
+            if (macs==null||macs.isEmpty()) {
+                return;
+            }
+            String mac = macs.iterator().next();
+            config.setValue(Collector.MAC, mac);
+        }catch(PluginException e) {
+            log.error(e,new Throwable());
+        }
+    }
+
 /*    protected List<ServerResource> discoverServers(String propertySet, String type, String namePrefix, String token) {
         List<ServerResource> servers = new ArrayList<ServerResource>();
         log.error("discoverServers");
