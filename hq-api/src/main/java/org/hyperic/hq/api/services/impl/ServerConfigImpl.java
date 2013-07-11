@@ -1,8 +1,8 @@
 package org.hyperic.hq.api.services.impl;
 
-import static org.hyperic.hq.api.model.config.ServerConfigType.VCENTER;
 import static org.hyperic.hq.api.model.config.ServerConfigType.LDAP;
 import static org.hyperic.hq.api.model.config.ServerConfigType.SERVER_GUID;
+import static org.hyperic.hq.api.model.config.ServerConfigType.VCENTER;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -144,5 +144,10 @@ public class ServerConfigImpl extends RestApiService  implements ServerConfigSer
         }
     }
 
+    @GET
+    @Path("/time")
+    public long getServerTime() {
+        return System.currentTimeMillis();
+    }
 
 }
