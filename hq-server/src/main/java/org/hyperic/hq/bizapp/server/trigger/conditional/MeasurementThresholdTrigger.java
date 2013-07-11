@@ -51,7 +51,7 @@ public class MeasurementThresholdTrigger
                                                          MeasurementThresholdTrigger.class);
     }
 
-    private Log log = LogFactory.getLog(getClass().getName());
+    private final Log log = LogFactory.getLog(getClass().getName());
 
     private final int OPER_LE = ConditionalTriggerSchema.OPER_LE;
     private final int OPER_LT = ConditionalTriggerSchema.OPER_LT;
@@ -77,8 +77,9 @@ public class MeasurementThresholdTrigger
     public ConfigResponse getConfigResponse(AppdefEntityID id, AlertConditionValue cond) throws InvalidOptionException,
                                                                                         InvalidOptionValueException
     {
-        if (cond.getType() != EventConstants.TYPE_THRESHOLD)
+        if (cond.getType() != EventConstants.TYPE_THRESHOLD) {
             throw new InvalidOptionValueException("Condition is not a Measurement Threshold");
+        }
         return getSharedConfigResponse(cond);
     }
 
@@ -124,8 +125,9 @@ public class MeasurementThresholdTrigger
             }
         }
 
-        if (operator == -1)
+        if (operator == -1) {
             throw new InvalidTriggerDataException("Invalid operator, '" + soperator + "'");
+        }
         return operator;
     }
 
@@ -167,7 +169,7 @@ public class MeasurementThresholdTrigger
             throw new InvalidTriggerDataException(e);
         }
 
-        if (soperator == null || sthreshold == null || smeasID == null) {
+        if ((soperator == null) || (sthreshold == null) || (smeasID == null)) {
             throw new InvalidTriggerDataException(CFG_COMPARATOR + " = '" + soperator + "' " + CFG_THRESHOLD + " = '" +
                                                   sthreshold + "' " + CFG_ID + " = '" + smeasID + "'");
         }
