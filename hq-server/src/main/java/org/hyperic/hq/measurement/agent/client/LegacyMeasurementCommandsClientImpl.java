@@ -181,5 +181,6 @@ public class LegacyMeasurementCommandsClientImpl implements MeasurementCommandsC
     }
 
     public void unscheduleTopn() throws AgentRemoteException, AgentConnectionException {
+        this.agentConn.sendCommand(this.verAPI.command_unscheduleTopn, this.verAPI.getVersion(), null);
     }
 }

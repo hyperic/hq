@@ -89,6 +89,7 @@ public class TopNManagerImpl implements ZeventListener<ResourceZevent>, TopNMana
         if (null == (schedule = topNScheduleDAO.get(resourceId))) {
             log.error("Cannot unschedule TopN collection for resource '" + resourceId + "', "
                     + "no such scheduling exists");
+            return;
         }
         Platform platform = platformManager.getPlatformByResourceId(resourceId);
         MeasurementCommandsClient client = measurementCommandsClientFactory.getClient(platform.getAgent());
