@@ -6,4 +6,6 @@ public interface TopNManager {
 
     void unscheduleTopNCollection(int resourceId);
 
+    void updateGlobalTopNInterval(int intervalInMinutes);
+
 }
