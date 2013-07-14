@@ -1794,6 +1794,7 @@ public class AppdefBossImpl implements AppdefBoss , ApplicationContextAware {
 
             AppdefEntityValue aev = new AppdefEntityValue(eid, caller);
             appdefManager.changeOwner(caller, aev.getResourcePOJO(), newOwner);
+            applicationContext.publishEvent(new ResourceOwnerChangedEvent(aev.getResourcePOJO().getResource()));
             return aev.getResourceValue();
         } catch (PermissionException e) {
             throw e;
