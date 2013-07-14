@@ -126,6 +126,7 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceOwnerChangedEvent;
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
 import org.hyperic.hq.authz.server.session.ResourceGroupSortField;
@@ -173,14 +174,17 @@ import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.util.timer.StopWatch;
 import org.quartz.SchedulerException;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  */
 @org.springframework.stereotype.Service
 @Transactional
-public class AppdefBossImpl implements AppdefBoss {
+public class AppdefBossImpl implements AppdefBoss , ApplicationContextAware {
     private static final String BUNDLE = "org.hyperic.hq.bizapp.Resources";
 
     private static final String APPDEF_PAGER_PROCESSOR = "org.hyperic.hq.appdef.shared.pager.AppdefPagerProc";
@@ -227,7 +231,9 @@ public class AppdefBossImpl implements AppdefBoss {
 
     private ZeventEnqueuer zEventManager;
     
-    private CritterTranslator critterTranslator; 
+    private CritterTranslator critterTranslator;
+    
+    private ApplicationContext applicationContext;
 
     protected Log log = LogFactory.getLog(AppdefBossImpl.class.getName());
     protected final int APPDEF_TYPE_UNDEFINED = -1;
@@ -1782,6 +1788,7 @@ public class AppdefBossImpl implements AppdefBoss {
             if (eid.isGroup()) {
                 ResourceGroup g = resourceGroupManager.findResourceGroupById(caller, eid.getId());
                 resourceGroupManager.changeGroupOwner(caller, g, newOwner);
+                applicationContext.publishEvent(new ResourceOwnerChangedEvent(g.getResource()));
                 return findGroup(sessionId, eid.getId());
             }
 
@@ -3401,5 +3408,9 @@ public class AppdefBossImpl implements AppdefBoss {
     @Transactional(readOnly=true)
     public boolean hasVirtualResourceRelation(Resource resource) {
         return resourceManager.hasResourceRelation(resource, resourceManager.getVirtualRelation());
+    }
+    
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 }

@@ -842,6 +842,28 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
 
         return plist;
     }
+    
+    /**
+     * Get all resource groups owned by with the specified owner
+     * @param owner of resource groups
+     * 
+     */
+    @Transactional(readOnly = true)
+    public Collection<ResourceGroup>  getResourceGroupsByOwnerId(AuthzSubject whoami)
+        throws PermissionException {
+
+        Collection<ResourceGroup> all = getAllResourceGroups(whoami, false);
+
+        List<ResourceGroup> ownerGroups = new ArrayList<ResourceGroup>();
+        Iterator<ResourceGroup> i = all.iterator();
+        while (i.hasNext()) {
+            ResourceGroup g = i.next();
+            if (whoami == g.getResource().getOwner())
+                ownerGroups.add(g);
+        }
+
+        return ownerGroups;
+    }
 
     /**
      * Change owner of a group.

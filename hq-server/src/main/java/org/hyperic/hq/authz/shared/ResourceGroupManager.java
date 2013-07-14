@@ -46,6 +46,7 @@ import org.hyperic.hq.grouping.GroupException;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Local interface for ResourceGroupManager.
@@ -303,6 +304,16 @@ public interface ResourceGroupManager
     public PageList<ResourceGroupValue> getResourceGroupsById(AuthzSubject whoami, Integer[] ids,
                                                               PageControl pc)
         throws PermissionException;
+    
+    
+
+    /**
+     * Get all resource groups owned by with the specified owner
+     * @param owner of resource groups
+     * @throws PermissionException 
+     * 
+     */
+    public Collection<ResourceGroup>  getResourceGroupsByOwnerId(AuthzSubject whoami) throws PermissionException;
 
     /**
      * Change owner of a group.
