@@ -10,4 +10,6 @@ public interface TopNManager {
 
     byte[] uncompressData(final byte[] data);
 
+    void updateGlobalTopNInterval(int intervalInMinutes);
+
 }

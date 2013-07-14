@@ -3,6 +3,7 @@ package org.hyperic.hq.topn;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -18,6 +19,8 @@ import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.PlatformManager;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
+import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.hibernate.SessionManager;
@@ -31,6 +34,7 @@ import org.hyperic.hq.measurement.shared.TopNManager;
 import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
+import org.hyperic.util.ConfigPropertyException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,16 +52,19 @@ public class TopNManagerImpl implements ZeventListener<ResourceZevent>, TopNMana
     private final MeasurementCommandsClientFactory measurementCommandsClientFactory;
     private final ServerConfigManager serverConfigManager;
     private final TopNScheduleDAO topNScheduleDAO;
+    private final AuthzSubjectManager authzSubjectManager;
 
     @Autowired
     public TopNManagerImpl(ZeventEnqueuer zEventManager, PlatformManager platformManager,
             MeasurementCommandsClientFactory measurementCommandsClientFactory,
-            ServerConfigManager serverConfigManager, TopNScheduleDAO topNScheduleDAO) {
+ ServerConfigManager serverConfigManager,
+            TopNScheduleDAO topNScheduleDAO, AuthzSubjectManager authzSubjectManager) {
         this.zEventManager = zEventManager;
         this.platformManager = platformManager;
         this.measurementCommandsClientFactory = measurementCommandsClientFactory;
         this.serverConfigManager = serverConfigManager;
         this.topNScheduleDAO = topNScheduleDAO;
+        this.authzSubjectManager = authzSubjectManager;
     }
 
     @PostConstruct
@@ -86,6 +93,27 @@ public class TopNManagerImpl implements ZeventListener<ResourceZevent>, TopNMana
     }
 
     @Transactional
+    public void updateGlobalTopNInterval(int intervalInMinutes) {
+        try {
+            Properties newProps = serverConfigManager.getConfig();
+            newProps.put(TOPN_DEFAULT_INTERVAL, String.valueOf(intervalInMinutes));
+            serverConfigManager.setConfig(authzSubjectManager.getOverlordPojo(), newProps);
+        } catch (ApplicationException e) {
+            log.error("Error updating TopN interval", e);
+            return;
+        } catch (ConfigPropertyException e) {
+            log.error("Error updating TopN interval", e);
+            return;
+        }
+        for (TopNSchedule schedule : topNScheduleDAO.findAll()) {
+            if (schedule.isEnabled()) {
+                scheduleOrUpdateTopNCollection(schedule.getResourceId(), intervalInMinutes);
+            }
+        }
+
+    }
+
+    @Transactional
     public void unscheduleTopNCollection(int resourceId) {
         TopNSchedule schedule = null;
         if (null == (schedule = topNScheduleDAO.get(resourceId))) {
@@ -104,7 +132,6 @@ public class TopNManagerImpl implements ZeventListener<ResourceZevent>, TopNMana
         } catch (AgentConnectionException ex) {
             log.error("Error while unscheduling TopN", ex);
         }
-
     }
 
     @Transactional
