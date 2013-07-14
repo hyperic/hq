@@ -74,26 +74,6 @@ public class HyperVDetector
         return servers;
     }
   
-    @Override
-    protected void setProductConfig(ServerResource server, ConfigResponse config) {
-        try {
-            Set<String> guids = DetectionUtil.getWMIObj("Msvm_ComputerSystem", "ElementName-"+server.getIdentifier(), "Name", "");
-            if (guids==null||guids.isEmpty()) {
-                return;
-            }
-            String guid = guids.iterator().next();
-            config.setValue(Collector.GUID, guid);
-            Set<String> macs = DetectionUtil.getWMIObj("Msvm_SyntheticEthernetPort", "SystemName-"+guid, "PermanentAddress", "");
-            if (macs==null||macs.isEmpty()) {
-                return;
-            }
-            String mac = macs.iterator().next();
-            config.setValue(Collector.MAC, mac);
-        }catch(PluginException e) {
-            log.error(e,new Throwable());
-        }
-    }
-
 /*    protected List<ServerResource> discoverServers(String propertySet, String type, String namePrefix, String token) {
         List<ServerResource> servers = new ArrayList<ServerResource>();
         log.error("discoverServers");
@@ -142,7 +122,7 @@ public class HyperVDetector
             return servers;
         } catch (Win32Exception e) {
             log.debug("Error getting pdh data for " + propertySet + ": " + e, e);
-            return null;
+            return null;conf
         }
     }
 */
@@ -154,12 +134,19 @@ public class HyperVDetector
             
             ConfigResponse conf = new ConfigResponse();
             conf.setValue("instance.name", name);
-            server.setProductConfig(conf);
                         
-            ConfigResponse cprops = new ConfigResponse();
+            Set<String> guids = DetectionUtil.getWMIObj("Msvm_ComputerSystem", "ElementName-"+name, "Name", "");
+            if (guids!=null&&!guids.isEmpty()) {
+                String guid = guids.iterator().next();
+                conf.setValue(Collector.GUID, guid);
+                Set<String> macs = DetectionUtil.getWMIObj("Msvm_SyntheticEthernetPort", "SystemName-"+guid, "PermanentAddress", "");
+                if (macs!=null&&!macs.isEmpty()) {
+                    String mac = macs.iterator().next();
+                    conf.setValue(Collector.MAC, mac);
+                }
+            }
             server.setProductConfig(conf);
             server.setMeasurementConfig();
-            server.setCustomProperties(cprops);           
             server.setName(getPlatformName() + " " +  " " +namePrefix + name);
             server.setDescription("");
             server.setInstallPath(name); //XXX

@@ -413,6 +413,15 @@ public class DetectionUtil {
         }
     }//EOM 
     
+    /**
+     * 
+     * @param wmiObjName
+     * @param filter a name-value pair. The first '-' sign seperates between the name and the value. The rest which follows are part of the value's name
+     * @param col
+     * @param name
+     * @return
+     * @throws PluginException
+     */
     public static Set<String> getWMIObj(String wmiObjName, String filter, String col, String name) throws PluginException {
         if (wmiObjName==null||"".equals(wmiObjName)) {
             throw new PluginException("object property not specified in the template of " + name);
@@ -420,8 +429,8 @@ public class DetectionUtil {
         StringBuilder sb = new StringBuilder().append("wmic /NAMESPACE:\\\\root\\virtualization path ").append(wmiObjName);
 
         if (filter!=null&&!"".equals(filter)) {
-            StringTokenizer s = new StringTokenizer(filter,"-");
-            sb.append(" WHERE ").append(s.nextElement()).append("='").append(s.nextElement()).append("'");
+            int i = filter.indexOf("-");
+            sb.append(" WHERE ").append(filter.substring(0, i)).append("='").append(filter.substring(i+1, filter.length())).append("'");
         }
         
         sb.append(" get");
@@ -445,7 +454,8 @@ public class DetectionUtil {
             while ((line = input.readLine()) != null) {                
                 line = line.trim();
                 StringTokenizer st = new StringTokenizer(line,"=");
-                while (st.hasMoreElements()) {                    
+                while (st.hasMoreElements()) {
+                    String k = ((String) st.nextElement()).trim();                    
                     String v = ((String) st.nextElement()).trim();                    
                     obj.add(v);
                 }
