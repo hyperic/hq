@@ -229,7 +229,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
             MaintenanceEvent event = PermissionManagerFactory.getInstance()
                 .getMaintenanceEventManager().getMaintenanceEvent(subj, group.getId());
 
-            if (event != null && MaintenanceEvent.STATE_RUNNING.equals(event.getState())) {
+            if ((event != null) && MaintenanceEvent.STATE_RUNNING.equals(event.getState())) {
                 String msg = ResourceBundle.getBundle(BUNDLE).getString(
                     "resourceGroup.update.error.downtime.running");
 
@@ -334,7 +334,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         checkGroupPermission(whoami, group.getId(), AuthzConstants.perm_modifyResourceGroup);
 
         // XXX: Add Auditing
-        if (name != null && !name.equals(group.getName())) {
+        if ((name != null) && !name.equals(group.getName())) {
             ResourceGroup existing = resourceGroupDAO.findByName(name);
 
             if (existing != null) {
@@ -345,11 +345,11 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
             group.getResource().setName(name);
         }
 
-        if (description != null && !description.equals(group.getDescription())) {
+        if ((description != null) && !description.equals(group.getDescription())) {
             group.setDescription(description);
         }
 
-        if (location != null && !location.equals(group.getLocation())) {
+        if ((location != null) && !location.equals(group.getLocation())) {
             group.setLocation(location);
         }
         
@@ -398,8 +398,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         final Resource resource = group.getResource();
         // if the group.id != resource.instanceId that means the resource should not be deleted since it is
         // associated with another first class object
-        final boolean removeResource =
-            group.getId().equals(resource.getResourceType().getId().equals(AuthzConstants.authzGroup)) ? true : false;
+        boolean removeResource = group.getId().equals(resource.getInstanceId()) ? true : false;
         resourceGroupDAO.remove(group, removeResource);
         resourceGroupDAO.getSession().flush();
         // Send resource delete event
@@ -742,8 +741,9 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
             if (excludeRoot) {
                 String name = rgloc.getName();
                 if (!name.equals(AuthzConstants.groupResourceTypeName) &&
-                    !name.equals(AuthzConstants.rootResourceGroupName))
+                    !name.equals(AuthzConstants.rootResourceGroupName)) {
                     groups.add(rgloc);
+                }
             } else {
                 groups.add(rgloc);
             }
@@ -810,8 +810,9 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     public PageList<ResourceGroupValue> getResourceGroupsById(AuthzSubject whoami, Integer[] ids,
                                                               PageControl pc)
         throws PermissionException {
-        if (ids.length == 0)
+        if (ids.length == 0) {
             return new PageList<ResourceGroupValue>();
+        }
 
         PageControl allPc = new PageControl();
         // get all roles, sorted but not paged
@@ -827,10 +828,11 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         // find the requested roles
         List<ResourceGroup> groups = new ArrayList<ResourceGroup>(numToFind);
         Iterator<ResourceGroup> i = all.iterator();
-        while (i.hasNext() && groups.size() < numToFind) {
+        while (i.hasNext() && (groups.size() < numToFind)) {
             ResourceGroup g = i.next();
-            if (index.contains(g.getId()))
+            if (index.contains(g.getId())) {
                 groups.add(g);
+            }
         }
 
         // TODO: G
@@ -893,8 +895,8 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
 
         g.setGroupType(new Integer(groupType));
 
-        if (groupType == AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS ||
-            groupType == AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC) {
+        if ((groupType == AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS) ||
+            (groupType == AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC)) {
             Resource r = findPrototype(new AppdefEntityTypeID(groupEntType, groupEntResType));
             g.setResourcePrototype(r);
         }
