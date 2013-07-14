@@ -77,6 +77,7 @@ import org.hyperic.hq.measurement.shared.MeasRange;
 import org.hyperic.hq.measurement.shared.MeasRangeObj;
 import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
+import org.hyperic.hq.measurement.shared.TopNManager;
 import org.hyperic.hq.plugin.system.TopReport;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
@@ -161,7 +162,8 @@ public class DataManagerImpl implements DataManager {
     private final RegisteredTriggers registeredTriggers;
     private final ConcurrentStatsCollector concurrentStatsCollector;
     private final int transactionTimeout;
-    
+    private final TopNManager topNManager;
+
     
     @Autowired
     public DataManagerImpl(DBUtil dbUtil, MeasurementDAO measurementDAO,
@@ -171,7 +173,8 @@ public class DataManagerImpl implements DataManager {
                            MetricDataCache metricDataCache, ZeventEnqueuer zeventManager,
                            MessagePublisher messagePublisher, RegisteredTriggers registeredTriggers,
                            ConcurrentStatsCollector concurrentStatsCollector,
-                           HibernateTransactionManager transactionManager) {
+                           HibernateTransactionManager transactionManager,
+                           TopNManager topNManager) {
         this.dbUtil = dbUtil;
         this.measurementDAO = measurementDAO;
         this.measurementManager = measurementManager;
@@ -183,6 +186,7 @@ public class DataManagerImpl implements DataManager {
         this.registeredTriggers = registeredTriggers;
         this.concurrentStatsCollector = concurrentStatsCollector;
         this.transactionTimeout = transactionManager.getDefaultTimeout();
+        this.topNManager = topNManager;
     }
 
     @PostConstruct
@@ -1016,8 +1020,10 @@ public class DataManagerImpl implements DataManager {
     public String getTopNDataAsString(int resourceId, long time) {
         TopNData data = getTopNData(resourceId, time);
         try {
-            return TopReport.fromSerializedForm(data.getData()).toString();
+            byte[] unCompressedData = topNManager.uncompressData(data.getData());
+            return TopReport.fromSerializedForm(unCompressedData).toString();
         } catch (Exception e) {
+            log.error("Error un serializing TopN data", e);
         }
         return null;
     }

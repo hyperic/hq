@@ -1,5 +1,6 @@
 package org.hyperic.hq.topn;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,6 +34,7 @@ import org.hyperic.hq.zevents.ZeventListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.xerial.snappy.Snappy;
 
 
 @SuppressWarnings("restriction")
@@ -191,5 +193,23 @@ public class TopNManagerImpl implements ZeventListener<ResourceZevent>, TopNMana
     @Override
     public String toString() {
         return "ResponseTimeRefreshListener";
+    }
+
+    public byte[] compressData(final byte[] data) {
+        try {
+            return Snappy.compress(data);
+        } catch (final IOException e) {
+            log.error("Unable to compress TopN data " + e.getClass().getSimpleName(), e);
+            return data;
+        }
+    }
+
+    public byte[] uncompressData(final byte[] data) {
+        try {
+            return Snappy.uncompress(data);
+        } catch (final IOException e) {
+            log.error("Unable to uncompress TopN data " + e.getClass().getSimpleName(), e);
+            return data;
+        }
     }
 }

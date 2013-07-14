@@ -70,6 +70,7 @@ import org.hyperic.hq.measurement.data.ValueList;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.ReportProcessor;
 import org.hyperic.hq.measurement.shared.SRNManager;
+import org.hyperic.hq.measurement.shared.TopNManager;
 import org.hyperic.hq.plugin.system.TopReport;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.zevents.Zevent;
@@ -98,6 +99,7 @@ public class ReportProcessorImpl implements ReportProcessor {
     private MeasurementInserterHolder measurementInserterManager;
     private AgentManager agentManager;
     private ZeventEnqueuer zEventManager;
+    private TopNManager topNManager;
 
     private ResourceManager resourceManager;
 
@@ -110,7 +112,9 @@ public class ReportProcessorImpl implements ReportProcessor {
                                ReportStatsCollector reportStatsCollector,
                                MeasurementInserterHolder measurementInserterManager,
                                AgentManager agentManager, ZeventEnqueuer zEventManager,
-                               ResourceManager resourceManager, AgentScheduleSynchronizer agentScheduleSynchronizer) {
+                               ResourceManager resourceManager, AgentScheduleSynchronizer agentScheduleSynchronizer,
+                               TopNManager topNManager
+                               ) {
         this.measurementManager = measurementManager;
         this.platformManager = platformManager;
         this.serverManager = serverManager;
@@ -122,6 +126,7 @@ public class ReportProcessorImpl implements ReportProcessor {
         this.zEventManager = zEventManager;
         this.resourceManager = resourceManager;
         this.agentScheduleSynchronizer = agentScheduleSynchronizer;
+        this.topNManager = topNManager;
     }
     
     @PostConstruct
@@ -358,13 +363,14 @@ public class ReportProcessorImpl implements ReportProcessor {
         if (platformRes == null) return;
         int resourceId = platformRes.getId();
         for (TopReport report : reports) {
-             Date minute = DateUtils.truncate(new Date(report.getCreateTime()), Calendar.MINUTE);
-            TopNData topNData = null;
+            Date minute = DateUtils.truncate(new Date(report.getCreateTime()), Calendar.MINUTE);
+            byte[] compressedData = null;
             try {
-                topNData = new TopNData(resourceId, minute, report.toSerializedForm());
+                compressedData = topNManager.compressData(report.toSerializedForm());
             } catch (IOException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                log.error("Error serializing TopN data", e);
             }
+            TopNData topNData = new TopNData(resourceId, minute, compressedData);
             topNs.add(topNData);
         }
 

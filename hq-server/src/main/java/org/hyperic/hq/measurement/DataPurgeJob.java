@@ -38,7 +38,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.engine.SessionFactoryImplementor;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.common.SystemException;
-import java.util.Calendar;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.context.Bootstrap;
@@ -254,7 +253,7 @@ public class DataPurgeJob implements Runnable {
     }
 
     private void purgeTopNData(long now) {
-        Date timeToKeep = DateUtils.add(new Date(now), Calendar.DAY_OF_MONTH, -this.purgeTopN);
+        Date timeToKeep = DateUtils.addDays(new Date(now), -this.purgeTopN);
         log.info("Purging TopNData older than " + timeToKeep);
         int topNDeleted = dataManager.purgeTopNData(timeToKeep);
         log.info("Done (Deleted " + topNDeleted + " TopNData rows)");

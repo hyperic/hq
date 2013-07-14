@@ -6,4 +6,8 @@ public interface TopNManager {
 
     void unscheduleTopNCollection(int resourceId);
 
+    byte[] compressData(final byte[] data);
+
+    byte[] uncompressData(final byte[] data);
+
 }
