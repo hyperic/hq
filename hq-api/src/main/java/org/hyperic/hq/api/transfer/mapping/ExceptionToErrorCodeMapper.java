@@ -173,7 +173,8 @@ public class ExceptionToErrorCodeMapper  {
         USER_NOT_AUTHORIZED_MODIFY_ROLE("9510"),
         POLICY_CREATE_ERROR("9511"),
         USER_NOT_AUTHORIZED_GROUP("9512"),
-        ROLE_NOT_FOUND_BY_ID("9513");
+        ROLE_NOT_FOUND_BY_ID("9513"),
+        USER_NOT_FOUND_BY_NAME("9514");
         
          
         private final String errorCode;
