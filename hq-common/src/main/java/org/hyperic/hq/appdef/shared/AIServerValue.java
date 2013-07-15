@@ -177,7 +177,9 @@ public class AIServerValue
    public void setCustomProperties( byte[] customProperties )
    {
 	  this.customProperties = customProperties;
-	  customPropertiesHasBeenSet = true;
+	  if (customProperties != null) {
+	      customPropertiesHasBeenSet = true;
+	  }
 
    }
 
@@ -192,7 +194,9 @@ public class AIServerValue
    public void setProductConfig( byte[] productConfig )
    {
 	  this.productConfig = productConfig;
-	  productConfigHasBeenSet = true;
+	  if (productConfig != null) {
+	      productConfigHasBeenSet = true;
+	  }
 
    }
 
@@ -207,7 +211,9 @@ public class AIServerValue
    public void setControlConfig( byte[] controlConfig )
    {
 	  this.controlConfig = controlConfig;
-	  controlConfigHasBeenSet = true;
+	  if (controlConfig != null) {
+	      controlConfigHasBeenSet = true;
+	  }
 
    }
 
@@ -222,7 +228,9 @@ public class AIServerValue
    public void setMeasurementConfig( byte[] measurementConfig )
    {
 	  this.measurementConfig = measurementConfig;
-	  measurementConfigHasBeenSet = true;
+	  if (measurementConfig != null) {
+	      measurementConfigHasBeenSet = true;
+	  }
 
    }
 
@@ -244,7 +252,9 @@ public class AIServerValue
    public void setResponseTimeConfig( byte[] responseTimeConfig )
    {
 	  this.responseTimeConfig = responseTimeConfig;
-	  responseTimeConfigHasBeenSet = true;
+	  if (responseTimeConfig != null) {
+	      responseTimeConfigHasBeenSet = true;
+	  }
 
    }
 
@@ -289,7 +299,9 @@ public class AIServerValue
    public void setServerTypeName( String serverTypeName )
    {
 	  this.serverTypeName = serverTypeName;
-	  serverTypeNameHasBeenSet = true;
+	  if (serverTypeName != null) {
+	      serverTypeNameHasBeenSet = true;
+	  }
 
    }
 
@@ -304,7 +316,9 @@ public class AIServerValue
    public void setName( java.lang.String name )
    {
 	  this.name = name;
-	  nameHasBeenSet = true;
+	  if (name != null) {
+	      nameHasBeenSet = true;
+	  }
 
    }
 
@@ -319,7 +333,9 @@ public class AIServerValue
    public void setAutoinventoryIdentifier( java.lang.String autoinventoryIdentifier )
    {
 	  this.autoinventoryIdentifier = autoinventoryIdentifier;
-	  autoinventoryIdentifierHasBeenSet = true;
+	  if (autoinventoryIdentifier != null) {
+	      autoinventoryIdentifierHasBeenSet = true;
+	  }
 
    }
 
@@ -334,7 +350,9 @@ public class AIServerValue
    public void setInstallPath( java.lang.String installPath )
    {
 	  this.installPath = installPath;
-	  installPathHasBeenSet = true;
+	  if (installPath != null) {
+	      installPathHasBeenSet = true;
+	  }
 
    }
 
@@ -349,7 +367,9 @@ public class AIServerValue
    public void setDescription( java.lang.String description )
    {
 	  this.description = description;
-	  descriptionHasBeenSet = true;
+	  if (description != null) {
+	      descriptionHasBeenSet = true;
+	  }
 
    }
 
@@ -379,7 +399,9 @@ public class AIServerValue
    public void setId( java.lang.Integer id )
    {
 	  this.id = id;
-	  idHasBeenSet = true;
+	  if (id != null) {
+	      idHasBeenSet = true;
+	  }
 
    }
 
@@ -394,7 +416,9 @@ public class AIServerValue
    public void setMTime( java.lang.Long mTime )
    {
 	  this.mTime = mTime;
-	  mTimeHasBeenSet = true;
+	  if (mTime != null) {
+	      mTimeHasBeenSet = true;
+	  }
 
    }
 
@@ -409,7 +433,9 @@ public class AIServerValue
    public void setCTime( java.lang.Long cTime )
    {
 	  this.cTime = cTime;
-	  cTimeHasBeenSet = true;
+	  if (cTime != null) {
+          cTimeHasBeenSet = true;
+	  }
 
    }
 
