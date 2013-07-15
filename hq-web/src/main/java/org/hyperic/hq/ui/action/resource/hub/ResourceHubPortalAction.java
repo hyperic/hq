@@ -93,6 +93,7 @@ public class ResourceHubPortalAction
     private static final String SERVICE_KEY = "resource.hub.filter.ServiceType";
     public static final int SELECTOR_GROUP_COMPAT = 1;
     public static final int SELECTOR_GROUP_ADHOC = 2;
+    public static final int SELECTOR_GROUP_DYNAMIC = 3;
 
     private static final int DEFAULT_ENTITY_TYPE = Constants.FILTER_BY_DEFAULT;
     private static final int DEFAULT_RESOURCE_TYPE = -1;
@@ -527,6 +528,10 @@ public class ResourceHubPortalAction
 
     private boolean isAdhocGroupSelected(int type) {
         return type == SELECTOR_GROUP_ADHOC;
+    }
+
+    private boolean isDynamicGroupSelected(int type) {
+        return type == SELECTOR_GROUP_DYNAMIC;
     }
 
     private boolean isCompatGroupSelected(int type) {
