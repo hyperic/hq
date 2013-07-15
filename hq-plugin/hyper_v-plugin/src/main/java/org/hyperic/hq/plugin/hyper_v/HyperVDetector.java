@@ -38,6 +38,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.util.config.ConfigResponse;
 
 import org.hyperic.hq.product.AutoServerDetector;
+import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.DetectionUtil;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerDetector;
@@ -59,11 +60,12 @@ public class HyperVDetector
 
         return servers;
     }
+
     
-    protected List<ServiceResource> discoverServices(String type, String namePrefix, String token, String instanceName) {
+    protected List<ServiceResource> discoverServices(String propertySet, String type, String namePrefix, String token, String instanceName) {
         List<ServiceResource> services = new ArrayList<ServiceResource>();
         try {
-            String[] instances = Pdh.getInstances(type);            
+            String[] instances = Pdh.getInstances(propertySet);            
 
             
             Set<String> names = new HashSet<String>();
@@ -102,6 +104,7 @@ public class HyperVDetector
     	    }
             return services;
         } catch (Win32Exception e) {
+
             log.debug("Error getting pdh data for " + type + ": " + e, e);
             return null;
         }
@@ -115,12 +118,19 @@ public class HyperVDetector
             
             ConfigResponse conf = new ConfigResponse();
             conf.setValue("instance.name", name);
-            server.setProductConfig(conf);
                         
-            ConfigResponse cprops = new ConfigResponse();
+            Set<String> guids = DetectionUtil.getWMIObj("Msvm_ComputerSystem", "ElementName-"+name, "Name", "");
+            if (guids!=null&&!guids.isEmpty()) {
+                String guid = guids.iterator().next();
+                conf.setValue(Collector.GUID, guid);
+                Set<String> macs = DetectionUtil.getWMIObj("Msvm_SyntheticEthernetPort", "SystemName-"+guid, "PermanentAddress", "");
+                if (macs!=null&&!macs.isEmpty()) {
+                    String mac = macs.iterator().next();
+                    conf.setValue(Collector.MAC, mac);
+                }
+            }
             server.setProductConfig(conf);
             server.setMeasurementConfig();
-            server.setCustomProperties(cprops);           
             server.setName(getPlatformName() + " " +  " " +namePrefix + name);
             server.setDescription("");
             server.setInstallPath(name); //XXX
@@ -142,22 +152,22 @@ public class HyperVDetector
  
         List<ServiceResource>  services =  new LinkedList<ServiceResource>();
         
-        List<ServiceResource> virtualProcessorServices  =  discoverServices("Hyper-V Hypervisor Virtual Processor", "Hyper-V Hypervisor Virtual Processor - ", ":", instanceName);  
+        List<ServiceResource> virtualProcessorServices  =  discoverServices("Hyper-V Hypervisor Virtual Processor", "Hyper-V Hypervisor Virtual Processor", "Hyper-V Hypervisor Virtual Processor - ", ":", instanceName);  
         if (virtualProcessorServices != null) {
             services.addAll(virtualProcessorServices);
         }
         
-        List<ServiceResource> virtualNetworkServices  =  discoverServices("Hyper-V Virtual Network Adapter", "Hyper-V Virtual Network Adapter - ", "_", instanceName);  
+        List<ServiceResource> virtualNetworkServices  =  discoverServices("Hyper-V Virtual Network Adapter", "Hyper-V Virtual Network Adapter", "Hyper-V Virtual Network Adapter - ", "_", instanceName);  
         if (virtualNetworkServices != null) {
             services.addAll(virtualNetworkServices);
         }
         
-        List<ServiceResource> legacyNetworkServices  =  discoverServices("Hyper-V Legacy Network Adapter", "Hyper-V Legacy Network Adapter - ", "_", instanceName);  
+        List<ServiceResource> legacyNetworkServices  =  discoverServices("Hyper-V Legacy Network Adapter","Hyper-V Legacy Network Adapter",  "Hyper-V Legacy Network Adapter - ", "_", instanceName);  
         if (legacyNetworkServices != null) {
             services.addAll(legacyNetworkServices);
         }
         
-        List<ServiceResource> virtualIdeControllers  =  discoverServices("Hyper-V Virtual IDE Controller (Emulated)", "Hyper-V Virtual IDE Controller - ", ":", instanceName);  
+        List<ServiceResource> virtualIdeControllers  =  discoverServices("Hyper-V Virtual IDE Controller (Emulated)","Hyper-V Virtual IDE Controller", "Hyper-V Virtual IDE Controller - ", ":", instanceName);  
         if (virtualIdeControllers != null) {
             services.addAll(virtualIdeControllers);
         }

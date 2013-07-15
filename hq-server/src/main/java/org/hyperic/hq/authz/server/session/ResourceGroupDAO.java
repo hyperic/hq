@@ -93,7 +93,10 @@ public class ResourceGroupDAO
     ResourceGroup create(AuthzSubject creator, ResourceGroupCreateInfo cInfo,
                          Collection<Resource> resources, Collection<Role> roles, Resource groupResource)
         throws GroupCreationException {
-        assertNameConstraints(cInfo.getName());
+        if (groupResource == null) {
+            // name is not persisted if the groupResource != null
+            assertNameConstraints(cInfo.getName());
+        }
         assertDescriptionConstraints(cInfo.getDescription());
         assertLocationConstraints(cInfo.getLocation());
         switch (cInfo.getGroupType()) {

@@ -40,7 +40,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.TriggerNotFiredEvent;
@@ -178,12 +177,12 @@ public class MultiConditionEvaluator implements AlertConditionEvaluator {
     	boolean stale = false;
 		AbstractEvent[] triggeredEvents = tfe.getEvents();
 		
-		for (int i=0; i<triggeredEvents.length; i++) {
-    		if (triggeredEvents[i] instanceof MeasurementEvent) {
-    			MeasurementEvent me = (MeasurementEvent) triggeredEvents[i];
+		for (AbstractEvent triggeredEvent : triggeredEvents) {
+    		if (triggeredEvent instanceof MeasurementEvent) {
+    			MeasurementEvent me = (MeasurementEvent) triggeredEvent;
     			Integer measurementId = me.getInstanceId();
     			MeasurementEvent latestMe = measMap.get(measurementId);
-    			if (latestMe != null && me.getTimestamp() < latestMe.getTimestamp()) {
+    			if ((latestMe != null) && (me.getTimestamp() < latestMe.getTimestamp())) {
     				stale = true;
     				break;
     			}
@@ -201,9 +200,9 @@ public class MultiConditionEvaluator implements AlertConditionEvaluator {
         		TriggerFiredEvent tfe = (TriggerFiredEvent) savedEvent;
         		AbstractEvent[] triggeredEvents = tfe.getEvents();
         		
-        		for (int i=0; i<triggeredEvents.length; i++) {
-            		if (triggeredEvents[i] instanceof MeasurementEvent) {
-            			MeasurementEvent me = (MeasurementEvent) triggeredEvents[i];
+        		for (AbstractEvent triggeredEvent : triggeredEvents) {
+            		if (triggeredEvent instanceof MeasurementEvent) {
+            			MeasurementEvent me = (MeasurementEvent) triggeredEvent;
             			Integer measurementId = me.getInstanceId();
             			MeasurementEvent savedMe = measMap.get(measurementId);
             			if (savedMe == null) {
@@ -227,8 +226,8 @@ public class MultiConditionEvaluator implements AlertConditionEvaluator {
             log.debug("evaluate event: " + event);
         }
         Integer triggerId = event.getInstanceId();
-        AbstractEvent previous = (AbstractEvent) events.get(triggerId);
-        if (previous != null && previous.getTimestamp() > event.getTimestamp()) {
+        AbstractEvent previous = events.get(triggerId);
+        if ((previous != null) && (previous.getTimestamp() > event.getTimestamp())) {
             // The event we are processing is older than our current state
             return null;
         }
@@ -254,8 +253,8 @@ public class MultiConditionEvaluator implements AlertConditionEvaluator {
         evictExpiredEvents();
         evictStaleEvents();
         List fulfilled = new ArrayList();
-        for (Iterator iter = events.values().iterator(); iter.hasNext();) {
-            AbstractEvent savedEvent = (AbstractEvent) iter.next();
+        for (Object element : events.values()) {
+            AbstractEvent savedEvent = (AbstractEvent) element;
             if (savedEvent instanceof TriggerFiredEvent) {
                 fulfilled.add(savedEvent);
             }
@@ -352,7 +351,7 @@ public class MultiConditionEvaluator implements AlertConditionEvaluator {
         }
 
         // Go through the subIds
-        for (int i = orInd; result == true && i < andTriggerIds.length; i++) {
+        for (int i = orInd; (result == true) && (i < andTriggerIds.length); i++) {
             // Did not fulfill yet
             if (!fulfilled.contains(andTriggerIds[i])) {
                 result = false;

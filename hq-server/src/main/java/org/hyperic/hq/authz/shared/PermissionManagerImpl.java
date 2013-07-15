@@ -531,6 +531,14 @@ public class PermissionManagerImpl extends PermissionManager {
         }
         return rtn;
     }
+    
+    @Override
+    public <T> Set<T> findViewableResources(AuthzSubject groupOwner, Collection<Role> groupRoles,
+            Collection<ResourceType> resourceTypes, IntegerTransformer<T> transformer) {
+        Set<T> resourcesViewableByOwner = findViewableResources(groupOwner, resourceTypes, PageControl.SORT_UNSORTED, transformer);        
+        
+        return resourcesViewableByOwner;                
+    }    
 
     public TypeCounts findViewableInstanceCounts(AuthzSubject subj, Collection<ResourceType> types) {
         final TypeCounts rtn = new TypeCounts();

@@ -88,8 +88,8 @@ public class CounterExecutionStrategy implements ExecutionStrategy {
             expirations.add(Long.valueOf(payload.getTimestamp() + timeRange));
             clearExpired();
             if (expirations.size() >= count) {
-                payload.setMessage("Occurred " + expirations.size() + " times in the span of " + timeRange /
-                                   MeasurementConstants.MINUTE + " minutes");
+                payload.setMessage("Occurred " + expirations.size() + " times in the span of " + (timeRange /
+                                   MeasurementConstants.MINUTE) + " minutes");
                 try {
                     if (log.isDebugEnabled()) {
                         log.debug("Firing event " + event);

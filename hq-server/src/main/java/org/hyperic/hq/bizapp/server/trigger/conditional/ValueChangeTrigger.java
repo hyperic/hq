@@ -68,8 +68,8 @@ public class ValueChangeTrigger
     private Integer measurementId;
     private MeasurementEvent last = null;
     private final Log log = LogFactory.getLog(ValueChangeTrigger.class);
-    private MeasurementManager measurementManager;
-    private DataManager dataManager;
+    private final MeasurementManager measurementManager;
+    private final DataManager dataManager;
 
     public ValueChangeTrigger() {
         this.measurementManager = Bootstrap.getBean(MeasurementManager.class);
@@ -156,6 +156,10 @@ public class ValueChangeTrigger
         return last;
     }
 
+    public void setLast(MeasurementEvent last) {
+        this.last = last;
+    }
+
     /**
      * Process an event from the dispatcher.
      * @param event the Event to process
@@ -175,8 +179,8 @@ public class ValueChangeTrigger
             TriggerFiredEvent myEvent = null;
             if (last == null) {
                 last = me;
-            } else if (last.getValue().getValue() != me.getValue().getValue() &&
-                       last.getValue().getTimestamp() < me.getValue().getTimestamp()) {
+            } else if ((last.getValue().getValue() != me.getValue().getValue()) &&
+                       (last.getValue().getTimestamp() < me.getValue().getTimestamp())) {
                 // Get ready to fire
                 myEvent = prepareTriggerFiredEvent(event);
                 double values[] = { me.getValue().getValue(), last.getValue().getValue() };
