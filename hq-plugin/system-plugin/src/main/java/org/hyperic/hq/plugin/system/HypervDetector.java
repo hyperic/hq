@@ -23,15 +23,14 @@ public class HypervDetector extends   SystemServerDetector  {
     
     protected ArrayList<AIServiceValue> getHyperVServices(String propertySet, String type, String namePrefix, String token, boolean toLower) {
         ArrayList<AIServiceValue> services = new ArrayList<AIServiceValue>();
-        log.error("discoverServices");
         try {
             String[] instances = Pdh.getInstances(propertySet);
-            log.error("num of instances found=" + instances.length);
+            log.debug("num of instances found=" + instances.length);
             
             Set<String> names = new HashSet<String>();
             for (int i = 0; i < instances.length; i++) {
-                log.error("instance=" +  instances[i]);
                 String instance = instances[i];
+                log.debug("instance=<" + instance + ">");
                 if ("_Total".equals(instance) || "<All instances>".equals(instance)) {
                     continue;
                 }
@@ -50,9 +49,8 @@ public class HypervDetector extends   SystemServerDetector  {
                 try {
                     ConfigResponse cprops = new ConfigResponse();
                     svc.setCustomProperties(cprops.encode());
-                    ConfigResponse conf = new ConfigResponse();
+                    ConfigResponse conf = new ConfigResponse();                   
                     
-                    log.error("name=<" + name + ">");                    
                     conf.setValue("instance.name", name);
                     conf.setValue(propertySet, name);
                     svc.setProductConfig(conf.encode());
@@ -66,7 +64,7 @@ public class HypervDetector extends   SystemServerDetector  {
             
             }
             if (services.isEmpty()) {
-                log.error("no servers found");
+                log.debug("no servers found");
                 return null;
             }
             return services;

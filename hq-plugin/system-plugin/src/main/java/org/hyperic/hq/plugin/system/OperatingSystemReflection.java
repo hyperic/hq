@@ -17,11 +17,11 @@ public class OperatingSystemReflection {
     {
         try {
             Class<?> hypericOperatingSystemClass = Class.forName (CLASS_NAME);
-            log.info("HypericOperatingSystem found");
+            log.debug(CLASS_NAME + " found!");
             return hypericOperatingSystemClass;
         }
-        catch (ClassNotFoundException exception) {
-            log.info("HypericOperatingSystem not found");
+        catch (ClassNotFoundException exception) {       
+            log.debug(CLASS_NAME + " not found!");
             return null;
         }
     }

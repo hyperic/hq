@@ -226,7 +226,7 @@ public class SystemPlugin extends ProductPlugin {
             }
             
             if (info.getName().equals(HYPERV_NETWORK_INTERFACE)) {
-                return new Win32MeasurementPlugin();
+                return new HyperVMeasurementPlugin();
             }
             if (info.getName().equals(HYPERV_PHYSICAL_DISK)) {
                

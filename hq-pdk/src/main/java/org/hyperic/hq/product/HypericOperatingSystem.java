@@ -13,7 +13,7 @@ public class HypericOperatingSystem {
      * 
      */
     
-    public static final String NAME_HYPER_V_WIN32   = "Win32-HYPER-V";
+    public static final String NAME_HYPER_V_WIN32   = "Win-Hyper-V";
     public static final String[] WIN32_NAMES = {
         OperatingSystem.NAME_WIN32,NAME_HYPER_V_WIN32
     };

@@ -27,9 +27,116 @@
 <plugin name="hyper_v">
   <property name="PLUGIN_VERSION" value="@project.version@"/>
     
+  <filter name="hyper-v_hypervisor_virtual-processor" value="Hyper-V Hypervisor Virtual Processor(%service.instance.name%)"/>
+  <metrics name="virtual-processor">
+  	<metric name="Availability"
+	        template="Hyper-V Hypervisor Virtual Processor:%service.instance.name%:Availability"
+		    category="AVAILABILITY"
+		    indicator="true"
+		    defaultOn="true"
+		    units="percentage"
+		    collectionType="dynamic"/>
+    <metric name="% Guest Run Time"
+			template="pdh_formatted:${hyper-v_hypervisor_virtual-processor}:% Guest Run Time"
+			indicator="true"
+			defaultOn="true"					
+			collectionType="dynamic"
+			units="percentage"/>
+    <metric name="% Hypervisor Run Time"
+			template="pdh_formatted:${hyper-v_hypervisor_virtual-processor}:% Hypervisor Run Time"
+			indicator="true"
+			defaultOn="true"								
+			collectionType="dynamic"
+			units="percentage"/>
+
+    <metric name="% Total Run Time"
+			template="pdh_formatted:${hyper-v_hypervisor_virtual-processor}:% Total Run Time"
+			indicator="true"
+			defaultOn="true"					
+			collectionType="dynamic"
+			units="percentage"/>			
+  </metrics>
+  
+   <filter name="hyper-v_virtual_network_adapter" value="Hyper-V Virtual Network Adapter(%service.instance.name%)"/>
+  <metrics name="virtual-network-adapter">
+  	<metric name="Availability"
+	        template="Hyper-V Virtual Network Adapter:%service.instance.name%:Availability"
+		    category="AVAILABILITY"
+		    indicator="true"
+		    defaultOn="true"
+		    units="percentage"
+		    collectionType="dynamic"/>
+    <metric name="Bytes"
+			template="pdh:${hyper-v_virtual_network_adapter}:Bytes/Sec"
+			indicator="true"
+			defaultOn="true"			
+			collectionType="trendsup"/>		
+	<metric name="Bytes Received"
+			template="pdh:${hyper-v_virtual_network_adapter}:Bytes Received/Sec"
+			indicator="true"
+			defaultOn="true"
+			collectionType="trendsup"/>
+	<metric name="Bytes Sent"
+			template="pdh:${hyper-v_virtual_network_adapter}:Bytes Sent/Sec"
+			indicator="true"
+			defaultOn="true"
+			collectionType="trendsup"/>						
+  </metrics>
+
+
+   <filter name="hyper-v_virtual_ide-controller" value="Hyper-V Virtual IDE Controller (Emulated)(%service.instance.name%)"/>
+  <metrics name="virtual-IDE-controller">
+  	<metric name="Availability"
+	        template="Hyper-V Virtual IDE Controller (Emulated):%service.instance.name%:Availability"
+		    category="AVAILABILITY"
+		    indicator="true"
+		    defaultOn="true"
+		    units="percentage"
+		    collectionType="dynamic"/>
+    <metric name="Write Bytes"
+			template="pdh:${hyper-v_virtual_ide-controller}:Write Bytes/Sec"
+			indicator="true"
+			defaultOn="true"			
+			collectionType="trendsup"/>		
+	<metric name="Read Bytes"
+			template="pdh:${hyper-v_virtual_ide-controller}:Read Bytes/Sec"
+			indicator="true"
+			defaultOn="true"
+			collectionType="trendsup"/>
+  </metrics>
+
+   
+     <filter name="hyper-v_legacy_network_adapter" value="Hyper-V Legacy Network Adapter(%service.instance.name%)"/>
+  <metrics name="legacy-network-adapter">
+  	<metric name="Availability"
+	        template="Hyper-V Legacy Network Adapter:%service.instance.name%:Availability"
+		    category="AVAILABILITY"
+		    indicator="true"
+		    defaultOn="true"
+		    units="percentage"
+		    collectionType="dynamic"/>
+    <metric name="Bytes Dropped"
+			template="pdh:${hyper-v_legacy_network_adapter}:Bytes Dropped"
+			indicator="true"
+			defaultOn="true"			
+			collectionType="trendsup"/>		
+	<metric name="Bytes Received"
+			template="pdh:${hyper-v_legacy_network_adapter}:Bytes Received/Sec"
+			indicator="true"
+			defaultOn="true"
+			collectionType="trendsup"/>
+	<metric name="Bytes Sent"
+			template="pdh:${hyper-v_legacy_network_adapter}:Bytes Sent/Sec"
+			indicator="true"
+			defaultOn="true"
+			collectionType="trendsup"/>						
+  </metrics>
+  
+  
+    
     <filter name="Hyper-V_VM_Vid_Partition" value="Hyper-V VM Vid Partition(%instance.name%)"/>
     <filter name="memory" value="Memory"/>
-    <server name="Hyper-V VM" platforms="Win32-HYPER-V">
+    <server name="Hyper-V VM" platforms="Win-Hyper-V">
 		<plugin type="measurement" class="HyperVMeasurementPlugin"/>
 	        <plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>
 	    	<plugin type="autoinventory" class="HyperVDetector"/>
@@ -50,6 +157,41 @@
 		        indicator="true"
 	         	defaultOn="true"
 		        collectionType="dynamic"/>
+		<service name="Hyper-V Hypervisor Virtual Processor">
+			<plugin type="measurement" class="HyperVMeasurementPlugin"/>
+			<plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>
+	    	<plugin type="autoinventory" class="HyperVDetector"/>
+				
+		    <metrics>                
+                <include name="virtual-processor"/>
+                </metrics>
+        </service>
+		<service name="Hyper-V Virtual Network Adapter">
+			<plugin type="measurement" class="HyperVMeasurementPlugin"/>
+			<plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>
+	    	<plugin type="autoinventory" class="HyperVDetector"/>
+				
+		    <metrics>                
+                <include name="virtual-network-adapter"/>
+                </metrics>
+        </service>        
+        <service name="Hyper-V Legacy Network Adapter">
+			<plugin type="measurement" class="HyperVMeasurementPlugin"/>
+			<plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>
+	    	<plugin type="autoinventory" class="HyperVDetector"/>
+		    <metrics>                
+                <include name="legacy-network-adapter"/>
+            </metrics>
+        </service>		
+        <service name="Hyper-V Virtual IDE Controller"> 
+			<plugin type="measurement" class="HyperVMeasurementPlugin"/>
+			<plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>
+	    	<plugin type="autoinventory" class="HyperVDetector"/>
+		    <metrics>                
+                <include name="virtual-IDE-controller"/>
+            </metrics>
+        </service>
+        
     </server>
 
 </plugin>

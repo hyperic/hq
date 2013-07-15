@@ -25,46 +25,33 @@
 
 package org.hyperic.hq.plugin.hyper_v;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.config.IntegerConfigOption;
 
-import org.hyperic.hq.appdef.shared.AIPlatformValue;
-import org.hyperic.hq.autoinventory.ServerSignature;
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.DetectionUtil;
-import org.hyperic.hq.product.PlatformServiceDetector;
 import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.RegistryServerDetector;
-import org.hyperic.hq.product.RuntimeResourceReport;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
 
 import org.hyperic.sigar.win32.Pdh;
-import org.hyperic.sigar.win32.RegistryKey;
 import org.hyperic.sigar.win32.Win32Exception;
 
 public class HyperVDetector
     extends  ServerDetector implements AutoServerDetector   {
 
     private static Log log =
-        LogFactory.getLog("HyperVDetector");
+        LogFactory.getLog(HyperVDetector.class);
 
     
     public List getServerResources(ConfigResponse platformConfig) throws PluginException {
@@ -73,58 +60,53 @@ public class HyperVDetector
         return servers;
     }
     
-/*    protected List<ServerResource> discoverServers(String propertySet, String type, String namePrefix, String token) {
-        List<ServerResource> servers = new ArrayList<ServerResource>();
-        log.error("discoverServers");
+    protected List<ServiceResource> discoverServices(String type, String namePrefix, String token, String instanceName) {
+        List<ServiceResource> services = new ArrayList<ServiceResource>();
         try {
-            String[] instances = Pdh.getInstances(propertySet);
-            log.error("num of instances found=" + instances.length);
+            String[] instances = Pdh.getInstances(type);            
+
             
             Set<String> names = new HashSet<String>();
             for (int i = 0; i < instances.length; i++) {
-                log.error("instance=" +  instances[i]);
                 String instance = instances[i];
                 if ("_Total".equals(instance) || "<All instances>".equals(instance)) {
                     continue;
                 }
-                StringTokenizer st = new StringTokenizer(instance,token);
-                String vmName = (String) st.nextElement();
-                names.add(vmName);
-                log.error("name=" + vmName);
+                String instancePrefix = instanceName + token;
+                if (!instance.startsWith(instancePrefix)) {
+                    continue;
+                }
+                log.debug("find instance=" + instance + " of:" + instanceName);                
+                names.add(instance);                
             }
             
             for (Iterator<String> it = names.iterator(); it.hasNext();) {
                 String name = it.next();
                 ConfigResponse conf = new ConfigResponse();
-                conf.setValue("instance.name", name);
+                conf.setValue("service.instance.name", name);
+                conf.setValue("instance.name", instanceName);
 
-                ServerResource server = new ServerResource();
+                ServiceResource service = new ServiceResource();
+                service.setType(this, type);
+                service.setServiceName(namePrefix + name);
+
                 ConfigResponse cprops = new ConfigResponse();
-                server.setProductConfig(conf);
-    	        server.setMeasurementConfig();
-            	server.setCustomProperties(cprops);
-            	String type1 = getTypeInfo().getName();
-            	//serddver.setType(type);
-                server.setName(getPlatformName() + " " + type1 + " " +namePrefix + name);
-                server.setDescription("");
-                server.setInstallPath(name); //XXX
-                server.setIdentifier(name);
-                servers.add(server);
-                server.setType(type1);
-                //server.setName(getPlatformName() + " " + type + " " + name);
-
+                service.setProductConfig(conf);
+                service.setMeasurementConfig();
+                service.setCustomProperties(cprops);
+            	
+                services.add(service);                
             }
-    	    if (servers.isEmpty()) {
-    	        log.error("no servers found");
+    	    if (services.isEmpty()) {
     	        return null;
     	    }
-            return servers;
+            return services;
         } catch (Win32Exception e) {
-            log.debug("Error getting pdh data for " + propertySet + ": " + e, e);
+            log.debug("Error getting pdh data for " + type + ": " + e, e);
             return null;
         }
     }
-*/
+
     protected List<ServerResource> discoverServersWMI(String wmiObjName, String filter, String col, String type, String namePrefix) throws PluginException {
         Set<String> wmiObjs = DetectionUtil.getWMIObj(wmiObjName, filter, col, "");
         List<ServerResource> servers = new ArrayList<ServerResource>();
@@ -152,7 +134,40 @@ public class HyperVDetector
 
     @Override
     protected List discoverServices(ConfigResponse config) throws PluginException {
-        return null;
+        String instanceName = config.getValue("instance.name");
+        log.debug("instance.name=" + instanceName);
+        if (instanceName == null || instanceName.length() == 0) {
+            log.error("discover services: - instance.name not found!" );
+        }        
+ 
+        List<ServiceResource>  services =  new LinkedList<ServiceResource>();
+        
+        List<ServiceResource> virtualProcessorServices  =  discoverServices("Hyper-V Hypervisor Virtual Processor", "Hyper-V Hypervisor Virtual Processor - ", ":", instanceName);  
+        if (virtualProcessorServices != null) {
+            services.addAll(virtualProcessorServices);
+        }
+        
+        List<ServiceResource> virtualNetworkServices  =  discoverServices("Hyper-V Virtual Network Adapter", "Hyper-V Virtual Network Adapter - ", "_", instanceName);  
+        if (virtualNetworkServices != null) {
+            services.addAll(virtualNetworkServices);
+        }
+        
+        List<ServiceResource> legacyNetworkServices  =  discoverServices("Hyper-V Legacy Network Adapter", "Hyper-V Legacy Network Adapter - ", "_", instanceName);  
+        if (legacyNetworkServices != null) {
+            services.addAll(legacyNetworkServices);
+        }
+        
+        List<ServiceResource> virtualIdeControllers  =  discoverServices("Hyper-V Virtual IDE Controller (Emulated)", "Hyper-V Virtual IDE Controller - ", ":", instanceName);  
+        if (virtualIdeControllers != null) {
+            services.addAll(virtualIdeControllers);
+        }
+
+
+
+        if (services.isEmpty()) {
+            return null;
+        }
+        return services;
     }
 
 

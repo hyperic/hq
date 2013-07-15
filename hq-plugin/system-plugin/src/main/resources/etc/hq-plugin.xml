@@ -510,7 +510,7 @@
    <filter name="hyper-v_virtual_machine_health_summary" value="Hyper-V Virtual Machine Health Summary"/>        
     
 
-<metrics name="Win32-HYPER-V"  include="Win32">
+<metrics name="Win-Hyper-V"  include="Win32">
 	      <metric name="Virtual Machines Health Summary:Health Ok"
                         template="pdh:${hyper-v_virtual_machine_health_summary}:HEALTH OK"
                         indicator="true"
@@ -1013,7 +1013,7 @@
   <metrics name="HyperV Physical Disk">
             <metric name="Availability"
             	alias="Availability"
-            	template="win32:Service=vmms:${alias}"
+            	template="PhysicalDisk:%instance.name%:Availability"
             	category="AVAILABILITY"
             	indicator="true"
             	units="percentage"
@@ -1039,7 +1039,7 @@
   <metrics name="HyperV Network Interface">  
             <metric name="Availability"
             	alias="Availability"
-            	template="win32:Service=vmms:${alias}"
+            	template="Network Interface:%instance.name%:Availability"
             	category="AVAILABILITY"
             	indicator="true"
             	units="percentage"
@@ -1096,7 +1096,7 @@
   <metrics name="Hyper-V Logical Processor">
   	<metric name="Availability"
             	alias="Availability"
-            	template="win32:Service=vmms:${alias}"
+            	template="Hyper-V Hypervisor Logical Processor:%instance.name%:Availability"
             	category="AVAILABILITY"
             	indicator="true"
             	units="percentage"
@@ -1104,22 +1104,26 @@
 	<metric name="% Guest Run Time"
 					template="pdh_formatted:${hyper-v_hypervisor_logical-processor}:% Guest Run Time"
 					indicator="true"
-					defaultOn="true"					
+					defaultOn="true"	
+					units="percentage"				
 				collectionType="dynamic"/>
 	<metric name="% Hypervisor Run Time"
 					template="pdh_formatted:${hyper-v_hypervisor_logical-processor}:% Hypervisor Run Time"
 					indicator="true"
-					defaultOn="true"					
+					defaultOn="true"	
+					units="percentage"				
 				collectionType="dynamic"/>
 	<metric name="% Idle Time"
 					template="pdh_formatted:${hyper-v_hypervisor_logical-processor}:% Idle Time"
 					indicator="true"
-					defaultOn="true"					
+					defaultOn="true"	
+					units="percentage"				
 				collectionType="dynamic"/>
 	<metric name="% Total Run Time"
 					template="pdh_formatted:${hyper-v_hypervisor_logical-processor}:% Total Run Time"
 					indicator="true"
-					defaultOn="true"					
+					defaultOn="true"	
+					units="percentage"				
 				collectionType="dynamic"/>
   </metrics>
 

@@ -76,7 +76,7 @@ public class SystemMeasurementPlugin
                MetricUnreachableException
     {
         String domain = metric.getDomainName(); 
-       //nira:L should be first!! since Type is not configured 
+       //nira: should be first!! since Type is not configured 
        if (domain.equals("pdh")) {
            return getPdhValue(metric);
        }
