@@ -82,6 +82,22 @@ else
 fi
   </script>
 
+ <script name="startup.sql">
+ <![CDATA[
+		startup;
+		quit;
+ ]]>
+
+ </script>
+
+ <script name="shutdown.sql">
+ <![CDATA[
+	shutdown &1;
+	quit
+]]>
+ </script>
+
+
   <classpath>
     <include name="pdk/lib/jdbc/ojdbc5.jar"/>
   </classpath>
