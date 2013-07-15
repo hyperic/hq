@@ -58,6 +58,7 @@ public class RegisteredTriggersTest
     /**
      * Sets up the tests
      */
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         this.alertRegulator = EasyMock.createMock(AlertRegulator.class);
@@ -115,7 +116,7 @@ public class RegisteredTriggersTest
         EasyMock.replay(trigger1);
         replay();
         registeredTriggers.addTrigger(trigger1);
-        assertTrue(registeredTriggers.getInterestedTriggers(MockEvent.class, 123).isEmpty());
+        assertTrue(registeredTriggers.getInterestedTriggers(new MockEvent(3l, 123), 123).isEmpty());
 
         assertFalse(registeredTriggers.isTriggerInterested(new MockEvent(7l, 123)));
         registeredTriggers.getInterestedTriggers(new MockEvent(3l, 123)).isEmpty();
@@ -314,7 +315,7 @@ public class RegisteredTriggersTest
             123));
         assertNotNull(actualTriggers);
         assertEquals(1, actualTriggers.size());
-        assertEquals(trigger2, (RegisterableTriggerInterface) actualTriggers.get(trigger2Id));
+        assertEquals(trigger2, actualTriggers.get(trigger2Id));
     }
 
     private void verify() {

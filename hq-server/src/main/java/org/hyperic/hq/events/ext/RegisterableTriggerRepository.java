@@ -28,6 +28,8 @@ package org.hyperic.hq.events.ext;
 
 import java.util.Collection;
 
+import org.hyperic.hq.events.AbstractEvent;
+
 /**
  * Repository of in-memory representations of alert triggers
  * @author jhickey
@@ -47,7 +49,7 @@ public interface RegisterableTriggerRepository {
      * @param instanceId The id of the source instance of the event
      * @return The {@link RegisterableTriggerInterface}s interested in the event
      */
-    Collection<RegisterableTriggerInterface> getInterestedTriggers(Class<?> eventClass,
+    Collection<RegisterableTriggerInterface> getInterestedTriggers(AbstractEvent event,
                                                                    Integer instanceId);
 
     /**

@@ -37,14 +37,15 @@ public class OracleServerControl extends  ControlPlugin{
     private static final String SHUTDOWN_SCRIPT = "shutdown.sql";
     private String startupScript = null; 
     private String shutdownScript = null;
-    
+    private static final String SCRIPT_PATH = "/pdk/work/scripts/oracle";
+ 
     private static final String INSUFFICIENT_PRIVILEGES_ERROR = "ORA-01031: insufficient privileges";
     
-    private String getScriptFullPath(String scriptName, File agentBundleHome ) throws PluginException {
-        File script = new File(agentBundleHome, scriptName);
+    private String getScriptFullPath(String scriptName, File dirName ) throws PluginException {
+        File script = new File(dirName, scriptName);
         String scriptStr = null;
-        log.debug("[configure] agentBundleHome =" + agentBundleHome.getAbsolutePath());
-        log.debug("[configure] startup =" + script.getAbsolutePath());
+        log.debug("[configure] dirName =" + dirName.getAbsolutePath());
+        log.debug("[configure] script =" + script.getAbsolutePath());
         if (script.exists()) {
             try {
                 scriptStr = script.getCanonicalPath();
@@ -63,10 +64,10 @@ public class OracleServerControl extends  ControlPlugin{
         super.configure(config);
         log.debug("[configure] config=" + config);
         setTimeout(180);
-        File agentBundleHome = new File(System.getProperty(AgentConfig.AGENT_BUNDLE_HOME));
-        log.debug("[configure] agentBundleHome =" + agentBundleHome.getAbsolutePath());
-        startupScript = getScriptFullPath(STARTUP_SCRIPT, agentBundleHome);
-        shutdownScript = getScriptFullPath(SHUTDOWN_SCRIPT, agentBundleHome);
+        File dirName = new File(System.getProperty(AgentConfig.AGENT_BUNDLE_HOME) + SCRIPT_PATH);
+        log.debug("[configure] dirName =" + dirName.getAbsolutePath());
+        startupScript = getScriptFullPath(STARTUP_SCRIPT, dirName);
+        shutdownScript = getScriptFullPath(SHUTDOWN_SCRIPT, dirName);
     }
 
     @Override
