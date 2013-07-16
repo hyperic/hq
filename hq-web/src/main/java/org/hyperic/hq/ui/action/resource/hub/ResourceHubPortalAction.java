@@ -270,6 +270,8 @@ public class ResourceHubPortalAction
                 // for findCompatInventory, resourceType always need
                 // to be this, for whatever reason
                 resourceType = DEFAULT_RESOURCE_TYPE;
+            } else if (isDynamicGroupSelected(groupType)){
+                groupSubtype = new int[] { AppdefEntityConstants.APPDEF_TYPE_GROUP_DYNAMIC };
             } else {
                 throw new ServletException("Invalid group type: " + groupType);
             }
@@ -414,6 +416,8 @@ public class ResourceHubPortalAction
                 // the entity is an adhoc group- we offer no adhoc group
                 // options
                 addMixedTypeOptions(hubForm, res);
+            } else if (isDynamicGroupSelected(groupType)) {
+                addDynamicTypeOptions(hubForm, res);
             } else {
                 throw new ServletException("invalid group type: " + groupType);
             }
@@ -524,6 +528,11 @@ public class ResourceHubPortalAction
             .valueOf(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS)));
         form.addType(new LabelValueBean(mr.getMessage("resource.group.inventory.New.props.GroupOfApplications"), String
             .valueOf(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP)));
+    }
+
+    private void addDynamicTypeOptions(ResourceHubForm form, MessageResources mr) {
+        form.addType(new LabelValueBean(mr.getMessage("resource.group.inventory.New.props.DynamicGroup"), String
+            .valueOf(AppdefEntityConstants.APPDEF_TYPE_GROUP_DYNAMIC)));
     }
 
     private boolean isAdhocGroupSelected(int type) {
