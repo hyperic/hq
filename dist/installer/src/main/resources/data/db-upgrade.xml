@@ -12020,6 +12020,16 @@ has already been defined.
 	  </schemaSpec>
 
 	
+	  <schemaSpec version="3.221">
+	    <schema-directSQL>  
+	        <statement targetDB="postgresql">
+	        	alter table EAM_RESOURCE
+	        		add column DELETABLE boolean not null default false
+		    </statement>
+ 	    </schema-directSQL>
+      </schemaSpec>
+
+	
 </dbupgrade>
 </target>
 </project>

@@ -75,6 +75,10 @@
       <column name="MTIME" default="0"/>
     </property>
 
+    <property name="deletable" type="boolean">
+      <column name="DELETABLE" not-null="false"/>
+    </property>
+
     <bag inverse="true" cascade="all-delete-orphan" name="groupBag" table="EAM_RES_GRP_RES_MAP">
       <cache usage="read-write"/>
       <key column="RESOURCE_ID"/>

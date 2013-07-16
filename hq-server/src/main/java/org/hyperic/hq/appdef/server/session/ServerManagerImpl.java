@@ -1518,4 +1518,8 @@ public class ServerManagerImpl implements ServerManager {
         valuePager = Pager.getPager(VALUE_PROCESSOR);
 
     }
+
+    public Collection<Server> getDeletableServers() {
+        return serverDAO.getDeletableServers();
+    }
 }

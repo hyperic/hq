@@ -26,6 +26,7 @@
 package org.hyperic.hq.autoinventory.server.session;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -72,6 +73,7 @@ import org.hyperic.hq.autoinventory.CompositeRuntimeResourceReport;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
+import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.shared.AuditManager;
 import org.hyperic.hq.measurement.server.session.AgentScheduleSyncZevent;
@@ -204,6 +206,17 @@ public class RuntimeReportProcessor {
             }
         }
 
+        // remove resources which are marked as to be deleted once the agent can't discover them
+        Collection<Server> deletableServers = serverManager.getDeletableServers();
+        deletableServers.removeAll(Arrays.asList(appdefServers));
+        for(Server s:deletableServers) {
+            try {
+                serverManager.removeServer(subject, s);
+            }catch(VetoException e) {
+                log.error("failed removing resource " + s.getName() + " with the following exception: " + e.getMessage(),e);
+            }
+        }
+        
         // Now, for each server report that had a corresponding appdef server,
         // process that report.
         /*

@@ -257,4 +257,9 @@ public class ServerDAO
         String hql = "from Server where resource.resourceType = null";
         return createQuery(hql).list();
     }
+
+    public Collection<Server> getDeletableServers() {
+        String hql = "from Server where resource.deletable = true";
+        return createQuery(hql).list();
+    }
 }
