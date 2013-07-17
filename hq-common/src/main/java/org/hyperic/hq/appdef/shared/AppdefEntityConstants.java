@@ -217,4 +217,8 @@ public final class AppdefEntityConstants {
                 AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC );
     }
 
+    public static boolean isDynamicGroup(int grpType) {
+        return (grpType == AppdefEntityConstants.APPDEF_TYPE_GROUP_DYNAMIC);
+    }
+
 }

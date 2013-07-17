@@ -116,6 +116,11 @@ public class AppdefGroupValue
         return AppdefEntityConstants.isGroupAdhoc(this.groupType);
     }
 
+    /** Test whether the group is dynamic */
+    public boolean isDynamicGroup () {
+        return AppdefEntityConstants.isDynamicGroup(this.groupType);
+    }
+
     /** Test whether the group type is one of the compatible types. */
     public boolean isGroupCompat() {
         return AppdefEntityConstants.isGroupCompat(this.groupType);
