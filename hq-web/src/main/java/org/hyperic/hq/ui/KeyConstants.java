@@ -142,6 +142,12 @@ public interface KeyConstants {
      * "Resource Metrics" view
      */
     public static final String MODE_MON_RES_METS = "resourceMetrics";
+
+    /*
+     * The top level tab controls for the monitoring screen link to the
+     * "Resource Metrics" view
+     */
+    public static final String MODE_MON_TOPN = "topN";
     
     /*
      * The top level tab controls for the monitoring screen link to the

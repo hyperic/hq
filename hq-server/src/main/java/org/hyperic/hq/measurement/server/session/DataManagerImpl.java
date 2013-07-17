@@ -1019,6 +1019,9 @@ public class DataManagerImpl implements DataManager {
     @Transactional(readOnly = true)
     public String getTopNDataAsString(int resourceId, long time) {
         TopNData data = getTopNData(resourceId, time);
+        if(data == null){
+            return null;
+        }
         try {
             byte[] unCompressedData = topNManager.uncompressData(data.getData());
             return TopReport.fromSerializedForm(unCompressedData).toString();

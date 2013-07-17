@@ -652,4 +652,6 @@
 		class="org.hyperic.hq.ui.action.resource.autogroup.monitor.visibility.AutoGroupMetricsFormPrepareAction" />
 	<bean name="/resource/autogroup/monitor/visibility/AutoGroupMetrics"
 		class="org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricsDisplayAction" />
+    <bean name="/resource/platform/TopN"
+          class="org.hyperic.hq.ui.action.resource.platform.topn.TopNAction" />
 </beans>

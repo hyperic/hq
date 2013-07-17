@@ -186,7 +186,7 @@
 											</c:otherwise>
 										</c:choose>
 									<div class="${timelineIndicatorColor}"
-									     onmousedown="overlay.moveOverlay(this);overlay.showTimePopupTopMetricChart(<c:out value="${status.count - 1}"/>, event)"
+									     onmouseover="overlay.moveOverlay(this);overlay.showTimePopupTopMetricChart(<c:out value="${status.count - 1}"/>, event)"
 									     onmouseout="overlay.hideTimePopup(this)"></div>
 								</td>
 							</c:forEach>

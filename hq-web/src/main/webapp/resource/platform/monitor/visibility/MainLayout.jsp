@@ -53,6 +53,9 @@
   <c:when test="${mode == 'performance'}">
     <c:set var="isPerformance" value="true"/>
   </c:when>
+  <c:when test="${mode == 'topN'}">
+    <c:set var="isTopN" value="true"/>
+  </c:when>
 </c:choose>
 
 <tiles:insert definition=".page.title.resource.platform.full">
@@ -143,6 +146,13 @@
       <tiles:put name="MetricSummaries" beanName="MetricSummaries"/>
     </tiles:insert>
   </c:when>
+    <c:when test="${isTopN}">
+        <tiles:insert page="/resource/platform/monitor/visibility/PlatformMetrics.jsp">
+            <tiles:put name="Resource" beanName="Resource"/>
+            <tiles:put name="entityId" beanName="entityId"/>
+            <tiles:put name="MetricSummaries" beanName="MetricSummaries"/>
+        </tiles:insert>
+    </c:when>
   <c:otherwise>
     <c:out value="${mode}"/>
   </c:otherwise>

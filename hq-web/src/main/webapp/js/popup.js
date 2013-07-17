@@ -53,6 +53,9 @@ var overlay = {
             return curtop;
     },
 
+    showTopN: function (index) {
+        requestTopN(this.times[index]);
+    },
     moveOverlay: function (anchor) {
         var ovl = hqDojo.byId('overlay');
         var anchorY = this.findPosY(anchor);

@@ -5,13 +5,31 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 <%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
-
 <tiles:importAttribute name="hideLogs" ignore="true"/>
 <jsu:script>
   	var semiIndex = imagePath.indexOf(";");
   	if (semiIndex != -1)
     	imagePath = imagePath.substring(0, semiIndex);
 
+        function requestTopN(timestamp) {
+        hqDojo.xhrGet({
+        url: "<html:rewrite action="/resource/platform/TopN?eid=${eid}" />",
+        content: {
+        time: timestamp
+        },
+        handleAs: "json",
+        load: function(response, args) {
+        displayTopN(response, args);
+        },
+        error: function(response, args) {
+        reportError(response, args);
+        }
+        });
+    }
+
+    function displayTopN(response, args){
+        alert(response.topn);
+    }
   	<c:forEach var="timeTick" items="${timeIntervals}">
     	overlay.times.push('<hq:dateFormatter value="${timeTick.time}"/>');
   	</c:forEach>
@@ -39,15 +57,19 @@
       <c:set var="count" value="${status.count}"/>
     <td width="9">
      <div id="timePopup_<c:out value="${count - 1}"/>"
- 	 	onmouseover="this.className = 'timelineOn'; overlay.delayTimePopup(<c:out value="${count - 1}"/>)"
- 	 	onmousedown="this.className = 'timelineDown'; overlay.moveOverlay(this)"
+ 	 	onmouseover="this.className = 'timelineOn'; overlay.moveOverlay(this);overlay.delayTimePopup(<c:out
+                value="${count - 1}"/>)"
+ 	 	onmousedown="this.className = 'timelineDown'; overlay.showTopN(<c:out value="${count - 1}"/>);"
  	 	onmouseout="this.className = 'timelineOff'; overlay.curTime = null"
  	 	class="timelineOff">
      </div>
     </td>
     </c:forEach>
-    <td width="100%">
-      <html:img page="/images/timeline_lr.gif" height="10"/> 
+      <td width="10" align="left">
+      <html:img page="/images/timeline_lr.gif" height="10"/>
+    </td>
+    <td class="BoldText" style="padding-left: 4px;">
+      <fmt:message key="resource.common.monitor.visibility.topn.value"/>
     </td>
   </tr>
   <tr>

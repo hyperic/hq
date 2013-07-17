@@ -2448,6 +2448,9 @@
               type="org.springframework.web.struts.DelegatingActionProxy">
       </action>
 
+      <action path="/resource/platform/TopN"
+              scope="request"
+              type="org.springframework.web.struts.DelegatingActionProxy"/>
   </action-mappings>
 
 <!-- ===================================== Controller Configuration -->

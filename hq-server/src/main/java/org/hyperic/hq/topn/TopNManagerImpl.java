@@ -80,6 +80,9 @@ public class TopNManagerImpl implements ZeventListener<ResourceZevent>, TopNMana
     public void scheduleOrUpdateTopNCollection(int resourceId, int intervalInMinutes) {
         TopNSchedule schedule = null;
         Platform platform = platformManager.getPlatformByResourceId(resourceId);
+        if(platform == null){
+            return;
+        }
         if (null == (schedule = topNScheduleDAO.get(resourceId))) {
             schedule = createTopNSchedule(platform,
                     Integer.valueOf(serverConfigManager.getPropertyValue(TOPN_DEFAULT_INTERVAL)));
