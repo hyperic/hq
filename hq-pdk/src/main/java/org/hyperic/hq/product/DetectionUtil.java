@@ -25,6 +25,7 @@
  */
 package org.hyperic.hq.product;
 
+import java.awt.image.FilteredImageSource;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,6 +35,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
@@ -422,15 +424,26 @@ public class DetectionUtil {
      * @return
      * @throws PluginException
      */
-    public static Set<String> getWMIObj(String wmiObjName, String filter, String col, String name) throws PluginException {
+    public static Set<String> getWMIObj(String wmiObjName, Map<String, String> filters, String col, String name) throws PluginException {
         if (wmiObjName==null||"".equals(wmiObjName)) {
             throw new PluginException("object property not specified in the template of " + name);
         }
         StringBuilder sb = new StringBuilder().append("wmic /NAMESPACE:\\\\root\\virtualization path ").append(wmiObjName);
 
-        if (filter!=null&&!"".equals(filter)) {
-            int i = filter.indexOf("-");
-            sb.append(" WHERE ").append(filter.substring(0, i)).append("='").append(filter.substring(i+1, filter.length())).append("'");
+        if (filters != null && !filters.isEmpty()) {        
+            sb.append(" WHERE \"");
+            int num = 0;
+            for (Entry<String,String> filterEntry:filters.entrySet()) {
+                String filterFieldAndVal = filterEntry.getKey();
+                String operator = filterEntry.getValue();
+                int i = filterFieldAndVal.indexOf("-");
+                sb.append(filterFieldAndVal.substring(0, i)).append(" ").append(operator).append(" '").append(filterFieldAndVal.substring(i+1, filterFieldAndVal.length())).append("'");
+                num++;
+                if (num <  filters.size()) {
+                    sb.append(" and ");
+                }
+            }
+            sb.append("\"");
         }
         
         sb.append(" get");
@@ -444,6 +457,7 @@ public class DetectionUtil {
         if (log.isDebugEnabled()) {
             log.debug("cmd=" + cmd);
         }
+        
         BufferedReader input = null;
         try {
             Process process = Runtime.getRuntime().exec(cmd);

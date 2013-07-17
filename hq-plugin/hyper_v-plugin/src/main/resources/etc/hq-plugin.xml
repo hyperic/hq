@@ -104,6 +104,38 @@
 			defaultOn="true"
 			collectionType="trendsup"/>
   </metrics>
+  
+     <filter name="hyper-v_virtual_storage_device" value="Hyper-V Virtual Storage Device(%service.instance.name%)"/>
+  <metrics name="virtual-storage-device">
+  	<metric name="Availability"
+	        template="Hyper-V Virtual Storage Device:%service.instance.name%:Availability"
+		    category="AVAILABILITY"
+		    indicator="true"
+		    defaultOn="true"
+		    units="percentage"
+		    collectionType="dynamic"/>
+    <metric name="Error Count"
+			template="pdh:${hyper-v_virtual_storage_device}:Error Count"
+			indicator="true"
+			defaultOn="true"			
+			collectionType="trendsup"/>		
+	<metric name="Flush Count"
+			template="pdh:${hyper-v_virtual_storage_device}:Flush Count"
+			indicator="true"
+			defaultOn="true"
+			collectionType="trendsup"/>
+	<metric name="Read Bytes"
+			template="pdh:${hyper-v_virtual_storage_device}:Read Bytes/Sec"
+			indicator="true"
+			defaultOn="true"
+			collectionType="trendsup"/> 
+	<metric name="Write Bytes"
+			template="pdh:${hyper-v_virtual_storage_device}:Write Bytes/Sec"
+			indicator="true"
+			defaultOn="true"
+			collectionType="trendsup"/>
+  </metrics>
+  
 
    
      <filter name="hyper-v_legacy_network_adapter" value="Hyper-V Legacy Network Adapter(%service.instance.name%)"/>
@@ -199,6 +231,15 @@
                 <include name="virtual-IDE-controller"/>
             </metrics>
         </service>
+        <service name="Hyper-V Virtual Storage Device"> 
+			<plugin type="measurement" class="HyperVMeasurementPlugin"/>
+			<plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>
+	    	<plugin type="autoinventory" class="HyperVDetector"/>
+		    <metrics>                
+                <include name="virtual-storage-device"/>
+            </metrics>
+        </service>
+        
         
     </server>
 

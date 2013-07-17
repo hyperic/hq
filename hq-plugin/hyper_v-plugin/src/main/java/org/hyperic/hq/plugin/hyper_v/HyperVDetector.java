@@ -26,10 +26,12 @@
 package org.hyperic.hq.plugin.hyper_v;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -48,6 +50,10 @@ import org.hyperic.hq.product.ServiceResource;
 import org.hyperic.sigar.win32.Pdh;
 import org.hyperic.sigar.win32.Win32Exception;
 
+import java.util.Collections;
+
+
+
 public class HyperVDetector
     extends  ServerDetector implements AutoServerDetector   {
 
@@ -59,6 +65,23 @@ public class HyperVDetector
         List<ServerResource> servers= discoverServersWMI("Msvm_ComputerSystem","Caption-Virtual Machine","ElementName","Hyper-V VM","Hyper-V VM - ");
 
         return servers;
+    }
+    
+    private ServiceResource createService(String type, String name, String serviceInstanceName, String instanceName) {
+        ConfigResponse conf = new ConfigResponse();
+        conf.setValue("service.instance.name", serviceInstanceName);
+        conf.setValue("instance.name", instanceName);
+
+        ServiceResource service = new ServiceResource();
+        service.setType(this, type);
+        service.setServiceName( name);
+
+        ConfigResponse cprops = new ConfigResponse();
+        service.setProductConfig(conf);
+        service.setMeasurementConfig();
+        service.setCustomProperties(cprops);
+        return service;
+
     }
 
     
@@ -83,21 +106,8 @@ public class HyperVDetector
             }
             
             for (Iterator<String> it = names.iterator(); it.hasNext();) {
-                String name = it.next();
-                ConfigResponse conf = new ConfigResponse();
-                conf.setValue("service.instance.name", name);
-                conf.setValue("instance.name", instanceName);
-
-                ServiceResource service = new ServiceResource();
-                service.setType(this, type);
-                service.setServiceName(namePrefix + name);
-
-                ConfigResponse cprops = new ConfigResponse();
-                service.setProductConfig(conf);
-                service.setMeasurementConfig();
-                service.setCustomProperties(cprops);
-            	
-                services.add(service);                
+                String name = it.next();            	
+                services.add(createService(type, namePrefix + name, name, instanceName));                
             }
     	    if (services.isEmpty()) {
     	        return null;
@@ -111,7 +121,7 @@ public class HyperVDetector
     }
 
     protected List<ServerResource> discoverServersWMI(String wmiObjName, String filter, String col, String type, String namePrefix) throws PluginException {
-        Set<String> wmiObjs = DetectionUtil.getWMIObj(wmiObjName, filter, col, "");
+        Set<String> wmiObjs = DetectionUtil.getWMIObj(wmiObjName, Collections.singletonMap(filter,"="), col, "");
         List<ServerResource> servers = new ArrayList<ServerResource>();
         for(String name:wmiObjs) {
             ServerResource server = new ServerResource();
@@ -119,11 +129,11 @@ public class HyperVDetector
             ConfigResponse conf = new ConfigResponse();
             conf.setValue("instance.name", name);
                         
-            Set<String> guids = DetectionUtil.getWMIObj("Msvm_ComputerSystem", "ElementName-"+name, "Name", "");
+            Set<String> guids = DetectionUtil.getWMIObj("Msvm_ComputerSystem", Collections.singletonMap("ElementName-"+name,"="), "Name", "");
             if (guids!=null&&!guids.isEmpty()) {
                 String guid = guids.iterator().next();
                 conf.setValue(Collector.GUID, guid);
-                Set<String> macs = DetectionUtil.getWMIObj("Msvm_SyntheticEthernetPort", "SystemName-"+guid, "PermanentAddress", "");
+                Set<String> macs = DetectionUtil.getWMIObj("Msvm_SyntheticEthernetPort", Collections.singletonMap("SystemName-"+guid, "="), "PermanentAddress", "");
                 if (macs!=null&&!macs.isEmpty()) {
                     String mac = macs.iterator().next();
                     conf.setValue(Collector.MAC, mac);
@@ -172,12 +182,65 @@ public class HyperVDetector
             services.addAll(virtualIdeControllers);
         }
 
-
-
+        // discover storage services:
+        String vmGuid = config.getValue(Collector.GUID);
+        if (vmGuid != null) {
+            log.debug("instanceNAME=" + instanceName + " guid=" + vmGuid);
+            List<ServiceResource> storageServices  =  discoverStorageServices(vmGuid, instanceName);  
+            if (storageServices != null) {
+                services.addAll(storageServices);
+            }
+        }
+        else{
+            log.error("null guid for:" + instanceName);
+        }
         if (services.isEmpty()) {
             return null;
         }
         return services;
+    }
+    
+    private List<ServiceResource> discoverStorageServices(String vmGuid, String instanceName)  {
+        /*
+         *
+         *Get-WmiObject -Namespace root\virtualization  -Query "Select Connection From Msvm_ResourceAllocationSettingData where ElementName='Hard Disk Image' and InstanceID LIKE '%3D546820-BB6B-4333-A808-057503C0DE13%'"
+         *
+         */
+        List<ServiceResource> services = new ArrayList<ServiceResource>();
+        Map<String, String> filters =  new HashMap<String,String>(2);
+        filters.put("ElementName-Hard Disk Image", "=");
+        filters.put("InstanceID-" + "%"+ vmGuid+"%", "like");
+        try {
+            Set<String> wmiObjs = DetectionUtil.getWMIObj("Msvm_ResourceAllocationSettingData", filters, "Connection", "");
+            log.debug("storage for instance=" + instanceName + " guid=" + vmGuid + " is:" + wmiObjs);
+ 
+            if (wmiObjs == null) {
+                log.debug("no storage were found for instance=" + instanceName + " guid=" + vmGuid);
+                return null;
+            }
+            for (String obj:wmiObjs) {
+                // remove \"{\"} the str is of the form[{"fsdfsdfsd"}
+                log.debug("storage obj=<" + obj + ">");
+                
+                String serviceInstanceName = obj.substring(2, obj.length()-2);
+                String serviceStr  = serviceInstanceName;
+                serviceInstanceName = serviceInstanceName.replace("\\", "-");
+                log.debug("service instance name=<" + serviceInstanceName + ">");
+                ServiceResource service = createService("Hyper-V Virtual Storage Device", "Hyper-V Virtual Storage Device - " + serviceStr, serviceInstanceName, instanceName);                    
+                services.add(service);
+                
+            }
+            if (services.isEmpty()) {
+                return null;
+            }
+            return services;
+
+            // create service for each res
+        }catch(PluginException e) {
+            // TODO Auto-generated catch block
+            log.info("faled to get Msvm_ResourceAllocationSettingData: for:" +  vmGuid + " " + e.getMessage());
+            return null;
+        }
     }
 
 

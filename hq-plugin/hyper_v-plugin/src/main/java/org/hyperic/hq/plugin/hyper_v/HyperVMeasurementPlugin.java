@@ -15,12 +15,14 @@ import org.hyperic.hq.product.Win32MeasurementPlugin;
 import org.hyperic.sigar.win32.Pdh;
 import org.hyperic.sigar.win32.Win32Exception;
 
+import java.util.Collections;
+
 
 public class HyperVMeasurementPlugin extends Win32MeasurementPlugin {
     private static Log log =LogFactory.getLog(HyperVMeasurementPlugin.class);
     
     protected Set<String> getWMIObj(Metric metric) throws PluginException {
-        return DetectionUtil.getWMIObj(metric.getObjectProperty("object"),metric.getAttributeName(),metric.getObjectProperty("column"),metric.getObjectName());
+        return DetectionUtil.getWMIObj(metric.getObjectProperty("object"),Collections.singletonMap(metric.getAttributeName(),"="),metric.getObjectProperty("column"),metric.getObjectName());
     }
     
   
