@@ -1519,7 +1519,7 @@ public class ServerManagerImpl implements ServerManager {
 
     }
 
-    public Collection<Server> getDeletableServers() {
-        return serverDAO.getDeletableServers();
+    public Collection<Server> getRemovableServers() {
+        return serverDAO.getRemovableServers();
     }
 }

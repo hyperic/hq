@@ -26,6 +26,7 @@
 package org.hyperic.hq.autoinventory.server.session;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -83,6 +84,7 @@ import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.dao.AIHistoryDAO;
 import org.hyperic.hq.dao.AIPlatformDAO;
 import org.hyperic.hq.measurement.shared.MeasurementProcessor;
@@ -651,17 +653,34 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
             // TODO: G
             Set<AIServerValue> serverSet = state.getAllServers();
 
+            Collection<Server> removableServers = serverManager.getRemovableServers();
+            AuthzSubject subject = getHQAdmin();
+            Platform p = platformManager.getPlatformByAIPlatform(subject,aiPlatform);
+
             for (AIServerValue aiServer : serverSet) {
                 // Ensure the server reported has a valid appdef type
                 try {
                     serverManager.findServerTypeByName(aiServer.getServerTypeName());
+                    // don't delete servers which are removable but still discoverable by the agent
+                    if (removableServers!=null&&!removableServers.isEmpty()) {
+                        Server s = serverManager.getServerByName(p,aiServer.getName());
+                        removableServers.remove(s);
+                    }
                 } catch (NotFoundException e) {
                     log.error("Ignoring non-existent server type: " + aiServer.getServerTypeName(),
                         e);
                     continue;
                 }
-
                 aiPlatform.addAIServerValue(aiServer);
+            }
+            if (removableServers!=null&&!removableServers.isEmpty()) {
+                for(Server s:removableServers) {
+                    try {
+                        serverManager.removeServer(subject, s);
+                    }catch(VetoException e) {
+                        log.error("failed removing resource " + s.getName() + " with the following exception: " + e.getMessage(),e);
+                    }
+                }
             }
         }
 
@@ -834,8 +853,8 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
         }
     }
 
-    private AuthzSubject getHQAdmin() throws AutoinventoryException {
         try {
+            private AuthzSubject getHQAdmin() throws AutoinventoryException {
             return authzSubjectManager.getSubjectById(AuthzConstants.rootSubjectId);
         } catch (Exception e) {
             throw new AutoinventoryException("Error looking up subject", e);

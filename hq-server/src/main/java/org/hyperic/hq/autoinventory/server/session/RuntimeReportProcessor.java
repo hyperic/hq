@@ -207,15 +207,15 @@ public class RuntimeReportProcessor {
         }
 
         // remove resources which are marked as to be deleted once the agent can't discover them
-        Collection<Server> deletableServers = serverManager.getDeletableServers();
-        deletableServers.removeAll(Arrays.asList(appdefServers));
-        for(Server s:deletableServers) {
-            try {
-                serverManager.removeServer(subject, s);
-            }catch(VetoException e) {
-                log.error("failed removing resource " + s.getName() + " with the following exception: " + e.getMessage(),e);
-            }
-        }
+//        Collection<Server> deletableServers = serverManager.getDeletableServers();
+//        deletableServers.removeAll(Arrays.asList(appdefServers));
+//        for(Server s:deletableServers) {
+//            try {
+//                serverManager.removeServer(subject, s);
+//            }catch(VetoException e) {
+//                log.error("failed removing resource " + s.getName() + " with the following exception: " + e.getMessage(),e);
+//            }
+//        }
         
         // Now, for each server report that had a corresponding appdef server,
         // process that report.

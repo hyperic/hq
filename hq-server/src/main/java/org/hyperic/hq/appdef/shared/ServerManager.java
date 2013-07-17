@@ -338,6 +338,6 @@ public interface ServerManager {
      */
     public Number getServerCount();
 
-    public Collection<Server> getDeletableServers();
+    public Collection<Server> getRemovableServers();
 
 }

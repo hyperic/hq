@@ -258,8 +258,8 @@ public class ServerDAO
         return createQuery(hql).list();
     }
 
-    public Collection<Server> getDeletableServers() {
-        String hql = "from Server where resource.deletable = true";
+    public Collection<Server> getRemovableServers() {
+        String hql = "from Server where resource.removable = true";
         return createQuery(hql).list();
     }
 }
