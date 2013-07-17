@@ -57,6 +57,7 @@ import org.hyperic.hq.product.CollectorExecutor;
 import org.hyperic.hq.product.ConfigTrackPluginManager;
 import org.hyperic.hq.product.ControlPlugin;
 import org.hyperic.hq.product.ControlPluginManager;
+import org.hyperic.hq.product.HypericOperatingSystem;
 import org.hyperic.hq.product.LiveDataPluginManager;
 import org.hyperic.hq.product.LogTrackPluginManager;
 import org.hyperic.hq.product.MeasurementInfo;
@@ -78,7 +79,6 @@ import org.hyperic.hq.product.TrackEvent;
 import org.hyperic.hq.product.TrackEventPluginManager;
 import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.sigar.FileWatcherThread;
-import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.util.ArrayUtil;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigOption;
@@ -106,7 +106,7 @@ public class PluginDumper {
 
     HashMap productTypes = new HashMap();
 
-    static final String OS = OperatingSystem.getInstance().getName();
+    static final String OS = HypericOperatingSystem.getInstance().getName();
 
     protected ProductPlugin[] pPlugins;
 

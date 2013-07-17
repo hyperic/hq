@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assembly>
+	<id>sparc-solaris</id>
+	<formats>
+		<format>tar.gz</format>
+	</formats>
+	
+	<componentDescriptors>
+    	<componentDescriptor>../../src/main/assembly/component.xml</componentDescriptor>
+    </componentDescriptors>
+
+    <dependencySets>
+		<dependencySet>
+			<useProjectArtifact>false</useProjectArtifact>
+			 <useTransitiveDependencies>false</useTransitiveDependencies>
+			 <unpack>true</unpack>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
+			<includes>
+				<include>org.hyperic.jre:sparc-sun-solaris</include>
+			</includes>
+		</dependencySet>
+	</dependencySets>
+	
+</assembly>

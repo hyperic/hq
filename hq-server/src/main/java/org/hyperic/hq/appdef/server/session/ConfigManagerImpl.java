@@ -613,11 +613,9 @@ public class ConfigManagerImpl implements ConfigManager {
 
     /**
      * Set the config response for an entity/type combination.
-     * 
      * @param id ID of the object to set the repsonse fo
      * @param response The response
-     * @param type One of ProductPlugin.TYPE_*
-     * 
+     * @param type One of ProductPlugin.TYPE_
      * @return an array of entities which may be affected by the change in
      *         configuration. For updates to platform and service configs, there
      *         are no other entities other than the given ID returned. If a
@@ -629,7 +627,7 @@ public class ConfigManagerImpl implements ConfigManager {
      */
     @Transactional
     public AppdefEntityID setConfigResponse(AuthzSubject subject, AppdefEntityID id, ConfigResponse response,
-                                            String type, boolean sendConfigEvent) throws ConfigFetchException,
+                                            String type, boolean userManaged, boolean sendConfigEvent) throws ConfigFetchException,
         AppdefEntityNotFoundException, PermissionException, EncodingException {
         byte[] productBytes = null;
         byte[] measurementBytes = null;
@@ -651,7 +649,7 @@ public class ConfigManagerImpl implements ConfigManager {
 
         ConfigResponseDB existingConfig = getConfigResponse(id);
         boolean wasUpdated = configureResponse(subject, existingConfig, id, productBytes, measurementBytes, controlBytes, rtBytes,
-            null, false);
+            userManaged, false);
         if (sendConfigEvent) {
             Resource r = resourceManager.findResource(id);
             resourceManager.resourceHierarchyUpdated(subject, Collections.singletonList(r));

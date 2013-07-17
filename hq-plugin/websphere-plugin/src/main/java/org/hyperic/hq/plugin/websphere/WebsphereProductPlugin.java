@@ -440,7 +440,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
     public String[] getClassPath(ProductPluginManager manager) {
         OperatingSystem os = OperatingSystem.getInstance();
         boolean testIBMJDK = (os.getName().equals(OperatingSystem.NAME_LINUX)
-                || os.getName().equals(OperatingSystem.NAME_WIN32));
+                || os.getName().equals(OperatingSystem.NAME_WIN32) );
         //assert testIBMJDK : os.getName();
         if (testIBMJDK) {
             VALID_JVM = System.getProperty("java.vm.vendor").toUpperCase().indexOf("IBM") != -1;

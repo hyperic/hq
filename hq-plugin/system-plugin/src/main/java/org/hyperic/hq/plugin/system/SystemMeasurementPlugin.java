@@ -42,6 +42,8 @@ import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
 import org.hyperic.sigar.ptql.ProcessQuery;
 import org.hyperic.sigar.ptql.ProcessQueryFactory;
+import org.hyperic.sigar.win32.Pdh;
+import org.hyperic.sigar.win32.Win32Exception;
 
 public class SystemMeasurementPlugin
     extends SigarMeasurementPlugin
@@ -54,13 +56,30 @@ public class SystemMeasurementPlugin
                                  LogTrackPlugin.LOGLEVEL_ERROR,
                                  "system", e.getMessage());
     }
+    
+    private MetricValue getPdhValue(Metric metric) throws PluginException {
+        String obj = "\\" + metric.getObjectPropString() + "\\" + metric.getAttributeName();
+        Double val;
+        try 
+        {   
+            val = new Pdh().getRawValue(obj);
+            return new MetricValue(val);
+            
+        }catch(Win32Exception e) {
+            throw new PluginException(e);
+        }
+    }
 
     public MetricValue getValue(Metric metric) 
         throws PluginException,
                MetricNotFoundException,
                MetricUnreachableException
     {
-        String domain = metric.getDomainName();
+        String domain = metric.getDomainName(); 
+       //nira: should be first!! since Type is not configured 
+       if (domain.equals("pdh")) {
+           return getPdhValue(metric);
+       }
 
         Properties props = metric.getObjectProperties();
         String type = props.getProperty("Type");

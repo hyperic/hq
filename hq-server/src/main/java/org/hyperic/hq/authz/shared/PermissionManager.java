@@ -869,11 +869,15 @@ public abstract class PermissionManager {
         final RoleManager roleManager = Bootstrap.getBean(RoleManager.class);
         final Collection<Role> roles = roleManager.getRoles(subj);
         for (final Role role : roles) {
-            if (role.getId().equals(AuthzConstants.rootRoleId)) {
+            if (roleIsSuperuserRole(role)) {
                 return true;
             }
         }
         return false;
+    }
+
+    protected boolean roleIsSuperuserRole(final Role role) {
+        return role.getId().equals(AuthzConstants.rootRoleId);
     }
 
     public void checkIsSuperUser(AuthzSubject subject) throws PermissionException {
@@ -916,5 +920,11 @@ public abstract class PermissionManager {
     public abstract <T> Set<T> findViewableResources(AuthzSubject subject, Collection<ResourceType> types,
                                                      int sortName, IntegerTransformer<T> transformer,
                                                      Comparator<T> comparator);
+    
+    public abstract <T> Set<T> findResourcesByOperationIds(AuthzSubject subj, Collection<Integer> operationIds,
+                                                           IntegerTransformer<T> transformer);
+    
+    public abstract <T> Set<T> findViewableResources(AuthzSubject groupOwner, Collection<Role> groupRoles,
+            Collection<ResourceType> types,  IntegerTransformer<T> transformer);
 
 }

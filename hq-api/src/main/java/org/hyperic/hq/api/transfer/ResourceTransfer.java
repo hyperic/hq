@@ -69,7 +69,7 @@ public interface ResourceTransfer {
     RegisteredResourceBatchResponse getResources(final ApiMessageContext messageContext,
                                                  final ResourceDetailsType[] responseMetadata,
                                                  final int hierarchyDepth) throws PermissionException,
-            NotFoundException;
+            NotFoundException, AppdefEntityNotFoundException, ConfigFetchException, PluginNotFoundException, EncodingException, PluginException;
 
     RegistrationID register(final ApiMessageContext messageContext, final ResourceDetailsType responseMetadata,
                             final ResourceFilterRequest resourceFilterRequest) throws PermissionException,

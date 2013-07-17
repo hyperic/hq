@@ -26,6 +26,7 @@
 package org.hyperic.hq.product;
 
 import org.hyperic.sigar.OperatingSystem;
+import org.hyperic.hq.product.HypericOperatingSystem;
 import org.hyperic.util.config.ConfigResponse;
 
 /**
@@ -34,23 +35,26 @@ import org.hyperic.util.config.ConfigResponse;
 public class PlatformDetector extends GenericPlugin {
 
     public static final boolean IS_WIN32 =
-        OperatingSystem.IS_WIN32;
+        HypericOperatingSystem.IS_WIN32;
 
     public static final String[] UNIX_PLATFORM_NAMES =
         OperatingSystem.UNIX_NAMES;
     
     public static String[] WIN32_PLATFORM_NAMES =
-        OperatingSystem.WIN32_NAMES;
+        HypericOperatingSystem.WIN32_NAMES;
     
     public static final String[] PLATFORM_NAMES =
-        OperatingSystem.NAMES;
+        HypericOperatingSystem.NAMES;
 
     public static boolean isSupportedPlatform(String name) {
-        return OperatingSystem.isSupported(name);
+        //if ("Hyper-V".equals(name)) {
+        //    return true;
+        //}
+        return HypericOperatingSystem.isSupported(name);
     }
 
     public static boolean isWin32(String name) {
-        return OperatingSystem.isWin32(name);
+        return HypericOperatingSystem.isWin32(name);
     }
 
     private String getValue(ConfigResponse config, String key)

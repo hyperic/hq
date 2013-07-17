@@ -40,9 +40,10 @@ import static org.hyperic.hq.product.ControlPlugin.RESULT_FAILURE;
 import static org.hyperic.hq.product.ControlPlugin.RESULT_SUCCESS;
 import static org.hyperic.hq.product.ControlPlugin.STATE_STARTED;
 import static org.hyperic.hq.product.GenericPlugin.getScriptExtension;
+
+import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPluginManager;
-import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.sigar.win32.Win32;
 import org.hyperic.util.ArrayUtil;
 import org.hyperic.util.StringUtil;

@@ -37,4 +37,8 @@ public interface ServerConfigService {
     @PUT
     @Path("/")
     void updateServerConfig(final List<ServerConfig> configs);
+
+    @GET
+    @Path("/time")
+    long getServerTime();
 }

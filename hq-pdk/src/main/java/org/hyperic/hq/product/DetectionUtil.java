@@ -25,11 +25,19 @@
  */
 package org.hyperic.hq.product;
 
+import java.awt.image.FilteredImageSource;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -335,5 +343,148 @@ public class DetectionUtil {
             sigar = SigarProxyCache.newInstance(sigarImpl, timeout);
         }
         return sigar;
+    }
+
+    public static String getMacs(String name) throws IOException {
+        //String cmd = "cmd /C powershell Get-VMNetworkAdapter " + name;
+        String cmd = "@echo Name            IsManagementOs VMName SwitchName                                                                 MacAddress   Status      IPAddresses";
+        
+        String line;
+        BufferedReader input = null;
+        List<String> macs = new ArrayList<String>();
+        try {
+            Process process = Runtime.getRuntime().exec(cmd);
+            input = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+            int i=-1;
+            while ((line = input.readLine()) != null) {
+                line = line.trim();
+                if ("".equals(line)) {
+                    continue;
+                }
+                if (i==-1) {
+                    i = line.indexOf("MacAddress");
+                } else {
+                    macs.add(line.substring(i,line.indexOf(" ", i)));
+                }
+            }
+            StringBuilder sb = new StringBuilder();
+            for(String mac:macs) {
+                sb.append(',').append(mac);
+            }
+            return sb.toString().substring(1);
+        } catch (Exception e) {
+            log.error(e);
+            return null;
+        } finally {
+            if (input!=null) {
+                try {
+                    input.close();
+                } catch (IOException e) {
+                    log.error(e);
+                }
+            }
+        }
+    }
+    public static void main(String[] args) throws Throwable {
+        final String in = "Name            IsManagementOs VMName SwitchName                                                                 MacAddress   Status      IPAddresses";
+        
+        String line;
+        BufferedReader input = null;
+        List<String> macs = new ArrayList<String>();
+        Process process = Runtime.getRuntime().exec("@echo Name            IsManagementOs VMName SwitchName                                                                 MacAddress   Status      IPAddresses");
+
+        try {
+            input = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+            int i=-1;
+            while ((line = input.readLine()) != null) {
+                line = line.trim();
+                System.out.println(line);
+            }
+        } catch (Exception e) {
+            log.error(e);
+        } finally {
+            if (input!=null) {
+                try {
+                    input.close();
+                } catch (IOException e) {
+                    log.error(e);
+                }
+            }
+        }
+    }//EOM 
+    
+    /**
+     * 
+     * @param wmiObjName
+     * @param filter a name-value pair. The first '-' sign seperates between the name and the value. The rest which follows are part of the value's name
+     * @param col
+     * @param name
+     * @return
+     * @throws PluginException
+     */
+    public static Set<String> getWMIObj(String wmiObjName, Map<String, String> filters, String col, String name) throws PluginException {
+        if (wmiObjName==null||"".equals(wmiObjName)) {
+            throw new PluginException("object property not specified in the template of " + name);
+        }
+        StringBuilder sb = new StringBuilder().append("wmic /NAMESPACE:\\\\root\\virtualization path ").append(wmiObjName);
+
+        if (filters != null && !filters.isEmpty()) {        
+            sb.append(" WHERE \"");
+            int num = 0;
+            for (Entry<String,String> filterEntry:filters.entrySet()) {
+                String filterFieldAndVal = filterEntry.getKey();
+                String operator = filterEntry.getValue();
+                int i = filterFieldAndVal.indexOf("-");
+                sb.append(filterFieldAndVal.substring(0, i)).append(" ").append(operator).append(" '").append(filterFieldAndVal.substring(i+1, filterFieldAndVal.length())).append("'");
+                num++;
+                if (num <  filters.size()) {
+                    sb.append(" and ");
+                }
+            }
+            sb.append("\"");
+        }
+        
+        sb.append(" get");
+        if (col!=null&&!"".equals(col)) {
+            sb.append(" " + col);
+        }
+
+
+        sb.append(" /format:textvaluelist.xsl");
+        String cmd = sb.toString();
+        if (log.isDebugEnabled()) {
+            log.debug("cmd=" + cmd);
+        }
+        
+        BufferedReader input = null;
+        try {
+            Process process = Runtime.getRuntime().exec(cmd);
+            input = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+            String line;
+            Set<String> obj = new HashSet<String>();
+            while ((line = input.readLine()) != null) {                
+                line = line.trim();
+                StringTokenizer st = new StringTokenizer(line,"=");
+                while (st.hasMoreElements()) {
+                    String k = ((String) st.nextElement()).trim();                    
+                    String v = ((String) st.nextElement()).trim();                    
+                    obj.add(v);
+                }
+            }
+            return obj;
+        }catch(IOException e) {
+            throw new PluginException(e);
+        } finally {
+            if (input!=null) {
+                try {
+                    input.close();
+                } catch (IOException e) {
+                    throw new PluginException(e);
+                }
+            }
+        }
     }
 }

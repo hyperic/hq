@@ -88,7 +88,7 @@ public class AppdefInventorySummary implements java.io.Serializable {
         platformCount = getCount(typeCounts, AppdefEntityConstants.APPDEF_TYPE_PLATFORM);
         serverTypeMap = typeCounts.getProtoTypeCounts(AppdefEntityConstants.APPDEF_TYPE_SERVER);
         serverCount = getCount(typeCounts, AppdefEntityConstants.APPDEF_TYPE_SERVER);
-        serverTypeMap = typeCounts.getProtoTypeCounts(AppdefEntityConstants.APPDEF_TYPE_SERVICE);
+        serviceTypeMap = typeCounts.getProtoTypeCounts(AppdefEntityConstants.APPDEF_TYPE_SERVICE);
         serviceCount = getCount(typeCounts, AppdefEntityConstants.APPDEF_TYPE_SERVICE);
         appTypeMap = typeCounts.getProtoTypeCounts(AppdefEntityConstants.APPDEF_TYPE_APPLICATION);
         appCount = getCount(typeCounts, AppdefEntityConstants.APPDEF_TYPE_APPLICATION);

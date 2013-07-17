@@ -1060,6 +1060,35 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
            // now get viewable group pks
            return filterViewableGroups(subject, groups);
     }
+    
+    
+    /**
+     * Get the resource groups applicable to a given role.
+     * @throws NotFoundException 
+     *
+    */
+    @Transactional(readOnly=true)
+    public Collection<ResourceGroup> getResourceGroupsByRoleAndGroupType(AuthzSubject subject,Role role, int groupType)
+        throws PermissionException, NotFoundException {
+           Collection<ResourceGroup> viewableGroups = getResourceGroupsByRole(subject,role);
+           return  filterByGroupType(viewableGroups, groupType);
+    }
+    
+    /**
+     * Filter a collection of groupLocal objects to only include those viewable
+     * by the specified user
+     */
+    private Collection<ResourceGroup> filterByGroupType(Collection<ResourceGroup> groups, int groupType) {
+
+        for (Iterator<ResourceGroup> i = groups.iterator(); i.hasNext();) {
+            ResourceGroup resGrp = i.next();
+
+            if (resGrp.getGroupType() != groupType) {
+                i.remove();
+            }
+        }
+        return groups;
+    }
 
     /**
      * Get the resource groups applicable to a given role
@@ -1433,6 +1462,10 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
 
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
        this.applicationContext = applicationContext;
+    }
+
+    public void checkCanModify(AuthzSubject authzSubject) throws PermissionException {
+        permissionManager.check(authzSubject.getId(), AuthzConstants.authzRole, AuthzConstants.perm_modifyRole);
     }
 
 }

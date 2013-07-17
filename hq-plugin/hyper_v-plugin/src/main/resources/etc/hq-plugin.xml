@@ -1,0 +1,246 @@
+<?xml version="1.0"?>
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
+<plugin name="hyper_v">
+  <property name="PLUGIN_VERSION" value="@project.version@"/>
+    
+  <filter name="hyper-v_hypervisor_virtual-processor" value="Hyper-V Hypervisor Virtual Processor(%service.instance.name%)"/>
+  <metrics name="virtual-processor">
+  	<metric name="Availability"
+	        template="Hyper-V Hypervisor Virtual Processor:%service.instance.name%:Availability"
+		    category="AVAILABILITY"
+		    indicator="true"
+		    defaultOn="true"
+		    units="percentage"
+		    collectionType="dynamic"/>
+    <metric name="% Guest Run Time"
+			template="pdh_formatted:${hyper-v_hypervisor_virtual-processor}:% Guest Run Time"
+			indicator="true"
+			defaultOn="true"					
+			collectionType="dynamic"
+			units="percentage"/>
+    <metric name="% Hypervisor Run Time"
+			template="pdh_formatted:${hyper-v_hypervisor_virtual-processor}:% Hypervisor Run Time"
+			indicator="true"
+			defaultOn="true"								
+			collectionType="dynamic"
+			units="percentage"/>
+
+    <metric name="% Total Run Time"
+			template="pdh_formatted:${hyper-v_hypervisor_virtual-processor}:% Total Run Time"
+			indicator="true"
+			defaultOn="true"					
+			collectionType="dynamic"
+			units="percentage"/>			
+  </metrics>
+  
+   <filter name="hyper-v_virtual_network_adapter" value="Hyper-V Virtual Network Adapter(%service.instance.name%)"/>
+  <metrics name="virtual-network-adapter">
+  	<metric name="Availability"
+	        template="Hyper-V Virtual Network Adapter:%service.instance.name%:Availability"
+		    category="AVAILABILITY"
+		    indicator="true"
+		    defaultOn="true"
+		    units="percentage"
+		    collectionType="dynamic"/>
+    <metric name="Bytes"
+			template="pdh:${hyper-v_virtual_network_adapter}:Bytes/Sec"
+			indicator="true"
+			defaultOn="true"			
+			collectionType="trendsup"/>		
+	<metric name="Bytes Received"
+			template="pdh:${hyper-v_virtual_network_adapter}:Bytes Received/Sec"
+			indicator="true"
+			defaultOn="true"
+			collectionType="trendsup"/>
+	<metric name="Bytes Sent"
+			template="pdh:${hyper-v_virtual_network_adapter}:Bytes Sent/Sec"
+			indicator="true"
+			defaultOn="true"
+			collectionType="trendsup"/>						
+  </metrics>
+
+
+   <filter name="hyper-v_virtual_ide-controller" value="Hyper-V Virtual IDE Controller (Emulated)(%service.instance.name%)"/>
+  <metrics name="virtual-IDE-controller">
+  	<metric name="Availability"
+	        template="Hyper-V Virtual IDE Controller (Emulated):%service.instance.name%:Availability"
+		    category="AVAILABILITY"
+		    indicator="true"
+		    defaultOn="true"
+		    units="percentage"
+		    collectionType="dynamic"/>
+    <metric name="Write Bytes"
+			template="pdh:${hyper-v_virtual_ide-controller}:Write Bytes/Sec"
+			indicator="true"
+			defaultOn="true"			
+			collectionType="trendsup"/>		
+	<metric name="Read Bytes"
+			template="pdh:${hyper-v_virtual_ide-controller}:Read Bytes/Sec"
+			indicator="true"
+			defaultOn="true"
+			collectionType="trendsup"/>
+  </metrics>
+  
+     <filter name="hyper-v_virtual_storage_device" value="Hyper-V Virtual Storage Device(%service.instance.name%)"/>
+  <metrics name="virtual-storage-device">
+  	<metric name="Availability"
+	        template="Hyper-V Virtual Storage Device:%service.instance.name%:Availability"
+		    category="AVAILABILITY"
+		    indicator="true"
+		    defaultOn="true"
+		    units="percentage"
+		    collectionType="dynamic"/>
+    <metric name="Error Count"
+			template="pdh:${hyper-v_virtual_storage_device}:Error Count"
+			indicator="true"
+			defaultOn="true"			
+			collectionType="trendsup"/>		
+	<metric name="Flush Count"
+			template="pdh:${hyper-v_virtual_storage_device}:Flush Count"
+			indicator="true"
+			defaultOn="true"
+			collectionType="trendsup"/>
+	<metric name="Read Bytes"
+			template="pdh:${hyper-v_virtual_storage_device}:Read Bytes/Sec"
+			indicator="true"
+			defaultOn="true"
+			collectionType="trendsup"/> 
+	<metric name="Write Bytes"
+			template="pdh:${hyper-v_virtual_storage_device}:Write Bytes/Sec"
+			indicator="true"
+			defaultOn="true"
+			collectionType="trendsup"/>
+  </metrics>
+  
+
+   
+     <filter name="hyper-v_legacy_network_adapter" value="Hyper-V Legacy Network Adapter(%service.instance.name%)"/>
+  <metrics name="legacy-network-adapter">
+  	<metric name="Availability"
+	        template="Hyper-V Legacy Network Adapter:%service.instance.name%:Availability"
+		    category="AVAILABILITY"
+		    indicator="true"
+		    defaultOn="true"
+		    units="percentage"
+		    collectionType="dynamic"/>
+    <metric name="Bytes Dropped"
+			template="pdh:${hyper-v_legacy_network_adapter}:Bytes Dropped"
+			indicator="true"
+			defaultOn="true"			
+			collectionType="trendsup"/>		
+	<metric name="Bytes Received"
+			template="pdh:${hyper-v_legacy_network_adapter}:Bytes Received/Sec"
+			indicator="true"
+			defaultOn="true"
+			collectionType="trendsup"/>
+	<metric name="Bytes Sent"
+			template="pdh:${hyper-v_legacy_network_adapter}:Bytes Sent/Sec"
+			indicator="true"
+			defaultOn="true"
+			collectionType="trendsup"/>						
+  </metrics>
+  
+  
+    
+    <filter name="Hyper-V_VM_Vid_Partition" value="Hyper-V VM Vid Partition(%instance.name%)"/>
+    <filter name="memory" value="Memory"/>
+    <server name="Hyper-V VM" platforms="Win-Hyper-V">
+		<plugin type="measurement" class="HyperVMeasurementPlugin"/>
+	        <plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>
+	    	<plugin type="autoinventory" class="HyperVDetector"/>
+		<!--properties>
+			<property name="GUID" description="GUID" />
+			<property name="Mac" description="Mac Address" />
+		</properties-->    	
+		<config>
+			<option name="GUID" description="GUID" />
+			<option name="Mac" description="Mac Address" />
+		</config>    	
+	 	<metric name="Availability"
+	        	template="wmic:object=Msvm_ComputerSystem,column=enabledstate:ElementName-%instance.name%"
+		    category="AVAILABILITY"
+		    indicator="true"
+		    defaultOn="true"
+		    collectionType="dynamic"
+		    units="percentage"/>
+		<metric name="Memory - Physical Pages Allocated"
+	       		template="${Hyper-V_VM_Vid_Partition}:Physical Pages Allocated"
+		       indicator="true"
+	        	defaultOn="true"
+		        collectionType="dynamic"/>
+		<metric name="Memory - Remote Physical Pages"
+	        	template="${Hyper-V_VM_Vid_Partition}:Remote Physical Pages"
+		        indicator="true"
+	         	defaultOn="true"
+		        collectionType="dynamic"/>
+		<service name="Hyper-V Hypervisor Virtual Processor">
+			<plugin type="measurement" class="HyperVMeasurementPlugin"/>
+			<plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>
+	    	<plugin type="autoinventory" class="HyperVDetector"/>
+				
+		    <metrics>                
+                <include name="virtual-processor"/>
+                </metrics>
+        </service>
+		<service name="Hyper-V Virtual Network Adapter">
+			<plugin type="measurement" class="HyperVMeasurementPlugin"/>
+			<plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>
+	    	<plugin type="autoinventory" class="HyperVDetector"/>
+				
+		    <metrics>                
+                <include name="virtual-network-adapter"/>
+                </metrics>
+        </service>        
+        <service name="Hyper-V Legacy Network Adapter">
+			<plugin type="measurement" class="HyperVMeasurementPlugin"/>
+			<plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>
+	    	<plugin type="autoinventory" class="HyperVDetector"/>
+		    <metrics>                
+                <include name="legacy-network-adapter"/>
+            </metrics>
+        </service>		
+        <service name="Hyper-V Virtual IDE Controller"> 
+			<plugin type="measurement" class="HyperVMeasurementPlugin"/>
+			<plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>
+	    	<plugin type="autoinventory" class="HyperVDetector"/>
+		    <metrics>                
+                <include name="virtual-IDE-controller"/>
+            </metrics>
+        </service>
+        <service name="Hyper-V Virtual Storage Device"> 
+			<plugin type="measurement" class="HyperVMeasurementPlugin"/>
+			<plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>
+	    	<plugin type="autoinventory" class="HyperVDetector"/>
+		    <metrics>                
+                <include name="virtual-storage-device"/>
+            </metrics>
+        </service>
+        
+        
+    </server>
+
+</plugin>

@@ -506,6 +506,38 @@
             script="pdk/scripts/windows_updates.vbs"
             template="exec:file=${script}:ResultValue"/>
   </metrics>
+   <filter name="hyper-v_hypervisor" value="Hyper-V Hypervisor"/>
+   <filter name="hyper-v_virtual_machine_health_summary" value="Hyper-V Virtual Machine Health Summary"/>        
+    
+
+<metrics name="Win-Hyper-V"  include="Win32">
+	      <metric name="Virtual Machines Health Summary:Health Ok"
+                        template="pdh:${hyper-v_virtual_machine_health_summary}:HEALTH OK"
+                        indicator="true"
+                        defaultOn="true"
+                    collectionType="dynamic"/>
+        <metric name="Virtual Machines Health Summary:Health Critical"
+                        template="pdh:${hyper-v_virtual_machine_health_summary}:Health Critical"
+                        indicator="true"
+                        defaultOn="true"
+                    collectionType="dynamic"/>
+        <metric name="Hyper-V Hypervisor:Logical Processors"
+                        template="pdh:${hyper-v_hypervisor}:Logical Processors"
+                        indicator="true"
+                        defaultOn="true"
+                    collectionType="dynamic"/>
+        <metric name="Hyper-V Hypervisor:Partitions"
+                        template="pdh:${hyper-v_hypervisor}:Partitions"
+                        indicator="true"
+                        defaultOn="true"
+                    collectionType="dynamic"/>
+        <metric name="Hyper-V Hypervisor:Total Pages"
+                        template="pdh:${hyper-v_hypervisor}:Total Pages"
+                        indicator="true"
+                        defaultOn="true"
+                    collectionType="dynamic"/>
+  </metrics>	
+
 
   <metrics name="FileServer Mount">
     <metric name="Availability"
@@ -976,6 +1008,124 @@
             collectionType="trendsup"
             units="ms"/>
   </metrics>
+  
+   <filter name="physical_disk" value="PhysicalDisk(%instance.name%)"/>
+  <metrics name="HyperV Physical Disk">
+            <metric name="Availability"
+            	alias="Availability"
+            	template="PhysicalDisk:%instance.name%:Availability"
+            	category="AVAILABILITY"
+            	indicator="true"
+            	units="percentage"
+            	collectionType="dynamic"/>
+                 <metric name="Current Disk Queue Length"
+                                template="pdh:${physical_disk}:Current Disk Queue Length"
+                                indicator="true"
+                                defaultOn="true"
+                            collectionType="dynamic"/>
+                <metric name="Disk Bytes"
+                                template="pdh:${physical_disk}:Disk Bytes/sec"
+                                indicator="true"
+                                defaultOn="true"
+                           collectionType="trendsup"/>
+                <metric name="Storage - Disk Transfers"
+                                template="pdh:${physical_disk}:Disk Transfers/sec"
+                                indicator="true"
+                                defaultOn="true"
+                            collectionType="trendsup"/>
+    </metrics>
+    
+   <filter name="network_interface" value="Network Interface(%instance.name%)"/>
+  <metrics name="HyperV Network Interface">  
+            <metric name="Availability"
+            	alias="Availability"
+            	template="Network Interface:%instance.name%:Availability"
+            	category="AVAILABILITY"
+            	indicator="true"
+            	units="percentage"
+            	collectionType="dynamic"/>
+       <metric name="Network - Bytes Total"
+                   template="${network_interface}:Bytes Total/sec"
+                           indicator="true"
+                                defaultOn="true"
+                            collectionType="trendsup"/>
+                <metric name="Network - Offloaded Connections"
+                                template="${network_interface}:Offloaded Connections"
+                                indicator="true"
+                                defaultOn="true"
+                            collectionType="dynamic"/>
+                <metric name="Network - Packets"
+                                template="${network_interface}:Packets/sec"
+                                indicator="true"
+                                defaultOn="true"
+                            collectionType="trendsup"/>
+        <metric name="Network - Packet Outbound Errors"
+                      template="${network_interface}:Packets Outbound Errors"
+                      indicator="true"
+                      defaultOn="true"
+                      collectionType="dynamic"/>
+        <metric name="Network - Packet Receive Errors"
+                       template="${network_interface}:Packets Received Errors"
+                       indicator="true"
+                       defaultOn="true"
+                       collectionType="dynamic"/>
+  </metrics>
+  
+  <filter name="hyper_v_memory" value="Memory"/>
+  <metrics name="Hyper-V Memory">
+     <metric name="Availability"
+            	alias="Availability"
+            	template="win32:Service=vmms:${alias}"
+            	category="AVAILABILITY"
+            	indicator="true"
+            	units="percentage"
+            	collectionType="dynamic"/>
+     <metric name="Available Bytes"
+                    template="${hyper_v_memory}:Available Bytes"
+                    indicator="true"
+                    defaultOn="true"
+                    collectionType="dynamic"/>
+        <metric name="Pages"
+                  template="${hyper_v_memory}:Pages/sec"
+                  indicator="true"
+                   defaultOn="true"
+                   collectionType="trendsup"/>
+  </metrics>
+   
+  <filter name="hyper-v_hypervisor_logical-processor" value="Hyper-V Hypervisor Logical Processor(%instance.name%)"/>
+  <metrics name="Hyper-V Logical Processor">
+  	<metric name="Availability"
+            	alias="Availability"
+            	template="Hyper-V Hypervisor Logical Processor:%instance.name%:Availability"
+            	category="AVAILABILITY"
+            	indicator="true"
+            	units="percentage"
+            	collectionType="dynamic"/>
+	<metric name="% Guest Run Time"
+					template="pdh_formatted:${hyper-v_hypervisor_logical-processor}:% Guest Run Time"
+					indicator="true"
+					defaultOn="true"	
+					units="percentage"				
+				collectionType="dynamic"/>
+	<metric name="% Hypervisor Run Time"
+					template="pdh_formatted:${hyper-v_hypervisor_logical-processor}:% Hypervisor Run Time"
+					indicator="true"
+					defaultOn="true"	
+					units="percentage"				
+				collectionType="dynamic"/>
+	<metric name="% Idle Time"
+					template="pdh_formatted:${hyper-v_hypervisor_logical-processor}:% Idle Time"
+					indicator="true"
+					defaultOn="true"	
+					units="percentage"				
+				collectionType="dynamic"/>
+	<metric name="% Total Run Time"
+					template="pdh_formatted:${hyper-v_hypervisor_logical-processor}:% Total Run Time"
+					indicator="true"
+					defaultOn="true"	
+					units="percentage"				
+				collectionType="dynamic"/>
+  </metrics>
 
   <metrics name="Process">
     <metric name="Availability"
@@ -1195,6 +1345,7 @@
     <metric name="Threads"
             template="sigar:Type=ProcState,Arg=${service.ptql}:Threads"/>
   </metrics>
+  
 
   <help name="AIX">
   <![CDATA[

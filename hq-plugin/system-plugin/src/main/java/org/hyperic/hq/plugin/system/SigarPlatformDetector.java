@@ -42,11 +42,11 @@ import org.hyperic.sigar.Mem;
 import org.hyperic.sigar.NetFlags;
 import org.hyperic.sigar.NetInfo;
 import org.hyperic.sigar.NetInterfaceConfig;
-import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
 import org.hyperic.util.HostIP;
 import org.hyperic.util.config.ConfigResponse;
+
 
 public class SigarPlatformDetector extends PlatformDetector {
 
@@ -136,25 +136,28 @@ public class SigarPlatformDetector extends PlatformDetector {
             " (VM Guest of " + href + ")";
         platform.setDescription(description);
     }
+    
 
     /**
      * Performs all the actual platform detection.
      * @param platformConfig ConfigResponse for the existing platform, if any.
      */
     public PlatformResource getPlatformResource(ConfigResponse config) 
-        throws PluginException {
-
-        OperatingSystem os = OperatingSystem.getInstance();
-        
+        throws PluginException {        
         PlatformResource platform = new PlatformResource();
         if(this.hasControlActions) platform.setControlConfig() ; 
         ConfigResponse cprops = new ConfigResponse();
 
-        platform.setPlatformTypeName(os.getName());
-        platform.setDescription(os.getDescription());
+        platform.setPlatformTypeName(OperatingSystemReflection.getName());
+        
+        
 
         Sigar sigar = new Sigar();
         HashMap ips = new HashMap();
+        
+        platform.setDescription(OperatingSystemReflection.getDescription());
+               
+        
         String fqdn = this.fqdn;
         String ip = null;
 
@@ -323,11 +326,10 @@ public class SigarPlatformDetector extends PlatformDetector {
             sigar.close();
         }
 
-        cprops.setValue("arch", os.getArch());
-        cprops.setValue("version", os.getVersion());
-        cprops.setValue("vendor", os.getVendor());
-        cprops.setValue("vendorVersion", os.getVendorVersion());
-
+        cprops.setValue("arch", OperatingSystemReflection.getArch());
+        cprops.setValue("version", OperatingSystemReflection.getVersion());
+        cprops.setValue("vendor", OperatingSystemReflection.getVendor());
+        cprops.setValue("vendorVersion", OperatingSystemReflection.getVendorVersion());
         platform.setCustomProperties(cprops);
 
         ConfigResponse mconfig = new ConfigResponse();

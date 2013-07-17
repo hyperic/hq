@@ -51,11 +51,15 @@ import org.hyperic.hq.api.model.resources.RegisteredResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
 import org.hyperic.hq.api.services.impl.ApiMessageContext;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.NotFoundException;
+import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.PluginNotFoundException;
+import org.hyperic.util.config.EncodingException;
 
 
 @Path("/")
@@ -86,7 +90,7 @@ public interface ResourceService {
     RegisteredResourceBatchResponse getResources(@QueryParam("responseStructure") final ResourceDetailsType[]
                                                          responseStructure,
                                                  @QueryParam("hierarchyDepth") final int hierarchyDepth) throws
-            SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException;
+            SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException, AppdefEntityNotFoundException, ConfigFetchException, PluginNotFoundException, EncodingException, PluginException;
 
     @POST
     @Path("/registration")

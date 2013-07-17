@@ -86,6 +86,9 @@ public class SystemPlugin extends ProductPlugin {
     //suggestions welcome.
     public static final String PROCESS_SERVER_NAME = "ProcessServer";
     public static final String WINDOWS_SERVER_NAME = "WindowsServer";
+    public static final String HYPERV_SERVER_NAME = "HyperVServer";
+    
+    ///public static
 
     public static final String FS_NAME    = "Mount";
     public static final String FILE_NAME  = "File";
@@ -97,6 +100,11 @@ public class SystemPlugin extends ProductPlugin {
     public static final String PROCESS_NAME = "Process";
     public static final String MPROCESS_NAME = "MultiProcess";
     public static final String SVC_NAME   = "Windows Service";
+    public static final String HYPERV_NETWORK_INTERFACE =   "HyperV Network Interface";
+    public static final String HYPERV_PHYSICAL_DISK =   "HyperV Physical Disk";
+    public static final String HYPERV_MEMORY =   "Hyper-V Memory";
+    public static final String HYPERV_LOGICAL_PROCESSOR = "Hyper-V Logical Processor";
+    
 
     public static final String[] FILE_SERVICES = {
         FS_NAME,
@@ -115,6 +123,14 @@ public class SystemPlugin extends ProductPlugin {
         MPROCESS_NAME
     };
 
+    public static final String[] HYPERV_SERVICES = {
+        HYPERV_NETWORK_INTERFACE,
+        HYPERV_PHYSICAL_DISK,
+        HYPERV_MEMORY,
+        HYPERV_LOGICAL_PROCESSOR
+    };
+
+    
     public static final String FILE_MOUNT_SERVICE =
         TypeBuilder.composeServiceTypeName(FILE_SERVER_NAME,
                                            FS_NAME);
@@ -144,6 +160,11 @@ public class SystemPlugin extends ProductPlugin {
     public static final String PROP_NETIF = "interface";
 
     public static final String PROP_CPU   = "cpu";
+    
+    public static final String PROP_HYPERV_NETWORK_INTERFACE   = "Network Interface";
+    public static final String PROP_HYPERV_PHYSICAL_DISK   = "PhysicalDisk";
+    public static final String PROP_HYPERV_LOGICAL_PROCESSOR   = "Hyper-V Hypervisor Logical Processor";
+    
 
     public static final String PROP_ENABLE_USER_AI = "autodiscover.users";
     
@@ -203,14 +224,29 @@ public class SystemPlugin extends ProductPlugin {
             if (info.getName().equals(SVC_NAME)) {
                 return new Win32MeasurementPlugin();
             }
-            else if ((info.getType() == TypeInfo.TYPE_SERVER) &&
-                     ((ServerTypeInfo)info).isVirtual())
-            {
+            
+            if (info.getName().equals(HYPERV_NETWORK_INTERFACE)) {
+                return new HyperVMeasurementPlugin();
+            }
+            if (info.getName().equals(HYPERV_PHYSICAL_DISK)) {
+               
+                return new HyperVMeasurementPlugin();
+            }
+            if (info.getName().equals(HYPERV_MEMORY)) {
+                return new Win32MeasurementPlugin();
+            }
+            if (info.getName().equals(HYPERV_LOGICAL_PROCESSOR)) {
+                return new HyperVMeasurementPlugin();
+            }
+            if ((info.getType() == TypeInfo.TYPE_SERVER) &&
+                     ((ServerTypeInfo)info).isVirtual()) {
                 //virtual server, no metrics.
+                return null;
+                
             }
-            else if (info.getName().equals(SCRIPT_NAME)) {
+            if (info.getName().equals(SCRIPT_NAME)) {
                 return new ExecutableMeasurementPlugin();
-            }
+            }            
             else {
                 return new SystemMeasurementPlugin();
             }
@@ -232,6 +268,10 @@ public class SystemPlugin extends ProductPlugin {
                 else if (info.getName().equals(WINDOWS_SERVER_NAME)) {
                     return new WindowsDetector();
                 }
+                else if (info.getName().equals(HYPERV_SERVER_NAME)) {
+                    return new HypervDetector();
+                }
+                
             }
         }
         else if (type.equals(ProductPlugin.TYPE_CONTROL)) {
@@ -299,7 +339,7 @@ public class SystemPlugin extends ProductPlugin {
         { "secondaryDNS", "Secondary DNS" },
         { "defaultGateway", "Default Gateway" },
         { HQConstants.MOID, "MOID" },
-        { HQConstants.VCUUID, "VCenter UUID" },
+        { HQConstants.VCUUID, "VCenter UUID" }        
         };
 
     private static final String[][] NETIF_CPROPS = {
@@ -382,6 +422,30 @@ public class SystemPlugin extends ProductPlugin {
         types.add(server);
         types.add(service);
     }
+    
+    
+    
+    private void addHyperVService(TypeBuilder types) {
+        /* we dont use TypeBuilder here because we dont want
+         * the virtual server name as part of the service name
+         */
+        ServerTypeInfo server = 
+            new ServerTypeInfo(HYPERV_SERVER_NAME,
+                    HYPERV_SERVER_NAME,
+                               TypeBuilder.NO_VERSION);
+
+        server.setVirtual(true);
+        
+        types.add(server);
+
+        for (int i=0; i<HYPERV_SERVICES.length; i++) {
+            String name = HYPERV_SERVICES[i];
+            ServiceTypeInfo service =
+                new ServiceTypeInfo(name, name, server);
+
+            types.add(service);
+        }
+    }
 
     private void addProcessServices(TypeBuilder types) {
         /* we dont use TypeBuilder here because we dont want
@@ -440,6 +504,8 @@ public class SystemPlugin extends ProductPlugin {
         addProcessServices(types);
 
         addWindowsService(types);
+        
+        addHyperVService(types);
 
         return types.getTypes();
     }
@@ -492,6 +558,22 @@ public class SystemPlugin extends ProductPlugin {
                 schema.add(SystemMeasurementPlugin.PTQL_CONFIG,
                           "Multi Process Query",
                           "State.Name.eq=httpd");
+            }
+            else if (info.getName().equals(HYPERV_NETWORK_INTERFACE) ) {
+                schema.add(PROP_HYPERV_NETWORK_INTERFACE,
+                        HYPERV_NETWORK_INTERFACE + " Name",
+                           "/");
+            }
+            
+            else if (info.getName().equals(HYPERV_PHYSICAL_DISK) ) {
+                schema.add(PROP_HYPERV_PHYSICAL_DISK,
+                        HYPERV_PHYSICAL_DISK + " Name",
+                           "/");
+            }
+            else if (info.getName().equals(HYPERV_LOGICAL_PROCESSOR) ) {
+                schema.add(PROP_HYPERV_LOGICAL_PROCESSOR,
+                        HYPERV_LOGICAL_PROCESSOR + " Name",
+                           "/");
             }
             else if (info.getName().equals(SVC_NAME)) {
                 schema.add(PROP_SVC,

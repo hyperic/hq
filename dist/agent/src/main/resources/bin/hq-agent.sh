@@ -142,8 +142,16 @@ PDK_LIB=$AGENT_BUNDLE_HOME/pdk/lib
 # for /proc/net/tcp mirror
 SIGAR_PROC_NET=$AGENT_BUNDLE_HOME/tmp
 
+if [ -f "${AGENT_BUNDLE_HOME}"/conf/wrapper-additional.conf ]; then
+	rm ${AGENT_BUNDLE_HOME}/conf/wrapper-additional.conf
+fi
+	
 if [ "x${HQ_JAVA_HOME}" != "x" ] ; then
     HQ_JAVA_HOME=${HQ_JAVA_HOME}
+elif [ -d "${AGENT_BUNDLE_HOME}"/jre ]; then
+    HQ_JAVA_HOME="${AGENT_BUNDLE_HOME}"/jre
+    # Just in case
+    chmod -R +x "${AGENT_BUNDLE_HOME}"/jre/bin/* > /dev/null 2>&1
 elif [ -d "${AGENT_INSTALL_HOME}"/jre ]; then
     HQ_JAVA_HOME="${AGENT_INSTALL_HOME}"/jre
     # Just in case

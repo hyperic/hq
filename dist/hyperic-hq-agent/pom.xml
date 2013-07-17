@@ -17,26 +17,18 @@
 	<packaging>pom</packaging>
 	<name>Hyperic HQ Distribution - Hyperic HQ Agent Modules</name>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.hyperic.hq.dist</groupId>
-			<artifactId>agent</artifactId>
-			<version>${project.version}</version>
-			<type>tar.gz</type>
-		</dependency>
-	</dependencies>
-
+	
 	<build>
-		<pluginManagement>
+	<!--	<pluginManagement>
 			<plugins>
 				<plugin>
 					<artifactId>maven-deploy-plugin</artifactId>
 					<configuration>
-						<skip combine.self="override">true</skip>
+						<skip combine.self="override"pom>true</skip>
 					</configuration>
 				</plugin>
 			</plugins>
-   		</pluginManagement>
+   		</pluginManagement>-->
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -71,13 +63,13 @@
 		      <!-- will use the no-JRE instead <module>modules/apple-osx</module>-->
 		      <module>modules/hyperic-hq-agent-parent</module>
 		      <module>modules/noJRE</module>
-		      <module>modules/hpux-11</module>
-		      <module>modules/ppc-aix</module>
-		      <module>modules/sparc-solaris</module>
 		      <module>modules/win32</module> 
 		      <module>modules/x86-64-win</module> 
 		      <module>modules/x86-linux</module> 
-		      <module>modules/x86-64-linux</module>   
+		      <module>modules/x86-64-linux</module>     
+		      <!-- <module>modules/hpux-11</module>
+		      <module>modules/ppc-aix</module>
+		      <module>modules/sparc-solaris</module>    -->  
 		</modules> 
 	    </profile> 
 		<profile> 
@@ -87,7 +79,11 @@
    			</activation>
 			<modules> 
 			    <module>modules/hyperic-hq-agent-parent</module>
-			    <module>modules/noJRE</module>
+		        <module>modules/noJRE</module>
+		        <module>modules/win32</module> 
+		        <module>modules/x86-64-win</module> 
+		        <module>modules/x86-linux</module> 
+		        <module>modules/x86-64-linux</module>    
 			</modules> 
 		</profile>  
 		<profile> 
@@ -96,8 +92,12 @@
         		<property><name>daily-build</name></property>
    			</activation>
 			<modules> 
-			    <module>modules/hyperic-hq-agent-parent</module>
-			    <module>modules/noJRE</module>
+			  <module>modules/hyperic-hq-agent-parent</module>
+		      <module>modules/noJRE</module>
+		      <module>modules/win32</module> 
+		      <module>modules/x86-64-win</module> 
+		      <module>modules/x86-linux</module> 
+		      <module>modules/x86-64-linux</module>     
 			</modules> 
 		</profile>  
 		<profile> 

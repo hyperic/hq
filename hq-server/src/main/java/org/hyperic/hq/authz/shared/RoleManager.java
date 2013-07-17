@@ -381,6 +381,9 @@ public interface RoleManager {
     
     Collection<ResourceGroup> getResourceGroupsByRole(AuthzSubject subject,Role role)
         throws PermissionException, NotFoundException;
+    
+    Collection<ResourceGroup> getResourceGroupsByRoleAndGroupType(AuthzSubject subject,Role role, int groupType)
+            throws PermissionException, NotFoundException;    
 
     /**
      * Get the resource groups applicable to a given role
@@ -461,5 +464,7 @@ public interface RoleManager {
     public Collection<Operation> findAllOperations();
 
     public Collection<Role> getRoles(AuthzSubject subj);
+
+    public void checkCanModify(AuthzSubject authzSubject) throws PermissionException;
 
 }

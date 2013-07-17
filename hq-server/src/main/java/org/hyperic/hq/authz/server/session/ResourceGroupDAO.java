@@ -47,7 +47,6 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.dao.HibernateDAO;
-import org.hyperic.hq.management.server.session.GroupCriteriaDAO;
 import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -60,9 +59,6 @@ public class ResourceGroupDAO
 
     @Autowired
     private ResourceDAO rDao;
-
-    @Autowired
-    private GroupCriteriaDAO groupCriteriaDAO;
 
     @Autowired
     private ResourceTypeDAO resourceTypeDAO;
@@ -90,13 +86,19 @@ public class ResourceGroupDAO
                                              + "between 1 and 100 characters in length");
     }
 
+    /**
+     * @param groupResource - Typically this param is null and the behavior is that a resource is create of authzGroup
+     *  type. Only used when associating a group with an existing resource.
+     */
     ResourceGroup create(AuthzSubject creator, ResourceGroupCreateInfo cInfo,
-                         Collection<Resource> resources, Collection<Role> roles)
+                         Collection<Resource> resources, Collection<Role> roles, Resource groupResource)
         throws GroupCreationException {
-        assertNameConstraints(cInfo.getName());
+        if (groupResource == null) {
+            // name is not persisted if the groupResource != null
+            assertNameConstraints(cInfo.getName());
+        }
         assertDescriptionConstraints(cInfo.getDescription());
         assertLocationConstraints(cInfo.getLocation());
-
         switch (cInfo.getGroupType()) {
             case AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP:
             case AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP:
@@ -112,21 +114,20 @@ public class ResourceGroupDAO
                 }
                 break;
         }
-
         ResourceGroup resGrp = cInfo.getResourceGroup(creator);
-
         ResourceType resType = resourceTypeDAO.findById(AuthzConstants.authzGroup);
-
         assert resType != null;
-
         final Resource proto = rDao.findById(AuthzConstants.rootResourceId);
-        Resource r = cInfo.isPrivateGroup() ?
-            rDao.createPrivate(resType, proto, cInfo.getName(), creator, resGrp.getId(), cInfo.isSystem()) :
-            rDao.create(resType, proto, cInfo.getName(), creator, resGrp.getId(), cInfo.isSystem());
-
+        Resource r = null;
+        if (groupResource == null) {
+            r = cInfo.isPrivateGroup() ?
+                rDao.createPrivate(resType, proto, cInfo.getName(), creator, resGrp.getId(), cInfo.isSystem()) :
+                rDao.create(resType, proto, cInfo.getName(), creator, resGrp.getId(), cInfo.isSystem());
+        } else {
+            r = groupResource;
+        }
         resGrp.setResource(r);
         save(resGrp);
-
         /*
          * The following oddity is needed because the above rDao.create()
          * flushes the session. If we don't refresh the object, then changing
@@ -135,13 +136,13 @@ public class ResourceGroupDAO
          */
         r = rDao.findById(r.getId());
         getSession().refresh(r);
-        r.setInstanceId(resGrp.getId());
+        if (groupResource == null) {
+            r.setInstanceId(resGrp.getId());
+        }
         getSession().saveOrUpdate(r);
         flushSession();
-
         setMembers(resGrp, new HashSet<Resource>(resources));
         resGrp.setRoles(new HashSet<Role>(roles));
-
         return resGrp;
     }
 
@@ -278,17 +279,24 @@ public class ResourceGroupDAO
     }
 
     public void remove(ResourceGroup entity) {
+        remove(entity, false);
+    }
+
+    /**
+     * @param removeResource true when the group is associated with a resource that belongs to another first class
+     * entity
+     */
+    void remove(ResourceGroup entity, boolean removeResource) {
         // remove all roles
         entity.getRoles().clear();
         removeAllMembers(entity);
-
         Resource res = entity.getResource();
-
         // remove this resourceGroup itself
         super.remove(entity);
         flushSession();
-
-        rDao.remove(res);
+        if (removeResource) {
+            rDao.remove(res);
+        }
     }
 
     public ResourceGroup findRootGroup() {
@@ -301,9 +309,14 @@ public class ResourceGroupDAO
     }
 
     public ResourceGroup findByName(String name) {
-        String sql = "from ResourceGroup g where lower(g.resource.name) = lower(?)";
-        return (ResourceGroup) getSession().createQuery(sql).setString(0, name).setCacheable(true)
-            .setCacheRegion("ResourceGroup.findByName").uniqueResult();
+        String sql = "from ResourceGroup g where lower(g.resource.name) = lower(?) " +
+                     "AND g.resource.resourceType.id = :groupType";
+        return (ResourceGroup) getSession().createQuery(sql)
+                                           .setString(0, name).setCacheable(true)
+                                           .setInteger("groupType", AuthzConstants.authzGroup)
+                                           .setCacheable(true)
+                                           .setCacheRegion("ResourceGroup.findByName")
+                                           .uniqueResult();
     }
 
     @SuppressWarnings("unchecked")
@@ -439,4 +452,11 @@ public class ResourceGroupDAO
         String hql = "from ResourceGroup where resource.resourceType = null";
         return (Collection<ResourceGroup>) createQuery(hql).list();
     }
+    
+    @SuppressWarnings("unchecked")
+    List<ResourceGroup> getGroupsByType(int groupType) {
+        String hql = "from ResourceGroup where groupType = :type";
+        return (List<ResourceGroup>) createQuery(hql).setInteger("type", groupType).list();
+    }
+
 }

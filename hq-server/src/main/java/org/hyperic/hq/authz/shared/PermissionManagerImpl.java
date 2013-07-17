@@ -45,6 +45,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Operation;
+import org.hyperic.hq.authz.server.session.OperationDAO;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDAO;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
@@ -75,6 +76,8 @@ public class PermissionManagerImpl extends PermissionManager {
 
     private DBUtil dbUtil;
 
+    private OperationDAO operationDAO;
+
     private static final String VIEWABLE_SELECT = "SELECT instance_id, EAM_RESOURCE.sort_name, EAM_RESOURCE.id, "
                                                   + "EAM_RESOURCE.resource_type_id "
                                                   + "FROM EAM_RESOURCE ";
@@ -102,9 +105,10 @@ public class PermissionManagerImpl extends PermissionManager {
     }
 
     @Autowired
-    public PermissionManagerImpl(DBUtil dbUtil) {
+    public PermissionManagerImpl(DBUtil dbUtil, OperationDAO operationDAO) {
         Connection conn = null;
         this.dbUtil = dbUtil;
+        this.operationDAO = operationDAO;
         try {
             conn = getConnection();
             _falseToken = DBUtil.getBooleanValue(false, conn);
@@ -497,6 +501,7 @@ public class PermissionManagerImpl extends PermissionManager {
         return findViewableResources(subj, resourceTypes, sortName, transformer, null);
     }
 
+    @Override
     public <T> Set<T> findViewableResources(AuthzSubject subj, Collection<ResourceType> resourceTypes,
                                             int sortName, IntegerTransformer<T> transformer,
                                             Comparator<T> comparator) {
@@ -526,6 +531,14 @@ public class PermissionManagerImpl extends PermissionManager {
         }
         return rtn;
     }
+    
+    @Override
+    public <T> Set<T> findViewableResources(AuthzSubject groupOwner, Collection<Role> groupRoles,
+            Collection<ResourceType> resourceTypes, IntegerTransformer<T> transformer) {
+        Set<T> resourcesViewableByOwner = findViewableResources(groupOwner, resourceTypes, PageControl.SORT_UNSORTED, transformer);        
+        
+        return resourcesViewableByOwner;                
+    }    
 
     public TypeCounts findViewableInstanceCounts(AuthzSubject subj, Collection<ResourceType> types) {
         final TypeCounts rtn = new TypeCounts();
@@ -560,6 +573,17 @@ public class PermissionManagerImpl extends PermissionManager {
             rtn.incrementProtoTypeCount(appdefType, protoType);
         }
         return rtn;
+    }
+
+    @Override
+    public <T> Set<T> findResourcesByOperationIds(AuthzSubject subj, Collection<Integer> operationIds,
+                                                  IntegerTransformer<T> transformer) {
+        final List<ResourceType> resourceTypes = new ArrayList<ResourceType>();
+        for (final Integer opId : operationIds) {
+            final Operation op = operationDAO.findById(opId);
+            resourceTypes.add(op.getResourceType());
+        }
+        return findViewableResources(subj, resourceTypes, transformer);
     }
 
 }

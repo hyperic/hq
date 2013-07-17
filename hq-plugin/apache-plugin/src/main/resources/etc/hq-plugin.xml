@@ -760,7 +760,7 @@
 
     <config type="control" platform="Win32">
       <option name="service_name"
-              description="Apache Service Name"/>
+              description="Apache Service Name (Relevant to Windows only, does not affect other platforms)"/>
     </config>
 
     <plugin type="measurement"

@@ -447,7 +447,7 @@ public class ProductBossImpl implements ProductBoss {
         PermissionException, InvalidConfigException, ConfigFetchException, AppdefEntityNotFoundException {
         boolean doRollback = true;
         try {
-            if (configManager.setConfigResponse(subject, id, response, type, true) != null) {
+            if (configManager.setConfigResponse(subject, id, response, type, false/*userManaged*/, true) != null) {
                 AppdefEntityID[] ids = new AppdefEntityID[] { id };
 
                 ConfigValidator configValidator = (ConfigValidator) org.hyperic.hq.common.ProductProperties

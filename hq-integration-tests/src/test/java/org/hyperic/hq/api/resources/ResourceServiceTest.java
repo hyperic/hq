@@ -814,7 +814,7 @@ public class ResourceServiceTest extends RestTestCaseBase<ResourceService, Resou
 		
 			final ConfigResponse configResponse = new ConfigResponse(configMap) ; 
 			this.configManager.setConfigResponse(subject, entityID, 
-							configResponse, ProductPlugin.CONFIGURABLE_TYPES[1], false);
+							configResponse, ProductPlugin.CONFIGURABLE_TYPES[1], false, false);
 		}//EOM
 		
 	}//EOC ResourceServiceTestDataPopulator

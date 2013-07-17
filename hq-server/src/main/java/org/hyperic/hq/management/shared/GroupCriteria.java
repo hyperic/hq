@@ -75,12 +75,13 @@ public class GroupCriteria extends AuthzNamedBean {
     }
 
     public Pattern getResourceNameRegexPattern() {
-        if (resourceNameRegex != null && resourceNameRegexPattern == null) {
-            resourceNameRegexPattern = Pattern.compile(resourceNameRegex, Pattern.CASE_INSENSITIVE);
+        if ((resourceNameRegex != null) && (resourceNameRegexPattern == null)) {
+            resourceNameRegexPattern = Pattern.compile(resourceNameRegex);
         }
         return resourceNameRegexPattern;
     }
 
+    @Override
     public int hashCode() {
         int rtn = 17;
         rtn += (name != null) ? name.hashCode() : 0;
@@ -97,6 +98,7 @@ public class GroupCriteria extends AuthzNamedBean {
         return rtn;
     }
     
+    @Override
     public String toString() {
         final StringBuilder rtn = new StringBuilder(128);
         rtn.append(name != null ? name : "");

@@ -55,12 +55,4 @@
 		</pluginManagement>
 	</build>
 
-	<repositories>
-		<repository>
-			<id>hyperic-jres</id>
-			<name>Hyperic JREs Repository</name>
-			<url>http://maven.hyperic.org/jres</url>
-		</repository>
-	</repositories>
-
 </project>

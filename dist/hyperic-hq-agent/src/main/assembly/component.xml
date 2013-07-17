@@ -34,12 +34,7 @@
 			<directoryMode>0755</directoryMode>
 		</fileSet>
 
-		<fileSet>
-			<directory>../../${project.build.directory}/generated-resources/agent-${project.version}</directory>
-			<outputDirectory>/bundles/agent-${project.version}</outputDirectory>
-			<fileMode>0644</fileMode>
-			<directoryMode>0755</directoryMode>
-		</fileSet>
+	
 		<!--<fileSet>
 			<directory>${project.build.directory}/generated-resources/support-${project.version}</directory>
 			<outputDirectory>/support</outputDirectory>

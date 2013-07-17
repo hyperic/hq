@@ -11795,209 +11795,7 @@ has already been defined.
 			commit="true"/>
 	</schemaSpec>
 
-  <schemaSpec version="3.217">
-    <schema-insert table="EAM_RESOURCE"
-                   insertCmd="(id,version_col,resource_type_id,instance_id,subject_id,proto_id,name,sort_name,fsystem,mtime) values (701,0,0,701,0,0,'','','1',0)"/>
-    <schema-insert table="EAM_RESOURCE_TYPE"
-                   insertCmd="(id,version_col,name,resource_id,fsystem) values (701,0,'groupPolicyResourceType',701,'0')"/>
-
-    <schema-directSQL>  
-        <statement targetDB="postgresql">
-            create table EAM_GROUP_CRITERIA (
-                ID int4 not null,
-                VERSION_COL int8 default 0 not null,
-                CTIME int8 not null,
-                NAME varchar(128) not null,
-                CREATED_BY varchar(128) not null,
-                DESCRIPTION varchar(128) not null,
-                RESOURCE_NAME_REGEX varchar(128),                
-                primary key (ID)
-            )
-        </statement>
-        <statement targetDB="postgresql">
-            alter table EAM_GROUP_CRITERIA
-                add constraint FK8154380D190495F3
-                foreign key (RESOURCE_PROTOTYPE)
-                references EAM_RESOURCE
-        </statement>
-        <statement targetDB="postgresql">
-            create sequence EAM_GROUP_CRITERIA_ID_SEQ start 10001 increment 1
-        </statement>
-        <statement targetDB="postgresql">
-            create table EAM_GROUP_CRITERIA_PROTOTYPE_MAP ( 
-                CRITERIA_ID int4 not null, 
-                PROTOTYPE_ID int4 not null, 
-                primary key (CRITERIA_ID, PROTOTYPE_ID) 
-            ); 
-        </statement>
-        <statement targetDB="postgresql">
-            alter table EAM_GROUP_CRITERIA_PROTOTYPE_MAP 
-                add constraint FKE111ABCDEE4336A8 
-                foreign key (CRITERIA_ID) 
-                references EAM_GROUP_CRITERIA; 
-        </statement>
-        <statement targetDB="postgresql">
-            alter table EAM_GROUP_CRITERIA_PROTOTYPE_MAP 
-                add constraint FKE111ABCD645F8D1A 
-                foreign key (PROTOTYPE_ID) 
-                references EAM_RESOURCE; 
-        </statement>				              
-        <statement targetDB="postgresql">
-            create table EAM_MGMT_POLICY (
-                ID int4 not null,
-                VERSION_COL int8 default 0 not null,
-                DESCRIPTION varchar(1024) not null,
-                RESOURCE_ID int4,
-                CRISPO_ID int4 not null,
-                primary key (ID)
-            )
-        </statement>
-        <statement targetDB="postgresql">
-            alter table EAM_MGMT_POLICY
-                add constraint FK8FD9FE626364EFCD
-                foreign key (CRISPO_ID)
-                references EAM_CRISPO
-        </statement>
-        <statement targetDB="postgresql">
-            alter table EAM_MGMT_POLICY
-                add constraint FK8FD9FE62FC176AE
-                foreign key (RESOURCE_ID)
-                references EAM_RESOURCE
-        </statement>
-        <statement targetDB="postgresql">
-            create sequence EAM_POLICY_ID_SEQ start 10001 increment 1
-        </statement>
-        <statement targetDB="postgresql">
-            create table EAM_MEAS_INSTR (
-                ID int4 not null,
-                VERSION_COL int8 default 0 not null,
-                COLL_INTERVAL int8 not null,
-                DEFAULT_ON bool not null,
-                INDICATOR bool not null,
-                TEMPLATE_ID int4 not null,
-                MGMT_POLICY_ID int4 not null,
-                primary key (ID)
-            )
-        </statement>
-        <statement targetDB="postgresql">
-            alter table EAM_MEAS_INSTR
-                add constraint FK9EF96BE51E213090
-                foreign key (MGMT_POLICY_ID)
-                references EAM_MGMT_POLICY
-                on delete cascade
-        </statement>
-        <statement targetDB="postgresql">
-            alter table EAM_MEAS_INSTR
-                add constraint FK9EF96BE5C37F24B8
-                foreign key (TEMPLATE_ID)
-                references EAM_MEASUREMENT_TEMPL
-        </statement>
-        <statement targetDB="postgresql">
-            create sequence EAM_MEAS_INSTR_ID_SEQ start 10001 increment 1
-        </statement>
-        <statement targetDB="postgresql">
-            create table EAM_POLICY_GRP_MAP (
-                ID int4 not null,
-                RESOURCE_ID int4 not null,
-                RESOURCE_GROUP_ID int4 not null,
-                CTIME int8 not null,
-                primary key (ID),
-                unique (RESOURCE_ID, RESOURCE_GROUP_ID)
-            )
-        </statement>
-        <statement targetDB="postgresql">
-            create index policy_grp_idx on EAM_POLICY_GRP_MAP (RESOURCE_GROUP_ID)
-        </statement>
-        <statement targetDB="postgresql">
-            create index policy_member_idx on EAM_POLICY_GRP_MAP (RESOURCE_ID)
-        </statement>
-        <statement targetDB="postgresql">
-            alter table EAM_POLICY_GRP_MAP
-                add constraint FKD95FEB83FC176AE
-                foreign key (RESOURCE_ID)
-                references EAM_RESOURCE
-        </statement>
-        <statement targetDB="postgresql">
-            alter table EAM_POLICY_GRP_MAP
-                add constraint FKD95FEB836DA1B7C9
-                foreign key (RESOURCE_GROUP_ID)
-                references EAM_RESOURCE_GROUP
-        </statement>
-        <statement targetDB="postgresql">
-            create sequence EAM_POLICY_GRP_MAP_ID_SEQ start 10001 increment 1
-        </statement>
-        <statement targetDB="postgresql">
-            create table EAM_POLICY_RESOURCE_STATUS (
-                ID int4 not null,
-                POLICY_ID int4 not null,
-                RESOURCE_ID int4 not null,
-                MTIME int8 not null,
-                CTIME int8 not null,
-                CONFIG_STATUS_BUF varchar(512) not null,
-                CONFIG_STATUS int4 not null,
-                primary key (ID),
-                unique (POLICY_ID, RESOURCE_ID)
-            )
-        </statement>
-        <statement targetDB="postgresql">
-            create index policy_group_member_idx on EAM_POLICY_RESOURCE_STATUS (RESOURCE_ID)
-        </statement>
-        <statement targetDB="postgresql">
-            create index policy_status_idx on EAM_POLICY_RESOURCE_STATUS (POLICY_ID)
-        </statement>
-        <statement targetDB="postgresql">
-            alter table EAM_POLICY_RESOURCE_STATUS
-                add constraint FKFBF11904FC176AE
-                foreign key (RESOURCE_ID)
-                references EAM_RESOURCE
-        </statement>
-        <statement targetDB="postgresql">
-            alter table EAM_POLICY_RESOURCE_STATUS
-                add constraint FKFBF119049675568E
-                foreign key (POLICY_ID)
-                references EAM_MGMT_POLICY
-        </statement>
-        <statement targetDB="postgresql">
-            create sequence EAM_POLICY_RESOURCE_STATUS_ID_SEQ start 10001 increment 1
-        </statement>
-    </schema-directSQL>  
-
-    <schema-addColumn table="EAM_RESOURCE_GROUP" column="GROUP_CRITERIA_ID" columnType="INTEGER" nullable="NULL" default="NULL"/>
-
-    <schema-directSQL>  
-        <statement targetDB="postgresql">
-            alter table EAM_RESOURCE_GROUP
-                add constraint FK6DBCCDBC96F9C405
-                foreign key (GROUP_CRITERIA_ID)
-                references EAM_GROUP_CRITERIA(id)
-        </statement>
-    </schema-directSQL>
-    
-	<schema-insert table="EAM_OPERATION"
-					insertCmd="(ID, NAME, RESOURCE_TYPE_ID) VALUES (430, 'createPolicy', 701)"/>
-	<schema-insert table="EAM_OPERATION"
-					insertCmd="(ID, NAME, RESOURCE_TYPE_ID) VALUES (431, 'modifyPolicy', 701)"/>
-	<schema-insert table="EAM_OPERATION"
-					insertCmd="(ID, NAME, RESOURCE_TYPE_ID) VALUES (432, 'removePolicy', 701)"/>
-	<schema-insert table="EAM_OPERATION"
-					insertCmd="(ID, NAME, RESOURCE_TYPE_ID) VALUES (433, 'viewPolicy', 701)"/>
-					
-	<schema-insert table="EAM_ROLE_OPERATION_MAP"
-  		   			 insertCmd="(OPERATION_ID, ROLE_ID) VALUES (430, 0)"/>
-  	<schema-insert table="EAM_ROLE_OPERATION_MAP"
-  		   			 insertCmd="(OPERATION_ID, ROLE_ID) VALUES (431, 0)"/>
-  	<schema-insert table="EAM_ROLE_OPERATION_MAP"
-  		   			 insertCmd="(OPERATION_ID, ROLE_ID) VALUES (432, 0)"/>
-  	<schema-insert table="EAM_ROLE_OPERATION_MAP"
-  		   			 insertCmd="(OPERATION_ID, ROLE_ID) VALUES (433, 0)"/>
-  </schemaSpec>
-
-
-    <schemaSpec version="3.218" >
-        <user-password-upgrader encryption="EAM_PRINCIPAL.PASSWORD" strength="256" encodeHashAsBase64="true" />
-    </schemaSpec>
-
-    <schemaSpec version="3.219" alwaysExecute="true">
+    <schemaSpec version="3.217" alwaysExecute="true">
         <schema-directSQL>
             <statement targetDB="postgresql">            	
             	CREATE TABLE if not exists EAM_VM_MAPPING(
@@ -12011,8 +11809,12 @@ has already been defined.
             </statement>
         </schema-directSQL>
     </schemaSpec>
+
+    <schemaSpec version="3.218" >
+        <user-password-upgrader encryption="EAM_PRINCIPAL.PASSWORD" strength="256" encodeHashAsBase64="true" />
+    </schemaSpec>	
 	
-	 <schemaSpec version="3.220">
+	 <schemaSpec version="3.219">
 	 	<!-- [HQ-4315] - we change the prefix of the existing organization user's name and sort name due to a javascript issue -->
 			       <schema-directSQL>  	
 			        <statement>
@@ -12023,17 +11825,208 @@ has already been defined.
 			       	</statement>	 
 			       </schema-directSQL>  
 			    </schemaSpec>
-	
+   
+	  <schemaSpec version="3.220">
+	    <schema-insert table="EAM_RESOURCE"
+	                   insertCmd="(id,version_col,resource_type_id,instance_id,subject_id,proto_id,name,sort_name,fsystem,mtime) values (701,0,0,701,0,0,'','','1',0)"/>
+	    <schema-insert table="EAM_RESOURCE_TYPE"
+	                   insertCmd="(id,version_col,name,resource_id,fsystem) values (701,0,'groupPolicyResourceType',701,'0')"/>
+
+	    <schema-directSQL>  
+	        <statement targetDB="postgresql">
+	            create table EAM_GROUP_CRITERIA (
+	                ID int4 not null,
+	                VERSION_COL int8 default 0 not null,
+	                CTIME int8 not null,
+	                NAME varchar(128) not null,
+	                CREATED_BY varchar(128) not null,
+	                DESCRIPTION varchar(128) not null,
+	                RESOURCE_NAME_REGEX varchar(128),                
+	                primary key (ID)
+	            )
+	        </statement>
+	        <statement targetDB="postgresql">
+	            create sequence EAM_GROUP_CRITERIA_ID_SEQ start 10001 increment 1
+	        </statement>
+	        <statement targetDB="postgresql">
+	            create table EAM_GROUP_CRITERIA_PROTOTYPE_MAP ( 
+	                CRITERIA_ID int4 not null, 
+	                PROTOTYPE_ID int4 not null, 
+	                primary key (CRITERIA_ID, PROTOTYPE_ID) 
+	            ); 
+	        </statement>
+	        <statement targetDB="postgresql">
+	            alter table EAM_GROUP_CRITERIA_PROTOTYPE_MAP 
+	                add constraint FKE111ABCDEE4336A8 
+	                foreign key (CRITERIA_ID) 
+	                references EAM_GROUP_CRITERIA; 
+	        </statement>
+	        <statement targetDB="postgresql">
+	            alter table EAM_GROUP_CRITERIA_PROTOTYPE_MAP 
+	                add constraint FKE111ABCD645F8D1A 
+	                foreign key (PROTOTYPE_ID) 
+	                references EAM_RESOURCE; 
+	        </statement>                              
+	        <statement targetDB="postgresql">
+	            create table EAM_MGMT_POLICY (
+	                ID int4 not null,
+	                VERSION_COL int8 default 0 not null,
+	                DESCRIPTION varchar(1024) not null,
+	                RESOURCE_ID int4,
+	                CRISPO_ID int4 not null,
+	                primary key (ID)
+	            )
+	        </statement>
+	        <statement targetDB="postgresql">
+	            alter table EAM_MGMT_POLICY
+	                add constraint FK8FD9FE626364EFCD
+	                foreign key (CRISPO_ID)
+	                references EAM_CRISPO
+	        </statement>
+	        <statement targetDB="postgresql">
+	            alter table EAM_MGMT_POLICY
+	                add constraint FK8FD9FE62FC176AE
+	                foreign key (RESOURCE_ID)
+	                references EAM_RESOURCE
+	        </statement>
+	        <statement targetDB="postgresql">
+	            create sequence EAM_POLICY_ID_SEQ start 10001 increment 1
+	        </statement>
+	        <statement targetDB="postgresql">
+	            create table EAM_MEAS_INSTR (
+	                ID int4 not null,
+	                VERSION_COL int8 default 0 not null,
+	                COLL_INTERVAL int8 not null,
+	                DEFAULT_ON bool not null,
+	                INDICATOR bool not null,
+	                TEMPLATE_ID int4 not null,
+	                MGMT_POLICY_ID int4 not null,
+	                primary key (ID)
+	            )
+	        </statement>
+	        <statement targetDB="postgresql">
+	            alter table EAM_MEAS_INSTR
+	                add constraint FK9EF96BE51E213090
+	                foreign key (MGMT_POLICY_ID)
+	                references EAM_MGMT_POLICY
+	                on delete cascade
+	        </statement>
+	        <statement targetDB="postgresql">
+	            alter table EAM_MEAS_INSTR
+	                add constraint FK9EF96BE5C37F24B8
+	                foreign key (TEMPLATE_ID)
+	                references EAM_MEASUREMENT_TEMPL
+	        </statement>
+	        <statement targetDB="postgresql">
+	            create sequence EAM_MEAS_INSTR_ID_SEQ start 10001 increment 1
+	        </statement>
+	        <statement targetDB="postgresql">
+	            create table EAM_POLICY_GRP_MAP (
+	                ID int4 not null,
+	                RESOURCE_ID int4 not null,
+	                RESOURCE_GROUP_ID int4 not null,
+	                CTIME int8 not null,
+	                primary key (ID),
+	                unique (RESOURCE_ID, RESOURCE_GROUP_ID)
+	            )
+	        </statement>
+	        <statement targetDB="postgresql">
+	            create index policy_grp_idx on EAM_POLICY_GRP_MAP (RESOURCE_GROUP_ID)
+	        </statement>
+	        <statement targetDB="postgresql">
+	            create index policy_member_idx on EAM_POLICY_GRP_MAP (RESOURCE_ID)
+	        </statement>
+	        <statement targetDB="postgresql">
+	            alter table EAM_POLICY_GRP_MAP
+	                add constraint FKD95FEB83FC176AE
+	                foreign key (RESOURCE_ID)
+	                references EAM_RESOURCE
+	        </statement>
+	        <statement targetDB="postgresql">
+	            alter table EAM_POLICY_GRP_MAP
+	                add constraint FKD95FEB836DA1B7C9
+	                foreign key (RESOURCE_GROUP_ID)
+	                references EAM_RESOURCE_GROUP
+	        </statement>
+	        <statement targetDB="postgresql">
+	            create sequence EAM_POLICY_GRP_MAP_ID_SEQ start 10001 increment 1
+	        </statement>
+	        <statement targetDB="postgresql">
+	            create table EAM_POLICY_RESOURCE_STATUS (
+	                ID int4 not null,
+	                POLICY_ID int4 not null,
+	                RESOURCE_ID int4 not null,
+	                MTIME int8 not null,
+	                CTIME int8 not null,
+	                CONFIG_STATUS_BUF varchar(512) not null,
+	                CONFIG_STATUS int4 not null,
+	                primary key (ID),
+	                unique (POLICY_ID, RESOURCE_ID)
+	            )
+	        </statement>
+	        <statement targetDB="postgresql">
+	            create index policy_group_member_idx on EAM_POLICY_RESOURCE_STATUS (RESOURCE_ID)
+	        </statement>
+	        <statement targetDB="postgresql">
+	            create index policy_status_idx on EAM_POLICY_RESOURCE_STATUS (POLICY_ID)
+	        </statement>
+	        <statement targetDB="postgresql">
+	            alter table EAM_POLICY_RESOURCE_STATUS
+	                add constraint FKFBF11904FC176AE
+	                foreign key (RESOURCE_ID)
+	                references EAM_RESOURCE
+	        </statement>
+	        <statement targetDB="postgresql">
+	            alter table EAM_POLICY_RESOURCE_STATUS
+	                add constraint FKFBF119049675568E
+	                foreign key (POLICY_ID)
+	                references EAM_MGMT_POLICY
+	        </statement>
+	        <statement targetDB="postgresql">
+	            create sequence EAM_POLICY_RESOURCE_STATUS_ID_SEQ start 10001 increment 1
+	        </statement>
+	    </schema-directSQL>  
+
+	    <schema-addColumn table="EAM_RESOURCE_GROUP" column="GROUP_CRITERIA_ID" columnType="INTEGER" nullable="NULL" default="NULL"/>
+
+	    <schema-directSQL>  
+	        <statement targetDB="postgresql">
+	            alter table EAM_RESOURCE_GROUP
+	                add constraint FK6DBCCDBC96F9C405
+	                foreign key (GROUP_CRITERIA_ID)
+	                references EAM_GROUP_CRITERIA(id)
+	        </statement>
+	    </schema-directSQL>
+	    
+	    <schema-insert table="EAM_OPERATION"
+	                    insertCmd="(ID, NAME, RESOURCE_TYPE_ID) VALUES (430, 'createPolicy', 701)"/>
+	    <schema-insert table="EAM_OPERATION"
+	                    insertCmd="(ID, NAME, RESOURCE_TYPE_ID) VALUES (431, 'modifyPolicy', 701)"/>
+	    <schema-insert table="EAM_OPERATION"
+	                    insertCmd="(ID, NAME, RESOURCE_TYPE_ID) VALUES (432, 'removePolicy', 701)"/>
+	    <schema-insert table="EAM_OPERATION"
+	                    insertCmd="(ID, NAME, RESOURCE_TYPE_ID) VALUES (433, 'viewPolicy', 701)"/>
+	                    
+	    <schema-insert table="EAM_ROLE_OPERATION_MAP"
+	                     insertCmd="(OPERATION_ID, ROLE_ID) VALUES (430, 0)"/>
+	    <schema-insert table="EAM_ROLE_OPERATION_MAP"
+	                     insertCmd="(OPERATION_ID, ROLE_ID) VALUES (431, 0)"/>
+	    <schema-insert table="EAM_ROLE_OPERATION_MAP"
+	                     insertCmd="(OPERATION_ID, ROLE_ID) VALUES (432, 0)"/>
+	    <schema-insert table="EAM_ROLE_OPERATION_MAP"
+	                     insertCmd="(OPERATION_ID, ROLE_ID) VALUES (433, 0)"/>
+	  </schemaSpec>
+
     <schemaSpec version="3.221">
-    	<schema-directSQL>
-    	 <statement targetDB="postgresql">
-    	 	INSERT INTO EAM_CONFIG_PROPS (ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES ('71', 'TOPN_PURGE', '8', '8', false)
-    	 </statement>
-    	
-    	 <statement targetDB="postgresql">
-    	 	INSERT INTO EAM_CONFIG_PROPS (ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES ('72', 'TOPN_DEFAULT_INTERVAL', '1', '1', false)
-    	 </statement>
-       
+        <schema-directSQL>
+         <statement targetDB="postgresql">
+                INSERT INTO EAM_CONFIG_PROPS (ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES ('71', 'TOPN_PURGE', '8', '8', false)
+         </statement>
+
+         <statement targetDB="postgresql">
+                INSERT INTO EAM_CONFIG_PROPS (ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES ('72', 'TOPN_DEFAULT_INTERVAL', '1', '1', false)
+         </statement>
+
             <statement targetDB="postgresql">
                 CREATE TABLE IF NOT EXISTS TopNData(
                 resourceId integer NOT NULL,
@@ -12042,17 +12035,18 @@ has already been defined.
                 PRIMARY KEY (resourceId, "time")
                 )
             </statement>
-        	 <statement targetDB="postgresql">
-        	                CREATE TABLE IF NOT EXISTS TopNSchedule(
-        	                resourceId integer NOT NULL,
-        	 				intervalInMinutes integer NOT NULL,
-        	 				enabled boolean NOT NULL,
-        	 				lastUpdated bigint NOT NULL,
-        	                PRIMARY KEY (resourceId)
-        	                )
-        	</statement>
+                 <statement targetDB="postgresql">
+                                CREATE TABLE IF NOT EXISTS TopNSchedule(
+                                resourceId integer NOT NULL,
+                                                intervalInMinutes integer NOT NULL,
+                                                enabled boolean NOT NULL,
+                                                lastUpdated bigint NOT NULL,
+                                PRIMARY KEY (resourceId)
+                                )
+                </statement>
         </schema-directSQL>
     </schemaSpec>
+
     <schemaSpec version="3.222" alwaysExecute="true">
         <schema-directSQL>
             <statement targetDB="postgresql">
@@ -12103,7 +12097,7 @@ has already been defined.
                 COST 100;
             </statement>
         </schema-directSQL>
-    </schemaSpec>
+    </schemaSpec>	
 </dbupgrade>
 </target>
 </project>

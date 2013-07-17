@@ -31,18 +31,18 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
+
 import org.hyperic.hq.product.ProductPlugin;
 
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
-import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.sigar.ptql.ProcessFinder;
 
 public class VMwareGuestInfo {
 
     private static final String PTQL_QUERY =
         "State.Name.eq=" +
-        (OperatingSystem.IS_WIN32 ?
+        (OperatingSystemReflection.IS_WIN32() ?
          "VMwareService" : "vmware-guestd");
 
     private static String findGuestd(Sigar sigar) {

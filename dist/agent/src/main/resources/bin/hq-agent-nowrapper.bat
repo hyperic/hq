@@ -23,6 +23,10 @@ if not "%HQ_JAVA_HOME%"=="" (
     set JAVA_HOME=%HQ_JAVA_HOME%
     goto gotjava
 )
+if EXIST %AGENT_BUNDLE_HOME%\jre\nul (
+    set JAVA_HOME=%AGENT_BUNDLE_HOME%\jre
+    goto gotjava
+)
 if EXIST %RUNDIR%\jre\nul (
     set JAVA_HOME=%RUNDIR%\jre
     goto gotjava

@@ -541,9 +541,10 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     }
 
     private HighLowMetricValue getMetricValue(List<AvailabilityDataRLE> avails, long timestamp) {
+        HighLowMetricValue val;
         if (avails.size() == 1) {
             AvailabilityDataRLE rle = avails.get(0);
-            return new HighLowMetricValue(rle.getAvailVal(), timestamp);
+            val = new HighLowMetricValue(rle.getAvailVal(), timestamp);
         } else if (avails.size() == 2) {
             AvailabilityDataRLE rle = null;
             // HHQ-5244
@@ -556,16 +557,17 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             } else {
                 rle = avails.get(1);
             }
-            return new HighLowMetricValue(rle.getAvailVal(), timestamp);
+            val = new HighLowMetricValue(rle.getAvailVal(), timestamp);
         }
-
-        double value = 0;
-        for (AvailabilityDataRLE rle : avails) {
-            double availVal = rle.getAvailVal();
-            value += availVal;
+        else {
+            double value = 0;
+            for (AvailabilityDataRLE rle : avails) {
+                double availVal = rle.getAvailVal();
+                value += availVal;
+            }
+            value = value / avails.size();
+            val = new HighLowMetricValue(value, timestamp);
         }
-        value = value / avails.size();
-        HighLowMetricValue val = new HighLowMetricValue(value, timestamp);
         val.incrementCount();
         return val;
     }

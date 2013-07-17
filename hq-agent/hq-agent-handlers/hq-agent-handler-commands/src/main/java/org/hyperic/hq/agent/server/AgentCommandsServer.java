@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.agent.server;
 
+import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
@@ -60,8 +61,8 @@ import org.hyperic.hq.agent.commands.FileRemoval_result;
 public class AgentCommandsServer 
     implements AgentServerHandler
 {
-    private AgentCommandsAPI verAPI;
-    private Log              log;
+    private final AgentCommandsAPI verAPI;
+    private final Log              log;
     private AgentDaemon      agent;
     private AgentCommandsService agentCommandsService;
 
@@ -86,7 +87,9 @@ public class AgentCommandsServer
                                             OutputStream outStream)
         throws AgentRemoteException 
     {
-        if (log.isDebugEnabled()) log.debug("dispatching cmd=" + cmd);
+        if (log.isDebugEnabled()) {
+            log.debug("dispatching cmd=" + cmd);
+        }
         if(cmd.equals(AgentCommandsAPI.command_ping)){
             new AgentPing_args(args);  // Just parse the args
 
@@ -102,11 +105,14 @@ public class AgentCommandsServer
             String dest = upgradeArgs.getDestination();
             Map props = agentCommandsService.upgrade(bundleFile, dest);
             
-            if (props.isEmpty()) return new AgentRestart_result(); // Fall back to what it used to do, if we have an empty map
+            if (props.isEmpty())
+             {
+                return new AgentRestart_result(); // Fall back to what it used to do, if we have an empty map
+            }
             
             String version = (String) props.get(AgentUpgrade_result.VERSION);
             String bundleName = (String) props.get(AgentUpgrade_result.BUNDLE_NAME);
-            
+
             return new AgentUpgrade_result(version, bundleName);
         } else if(cmd.equals(AgentCommandsAPI.command_die)){
             new AgentDie_args(args);  // Just parse the args
@@ -150,7 +156,13 @@ public class AgentCommandsServer
         } catch (Exception e) {
             throw new AgentStartException("Failed to register Agent Commands Service.", e);
         }
-        
+        StringBuilder sb = new StringBuilder();
+        sb.append(System.getProperty("agent.bundle.home")).append(System.getProperty("file.separator")).append("conf")
+                .append(System.getProperty("file.separator")).append("wrapper-additional.conf");
+        File f = new File(sb.toString());
+        if (f.exists()) {
+            f.delete();
+        }
         this.log.info("Agent commands started up");
     }
     

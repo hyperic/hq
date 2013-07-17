@@ -84,6 +84,8 @@ public final class AppdefEntityConstants {
     public static final int    APPDEF_TYPE_GROUP_COMPAT_SVC = 15;
     /* Dynamic group (mixed with special powers) */
     public static final int    APPDEF_TYPE_GROUP_DYNAMIC    = 16;
+    /* Policy group (only used for policy permissions) */
+    public static final int    APPDEF_TYPE_GROUP_POLICY     = 17;
 
     private static final String APPDEF_TYPE_GROUP_ADHOC_APP_LABEL  = "Mixed Group - Applications";
     private static final String APPDEF_TYPE_GROUP_ADHOC_GRP_LABEL  = "Mixed Group - Groups";

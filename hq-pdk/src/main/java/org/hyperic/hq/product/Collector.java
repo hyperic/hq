@@ -97,6 +97,10 @@ public abstract class Collector implements Runnable {
     
     public static final String LISTEN_PORTS = "listen.ports";
 
+    public static final String GUID = "GUID";
+
+    public static final String MAC = "Mac";
+
     static Log log =
         LogFactory.getLog(Collector.class.getName());
 
@@ -624,6 +628,7 @@ public abstract class Collector implements Runnable {
     private static final long MINUTE = 60 * SECOND;
     private static final long HOUR   = 60 * MINUTE;
     private static final long DAY    = 24 * HOUR;
+
 
     private static String lastRun(long now, long time) {
         long delta = now - time;

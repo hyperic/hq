@@ -141,6 +141,12 @@
   			<groupId>org.slf4j</groupId>
   			<artifactId>slf4j-log4j12</artifactId>
 		</dependency>
+		 <dependency>
+                        <groupId>org.hyperic.hq</groupId>
+                        <artifactId>hq-pdk</artifactId>
+                        <version>${project.version}</version>
+                </dependency>
+
 		<!--  Joda Time -->
         <dependency>
             <groupId>joda-time</groupId>
@@ -382,6 +388,13 @@
 			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+                        <groupId>org.hyperic.hq.plugin</groupId>
+                        <artifactId>hyper_v-plugin</artifactId>
+                        <version>${project.version}</version>
+                        <scope>provided</scope>
+                </dependency>
+
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>informix-plugin</artifactId>
