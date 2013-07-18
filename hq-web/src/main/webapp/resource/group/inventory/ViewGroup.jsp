@@ -110,6 +110,7 @@
   <tiles:put name="resource" beanName="Resource"/>
   <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
   <tiles:put name="resourceModifier" beanName="ResourceModifier"/>
+  <tiles:put name="groupType" beanName="GroupType"/>
 </tiles:insert>
 </div>
 </div>

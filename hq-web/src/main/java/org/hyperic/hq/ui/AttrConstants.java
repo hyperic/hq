@@ -534,6 +534,7 @@ public interface AttrConstants {
      * recently modified the resource.
      */
     public static final String GROUP_TYPE_LABEL = "GroupTypeLabel";
+    public static final String GROUP_TYPE_ATTR = "GroupType";
 
     /**
      * The request scope attribute under which actions store the
