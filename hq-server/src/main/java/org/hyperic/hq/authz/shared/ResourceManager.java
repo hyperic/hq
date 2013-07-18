@@ -25,6 +25,7 @@
  */
 package org.hyperic.hq.authz.shared;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -387,5 +388,8 @@ public interface ResourceManager {
     public Map<Resource, Collection<Resource>> findChildResources(List<Resource> resources,
                                                                   Set<Integer> viewableResourceIds,
                                                                   boolean includeSystemResources);
+    
+    
+    public Collection<ResourceType> getPSSTypes();
 
 }

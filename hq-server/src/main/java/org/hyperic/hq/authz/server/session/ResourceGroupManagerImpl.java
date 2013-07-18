@@ -51,6 +51,10 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
+import org.hyperic.hq.authz.server.session.events.group.GroupCreatedEvent;
+import org.hyperic.hq.authz.server.session.events.group.GroupDeleteRequestedEvent;
+import org.hyperic.hq.authz.server.session.events.group.GroupMembersChangedEvent;
+import org.hyperic.hq.authz.server.session.events.group.GroupMembersRemovedEvent;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.GroupCreationException;
@@ -410,21 +414,32 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         ResourceGroup group = resourceGroupDAO.findById(groupId);
         removeResourceGroup(whoami, group);
     }
-
+    
+    
     /**
      * 
      */
     public void addResources(AuthzSubject subj, ResourceGroup group, Collection<Resource> resources)
         throws PermissionException, VetoException {
+        addResources(subj, group, resources, true);
+    }
+    
+    /**
+     * 
+     */
+    public void addResources(AuthzSubject subj, ResourceGroup group, Collection<Resource> resources, boolean fireEvents)
+        throws PermissionException, VetoException {
         checkGroupPermission(subj, group.getId(), AuthzConstants.perm_modifyResourceGroup);
         checkGroupMaintenance(subj, group);
-        addResources(group, resources);
+        addResources(group, resources, fireEvents);
     }
 
-    private void addResources(ResourceGroup group, Collection<Resource> resources) {
+    private void addResources(ResourceGroup group, Collection<Resource> resources, boolean fireEvents) {
         resourceGroupDAO.addMembers(group, resources);
-        applicationContext.publishEvent(new GroupMembersChangedEvent(group));
-        zeventManager.enqueueEventAfterCommit(new GroupMembersAddedZevent(group, resources));
+        if (fireEvents){
+            applicationContext.publishEvent(new GroupMembersChangedEvent(group));
+            zeventManager.enqueueEventAfterCommit(new GroupMembersAddedZevent(group, resources));
+        }
     }
 
     /**
@@ -436,7 +451,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         checkGroupPermission(whoami, group.getId(), AuthzConstants.perm_modifyResourceGroup);
 
         checkGroupMaintenance(whoami, group);
-        addResources(group, Collections.singletonList(resource));
+        addResources(group, Collections.singletonList(resource), true);
         return group;
     }
 
@@ -453,13 +468,13 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         }
 
         for (ResourceGroup g : groups) {
-            addResources(g, Collections.singletonList(resource));
+            addResources(g, Collections.singletonList(resource), true);
         }
     }
 
     public void removeResource(AuthzSubject whoami, Resource resource,
-                               Collection<ResourceGroup> groups) throws PermissionException,
-        VetoException {
+                               Collection<ResourceGroup> groups) 
+                                       throws PermissionException, VetoException {
         // Do all of the pre-condition checks first before
         // iterating through removeResources() because
         // ResourceGroupDAO().removeMembers() will commit
@@ -471,8 +486,19 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         }
 
         for (ResourceGroup g : groups) {
-            removeResources(g, Collections.singletonList(resource));
+            removeResources(g, Collections.singletonList(resource), true);
         }
+    }
+    
+    /**
+     * RemoveResources from a group.
+     * @param whoami The current running user.
+     * @param group The group .
+     * 
+     */
+    public void removeResources(AuthzSubject whoami, ResourceGroup group, Collection<Resource> resources) 
+            throws PermissionException, VetoException {
+        removeResources(whoami, group, resources, true);
     }
 
     /**
@@ -482,16 +508,18 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      * 
      */
     public void removeResources(AuthzSubject whoami, ResourceGroup group,
-                                Collection<Resource> resources) throws PermissionException,
-        VetoException {
+                                Collection<Resource> resources, boolean fireEvents) 
+                                        throws PermissionException, VetoException {
         checkGroupPermission(whoami, group.getId(), AuthzConstants.perm_modifyResourceGroup);
         checkGroupMaintenance(whoami, group);
-        removeResources(group, resources);
+        removeResources(group, resources, fireEvents);
     }
 
-    private void removeResources(ResourceGroup group, Collection<Resource> resources) {
+    private void removeResources(ResourceGroup group, Collection<Resource> resources, boolean fireEvents) {
         resourceGroupDAO.removeMembers(group, resources);
-        applicationContext.publishEvent(new GroupMembersChangedEvent(group));
+        if (fireEvents){
+            applicationContext.publishEvent(new GroupMembersRemovedEvent(group));
+        }
     }
 
     /**
@@ -946,10 +974,10 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         resourcesToAdd.removeAll(groupMembers);
 
         if (!resourcesToRemove.isEmpty()) {
-            removeResources(group, resourcesToRemove);
+            removeResources(group, resourcesToRemove, true);
         }
         if (!(resourcesToAdd.isEmpty())) {
-            addResources(group, resourcesToAdd);
+            addResources(group, resourcesToAdd, true);
         }
     }
 

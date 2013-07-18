@@ -24,24 +24,20 @@
  *
  */
 
-package org.hyperic.hq.authz.server.session;
+package org.hyperic.hq.authz.server.session.events.group;
 
-import org.springframework.context.ApplicationEvent;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
+
 
 /**
- * Indicates that members have been added to or removed from the group
+ * Indicates that a group has been created
  * @author jhickey
- * 
  */
-public class GroupMembersChangedEvent
-    extends ApplicationEvent {
+public class GroupCreatedEvent extends GroupRelatedEvent {
 
-    public GroupMembersChangedEvent(ResourceGroup group) {
+    public GroupCreatedEvent(ResourceGroup group) {
         super(group);
     }
-
-    public ResourceGroup getGroup() {
-        return (ResourceGroup) getSource();
-    }
+   
 
 }

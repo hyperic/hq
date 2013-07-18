@@ -39,6 +39,9 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.authz.server.session.events.group.GroupAddedToRoleEvent;
+import org.hyperic.hq.authz.server.session.events.group.GroupRemovedFromRoleEvent;
+import org.hyperic.hq.authz.server.session.events.group.GroupRemovedFromRolesEvent;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzDuplicateNameException;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -402,6 +405,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
         for (int i = 0; i < gids.length; i++) {
             ResourceGroup group = lookupGroup(gids[i]);
             group.addRole(roleLocal);
+            applicationContext.publishEvent(new GroupAddedToRoleEvent(group));
         }
     }
 
@@ -421,6 +425,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
         for (int i = 0; i < ids.length; i++) {
             Role roleLocal = lookupRole(ids[i]);
             group.addRole(roleLocal);
+            applicationContext.publishEvent(new GroupAddedToRoleEvent(group));
         }
     }
 
@@ -442,7 +447,9 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
             AuthzConstants.roleOpModifyRole);
 
         for (int i = 0; i < gids.length; i++) {
-            roleLocal.removeResourceGroup(lookupGroup(gids[i]));
+            ResourceGroup group = lookupGroup(gids[i]);
+            roleLocal.removeResourceGroup(group);
+            applicationContext.publishEvent(new GroupRemovedFromRoleEvent(group, roleLocal));
         }
     }
 
@@ -468,6 +475,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
 
             roleLocal.removeResourceGroup(group);
         }
+        applicationContext.publishEvent(new GroupRemovedFromRolesEvent(group, ids));
     }
 
     /**

@@ -24,17 +24,19 @@
  *
  */
 
-package org.hyperic.hq.authz.server.session;
+package org.hyperic.hq.authz.server.session.events.group;
 
+import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.springframework.context.ApplicationEvent;
 
 /**
- * Sent before a group is deleted
- * @author jhickey
+ * general event with group. 
+ * @author awiener
+ * 
  */
-public class GroupDeleteRequestedEvent extends ApplicationEvent {
+public abstract class GroupRelatedEvent extends ApplicationEvent {
 
-    public GroupDeleteRequestedEvent(ResourceGroup group) {
+    public GroupRelatedEvent(ResourceGroup group) {
         super(group);
     }
 
