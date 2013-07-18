@@ -134,7 +134,10 @@ public interface ResourceGroupManager
 
     public void addResources(AuthzSubject subj, ResourceGroup group, Collection<Resource> resources)
         throws PermissionException, VetoException;
-
+    
+    public void addResources(AuthzSubject subj, ResourceGroup group, Collection<Resource> resources, boolean fireEvents)
+        throws PermissionException, VetoException;
+    
     /**
      * Add a resource to a group by resource id and resource type
      */
@@ -157,10 +160,23 @@ public interface ResourceGroupManager
      * RemoveResources from a group.
      * @param whoami The current running user.
      * @param group The group .
+     * 
+     */
+    public void removeResources(AuthzSubject whoami, ResourceGroup group, Collection<Resource> resources) 
+            throws PermissionException, VetoException;
+    
+    /**
+     * RemoveResources from a group.
+     * @param whoami The current running user.
+     * @param group The group .
+     * @param resources
+     * @param fireEvents true/false
+     * @throws PermissionException
+     * @throws VetoException
      */
     public void removeResources(AuthzSubject whoami, ResourceGroup group,
-                                Collection<Resource> resources) throws PermissionException,
-        VetoException;
+                                Collection<Resource> resources, boolean fireEvents) 
+                                        throws PermissionException, VetoException;
 
     /**
      * Remove a resource from a collection of groups

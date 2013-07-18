@@ -660,6 +660,17 @@ public class ResourceManagerImpl implements ResourceManager {
     /**
      * Get Platform, Server, Service, Application and Group ResourceTypes
      */
+    public Collection<ResourceType> getPSSTypes() {
+        final Collection<ResourceType> types = new ArrayList<ResourceType>(5);
+        types.add(findResourceTypeById(AuthzConstants.authzPlatform));
+        types.add(findResourceTypeById(AuthzConstants.authzServer));
+        types.add(findResourceTypeById(AuthzConstants.authzService));
+        return types;
+    }
+    
+    /**
+     * Get Platform, Server, Service, Application and Group ResourceTypes
+     */
     private Collection<ResourceType> getPSSAGResourceTypes() {
         final Collection<ResourceType> types = new ArrayList<ResourceType>(5);
         types.add(findResourceTypeById(AuthzConstants.authzPlatform));
@@ -669,6 +680,7 @@ public class ResourceManagerImpl implements ResourceManager {
         types.add(findResourceTypeById(AuthzConstants.authzApplication));
         return types;
     }
+    
 
     @Transactional(readOnly = true)
     public Map<Resource, Collection<Resource>> findChildResources(List<Resource> resources,

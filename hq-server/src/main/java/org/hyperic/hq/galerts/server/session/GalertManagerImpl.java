@@ -41,11 +41,13 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.GroupDeleteRequestedEvent;
-import org.hyperic.hq.authz.server.session.GroupMembersChangedEvent;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.SubjectDeleteRequestedEvent;
+import org.hyperic.hq.authz.server.session.events.group.GroupDeleteRequestedEvent;
+import org.hyperic.hq.authz.server.session.events.group.GroupMembersChangedEvent;
+import org.hyperic.hq.authz.server.session.events.group.GroupMembersRemovedEvent;
+import org.hyperic.hq.authz.server.session.events.group.GroupRelatedEvent;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
@@ -748,8 +750,9 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
     public void onApplicationEvent(ApplicationEvent event) {
         if (event instanceof GroupDeleteRequestedEvent) {
             processGroupDeletion(((GroupDeleteRequestedEvent) event).getGroup());
-        } else if (event instanceof GroupMembersChangedEvent) {
-            groupMembersChanged(((GroupMembersChangedEvent) event).getGroup());
+        } else if (event instanceof GroupMembersChangedEvent || 
+                event instanceof GroupMembersRemovedEvent) {
+            groupMembersChanged(((GroupRelatedEvent) event).getGroup());
         } else if (event instanceof SubjectDeleteRequestedEvent) {
             _actionLogDAO.handleSubjectRemoval(((SubjectDeleteRequestedEvent) event).getSubject());
         }
