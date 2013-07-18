@@ -31,6 +31,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.hibernate.SessionFactory;
@@ -82,6 +83,11 @@ public class OperationDAO
 
     @SuppressWarnings("unchecked")
     public Collection<Integer> findViewableOperationIds(Collection<ResourceType> resourceTypes) {
+        // adding this due to bug in hibernate-https://hibernate.atlassian.net/browse/HHH-2045
+        // our bug-https://jira.hyperic.com/browse/HQ-4479
+        if ((resourceTypes == null) || resourceTypes.isEmpty()) {
+            return Collections.emptyList();
+        }
         String sql = "from Operation where resourceType in (:types) and name like '+view+%'";
         sql = sql.replace("+view+", AuthzConstants.VIEW_PREFIX);
         final List<Operation> list = getSession().createQuery(sql).setParameterList("types", resourceTypes).list();
@@ -94,6 +100,10 @@ public class OperationDAO
 
     @SuppressWarnings("unchecked")
     public Collection<Operation> findByResourceType(Collection<ResourceType> resourceTypes) {
+        // adding this due to bug in hibernate-https://hibernate.atlassian.net/browse/HHH-2045
+        if ((resourceTypes == null) || resourceTypes.isEmpty()) {
+            return Collections.emptyList();
+        }
         String sql = "from Operation where resourceType in (:types)";
         return getSession().createQuery(sql).setParameterList("types", resourceTypes).list();
     }
