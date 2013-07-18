@@ -40,8 +40,9 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.authz.server.session.events.group.GroupAddedToRoleEvent;
-import org.hyperic.hq.authz.server.session.events.group.GroupRemovedFromRoleEvent;
 import org.hyperic.hq.authz.server.session.events.group.GroupRemovedFromRolesEvent;
+import org.hyperic.hq.authz.server.session.events.role.GroupsAddedToRoleEvent;
+import org.hyperic.hq.authz.server.session.events.role.GroupsRemovedFromRoleEvent;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzDuplicateNameException;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -405,7 +406,9 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
         for (int i = 0; i < gids.length; i++) {
             ResourceGroup group = lookupGroup(gids[i]);
             group.addRole(roleLocal);
-            applicationContext.publishEvent(new GroupAddedToRoleEvent(group));
+        }
+        if (gids!= null && gids.length > 0){
+            applicationContext.publishEvent(new GroupsAddedToRoleEvent(roleLocal, gids));
         }
     }
 
@@ -425,7 +428,9 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
         for (int i = 0; i < ids.length; i++) {
             Role roleLocal = lookupRole(ids[i]);
             group.addRole(roleLocal);
-            applicationContext.publishEvent(new GroupAddedToRoleEvent(group));
+        }
+        if (ids!= null && ids.length > 0){
+            applicationContext.publishEvent(new GroupAddedToRoleEvent(group));        
         }
     }
 
@@ -449,7 +454,10 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
         for (int i = 0; i < gids.length; i++) {
             ResourceGroup group = lookupGroup(gids[i]);
             roleLocal.removeResourceGroup(group);
-            applicationContext.publishEvent(new GroupRemovedFromRoleEvent(group, roleLocal));
+            
+        }
+        if (gids!= null && gids.length > 0){
+            applicationContext.publishEvent(new GroupsRemovedFromRoleEvent(roleLocal, gids));
         }
     }
 
@@ -475,7 +483,9 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
 
             roleLocal.removeResourceGroup(group);
         }
-        applicationContext.publishEvent(new GroupRemovedFromRolesEvent(group, ids));
+        if (ids!= null && ids.length > 0){
+            applicationContext.publishEvent(new GroupRemovedFromRolesEvent(group, ids));
+        }
     }
 
     /**
