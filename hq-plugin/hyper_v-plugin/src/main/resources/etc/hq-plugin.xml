@@ -40,6 +40,7 @@
 		<config>
 			<option name="GUID" description="GUID" />
 			<option name="Mac" description="Mac Address" />
+			<option name="removable" type="hidden"/>
 		</config>    	
 	 	<metric name="Availability"
 	        	template="wmic:object=Msvm_ComputerSystem,column=enabledstate:ElementName-%instance.name%"

@@ -657,14 +657,16 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
             AuthzSubject subject = getHQAdmin();
             Platform p = null;
             try {
-                removableServers  = serverManager.getRemovableServers();
-            } catch (Exception e) {
-                log.error("failed getting removable servers with the following exception: " + e.getMessage(),e);
-            }
-            try {
                 p = platformManager.getPlatformByAIPlatform(subject,aiPlatform);
             }catch(Exception e) {
                 log.error("failed finding a platform for AI platform " + aiPlatform.getName() + " with the following exception: " + e.getMessage(),e);
+            }
+            try {
+                if (p!=null) {
+                    removableServers  = serverManager.getRemovableChildren(subject,p.getResource());
+                }
+            } catch (Exception e) {
+                log.error("failed getting removable servers with the following exception: " + e.getMessage(),e);
             }
 
             for (AIServerValue aiServer : serverSet) {
@@ -677,8 +679,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
                         removableServers.remove(s);
                     }
                 } catch (NotFoundException e) {
-                    log.error("Ignoring non-existent server type: " + aiServer.getServerTypeName(),
-                        e);
+                    log.error("Ignoring non-existent server type: " + aiServer.getServerTypeName(),e);
                     continue;
                 }
                 aiPlatform.addAIServerValue(aiServer);

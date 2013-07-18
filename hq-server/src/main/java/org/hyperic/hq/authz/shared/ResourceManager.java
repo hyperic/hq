@@ -387,5 +387,8 @@ public interface ResourceManager {
     public Map<Resource, Collection<Resource>> findChildResources(List<Resource> resources,
                                                                   Set<Integer> viewableResourceIds,
                                                                   boolean includeSystemResources);
+    
+    public Collection<Resource> getRemovableChildren(AuthzSubject subject, Resource parent);
+
 
 }

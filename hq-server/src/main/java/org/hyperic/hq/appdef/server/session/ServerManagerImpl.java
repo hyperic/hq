@@ -75,10 +75,12 @@ import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.ResourceAuditFactory;
 import org.hyperic.hq.common.shared.AuditManager;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
+import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.ArrayUtil;
 import org.hyperic.util.StringUtil;
+import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -1559,7 +1561,8 @@ public class ServerManagerImpl implements ServerManager {
 
     }
 
-    public Collection<Server> getRemovableServers() {
-        return serverDAO.getRemovableServers();
+    public Collection<Server> getRemovableChildren(AuthzSubject subject, Resource parent) {
+        Collection<Resource> removableChildren = this.resourceManager.getRemovableChildren(subject, parent);
+        return serverDAO.getServers(removableChildren);
     }
 }

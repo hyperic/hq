@@ -37,6 +37,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
@@ -63,6 +65,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
+import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ResourceTypeCleanupZevent;
@@ -83,19 +86,25 @@ import org.hyperic.hq.common.server.session.ResourceAuditFactory;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplateDAO;
+import org.hyperic.hq.measurement.server.session.MeasurementZevent;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
 import org.hyperic.hq.measurement.server.session.MonitorableTypeDAO;
+import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
+import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.util.Classifier;
 import org.hyperic.util.IntegerTransformer;
+import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -136,6 +145,7 @@ public class ResourceManagerImpl implements ResourceManager {
     private ResourceRemover resourceRemover;
     @Autowired
     private ResourceGroupManager resourceGroupManager;
+    private ConfigManager configManager;
 
     @Autowired
     public ResourceManagerImpl(ResourceEdgeDAO resourceEdgeDAO, PlatformDAO platformDAO,
@@ -171,6 +181,11 @@ public class ResourceManagerImpl implements ResourceManager {
         this.measurementTemplateDAO = measurementTemplateDAO;
         this.resourceRemover = resourceRemover;
     }
+    
+    @PostConstruct
+    public void init() {
+        this.configManager = (ConfigManager) Bootstrap.getBean("ConfigManager");
+    }    
 
     /**
      * Find the type that has the given name.
@@ -1631,4 +1646,17 @@ public class ResourceManagerImpl implements ResourceManager {
         }
     }
 
+    public Collection<Resource> getRemovableChildren(AuthzSubject subject, Resource parent) {
+        Collection<Resource> children = this.findChildren(subject,parent);
+        Map<Resource, ConfigResponse> rscConf = this.configManager.getConfigResponses(new HashSet<Resource>(children),false);
+        Collection<Resource> removableResources = new ArrayList<Resource>();
+        for(Map.Entry<Resource, ConfigResponse> rscConfE:rscConf.entrySet()) {
+            ConfigResponse conf = rscConfE.getValue();
+            String removable = conf.getValue(Collector.REMOVABLE);
+            if (removable!=null) {
+                removableResources.add(rscConfE.getKey());
+            }
+        }
+        return removableResources;
+    }
 }

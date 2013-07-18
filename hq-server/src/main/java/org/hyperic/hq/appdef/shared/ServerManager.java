@@ -338,6 +338,6 @@ public interface ServerManager {
      */
     public Number getServerCount();
 
-    public Collection<Server> getRemovableServers();
+    public Collection<Server> getRemovableChildren(AuthzSubject subject, Resource parent);
 
 }

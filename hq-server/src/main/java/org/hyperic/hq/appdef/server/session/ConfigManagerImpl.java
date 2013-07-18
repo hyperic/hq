@@ -80,7 +80,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  */
-@org.springframework.stereotype.Service
+@org.springframework.stereotype.Service("ConfigManager")
 public class ConfigManagerImpl implements ConfigManager {
     private static final int MAX_VALIDATION_ERR_LEN = 512;
     protected final Log log = LogFactory.getLog(ConfigManagerImpl.class.getName());
