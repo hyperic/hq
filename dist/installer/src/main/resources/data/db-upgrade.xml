@@ -12024,7 +12024,7 @@ has already been defined.
 	    <schema-directSQL>  
 	        <statement targetDB="postgresql">
 	        	alter table EAM_RESOURCE
-	        		add column REMOVABLE boolean not null default false
+	        		add column REMOVABLE boolean not null default 'false'
 		    </statement>
  	    </schema-directSQL>
       </schemaSpec>

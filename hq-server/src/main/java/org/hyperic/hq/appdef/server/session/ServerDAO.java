@@ -259,7 +259,10 @@ public class ServerDAO
     }
 
     public Collection<Server> getRemovableServers() {
-        String hql = "from Server where resource.removable = true";
+        String hql = "select s from Server s " + 
+                        "join s.resource r " +
+                        "join r.prototype p " + 
+                        "where p.removable = true";
         return createQuery(hql).list();
     }
 }

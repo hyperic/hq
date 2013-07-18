@@ -653,16 +653,26 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
             // TODO: G
             Set<AIServerValue> serverSet = state.getAllServers();
 
-            Collection<Server> removableServers = serverManager.getRemovableServers();
+            Collection<Server> removableServers = null;
             AuthzSubject subject = getHQAdmin();
-            Platform p = platformManager.getPlatformByAIPlatform(subject,aiPlatform);
+            Platform p = null;
+            try {
+                removableServers  = serverManager.getRemovableServers();
+            } catch (Exception e) {
+                log.error("failed getting removable servers with the following exception: " + e.getMessage(),e);
+            }
+            try {
+                p = platformManager.getPlatformByAIPlatform(subject,aiPlatform);
+            }catch(Exception e) {
+                log.error("failed finding a platform for AI platform " + aiPlatform.getName() + " with the following exception: " + e.getMessage(),e);
+            }
 
             for (AIServerValue aiServer : serverSet) {
                 // Ensure the server reported has a valid appdef type
                 try {
                     serverManager.findServerTypeByName(aiServer.getServerTypeName());
                     // don't delete servers which are removable but still discoverable by the agent
-                    if (removableServers!=null&&!removableServers.isEmpty()) {
+                    if (p!=null&&removableServers!=null&&!removableServers.isEmpty()) {
                         Server s = serverManager.getServerByName(p,aiServer.getName());
                         removableServers.remove(s);
                     }
@@ -678,6 +688,8 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
                     try {
                         serverManager.removeServer(subject, s);
                     }catch(VetoException e) {
+                        log.error("failed removing resource " + s.getName() + " with the following exception: " + e.getMessage(),e);
+                    }catch(PermissionException e) {
                         log.error("failed removing resource " + s.getName() + " with the following exception: " + e.getMessage(),e);
                     }
                 }
@@ -853,8 +865,8 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
         }
     }
 
+    private AuthzSubject getHQAdmin() throws AutoinventoryException {
         try {
-            private AuthzSubject getHQAdmin() throws AutoinventoryException {
             return authzSubjectManager.getSubjectById(AuthzConstants.rootSubjectId);
         } catch (Exception e) {
             throw new AutoinventoryException("Error looking up subject", e);

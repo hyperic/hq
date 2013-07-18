@@ -76,7 +76,7 @@
     </property>
 
     <property name="removable" type="boolean">
-      <column name="REMOVABLE" not-null="false"/>
+      <column name="REMOVABLE" not-null="true" default="false"/>
     </property>
 
     <bag inverse="true" cascade="all-delete-orphan" name="groupBag" table="EAM_RES_GRP_RES_MAP">
