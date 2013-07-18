@@ -131,7 +131,7 @@
     <c:set var="entityIdType" value="application"/>
     <c:set var="canModify" value="${useroperations['modifyApplication']}"/>
   </c:when>
-  <c:when test="${resource.entityId.type == GROUP && groupType == DYNAMIC_GROUP}">
+  <c:when test="${resource.entityId.type == GROUP && !(groupType == DYNAMIC_GROUP)}">
     <c:set var="entityIdType" value="group"/>
     <c:set var="canModify" value="${(webUser.id == resourceOwner.id) || useroperations['modifyResourceGroup']}"/>
   </c:when>
