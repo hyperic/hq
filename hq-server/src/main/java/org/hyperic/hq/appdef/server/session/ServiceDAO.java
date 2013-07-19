@@ -328,11 +328,6 @@ public class ServiceDAO
         return (Number) createQuery("select count(*) from Service").uniqueResult();
     }
 
-    void clearResource(Resource res) {
-        createQuery("update Service set resource = null where resource = ?").setParameter(0, res)
-            .executeUpdate();
-    }
-
     public Collection<Service> findDeletedServices() {
         String hql = "from Service where resource.resourceType = null";
         return createQuery(hql).list();
@@ -340,5 +335,11 @@ public class ServiceDAO
 
     public Service findByResource(Resource res) {
         return (Service) createCriteria().add(Restrictions.eq("resource", res)).uniqueResult();
+    }
+
+    @SuppressWarnings("unchecked")
+    public Collection<Service> getOrphanedServices() {
+        final String hql = "from Service where resource is null";
+        return createQuery(hql).list();
     }
 }

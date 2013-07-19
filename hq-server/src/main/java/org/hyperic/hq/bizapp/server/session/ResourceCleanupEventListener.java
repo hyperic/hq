@@ -36,6 +36,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.Platform;
@@ -45,30 +46,41 @@ import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ApplicationManager;
 import org.hyperic.hq.appdef.shared.PlatformManager;
+import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ResourceTypeCleanupZevent;
 import org.hyperic.hq.appdef.shared.ResourcesCleanupZevent;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.GroupMember;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.common.server.session.Audit;
+import org.hyperic.hq.common.shared.AuditManager;
+import org.hyperic.hq.escalation.server.session.EscalationState;
+import org.hyperic.hq.escalation.shared.EscalationManager;
+import org.hyperic.hq.events.server.session.AlertDefinition;
+import org.hyperic.hq.events.shared.AlertManager;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
+@Transactional
 public class ResourceCleanupEventListener implements ZeventListener<ResourcesCleanupZevent>, ResourceCleanupEventListenerRegistrar {
 
     private AppdefBoss appdefBoss;
@@ -95,7 +107,12 @@ public class ResourceCleanupEventListener implements ZeventListener<ResourcesCle
 
     private ResourceManager resourceManager;
 
-   
+    private AlertManager alertManager;
+
+    private AuditManager auditManager;
+
+    private EscalationManager escalationManager;
+
     @Autowired 
     public ResourceCleanupEventListener(AppdefBoss appdefBoss, ZeventEnqueuer zEventManager,
                                         AuthzSubjectManager authzSubjectManager,
@@ -104,7 +121,8 @@ public class ResourceCleanupEventListener implements ZeventListener<ResourcesCle
                                         ServiceManager serviceManager, ServerManager serverManager,
                                         PlatformManager platformManager, AgentManager agentManager,
                                         MeasurementManager measurementManager,
-                                        ResourceManager resourceManager) {
+                                        ResourceManager resourceManager, AlertManager alertManager,
+                                        AuditManager auditManager, EscalationManager escalationManager) {
         this.appdefBoss = appdefBoss;
         this.zEventManager = zEventManager;
         this.authzSubjectManager = authzSubjectManager;
@@ -116,9 +134,24 @@ public class ResourceCleanupEventListener implements ZeventListener<ResourcesCle
         this.agentManager = agentManager;
         this.measurementManager = measurementManager;
         this.resourceManager = resourceManager;
+        this.alertManager = alertManager;
+        this.auditManager = auditManager;
+        this.escalationManager = escalationManager;
+    }
+    
+    /*
+     * Field 1: (0-59) second
+     * Field 2: (0-59) minute
+     * Field 3: (0-23) hour
+	 * Field 4: (1-31) day  of  the month
+	 * Field 5: (1-12) month of the year
+	 * Field 6: (0-6)  day of the week - 1=Monday
+     */
+    @Scheduled(cron="0 50 9 * * *")
+    public void runCleanup() {
+        zEventManager.enqueueEventAfterCommit(new ResourcesCleanupZevent());
     }
 
-    @Transactional
     public void registerResourceCleanupListener() {
         // Add listener to remove alert definition and alerts after resources
         // are deleted.
@@ -130,6 +163,8 @@ public class ResourceCleanupEventListener implements ZeventListener<ResourcesCle
     }
 
     public void processEvents(List<ResourcesCleanupZevent> events) {
+        log.info("starting removeDeletedResources");
+        final StopWatch watch = new StopWatch();
         final Collection<String> typeNames = new ArrayList<String>();
         for (final ResourcesCleanupZevent e : events) {
             if (e instanceof ResourceTypeCleanupZevent) {
@@ -140,15 +175,153 @@ public class ResourceCleanupEventListener implements ZeventListener<ResourcesCle
             try {
                 Map<Integer,List<AppdefEntityID>> agentCache = buildAsyncDeleteAgentCache(events);
                 removeDeletedResources(agentCache, typeNames);
+                final AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
                 if (!typeNames.isEmpty()) {
                     resourceManager.removeResourceTypes(typeNames);
                 }
+                removeOrphanedPlatforms(overlord);
+                removeOrphanedServers(overlord);
+                removeOrphanedServices(overlord);
+                removeOrphanedAlertDefs();
+                removeOrphanedResourceGroupMembers();
+                removeOrphanedAudits();
+                removeOrphanedEscalationStates(overlord);
+                removeOrphanedResources(overlord);
             } catch (Exception e) {
-                log.error("removeDeletedResources() failed", e);
+                log.error("removeDeletedResources failed", e);
             }                        
         }
+        log.info("completed removeDeletedResources " + watch);
     }
-    
+
+    private void removeOrphanedResources(AuthzSubject overlord) {
+        final Collection<Resource> resources = resourceManager.getOrphanedResources();
+        if (!resources.isEmpty()) {
+            log.info("cleaning up " + resources.size() + " orphaned resources");
+        }
+        for (final Resource r : resources) {
+            try {
+                resourceManager.removeResource(overlord, r);
+            } catch (VetoException e) {
+                log.error(e,e);
+            }
+        }
+    }
+
+    private void removeOrphanedEscalationStates(AuthzSubject overlord) {
+        final Collection<EscalationState> escalationStates = escalationManager.getOrphanedEscalationStates();
+        if (!escalationStates.isEmpty()) {
+            log.info("cleaning up " + escalationStates.size() + " orphaned escalation states");
+        }
+        for (final EscalationState e : escalationStates) {
+            escalationManager.removeEscalationState(e);
+        }
+    }
+
+    private void removeOrphanedAudits() {
+        final Collection<Audit> audits = auditManager.getOrphanedAudits();
+        if (!audits.isEmpty()) {
+            log.info("cleaning up " + audits.size() + " orphaned audits");
+        }
+        for (final Audit a : audits) {
+            auditManager.deleteAudit(a);
+        }
+    }
+
+    private void removeOrphanedResourceGroupMembers() {
+        final Collection<GroupMember> members = resourceGroupManager.getOrphanedResourceGroupMembers();
+        if (!members.isEmpty()) {
+            log.info("cleaning up " + members.size() + " orphaned group members");
+        }
+        for (final GroupMember m : members) {
+            resourceGroupManager.removeGroupMember(m);
+        }
+    }
+
+    private void removeOrphanedAlertDefs() {
+        final Collection<AlertDefinition> alertDefs = alertManager.getOrphanedAlertDefs();
+        if (!alertDefs.isEmpty()) {
+            log.info("cleaning up " + alertDefs.size() + " orphaned alert definitions");
+        }
+        for (final AlertDefinition def : alertDefs) {
+            try {
+                alertManager.deleteAlertDef(def);
+            } catch (ObjectNotFoundException e) {
+                log.warn(e);
+                log.debug(e,e);
+            }
+        }
+    }
+
+    private void removeOrphanedPlatforms(AuthzSubject overlord) {
+        final Collection<Platform> platforms = platformManager.getOrphanedPlatforms();
+        if (!platforms.isEmpty()) {
+            log.info("cleaning up " + platforms.size() + " orphaned platforms");
+        }
+        for (Platform platform : platforms) {
+            try {
+                platform = platformManager.getPlatformById(platform.getId());
+                platformManager.removePlatform(overlord, platform);
+            } catch (ObjectNotFoundException e) {
+                log.warn(e);
+                log.debug(e,e);
+            } catch (PlatformNotFoundException e) {
+                log.warn(e);
+                log.debug(e,e);
+            } catch (PermissionException e) {
+                log.warn(e);
+                log.debug(e,e);
+            } catch (VetoException e) {
+                log.warn(e);
+                log.debug(e,e);
+            }
+        }
+    }
+
+    private void removeOrphanedServers(AuthzSubject overlord) {
+        final Collection<Server> servers = serverManager.getOrphanedServers();
+        if (!servers.isEmpty()) {
+            log.info("cleaning up " + servers.size() + " orphaned servers");
+        }
+        for (Server server : servers) {
+            try {
+                server = serverManager.getServerById(server.getId());
+                serverManager.removeServer(overlord, server);
+            } catch (ObjectNotFoundException e) {
+                log.warn(e);
+                log.debug(e,e);
+            } catch (PermissionException e) {
+                log.warn(e);
+                log.debug(e,e);
+            } catch (VetoException e) {
+                log.warn(e);
+                log.debug(e,e);
+            }
+        }
+    }
+
+    private void removeOrphanedServices(AuthzSubject overlord) {
+        final Collection<Service> services = serviceManager.getOrphanedServices();
+        if (!services.isEmpty()) {
+            log.info("cleaning up " + services.size() + " orphaned services");
+        }
+        for (Service service : services) {
+            try {
+                service = serviceManager.getServiceById(service.getId());
+                serviceManager.removeService(overlord, service);
+            } catch (ObjectNotFoundException e) {
+                log.warn(e);
+                log.debug(e,e);
+            } catch (PermissionException e) {
+                log.warn(e);
+                log.debug(e,e);
+            } catch (VetoException e) {
+                log.warn(e);
+                log.debug(e,e);
+            }
+        }
+    }
+
     /**
      * @param zevents {@link List} of {@link ResourcesCleanupZevent}
      * 
@@ -181,9 +354,8 @@ public class ResourceCleanupEventListener implements ZeventListener<ResourcesCle
     }
     
     @SuppressWarnings("unchecked")
-    private void removeDeletedResources(Map<Integer, List<AppdefEntityID>> agentCache,
-                                        Collection<String> typeNames)
-        throws ApplicationException, VetoException {
+    private void removeDeletedResources(Map<Integer, List<AppdefEntityID>> agentCache, Collection<String> typeNames)
+    throws ApplicationException, VetoException {
         final boolean debug = log.isDebugEnabled();
         final StopWatch watch = new StopWatch();
         final AuthzSubject subject = authzSubjectManager.findSubjectById(AuthzConstants.overlordId);

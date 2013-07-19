@@ -97,7 +97,7 @@ public interface MeasurementManager {
      * Remove all measurements no longer associated with a resource.
      * @return The number of Measurement objects removed.
      */
-    public int removeOrphanedMeasurements();
+    public int removeOrphanedMeasurements(int batchSize);
 
     /**
      * Look up a Measurement for a Resource and Measurement alias

@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.common.server.session;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -243,6 +244,10 @@ public class AuditManagerImpl implements AuditManager, ApplicationListener<Appli
         } else if (event instanceof SubjectDeleteRequestedEvent) {
             handleSubjectDelete(((SubjectDeleteRequestedEvent) event).getSubject());
         }
+    }
+
+    public Collection<Audit> getOrphanedAudits() {
+        return auditDao.getOrphanedAudits();
     }
 
 }

@@ -25,6 +25,7 @@
  */
 package org.hyperic.hq.events.shared;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -36,6 +37,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.Alert;
+import org.hyperic.hq.events.server.session.AlertCondition;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
 import org.hyperic.util.pager.PageControl;
@@ -212,5 +214,9 @@ public interface AlertManager {
      * The max number of records to delete is specified by maxDeletes
      */
     public int deleteAlerts(long before, int maxDeletes);
+
+    public Collection<AlertDefinition> getOrphanedAlertDefs();
+
+    public void deleteAlertDef(AlertDefinition def);
 
 }

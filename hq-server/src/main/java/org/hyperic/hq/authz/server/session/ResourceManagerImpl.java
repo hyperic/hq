@@ -1643,4 +1643,8 @@ public class ResourceManagerImpl implements ResourceManager {
         }
     }
 
+    public Collection<Resource> getOrphanedResources() {
+        return resourceDAO.getOrphanedResources();
+    }
+
 }

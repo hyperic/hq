@@ -33,6 +33,7 @@ import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.GroupMember;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
@@ -46,7 +47,6 @@ import org.hyperic.hq.grouping.GroupException;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Local interface for ResourceGroupManager.
@@ -386,5 +386,9 @@ public interface ResourceGroupManager
     throws GroupCreationException, GroupDuplicateNameException;
 
     public List<ResourceGroup> getResourceGroupsByType(int groupType);
+
+    public Collection<GroupMember> getOrphanedResourceGroupMembers();
+
+    public void removeGroupMember(GroupMember m);
 
 }

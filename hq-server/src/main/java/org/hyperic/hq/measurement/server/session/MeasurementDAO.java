@@ -33,8 +33,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hibernate.FlushMode;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -49,36 +47,21 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.util.jdbc.DBUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-
-
 @Repository
-public class MeasurementDAO
-    extends HibernateDAO<Measurement> {
-    private static final String NON_AVAIL_CLAUSE =
-        " upper(t.alias) != '" + MeasurementConstants.CAT_AVAILABILITY.toUpperCase() + "' ";
-    private static final String ALIAS_CLAUSE =
-        " upper(t.alias) = '" + MeasurementConstants.CAT_AVAILABILITY.toUpperCase() + "' ";
+public class MeasurementDAO extends HibernateDAO<Measurement> {
+    private static final String CAT_AVAILABILITY = MeasurementConstants.CAT_AVAILABILITY.toUpperCase();
+    private static final String NON_AVAIL_CLAUSE = " upper(t.alias) != '" + CAT_AVAILABILITY + "' ";
+    private static final String ALIAS_CLAUSE = " upper(t.alias) = '" + CAT_AVAILABILITY + "' ";
     private final AgentDAO agentDao;
-    private final DBUtil dbUtil;
-    
-    @Autowired
-    private org.jasypt.hibernate.encryptor.HibernatePBEStringEncryptor hibernateStringEncryptor ; 
-    
-    protected final Log logger = LogFactory.getLog(this.getClass().getName());
-    private final static  int ENCRYPT_UPDATE_TIMEOUT = 54000;
-    private final static  int ENCRYPT_UPDATE_CHUNK_SIZE = 500;
 
     @Autowired
-    public MeasurementDAO(SessionFactory f, AgentDAO agentDao, DBUtil dbUtil) {
+    public MeasurementDAO(SessionFactory f, AgentDAO agentDao) {
         super(Measurement.class, f);
         this.agentDao = agentDao;
-        this.dbUtil = dbUtil;
     }
-
 
     public void removeBaseline(Measurement m) {
         m.setBaseline(null);
@@ -293,15 +276,18 @@ public class MeasurementDAO
     }
  
     @SuppressWarnings("unchecked")
-    public List<Measurement> findEnabledByResource(Resource resource) {
+    public List<Measurement> findEnabledByResource(Resource resource, boolean sortByName) {
         if (resource == null || resource.isInAsyncDeleteState()) {
             return Collections.emptyList();
         }
-        String sql = "select m from Measurement m " + "join m.template t "
-                     + "where m.enabled = true and " + "m.resource = ? " + "order by t.name";
-
-        return getSession().createQuery(sql).setParameter(0, resource).setCacheable(true)
-            .setCacheRegion("Measurement.findEnabledByResource").list();
+        final String hql = (sortByName) ? 
+            "select m from Measurement m join m.template t where m.enabled = true and m.resource = ? order by t.name" :
+            "select m from Measurement m where m.enabled = true and m.resource = ?";
+        return getSession().createQuery(hql)
+                           .setParameter(0, resource)
+                           .setCacheable(true)
+                           .setCacheRegion("Measurement.findEnabledByResource")
+                           .list();
     }
 
     @SuppressWarnings("unchecked")
@@ -880,9 +866,12 @@ public class MeasurementDAO
      * @return A List of Measurement ID's.
      */
     @SuppressWarnings("unchecked")
-    List<Integer> findOrphanedMeasurements() {
+    List<Integer> findOrphanedMeasurements(int limit) {
+        if (limit <= 0) {
+            return Collections.emptyList();
+        }
         String sql = "SELECT id FROM Measurement WHERE resource IS NULL";
-        return getSession().createQuery(sql).list();
+        return getSession().createQuery(sql).setMaxResults(limit).list();
     }
 
     public Map<Integer, Collection<Measurement>> getMeasurementsByTemplateIds(Integer[] templIds) {

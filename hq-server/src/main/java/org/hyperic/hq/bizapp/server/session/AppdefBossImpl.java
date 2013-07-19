@@ -1731,32 +1731,17 @@ public class AppdefBossImpl implements AppdefBoss , ApplicationContextAware {
     }
 
    
-    public void removeServer(AuthzSubject subj, Integer serverId) throws ServerNotFoundException,
-        SessionNotFoundException, SessionTimeoutException, PermissionException, SessionException,
-        VetoException {
+    public void removeServer(AuthzSubject subj, Integer serverId)
+    throws ServerNotFoundException, SessionNotFoundException, SessionTimeoutException, PermissionException,
+           SessionException, VetoException {
         Server server = serverManager.findServerById(serverId);
         try {
-            // now remove the measurements
             disableMeasurements(subj, server.getResource());
-            try {
-                autoinventoryManager.toggleRuntimeScan(authzSubjectManager.getOverlordPojo(),
-                    server.getEntityId(), false);
-            } catch (ResourceDeletedException e) {
-                log.debug(e);
-            } catch (AutoinventoryException e) {
-                log.warn("Exception while turning off RuntimeScan for: " + server +
-                         " (handled gracefully).  " + e);
-            } catch (Exception e) {
-                log.error("Unexpected error turning off RuntimeScan for: " + server +
-                          " (handled gracefully).", e);
-            }
-            // finally, remove the server
             serverManager.removeServer(subj, server);
-
         } catch (PermissionException e) {
-
             log.error("Caught permission exception: [server:" + server.getId() + "]");
-            throw (PermissionException) e;
+            log.debug(e,e);
+            throw e;
         }
     }
 

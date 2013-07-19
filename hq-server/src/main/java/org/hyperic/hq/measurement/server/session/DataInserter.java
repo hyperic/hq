@@ -25,8 +25,6 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import org.hyperic.hq.plugin.system.TopReport;
-
 import java.util.List;
 
 /**

@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.common.server.session;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.hibernate.Query;
@@ -97,5 +98,15 @@ public class AuditDAO
             q.setParameter("subject", target);
 
         return pInfo.pageResults(q).list();
+    }
+
+    @SuppressWarnings("unchecked")
+    public Collection<Audit> getOrphanedAudits() {
+        final String hql = new StringBuilder(128)
+            .append("from Audit a where not exists (")
+            .append("select 1 from Resource r where a.resource = r")
+            .append(")")
+            .toString();
+        return createQuery(hql).list();
     }
 }

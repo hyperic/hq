@@ -534,4 +534,30 @@ public class ResourceDAO
                            .list();
     }
 
+    @SuppressWarnings("unchecked")
+    Collection<Resource> getOrphanedResources() {
+        final List<Resource> rtn = new ArrayList<Resource>();
+        // normally i would use a union all in sql instead of three different queries,
+        // but hibernate keeps giving an NPE when I try that
+        final String platformHql = new StringBuilder(128)
+            .append("from Resource r where r.resourceType.id = :platformType and not exists (")
+                .append("select 1 from Platform p where p.id = r.instanceId")
+            .append(")")
+            .toString();
+        rtn.addAll(createQuery(platformHql).setInteger("platformType", AuthzConstants.authzPlatform).list());
+        final String serverHql = new StringBuilder(128)
+            .append("from Resource r where r.resourceType.id = :serverType and not exists (")
+                .append("select 1 from Server s where s.id = r.instanceId")
+            .append(")")
+            .toString();
+        rtn.addAll(createQuery(serverHql).setInteger("serverType", AuthzConstants.authzServer).list());
+        final String serviceHql = new StringBuilder(128)
+            .append("from Resource r where r.resourceType.id = :serviceType and not exists (")
+                .append("select 1 from Service s where s.id = r.instanceId")
+            .append(")")
+            .toString();
+        rtn.addAll(createQuery(serviceHql).setInteger("serviceType", AuthzConstants.authzService).list());
+        return rtn;
+    }
+
 }

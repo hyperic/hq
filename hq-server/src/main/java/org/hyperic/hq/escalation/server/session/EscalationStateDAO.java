@@ -33,12 +33,13 @@ import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
+import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class EscalationStateDAO
-    extends HibernateDAO<EscalationState> {
+public class EscalationStateDAO extends HibernateDAO<EscalationState> {
     @Autowired
     EscalationStateDAO(SessionFactory f) {
         super(EscalationState.class, f);
@@ -94,6 +95,21 @@ public class EscalationStateDAO
 
         getSession().createQuery("delete from EscalationState s where s.id in (:stateIds)")
             .setParameterList("stateIds", stateIds).executeUpdate();
+    }
+
+    @SuppressWarnings("unchecked")
+    Collection<EscalationState> getOrphanedEscalationStates() {
+        final String hql = new StringBuilder()
+            .append("from EscalationState e where (alertTypeEnum = :classicType and not exists (")
+                .append("select 1 from Alert a where a = e.alertId")
+            .append(")) OR (alertTypeEnum = :galertType and not exists (")
+                .append("select 1 from GalertLog g where g.id = e.alertId")
+            .append("))")
+            .toString();
+        return createQuery(hql)
+            .setInteger("classicType", ClassicEscalationAlertType.CLASSIC.getCode())
+            .setInteger("galertType", GalertEscalationAlertType.GALERT.getCode())
+            .list();
     }
 
 }

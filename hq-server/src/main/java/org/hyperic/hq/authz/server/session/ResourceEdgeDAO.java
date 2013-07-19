@@ -177,30 +177,44 @@ public class ResourceEdgeDAO
 
     @SuppressWarnings("unchecked")
     Collection<ResourceEdge> findAncestorEdges(Resource r, ResourceRelation rel) {
-        String sql = "from ResourceEdge e where e.from = :from " + "and distance < :distance "
-                     + "and rel_id = :rel_id ";
-
+        String sql = "from ResourceEdge e where e.from = :from and distance < :distance and rel_id = :rel_id ";
         return getSession().createQuery(sql).setParameter("from", r).setInteger("distance", 0)
             .setInteger("rel_id", rel.getId().intValue()).list();
     }
 
     void deleteEdges(Resource r) {
-        String sql = "delete ResourceEdge where to_id = :to or from_id = :from)";
-        getSession().createQuery(sql).setParameter("to", r).setParameter("from", r).executeUpdate();
+        String sql = "from ResourceEdge where to_id = :to or from_id = :from)";
+        @SuppressWarnings("unchecked")
+        List<ResourceEdge> edges = getSession().createQuery(sql).setParameter("to", r).setParameter("from", r).list();
+        for (ResourceEdge edge : edges) {
+            remove(edge);
+        }
     }
 
     void deleteEdges(Resource r, ResourceRelation rel) {
-        String sql = "delete ResourceEdge where (to_id = :to or from_id = :from) "
-                     + "and rel_id = :rel_id ";
-        getSession().createQuery(sql).setParameter("to", r).setParameter("from", r).setInteger(
-            "rel_id", rel.getId().intValue()).executeUpdate();
+        String sql = "from ResourceEdge where (to_id = :to or from_id = :from) and rel_id = :rel_id ";
+        @SuppressWarnings("unchecked")
+        List<ResourceEdge> edges = getSession().createQuery(sql)
+            .setParameter("to", r)
+            .setParameter("from", r)
+            .setInteger("rel_id", rel.getId())
+            .list();
+        for (ResourceEdge edge : edges) {
+            remove(edge);
+        }
     }
 
     void deleteEdge(Resource parent, Resource child, ResourceRelation rel) {
-        String sql = "delete ResourceEdge where from_id = :from " + "and to_id = :to "
-                     + "and rel_id = :rel_id ";
-        getSession().createQuery(sql).setParameter("from", parent).setParameter("to", child)
-            .setInteger("rel_id", rel.getId().intValue()).executeUpdate();
+        String sql = "from ResourceEdge where from_id = :from and to_id = :to and rel_id = :rel_id ";
+        @SuppressWarnings("unchecked")
+        List<ResourceEdge> edges = getSession().createQuery(sql)
+            .setParameter("from", parent)
+            .setParameter("to", child)
+            .setInteger("rel_id", rel.getId())
+            .list();
+        for (ResourceEdge edge : edges) {
+            remove(edge);
+        }
     }
 
     @SuppressWarnings("unchecked")

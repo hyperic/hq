@@ -420,13 +420,14 @@ public class PlatformDAO
         return (rslt == null) ? new Integer(0) : rslt;
     }
 
-    void clearResource(Resource res) {
-        createQuery("update Platform set resource = null where resource = ?").setParameter(0, res)
-            .executeUpdate();
-    }
-
     public Collection<Platform> findDeletedPlatforms() {
         String hql = "from Platform where resource.resourceType = null";
         return createQuery(hql).list();
+    }
+
+    @SuppressWarnings("unchecked")
+    public Collection<Platform> getOrphanedPlatforms() {
+        final String hql = "from Platform where resource is null";
+        return getSession().createQuery(hql).list();
     }
 }

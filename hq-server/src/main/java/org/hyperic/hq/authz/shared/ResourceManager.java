@@ -392,4 +392,6 @@ public interface ResourceManager {
     
     public Collection<ResourceType> getPSSTypes();
 
+    public Collection<Resource> getOrphanedResources();
+
 }

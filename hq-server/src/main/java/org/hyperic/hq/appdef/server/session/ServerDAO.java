@@ -248,13 +248,14 @@ public class ServerDAO
         return (Number) getSession().createQuery(sql).uniqueResult();
     }
 
-    void clearResource(Resource res) {
-        createQuery("update Server set resource = null where resource = ?").setParameter(0, res)
-            .executeUpdate();
-    }
-
     public Collection<Server> findDeletedServers() {
         String hql = "from Server where resource.resourceType = null";
+        return createQuery(hql).list();
+    }
+
+    @SuppressWarnings("unchecked")
+    public Collection<Server> getOrphanedServers() {
+        String hql = "from Server where resource is null";
         return createQuery(hql).list();
     }
 }

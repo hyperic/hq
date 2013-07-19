@@ -1558,7 +1558,7 @@ public class ServiceManagerImpl implements ServiceManager {
     }
 
     public void handleResourceDelete(Resource resource) {
-        serviceDAO.clearResource(resource);
+        resource.setResourceType(null);
     }
 
     /**
@@ -1582,6 +1582,10 @@ public class ServiceManagerImpl implements ServiceManager {
     @PostConstruct
     public void afterPropertiesSet() throws Exception {
         valuePager = Pager.getPager(VALUE_PROCESSOR);
+    }
+
+    public Collection<Service> getOrphanedServices() {
+        return serviceDAO.getOrphanedServices();
     }
 
 }

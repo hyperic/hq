@@ -113,7 +113,6 @@ import org.springframework.transaction.annotation.Transactional;
  * relationships
  * 
  */
-@SuppressWarnings("restriction")
 @org.springframework.stereotype.Service
 @Transactional
 public class PlatformManagerImpl implements PlatformManager {
@@ -474,17 +473,12 @@ public class PlatformManagerImpl implements PlatformManager {
         }
     }
 
-    /**
-     * 
-     */
     public void handleResourceDelete(Resource resource) {
-        platformDAO.clearResource(resource);
+        resource.setResourceType(null);
     }
 
     /**
      * Create a Platform of a specified type
-     * 
-     * 
      */
     public Platform createPlatform(AuthzSubject subject, Integer platformTypeId,
                                    PlatformValue pValue, Integer agentPK)
@@ -2125,6 +2119,10 @@ public class PlatformManagerImpl implements PlatformManager {
         }
         //TODO~ check if updates DB by the end of the transaction
         //TODO~ make sure the uuid is extracted in the resource mapper for platforms
+    }
+
+    public Collection<Platform> getOrphanedPlatforms() {
+        return platformDAO.getOrphanedPlatforms();
     }
     
     

@@ -284,15 +284,16 @@ public class ReportProcessorImpl implements ReportProcessor {
             if (!match) {
                 String ipAddr = agent.getAddress();
                 String portString = agent.getPort().toString();
-                             
-                log.warn("measurement (id=" + m.getId() + ", name=" +
-                          m.getTemplate().getName() + ") was sent to the " +
-                          "HQ server from agent (agentToken=" + agentToken + ", name=" +
-                          ipAddr + ", port=" + portString + ")" +
-                          " but resource (id=" + res.getId() + ", name=" +
-                          res.getName() + ") is not associated " +
-                          " with that agent.  Dropping measurement.");
-                if (debug) watch.markTimeEnd("resMatchesAgent");
+                if (debug) {
+                    log.debug("measurement (id=" + m.getId() + ", name=" +
+                              m.getTemplate().getName() + ") was sent to the " +
+                              "HQ server from agent (agentToken=" + agentToken + ", name=" +
+                              ipAddr + ", port=" + portString + ")" +
+                              " but resource (id=" + res.getId() + ", name=" +
+                              res.getName() + ") is not associated " +
+                              " with that agent.  Dropping measurement.");
+                    watch.markTimeEnd("resMatchesAgent");
+                }
                 toUnschedule.add(AppdefUtil.newAppdefEntityId(res));
                 continue;
             }

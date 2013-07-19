@@ -200,4 +200,8 @@ public interface EscalationManager {
 
     public void startup();
 
+    public Collection<EscalationState> getOrphanedEscalationStates();
+
+    public void removeEscalationState(EscalationState e);
+
 }

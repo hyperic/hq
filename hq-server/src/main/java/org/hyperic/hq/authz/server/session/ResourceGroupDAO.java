@@ -459,4 +459,25 @@ public class ResourceGroupDAO
         return (List<ResourceGroup>) createQuery(hql).setInteger("type", groupType).list();
     }
 
+    @SuppressWarnings("unchecked")
+    Collection<GroupMember> getOrphanedResourceGroupMembers() {
+        String hql = new StringBuilder(512)
+            .append("from GroupMember g where exists (")
+                .append("SELECT 1 FROM Resource r WHERE r.resourceType.id = :platformType AND g.resource != r ")
+                .append("AND r.instanceId not in (select p.id from Platform p)")
+            .append(") OR exists (")
+                .append("SELECT 1 FROM Resource r WHERE r.resourceType.id = :serverType AND g.resource != r ")
+                .append("AND r.instanceId not in (select s.id from Server s)")
+            .append(") OR exists (")
+                .append("SELECT 1 FROM Resource r WHERE r.resourceType.id = :serviceType AND g.resource != r ")
+                .append("AND r.instanceId not in (select s.id from Service s)")
+            .append(")")
+            .toString();
+        return createQuery(hql)
+            .setInteger("platformType", AuthzConstants.authzPlatform)
+            .setInteger("serverType", AuthzConstants.authzServer)
+            .setInteger("serviceType", AuthzConstants.authzService)
+            .list();
+    }
+
 }

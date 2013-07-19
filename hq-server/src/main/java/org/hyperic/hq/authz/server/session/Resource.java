@@ -81,7 +81,7 @@ public class Resource extends AuthzNamedBean implements Comparable<Resource> {
         return _resourceType;
     }
 
-    protected void setResourceType(ResourceType resourceTypeId) {
+    public void setResourceType(ResourceType resourceTypeId) {
         _resourceType = resourceTypeId;
     }
 

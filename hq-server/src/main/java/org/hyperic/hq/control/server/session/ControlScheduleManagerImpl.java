@@ -254,17 +254,22 @@ public class ControlScheduleManagerImpl
 
         try {
               List<ControlFrequency> frequencies = controlHistoryDAO.getControlFrequencies(numToReturn);
-              for(ControlFrequency frequency: frequencies) {
+              for (ControlFrequency frequency: frequencies) {
                  try {
                      checkControlPermission(subject, frequency.getId());
+                     AppdefEntityValue aVal = new AppdefEntityValue(frequency.getId(), subject);
+                     String name = aVal.getName();
+                     ControlFrequencyValue cv =
+                         new ControlFrequencyValue(name, frequency.getId().getType(), frequency.getId().getID(),
+                             frequency.getAction(), (int)frequency.getCount());
+                    list.add(cv);
+                 } catch (AppdefEntityNotFoundException e) {
+                     log.debug(e,e);
+                     continue;
                  } catch (PermissionException e) {
+                     log.debug(e,e);
                      continue;
                  }
-                 AppdefEntityValue aVal = new AppdefEntityValue(frequency.getId(), subject);
-                 String name = aVal.getName();
-                 ControlFrequencyValue cv = new ControlFrequencyValue(name, frequency.getId().getType(), frequency.getId().getID(), frequency.getAction(),
-                   (int)frequency.getCount());
-                list.add(cv);
             }
         } catch (Exception e) {
             throw new ApplicationException(e);

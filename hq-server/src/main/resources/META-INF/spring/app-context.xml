@@ -299,6 +299,7 @@
 		<bean class="org.hyperic.hq.bizapp.server.action.integrate.OpenNMSAction" />
 	</util:list>
 	
+    <task:annotation-driven scheduler="scheduler"/>
 	<task:scheduler id="scheduler" pool-size="8"/>
 	
     <bean class="org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler" id="notificationFilterExecutor" p:poolSize="1">

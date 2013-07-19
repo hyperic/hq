@@ -315,4 +315,6 @@ public interface ServiceManager {
     ServiceType createServiceType(ServiceTypeInfo sinfo, String plugin, ServerType servType)
     throws NotFoundException;
 
+    public Collection<Service> getOrphanedServices();
+
 }

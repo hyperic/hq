@@ -25,6 +25,7 @@
 package org.hyperic.hq.events.server.session;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import org.hibernate.CacheMode;
@@ -458,6 +459,12 @@ public class AlertDefinitionDAO
 
     public AlertDefinition findById(Integer id) {
         return super.findById(id);
+    }
+
+    @SuppressWarnings("unchecked")
+    Collection<AlertDefinition> getOrphanedAlertDefs() {
+        String hql = "from AlertDefinition ad where ad.resource is null and ad.parent is not null and ad.parent.id != 0";
+        return createQuery(hql).list();
     }
 
 }

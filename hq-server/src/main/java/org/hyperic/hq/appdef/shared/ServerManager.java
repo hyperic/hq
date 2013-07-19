@@ -337,4 +337,6 @@ public interface ServerManager {
      */
     public Number getServerCount();
 
+    public Collection<Server> getOrphanedServers();
+
 }

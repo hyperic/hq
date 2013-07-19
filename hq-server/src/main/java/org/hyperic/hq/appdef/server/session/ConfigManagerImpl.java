@@ -36,6 +36,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -807,9 +808,8 @@ public class ConfigManagerImpl implements ConfigManager {
     }
 
     private byte[] getConfigForType(ConfigResponseDB val, String productType, AppdefEntityID id, boolean fail)
-        throws ConfigFetchException {
+    throws ConfigFetchException {
         byte[] res;
-
         if (productType.equals(ProductPlugin.TYPE_PRODUCT)) {
             res = val.getProductResponse();
         } else if (productType.equals(ProductPlugin.TYPE_CONTROL)) {
@@ -823,7 +823,6 @@ public class ConfigManagerImpl implements ConfigManager {
         } else {
             throw new IllegalArgumentException("Unknown product type");
         }
-
         if (((res == null) || (res.length == 0)) && fail) {
             throw new ConfigFetchException(productType, id);
         }
@@ -831,42 +830,58 @@ public class ConfigManagerImpl implements ConfigManager {
     }
 
     private ServerConfigStuff getServerStuffForService(Integer id) throws AppdefEntityNotFoundException {
-
-        org.hyperic.hq.appdef.server.session.Service service = serviceDAO.findById(id);
-        Server server = service.getServer();
-        if (server == null) {
+        // HQ-4096, need to catch ObjectNotFoundException
+        try {
+            org.hyperic.hq.appdef.server.session.Service service = serviceDAO.get(id);
+            if (service == null) {
+                return null;
+            }
+            Server server = service.getServer();
+            if (server == null) {
+                return null;
+            }
+            return new ServerConfigStuff(server.getId().intValue(), server.getInstallPath());
+        } catch (ObjectNotFoundException e) {
+            log.debug(e,e);
             return null;
         }
-        return new ServerConfigStuff(server.getId().intValue(), server.getInstallPath());
     }
 
     private ServerConfigStuff getServerStuffForServer(Integer id) throws AppdefEntityNotFoundException {
-
-        Server server = serverDAO.findById(id);
-
-        return new ServerConfigStuff(server.getId().intValue(), server.getInstallPath());
+        try {
+            Server server = serverDAO.findById(id);
+            return new ServerConfigStuff(server.getId().intValue(), server.getInstallPath());
+        } catch (ObjectNotFoundException e) {
+            log.debug(e,e);
+            return null;
+        }
     }
 
     private PlatformConfigStuff getPlatformStuffForServer(Integer id) throws AppdefEntityNotFoundException {
-
-        Server server = serverDAO.findById(id);
-        Platform platform = server.getPlatform();
-        if (platform == null) {
+        try {
+            Server server = serverDAO.findById(id);
+            Platform platform = server.getPlatform();
+            if (platform == null) {
+                return null;
+            }
+            PlatformConfigStuff pConfig = new PlatformConfigStuff(platform.getId(), platform.getName(),
+                                                                  platform.getFqdn(),
+                                                                  platform.getPlatformType().getName());
+            loadPlatformIp(platform, pConfig);
+            return pConfig;
+        } catch (ObjectNotFoundException e) {
+            log.debug(e,e);
             return null;
         }
-
-        PlatformConfigStuff pConfig = new PlatformConfigStuff(platform.getId().intValue(), platform.getName(), platform
-            .getFqdn(), platform.getPlatformType().getName());
-        loadPlatformIp(platform, pConfig);
-        return pConfig;
     }
 
     private PlatformConfigStuff getPlatformStuffForPlatform(Integer id) throws AppdefEntityNotFoundException {
-
-        Platform platform = platformDAO.findById(id);
-
-        PlatformConfigStuff pConfig = new PlatformConfigStuff(platform.getId().intValue(), platform.getName(), platform
-            .getFqdn(), platform.getPlatformType().getName());
+        Platform platform = platformDAO.get(id);
+        if (platform == null) {
+            return null;
+        }
+        PlatformConfigStuff pConfig = new PlatformConfigStuff(platform.getId(), platform.getName(), platform.getFqdn(),
+                                                              platform.getPlatformType().getName());
         loadPlatformIp(platform, pConfig);
         return pConfig;
     }

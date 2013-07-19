@@ -137,7 +137,7 @@ public class DataPurgeJob implements Runnable {
             this.purgeTopN = Integer.parseInt(purgeTopNString);
         } catch (NumberFormatException e) {
             // Shouldn't happen unless manual edit of config table
-            throw new IllegalArgumentException("Invalid purge interval: " + e);
+            throw new IllegalArgumentException("Invalid purge interval: " + e, e);
         }
     }
 
@@ -381,16 +381,21 @@ public class DataPurgeJob implements Runnable {
      * Remove measurements no longer associated with a resource.
      */
     private void purgeMeasurements() {
-        long start = System.currentTimeMillis();
+        final long start = System.currentTimeMillis();
+        int total = 0;
         try {
-            int dcount = measurementManager.removeOrphanedMeasurements();
-            log.info("Removed " + dcount + " measurements in " +
-                     ((System.currentTimeMillis() - start) / 1000) + " seconds.");
-        } catch (Throwable t) {
-            // Do not allow errors to cause other maintenance functions to
-            // not run.
-            log.error("Error removing measurements", t);
+            final int batchSize = 10000;
+            int dcount = Integer.MAX_VALUE;
+            while (dcount > 0) {
+                dcount = measurementManager.removeOrphanedMeasurements(batchSize);
+                total += dcount;
+            }
+        } catch (Exception e) {
+            // Do not allow errors to cause other maintenance functions to not run.
+            log.error("Error removing measurements: " + e, e);
         }
+        final long finish = System.currentTimeMillis();
+        log.info("Removed " + total + " measurements in " + ((finish - start) / 1000) + " seconds.");
     }
 
     void purgeMeasurements(long dataInterval, long purgeAfter) {

@@ -143,7 +143,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
     private static final double AVAIL_POWERED_OFF = MeasurementConstants.AVAIL_POWERED_OFF;
     private static final double AVAIL_UNKNOWN = MeasurementConstants.AVAIL_UNKNOWN;
     private static final double AVAIL_UP = MeasurementConstants.AVAIL_UP;
-    protected final Log log = LogFactory.getLog(MeasurementBossImpl.class);
+    private final Log log = LogFactory.getLog(MeasurementBossImpl.class);
 
     private final SessionManager sessionManager;
     private final AuthBoss authBoss;
@@ -3137,8 +3137,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
      */
     @Transactional(readOnly = true)
     public List<ResourceDisplaySummary> findGroupCurrentHealth(int sessionId, Integer id)
-        throws SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException,
-        PermissionException {
+    throws SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException, PermissionException {
         final AuthzSubject subject = sessionManager.getSubject(sessionId);
 
         // Find the group
@@ -3155,8 +3154,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
         // Look up metrics by group first
 
         for (Map.Entry<String, Map<Resource, Measurement>> entry : cats.entrySet()) {
-            List<Measurement> metrics =
-                measurementManager.findDesignatedMeasurements(subject, group, entry.getKey());
+            List<Measurement> metrics = measurementManager.findDesignatedMeasurements(subject, group, entry.getKey());
             Map<Resource, Measurement> mmap = new HashMap<Resource, Measurement>(metrics.size());
             // Optimization for the fact that we can have multiple indicator
             // metrics for each category, only keep one
@@ -3172,8 +3170,8 @@ public class MeasurementBossImpl implements MeasurementBoss {
         final StopWatch watch = new StopWatch();
         final PageList<ResourceDisplaySummary> summaries = new PageList<ResourceDisplaySummary>();
         watch.markTimeBegin("getAvailMeasurements");
-        final Map<Integer, List<Measurement>> measCache = measurementManager
-            .getAvailMeasurements(Collections.singleton(group));
+        final Map<Integer, List<Measurement>> measCache =
+            measurementManager.getAvailMeasurements(Collections.singleton(group));
         watch.markTimeEnd("getAvailMeasurements");
 
         // Remap from list to map of metrics
@@ -3190,33 +3188,33 @@ public class MeasurementBossImpl implements MeasurementBoss {
             measCache);
         watch.markTimeEnd("getLastAvail");
         for (Resource res : members) {
-
             AppdefEntityID aeid = null ; 
             try {
                 aeid = AppdefUtil.newAppdefEntityId(res);
                 ResourceDisplaySummary summary = new ResourceDisplaySummary();
-
                 // Set the resource
                 AppdefResourceValue parent = null;
                 switch (aeid.getType()) {
                     case AppdefEntityConstants.APPDEF_TYPE_SERVER:
                         watch.markTimeBegin("get platform from server");
-                        Server server = serverManager.findServerById(aeid.getId());
-                        final Resource serverResource = server.getResource() ;  
-                        
+                        Server server = serverManager.getServerById(aeid.getId());
+                        // HHQ-5648 - server may not exist due to delete
+                        if (server == null) {
+                            continue;
+                        }
+                        final Resource serverResource = server.getResource();
                         //[HQ-4052] Guys 16.10.2012 - platform might be null due to async. delete operation in progress 
                         if(serverResource != null && serverResource.isInAsyncDeleteState()) { 
-                            this.log.warn("findGroupCurrentHealth() -->  skipping server " + server + " as server is in deletion process.") ;
+                            log.warn("findGroupCurrentHealth() -->  skipping server " + server +
+                                     " as server is in deletion process.") ;
                             continue ; 
-                        }//EO if server async. delete operation was in progress
-                        
+                        }
                         parent = server.getPlatform().getPlatformValue();
                         watch.markTimeEnd("get platform from server");
                     case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
                     case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
                         watch.markTimeBegin("Set Resource Display for PSS Type");
-                        setResourceDisplaySummaryValueForCategories(subject, res, summary, cats,
-                            measCache, availCache);
+                        setResourceDisplaySummaryValueForCategories(subject, res, summary, cats, measCache, availCache);
                         summary.setMonitorable(Boolean.TRUE);
                         watch.markTimeEnd("Set Resource Display for PSS Type");
                         break;
@@ -3225,13 +3223,10 @@ public class MeasurementBossImpl implements MeasurementBoss {
                         watch.markTimeBegin("Group Type");
                         summary.setMonitorable(Boolean.TRUE);
                         // Set the availability now
-                        summary.setAvailability(new Double(getAvailability(subject, aeid, measCache,
-                            availCache)));
-
+                        summary.setAvailability(new Double(getAvailability(subject, aeid, measCache, availCache)));
                         try {
                             // Get the availability template
-                            MeasurementTemplate tmpl = getAvailabilityMetricTemplate(subject, aeid,
-                                measCache);
+                            MeasurementTemplate tmpl = getAvailabilityMetricTemplate(subject, aeid, measCache);
                             summary.setAvailTempl(tmpl.getId());
                         } catch (MeasurementNotFoundException e) {
                             // No availability metric, don't set it
@@ -3244,19 +3239,15 @@ public class MeasurementBossImpl implements MeasurementBoss {
                 }
                 setResourceDisplaySummary(summary, res, aeid, parent);
                 summaries.add(summary);
-            
-            }catch(Throwable  t) {
-                this.log.error("Failure to add resource "+ (aeid == null ? "unknown" : aeid) +" to display summary, skipping resource") ;  
-                this.log.error(this, t) ; 
-            }//EO catch block
-            
-        }//EO while there are more resourcees 
-        
+            } catch(Exception e) {
+                log.error("Failure to add resource "+ (aeid == null ? "unknown" : aeid) +
+                          " to display summary, skipping resource: " + e, e);
+            }
+        }
         if (log.isDebugEnabled()) {
             log.debug("getGroupCurrentHealth: " + watch);
         }
         summaries.setTotalSize(summaries.size());
-        
         return summaries;
     }
 

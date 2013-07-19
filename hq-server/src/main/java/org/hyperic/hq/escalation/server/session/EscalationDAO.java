@@ -24,9 +24,13 @@
  */
 package org.hyperic.hq.escalation.server.session;
 
+import java.util.Collection;
+
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Expression;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
+import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -41,4 +45,5 @@ public class EscalationDAO
     Escalation findByName(String name) {
         return (Escalation) createCriteria().add(Expression.eq("name", name)).uniqueResult();
     }
+    
 }

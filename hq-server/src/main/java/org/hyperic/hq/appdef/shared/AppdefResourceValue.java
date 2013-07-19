@@ -259,8 +259,7 @@ public abstract class AppdefResourceValue
             res.setName(AppdefEntityConstants.getAppdefGroupTypeName(iGrpType));
             return res;
         } else {
-            return getAppdefResourceType(subject, group)
-                                                        .getAppdefResourceTypeValue();
+            return getAppdefResourceType(subject, group).getAppdefResourceTypeValue();
         }
     }
     

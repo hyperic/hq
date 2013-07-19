@@ -25,6 +25,7 @@
  */
 package org.hyperic.hq.common.shared;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.hyperic.hibernate.PageInfo;
@@ -70,5 +71,7 @@ public interface AuditManager {
 
     public List<Audit> find(AuthzSubject me, PageInfo pInfo, long startTime, long endTime,
                             AuditImportance minImportance, AuditPurpose purpose, AuthzSubject target, String klazz);
+
+    public Collection<Audit> getOrphanedAudits();
 
 }

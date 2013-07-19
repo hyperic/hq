@@ -1032,7 +1032,6 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
 
     private Resource findPrototype(AppdefEntityTypeID id) {
         Integer authzType;
-
         switch (id.getType()) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
                 authzType = AuthzConstants.authzPlatformProto;
@@ -1067,5 +1066,13 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     @Transactional(readOnly=true)
     public List<ResourceGroup> getResourceGroupsByType(int groupType) {
         return resourceGroupDAO.getGroupsByType(groupType);
+    }
+
+    public Collection<GroupMember> getOrphanedResourceGroupMembers() {
+        return resourceGroupDAO.getOrphanedResourceGroupMembers();
+    }
+
+    public void removeGroupMember(GroupMember m) {
+        resourceGroupDAO.getSession().delete(m);
     }
 }

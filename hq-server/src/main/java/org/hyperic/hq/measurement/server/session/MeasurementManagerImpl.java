@@ -90,7 +90,6 @@ import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
-import org.hyperic.hq.measurement.shared.MeasurementProcessor;
 import org.hyperic.hq.measurement.shared.SRNManager;
 import org.hyperic.hq.measurement.shared.TrackerManager;
 import org.hyperic.hq.product.MeasurementPluginManager;
@@ -149,8 +148,6 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 	private ZeventManager zeventManager;
     @Autowired
 	private SRNManager srnManager;
-    @Autowired
-	private MeasurementProcessor measurementProcessor;
     @Autowired
 	private AvailabilityManager availabilityManager;
     @Autowired
@@ -428,28 +425,21 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
     /**
      * Remove all measurements no longer associated with a resource.
-     * 
      * @return The number of Measurement objects removed.
      */
-    public int removeOrphanedMeasurements() {
-        final int MAX_MIDS = 200;
-
+    public int removeOrphanedMeasurements(int batchSize) {
         StopWatch watch = new StopWatch();
-
         MeasurementDAO dao = measurementDAO;
-        List<Integer> mids = dao.findOrphanedMeasurements();
-
+        List<Integer> mids = dao.findOrphanedMeasurements(batchSize);
         // Shrink the list down to MAX_MIDS so that we spread out the work over
         // successive data purges
-        if (mids.size() > MAX_MIDS) {
-            mids = mids.subList(0, MAX_MIDS);
+        if (mids.size() > batchSize) {
+            mids = mids.subList(0, batchSize);
         }
-
         if (mids.size() > 0) {
             applicationContext.publishEvent(new MetricsDeleteRequestedEvent(mids));
             dao.deleteByIds(mids);
         }
-
         if (log.isDebugEnabled()) {
             log.debug("MeasurementManager.removeOrphanedMeasurements() " + watch);
         }
@@ -484,9 +474,8 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
      */
     @Transactional(readOnly = true)
     public void getLiveMeasurementValues(AuthzSubject subject, AppdefEntityID id)
-        throws PermissionException, LiveMeasurementException, MeasurementNotFoundException {
-        List<Measurement> mcol = measurementDAO.findEnabledByResource(resourceManager
-            .findResource(id));
+    throws PermissionException, LiveMeasurementException, MeasurementNotFoundException {
+        List<Measurement> mcol = measurementDAO.findEnabledByResource(resourceManager.findResource(id), false);
         String[] dsns = new String[mcol.size()];
         Integer availMeasurement = null; // For insert of AVAIL down
 
@@ -541,7 +530,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         if (res == null || res.isInAsyncDeleteState()) {
             return 0;
         }
-        final List<Measurement> mcol = measurementDAO.findEnabledByResource(res);
+        final List<Measurement> mcol = measurementDAO.findEnabledByResource(res, false);
         return mcol.size();
     }
 
@@ -736,8 +725,9 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         List<Measurement> meas;
 
         // See if category is valid
+        boolean sorted = (pc.getSortorder() != PageControl.SORT_UNSORTED) ? true : false;
         if (cat == null || Arrays.binarySearch(MeasurementConstants.VALID_CATEGORIES, cat) < 0) {
-            meas = measurementDAO.findEnabledByResource(resourceManager.findResource(id));
+            meas = measurementDAO.findEnabledByResource(resourceManager.findResource(id), sorted);
         } else {
             meas = measurementDAO.findByResourceForCategory(resourceManager.findResource(id), cat);
         }
@@ -775,7 +765,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
         // See if category is valid
         if (cat == null || Arrays.binarySearch(MeasurementConstants.VALID_CATEGORIES, cat) < 0) {
-            mcol = measurementDAO.findEnabledByResource(resourceManager.findResource(id));
+            mcol = measurementDAO.findEnabledByResource(resourceManager.findResource(id), true);
         } else {
             mcol = measurementDAO.findByResourceForCategory(resourceManager.findResource(id), cat);
         }
@@ -1266,10 +1256,9 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
      * NOTE: This method requires all entity ids to be monitored by the same
      * agent as specified by the agent
      */
-    public void disableMeasurements(AuthzSubject subject, Agent agent,
-                                    AppdefEntityID[] ids, boolean isAsyncDelete)
-        throws PermissionException {
-  
+    public void disableMeasurements(AuthzSubject subject, Agent agent, AppdefEntityID[] ids, boolean isAsyncDelete)
+    throws PermissionException {
+        final boolean debug = log.isDebugEnabled();
         for (int i = 0; i < ids.length; i++) {
             permissionManager.checkModifyPermission(subject.getId(), ids[i]);
             List<Measurement> mcol = null;
@@ -1281,18 +1270,14 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                 // we need to unschedule these measurements
                 mcol = findMeasurements(subject, res);
             } else {
-                mcol = measurementDAO.findEnabledByResource(res);            
+                mcol = measurementDAO.findEnabledByResource(res, false);
             }
-            
             if (mcol.isEmpty()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("No measurements to disable for resource[" 
-                                    + ids[i]
-                                    + "], isAsyncDelete=" + isAsyncDelete);
+                if (debug) {
+                    log.debug("No measurements to disable for resource["  + ids[i] + "], isAsyncDelete=" + isAsyncDelete);
                 }
                 continue;
             }
-            
             Integer[] mids = new Integer[mcol.size()];
             Iterator<Measurement> it = mcol.iterator();
             for (int j = 0; it.hasNext(); j++) {
@@ -1300,9 +1285,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                 dm.setEnabled(false);
                 mids[j] = dm.getId();
             }
-
             removeMeasurementsFromCache(mids);
-            
             enqueueZeventsForMeasScheduleCollectionDisabled(mids);
         }
         zeventManager.enqueueEventAfterCommit(new AgentUnscheduleZevent(Arrays.asList(ids), agent.getAgentToken()));
@@ -1325,32 +1308,28 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
      * 
      */
     public void disableMeasurements(AuthzSubject subject, Resource res) throws PermissionException {
-        List<Measurement> mcol = measurementDAO.findEnabledByResource(res);
-
+        List<Measurement> mcol = measurementDAO.findEnabledByResource(res, false);
         if (mcol.size() == 0) {
             return;
         }
-
         Integer[] mids = new Integer[mcol.size()];
         Iterator<Measurement> it = mcol.iterator();
-        AppdefEntityID aeid = null;
         for (int i = 0; it.hasNext(); i++) {
             Measurement dm = it.next();
             dm.setEnabled(false);
             mids[i] = dm.getId();
-            if (aeid == null) {
-                aeid = new AppdefEntityID(dm.getTemplate().getMonitorableType().getAppdefType(), dm
-                    .getInstanceId());
-            }
         }
-
         removeMeasurementsFromCache(mids);
         enqueueZeventsForMeasScheduleCollectionDisabled(mids);
-
-        // Unscheduling of all metrics for a resource could indicate that
-        // the resource is getting removed. Send the unschedule synchronously
-        // so that all the necessary plumbing is in place.
-        measurementProcessor.unschedule(Collections.singletonList(aeid));
+        try {
+            final AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(res);
+            final Agent agent = agentManager.getAgent(aeid);
+            final AgentUnscheduleZevent zevent =
+                new AgentUnscheduleZevent(Collections.singletonList(aeid), agent.getAgentToken());
+            zeventManager.enqueueEventAfterCommit(zevent);
+        } catch (AgentNotFoundException e) {
+            log.error(e,e);
+        }
     }
 
     /**
@@ -1898,7 +1877,6 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         this.availabilityManager = null ; 
         this.configManager = null ; 
         this.measurementDAO = null ; 
-        this.measurementProcessor = null ; 
         this.measurementTemplateDAO = null ; 
         this.metricDataCache = null ; 
         this.permissionManager = null ; 

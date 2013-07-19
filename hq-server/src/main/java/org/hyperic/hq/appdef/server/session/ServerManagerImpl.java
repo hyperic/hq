@@ -522,7 +522,7 @@ public class ServerManagerImpl implements ServerManager {
      * 
      */
     public void handleResourceDelete(Resource resource) {
-        serverDAO.clearResource(resource);
+        resource.setResourceType(null);
     }
 
     /**
@@ -1517,5 +1517,9 @@ public class ServerManagerImpl implements ServerManager {
 
         valuePager = Pager.getPager(VALUE_PROCESSOR);
 
+    }
+
+    public Collection<Server> getOrphanedServers() {
+        return serverDAO.getOrphanedServers();
     }
 }

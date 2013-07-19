@@ -790,4 +790,12 @@ public class AlertManagerImpl implements AlertManager,
         alertActionLogDAO.handleSubjectRemoval(subject);
     }
 
+    public Collection<AlertDefinition> getOrphanedAlertDefs() {
+        return alertDefDao.getOrphanedAlertDefs();
+    }
+
+    public void deleteAlertDef(AlertDefinition def) {
+        alertDefDao.deleteByAlertDefinition(def);
+    }
+
 }

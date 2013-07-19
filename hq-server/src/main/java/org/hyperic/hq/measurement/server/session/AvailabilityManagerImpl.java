@@ -1198,8 +1198,9 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     }
 
     private void merge(DataPoint state, Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails,
-            Map<DataPoint, AvailabilityDataRLE> createMap, Map<DataPoint, AvailabilityDataRLE> removeMap)
-            throws BadAvailStateException {
+                       Map<DataPoint, AvailabilityDataRLE> createMap,
+                       Map<DataPoint, AvailabilityDataRLE> removeMap)
+    throws BadAvailStateException {
         AvailabilityDataRLE dup = findAvail(state, currAvails);
         if (dup != null) {
             updateDup(state, dup, currAvails, createMap, removeMap);
@@ -1208,8 +1209,12 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         AvailabilityDataRLE before = findAvailBefore(state, currAvails);
         AvailabilityDataRLE after = findAvailAfter(state, currAvails);
         if (before == null && after == null) {
-            // this shouldn't happen here
+            // this shouldn't happen here unless the resource was deleted
             Measurement meas = getMeasurement(state.getMeasurementId());
+            // HHQ-5648 measurement could have been deleted
+            if (meas == null) {
+                return;
+            }
             create(meas, state.getTimestamp(), state.getValue(), currAvails, createMap);
         } else if (before == null) {
             if (after.getAvailVal() != state.getValue()) {

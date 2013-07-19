@@ -307,14 +307,13 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
             Agent a = agentManager.getAgent(agentToken);
             unschedule(a, entIds);
         } catch (MonitorAgentException e) {
-            log.warn("Error unscheduling metrics: " + e.getMessage());
+            log.error("Error unscheduling metrics: " + e);
             log.debug(e,e);
         } catch (AgentNotFoundException e) {
-            log.warn("Error unscheduling metrics: " + e.getMessage());
+            log.warn("Error unscheduling metrics: " + e);
             log.debug(e,e);
         } catch (MeasurementUnscheduleException e) {
-            log.warn("Error unscheduling metrics: " + e.getMessage());
-            log.debug(e,e);
+            log.error("Error unscheduling metrics: " + e, e);
         }
     }
 

@@ -417,4 +417,7 @@ public interface PlatformManager {
     void removePlatformVmMapping(AuthzSubject subject, List<String> macAddresses) throws PermissionException;
 
     Platform getPlatformByResourceId(int id);
+
+    public Collection<Platform> getOrphanedPlatforms();
+
 }

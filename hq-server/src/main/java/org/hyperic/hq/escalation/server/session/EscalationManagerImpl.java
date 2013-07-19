@@ -797,4 +797,12 @@ public class EscalationManagerImpl implements EscalationManager {
             escalationRuntime.scheduleEscalation(state);
         }
     }
+
+    public Collection<EscalationState> getOrphanedEscalationStates() {
+        return escalationStateDAO.getOrphanedEscalationStates();
+    }
+
+    public void removeEscalationState(EscalationState e) {
+        escalationStateDAO.remove(e);
+    }
 }
