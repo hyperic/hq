@@ -25,6 +25,7 @@
 //XXX move this class to sigar
 package org.hyperic.hq.plugin.system;
 
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
@@ -53,6 +54,7 @@ public class ProcessData {
     public static final String LABEL_STATE = "STATE";
     public static final String LABEL_TIME  = "TIME";
     public static final String LABEL_CPU   = "%CPU";
+    public static final String LABEL_MEM   = "%MEM";
     public static final String LABEL_NAME  = "COMMAND";
 
     public static final String PS_HEADER =
@@ -65,6 +67,7 @@ public class ProcessData {
         LABEL_STATE + "\t" +
         LABEL_TIME  + "\t" +
         LABEL_CPU   + "\t" +
+        LABEL_MEM   + "\t" +
         LABEL_NAME;
 
     private long _pid;
@@ -76,6 +79,7 @@ public class ProcessData {
     private char _state;
     private long _cpuTotal;
     private double _cpuPerc;
+    private double _memPerc;
     private String _name;
     private String[] _args;
     private Map _env;
@@ -126,8 +130,9 @@ public class ProcessData {
             _size = _procMem.getSize();
             _resident = _procMem.getResident();
             _share = _procMem.getShare();
+            _memPerc = (double)_resident / sigar.getMem().getTotal();
         } catch (SigarException e) {
-            _size = _resident = _share = Sigar.FIELD_NOTIMPL;
+            _memPerc = _size = _resident = _share = Sigar.FIELD_NOTIMPL;
         }
 
         _state = _procState.getState();
@@ -211,6 +216,10 @@ public class ProcessData {
         return _cpuPerc;
     }
 
+    public double getMemPerc() {
+        return _memPerc;
+    }
+
     public String getName() {
         return _name;
     }
@@ -285,6 +294,16 @@ public class ProcessData {
         return CpuPerc.format(_cpuPerc);
     }
 
+    public String getFormattedMemPerc() {
+        if (_memPerc == Sigar.FIELD_NOTIMPL) {
+            return NA;
+        }
+        NumberFormat percentFormat = NumberFormat.getPercentInstance();
+        percentFormat.setMaximumFractionDigits(1);
+        percentFormat.setMinimumFractionDigits(1);
+        return percentFormat.format(_memPerc);
+    }
+
     public String toString(String delim) {
         return
             _pid + delim +
@@ -296,6 +315,7 @@ public class ProcessData {
             _state + delim +
             getFormattedCpuTotal() + delim +
             getFormattedCpuPerc() + delim +
+            getFormattedMemPerc() + delim +
             getBaseName();
     }
 

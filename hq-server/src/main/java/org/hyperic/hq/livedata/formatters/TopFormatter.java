@@ -144,6 +144,8 @@ public class TopFormatter
          .append("</td><td>")
          .append(BUNDLE.format("formatter.top.proc.cpu"))
          .append("</td><td>")
+         .append(BUNDLE.format("formatter.top.proc.mem"))
+         .append("</td><td>")
          .append(BUNDLE.format("formatter.top.proc.name"))
          .append("</td></tr></thead><tbody>");
          
@@ -161,8 +163,9 @@ public class TopFormatter
              .append("<td>").append(d.getFormattedShare()).append("</td>")      
              .append("<td>").append(stateStr).append("</td>")                           
              .append("<td>").append(d.getFormattedCpuTotal()).append("</td>")                           
-             .append("<td>").append(d.getFormattedCpuPerc()).append("</td>")                           
-             .append("<td>").append(h(d.getBaseName())).append("</td></tr>");                           
+             .append("<td>").append(d.getFormattedCpuPerc()).append("</td>")
+             .append("<td>").append(d.getFormattedMemPerc()).append("</td>")
+             .append("<td>").append(h(d.getBaseName())).append("</td></tr>");
         }
         
         r.append("</tbody></table></div>");

@@ -15,6 +15,7 @@ public class ProcessReport implements Serializable {
     private long share;
     private long cpuTotal;
     private double cpuPerc;
+    private double memPerc;
     private String baseName;
     private long startTime;
     private String[] args;
@@ -30,6 +31,7 @@ public class ProcessReport implements Serializable {
         this.share = process.getShare();
         this.cpuTotal = process.getCpuTotal();
         this.cpuPerc = process.getCpuPerc();
+        this.memPerc = process.getMemPerc();
         this.baseName = process.getBaseName();
         this.startTime = process.getStartTime();
         this.setArgs(process.getProcArgs());
@@ -123,6 +125,7 @@ public class ProcessReport implements Serializable {
         share = in.readLong();
         cpuTotal = in.readLong();
         cpuPerc = in.readDouble();
+        memPerc = in.readDouble();
         baseName = in.readUTF();
         startTime = in.readLong();
         args = (String[]) in.readObject();
@@ -136,6 +139,7 @@ public class ProcessReport implements Serializable {
         out.writeLong(share);
         out.writeLong(cpuTotal);
         out.writeDouble(cpuPerc);
+        out.writeDouble(memPerc);
         out.writeUTF(baseName);
         out.writeLong(startTime);
         out.writeObject(args);
@@ -144,10 +148,11 @@ public class ProcessReport implements Serializable {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("pid=").append(pid).append(", owner=").append(owner).append(", size=").append(size)
-                .append(", resident=").append(resident).append(", share=").append(share).append(", cpuTotal=")
-                .append(cpuTotal).append(", cpuPerc=").append(cpuPerc).append(", baseName=").append(baseName)
-                .append(", startTime=").append(startTime).append(", args=");
+        sb.append("pid=").append(pid).append(", owner=").append(owner).append(", size=").append(size).append(", " +
+                "" + "resident=").append(resident).append(", share=").append(share).append(", " +
+                "" + "cpuTotal=").append(cpuTotal).append(", cpuPerc=").append(cpuPerc).append(", " +
+                "" + "memPerc=").append(memPerc).append(", baseName = ").append(baseName).append(", " +
+                "" + "startTime = ").append(startTime).append(", args = ");
         for (String arg : args) {
             if (!arg.equalsIgnoreCase("")) {
                 sb.append(arg).append(",");
