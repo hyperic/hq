@@ -66,6 +66,7 @@ import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.common.util.MessagePublisher;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
+import org.hyperic.hq.livedata.formatters.TopFormatter;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.data.MeasurementDataSourceException;
@@ -1024,7 +1025,7 @@ public class DataManagerImpl implements DataManager {
         }
         try {
             byte[] unCompressedData = topNManager.uncompressData(data.getData());
-            return TopReport.fromSerializedForm(unCompressedData).toString();
+            return TopFormatter.formatHtml(TopReport.fromSerializedForm(unCompressedData));
         } catch (Exception e) {
             log.error("Error un serializing TopN data", e);
         }

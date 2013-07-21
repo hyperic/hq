@@ -7,6 +7,17 @@
 <%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <tiles:importAttribute name="hideLogs" ignore="true"/>
 <jsu:script>
+    hqDojo.require("dijit.dijit");
+    hqDojo.require("dijit.Dialog");
+    var topNDia = new hqDijit.Dialog({
+        id: 'TopN_popup',
+        refocus: true,
+        autofocus: false,
+        opacity: 0,
+        title: "TopN"
+    });
+</jsu:script>
+<jsu:script>
   	var semiIndex = imagePath.indexOf(";");
   	if (semiIndex != -1)
     	imagePath = imagePath.substring(0, semiIndex);
@@ -28,7 +39,8 @@
     }
 
     function displayTopN(response, args){
-        alert(response.topn);
+        topNDia.set("content",response.topn);
+        topNDia.show();
     }
   	<c:forEach var="timeTick" items="${timeIntervals}">
     	overlay.times.push('<hq:dateFormatter value="${timeTick.time}"/>');

@@ -198,6 +198,7 @@ class TopNScheduler {
         report.setCpu(data.getCpu().toString());
         report.setMem(data.getMem().toString());
         report.setSwap(data.getSwap().toString());
+        report.setProcStat(data.getProcStat().toString());
         for (ProcessData process : data.getProcesses()) {
             ProcessReport processReport = new ProcessReport(process);
             report.addProcess(processReport);

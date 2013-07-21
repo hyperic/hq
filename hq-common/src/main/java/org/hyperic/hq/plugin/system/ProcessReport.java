@@ -10,14 +10,15 @@ public class ProcessReport implements Serializable {
     private static final long serialVersionUID = 1L;
     private long pid;
     private String owner;
-    private long size;
-    private long resident;
-    private long share;
-    private long cpuTotal;
-    private double cpuPerc;
-    private double memPerc;
+    private String size;
+    private String resident;
+    private String share;
+    private String cpuTotal;
+    private String cpuPerc;
+    private String memPerc;
+    private char state;
     private String baseName;
-    private long startTime;
+    private String startTime;
     private String[] args;
 
     public ProcessReport() {
@@ -26,15 +27,17 @@ public class ProcessReport implements Serializable {
     public ProcessReport(ProcessData process) {
         this.pid = process.getPid();
         this.owner = process.getOwner();
-        this.size = process.getSize();
-        this.resident = process.getResident();
-        this.share = process.getShare();
-        this.cpuTotal = process.getCpuTotal();
-        this.cpuPerc = process.getCpuPerc();
-        this.memPerc = process.getMemPerc();
+        this.startTime = process.getFormattedStartTime();
+        this.size = process.getFormattedSize();
+        this.resident = process.getFormattedResident();
+        this.share = process.getFormattedShare();
+        this.cpuTotal = process.getFormattedCpuTotal();
+        this.cpuPerc = process.getFormattedCpuPerc();
+        this.memPerc = process.getFormattedMemPerc();
         this.baseName = process.getBaseName();
-        this.startTime = process.getStartTime();
-        this.setArgs(process.getProcArgs());
+        this.state = process.getState();
+
+       this.setArgs(process.getProcArgs());
     }
 
     public long getPid() {
@@ -53,36 +56,44 @@ public class ProcessReport implements Serializable {
         this.owner = owner;
     }
 
-    public long getSize() {
+    public String getSize() {
         return size;
     }
 
-    public void setSize(long size) {
+    public void setSize(String size) {
         this.size = size;
     }
 
-    public long getResident() {
+    public String getResident() {
         return resident;
     }
 
-    public void setResident(long resident) {
+    public void setResident(String resident) {
         this.resident = resident;
     }
 
-    public long getShare() {
+    public String getShare() {
         return share;
     }
 
-    public void setShare(long share) {
+    public void setShare(String share) {
         this.share = share;
     }
 
-    public double getCpuPerc() {
+    public String getCpuPerc() {
         return cpuPerc;
     }
 
-    public void setCpuPerc(double cpuPerc) {
+    public void setCpuPerc(String cpuPerc) {
         this.cpuPerc = cpuPerc;
+    }
+
+    public String getMemPerc() {
+        return memPerc;
+    }
+
+    public void setMemPerc(String memPerc) {
+        this.memPerc = memPerc;
     }
 
     public String getBaseName() {
@@ -93,20 +104,28 @@ public class ProcessReport implements Serializable {
         this.baseName = baseName;
     }
 
-    public long getCpuTotal() {
+    public String getCpuTotal() {
         return cpuTotal;
     }
 
-    public void setCpuTotal(long cpuTotal) {
+    public void setCpuTotal(String cpuTotal) {
         this.cpuTotal = cpuTotal;
     }
 
-    public long getStartTime() {
+    public String getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(long startTime) {
+    public void setStartTime(String startTime) {
         this.startTime = startTime;
+    }
+
+    public char getState() {
+        return state;
+    }
+
+    public void setState(char state) {
+        this.state = state;
     }
 
     public String[] getArgs() {
@@ -120,28 +139,30 @@ public class ProcessReport implements Serializable {
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         pid = in.readLong();
         owner = in.readUTF();
-        size = in.readLong();
-        resident = in.readLong();
-        share = in.readLong();
-        cpuTotal = in.readLong();
-        cpuPerc = in.readDouble();
-        memPerc = in.readDouble();
+        size = in.readUTF();
+        resident = in.readUTF();
+        share = in.readUTF();
+        cpuTotal = in.readUTF();
+        cpuPerc = in.readUTF();
+        memPerc = in.readUTF();
         baseName = in.readUTF();
-        startTime = in.readLong();
+        startTime = in.readUTF();
+        state = in.readChar();
         args = (String[]) in.readObject();
     }
 
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.writeLong(pid);
         out.writeUTF(owner);
-        out.writeLong(size);
-        out.writeLong(resident);
-        out.writeLong(share);
-        out.writeLong(cpuTotal);
-        out.writeDouble(cpuPerc);
-        out.writeDouble(memPerc);
+        out.writeUTF(size);
+        out.writeUTF(resident);
+        out.writeUTF(share);
+        out.writeUTF(cpuTotal);
+        out.writeUTF(cpuPerc);
+        out.writeUTF(memPerc);
         out.writeUTF(baseName);
-        out.writeLong(startTime);
+        out.writeUTF(startTime);
+        out.writeChar(state);
         out.writeObject(args);
     }
 
@@ -161,6 +182,4 @@ public class ProcessReport implements Serializable {
         sb.setLength(sb.length() - 1);
         return sb.toString();
     }
-
-
 }

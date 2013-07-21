@@ -33,7 +33,9 @@ import org.hyperic.hq.livedata.FormatType;
 import org.hyperic.hq.livedata.LiveDataFormatter;
 import org.hyperic.hq.livedata.shared.LiveDataCommand;
 import org.hyperic.hq.plugin.system.ProcessData;
+import org.hyperic.hq.plugin.system.ProcessReport;
 import org.hyperic.hq.plugin.system.TopData;
+import org.hyperic.hq.plugin.system.TopReport;
 import org.hyperic.hq.plugin.system.UptimeData;
 import org.hyperic.sigar.CpuPerc;
 import org.hyperic.sigar.Mem;
@@ -70,10 +72,84 @@ public class TopFormatter
         return "Text stuff " + td;
     }
 
-    private String h(String s) {
+    private static String h(String s) {
         return StringEscapeUtils.escapeHtml(s);
     }
-    
+
+    public static String formatHtml(TopReport t) {
+        StringBuilder buf = new StringBuilder();
+
+        buf.append("<div class='top_livedata'><div class='fivepad' style='background:#efefef;" +
+                "'><b>Time</b>: ")
+                     .append(h(t.getUpTime()))
+                .append("<br/>");
+
+        buf.append("<b>CPU States</b>: ")
+                .append(h(BUNDLE.format("formatter.top.cpuStates",
+                        t.getCpu())))
+                .append("<br/>");
+
+         buf.append("<b>Mem</b>: ")
+                .append(h(BUNDLE.format("formatter.top.memUse",
+                       t.getMem())))
+                .append("<br/>");
+
+        buf.append("<b>Swap</b>: ")
+                .append(h(BUNDLE.format("formatter.top.memUse",
+                        t.getSwap())))
+                .append("<br/>");
+
+             buf.append("<b>Processes</b>: ")
+                .append(h(BUNDLE.format("formatter.top.procSummary",
+                        t.getProcStat())))
+                .append("<br/><br/>");
+
+        buf.append("</div><table cellpadding='0' cellspacing='0' width='100%'><thead><tr><td>")
+                .append(BUNDLE.format("formatter.top.proc.pid"))
+                .append("</td><td>")
+                .append(BUNDLE.format("formatter.top.proc.user"))
+                .append("</td><td>")
+                .append(BUNDLE.format("formatter.top.proc.stime"))
+                .append("</td><td>")
+                .append(BUNDLE.format("formatter.top.proc.size"))
+                .append("</td><td>")
+                .append(BUNDLE.format("formatter.top.proc.rss"))
+                .append("</td><td>")
+                .append(BUNDLE.format("formatter.top.proc.share"))
+                .append("</td><td>")
+                .append(BUNDLE.format("formatter.top.proc.state"))
+                .append("</td><td>")
+                .append(BUNDLE.format("formatter.top.proc.time"))
+                .append("</td><td>")
+                .append(BUNDLE.format("formatter.top.proc.cpu"))
+                .append("</td><td>")
+                .append(BUNDLE.format("formatter.top.proc.mem"))
+                .append("</td><td>")
+                .append(BUNDLE.format("formatter.top.proc.name"))
+                .append("</td></tr></thead><tbody>");
+
+        for(ProcessReport pr : t.getProcesses()){
+            char[] st = new char[1];
+            st[0] = pr.getState();
+            String str = new String(buf);
+            char stateStr = ((str.trim().length() == 0) ? '-' : pr.getState());
+            buf.append("<tr><td>").append(pr.getPid()).append("</td>")
+                    .append("<td>").append(pr.getOwner()).append("</td>")
+                    .append("<td>").append(pr.getStartTime()).append("</td>")
+                    .append("<td>").append(pr.getSize()).append("</td>")
+                    .append("<td>").append(pr.getResident()).append("</td>")
+                    .append("<td>").append(pr.getShare()).append("</td>")
+                    .append("<td>").append(stateStr).append("</td>")
+                    .append("<td>").append(pr.getCpuTotal()).append("</td>")
+                    .append("<td>").append(pr.getCpuPerc()).append("</td>")
+                    .append("<td>").append(pr.getMemPerc()).append("</td>")
+                    .append("<td>").append(h(pr.getBaseName())).append("</td></tr>");
+        }
+
+        buf.append("</tbody></table></div>");
+        return buf.toString();
+    }
+
     private String formatHtml(ConfigResponse cfg, TopData t) {
         StringBuffer r = new StringBuffer();
         DateFormat dateFmt = 

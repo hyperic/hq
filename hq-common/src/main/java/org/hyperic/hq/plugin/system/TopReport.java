@@ -14,6 +14,7 @@ public class TopReport implements Serializable {
     private static final long serialVersionUID = 1L;
     private long createTime;
     private String upTime;
+    private String procStat;
     private String cpu;
     private String mem;
     private String swap;
@@ -63,6 +64,14 @@ public class TopReport implements Serializable {
         this.swap = swap;
     }
 
+    public void setProcStat(String procStat) {
+        this.procStat = procStat;
+    }
+
+    public String getProcStat() {
+        return procStat;
+    }
+
     public Set<ProcessReport> getProcesses() {
         return processes;
     }
@@ -82,6 +91,7 @@ public class TopReport implements Serializable {
         cpu = in.readUTF();
         mem = in.readUTF();
         swap = in.readUTF();
+        procStat = in.readUTF();
         processes = (Set<ProcessReport>) in.readObject();
     }
 
@@ -91,6 +101,7 @@ public class TopReport implements Serializable {
         out.writeUTF(cpu);
         out.writeUTF(mem);
         out.writeUTF(swap);
+        out.writeUTF(procStat);
         out.writeObject(processes);
     }
 
