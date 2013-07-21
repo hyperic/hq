@@ -1653,7 +1653,7 @@ public class ResourceManagerImpl implements ResourceManager {
         for(Map.Entry<Resource, ConfigResponse> rscConfE:rscConf.entrySet()) {
             ConfigResponse conf = rscConfE.getValue();
             String removable = conf.getValue(Collector.REMOVABLE);
-            if (removable!=null) {
+            if (removable!=null&&"true".equals(removable)) {
                 removableResources.add(rscConfE.getKey());
             }
         }
