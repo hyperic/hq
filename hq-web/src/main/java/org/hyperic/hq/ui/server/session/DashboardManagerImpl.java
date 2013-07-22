@@ -45,14 +45,13 @@ import org.hyperic.hq.authz.server.session.RoleCreatedEvent;
 import org.hyperic.hq.authz.server.session.RoleDeleteRequestedEvent;
 import org.hyperic.hq.authz.server.session.SubjectDeleteRequestedEvent;
 import org.hyperic.hq.authz.server.session.events.subject.RoleMambersChangedZEvent;
-import org.hyperic.hq.authz.server.session.events.subject.SubjectRemovedFromRolesEvent;
+import org.hyperic.hq.authz.server.session.events.subject.SubjectRemovedFromRolesZevent;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
-import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.server.session.Crispo;
 import org.hyperic.hq.common.server.session.CrispoOption;
 import org.hyperic.hq.common.shared.CrispoManager;
@@ -267,8 +266,8 @@ public class DashboardManagerImpl implements DashboardManager, ApplicationListen
 
     public void processEvents(List<RoleMambersChangedZEvent> events) {
         for (final RoleMambersChangedZEvent zevent : events) {
-            if (zevent instanceof SubjectRemovedFromRolesEvent) {
-                handleSubjectRemovedFromRolesEvent((SubjectRemovedFromRolesEvent) zevent);
+            if (zevent instanceof SubjectRemovedFromRolesZevent) {
+                handleSubjectRemovedFromRolesZevent((SubjectRemovedFromRolesZevent) zevent);
             }
         }
     }
@@ -308,13 +307,13 @@ public class DashboardManagerImpl implements DashboardManager, ApplicationListen
         }
     }
     
-    private void handleSubjectRemovedFromRolesEvent(SubjectRemovedFromRolesEvent event) {
-            AuthzSubject subject = event.getSubject();
-            Collection<Role> roles = event.getRoles();
+    private void handleSubjectRemovedFromRolesZevent(SubjectRemovedFromRolesZevent zevent) {
+            AuthzSubject subject = zevent.getSubject();
+            Collection<Role> roles = zevent.getRoles();
             for (Role role : roles){
                 roleRemovedFromSubject(role, subject);
             }
-    }//EOM handleSubjectRemovedFromRolesEvent 
+    }//EOM handleSubjectRemovedFromRolesZevent 
 
 
     @Transactional(readOnly = true)
