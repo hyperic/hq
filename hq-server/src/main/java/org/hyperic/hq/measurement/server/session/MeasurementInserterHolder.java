@@ -38,6 +38,8 @@ public class MeasurementInserterHolder implements ApplicationContextAware {
     private ApplicationContext ctx;
     private DataInserter availDataInserter;
     private DataInserter dataInserter;
+    private DataInserter topNInserter;
+
 
     @Autowired
     public MeasurementInserterHolder(SynchronousAvailDataInserter synchronousAvailDataInserter) {
@@ -63,7 +65,14 @@ public class MeasurementInserterHolder implements ApplicationContextAware {
         return dataInserter;
     }
 
-    
+    public DataInserter getTopNInserter() {
+        if (topNInserter == null) {
+            topNInserter = ctx.getBean(TopNDataInserter.class);
+        }
+        return topNInserter;
+    }
+
+
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         ctx = applicationContext;
     }

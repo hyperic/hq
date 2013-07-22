@@ -346,7 +346,7 @@ public class ReportProcessorImpl implements ReportProcessor {
     public void handleTopNReport(List<TopReport> reports, String agentToken) throws DataInserterException {
         final boolean debug = log.isDebugEnabled();
         final StopWatch watch = new StopWatch();
-        DataInserter d = measurementInserterManager.getDataInserter();
+        DataInserter d = measurementInserterManager.getTopNInserter();
         List<TopNData> topNs = new LinkedList<TopNData>();
         Agent agent = null;
         try {
