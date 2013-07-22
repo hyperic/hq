@@ -46,7 +46,8 @@ public class Resource extends AuthzNamedBean implements Comparable<Resource> {
     private Collection<ResourceEdge>   _fromEdges = new ArrayList<ResourceEdge>();
     private Collection<ResourceEdge>   _toEdges = new ArrayList<ResourceEdge>();
     private Collection<ResourceGroup>  _groupBag = new ArrayList<ResourceGroup>();
-
+    private boolean isRemovable;
+    
     protected Resource() {
     }
 
@@ -144,6 +145,14 @@ public class Resource extends AuthzNamedBean implements Comparable<Resource> {
         _virtuals = virtuals;
     }
 
+    public boolean getRemovable() {
+        return this.isRemovable;
+    }
+    
+    protected void setRemovable(boolean isRemovable) {
+        this.isRemovable = isRemovable;
+    }
+    
     protected void setFromEdges(Collection<ResourceEdge> e) {
         _fromEdges = e;
     }

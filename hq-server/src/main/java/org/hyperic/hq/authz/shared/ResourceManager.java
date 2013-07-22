@@ -394,4 +394,5 @@ public interface ResourceManager {
 
     public Collection<Resource> getOrphanedResources();
 
+    public Collection<Resource> getRemovableChildren(AuthzSubject subject, Resource parent);
 }
