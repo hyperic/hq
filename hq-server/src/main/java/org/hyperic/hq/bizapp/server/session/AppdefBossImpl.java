@@ -58,7 +58,7 @@ import org.hyperic.hq.appdef.server.session.DownResSortField;
 import org.hyperic.hq.appdef.server.session.DownResource;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformType;
-import org.hyperic.hq.appdef.server.session.ResourceContentChangedEvent;
+import org.hyperic.hq.appdef.server.session.ResourceContentChangedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerType;
@@ -3097,8 +3097,8 @@ public class AppdefBossImpl implements AppdefBoss , ApplicationContextAware {
                 ids.add(entityId);
                 Resource r = this.resourceManager.findResource(entityId);
                 Integer rid = r.getId();
-                ResourceContentChangedEvent contentChangedEvent = new ResourceContentChangedEvent(rid,null,diff.getAllConfigDiff(),null);
-                List<ResourceContentChangedEvent> updateEvents = new ArrayList<ResourceContentChangedEvent>();
+                ResourceContentChangedZevent contentChangedEvent = new ResourceContentChangedZevent(rid,null,diff.getAllConfigDiff(),null);
+                List<ResourceContentChangedZevent> updateEvents = new ArrayList<ResourceContentChangedZevent>();
                 updateEvents.add(contentChangedEvent);
                 zEventManager.enqueueEventsAfterCommit(updateEvents);
             }

@@ -4,13 +4,13 @@ import java.util.Map;
 
 import org.hyperic.hq.bizapp.shared.AllConfigDiff;
 
-public class ResourceContentChangedEvent extends InventoryEvent {
+public class ResourceContentChangedZevent extends InventoryEvent {
     protected Integer resourceID;
     protected String resourceName;
     protected AllConfigDiff allConfigs;
     protected Map<String, String> cProps;
     
-    public ResourceContentChangedEvent(Integer rid, String resourceName, AllConfigDiff allConfigs, Map<String, String> cProps) {
+    public ResourceContentChangedZevent(Integer rid, String resourceName, AllConfigDiff allConfigs, Map<String, String> cProps) {
         this.resourceID=rid;
         this.allConfigs=allConfigs;
         this.cProps=cProps;

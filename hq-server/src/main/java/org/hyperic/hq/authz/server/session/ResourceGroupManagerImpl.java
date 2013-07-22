@@ -886,7 +886,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         Iterator<ResourceGroup> i = all.iterator();
         while (i.hasNext()) {
             ResourceGroup g = i.next();
-            if (whoami == g.getResource().getOwner())
+            if (whoami.equals(g.getResource().getOwner()))
                 ownerGroups.add(g);
         }
 
