@@ -270,6 +270,9 @@ public class ServerDAO
 
     @SuppressWarnings("unchecked")
     public Collection<Server> getServers(Collection<Resource> resources) {
+        if (resources == null || resources.isEmpty()) {
+            return Collections.emptyList();
+        }
         String hql = "select s from Server s where s.resource in (:resources)";
         Query q = createQuery(hql).setParameterList("resources",resources);
         return q.list();
