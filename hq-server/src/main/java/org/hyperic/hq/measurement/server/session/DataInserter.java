@@ -32,16 +32,14 @@ import java.util.List;
  * {@link ReportProcessorImpl} and sends it to the {@link DataManagerImpl} 
  * to put into the DB.
  */
-public interface DataInserter {
+public interface DataInserter<T> {
     /**
      * Insert data into the DB, possibly blocking.
      * 
-     * @param metricData a list of {@link DataPoint}s
+     * @param data a list
      */
-    public void insertMetrics(List<DataPoint> metricData)
+    public void insertData(List<T> data)
         throws InterruptedException, DataInserterException;
-
-    public void insertTopN(List<TopNData> topNData) throws InterruptedException, DataInserterException;
 
     /**
      * Insert priority data into the DB, possibly blocking.  This may or may not

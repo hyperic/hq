@@ -378,9 +378,9 @@ public class ReportProcessorImpl implements ReportProcessor {
 
         if (debug) watch.markTimeBegin("insertTopNToDB");
         try {
-            d.insertTopN(topNs);
+            d.insertData(topNs);
         } catch (InterruptedException e) {
-            throw new SystemException("Interrupted while attempting to " + "insert topN data");
+            throw new SystemException("Interrupted while attempting to insert topN data", e);
         }
         if (debug) watch.markTimeEnd("insertTopNToDB");
     }

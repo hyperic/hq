@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.lang.time.DurationFormatUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,7 +34,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +42,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
-public class TopNDataInserter implements DataInserter {
+public class TopNDataInserter implements DataInserter<TopNData> {
 
     private static final Log LOG = LogFactory.getLog(TopNDataInserter.class);
     private final DataManager dataManager;
@@ -61,7 +61,7 @@ public class TopNDataInserter implements DataInserter {
         overflowCounter = new AtomicInteger(0);
     }
 
-    public void insertTopN(List<TopNData> topNData) {
+    public void insertData(List<TopNData> topNData) {
         if (LOG.isTraceEnabled()) {
             LOG.trace(topNData);
         }
@@ -100,10 +100,6 @@ public class TopNDataInserter implements DataInserter {
 
     public Object getLock() {
         return null;
-    }
-
-    public void insertMetrics(List<DataPoint> metricData) throws InterruptedException {
-        throw new NotImplementedException();
     }
 
     public void insertMetrics(List<DataPoint> metricData, boolean isPriority) throws InterruptedException,

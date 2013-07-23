@@ -31,7 +31,6 @@ import org.hyperic.hq.measurement.shared.DataManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * A {@link DataInserter} which immediately calls addData in the data manager
@@ -40,7 +39,7 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 @Component
 @Scope("prototype")
 public class SynchronousDataInserter 
-    implements DataInserter
+    implements DataInserter<DataPoint>
 {
     private final Object lock = new Object();
 
@@ -53,12 +52,8 @@ public class SynchronousDataInserter
     }
 
  
-    public void insertMetrics(List<DataPoint> metricData) throws InterruptedException {
+    public void insertData(List<DataPoint> metricData) throws InterruptedException {
         dataManager.addData(metricData);
-    }
-
-    public void insertTopN(List<TopNData> topNData) throws InterruptedException {
-        throw new NotImplementedException();
     }
 
     public Object getLock() {
@@ -68,12 +63,12 @@ public class SynchronousDataInserter
    
     public void insertMetrics(List<DataPoint> metricData, boolean isPriority)
         throws InterruptedException, DataInserterException {
-        insertMetrics(metricData);
+        insertData(metricData);
     }
 
 
 	public void insertMetricsFromServer(List<DataPoint> metricData)
 			throws InterruptedException, DataInserterException {
-        insertMetrics(metricData);
+        insertData(metricData);
 	}
 }

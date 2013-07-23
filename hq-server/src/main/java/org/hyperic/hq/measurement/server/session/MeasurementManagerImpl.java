@@ -512,7 +512,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                 DataInserter inserter = measurementInserterHolder.getAvailDataInserter();
                 synchronized (inserter.getLock()) {
                 	try {
-                		inserter.insertMetrics(l);
+                		inserter.insertData(l);
                 	} catch (Exception exp) {
                 		log.warn("Problem inserting new availability data for measurement '" + availMeasurement + "'", exp);
                 	}
