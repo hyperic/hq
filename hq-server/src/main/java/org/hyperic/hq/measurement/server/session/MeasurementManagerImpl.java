@@ -95,11 +95,13 @@ import org.hyperic.hq.measurement.shared.TrackerManager;
 import org.hyperic.hq.product.MeasurementPluginManager;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricValue;
+import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.shared.ProductManager;
 import org.hyperic.hq.util.Reference;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.BeansException;
@@ -1588,8 +1590,18 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
             } catch (ConfigFetchException e) {
                 log.warn("Config not set for [" + aeid + "] (this is usually ok): " + e);
-            } catch (Exception e) {
-                log.warn("Unable to enable default metrics for [" + aeid + "]", e);
+            } catch (MeasurementCreateException e) {
+                log.error("Unable to create measurements for [" + aeid + "]: " + e, e);
+            } catch (PermissionException e) {
+                log.error(e,e);
+            } catch (BeansException e) {
+                log.error(e,e);
+            } catch (PluginException e) {
+                log.error(e,e);
+            } catch (AppdefEntityNotFoundException e) {
+                log.error(e,e);
+            } catch (EncodingException e) {
+                log.error(e,e);
             } 
         }
         srnManager.scheduleInBackground(eids, true, false);
