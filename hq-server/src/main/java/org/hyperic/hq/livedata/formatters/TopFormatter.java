@@ -78,10 +78,11 @@ public class TopFormatter
 
     public static String formatHtml(TopReport t) {
         StringBuilder buf = new StringBuilder();
-
-        buf.append("<div class='top_livedata'><div class='fivepad' style='background:#efefef;" +
-                "'><b>Time</b>: ")
-                     .append(h(t.getUpTime()))
+        buf.append("<div id='topn_result_cont'>\n");
+        buf.append("<div id='result' style='border: 1px solid #7BAFFF;'>")
+                .append("<div class='fivepad' style='background:#efefef;'>")
+                .append("<b>Time</b>: ")
+                .append(h(t.getUpTime()))
                 .append("<br/>");
 
         buf.append("<b>CPU States</b>: ")
@@ -104,7 +105,7 @@ public class TopFormatter
                         t.getProcStat())))
                 .append("<br/><br/>");
 
-        buf.append("</div><table cellpadding='0' cellspacing='0' width='100%'><thead><tr><td>")
+        buf.append("</div>\n<table table-layout:'fixed' cellpadding='0' cellspacing='0' width='100%'><thead><tr><td>")
                 .append(BUNDLE.format("formatter.top.proc.pid"))
                 .append("</td><td>")
                 .append(BUNDLE.format("formatter.top.proc.user"))
@@ -143,10 +144,10 @@ public class TopFormatter
                     .append("<td>").append(pr.getCpuTotal()).append("</td>")
                     .append("<td>").append(pr.getCpuPerc()).append("</td>")
                     .append("<td>").append(pr.getMemPerc()).append("</td>")
-                    .append("<td>").append(h(pr.getBaseName())).append("</td></tr>");
+                    .append("<td style='word-wrap:break-word;'>").append(h(pr.getBaseName())).append("</td></tr>");
         }
 
-        buf.append("</tbody></table></div>");
+        buf.append("</tbody></table></div></div>");
         return buf.toString();
     }
 
