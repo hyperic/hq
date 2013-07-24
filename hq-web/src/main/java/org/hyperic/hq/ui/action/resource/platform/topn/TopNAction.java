@@ -91,7 +91,7 @@ public class TopNAction extends BaseAction {
         int rid = resourceManager.findResource(eid).getId();
         String data = dataManager.getTopNDataAsString(rid, longTime);
         if(data == null){
-            data = "TopN Data Unavailable";
+            data = "Data unavailable";
         }
         JSONObject topN = new JSONObject();
         topN.put("topn", data);
