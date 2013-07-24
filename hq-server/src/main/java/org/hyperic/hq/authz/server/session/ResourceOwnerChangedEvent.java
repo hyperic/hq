@@ -34,9 +34,12 @@ import org.springframework.context.ApplicationEvent;
  */
 @SuppressWarnings("serial")
 public class ResourceOwnerChangedEvent extends ApplicationEvent {
+    
+    final private AuthzSubject oldOwner;
 
-    public ResourceOwnerChangedEvent(Resource resource) {
+    public ResourceOwnerChangedEvent(Resource resource, AuthzSubject oldOwner) {
         super(resource);
+        this.oldOwner = oldOwner;
     }
     
     public ResourceGroup getGroup() {
@@ -45,6 +48,10 @@ public class ResourceOwnerChangedEvent extends ApplicationEvent {
 
     public Resource getResource() {
         return (Resource) getSource();
+    }
+
+    public AuthzSubject getOldOwner() {
+        return oldOwner;
     }
 
 }

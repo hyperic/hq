@@ -1773,13 +1773,14 @@ public class AppdefBossImpl implements AppdefBoss , ApplicationContextAware {
             if (eid.isGroup()) {
                 ResourceGroup g = resourceGroupManager.findResourceGroupById(caller, eid.getId());
                 resourceGroupManager.changeGroupOwner(caller, g, newOwner);
-                applicationContext.publishEvent(new ResourceOwnerChangedEvent(g.getResource()));
+                applicationContext.publishEvent(new ResourceOwnerChangedEvent(g.getResource(), g.getResource().getOwner()));
                 return findGroup(sessionId, eid.getId());
             }
 
             AppdefEntityValue aev = new AppdefEntityValue(eid, caller);
             appdefManager.changeOwner(caller, aev.getResourcePOJO(), newOwner);
-            applicationContext.publishEvent(new ResourceOwnerChangedEvent(aev.getResourcePOJO().getResource()));
+            Resource aevResource = aev.getResourcePOJO().getResource();
+            applicationContext.publishEvent(new ResourceOwnerChangedEvent(aevResource, aevResource.getOwner()));
             return aev.getResourceValue();
         } catch (PermissionException e) {
             throw e;

@@ -533,9 +533,9 @@ public class PermissionManagerImpl extends PermissionManager {
     }
     
     @Override
-    public <T> Set<T> findViewableResources(AuthzSubject groupOwner, Collection<Role> groupRoles,
+    public <T> Set<T> findViewableResources(AuthzSubject subj, Collection<Role> roles,
             Collection<ResourceType> resourceTypes, IntegerTransformer<T> transformer) {
-        Set<T> resourcesViewableByOwner = findViewableResources(groupOwner, resourceTypes, PageControl.SORT_UNSORTED, transformer);        
+        Set<T> resourcesViewableByOwner = findViewableResources(subj, resourceTypes, PageControl.SORT_UNSORTED, transformer);        
         
         return resourcesViewableByOwner;                
     }    
