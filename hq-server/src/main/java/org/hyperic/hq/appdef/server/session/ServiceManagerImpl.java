@@ -1319,7 +1319,7 @@ public class ServiceManagerImpl implements ServiceManager {
         } else {
             service.updateService(existing);
             Resource r = service.getResource();
-            this.zeventManager.enqueueEventAfterCommit(new ResourceContentChangedEvent(r.getId(),r.getName(), null, changedProps));
+            this.zeventManager.enqueueEventAfterCommit(new ResourceContentChangedZevent(r.getId(),r.getName(), null, changedProps));
         }
         return service;
     }

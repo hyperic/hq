@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Expression;
 import org.hibernate.type.IntegerType;
@@ -257,5 +258,23 @@ public class ServerDAO
     public Collection<Server> getOrphanedServers() {
         String hql = "from Server where resource is null";
         return createQuery(hql).list();
+    }
+
+    public Collection<Server> getRemovableServers() {
+        String hql = "select s from Server s " + 
+                        "join s.resource r " +
+                        "join r.prototype p " + 
+                        "where p.removable = true";
+        return createQuery(hql).list();
+    }
+
+    @SuppressWarnings("unchecked")
+    public Collection<Server> getServers(Collection<Resource> resources) {
+        if (resources == null || resources.isEmpty()) {
+            return Collections.emptyList();
+        }
+        String hql = "select s from Server s where s.resource in (:resources)";
+        Query q = createQuery(hql).setParameterList("resources",resources);
+        return q.list();
     }
 }

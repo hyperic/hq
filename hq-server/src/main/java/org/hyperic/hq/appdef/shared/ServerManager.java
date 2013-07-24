@@ -27,6 +27,7 @@ package org.hyperic.hq.appdef.shared;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.Server;
@@ -338,5 +339,6 @@ public interface ServerManager {
     public Number getServerCount();
 
     public Collection<Server> getOrphanedServers();
+    public Collection<Server> getRemovableChildren(AuthzSubject subject, Resource parent);
 
 }

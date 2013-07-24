@@ -43,8 +43,9 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.server.session.RoleCreatedEvent;
 import org.hyperic.hq.authz.server.session.RoleDeleteRequestedEvent;
-import org.hyperic.hq.authz.server.session.RoleRemoveFromSubjectRequestedEvent;
 import org.hyperic.hq.authz.server.session.SubjectDeleteRequestedEvent;
+import org.hyperic.hq.authz.server.session.events.subject.RoleMambersChangedZEvent;
+import org.hyperic.hq.authz.server.session.events.subject.SubjectRemovedFromRolesZevent;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -58,6 +59,7 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Dashboard;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.shared.DashboardManager;
+import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +71,8 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class DashboardManagerImpl implements DashboardManager, ApplicationListener<AuthzApplicationEvent> {
+public class DashboardManagerImpl implements DashboardManager, ApplicationListener<AuthzApplicationEvent>, 
+    ZeventListener<RoleMambersChangedZEvent> {
 
     private Log log = LogFactory.getLog(DashboardManagerImpl.class);
 
@@ -256,10 +259,19 @@ public class DashboardManagerImpl implements DashboardManager, ApplicationListen
             roleRemoved(((RoleDeleteRequestedEvent)event).getRole());
         }else if(event instanceof RoleCreatedEvent) {
             roleCreated(((RoleCreatedEvent)event).getRole());
-        }else if(event instanceof RoleRemoveFromSubjectRequestedEvent) {
-            roleRemovedFromSubject(((RoleRemoveFromSubjectRequestedEvent)event).getRole(), ((RoleRemoveFromSubjectRequestedEvent)event).getSubject());
+//        }else if(event instanceof SubjectRemovedFromRolesEvent) {
+//            handleSubjectRemovedFromRolesEvent((SubjectRemovedFromRolesEvent) event);
         }
     }
+
+    public void processEvents(List<RoleMambersChangedZEvent> events) {
+        for (final RoleMambersChangedZEvent zevent : events) {
+            if (zevent instanceof SubjectRemovedFromRolesZevent) {
+                handleSubjectRemovedFromRolesZevent((SubjectRemovedFromRolesZevent) zevent);
+            }
+        }
+    }
+
 
     private void roleRemoved(Role role) {
         RoleDashboardConfig cfg = dashDao.findDashboard(role);
@@ -294,6 +306,15 @@ public class DashboardManagerImpl implements DashboardManager, ApplicationListen
             }
         }
     }
+    
+    private void handleSubjectRemovedFromRolesZevent(SubjectRemovedFromRolesZevent zevent) {
+            AuthzSubject subject = zevent.getSubject();
+            Collection<Role> roles = zevent.getRoles();
+            for (Role role : roles){
+                roleRemovedFromSubject(role, subject);
+            }
+    }//EOM handleSubjectRemovedFromRolesZevent 
+
 
     @Transactional(readOnly = true)
     public List<DashboardConfig> findEditableDashboardConfigs(WebUser user, AuthzBoss boss)

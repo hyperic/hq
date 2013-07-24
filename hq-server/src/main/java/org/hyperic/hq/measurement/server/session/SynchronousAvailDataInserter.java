@@ -30,10 +30,9 @@ import java.util.List;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 @Component
-public class SynchronousAvailDataInserter implements DataInserter {
+public class SynchronousAvailDataInserter implements DataInserter<DataPoint> {
 
     private final AvailabilityManager availabilityManager;
 
@@ -46,7 +45,7 @@ public class SynchronousAvailDataInserter implements DataInserter {
         this.availabilityCache = availabilityCache;
     }
 
-    public void insertMetrics(List<DataPoint> availData) throws InterruptedException,
+    public void insertData(List<DataPoint> availData) throws InterruptedException,
         DataInserterException {
         availabilityManager.addData(availData);
     }
@@ -57,16 +56,11 @@ public class SynchronousAvailDataInserter implements DataInserter {
 
     public void insertMetrics(List<DataPoint> metricData, boolean isPriority)
         throws InterruptedException, DataInserterException {
-        insertMetrics(metricData);
+        insertData(metricData);
     }
 
     public void insertMetricsFromServer(List<DataPoint> availData)
             throws InterruptedException, DataInserterException {
         availabilityManager.addData(availData, true, true);
     }
-
-    public void insertTopN(List<TopNData> topNData) throws InterruptedException, DataInserterException{
-        throw new NotImplementedException();
-    }
-
 }

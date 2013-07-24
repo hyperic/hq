@@ -39,7 +39,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("prototype")
 public class SynchronousDataInserter 
-    implements DataInserter
+    implements DataInserter<DataPoint>
 {
     private final Object lock = new Object();
 
@@ -52,12 +52,8 @@ public class SynchronousDataInserter
     }
 
  
-    public void insertMetrics(List<DataPoint> metricData) throws InterruptedException {
+    public void insertData(List<DataPoint> metricData) throws InterruptedException {
         dataManager.addData(metricData);
-    }
-
-    public void insertTopN(List<TopNData> topNData) throws InterruptedException {
-        dataManager.addTopData(topNData);
     }
 
     public Object getLock() {
@@ -67,12 +63,12 @@ public class SynchronousDataInserter
    
     public void insertMetrics(List<DataPoint> metricData, boolean isPriority)
         throws InterruptedException, DataInserterException {
-        insertMetrics(metricData);
+        insertData(metricData);
     }
 
 
 	public void insertMetricsFromServer(List<DataPoint> metricData)
 			throws InterruptedException, DataInserterException {
-        insertMetrics(metricData);
+        insertData(metricData);
 	}
 }

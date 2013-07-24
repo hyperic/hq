@@ -1635,7 +1635,7 @@ public class PlatformManagerImpl implements PlatformManager {
                 }
             }
             Resource r = plat.getResource();
-            this.zeventManager.enqueueEventAfterCommit(new ResourceContentChangedEvent(r.getId(),existing.getName(),
+            this.zeventManager.enqueueEventAfterCommit(new ResourceContentChangedZevent(r.getId(),existing.getName(),
                     null, changedProps));
             platformDAO.updatePlatform(plat, existing);
             return plat;
@@ -1818,7 +1818,7 @@ public class PlatformManagerImpl implements PlatformManager {
         platform.updateWithAI(aiplatform, subj.getName(), platform.getResource());
         Map<String, String> changedProperties = platform.changedProperties(aiplatform);
         if (!changedProperties.isEmpty()) {
-            this.zeventManager.enqueueEventAfterCommit(new ResourceContentChangedEvent(aiplatform.getId(),
+            this.zeventManager.enqueueEventAfterCommit(new ResourceContentChangedZevent(aiplatform.getId(),
                     aiplatform.getName(), null, changedProperties));
         }
         // If FQDN has changed, we need to update servers' auto-inventory tokens
@@ -2058,7 +2058,7 @@ public class PlatformManagerImpl implements PlatformManager {
                 if (log.isDebugEnabled()) { log.debug("no platform in the system is assosiated to the " + mac + " mac address"); }
                 continue;
             }
-            List<ResourceContentChangedEvent> events = new ArrayList<ResourceContentChangedEvent>(platforms.size());
+            List<ResourceContentChangedZevent> events = new ArrayList<ResourceContentChangedZevent>(platforms.size());
           
             for (Platform platform : platforms) {
                 try {
@@ -2069,7 +2069,7 @@ public class PlatformManagerImpl implements PlatformManager {
                     Map<String,String> changedProps = new HashMap<String,String>();
                     changedProps.put(HQConstants.MOID, null);
                     changedProps.put(HQConstants.VCUUID, null);
-                    ResourceContentChangedEvent contentChangedEvent = new ResourceContentChangedEvent(platform.getId(),null,null,changedProps);
+                    ResourceContentChangedZevent contentChangedEvent = new ResourceContentChangedZevent(platform.getId(),null,null,changedProps);
                     events.add(contentChangedEvent);
 
                 }catch(Throwable t) {
@@ -2092,7 +2092,7 @@ public class PlatformManagerImpl implements PlatformManager {
 
                 // there should only be 2 platforms
                 boolean platformUUIDUpdated = false;
-                List<ResourceContentChangedEvent> events = new ArrayList<ResourceContentChangedEvent>(platforms.size());
+                List<ResourceContentChangedZevent> events = new ArrayList<ResourceContentChangedZevent>(platforms.size());
                 for(Platform platform:platforms) {
                     try {
                         // only map the UUID for actual platforms, not for virtual ones discovered by the vc plugin
@@ -2106,7 +2106,7 @@ public class PlatformManagerImpl implements PlatformManager {
                         Map<String,String> changedProps = new HashMap<String,String>();
                         changedProps.put(HQConstants.MOID,moref);
                         changedProps.put(HQConstants.VCUUID,vcUUID);
-                        ResourceContentChangedEvent contentChangedEvent = new ResourceContentChangedEvent(platform.getId(),null,null,changedProps);
+                        ResourceContentChangedZevent contentChangedEvent = new ResourceContentChangedZevent(platform.getId(),null,null,changedProps);
                         events.add(contentChangedEvent);
                         platformUUIDUpdated=true;
                     } catch (AppdefEntityNotFoundException e) { log.error(e); }

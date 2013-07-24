@@ -1,17 +1,20 @@
 package org.hyperic.hq.authz.server.session.events.group;
 
+import java.util.Collection;
+
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.Role;
 
 public class GroupRemovedFromRolesEvent extends GroupRelatedEvent {
     
-    final Integer[] groupOldRoles;
+    final Collection<Role> groupOldRoles;
 
-    public GroupRemovedFromRolesEvent(ResourceGroup group, Integer[] ids) {
+    public GroupRemovedFromRolesEvent(ResourceGroup group, Collection<Role> roles) {
         super(group);
-        this.groupOldRoles = ids;
+        this.groupOldRoles = roles;
     }
 
-    public Integer[] getGroupOldRoles() {
+    public Collection<Role> getGroupOldRoles() {
         return groupOldRoles;
     }
 

@@ -34,6 +34,7 @@
 <link rel="shortcut icon" href="<html:rewrite page="/images/4.0/icons/favicon.ico"/>"/>
 <link rel="stylesheet" href="<html:rewrite page="/css/win.css"/>" type="text/css"/>
 <link rel="stylesheet" href="<html:rewrite page="/css/HQ_40.css"/>" type="text/css"/>
+<link rel="stylesheet" href="<html:rewrite page="/hqu/public/hqu.css"/>" type="text/css"/>
 <script>
 	var djConfig = {};
 	djConfig.parseOnLoad = true;

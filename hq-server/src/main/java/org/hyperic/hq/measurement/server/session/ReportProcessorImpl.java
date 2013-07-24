@@ -346,7 +346,7 @@ public class ReportProcessorImpl implements ReportProcessor {
     public void handleTopNReport(List<TopReport> reports, String agentToken) throws DataInserterException {
         final boolean debug = log.isDebugEnabled();
         final StopWatch watch = new StopWatch();
-        DataInserter d = measurementInserterManager.getDataInserter();
+        DataInserter d = measurementInserterManager.getTopNInserter();
         List<TopNData> topNs = new LinkedList<TopNData>();
         Agent agent = null;
         try {
@@ -378,9 +378,9 @@ public class ReportProcessorImpl implements ReportProcessor {
 
         if (debug) watch.markTimeBegin("insertTopNToDB");
         try {
-            d.insertTopN(topNs);
+            d.insertData(topNs);
         } catch (InterruptedException e) {
-            throw new SystemException("Interrupted while attempting to " + "insert topN data");
+            throw new SystemException("Interrupted while attempting to insert topN data", e);
         }
         if (debug) watch.markTimeEnd("insertTopNToDB");
     }

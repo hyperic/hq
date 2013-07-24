@@ -5,7 +5,7 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
-import org.hyperic.hq.appdef.server.session.ResourceContentChangedEvent;
+import org.hyperic.hq.appdef.server.session.ResourceContentChangedZevent;
 import org.hyperic.hq.bizapp.shared.AllConfigDiff;
 import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.common.shared.HQConstants;
@@ -17,10 +17,10 @@ import org.hyperic.util.config.ConfigResponse;
 import org.springframework.stereotype.Component;
 
 @Component("resourceContentUpdatedNotificationsZeventListener")
-public class ResourceContentUpdatedNotificationsZeventListener extends InventoryNotificationsZeventListener<ResourceContentChangedEvent> {
+public class ResourceContentUpdatedNotificationsZeventListener extends InventoryNotificationsZeventListener<ResourceContentChangedZevent> {
     @PostConstruct
     public void init() {
-        zEventManager.addBufferedListener(ResourceContentChangedEvent.class, (ZeventListener<ResourceContentChangedEvent>) Bootstrap.getBean(getListenersBeanName()));
+        zEventManager.addBufferedListener(ResourceContentChangedZevent.class, (ZeventListener<ResourceContentChangedZevent>) Bootstrap.getBean(getListenersBeanName()));
         concurrentStatsCollector.register(getConcurrentStatsCollectorType());
     }
     @Override
@@ -29,7 +29,7 @@ public class ResourceContentUpdatedNotificationsZeventListener extends Inventory
     }
     @SuppressWarnings("unchecked")
     @Override
-    protected ResourceChangedContentNotification createNotification(ResourceContentChangedEvent event) {
+    protected ResourceChangedContentNotification createNotification(ResourceContentChangedZevent event) {
         Integer rid = event.getResourceID();
         Map<String,String> configValues = new HashMap<String,String>(); 
         

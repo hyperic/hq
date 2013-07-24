@@ -14,7 +14,7 @@
         refocus: true,
         autofocus: false,
         opacity: 0,
-        title: "TopN"
+        title: "Top Processes"
     });
 </jsu:script>
 <jsu:script>
