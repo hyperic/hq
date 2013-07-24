@@ -34,6 +34,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.control.shared.ControlManager;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
+import org.hyperic.hq.measurement.shared.TopNManager;
 import org.hyperic.hq.measurement.shared.TrackerManager;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
@@ -47,15 +48,17 @@ public class ConfigValidatorImpl implements ConfigValidator {
     protected MeasurementManager measurementManager;
     protected TrackerManager trackerManager;
     protected ConfigManager configManager;
-    private ControlManager controlManager;
+    private final ControlManager controlManager;
+    private final TopNManager topNManager;
 
     @Autowired
     public ConfigValidatorImpl(ConfigManager configManager, MeasurementManager measurementManager,
-                               TrackerManager trackerManager, ControlManager controlManager) {
+            TrackerManager trackerManager, ControlManager controlManager, TopNManager topNManager) {
         this.configManager = configManager;
         this.measurementManager = measurementManager;
         this.trackerManager = trackerManager;
         this.controlManager = controlManager;
+        this.topNManager = topNManager;
     }
 
     public void validate(AuthzSubject subject, String type, AppdefEntityID[] ids) throws PermissionException,
@@ -104,22 +107,24 @@ public class ConfigValidatorImpl implements ConfigValidator {
             } catch (PluginException e) {
                 throw new InvalidConfigException("Unable to modify config " + "track config: " + e.getMessage(), e);
             }
+
+            topNManager.scheduleTopNCollection(ids[i], responses[i]);
         }
     }
 
     private void updateControlConfigs(AuthzSubject subject, AppdefEntityID[] ids) throws PermissionException,
         ConfigFetchException, EncodingException, InvalidConfigException {
 
-        for (int i = 0; i < ids.length; i++) {
+        for (AppdefEntityID id : ids) {
             try {
-                controlManager.checkControlEnabled(subject, ids[i]);
+                controlManager.checkControlEnabled(subject, id);
             } catch (PluginException e) {
                 // Not configured for control
                 continue;
             }
 
             try {
-                controlManager.configureControlPlugin(subject, ids[i]);
+                controlManager.configureControlPlugin(subject, id);
             } catch (Exception e) {
                 throw new InvalidConfigException(e.getMessage());
             }

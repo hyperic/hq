@@ -59,13 +59,14 @@ public class SigarPlatformDetector extends PlatformDetector {
     private String ip;
     private boolean ipDiscover;
     private PluginManager manager;
-    private Map ipIgnore = new HashMap();
+    private final Map ipIgnore = new HashMap();
     private boolean hasControlActions ; 
     
     public SigarPlatformDetector() { super() ; }//EOM 
     
     public SigarPlatformDetector(final boolean hasPlatformControlActions) { this.hasControlActions = hasPlatformControlActions ; }//EOM 
 
+    @Override
     public void init(PluginManager manager) throws PluginException {
         super.init(manager);
         Properties props = manager.getProperties();
@@ -142,10 +143,13 @@ public class SigarPlatformDetector extends PlatformDetector {
      * Performs all the actual platform detection.
      * @param platformConfig ConfigResponse for the existing platform, if any.
      */
+    @Override
     public PlatformResource getPlatformResource(ConfigResponse config) 
         throws PluginException {        
         PlatformResource platform = new PlatformResource();
-        if(this.hasControlActions) platform.setControlConfig() ; 
+        if(this.hasControlActions) {
+            platform.setControlConfig() ;
+        } 
         ConfigResponse cprops = new ConfigResponse();
 
         platform.setPlatformTypeName(OperatingSystemReflection.getName());
@@ -182,8 +186,7 @@ public class SigarPlatformDetector extends PlatformDetector {
                                       "00:00:00:00:00:00");
             }
 
-            for (int i=0; i<interfaces.length; i++) {
-                String name = interfaces[i];
+            for (String name : interfaces) {
                 NetInterfaceConfig ifconfig;
                 try {
                     ifconfig = sigar.getNetInterfaceConfig(name);
@@ -343,6 +346,7 @@ public class SigarPlatformDetector extends PlatformDetector {
         platform.setMeasurementConfig(mconfig,
                                       LogTrackPlugin.LOGLEVEL_WARN,
                                       true);
+
         return platform;
     }
 }

@@ -39,6 +39,7 @@ import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.TimeframeSizeException;
 import org.hyperic.hq.measurement.server.session.TopNData;
+import org.hyperic.hq.plugin.system.TopReport.TOPN_SORT_TYPE;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -257,7 +258,7 @@ public interface DataManager {
      * @param time
      * @return
      */
-    String getTopNDataAsString(int resourceId, long time);
+    String getTopNDataAsString(int resourceId, long time, TOPN_SORT_TYPE sortType);
 
     /**
      * @param resourceId

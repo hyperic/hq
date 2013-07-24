@@ -26,7 +26,6 @@ package org.hyperic.hq.livedata.formatters;
 
 import java.text.DateFormat;
 import java.util.Date;
-import java.util.Iterator;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.hyperic.hq.livedata.FormatType;
@@ -36,6 +35,7 @@ import org.hyperic.hq.plugin.system.ProcessData;
 import org.hyperic.hq.plugin.system.ProcessReport;
 import org.hyperic.hq.plugin.system.TopData;
 import org.hyperic.hq.plugin.system.TopReport;
+import org.hyperic.hq.plugin.system.TopReport.TOPN_SORT_TYPE;
 import org.hyperic.hq.plugin.system.UptimeData;
 import org.hyperic.sigar.CpuPerc;
 import org.hyperic.sigar.Mem;
@@ -61,10 +61,11 @@ public class TopFormatter
     {
         TopData td = (TopData)val;
         
-        if (type.equals(FormatType.TEXT))
+        if (type.equals(FormatType.TEXT)) {
             return formatText(formatCfg, td);
-        else if (type.equals(FormatType.HTML)) 
+        } else if (type.equals(FormatType.HTML)) {
             return formatHtml(formatCfg, td);
+        }
         throw new IllegalStateException("Unhandled format type [" + type + "]");
     }
 
@@ -76,7 +77,7 @@ public class TopFormatter
         return StringEscapeUtils.escapeHtml(s);
     }
 
-    public static String formatHtml(TopReport t) {
+    public static String formatHtml(TopReport t, TOPN_SORT_TYPE sortType) {
         StringBuilder buf = new StringBuilder();
 
         buf.append("<div class='top_livedata'><div class='fivepad' style='background:#efefef;" +
@@ -128,7 +129,7 @@ public class TopFormatter
                 .append(BUNDLE.format("formatter.top.proc.name"))
                 .append("</td></tr></thead><tbody>");
 
-        for(ProcessReport pr : t.getProcesses()){
+        for (ProcessReport pr : t.getProcessesSorted(sortType)) {
             char[] st = new char[1];
             st[0] = pr.getState();
             String str = new String(buf);
@@ -225,8 +226,8 @@ public class TopFormatter
          .append(BUNDLE.format("formatter.top.proc.name"))
          .append("</td></tr></thead><tbody>");
          
-        for (Iterator i=t.getProcesses().iterator(); i.hasNext(); ) {
-            ProcessData d = (ProcessData)i.next();
+        for (Object element : t.getProcesses()) {
+            ProcessData d = (ProcessData)element;
             char[] buf = new char[1];
             buf[0] = d.getState();
             String str = new String(buf);

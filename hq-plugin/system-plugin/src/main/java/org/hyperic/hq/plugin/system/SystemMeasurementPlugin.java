@@ -27,9 +27,7 @@ package org.hyperic.hq.plugin.system;
 
 import java.util.Properties;
 
-import org.hyperic.sigar.FileInfo;
-import org.hyperic.sigar.NetFlags;
-
+import org.hyperic.hq.measurement.data.TopNConfigurationProperties;
 import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricNotFoundException;
@@ -37,6 +35,9 @@ import org.hyperic.hq.product.MetricUnreachableException;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.SigarMeasurementPlugin;
+import org.hyperic.hq.product.TypeInfo;
+import org.hyperic.sigar.FileInfo;
+import org.hyperic.sigar.NetFlags;
 import org.hyperic.sigar.ProcState;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
@@ -44,6 +45,8 @@ import org.hyperic.sigar.ptql.ProcessQuery;
 import org.hyperic.sigar.ptql.ProcessQueryFactory;
 import org.hyperic.sigar.win32.Pdh;
 import org.hyperic.sigar.win32.Win32Exception;
+import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.ConfigSchema;
 
 public class SystemMeasurementPlugin
     extends SigarMeasurementPlugin
@@ -70,6 +73,7 @@ public class SystemMeasurementPlugin
         }
     }
 
+    @Override
     public MetricValue getValue(Metric metric) 
         throws PluginException,
                MetricNotFoundException,
@@ -210,7 +214,7 @@ public class SystemMeasurementPlugin
         throws MetricNotFoundException {
 
         try {
-            return (double)getSigar().getCpuInfoList().length;
+            return getSigar().getCpuInfoList().length;
         } catch (Exception e) {
             throw new MetricNotFoundException(e.getMessage(), e);
         }
@@ -224,5 +228,16 @@ public class SystemMeasurementPlugin
         } catch (Exception e) {
             throw new MetricNotFoundException(e.getMessage(), e);
         }
+    }
+
+    @Override
+    public ConfigSchema getConfigSchema(TypeInfo info, ConfigResponse config) {
+        ConfigSchema schema = new ConfigSchema();
+
+        for (TopNConfigurationProperties conf : TopNConfigurationProperties.values()) {
+            schema.addOption(conf.getConfigOption());
+        }
+
+        return schema;
     }
 }

@@ -215,6 +215,9 @@
               FREAD_ONLY="FALSE"/>
           <data ID="72" PROPKEY="TOPN_DEFAULT_INTERVAL"
               PROPVALUE="1" DEFAULT_PROPVALUE="1"
+              FREAD_ONLY="FALSE"/> 
+          <data ID="73" PROPKEY="TOPN_NUMBER_OF_PROCESSES"
+              PROPVALUE="10" DEFAULT_PROPVALUE="10"
               FREAD_ONLY="FALSE"/>  
                                    
     </table>

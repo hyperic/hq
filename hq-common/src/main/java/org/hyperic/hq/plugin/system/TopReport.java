@@ -6,10 +6,18 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class TopReport implements Serializable {
+
+    public enum TOPN_SORT_TYPE {
+        CPU, MEM;
+    }
 
     private static final long serialVersionUID = 1L;
     private long createTime;
@@ -21,6 +29,46 @@ public class TopReport implements Serializable {
     private Set<ProcessReport> processes = new HashSet<ProcessReport>();
 
     public TopReport() {
+    }
+
+
+    public void filterTopProcesses(final int topNumber) {
+        if (processes.size() <= topNumber) {
+            return;
+        }
+        List<ProcessReport> processesList = new ArrayList<ProcessReport>(processes);
+        processes.clear();
+
+        sortProcessesByCpu(processesList);
+        processes.addAll(processesList.subList(0, topNumber - 1));
+
+        sortProcessesByMemory(processesList);
+        processes.addAll(processesList.subList(0, topNumber - 1));
+
+    }
+
+    private void sortProcessesByMemory(List<ProcessReport> processesList) {
+        Collections.sort(processesList, new Comparator<ProcessReport>() {
+            public int compare(ProcessReport first, ProcessReport second) {
+                int returnValue = 0;
+                double firstMem = Double.valueOf(first.getMemPerc().replace("%", "").trim());
+                double secondMem = Double.valueOf(second.getMemPerc().replace("%", "").trim());
+                returnValue = (firstMem >= secondMem ? -1 : 1);
+                return returnValue;
+            }
+        });
+    }
+
+    private void sortProcessesByCpu(List<ProcessReport> processesList) {
+        Collections.sort(processesList, new Comparator<ProcessReport>() {
+            public int compare(ProcessReport first, ProcessReport second) {
+                int returnValue = 0;
+                double firstCpu = Double.valueOf(first.getCpuPerc().replace("%", "").trim());
+                double secondCpu = Double.valueOf(second.getCpuPerc().replace("%", "").trim());
+                returnValue = (firstCpu >= secondCpu ? -1 : 1);
+                return returnValue;
+            }
+        });
     }
 
 
@@ -70,6 +118,21 @@ public class TopReport implements Serializable {
 
     public String getProcStat() {
         return procStat;
+    }
+
+    public List<ProcessReport> getProcessesSorted(TOPN_SORT_TYPE type) {
+        List<ProcessReport> processesList = new ArrayList<ProcessReport>(processes);
+        switch (type) {
+        case CPU:
+            sortProcessesByCpu(processesList);
+            break;
+        case MEM:
+            sortProcessesByMemory(processesList);
+            break;
+        default:
+            break;
+        }
+        return processesList;
     }
 
     public Set<ProcessReport> getProcesses() {

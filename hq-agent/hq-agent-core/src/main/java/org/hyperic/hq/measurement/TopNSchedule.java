@@ -8,6 +8,7 @@ public class TopNSchedule implements Serializable {
     private int interval;
     private long lastUpdateTime;
     private String queryFilter;
+    private int numberOfProcesses;
 
     public TopNSchedule() {
     }
@@ -34,6 +35,14 @@ public class TopNSchedule implements Serializable {
 
     public void setQueryFilter(String queryFilter) {
         this.queryFilter = queryFilter;
+    }
+
+    public int getNumberOfProcesses() {
+        return numberOfProcesses;
+    }
+
+    public void setNumberOfProcesses(int numberOfProcesses) {
+        this.numberOfProcesses = numberOfProcesses;
     }
 
 }

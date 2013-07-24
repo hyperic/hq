@@ -24,6 +24,12 @@ package org.hyperic.hq.ui.action.resource.platform.topn;
  * USA.
  */
 
+import java.text.SimpleDateFormat;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
@@ -34,19 +40,14 @@ import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
-import org.hyperic.hq.measurement.server.session.TopNData;
 import org.hyperic.hq.measurement.shared.DataManager;
+import org.hyperic.hq.plugin.system.TopReport.TOPN_SORT_TYPE;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.text.SimpleDateFormat;
 
 /**
  * This action class is used by the TopN Popup screen. It's main use
@@ -89,7 +90,7 @@ public class TopNAction extends BaseAction {
 
         long longTime = new SimpleDateFormat("MM/dd/yyyy hh:mm aa").parse(time).getTime();
         int rid = resourceManager.findResource(eid).getId();
-        String data = dataManager.getTopNDataAsString(rid, longTime);
+        String data = dataManager.getTopNDataAsString(rid, longTime, TOPN_SORT_TYPE.CPU);
         if(data == null){
             data = "TopN Data Unavailable";
         }

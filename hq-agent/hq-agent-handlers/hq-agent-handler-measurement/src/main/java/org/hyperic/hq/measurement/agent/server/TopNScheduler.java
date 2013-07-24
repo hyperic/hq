@@ -134,6 +134,7 @@ class TopNScheduler {
         TopNSchedule schedule = new TopNSchedule();
         schedule.setQueryFilter(args.getQueryFilter());
         schedule.setInterval(args.getInterval());
+        schedule.setNumberOfProcesses(args.getNumberOfProcesses());
         schedule.setLastUpdateTime(System.currentTimeMillis());
 
         // Store the schedule data in the local storage
@@ -160,6 +161,7 @@ class TopNScheduler {
                 }
                 if (null != data) {
                     TopReport report = generateTopReport(data);
+                    report.filterTopProcesses(schedule.getNumberOfProcesses());
                     try {
                         storage.addObjectToFolder(DATA_FOLDERNAME, report, report.getCreateTime());
                     } catch (Exception ex) {

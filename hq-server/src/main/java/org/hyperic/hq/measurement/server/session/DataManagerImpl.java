@@ -80,6 +80,7 @@ import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.TopNManager;
 import org.hyperic.hq.plugin.system.TopReport;
+import org.hyperic.hq.plugin.system.TopReport.TOPN_SORT_TYPE;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
@@ -1018,14 +1019,14 @@ public class DataManagerImpl implements DataManager {
      * long)
      */
     @Transactional(readOnly = true)
-    public String getTopNDataAsString(int resourceId, long time) {
+    public String getTopNDataAsString(int resourceId, long time, TOPN_SORT_TYPE sortType) {
         TopNData data = getTopNData(resourceId, time);
         if(data == null){
             return null;
         }
         try {
             byte[] unCompressedData = topNManager.uncompressData(data.getData());
-            return TopFormatter.formatHtml(TopReport.fromSerializedForm(unCompressedData));
+            return TopFormatter.formatHtml(TopReport.fromSerializedForm(unCompressedData), sortType);
         } catch (Exception e) {
             log.error("Error un serializing TopN data", e);
         }

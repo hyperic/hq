@@ -12026,7 +12026,11 @@ has already been defined.
          <statement targetDB="postgresql">
                 INSERT INTO EAM_CONFIG_PROPS (ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES ('72', 'TOPN_DEFAULT_INTERVAL', '1', '1', false)
          </statement>
-
+        	
+          <statement targetDB="postgresql">
+        	    INSERT INTO EAM_CONFIG_PROPS (ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES ('73', 'TOPN_NUMBER_OF_PROCESSES', '10', '10', false)
+          </statement>
+        	
             <statement targetDB="postgresql">
                 CREATE TABLE IF NOT EXISTS TopNData(
                 resourceId integer NOT NULL,
@@ -12039,6 +12043,7 @@ has already been defined.
                                 CREATE TABLE IF NOT EXISTS TopNSchedule(
                                 resourceId integer NOT NULL,
                                                 intervalInMinutes integer NOT NULL,
+                 								numberOfProcesses integer NOT NULL,
                                                 enabled boolean NOT NULL,
                                                 lastUpdated bigint NOT NULL,
                                 PRIMARY KEY (resourceId)

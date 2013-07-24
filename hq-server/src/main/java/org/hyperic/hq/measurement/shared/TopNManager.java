@@ -1,8 +1,15 @@
 package org.hyperic.hq.measurement.shared;
 
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.util.config.ConfigResponse;
+
 public interface TopNManager {
 
-    void scheduleOrUpdateTopNCollection(int resourceId, int intervalInMinutes);
+    void scheduleTopNCollection(int resourceId, int intervalInMinutes, int numberOfProcesses);
+
+    void scheduleTopNCollection(AppdefEntityID id, ConfigResponse config);
+
+    void unscheduleTopNCollection(int resourceId, ConfigResponse config);
 
     void unscheduleTopNCollection(int resourceId);
 
@@ -11,5 +18,9 @@ public interface TopNManager {
     byte[] uncompressData(final byte[] data);
 
     void updateGlobalTopNInterval(int intervalInMinutes);
+
+    void unscheduleGlobalTopNCollection();
+
+    void updateGlobalTopNNumberOfProcesses(int numberOfProcesses);
 
 }

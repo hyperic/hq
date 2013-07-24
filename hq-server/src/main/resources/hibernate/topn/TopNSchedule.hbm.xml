@@ -39,6 +39,9 @@
        <property name="intervalInMinutes" type="int">
             <column name="intervalInMinutes" not-null="true"/>
        </property>
+        <property name="numberOfProcesses" type="int">
+            <column name="numberOfProcesses" not-null="true"/>
+       </property>
        <property name="enabled" type="boolean">
      		 <column name="ENABLED" not-null="true"/>
    	   </property>

@@ -8,6 +8,7 @@ public class TopNSchedule implements Serializable {
     private int intervalInMinutes;
     private boolean enabled;
     private long lastUpdated;
+    private int numberOfProcesses;
 
     public int getResourceId() {
         return resourceId;
@@ -39,6 +40,14 @@ public class TopNSchedule implements Serializable {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public int getNumberOfProcesses() {
+        return numberOfProcesses;
+    }
+
+    public void setNumberOfProcesses(int numberOfProcesses) {
+        this.numberOfProcesses = numberOfProcesses;
     }
 
 }

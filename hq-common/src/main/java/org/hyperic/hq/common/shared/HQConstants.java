@@ -153,5 +153,6 @@ public class HQConstants {
 
     public static final String TOPN_PURGE = "TOPN_PURGE";
     public static final String TOPN_DEFAULT_INTERVAL = "TOPN_DEFAULT_INTERVAL";
+    public static final String TOPN_NUMBER_OF_PROCESSES = "TOPN_NUMBER_OF_PROCESSES";
 
 }

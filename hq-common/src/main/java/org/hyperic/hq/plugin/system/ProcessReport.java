@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.Arrays;
 
 public class ProcessReport implements Serializable {
+
 
     private static final long serialVersionUID = 1L;
     private long pid;
@@ -181,5 +183,111 @@ public class ProcessReport implements Serializable {
         }
         sb.setLength(sb.length() - 1);
         return sb.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = (prime * result) + Arrays.hashCode(args);
+        result = (prime * result) + ((baseName == null) ? 0 : baseName.hashCode());
+        result = (prime * result) + ((cpuPerc == null) ? 0 : cpuPerc.hashCode());
+        result = (prime * result) + ((cpuTotal == null) ? 0 : cpuTotal.hashCode());
+        result = (prime * result) + ((memPerc == null) ? 0 : memPerc.hashCode());
+        result = (prime * result) + ((owner == null) ? 0 : owner.hashCode());
+        result = (prime * result) + (int) (pid ^ (pid >>> 32));
+        result = (prime * result) + ((resident == null) ? 0 : resident.hashCode());
+        result = (prime * result) + ((share == null) ? 0 : share.hashCode());
+        result = (prime * result) + ((size == null) ? 0 : size.hashCode());
+        result = (prime * result) + ((startTime == null) ? 0 : startTime.hashCode());
+        result = (prime * result) + state;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        ProcessReport other = (ProcessReport) obj;
+        if (!Arrays.equals(args, other.args)) {
+            return false;
+        }
+        if (baseName == null) {
+            if (other.baseName != null) {
+                return false;
+            }
+        } else if (!baseName.equals(other.baseName)) {
+            return false;
+        }
+        if (cpuPerc == null) {
+            if (other.cpuPerc != null) {
+                return false;
+            }
+        } else if (!cpuPerc.equals(other.cpuPerc)) {
+            return false;
+        }
+        if (cpuTotal == null) {
+            if (other.cpuTotal != null) {
+                return false;
+            }
+        } else if (!cpuTotal.equals(other.cpuTotal)) {
+            return false;
+        }
+        if (memPerc == null) {
+            if (other.memPerc != null) {
+                return false;
+            }
+        } else if (!memPerc.equals(other.memPerc)) {
+            return false;
+        }
+        if (owner == null) {
+            if (other.owner != null) {
+                return false;
+            }
+        } else if (!owner.equals(other.owner)) {
+            return false;
+        }
+        if (pid != other.pid) {
+            return false;
+        }
+        if (resident == null) {
+            if (other.resident != null) {
+                return false;
+            }
+        } else if (!resident.equals(other.resident)) {
+            return false;
+        }
+        if (share == null) {
+            if (other.share != null) {
+                return false;
+            }
+        } else if (!share.equals(other.share)) {
+            return false;
+        }
+        if (size == null) {
+            if (other.size != null) {
+                return false;
+            }
+        } else if (!size.equals(other.size)) {
+            return false;
+        }
+        if (startTime == null) {
+            if (other.startTime != null) {
+                return false;
+            }
+        } else if (!startTime.equals(other.startTime)) {
+            return false;
+        }
+        if (state != other.state) {
+            return false;
+        }
+        return true;
     }
 }
