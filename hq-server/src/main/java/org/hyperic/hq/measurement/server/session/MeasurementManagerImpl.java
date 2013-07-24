@@ -899,72 +899,100 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     }
 
     /**
-     * TODO: scottmf, need to do some more work to handle other authz resource
-     * types other than platform, server, service, and group
-     * 
      * @return {@link Map} of {@link Integer} to {@link List} of
      *         {@link Measurement}s, Integer => Resource.getId(),
      */
     @Transactional(readOnly = true)
     public Map<Integer, List<Measurement>> getAvailMeasurements(Collection<?> resources) {
-        final Map<Integer, List<Measurement>> rtn = new HashMap<Integer, List<Measurement>>(
-            resources.size());
-        final List<Resource> res = new ArrayList<Resource>(resources.size());
-        for (Object o : resources) {
-            Resource resource = null;
-            if (o == null) {
-                continue;
-            } else if (o instanceof AppdefEntityValue) {
-                AppdefEntityValue rv = (AppdefEntityValue) o;
-                AppdefEntityID aeid = rv.getID();
-                resource = resourceManager.findResource(aeid);
-            } else if (o instanceof AppdefEntityID) {
-                AppdefEntityID aeid = (AppdefEntityID) o;
-                resource = resourceManager.findResource(aeid);
-            } else if (o instanceof AppdefResource) {
-                AppdefResource r = (AppdefResource) o;
-                resource = resourceManager.findResource(r.getEntityId());
-            } else if (o instanceof Resource) {
-                resource = (Resource) o;
-            } else if (o instanceof ResourceGroup) {
-                ResourceGroup grp = (ResourceGroup) o;
-                resource = grp.getResource();
-                rtn.put(resource.getId(), measurementDAO.findAvailMeasurements(grp));
-                continue;
-            } else if (o instanceof AppdefResourceValue) {
-                AppdefResourceValue r = (AppdefResourceValue) o;
-                AppdefEntityID aeid = r.getEntityId();
-                resource = resourceManager.findResource(aeid);
-            } else {
-                resource = resourceManager.findResourceById((Integer) o);
+        final Map<Resource, List<Measurement>> map = new HashMap<Resource, List<Measurement>>();
+        Collection<Measurement> measurements = getAvailMeasurements(resources, map);
+        if (measurements == null) {
+            measurements = Collections.emptyList();
+        }
+        final Map<Integer, List<Measurement>> rtn = new HashMap<Integer, List<Measurement>>();
+        for (final Map.Entry<Resource, List<Measurement>> entry : map.entrySet()) {
+            final Resource r = entry.getKey();
+            final List<Measurement> list = entry.getValue();
+            rtn.put(r.getId(), list);
+        }
+        for (final Measurement m : measurements) {
+            rtn.put(m.getResource().getId(), Collections.singletonList(m));
+        }
+        return rtn;
+    }
+
+    /**
+     * @return {@link Map} of {@link Resource} to {@link List} of {@link Measurement}s
+     */
+    @Transactional(readOnly = true)
+    public Map<Resource, List<Measurement>> getAvailMeasurementsByResource(Collection<?> resources) {
+        final Map<Resource, List<Measurement>> rtn = new HashMap<Resource, List<Measurement>>();
+        final Collection<Measurement> measurements = getAvailMeasurements(resources, rtn);
+        // may be null if measurements have not been configured
+        if (measurements != null && !measurements.isEmpty()) {
+            for (final Measurement m : measurements) {
+                rtn.put(m.getResource(), Collections.singletonList(m));
             }
+        }
+        return rtn;
+    }
+    
+    private Collection<Measurement> getAvailMeasurements(Collection<?> objects, Map<Resource, List<Measurement>> map) {
+        final List<Resource> resources = new ArrayList<Resource>(objects.size());
+        for (final Object o : objects) {
+            Resource resource = null;
             try {
+                resource = getResourceFromObject(o);
                 if (resource == null || resource.isInAsyncDeleteState()) {
                     continue;
                 }
             } catch (ObjectNotFoundException e) {
+                log.debug(e,e);
                 continue;
             }
             final ResourceType type = resource.getResourceType();
             if (type.getId().equals(AuthzConstants.authzGroup)) {
-                ResourceGroup grp = resourceGroupManager.getResourceGroupByResource(resource);
-                rtn.put(resource.getId(), measurementDAO.findAvailMeasurements(grp));
-                continue;
+                final ResourceGroup grp = resourceGroupManager.getResourceGroupByResource(resource);
+                map.put(resource, measurementDAO.findAvailMeasurements(grp));
             } else if (type.getId().equals(AuthzConstants.authzApplication)) {
-                rtn.putAll(getAvailMeas(resource));
-                continue;
+                map.putAll(getAvailMeas(resource));
+            } else {
+                map.put(resource, Collections.<Measurement> emptyList());
+                resources.add(resource);
             }
-            res.add(resource);
         }
-        List<Measurement> ids = measurementDAO.findAvailMeasurements(res);
-        // may be null if measurements have not been configured
-        if (ids == null) {
-            return Collections.emptyMap();
+        return measurementDAO.findAvailMeasurements(resources);
+    }
+
+    /**
+     * TODO: scottmf, need to do some more work to handle other authz resource
+     * types other than platform, server, service, and group
+     */
+    private Resource getResourceFromObject(Object o) {
+        if (o == null) {
+            return null;
+        } else if (o instanceof AppdefEntityValue) {
+            AppdefEntityValue rv = (AppdefEntityValue) o;
+            AppdefEntityID aeid = rv.getID();
+            return resourceManager.findResource(aeid);
+        } else if (o instanceof AppdefEntityID) {
+            AppdefEntityID aeid = (AppdefEntityID) o;
+            return resourceManager.findResource(aeid);
+        } else if (o instanceof AppdefResource) {
+            AppdefResource r = (AppdefResource) o;
+            return resourceManager.findResource(r.getEntityId());
+        } else if (o instanceof Resource) {
+            return (Resource) o;
+        } else if (o instanceof ResourceGroup) {
+            ResourceGroup grp = (ResourceGroup) o;
+            return grp.getResource();
+        } else if (o instanceof AppdefResourceValue) {
+            AppdefResourceValue r = (AppdefResourceValue) o;
+            AppdefEntityID aeid = r.getEntityId();
+            return resourceManager.findResource(aeid);
+        } else {
+            return resourceManager.findResourceById((Integer) o);
         }
-        for (Measurement m : ids) {
-            rtn.put(m.getResource().getId(), Collections.singletonList(m));
-        }
-        return rtn;
     }
 
     private Application findApplicationById(AuthzSubject subject, Integer id)
@@ -977,8 +1005,8 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             throw new ApplicationNotFoundException(id, e);
         }
     }
-
-    private final Map<Integer, List<Measurement>> getAvailMeas(Resource application) {
+    
+    private final Map<Resource, List<Measurement>> getAvailMeas(Resource application) {
         final Integer typeId = application.getResourceType().getId();
         if (!typeId.equals(AuthzConstants.authzApplication)) {
             return Collections.emptyMap();
@@ -991,7 +1019,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             for (AppService appService : appServices) {
                 resources.addAll(getAppResources(appService));
             }
-            return getAvailMeasurements(resources);
+            return getAvailMeasurementsByResource(resources);
         } catch (ApplicationNotFoundException e) {
             log.warn("cannot find Application by id = " + application.getInstanceId());
         } catch (PermissionException e) {
@@ -1452,34 +1480,33 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         return new DataPoint(m.getId().intValue(), MeasurementConstants.AVAIL_PAUSED, time);
     }
 
-    /**
-     */
+/*
     public void syncPluginMetrics(String plugin) {
         List<java.lang.Number[]> entities = measurementDAO.findMetricsCountMismatch(plugin);
-
         AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
-
         for (java.lang.Number[] vals : entities) {
             java.lang.Number type = vals[0];
             java.lang.Number id = vals[1];
             AppdefEntityID aeid = new AppdefEntityID(type.intValue(), id.intValue());
-
             try {
                 log.info("syncPluginMetrics sync'ing metrics for " + aeid);
-                ConfigResponse c = configManager.getMergedConfigResponse(overlord,
-                    ProductPlugin.TYPE_MEASUREMENT, aeid, true);
+                ConfigResponse c =
+                    configManager.getMergedConfigResponse(overlord, ProductPlugin.TYPE_MEASUREMENT, aeid, true);
                 enableDefaultMetrics(overlord, aeid, c, false);
             } catch (AppdefEntityNotFoundException e) {
-                // Move on since we did this query based on measurement table
-                // not resource table
+                log.debug(e,e);
             } catch (PermissionException e) {
                 // Quite impossible
+                log.error(e,e);
                 assert (false);
-            } catch (Exception e) {
-                // No valid configuration to use to enable metrics
+            } catch (ConfigFetchException e) {
+                log.error(e,e);
+            } catch (EncodingException e) {
+                log.error(e,e);
             }
         }
     }
+*/
 
     /**
      * Gets a summary of the metrics which are scheduled for collection, across
@@ -1587,9 +1614,9 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                     // TODO break circular dep preventing DI of TrackerManager
                     applicationContext.getBean(TrackerManager.class).enableTrackers(subject, aeid, config);
                 }
-
+            // don't wrap everything in exception, certain exceptions should be allowed to propagate up the stack
             } catch (ConfigFetchException e) {
-                log.warn("Config not set for [" + aeid + "] (this is usually ok): " + e);
+                log.warn("Config for resource=[" + r + "] is invalid (this is usually ok): " + e);
             } catch (MeasurementCreateException e) {
                 log.error("Unable to create measurements for [" + aeid + "]: " + e, e);
             } catch (PermissionException e) {

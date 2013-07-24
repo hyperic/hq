@@ -29,11 +29,12 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -54,9 +55,6 @@ import org.hyperic.hq.appdef.shared.AppdefInventorySummary;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
-import org.hyperic.hq.appdef.shared.PlatformTypeValue;
-import org.hyperic.hq.appdef.shared.ServerTypeValue;
-import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -388,14 +386,28 @@ public class ResourceHubPortalAction
                 // the entity is a compatible group- we build a
                 // combined menu containing all platform, server and
                 // service types
-
-                List<PlatformTypeValue> platformTypes = appdefBoss.findViewablePlatformTypes(sessionId, pc);
+                final Collection<Integer> platformTypeIds = summary.getPlatformTypeMap().keySet();
+                final Collection<AppdefResourceTypeValue> platformTypes =
+                    new ArrayList<AppdefResourceTypeValue>(platformTypeIds.size());
+                for (final Integer id : platformTypeIds) {
+                    platformTypes.add(appdefBoss.findResourceTypeByResId(sessionId, id));
+                }
                 addCompatTypeOptions(hubForm, platformTypes, msg(request, PLATFORM_KEY));
 
-                List<ServerTypeValue> serverTypes = appdefBoss.findViewableServerTypes(sessionId, pc);
+                final Collection<Integer> serverTypeIds = summary.getServerTypeMap().keySet();
+                final Collection<AppdefResourceTypeValue> serverTypes =
+                    new ArrayList<AppdefResourceTypeValue>(serverTypeIds.size());
+                for (final Integer id : serverTypeIds) {
+                    serverTypes.add(appdefBoss.findResourceTypeByResId(sessionId, id));
+                }
                 addCompatTypeOptions(hubForm, serverTypes, msg(request, SERVER_KEY));
 
-                List<ServiceTypeValue> serviceTypes = appdefBoss.findViewableServiceTypes(sessionId, pc);
+                final Collection<Integer> serviceTypeIds = summary.getServiceTypeMap().keySet();
+                final Collection<AppdefResourceTypeValue> serviceTypes =
+                    new ArrayList<AppdefResourceTypeValue>(serviceTypeIds.size());
+                for (final Integer id : serviceTypeIds) {
+                    serviceTypes.add(appdefBoss.findResourceTypeByResId(sessionId, id));
+                }
                 addCompatTypeOptions(hubForm, serviceTypes, msg(request, SERVICE_KEY));
             } else if (isAdhocGroupSelected(groupType)) {
                 // the entity is an adhoc group- we offer no adhoc group
@@ -405,8 +417,23 @@ public class ResourceHubPortalAction
                 throw new ServletException("invalid group type: " + groupType);
             }
         } else {
-            // the entity is not a group- this is easy.
-            List<AppdefResourceTypeValue> types = appdefBoss.findAllResourceTypes(sessionId, entityType, pc);
+            Collection<AppdefResourceTypeValue> types = new TreeSet<AppdefResourceTypeValue>(getTypeComparator());
+            if (entityType == AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
+                final Collection<Integer> platformTypeIds = summary.getPlatformTypeMap().keySet();
+                for (final Integer id : platformTypeIds) {
+                    types.add(appdefBoss.findResourceTypeByResId(sessionId, id));
+                }
+            } else if (entityType == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
+                final Collection<Integer> serverTypeIds = summary.getServerTypeMap().keySet();
+                for (final Integer id : serverTypeIds) {
+                    types.add(appdefBoss.findResourceTypeByResId(sessionId, id));
+                }
+            } else if (entityType == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
+                final Collection<Integer> serviceTypeIds = summary.getServiceTypeMap().keySet();
+                for (final Integer id : serviceTypeIds) {
+                    types.add(appdefBoss.findResourceTypeByResId(sessionId, id));
+                }
+            }
             addTypeOptions(hubForm, types);
         }
 
@@ -430,6 +457,22 @@ public class ResourceHubPortalAction
         request.setAttribute(Constants.INVENTORY_HIERARCHY_ATTR, navHierarchy);
 
         return null;
+    }
+
+    private Comparator<AppdefResourceTypeValue> getTypeComparator() {
+        return new Comparator<AppdefResourceTypeValue>() {
+            public int compare(AppdefResourceTypeValue o1, AppdefResourceTypeValue o2) {
+                if (o1 == o2) {
+                    return 0;
+                }
+                int rtn = o1.getName().toLowerCase().compareTo(o2.getName().toLowerCase());
+                if (rtn != 0) {
+                    return rtn;
+                } else {
+                    return o1.getId().compareTo(o2.getId());
+                }
+            }
+        };
     }
 
     private String[] getResourceMetrics(HttpServletRequest request, int sessionId, MeasurementBoss mboss,
@@ -458,15 +501,15 @@ public class ResourceHubPortalAction
         return metrics;
     }
 
-    private void addTypeOptions(ResourceHubForm form, List<? extends AppdefResourceTypeValue> types) {
+    private void addTypeOptions(ResourceHubForm form, Collection<? extends AppdefResourceTypeValue> types) {
 
         for (AppdefResourceTypeValue value : types) {
             form.addType(new LabelValueBean(value.getName(), value.getAppdefTypeKey()));
         }
     }
 
-    private void addCompatTypeOptions(ResourceHubForm form, List<? extends AppdefResourceTypeValue> types, String label) {
-        if (types.size() > 0) {
+    private void addCompatTypeOptions(ResourceHubForm form, Collection<? extends AppdefResourceTypeValue> types, String label) {
+        if (types != null && !types.isEmpty()) {
             form.addType(new LabelValueBean(BLANK_LABEL, BLANK_VAL));
             form.addType(new LabelValueBean(label, BLANK_VAL));
             addTypeOptions(form, types);

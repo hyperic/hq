@@ -283,11 +283,10 @@ public class MeasurementBossImpl implements MeasurementBoss {
 
     /**
      * Update the templates to be indicators or not
-     * 
      */
     public void updateIndicatorMetrics(int sessionId, AppdefEntityTypeID aetid, Integer[] tids)
-        throws TemplateNotFoundException, SessionTimeoutException, SessionNotFoundException {
-    	String typeName = aetid.getAppdefResourceType().getName();
+    throws TemplateNotFoundException, SessionTimeoutException, SessionNotFoundException {
+        String typeName = aetid.getAppdefResourceType().getName();
         templateManager.setDesignatedTemplates(typeName, tids);
     }
 
@@ -789,26 +788,29 @@ public class MeasurementBossImpl implements MeasurementBoss {
      * Get the last metric values for the given template IDs.
      * 
      * @param tids The template IDs to get
-     * 
      */
     @Transactional(readOnly = true)
     public MetricValue[] getLastMetricValue(int sessionId, AppdefEntityID aeid, Integer[] tids)
         throws SessionTimeoutException, SessionNotFoundException, PermissionException {
         final AuthzSubject subject = sessionManager.getSubject(sessionId);
-
-        List<Integer> measurements = new ArrayList<Integer>(tids.length);
+        List<Measurement> measurements = new ArrayList<Measurement>(tids.length);
         long interval = 0;
         for (int i = 0; i < tids.length; i++) {
             try {
                 Measurement m = measurementManager.findMeasurement(subject, tids[i], aeid);
-                measurements.add(m.getId());
+                measurements.add(m);
                 interval = Math.max(interval, m.getInterval());
             } catch (MeasurementNotFoundException e) {
                 measurements.add(null);
             }
         }
-
-        return getLastMetricValue(sessionId, measurements, interval);
+        List<Integer> mids = new Transformer<Measurement, Integer>() {
+            @Override
+            public Integer transform(Measurement m) {
+                return m.getId();
+            }
+        }.transform(measurements);
+        return getLastMetricValue(sessionId, mids, interval);
     }
 
     /**
@@ -819,16 +821,15 @@ public class MeasurementBossImpl implements MeasurementBoss {
      * 
      */
     @Transactional(readOnly = true)
-    public MetricValue[] getLastMetricValue(int sessionId, List<Integer> measurementIds, long interval) {
-        MetricValue[] ret = new MetricValue[measurementIds.size()];
+    public MetricValue[] getLastMetricValue(int sessionId, List<Integer> measurements, long interval) {
+        MetricValue[] ret = new MetricValue[measurements.size()];
         long after = System.currentTimeMillis() - (3 * interval);
-        Map<Integer, MetricValue> data = dataManager.getLastDataPoints(measurementIds, after);
+        Map<Integer, MetricValue> data = dataManager.getLastDataPoints(measurements, after);
         int i=0;
-        for (final Integer measId : measurementIds) {
-            if (measId != null && data.containsKey(measId)) {
-                ret[i] = data.get(measId);
+        for (final Integer mid : measurements) {
+            if (mid != null && data.containsKey(mid)) {
+                ret[i++] = data.get(mid);
             }
-            i++;
         }
         return ret;
     }
@@ -1592,13 +1593,11 @@ public class MeasurementBossImpl implements MeasurementBoss {
             throw new MeasurementNotFoundException("No entry point found: " + aid);
         } else if (aid.isGroup()) {
             if (tmpl.isAvailability()) {
-                // Find the group
-                final ResourceGroup group = resourceGroupManager.findResourceGroupById(subject, aid
-                    .getId());
-                final Map<Integer, List<Measurement>> mmap = measurementManager
-                    .getAvailMeasurements(Collections.singleton(group));
-                List<Measurement> metrics = mmap.get(group.getResource().getId());
-                for (Iterator<Measurement> it = metrics.iterator(); it.hasNext();) {
+                final ResourceGroup group = resourceGroupManager.findResourceGroupById(aid.getId());
+                final Map<Integer, List<Measurement>> mmap =
+                    measurementManager.getAvailMeasurements(Collections.singleton(group));
+                final List<Measurement> metrics = mmap.get(group.getResource().getId());
+                for (final Iterator<Measurement> it = metrics.iterator(); it.hasNext();) {
                     Measurement m = it.next();
                     if (!m.getTemplate().equals(tmpl)) {
                         it.remove();
@@ -1669,8 +1668,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
 
     private AppdefEntityID[] getGroupMemberIDs(AuthzSubject subject, Integer gid)
         throws AppdefEntityNotFoundException, PermissionException {
-        final List<AppdefEntityID> members = getResourceIds(subject,
-            AppdefEntityID.newGroupID(gid), null);
+        final List<AppdefEntityID> members = getResourceIds(subject, AppdefEntityID.newGroupID(gid), null);
         return members.toArray(new AppdefEntityID[members.size()]);
     }
 
@@ -2021,7 +2019,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
      *        (?) representation
      */
     private double getAggregateAvailability(AuthzSubject subject, AppdefEntityID[] ids,
-                                            Map<Integer, List<Measurement>> measCache,
+                                            Map<Resource, List<Measurement>> measCache,
                                             Map<Integer, MetricValue> availCache)
         throws AppdefEntityNotFoundException, PermissionException {
         if (ids.length == 0) {
@@ -2033,12 +2031,10 @@ public class MeasurementBossImpl implements MeasurementBoss {
         double sum = 0;
         int count = 0;
         int unknownCount = 0;
-        final Map<Integer, Measurement> midMap = getMidMap(ids, measCache);
-        if (debug)
-            watch.markTimeBegin("getAvailability");
+        final Map<Resource, Measurement> midMap = getMidMap(ids, measCache);
+        if (debug) watch.markTimeBegin("getAvailability");
         double[] avails = getAvailability(subject, ids, midMap, availCache);
-        if (debug)
-            watch.markTimeEnd("getAvailability");
+        if (debug) watch.markTimeEnd("getAvailability");
         for (int i = 0; i < avails.length; i++) {
             if (avails[i] == MeasurementConstants.AVAIL_UNKNOWN) {
                 unknownCount++;
@@ -2047,7 +2043,6 @@ public class MeasurementBossImpl implements MeasurementBoss {
                 count++;
             }
         }
-
         if (unknownCount == ids.length) {
             // All resources are unknown
             return MeasurementConstants.AVAIL_UNKNOWN;
@@ -2137,7 +2132,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
      * @return {@link Map} of {@link Integer} to {@link Measurement}. Integer =
      *         Resource.getId()
      */
-    private final Map<Integer, Measurement> getMidMap(Collection<Resource> resources) {
+    private final Map<Resource, Measurement> getMidMap(Collection<Resource> resources) {
         final List<AppdefEntityID> aeids = new ArrayList<AppdefEntityID>();
         for (final Iterator<Resource> it = resources.iterator(); it.hasNext();) {
             final Resource r = it.next();
@@ -2154,10 +2149,8 @@ public class MeasurementBossImpl implements MeasurementBoss {
      * @return {@link Map} of {@link Integer} to {@link Measurement} Integer =
      *         Resource.getId()
      */
-    private final Map<Integer, Measurement> getMidMap(AppdefEntityID[] ids,
-                                                      Map<Integer, List<Measurement>> measCache) {
-        final Map<Integer, Measurement> rtn = new HashMap<Integer, Measurement>(ids.length);
-
+    private final Map<Resource, Measurement> getMidMap(AppdefEntityID[] ids, Map<Resource, List<Measurement>> measCache) {
+        final Map<Resource, Measurement> rtn = new HashMap<Resource, Measurement>(ids.length);
         final List<Resource> toGet = new ArrayList<Resource>();
         final boolean debug = log.isDebugEnabled();
         final StopWatch watch = new StopWatch();
@@ -2167,37 +2160,29 @@ public class MeasurementBossImpl implements MeasurementBoss {
             if (id == null) {
                 continue;
             }
-            if (debug)
-                watch.markTimeBegin("findResource size=" + size);
+            if (debug) watch.markTimeBegin("findResource size=" + size);
             final Resource res = resourceManager.findResource(id);
             if (res == null || res.isInAsyncDeleteState()) {
                 continue;
             }
-            if (debug)
-                watch.markTimeEnd("findResource size=" + size);
+            if (debug) watch.markTimeEnd("findResource size=" + size);
             List<Measurement> list;
-            if (null != measCache && null != (list = measCache.get(res.getId()))) {
+            if (null != measCache && null != (list = measCache.get(res))) {
                 if (list.size() > 1) {
-                    log.warn("resourceId " + res.getId() +
-                             " has more than one availability measurement " + " assigned to it");
+                    log.warn("resourceId " + res.getId() + " has more than one availability measurement assigned to it");
                 } else if (list.size() <= 0) {
                     continue;
                 }
                 final Measurement m = list.get(0);
-                rtn.put(res.getId(), m);
+                rtn.put(res, m);
             } else {
                 toGet.add(res);
             }
         }
-        if (debug)
-            watch.markTimeBegin("getAvailMeasurements");
-        final Map<Integer, List<Measurement>> measMap = measurementManager
-            .getAvailMeasurements(toGet);
-        if (debug)
-            watch.markTimeEnd("getAvailMeasurements");
-        for (final Iterator<Map.Entry<Integer, List<Measurement>>> it = measMap.entrySet()
-            .iterator(); it.hasNext();) {
-            final Map.Entry<Integer, List<Measurement>> entry = it.next();
+        if (debug) watch.markTimeBegin("getAvailMeasurements");
+        final Map<Integer, List<Measurement>> measMap = measurementManager.getAvailMeasurements(toGet);
+        if (debug) watch.markTimeEnd("getAvailMeasurements");
+        for (final Map.Entry<Integer, List<Measurement>> entry : measMap.entrySet()) {
             final Integer id = entry.getKey();
             final Resource r = resourceManager.findResourceById(id);
             final List<Measurement> vals = entry.getValue();
@@ -2206,13 +2191,11 @@ public class MeasurementBossImpl implements MeasurementBoss {
             }
             final Measurement m = vals.get(0);
             if (vals.size() > 1) {
-                log.warn("resourceId " + r.getId() +
-                         " has more than one availability measurement " + " assigned to it");
+                log.warn("resourceId " + r.getId() + " has more than one availability measurement assigned to it");
             }
-            rtn.put(r.getId(), m);
+            rtn.put(r, m);
         }
-        if (debug)
-            log.debug(watch);
+        if (debug) log.debug(watch);
         return rtn;
     }
 
@@ -2223,39 +2206,25 @@ public class MeasurementBossImpl implements MeasurementBoss {
      *        Integer = Measurement.getId()
      */
     private double[] getAvailability(final AuthzSubject subject, final AppdefEntityID[] ids,
-                                     final Map<Integer, Measurement> midMap,
+                                     final Map<Resource, Measurement> midMap,
                                      final Map<Integer, MetricValue> availCache)
-        throws ApplicationNotFoundException, AppdefEntityNotFoundException, PermissionException {
-
+    throws ApplicationNotFoundException, AppdefEntityNotFoundException, PermissionException {
         final double[] result = new double[ids.length];
         Arrays.fill(result, MeasurementConstants.AVAIL_UNKNOWN);
         final Map<Integer, MetricValue> data = new HashMap<Integer, MetricValue>();
         final StopWatch watch = new StopWatch();
         final boolean debug = log.isDebugEnabled();
         final Map<AppdefEntityID, Resource> prefetched = new HashMap<AppdefEntityID, Resource>();
-
-        if (midMap.size() > 0) {
+        if (!midMap.isEmpty()) {
             final List<Integer> mids = new ArrayList<Integer>();
-            final List<AppdefEntityID> aeids = Arrays.asList(ids);
-            final int size = aeids.size();
-            for (final Iterator<AppdefEntityID> it = aeids.iterator(); it.hasNext();) {
-                final AppdefEntityID aeid = it.next();
-                if (debug)
-                    watch.markTimeBegin("findResource size=" + size);
-                final Resource r = resourceManager.findResource(aeid);
-                if (debug)
-                    watch.markTimeEnd("findResource size=" + size);
+            for (final Resource r : midMap.keySet()) {
+                final AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(r);
                 prefetched.put(aeid, r);
-                if (r == null || r.isInAsyncDeleteState()) {
-                    continue;
-                }
                 Measurement meas;
-                if (null == midMap || null == (meas = midMap.get(r.getId()))) {
-                    if (debug)
-                        watch.markTimeBegin("getAvailabilityMeasurement");
+                if (null == midMap || null == (meas = midMap.get(r))) {
+                    if (debug) watch.markTimeBegin("getAvailabilityMeasurement");
                     meas = measurementManager.getAvailabilityMeasurement(r);
-                    if (debug)
-                        watch.markTimeEnd("getAvailabilityMeasurement");
+                    if (debug) watch.markTimeEnd("getAvailabilityMeasurement");
                 }
                 if (meas == null) {
                     continue;
@@ -2271,13 +2240,10 @@ public class MeasurementBossImpl implements MeasurementBoss {
                     mids.add(meas.getId());
                 }
             }
-            if (debug)
-                watch.markTimeBegin("getLastAvail");
+            if (debug) watch.markTimeBegin("getLastAvail");
             data.putAll(availabilityManager.getLastAvail(mids.toArray(new Integer[0])));
-            if (debug)
-                watch.markTimeEnd("getLastAvail");
+            if (debug) watch.markTimeEnd("getLastAvail");
         }
-
         for (int i = 0; i < ids.length; i++) {
             Resource r = prefetched.get(ids[i]);
             if (r == null) {
@@ -2286,8 +2252,8 @@ public class MeasurementBossImpl implements MeasurementBoss {
             if (r == null || r.isInAsyncDeleteState()) {
                 continue;
             }
-            if (midMap.containsKey(r.getId())) {
-                Integer mid = midMap.get(r.getId()).getId();
+            if (midMap.containsKey(r)) {
+                Integer mid = midMap.get(r).getId();
                 MetricValue mval = null;
                 if (null != (mval = data.get(mid))) {
                     result[i] = mval.getValue();
@@ -2297,31 +2263,24 @@ public class MeasurementBossImpl implements MeasurementBoss {
                 switch (ids[i].getType()) {
                     case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
                         AppdefEntityValue appVal = new AppdefEntityValue(ids[i], subject);
-                        if (debug)
-                            watch.markTimeBegin("getFlattenedServiceIds");
+                        if (debug) watch.markTimeBegin("getFlattenedServiceIds");
                         AppdefEntityID[] services = appVal.getFlattenedServiceIds();
-                        if (debug)
-                            watch.markTimeEnd("getFlattenedServiceIds");
-                        if (debug)
-                            watch.markTimeBegin("getAggregateAvailability");
+                        if (debug) watch.markTimeEnd("getFlattenedServiceIds");
+                        if (debug) watch.markTimeBegin("getAggregateAvailability");
                         result[i] = getAggregateAvailability(subject, services, null, availCache);
-                        if (debug)
-                            watch.markTimeEnd("getAggregateAvailability");
+                        if (debug) watch.markTimeEnd("getAggregateAvailability");
                         break;
                     case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-                        if (debug)
-                            watch.markTimeBegin("getGroupAvailability");
+                        if (debug) watch.markTimeBegin("getGroupAvailability");
                         result[i] = getGroupAvailability(subject, ids[i].getId(), null, null);
-                        if (debug)
-                            watch.markTimeEnd("getGroupAvailability");
+                        if (debug) watch.markTimeEnd("getGroupAvailability");
                         break;
                     default:
                         break;
                 }
             }
         }
-        if (debug)
-            log.debug(watch);
+        if (debug) log.debug(watch);
         return result;
     }
 
@@ -2339,39 +2298,40 @@ public class MeasurementBossImpl implements MeasurementBoss {
      * @param availCache {@link Map} of {@link Measurement.getId} to
      *        {@link MetricValue}. May be null.
      */
-    private double getGroupAvailability(AuthzSubject subject, Integer gid,
-                                        Map<Integer, List<Measurement>> measCache,
+    private double getGroupAvailability(AuthzSubject subject, Integer gid, Map<Resource, List<Measurement>> measCache,
                                         Map<Integer, MetricValue> availCache)
-        throws AppdefEntityNotFoundException, PermissionException {
-
-        final ResourceGroup group = resourceGroupManager.findResourceGroupById(subject, gid);
+    throws AppdefEntityNotFoundException, PermissionException {
+        final StopWatch watch = new StopWatch();
+        final boolean debug = log.isDebugEnabled();
+        final ResourceGroup group = resourceGroupManager.getGroupById(gid);
         if (group == null) {
             return MeasurementConstants.AVAIL_UNKNOWN;
         }
-        final Resource resource = group.getResource();
-        if (resource == null || resource.isInAsyncDeleteState()) {
+        final Resource groupResource = group.getResource();
+        if (groupResource == null || groupResource.isInAsyncDeleteState()) {
             return MeasurementConstants.AVAIL_UNKNOWN;
         }
         if (measCache == null) {
-            measCache = measurementManager.getAvailMeasurements(Collections.singleton(group));
+            measCache = measurementManager.getAvailMeasurementsByResource(Collections.singleton(group));
         }
-        final List<Measurement> metrics = measCache.get(resource.getId());
-
         // Allow for the maximum window based on collection interval
-        Map<Integer, Measurement> midMap = new HashMap<Integer, Measurement>(metrics.size());
-        for (Measurement m : metrics) {
-
-            try {
-                midMap.put(m.getResource().getId(), m);
-            } catch (IllegalArgumentException e) {
-                // Resource has been deleted, waiting for purging. Ignore.
-            }
+        if (debug) watch.markTimeBegin("getMembers");
+        final Collection<Resource> members = resourceGroupManager.getMembers(group);
+        if (debug) watch.markTimeEnd("getMembers");
+        final List<AppdefEntityID> aeids = new ArrayList<AppdefEntityID>(members.size());
+        for (final Resource r : members) {
+            aeids.add(AppdefUtil.newAppdefEntityId(r));
         }
-
-        AppdefEntityID[] ids = getGroupMemberIDs(subject, gid);
-        double[] data = getAvailability(subject, ids, midMap, availCache);
-
-        return getCalculatedGroupAvailability(data);
+        final List<Measurement> metrics = measCache.get(groupResource);
+        final Map<Resource, Measurement> midMap = new HashMap<Resource, Measurement>(metrics.size());
+        for (final Measurement m : metrics) {
+            final Resource r = m.getResource();
+            midMap.put(r, m);
+        }
+        final double[] data = getAvailability(subject, aeids.toArray(new AppdefEntityID[0]), midMap, availCache);
+        double rtn = getCalculatedGroupAvailability(data);
+        log.debug(watch);
+        return rtn;
     }
 
     private List<AppdefEntityID> getAGMemberIds(AuthzSubject subject, AppdefEntityID[] aids, AppdefEntityTypeID ctype)
@@ -2761,11 +2721,9 @@ public class MeasurementBossImpl implements MeasurementBoss {
      * @deprecated use POJO API instead
      */
     @Deprecated
-    private List<ResourceTypeDisplaySummary> getSummarizedResourceCurrentHealth(
-                                                                                AuthzSubject subject,
+    private List<ResourceTypeDisplaySummary> getSummarizedResourceCurrentHealth(AuthzSubject subject,
                                                                                 AppdefResourceValue[] resources)
-        throws SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException,
-        PermissionException {
+    throws SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException, PermissionException {
         final List<ResourceTypeDisplaySummary> summaries = new ArrayList<ResourceTypeDisplaySummary>();
 
         // Create Map of auto-group'd/singleton resources and a List of clusters
@@ -2779,9 +2737,8 @@ public class MeasurementBossImpl implements MeasurementBoss {
         // AppdefResourceValues
         final HashMap<AppdefEntityID, AppdefResourceValue> resourcemap = new HashMap<AppdefEntityID, AppdefResourceValue>();
         final List<AppdefResourceValue> appdefVals = Arrays.asList(resources);
-        final Map<Integer, List<Measurement>> tmp = measurementManager
-            .getAvailMeasurements(appdefVals);
-        final Map<Integer, Measurement> midMap = getMidMap(getAeids(appdefVals), tmp);
+        final Map<Resource, List<Measurement>> tmp = measurementManager.getAvailMeasurementsByResource(appdefVals);
+        final Map<Resource, Measurement> midMap = getMidMap(getAeids(appdefVals), tmp);
         // keys are type id's and the values are AppdefResourceTypeValues
         for (int i = 0; i < resources.length; i++) {
             if (resources[i] instanceof ServiceClusterValue) {
@@ -2790,7 +2747,6 @@ public class MeasurementBossImpl implements MeasurementBoss {
                 AppdefEntityValue aeval = new AppdefEntityValue(aid, subject);
                 AppdefGroupValue agval = (AppdefGroupValue) aeval.getResourceValue();
                 ClusterDisplaySummary cds = new ClusterDisplaySummary();
-
                 cds.setEntityId(resource.getEntityId());
                 cds.setEntityName(agval.getName());
                 int size = agval.getTotalSize();
@@ -2798,8 +2754,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
                 // Replace the IDs with all of the members
                 List<AppdefEntityID> memberIds = getResourceIds(subject, aid, null);
                 AppdefEntityID[] ids = memberIds.toArray(new AppdefEntityID[0]);
-                setResourceTypeDisplaySummary(subject, cds, agval.getAppdefResourceTypeValue(),
-                    ids, midMap);
+                setResourceTypeDisplaySummary(subject, cds, agval.getAppdefResourceTypeValue(), ids, midMap);
                 summaries.add(cds);
             } else {
                 // all of the non-clusters get organized in here
@@ -2819,15 +2774,12 @@ public class MeasurementBossImpl implements MeasurementBoss {
         // are just the degenerative case of an autogroup, why it's
         // its own type is... silly)
         for (Map.Entry<Integer, List<AppdefEntityID>> entry : resTypeMap.entrySet()) {
-
             Collection<AppdefEntityID> siblings = entry.getValue();
             // Make sure we have valid IDs
             if (siblings == null || siblings.size() == 0) {
                 continue;
             }
-
             ResourceTypeDisplaySummary summary;
-
             AppdefEntityID[] ids = siblings.toArray(new AppdefEntityID[0]);
             AppdefEntityID aid = ids[0];
             AppdefResourceValue resource = resourcemap.get(aid);
@@ -2839,11 +2791,9 @@ public class MeasurementBossImpl implements MeasurementBoss {
                 // singleton
                 summary = new SingletonDisplaySummary(aid, resource.getName());
             }
-            setResourceTypeDisplaySummary(subject, summary, resource.getAppdefResourceTypeValue(),
-                ids, midMap);
+            setResourceTypeDisplaySummary(subject, summary, resource.getAppdefResourceTypeValue(), ids, midMap);
             summaries.add(summary);
         }
-
         Collections.sort(summaries);
         return summaries;
     }
@@ -2855,14 +2805,11 @@ public class MeasurementBossImpl implements MeasurementBoss {
                                                                                 Collection<AppdefResource> resources)
     throws SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException, PermissionException {
         List<ResourceTypeDisplaySummary> summaries = new ArrayList<ResourceTypeDisplaySummary>();
-
         // auto-group'd entities are kept track of in here where keys are the
         // type id's and the values are lists of resources
         HashMap<Integer, List<AppdefResource>> resTypeMap = new HashMap<Integer, List<AppdefResource>>();
-
         // keys are type id's and the values are AppdefResources
         for (AppdefResource resource : resources) {
-
             AppdefResourceType type = resource.getAppdefResourceType();
             Integer typeId = type.getId();
             List<AppdefResource> siblings = resTypeMap.get(typeId);
@@ -2870,38 +2817,29 @@ public class MeasurementBossImpl implements MeasurementBoss {
                 siblings = new ArrayList<AppdefResource>();
                 resTypeMap.put(typeId, siblings);
             }
-
             // Add resource to list
             siblings.add(resource);
         }
-        final Map<Integer, List<Measurement>> measCache = measurementManager
-            .getAvailMeasurements(resources);
-        final Map<Integer, Measurement> midMap = getMidMap(getAeids(resources), measCache);
-
+        final Map<Resource, List<Measurement>> measCache = measurementManager.getAvailMeasurementsByResource(resources);
+        final Map<Resource, Measurement> midMap = getMidMap(getAeids(resources), measCache);
         // first deal with the autogroups and singletons (singletons
         // are just the degenerative case of an autogroup, why it's
         // its own type is... silly)
         for (Map.Entry<Integer, List<AppdefResource>> entry : resTypeMap.entrySet()) {
-
-            final Collection<AppdefResource> siblings = entry
-                .getValue();
+            final Collection<AppdefResource> siblings = entry.getValue();
             // Make sure we have valid IDs
             if (siblings == null || siblings.size() == 0) {
                 continue;
             }
-
             ResourceTypeDisplaySummary summary = null;
-
             AppdefResourceType type = null;
             AppdefEntityID[] ids = new AppdefEntityID[siblings.size()];
             int i = 0;
             for (Iterator<AppdefResource> sibIt = siblings.iterator(); sibIt.hasNext(); i++) {
                 AppdefResource res = sibIt.next();
                 ids[i] = res.getEntityId();
-
                 if (type == null) {
                     type = res.getAppdefResourceType();
-
                     if (sibIt.hasNext()) {
                         // autogroup
                         summary = new AutogroupDisplaySummary();
@@ -2912,11 +2850,9 @@ public class MeasurementBossImpl implements MeasurementBoss {
                     }
                 }
             }
-            setResourceTypeDisplaySummary(subject, summary, type.getAppdefResourceTypeValue(), ids,
-                midMap);
+            setResourceTypeDisplaySummary(subject, summary, type.getAppdefResourceTypeValue(), ids, midMap);
             summaries.add(summary);
         }
-
         Collections.sort(summaries);
         return summaries;
     }
@@ -2933,17 +2869,14 @@ public class MeasurementBossImpl implements MeasurementBoss {
                                                ResourceTypeDisplaySummary summary,
                                                AppdefResourceTypeValue resType,
                                                AppdefEntityID[] ids,
-                                               Map<Integer, Measurement> midMap) {
+                                               Map<Resource, Measurement> midMap) {
         // Now get each category of measurements
         long end = System.currentTimeMillis();
-
         summary.setResourceType(resType);
-
         StopWatch watch = new StopWatch(end);
-
-        if (log.isDebugEnabled())
+        if (log.isDebugEnabled()) {
             log.debug("BEGIN setResourceTypeDisplaySummary");
-
+        }
         // Availability
         try {
            double[] data = getAvailability(subject, ids, midMap, null);
@@ -2955,9 +2888,9 @@ public class MeasurementBossImpl implements MeasurementBoss {
             log.debug(e, e);
             summary.setAvailability(new Double(MeasurementConstants.AVAIL_UNKNOWN));
         }
-
-        if (log.isDebugEnabled())
+        if (log.isDebugEnabled()) {
             log.debug("END setResourceTypeDisplaySummary -- " + watch.getElapsed() + " msec");
+        }
     }
 
     protected double getCalculatedGroupAvailability(double[] data) {
@@ -3130,20 +3063,13 @@ public class MeasurementBossImpl implements MeasurementBoss {
     public List<ResourceDisplaySummary> findGroupCurrentHealth(int sessionId, Integer id)
     throws SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException, PermissionException {
         final AuthzSubject subject = sessionManager.getSubject(sessionId);
-
-        // Find the group
-
         final ResourceGroup group = resourceGroupManager.findResourceGroupById(subject, id);
-
-        Map<String, Map<Resource, Measurement>> cats = new HashMap<String, Map<Resource, Measurement>>(
-            2);
+        Map<String, Map<Resource, Measurement>> cats = new HashMap<String, Map<Resource, Measurement>>(2);
         cats.put(MeasurementConstants.CAT_AVAILABILITY, null);
         // XXX scottmf need to review this, perf is bad and metric
         // is not very useful
         // cats.put(MeasurementConstants.CAT_THROUGHPUT, null);
-
         // Look up metrics by group first
-
         for (Map.Entry<String, Map<Resource, Measurement>> entry : cats.entrySet()) {
             List<Measurement> metrics = measurementManager.findDesignatedMeasurements(subject, group, entry.getKey());
             Map<Resource, Measurement> mmap = new HashMap<Resource, Measurement>(metrics.size());
@@ -3161,79 +3087,71 @@ public class MeasurementBossImpl implements MeasurementBoss {
         final StopWatch watch = new StopWatch();
         final PageList<ResourceDisplaySummary> summaries = new PageList<ResourceDisplaySummary>();
         watch.markTimeBegin("getAvailMeasurements");
-        final Map<Integer, List<Measurement>> measCache =
-            measurementManager.getAvailMeasurements(Collections.singleton(group));
+        final Map<Resource, List<Measurement>> measCache =
+            measurementManager.getAvailMeasurementsByResource(Collections.singleton(group));
+        final Map<Integer, List<Measurement>> measCacheById = new HashMap<Integer, List<Measurement>>();
         watch.markTimeEnd("getAvailMeasurements");
-
         // Remap from list to map of metrics
-        List<Measurement> metrics = measCache.remove(group.getResource().getId());
+        List<Measurement> metrics = measCache.remove(group.getResource());
         for (Measurement meas : metrics) {
-
-            measCache.put(meas.getResource().getId(), Collections.singletonList(meas));
+            measCache.put(meas.getResource(), Collections.singletonList(meas));
+            measCacheById.put(meas.getResource().getId(), Collections.singletonList(meas));
         }
-
         // Members are sorted
         final Collection<Resource> members = resourceGroupManager.getMembers(group);
         watch.markTimeBegin("getLastAvail");
-        final Map<Integer, MetricValue> availCache = availabilityManager.getLastAvail(members,
-            measCache);
+        final Map<Integer, MetricValue> availCache = availabilityManager.getLastAvail(members, measCacheById);
         watch.markTimeEnd("getLastAvail");
         for (Resource res : members) {
-            AppdefEntityID aeid = null ; 
-            try {
-                aeid = AppdefUtil.newAppdefEntityId(res);
-                ResourceDisplaySummary summary = new ResourceDisplaySummary();
-                // Set the resource
-                AppdefResourceValue parent = null;
-                switch (aeid.getType()) {
-                    case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                        watch.markTimeBegin("get platform from server");
-                        Server server = serverManager.getServerById(aeid.getId());
-                        // HHQ-5648 - server may not exist due to delete
-                        if (server == null) {
-                            continue;
-                        }
-                        final Resource serverResource = server.getResource();
-                        //[HQ-4052] Guys 16.10.2012 - platform might be null due to async. delete operation in progress 
-                        if(serverResource != null && serverResource.isInAsyncDeleteState()) { 
-                            log.warn("findGroupCurrentHealth() -->  skipping server " + server +
-                                     " as server is in deletion process.") ;
-                            continue ; 
-                        }
-                        parent = server.getPlatform().getPlatformValue();
-                        watch.markTimeEnd("get platform from server");
-                    case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                    case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                        watch.markTimeBegin("Set Resource Display for PSS Type");
-                        setResourceDisplaySummaryValueForCategories(subject, res, summary, cats, measCache, availCache);
-                        summary.setMonitorable(Boolean.TRUE);
-                        watch.markTimeEnd("Set Resource Display for PSS Type");
-                        break;
-                    case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-                    case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-                        watch.markTimeBegin("Group Type");
-                        summary.setMonitorable(Boolean.TRUE);
-                        // Set the availability now
-                        summary.setAvailability(new Double(getAvailability(subject, aeid, measCache, availCache)));
-                        try {
-                            // Get the availability template
-                            MeasurementTemplate tmpl = getAvailabilityMetricTemplate(subject, aeid, measCache);
-                            summary.setAvailTempl(tmpl.getId());
-                        } catch (MeasurementNotFoundException e) {
-                            // No availability metric, don't set it
-                        }
-                        watch.markTimeEnd("Group Type");
-                        break;
-                    default:
-                        throw new InvalidAppdefTypeException(
-                            "entity type is not monitorable, id type: " + aeid.getType());
-                }
-                setResourceDisplaySummary(summary, res, aeid, parent);
-                summaries.add(summary);
-            } catch(Exception e) {
-                log.error("Failure to add resource "+ (aeid == null ? "unknown" : aeid) +
-                          " to display summary, skipping resource: " + e, e);
+            AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(res);
+            ResourceDisplaySummary summary = new ResourceDisplaySummary();
+            // Set the resource
+            AppdefResourceValue parent = null;
+            switch (aeid.getType()) {
+                case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                    watch.markTimeBegin("get platform from server");
+                    Server server = serverManager.getServerById(aeid.getId());
+                    // HHQ-5648 - server may not exist due to delete
+                    if (server == null) {
+                        continue;
+                    }
+                    final Resource serverResource = server.getResource();
+                    //[HQ-4052] Guys 16.10.2012 - platform might be null due to async. delete operation in progress 
+                    if(serverResource != null && serverResource.isInAsyncDeleteState()) { 
+                        log.warn("findGroupCurrentHealth() -->  skipping server " + server +
+                                 " as server is in deletion process.") ;
+                        continue ; 
+                    }
+                    parent = server.getPlatform().getPlatformValue();
+                    watch.markTimeEnd("get platform from server");
+                case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                    watch.markTimeBegin("Set Resource Display for PSS Type");
+                    setResourceDisplaySummaryValueForCategories(subject, res, summary, cats, measCache, availCache);
+                    summary.setMonitorable(Boolean.TRUE);
+                    watch.markTimeEnd("Set Resource Display for PSS Type");
+                    break;
+                case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+                case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+                    watch.markTimeBegin("Group Type");
+                    summary.setMonitorable(Boolean.TRUE);
+                    // Set the availability now
+                    summary.setAvailability(new Double(getAvailability(subject, aeid, measCache, availCache)));
+                    try {
+                        // Get the availability template
+                        MeasurementTemplate tmpl = getAvailabilityMetricTemplate(subject, aeid, measCacheById);
+                        summary.setAvailTempl(tmpl.getId());
+                    } catch (MeasurementNotFoundException e) {
+                        // No availability metric, don't set it
+                    }
+                    watch.markTimeEnd("Group Type");
+                    break;
+                default:
+                    throw new InvalidAppdefTypeException(
+                        "entity type is not monitorable, id type: " + aeid.getType());
             }
+            setResourceDisplaySummary(summary, res, aeid, parent);
+            summaries.add(summary);
         }
         if (log.isDebugEnabled()) {
             log.debug("getGroupCurrentHealth: " + watch);
@@ -3269,7 +3187,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
 
     private void setResourceDisplaySummary(ResourceDisplaySummary rds, AppdefEntityID aeid,
                                            AppdefResourceValue parentResource)
-        throws AppdefEntityNotFoundException, PermissionException {
+    throws AppdefEntityNotFoundException, PermissionException {
         Resource resource = resourceManager.findResource(aeid);
         rds.setEntityId(aeid);
         rds.setResourceName(resource.getName()); 
@@ -3287,7 +3205,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
 
     private void setResourceDisplaySummary(ResourceDisplaySummary rds, Resource resource,
                                            AppdefEntityID aeid, AppdefResourceValue parentResource)
-        throws AppdefEntityNotFoundException, PermissionException {
+    throws AppdefEntityNotFoundException, PermissionException {
         rds.setEntityId(aeid);
         rds.setResourceName(resource.getName());
         rds.setResourceEntityTypeName(aeid.getTypeName());
@@ -3302,9 +3220,8 @@ public class MeasurementBossImpl implements MeasurementBoss {
         }
     }
 
-    private PageList<ResourceDisplaySummary> getResourcesCurrentHealth(AuthzSubject subject,
-                                                                       Collection<?> resources)
-        throws AppdefEntityNotFoundException, PermissionException {
+    private PageList<ResourceDisplaySummary> getResourcesCurrentHealth(AuthzSubject subject, Collection<?> resources)
+    throws AppdefEntityNotFoundException, PermissionException {
         final boolean debug = log.isDebugEnabled();
         final StopWatch watch = new StopWatch();
         final Collection<ResourceDisplaySummary> summaries =
@@ -3314,10 +3231,14 @@ public class MeasurementBossImpl implements MeasurementBoss {
                 }
         });
         if (debug) watch.markTimeBegin("getAvailMeasurements");
-        final Map<Integer, List<Measurement>> measCache = measurementManager.getAvailMeasurements(resources);
+        final Map<Resource, List<Measurement>> measCache = measurementManager.getAvailMeasurementsByResource(resources);
+        final Map<Integer, List<Measurement>> measCacheById = new HashMap<Integer, List<Measurement>>();
+        for (Map.Entry<Resource, List<Measurement>> entry : measCache.entrySet()) {
+            measCacheById.put(entry.getKey().getId(), entry.getValue());
+        }
         if (debug) watch.markTimeEnd("getAvailMeasurements");
         if (debug) watch.markTimeBegin("getLastAvail");
-        final Map<Integer, MetricValue> availCache = availabilityManager.getLastAvail(resources, measCache);
+        final Map<Integer, MetricValue> availCache = availabilityManager.getLastAvail(resources, measCacheById);
         if (debug) watch.markTimeEnd("getLastAvail");
         for (final Iterator<?> it = resources.iterator(); it.hasNext();) {
             try {
@@ -3363,7 +3284,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
                         summary.setAvailability(new Double(avail));
                         try {
                             // Get the availability template
-                            MeasurementTemplate tmpl = getAvailabilityMetricTemplate(subject, aeid, measCache);
+                            MeasurementTemplate tmpl = getAvailabilityMetricTemplate(subject, aeid, measCacheById);
                             summary.setAvailTempl(tmpl.getId());
                         } catch (MeasurementNotFoundException e) {
                             // No availability metric, don't set it
@@ -3401,7 +3322,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
     private void setResourceDisplaySummaryValueForCategory(AuthzSubject subject, AppdefEntityID aeid,
                                                            ResourceDisplaySummary summary,
                                                            Set<String> categories,
-                                                           Map<Integer, List<Measurement>> measCache,
+                                                           Map<Resource, List<Measurement>> measCache,
                                                            Map<Integer, MetricValue> availCache)
         throws AppdefEntityNotFoundException, PermissionException {
         // Maybe we're not doing anything
@@ -3414,7 +3335,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
             Measurement dm = null;
             // try to use prefetched caches
             if (measCache != null) {
-                List<Measurement> list = measCache.get(resource.getId());
+                List<Measurement> list = measCache.get(resource);
                 if (list == null) {
                     // nothing to do
                 } else if (list.size() == 1) {
@@ -3429,8 +3350,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
             // check if prefetched caches didn't contain values
             dm = (dm == null) ? measurementManager.getAvailabilityMeasurement(subject, aeid) : dm;
             if (dm != null && mv == null) {
-                summary.setAvailability(new Double(getAvailability(subject, aeid, measCache,
-                    availCache)));
+                summary.setAvailability(new Double(getAvailability(subject, aeid, measCache, availCache)));
                 summary.setAvailTempl(dm.getTemplate().getId());
             }
         }
@@ -3487,42 +3407,34 @@ public class MeasurementBossImpl implements MeasurementBoss {
     private void setResourceDisplaySummaryValueForCategories(AuthzSubject subject, Resource res,
                                                              ResourceDisplaySummary summary,
                                                              Map<String, Map<Resource, Measurement>> categories,
-                                                             Map<Integer, List<Measurement>> measCache,
+                                                             Map<Resource, List<Measurement>> measCache,
                                                              Map<Integer, MetricValue> availCache)
         throws AppdefEntityNotFoundException, PermissionException {
         StopWatch watch = new StopWatch();
         List<Measurement> resMetrics = new ArrayList<Measurement>(categories.size());
-
         // First find the measurements
         for (Map<Resource, Measurement> metrics : categories.values()) {
-
             if (metrics.containsKey(res)) {
                 resMetrics.add(metrics.remove(res));
             }
         }
-
         final AppdefEntityID id = AppdefUtil.newAppdefEntityId(res);
         for (Measurement m : resMetrics) {
-
             final MeasurementTemplate templ = m.getTemplate();
             final String category = templ.getCategory().getName();
-
             if (category.equals(MeasurementConstants.CAT_AVAILABILITY)) {
                 watch.markTimeBegin("getAvailability");
                 MetricValue mv = null;
-                ;
                 if (availCache != null) {
                     Integer mid = m.getId();
                     mv = availCache.get(mid);
                 }
-                Double val = (mv == null) ? new Double(getAvailability(subject, id, measCache,
-                    availCache)) : mv.getObjectValue();
+                Double val = (mv == null) ? new Double(getAvailability(subject, id, measCache, availCache)) : mv.getObjectValue();
                 summary.setAvailability(val);
                 summary.setAvailTempl(templ.getId());
                 watch.markTimeEnd("getAvailability");
                 continue;
             }
-
             // XXX scottmf, need to investigate this for perf
             // MetricValue mv = dataManager.getLastHistoricalData(m);
             MetricValue mv = new MetricValue();
@@ -3802,12 +3714,16 @@ public class MeasurementBossImpl implements MeasurementBoss {
         if (id == null) {
             return MeasurementConstants.AVAIL_UNKNOWN;
         }
-        final Map<Integer, List<Measurement>> measCache = measurementManager
-            .getAvailMeasurements(Collections.singleton(id));
+        final Map<Resource, List<Measurement>> measCache =
+            measurementManager.getAvailMeasurementsByResource(Collections.singletonList(id));
+        final Map<Integer, List<Measurement>> measCacheById = new HashMap<Integer, List<Measurement>>();
+        for (Map.Entry<Resource, List<Measurement>> entry : measCache.entrySet()) {
+            measCacheById.put(entry.getKey().getId(), entry.getValue());
+        }
         Map<Integer, MetricValue> availCache = null;
         if (id.isApplication()) {
             List<Resource> members = applicationManager.getApplicationResources(subj, id.getId());
-            availCache = availabilityManager.getLastAvail(members, measCache);
+            availCache = availabilityManager.getLastAvail(members, measCacheById);
         }
         return getAvailability(subj, id, measCache, availCache);
     }
@@ -3819,39 +3735,35 @@ public class MeasurementBossImpl implements MeasurementBoss {
      *        Measurement.getId(), may be null
      */
     @Transactional(readOnly = true)
-    private double getAvailability(AuthzSubject subject, AppdefEntityID id,
-                                   Map<Integer, List<Measurement>> measCache,
+    private double getAvailability(AuthzSubject subject, AppdefEntityID id, Map<Resource, List<Measurement>> measCache,
                                    Map<Integer, MetricValue> availCache)
-        throws AppdefEntityNotFoundException, PermissionException {
-        StopWatch watch = new StopWatch();
+    throws AppdefEntityNotFoundException, PermissionException {
+        final StopWatch watch = new StopWatch();
         final boolean debug = log.isDebugEnabled();
-        if (debug)
-            log.debug("BEGIN getAvailability() id=" + id);
-
+        if (debug) log.debug("BEGIN getAvailability() id=" + id);
         try {
             if (id.isGroup()) {
-                return getGroupAvailability(subject, id.getId(), measCache, availCache);
+                if (debug) watch.markTimeBegin("getGroupAvailability");
+                double rtn = getGroupAvailability(subject, id.getId(), measCache, availCache);
+                if (debug) watch.markTimeEnd("getGroupAvailability");
+                return rtn;
             } else if (id.isApplication()) {
                 AppdefEntityValue appVal = new AppdefEntityValue(id, subject);
-                if (debug)
-                    watch.markTimeBegin("getFlattenedServiceIds");
+                if (debug) watch.markTimeBegin("getFlattenedServiceIds");
                 AppdefEntityID[] services = appVal.getFlattenedServiceIds();
-                if (debug)
-                    watch.markTimeEnd("getFlattenedServiceIds");
-
-                if (debug)
-                    watch.markTimeBegin("getAggregateAvailability");
+                if (debug) watch.markTimeEnd("getFlattenedServiceIds");
+                if (debug) watch.markTimeBegin("getAggregateAvailability");
                 double rtn = getAggregateAvailability(subject, services, measCache, availCache);
-                if (debug)
-                    watch.markTimeEnd("getAggregateAvailability");
+                if (debug) watch.markTimeEnd("getAggregateAvailability");
                 return rtn;
             }
-
             AppdefEntityID[] ids = new AppdefEntityID[] { id };
             return getAvailability(subject, ids, getMidMap(ids, measCache), availCache)[0];
+        } catch (RuntimeException e) {
+            log.error(e,e);
+            throw e;
         } finally {
-            if (debug)
-                log.debug("END getAvailability() id=" + id + " -- " + watch);
+            if (debug) log.debug("END getAvailability() id=" + id + " -- " + watch);
         }
     }
 
@@ -3861,8 +3773,8 @@ public class MeasurementBossImpl implements MeasurementBoss {
      * 
      */
     @Transactional(readOnly = true)
-    public double getAvailability(int sessionId, AppdefEntityID id) throws SessionTimeoutException,
-        SessionNotFoundException, AppdefEntityNotFoundException, PermissionException {
+    public double getAvailability(int sessionId, AppdefEntityID id)
+    throws SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException, PermissionException {
         final AuthzSubject subject = sessionManager.getSubject(sessionId);
         return getAvailability(subject, id);
     }
@@ -3972,11 +3884,11 @@ public class MeasurementBossImpl implements MeasurementBoss {
      * 
      */
     @Transactional(readOnly = true)
-    public List findAllMetrics(int sessionId, AppdefEntityID aeid, AppdefEntityID[] hosts,
-                               AppdefEntityTypeID[] children, AppdefEntityID[] members, long begin,
-                               long end) throws SessionTimeoutException, SessionNotFoundException,
-        AppdefEntityNotFoundException, PermissionException, AppdefCompatException,
-        InvalidAppdefTypeException {
+    public List<ProblemMetricSummary> findAllMetrics(int sessionId, AppdefEntityID aeid, AppdefEntityID[] hosts,
+                                                     AppdefEntityTypeID[] children, AppdefEntityID[] members,
+                                                     long begin, long end)
+    throws SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException, PermissionException,
+           AppdefCompatException, InvalidAppdefTypeException {
         List<AppdefEntityID> singlesList = new ArrayList<AppdefEntityID>();
 
         if (aeid != null && members == null) {
@@ -4046,10 +3958,10 @@ public class MeasurementBossImpl implements MeasurementBoss {
      * 
      */
     @Transactional(readOnly = true)
-    public List findAllMetrics(int sessionId, AppdefEntityID aeid, AppdefEntityID[] hosts,
-                               AppdefEntityTypeID[] children, long begin, long end)
+    public List<ProblemMetricSummary> findAllMetrics(int sessionId, AppdefEntityID aeid, AppdefEntityID[] hosts,
+                                                     AppdefEntityTypeID[] children, long begin, long end)
         throws SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException,
-        PermissionException, AppdefCompatException, InvalidAppdefTypeException {
+               PermissionException, AppdefCompatException, InvalidAppdefTypeException {
         List<AppdefEntityID> singlesList = new ArrayList<AppdefEntityID>();
 
         if (aeid != null) {

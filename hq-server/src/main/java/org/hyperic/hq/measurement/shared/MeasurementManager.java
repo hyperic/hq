@@ -28,6 +28,7 @@ package org.hyperic.hq.measurement.shared;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.Platform;
@@ -253,6 +254,8 @@ public interface MeasurementManager {
      */
     public Map<Integer, List<Measurement>> getAvailMeasurements(Collection<?> resources);
 
+    public Map<Resource, List<Measurement>> getAvailMeasurementsByResource(Collection<?> resources);
+
     /**
      * Look up a list of Measurement intervals for template IDs.
      * @return a map keyed by template ID and values of metric intervals There
@@ -336,7 +339,7 @@ public interface MeasurementManager {
                                               MaintenanceEvent event,
                                               Collection<Resource> resources);
 
-    public void syncPluginMetrics(String plugin);
+//    public void syncPluginMetrics(String plugin);
 
     /**
      * Gets a summary of the metrics which are scheduled for collection, across

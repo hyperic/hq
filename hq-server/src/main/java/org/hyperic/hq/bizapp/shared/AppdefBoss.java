@@ -841,4 +841,7 @@ public interface AppdefBoss {
     	throws PermissionException, EncodingException, PluginException,
                ApplicationException, AutoinventoryException,
                ScheduleWillNeverFireException, AgentConnectionException;
+
+    AppdefResourceTypeValue findResourceTypeByResId(int sessionID, Integer resourceId)
+    throws SessionTimeoutException, SessionNotFoundException;
 }

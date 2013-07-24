@@ -361,12 +361,9 @@ public class AppdefBossImpl implements AppdefBoss , ApplicationContextAware {
      */
     @Transactional(readOnly = true)
     public PageList<PlatformTypeValue> findViewablePlatformTypes(int sessionID, PageControl pc)
-        throws SessionTimeoutException, SessionNotFoundException, PermissionException,
-        NotFoundException {
+    throws SessionTimeoutException, SessionNotFoundException, PermissionException, NotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
-        PageList<PlatformTypeValue> platTypeList = platformManager.getViewablePlatformTypes(
-            subject, pc);
-
+        PageList<PlatformTypeValue> platTypeList = platformManager.getViewablePlatformTypes( subject, pc);
         return platTypeList;
     }
 
@@ -1077,6 +1074,30 @@ public class AppdefBossImpl implements AppdefBoss , ApplicationContextAware {
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown appdef type: " + id);
+            }
+            return type.getAppdefResourceTypeValue();
+        } catch (Exception e) {
+            throw new SystemException(e);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public AppdefResourceTypeValue findResourceTypeByResId(int sessionID, Integer resourceId)
+    throws SessionTimeoutException, SessionNotFoundException {
+        if (resourceId == null) {
+            return null;
+        }
+        try {
+            final Resource resType = resourceManager.getResourceById(resourceId);
+            AppdefResourceType type = null;
+            if (resType.getResourceType().getId().equals(AuthzConstants.authzPlatformProto)) {
+                type = findPlatformTypeById(sessionID, resType.getInstanceId());
+            } else if (resType.getResourceType().getId().equals(AuthzConstants.authzServerProto)) {
+                type = findServerTypeById(sessionID, resType.getInstanceId());
+            } else if (resType.getResourceType().getId().equals(AuthzConstants.authzServiceProto)) {
+                type = findServiceTypeById(sessionID, resType.getInstanceId());
+            } else {
+                throw new IllegalArgumentException("Unknown appdef type: " + resType.getInstanceId());
             }
             return type.getAppdefResourceTypeValue();
         } catch (Exception e) {
@@ -2539,6 +2560,12 @@ public class AppdefBossImpl implements AppdefBoss , ApplicationContextAware {
             int resProtoId;
             @SuppressWarnings("deprecation")
             public AppdefResourceValue transform(Integer id) {
+                // don't do any work if there are no selections and if the item is not within the page
+                if (noSelections && !(index >= startIndex && returned < pagesize)) {
+                    index++;
+                    totalSetSize.set(totalSetSize.get()+1);
+                    return null;
+                }
                 final Resource resource = resourceManager.getResourceById(id);
                 if (resource == null || resource.isInAsyncDeleteState()) {
                     return null;
