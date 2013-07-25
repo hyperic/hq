@@ -249,11 +249,19 @@ public class TopNManagerImpl implements ZeventListener<ResourceZevent>, TopNMana
 
 
                         if (e instanceof ResourceCreatedZevent) {
-                            configureTopNSchedule(platform, config,
-                                    Integer.valueOf(serverConfigManager.getPropertyValue(TOPN_DEFAULT_INTERVAL)),
-                                    Integer.valueOf(serverConfigManager.getPropertyValue(TOPN_NUMBER_OF_PROCESSES)));
+                            configureDefaultTopNSchedule(platform, config);
                             log.info("Scheduling TopN collection for platform '" + platform.getResource().getId() + "'");
                             scheduleTopNCollection(platform, config);
+                        }
+
+                        else if (e instanceof ResourceUpdatedZevent) {
+                            TopNSchedule schedule = topNScheduleDao.get(platform.getResource().getId());
+                            if (null == schedule) {
+                                configureDefaultTopNSchedule(platform, config);
+                                log.info("Scheduling TopN collection for platform '" + platform.getResource().getId()
+                                        + "'");
+                                scheduleTopNCollection(platform, config);
+                            }
                         }
 
                         else if (e instanceof ResourceRefreshZevent) {
@@ -265,16 +273,13 @@ public class TopNManagerImpl implements ZeventListener<ResourceZevent>, TopNMana
                                     + "'");
 
                             if (null == schedule) {
-                                configureTopNSchedule(platform, config,
-                                        Integer.valueOf(serverConfigManager.getPropertyValue(TOPN_DEFAULT_INTERVAL)),
-                                        Integer.valueOf(serverConfigManager.getPropertyValue(TOPN_NUMBER_OF_PROCESSES)));
+                                configureDefaultTopNSchedule(platform, config);
                             }
 
                             scheduleTopNCollection(platform, config);
                         }
 
                     }
-
 
                     public String getName() {
                         return "TopNEventsListener";
@@ -287,6 +292,12 @@ public class TopNManagerImpl implements ZeventListener<ResourceZevent>, TopNMana
 
         }
 
+    }
+
+    private void configureDefaultTopNSchedule(Platform platform, ConfigResponse config) {
+        configureTopNSchedule(platform, config,
+                Integer.valueOf(serverConfigManager.getPropertyValue(TOPN_DEFAULT_INTERVAL)),
+                Integer.valueOf(serverConfigManager.getPropertyValue(TOPN_NUMBER_OF_PROCESSES)));
     }
 
     private boolean agentVersionValid(Platform platform) {
