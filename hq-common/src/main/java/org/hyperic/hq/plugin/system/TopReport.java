@@ -53,13 +53,18 @@ public class TopReport implements Serializable {
                 int returnValue = 0;
                 double firstMem = -1;
                 double secondMem = -1;
+
                 if (first.getMemPerc().contains("%")) {
                     firstMem = Double.valueOf(first.getMemPerc().replace("%", "").trim());
                 }
                 if (second.getMemPerc().contains("%")) {
                     secondMem = Double.valueOf(second.getMemPerc().replace("%", "").trim());
                 }
-                returnValue = (firstMem >= secondMem ? -1 : 1);
+                if (firstMem == secondMem) {
+                    returnValue = 0;
+                } else {
+                    returnValue = (firstMem > secondMem ? -1 : 1);
+                }
                 return returnValue;
             }
         });
@@ -78,7 +83,11 @@ public class TopReport implements Serializable {
                 if (second.getCpuPerc().contains("%")) {
                     secondCpu = Double.valueOf(second.getCpuPerc().replace("%", "").trim());
                 }
-                returnValue = (firstCpu >= secondCpu ? -1 : 1);
+                if (firstCpu == secondCpu) {
+                    returnValue = 0;
+                } else {
+                    returnValue = (firstCpu > secondCpu ? -1 : 1);
+                }
                 return returnValue;
             }
         });
@@ -190,7 +199,8 @@ public class TopReport implements Serializable {
     }
 
     public static final TopReport fromSerializedForm(final byte[] data, final int startPos,
-                                                     final int length) throws IOException, ClassNotFoundException {
+ final int length)
+            throws IOException, ClassNotFoundException {
         final ByteArrayInputStream inStream = new ByteArrayInputStream(data, startPos, length);
         final ObjectInputStream objStream = new ObjectInputStream(inStream);
         return (TopReport) objStream.readObject();
