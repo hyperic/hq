@@ -409,8 +409,10 @@ public class OracleMeasurementPlugin
         String tablespace = metric.getObjectProperty(PROP_TABLESPACE);
         String sql = (String)ora10Queries.get(metric.getAttributeName());
         sql = StringUtil.replace(sql, "%segment%", segment);
+        
+        Connection conn = null;
         try {
-            Connection conn = getCachedConnection(metric);
+            conn = getCachedConnection(metric);
             if (OracleControlPlugin.isTable(conn, segment, tablespace)) {
                 sql = StringUtil.replace(sql, "%tablename%", "all_tables");
                 sql = StringUtil.replace(sql, "%identifier%", "table_name");
@@ -421,6 +423,10 @@ public class OracleMeasurementPlugin
             }
         } catch (SQLException e) {
             _log.error(e.getMessage(), e);
+        }
+        finally{
+            //Return the connection
+            returnCachedConnection(metric, conn);
         }
         return sql;
     }
@@ -503,6 +509,8 @@ public class OracleMeasurementPlugin
         } finally {
             // don't close the conn, since it is shared
             DBUtil.closeJDBCObjects(getLog(), null, stmt, rs);
+            //Return the connection
+            returnCachedConnection(metric, conn);
         }
         // assume non-temporary tablespace in general
         return false; 
@@ -531,6 +539,8 @@ public class OracleMeasurementPlugin
         } finally {
             // don't close the conn, since it is shared
             DBUtil.closeJDBCObjects(getLog(), null, stmt, rs);
+            //Return the connection
+            returnCachedConnection(metric, conn);
         }
         // we don't want to collect any metrics if the tablespace does not exist
         return true;
@@ -606,6 +616,17 @@ public class OracleMeasurementPlugin
             throw new MetricNotFoundException(msg, e);
         } finally {
             DBUtil.closeJDBCObjects(getLog(), null, ps, rs);
+            //Return the connection
+            returnCachedConnection(metric, conn);
         }
     }
+    
+    protected void returnCachedConnection(Metric metric, Connection conn)
+                   {
+            Properties props = metric.getProperties();
+            String url  = props.getProperty(PROP_URL),
+                   user = props.getProperty(PROP_USER),
+                   pass = props.getProperty(PROP_PASSWORD);
+             returnCachedConnection(url, user, pass, conn);
+        }
 }
