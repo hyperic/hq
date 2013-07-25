@@ -18,15 +18,15 @@
   PARTICULAR PURPOSE. See the GNU General Public License for more
   details.
   
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
-  USA.
- -->
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ USA.
+-->
 
 <plugin name="mssql">
-  <property name="PLUGIN_VERSION" value="@project.version@"/>
-  <script name="MDF_FreeSpacePct2005.sql">
+    <property name="PLUGIN_VERSION" value="@project.version@"/>
+    <script name="MDF_FreeSpacePct2005.sql">
 	<![CDATA[
 set ANSI_NULLS ON 
 set QUOTED_IDENTIFIER ON 
@@ -68,10 +68,10 @@ insert into #tTables( strTableName, db_sizes, unalloc_sizes)
 select 
 db_name(), 
 database_size =  (case @dbmaxsize 
-                              when -1 then -1 
-                              else  
-                              cast( ((@dbmaxsize / @pagesperMB)*1024) as bigint ) 
-                              end), 
+              when -1 then -1 
+              else  
+              cast( ((@dbmaxsize / @pagesperMB)*1024) as bigint ) 
+              end), 
 unallocated_space = (case when @dbmaxsize >= @reservedpages then
 						cast(((convert (dec (15,2),@dbmaxsize) - convert (dec (15,2),@reservedpages)) / @pagesperMB*1024) as bigint )
 					else 0 
@@ -82,10 +82,10 @@ select strTableName "DBName",
               
 drop table #tTables 
 	]]>
-	</script>
+    </script>
 	
-	<!-- Script for version 2000 -->
-	<script name="MDF_FreeSpacePct2000.sql">
+    <!-- Script for version 2000 -->
+    <script name="MDF_FreeSpacePct2000.sql">
 	<![CDATA[
 set ANSI_NULLS ON 
 set QUOTED_IDENTIFIER ON 
@@ -124,588 +124,581 @@ select strTableName "DBName",
 
 drop table #tTables
 	]]>
-	</script>
+    </script>
 	
-  <!-- appended to each template by the hq-plugin.xml parser -->
+    <!-- appended to each template by the hq-plugin.xml parser -->
     <property name="template-config"
-            value="service_name=%service_name%"/>
+              value="service_name=%service_name%"/>
 
     <filter name="db.domain"
-          value="Databases(${db.name})"/>
+            value="Databases(${db.name})"/>
 
     <filter name="lock.domain"
-          value="Locks(${lock.name})"/>
+            value="Locks(${lock.name})"/>
 
     <filter name="cache.domain"
-          value="Cache Manager(${cache.name})"/>
+            value="Cache Manager(${cache.name})"/>
 
-<!-- NUEVOS -->
-    <filter name="buffer.manager" value="Buffer Manager:Platform=Win32:${name}"/>
-
+    <filter name="template" value="pdh:Buffer Manager:${name}"/>
     <metrics name="Buffer-Manager_2012">
-        <metric name="Page life expectancy"
-            template="${buffer.manager}"
-            category="UTILIZATION"
-            group="Reliability"
-            collectionType="dynamic"
-            units="sec"/>
-        <metric name="Lazy Writes"
-            template="Buffer Manager:Platform=Win32:Lazy Writes/Sec"
-            category="UTILIZATION"
-            group="Reliability"
-            collectionType="trendsup"
-            units="none"/>
-        <metric name="Checkpoint Pages"
-            template="Buffer Manager:Platform=Win32:Checkpoint Pages/Sec"
-            category="UTILIZATION"
-            group="Reliability"
-            collectionType="trendsup"
-            units="none"/>
-        <metric name="Page reads"
-            template="Buffer Manager:Platform=Win32:Page reads/sec"
-            category="UTILIZATION"
-            group="Reliability"
-            collectionType="trendsup"
-            units="none"/>
-        <metric name="Page writes"
-            template="Buffer Manager:Platform=Win32:Page writes/sec"
-            category="UTILIZATION"
-            group="Reliability"
-            collectionType="trendsup"
-            units="none"/>
-        <metric name="Buffer Cache hit ratio"
-            template="Buffer Manager:Type=Formatted:${name}"
-            category="UTILIZATION"
-            group="Reliability"
-            collectionType="dynamic"
-            units="percent"/>
+        <metric name="Buffer cache hit ratio" units="percent"/>
+        <metric name="Page lookups/sec"/>
+        <metric name="Free list stalls/sec"/>
+        <metric name="Database pages"/>
+        <metric name="Target pages"/>
+        <metric name="Integral Controller Slope"/>
+        <metric name="Lazy writes/sec"/>
+        <metric name="Readahead pages/sec"/>
+        <metric name="Page reads/sec"/>
+        <metric name="Page writes/sec"/>
+        <metric name="Checkpoint pages/sec"/>
+        <metric name="Background writer pages/sec"/>
+        <metric name="Page life expectancy" units="sec"/>
     </metrics>
     
+    <filter name="buffer.manager" value="Buffer Manager:Platform=Win32:${name}"/>
     <metrics name="Buffer-Manager">
         <include name="Buffer-Manager_2012"/>
-        <metric name="Free pages"
-                template="${buffer.manager}"
-                category="UTILIZATION"
-                group="Reliability"
-                collectionType="dynamic"
-                units="none"/>
-        <metric name="Stolen pages"
-                template="${buffer.manager}"
-                category="UTILIZATION"
-                group="Reliability"
-                collectionType="dynamic"
-                units="none"/>
+        <metric name="Free pages" template="${buffer.manager}" group="Reliability" collectionType="dynamic" />
+        <metric name="Stolen pages" template="${buffer.manager}" group="Reliability" collectionType="dynamic" />
     </metrics>
-
-<!-- FIN NUEVOS -->
-
+    
     <metrics name="mssql-avail">
-        <metric name="Availability"
-            alias="Availability"
-            template="${db.domain}:Type=Availability:Active Transactions"
-            category="AVAILABILITY"
-            group="Reliability"
-            indicator="true"
-            collectionType="dynamic"
-            units="percentage"/>
+        <metric name="Availability" template="${db.domain}:Type=Availability:Active Transactions" category="AVAILABILITY" indicator="true" units="percentage"/>
     </metrics>
 
     <metrics name="mssql-database">
-        <metric name="Data File Size"
-            alias="DataFileSize"
-            template="${db.domain}:Platform=Win32:Data File(s) Size (KB)"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            indicator="true"
-            collectionType="dynamic"
-            units="KB"/>
-
-        <metric name="Log File Size"
-            alias="LogFileSize"
-            template="${db.domain}:Platform=Win32:Log File(s) Size (KB)"
-            category="UTILIZATION"
-            group="Log"
-            collectionType="dynamic"
-            units="KB"/>
-
-        <metric name="Log File Used Size"
-            alias="LogFileUsedSize"
-            template="${db.domain}:Platform=Win32:Log File(s) Used Size (KB)"
-            category="UTILIZATION"
-            group="Log"
-            collectionType="dynamic"
-            units="KB"/>
-
-        <metric name="Percent Log Used"
-            alias="PercentLogUsed"
-            template="${db.domain}:Platform=Win32:Percent Log Used"
-            category="UTILIZATION"
-            group="Log"
-            collectionType="dynamic"
-            units="percentage"/>
-
-        <metric name="Active Transactions"
-            alias="ActiveTransactions"
-            template="${db.domain}:Platform=Win32:Active Transactions"
-            category="THROUGHPUT"
-            group="Throughput"
-            indicator="true"
-            collectionType="dynamic"
-            units="none"/>
-
-        <metric name="Transactions"
-            alias="Transactions"
-            template="${db.domain}:Platform=Win32:Transactions/sec"
-            category="THROUGHPUT"
-            group="Throughput"
-            indicator="true"
-            collectionType="trendsup"
-            units="none"/>
-
-        <metric name="Transactions"
-            alias="Transactions"
-            template="${db.domain}:Type=Formatted:Transactions/sec"
-            category="THROUGHPUT"
-            group="Throughput"
-            collectionType="dynamic"
-            units="none"/>
-
-        <metric name="Replication Pending Transactions"
-            alias="ReplPendingTx"
-            template="${db.domain}:Platform=Win32:Repl. Pending Xacts"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="dynamic"
-            units="none"/>
-
-        <metric name="Replication Transaction Rate"
-            alias="ReplTransRate"
-            template="${db.domain}:Type=Formatted:Repl. Trans. Rate"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="dynamic"
-            units="none"/>
-
-        <metric name="Log Cache Hit Ratio"
-            alias="LogCacheHitRatio"
-            template="${db.domain}:Type=Formatted:Log Cache Hit Ratio"
-            category="UTILIZATION"
-            group="Log"
-            collectionType="dynamic"
-            units="none"/>
-
-        <metric name="Log Flush Wait Time"
-            alias="LogFlushWaitTime"
-            template="${db.domain}:Platform=Win32:Log Flush Wait Time"
-            category="UTILIZATION"
-            group="Log"
-            collectionType="dynamic"
-            units="none"/>
-
-        <metric name="Log Truncations"
-            alias="LogTruncations"
-            template="${db.domain}:Platform=Win32:Log Truncations"
-            category="UTILIZATION"
-            group="Log"
-            collectionType="dynamic"
-            units="none"/>
-
-        <metric name="Log Growths"
-            alias="LogGrowths"
-            template="${db.domain}:Platform=Win32:Log Growths"
-            category="UTILIZATION"
-            group="Log"
-            collectionType="dynamic"
-            units="none"/>
-
-        <metric name="Log Shrinks"
-            alias="LogShrinks"
-            template="${db.domain}:Platform=Win32:Log Shrinks"
-            category="UTILIZATION"
-            group="Log"
-            collectionType="dynamic"
-            units="none"/>
-
+        <metric name="Data File Size" template="${db.domain}:Platform=Win32:Data File(s) Size (KB)" indicator="true" units="KB"/>
+        <metric name="Log File Size" template="${db.domain}:Platform=Win32:Log File(s) Size (KB)" units="KB"/>
+        <metric name="Log File Used Size" template="${db.domain}:Platform=Win32:Log File(s) Used Size (KB)" group="Log" collectionType="dynamic" units="KB"/>
+        <metric name="Percent Log Used" template="${db.domain}:Platform=Win32:Percent Log Used" units="percentage"/>
+        <metric name="Active Transactions" template="${db.domain}:Platform=Win32:Active Transactions" category="THROUGHPUT" indicator="true"/>
+        <metric name="Transactions" template="${db.domain}:Platform=Win32:Transactions/sec" category="THROUGHPUT" indicator="true"/>
+        <metric name="Transactions" template="${db.domain}:Type=Formatted:Transactions/sec" category="THROUGHPUT"/>
+        <metric name="Replication Pending Transactions" template="${db.domain}:Platform=Win32:Repl. Pending Xacts"/>
+        <metric name="Replication Transaction Rate" template="${db.domain}:Type=Formatted:Repl. Trans. Rate"/>
+        <metric name="Log Cache Hit Ratio" template="${db.domain}:Type=Formatted:Log Cache Hit Ratio"/>
+        <metric name="Log Flush Wait Time" template="${db.domain}:Platform=Win32:Log Flush Wait Time"/>
+        <metric name="Log Truncations" template="${db.domain}:Platform=Win32:Log Truncations"/>
+        <metric name="Log Growths" template="${db.domain}:Platform=Win32:Log Growths"/>
+        <metric name="Log Shrinks" template="${db.domain}:Platform=Win32:Log Shrinks"/>
     </metrics>
 
+    <filter name="template" value="pdh:Access Methods:${name}"/>
     <metrics name="mssql-access">
-    <metric name="Full Scans"
-            alias="FullScans"
-            template="Access Methods:Platform=Win32:Full Scans/Sec"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="trendsup"
-            units="none"/>
-    <metric name="Worktables Created"
-            template="Access Methods:Platform=Win32:Worktables Created/Sec"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="trendsup"
-            units="none"/>
-
-    <metric name="Workfiles Created"
-            alias="WorkfilesCreatedSec"
-            template="Access Methods:Platform=Win32:Workfiles Created/Sec"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="trendsup"
-            units="none"/>
-
-
-        <metric name="Worktables From Cache Ratio"
-            alias="WorktablesFromCacheRatio"
-            template="Access Methods:Type=Formatted:Worktables From Cache Ratio"
-            category="UTILIZATION"
-            group="Cache"
-            collectionType="dynamic"
-            units="none"/>
-
-    <metric name="Page Splits"
-            alias="PageSplitsSec"
-            template="Access Methods:Platform=Win32:Page Splits/Sec"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="trendsup"
-            units="none"/>
-
+        <metric name="Full Scans/sec"/>
+        <metric name="Range Scans/sec"/>
+        <metric name="Probe Scans/sec"/>
+        <metric name="Scan Point Revalidations/sec"/>
+        <metric name="Workfiles Created/sec"/>
+        <metric name="Worktables Created/sec"/>
+        <metric name="Worktables From Cache Ratio"/>
+        <metric name="Forwarded Records/sec"/>
+        <metric name="Skipped Ghosted Records/sec"/>
+        <metric name="Index Searches/sec"/>
+        <metric name="FreeSpace Scans/sec"/>
+        <metric name="FreeSpace Page Fetches/sec"/>
+        <metric name="Pages Allocated/sec"/>
+        <metric name="Extents Allocated/sec"/>
+        <metric name="Mixed page allocations/sec"/>
+        <metric name="Extent Deallocations/sec"/>
+        <metric name="Page Deallocations/sec"/>
+        <metric name="Page Splits/sec"/>
+        <metric name="Table Lock Escalations/sec"/>
+        <metric name="Deferred Dropped rowsets"/>
+        <metric name="Dropped rowset cleanups/sec"/>
+        <metric name="Dropped rowsets skipped/sec"/>
+        <metric name="Deferred dropped AUs"/>
+        <metric name="AU cleanups/sec"/>
+        <metric name="AU cleanup batches/sec"/>
+        <metric name="Failed AU cleanup batches/sec"/>
+        <metric name="Used tree page cookie"/>
+        <metric name="Failed tree page cookie"/>
+        <metric name="Used leaf page cookie"/>
+        <metric name="Failed leaf page cookie"/>
+        <metric name="LobSS Provider Create Count" collectionType="trendsup"/>
+        <metric name="LobSS Provider Destroy Count" collectionType="trendsup"/>
+        <metric name="LobSS Provider Truncation Count" collectionType="trendsup"/>
+        <metric name="LobHandle Create Count" collectionType="trendsup"/>
+        <metric name="LobHandle Destroy Count" collectionType="trendsup"/>
+        <metric name="By-reference Lob Create Count"/>
+        <metric name="By-reference Lob Use Count"/>
+        <metric name="Count Push Off Row" collectionType="trendsup"/>
+        <metric name="Count Pull In Row" collectionType="trendsup"/>
+        <metric name="Count Lob Readahead" collectionType="trendsup"/>
+        <metric name="Page compression attempts/sec"/>
+        <metric name="Pages compressed/sec"/>
+        <metric name="InSysXact waits/sec"/>
     </metrics>
 
+    <filter name="template" value="pdh:General Statistics:${name}"/>
     <metrics name="mssql-general">
-    <metric name="Logins"
-            alias="Logins"
-            template="General Statistics:Platform=Win32:Logins/Sec"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="trendsup"
-            units="none"/>
-
-    <metric name="Logouts"
-            alias="Logouts"
-            template="General Statistics:Platform=Win32:Logouts/Sec"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="trendsup"
-            units="none"/>
-
-        <metric name="User Connections"
-            alias="UserConnections"
-            template="General Statistics:Platform=Win32:User Connections"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="dynamic"
-            units="none"/>
+        <metric name="Active Temp Tables"/>
+        <metric name="Temp Tables Creation Rate"/>
+        <metric name="Logins/sec"/>
+        <metric name="Connection Reset/sec"/>
+        <metric name="Logouts/sec"/>
+        <metric name="User Connections"/>
+        <metric name="Logical Connections"/>
+        <metric name="Transactions"/>
+        <metric name="Non-atomic yield rate"/>
+        <metric name="Mars Deadlocks"/>
+        <metric name="HTTP Authenticated Requests"/>
+        <metric name="SOAP Empty Requests"/>
+        <metric name="SOAP SQL Requests"/>
+        <metric name="SOAP Method Invocations"/>
+        <metric name="SOAP WSDL Requests"/>
+        <metric name="SOAP Session Initiate Requests"/>
+        <metric name="SOAP Session Terminate Requests"/>
+        <metric name="Processes blocked"/>
+        <metric name="Temp Tables For Destruction"/>
+        <metric name="Event Notifications Delayed Drop"/>
+        <metric name="Trace Event Notification Queue"/>
+        <metric name="SQL Trace IO Provider Lock Waits"/>
+        <metric name="Tempdb recovery unit id"/>
+        <metric name="Tempdb rowset id"/>
     </metrics>
 
-    <metrics name="mssql-memory">
-        <metric name="Connection Memory"
-            alias="ConnectionMemory"
-            template="Memory Manager:Platform=Win32:Connection Memory (KB)"
-            category="UTILIZATION"
-            group="Memory"
-            collectionType="dynamic"
-            units="KB"/>
-
-        <metric name="Granted Workspace Memory"
-            alias="GrantedWorkspaceMemory"
-            template="Memory Manager:Platform=Win32:Granted Workspace Memory (KB)"
-            category="UTILIZATION"
-            group="Memory"
-            collectionType="dynamic"
-            units="KB"/>
-
-        <metric name="Lock Memory"
-            alias="LockMemory"
-            template="Memory Manager:Platform=Win32:Lock Memory (KB)"
-            category="UTILIZATION"
-            group="Memory"
-            collectionType="dynamic"
-            units="KB"/>
-
-        <metric name="Lock Blocks Allocated"
-            alias="LockBlocksAllocated"
-            template="Memory Manager:Platform=Win32:Lock Blocks Allocated"
-            category="UTILIZATION"
-            group="Memory"
-            collectionType="dynamic"
-            units="none"/>
-
-        <metric name="Lock Owner Blocks Allocated"
-            alias="LockOwnerBlocksAllocated"
-            template="Memory Manager:Platform=Win32:Lock Owner Blocks Allocated"
-            category="UTILIZATION"
-            group="Memory"
-            collectionType="dynamic"
-            units="none"/>
-
-        <metric name="Lock Blocks"
-            alias="LockBlocks"
-            template="Memory Manager:Platform=Win32:Lock Blocks"
-            category="UTILIZATION"
-            group="Memory"
-            collectionType="dynamic"
-            units="none"/>
-
-        <metric name="Lock Owner Blocks"
-            alias="LockOwnerBlocks"
-            template="Memory Manager:Platform=Win32:Lock Owner Blocks"
-            category="UTILIZATION"
-            group="Memory"
-            collectionType="dynamic"
-            units="none"/>
-
-        <metric name="Maximum Workspace Memory"
-            alias="MaximumWorkspaceMemory"
-            template="Memory Manager:Platform=Win32:Maximum Workspace Memory (KB)"
-            category="UTILIZATION"
-            group="Memory"
-            collectionType="dynamic"
-            units="KB"/>
-
-        <metric name="Memory Grants Outstanding"
-            alias="MemoryGrantsOutstanding"
-            template="Memory Manager:Platform=Win32:Memory Grants Outstanding"
-            category="UTILIZATION"
-            group="Memory"
-            collectionType="dynamic"
-            units="none"/>
-
-        <metric name="Memory Grants Pending"
-            alias="MemoryGrantsPending"
-            template="Memory Manager:Platform=Win32:Memory Grants Pending"
-            category="UTILIZATION"
-            group="Memory"
-            collectionType="dynamic"
-            units="none"/>
-
-        <metric name="Optimizer Memory"
-            alias="OptimizerMemory"
-            template="Memory Manager:Platform=Win32:Optimizer Memory (KB)"
-            category="UTILIZATION"
-            group="Memory"
-            collectionType="dynamic"
-            units="KB"/>
-
-        <metric name="SQL Cache Memory"
-            alias="SQLCacheMemory"
-            template="Memory Manager:Platform=Win32:SQL Cache Memory (KB)"
-            category="UTILIZATION"
-            group="Memory"
-            collectionType="dynamic"
-            units="KB"/>
-
-        <metric name="Total Server Memory"
-            alias="TotalServerMemory"
-            template="Memory Manager:Platform=Win32:Total Server Memory (KB)"
-            category="UTILIZATION"
-            group="Memory"
-            collectionType="dynamic"
-            units="KB"/>
+    <filter name="template" value="pdh:Memory Manager:${name} (KB)"/>
+    <metrics name="mssql-memory_kb">
+        <metric name="Connection Memory" units="KB"/>
+        <metric name="Granted Workspace Memory" units="KB"/>
+        <metric name="Lock Memory" units="KB"/>
+        <metric name="Maximum Workspace Memory" units="KB"/>
+        <metric name="Optimizer Memory" units="KB"/>
+        <metric name="SQL Cache Memory" units="KB"/>
+        <metric name="Total Server Memory" units="KB"/>
     </metrics>
-
-    <metrics name="mssql-stats">
     
-    <metric name="Batch Requests"
-            alias="BatchRequests"
-            template="SQL Statistics:Platform=Win32:Batch Requests/Sec"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="trendsup"
-            units="none"/>
-   
-    <metric name="SQL Compilations"
-            alias="SQLCompilations"
-            template="SQL Statistics:Platform=Win32:SQL Compilations/Sec"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="trendsup"
-            units="none"/>
-            
-    <metric name="SQL Re-Compilations"
-            alias="SQLReCompilations"
-            template="SQL Statistics:Platform=Win32:SQL Re-Compilations/Sec"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="trendsup"
-            units="none"/>
+    <filter name="template" value="pdh:Memory Manager:${name}"/>
+    <metrics name="mssql-memory">
+        <include name="mssql-memory_kb"/>
+        <metric name="Lock Blocks Allocated" />
+        <metric name="Lock Owner Blocks Allocated" />
+        <metric name="Lock Blocks" />
+        <metric name="Lock Owner Blocks" />
+        <metric name="Memory Grants Outstanding" />
+        <metric name="Memory Grants Pending" />
+    </metrics>
+    
+    <filter name="template" value="pdh:Memory Manager:${name} (KB)"/>
+    <metrics name="mssql-memory-2012_kb">
+        <metric name="Database Cache Memory" units="KB"/>
+        <metric name="Free Memory" units="KB"/>
+        <metric name="Reserved Server Memory" units="KB"/>
+        <metric name="Stolen Server Memory" units="KB"/>
+        <metric name="Log Pool Memory" units="KB"/>
+        <metric name="Target Server Memory" units="KB"/>
+    </metrics>
+    
+    <filter name="template" value="pdh:Memory Manager:${name}"/>
+    <metrics name="mssql-memory-2012">
+        <include name="mssql-memory-2012_kb"/>
+        <metric name="External benefit of memory" />
     </metrics>
 
-  <!-- XXX define Lock service?  breaks down into:
-       Database, Extent, Key, Page, RID, Table
-  -->
+    <filter name="template" value="pdh:SQL Statistics:${name}"/>
+    <metrics name="mssql-stats">
+        <metric name="Batch Requests/sec"/>
+        <metric name="SQL Compilations/sec"/> 
+        <metric name="SQL Re-Compilations/sec"/>
+        <metric name="Forced Parameterizations/sec"/>
+        <metric name="Auto-Param Attempts/sec"/>
+        <metric name="Failed Auto-Params/sec"/>
+        <metric name="Safe Auto-Params/sec"/>
+        <metric name="Unsafe Auto-Params/sec"/>
+        <metric name="SQL Attention rate"/>
+        <metric name="Guided plan executions/sec"/>
+        <metric name="Misguided plan executions/sec"/>
+    </metrics>
+
+    <!-- XXX define Lock service?  breaks down into:
+         Database, Extent, Key, Page, RID, Table
+    -->
     <metrics name="mssql-locks">
-        <metric name="Lock Requests"
-            alias="LockRequests"
-            template="${lock.domain}:Platform=Win32:Lock Requests/Sec"
-            category="UTILIZATION"
-            group="Lock"
-            indicator="true"
-            collectionType="trendsup"
-            units="none"/>
-
-        <metric name="Lock Timeouts"
-            alias="LockTimeouts"
-            template="${lock.domain}:Platform=Win32:Lock Timeouts/Sec"
-            category="UTILIZATION"
-            group="Lock"
-            collectionType="trendsup"
-            units="none"/>
-
-        <metric name="Number of Deadlocks"
-            alias="NumDeadlocks"
-            template="${lock.domain}:Platform=Win32:Number of Deadlocks/Sec"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="trendsup"
-            units="none"/>
-
-        <metric name="Lock Waits"
-            alias="LockWaits"
-            template="${lock.domain}:Platform=Win32:Lock Waits/Sec"
-            category="UTILIZATION"
-            group="Lock"
-            indicator="true"
-            collectionType="trendsup"
-            units="none"/>
-
-        <metric name="Lock Wait Time"
-            alias="LockWaitTime"
-            template="${lock.domain}:Platform=Win32:Lock Wait Time (ms)"
-            category="UTILIZATION"
-            group="Lock"
-            collectionType="dynamic"
-            units="ms"/>
-
-        <metric name="Average Wait Time"
-            alias="AverageWaitTime"
-            template="${lock.domain}:Platform=Win32:Average Wait Time (ms)"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="dynamic"
-            units="ms"/>
+        <metric name="Lock Requests" template="${lock.domain}:Platform=Win32:Lock Requests/Sec" indicator="true" collectionType="trendsup"/>
+        <metric name="Lock Timeouts" template="${lock.domain}:Platform=Win32:Lock Timeouts/Sec" collectionType="trendsup"/>
+        <metric name="Number of Deadlocks" template="${lock.domain}:Platform=Win32:Number of Deadlocks/Sec" collectionType="trendsup"/>
+        <metric name="Lock Waits" template="${lock.domain}:Platform=Win32:Lock Waits/Sec" indicator="true" collectionType="trendsup"/>
+        <metric name="Lock Wait Time" template="${lock.domain}:Platform=Win32:Lock Wait Time (ms)" collectionType="dynamic" units="ms"/>
+        <metric name="Average Wait Time" template="${lock.domain}:Platform=Win32:Average Wait Time (ms)" collectionType="dynamic" units="ms"/>
     </metrics>
 
+    <filter name="template" value="pdh:Latches:${name}"/>
     <metrics name="mssql-latches">
-
-        <metric name="Average Latch Wait Time"
-            alias="AverageLatchWaitTime"
-            template="Latches:Platform=Win32:Average Latch Wait Time (ms)"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="dynamic"
-            units="ms"/>
-
-        <metric name="Total Latch Wait Time"
-            alias="TotalLatchWaitTime"
-            template="Latches:Platform=Win32:Total Latch Wait Time (ms)"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="dynamic"
-            units="ms"/>
+        <metric name="Latch Waits/sec"/>
+        <metric name="Average Latch Wait Time" template="pdh:Memory Manager:${name} (ms)" units="ms"/>
+        <metric name="Total Latch Wait Time" template="pdh:Memory Manager:${name} (ms)" units="ms"/>
+        <metric name="Number of SuperLatches"/>
+        <metric name="SuperLatch Promotions/sec"/>
+        <metric name="SuperLatch Demotions/sec"/>
     </metrics>
 
-  <!-- XXX define Cache service?  breaks down into:
-       Adhoc Sql Plans, Cursors, Execution Contexts,
-       Misc. Normalized Trees, Prepared Sql Plans,
-       Procedure Plans, Replication Procedure Plans,
-       Trigger Plans.
-  -->
+    <!-- XXX define Cache service?  breaks down into:
+         Adhoc Sql Plans, Cursors, Execution Contexts,
+         Misc. Normalized Trees, Prepared Sql Plans,
+         Procedure Plans, Replication Procedure Plans,
+         Trigger Plans.
+    -->
 
     <metrics name="mssql-cache"/>
 
     <metrics name="mssql-broker-activation">
-
-        <metric name="Stored Procedures Invoked"
-            alias="StoredProceduresInvoked"
-            template="Broker Activation(_Total):Platform=Win32:Stored Procedures Invoked/sec"
-            indicator="true"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="trendsup"
-            units="none"/>
-
+        <metric name="Stored Procedures Invoked" template="Broker Activation(_Total):Platform=Win32:Stored Procedures Invoked/sec" indicator="true" collectionType="trendsup"/>
     </metrics>
  
-     <metrics name="mssql-agent-avail">
+    <metrics name="mssql-agent-avail">
         <metric name="Agent Availability"
             alias="Availability"
             template="Jobs(_Total):Type=Availability,Prefix=SQLAgent:Active jobs"
             category="AVAILABILITY"
-            group="Reliability"
             indicator="true"
-            collectionType="dynamic"
             units="percentage"/>
     </metrics>
-     <metrics name="mssql-agent-jobs">
+    
 
-        <metric name="Active jobs"
-            alias="ActiveJobs"
-            template="Jobs(_Total):Platform=Win32,Prefix=SQLAgent:Active jobs"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="dynamic"
-            units="none"/>
-
-        <metric name="Successful jobs"
-            alias="SuccessfulJobs"
-            template="Jobs(_Total):Platform=Win32,Prefix=SQLAgent:Successful jobs"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="dynamic"
-            units="none"/>
-
-        <metric name="Failed jobs"
-            alias="FailedJobs"
-            template="Jobs(_Total):Platform=Win32,Prefix=SQLAgent:Failed jobs"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="dynamic"
-            units="none"/>
-
-        <metric name="Job success rate"
-            alias="JobSuccessRate"
-            template="Jobs(_Total):Platform=Win32,Type=Formatted,Prefix=SQLAgent:Job success rate"
-            indicator="true"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="dynamic"
-            units="none"/>
-
-        <metric name="Jobs activated"
-            alias="JobsActivatedPerMinute"
-            template="Jobs(_Total):Platform=Win32,Prefix=SQLAgent:Jobs activated/minute"
-            indicator="true"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="trendsup"
-            units="none"/>
-
-        <metric name="Queued jobs"
-            alias="QueuedJobs"
-            template="Jobs(_Total):Platform=Win32,Prefix=SQLAgent:Queued jobs"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="dynamic"
-            units="none"/>
-
+    <filter name="template" value="mssql:process:${name}"/>
+    <metrics name="mssql-process">
+        <metric name="% Processor Time"/>
+        <metric name="% User Time"/>
+        <metric name="% Privileged Time"/>
+        <metric name="Virtual Bytes Peak"/>
+        <metric name="Virtual Bytes"/>
+        <metric name="Page Faults/sec"/>
+        <metric name="Working Set Peak"/>
+        <metric name="Working Set"/>
+        <metric name="Page File Bytes Peak"/>
+        <metric name="Page File Bytes"/>
+        <metric name="Private Bytes"/>
+        <metric name="Thread Count"/>
+        <metric name="Priority Base"/>
+        <metric name="Elapsed Time"/>
+        <metric name="Pool Paged Bytes"/>
+        <metric name="Pool Nonpaged Bytes"/>
+        <metric name="Handle Count"/>
+        <metric name="IO Read Operations/sec"/>
+        <metric name="IO Write Operations/sec"/>
+        <metric name="IO Data Operations/sec"/>
+        <metric name="IO Other Operations/sec"/>
+        <metric name="IO Read Bytes/sec"/>
+        <metric name="IO Write Bytes/sec"/>
+        <metric name="IO Data Bytes/sec"/>
+        <metric name="IO Other Bytes/sec"/>
+        <metric name="Working Set - Private"/>
     </metrics>
     
-    <server name="MsSQL"
-          version="2000"
-          platforms="Win32">
+    <metrics name="mssql-agent-jobs">
+        <metric name="Active jobs" template="Jobs(_Total):Platform=Win32,Prefix=SQLAgent:Active jobs" collectionType="dynamic"/>
+        <metric name="Successful jobs" template="Jobs(_Total):Platform=Win32,Prefix=SQLAgent:Successful jobs" collectionType="dynamic"/>
+        <metric name="Failed jobs" template="Jobs(_Total):Platform=Win32,Prefix=SQLAgent:Failed jobs" collectionType="dynamic"/>
+        <metric name="Job success rate" template="Jobs(_Total):Platform=Win32,Type=Formatted,Prefix=SQLAgent:Job success rate" indicator="true"/>
+        <metric name="Jobs activated" template="Jobs(_Total):Platform=Win32,Prefix=SQLAgent:Jobs activated/minute" indicator="true" collectionType="trendsup"/>
+        <metric name="Queued jobs" template="Jobs(_Total):Platform=Win32,Prefix=SQLAgent:Queued jobs" group="Resource Utilization"/>
+    </metrics>
+    
+    <filter name="template" value="pdh:Connection:${name}"/>
+    <metrics name="MSOLAP_Connection">
+        <metric name="Current connections" indicator="true"/>
+        <metric name="Requests/sec"/>
+        <metric name="Total requests"/>
+        <metric name="Successes/sec"/>
+        <metric name="Total successes"/>
+        <metric name="Failures/sec"/>
+        <metric name="Total failures"/>
+        <metric name="Current user sessions"/>
+    </metrics>
 
-        <plugin type="measurement"
-            class="MsSQLMeasurementPlugin"/>
+    <filter name="template" value="pdh:Locks:${name}"/>
+    <metrics name="MSOLAP_Locks">
+        <metric name="Current latch waits"/>
+        <metric name="Latch waits/sec"/>
+        <metric name="Current locks"/>
+        <metric name="Current lock waits"/>
+        <metric name="Lock requests/sec"/>
+        <metric name="Unlock requests/sec"/>
+        <metric name="Lock grants/sec"/>
+        <metric name="Lock denials/sec"/>
+        <metric name="Lock waits/sec"/>
+        <metric name="Total deadlocks detected"/>
+    </metrics>
 
-        <plugin type="autoinventory"
-            class="MsSQLDetector"/>
+    <filter name="template" value="pdh:Threads:${name}"/>
+    <metrics name="MSOLAP_Threads">
+        <metric name="Short parsing idle threads"/>
+        <metric name="Short parsing busy threads"/>
+        <metric name="Short parsing job queue length"/>
+        <metric name="Short parsing job rate"/>
+        <metric name="Long parsing idle threads"/>
+        <metric name="Long parsing busy threads"/>
+        <metric name="Long parsing job queue length"/>
+        <metric name="Long parsing job rate"/>
+        <metric name="Query pool idle threads"/>
+        <metric name="Query pool busy threads"/>
+        <metric name="Query pool job queue length" indicator="true"/>
+        <metric name="Query pool job rate"/>
+        <metric name="Processing pool idle non-I/O threads"/>
+        <metric name="Processing pool busy non-I/O threads"/>
+        <metric name="Processing pool job queue length"/>
+        <metric name="Processing pool job rate"/>
+        <metric name="Processing pool idle I/O job threads"/>
+        <metric name="Processing pool busy I/O job threads"/>
+        <metric name="Processing pool I/O job queue length"/>
+        <metric name="Processing pool I/O job completion rate"/>
+    </metrics>
 
-        <plugin type="log_track"
-            class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>
+    <filter name="template" value="pdh:Memory:${name}"/>
+    <metrics name="MSOLAP_Memory">
+        <metric name="Page Pool 64 Alloc KB"/>
+        <metric name="Page Pool 64 Lookaside KB"/>
+        <metric name="Page Pool 8 Alloc KB"/>
+        <metric name="Page Pool 8 Lookaside KB"/>
+        <metric name="Page Pool 1 Alloc KB"/>
+        <metric name="Page Pool 1 Lookaside KB"/>
+        <metric name="Cleaner Current Price"/>
+        <metric name="Cleaner Balance/sec"/>
+        <metric name="Cleaner Memory shrunk KB/sec"/>
+        <metric name="Cleaner Memory shrinkable KB"/>
+        <metric name="Cleaner Memory nonshrinkable KB"/>
+        <metric name="Cleaner Memory KB"/>
+        <metric name="Memory Usage KB" indicator="true"/>
+        <metric name="Memory Limit Low KB"/>
+        <metric name="Memory Limit High KB"/>
+        <metric name="AggCacheKB"/>
+        <metric name="Quota KB"/>
+        <metric name="Quota Blocked"/>
+        <metric name="Filestore KB"/>
+        <metric name="Filestore Page Faults/sec"/>
+        <metric name="Filestore Reads/sec"/>
+        <metric name="Filestore KB Reads/sec"/>
+        <metric name="Filestore Writes/sec"/>
+        <metric name="Filestore KB Write/sec"/>
+        <metric name="Filestore IO Errors/sec"/>
+        <metric name="Filestore IO Errors"/>
+        <metric name="Filestore Clock Pages Examined/sec"/>
+        <metric name="Filestore Clock Pages HaveRef/sec"/>
+        <metric name="Filestore Clock Pages Valid/sec"/>
+        <metric name="Filestore Memory Pinned KB"/>
+        <metric name="In-memory Dimension Property File KB"/>
+        <metric name="In-memory Dimension Property File KB/sec"/>
+        <metric name="Potential In-memory Dimension Property File KB"/>
+        <metric name="Dimension Property Files"/>
+        <metric name="In-memory Dimension Index (Hash) File KB"/>
+        <metric name="In-memory Dimension Index (Hash) File KB/sec"/>
+        <metric name="Potential In-memory Dimension Index (Hash) File KB"/>
+        <metric name="Dimension Index (Hash) Files"/>
+        <metric name="In-memory Dimension String File KB"/>
+        <metric name="In-memory Dimension String File KB/sec"/>
+        <metric name="Potential In-memory Dimension String File KB"/>
+        <metric name="Dimension String Files"/>
+        <metric name="In-memory Map File KB"/>
+        <metric name="In-memory Map File KB/sec"/>
+        <metric name="Potential In-memory Map File KB"/>
+        <metric name="Map Files"/>
+        <metric name="In-memory Aggregation Map File KB"/>
+        <metric name="In-memory Aggregation Map File KB/sec"/>
+        <metric name="Potential In-memory Aggregation Map File KB"/>
+        <metric name="Aggregation Map Files"/>
+        <metric name="In-memory Fact Data File KB"/>
+        <metric name="In-memory Fact Data File KB/sec"/>
+        <metric name="Potential In-memory Fact Data File KB"/>
+        <metric name="Fact Data Files"/>
+        <metric name="In-memory Fact String File KB"/>
+        <metric name="In-memory Fact String File KB/sec"/>
+        <metric name="Potential In-memory Fact String File KB"/>
+        <metric name="Fact String Files"/>
+        <metric name="In-memory Fact Aggregation File KB"/>
+        <metric name="In-memory Fact Aggregation File KB/sec"/>
+        <metric name="Potential In-memory Fact Aggregation File KB"/>
+        <metric name="Fact Aggregation Files"/>
+        <metric name="In-memory Other File KB"/>
+        <metric name="In-memory Other File KB/sec"/>
+        <metric name="Potential In-memory Other File KB"/>
+        <metric name="Other Files"/>
+        <metric name="VertiPaq Paged KB"/>
+        <metric name="VertiPaq Nonpaged KB"/>
+        <metric name="VertiPaq Memory-Mapped KB"/>
+        <metric name="Memory Limit Hard KB"/>
+        <metric name="Memory Limit VertiPaq KB"/>
+    </metrics>
 
-        <plugin type="control"
-            class="MsSQLControlPlugin"/>
+    <filter name="template" value="pdh:Cache:${name}"/>
+    <metrics name="MSOLAP_Cache">
+        <metric name="Current KB"/>
+        <metric name="KB added/sec"/>
+        <metric name="Current entries"/>
+        <metric name="Inserts/sec"/>
+        <metric name="Evictions/sec"/>
+        <metric name="Total inserts"/>
+        <metric name="Total evictions"/>
+        <metric name="Direct hits/sec"/>
+        <metric name="Misses/sec"/>
+        <metric name="Lookups/sec"/>
+        <metric name="Total direct hits"/>
+        <metric name="Total misses"/>
+        <metric name="Total lookups"/>
+        <metric name="Total filtered iterator cache hits"/>
+        <metric name="Total filtered iterator cache misses"/>
+        <metric name="Direct hit ratio" indicator="true"/>
+    </metrics>
 
-    <!-- just an example.  Win32ControlPlugin overrides this -->
+    <filter name="template" value="pdh:MDX:${name}"/>
+    <metrics name="MSOLAP_MDX">
+        <metric name="Number of calculation covers"/>
+        <metric name="Current number of evaluation nodes"/>
+        <metric name="Number of Storage Engine evaluation nodes"/>
+        <metric name="Number of cell-by-cell evaluation nodes"/>
+        <metric name="Number of bulk-mode evaluation nodes"/>
+        <metric name="Number of evaluation nodes that covered a single cell"/>
+        <metric name="Number of evaluation nodes with calculations at the same granularity"/>
+        <metric name="Current number of cached evaluation nodes"/>
+        <metric name="Number of cached Storage Engine evaluation nodes"/>
+        <metric name="Number of cached bulk-mode evaluation nodes"/>
+        <metric name="Number of cached 'other' evaluation nodes"/>
+        <metric name="Number of evictions of evaluation nodes"/>
+        <metric name="Number of hash index hits in the cache of evaluation nodes"/>
+        <metric name="Number of cell-by-cell hits in the cache of evaluation nodes"/>
+        <metric name="Number of cell-by-cell misses in the cache of evaluation nodes"/>
+        <metric name="Number of subcube hits in the cache of evaluation nodes"/>
+        <metric name="Number of subcube misses in the cache of evaluation nodes"/>
+        <metric name="Total Sonar subcubes"/>
+        <metric name="Total cells calculated"/>
+        <metric name="Total recomputes"/>
+        <metric name="Total flat cache inserts"/>
+        <metric name="Total NON EMPTY"/>
+        <metric name="Total NON EMPTY for calculated members"/>
+        <metric name="Total NON EMPTY unoptimized"/>
+        <metric name="Total Autoexist"/>
+        <metric name="Total EXISTING"/>
+    </metrics>
+
+    <filter name="template" value="pdh:Processing:${name}"/>
+    <metrics name="MSOLAP_Processing">
+        <metric name="Rows read/sec" indicator="true"/>
+        <metric name="Total rows read"/>
+        <metric name="Rows converted/sec"/>
+        <metric name="Total rows converted"/>
+        <metric name="Rows written/sec" indicator="true"/>
+        <metric name="Total rows written"/>
+    </metrics>
+
+
+    <filter name="template" value="pdh:Proc Aggregations:${name}"/>
+    <metrics name="MSOLAP_Proc Aggregations">
+        <metric name="Current partitions"/>
+        <metric name="Total partitions"/>
+        <metric name="Memory size rows"/>
+        <metric name="Memory size bytes"/>
+        <metric name="Rows merged/sec"/>
+        <metric name="Rows created/sec"/>
+        <metric name="Temp file rows written/sec"/>
+        <metric name="Temp file bytes written/sec"/>
+    </metrics>
+
+    <filter name="template" value="pdh:Proc Indexes:${name}"/>
+    <metrics name="MSOLAP_Proc Indexes">
+        <metric name="Current partitions"/>
+        <metric name="Total partitions"/>
+        <metric name="Rows/sec"/>
+        <metric name="Total rows"/>
+    </metrics>
+
+    <filter name="template" value="pdh:Storage Engine Query:${name}"/>
+    <metrics name="MSOLAP_Storage Engine Query">
+        <metric name="Current measure group queries"/>
+        <metric name="Measure group queries/sec"/>
+        <metric name="Total measure group queries"/>
+        <metric name="Current dimension queries"/>
+        <metric name="Dimension queries/sec"/>
+        <metric name="Total dimension queries."/>
+        <metric name="Queries answered/sec" indicator="true"/>
+        <metric name="Total queries answered"/>
+        <metric name="Bytes sent/sec"/>
+        <metric name="Total bytes sent"/>
+        <metric name="Rows sent/sec"/>
+        <metric name="Total rows sent"/>
+        <metric name="Queries from cache filtered/sec"/>
+        <metric name="Queries from cache direct/sec"/>
+        <metric name="Queries from file/sec"/>
+        <metric name="Total queries from cache filtered"/>
+        <metric name="Total queries from cache direct"/>
+        <metric name="Total queries from file"/>
+        <metric name="Map reads/sec"/>
+        <metric name="Map bytes/sec"/>
+        <metric name="Data reads/sec"/>
+        <metric name="Data bytes/sec"/>
+        <metric name="Avg time/query" indicator="true"/>
+        <metric name="Network round trips/sec"/>
+        <metric name="Total network round trips"/>
+        <metric name="Flat cache lookups/sec"/>
+        <metric name="Flat cache hits/sec"/>
+        <metric name="Calculation cache lookups/sec"/>
+        <metric name="Calculation cache hits/sec"/>
+        <metric name="Persisted cache lookups/sec"/>
+        <metric name="Persisted cache hits/sec"/>
+        <metric name="Dimension cache lookups/sec"/>
+        <metric name="Dimension cache hits/sec"/>
+        <metric name="Measure group cache lookups/sec"/>
+        <metric name="Measure group cache hits/sec"/>
+        <metric name="Aggregation lookups/sec"/>
+        <metric name="Aggregation hits/sec"/>
+    </metrics>
+
+    <filter name="template" value="pdh:Data Mining Model Processing:${name}"/>
+    <metrics name="MSOLAP_Data Mining Model Processing">
+        <metric name="Cases/sec"/>
+        <metric name="Current models processing"/>
+    </metrics>
+
+    <filter name="template" value="pdh:Data Mining Prediction:${name}"/>
+    <metrics name="MSOLAP_Data Mining Prediction">
+        <metric name="Predictions/sec"/>
+        <metric name="Rows/sec"/>
+        <metric name="Concurrent DM queries"/>
+        <metric name="Queries/sec"/>
+        <metric name="Total Queries"/>
+        <metric name="Total Rows"/>
+        <metric name="Total Predictions"/>
+    </metrics>
+
+    <filter name="template" value="pdh:Proactive Caching:${name}"/>
+    <metrics name="MSOLAP_Proactive Caching">
+        <metric name="Notifications/sec"/>
+        <metric name="Processing Cancellations/sec"/>
+        <metric name="Proactive Caching Begin/sec"/>
+        <metric name="Proactive Caching Completion/sec"/>
+    </metrics>
+
+    <filter name="template" value="pdh:Service:${name}"/>
+    <metrics name="ReportServer Service">
+        <metric name="Requests/sec" indicator="true"/>
+        <metric name="Requests Total"/>
+        <metric name="Errors/sec"/>
+        <metric name="Errors Total"/>
+        <metric name="Bytes Sent/sec"/>
+        <metric name="Bytes Sent Total"/>
+        <metric name="Bytes Received/sec"/>
+        <metric name="Bytes Received Total"/>
+        <metric name="Active Connections"/>
+        <metric name="Logon Attempts/sec" indicator="true"/>
+        <metric name="Logon Attempts Total"/>
+        <metric name="Logon Successes/sec"/>
+        <metric name="Logon Successes Total"/>
+        <metric name="Requests Not Authorized"/>
+        <metric name="Requests Rejected"/>
+        <metric name="Requests Disconnected"/>
+        <metric name="Requests Executing"/>
+        <metric name="Memory Pressure State"/>
+        <metric name="Memory Shrink Notifications/sec"/>
+        <metric name="Memory Shrink Amount"/>
+        <metric name="Tasks Queued"/>
+    </metrics>
+
+    <server name="MsSQL" version="2000" platforms="Win32">
+        <plugin type="measurement" class="MsSQLMeasurementPlugin"/>
+        <plugin type="autoinventory" class="MsSQLDetector"/>
+        <plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>
+        <plugin type="control" class="MsSQLControlPlugin"/>
+
         <actions include="start,stop,restart"/>
 
         <property name="mssql.version" value="8"/>
@@ -713,8 +706,8 @@ drop table #tTables
 
         <metrics>
             <include name="mssql-avail"/>
-            <include name="mssql-database"/>
-      <!-- server only -->
+            <include name="mssql-process"/>
+            <!--include name="mssql-database"/>
             <include name="mssql-access"/>
             <include name="mssql-general"/>
             <include name="mssql-memory"/>
@@ -723,43 +716,29 @@ drop table #tTables
             <include name="mssql-latches"/>
             <include name="mssql-cache"/>
             <include name="Buffer-Manager"/>
-            <include name="mssql-broker-activation"/>
-         </metrics>
+            <include name="mssql-broker-activation"/-->
+        </metrics>
 
         <config>
-            <option name="service_name"
-              description="Service Name"
-              default="MSSQLSERVER"/>
-            <option name="sqlserver_name"
-              description="Server Name"
-              default="localhost"/>
-          <option name="user"
-              description="Username"
-              optional="true"
-              default="%user%"/>
-            <option name="password"
-              description="Password"
-              optional="true"
-              type="secret"
-              default="%password%"/> 
+            <option name="service_name" description="Service Name" default="MSSQLSERVER"/>
+            <option name="sqlserver_name" description="Server Name" default="localhost"/>
+            <option name="user" description="Username" optional="true"/>
+            <option name="password" description="Password" optional="true" type="secret"/> 
         </config>
 
         <properties>
-            <property name="version"
-                 description="SQL Server Version"/>
+            <property name="version" description="SQL Server Version"/>
         </properties>
 
         <service name="SQLAgent">
-              <plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin"/>
-              <metrics>
-            	 <include name="mssql-agent-avail"/>
-            	 <include name="mssql-agent-jobs"/>
-              </metrics>
-              <config>
-                 <option name="service_name"
-                  description="Service Name"
-                  default="SQLSERVERAGENT"/>
-              </config>          
+            <plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin"/>
+            <metrics>
+                <include name="mssql-agent-avail"/>
+                <include name="mssql-agent-jobs"/>
+            </metrics>
+            <config>
+                <option name="service_name" description="Service Name" default="SQLSERVERAGENT"/>
+            </config>          
         </service>
 
         <service name="Database">
@@ -767,92 +746,105 @@ drop table #tTables
                 <include name="mssql-avail"/>
                 <include name="mssql-database"/>
                 <!-- Metric for 2000 only -->
-                <metric name="Database Free Percent" category="UTILIZATION"
-             		units="percent"
-             		template="${db.name}:ServerName=%sqlserver_name%,User=%user%,Password=%password%:Database Free Percent 2000"
-             		collectionType="dynamic" />
+                <metric name="Database Free Percent" units="percent" template="${db.name}:ServerName=%sqlserver_name%,User=%user%,Password=%password%:Database Free Percent 2000"/>
             </metrics>
 
             <config>
-                <option name="db.name"
-                description="Database name"
-                default="Northwind"/>
+                <option name="db.name" description="Database name" default="Northwind"/>
             </config>
         </service>
     </server>
 
-    <server name="MsSQL"
-          version="2005"
-          include="2000">
+    <server name="MsSQL" version="2005" include="2000">
 
         <property name="mssql.version" value="9"/>
         <property name="mssql.version.file" value="sqlsvc90.dll"/>
     
         <service name="SQLAgent">
-              <plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin"/>
-              <metrics>
-            	 <include name="mssql-agent-avail"/>
-            	 <include name="mssql-agent-jobs"/>
-              </metrics>
-              <config>
-                 <option name="service_name"
-                  description="Service Name"
-                  default="SQLSERVERAGENT"/>
-              </config>          
+            <plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin"/>
+            <metrics>
+                <include name="mssql-agent-avail"/>
+                <include name="mssql-agent-jobs"/>
+            </metrics>
+            <config>
+                <option name="service_name" description="Service Name" default="SQLSERVERAGENT"/>
+            </config>          
         </service>
-        
+
+        <service name="Report Server">
+            <plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin"/>
+            <config>
+                <option name="service_name" description="Service Name"/>
+            </config>          
+            <metrics>
+                <metric name="Availability" alias="Availability" template="service:Type=Availability,service_name=%service_name%:${alias}" indicator="true" category="AVAILABILITY"/>
+                <include name="ReportServer Service"/>
+            </metrics> 
+        </service>
+
+        <service name="Analysis Services">
+            <plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin"/>
+            <config>
+                <option name="service_name" description="Service Name"/>
+            </config>       
+            <metrics>
+                <metric name="Availability" alias="Availability" template="service:Type=Availability,service_name=%service_name%:${alias}" indicator="true" category="AVAILABILITY"/>
+                <include name="MSOLAP_Connection"/>
+                <include name="MSOLAP_Locks"/>
+                <include name="MSOLAP_Threads"/>
+                <include name="MSOLAP_Memory"/>
+                <include name="MSOLAP_Cache"/>
+                <include name="MSOLAP_MDX"/>
+                <include name="MSOLAP_Processing"/>
+                <include name="MSOLAP_Proc Aggregations"/>
+                <include name="MSOLAP_Proc Indexes"/>
+                <include name="MSOLAP_Storage Engine Query"/>
+                <include name="MSOLAP_Data Mining Model Processing"/>
+                <include name="MSOLAP_Data Mining Prediction"/>
+                <include name="MSOLAP_Proactive Caching"/>
+            </metrics>
+        </service>
+
         <service name="Database">
             <metrics>
                 <include name="mssql-avail"/>
                 <include name="mssql-database"/>
                 <!-- Metric for 2005 and 2008 only -->
-                <metric name="Database Free Percent" category="UTILIZATION"
-             		units="percent"
-             		template="${db.name}:ServerName=%sqlserver_name%,User=%user%,Password=%password%:Database Free Percent"
-             		collectionType="dynamic" />
+                <metric name="Database Free Percent" units="percent" template="${db.name}:ServerName=%sqlserver_name%,User=%user%,Password=%password%:Database Free Percent"/>
             </metrics>
 
             <config>
-                <option name="db.name"
-                description="Database name"
-                default="Northwind"/>
+                <option name="db.name" description="Database name" default="Northwind"/>
             </config>
         </service>
 
     </server>
-    <server name="MsSQL"
-          version="2008"
-          include="2005">
+    <server name="MsSQL" version="2008" include="2005">
         <property name="mssql.version.file" value="sqlsvc.dll"/>
         <property name="regKey" value="SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL10.%NAME%\MSSQLServer\CurrentVersion"/>
         <property name="version" value="10.0.\d*\.\d*"/>
     </server>
-    <server name="MsSQL"
-          version="2008 R2"
-          include="2008">
+    <server name="MsSQL" version="2008 R2" include="2008">
         <property name="mssql.version.file" value="sqlsvc.dll"/>
         <property name="regKey" value="SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL10_50.%NAME%\MSSQLServer\CurrentVersion"/>
         <property name="version" value="10.5.\d*\.\d*"/>
     </server>
-    <server name="MsSQL"
-          version="2012"
-          include="2008">
+    <server name="MsSQL" version="2012" include="2008">
         <property name="mssql.version.file" value="sqlsvc.dll"/>
         <property name="regKey" value="SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL11.%NAME%\MSSQLServer\CurrentVersion"/>
         <property name="version" value="11.0.\d*\.\d*"/>
         <metrics>
             <include name="mssql-avail"/>
-            <include name="mssql-database"/>
-      <!-- server only -->
+            <!--include name="mssql-database"/>
             <include name="mssql-access"/>
             <include name="mssql-general"/>
-            <include name="mssql-memory"/>
+            <include name="mssql-memory-2012"/>
             <include name="mssql-stats"/>
             <include name="mssql-locks"/>
             <include name="mssql-latches"/>
             <include name="mssql-cache"/>
             <include name="Buffer-Manager_2012"/>
-            <include name="mssql-broker-activation"/>
+            <include name="mssql-broker-activation"/-->
         </metrics>
     </server>
 </plugin>

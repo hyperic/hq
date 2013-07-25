@@ -45,24 +45,24 @@ public class MsSQLDetector
     private static final Log log = LogFactory.getLog(MsSQLDetector.class);
 
     public List getServerResources(ConfigResponse platformConfig) throws PluginException {
-        List configs;
+        List cfgs;
         try {
-            configs =
+            cfgs =
                     Service.getServiceConfigs("sqlservr.exe");
         } catch (Win32Exception e) {
-            log.debug("[getServerResources] Error: "+e.getMessage(), e);
+            log.debug("[getServerResources] Error: " + e.getMessage(), e);
             return null;
         }
-        
-        log.debug("[getServerResources] MSSQL Server found:'" + configs.size() + "'");
 
-        if (configs.size() == 0) {
+        log.debug("[getServerResources] MSSQL Server found:'" + cfgs.size() + "'");
+
+        if (cfgs.size() == 0) {
             return null;
         }
 
         List servers = new ArrayList();
-        for (int i = 0; i < configs.size(); i++) {
-            ServiceConfig serviceConfig = (ServiceConfig) configs.get(i);
+        for (int i = 0; i < cfgs.size(); i++) {
+            ServiceConfig serviceConfig = (ServiceConfig) cfgs.get(i);
             String name = serviceConfig.getName();
             String instance = instaceName(name);
             File dir = new File(serviceConfig.getExe()).getParentFile();
@@ -110,9 +110,9 @@ public class MsSQLDetector
         String instance = instaceName(name);
         server.setName(server.getName() + " " + instance);
 
-        ConfigResponse config = new ConfigResponse();
-        config.setValue(Win32ControlPlugin.PROP_SERVICENAME, name);
-        server.setProductConfig(config);
+        ConfigResponse cfg = new ConfigResponse();
+        cfg.setValue(Win32ControlPlugin.PROP_SERVICENAME, name);
+        server.setProductConfig(cfg);
         server.setMeasurementConfig();
         server.setControlConfig();
 
@@ -131,8 +131,10 @@ public class MsSQLDetector
         Service svc = null;
         try {
             svc = new Service(name);
+            log.debug("[getServiceStatus] name='"+name+"' status='"+svc.getStatusString()+"'");
             return svc.getStatus();
         } catch (Win32Exception e) {
+            log.debug("[getServiceStatus] name='"+name+"' "+e);
             return Service.SERVICE_STOPPED;
         } finally {
             if (svc != null) {
@@ -140,6 +142,7 @@ public class MsSQLDetector
             }
         }
     }
+
     @Override
     protected List discoverServices(ConfigResponse serverConfig)
             throws PluginException {
@@ -151,22 +154,56 @@ public class MsSQLDetector
                 DEFAULT_SQLSERVER_SERVICE_NAME);
 
         String sqlServerMetricPrefix = "SQLServer"; //  metric prefix in case of default instance 
-        String sqlAgentServiceName=MsSQLDetector.DEFAULT_SQLAGENT_SERVICE_NAME; //agent name in case of default instance
+        String sqlAgentServiceName = MsSQLDetector.DEFAULT_SQLAGENT_SERVICE_NAME; //agent name in case of default instance
 
         if (!sqlServerServiceName.equals(DEFAULT_SQLSERVER_SERVICE_NAME)) {
             sqlServerMetricPrefix = sqlServerServiceName;
             sqlAgentServiceName = sqlServerServiceName.replaceFirst("MSSQL", "SQLAgent");
-       }
+        }
         // creating agent service
-        if (getServiceStatus(sqlAgentServiceName) != Service.SERVICE_STOPPED) { 
+        if (getServiceStatus(sqlAgentServiceName) != Service.SERVICE_STOPPED) {
             ServiceResource agentService = new ServiceResource();
             agentService.setType(this, "SQLAgent");
             agentService.setServiceName(sqlAgentServiceName);
 
-            ConfigResponse config = new ConfigResponse();
-            config.setValue(Win32ControlPlugin.PROP_SERVICENAME, sqlAgentServiceName);
-     
-            agentService.setProductConfig(config);
+            ConfigResponse cfg = new ConfigResponse();
+            cfg.setValue(Win32ControlPlugin.PROP_SERVICENAME, sqlAgentServiceName);
+
+            agentService.setProductConfig(cfg);
+            agentService.setMeasurementConfig();
+            agentService.setControlConfig();
+            services.add(agentService);
+        }
+
+        String instaceName = sqlServerServiceName.substring(sqlServerServiceName.indexOf("$") + 1);
+
+        // ReportServer
+        String reportServiceName = "ReportServer$" + instaceName;
+        if (getServiceStatus(reportServiceName) == Service.SERVICE_RUNNING) {
+            ServiceResource agentService = new ServiceResource();
+            agentService.setType(this, "Report Server");
+            agentService.setServiceName("Report Server");
+
+            ConfigResponse cfg = new ConfigResponse();
+            cfg.setValue(Win32ControlPlugin.PROP_SERVICENAME, reportServiceName);
+
+            agentService.setProductConfig(cfg);
+            agentService.setMeasurementConfig();
+            agentService.setControlConfig();
+            services.add(agentService);
+        }
+
+        // MSOLAP
+        String olapServiceName = "MSOLAP$" + instaceName;
+        if (getServiceStatus(olapServiceName) == Service.SERVICE_RUNNING) {
+            ServiceResource agentService = new ServiceResource();
+            agentService.setType(this, "Analysis Services");
+            agentService.setServiceName("Analysis Services");
+
+            ConfigResponse cfg = new ConfigResponse();
+            cfg.setValue(Win32ControlPlugin.PROP_SERVICENAME, olapServiceName);
+
+            agentService.setProductConfig(cfg);
             agentService.setMeasurementConfig();
             agentService.setControlConfig();
             services.add(agentService);
@@ -174,9 +211,7 @@ public class MsSQLDetector
         
         // creating Database services
         try {
-            String[] instances =
-                    Pdh.getInstances(sqlServerMetricPrefix + ":Databases");
-
+            String[] instances = Pdh.getInstances(sqlServerMetricPrefix + ":Databases");
             for (int i = 0; i < instances.length; i++) {
                 String name = instances[i];
                 if (name.equals("_Total")) {
@@ -187,21 +222,18 @@ public class MsSQLDetector
                 service.setType(this, DB_NAME);
                 service.setServiceName(name);
 
-                ConfigResponse config = new ConfigResponse();
-                config.setValue(MsSQLDetector.PROP_DB, name);
-                service.setProductConfig(config);
+                ConfigResponse cfg = new ConfigResponse();
+                cfg.setValue(MsSQLDetector.PROP_DB, name);
+                service.setProductConfig(cfg);
 
                 service.setMeasurementConfig();
                 //service.setControlConfig(...); XXX?
 
                 services.add(service);
-              
+
             }
         } catch (Win32Exception e) {
-            String msg =
-                    "Error getting pdh data for '" +
-                    sqlServerServiceName + "': " + e.getMessage();
-            throw new PluginException(msg, e);
+            throw new PluginException("Error getting pdh data for '" + sqlServerServiceName + "': " + e.getMessage(), e);
         }
 
         return services;
