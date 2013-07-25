@@ -125,6 +125,7 @@ import org.hyperic.hq.notifications.model.InventoryNotification;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.hq.product.shared.ProductManager;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
 import org.hyperic.util.Transformer;
 import org.hyperic.util.config.ConfigResponse;
@@ -157,6 +158,7 @@ public class ResourceTransferImpl implements ResourceTransfer {
     private ConfigManager configManager;
     private IpManager ipManager;
     protected NotificationsTransfer notificationsTransfer;
+    protected ProductManager productManager;
     @Autowired
     protected PermissionManager permissionManager;
 
@@ -165,7 +167,7 @@ public class ResourceTransferImpl implements ResourceTransfer {
                                 ProductBoss productBoss, CPropManager cpropManager, AppdefBoss appdepBoss, 
                                 PlatformManager platformManager, final ConfigurationTemplateMapper configTemplateMapper, ExceptionToErrorCodeMapper errorHandler,
                                 ResourceDestinationEvaluator evaluator, ConfigManager configManager,
-                                IpManager ipManager) {
+                                IpManager ipManager, ProductManager productManager) {
     	this.resourceManager = resourceManager ;
     	this.resourceMapper = resourceMapper ; 
     	this.productBoss = productBoss ; 
@@ -177,6 +179,7 @@ public class ResourceTransferImpl implements ResourceTransfer {
     	this.evaluator = evaluator;
         this.configManager = configManager;
         this.ipManager = ipManager;
+        this.productManager = productManager;
     }//EOM
 
     @PostConstruct
@@ -956,7 +959,7 @@ public class ResourceTransferImpl implements ResourceTransfer {
             !responseMetadataList.contains(ResourceDetailsType.ALL)) {
             return Collections.emptyMap();
         }
-        return configManager.getConfigResponsesAndSchema(subject, resources, true);
+        return configManager.getConfigResponsesAndSchema(subject, platformManager, productManager, resources, true);
     }
 
     private void setAllChildren(ResourceModel model, Resource platformResource,

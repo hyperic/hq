@@ -99,8 +99,8 @@ public class ConfigManagerImpl implements ConfigManager {
     private final ServerDAO serverDAO;
     private final PlatformDAO platformDAO;
     private final ResourceManager resourceManager;
-    private PlatformManager platformManager;
-    private ProductManager productManager;
+//    private PlatformManager platformManager;
+//    private ProductManager productManager;
 
     @Autowired
     public ConfigManagerImpl(ConfigResponseDAO configResponseDAO, ServiceDAO serviceDAO,
@@ -114,11 +114,11 @@ public class ConfigManagerImpl implements ConfigManager {
         this.monitorableTypeDAO = monitorableTypeDAO;
     }
 
-    @PostConstruct
-    public void init() {
-        this.platformManager = (PlatformManager) Bootstrap.getBean("PlatformManager");
-        this.productManager = (ProductManager) Bootstrap.getBean("ProductManager");
-    }
+//    @PostConstruct
+//    public void init() {
+//        this.platformManager = (PlatformManager) Bootstrap.getBean("PlatformManager");
+//        this.productManager = (ProductManager) Bootstrap.getBean("ProductManager");
+//    }
     
     /**
      * 
@@ -220,9 +220,9 @@ public class ConfigManagerImpl implements ConfigManager {
         }
         return rtn;
     }
-    
+
     @Transactional(readOnly=true)
-    private ConfigSchema getConfigSchema(AuthzSubject subject, AppdefEntityID id, String type, ConfigResponse baseResponse) {
+    private ConfigSchema getConfigSchema(AuthzSubject subject, PlatformManager platformManager, ProductManager productManager, AppdefEntityID id, String type, ConfigResponse baseResponse) {
         String name;
         try {
             if (type.equals(ProductPlugin.TYPE_PRODUCT)) {
@@ -245,7 +245,7 @@ public class ConfigManagerImpl implements ConfigManager {
     }  
     
     @Transactional(readOnly=true)
-    public Map<Resource, ConfigResponse> getConfigResponsesAndSchema(AuthzSubject subject, Set<Resource> resources, boolean hideSecrets) {
+    public Map<Resource, ConfigResponse> getConfigResponsesAndSchema(AuthzSubject subject, PlatformManager platformManager, ProductManager productManager, Set<Resource> resources, boolean hideSecrets) {
         final boolean debug = log.isDebugEnabled();
         final StopWatch watch = new StopWatch();
         final Map<Integer, Collection<Resource>> resourcesByType = new Classifier<Resource, Integer, Resource>() {
@@ -309,19 +309,19 @@ public class ConfigManagerImpl implements ConfigManager {
             try {
                 if ((measurementResponse != null) && (measurementResponse.length > 0)) {
                     ConfigResponse measurementConf = ConfigResponse.decode(measurementResponse); 
-                    ConfigSchema schema = getConfigSchema(subject,id, ProductPlugin.TYPE_PRODUCT, measurementConf);
+                    ConfigSchema schema = getConfigSchema(subject,platformManager, productManager,id, ProductPlugin.TYPE_PRODUCT, measurementConf);
                     measurementConf.setSchema(schema);
                     configResponse.merge(measurementConf, true);
                 }
                 if ((productResponse != null) && (productResponse.length > 0)) {
                     ConfigResponse productConf = ConfigResponse.decode(productResponse); 
-                    ConfigSchema schema = getConfigSchema(subject,id, ProductPlugin.TYPE_PRODUCT, productConf);
+                    ConfigSchema schema = getConfigSchema(subject,platformManager, productManager,id, ProductPlugin.TYPE_PRODUCT, productConf);
                     productConf.setSchema(schema);
                     configResponse.merge(productConf, true);
                 }
                 if ((controlResponse != null) && (controlResponse.length > 0)) {
                     ConfigResponse controlConf = ConfigResponse.decode(controlResponse); 
-                    ConfigSchema schema = getConfigSchema(subject,id, ProductPlugin.TYPE_PRODUCT, controlConf);
+                    ConfigSchema schema = getConfigSchema(subject,platformManager, productManager, id, ProductPlugin.TYPE_PRODUCT, controlConf);
                     controlConf.setSchema(schema);
                     configResponse.merge(controlConf, true);
                 }
