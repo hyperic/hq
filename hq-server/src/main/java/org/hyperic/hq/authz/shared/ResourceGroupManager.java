@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.GroupMember;
@@ -41,6 +42,8 @@ import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.grouping.CritterList;
+import org.hyperic.hq.grouping.GroupException;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -58,10 +61,20 @@ public interface ResourceGroupManager
      */
     public ResourceGroup createResourceGroup(AuthzSubject whoami,
                                              ResourceGroup.ResourceGroupCreateInfo cInfo,
-                                             Collection<Role> roles,
-                                             Collection<Resource> resources)
-    throws GroupCreationException, GroupDuplicateNameException;
+                                             Collection<Role> roles, Collection<Resource> resources)
+        throws GroupCreationException, GroupDuplicateNameException;
     
+    
+    /**
+     * Create a resource group and set its Criteria. Currently no permission checking.
+     * @param roles List of {@link Role}s
+     * @param resources List of {@link Resource}s
+     * @param criteriaList List of criteria for automatic addition of resources to the group
+     */
+    public ResourceGroup createResourceGroup(AuthzSubject whoami, ResourceGroupCreateInfo cInfo,
+                                             Collection<Role> roles,
+                                             Collection<Resource> resources,
+                                             CritterList criteriaList) throws GroupCreationException, GroupDuplicateNameException ;
 
     /**
      * Find the group that has the given ID. Performs authz checking
@@ -177,6 +190,18 @@ public interface ResourceGroupManager
     public void removeResource(AuthzSubject whoami, Resource resource,
                                Collection<ResourceGroup> groups) throws PermissionException,
         VetoException;
+
+    /**
+     * Sets the criteria list for this group and updates the groups members based on the criteria
+     * @param whoami The current running user.
+     * @param group This group.
+     * @param critters List of critters to associate with this resource group.
+     * @throws PermissionException whoami does not own the resource.
+     * @throws GroupException critters is not a valid list of criteria.
+     * 
+     */
+    public void setCriteria(AuthzSubject whoami, ResourceGroup group, CritterList critters)
+        throws PermissionException, GroupException;
 
     /**
      * Change the resource contents of a group to the specified list of
@@ -330,6 +355,13 @@ public interface ResourceGroupManager
 
     public void updateGroupType(AuthzSubject subject, ResourceGroup g, int groupType,
                                 int groupEntType, int groupEntResType) throws PermissionException;
+
+    
+    /**
+     * Adds new resources to any groups whose criteria match the resources
+     * @param resourceEvents Events representing resource creations
+     */
+    public void updateGroupMembers(List<ResourceCreatedZevent> resourceEvents);
 
     public void removeGroupsCompatibleWith(String name) throws VetoException;
 
