@@ -2,6 +2,7 @@ package org.hyperic.hq.measurement.agent.server;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -23,6 +24,7 @@ import org.hyperic.hq.plugin.system.ProcessData;
 import org.hyperic.hq.plugin.system.ProcessReport;
 import org.hyperic.hq.plugin.system.TopData;
 import org.hyperic.hq.plugin.system.TopReport;
+import org.hyperic.hq.util.properties.PropertiesUtil;
 import org.hyperic.sigar.Humidor;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
@@ -44,12 +46,20 @@ class TopNScheduler {
     private ScheduledExecutorService sender;
     private final MeasurementCallbackClient client;
     private String agentToken;
+    private boolean deductServerTimeDiff = true;
 
 
-         TopNScheduler(AgentStorageProvider storage) throws AgentStartException {
+    TopNScheduler(AgentStorageProvider storage, Properties config) throws AgentStartException {
         this.log             = LogFactory.getLog(TopNScheduler.class);
         this.storage         = storage;
         this.client = setupClient();
+
+        // by default we the deduction feature is on
+        Boolean deductServerOffset = PropertiesUtil.getBooleanValue(
+                config.getProperty(ServerTimeDiff.PROP_DEDUCT_SERVER_TIME_DIFF), true);
+
+        deductServerTimeDiff = deductServerOffset;
+
         createSender();
         loadScheduleData();
     }
@@ -195,7 +205,14 @@ class TopNScheduler {
 
     private TopReport generateTopReport(TopData data) {
         TopReport report = new TopReport();
-        report.setCreateTime(System.currentTimeMillis());
+        if (deductServerTimeDiff
+                && (Math.abs(ServerTimeDiff.getInstance().getServerTimeDiff()) > ServerTimeDiff.MIN_OFFSET_FOR_DEDUCTION)) {
+            // deduct the server time offset from the metric
+            // value time stamp
+            report.setCreateTime(System.currentTimeMillis() + ServerTimeDiff.getInstance().getServerTimeDiff());
+        } else {
+            report.setCreateTime(System.currentTimeMillis());
+        }
         report.setUpTime(data.getUptime().toString());
         report.setCpu(data.getCpu().toString());
         report.setMem(data.getMem().toString());

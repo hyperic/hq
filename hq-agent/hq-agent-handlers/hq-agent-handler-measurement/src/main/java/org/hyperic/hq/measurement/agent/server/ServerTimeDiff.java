@@ -39,6 +39,7 @@ import java.util.concurrent.atomic.AtomicLong;
 class ServerTimeDiff {
 
     public static final int MIN_OFFSET_FOR_DEDUCTION = 30 * 1000;
+    public static final String PROP_DEDUCT_SERVER_TIME_DIFF = "agent.deductServerTimeDiff";
 
     private static final ServerTimeDiff instance = new ServerTimeDiff();
 

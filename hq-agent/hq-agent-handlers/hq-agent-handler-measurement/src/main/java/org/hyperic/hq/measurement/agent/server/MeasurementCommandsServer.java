@@ -264,7 +264,7 @@ public class MeasurementCommandsServer
                               this.storage,
                               this.bootConfig.getBootProperties());
         
-        this.topnScheduler = new TopNScheduler(this.storage);
+        this.topnScheduler = new TopNScheduler(this.storage, this.bootConfig.getBootProperties());
         
         this.measurementCommandsService = new MeasurementCommandsService(this.storage, this.validProps,
                 this.schedStorage, this.pluginManager, this.ltPluginManager, this.ctPluginManager, this.scheduleObject,

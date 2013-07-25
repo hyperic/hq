@@ -95,7 +95,6 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable, Age
     static final String PROP_FETCH_LOG_TIMEOUT = "scheduleThread.fetchLogTimeout";
     static final String PROP_CANCEL_TIMEOUT = "scheduleThread.cancelTimeout";
     static final String PROP_QUEUE_SIZE = "scheduleThread.queuesize.";
-    static final String PROP_DEDUCT_SERVER_TIME_DIFF = "agent.deductServerTimeDiff";
 
     private boolean deductServerTimeDiff = true;
 
@@ -198,7 +197,7 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable, Age
 
         // by default we the deduction feature is on
         Boolean deductServerOffset = PropertiesUtil.getBooleanValue(
-                agentConfig.getProperty(PROP_DEDUCT_SERVER_TIME_DIFF), true);
+                agentConfig.getProperty(ServerTimeDiff.PROP_DEDUCT_SERVER_TIME_DIFF), true);
 
         deductServerTimeDiff = deductServerOffset;
     }
