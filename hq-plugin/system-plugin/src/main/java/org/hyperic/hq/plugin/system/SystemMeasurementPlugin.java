@@ -233,11 +233,11 @@ public class SystemMeasurementPlugin
     @Override
     public ConfigSchema getConfigSchema(TypeInfo info, ConfigResponse config) {
         ConfigSchema schema = new ConfigSchema();
-
-        for (TopNConfigurationProperties conf : TopNConfigurationProperties.values()) {
-            schema.addOption(conf.getConfigOption());
+        if (config.getKeys().contains(TopNConfigurationProperties.ENABLE_TOPN_COLLECTION.getName())) {
+            for (TopNConfigurationProperties conf : TopNConfigurationProperties.values()) {
+                schema.addOption(conf.getConfigOption());
+            }
         }
-
         return schema;
     }
 }

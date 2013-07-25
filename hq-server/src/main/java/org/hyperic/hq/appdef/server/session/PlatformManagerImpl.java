@@ -416,7 +416,6 @@ public class PlatformManagerImpl implements PlatformManager {
                 agentManager.removeAgent(agent);
             }
 
-
         } catch (PermissionException e) {
             log.debug("Error while removing Platform");
 

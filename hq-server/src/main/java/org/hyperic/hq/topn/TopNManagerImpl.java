@@ -231,13 +231,11 @@ public class TopNManagerImpl implements ZeventListener<ResourceZevent>, TopNMana
                 SessionManager.runInSession(new SessionRunner() {
                     public void run() throws Exception {
                         Platform platform = platformManager.getPlatformById(id.getId());
-                        ConfigResponse config = configManager.getMergedConfigResponse(
-                                authzSubjectManager.getOverlordPojo(), ProductPlugin.TYPE_MEASUREMENT, id, true);
 
-                        if (!platform.getPlatformType().getPlugin().equalsIgnoreCase("system")) {
+                        if ((null == platform) || !agentVersionValid(platform)) {
                             return;
                         }
-                        if (!agentVersionValid(platform)) {
+                        if (!platform.getPlatformType().getPlugin().equalsIgnoreCase("system")) {
                             return;
                         }
                         if (Integer.valueOf(serverConfigManager.getPropertyValue(TOPN_DEFAULT_INTERVAL)) <= 0) {
@@ -245,6 +243,10 @@ public class TopNManagerImpl implements ZeventListener<ResourceZevent>, TopNMana
                                     + "'");
                             return;
                         }
+
+                        ConfigResponse config = configManager.getMergedConfigResponse(
+                                authzSubjectManager.getOverlordPojo(), ProductPlugin.TYPE_MEASUREMENT, id, true);
+
 
                         if (e instanceof ResourceCreatedZevent) {
                             configureTopNSchedule(platform, config,
@@ -269,10 +271,6 @@ public class TopNManagerImpl implements ZeventListener<ResourceZevent>, TopNMana
                             }
 
                             scheduleTopNCollection(platform, config);
-                        }
-
-                        else if (e instanceof ResourceUpdatedZevent) {
-
                         }
 
                     }

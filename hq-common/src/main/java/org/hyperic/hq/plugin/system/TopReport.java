@@ -51,8 +51,14 @@ public class TopReport implements Serializable {
         Collections.sort(processesList, new Comparator<ProcessReport>() {
             public int compare(ProcessReport first, ProcessReport second) {
                 int returnValue = 0;
-                double firstMem = Double.valueOf(first.getMemPerc().replace("%", "").trim());
-                double secondMem = Double.valueOf(second.getMemPerc().replace("%", "").trim());
+                double firstMem = -1;
+                double secondMem = -1;
+                if (first.getMemPerc().contains("%")) {
+                    firstMem = Double.valueOf(first.getMemPerc().replace("%", "").trim());
+                }
+                if (second.getMemPerc().contains("%")) {
+                    secondMem = Double.valueOf(second.getMemPerc().replace("%", "").trim());
+                }
                 returnValue = (firstMem >= secondMem ? -1 : 1);
                 return returnValue;
             }
@@ -63,8 +69,15 @@ public class TopReport implements Serializable {
         Collections.sort(processesList, new Comparator<ProcessReport>() {
             public int compare(ProcessReport first, ProcessReport second) {
                 int returnValue = 0;
-                double firstCpu = Double.valueOf(first.getCpuPerc().replace("%", "").trim());
-                double secondCpu = Double.valueOf(second.getCpuPerc().replace("%", "").trim());
+                double firstCpu = -1;
+                double secondCpu = -1;
+
+                if (first.getCpuPerc().contains("%")) {
+                    firstCpu = Double.valueOf(first.getCpuPerc().replace("%", "").trim());
+                }
+                if (second.getCpuPerc().contains("%")) {
+                    secondCpu = Double.valueOf(second.getCpuPerc().replace("%", "").trim());
+                }
                 returnValue = (firstCpu >= secondCpu ? -1 : 1);
                 return returnValue;
             }
