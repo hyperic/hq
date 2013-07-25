@@ -261,6 +261,19 @@ public class TopNManagerImpl implements ZeventListener<ResourceZevent>, TopNMana
                                 log.info("Scheduling TopN collection for platform '" + platform.getResource().getId()
                                         + "'");
                                 scheduleTopNCollection(platform, config);
+                            } else {
+                                int interval = Integer.valueOf(config
+                                        .getValue(TopNConfigurationProperties.TOPN_COLLECTION_INTERVAL_IN_MINUTES
+                                                .getName()));
+                                int numberOfProcesses = Integer.valueOf(config
+                                        .getValue(TopNConfigurationProperties.TOPN_NUMBER_OF_PROCESSES.getName()));
+                                boolean enabled = Boolean.valueOf(config
+                                        .getValue(TopNConfigurationProperties.ENABLE_TOPN_COLLECTION.getName()));
+                                if ((interval != schedule.getIntervalInMinutes())
+                                        || (numberOfProcesses != schedule.getNumberOfProcesses())
+                                        || (enabled != schedule.isEnabled())) {
+                                    scheduleTopNCollection(id, config);
+                                }
                             }
                         }
 

@@ -6,8 +6,8 @@ import org.hyperic.util.config.InvalidOptionValueException;
 
 public enum TopNConfigurationProperties {
 
-    ENABLE_TOPN_COLLECTION("EnableTopN"), TOPN_COLLECTION_INTERVAL_IN_MINUTES("TopNInterval"), TOPN_NUMBER_OF_PROCESSES(
-            "TopNProcessNumber");
+    ENABLE_TOPN_COLLECTION("top_processes.enable"), TOPN_COLLECTION_INTERVAL_IN_MINUTES("top_processes.interval"), TOPN_NUMBER_OF_PROCESSES(
+            "top_processes.number");
 
     private String name;
 
@@ -23,10 +23,11 @@ public enum TopNConfigurationProperties {
     public ConfigOption getConfigOption() {
         switch (this) {
         case ENABLE_TOPN_COLLECTION:
-            return new BooleanConfigOption(this.name, "Enable TopN collection", true);
+            return new BooleanConfigOption(this.name, "Enable top processes collection", true);
 
         case TOPN_COLLECTION_INTERVAL_IN_MINUTES:
-            ConfigOption intervalOption = new ConfigOption(this.name, "TopN collection interval in minutes", "1") {
+            ConfigOption intervalOption = new ConfigOption(this.name, "Top processes collection interval in minutes",
+                    "1") {
 
                 @Override
                 public void checkOptionIsValid(String value) throws InvalidOptionValueException {
@@ -34,10 +35,10 @@ public enum TopNConfigurationProperties {
                         int val = Integer.valueOf(value);
                         if ((val <= 0) || (val > 30)) {
                             throw new InvalidOptionValueException(
-                                    "TopN collection interval must be between 1 and 30 minutes");
+                                    "top_processes.interval must be between 1 and 30 minutes");
                         }
                     } catch (Exception e) {
-                        throw new InvalidOptionValueException("TopN collection interval must be a number");
+                        throw new InvalidOptionValueException("top_processes.interval must be a number");
                     }
                 }
             };
@@ -54,10 +55,10 @@ public enum TopNConfigurationProperties {
                         int val = Integer.valueOf(value);
                         if ((val <= 0) || (val > 30)) {
                             throw new InvalidOptionValueException(
-                                    "TopN number of processes must be between 1 and 30 minutes");
+                                    "top_processes.number must be between 1 and 30 minutes");
                         }
                     } catch (Exception e) {
-                        throw new InvalidOptionValueException("TopN number of processes must be a number");
+                        throw new InvalidOptionValueException("top_processes.number must be a number");
                     }
                 }
             };
