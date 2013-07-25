@@ -14,7 +14,7 @@ public class MeasurementBossTest
         super.setUp();
         measurementBoss = new MeasurementBossImpl(null, null, null,
             null, null, null, null, null, null, null, null, null, null,
-            null, null, null);
+            null, null);
     }
 
     public void testGetAvailabilityForGroups() throws Exception{

@@ -77,7 +77,11 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceRelation;
+import org.hyperic.hq.authz.server.session.ResourceType;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.PermissionManager;
+import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
@@ -97,10 +101,6 @@ import org.hyperic.hq.bizapp.shared.uibeans.ResourceMetricDisplaySummary;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceTypeDisplaySummary;
 import org.hyperic.hq.bizapp.shared.uibeans.SingletonDisplaySummary;
 import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.hq.grouping.CritterList;
-import org.hyperic.hq.grouping.CritterTranslationContext;
-import org.hyperic.hq.grouping.CritterTranslator;
-import org.hyperic.hq.grouping.critters.DescendantProtoCritterType;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -120,6 +120,7 @@ import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.ConfigPropertyException;
+import org.hyperic.util.Transformer;
 import org.hyperic.util.collection.IntHashMap;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
@@ -159,7 +160,6 @@ public class MeasurementBossImpl implements MeasurementBoss {
     private final ServiceManager serviceManager;
     private final VirtualManager virtualManager;
     private final ApplicationManager applicationManager;
-    private final CritterTranslator critterTranslator;
     private final ProblemMetricManager problemMetricManager;
 
     @Autowired
@@ -172,7 +172,6 @@ public class MeasurementBossImpl implements MeasurementBoss {
                                ResourceGroupManager resourceGroupManager,
                                ServerManager serverManager, ServiceManager serviceManager,
                                VirtualManager virtualManager, ApplicationManager applicationManager, 
-                               CritterTranslator critterTranslator,
                                ProblemMetricManager problemMetricManager) {
         this.sessionManager = sessionManager;
         this.authBoss = authBoss;
@@ -188,7 +187,6 @@ public class MeasurementBossImpl implements MeasurementBoss {
         this.serviceManager = serviceManager;
         this.virtualManager = virtualManager;
         this.applicationManager = applicationManager;
-        this.critterTranslator = critterTranslator;
         this.problemMetricManager = problemMetricManager;
     }
     
@@ -2376,44 +2374,37 @@ public class MeasurementBossImpl implements MeasurementBoss {
         return getCalculatedGroupAvailability(data);
     }
 
-    private List<AppdefEntityID> getAGMemberIds(AuthzSubject subject, AppdefEntityID[] aids,
-                                                AppdefEntityTypeID ctype)
-        throws AppdefEntityNotFoundException, PermissionException {
-        List<AppdefEntityID> res = new ArrayList<AppdefEntityID>();
-
-        Resource proto = resourceManager.findResourcePrototype(ctype);
-
+    private List<AppdefEntityID> getAGMemberIds(AuthzSubject subject, AppdefEntityID[] aids, AppdefEntityTypeID ctype)
+    throws AppdefEntityNotFoundException, PermissionException {
+        final List<AppdefEntityID> res = new ArrayList<AppdefEntityID>();
+        final Resource proto = resourceManager.findResourcePrototype(ctype);
         if (proto == null) {
             log.warn("Unable to find prototype for ctype=[" + ctype + "]");
             return res;
         }
-
-        DescendantProtoCritterType descType = new DescendantProtoCritterType();
-      
-        CritterTranslationContext ctx = new CritterTranslationContext(subject);
-
-        for (int i = 0; i < aids.length; i++) {
-            if (aids[i].isApplication()) {
-                AppdefEntityValue rv = new AppdefEntityValue(aids[i], subject);
-                Collection<AppdefResourceValue> services = rv.getAssociatedServices(ctype.getId(),
-                    PageControl.PAGE_ALL);
+        final List<Resource> resources = new ArrayList<Resource>();
+        for (final AppdefEntityID aeid : aids) {
+            if (aeid.isApplication()) {
+                AppdefEntityValue rv = new AppdefEntityValue(aeid, subject);
+                Collection<AppdefResourceValue> services = rv.getAssociatedServices(ctype.getId(), PageControl.PAGE_ALL);
                 for (AppdefResourceValue r : services) {
-
                     res.add(r.getEntityId());
                 }
             } else {
-                Resource r = resourceManager.findResource(aids[i]);
-                List critters = new ArrayList(1);
-                critters.add(descType.newInstance(r, proto));
-                CritterList cList = new CritterList(critters, false);
-
-                List<Resource> children = critterTranslator.translate(ctx, cList).list();
-                for (Resource child : children) {
-
-                    res.add(AppdefUtil.newAppdefEntityId(child));
-                }
+                final Resource r = resourceManager.findResource(aeid);
+                resources.add(r);
             }
         }
+        final ResourceRelation containment = resourceManager.getContainmentRelation();
+        final Collection<Resource> children =
+            resourceManager.getDescendantResources(subject, resources, containment, proto, true);
+        final List<AppdefEntityID> childAeids = new Transformer<Resource, AppdefEntityID>() {
+            @Override
+            public AppdefEntityID transform(Resource r) {
+                return AppdefUtil.newAppdefEntityId(r);
+            }
+        }.transform(children);
+        res.addAll(childAeids);
         return res;
     }
 

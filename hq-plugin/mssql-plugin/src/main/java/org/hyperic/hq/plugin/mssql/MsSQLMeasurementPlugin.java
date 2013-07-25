@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.plugin.mssql;
 
+import edu.emory.mathcs.backport.java.util.Arrays;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,6 +35,10 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricNotFoundException;
@@ -44,6 +49,8 @@ import org.hyperic.hq.product.ProductPluginManager;
 import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.hq.product.Win32ControlPlugin;
 import org.hyperic.hq.product.Win32MeasurementPlugin;
+import org.hyperic.sigar.Sigar;
+import org.hyperic.sigar.SigarException;
 import org.hyperic.sigar.win32.Pdh;
 import org.hyperic.sigar.win32.Service;
 import org.hyperic.sigar.win32.Win32Exception;
@@ -52,6 +59,8 @@ import org.hyperic.util.config.ConfigResponse;
 
 public class MsSQLMeasurementPlugin
     extends Win32MeasurementPlugin {
+
+    private static Log log = LogFactory.getLog(MsSQLMeasurementPlugin.class);
 
     private static final String MSSQL_LOGIN_TIMEOUT = "mssql.login_timeout";
 	private static final String ATTR_NAME_DATABASE_FREE_PERCENT = "Database Free Percent";
@@ -159,38 +168,130 @@ public class MsSQLMeasurementPlugin
     	return serverName;    		
     }
 
-    public MetricValue getValue(Metric metric) throws PluginException, MetricNotFoundException,
-        MetricUnreachableException {
+    @Override
+    public MetricValue getValue(Metric metric) throws PluginException, MetricNotFoundException, MetricUnreachableException {
 
-        // This metric requires SQL query, not available via perflib
-        if (metric.getAttributeName().startsWith(ATTR_NAME_DATABASE_FREE_PERCENT)) {
-            // Ignore the SQL Server services, we only want db instances.
-            if (metric.getDomainName().endsWith("_Total")) {
-                return MetricValue.NONE;
-            } else if (ATTR_NAME_DATABASE_FREE_PERCENT_2000.equals(metric.getAttributeName())){
-                return getUnallocatedSpace(metric, MDF_FREE_SPACE_PCT2000_SQL);
+        if (metric.getDomainName().equalsIgnoreCase("pdh")) {
+            return getPDHMetric(metric);
+        } else if (metric.getDomainName().equalsIgnoreCase("service")) {
+            return checkServiceAvail(metric);
+        } else if (metric.getDomainName().equalsIgnoreCase("mssql")) {
+            if (metric.getObjectPropString().equals("process")) {
+                return getInstanceProcessMetric(metric);
+            }
+            getLog().debug("Unable to retrieve value for: " + metric);
+            return MetricValue.NONE;
+        } else {
+            // This metric requires SQL query, not available via perflib
+            if (metric.getAttributeName().startsWith(ATTR_NAME_DATABASE_FREE_PERCENT)) {
+                // Ignore the SQL Server services, we only want db instances.
+                if (metric.getDomainName().endsWith("_Total")) {
+                    return MetricValue.NONE;
+                } else if (ATTR_NAME_DATABASE_FREE_PERCENT_2000.equals(metric.getAttributeName())){
+                    return getUnallocatedSpace(metric, MDF_FREE_SPACE_PCT2000_SQL);
+                } else {
+                    return getUnallocatedSpace(metric, MDF_FREE_SPACE_PCT2005_SQL);
+                }
+            }
+            String name = getServiceName(metric);
+            if (getServiceStatus(name) != Service.SERVICE_STOPPED) {
+                return getValueCompat(metric);
+            }
+            // XXX should not have to do this, but pdh.dll seems to cache last
+            // value in some environments
+            if (metric.isAvail() || ("Availability").equals(metric.getObjectProperty("Type"))) // XXX
+            {
+                return new MetricValue(Metric.AVAIL_DOWN);
+            } else if (getTypeInfo().getType() == TypeInfo.TYPE_SERVER) {
+                throw new MetricUnreachableException(metric.toString());
             } else {
-            	return getUnallocatedSpace(metric, MDF_FREE_SPACE_PCT2005_SQL);
+                getLog().debug("Unable to retrieve value for: " + metric.getAttributeName());
+                return MetricValue.NONE;
             }
         }
-        String name = getServiceName(metric);
-        if (getServiceStatus(name) != Service.SERVICE_STOPPED) {
-            return getValueCompat(metric);
-        }
-        // XXX should not have to do this, but pdh.dll seems to cache last
-        // value in some environments
-        if (metric.isAvail() || ("Availability").equals(metric.getObjectProperty("Type"))) // XXX
+    }
 
-        {
-            return new MetricValue(Metric.AVAIL_DOWN);
-        } else if (getTypeInfo().getType() == TypeInfo.TYPE_SERVER) {
-            throw new MetricUnreachableException(metric.toString());
-        } else {
-        	getLog().error("Unable to retrieve value for: " + metric.getAttributeName());
-            return MetricValue.NONE; 
+    private MetricValue getInstanceProcessMetric(Metric metric) {
+        try {
+            log.info("[getInstanceCPU] metric='" + metric + "'");
+            String serviceName = metric.getProperties().getProperty("service_name");
+            Sigar sigar = new Sigar();
+            long servicePID = sigar.getServicePid(serviceName);
+            log.info("[getInstanceCPU] serviceName='" + serviceName + "' servicePID='" + servicePID + "'");
+
+            List<String> instances = Arrays.asList(Pdh.getInstances("Process"));
+            String serviceInstance = null;
+            for (int i = 0; (i < instances.size()) && (serviceInstance == null); i++) {
+                String instance = instances.get(i);
+                if (instance.startsWith("sqlservr")) {
+                    String obj = "\\Process(" + instance + ")\\ID Process";
+                    log.info("[getInstanceCPU] obj='" + obj + "'");
+                    double pid = new Pdh().getFormattedValue(obj);
+                    if (pid == servicePID) {
+                        serviceInstance = instance;
+                        log.info("[getInstanceCPU] serviceName='" + serviceName + "' serviceInstance='" + serviceInstance + "'");
+                    }
+                }
+            }
+            
+            if (serviceInstance != null) {
+                String obj = "\\Process(" + serviceInstance + ")\\"+metric.getAttributeName();
+                log.info("[getInstanceCPU] obj='" + obj + "'");
+                double val = new Pdh().getFormattedValue(obj);
+                log.info("[getInstanceCPU] val='" + val + "'");
+                return new MetricValue(val);
+            } else {
+                return MetricValue.NONE;
+            }
+
+        } catch (SigarException ex) {
+            log.debug("[getInstanceCPU] " + ex, ex);
+            return MetricValue.NONE;
         }
     }
     
+    private MetricValue checkServiceAvail(Metric metric) {
+        String service = metric.getObjectProperty("service_name");
+        log.debug("[checkServiceAvail] service='" + service + "'");
+        double res = Metric.AVAIL_DOWN;
+        try {
+            if (service != null) {
+                Service s = new Service(service);
+                if (s.getStatus() == Service.SERVICE_RUNNING) {
+                    res = Metric.AVAIL_UP;
+                }
+                log.debug("[checkServiceAvail] service='" + service + "' metric:'" + metric + "' res=" + res);
+            }
+        } catch (Win32Exception ex) {
+            log.debug("[checkServiceAvail] error. service='" + service + "' metric:'" + metric + "'", ex);
+        }
+        return new MetricValue(res);
+    }
+
+    private MetricValue getPDHMetric(Metric metric) {
+        MetricValue res;
+        String obj = "\\" + metric.getProperties().getProperty("service_name") + ":" + metric.getObjectPropString();
+        if (!metric.isAvail()) {
+            obj += "\\" + metric.getAttributeName();
+        }
+        try {
+            Double val = new Pdh().getFormattedValue(obj);
+            res = new MetricValue(val);
+            if (metric.isAvail()) {
+                res = new MetricValue(Metric.AVAIL_UP);
+            }
+        } catch (Win32Exception ex) {
+            if (metric.isAvail()) {
+                res = new MetricValue(Metric.AVAIL_DOWN);
+                log.debug("error on metric:'" + metric + "' (obj:"+obj+") :" + ex.getLocalizedMessage(), ex);
+            } else {
+                res = MetricValue.NONE;
+                log.debug("error on metric:'" + metric + "' (obj:"+obj+") :" + ex.getLocalizedMessage());
+            }
+        }
+        return res;
+    }
+        
     private List<String> getScript(Metric metric, String scriptName){
     	String dbNameWithQuotes = "\"" + metric.getDomainName() + "\"";
     	String serverName = getServerName(metric);

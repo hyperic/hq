@@ -12103,6 +12103,21 @@ has already been defined.
             </statement>
         </schema-directSQL>
     </schemaSpec>	
+	
+    <schemaSpec version="3.223" alwaysExecute="true">
+        <schema-directSQL>
+            <statement targetDB="postgresql">
+                DROP SEQUENCE IF EXISTS EAM_CRITERIA_ID_SEQ
+            </statement>
+            <statement targetDB="postgresql">
+                DROP table IF EXISTS EAM_CRITERIA
+            </statement>
+            <statement targetDB="postgresql">
+            	ALTER table EAM_RESOURCE_GROUP drop column IF EXISTS HAS_OR_CRITERIA
+            </statement>
+        </schema-directSQL>
+    </schemaSpec>	
+	
 </dbupgrade>
 </target>
 </project>
