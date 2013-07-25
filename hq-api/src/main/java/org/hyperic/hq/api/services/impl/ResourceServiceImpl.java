@@ -54,9 +54,6 @@ import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.ObjectNotFoundException;
 import org.hyperic.hq.notifications.EndpointQueue;
 import org.hyperic.hq.notifications.NotificationEndpoint;
-import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.PluginNotFoundException;
-import org.hyperic.util.config.EncodingException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class ResourceServiceImpl extends RestApiService implements ResourceService {
@@ -102,7 +99,7 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
         return resource;
 	}//EOM
 
-    public final RegisteredResourceBatchResponse getResources(final ResourceDetailsType[] responseMetaData, final int hierarchyDepth) throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException, AppdefEntityNotFoundException, ConfigFetchException, PluginNotFoundException, EncodingException, PluginException {
+    public final RegisteredResourceBatchResponse getResources(final ResourceDetailsType[] responseMetaData, final int hierarchyDepth) throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException {
         ApiMessageContext apiMessageContext = newApiMessageContext();
         return this.resourceTransfer.getResources(apiMessageContext, responseMetaData, hierarchyDepth) ;
 	}//EOM 
