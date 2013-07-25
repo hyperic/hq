@@ -97,6 +97,10 @@ import org.hyperic.hq.bizapp.shared.uibeans.ResourceMetricDisplaySummary;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceTypeDisplaySummary;
 import org.hyperic.hq.bizapp.shared.uibeans.SingletonDisplaySummary;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.grouping.CritterList;
+import org.hyperic.hq.grouping.CritterTranslationContext;
+import org.hyperic.hq.grouping.CritterTranslator;
+import org.hyperic.hq.grouping.critters.DescendantProtoCritterType;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -155,6 +159,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
     private final ServiceManager serviceManager;
     private final VirtualManager virtualManager;
     private final ApplicationManager applicationManager;
+    private final CritterTranslator critterTranslator;
     private final ProblemMetricManager problemMetricManager;
 
     @Autowired
@@ -167,6 +172,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
                                ResourceGroupManager resourceGroupManager,
                                ServerManager serverManager, ServiceManager serviceManager,
                                VirtualManager virtualManager, ApplicationManager applicationManager, 
+                               CritterTranslator critterTranslator,
                                ProblemMetricManager problemMetricManager) {
         this.sessionManager = sessionManager;
         this.authBoss = authBoss;
@@ -182,6 +188,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
         this.serviceManager = serviceManager;
         this.virtualManager = virtualManager;
         this.applicationManager = applicationManager;
+        this.critterTranslator = critterTranslator;
         this.problemMetricManager = problemMetricManager;
     }
     
@@ -2371,29 +2378,27 @@ public class MeasurementBossImpl implements MeasurementBoss {
 
     private List<AppdefEntityID> getAGMemberIds(AuthzSubject subject, AppdefEntityID[] aids,
                                                 AppdefEntityTypeID ctype)
-    throws AppdefEntityNotFoundException, PermissionException {
-// XXX need to implement this!
-        return Collections.emptyList();
-    }
-                                                
-/* XXX remove!
-    private List<AppdefEntityID> getAGMemberIds(AuthzSubject subject, AppdefEntityID[] aids,
-                                                AppdefEntityTypeID ctype)
         throws AppdefEntityNotFoundException, PermissionException {
         List<AppdefEntityID> res = new ArrayList<AppdefEntityID>();
+
         Resource proto = resourceManager.findResourcePrototype(ctype);
+
         if (proto == null) {
             log.warn("Unable to find prototype for ctype=[" + ctype + "]");
             return res;
         }
+
         DescendantProtoCritterType descType = new DescendantProtoCritterType();
+      
         CritterTranslationContext ctx = new CritterTranslationContext(subject);
+
         for (int i = 0; i < aids.length; i++) {
             if (aids[i].isApplication()) {
                 AppdefEntityValue rv = new AppdefEntityValue(aids[i], subject);
                 Collection<AppdefResourceValue> services = rv.getAssociatedServices(ctype.getId(),
                     PageControl.PAGE_ALL);
                 for (AppdefResourceValue r : services) {
+
                     res.add(r.getEntityId());
                 }
             } else {
@@ -2401,15 +2406,16 @@ public class MeasurementBossImpl implements MeasurementBoss {
                 List critters = new ArrayList(1);
                 critters.add(descType.newInstance(r, proto));
                 CritterList cList = new CritterList(critters, false);
+
                 List<Resource> children = critterTranslator.translate(ctx, cList).list();
                 for (Resource child : children) {
+
                     res.add(AppdefUtil.newAppdefEntityId(child));
                 }
             }
         }
         return res;
     }
-*/
 
     /**
      * Return a MetricSummary bean for each of the servers of a specific type.

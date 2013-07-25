@@ -126,11 +126,12 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceOwnerChangedEvent;
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
 import org.hyperic.hq.authz.server.session.ResourceGroupSortField;
-import org.hyperic.hq.authz.server.session.ResourceOwnerChangedEvent;
 import org.hyperic.hq.authz.server.session.ResourceType;
+import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.GroupCreationException;
@@ -153,6 +154,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.events.shared.MaintenanceEventManager;
+import org.hyperic.hq.grouping.CritterTranslator;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.measurement.ext.DownMetricValue;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
@@ -229,6 +231,8 @@ public class AppdefBossImpl implements AppdefBoss , ApplicationContextAware {
 
     private ZeventEnqueuer zEventManager;
     
+    private CritterTranslator critterTranslator;
+    
     private ApplicationContext applicationContext;
 
     protected Log log = LogFactory.getLog(AppdefBossImpl.class.getName());
@@ -248,7 +252,7 @@ public class AppdefBossImpl implements AppdefBoss , ApplicationContextAware {
                           AIBoss aiBoss, ResourceGroupManager resourceGroupManager,
                           ResourceManager resourceManager, ServerManager serverManager,
                           ServiceManager serviceManager, TrackerManager trackerManager,
-                          AppdefManager appdefManager, ZeventEnqueuer zEventManager) {
+                          AppdefManager appdefManager, ZeventEnqueuer zEventManager, CritterTranslator critterTranslator) {
         this.sessionManager = sessionManager;
         this.agentManager = agentManager;
         this.aiQueueManager = aiQueueManager;
@@ -270,6 +274,7 @@ public class AppdefBossImpl implements AppdefBoss , ApplicationContextAware {
         this.trackerManager = trackerManager;
         this.appdefManager = appdefManager;
         this.zEventManager = zEventManager;
+        this.critterTranslator = critterTranslator;
     }
 
     /**

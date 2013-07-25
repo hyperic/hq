@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  *  "derived work".
  *
- *  Copyright (C) [2004-2013], VMware, Inc.
+ *  Copyright (C) [2004-2010], VMware, Inc.
  *  This file is part of Hyperic.
  *
  *  Hyperic is free software; you can redistribute it and/or modify
@@ -42,7 +42,9 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.HibernateException;
 import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -69,6 +71,11 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.events.shared.EventLogManager;
+import org.hyperic.hq.grouping.Critter;
+import org.hyperic.hq.grouping.CritterList;
+import org.hyperic.hq.grouping.CritterTranslationContext;
+import org.hyperic.hq.grouping.CritterTranslator;
+import org.hyperic.hq.grouping.GroupException;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.grouping.shared.GroupEntry;
 import org.hyperic.hq.management.server.session.GroupCriteriaDAO;
@@ -110,6 +117,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     protected final ResourceDAO resourceDAO;
     private final ResourceRelationDAO resourceRelationDAO;
     private ApplicationContext applicationContext;
+    private final CritterTranslator critterTranslator;
     protected GroupCriteriaDAO groupCriteriaDAO;
     protected PermissionManager permissionManager;
     protected ResourceTypeDAO resourceTypeDAO;
@@ -124,6 +132,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
                                     GroupCriteriaDAO groupCriteriaDAO,
                                     ResourceTypeDAO resourceTypeDAO,
                                     PermissionManager permissionManager,
+                                    CritterTranslator critterTranslator,
                                     ZeventManager zeventManager) {
         this.resourceEdgeDAO = resourceEdgeDAO;
         this.authzSubjectManager = authzSubjectManager;
@@ -131,6 +140,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         this.resourceGroupDAO = resourceGroupDAO;
         this.resourceDAO = resourceDAO;
         this.resourceRelationDAO = resourceRelationDAO;
+        this.critterTranslator = critterTranslator;
         this.groupCriteriaDAO = groupCriteriaDAO;
         this.permissionManager = permissionManager;
         this.resourceTypeDAO = resourceTypeDAO;
@@ -148,10 +158,12 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      * 
      * @param roles List of {@link Role}s
      * @param resources List of {@link Resource}s
+     * 
+     * 
      */
     public ResourceGroup createResourceGroup(AuthzSubject whoami, ResourceGroupCreateInfo cInfo,
                                              Collection<Role> roles, Collection<Resource> resources)
-    throws GroupCreationException, GroupDuplicateNameException {
+        throws GroupCreationException, GroupDuplicateNameException {
         ResourceGroup res = createGroup(whoami, cInfo, roles, resources);
         applicationContext.publishEvent(new GroupCreatedEvent(res));
         return res;
@@ -162,6 +174,23 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     throws GroupCreationException, GroupDuplicateNameException {
         final ResourceGroup res = createGroup(whoami, cInfo, groupResource, roles);
         return res;
+    }
+
+    public ResourceGroup createResourceGroup(AuthzSubject whoami, ResourceGroupCreateInfo cInfo,
+                                             Collection<Role> roles,
+                                             Collection<Resource> resources,
+                                             CritterList criteriaList)
+    throws GroupCreationException, GroupDuplicateNameException {
+        ResourceGroup group = createGroup(whoami, cInfo, roles, resources);
+        try {
+            setCriteria(whoami, group, criteriaList);
+        } catch (PermissionException e) {
+            throw new GroupCreationException("Error creating group.  Unable to set group criteria.", e);
+        } catch (GroupException e) {
+            throw new GroupCreationException("Error creating group.  Unable to set group criteria.", e);
+        }
+        applicationContext.publishEvent(new GroupCreatedEvent(group));
+        return group;
     }
 
     @SuppressWarnings("unchecked")
@@ -491,6 +520,23 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         if (fireEvents){
             applicationContext.publishEvent(new GroupMembersRemovedEvent(group));
         }
+    }
+
+    /**
+     * Sets the criteria list for this group and updates the groups members
+     * based on the criteria
+     * @param whoami The current running user.
+     * @param group This group.
+     * @param critters List of critters to associate with this resource group.
+     * @throws PermissionException whoami does not own the resource.
+     * @throws GroupException critters is not a valid list of criteria.
+     * 
+     */
+    public void setCriteria(AuthzSubject whoami, ResourceGroup group, CritterList critters)
+        throws PermissionException, GroupException {
+        checkGroupPermission(whoami, group.getId(), AuthzConstants.perm_modifyResourceGroup);
+        group.setCritterList(critters);
+        updateGroupMembers(whoami, group);
     }
 
     /**
@@ -904,6 +950,84 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
             Resource r = findPrototype(new AppdefEntityTypeID(groupEntType, groupEntResType));
             g.setResourcePrototype(r);
         }
+    }
+
+    /**
+     * Updates the group with all resources meeting the group criteria
+     * @param whoami The user token
+     * @param group The group whose resources should be updated to match its
+     *        criteria
+     * @throws HibernateException
+     * @throws GroupException
+     */
+    @SuppressWarnings("unchecked")
+    private void updateGroupMembers(AuthzSubject whoami, ResourceGroup group) throws GroupException {
+        CritterTranslationContext translationContext = new CritterTranslationContext(whoami);
+        List<Resource> proposedResources = critterTranslator.translate(translationContext,
+            group.getCritterList()).list();
+        Collection<Resource> groupMembers = getMembers(group);
+        Collection<Resource> resourcesToRemove = new HashSet<Resource>(groupMembers);
+        Collection<Resource> resourcesToAdd = new HashSet<Resource>(proposedResources);
+        // elements in existing group not in proposed group
+        resourcesToRemove.removeAll(proposedResources);
+        // elements in proposed group not in existing group
+        resourcesToAdd.removeAll(groupMembers);
+
+        if (!resourcesToRemove.isEmpty()) {
+            removeResources(group, resourcesToRemove, true);
+        }
+        if (!(resourcesToAdd.isEmpty())) {
+            addResources(group, resourcesToAdd, true);
+        }
+    }
+
+    public void updateGroupMembers(List<ResourceCreatedZevent> resourceEvents) {
+        for (ResourceCreatedZevent resourceEvent : resourceEvents) {
+            updateGroupMember(resourceEvent);
+        }
+    }
+
+    private void updateGroupMember(ResourceCreatedZevent resourceEvent) {
+        final Resource resource = resourceManager.findResource(resourceEvent.getAppdefEntityID());
+        final AuthzSubject subject = authzSubjectManager.findSubjectById(resourceEvent
+            .getAuthzSubjectId());
+        for (ResourceGroup group : getAllResourceGroups()) {
+            try {
+                CritterList groupCriteria = group.getCritterList();
+                if (isCriteriaMet(groupCriteria, resource)) {
+                    try {
+                        addResource(subject, group, resource);
+                    } catch (Exception e) {
+                        log.error("Unable to add resource " + resource + " to group " +
+                                  group.getName());
+                    }
+                }
+            } catch (Exception e) {
+                log.error("Unable to process criteria for group " + group.getName() +
+                          " while processing event " + resourceEvent +
+                          ".  The groups' members may not be updated.");
+            }
+        }
+    }
+
+    private boolean isCriteriaMet(CritterList groupCriteria, Resource resource) {
+        if (groupCriteria.getCritters().isEmpty()) {
+            return false;
+        }
+        if (groupCriteria.isAll()) {
+            for (Critter groupCrit : groupCriteria.getCritters()) {
+                if (!groupCrit.meets(resource)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        for (Critter groupCrit : groupCriteria.getCritters()) {
+            if (groupCrit.meets(resource)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private Resource findPrototype(AppdefEntityTypeID id) {
