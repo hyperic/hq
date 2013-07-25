@@ -707,7 +707,7 @@ drop table #tTables
         <metrics>
             <include name="mssql-avail"/>
             <include name="mssql-process"/>
-            <!--include name="mssql-database"/>
+            <include name="mssql-database"/>
             <include name="mssql-access"/>
             <include name="mssql-general"/>
             <include name="mssql-memory"/>
@@ -716,7 +716,7 @@ drop table #tTables
             <include name="mssql-latches"/>
             <include name="mssql-cache"/>
             <include name="Buffer-Manager"/>
-            <include name="mssql-broker-activation"/-->
+            <include name="mssql-broker-activation"/>
         </metrics>
 
         <config>
@@ -835,7 +835,7 @@ drop table #tTables
         <property name="version" value="11.0.\d*\.\d*"/>
         <metrics>
             <include name="mssql-avail"/>
-            <!--include name="mssql-database"/>
+            <include name="mssql-database"/>
             <include name="mssql-access"/>
             <include name="mssql-general"/>
             <include name="mssql-memory-2012"/>
@@ -844,7 +844,7 @@ drop table #tTables
             <include name="mssql-latches"/>
             <include name="mssql-cache"/>
             <include name="Buffer-Manager_2012"/>
-            <include name="mssql-broker-activation"/-->
+            <include name="mssql-broker-activation"/>
         </metrics>
     </server>
 </plugin>

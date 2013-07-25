@@ -34,9 +34,7 @@ import org.hyperic.hq.product.*;
 import org.hyperic.sigar.win32.*;
 import org.hyperic.util.config.ConfigResponse;
 
-public class MsSQLDetector
-        extends ServerDetector
-        implements AutoServerDetector {
+public class MsSQLDetector extends ServerDetector implements AutoServerDetector {
 
     static final String PROP_DB = "db.name";
     private static final String DB_NAME = "Database";
@@ -47,8 +45,7 @@ public class MsSQLDetector
     public List getServerResources(ConfigResponse platformConfig) throws PluginException {
         List cfgs;
         try {
-            cfgs =
-                    Service.getServiceConfigs("sqlservr.exe");
+            cfgs = Service.getServiceConfigs("sqlservr.exe");
         } catch (Win32Exception e) {
             log.debug("[getServerResources] Error: " + e.getMessage(), e);
             return null;
@@ -160,6 +157,7 @@ public class MsSQLDetector
             sqlServerMetricPrefix = sqlServerServiceName;
             sqlAgentServiceName = sqlServerServiceName.replaceFirst("MSSQL", "SQLAgent");
         }
+        
         // creating agent service
         if (getServiceStatus(sqlAgentServiceName) != Service.SERVICE_STOPPED) {
             ServiceResource agentService = new ServiceResource();
