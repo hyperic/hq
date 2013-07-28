@@ -321,7 +321,7 @@ public class ConfigManagerImpl implements ConfigManager {
                 }
                 if ((controlResponse != null) && (controlResponse.length > 0)) {
                     ConfigResponse controlConf = ConfigResponse.decode(controlResponse); 
-                    ConfigSchema schema = getConfigSchema(subject,platformManager, productManager, id, ProductPlugin.TYPE_PRODUCT, controlConf);
+                    ConfigSchema schema = getConfigSchema(subject,platformManager, productManager, id, ProductPlugin.TYPE_CONTROL, controlConf);
                     controlConf.setSchema(schema);
                     configResponse.merge(controlConf, true);
                 }
