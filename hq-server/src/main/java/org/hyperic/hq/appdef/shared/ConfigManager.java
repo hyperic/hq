@@ -33,6 +33,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AllConfigDiff;
+import org.hyperic.hq.product.shared.ProductManager;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 
@@ -130,4 +131,5 @@ public interface ConfigManager {
      * @return {@link Map} of {@link Resource} to its associated {@link ConfigResponse}
      */
     public Map<Resource, ConfigResponse> getConfigResponses(Set<Resource> resources, boolean hideSecrets);
+    public Map<Resource, ConfigResponse> getConfigResponsesAndSchema(AuthzSubject subject, PlatformManager platformManager, ProductManager productManager, Set<Resource> resources, boolean hideSecrets);
 }

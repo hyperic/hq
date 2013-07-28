@@ -113,7 +113,7 @@ import org.springframework.transaction.annotation.Transactional;
  * relationships
  * 
  */
-@org.springframework.stereotype.Service
+@org.springframework.stereotype.Service("PlatformManager")
 @Transactional
 public class PlatformManagerImpl implements PlatformManager {
 
