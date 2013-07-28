@@ -35,9 +35,9 @@ public enum TopNConfigurationProperties {
                         int val = Integer.valueOf(value);
                         if ((val <= 0) || (val > 30)) {
                             throw new InvalidOptionValueException(
-                                    "top_processes.interval must be between 1 and 30 minutes");
+                                    "top_processes.interval must be between 1 and 10 minutes");
                         }
-                    } catch (Exception e) {
+                    } catch (NumberFormatException e) {
                         throw new InvalidOptionValueException("top_processes.interval must be a number");
                     }
                 }
@@ -57,7 +57,7 @@ public enum TopNConfigurationProperties {
                             throw new InvalidOptionValueException(
                                     "top_processes.number must be between 1 and 30 minutes");
                         }
-                    } catch (Exception e) {
+                    } catch (NumberFormatException e) {
                         throw new InvalidOptionValueException("top_processes.number must be a number");
                     }
                 }
