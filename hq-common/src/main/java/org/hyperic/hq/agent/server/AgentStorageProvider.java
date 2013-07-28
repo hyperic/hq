@@ -47,7 +47,7 @@ public interface AgentStorageProvider extends GenericValueMap {
      * @param obj
      * @param createTime
      */
-    void addObjectToFolder(String folderName, Object obj, long createTime);
+    void addObjectToFolder(String folderName, Object obj, long createTime, int maxElementsInFolder);
 
     /**
      * @param folderName

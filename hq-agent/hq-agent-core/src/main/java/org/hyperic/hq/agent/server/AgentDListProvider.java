@@ -437,11 +437,28 @@ public class AgentDListProvider implements AgentStorageProvider {
         }
     }
 
-    public void addObjectToFolder(String folderName, Object obj, long createTime) {
+    public void addObjectToFolder(String folderName, Object obj, long createTime, int maxElementsInFolder) {
         File folder = new File(this.writeDir + System.getProperty("file.separator") + folderName);
         if (!folder.exists()) {
             folder.mkdir();
         }
+        File[] files = folder.listFiles();
+        int numberOfElementsInFolder = files.length;
+        if (numberOfElementsInFolder >= maxElementsInFolder) {
+            // sort the files by create time
+            Arrays.sort(files, new Comparator<File>() {
+                public int compare(File f1, File f2) {
+                    return (Long.valueOf(f1.lastModified()).compareTo(f2.lastModified()));
+                }
+            });
+            int i = 0;
+            while (numberOfElementsInFolder >= maxElementsInFolder) {
+                files[i].delete();
+                numberOfElementsInFolder--;
+                i++;
+            }
+        }
+
         ObjectOutputStream outputStream = null;
         try {
             outputStream = new ObjectOutputStream(new FileOutputStream(folder.getAbsolutePath()
