@@ -272,6 +272,7 @@ public class TopNManagerImpl implements ZeventListener<ResourceZevent>, TopNMana
                                 if ((interval != schedule.getIntervalInMinutes())
                                         || (numberOfProcesses != schedule.getNumberOfProcesses())
                                         || (enabled != schedule.isEnabled())) {
+                                    topNScheduleDao.getSession().clear();
                                     scheduleTopNCollection(id, config);
                                 }
                             }
