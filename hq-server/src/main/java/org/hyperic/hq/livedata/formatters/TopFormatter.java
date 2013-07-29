@@ -77,7 +77,7 @@ public class TopFormatter
         return StringEscapeUtils.escapeHtml(s);
     }
 
-    public static String formatHtml(TopReport t, TOPN_SORT_TYPE sortType) {
+    public static String formatHtml(TopReport t, TOPN_SORT_TYPE sortType, int numberOfProcessesToShow) {
         StringBuilder buf = new StringBuilder();
         buf.append("<div id='topn_result_cont'>\n");
         buf.append("<div id='result' style='border: 1px solid #7BAFFF;'>")
@@ -130,7 +130,11 @@ public class TopFormatter
                 .append(BUNDLE.format("formatter.top.proc.name"))
                 .append("</td></tr></thead><tbody>");
 
+        int i = 0;
         for (ProcessReport pr : t.getProcessesSorted(sortType)) {
+            if (i++ >= numberOfProcessesToShow) {
+                break;
+            }
             char[] st = new char[1];
             st[0] = pr.getState();
             String str = new String(buf);

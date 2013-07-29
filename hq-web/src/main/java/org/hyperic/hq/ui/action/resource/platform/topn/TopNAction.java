@@ -40,7 +40,10 @@ import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.livedata.formatters.TopFormatter;
 import org.hyperic.hq.measurement.shared.DataManager;
+import org.hyperic.hq.measurement.shared.TopNManager;
+import org.hyperic.hq.plugin.system.TopReport;
 import org.hyperic.hq.plugin.system.TopReport.TOPN_SORT_TYPE;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
@@ -61,16 +64,18 @@ public class TopNAction extends BaseAction {
     private final AppdefBoss appdefBoss;
     private final DataManager dataManager;
     private final ResourceManager resourceManager;
+    private final TopNManager topnManager;
 
     @Autowired
     public TopNAction(AuthzBoss authzBoss, MeasurementBoss measurementBoss, AppdefBoss appdefBoss,
-                      DataManager dataManager, ResourceManager resourceManager) {
+            DataManager dataManager, ResourceManager resourceManager, TopNManager topnManager) {
         super();
         this.authzBoss = authzBoss;
         this.measurementBoss = measurementBoss;
         this.appdefBoss = appdefBoss;
         this.dataManager = dataManager;
         this.resourceManager = resourceManager;
+        this.topnManager = topnManager;
     }
 
     @Override
@@ -90,13 +95,16 @@ public class TopNAction extends BaseAction {
 
         long longTime = new SimpleDateFormat("MM/dd/yyyy hh:mm aa").parse(time).getTime();
         int rid = resourceManager.findResource(eid).getId();
-        String data = dataManager.getTopNDataAsString(rid, longTime, TOPN_SORT_TYPE.CPU);
-        if(data == null){
-            data = "Data unavailable";
+        TopReport report = dataManager.getTopReport(rid, longTime);
+        String topCpu = null;
+        String topMem = null;
+        if (report != null) {
+            int numberOfProcesesToShow = topnManager.getNumberOfProcessesToShowForPlatform(rid);
+            topCpu = TopFormatter.formatHtml(report, TOPN_SORT_TYPE.CPU, numberOfProcesesToShow);
         }
         JSONObject topN = new JSONObject();
-        topN.put("topn", data);
-
+        topN.put("topCpu", topCpu);
+ topN.put("topMem", topMem);
         response.getWriter().write(topN.toString());
         return null;
     }

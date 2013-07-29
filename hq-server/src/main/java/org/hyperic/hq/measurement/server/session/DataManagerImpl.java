@@ -66,7 +66,6 @@ import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.common.util.MessagePublisher;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
-import org.hyperic.hq.livedata.formatters.TopFormatter;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.data.MeasurementDataSourceException;
@@ -80,7 +79,6 @@ import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.TopNManager;
 import org.hyperic.hq.plugin.system.TopReport;
-import org.hyperic.hq.plugin.system.TopReport.TOPN_SORT_TYPE;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
@@ -1020,15 +1018,14 @@ public class DataManagerImpl implements DataManager {
      * long)
      */
     @Transactional(readOnly = true)
-    public String getTopNDataAsString(int resourceId, long time, TOPN_SORT_TYPE sortType) {
+    public TopReport getTopReport(int resourceId, long time) {
         TopNData data = getTopNData(resourceId, time);
         if(data == null){
             return null;
         }
         try {
             byte[] unCompressedData = topNManager.uncompressData(data.getData());
-            return TopFormatter.formatHtml(TopReport.fromSerializedForm(unCompressedData), sortType,
-                    topNManager.getNumberOfProcessesToShowForPlatform(resourceId));
+            return TopReport.fromSerializedForm(unCompressedData);
         } catch (Exception e) {
             log.error("Error un serializing TopN data", e);
         }

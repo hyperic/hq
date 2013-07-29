@@ -99,6 +99,18 @@ public class TopNManagerImpl implements ZeventListener<ResourceZevent>, TopNMana
         scheduleTopNCollection(platform, config);
     }
 
+    public int getNumberOfProcessesToShowForPlatform(int resourceId) {
+        Platform platform = platformManager.getPlatformByResourceId(resourceId);
+        ConfigResponse config;
+        try {
+            config = configManager.getMergedConfigResponse(authzSubjectManager.getOverlordPojo(),
+                    ProductPlugin.TYPE_MEASUREMENT, platform.getEntityId(), true);
+        } catch (Exception e) {
+            return -1;
+        }
+        return Integer.valueOf(config.getValue(TopNConfigurationProperties.TOPN_NUMBER_OF_PROCESSES.getName()));
+    }
+
     @Transactional
     public void scheduleTopNCollection(int resourceId, int intervalInMinutes, int numberOfProcesses) {
         ConfigResponse config;

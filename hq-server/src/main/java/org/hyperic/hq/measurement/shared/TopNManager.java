@@ -23,4 +23,6 @@ public interface TopNManager {
 
     void updateGlobalTopNNumberOfProcesses(int numberOfProcesses);
 
+    int getNumberOfProcessesToShowForPlatform(int resourceId);
+
 }

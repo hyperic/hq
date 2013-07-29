@@ -9,6 +9,11 @@
 <jsu:script>
     hqDojo.require("dijit.dijit");
     hqDojo.require("dijit.Dialog");
+    hqDojo.require("dijit.layout.TabContainer");
+    hqDojo.require("dijit.layout.ContentPane");
+
+    var cpuPane = new hqDijit.layout.ContentPane({title:'Top CPU'});
+    var memPane = new hqDijit.layout.ContentPane({title:'Top MEM'});
     var topNDia = new hqDijit.Dialog({
         id: 'TopN_popup',
         refocus: true,
@@ -16,8 +21,7 @@
         opacity: 0,
         title: "Top Processes"
     });
-</jsu:script>
-<jsu:script>
+
   	var semiIndex = imagePath.indexOf(";");
   	if (semiIndex != -1)
     	imagePath = imagePath.substring(0, semiIndex);
@@ -39,10 +43,22 @@
     }
 
     function displayTopN(response, args){
-        topNDia.set("content",response.topn);
+        if(response.topCpu == undefined) {
+            topNDia.set("style", 'height:8%');
+            topNDia.set("content",'Data unavailable');
+        } else {
+            cpuPane.set("content", response.topCpu);
+            memPane.set("content", response.topMem);
+            var tabContainer = new hqDijit.layout.TabContainer({});
+            tabContainer.addChild(cpuPane);
+            tabContainer.addChild(memPane);
+            tabContainer.selectChild(cpuPane);
+            topNDia.set("style", 'height:80%');
+            topNDia.set("content",tabContainer);
+        }
         topNDia.show();
     }
-  	<c:forEach var="timeTick" items="${timeIntervals}">
+    <c:forEach var="timeTick" items="${timeIntervals}">
     	overlay.times.push('<hq:dateFormatter value="${timeTick.time}"/>');
   	</c:forEach>
 </jsu:script>
