@@ -41,15 +41,22 @@ public class GroupMembersAddedZevent extends Zevent {
     private final Integer groupId;
     // don't use the Resource object.  Could lead to lazy initialization issues if the Resource object is a proxy
     private final List<Integer> addedResourceIds;
+    private final boolean isDuringCalculation;
 
     @SuppressWarnings("serial")
     public GroupMembersAddedZevent(ResourceGroup group, Collection<Resource> added) {
+        this(group, added, false);
+    }
+    
+
+    public GroupMembersAddedZevent(ResourceGroup group, Collection<Resource> added, boolean isDuringCalculation) {
         super(new ZeventSourceId() {}, new ZeventPayload() {});
         this.groupId = group.getId();
         this.addedResourceIds = new ArrayList<Integer>(added.size());
         for (Resource r : added) {
             addedResourceIds.add(r.getId());
         }
+        this.isDuringCalculation = isDuringCalculation;
     }
 
     public Integer getGroupId() {
@@ -58,6 +65,11 @@ public class GroupMembersAddedZevent extends Zevent {
 
     public List<Integer> getAddedResourceIds() {
         return addedResourceIds;
+    }
+
+
+    public boolean isDuringCalculation() {
+        return isDuringCalculation;
     }
 
 }
