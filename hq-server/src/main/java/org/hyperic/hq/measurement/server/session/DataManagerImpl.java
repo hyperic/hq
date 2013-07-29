@@ -1027,7 +1027,8 @@ public class DataManagerImpl implements DataManager {
         }
         try {
             byte[] unCompressedData = topNManager.uncompressData(data.getData());
-            return TopFormatter.formatHtml(TopReport.fromSerializedForm(unCompressedData), sortType);
+            return TopFormatter.formatHtml(TopReport.fromSerializedForm(unCompressedData), sortType,
+                    topNManager.getNumberOfProcessesToShowForPlatform(resourceId));
         } catch (Exception e) {
             log.error("Error un serializing TopN data", e);
         }
