@@ -1020,14 +1020,14 @@ public class DataManagerImpl implements DataManager {
      * long)
      */
     @Transactional(readOnly = true)
-    public String getTopNDataAsString(int resourceId, long time, TOPN_SORT_TYPE sortType) {
+    public TopReport getTopReport(int resourceId, long time) {
         TopNData data = getTopNData(resourceId, time);
         if(data == null){
             return null;
         }
         try {
             byte[] unCompressedData = topNManager.uncompressData(data.getData());
-            return TopFormatter.formatHtml(TopReport.fromSerializedForm(unCompressedData), sortType);
+            return TopReport.fromSerializedForm(unCompressedData);
         } catch (Exception e) {
             log.error("Error un serializing TopN data", e);
         }

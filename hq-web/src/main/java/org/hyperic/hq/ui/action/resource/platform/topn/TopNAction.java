@@ -40,7 +40,9 @@ import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.livedata.formatters.TopFormatter;
 import org.hyperic.hq.measurement.shared.DataManager;
+import org.hyperic.hq.plugin.system.TopReport;
 import org.hyperic.hq.plugin.system.TopReport.TOPN_SORT_TYPE;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
@@ -90,13 +92,16 @@ public class TopNAction extends BaseAction {
 
         long longTime = new SimpleDateFormat("MM/dd/yyyy hh:mm aa").parse(time).getTime();
         int rid = resourceManager.findResource(eid).getId();
-        String data = dataManager.getTopNDataAsString(rid, longTime, TOPN_SORT_TYPE.CPU);
-        if(data == null){
-            data = "Data unavailable";
+        TopReport report = dataManager.getTopReport(rid, longTime);
+        String topCpu = null;
+        String topMem = null;
+        if (report != null) {
+            topCpu = TopFormatter.formatHtml(report, TOPN_SORT_TYPE.CPU);
+            topMem = TopFormatter.formatHtml(report, TOPN_SORT_TYPE.MEM);
         }
         JSONObject topN = new JSONObject();
-        topN.put("topn", data);
-
+        topN.put("topCpu", topCpu);
+        topN.put("topMem", topMem);
         response.getWriter().write(topN.toString());
         return null;
     }
