@@ -41,4 +41,8 @@ public class ResourceDeletedZevent extends ResourceZevent {
     public ResourceDeletedZevent(AuthzSubject subject, AppdefEntityID id) {
         super(subject.getId(), id);
     }
+
+    public ResourceDeletedZevent(AuthzSubject subject, AppdefEntityID id, int resourceId) {
+        super(subject.getId(), id, resourceId);
+    }
 }

@@ -42,7 +42,7 @@ public enum TopNConfigurationProperties {
                     }
                 }
             };
-            intervalOption.setOptional(true);
+            intervalOption.setOptional(false);
             return intervalOption;
 
         case TOPN_NUMBER_OF_PROCESSES:
@@ -61,7 +61,7 @@ public enum TopNConfigurationProperties {
                     }
                 }
             };
-            numberOfProcessesOption.setOptional(true);
+            numberOfProcessesOption.setOptional(false);
             return numberOfProcessesOption;
 
         default:

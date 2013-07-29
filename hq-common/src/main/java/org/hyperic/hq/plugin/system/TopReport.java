@@ -40,10 +40,18 @@ public class TopReport implements Serializable {
         processes.clear();
 
         sortProcessesByCpu(processesList);
-        processes.addAll(processesList.subList(0, topNumber - 1));
+        if (1 == topNumber) {
+            processes.add(processesList.get(0));
+        } else {
+            processes.addAll(processesList.subList(0, topNumber - 1));
+        }
 
         sortProcessesByMemory(processesList);
-        processes.addAll(processesList.subList(0, topNumber - 1));
+        if (1 == topNumber) {
+            processes.add(processesList.get(0));
+        } else {
+            processes.addAll(processesList.subList(0, topNumber - 1));
+        }
 
     }
 

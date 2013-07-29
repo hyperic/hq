@@ -40,6 +40,10 @@ public abstract class ResourceZevent extends Zevent {
               new ResourceZeventPayload(subject, id));
     }
 
+    public ResourceZevent(Integer subject, AppdefEntityID id, int resourceID) {
+        super(new ResourceZeventSource(id, resourceID), new ResourceZeventPayload(subject, id, resourceID));
+    }
+
     public ResourceZevent(ResourceZeventSource source,
                           ResourceZeventPayload payload) {
         super(source, payload);
@@ -55,21 +59,33 @@ public abstract class ResourceZevent extends Zevent {
             getAuthzSubjectId();
     }
 
+    public Integer getResourceId() {
+        return ((ResourceZeventPayload) getPayload()).getResourceId();
+    }
+
     protected static class ResourceZeventSource
         implements ZeventSourceId
     {
         private static final long serialVersionUID = -2799620967593343325L;
         
-        private AppdefEntityID _id;
+        private final AppdefEntityID _id;
+        private Integer _resourceId;
 
         public ResourceZeventSource(AppdefEntityID id) {
-            _id = id;
+            this(id, null);
         }
 
+        public ResourceZeventSource(AppdefEntityID id, Integer resourceId) {
+            _id = id;
+            _resourceId = resourceId;
+        }
+
+        @Override
         public int hashCode() {
             return _id.hashCode();
         }
 
+        @Override
         public boolean equals(Object other) {
             if (other == this) {
                 return true;
@@ -82,17 +98,31 @@ public abstract class ResourceZevent extends Zevent {
             
             return false;
         }
+
+        public Integer getResourceId() {
+            return _resourceId;
+        }
+
+        public void setResourceId(Integer _resourceId) {
+            this._resourceId = _resourceId;
+        }
     }
 
     protected static class ResourceZeventPayload
         implements ZeventPayload
     {
-        private AppdefEntityID _id;
-        private Integer _subject;
+        private final AppdefEntityID _id;
+        private final Integer _subject;
+        private Integer _resourceId;
 
         public ResourceZeventPayload(Integer subject, AppdefEntityID id) {
+            this(subject, id, null);
+        }
+
+        public ResourceZeventPayload(Integer subject, AppdefEntityID id, Integer resourceId) {
             _subject = subject;
             _id = id;
+            _resourceId = resourceId;
         }
 
         public Integer getAuthzSubjectId() {
@@ -101,6 +131,14 @@ public abstract class ResourceZevent extends Zevent {
 
         public AppdefEntityID getAppdefEntityID() {
             return _id;
+        }
+
+        public Integer getResourceId() {
+            return _resourceId;
+        }
+
+        public void setResourceId(Integer _resourceId) {
+            this._resourceId = _resourceId;
         }
     }
 }

@@ -14,6 +14,7 @@ import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
+import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
@@ -78,6 +79,7 @@ public class TopNManagerImpl implements ZeventListener<ResourceZevent>, TopNMana
         listenEvents.add(ResourceCreatedZevent.class);
         listenEvents.add(ResourceUpdatedZevent.class);
         listenEvents.add(ResourceRefreshZevent.class);
+        listenEvents.add(ResourceDeletedZevent.class);
         zEventManager.addBufferedListener(listenEvents, this);
     }
 
@@ -247,6 +249,21 @@ public class TopNManagerImpl implements ZeventListener<ResourceZevent>, TopNMana
             try {
                 SessionManager.runInSession(new SessionRunner() {
                     public void run() throws Exception {
+
+                        if (e instanceof ResourceDeletedZevent) {
+                            if(null != e.getResourceId()) {
+                                TopNSchedule schedule = topNScheduleDao.get(e.getResourceId());
+                                if (null != schedule) {
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("Deleting TopNSchedule entry with id - '" + e.getResourceId() + "'");
+                                    }
+                                    topNScheduleDao.remove(schedule);
+                                    topNScheduleDao.getSession().flush();
+                                }
+                            }
+                            return;
+                        }
+
                         Platform platform = platformManager.getPlatformById(id.getId());
 
                         if ((null == platform) || !agentVersionValid(platform)) {
@@ -339,6 +356,7 @@ public class TopNManagerImpl implements ZeventListener<ResourceZevent>, TopNMana
     }
 
     private boolean agentVersionValid(Platform platform) {
+        // TODO:Revisit this
         // TopN is supported only for agents with version >=
         // 5.8.0
         if (0 > platform.getAgent().getVersion().compareTo("5.8.0")) {

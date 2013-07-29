@@ -101,10 +101,11 @@ public class TopNAction extends BaseAction {
         if (report != null) {
             int numberOfProcesesToShow = topnManager.getNumberOfProcessesToShowForPlatform(rid);
             topCpu = TopFormatter.formatHtml(report, TOPN_SORT_TYPE.CPU, numberOfProcesesToShow);
+            topMem = TopFormatter.formatHtml(report, TOPN_SORT_TYPE.MEM, numberOfProcesesToShow);
         }
         JSONObject topN = new JSONObject();
         topN.put("topCpu", topCpu);
- topN.put("topMem", topMem);
+        topN.put("topMem", topMem);
         response.getWriter().write(topN.toString());
         return null;
     }
