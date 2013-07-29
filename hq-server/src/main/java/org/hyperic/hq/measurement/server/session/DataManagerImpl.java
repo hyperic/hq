@@ -413,8 +413,9 @@ public class DataManagerImpl implements DataManager {
 
     protected boolean _addTopData(List<TopNData> topNData, Connection conn) {
 
-        log.debug("Attempting to insert topN data in a single transaction.");
-
+        if (log.isDebugEnabled()) {
+            log.debug("Attempting to insert topN data in a single transaction.");
+        }
         boolean succeeded = false;
         final boolean debug = log.isDebugEnabled();
 
@@ -1102,6 +1103,9 @@ public class DataManagerImpl implements DataManager {
 
     private boolean insertTopData(Connection conn, List<TopNData> topNData, boolean continueOnSQLException) throws
             SQLException {
+        if (log.isDebugEnabled()) {
+            log.debug("Inserting Top Processes data - '" + topNData + "'");
+        }
         PreparedStatement stmt = null;
         final StringBuilder buf = new StringBuilder();
 

@@ -21,4 +21,9 @@ public class TopNSendReport_args extends SecureAgentLatherValue {
         addObject(TOP_REPORTS, (Serializable) topReports);
     }
 
+    @Override
+    public String toString() {
+        return "TopNSendReport_args [Reports: '" + getTopReports() + "']";
+    }
+
 }

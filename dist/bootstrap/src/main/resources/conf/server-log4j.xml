@@ -211,6 +211,23 @@
 	    <level value="ERROR" />
 	</logger>
 	
+	
+	
+	
+	<!-- To debug Top Processes issues change the following from INFO to DEBUG, you can also change the debug
+	level of ReportProcessorImpl and LatherDispatcherImpl for additional debug info-->
+	 <logger name="org.hyperic.hq.topn.TopNManagerImpl">
+        <level value="INFO"/>
+    </logger>
+     <logger name="org.hyperic.hq.measurement.server.session.DataManagerImpl">
+        <level value="INFO"/>
+    </logger>
+    <logger name="org.hyperic.hq.measurement.server.session.TopNDataInserter">
+        <level value="INFO"/>
+    </logger>
+    
+    
+	
 	<!--
 		Subsystems. Uncomment individual subsystems to see debug messages.
 	-->
