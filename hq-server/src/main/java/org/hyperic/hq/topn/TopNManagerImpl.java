@@ -373,7 +373,6 @@ public class TopNManagerImpl implements ZeventListener<ResourceZevent>, TopNMana
                 .getName()));
         boolean enabled = Boolean
                 .valueOf(config.getValue(TopNConfigurationProperties.ENABLE_TOPN_COLLECTION.getName()));
-        platform.getResource()
         updateScheduleObject(resourceId, enabled, interval, numberOfProcesses);
 
     }
