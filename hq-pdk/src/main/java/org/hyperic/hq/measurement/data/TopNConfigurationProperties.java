@@ -34,8 +34,7 @@ public enum TopNConfigurationProperties {
                     try {
                         int val = Integer.valueOf(value);
                         if (val <= 0) {
-                            throw new InvalidOptionValueException(
-                                    "top_processes.interval must be between larger than 0");
+                            throw new InvalidOptionValueException("top_processes.interval must be larger than 0");
                         }
                     } catch (NumberFormatException e) {
                         throw new InvalidOptionValueException("top_processes.interval must be a number");
